@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    index: path.resolve(__dirname, 'src/index.ts')
+    index: path.resolve(__dirname, 'src/main.ts')
   },
   output: {
     path: path.resolve(__dirname, 'dist')
@@ -26,8 +26,33 @@ module.exports = {
       test: /\.ts$/,
       loader: ['ts-loader']
     }, {
-      test: /\.scss$/,
-      loader: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+      test: /\.s?css$/,
+      loader: ['style-loader', 'css-loader', {
+        loader: 'postcss-loader',
+        options: {
+          plugins() {
+            return [require('autoprefixer')];
+          }
+        }
+      }, 'sass-loader']
+    }, {
+      test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+      use: [{
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: path.posix.join('static/', `img/[name][hash].[ext]`)
+        }
+      }],
+    }, {
+      test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+      use: [{
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: path.posix.join('static/', `fonts/[name][hash].[ext]`)
+        }
+      }],
     }]
   },
   plugins: [

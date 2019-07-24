@@ -31,12 +31,22 @@ export interface DropdownHandler<T> {
 export type Handler<T> = DropdownHandler<T> | ButtonHandler<T> | SelectHandler<T>;
 
 export class Toolbar<T> {
-  host = document.createElement('div');
+  readonly host = document.createElement('div');
 
-  constructor() {
+  constructor(private editor: T) {
+    this.host.classList.add('tanbo-editor-toolbar')
   }
 
   addHandler(handler: Handler<T>) {
+    const action = document.createElement('button');
+    action.type = 'button';
+    action.classList.add('tanbo-editor-toolbar-handler', handler.format);
+    if(action.type === 'button') {
+      action.addEventListener('click', () => {
+        (handler as ButtonHandler<T>).handler(this.editor);
+      });
+    }
+    this.host.appendChild(action);
   }
 
   addGroup(handlers: Handler<T>[]) {

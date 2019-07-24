@@ -1,0 +1,29 @@
+.tanbo-editor-toolbar {
+  padding: 5px;
+  background-color: $color-light;
+  border-bottom: 1px solid $color-gray-light;
+  min-height: 34px;
+}
+
+.tanbo-editor-toolbar-handler {
+  font-size: 14px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px;
+  border-radius: 3px;
+
+  &:hover {
+    box-shadow: 0 0 1px 0 rgba(0, 0, 0, .4);
+  }
+
+  &:focus {
+    @include focus($color-primary);
+  }
+
+  &:active {
+    background-color: $color-gray-light;
+  }
+}

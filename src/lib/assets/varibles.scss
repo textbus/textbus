@@ -1,0 +1,15 @@
+// 基础颜色
+$color-darker: #1c2838 !default; // 标题颜色
+$color-dark: #495060 !default; // 正文颜色
+$color-gray-dark: #80848f !default; // 图标、icon颜色
+$color-gray: #bbbec4 !default; // 表单边框颜色
+$color-gray-light: #dddee1 !default; // 内边线颜色
+$color-light: #e9eaec !default; // 布局边框颜色
+$color-lighter: #f8f8f9 !default; // 背景颜色
+
+$color-default: $color-dark !default;
+$color-primary: #1296db !default; // 主色调
+$color-info: #6ad1ec !default; // 信息提示颜色
+$color-success: #15bd9a !default; // 正向操作提示颜色
+$color-warning: #ff9900 !default; // 负面操作警告颜色
+$color-danger: #E74F5E !default; // 危险操作警告颜色
