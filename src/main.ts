@@ -1,15 +1,11 @@
-import { Core, Editor } from './lib/index';
+import { boldHandler, italicHandler, Core } from './lib/public-api';
 
 import './lib/assets/index.scss';
 import './assets/icon/style.css';
 
-const editor = new Core('#editor');
-
-editor.toolbar.addHandler({
-  type: 'button',
-  label: '加粗',
-  format: 'icon-bold',
-  handler(editor: Editor): void {
-    console.log(editor);
-  }
+new Core('#editor', {
+  handlers: [
+    boldHandler,
+    italicHandler
+  ]
 });
