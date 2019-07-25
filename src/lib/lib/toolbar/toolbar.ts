@@ -80,7 +80,6 @@ export class Toolbar {
     });
     this.checkers.push(function (node: Node) {
       const hasContain = createTagChecker(handler.tags);
-      console.log(hasContain(node));
       if (hasContain(node)) {
         action.classList.add('tanbo-editor-toolbar-handler-active');
       } else {

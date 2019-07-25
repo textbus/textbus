@@ -5,3 +5,5 @@ export { EditorOptions } from './lib/help';
 
 export { boldHandler } from './lib/formats/bold';
 export { italicHandler } from './lib/formats/italic';
+export { strikeThroughHandler } from './lib/formats/strikeThrough';
+export { underlineHandler } from './lib/formats/underline';
