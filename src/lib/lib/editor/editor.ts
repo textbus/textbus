@@ -1,11 +1,12 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
+import { debounceTime, throttleTime } from 'rxjs/operators';
 
 export class Editor {
   readonly host = document.createElement('iframe');
-  readonly onFocusChange: Observable<Node>;
+  readonly onSelectionChange: Observable<Selection>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
-  private focusChangeEvent = new Subject<Node>();
+  private selectionChangeEvent = new Subject<Selection>();
   private editorHTML = `
     <!DOCTYPE html>
     <html lang="zh">
@@ -17,16 +18,26 @@ export class Editor {
       <title>tanbo-editor</title>
       <style>
         html { height: 100% }
-        body { min-height: 100%; font-size: 16px; padding: 8px; margin: 0; box-sizing: border-box; }
+        body { 
+          min-height: 100%; 
+          font-size: 14px; 
+          padding: 8px;
+          margin: 0; 
+          box-sizing: border-box; 
+          text-size-adjust: none;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+        }
       </style>
     </head>
     <body contenteditable>
+      <p><br></p>
     </body>
     </html>
     `;
 
   constructor() {
-    this.onFocusChange = this.focusChangeEvent.asObservable();
+    this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.host.classList.add('tanbo-editor');
 
     this.host.src = `javascript:void((function () {
@@ -45,8 +56,19 @@ export class Editor {
 
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
-    merge(fromEvent(childBody, 'click'), fromEvent(childBody, 'keyup')).subscribe((ev: Event) => {
-      this.focusChangeEvent.next(ev.target as any);
+    merge(...[
+      'click',
+      'contextmenu',
+      'mousedown',
+      'keydown',
+      'keyup',
+      'keypress',
+      'mouseup',
+      'mouseover',
+      'mouseout', 
+      'selectstart'
+    ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
+      this.selectionChangeEvent.next(this.contentWindow.getSelection());
     });
   }
 }

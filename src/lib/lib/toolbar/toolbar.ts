@@ -42,8 +42,8 @@ export class Toolbar {
 
   constructor(private editor: Editor) {
     this.host.classList.add('tanbo-editor-toolbar');
-    this.editor.onFocusChange.subscribe(node => {
-      this.checkers.forEach(fn => fn(node));
+    this.editor.onSelectionChange.subscribe(node => {
+      this.checkers.forEach(fn => fn(node.focusNode));
     });
   }
 
