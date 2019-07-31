@@ -1,13 +1,6 @@
-import { boldHandler, italicHandler, Core, underlineHandler, strikeThroughHandler } from './lib/public-api';
+import { createEditor } from './lib/tanbo-editor';
 
 import './lib/assets/index.scss';
-import './assets/icon/style.css';
+import './lib/assets/icons/style.css';
 
-new Core('#editor', {
-  handlers: [
-    boldHandler,
-    italicHandler,
-    strikeThroughHandler,
-    underlineHandler
-  ]
-});
+createEditor('#editor');

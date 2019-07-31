@@ -3,6 +3,19 @@
   background-color: $color-light;
   border-bottom: 1px solid $color-gray-light;
   min-height: 24px;
+  font-size: 14px;
+  color: $color-default;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.tanbo-editor-toolbar-split-line {
+  display: inline-block;
+  height: 1em;
+  width: 5px;
 }
 
 .tanbo-editor-toolbar-handler {
@@ -14,6 +27,7 @@
   padding: 5px;
   border-radius: 3px;
   color: $color-default;
+
   &-active {
     color: $color-primary;
   }
@@ -28,5 +42,94 @@
 
   &:active {
     background-color: $color-gray-light;
+  }
+}
+
+.tanbo-editor-toolbar-dropdown {
+  position: relative;
+  display: inline-block;
+  &.tanbo-editor-toolbar-dropdown-open {
+    .tanbo-editor-toolbar-dropdown-menu {
+      transform: scaleY(1);
+    }
+  }
+}
+
+.tanbo-editor-toolbar-dropdown-button {
+  width: 110px;
+  display: inline-flex;
+  justify-content: space-between;
+}
+.tanbo-editor-toolbar-dropdown-button-caret {
+  &:after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px dashed;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+  }
+}
+
+.tanbo-editor-toolbar-dropdown-menu {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform-origin: 0 0;
+  transition: transform .1s;
+  transform: scaleY(0);
+  background-color: rgba(255, 255, 255, .96);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+  border-radius: 4px;
+  min-width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  z-index: 1;
+}
+
+.tanbo-editor-toolbar-dropdown-menu-item {
+  display: block;
+  padding: 5px 15px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  outline: none;
+  font-size: 1em;
+  cursor: pointer;
+  &:hover {
+    color: $color-primary;
+  }
+
+  &-h1 {
+    font-size: 2em;
+    font-weight: 500;
+  }
+
+  &-h2 {
+    font-size: 1.5em;
+    font-weight: 500;
+  }
+
+  &-h3 {
+    font-size: 1.17em;
+    font-weight: 500;
+  }
+
+  &-h4 {
+    font-size: 1em;
+    font-weight: 500;
+  }
+
+  &-h5 {
+    font-size: .83em;
+    font-weight: 500;
+  }
+
+  &-h6 {
+    font-size: .67em;
+    font-weight: 500;
   }
 }

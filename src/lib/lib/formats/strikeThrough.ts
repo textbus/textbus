@@ -1,12 +1,12 @@
-import { ButtonHandler } from '../toolbar/toolbar';
+import { ButtonHandler } from '../toolbar/help';
 import { Editor } from '../editor/editor';
 
 export const strikeThroughHandler: ButtonHandler = {
   type: 'button',
-  format: 'icon-strikethrough',
+  format: 'tanbo-editor-icon-strikethrough',
   tooltip: '删除线',
   tags: ['STRIKE', 'DEL', 'S'],
-  handler(editor: Editor): void {
+  execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('strikeThrough');
   }
 };

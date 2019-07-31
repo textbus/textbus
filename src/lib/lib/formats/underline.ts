@@ -1,12 +1,12 @@
-import { ButtonHandler } from '../toolbar/toolbar';
+import { ButtonHandler } from '../toolbar/help';
 import { Editor } from '../editor/editor';
 
 export const underlineHandler: ButtonHandler = {
   type: 'button',
-  format: 'icon-underline',
+  format: 'tanbo-editor-icon-underline',
   tooltip: '下划线',
   tags: ['U'],
-  handler(editor: Editor): void {
+  execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('underline');
   }
 };

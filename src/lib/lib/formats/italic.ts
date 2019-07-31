@@ -1,12 +1,12 @@
-import { ButtonHandler } from '../toolbar/toolbar';
+import { ButtonHandler } from '../toolbar/help';
 import { Editor } from '../editor/editor';
 
 export const italicHandler: ButtonHandler = {
   type: 'button',
-  format: 'icon-italic',
+  format: 'tanbo-editor-icon-italic',
   tooltip: '斜体',
   tags: ['EM', 'I'],
-  handler(editor: Editor): void {
+  execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('italic');
   }
 };

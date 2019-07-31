@@ -1,12 +1,12 @@
-import { ButtonHandler } from '../toolbar/toolbar';
+import { ButtonHandler } from '../toolbar/help';
 import { Editor } from '../editor/editor';
 
 export const boldHandler: ButtonHandler = {
   type: 'button',
-  format: 'icon-bold',
+  format: 'tanbo-editor-icon-bold',
   tooltip: '加粗',
   tags: ['STRONG', 'B'],
-  handler(editor: Editor): void {
+  execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('bold');
   }
 };

@@ -1,49 +1,21 @@
 import { Editor } from '../editor/editor';
-
-export interface ButtonHandler {
-  type: 'button';
-  tags: string[];
-  label?: string;
-  format?: string;
-  tooltip?: string;
-
-  handler(editor: Editor): void;
-}
-
-export interface SelectHandlerOption {
-  format?: string;
-  label?: string;
-}
-
-export interface SelectHandler {
-  type: 'select';
-  options: SelectHandlerOption[];
-  label?: string;
-  format?: string;
-  tooltip?: string;
-
-  handler(option: SelectHandlerOption, editor: Editor): void;
-}
-
-export interface DropdownHandler {
-  type: 'dropdown';
-  options: ButtonHandler[];
-  label?: string;
-  format?: string;
-  placeholder?: string;
-}
-
-export type Handler = DropdownHandler | ButtonHandler | SelectHandler;
+import { ButtonHandler, DropdownHandler, Handler, SelectHandler, SelectHandlerOption } from './help';
 
 export class Toolbar {
   readonly host = document.createElement('div');
   private isFirst = true;
-  private checkers: Array<(node: Node) => void> = [];
+  private checkers: Array<(paths: string[]) => void> = [];
 
   constructor(private editor: Editor) {
     this.host.classList.add('tanbo-editor-toolbar');
     this.editor.onSelectionChange.subscribe(node => {
-      this.checkers.forEach(fn => fn(node.focusNode));
+      const paths: string[] = [];
+      let ele = node.focusNode;
+      while (ele) {
+        paths.push(ele.nodeName);
+        ele = ele.parentNode;
+      }
+      this.checkers.forEach(fn => fn(paths));
     });
   }
 
@@ -75,12 +47,19 @@ export class Toolbar {
     action.classList.add('tanbo-editor-toolbar-handler', handler.format);
     action.addEventListener('click', () => {
       if (this.editor.contentDocument) {
-        handler.handler(this.editor);
+        handler.execCommand(this.editor);
       }
     });
-    this.checkers.push(function (node: Node) {
-      const hasContain = createTagChecker(handler.tags);
-      if (hasContain(node)) {
+    this.checkers.push(function (paths: string[]) {
+      let isFind = false;
+      for (const path of paths) {
+        if (handler.tags.indexOf(path) > -1) {
+          isFind = true;
+          break;
+        }
+      }
+
+      if (isFind) {
         action.classList.add('tanbo-editor-toolbar-handler-active');
       } else {
         action.classList.remove('tanbo-editor-toolbar-handler-active');
@@ -90,7 +69,81 @@ export class Toolbar {
   }
 
   private addSelectHandler(handler: SelectHandler) {
+    const dropdown = document.createElement('span');
+    dropdown.classList.add('tanbo-editor-toolbar-dropdown');
 
+    const dropdownButton = document.createElement('button');
+    dropdownButton.type = 'button';
+    dropdownButton.classList.add('tanbo-editor-toolbar-handler');
+    dropdownButton.classList.add('tanbo-editor-toolbar-dropdown-button');
+
+    const dropdownInner = document.createElement('span');
+    const dropdownArrow = document.createElement('span');
+    dropdownArrow.classList.add('tanbo-editor-toolbar-dropdown-button-caret');
+
+    dropdownButton.appendChild(dropdownInner);
+    dropdownButton.appendChild(dropdownArrow);
+    let isSelfClick = false;
+    document.addEventListener('click', () => {
+      if (!isSelfClick) {
+        dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+      }
+      isSelfClick = false;
+    });
+    dropdownButton.addEventListener('click', () => {
+      isSelfClick = true;
+      dropdown.classList.toggle('tanbo-editor-toolbar-dropdown-open');
+    });
+
+    const dropdownMenu = document.createElement('div');
+    dropdownMenu.classList.add('tanbo-editor-toolbar-dropdown-menu');
+    handler.options.forEach(option => {
+      const item = document.createElement('button');
+      item.classList.add('tanbo-editor-toolbar-dropdown-menu-item');
+      item.type = 'button';
+      if (option.format) {
+        item.classList.add(option.format);
+      }
+      item.innerText = option.label;
+      item.addEventListener('click', () => {
+        if (this.editor.contentDocument) {
+          handler.execCommand(option, this.editor);
+        }
+      });
+      dropdownMenu.appendChild(item);
+
+    });
+    this.checkers.push((paths: string[]) => {
+      let selectedOption: SelectHandlerOption;
+      for (const option of handler.options) {
+        for (const path of paths) {
+          if (option.tags.indexOf(path) > -1) {
+            selectedOption = option;
+            break;
+          }
+        }
+        if (selectedOption) {
+          break;
+        }
+      }
+      if (!selectedOption) {
+        for (const option of handler.options) {
+          if (option.normal) {
+            selectedOption = option;
+          }
+        }
+      }
+      if (selectedOption) {
+        dropdownInner.innerHTML = selectedOption.label;
+      }
+    });
+
+    dropdown.appendChild(dropdownButton);
+    dropdown.appendChild(dropdownMenu);
+    this.host.appendChild(dropdown);
+    this.editor.onSelectionChange.subscribe(() => {
+      dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+    });
   }
 
   private addDropdownHandler(handler: DropdownHandler) {
@@ -101,17 +154,5 @@ export class Toolbar {
     const splitLine = document.createElement('span');
     splitLine.classList.add('tanbo-editor-toolbar-split-line');
     return splitLine;
-  }
-}
-
-function createTagChecker(tags: string[]) {
-  return function (node: Node) {
-    while (node) {
-      if (tags.indexOf(node.nodeName) > -1) {
-        return true;
-      }
-      node = node.parentNode;
-    }
-    return false;
   }
 }

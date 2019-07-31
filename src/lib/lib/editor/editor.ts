@@ -1,5 +1,6 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
 import { debounceTime, throttleTime } from 'rxjs/operators';
+import { template } from './template-html';
 
 export class Editor {
   readonly host = document.createElement('iframe');
@@ -7,34 +8,7 @@ export class Editor {
   readonly contentDocument: Document;
   readonly contentWindow: Window;
   private selectionChangeEvent = new Subject<Selection>();
-  private editorHTML = `
-    <!DOCTYPE html>
-    <html lang="zh">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport"
-            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge">
-      <title>tanbo-editor</title>
-      <style>
-        html { height: 100% }
-        body { 
-          min-height: 100%; 
-          font-size: 14px; 
-          padding: 8px;
-          margin: 0; 
-          box-sizing: border-box; 
-          text-size-adjust: none;
-          text-rendering: optimizeLegibility;
-          -webkit-font-smoothing: antialiased;
-        }
-      </style>
-    </head>
-    <body contenteditable>
-      <p><br></p>
-    </body>
-    </html>
-    `;
+  private editorHTML = template;
 
   constructor() {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
@@ -47,10 +21,11 @@ export class Editor {
                       document.close();
                     })())`;
     const self = this;
-    this.host.onload = function () {
+    this.host.onload = () => {
       self.setup(self.host.contentDocument);
       (<any>self).contentDocument = self.host.contentDocument;
       (<any>self).contentWindow = self.host.contentWindow;
+      this.selectionChangeEvent.next(this.contentWindow.getSelection());
     }
   }
 
@@ -64,8 +39,6 @@ export class Editor {
       'keyup',
       'keypress',
       'mouseup',
-      'mouseover',
-      'mouseout', 
       'selectstart'
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
       this.selectionChangeEvent.next(this.contentWindow.getSelection());
