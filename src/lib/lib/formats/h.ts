@@ -4,6 +4,7 @@ import { Editor } from '../editor/editor';
 export const hHandler: SelectHandler = {
   type: 'select',
   format: null,
+  tooltip: '标题',
   options: [{
     label: '标题1',
     tags: ['H1'],

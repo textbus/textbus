@@ -1,7 +1,7 @@
 import { Core } from './lib/core';
 import { boldHandler } from './lib/formats/bold';
 import { italicHandler } from './lib/formats/italic';
-import { strikeThroughHandler } from './lib/formats/strikeThrough';
+import { strikeThroughHandler } from './lib/formats/strike-through';
 import { underlineHandler } from './lib/formats/underline';
 import { hHandler } from './lib/formats/h';
 import { blockquoteHandler } from './lib/formats/blockquote';
@@ -12,6 +12,7 @@ import { superscriptHandler } from './lib/formats/superscript';
 import { subscriptHandler } from './lib/formats/subscript';
 import { backgroundHandler } from './lib/formats/background';
 import { colorHandler } from './lib/formats/color';
+import { fontFamilyHandler } from './lib/formats/font-family';
 
 export * from './public-api';
 
@@ -35,7 +36,7 @@ export function createEditor(selector: string | HTMLElement) {
       ], [
         backgroundHandler,
         colorHandler
-      ]
+      ], fontFamilyHandler
     ]
   });
 }

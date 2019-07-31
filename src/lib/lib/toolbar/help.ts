@@ -11,7 +11,7 @@ export interface ButtonHandler {
 }
 
 export interface SelectHandlerOption {
-  tags: string[];
+  tags?: string[];
   format?: string;
   label?: string;
   normal?: boolean;

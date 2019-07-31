@@ -19,6 +19,10 @@ export const template = `
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
     }
+    p {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body contenteditable>

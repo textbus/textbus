@@ -74,6 +74,7 @@ export class Toolbar {
 
     const dropdownButton = document.createElement('button');
     dropdownButton.type = 'button';
+    dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     dropdownButton.classList.add('tanbo-editor-toolbar-handler');
     dropdownButton.classList.add('tanbo-editor-toolbar-dropdown-button');
 

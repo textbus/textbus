@@ -7,6 +7,6 @@ export const colorHandler: ButtonHandler = {
   tooltip: '引用',
   tags: [],
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('fontColor', false, '#0000ff');
+    editor.contentDocument.execCommand('foreColor', false, '#0000ff');
   }
 };
