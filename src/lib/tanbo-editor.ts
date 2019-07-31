@@ -19,7 +19,9 @@ export * from './public-api';
 export function createEditor(selector: string | HTMLElement) {
   return new Core(selector, {
     handlers: [
-      hHandler, [
+      [
+        hHandler
+      ], [
         boldHandler,
         italicHandler,
         strikeThroughHandler,
@@ -36,7 +38,9 @@ export function createEditor(selector: string | HTMLElement) {
       ], [
         backgroundHandler,
         colorHandler
-      ], fontFamilyHandler
+      ], [
+        fontFamilyHandler
+      ]
     ]
   });
 }
