@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?jvfo9k') format('truetype'),
-    url('fonts/tanbo-editor.woff?jvfo9k') format('woff'),
-    url('fonts/tanbo-editor.svg?jvfo9k#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?93has5') format('truetype'),
+    url('fonts/tanbo-editor.woff?93has5') format('woff'),
+    url('fonts/tanbo-editor.svg?93has5#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -31,6 +31,9 @@
 }
 .tanbo-editor-icon-color:before {
   content: "\e901";
+}
+.tanbo-editor-icon-arrow-right:before {
+  content: "\e50f";
 }
 .tanbo-editor-icon-image:before {
   content: "\e90d";

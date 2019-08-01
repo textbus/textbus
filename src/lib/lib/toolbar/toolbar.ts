@@ -53,7 +53,7 @@ export class Toolbar {
     this.checkers.push(function (paths: string[]) {
       let isFind = false;
       for (const path of paths) {
-        if (handler.tags.indexOf(path) > -1) {
+        if ((handler.tags || []).indexOf(path) > -1) {
           isFind = true;
           break;
         }
@@ -118,7 +118,7 @@ export class Toolbar {
       let selectedOption: SelectHandlerOption;
       for (const option of handler.options) {
         for (const path of paths) {
-          if (option.tags.indexOf(path) > -1) {
+          if ((option.tags || []).indexOf(path) > -1) {
             selectedOption = option;
             break;
           }
@@ -148,7 +148,7 @@ export class Toolbar {
   }
 
   private addDropdownHandler(handler: DropdownHandler) {
-
+    // this.
   }
 
   private createSplitLine() {

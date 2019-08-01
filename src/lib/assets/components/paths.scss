@@ -1,0 +1,29 @@
+.tanbo-editor-paths {
+  border-top: 1px solid $color-light;
+  padding: 4px 15px;
+  font-size: 12px;
+  background-color: lighten($color-lighter, 1);
+  &:before {
+    content: "路径：";
+  }
+}
+
+.tanbo-editor-paths-link {
+  color: $color-primary;
+  text-decoration: none;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid $color-light;
+  outline: none;
+  cursor: pointer;
+  &:active {
+    background-color: $color-lighter;
+  }
+}
+
+.tanbo-editor-paths-split {
+  font-size: .8em;
+  color: $color-gray-dark;
+  margin-left: 5px;
+  margin-right: 5px;
+}
