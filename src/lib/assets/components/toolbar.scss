@@ -48,6 +48,7 @@
 .tanbo-editor-toolbar-dropdown {
   position: relative;
   display: inline-block;
+
   &.tanbo-editor-toolbar-dropdown-open {
     .tanbo-editor-toolbar-dropdown-menu {
       transform: scaleY(1);
@@ -60,6 +61,7 @@
   display: inline-flex;
   justify-content: space-between;
 }
+
 .tanbo-editor-toolbar-dropdown-button-caret {
   &:after {
     content: "";
@@ -100,6 +102,7 @@
   font-size: 1em;
   cursor: pointer;
   white-space: nowrap;
+
   &:hover {
     color: $color-primary;
   }
@@ -139,25 +142,50 @@
   &-sans-serif {
     font-family: sans-serif;
   }
+
   &-SimSun {
     font-family: SimSun;
   }
+
   &-SimHei {
     font-family: SimHei;
   }
+
   &-Microsoft-YaHei {
     font-family: "Microsoft YaHei";
   }
+
   &-KaiTi {
-    font-family: KaiTi ;
+    font-family: KaiTi;
   }
+
   &-FangSong {
     font-family: FangSong;
   }
+
   &-Arial {
     font-family: Arial;
   }
+
   &-Times-New-Roman {
     font-family: "Times New Roman";
+  }
+}
+
+.tanbo-editor-toolbar-text {
+  &-left {
+    text-align: left;
+  }
+
+  &-right {
+    text-align: right;
+  }
+
+  &-center {
+    text-align: center;
+  }
+
+  &-justify {
+    text-align: justify;
   }
 }

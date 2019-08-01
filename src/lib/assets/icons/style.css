@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?79ual7') format('truetype'),
-    url('fonts/tanbo-editor.woff?79ual7') format('woff'),
-    url('fonts/tanbo-editor.svg?79ual7#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?jvfo9k') format('truetype'),
+    url('fonts/tanbo-editor.woff?jvfo9k') format('woff'),
+    url('fonts/tanbo-editor.svg?jvfo9k#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -23,6 +23,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tanbo-editor-icon-clean:before {
+  content: "\e902";
+}
 .tanbo-editor-icon-background-color:before {
   content: "\e900";
 }
@@ -67,6 +70,21 @@
 }
 .tanbo-editor-icon-subscript:before {
   content: "\ea6a";
+}
+.tanbo-editor-icon-table:before {
+  content: "\ea71";
+}
+.tanbo-editor-icon-paragraph-left:before {
+  content: "\ea77";
+}
+.tanbo-editor-icon-paragraph-center:before {
+  content: "\ea78";
+}
+.tanbo-editor-icon-paragraph-right:before {
+  content: "\ea79";
+}
+.tanbo-editor-icon-paragraph-justify:before {
+  content: "\ea7a";
 }
 .tanbo-editor-icon-code:before {
   content: "\ea80";

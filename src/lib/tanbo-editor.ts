@@ -13,6 +13,13 @@ import { subscriptHandler } from './lib/formats/subscript';
 import { backgroundHandler } from './lib/formats/background';
 import { colorHandler } from './lib/formats/color';
 import { fontFamilyHandler } from './lib/formats/font-family';
+import { imageHandler } from './lib/formats/image';
+import { musicHandler } from './lib/formats/music';
+import { videoHandler } from './lib/formats/video';
+import { alignHandler } from './lib/formats/align';
+import { linkHandler } from './lib/formats/link';
+import { tableHandler } from './lib/formats/table';
+import { cleanHandler } from './lib/formats/clean';
 
 export * from './public-api';
 
@@ -40,6 +47,17 @@ export function createEditor(selector: string | HTMLElement) {
         colorHandler
       ], [
         fontFamilyHandler
+      ], [
+        linkHandler,
+        imageHandler,
+        musicHandler,
+        videoHandler
+      ], [
+        alignHandler
+      ], [
+        tableHandler
+      ], [
+        cleanHandler
       ]
     ]
   });

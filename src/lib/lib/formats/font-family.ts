@@ -3,7 +3,6 @@ import { Editor } from '../editor/editor';
 
 export const fontFamilyHandler: SelectHandler = {
   type: 'select',
-  format: null,
   tooltip: '字体',
   options: [{
     label: 'sans-serif',
