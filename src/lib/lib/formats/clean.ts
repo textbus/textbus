@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const cleanHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-clean',
+  classes: ['tanbo-editor-icon-clean'],
   tooltip: '清除格式',
   tags: [],
   execCommand(editor: Editor): void {

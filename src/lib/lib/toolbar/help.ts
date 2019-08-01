@@ -4,7 +4,7 @@ export interface ButtonHandler {
   type: 'button';
   tags: string[];
   label?: string;
-  format?: string;
+  classes?: string[];
   tooltip?: string;
 
   execCommand(editor: Editor): void;
@@ -12,15 +12,15 @@ export interface ButtonHandler {
 
 export interface SelectHandlerOption {
   tags?: string[];
-  format?: string;
+  classes?: string[];
   label?: string;
-  normal?: boolean;
+  default?: boolean;
 }
 
 export interface SelectHandler {
   type: 'select';
   options: SelectHandlerOption[];
-  format?: string;
+  classes?: string[];
   tooltip?: string;
 
   execCommand(option: SelectHandlerOption, editor: Editor): void;

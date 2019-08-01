@@ -44,7 +44,7 @@ export class Toolbar {
     action.type = 'button';
     action.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     action.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
-    action.classList.add('tanbo-editor-toolbar-handler', handler.format);
+    action.classList.add('tanbo-editor-toolbar-handler', ...(handler.classes || []));
     action.addEventListener('click', () => {
       if (this.editor.contentDocument) {
         handler.execCommand(this.editor);
@@ -102,8 +102,8 @@ export class Toolbar {
       const item = document.createElement('button');
       item.classList.add('tanbo-editor-toolbar-dropdown-menu-item');
       item.type = 'button';
-      if (option.format) {
-        item.classList.add(option.format);
+      if (option.classes) {
+        item.classList.add(...(option.classes || []));
       }
       item.innerText = option.label;
       item.addEventListener('click', () => {
@@ -129,7 +129,7 @@ export class Toolbar {
       }
       if (!selectedOption) {
         for (const option of handler.options) {
-          if (option.normal) {
+          if (option.default) {
             selectedOption = option;
           }
         }

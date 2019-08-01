@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const underlineHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-underline',
+  classes: ['tanbo-editor-icon-underline'],
   tooltip: '下划线',
   tags: ['U'],
   execCommand(editor: Editor): void {

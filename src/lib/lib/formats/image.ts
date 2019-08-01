@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const imageHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-image',
+  classes: ['tanbo-editor-icon-image'],
   tooltip: '图片',
   tags: ['IMG'],
   execCommand(editor: Editor): void {

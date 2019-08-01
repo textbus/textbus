@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const boldHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-bold',
+  classes: ['tanbo-editor-icon-bold'],
   tooltip: '加粗',
   tags: ['STRONG', 'B'],
   execCommand(editor: Editor): void {

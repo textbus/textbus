@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const videoHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-video',
+  classes: ['tanbo-editor-icon-video'],
   tooltip: '视频',
   tags: ['VIDEO'],
   execCommand(editor: Editor): void {

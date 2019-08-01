@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const strikeThroughHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-strikethrough',
+  classes: ['tanbo-editor-icon-strikethrough'],
   tooltip: '删除线',
   tags: ['STRIKE', 'DEL', 'S'],
   execCommand(editor: Editor): void {

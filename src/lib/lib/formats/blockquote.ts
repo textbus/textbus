@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const blockquoteHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-quotes-right',
+  classes: ['tanbo-editor-icon-quotes-right'],
   tooltip: '引用',
   tags: ['BLOCKQUOTE'],
   execCommand(editor: Editor): void {

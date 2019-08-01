@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const linkHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-link',
+  classes: ['tanbo-editor-icon-link'],
   tooltip: '链接',
   tags: ['A'],
   execCommand(editor: Editor): void {

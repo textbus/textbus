@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const tableHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-table',
+  classes: ['tanbo-editor-icon-table'],
   tooltip: '视频',
   tags: ['TABLE'],
   execCommand(editor: Editor): void {

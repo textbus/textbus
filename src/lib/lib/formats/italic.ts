@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const italicHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-italic',
+  classes: ['tanbo-editor-icon-italic'],
   tooltip: '斜体',
   tags: ['EM', 'I'],
   execCommand(editor: Editor): void {

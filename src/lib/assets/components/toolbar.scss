@@ -52,6 +52,7 @@
   &.tanbo-editor-toolbar-dropdown-open {
     .tanbo-editor-toolbar-dropdown-menu {
       transform: scaleY(1);
+      z-index: 1;
     }
   }
 }
@@ -88,7 +89,6 @@
   min-width: 100%;
   padding-top: 5px;
   padding-bottom: 5px;
-  z-index: 1;
 }
 
 .tanbo-editor-toolbar-dropdown-menu-item {

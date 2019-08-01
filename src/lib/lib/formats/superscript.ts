@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const superscriptHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-superscript',
+  classes: ['tanbo-editor-icon-superscript'],
   tooltip: '上标',
   tags: ['SUP'],
   execCommand(editor: Editor): void {

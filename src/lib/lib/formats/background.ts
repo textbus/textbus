@@ -3,7 +3,7 @@ import { Editor } from '../editor/editor';
 
 export const backgroundHandler: ButtonHandler = {
   type: 'button',
-  format: 'tanbo-editor-icon-background-color',
+  classes: ['tanbo-editor-icon-background-color'],
   tooltip: '引用',
   tags: [],
   execCommand(editor: Editor): void {
