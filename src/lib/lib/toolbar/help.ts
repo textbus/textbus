@@ -2,7 +2,7 @@ import { Editor } from '../editor/editor';
 
 export interface ButtonHandler {
   type: 'button';
-  tags: string[];
+  tags?: string[];
   label?: string;
   classes?: string[];
   tooltip?: string;

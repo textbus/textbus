@@ -7,6 +7,7 @@ export const boldHandler: ButtonHandler = {
   tooltip: '加粗',
   tags: ['STRONG', 'B'],
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('bold');
+    editor.wrap('strong');
+    // editor.contentDocument.execCommand('bold');
   }
 };
