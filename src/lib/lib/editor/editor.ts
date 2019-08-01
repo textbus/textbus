@@ -59,66 +59,68 @@ export class Editor {
   }
 
   private wrapInlineElement(tag: string) {
+    function findSelf(node: Element, tag: string) {
+      while (node) {
+        if (node.nodeType === 1 && node.tagName.toLowerCase() === tag) {
+          return node;
+        }
+        node = node.parentNode as HTMLElement;
+      }
+      return null
+    }
+
+    function cleanSelf(el: Element) {
+      const c = document.createComment('');
+      const parentNode = el.parentNode;
+      parentNode.insertBefore(c, el);
+      parentNode.removeChild(el);
+      const childNodes = el.childNodes;
+      const newEle = document.createDocumentFragment();
+      Array.from(childNodes).forEach(item => newEle.appendChild(item));
+
+      parentNode.insertBefore(newEle, c);
+      parentNode.removeChild(c);
+    }
+
+    function getTextNodes(container: HTMLElement) {
+      const result: Node[] = [];
+      Array.from(container.childNodes).forEach(node => {
+        if (node.nodeType === 3) {
+          result.push(node);
+        } else if (node.nodeType === 1) {
+          result.push(...getTextNodes(node as HTMLElement));
+        }
+      });
+      return result;
+    }
+
     const selection = this.contentDocument.getSelection();
     const range = selection.getRangeAt(0);
-    const contents = range.cloneContents();
-    range.surroundContents(document.createElement(tag));
-    console.log(range.commonAncestorContainer);
-    // range.insertNode(contents);
-    // const node = selection.focusNode as HTMLElement;
-    // if (!node) {
-    //   return;
-    // }
-    //
-    // function findSelf(node: Element, tag: string) {
-    //   while (node) {
-    //     if (node.nodeType === 1 && node.tagName.toLowerCase() === tag) {
-    //       return node;
-    //     }
-    //     node = node.parentNode as HTMLElement;
-    //   }
-    //   return null
-    // }
-    //
-    // function cleanSelf(el: Element) {
-    //   const c = document.createComment('');
-    //   const parentNode = el.parentNode;
-    //   parentNode.insertBefore(c, el);
-    //   parentNode.removeChild(el);
-    //   const childNodes = el.childNodes;
-    //   const newEle = document.createDocumentFragment();
-    //   Array.from(childNodes).forEach(item => newEle.appendChild(item));
-    //
-    //   parentNode.insertBefore(newEle, c);
-    //   parentNode.removeChild(c);
-    // }
-    //
-    // function wrapSelf(node: Node, tag: string) {
-    //   if (node.nodeType === 3) {
-    //     const newEle = document.createElement(tag);
-    //     range.deleteContents();
-    //     newEle.appendChild(contents);
-    //     range.insertNode(newEle);
-    //     // node.parentNode.appendChild(newEle);
-    //     // newEle.appendChild(node);
-    //   } else if (node.nodeType === 1) {
-    //     Array.from(node.childNodes).forEach(child => {
-    //       wrapSelf(child, tag);
-    //     });
-    //   }
-    // }
-    //
-    // const shadowSelf = findSelf(node, tag);
-    // if (shadowSelf) {
-    //   cleanSelf(shadowSelf);
-    // } else {
-    //   if (node.nodeType === 1) {
-    //     Array.from(node.querySelectorAll(tag)).forEach(item => cleanSelf(item));
-    //     wrapSelf(node, tag);
-    //   } else if (node.nodeType === 3) {
-    //     wrapSelf(node, tag);
-    //   }
-    // }
+
+    const container = range.commonAncestorContainer as HTMLElement;
+    const nodes: Node[] = getTextNodes(container).filter(item => selection.containsNode(item));
+
+    const shadowSelf = findSelf(container, tag);
+    console.log(range);
+    if (shadowSelf) {
+      cleanSelf(shadowSelf);
+    } else {
+      Array.from(container.querySelectorAll(tag)).forEach(item => cleanSelf(item));
+      if (range.startContainer === range.endContainer) {
+        range.surroundContents(document.createElement(tag));
+      } else {
+        nodes.forEach(item => {
+          const temporaryRange = this.contentDocument.createRange();
+          temporaryRange.selectNode(item);
+          if (item === range.startContainer) {
+            temporaryRange.setStart(item, range.startOffset);
+          } else if (item === range.endContainer) {
+            temporaryRange.setEnd(item, range.endOffset);
+          }
+          temporaryRange.surroundContents(document.createElement(tag));
+        });
+      }
+    }
   }
 
   private setup(childDocument: Document) {
