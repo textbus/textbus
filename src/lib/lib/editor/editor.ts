@@ -105,11 +105,19 @@ export class Editor {
     if (shadowSelf) {
       cleanSelf(shadowSelf);
     } else {
-      Array.from(container.querySelectorAll(tag)).forEach(item => cleanSelf(item));
+      if (container.nodeType === 1) {
+        Array.from(container.querySelectorAll(tag))
+          .filter(item => selection.containsNode(item))
+          .forEach(item => cleanSelf(item));
+      }
       if (range.startContainer === range.endContainer) {
         range.surroundContents(document.createElement(tag));
       } else {
         nodes.forEach(item => {
+          if (item.textContent === '') {
+            item.parentNode.removeChild(item);
+            return;
+          }
           const temporaryRange = this.contentDocument.createRange();
           temporaryRange.selectNode(item);
           if (item === range.startContainer) {
