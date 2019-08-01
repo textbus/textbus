@@ -53,7 +53,7 @@ export class Editor {
   updateSelectionByElement(node: Element) {
     const selection = this.contentDocument.getSelection();
     selection.removeAllRanges();
-    const range = new Range();
+    const range = this.contentDocument.createRange();
     range.selectNode(node);
     selection.addRange(range);
   }

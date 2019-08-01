@@ -20,9 +20,12 @@ export class Paths {
         link.type = 'button';
         link.classList.add('tanbo-editor-paths-link');
         link.innerText = node.parentNode.nodeName;
-        link.onclick = () => {
-          this.checkEvent.next(node.parentNode as HTMLElement);
-        };
+        ((node) => {
+          link.onclick = () => {
+            this.checkEvent.next(node);
+          };
+        })(node.parentNode as HTMLElement);
+
         elements.push(link);
         node = node.parentNode as HTMLElement;
       } else {
