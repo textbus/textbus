@@ -30,6 +30,6 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
-    "rxjs": "^6.5.2",
+    "rxjs": "^6.5.2"
   }
 }
