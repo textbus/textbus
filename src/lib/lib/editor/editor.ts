@@ -88,7 +88,7 @@ export class Editor {
           const startWrap = this.matchContainerByTagName(range.startContainer as HTMLElement, tag);
           const endWrap = this.matchContainerByTagName(range.endContainer as HTMLElement, tag);
           Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
-            .filter(item => item !== startWrap && item !== endWrap)
+            .filter(item => item !== startWrap && item !== endWrap && range.intersectsNode(item))
             .forEach(node => {
               this.takeOffWrapper(node);
             });
