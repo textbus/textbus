@@ -70,10 +70,12 @@ export class Editor {
 
     const parentTagContainer = this.matchContainerByTagName(range.commonAncestorContainer as HTMLElement, tag);
     if (parentTagContainer) {
+      console.log(1);
       this.reverse(parentTagContainer, range, this.contentDocument, tag);
       this.takeOffWrapper(parentTagContainer);
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
+        console.log(2);
         const newWrap = document.createElement(tag);
         const isCollapsed = range.collapsed;
         range.surroundContents(newWrap);
@@ -82,28 +84,38 @@ export class Editor {
           range.selectNodeContents(newWrap);
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
+        console.log(3);
         if (this.hasOtherTag(range.cloneContents(), tag)) {
-          console.log(3333);
+          console.log(4);
           this.wrapper(range, this.contentDocument, tag);
         } else {
+          console.log(5)
           Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
             .filter(item => range.intersectsNode(item))
             .forEach((node: HTMLElement) => {
               const temporaryRange = this.contentDocument.createRange();
               temporaryRange.selectNode(node);
-              if (temporaryRange.isPointInRange(range.startContainer, range.startOffset)) {
+              const parentNode = node.parentNode;
+              const nextSibling = node.nextSibling;
+              if (temporaryRange.isPointInRange(range.startContainer, range.startOffset) &&
+                temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
+                this.takeOffWrapper(node);
+              } else if (temporaryRange.isPointInRange(range.startContainer, range.startOffset)) {
+                console.log(6)
                 const startRange = this.contentDocument.createRange();
                 startRange.setStart(range.startContainer, range.startOffset);
                 startRange.setEndAfter(node);
                 const extractStart = startRange.extractContents().children[0];
-                node.parentNode.insertBefore(extractStart, node.nextSibling);
+                if (nextSibling) {
+                  parentNode.insertBefore(extractStart, nextSibling);
+                } else {
+                  parentNode.appendChild(extractStart);
+                }
+                range.setEndBefore(extractStart);
                 this.takeOffWrapper(extractStart);
                 startRange.detach();
-                if (node.parentNode && node.innerText === '') {
-                  range.setStartAfter(node);
-                  node.parentNode.removeChild(node);
-                }
               } else if (temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
+                console.log(7)
                 const endRange = this.contentDocument.createRange();
                 endRange.setStartBefore(node);
                 endRange.setEnd(range.endContainer, range.endOffset);
@@ -111,10 +123,6 @@ export class Editor {
                 node.parentNode.insertBefore(extractEnd, node);
                 this.takeOffWrapper(extractEnd);
                 endRange.detach();
-                if (node.parentNode && node.innerText === '') {
-                  range.setEndBefore(node);
-                  node.parentNode.removeChild(node);
-                }
               } else {
                 this.takeOffWrapper(node);
               }
@@ -144,9 +152,7 @@ export class Editor {
             temporaryRange.setEnd(item, range.endOffset);
           }
           // TODO 这里默认不会有问题，但删除元素后再添加，会在选区开始和结束多一个空白的标签
-          if (temporaryRange.cloneContents().textContent) {
-            temporaryRange.surroundContents(document.createElement(tag));
-          }
+          temporaryRange.surroundContents(document.createElement(tag));
           temporaryRange.detach();
         });
     }
