@@ -100,8 +100,9 @@ export class Editor {
               if (temporaryRange.isPointInRange(range.startContainer, range.startOffset) &&
                 temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
                 this.takeOffWrapper(node);
-              } else if (temporaryRange.isPointInRange(range.startContainer, range.startOffset)) {
                 console.log(6)
+              } else if (temporaryRange.isPointInRange(range.startContainer, range.startOffset)) {
+                console.log(7)
                 const startRange = this.contentDocument.createRange();
                 startRange.setStart(range.startContainer, range.startOffset);
                 startRange.setEndAfter(node);
@@ -115,7 +116,7 @@ export class Editor {
                 this.takeOffWrapper(extractStart);
                 startRange.detach();
               } else if (temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
-                console.log(7)
+                console.log(8)
                 const endRange = this.contentDocument.createRange();
                 endRange.setStartBefore(node);
                 endRange.setEnd(range.endContainer, range.endOffset);
@@ -124,6 +125,7 @@ export class Editor {
                 this.takeOffWrapper(extractEnd);
                 endRange.detach();
               } else {
+                console.log(9)
                 this.takeOffWrapper(node);
               }
             });
@@ -135,24 +137,36 @@ export class Editor {
 
   private wrapper(range: Range, doc: Document, tag: string) {
     if (range.startContainer === range.endContainer && range.commonAncestorContainer.nodeType === 3) {
+      console.log(11)
       range.surroundContents(document.createElement(tag));
     } else {
+      console.log(12)
       this.getTextNodes(range.commonAncestorContainer as HTMLElement, tag)
         .filter(item => range.intersectsNode(item))
         .forEach(item => {
-          if (item.textContent === '') {
-            item.parentNode.removeChild(item);
-            return;
-          }
+          // if (item.textContent === '') {
+          //   item.parentNode.removeChild(item);
+          //   return;
+          // }
+          console.log(13)
           const temporaryRange = doc.createRange();
           temporaryRange.selectNode(item);
-          if (item === range.startContainer) {
+          if (item === range.startContainer && item === range.endContainer) {
+            console.log(14)
+            // range.selectNode(wrap);
+          } else if (item === range.startContainer) {
+            console.log(15)
             temporaryRange.setStart(item, range.startOffset);
           } else if (item === range.endContainer) {
+            console.log(15)
             temporaryRange.setEnd(item, range.endOffset);
           }
           // TODO 这里默认不会有问题，但删除元素后再添加，会在选区开始和结束多一个空白的标签
-          temporaryRange.surroundContents(document.createElement(tag));
+          const wrap = document.createElement(tag);
+          temporaryRange.surroundContents(wrap);
+          if (range.collapsed) {
+            range.selectNode(wrap);
+          }
           temporaryRange.detach();
         });
     }
