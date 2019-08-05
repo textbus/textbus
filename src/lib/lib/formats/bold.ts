@@ -5,9 +5,11 @@ export const boldHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-bold'],
   tooltip: '加粗',
-  tags: ['STRONG', 'B'],
+  match: {
+    tags: ['STRONG', 'B']
+  },
   execCommand(editor: Editor): void {
-    editor.wrap('strong');
+    editor.format('strong');
     // editor.contentDocument.execCommand('bold');
   }
 };

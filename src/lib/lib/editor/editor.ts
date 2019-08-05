@@ -35,15 +35,14 @@ export class Editor {
     }
   }
 
-  wrap(tag: string) {
+  format(tag: string) {
     tag = tag.toLowerCase();
     if (dtd[tag].type === 'single') {
       return;
     }
     if (dtd[tag].display === 'inline') {
-      this.wrapInlineElement(tag);
+      this.inlineElementFormat(tag);
     }
-
   }
 
   /**
@@ -58,180 +57,159 @@ export class Editor {
     selection.addRange(range);
   }
 
-  private wrapInlineElement(tag: string) {
+  private inlineElementFormat(tag: string) {
     const selection = this.contentDocument.getSelection();
     const range = selection.getRangeAt(0);
 
-    if (range.commonAncestorContainer.nodeType === 1 &&
-      (range.commonAncestorContainer as HTMLElement).tagName.toLowerCase() === tag) {
-      this.takeOffWrapper(range.commonAncestorContainer as HTMLElement);
-      return;
-    }
-
     const parentTagContainer = this.matchContainerByTagName(range.commonAncestorContainer as HTMLElement, tag);
+
     if (parentTagContainer) {
-      console.log(1);
-      this.reverse(parentTagContainer, range, this.contentDocument, tag);
+      console.log(1)
+      const ranges = this.splitBySelectedRange(range, parentTagContainer);
+      const {startContainer, endContainer, startOffset, endOffset} = ranges.current;
       this.takeOffWrapper(parentTagContainer);
+      this.wrap(ranges.before, tag);
+      this.unWrap(ranges.current, tag);
+      this.wrap(ranges.after, tag);
+      ranges.before.detach();
+      ranges.after.detach();
+
+      ranges.current.setStart(startContainer, startOffset);
+      ranges.current.setEnd(endContainer, endOffset);
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
-        console.log(2);
+        console.log(2)
         const newWrap = document.createElement(tag);
         const isCollapsed = range.collapsed;
         range.surroundContents(newWrap);
         if (isCollapsed) {
-          newWrap.innerHTML = ' ';
+          newWrap.innerHTML = '&#8203;';
           range.selectNodeContents(newWrap);
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
-        console.log(3);
-        if (this.hasOtherTag(range.cloneContents(), tag)) {
-          console.log(4);
-          this.wrapper(range, this.contentDocument, tag);
+        console.log(3)
+        const ranges = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
+        if (this.hasOtherTag(range.commonAncestorContainer as HTMLElement, range, tag)) {
+          console.log(4)
+          this.wrap(ranges.current, tag);
         } else {
           console.log(5)
-          Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
-            .filter(item => range.intersectsNode(item))
-            .forEach((node: HTMLElement) => {
-              const temporaryRange = this.contentDocument.createRange();
-              temporaryRange.selectNode(node);
-              const parentNode = node.parentNode;
-              const nextSibling = node.nextSibling;
-              if (temporaryRange.isPointInRange(range.startContainer, range.startOffset) &&
-                temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
-                this.takeOffWrapper(node);
-                console.log(6)
-              } else if (temporaryRange.isPointInRange(range.startContainer, range.startOffset)) {
-                console.log(7)
-                const startRange = this.contentDocument.createRange();
-                startRange.setStart(range.startContainer, range.startOffset);
-                startRange.setEndAfter(node);
-                const extractStart = startRange.extractContents().children[0];
-                if (nextSibling) {
-                  parentNode.insertBefore(extractStart, nextSibling);
-                } else {
-                  parentNode.appendChild(extractStart);
-                }
-                range.setEndBefore(extractStart);
-                this.takeOffWrapper(extractStart);
-                startRange.detach();
-              } else if (temporaryRange.isPointInRange(range.endContainer, range.endOffset)) {
-                console.log(8)
-                const endRange = this.contentDocument.createRange();
-                endRange.setStartBefore(node);
-                endRange.setEnd(range.endContainer, range.endOffset);
-                const extractEnd = endRange.extractContents().children[0];
-                node.parentNode.insertBefore(extractEnd, node);
-                this.takeOffWrapper(extractEnd);
-                endRange.detach();
-              } else {
-                console.log(9)
-                this.takeOffWrapper(node);
-              }
-            });
+          this.unWrap(ranges.current, tag);
         }
+        ranges.before.detach();
+        ranges.after.detach();
       }
     }
     this.contentDocument.body.focus();
   }
 
-  private wrapper(range: Range, doc: Document, tag: string) {
-    if (range.startContainer === range.endContainer && range.commonAncestorContainer.nodeType === 3) {
-      console.log(11)
-      range.surroundContents(document.createElement(tag));
-    } else {
-      console.log(12)
-      this.getTextNodes(range.commonAncestorContainer as HTMLElement, tag)
-        .filter(item => range.intersectsNode(item))
-        .forEach(item => {
-          // if (item.textContent === '') {
-          //   item.parentNode.removeChild(item);
-          //   return;
-          // }
-          console.log(13)
-          const temporaryRange = doc.createRange();
-          temporaryRange.selectNode(item);
-          if (item === range.startContainer && item === range.endContainer) {
-            console.log(14)
-            // range.selectNode(wrap);
-          } else if (item === range.startContainer) {
-            console.log(15)
-            temporaryRange.setStart(item, range.startOffset);
-          } else if (item === range.endContainer) {
-            console.log(15)
-            temporaryRange.setEnd(item, range.endOffset);
-          }
-          // TODO 这里默认不会有问题，但删除元素后再添加，会在选区开始和结束多一个空白的标签
-          const wrap = document.createElement(tag);
-          temporaryRange.surroundContents(wrap);
-          if (range.collapsed) {
-            range.selectNode(wrap);
-          }
-          temporaryRange.detach();
-        });
+  private splitBySelectedRange(range: Range, scope: Element): { before: Range, current: Range, after: Range } {
+    const beforeRange = this.contentDocument.createRange();
+    const afterRange = this.contentDocument.createRange();
+
+    if (range.startContainer.nodeType === 3) {
+      const startParent = range.startContainer.parentNode;
+      beforeRange.setStart(range.startContainer, 0);
+      beforeRange.setEnd(range.startContainer, range.startOffset);
+      startParent.insertBefore(beforeRange.extractContents(), range.startContainer);
+      beforeRange.setStartBefore(scope);
+      beforeRange.setEndAfter(range.startContainer.previousSibling);
+    } else if (range.startContainer.nodeType === 1) {
+      beforeRange.setStartBefore(scope);
+      beforeRange.setEndBefore(range.startContainer);
     }
+
+    if (range.endContainer.nodeType === 3) {
+      const endParent = range.endContainer.parentNode;
+      afterRange.setStart(range.endContainer, range.endOffset);
+      afterRange.setEndAfter(range.endContainer);
+      endParent.appendChild(afterRange.extractContents());
+      afterRange.setStartAfter(range.endContainer);
+      afterRange.setEndAfter(scope);
+    } else if (range.endContainer.nodeType === 1) {
+      afterRange.setEndAfter(range.endContainer);
+      afterRange.setEndAfter(scope);
+    }
+    return {
+      before: beforeRange,
+      current: range,
+      after: afterRange
+    };
   }
 
-  private reverse(container: HTMLElement, range: Range, doc: Document, tag: string) {
-    Array.from(container.childNodes).forEach(node => {
-      if (range.intersectsNode(node)) {
-        if (node.nodeType === 1) {
-          if ((node as HTMLElement).tagName.toLowerCase() === tag) {
-            this.takeOffWrapper(node as HTMLElement);
-          } else {
-            this.reverse(node as HTMLElement, range, doc, tag);
-          }
-        } else if (node.nodeType === 3) {
-          if (node === range.startContainer && range.startOffset > 0) {
-            const startRange = doc.createRange();
-            startRange.setStartBefore(node);
-            startRange.setEnd(node, range.startOffset);
-            startRange.surroundContents(document.createElement(tag));
-            startRange.detach();
-          }
-          if (node === range.endContainer) {
-            const endRange = doc.createRange();
-            endRange.setStart(node, range.endOffset);
-            endRange.setEndAfter(node);
-            if (!endRange.collapsed) {
-              endRange.surroundContents(document.createElement(tag));
-            }
-            endRange.detach();
-          }
-        }
-      } else {
-        if (node.nodeType === 1) {
-          this.reverse(node as HTMLElement, range, doc, tag);
-        } else if (node.nodeType === 3) {
-          const containerRange = doc.createRange();
-          containerRange.selectNode(node);
-          containerRange.surroundContents(document.createElement(tag));
-          containerRange.detach();
-        }
+  private wrap(range: Range, tag: string) {
+    this.getTextNodes(range.commonAncestorContainer as Element).filter(item => {
+      return range.intersectsNode(item) && (item.parentNode as HTMLElement).tagName.toLowerCase() !== tag;
+    }).forEach(item => {
+      const wrap = document.createElement(tag);
+      item.parentNode.insertBefore(wrap, item);
+      wrap.appendChild(item);
+      if (!range.intersectsNode(wrap)) {
+        range.setStartBefore(wrap);
       }
     });
   }
 
-  private getTextNodes(container: HTMLElement, exclude: string) {
+  private unWrap(range: Range, tag: string) {
+    const container = range.commonAncestorContainer.nodeType === 1 ?
+      range.commonAncestorContainer : range.commonAncestorContainer.parentNode;
+    Array.from((container as HTMLElement).getElementsByTagName(tag))
+      .filter(item => range.intersectsNode(item))
+      .forEach(item => {
+        this.takeOffWrapper(item);
+        // console.dir(fragment);
+      });
+  }
+
+  private normalize(el: Element) {
+    const elements = Array.from(el.childNodes);
+    for (let i = 0; i < elements.length; i++) {
+      const node = elements[i];
+      for (let j = i + 1; j < elements.length; j++) {
+        const next = elements[j];
+        if (next) {
+          break;
+        }
+        if (node.nodeType === 3 && next.nodeType === 3) {
+          node.textContent = node.textContent + next.textContent;
+          el.removeChild(next);
+          i++;
+        } else if (node.nodeType === 1 && next.nodeType === 1 &&
+          (node as Element).tagName === (next as Element).tagName) {
+          Array.from(next.childNodes).forEach(item => node.appendChild(item));
+          el.removeChild(next);
+          i++;
+        }
+      }
+      if (node.nodeType === 1) {
+        this.normalize(node as HTMLElement);
+      }
+    }
+  }
+
+  private getTextNodes(container: Element) {
     const result: Node[] = [];
     Array.from(container.childNodes).forEach(node => {
       if (node.nodeType === 3) {
         result.push(node);
-      } else if (node.nodeType === 1 && (node as HTMLElement).tagName.toLowerCase() !== exclude) {
-        result.push(...this.getTextNodes(node as HTMLElement, exclude));
+      } else if (node.nodeType === 1) {
+        result.push(...this.getTextNodes(node as HTMLElement));
       }
     });
     return result;
   }
 
-  private hasOtherTag(ele: Node, tag: string): boolean {
-    for (const node of Array.from(ele.childNodes)) {
+  private hasOtherTag(container: HTMLElement, range: Range, tag: string): boolean {
+    for (const node of Array.from(container.childNodes)) {
+      if (!range.intersectsNode(node)) {
+        continue;
+      }
       if (node.nodeType === 3 && node.textContent !== '') {
         return true;
       }
       if (node.nodeType === 1) {
         if ((node as HTMLElement).tagName.toLowerCase() !== tag) {
-          return this.hasOtherTag(node, tag);
+          return this.hasOtherTag(node as HTMLElement, range, tag);
         }
       }
     }
@@ -248,17 +226,18 @@ export class Editor {
     return null;
   }
 
-  private takeOffWrapper(el: Element) {
-    const c = document.createComment('');
-    const parentNode = el.parentNode;
-    parentNode.insertBefore(c, el);
-    parentNode.removeChild(el);
-    const childNodes = el.childNodes;
-    const newEle = document.createDocumentFragment();
-    Array.from(childNodes).forEach(item => newEle.appendChild(item));
-
-    parentNode.insertBefore(newEle, c);
-    parentNode.removeChild(c);
+  private takeOffWrapper(el: Element): { firstChild: Node, lastChild: Node } {
+    const fragment = document.createDocumentFragment();
+    const childNodes = Array.from(el.childNodes);
+    childNodes.forEach(item => {
+      fragment.appendChild(item);
+    });
+    el.parentNode.insertBefore(fragment, el);
+    el.parentNode.removeChild(el);
+    return {
+      firstChild: childNodes[0],
+      lastChild: childNodes[childNodes.length - 1]
+    };
   }
 
   private setup(childDocument: Document) {

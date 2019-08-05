@@ -5,7 +5,9 @@ export const blockquoteHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-quotes-right'],
   tooltip: '引用',
-  tags: ['BLOCKQUOTE'],
+  match: {
+    tags: ['BLOCKQUOTE']
+  },
   execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('formatBlock', false, 'blockquote');
   }

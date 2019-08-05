@@ -5,7 +5,9 @@ export const subscriptHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-subscript'],
   tooltip: '下标',
-  tags: ['SUB'],
+  match: {
+    tags: ['SUB']
+  },
   execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('subscript');
   }

@@ -5,7 +5,9 @@ export const imageHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-image'],
   tooltip: '图片',
-  tags: ['IMG'],
+  match: {
+    tags: ['IMG']
+  },
   execCommand(editor: Editor): void {
     // editor.contentDocument.execCommand('italic');
   }

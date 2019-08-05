@@ -5,7 +5,9 @@ export const strikeThroughHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-strikethrough'],
   tooltip: '删除线',
-  tags: ['STRIKE', 'DEL', 'S'],
+  match: {
+    tags: ['STRIKE', 'DEL', 'S']
+  },
   execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('strikeThrough');
   }

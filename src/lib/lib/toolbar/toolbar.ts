@@ -53,7 +53,7 @@ export class Toolbar {
     this.checkers.push(function (paths: string[]) {
       let isFind = false;
       for (const path of paths) {
-        if ((handler.tags || []).indexOf(path) > -1) {
+        if ((handler.match.tags || []).indexOf(path) > -1) {
           isFind = true;
           break;
         }

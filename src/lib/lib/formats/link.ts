@@ -5,7 +5,9 @@ export const linkHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-link'],
   tooltip: '链接',
-  tags: ['A'],
+  match: {
+    tags: ['A']
+  },
   execCommand(editor: Editor): void {
     // editor.contentDocument.execCommand('italic');
   }

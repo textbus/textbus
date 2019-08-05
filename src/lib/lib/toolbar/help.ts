@@ -1,8 +1,23 @@
 import { Editor } from '../editor/editor';
 
+export interface FormatMatchStyles {
+  [key: string]: number | string;
+}
+
+export interface FormatAttrs {
+  [key: string]: any;
+}
+
+export interface FormatMatch {
+  tags?: string[];
+  styles?: FormatMatchStyles;
+  classes?: string[];
+  attrs?: FormatAttrs;
+}
+
 export interface ButtonHandler {
   type: 'button';
-  tags?: string[];
+  match?: FormatMatch;
   label?: string;
   classes?: string[];
   tooltip?: string;

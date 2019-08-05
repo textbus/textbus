@@ -5,7 +5,9 @@ export const videoHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-video'],
   tooltip: '视频',
-  tags: ['VIDEO'],
+  match: {
+    tags: ['VIDEO']
+  },
   execCommand(editor: Editor): void {
     // editor.contentDocument.execCommand('italic');
   }

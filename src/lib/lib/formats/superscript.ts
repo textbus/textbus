@@ -5,7 +5,9 @@ export const superscriptHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-superscript'],
   tooltip: '上标',
-  tags: ['SUP'],
+  match: {
+    tags: ['SUP']
+  },
   execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('superscript');
   }

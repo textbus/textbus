@@ -5,7 +5,9 @@ export const italicHandler: ButtonHandler = {
   type: 'button',
   classes: ['tanbo-editor-icon-italic'],
   tooltip: '斜体',
-  tags: ['EM', 'I'],
+  match: {
+    tags: ['EM', 'I']
+  },
   execCommand(editor: Editor): void {
     editor.contentDocument.execCommand('italic');
   }
