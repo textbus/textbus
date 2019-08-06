@@ -13,6 +13,7 @@ export class Editor {
   private selectionChangeEvent = new Subject<Selection>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
+  private selection: Selection;
 
   constructor() {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
@@ -30,7 +31,9 @@ export class Editor {
       self.setup(self.host.contentDocument);
       (<any>self).contentDocument = self.host.contentDocument;
       (<any>self).contentWindow = self.host.contentWindow;
-      this.selectionChangeEvent.next(this.contentWindow.getSelection());
+      this.contentDocument.body.focus();
+      this.selection = this.contentDocument.getSelection();
+      this.selectionChangeEvent.next(this.selection);
       this.loadEvent.next(this);
     }
   }
@@ -58,7 +61,7 @@ export class Editor {
   }
 
   private inlineElementFormat(tag: string) {
-    const selection = this.contentDocument.getSelection();
+    const selection = this.selection;
     const range = selection.getRangeAt(0);
 
     const parentTagContainer = this.matchContainerByTagName(range.commonAncestorContainer as HTMLElement, tag);
@@ -67,10 +70,10 @@ export class Editor {
       console.log(1)
       const ranges = this.splitBySelectedRange(range, parentTagContainer);
       const {startContainer, endContainer, startOffset, endOffset} = ranges.current;
-      this.takeOffWrapper(parentTagContainer);
       this.wrap(ranges.before, tag);
       this.unWrap(ranges.current, tag);
       this.wrap(ranges.after, tag);
+      this.takeOffWrapper(parentTagContainer);
       ranges.before.detach();
       ranges.after.detach();
 
@@ -88,16 +91,18 @@ export class Editor {
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
         console.log(3)
-        const ranges = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
-        if (this.hasOtherTag(range.commonAncestorContainer as HTMLElement, range, tag)) {
+        const {before, current, after} = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
+        if (this.hasOtherTag(current.commonAncestorContainer as HTMLElement, current, tag)) {
+          this.unWrap(current, tag);
+          this.wrap(current, tag);
           console.log(4)
-          this.wrap(ranges.current, tag);
         } else {
           console.log(5)
-          this.unWrap(ranges.current, tag);
+          this.unWrap(current, tag);
+          console.log(current);
         }
-        ranges.before.detach();
-        ranges.after.detach();
+        before.detach();
+        after.detach();
       }
     }
     this.contentDocument.body.focus();
@@ -113,7 +118,7 @@ export class Editor {
       beforeRange.setEnd(range.startContainer, range.startOffset);
       startParent.insertBefore(beforeRange.extractContents(), range.startContainer);
       beforeRange.setStartBefore(scope);
-      beforeRange.setEndAfter(range.startContainer.previousSibling);
+      beforeRange.setEndBefore(range.startContainer);
     } else if (range.startContainer.nodeType === 1) {
       beforeRange.setStartBefore(scope);
       beforeRange.setEndBefore(range.startContainer);
@@ -139,10 +144,10 @@ export class Editor {
 
   private wrap(range: Range, tag: string) {
     this.getTextNodes(range.commonAncestorContainer as Element).filter(item => {
-      return range.intersectsNode(item) && (item.parentNode as HTMLElement).tagName.toLowerCase() !== tag;
+      return range.intersectsNode(item);
     }).forEach(item => {
       const wrap = document.createElement(tag);
-      item.parentNode.insertBefore(wrap, item);
+      item.parentNode.replaceChild(wrap, item);
       wrap.appendChild(item);
       if (!range.intersectsNode(wrap)) {
         range.setStartBefore(wrap);
@@ -156,8 +161,15 @@ export class Editor {
     Array.from((container as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        this.takeOffWrapper(item);
-        // console.dir(fragment);
+        const {lastChild} = this.takeOffWrapper(item);
+        console.log(range.cloneContents())
+        console.log(lastChild, this.selection.focusNode);
+        if (!range.intersectsNode(lastChild)) {
+          console.log(545432);
+          range.setEnd(lastChild, lastChild.textContent.length);
+
+        }
+        console.log(range.cloneContents(), this.selection.focusNode);
       });
   }
 
@@ -232,8 +244,7 @@ export class Editor {
     childNodes.forEach(item => {
       fragment.appendChild(item);
     });
-    el.parentNode.insertBefore(fragment, el);
-    el.parentNode.removeChild(el);
+    el.parentNode.replaceChild(fragment, el);
     return {
       firstChild: childNodes[0],
       lastChild: childNodes[childNodes.length - 1]
