@@ -70,15 +70,24 @@ export class Editor {
       console.log(1)
       const ranges = this.splitBySelectedRange(range, parentTagContainer);
       const {startContainer, endContainer, startOffset, endOffset} = ranges.current;
+      const startChild = startContainer.nodeType === 1 ? startContainer.childNodes[startOffset] : null;
+      const endChild = endContainer.nodeType === 1 ? endContainer.childNodes[endOffset] : null;
       this.wrap(ranges.before, tag);
       this.unWrap(ranges.current, tag);
       this.wrap(ranges.after, tag);
       this.takeOffWrapper(parentTagContainer);
       ranges.before.detach();
       ranges.after.detach();
-
-      ranges.current.setStart(startContainer, startOffset);
-      ranges.current.setEnd(endContainer, endOffset);
+      if (startChild) {
+        ranges.current.setStartBefore(startChild);
+      } else {
+        ranges.current.setStart(startContainer, startOffset);
+      }
+      if (endChild) {
+        ranges.current.setEndBefore(endChild);
+      } else {
+        ranges.current.setEnd(endContainer, endOffset);
+      }
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
         console.log(2)
@@ -92,13 +101,19 @@ export class Editor {
       } else if (range.commonAncestorContainer.nodeType === 1) {
         console.log(3)
         const {before, current, after} = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
-        if (this.hasOtherTag(current.commonAncestorContainer as HTMLElement, current, tag)) {
+        console.log(before.cloneContents(), current.cloneContents(), after.cloneContents())
+        const textNodes = this.getTextNodes(current.commonAncestorContainer as HTMLElement, tag).filter(node => {
+          return current.intersectsNode(node);
+        });
+        const allOffspringInTag = textNodes.length === 0;
+        if (allOffspringInTag) {
           this.unWrap(current, tag);
-          this.wrap(current, tag);
           console.log(4)
         } else {
+          // textNodes.forEach()
           console.log(5)
           this.unWrap(current, tag);
+          this.wrap(current, tag);
           console.log(current);
         }
         before.detach();
@@ -120,8 +135,9 @@ export class Editor {
       beforeRange.setStartBefore(scope);
       beforeRange.setEndBefore(range.startContainer);
     } else if (range.startContainer.nodeType === 1) {
+      // beforeRange.setStart(scope, 0);
       beforeRange.setStartBefore(scope);
-      beforeRange.setEndBefore(range.startContainer);
+      beforeRange.setEnd(range.startContainer, range.startOffset);
     }
 
     if (range.endContainer.nodeType === 3) {
@@ -132,9 +148,11 @@ export class Editor {
       afterRange.setStartAfter(range.endContainer);
       afterRange.setEndAfter(scope);
     } else if (range.endContainer.nodeType === 1) {
-      afterRange.setEndAfter(range.endContainer);
+      afterRange.setStart(range.endContainer, range.endOffset);
       afterRange.setEndAfter(scope);
+      // afterRange.setEndAfter(scope.childNodes[scope.childNodes.length - 1]);
     }
+    console.log(beforeRange.toString(), range.toString(), afterRange.toString())
     return {
       before: beforeRange,
       current: range,
@@ -143,34 +161,36 @@ export class Editor {
   }
 
   private wrap(range: Range, tag: string) {
+    const wraps: HTMLElement[] = [];
     this.getTextNodes(range.commonAncestorContainer as Element).filter(item => {
       return range.intersectsNode(item);
     }).forEach(item => {
       const wrap = document.createElement(tag);
       item.parentNode.replaceChild(wrap, item);
       wrap.appendChild(item);
-      if (!range.intersectsNode(wrap)) {
-        range.setStartBefore(wrap);
-      }
+      wraps.push(wrap);
     });
+    if (wraps.length) {
+      range.setStartBefore(wraps[0]);
+      range.setEndAfter(wraps[wraps.length - 1]);
+    }
+    return range;
   }
 
   private unWrap(range: Range, tag: string) {
+    const nodes: Array<{ firstChild: Node, lastChild: Node }> = [];
     const container = range.commonAncestorContainer.nodeType === 1 ?
       range.commonAncestorContainer : range.commonAncestorContainer.parentNode;
     Array.from((container as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        const {lastChild} = this.takeOffWrapper(item);
-        console.log(range.cloneContents())
-        console.log(lastChild, this.selection.focusNode);
-        if (!range.intersectsNode(lastChild)) {
-          console.log(545432);
-          range.setEnd(lastChild, lastChild.textContent.length);
-
-        }
-        console.log(range.cloneContents(), this.selection.focusNode);
+        nodes.push(this.takeOffWrapper(item));
       });
+    if (nodes.length) {
+      range.setStartBefore(nodes[0].firstChild);
+      range.setEndAfter(nodes[nodes.length - 1].lastChild);
+    }
+    return range;
   }
 
   private normalize(el: Element) {
@@ -199,19 +219,23 @@ export class Editor {
     }
   }
 
-  private getTextNodes(container: Element) {
+  private getTextNodes(container: Element, excludeTag?: string) {
     const result: Node[] = [];
     Array.from(container.childNodes).forEach(node => {
       if (node.nodeType === 3) {
         result.push(node);
       } else if (node.nodeType === 1) {
-        result.push(...this.getTextNodes(node as HTMLElement));
+        if (!excludeTag) {
+          result.push(...this.getTextNodes(node as HTMLElement));
+        } else if ((node as HTMLElement).tagName.toLowerCase() !== excludeTag) {
+          result.push(...this.getTextNodes(node as HTMLElement));
+        }
       }
     });
     return result;
   }
 
-  private hasOtherTag(container: HTMLElement, range: Range, tag: string): boolean {
+  private hasOtherTag(container: Node, range: Range, tag: string): boolean {
     for (const node of Array.from(container.childNodes)) {
       if (!range.intersectsNode(node)) {
         continue;
@@ -221,7 +245,7 @@ export class Editor {
       }
       if (node.nodeType === 1) {
         if ((node as HTMLElement).tagName.toLowerCase() !== tag) {
-          return this.hasOtherTag(node as HTMLElement, range, tag);
+          return this.hasOtherTag(node, range, tag);
         }
       }
     }
