@@ -64,33 +64,30 @@ export class Editor {
     const selection = this.selection;
     const range = selection.getRangeAt(0);
 
-    const parentTagContainer = this.matchContainerByTagName(range.commonAncestorContainer as HTMLElement, tag);
+    const parentTagContainer = this.matchContainerByTagName(
+      range.commonAncestorContainer as HTMLElement,
+      tag,
+      document.body) as HTMLElement;
 
     if (parentTagContainer) {
-      console.log(1)
-      const ranges = this.splitBySelectedRange(range, parentTagContainer);
-      const {startContainer, endContainer, startOffset, endOffset} = ranges.current;
-      const startChild = startContainer.nodeType === 1 ? startContainer.childNodes[startOffset] : null;
-      const endChild = endContainer.nodeType === 1 ? endContainer.childNodes[endOffset] : null;
-      this.wrap(ranges.before, tag);
-      this.unWrap(ranges.current, tag);
-      this.wrap(ranges.after, tag);
+      if (range.collapsed) {
+        return;
+      }
+
+      const {current, before, after, endMark, startMark} = this.splitBySelectedRange(range, parentTagContainer);
+
+      this.wrap(before, tag);
+      this.wrap(after, tag);
       this.takeOffWrapper(parentTagContainer);
-      ranges.before.detach();
-      ranges.after.detach();
-      if (startChild) {
-        ranges.current.setStartBefore(startChild);
-      } else {
-        ranges.current.setStart(startContainer, startOffset);
-      }
-      if (endChild) {
-        ranges.current.setEndBefore(endChild);
-      } else {
-        ranges.current.setEnd(endContainer, endOffset);
-      }
+      before.detach();
+      after.detach();
+      current.setStartAfter(startMark);
+      current.setEndBefore(endMark);
+
+      startMark.parentNode.removeChild(startMark);
+      endMark.parentNode.removeChild(endMark);
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
-        console.log(2)
         const newWrap = document.createElement(tag);
         const isCollapsed = range.collapsed;
         range.surroundContents(newWrap);
@@ -100,8 +97,8 @@ export class Editor {
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
         console.log(3)
-        const {before, current, after} = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
-        console.log(before.cloneContents(), current.cloneContents(), after.cloneContents())
+        const {before, current, after, startMark, endMark} = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
+
         const textNodes = this.getTextNodes(current.commonAncestorContainer as HTMLElement, tag).filter(node => {
           return current.intersectsNode(node);
         });
@@ -110,87 +107,119 @@ export class Editor {
           this.unWrap(current, tag);
           console.log(4)
         } else {
-          // textNodes.forEach()
           console.log(5)
+          current.setStartBefore(startMark);
+          current.setEndAfter(endMark);
           this.unWrap(current, tag);
+          current.setStartAfter(startMark);
+          current.setEndBefore(endMark);
           this.wrap(current, tag);
-          console.log(current);
         }
         before.detach();
         after.detach();
+        const s = this.findEmptyContainer(startMark);
+        const e = this.findEmptyContainer(endMark);
+        current.setStartAfter(s);
+        current.setEndBefore(e);
+        s.parentNode.removeChild(s);
+        e.parentNode.removeChild(e);
       }
     }
     this.contentDocument.body.focus();
   }
 
-  private splitBySelectedRange(range: Range, scope: Element): { before: Range, current: Range, after: Range } {
+  private findEmptyContainer(node: Node): Node {
+    if ((node.parentNode as HTMLElement).innerText) {
+      return node;
+    }
+    return this.findEmptyContainer(node.parentNode);
+  }
+
+  private splitBySelectedRange(range: Range, scope: Element): {
+    before: Range,
+    current: Range,
+    after: Range,
+    startMark: HTMLElement,
+    endMark: HTMLElement
+  } {
     const beforeRange = this.contentDocument.createRange();
     const afterRange = this.contentDocument.createRange();
+
+    const startMark = document.createElement('span');
+    const endMark = document.createElement('span');
 
     if (range.startContainer.nodeType === 3) {
       const startParent = range.startContainer.parentNode;
       beforeRange.setStart(range.startContainer, 0);
       beforeRange.setEnd(range.startContainer, range.startOffset);
       startParent.insertBefore(beforeRange.extractContents(), range.startContainer);
+      startParent.insertBefore(startMark, range.startContainer);
       beforeRange.setStartBefore(scope);
-      beforeRange.setEndBefore(range.startContainer);
+      beforeRange.setEndBefore(startMark);
     } else if (range.startContainer.nodeType === 1) {
-      // beforeRange.setStart(scope, 0);
       beforeRange.setStartBefore(scope);
-      beforeRange.setEnd(range.startContainer, range.startOffset);
+      range.startContainer.insertBefore(startMark, range.startContainer.childNodes[range.startOffset]);
+      beforeRange.setEndBefore(startMark);
     }
 
     if (range.endContainer.nodeType === 3) {
       const endParent = range.endContainer.parentNode;
       afterRange.setStart(range.endContainer, range.endOffset);
       afterRange.setEndAfter(range.endContainer);
+      endParent.appendChild(endMark);
       endParent.appendChild(afterRange.extractContents());
-      afterRange.setStartAfter(range.endContainer);
+      afterRange.setStartAfter(endMark);
       afterRange.setEndAfter(scope);
     } else if (range.endContainer.nodeType === 1) {
-      afterRange.setStart(range.endContainer, range.endOffset);
+      range.endContainer.insertBefore(endMark, range.endContainer.childNodes[range.endOffset]);
+      afterRange.setStartAfter(endMark);
       afterRange.setEndAfter(scope);
-      // afterRange.setEndAfter(scope.childNodes[scope.childNodes.length - 1]);
     }
-    console.log(beforeRange.toString(), range.toString(), afterRange.toString())
     return {
       before: beforeRange,
       current: range,
-      after: afterRange
+      after: afterRange,
+      startMark,
+      endMark
     };
   }
 
   private wrap(range: Range, tag: string) {
-    const wraps: HTMLElement[] = [];
     this.getTextNodes(range.commonAncestorContainer as Element).filter(item => {
-      return range.intersectsNode(item);
+      return range.intersectsNode(item) && item.textContent;
     }).forEach(item => {
       const wrap = document.createElement(tag);
       item.parentNode.replaceChild(wrap, item);
       wrap.appendChild(item);
-      wraps.push(wrap);
     });
-    if (wraps.length) {
-      range.setStartBefore(wraps[0]);
-      range.setEndAfter(wraps[wraps.length - 1]);
-    }
-    return range;
   }
 
   private unWrap(range: Range, tag: string) {
-    const nodes: Array<{ firstChild: Node, lastChild: Node }> = [];
-    const container = range.commonAncestorContainer.nodeType === 1 ?
-      range.commonAncestorContainer : range.commonAncestorContainer.parentNode;
-    Array.from((container as HTMLElement).getElementsByTagName(tag))
+    const start = this.matchContainerByTagName(range.startContainer, tag, range.commonAncestorContainer);
+    const end = this.matchContainerByTagName(range.endContainer, tag, range.commonAncestorContainer);
+
+    if (start) {
+      const startRange = document.createRange();
+      startRange.setStartBefore(start);
+      startRange.setEnd(range.startContainer, range.startOffset);
+      start.parentNode.insertBefore(startRange.extractContents(), start);
+    }
+    if (end) {
+      const endRange = document.createRange();
+      endRange.setStart(range.endContainer, range.endOffset);
+      endRange.setEndAfter(end);
+      if (end.nextSibling) {
+        end.parentNode.insertBefore(endRange.extractContents(), end.nextSibling);
+      } else {
+        end.parentNode.appendChild(endRange.extractContents());
+      }
+    }
+
+    Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        nodes.push(this.takeOffWrapper(item));
+        this.takeOffWrapper(item);
       });
-    if (nodes.length) {
-      range.setStartBefore(nodes[0].firstChild);
-      range.setEndAfter(nodes[nodes.length - 1].lastChild);
-    }
-    return range;
   }
 
   private normalize(el: Element) {
@@ -228,33 +257,19 @@ export class Editor {
         if (!excludeTag) {
           result.push(...this.getTextNodes(node as HTMLElement));
         } else if ((node as HTMLElement).tagName.toLowerCase() !== excludeTag) {
-          result.push(...this.getTextNodes(node as HTMLElement));
+          result.push(...this.getTextNodes(node as HTMLElement, excludeTag));
         }
       }
     });
     return result;
   }
 
-  private hasOtherTag(container: Node, range: Range, tag: string): boolean {
-    for (const node of Array.from(container.childNodes)) {
-      if (!range.intersectsNode(node)) {
-        continue;
-      }
-      if (node.nodeType === 3 && node.textContent !== '') {
-        return true;
-      }
-      if (node.nodeType === 1) {
-        if ((node as HTMLElement).tagName.toLowerCase() !== tag) {
-          return this.hasOtherTag(node, range, tag);
-        }
-      }
-    }
-    return false;
-  }
-
-  private matchContainerByTagName(node: HTMLElement, tagName: string) {
+  private matchContainerByTagName(node: Node, tagName: string, scope: Node) {
     while (node) {
-      if (node.nodeType === 1 && node.tagName.toLowerCase() === tagName) {
+      if (node === scope) {
+        return null;
+      }
+      if (node.nodeType === 1 && (node as HTMLElement).tagName.toLowerCase() === tagName) {
         return node;
       }
       node = node.parentNode as HTMLElement;

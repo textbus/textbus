@@ -25,8 +25,6 @@ export const template = `
     }
   </style>
 </head>
-<body contenteditable><p>
-fdsafdsafdsadf<strong>fdsafd<em>eee</em><em>eee</em>safdsa</strong>
-</p></body>
+<body contenteditable><p><br></p></body>
 </html>
 `;
