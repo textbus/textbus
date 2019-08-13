@@ -9,6 +9,8 @@ export const codeHandler: ButtonHandler = {
     tags: ['PRE']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('formatBlock', false, 'pre');
+    editor.format({
+      useTagName: 'pre'
+    });
   }
 };

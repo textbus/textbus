@@ -9,6 +9,8 @@ export const blockquoteHandler: ButtonHandler = {
     tags: ['BLOCKQUOTE']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('formatBlock', false, 'blockquote');
+    editor.format({
+      useTagName: 'blockquote'
+    });
   }
 };

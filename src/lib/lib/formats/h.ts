@@ -34,6 +34,8 @@ export const hHandler: SelectHandler = {
     default: true
   }],
   execCommand(option: SelectHandlerOption, editor: Editor): void {
-    editor.contentDocument.execCommand('formatBlock', false, option.tags[0].toLowerCase());
+    editor.format({
+      useTagName: option.tags[0].toLowerCase()
+    });
   }
 };

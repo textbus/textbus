@@ -106,7 +106,7 @@ export const dtd: { [tagName: string]: TagProperties } = {
   sub: {display: 'inline', type: 'double'},
   summary: {display: 'block', type: 'double'},
   sup: {display: 'inline', type: 'double'},
-  table: {display: 'table', type: 'single', limitChildren: ['thead', 'tbody', 'tr', 'col', 'colgroup']},
+  table: {display: 'table', type: 'single', limitChildren: ['tbody', 'thead', 'tr', 'col', 'colgroup']},
   textarea: {display: 'inline-block', type: 'single'},
   time: {display: 'inline', type: 'double'},
   title: {display: 'none', type: 'double', limitParents: ['head']},
