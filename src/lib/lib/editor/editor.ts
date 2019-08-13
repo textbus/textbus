@@ -277,17 +277,12 @@ export class Editor {
     return null;
   }
 
-  private takeOffWrapper(el: Element): { firstChild: Node, lastChild: Node } {
+  private takeOffWrapper(el: Element) {
     const fragment = document.createDocumentFragment();
-    const childNodes = Array.from(el.childNodes);
-    childNodes.forEach(item => {
+    Array.from(el.childNodes).forEach(item => {
       fragment.appendChild(item);
     });
     el.parentNode.replaceChild(fragment, el);
-    return {
-      firstChild: childNodes[0],
-      lastChild: childNodes[childNodes.length - 1]
-    };
   }
 
   private setup(childDocument: Document) {
