@@ -3,6 +3,7 @@ import { debounceTime, throttleTime } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { dtd } from './dtd';
+import { Format, TagNameFormat } from './help';
 
 export class Editor {
   readonly host = document.createElement('iframe');
@@ -38,13 +39,15 @@ export class Editor {
     }
   }
 
-  format(tag: string) {
-    tag = tag.toLowerCase();
-    if (dtd[tag].type === 'single') {
-      return;
-    }
-    if (dtd[tag].display === 'inline') {
-      this.inlineElementFormat(tag);
+  format(format: Format) {
+    if ((format as TagNameFormat).useTagName) {
+      const tag = (format as TagNameFormat).useTagName.toLowerCase();
+      if (dtd[tag].type === 'single') {
+        return;
+      }
+      if (dtd[tag].display === 'inline') {
+        this.inlineElementFormat(tag);
+      }
     }
   }
 
@@ -102,18 +105,17 @@ export class Editor {
         const textNodes = this.getTextNodes(current.commonAncestorContainer as HTMLElement, tag).filter(node => {
           return current.intersectsNode(node);
         });
-        const allOffspringInTag = textNodes.length === 0;
-        if (allOffspringInTag) {
-          this.unWrap(current, tag);
-          console.log(4)
-        } else {
-          console.log(5)
+        if (textNodes.length) {
           current.setStartBefore(startMark);
           current.setEndAfter(endMark);
           this.unWrap(current, tag);
           current.setStartAfter(startMark);
           current.setEndBefore(endMark);
           this.wrap(current, tag);
+          console.log(4)
+        } else {
+          console.log(5)
+          this.unWrap(current, tag);
         }
         before.detach();
         after.detach();
@@ -163,11 +165,21 @@ export class Editor {
     }
 
     if (range.endContainer.nodeType === 3) {
+      const nextSibling = range.endContainer.nextSibling;
       const endParent = range.endContainer.parentNode;
+
       afterRange.setStart(range.endContainer, range.endOffset);
       afterRange.setEndAfter(range.endContainer);
-      endParent.appendChild(endMark);
-      endParent.appendChild(afterRange.extractContents());
+
+      const contents = afterRange.extractContents();
+      if (nextSibling) {
+        endParent.insertBefore(endMark, nextSibling);
+        endParent.insertBefore(contents, nextSibling);
+      } else {
+        endParent.appendChild(endMark);
+        endParent.appendChild(contents);
+      }
+
       afterRange.setStartAfter(endMark);
       afterRange.setEndAfter(scope);
     } else if (range.endContainer.nodeType === 1) {

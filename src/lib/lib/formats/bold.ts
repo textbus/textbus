@@ -9,7 +9,8 @@ export const boldHandler: ButtonHandler = {
     tags: ['STRONG', 'B']
   },
   execCommand(editor: Editor): void {
-    editor.format('strong');
-    // editor.contentDocument.execCommand('bold');
+    editor.format({
+      useTagName: 'strong'
+    });
   }
 };

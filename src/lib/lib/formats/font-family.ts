@@ -31,6 +31,6 @@ export const fontFamilyHandler: SelectHandler = {
     classes: ['tanbo-editor-toolbar-font-Times-New-Roman']
   }],
   execCommand(option: SelectHandlerOption, editor: Editor): void {
-    // editor.contentDocument.execCommand('styleWidthCSS', false, option.classes);
+    editor.contentDocument.execCommand('fontName', false, option.label);
   }
 };

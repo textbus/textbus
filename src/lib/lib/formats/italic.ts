@@ -9,6 +9,8 @@ export const italicHandler: ButtonHandler = {
     tags: ['EM', 'I']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('italic');
+    editor.format({
+      useTagName: 'i'
+    });
   }
 };

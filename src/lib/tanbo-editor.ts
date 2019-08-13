@@ -26,40 +26,39 @@ export * from './public-api';
 export function createEditor(selector: string | HTMLElement) {
   return new Core(selector, {
     handlers: [
-      boldHandler
-      // [
-      //   hHandler
-      // ], [
-      //   boldHandler,
-      //   italicHandler,
-      //   strikeThroughHandler,
-      //   underlineHandler,
-      // ], [
-      //   blockquoteHandler,
-      //   codeHandler
-      // ], [
-      //   olHandler,
-      //   ulHandler
-      // ], [
-      //   superscriptHandler,
-      //   subscriptHandler
-      // ], [
-      //   backgroundHandler,
-      //   colorHandler
-      // ], [
-      //   fontFamilyHandler
-      // ], [
-      //   linkHandler,
-      //   imageHandler,
-      //   musicHandler,
-      //   videoHandler
-      // ], [
-      //   alignHandler
-      // ], [
-      //   tableHandler
-      // ], [
-      //   cleanHandler
-      // ]
+      [
+        hHandler
+      ], [
+        boldHandler,
+        italicHandler,
+        strikeThroughHandler,
+        underlineHandler,
+      ], [
+        blockquoteHandler,
+        codeHandler
+      ], [
+        olHandler,
+        ulHandler
+      ], [
+        superscriptHandler,
+        subscriptHandler
+      ], [
+        backgroundHandler,
+        colorHandler
+      ], [
+        fontFamilyHandler
+      ], [
+        linkHandler,
+        imageHandler,
+        musicHandler,
+        videoHandler
+      ], [
+        alignHandler
+      ], [
+        tableHandler
+      ], [
+        cleanHandler
+      ]
     ]
   });
 }

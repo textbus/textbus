@@ -9,6 +9,6 @@ export const olHandler: ButtonHandler = {
     tags: ['OL']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('formatBlock', false, 'ol');
+    editor.contentDocument.execCommand('formatBlock', false, 'li');
   }
 };

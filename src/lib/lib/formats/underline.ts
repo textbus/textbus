@@ -9,6 +9,8 @@ export const underlineHandler: ButtonHandler = {
     tags: ['U']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('underline');
+    editor.format({
+      useTagName: 'u'
+    });
   }
 };

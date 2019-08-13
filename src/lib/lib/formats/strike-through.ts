@@ -9,6 +9,8 @@ export const strikeThroughHandler: ButtonHandler = {
     tags: ['STRIKE', 'DEL', 'S']
   },
   execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('strikeThrough');
+    editor.format({
+      useTagName: 'del'
+    });
   }
 };
