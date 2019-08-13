@@ -186,7 +186,11 @@ export class Editor {
 
   private wrap(range: Range, tag: string) {
     this.getTextNodes(range.commonAncestorContainer as Element).filter(item => {
-      return range.intersectsNode(item) && item.textContent;
+      if (!item.textContent) {
+        item.parentNode.removeChild(item);
+        return false;
+      }
+      return range.intersectsNode(item);
     }).forEach(item => {
       const wrap = document.createElement(tag);
       item.parentNode.replaceChild(wrap, item);
