@@ -1,13 +1,19 @@
-import { EditorFormatter } from './range';
-import { dtd } from '../dtd';
+import { Formatter } from './formatter';
+import { dtd } from '../editor/dtd';
 
-export class ListFormatter extends EditorFormatter {
+export class BlockFormatter extends Formatter {
+  readonly doc: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
-  format(tag: string) {
-    const selection = this.selection;
-    const range = selection.getRangeAt(0);
+  constructor(private tagName: string) {
+    super();
+  }
 
+  format(doc: Document): Range {
+    (this as { doc: Document }).doc = doc;
+    const selection = doc.getSelection();
+    const range = selection.getRangeAt(0);
+    const tag = this.tagName;
     const parentTagContainer = this.matchContainerByTagName(
       range.commonAncestorContainer as HTMLElement,
       tag,
@@ -17,7 +23,7 @@ export class ListFormatter extends EditorFormatter {
       const cacheMark = this.splitBySelectedRange(range, range.commonAncestorContainer);
       const parent = parentTagContainer.parentNode;
       const block = this.findBlockContainer(range.commonAncestorContainer as HTMLElement, parentTagContainer);
-      const containerRange = this.doc.createRange();
+      const containerRange = doc.createRange();
       const nextSibling = parentTagContainer.nextSibling;
       const rawTag = parentTagContainer[this.rawTagKey];
       if (parentTagContainer === block) {
@@ -50,7 +56,7 @@ export class ListFormatter extends EditorFormatter {
           parent.appendChild(beforeContents);
         }
         if (rawTag) {
-          const wrapper = this.doc.createElement(rawTag);
+          const wrapper = doc.createElement(rawTag);
           wrapper.appendChild(current.extractContents());
           parent.insertBefore(wrapper, nextSibling);
         } else {
@@ -74,15 +80,18 @@ export class ListFormatter extends EditorFormatter {
 
       console.log('b2');
       const {startMark, current, endMark} = this.splitBySelectedRange(range, range.commonAncestorContainer);
-      const containerRange = this.doc.createRange();
-      const container = this.findBlockContainer(range.commonAncestorContainer, this.doc.body);
+      const containerRange = doc.createRange();
+      const container = this.findBlockContainer(range.commonAncestorContainer, doc.body);
       containerRange.selectNodeContents(container);
-      const newContainer = this.createContainer(tag);
-      newContainer.wrapper[this.rawTagKey] = (container as HTMLElement).tagName;
-      container.parentNode.insertBefore(newContainer.wrapper, container);
-      newContainer.container.appendChild(container);
-      // containerRange.surroundContents(newContainer.container);
-      // container.parentNode.replaceChild(newContainer.wrapper, container);
+      const newContainer = doc.createElement(tag);
+      containerRange.surroundContents(newContainer);
+      console.log(container);
+      if (container !== doc.body) {
+        newContainer[this.rawTagKey] = (container as HTMLElement).tagName;
+        container.parentNode.replaceChild(newContainer, container);
+      } else {
+        newContainer[this.rawTagKey] = tag;
+      }
 
       const s = this.findEmptyContainer(startMark);
       const e = this.findEmptyContainer(endMark);
@@ -91,6 +100,7 @@ export class ListFormatter extends EditorFormatter {
       s.parentNode.removeChild(s);
       e.parentNode.removeChild(e);
     }
+    return range;
   }
 
 

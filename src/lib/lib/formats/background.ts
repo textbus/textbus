@@ -1,11 +1,8 @@
-import { ButtonHandler } from '../toolbar/help';
+import { DropdownHandler, HandlerType } from '../toolbar/help';
 import { Editor } from '../editor/editor';
 
-export const backgroundHandler: ButtonHandler = {
-  type: 'button',
+export const backgroundHandler: DropdownHandler = {
+  type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-background-color'],
-  tooltip: '引用',
-  execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('backColor', false, '#ff0000');
-  }
+  tooltip: '引用'
 };

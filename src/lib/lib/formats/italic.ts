@@ -1,16 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { InlineFormatter } from '../toolbar/inline-formatter';
 
 export const italicHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-italic'],
   tooltip: '斜体',
   match: {
     tags: ['EM', 'I']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'i'
-    });
-  }
+  execCommand: new InlineFormatter('em')
 };

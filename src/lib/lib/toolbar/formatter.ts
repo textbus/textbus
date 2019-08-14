@@ -1,4 +1,4 @@
-import { dtd } from '../dtd';
+import { dtd } from '../editor/dtd';
 
 export interface RangeMarker {
   before: Range;
@@ -8,17 +8,10 @@ export interface RangeMarker {
   endMark: HTMLElement;
 }
 
-export abstract class EditorFormatter {
-  abstract format(tag: string): void;
+export abstract class Formatter {
+  abstract readonly doc: Document;
 
-  selection: Selection;
-  doc: Document;
-
-  config(selection: Selection, doc: Document) {
-    this.selection = selection;
-    this.doc = doc;
-    return this;
-  }
+  abstract format(doc: Document): Range;
 
   splitBySelectedRange(range: Range, scope: Node): RangeMarker {
     const beforeRange = this.doc.createRange();

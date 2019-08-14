@@ -1,14 +1,10 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { DropdownHandler, HandlerType } from '../toolbar/help';
 
-export const musicHandler: ButtonHandler = {
-  type: 'button',
+export const musicHandler: DropdownHandler = {
+  type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-music'],
   tooltip: '音乐',
   match: {
     tags: ['AUDIO']
-  },
-  execCommand(editor: Editor): void {
-    // editor.contentDocument.execCommand('italic');
   }
 };

@@ -1,15 +1,22 @@
-import { EditorFormatter } from './range';
+import { Formatter } from './formatter';
 
-export class InlineFormatter extends EditorFormatter {
+export class InlineFormatter extends Formatter {
+  readonly doc: Document;
 
-  format(tag: string) {
-    const selection = this.selection;
+  constructor(private tagName: string) {
+    super();
+  }
+
+  format(doc: Document): Range {
+    (this as { doc: Document }).doc = doc;
+    const selection = doc.getSelection();
     const range = selection.getRangeAt(0);
+    const tag = this.tagName;
 
     const parentTagContainer = this.matchContainerByTagName(
       range.commonAncestorContainer as HTMLElement,
       tag,
-      this.doc.body) as HTMLElement;
+      doc.body) as HTMLElement;
 
     if (parentTagContainer) {
       if (range.collapsed) {
@@ -30,7 +37,7 @@ export class InlineFormatter extends EditorFormatter {
       endMark.parentNode.removeChild(endMark);
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
-        const newWrap = this.doc.createElement(tag);
+        const newWrap = doc.createElement(tag);
         const isCollapsed = range.collapsed;
         range.surroundContents(newWrap);
         if (isCollapsed) {
@@ -66,6 +73,7 @@ export class InlineFormatter extends EditorFormatter {
         e.parentNode.removeChild(e);
       }
     }
+    return range;
   }
 
   private wrap(range: Range, tag: string) {

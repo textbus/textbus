@@ -1,11 +1,9 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const cleanHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-clean'],
   tooltip: '清除格式',
-  execCommand(editor: Editor): void {
-    // editor.contentDocument.execCommand('bold');
-  }
+  execCommand: new BlockFormatter('')
 };

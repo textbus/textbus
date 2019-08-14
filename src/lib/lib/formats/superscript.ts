@@ -1,14 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { InlineFormatter } from '../toolbar/inline-formatter';
 
 export const superscriptHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-superscript'],
   tooltip: '上标',
   match: {
     tags: ['SUP']
   },
-  execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('superscript');
-  }
+  execCommand: new InlineFormatter('superscript')
 };

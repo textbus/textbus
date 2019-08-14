@@ -1,7 +1,7 @@
-import { Editor } from '../editor/editor';
+import { Formatter } from './formatter';
 
 export interface FormatMatchStyles {
-  [key: string]: number | string;
+  [key: string]: number | string | Array<number | string>;
 }
 
 export interface FormatAttrs {
@@ -15,36 +15,42 @@ export interface FormatMatch {
   attrs?: FormatAttrs;
 }
 
+export enum HandlerType {
+  Button,
+  Select,
+  Dropdown
+}
+
 export interface ButtonHandler {
-  type: 'button';
+  type: HandlerType.Button;
+  execCommand: Formatter;
   match?: FormatMatch;
   label?: string;
   classes?: string[];
   tooltip?: string;
-
-  execCommand(editor: Editor): void;
 }
 
 export interface SelectHandlerOption {
-  tags?: string[];
+  execCommand: Formatter;
+  label: string;
+  match?: FormatMatch;
   classes?: string[];
-  label?: string;
   default?: boolean;
 }
 
 export interface SelectHandler {
-  type: 'select';
+  type: HandlerType.Select
   options: SelectHandlerOption[];
   classes?: string[];
   tooltip?: string;
-
-  execCommand(option: SelectHandlerOption, editor: Editor): void;
 }
 
 export interface DropdownHandler {
-  type: 'dropdown';
-  options: ButtonHandler[];
+  type: HandlerType.Dropdown;
+  classes?: string[];
   format?: string;
+  tooltip?: string;
+  match?: FormatMatch;
 }
 
 export type Handler = DropdownHandler | ButtonHandler | SelectHandler;

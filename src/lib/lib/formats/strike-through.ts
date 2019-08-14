@@ -1,16 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { InlineFormatter } from '../toolbar/inline-formatter';
 
 export const strikeThroughHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-strikethrough'],
   tooltip: '删除线',
   match: {
     tags: ['STRIKE', 'DEL', 'S']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'del'
-    });
-  }
+  execCommand: new InlineFormatter('del')
 };

@@ -1,41 +1,43 @@
-import { SelectHandler, SelectHandlerOption } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { HandlerType, SelectHandler } from '../toolbar/help';
+import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const hHandler: SelectHandler = {
-  type: 'select',
+  type: HandlerType.Select,
   tooltip: '标题',
   options: [{
     label: '标题1',
-    tags: ['H1'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h1']
+    match: {tags: ['H1']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h1'],
+    execCommand: new BlockFormatter('h1')
   }, {
     label: '标题2',
-    tags: ['H2'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h2']
+    match: {tags: ['H2']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h2'],
+    execCommand: new BlockFormatter('h2')
   }, {
     label: '标题3',
-    tags: ['H3'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h3']
+    match: {tags: ['H3']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h3'],
+    execCommand: new BlockFormatter('h3')
   }, {
     label: '标题4',
-    tags: ['H4'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h4']
+    match: {tags: ['H4']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h4'],
+    execCommand: new BlockFormatter('h4')
   }, {
     label: '标题5',
-    tags: ['H5'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h5']
+    match: {tags: ['H5']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h5'],
+    execCommand: new BlockFormatter('h5')
   }, {
     label: '标题6',
-    tags: ['H6'],
-    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h6']
+    match: {tags: ['H6']},
+    classes: ['tanbo-editor-toolbar-dropdown-menu-item-h6'],
+    execCommand: new BlockFormatter('h6')
   }, {
     label: '正文',
-    tags: ['P'],
+    match: {tags: ['P']},
+    execCommand: new BlockFormatter('p'),
     default: true
-  }],
-  execCommand(option: SelectHandlerOption, editor: Editor): void {
-    editor.format({
-      useTagName: option.tags[0].toLowerCase()
-    });
-  }
+  }]
 };

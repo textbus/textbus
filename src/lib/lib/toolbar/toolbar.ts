@@ -1,5 +1,5 @@
 import { Editor } from '../editor/editor';
-import { ButtonHandler, DropdownHandler, Handler, SelectHandler, SelectHandlerOption } from './help';
+import { ButtonHandler, DropdownHandler, Handler, HandlerType, SelectHandler, SelectHandlerOption } from './help';
 
 export class Toolbar {
   readonly host = document.createElement('div');
@@ -21,11 +21,11 @@ export class Toolbar {
 
   addHandler(handler: Handler) {
     this.isFirst = false;
-    if (handler.type === 'button') {
+    if (handler.type === HandlerType.Button) {
       this.addButtonHandler(handler);
-    } else if (handler.type === 'select') {
+    } else if (handler.type === HandlerType.Select) {
       this.addSelectHandler(handler);
-    } else if (handler.type === 'dropdown') {
+    } else if (handler.type === HandlerType.Dropdown) {
       this.addDropdownHandler(handler);
     }
   }
@@ -47,7 +47,7 @@ export class Toolbar {
     action.classList.add('tanbo-editor-toolbar-handler', ...(handler.classes || []));
     action.addEventListener('click', () => {
       if (this.editor.contentDocument) {
-        handler.execCommand(this.editor);
+        handler.execCommand.format(this.editor.contentDocument);
       }
     });
     this.checkers.push(function (paths: string[]) {
@@ -110,7 +110,7 @@ export class Toolbar {
       item.innerText = option.label;
       item.addEventListener('click', () => {
         if (this.editor.contentDocument) {
-          handler.execCommand(option, this.editor);
+          option.execCommand.format(this.editor.contentDocument);
         }
       });
       dropdownMenu.appendChild(item);
@@ -120,9 +120,11 @@ export class Toolbar {
       let selectedOption: SelectHandlerOption;
       for (const option of handler.options) {
         for (const path of paths) {
-          if ((option.tags || []).indexOf(path) > -1) {
-            selectedOption = option;
-            break;
+          if (option.match) {
+            if ((option.match.tags || []).indexOf(path) > -1) {
+              selectedOption = option;
+              break;
+            }
           }
         }
         if (selectedOption) {

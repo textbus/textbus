@@ -1,14 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ListFormatter } from '../toolbar/list-formatter';
 
 export const ulHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-list'],
   tooltip: '无序列表',
   match: {
     tags: ['UL']
   },
-  execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('formatBlock', false, 'ul');
-  }
+  execCommand: new ListFormatter('ul')
 };

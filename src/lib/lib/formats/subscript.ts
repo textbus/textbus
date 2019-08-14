@@ -1,14 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { InlineFormatter } from '../toolbar/inline-formatter';
 
 export const subscriptHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-subscript'],
   tooltip: '下标',
   match: {
     tags: ['SUB']
   },
-  execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('subscript');
-  }
+  execCommand: new InlineFormatter('subscript')
 };

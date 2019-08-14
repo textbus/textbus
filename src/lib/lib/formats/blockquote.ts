@@ -1,16 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const blockquoteHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-quotes-right'],
   tooltip: '引用',
   match: {
     tags: ['BLOCKQUOTE']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'blockquote'
-    });
-  }
+  execCommand: new BlockFormatter('blockquote')
 };

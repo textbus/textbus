@@ -1,16 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ListFormatter } from '../toolbar/list-formatter';
 
 export const olHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-list-numbered'],
   tooltip: '有序列表',
   match: {
     tags: ['OL']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'ol'
-    });
-  }
+  execCommand: new ListFormatter('ol')
 };

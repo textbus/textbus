@@ -1,11 +1,9 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const colorHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-color'],
   tooltip: '引用',
-  execCommand(editor: Editor): void {
-    editor.contentDocument.execCommand('foreColor', false, '#0000ff');
-  }
+  execCommand: new BlockFormatter('')
 };

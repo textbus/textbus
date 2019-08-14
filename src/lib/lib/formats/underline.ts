@@ -1,16 +1,12 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { InlineFormatter } from '../toolbar/inline-formatter';
 
 export const underlineHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-underline'],
   tooltip: '下划线',
   match: {
     tags: ['U']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'u'
-    });
-  }
+  execCommand: new InlineFormatter('u')
 };

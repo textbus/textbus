@@ -1,16 +1,13 @@
-import { ButtonHandler } from '../toolbar/help';
+import { ButtonHandler, HandlerType } from '../toolbar/help';
 import { Editor } from '../editor/editor';
+import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const codeHandler: ButtonHandler = {
-  type: 'button',
+  type: HandlerType.Button,
   classes: ['tanbo-editor-icon-code'],
   tooltip: '代码',
   match: {
     tags: ['PRE']
   },
-  execCommand(editor: Editor): void {
-    editor.format({
-      useTagName: 'pre'
-    });
-  }
+  execCommand: new BlockFormatter('')
 };

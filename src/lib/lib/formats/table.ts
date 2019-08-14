@@ -1,14 +1,10 @@
-import { ButtonHandler } from '../toolbar/help';
-import { Editor } from '../editor/editor';
+import { DropdownHandler, HandlerType } from '../toolbar/help';
 
-export const tableHandler: ButtonHandler = {
-  type: 'button',
+export const tableHandler: DropdownHandler = {
+  type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-table'],
   tooltip: '视频',
   match: {
     tags: ['TABLE']
-  },
-  execCommand(editor: Editor): void {
-    // editor.contentDocument.execCommand('italic');
   }
 };

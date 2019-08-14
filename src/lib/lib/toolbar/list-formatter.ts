@@ -1,13 +1,19 @@
-import { EditorFormatter } from './range';
-import { dtd } from '../dtd';
+import { Formatter } from './formatter';
+import { dtd } from '../editor/dtd';
 
-export class BlockFormatter extends EditorFormatter {
+export class ListFormatter extends Formatter {
+  readonly doc: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
-  format(tag: string) {
-    const selection = this.selection;
-    const range = selection.getRangeAt(0);
+  constructor(private tagName: string) {
+    super();
+  }
 
+  format(doc: Document): Range {
+    (this as { doc: Document }).doc = doc;
+    const selection = doc.getSelection();
+    const range = selection.getRangeAt(0);
+    const tag = this.tagName;
     const parentTagContainer = this.matchContainerByTagName(
       range.commonAncestorContainer as HTMLElement,
       tag,
@@ -77,15 +83,12 @@ export class BlockFormatter extends EditorFormatter {
       const containerRange = this.doc.createRange();
       const container = this.findBlockContainer(range.commonAncestorContainer, this.doc.body);
       containerRange.selectNodeContents(container);
-      const newContainer = this.doc.createElement(tag);
-      containerRange.surroundContents(newContainer);
-      console.log(container);
-      if (container !== this.doc.body) {
-        newContainer[this.rawTagKey] = (container as HTMLElement).tagName;
-        container.parentNode.replaceChild(newContainer, container);
-      } else {
-        newContainer[this.rawTagKey] = tag;
-      }
+      const newContainer = this.createContainer(tag);
+      newContainer.wrapper[this.rawTagKey] = (container as HTMLElement).tagName;
+      container.parentNode.insertBefore(newContainer.wrapper, container);
+      newContainer.container.appendChild(container);
+      // containerRange.surroundContents(newContainer.container);
+      // container.parentNode.replaceChild(newContainer.wrapper, container);
 
       const s = this.findEmptyContainer(startMark);
       const e = this.findEmptyContainer(endMark);
@@ -94,6 +97,7 @@ export class BlockFormatter extends EditorFormatter {
       s.parentNode.removeChild(s);
       e.parentNode.removeChild(e);
     }
+    return range;
   }
 
 
