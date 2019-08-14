@@ -2,8 +2,6 @@ import { Subject, merge, fromEvent, Observable } from 'rxjs';
 import { debounceTime, throttleTime } from 'rxjs/operators';
 
 import { template } from './template-html';
-import { dtd } from './dtd';
-import { Format, TagNameFormat } from './help';
 
 export class Editor {
   readonly host = document.createElement('iframe');
@@ -38,21 +36,6 @@ export class Editor {
       this.loadEvent.next(this);
     }
   }
-
-  // format(format: Format) {
-  //   if ((format as TagNameFormat).useTagName) {
-  //     const tag = (format as TagNameFormat).useTagName.toLowerCase();
-  //     if (dtd[tag].type === 'single') {
-  //       return;
-  //     }
-  //     if (dtd[tag].display === 'inline') {
-  //       this.inlineFormatter.config(this.selection, this.contentDocument).format(tag);
-  //     } else if (dtd[tag].display === 'block') {
-  //       this.blockFormatter.config(this.selection, this.contentDocument).format(tag);
-  //     }
-  //   }
-  //   this.contentDocument.body.focus();
-  // }
 
   /**
    * 在文档选中某一个元素节点
