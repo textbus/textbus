@@ -2,7 +2,7 @@ import { Formatter } from './formatter';
 import { dtd } from '../editor/dtd';
 
 export class ListFormatter extends Formatter {
-  readonly doc: Document;
+  readonly document: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
   constructor(private tagName: string) {
@@ -10,20 +10,20 @@ export class ListFormatter extends Formatter {
   }
 
   format(doc: Document): Range {
-    (this as { doc: Document }).doc = doc;
+    (this as { document: Document }).document = doc;
     const selection = doc.getSelection();
     const range = selection.getRangeAt(0);
     const tag = this.tagName;
     const parentTagContainer = this.matchContainerByTagName(
       range.commonAncestorContainer as HTMLElement,
       tag,
-      this.doc.body) as HTMLElement;
+      this.document.body) as HTMLElement;
     if (parentTagContainer) {
       console.log('b1');
       const cacheMark = this.splitBySelectedRange(range, range.commonAncestorContainer);
       const parent = parentTagContainer.parentNode;
       const block = this.findBlockContainer(range.commonAncestorContainer as HTMLElement, parentTagContainer);
-      const containerRange = this.doc.createRange();
+      const containerRange = this.document.createRange();
       const nextSibling = parentTagContainer.nextSibling;
       const rawTag = parentTagContainer[this.rawTagKey];
       if (parentTagContainer === block) {
@@ -42,7 +42,7 @@ export class ListFormatter extends Formatter {
           parent.insertBefore(beforeContents, nextSibling);
         }
         if (rawTag) {
-          const wrapper = this.doc.createElement(rawTag);
+          const wrapper = this.document.createElement(rawTag);
           wrapper.appendChild(current.extractContents());
           parent.insertBefore(wrapper, nextSibling);
         } else {
@@ -56,7 +56,7 @@ export class ListFormatter extends Formatter {
           parent.appendChild(beforeContents);
         }
         if (rawTag) {
-          const wrapper = this.doc.createElement(rawTag);
+          const wrapper = this.document.createElement(rawTag);
           wrapper.appendChild(current.extractContents());
           parent.insertBefore(wrapper, nextSibling);
         } else {
@@ -80,15 +80,20 @@ export class ListFormatter extends Formatter {
 
       console.log('b2');
       const {startMark, current, endMark} = this.splitBySelectedRange(range, range.commonAncestorContainer);
-      const containerRange = this.doc.createRange();
-      const container = this.findBlockContainer(range.commonAncestorContainer, this.doc.body);
+      const containerRange = this.document.createRange();
+      const container = this.findBlockContainer(range.commonAncestorContainer, this.document.body);
       containerRange.selectNodeContents(container);
-      const newContainer = this.createContainer(tag);
-      newContainer.wrapper[this.rawTagKey] = (container as HTMLElement).tagName;
-      container.parentNode.insertBefore(newContainer.wrapper, container);
-      newContainer.container.appendChild(container);
-      // containerRange.surroundContents(newContainer.container);
-      // container.parentNode.replaceChild(newContainer.wrapper, container);
+      const newContainer = this.createContainerByDtdRule(tag);
+      newContainer.contentsContainer[this.rawTagKey] = (container as HTMLElement).tagName;
+
+      // if(container === this.document.body) {
+      //
+      // }
+
+      container.parentNode.insertBefore(newContainer.contentsContainer, container);
+      newContainer.newNode.appendChild(container);
+      // containerRange.surroundContents(newContainer.newNode);
+      // newNode.parentNode.replaceChild(newContainer.contentsContainer, newNode);
 
       const s = this.findEmptyContainer(startMark);
       const e = this.findEmptyContainer(endMark);
@@ -98,26 +103,5 @@ export class ListFormatter extends Formatter {
       e.parentNode.removeChild(e);
     }
     return range;
-  }
-
-
-  private findBlockContainer(node: Node, scope: HTMLElement): Node {
-    if (node === scope) {
-      return node;
-    }
-
-    if (node.nodeType === 3) {
-      return this.findBlockContainer(node.parentNode, scope);
-    }
-    if (node.nodeType === 1) {
-      const tagName = (node as HTMLElement).tagName.toLowerCase();
-      if (dtd[tagName].display === 'block') {
-        return node;
-      }
-      if (node.parentNode) {
-        return this.findBlockContainer(node.parentNode, scope);
-      }
-    }
-    return scope;
   }
 }

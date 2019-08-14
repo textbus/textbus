@@ -38,7 +38,7 @@ export class Core {
     this.host.appendChild(this.editor.host);
     this.host.appendChild(this.paths.host);
 
-    this.host.classList.add('tanbo-editor-container');
+    this.host.classList.add('tanbo-editor-newNode');
     this.container.appendChild(this.host);
 
     this.paths.onCheck.subscribe(node => {

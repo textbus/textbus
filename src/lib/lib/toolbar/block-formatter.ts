@@ -2,7 +2,7 @@ import { Formatter } from './formatter';
 import { dtd } from '../editor/dtd';
 
 export class BlockFormatter extends Formatter {
-  readonly doc: Document;
+  readonly document: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
   constructor(private tagName: string) {
@@ -10,14 +10,14 @@ export class BlockFormatter extends Formatter {
   }
 
   format(doc: Document): Range {
-    (this as { doc: Document }).doc = doc;
+    (this as { document: Document }).document = doc;
     const selection = doc.getSelection();
     const range = selection.getRangeAt(0);
     const tag = this.tagName;
     const parentTagContainer = this.matchContainerByTagName(
       range.commonAncestorContainer as HTMLElement,
       tag,
-      this.doc.body) as HTMLElement;
+      this.document.body) as HTMLElement;
     if (parentTagContainer) {
       console.log('b1');
       const cacheMark = this.splitBySelectedRange(range, range.commonAncestorContainer);
@@ -42,7 +42,7 @@ export class BlockFormatter extends Formatter {
           parent.insertBefore(beforeContents, nextSibling);
         }
         if (rawTag) {
-          const wrapper = this.doc.createElement(rawTag);
+          const wrapper = this.document.createElement(rawTag);
           wrapper.appendChild(current.extractContents());
           parent.insertBefore(wrapper, nextSibling);
         } else {
@@ -101,26 +101,5 @@ export class BlockFormatter extends Formatter {
       e.parentNode.removeChild(e);
     }
     return range;
-  }
-
-
-  private findBlockContainer(node: Node, scope: HTMLElement): Node {
-    if (node === scope) {
-      return node;
-    }
-
-    if (node.nodeType === 3) {
-      return this.findBlockContainer(node.parentNode, scope);
-    }
-    if (node.nodeType === 1) {
-      const tagName = (node as HTMLElement).tagName.toLowerCase();
-      if (dtd[tagName].display === 'block') {
-        return node;
-      }
-      if (node.parentNode) {
-        return this.findBlockContainer(node.parentNode, scope);
-      }
-    }
-    return scope;
   }
 }

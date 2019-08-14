@@ -9,13 +9,13 @@ export interface RangeMarker {
 }
 
 export abstract class Formatter {
-  abstract readonly doc: Document;
+  abstract readonly document: Document;
 
   abstract format(doc: Document): Range;
 
   splitBySelectedRange(range: Range, scope: Node): RangeMarker {
-    const beforeRange = this.doc.createRange();
-    const afterRange = this.doc.createRange();
+    const beforeRange = this.document.createRange();
+    const afterRange = this.document.createRange();
 
     const startMark = document.createElement('span');
     const endMark = document.createElement('span');
@@ -86,17 +86,37 @@ export abstract class Formatter {
     return this.findEmptyContainer(node.parentNode);
   }
 
-  createContainer(tagName: string): { container: HTMLElement, wrapper: HTMLElement } {
-    const wrapper = this.doc.createElement(tagName);
+  createContainerByDtdRule(tagName: string): { newNode: HTMLElement, contentsContainer: HTMLElement } {
+    const wrapper = this.document.createElement(tagName);
     let container = wrapper;
     while (dtd[container.tagName.toLowerCase()].limitChildren) {
-      const child = this.doc.createElement(dtd[container.tagName.toLowerCase()].limitChildren[0]);
+      const child = this.document.createElement(dtd[container.tagName.toLowerCase()].limitChildren[0]);
       container.appendChild(child);
       container = child;
     }
     return {
-      wrapper,
-      container
+      contentsContainer: wrapper,
+      newNode: container
     };
+  }
+
+  findBlockContainer(node: Node, scope: HTMLElement): Node {
+    if (node === scope) {
+      return node;
+    }
+
+    if (node.nodeType === 3) {
+      return this.findBlockContainer(node.parentNode, scope);
+    }
+    if (node.nodeType === 1) {
+      const tagName = (node as HTMLElement).tagName.toLowerCase();
+      if (dtd[tagName].display === 'block') {
+        return node;
+      }
+      if (node.parentNode) {
+        return this.findBlockContainer(node.parentNode, scope);
+      }
+    }
+    return scope;
   }
 }

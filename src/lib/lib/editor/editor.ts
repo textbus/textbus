@@ -12,7 +12,6 @@ export class Editor {
   private selectionChangeEvent = new Subject<Selection>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
-  private selection: Selection;
 
   constructor() {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
@@ -30,9 +29,6 @@ export class Editor {
       self.setup(self.host.contentDocument);
       (<any>self).contentDocument = self.host.contentDocument;
       (<any>self).contentWindow = self.host.contentWindow;
-      this.contentDocument.body.focus();
-      this.selection = this.contentDocument.getSelection();
-      this.selectionChangeEvent.next(this.selection);
       this.loadEvent.next(this);
     }
   }

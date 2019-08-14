@@ -1,5 +1,4 @@
 import { ButtonHandler, HandlerType } from '../toolbar/help';
-import { Editor } from '../editor/editor';
 import { BlockFormatter } from '../toolbar/block-formatter';
 
 export const codeHandler: ButtonHandler = {
@@ -9,5 +8,5 @@ export const codeHandler: ButtonHandler = {
   match: {
     tags: ['PRE']
   },
-  execCommand: new BlockFormatter('')
+  execCommand: new BlockFormatter('pre')
 };

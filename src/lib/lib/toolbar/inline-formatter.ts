@@ -1,14 +1,14 @@
 import { Formatter } from './formatter';
 
 export class InlineFormatter extends Formatter {
-  readonly doc: Document;
+  readonly document: Document;
 
   constructor(private tagName: string) {
     super();
   }
 
   format(doc: Document): Range {
-    (this as { doc: Document }).doc = doc;
+    (this as { document: Document }).document = doc;
     const selection = doc.getSelection();
     const range = selection.getRangeAt(0);
     const tag = this.tagName;
@@ -84,7 +84,7 @@ export class InlineFormatter extends Formatter {
       }
       return range.intersectsNode(item);
     }).forEach(item => {
-      const wrap = this.doc.createElement(tag);
+      const wrap = this.document.createElement(tag);
       item.parentNode.replaceChild(wrap, item);
       wrap.appendChild(item);
     });
@@ -95,13 +95,13 @@ export class InlineFormatter extends Formatter {
     const end = this.matchContainerByTagName(range.endContainer, tag, range.commonAncestorContainer);
 
     if (start) {
-      const startRange = this.doc.createRange();
+      const startRange = this.document.createRange();
       startRange.setStartBefore(start);
       startRange.setEnd(range.startContainer, range.startOffset);
       start.parentNode.insertBefore(startRange.extractContents(), start);
     }
     if (end) {
-      const endRange = this.doc.createRange();
+      const endRange = this.document.createRange();
       endRange.setStart(range.endContainer, range.endOffset);
       endRange.setEndAfter(end);
       if (end.nextSibling) {
@@ -135,7 +135,7 @@ export class InlineFormatter extends Formatter {
   }
 
   private takeOffWrapper(el: Element) {
-    const fragment = this.doc.createDocumentFragment();
+    const fragment = this.document.createDocumentFragment();
     Array.from(el.childNodes).forEach(item => {
       fragment.appendChild(item);
     });

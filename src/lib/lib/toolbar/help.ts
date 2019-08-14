@@ -4,15 +4,16 @@ export interface FormatMatchStyles {
   [key: string]: number | string | Array<number | string>;
 }
 
-export interface FormatAttrs {
-  [key: string]: any;
+export interface FormatAttr {
+  key: string;
+  value?: string | string[];
 }
 
 export interface FormatMatch {
   tags?: string[];
   styles?: FormatMatchStyles;
   classes?: string[];
-  attrs?: FormatAttrs;
+  attrs?: FormatAttr[];
 }
 
 export enum HandlerType {
