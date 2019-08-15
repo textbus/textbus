@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Toolbar } from './toolbar/toolbar';
 import { Editor } from './editor/editor';
@@ -11,7 +11,7 @@ export class Core {
   readonly host = document.createElement('div');
   readonly editor = new Editor();
   readonly paths = new Paths();
-  readonly toolbar = new Toolbar(this.editor);
+  readonly toolbar = new Toolbar();
   readonly onReady: Observable<this>;
   private container: HTMLElement;
   private readyEvent = new Subject<this>();
@@ -44,8 +44,19 @@ export class Core {
     this.paths.onCheck.subscribe(node => {
       this.editor.updateSelectionByElement(node);
     });
-
-    this.editor.onSelectionChange.pipe(map(range => range.startContainer), distinctUntilChanged()).subscribe(node => {
+    this.editor.onSelectionChange.pipe(debounceTime(100)).subscribe(range => {
+      this.toolbar.handlers.forEach(handler => {
+        if (Array.isArray(handler.matcher)) {
+          handler.updateStatus(handler.matcher.map(match => {
+            return match.match(this.editor.contentDocument, range);
+          }))
+        } else {
+          handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
+        }
+      })
+    });
+    this.editor.onSelectionChange
+      .pipe(map(range => range.startContainer), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
     this.editor.onLoad.subscribe(() => {

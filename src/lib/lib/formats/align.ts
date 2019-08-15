@@ -1,6 +1,6 @@
-import { HandlerType, SelectHandler } from '../toolbar/help';
+import { HandlerType, SelectHandlerOption } from '../toolbar/help';
 
-export const alignHandler: SelectHandler = {
+export const alignHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '对齐方式',
   options: [

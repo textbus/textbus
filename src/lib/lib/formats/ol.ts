@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { ListFormatter } from '../toolbar/list-formatter';
 
-export const olHandler: ButtonHandler = {
+export const olHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-list-numbered'],
   tooltip: '有序列表',

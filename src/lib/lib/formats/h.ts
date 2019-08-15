@@ -1,7 +1,7 @@
-import { HandlerType, SelectHandler } from '../toolbar/help';
+import { HandlerType, SelectHandlerOption } from '../toolbar/help';
 import { BlockFormatter } from '../toolbar/block-formatter';
 
-export const hHandler: SelectHandler = {
+export const hHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '标题',
   options: [{

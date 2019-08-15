@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { BlockFormatter } from '../toolbar/block-formatter';
 
-export const blockquoteHandler: ButtonHandler = {
+export const blockquoteHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-quotes-right'],
   tooltip: '引用',

@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { BlockFormatter } from '../toolbar/block-formatter';
 
-export const codeHandler: ButtonHandler = {
+export const codeHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-code'],
   tooltip: '代码',

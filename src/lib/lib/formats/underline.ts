@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { InlineFormatter } from '../toolbar/inline-formatter';
 
-export const underlineHandler: ButtonHandler = {
+export const underlineHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-underline'],
   tooltip: '下划线',

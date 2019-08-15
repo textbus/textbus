@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { InlineFormatter } from '../toolbar/inline-formatter';
 
-export const superscriptHandler: ButtonHandler = {
+export const superscriptHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-superscript'],
   tooltip: '上标',

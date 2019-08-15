@@ -1,6 +1,6 @@
-import { HandlerType, SelectHandler } from '../toolbar/help';
+import { HandlerType, SelectHandlerOption } from '../toolbar/help';
 
-export const fontFamilyHandler: SelectHandler = {
+export const fontFamilyHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '字体',
   options: [

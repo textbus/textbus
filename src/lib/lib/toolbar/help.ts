@@ -22,7 +22,7 @@ export interface FormatMatch {
   attrs?: FormatAttr[];
 }
 
-export interface ButtonHandler {
+export interface ButtonHandlerOption {
   type: HandlerType.Button;
   execCommand: Formatter;
   match?: FormatMatch;
@@ -31,7 +31,7 @@ export interface ButtonHandler {
   tooltip?: string;
 }
 
-export interface SelectHandlerOption {
+export interface SelectHandlerItemOption {
   execCommand: Formatter;
   label: string;
   match?: FormatMatch;
@@ -39,14 +39,14 @@ export interface SelectHandlerOption {
   default?: boolean;
 }
 
-export interface SelectHandler {
+export interface SelectHandlerOption {
   type: HandlerType.Select
-  options: SelectHandlerOption[];
+  options: SelectHandlerItemOption[];
   classes?: string[];
   tooltip?: string;
 }
 
-export interface DropdownHandler {
+export interface DropdownHandlerOption {
   type: HandlerType.Dropdown;
   classes?: string[];
   format?: string;
@@ -54,4 +54,4 @@ export interface DropdownHandler {
   match?: FormatMatch;
 }
 
-export type Handler = DropdownHandler | ButtonHandler | SelectHandler;
+export type HandlerOption = DropdownHandlerOption | ButtonHandlerOption | SelectHandlerOption;

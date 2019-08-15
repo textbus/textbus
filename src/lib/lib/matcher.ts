@@ -1,6 +1,4 @@
 import { FormatMatch } from './toolbar/help';
-import { TBRange } from './range';
-import { Editor } from './editor/editor';
 
 export interface MatchStatus {
   inContainer: boolean;
@@ -11,7 +9,7 @@ export interface MatchStatus {
 export class Matcher {
   private validators: Array<(node: Node) => boolean> = [];
 
-  constructor(private editor: Editor, private config: FormatMatch = {}) {
+  constructor(private config: FormatMatch = {}) {
     if (config.tags) {
       this.validators.push(...config.tags.map(tagName => {
         return (node: Node): boolean => {
@@ -61,17 +59,16 @@ export class Matcher {
     }
   }
 
-  match(range: TBRange): MatchStatus {
-    const rawRange = range.range;
+  match(context: Document, range: Range): MatchStatus {
     let inContainer = false;
-    let node = rawRange.commonAncestorContainer;
+    let node = range.commonAncestorContainer;
     while (node) {
       if (this.validators.map(fn => fn(node)).indexOf(true) > -1) {
         inContainer = true;
         break;
       }
       node = node.parentNode;
-      if (node === this.editor.contentDocument.body) {
+      if (node === context.body) {
         break;
       }
     }
@@ -79,7 +76,7 @@ export class Matcher {
     return {
       inContainer,
       container: node,
-      matchAllChild: this.matchAllChild(rawRange, rawRange.commonAncestorContainer)
+      matchAllChild: this.matchAllChild(range, range.commonAncestorContainer)
     }
   }
 

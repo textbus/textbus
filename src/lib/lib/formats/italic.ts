@@ -1,7 +1,7 @@
-import { ButtonHandler, HandlerType } from '../toolbar/help';
+import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
 import { InlineFormatter } from '../toolbar/inline-formatter';
 
-export const italicHandler: ButtonHandler = {
+export const italicHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-italic'],
   tooltip: '斜体',
