@@ -1,21 +1,25 @@
 import { Editor } from '../editor/editor';
-import { ButtonHandler, DropdownHandler, Handler, HandlerType, SelectHandler, SelectHandlerOption } from './help';
+import {
+  ButtonHandler,
+  DropdownHandler,
+  Handler,
+  HandlerType,
+  SelectHandler
+} from './help';
+import { Matcher } from '../matcher';
+import { TBRange } from '../range';
 
 export class Toolbar {
   readonly host = document.createElement('div');
   private isFirst = true;
-  private checkers: Array<(paths: string[]) => void> = [];
+  private checkers: Array<(range: Range) => void> = [];
+  private range: Range;
 
   constructor(private editor: Editor) {
     this.host.classList.add('tanbo-editor-toolbar');
-    this.editor.onSelectionChange.subscribe(node => {
-      const paths: string[] = [];
-      let ele = node.focusNode;
-      while (ele) {
-        paths.push(ele.nodeName);
-        ele = ele.parentNode;
-      }
-      this.checkers.forEach(fn => fn(paths));
+    this.editor.onSelectionChange.subscribe(range => {
+      this.range = range;
+      this.checkers.forEach(fn => fn(range));
     });
   }
 
@@ -45,28 +49,21 @@ export class Toolbar {
     action.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     action.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
     action.classList.add('tanbo-editor-toolbar-handler', ...(handler.classes || []));
+    const matcher = new Matcher(this.editor, handler.match);
     action.addEventListener('click', () => {
       if (this.editor.contentDocument) {
-        handler.execCommand.format(this.editor.contentDocument);
+        const r = new TBRange(this.range, this.editor.contentDocument);
+        handler.execCommand.format(r, this.editor, matcher.match(r));
       }
     });
-    this.checkers.push(function (paths: string[]) {
-      let isFind = false;
-      for (const path of paths) {
-        if (handler.match) {
-          if ((handler.match.tags || []).indexOf(path) > -1) {
-            isFind = true;
-            break;
-          }
-        }
-      }
-
-      if (isFind) {
-        action.classList.add('tanbo-editor-toolbar-handler-active');
-      } else {
-        action.classList.remove('tanbo-editor-toolbar-handler-active');
-      }
-    });
+    // this.checkers.push(function (range) {
+    //   const {matchAllChild, inContainer} = matcher.match(range);
+    //   if (matchAllChild || inContainer) {
+    //     action.classList.add('tanbo-editor-toolbar-handler-active');
+    //   } else {
+    //     action.classList.remove('tanbo-editor-toolbar-handler-active');
+    //   }
+    // });
     this.host.appendChild(action);
   }
 
@@ -108,39 +105,20 @@ export class Toolbar {
         item.classList.add(...(option.classes || []));
       }
       item.innerText = option.label;
+      const matcher = new Matcher(this.editor, option.match);
       item.addEventListener('click', () => {
         if (this.editor.contentDocument) {
-          option.execCommand.format(this.editor.contentDocument);
+          const r = new TBRange(this.range, this.editor.contentDocument);
+          option.execCommand.format(r, this.editor, matcher.match(r));
         }
       });
       dropdownMenu.appendChild(item);
-
-    });
-    this.checkers.push((paths: string[]) => {
-      let selectedOption: SelectHandlerOption;
-      for (const option of handler.options) {
-        for (const path of paths) {
-          if (option.match) {
-            if ((option.match.tags || []).indexOf(path) > -1) {
-              selectedOption = option;
-              break;
-            }
-          }
-        }
-        if (selectedOption) {
-          break;
-        }
-      }
-      if (!selectedOption) {
-        for (const option of handler.options) {
-          if (option.default) {
-            selectedOption = option;
-          }
-        }
-      }
-      if (selectedOption) {
-        dropdownInner.innerHTML = selectedOption.label;
-      }
+      // this.checkers.push(range => {
+      //   const {matchAllChild, inContainer} = matcher.match(range);
+      //   if (matchAllChild || inContainer) {
+      //     dropdownInner.innerHTML = option.label;
+      //   }
+      // });
     });
 
     dropdown.appendChild(dropdownButton);

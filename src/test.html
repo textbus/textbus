@@ -15,7 +15,7 @@
       range.setStart(box.childNodes[0], 2);
       range.setEnd(box, 2);
       selection.addRange(range);
-
+      console.log(range.intersectsNode(box));
     }
   </script>
 </head>

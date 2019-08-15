@@ -1,5 +1,11 @@
 import { Formatter } from './formatter';
 
+export enum HandlerType {
+  Button,
+  Select,
+  Dropdown
+}
+
 export interface FormatMatchStyles {
   [key: string]: number | string | Array<number | string>;
 }
@@ -14,12 +20,6 @@ export interface FormatMatch {
   styles?: FormatMatchStyles;
   classes?: string[];
   attrs?: FormatAttr[];
-}
-
-export enum HandlerType {
-  Button,
-  Select,
-  Dropdown
 }
 
 export interface ButtonHandler {

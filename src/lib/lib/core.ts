@@ -38,14 +38,14 @@ export class Core {
     this.host.appendChild(this.editor.host);
     this.host.appendChild(this.paths.host);
 
-    this.host.classList.add('tanbo-editor-newNode');
+    this.host.classList.add('tanbo-editor-container');
     this.container.appendChild(this.host);
 
     this.paths.onCheck.subscribe(node => {
       this.editor.updateSelectionByElement(node);
     });
 
-    this.editor.onSelectionChange.pipe(map(selector => selector.focusNode), distinctUntilChanged()).subscribe(node => {
+    this.editor.onSelectionChange.pipe(map(range => range.startContainer), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
     this.editor.onLoad.subscribe(() => {

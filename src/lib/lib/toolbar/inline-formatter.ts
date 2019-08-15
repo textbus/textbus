@@ -1,79 +1,55 @@
 import { Formatter } from './formatter';
+import { MatchStatus } from '../matcher';
+import { TBRange } from '../range';
+import { Editor } from '../editor/editor';
 
 export class InlineFormatter extends Formatter {
-  readonly document: Document;
+  private document: Document;
 
   constructor(private tagName: string) {
     super();
   }
 
-  format(doc: Document): Range {
-    (this as { document: Document }).document = doc;
-    const selection = doc.getSelection();
-    const range = selection.getRangeAt(0);
+  format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
+    this.document = editor.contentDocument;
     const tag = this.tagName;
 
-    const parentTagContainer = this.matchContainerByTagName(
-      range.commonAncestorContainer as HTMLElement,
-      tag,
-      doc.body) as HTMLElement;
-
-    if (parentTagContainer) {
-      if (range.collapsed) {
+    if (matchStatus.inContainer) {
+      if (range.range.collapsed) {
         return;
       }
-
-      const {current, before, after, endMark, startMark} = this.splitBySelectedRange(range, parentTagContainer);
+      const {before, after} = new TBRange(range.range, this.document)
+        .getBeforeAndAfterInContainer(matchStatus.container as HTMLElement);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      this.takeOffWrapper(parentTagContainer);
+      this.takeOffWrapper(matchStatus.container as HTMLElement);
       before.detach();
       after.detach();
-      current.setStartAfter(startMark);
-      current.setEndBefore(endMark);
 
-      startMark.parentNode.removeChild(startMark);
-      endMark.parentNode.removeChild(endMark);
     } else {
-      if (range.commonAncestorContainer.nodeType === 3) {
-        const newWrap = doc.createElement(tag);
-        const isCollapsed = range.collapsed;
-        range.surroundContents(newWrap);
+      if (range.range.commonAncestorContainer.nodeType === 3) {
+        const newWrap = this.document.createElement(tag);
+        const isCollapsed = range.range.collapsed;
+        range.range.surroundContents(newWrap);
         if (isCollapsed) {
           newWrap.innerHTML = '&#8203;';
-          range.selectNodeContents(newWrap);
+          range.range.selectNodeContents(newWrap);
         }
-      } else if (range.commonAncestorContainer.nodeType === 1) {
-        console.log(3)
-        const {before, current, after, startMark, endMark} = this.splitBySelectedRange(range, range.commonAncestorContainer as Element);
+        range.apply();
+      } else if (range.range.commonAncestorContainer.nodeType === 1) {
 
-        const textNodes = this.getTextNodes(current.commonAncestorContainer as HTMLElement, tag).filter(node => {
-          return current.intersectsNode(node);
-        });
-        if (textNodes.length) {
-          current.setStartBefore(startMark);
-          current.setEndAfter(endMark);
+        const current = range.markRange().range;
+
+        if (matchStatus.matchAllChild) {
           this.unWrap(current, tag);
-          current.setStartAfter(startMark);
-          current.setEndBefore(endMark);
-          this.wrap(current, tag);
-          console.log(4)
         } else {
-          console.log(5)
           this.unWrap(current, tag);
+          this.wrap(current, tag);
         }
-        before.detach();
-        after.detach();
-        const s = this.findEmptyContainer(startMark);
-        const e = this.findEmptyContainer(endMark);
-        current.setStartAfter(s);
-        current.setEndBefore(e);
-        s.parentNode.removeChild(s);
-        e.parentNode.removeChild(e);
+        range.removeMarkRange().apply();
       }
     }
-    return range;
   }
 
   private wrap(range: Range, tag: string) {

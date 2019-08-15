@@ -5,11 +5,11 @@ import { template } from './template-html';
 
 export class Editor {
   readonly host = document.createElement('iframe');
-  readonly onSelectionChange: Observable<Selection>;
+  readonly onSelectionChange: Observable<Range>;
   readonly onLoad: Observable<this>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
-  private selectionChangeEvent = new Subject<Selection>();
+  private selectionChangeEvent = new Subject<Range>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
 
@@ -45,31 +45,31 @@ export class Editor {
     selection.addRange(range);
   }
 
-  private normalize(el: Element) {
-    const elements = Array.from(el.childNodes);
-    for (let i = 0; i < elements.length; i++) {
-      const node = elements[i];
-      for (let j = i + 1; j < elements.length; j++) {
-        const next = elements[j];
-        if (next) {
-          break;
-        }
-        if (node.nodeType === 3 && next.nodeType === 3) {
-          node.textContent = node.textContent + next.textContent;
-          el.removeChild(next);
-          i++;
-        } else if (node.nodeType === 1 && next.nodeType === 1 &&
-          (node as Element).tagName === (next as Element).tagName) {
-          Array.from(next.childNodes).forEach(item => node.appendChild(item));
-          el.removeChild(next);
-          i++;
-        }
-      }
-      if (node.nodeType === 1) {
-        this.normalize(node as HTMLElement);
-      }
-    }
-  }
+  // private normalize(el: Element) {
+  //   const elements = Array.from(el.childNodes);
+  //   for (let i = 0; i < elements.length; i++) {
+  //     const node = elements[i];
+  //     for (let j = i + 1; j < elements.length; j++) {
+  //       const next = elements[j];
+  //       if (next) {
+  //         break;
+  //       }
+  //       if (node.nodeType === 3 && next.nodeType === 3) {
+  //         node.textContent = node.textContent + next.textContent;
+  //         el.removeChild(next);
+  //         i++;
+  //       } else if (node.nodeType === 1 && next.nodeType === 1 &&
+  //         (node as Element).tagName === (next as Element).tagName) {
+  //         Array.from(next.childNodes).forEach(item => node.appendChild(item));
+  //         el.removeChild(next);
+  //         i++;
+  //       }
+  //     }
+  //     if (node.nodeType === 1) {
+  //       this.normalize(node as HTMLElement);
+  //     }
+  //   }
+  // }
 
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
@@ -81,9 +81,10 @@ export class Editor {
       'keyup',
       'keypress',
       'mouseup',
-      'selectstart'
+      'selectstart',
+      'focus'
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next(this.contentWindow.getSelection());
+      this.selectionChangeEvent.next(this.contentWindow.getSelection().getRangeAt(0));
     });
     merge(...[
       'keyup',

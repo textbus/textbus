@@ -1,70 +1,10 @@
 import { dtd } from '../editor/dtd';
-
-export interface RangeMarker {
-  before: Range;
-  current: Range;
-  after: Range;
-  startMark: HTMLElement;
-  endMark: HTMLElement;
-}
+import { MatchStatus } from '../matcher';
+import { TBRange } from '../range';
+import { Editor } from '../editor/editor';
 
 export abstract class Formatter {
-  abstract readonly document: Document;
-
-  abstract format(doc: Document): Range;
-
-  splitBySelectedRange(range: Range, scope: Node): RangeMarker {
-    const beforeRange = this.document.createRange();
-    const afterRange = this.document.createRange();
-
-    const startMark = document.createElement('span');
-    const endMark = document.createElement('span');
-
-    if (range.startContainer.nodeType === 3) {
-      const startParent = range.startContainer.parentNode;
-      beforeRange.setStart(range.startContainer, 0);
-      beforeRange.setEnd(range.startContainer, range.startOffset);
-      startParent.insertBefore(beforeRange.extractContents(), range.startContainer);
-      startParent.insertBefore(startMark, range.startContainer);
-      beforeRange.setStartBefore(scope);
-      beforeRange.setEndBefore(startMark);
-    } else if (range.startContainer.nodeType === 1) {
-      beforeRange.setStartBefore(scope);
-      range.startContainer.insertBefore(startMark, range.startContainer.childNodes[range.startOffset]);
-      beforeRange.setEndBefore(startMark);
-    }
-
-    if (range.endContainer.nodeType === 3) {
-      const nextSibling = range.endContainer.nextSibling;
-      const endParent = range.endContainer.parentNode;
-
-      afterRange.setStart(range.endContainer, range.endOffset);
-      afterRange.setEndAfter(range.endContainer);
-
-      const contents = afterRange.extractContents();
-      if (nextSibling) {
-        endParent.insertBefore(endMark, nextSibling);
-        endParent.insertBefore(contents, nextSibling);
-      } else {
-        endParent.appendChild(endMark);
-        endParent.appendChild(contents);
-      }
-
-      afterRange.setStartAfter(endMark);
-      afterRange.setEndAfter(scope);
-    } else if (range.endContainer.nodeType === 1) {
-      range.endContainer.insertBefore(endMark, range.endContainer.childNodes[range.endOffset]);
-      afterRange.setStartAfter(endMark);
-      afterRange.setEndAfter(scope);
-    }
-    return {
-      before: beforeRange,
-      current: range,
-      after: afterRange,
-      startMark,
-      endMark
-    };
-  }
+  abstract format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void;
 
   matchContainerByTagName(node: Node, tagName: string, scope: Node) {
     while (node) {
@@ -86,11 +26,11 @@ export abstract class Formatter {
     return this.findEmptyContainer(node.parentNode);
   }
 
-  createContainerByDtdRule(tagName: string): { newNode: HTMLElement, contentsContainer: HTMLElement } {
-    const wrapper = this.document.createElement(tagName);
+  createContainerByDtdRule(context: Document, tagName: string): { newNode: HTMLElement, contentsContainer: HTMLElement } {
+    const wrapper = context.createElement(tagName);
     let container = wrapper;
     while (dtd[container.tagName.toLowerCase()].limitChildren) {
-      const child = this.document.createElement(dtd[container.tagName.toLowerCase()].limitChildren[0]);
+      const child = context.createElement(dtd[container.tagName.toLowerCase()].limitChildren[0]);
       container.appendChild(child);
       container = child;
     }
