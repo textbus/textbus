@@ -8,5 +8,5 @@ export const superscriptHandler: ButtonHandlerOption = {
   match: {
     tags: ['SUP']
   },
-  execCommand: new InlineFormatter('superscript')
+  execCommand: new InlineFormatter('sup')
 };

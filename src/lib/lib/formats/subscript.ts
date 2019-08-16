@@ -8,5 +8,5 @@ export const subscriptHandler: ButtonHandlerOption = {
   match: {
     tags: ['SUB']
   },
-  execCommand: new InlineFormatter('subscript')
+  execCommand: new InlineFormatter('sub')
 };
