@@ -44,6 +44,7 @@ export class InlineFormatter extends Formatter {
           this.unWrap(current, tag);
         } else {
           this.unWrap(current, tag);
+          range.apply();
           this.wrap(current, tag);
         }
         range.removeMarkRange();

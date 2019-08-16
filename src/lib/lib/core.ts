@@ -63,9 +63,7 @@ export class Core {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.editor.host.dispatchEvent(event);
-      this.handlers.forEach(handler => {
-        handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
-      });
+      this.updateToolbarStatus(range);
     });
     this.editor.onSelectionChange
       .pipe(map(range => {
@@ -99,11 +97,18 @@ export class Core {
     });
   }
 
+  private updateToolbarStatus(range: Range) {
+    this.handlers.forEach(handler => {
+      handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
+    });
+  }
+
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
     button.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor.contentDocument, this.range));
+      this.updateToolbarStatus(this.range);
     });
     this.toolbar.appendChild(button.host);
     this.handlers.push(button);
@@ -115,6 +120,7 @@ export class Core {
       item.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
         const range = new TBRange(this.range, this.editor.contentDocument);
         item.execCommand.format(range, this.editor, item.matcher.match(this.editor.contentDocument, this.range));
+        this.updateToolbarStatus(this.range);
       });
       this.handlers.push(item);
     });

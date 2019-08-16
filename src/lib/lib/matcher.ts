@@ -76,7 +76,7 @@ export class Matcher {
     return {
       inContainer,
       container: node,
-      matchAllChild: this.matchAllChild(range, range.commonAncestorContainer)
+      matchAllChild: range.collapsed ? false : this.matchAllChild(range, range.commonAncestorContainer)
     }
   }
 

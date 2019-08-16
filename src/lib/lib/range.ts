@@ -95,6 +95,11 @@ export class TBRange {
     return this;
   }
 
+  apply() {
+    this.range.setStartAfter(this.startMark);
+    this.range.setEndBefore(this.endMark);
+  }
+
   getBeforeAndAfterInContainer(scope: HTMLElement): { before: Range, after: Range } {
     const beforeRange = this.context.createRange();
     const afterRange = this.context.createRange();
