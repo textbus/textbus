@@ -59,4 +59,12 @@ export abstract class Formatter {
     }
     return scope;
   }
+
+  takeOffWrapper(context: Document, el: Element) {
+    const fragment = context.createDocumentFragment();
+    Array.from(el.childNodes).forEach(item => {
+      fragment.appendChild(item);
+    });
+    el.parentNode.replaceChild(fragment, el);
+  }
 }

@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { BlockFormatter } from '../toolbar/fomatter/block-formatter';
+import { ToggleBlockFormatter } from '../toolbar/fomatter/toggle-block-formatter';
 
 export const codeHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
@@ -8,5 +8,5 @@ export const codeHandler: ButtonHandlerOption = {
   match: {
     tags: ['PRE']
   },
-  execCommand: new BlockFormatter('pre')
+  execCommand: new ToggleBlockFormatter('pre')
 };

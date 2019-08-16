@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { BlockFormatter } from '../toolbar/fomatter/block-formatter';
+import { ToggleBlockFormatter } from '../toolbar/fomatter/toggle-block-formatter';
 
 export const blockquoteHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
@@ -8,5 +8,5 @@ export const blockquoteHandler: ButtonHandlerOption = {
   match: {
     tags: ['BLOCKQUOTE']
   },
-  execCommand: new BlockFormatter('blockquote')
+  execCommand: new ToggleBlockFormatter('blockquote')
 };

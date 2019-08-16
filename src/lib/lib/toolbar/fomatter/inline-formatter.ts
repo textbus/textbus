@@ -18,11 +18,11 @@ export class InlineFormatter extends Formatter {
       if (range.rawRange.collapsed) {
         return;
       }
-      const {before, after} = range.getBeforeAndAfterInContainer(matchStatus.container as HTMLElement);
+      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchStatus.container as HTMLElement);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      this.takeOffWrapper(matchStatus.container as HTMLElement);
+      this.takeOffWrapper(this.document, matchStatus.container as HTMLElement);
       before.detach();
       after.detach();
       range.removeMarkRange();
@@ -89,7 +89,7 @@ export class InlineFormatter extends Formatter {
     Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        this.takeOffWrapper(item);
+        this.takeOffWrapper(this.document, item);
       });
   }
 
@@ -107,13 +107,5 @@ export class InlineFormatter extends Formatter {
       }
     });
     return result;
-  }
-
-  private takeOffWrapper(el: Element) {
-    const fragment = this.document.createDocumentFragment();
-    Array.from(el.childNodes).forEach(item => {
-      fragment.appendChild(item);
-    });
-    el.parentNode.replaceChild(fragment, el);
   }
 }
