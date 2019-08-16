@@ -2,7 +2,7 @@ import { SelectHandlerOption, SelectHandlerItemOption } from '../help';
 import { Observable, Subject } from 'rxjs';
 import { Handler } from './help';
 import { Matcher, MatchStatus } from '../../matcher';
-import { Formatter } from '../formatter';
+import { Formatter } from '../fomatter/formatter';
 
 export class SelectHandler {
   readonly host = document.createElement('span');

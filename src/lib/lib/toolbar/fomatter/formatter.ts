@@ -1,7 +1,7 @@
-import { dtd } from '../editor/dtd';
-import { MatchStatus } from '../matcher';
-import { TBRange } from '../range';
-import { Editor } from '../editor/editor';
+import { dtd } from '../../editor/dtd';
+import { MatchStatus } from '../../matcher';
+import { TBRange } from '../../range';
+import { Editor } from '../../editor/editor';
 
 export abstract class Formatter {
   abstract format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void;

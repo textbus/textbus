@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
-import { MatchStatus } from '../matcher';
-import { TBRange } from '../range';
-import { Editor } from '../editor/editor';
+import { MatchStatus } from '../../matcher';
+import { TBRange } from '../../range';
+import { Editor } from '../../editor/editor';
 
 export class InlineFormatter extends Formatter {
   private document: Document;

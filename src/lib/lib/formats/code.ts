@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { BlockFormatter } from '../toolbar/block-formatter';
+import { BlockFormatter } from '../toolbar/fomatter/block-formatter';
 
 export const codeHandler: ButtonHandlerOption = {
   type: HandlerType.Button,

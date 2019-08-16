@@ -1,4 +1,4 @@
-import { Formatter } from './formatter';
+import { Formatter } from './fomatter/formatter';
 
 export enum HandlerType {
   Button,

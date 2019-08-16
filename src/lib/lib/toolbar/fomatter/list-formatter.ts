@@ -1,8 +1,8 @@
 import { Formatter } from './formatter';
-import { dtd } from '../editor/dtd';
-import { TBRange } from '../range';
-import { MatchStatus } from '../matcher';
-import { Editor } from '../editor/editor';
+import { dtd } from '../../editor/dtd';
+import { TBRange } from '../../range';
+import { MatchStatus } from '../../matcher';
+import { Editor } from '../../editor/editor';
 
 export class ListFormatter extends Formatter {
   readonly document: Document;

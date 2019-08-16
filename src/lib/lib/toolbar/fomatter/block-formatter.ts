@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
-import { TBRange } from '../range';
-import { MatchStatus } from '../matcher';
-import { Editor } from '../editor/editor';
+import { TBRange } from '../../range';
+import { MatchStatus } from '../../matcher';
+import { Editor } from '../../editor/editor';
 
 export class BlockFormatter extends Formatter {
   constructor(private tagName: string) {

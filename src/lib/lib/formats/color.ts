@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { BlockFormatter } from '../toolbar/block-formatter';
+import { BlockFormatter } from '../toolbar/fomatter/block-formatter';
 
 export const colorHandler: ButtonHandlerOption = {
   type: HandlerType.Button,

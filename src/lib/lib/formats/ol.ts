@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { ListFormatter } from '../toolbar/list-formatter';
+import { ListFormatter } from '../toolbar/fomatter/list-formatter';
 
 export const olHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
