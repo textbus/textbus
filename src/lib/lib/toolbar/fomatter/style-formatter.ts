@@ -27,25 +27,44 @@ export class StyleFormatter extends Formatter {
 
   findCanApplyElements(node: Node, range: Range, context: Document): Node[] {
     const nodes: Node[] = [];
-    const newRange = context.createRange();
-    newRange.selectNode(node);
-    console.log([
-      range.compareBoundaryPoints(range.START_TO_START, newRange),
-      range.compareBoundaryPoints(range.END_TO_END, newRange)
-    ], node);
-    const compare = [
-      range.compareBoundaryPoints(range.START_TO_START, newRange) === 0,
-      range.compareBoundaryPoints(range.END_TO_END, newRange) === 0
-    ].indexOf(false) === -1;
+
+    const ranges: Range[] = [];
+
+    const testingRange = context.createRange();
+    testingRange.selectNode(node);
+
+    // <div>88888[<span>8888</span>]88888</div>
+    ranges.push(testingRange.cloneRange());
+
+    // <div>88888<span>[8888]</span>88888</div>
+    testingRange.selectNodeContents(node);
+    ranges.push(testingRange.cloneRange());
+
+    // <div>88888[<span>8888]</span>88888</div>
+    testingRange.setStartBefore(node);
+    ranges.push(testingRange.cloneRange());
+
+    // <div>88888<span>[8888</span>]88888</div>
+    testingRange.selectNodeContents(node);
+    testingRange.setEndAfter(node);
+    ranges.push(testingRange);
+
+    // console.log(JSON.stringify(ranges.map(item => {
+    //   return item.compareBoundaryPoints(range.START_TO_START, range) > -1 &&
+    //     item.compareBoundaryPoints(range.END_TO_END, range) < 1;
+    // })), node);
+
+    const compare = ranges.map(item => {
+      return item.compareBoundaryPoints(range.START_TO_START, range) > -1 &&
+        item.compareBoundaryPoints(range.END_TO_END, range) < 1;
+    }).indexOf(true) > -1;
 
     if (compare) {
       nodes.push(node);
     } else {
-      if (node.nodeType === 1) {
-        Array.from((node as HTMLElement).childNodes).forEach(item => {
-          nodes.push(...this.findCanApplyElements(item, range, context));
-        });
-      }
+      Array.from((node as HTMLElement).childNodes).forEach(item => {
+        nodes.push(...this.findCanApplyElements(item, range, context));
+      });
     }
     return nodes;
   }

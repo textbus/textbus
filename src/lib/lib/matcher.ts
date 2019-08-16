@@ -33,12 +33,16 @@ export class Matcher {
     if (config.styles) {
       this.validators.push(node => {
         if (node.nodeType === 1) {
-          const styles = (node as HTMLElement).style;
+          const elementStyles = (node as HTMLElement).style;
           return Object.keys(config.styles).map(key => {
             const optionValue = (Array.isArray(config.styles[key]) ?
               config.styles[key] :
               [config.styles[key]]) as Array<string | number>;
-            return optionValue.indexOf(styles[key]) > -1;
+            let styleValue = elementStyles[key];
+            if (key === 'fontFamily' && typeof styleValue === 'string') {
+              styleValue = styleValue.replace(/['"]/g, '');
+            }
+            return optionValue.indexOf(styleValue) > -1;
           }).indexOf(false) === -1;
         }
         return false;

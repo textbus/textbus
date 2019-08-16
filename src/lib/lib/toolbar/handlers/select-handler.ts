@@ -20,6 +20,7 @@ export class SelectHandler {
 
     const dropdownInner = document.createElement('span');
     const dropdownArrow = document.createElement('span');
+    dropdownInner.classList.add('tanbo-editor-toolbar-dropdown-button-inner');
     dropdownArrow.classList.add('tanbo-editor-toolbar-dropdown-button-caret');
 
     dropdownButton.appendChild(dropdownInner);

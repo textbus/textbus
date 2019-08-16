@@ -61,8 +61,14 @@
   width: 110px;
   display: inline-flex;
   justify-content: space-between;
+  &-inner {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
 }
-
 .tanbo-editor-toolbar-dropdown-button-caret {
   &:after {
     content: "";
