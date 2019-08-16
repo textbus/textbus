@@ -108,7 +108,7 @@ export class Core {
     button.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor.contentDocument, this.range));
-      this.updateToolbarStatus(this.range);
+      this.editor.contentDocument.body.focus();
     });
     this.toolbar.appendChild(button.host);
     this.handlers.push(button);
@@ -120,7 +120,7 @@ export class Core {
       item.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
         const range = new TBRange(this.range, this.editor.contentDocument);
         item.execCommand.format(range, this.editor, item.matcher.match(this.editor.contentDocument, this.range));
-        this.updateToolbarStatus(this.range);
+        this.editor.contentDocument.body.focus();
       });
       this.handlers.push(item);
     });
