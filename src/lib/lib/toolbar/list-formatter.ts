@@ -18,17 +18,17 @@ export class ListFormatter extends Formatter {
   // format(doc: Document): Range {
   //   (this as { document: Document }).document = doc;
   //   const selection = doc.getSelection();
-  //   const range = selection.getRangeAt(0);
+  //   const rawRange = selection.getRangeAt(0);
   //   const tag = this.tagName;
   //   const parentTagContainer = this.matchContainerByTagName(
-  //     range.commonAncestorContainer as HTMLElement,
+  //     rawRange.commonAncestorContainer as HTMLElement,
   //     tag,
   //     this.document.body) as HTMLElement;
   //   if (parentTagContainer) {
   //     console.log('b1');
-  //     const cacheMark = this.splitBySelectedRange(range, range.commonAncestorContainer);
+  //     const cacheMark = this.splitBySelectedRange(rawRange, rawRange.commonAncestorContainer);
   //     const parent = parentTagContainer.parentNode;
-  //     const block = this.findBlockContainer(range.commonAncestorContainer as HTMLElement, parentTagContainer);
+  //     const block = this.findBlockContainer(rawRange.commonAncestorContainer as HTMLElement, parentTagContainer);
   //     const containerRange = this.document.createRange();
   //     const nextSibling = parentTagContainer.nextSibling;
   //     const rawTag = parentTagContainer[this.rawTagKey];
@@ -74,8 +74,8 @@ export class ListFormatter extends Formatter {
   //     }
   //     const s = this.findEmptyContainer(cacheMark.startMark);
   //     const e = this.findEmptyContainer(cacheMark.endMark);
-  //     range.setStartAfter(s);
-  //     range.setEndBefore(e);
+  //     rawRange.setStartAfter(s);
+  //     rawRange.setEndBefore(e);
   //     s.parentNode.removeChild(s);
   //     e.parentNode.removeChild(e);
   //     const ss = this.findEmptyContainer(startMark);
@@ -85,9 +85,9 @@ export class ListFormatter extends Formatter {
   //   } else {
   //
   //     console.log('b2');
-  //     const {startMark, current, endMark} = this.splitBySelectedRange(range, range.commonAncestorContainer);
+  //     const {startMark, current, endMark} = this.splitBySelectedRange(rawRange, rawRange.commonAncestorContainer);
   //     const containerRange = this.document.createRange();
-  //     const container = this.findBlockContainer(range.commonAncestorContainer, this.document.body);
+  //     const container = this.findBlockContainer(rawRange.commonAncestorContainer, this.document.body);
   //     containerRange.selectNodeContents(container);
   //     const newContainer = this.createContainerByDtdRule(tag);
   //     newContainer.contentsContainer[this.rawTagKey] = (container as HTMLElement).tagName;
@@ -108,6 +108,6 @@ export class ListFormatter extends Formatter {
   //     s.parentNode.removeChild(s);
   //     e.parentNode.removeChild(e);
   //   }
-  //   return range;
+  //   return rawRange;
   // }
 }

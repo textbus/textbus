@@ -40,7 +40,7 @@ export abstract class Formatter {
     };
   }
 
-  findBlockContainer(node: Node, scope: HTMLElement): Node {
+  findBlockContainer(node: Node, scope: Node): Node {
     if (node === scope) {
       return node;
     }

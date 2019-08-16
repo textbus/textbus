@@ -15,30 +15,29 @@ export class InlineFormatter extends Formatter {
     const tag = this.tagName;
 
     if (matchStatus.inContainer) {
-      if (range.range.collapsed) {
+      if (range.rawRange.collapsed) {
         return;
       }
-      const {before, after} = new TBRange(range.range, this.document)
-        .getBeforeAndAfterInContainer(matchStatus.container as HTMLElement);
+      const {before, after} = range.getBeforeAndAfterInContainer(matchStatus.container as HTMLElement);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
       this.takeOffWrapper(matchStatus.container as HTMLElement);
       before.detach();
       after.detach();
-
+      range.removeMarkRange();
     } else {
-      if (range.range.commonAncestorContainer.nodeType === 3) {
+      if (range.rawRange.commonAncestorContainer.nodeType === 3) {
         const newWrap = this.document.createElement(tag);
-        const isCollapsed = range.range.collapsed;
-        range.range.surroundContents(newWrap);
+        const isCollapsed = range.rawRange.collapsed;
+        range.rawRange.surroundContents(newWrap);
         if (isCollapsed) {
           newWrap.innerHTML = '&#8203;';
-          range.range.selectNodeContents(newWrap);
+          range.rawRange.selectNodeContents(newWrap);
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
         range.markRange();
-        const current = range.range;
+        const current = range.rawRange;
 
         if (matchStatus.matchAllChild) {
           this.unWrap(current, tag);

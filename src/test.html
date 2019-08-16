@@ -10,7 +10,7 @@
     window.onload = function () {
       var selection = document.getSelection();
 
-      var range = document.createRange();
+      var rawRange = document.createRange();
       var box = document.getElementById('box');
       range.setStart(box.childNodes[0], 2);
       range.setEnd(box, 2);

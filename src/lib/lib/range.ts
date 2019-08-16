@@ -1,22 +1,22 @@
 export class TBRange {
   get commonAncestorContainer() {
-    return this.range.commonAncestorContainer;
+    return this.rawRange.commonAncestorContainer;
   }
 
   get startContainer() {
-    return this.range.startContainer;
+    return this.rawRange.startContainer;
   }
 
   get startOffset() {
-    return this.range.startOffset;
+    return this.rawRange.startOffset;
   }
 
   get endContainer() {
-    return this.range.endContainer;
+    return this.rawRange.endContainer;
   }
 
   get endOffset() {
-    return this.range.endOffset;
+    return this.rawRange.endOffset;
   }
 
   private startMark = document.createElement('span');
@@ -24,23 +24,23 @@ export class TBRange {
 
   private marked = false;
 
-  constructor(public range: Range, private context: Document) {
+  constructor(public rawRange: Range, private context: Document) {
     const beforeRange = this.context.createRange();
     const afterRange = this.context.createRange();
 
-    if (range.startContainer.nodeType === 3) {
-      const startParent = range.startContainer.parentNode;
-      beforeRange.setStart(range.startContainer, 0);
-      beforeRange.setEnd(range.startContainer, range.startOffset);
-      startParent.insertBefore(beforeRange.extractContents(), range.startContainer);
+    if (rawRange.startContainer.nodeType === 3) {
+      const startParent = rawRange.startContainer.parentNode;
+      beforeRange.setStart(rawRange.startContainer, 0);
+      beforeRange.setEnd(rawRange.startContainer, rawRange.startOffset);
+      startParent.insertBefore(beforeRange.extractContents(), rawRange.startContainer);
     }
 
-    if (range.endContainer.nodeType === 3) {
-      const nextSibling = range.endContainer.nextSibling;
-      const endParent = range.endContainer.parentNode;
+    if (rawRange.endContainer.nodeType === 3) {
+      const nextSibling = rawRange.endContainer.nextSibling;
+      const endParent = rawRange.endContainer.parentNode;
 
-      afterRange.setStart(range.endContainer, range.endOffset);
-      afterRange.setEndAfter(range.endContainer);
+      afterRange.setStart(rawRange.endContainer, rawRange.endOffset);
+      afterRange.setEndAfter(rawRange.endContainer);
 
       const contents = afterRange.extractContents();
       if (nextSibling) {
@@ -53,7 +53,7 @@ export class TBRange {
 
   markRange() {
     if (!this.marked) {
-      const {startContainer, endContainer, startOffset, endOffset} = this.range;
+      const {startContainer, endContainer, startOffset, endOffset} = this.rawRange;
 
       let endParent: HTMLElement;
       let endNext: Node;
@@ -74,7 +74,7 @@ export class TBRange {
         startContainer.insertBefore(this.startMark, startContainer.childNodes[startOffset]);
       } else {
         const startParent = startContainer.parentNode;
-        startParent.insertBefore(this.startMark, this.range.startContainer);
+        startParent.insertBefore(this.startMark, this.rawRange.startContainer);
       }
 
       this.marked = true;
@@ -86,8 +86,8 @@ export class TBRange {
     if (this.marked) {
       const s = this.findEmptyContainer(this.startMark);
       const e = this.findEmptyContainer(this.endMark);
-      this.range.setStartAfter(s);
-      this.range.setEndBefore(e);
+      this.rawRange.setStartAfter(s);
+      this.rawRange.setEndBefore(e);
       s.parentNode.removeChild(s);
       e.parentNode.removeChild(e);
       this.marked = false;
@@ -96,8 +96,8 @@ export class TBRange {
   }
 
   apply() {
-    this.range.setStartAfter(this.startMark);
-    this.range.setEndBefore(this.endMark);
+    this.rawRange.setStartAfter(this.startMark);
+    this.rawRange.setEndBefore(this.endMark);
   }
 
   getBeforeAndAfterInContainer(scope: HTMLElement): { before: Range, after: Range } {
@@ -105,13 +105,10 @@ export class TBRange {
     const afterRange = this.context.createRange();
 
     beforeRange.setStartBefore(scope);
-    if (this.marked) {
-      beforeRange.setEndBefore(this.startMark);
-      afterRange.setStartAfter(this.endMark);
-    } else {
-      beforeRange.setEnd(this.range.startContainer, this.range.startOffset);
-      afterRange.setEnd(this.range.endContainer, this.range.endOffset);
-    }
+    afterRange.setEndAfter(scope);
+    this.markRange();
+    beforeRange.setEndBefore(this.startMark);
+    afterRange.setStartAfter(this.endMark);
     return {
       before: beforeRange,
       after: afterRange

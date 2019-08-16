@@ -5,7 +5,6 @@ import { MatchStatus } from '../matcher';
 import { Editor } from '../editor/editor';
 
 export class BlockFormatter extends Formatter {
-  private document: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
   constructor(private tagName: string) {
@@ -13,13 +12,13 @@ export class BlockFormatter extends Formatter {
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
-    // this.document = doc;
+    // const doc = editor.contentDocument;
     // const tag = this.tagName;
     //
     // if (matchStatus.inContainer) {
     //   console.log('b1');
     //   const parent = matchStatus.container.parentNode;
-    //   const block = this.findBlockContainer(range.range.commonAncestorContainer as HTMLElement, matchStatus.container);
+    //   const block = this.findBlockContainer(range.rawRange.commonAncestorContainer as HTMLElement, matchStatus.container);
     //   const containerRange = doc.createRange();
     //   const nextSibling = matchStatus.container.nextSibling;
     //   const rawTag = matchStatus.container[this.rawTagKey];
