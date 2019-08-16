@@ -4,7 +4,7 @@ import { Matcher, MatchStatus } from '../../matcher';
 export interface Handler {
   host: HTMLElement;
   onAction: Observable<any>;
-  matcher: Matcher | Matcher[];
+  matcher: Matcher;
 
-  updateStatus(status: MatchStatus | MatchStatus[]): void;
+  updateStatus(status: MatchStatus): void;
 }

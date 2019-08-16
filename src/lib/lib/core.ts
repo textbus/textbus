@@ -1,20 +1,33 @@
 import { Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
-import { Toolbar } from './toolbar/toolbar';
 import { Editor } from './editor/editor';
 import { EditorOptions } from './help';
 import { Paths } from './paths/paths';
-
+import {
+  ButtonHandlerOption,
+  DropdownHandlerOption,
+  HandlerOption,
+  HandlerType,
+  SelectHandlerOption
+} from './toolbar/help';
+import { ButtonHandler } from './toolbar/handlers/button-handler';
+import { SelectHandler } from './toolbar/handlers/select-handler';
+import { TBRange } from './range';
+import { Handler } from './toolbar/handlers/help';
 
 export class Core {
   readonly host = document.createElement('div');
   readonly editor = new Editor();
   readonly paths = new Paths();
-  readonly toolbar = new Toolbar();
   readonly onReady: Observable<this>;
+
+  private toolbar = document.createElement('div');
   private container: HTMLElement;
   private readyEvent = new Subject<this>();
+  private isFirst = true;
+  private range: Range;
+  private handlers: Handler[] = [];
 
   constructor(selector: string | HTMLElement, private options: EditorOptions = {}) {
     if (typeof selector === 'string') {
@@ -25,16 +38,18 @@ export class Core {
     if (Array.isArray(options.handlers)) {
       options.handlers.forEach(handler => {
         if (Array.isArray(handler)) {
-          this.toolbar.addGroup(handler);
+          this.addGroup(handler);
         } else {
-          this.toolbar.addHandler(handler);
+          this.addHandler(handler);
         }
       });
     }
 
     this.onReady = this.readyEvent.asObservable();
 
-    this.host.appendChild(this.toolbar.host);
+    this.toolbar.classList.add('tanbo-editor-toolbar');
+
+    this.host.appendChild(this.toolbar);
     this.host.appendChild(this.editor.host);
     this.host.appendChild(this.paths.host);
 
@@ -44,19 +59,19 @@ export class Core {
     this.paths.onCheck.subscribe(node => {
       this.editor.updateSelectionByElement(node);
     });
-    this.editor.onSelectionChange.pipe(debounceTime(100)).subscribe(range => {
-      this.toolbar.handlers.forEach(handler => {
-        if (Array.isArray(handler.matcher)) {
-          handler.updateStatus(handler.matcher.map(match => {
-            return match.match(this.editor.contentDocument, range);
-          }))
-        } else {
-          handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
-        }
-      })
+    this.editor.onSelectionChange.pipe(debounceTime(10)).subscribe(range => {
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.editor.host.dispatchEvent(event);
+      this.handlers.forEach(handler => {
+        handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
+      });
     });
     this.editor.onSelectionChange
-      .pipe(map(range => range.startContainer), distinctUntilChanged()).subscribe(node => {
+      .pipe(map(range => {
+        this.range = range;
+        return range.startContainer;
+      }), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
     this.editor.onLoad.subscribe(() => {
@@ -64,4 +79,55 @@ export class Core {
     });
   }
 
+  addHandler(option: HandlerOption) {
+    this.isFirst = false;
+    if (option.type === HandlerType.Button) {
+      this.addButtonHandler(option);
+    } else if (option.type === HandlerType.Select) {
+      this.addSelectHandler(option);
+    } else if (option.type === HandlerType.Dropdown) {
+      this.addDropdownHandler(option);
+    }
+  }
+
+  addGroup(handlers: HandlerOption[]) {
+    if (!this.isFirst) {
+      this.toolbar.appendChild(Core.createSplitLine());
+    }
+    handlers.forEach(handler => {
+      this.addHandler(handler);
+    });
+  }
+
+  private addButtonHandler(option: ButtonHandlerOption) {
+    const button = new ButtonHandler(option);
+    button.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+      const range = new TBRange(this.range, this.editor.contentDocument);
+      option.execCommand.format(range, this.editor, button.matcher.match(this.editor.contentDocument, this.range));
+    });
+    this.toolbar.appendChild(button.host);
+    this.handlers.push(button);
+  }
+
+  private addSelectHandler(option: SelectHandlerOption) {
+    const select = new SelectHandler(option);
+    select.options.forEach(item => {
+      item.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+        const range = new TBRange(this.range, this.editor.contentDocument);
+        item.execCommand.format(range, this.editor, item.matcher.match(this.editor.contentDocument, this.range));
+      });
+      this.handlers.push(item);
+    });
+    this.toolbar.appendChild(select.host);
+  }
+
+  private addDropdownHandler(handler: DropdownHandlerOption) {
+    // this.
+  }
+
+  private static createSplitLine() {
+    const splitLine = document.createElement('span');
+    splitLine.classList.add('tanbo-editor-toolbar-split-line');
+    return splitLine;
+  }
 }

@@ -22,7 +22,7 @@ export class ButtonHandler implements Handler {
   }
 
   updateStatus(status: MatchStatus): void {
-    if (status.container || status.matchAllChild) {
+    if (status.inContainer || status.matchAllChild) {
       this.host.classList.add('tanbo-editor-toolbar-handler-active');
     } else {
       this.host.classList.remove('tanbo-editor-toolbar-handler-active');

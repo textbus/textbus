@@ -1,14 +1,30 @@
 export class TBRange {
-  readonly range: Range;
+  get commonAncestorContainer() {
+    return this.range.commonAncestorContainer;
+  }
+
+  get startContainer() {
+    return this.range.startContainer;
+  }
+
+  get startOffset() {
+    return this.range.startOffset;
+  }
+
+  get endContainer() {
+    return this.range.endContainer;
+  }
+
+  get endOffset() {
+    return this.range.endOffset;
+  }
 
   private startMark = document.createElement('span');
   private endMark = document.createElement('span');
 
   private marked = false;
 
-  constructor(rawRange: Range, private context: Document) {
-    this.range = rawRange;
-    const range = this.range;
+  constructor(public range: Range, private context: Document) {
     const beforeRange = this.context.createRange();
     const afterRange = this.context.createRange();
 
@@ -37,16 +53,30 @@ export class TBRange {
 
   markRange() {
     if (!this.marked) {
-      const {startContainer, endContainer} = this.range;
-      const startParent = startContainer.parentNode;
-      const endParent = endContainer.parentNode;
-      const endNext = endContainer.nextSibling;
-      startParent.insertBefore(this.startMark, this.range.startContainer);
+      const {startContainer, endContainer, startOffset, endOffset} = this.range;
+
+      let endParent: HTMLElement;
+      let endNext: Node;
+      if (endContainer.nodeType === 1) {
+        endParent = endContainer as HTMLElement;
+        endNext = endContainer.childNodes[endOffset];
+      } else {
+        endParent = endContainer.parentNode as HTMLElement;
+        endNext = endContainer.nextSibling;
+      }
       if (endNext) {
         endParent.insertBefore(this.endMark, endNext);
       } else {
         endParent.appendChild(this.endMark);
       }
+
+      if (startContainer.nodeType === 1) {
+        startContainer.insertBefore(this.startMark, startContainer.childNodes[startOffset]);
+      } else {
+        const startParent = startContainer.parentNode;
+        startParent.insertBefore(this.startMark, this.range.startContainer);
+      }
+
       this.marked = true;
     }
     return this;
@@ -63,12 +93,6 @@ export class TBRange {
       this.marked = false;
     }
     return this;
-  }
-
-  apply() {
-    const selection = this.context.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(this.range);
   }
 
   getBeforeAndAfterInContainer(scope: HTMLElement): { before: Range, after: Range } {

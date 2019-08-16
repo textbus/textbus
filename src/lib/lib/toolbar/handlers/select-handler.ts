@@ -2,15 +2,13 @@ import { SelectHandlerOption, SelectHandlerItemOption } from '../help';
 import { Observable, Subject } from 'rxjs';
 import { Handler } from './help';
 import { Matcher, MatchStatus } from '../../matcher';
+import { Formatter } from '../formatter';
 
-export class SelectHandler implements Handler {
+export class SelectHandler {
   readonly host = document.createElement('span');
-  matcher: Matcher[];
-  onAction: Observable<SelectHandlerItemOption>;
-  private eventSource = new Subject<SelectHandlerItemOption>();
+  options: SelectOptionHandler[] = [];
 
   constructor(private handler: SelectHandlerOption) {
-    this.onAction = this.eventSource.asObservable();
     const dropdown = this.host;
     dropdown.classList.add('tanbo-editor-toolbar-dropdown');
 
@@ -41,30 +39,50 @@ export class SelectHandler implements Handler {
     const dropdownMenu = document.createElement('div');
     dropdownMenu.classList.add('tanbo-editor-toolbar-dropdown-menu');
     handler.options.forEach(option => {
-      const item = document.createElement('button');
-      item.classList.add('tanbo-editor-toolbar-dropdown-menu-item');
-      item.type = 'button';
-      if (option.classes) {
-        item.classList.add(...(option.classes || []));
+      const item = new SelectOptionHandler(option);
+      dropdownMenu.appendChild(item.host);
+      if (option.default) {
+        dropdownInner.innerText = option.label;
       }
-      item.innerText = option.label;
-      item.addEventListener('click', () => {
-        this.eventSource.next(option)
+      item.onMatched.subscribe(option => {
+        dropdownInner.innerText = option.label;
       });
-      dropdownMenu.appendChild(item);
-      this.matcher.push(new Matcher(option.match));
+      this.options.push(item);
     });
 
     dropdown.appendChild(dropdownButton);
     dropdown.appendChild(dropdownMenu);
-    this.host.appendChild(dropdown);
+  }
+}
+
+export class SelectOptionHandler implements Handler {
+  readonly host = document.createElement('button');
+  onAction: Observable<void>;
+  onMatched: Observable<SelectHandlerItemOption>;
+  matcher: Matcher;
+  execCommand: Formatter;
+  private eventSource = new Subject<void>();
+  private matchedEvent = new Subject<SelectHandlerItemOption>();
+
+  constructor(private option: SelectHandlerItemOption) {
+    this.onAction = this.eventSource.asObservable();
+    this.onMatched = this.matchedEvent.asObservable();
+    this.host.classList.add('tanbo-editor-toolbar-dropdown-menu-item');
+    this.host.type = 'button';
+    if (option.classes) {
+      this.host.classList.add(...(option.classes || []));
+    }
+    this.host.innerText = option.label;
+    this.host.addEventListener('click', () => {
+      this.eventSource.next();
+    });
+    this.execCommand = option.execCommand;
+    this.matcher = new Matcher(option.match);
   }
 
-  updateStatus(status: MatchStatus[]): void {
-    // if (status.container || status.matchAllChild) {
-    //   this.host.classList.add('tanbo-editor-toolbar-handler-active');
-    // } else {
-    //   this.host.classList.remove('tanbo-editor-toolbar-handler-active');
-    // }
+  updateStatus(status: MatchStatus): void {
+    if (status.inContainer || status.matchAllChild) {
+      this.matchedEvent.next(this.option);
+    }
   }
 }

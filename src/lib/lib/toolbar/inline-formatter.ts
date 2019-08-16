@@ -36,10 +36,9 @@ export class InlineFormatter extends Formatter {
           newWrap.innerHTML = '&#8203;';
           range.range.selectNodeContents(newWrap);
         }
-        range.apply();
-      } else if (range.range.commonAncestorContainer.nodeType === 1) {
-
-        const current = range.markRange().range;
+      } else if (range.commonAncestorContainer.nodeType === 1) {
+        range.markRange();
+        const current = range.range;
 
         if (matchStatus.matchAllChild) {
           this.unWrap(current, tag);
@@ -47,7 +46,7 @@ export class InlineFormatter extends Formatter {
           this.unWrap(current, tag);
           this.wrap(current, tag);
         }
-        range.removeMarkRange().apply();
+        range.removeMarkRange();
       }
     }
   }
