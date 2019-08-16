@@ -27,7 +27,7 @@ export class InlineFormatter extends Formatter {
       after.detach();
       range.removeMarkRange();
     } else {
-      if (range.rawRange.commonAncestorContainer.nodeType === 3) {
+      if (range.commonAncestorContainer.nodeType === 3) {
         const newWrap = this.document.createElement(tag);
         const isCollapsed = range.rawRange.collapsed;
         range.rawRange.surroundContents(newWrap);
