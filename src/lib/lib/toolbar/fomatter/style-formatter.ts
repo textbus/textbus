@@ -11,8 +11,11 @@ export class StyleFormatter extends Formatter {
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
+    const nodes = this.findCanApplyElements(range.commonAncestorContainer,
+      range.rawRange.cloneRange(),
+      editor.contentDocument);
     range.markRange();
-    this.findCanApplyElements(range.commonAncestorContainer, range.rawRange, editor.contentDocument).forEach(node => {
+    nodes.forEach(node => {
       if (node.nodeType === 3) {
         const newWrap = editor.contentDocument.createElement('span');
         newWrap.style[this.name] = this.value;
@@ -42,17 +45,12 @@ export class StyleFormatter extends Formatter {
 
     // <div>88888[<span>8888]</span>88888</div>
     testingRange.setStartBefore(node);
-    ranges.push(testingRange.cloneRange());
+    ranges.push(this.moveRangeEndMarkToRecentChildTextNode(testingRange.cloneRange()));
 
     // <div>88888<span>[8888</span>]88888</div>
     testingRange.selectNodeContents(node);
     testingRange.setEndAfter(node);
     ranges.push(testingRange);
-
-    // console.log(JSON.stringify(ranges.map(item => {
-    //   return item.compareBoundaryPoints(range.START_TO_START, range) > -1 &&
-    //     item.compareBoundaryPoints(range.END_TO_END, range) < 1;
-    // })), node);
 
     const compare = ranges.map(item => {
       return item.compareBoundaryPoints(range.START_TO_START, range) > -1 &&
@@ -67,5 +65,18 @@ export class StyleFormatter extends Formatter {
       });
     }
     return nodes;
+  }
+
+  private moveRangeEndMarkToRecentChildTextNode(range: Range): Range {
+    if (range.endContainer.nodeType === 1) {
+      const child = (range.endContainer.childNodes[range.endOffset - 1] as HTMLElement);
+      if (child.nodeType === 1) {
+        range.setEnd(child, child.childNodes.length);
+        this.moveRangeEndMarkToRecentChildTextNode(range);
+      } else if (child.nodeType === 3) {
+        range.setEnd(child, child.textContent.length);
+      }
+    }
+    return range;
   }
 }
