@@ -19,8 +19,8 @@ export class TBRange {
     return this.rawRange.endOffset;
   }
 
-  private startMark = document.createElement('span');
-  private endMark = document.createElement('span');
+  readonly startMark = document.createElement('span');
+  readonly endMark = document.createElement('span');
 
   private marked = false;
 
@@ -32,7 +32,10 @@ export class TBRange {
       const startParent = rawRange.startContainer.parentNode;
       beforeRange.setStart(rawRange.startContainer, 0);
       beforeRange.setEnd(rawRange.startContainer, rawRange.startOffset);
-      startParent.insertBefore(beforeRange.extractContents(), rawRange.startContainer);
+      const contents = beforeRange.extractContents();
+      if (contents.textContent) {
+        startParent.insertBefore(contents, rawRange.startContainer);
+      }
     }
 
     if (rawRange.endContainer.nodeType === 3) {
@@ -41,12 +44,13 @@ export class TBRange {
 
       afterRange.setStart(rawRange.endContainer, rawRange.endOffset);
       afterRange.setEndAfter(rawRange.endContainer);
-
       const contents = afterRange.extractContents();
-      if (nextSibling) {
-        endParent.insertBefore(contents, nextSibling);
-      } else {
-        endParent.appendChild(contents);
+      if (contents.textContent) {
+        if (nextSibling) {
+          endParent.insertBefore(contents, nextSibling);
+        } else {
+          endParent.appendChild(contents);
+        }
       }
     }
   }
@@ -78,6 +82,7 @@ export class TBRange {
       }
 
       this.marked = true;
+      this.apply();
     }
     return this;
   }
