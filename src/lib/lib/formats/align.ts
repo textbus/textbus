@@ -1,5 +1,5 @@
 import { HandlerType, SelectHandlerOption } from '../toolbar/help';
-import { StyleFormatter } from '../toolbar/fomatter/style-formatter';
+import { BlockStyleFormatter } from '../toolbar/fomatter/block-style-formatter';
 
 export const alignHandler: SelectHandlerOption = {
   type: HandlerType.Select,
@@ -13,7 +13,7 @@ export const alignHandler: SelectHandlerOption = {
           textAlign: 'left'
         }
       },
-      execCommand: new StyleFormatter('textAlign', 'left', false),
+      execCommand: new BlockStyleFormatter('textAlign', 'left'),
       default: true
     }, {
       label: ' 右对齐',
@@ -23,7 +23,7 @@ export const alignHandler: SelectHandlerOption = {
           textAlign: 'right'
         }
       },
-      execCommand: new StyleFormatter('textAlign', 'right', false),
+      execCommand: new BlockStyleFormatter('textAlign', 'right'),
     }, {
       label: ' 居中对齐',
       classes: ['tanbo-editor-icon-paragraph-center'],
@@ -32,7 +32,7 @@ export const alignHandler: SelectHandlerOption = {
           textAlign: 'center'
         }
       },
-      execCommand: new StyleFormatter('textAlign', 'center', false),
+      execCommand: new BlockStyleFormatter('textAlign', 'center'),
     }, {
       label: ' 分散对齐',
       classes: ['tanbo-editor-icon-paragraph-justify'],
@@ -41,7 +41,7 @@ export const alignHandler: SelectHandlerOption = {
           textAlign: 'justify'
         }
       },
-      execCommand: new StyleFormatter('textAlign', 'justify', false),
+      execCommand: new BlockStyleFormatter('textAlign', 'justify'),
     }
   ]
 };

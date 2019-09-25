@@ -5,30 +5,43 @@ import { MatchStatus } from '../../matcher';
 
 export class StyleFormatter extends Formatter {
   constructor(private name: string,
-              private value: string | number,
-              private canTakeEffectInline: boolean) {
+              private value: string | number) {
     super();
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
-    const nodes = this.findCanApplyElements(range.commonAncestorContainer,
-      range.rawRange.cloneRange(),
-      editor.contentDocument);
-    range.markRange();
-    nodes.forEach(node => {
-      if (node.nodeType === 3) {
-        const newWrap = editor.contentDocument.createElement('span');
-        newWrap.style[this.name] = this.value;
-        node.parentNode.insertBefore(newWrap, node);
-        newWrap.appendChild(node);
-      } else if (node.nodeType === 1) {
-        (node as HTMLElement).style[this.name] = this.value;
-      }
-    });
-    range.removeMarkRange();
+    if (range.rawRange.collapsed) {
+      const newWrap = editor.contentDocument.createElement('span');
+      newWrap.style[this.name] = this.value;
+      range.rawRange.surroundContents(newWrap);
+      newWrap.innerHTML = '&#8203;';
+    } else {
+      const nodes = this.findCanApplyElements(range.commonAncestorContainer,
+        range.rawRange.cloneRange(),
+        editor.contentDocument);
+      range.markRange();
+      nodes.forEach(node => {
+        if (node.nodeType === 3) {
+          const newWrap = editor.contentDocument.createElement('span');
+          newWrap.style[this.name] = this.value;
+          node.parentNode.insertBefore(newWrap, node);
+          newWrap.appendChild(node);
+        } else if (node.nodeType === 1) {
+          const el = node as HTMLElement;
+          el.style[this.name] = this.value;
+          Array.from(el.getElementsByTagName('*')).forEach((item: HTMLElement) => {
+            item.style[this.name] = '';
+          });
+        }
+      });
+      range.removeMarkRange();
+    }
   }
 
   findCanApplyElements(node: Node, range: Range, context: Document): Node[] {
+    if (node.nodeType === 3 && (node.textContent.length === 0 || /^(&#8203;)+$/.test(node.textContent))) {
+      return [];
+    }
     const nodes: Node[] = [];
 
     const ranges: Range[] = [];
@@ -55,9 +68,10 @@ export class StyleFormatter extends Formatter {
     const compare = ranges.map(item => {
       return item.compareBoundaryPoints(range.START_TO_START, range) > -1 &&
         item.compareBoundaryPoints(range.END_TO_END, range) < 1;
-    }).indexOf(true) > -1;
+    });
 
-    if (compare) {
+
+    if (compare.indexOf(true) > -1) {
       nodes.push(node);
     } else {
       Array.from((node as HTMLElement).childNodes).forEach(item => {

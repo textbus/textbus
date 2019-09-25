@@ -35,6 +35,10 @@ export class TBRange {
       const contents = beforeRange.extractContents();
       if (contents.textContent) {
         startParent.insertBefore(contents, rawRange.startContainer);
+        // 当内容被完全提取后，会留下一个空的，鼠标不能选中的脏文本节点，这会影响程序判断，所以这里需要删除掉
+        if (rawRange.startContainer.textContent === '') {
+          rawRange.startContainer.parentNode.removeChild(rawRange.startContainer);
+        }
       }
     }
 
@@ -45,6 +49,7 @@ export class TBRange {
       afterRange.setStart(rawRange.endContainer, rawRange.endOffset);
       afterRange.setEndAfter(rawRange.endContainer);
       const contents = afterRange.extractContents();
+      // 确保不是一个空的脏文本节点时，再插入到文档中
       if (contents.textContent) {
         if (nextSibling) {
           endParent.insertBefore(contents, nextSibling);

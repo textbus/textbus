@@ -47,33 +47,8 @@ export class Editor {
       range.selectNode(node);
     }
     selection.addRange(range);
+    this.selectionChangeEvent.next(range);
   }
-
-  // private normalize(el: Element) {
-  //   const elements = Array.from(el.childNodes);
-  //   for (let i = 0; i < elements.length; i++) {
-  //     const node = elements[i];
-  //     for (let j = i + 1; j < elements.length; j++) {
-  //       const next = elements[j];
-  //       if (next) {
-  //         break;
-  //       }
-  //       if (node.nodeType === 3 && next.nodeType === 3) {
-  //         node.textContent = node.textContent + next.textContent;
-  //         el.removeChild(next);
-  //         i++;
-  //       } else if (node.nodeType === 1 && next.nodeType === 1 &&
-  //         (node as Element).tagName === (next as Element).tagName) {
-  //         Array.from(next.childNodes).forEach(item => node.appendChild(item));
-  //         el.removeChild(next);
-  //         i++;
-  //       }
-  //     }
-  //     if (node.nodeType === 1) {
-  //       this.normalize(node as HTMLElement);
-  //     }
-  //   }
-  // }
 
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
