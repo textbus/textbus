@@ -2,11 +2,21 @@ import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { Editor } from '../../editor/editor';
 import { MatchStatus } from '../../matcher';
+import { Observable } from 'rxjs';
 
 export class StyleFormatter extends Formatter {
+  private value: string | number;
+
   constructor(private name: string,
-              private value: string | number) {
+              value: string | number | Observable<string | number>) {
     super();
+    if (value instanceof Observable) {
+      value.subscribe(v => {
+        this.value = v;
+      })
+    } else {
+      this.value = value;
+    }
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {

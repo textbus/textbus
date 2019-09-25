@@ -10,7 +10,7 @@ export const alignHandler: SelectHandlerOption = {
       classes: ['tanbo-editor-icon-paragraph-left'],
       match: {
         styles: {
-          textAlign: 'left'
+          textAlign: ['', 'left']
         }
       },
       execCommand: new BlockStyleFormatter('textAlign', 'left'),

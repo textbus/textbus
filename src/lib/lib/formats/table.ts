@@ -1,10 +1,20 @@
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
+import { Subject } from 'rxjs';
+import { StyleFormatter } from '../toolbar/fomatter/style-formatter';
+
+const selector = document.createElement('div');
+const updateEvent = new Subject<string>();
+
+selector.innerHTML = `
+<ul>
+  <li></li>
+</ul>
+`;
 
 export const tableHandler: DropdownHandlerOption = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-table'],
-  tooltip: '视频',
-  match: {
-    tags: ['TABLE']
-  }
+  tooltip: '表格',
+  viewContents: selector,
+  execCommand: new StyleFormatter('color', updateEvent.asObservable())
 };

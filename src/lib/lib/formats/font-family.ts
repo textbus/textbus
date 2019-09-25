@@ -9,7 +9,7 @@ export const fontFamilyHandler: SelectHandlerOption = {
       label: 'sans-serif',
       classes: ['tanbo-editor-toolbar-font-sans-serif'],
       match: {
-        styles: {fontFamily: 'sans-serif'}
+        styles: {fontFamily: ['', 'sans-serif']}
       },
       execCommand: new StyleFormatter('fontFamily', 'sans-serif'),
       default: true

@@ -10,35 +10,35 @@ export class SelectHandler {
 
   constructor(private handler: SelectHandlerOption) {
     const dropdown = this.host;
-    dropdown.classList.add('tanbo-editor-toolbar-dropdown');
+    dropdown.classList.add('tanbo-editor-toolbar-select');
 
     const dropdownButton = document.createElement('button');
     dropdownButton.type = 'button';
     dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     dropdownButton.classList.add('tanbo-editor-toolbar-handler');
-    dropdownButton.classList.add('tanbo-editor-toolbar-dropdown-button');
+    dropdownButton.classList.add('tanbo-editor-toolbar-select-button');
 
     const dropdownInner = document.createElement('span');
     const dropdownArrow = document.createElement('span');
-    dropdownInner.classList.add('tanbo-editor-toolbar-dropdown-button-inner');
-    dropdownArrow.classList.add('tanbo-editor-toolbar-dropdown-button-caret');
+    dropdownInner.classList.add('tanbo-editor-toolbar-select-button-inner');
+    dropdownArrow.classList.add('tanbo-editor-toolbar-select-button-caret');
 
     dropdownButton.appendChild(dropdownInner);
     dropdownButton.appendChild(dropdownArrow);
     let isSelfClick = false;
     document.addEventListener('click', () => {
       if (!isSelfClick) {
-        dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+        dropdown.classList.remove('tanbo-editor-toolbar-select-open');
       }
       isSelfClick = false;
     });
     dropdownButton.addEventListener('click', () => {
       isSelfClick = true;
-      dropdown.classList.toggle('tanbo-editor-toolbar-dropdown-open');
+      dropdown.classList.toggle('tanbo-editor-toolbar-select-open');
     });
 
     const dropdownMenu = document.createElement('div');
-    dropdownMenu.classList.add('tanbo-editor-toolbar-dropdown-menu');
+    dropdownMenu.classList.add('tanbo-editor-toolbar-select-menu');
     handler.options.forEach(option => {
       const item = new SelectOptionHandler(option);
       dropdownMenu.appendChild(item.host);
@@ -68,7 +68,7 @@ export class SelectOptionHandler implements Handler {
   constructor(private option: SelectHandlerItemOption) {
     this.onAction = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
-    this.host.classList.add('tanbo-editor-toolbar-dropdown-menu-item');
+    this.host.classList.add('tanbo-editor-toolbar-select-menu-item');
     this.host.type = 'button';
     if (option.classes) {
       this.host.classList.add(...(option.classes || []));

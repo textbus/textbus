@@ -15,6 +15,7 @@ import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { TBRange } from './range';
 import { Handler } from './toolbar/handlers/help';
+import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 
 export class Core {
   readonly host = document.createElement('div');
@@ -128,7 +129,8 @@ export class Core {
   }
 
   private addDropdownHandler(handler: DropdownHandlerOption) {
-    // this.
+    const dropdown = new DropdownHandler(handler);
+    this.toolbar.appendChild(dropdown.host);
   }
 
   private static createSplitLine() {

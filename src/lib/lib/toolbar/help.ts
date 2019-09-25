@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { Formatter } from './fomatter/formatter';
 
 export enum HandlerType {
@@ -48,10 +50,14 @@ export interface SelectHandlerOption {
 
 export interface DropdownHandlerOption {
   type: HandlerType.Dropdown;
+  viewContents: HTMLElement | DocumentFragment;
+  execCommand: Formatter;
   classes?: string[];
   format?: string;
   tooltip?: string;
+  label?: string;
   match?: FormatMatch;
+
 }
 
 export type HandlerOption = DropdownHandlerOption | ButtonHandlerOption | SelectHandlerOption;
