@@ -13,23 +13,26 @@ export class Paths {
   update(node: Element) {
     const fragment = document.createDocumentFragment();
     const elements: HTMLElement[] = [];
-    while (node && node.parentNode) {
-      const tagName = (node.parentNode as Element).tagName;
-      if (tagName && tagName !== 'HTML') {
-        const link = document.createElement('button');
-        link.type = 'button';
-        link.classList.add('tanbo-editor-paths-link');
-        link.innerText = node.parentNode.nodeName.toLowerCase();
-        ((node) => {
-          link.onclick = () => {
-            this.checkEvent.next(node);
-          };
-        })(node.parentNode as HTMLElement);
-
-        elements.push(link);
+    while (node) {
+      if (node.nodeType !== 1) {
         node = node.parentNode as HTMLElement;
       } else {
-        break;
+        const tagName = node.tagName;
+        if (tagName && tagName !== 'HTML') {
+          const link = document.createElement('button');
+          link.type = 'button';
+          link.classList.add('tanbo-editor-paths-link');
+          link.innerText = node.nodeName.toLowerCase();
+          ((node) => {
+            link.onclick = () => {
+              this.checkEvent.next(node as HTMLElement);
+            };
+          })(node);
+          elements.push(link);
+          node = node.parentNode as HTMLElement;
+        } else {
+          break;
+        }
       }
     }
     let ele = elements.pop();

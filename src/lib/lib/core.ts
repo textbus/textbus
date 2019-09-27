@@ -69,7 +69,7 @@ export class Core {
     this.editor.onSelectionChange
       .pipe(map(range => {
         this.range = range;
-        return range.startContainer;
+        return range.endContainer;
       }), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });

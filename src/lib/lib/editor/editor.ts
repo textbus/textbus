@@ -41,11 +41,7 @@ export class Editor {
     const selection = this.contentDocument.getSelection();
     selection.removeAllRanges();
     const range = this.contentDocument.createRange();
-    if (node === this.contentDocument.body) {
-      range.selectNodeContents(node);
-    } else {
-      range.selectNode(node);
-    }
+    range.selectNodeContents(node);
     selection.addRange(range);
     this.selectionChangeEvent.next(range);
   }
