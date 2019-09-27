@@ -50,6 +50,11 @@
   display: inline-block;
 
   &.tanbo-editor-toolbar-select-open {
+
+    > .tanbo-editor-toolbar-handler {
+      background-color: #fff;
+    }
+
     .tanbo-editor-toolbar-select-menu {
       transform: scaleY(1);
       z-index: 1;
@@ -201,7 +206,12 @@
 .tanbo-editor-toolbar-dropdown {
   position: relative;
   display: inline-block;
+
   &.tanbo-editor-toolbar-dropdown-open {
+    > .tanbo-editor-toolbar-handler {
+      background-color: #fff;
+    }
+
     .tanbo-editor-toolbar-dropdown-menu {
       transform: scaleY(1);
       z-index: 1;

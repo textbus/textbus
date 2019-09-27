@@ -1,6 +1,5 @@
-@import "./varibles";
-
-@import "~@tanbo/color-picker/bundles/index.min.css";
+@import "~@tanbo/css-themes/themes/scss/default";
+@import "~@tanbo/color-picker/bundles/color-picker.min.css";
 
 @import "./components/mixin";
 @import "./components/container";

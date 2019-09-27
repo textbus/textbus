@@ -52,12 +52,12 @@ export interface DropdownHandlerOption {
   type: HandlerType.Dropdown;
   viewContents: HTMLElement | DocumentFragment;
   execCommand: Formatter;
+  onHide: Observable<void>;
   classes?: string[];
   format?: string;
   tooltip?: string;
   label?: string;
   match?: FormatMatch;
-
 }
 
 export type HandlerOption = DropdownHandlerOption | ButtonHandlerOption | SelectHandlerOption;

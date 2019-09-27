@@ -1,6 +1,7 @@
+import { Observable, Subject } from 'rxjs';
+
 import { DropdownHandlerOption } from '../help';
 import { Handler } from './help';
-import { Observable, Subject } from 'rxjs';
 import { Matcher, MatchStatus } from '../../matcher';
 
 export class DropdownHandler implements Handler {
@@ -11,6 +12,7 @@ export class DropdownHandler implements Handler {
 
   constructor(private handler: DropdownHandlerOption) {
     this.onAction = this.eventSource.asObservable();
+    this.matcher = new Matcher(handler.match);
     const dropdown = this.host;
 
     dropdown.classList.add('tanbo-editor-toolbar-dropdown');
@@ -28,12 +30,20 @@ export class DropdownHandler implements Handler {
       }
       isSelfClick = false;
     });
+    handler.onHide.subscribe(() => {
+      this.eventSource.next();
+      dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+    });
     dropdownButton.addEventListener('click', () => {
       isSelfClick = true;
       dropdown.classList.toggle('tanbo-editor-toolbar-dropdown-open');
     });
 
     const dropdownMenu = document.createElement('div');
+    dropdownMenu.addEventListener('click', () => {
+      isSelfClick = true;
+    });
+
     dropdownMenu.classList.add('tanbo-editor-toolbar-dropdown-menu');
     dropdownMenu.appendChild(handler.viewContents);
 

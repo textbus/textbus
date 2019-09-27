@@ -1,5 +1,5 @@
 {
-  "name": "editor",
+  "name": "@tanbo/editor",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -34,7 +34,8 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
-    "@tanbo/color-picker": "0.0.3",
+    "@tanbo/color-picker": "^0.0.8",
+    "@tanbo/css-themes": "^0.0.1",
     "rxjs": "^6.5.2"
   }
 }

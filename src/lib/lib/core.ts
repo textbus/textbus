@@ -131,6 +131,11 @@ export class Core {
   private addDropdownHandler(handler: DropdownHandlerOption) {
     const dropdown = new DropdownHandler(handler);
     this.toolbar.appendChild(dropdown.host);
+    dropdown.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+      const range = new TBRange(this.range, this.editor.contentDocument);
+      handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor.contentDocument, this.range));
+      this.editor.contentDocument.body.focus();
+    });
   }
 
   private static createSplitLine() {
