@@ -1,11 +1,11 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { MatchStatus } from '../../matcher';
-import { Editor } from '../../editor/editor';
+import { Editor } from '../editor';
+import { findBlockContainer } from '../utils';
 
-export class BlockFormatter extends Formatter {
+export class BlockFormatter implements Formatter {
   constructor(private tagName: string) {
-    super();
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
@@ -13,7 +13,7 @@ export class BlockFormatter extends Formatter {
     if (!matchStatus.inContainer) {
       range.markRange();
       const containerRange = doc.createRange();
-      const container = this.findBlockContainer(range.commonAncestorContainer, doc.body);
+      const container = findBlockContainer(range.commonAncestorContainer, doc.body);
       containerRange.selectNodeContents(container);
       const newContainer = doc.createElement(this.tagName);
       containerRange.surroundContents(newContainer);

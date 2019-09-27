@@ -1,13 +1,13 @@
 import { Formatter } from './formatter';
 import { MatchStatus } from '../../matcher';
 import { TBRange } from '../../range';
-import { Editor } from '../../editor/editor';
+import { Editor } from '../editor';
+import { matchContainerByTagName, takeOffWrapper } from '../utils';
 
-export class InlineFormatter extends Formatter {
+export class InlineFormatter implements Formatter {
   private document: Document;
 
   constructor(private tagName: string) {
-    super();
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
@@ -22,7 +22,7 @@ export class InlineFormatter extends Formatter {
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      this.takeOffWrapper(this.document, matchStatus.container as HTMLElement);
+      takeOffWrapper(this.document, matchStatus.container as HTMLElement);
       before.detach();
       after.detach();
       range.removeMarkRange();
@@ -66,8 +66,8 @@ export class InlineFormatter extends Formatter {
   }
 
   private unWrap(range: Range, tag: string) {
-    const start = this.matchContainerByTagName(range.startContainer, tag, range.commonAncestorContainer);
-    const end = this.matchContainerByTagName(range.endContainer, tag, range.commonAncestorContainer);
+    const start = matchContainerByTagName(range.startContainer, tag, range.commonAncestorContainer);
+    const end = matchContainerByTagName(range.endContainer, tag, range.commonAncestorContainer);
 
     if (start) {
       const startRange = this.document.createRange();
@@ -89,7 +89,7 @@ export class InlineFormatter extends Formatter {
     Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        this.takeOffWrapper(this.document, item);
+        takeOffWrapper(this.document, item);
       });
   }
 

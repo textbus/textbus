@@ -9,13 +9,13 @@ import {
   DropdownHandlerOption,
   HandlerOption,
   HandlerType,
-  SelectHandlerOption
+  SelectHandlerOption,
+  Handler
 } from './toolbar/help';
-import { ButtonHandler } from './toolbar/handlers/button-handler';
-import { SelectHandler } from './toolbar/handlers/select-handler';
+import { ButtonHandler } from './toolbar/button-handler';
+import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
-import { Handler } from './toolbar/handlers/help';
-import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
+import { DropdownHandler } from './toolbar/dropdown-handler';
 
 export class Core {
   readonly host = document.createElement('div');

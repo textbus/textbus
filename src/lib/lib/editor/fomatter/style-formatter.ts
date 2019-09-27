@@ -1,15 +1,14 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { Editor } from '../../editor/editor';
+import { Editor } from '../editor';
 import { MatchStatus } from '../../matcher';
 import { Observable } from 'rxjs';
 
-export class StyleFormatter extends Formatter {
+export class StyleFormatter implements Formatter {
   private value: string | number;
 
   constructor(private name: string,
               value: string | number | Observable<string | number>) {
-    super();
     if (value instanceof Observable) {
       value.subscribe(v => {
         this.value = v;

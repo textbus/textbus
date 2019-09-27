@@ -1,8 +1,8 @@
-import { SelectHandlerOption, SelectHandlerItemOption } from '../help';
 import { Observable, Subject } from 'rxjs';
-import { Handler } from './help';
-import { Matcher, MatchStatus } from '../../matcher';
-import { Formatter } from '../fomatter/formatter';
+
+import { SelectHandlerOption, SelectHandlerItemOption, Handler } from './help';
+import { Matcher, MatchStatus } from '../matcher';
+import { Formatter } from '../editor/fomatter/formatter';
 
 export class SelectHandler {
   readonly host = document.createElement('span');

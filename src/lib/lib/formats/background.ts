@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 import { createPicker } from '@tanbo/color-picker';
 
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
-import { StyleFormatter } from '../toolbar/fomatter/style-formatter';
+import { StyleFormatter } from '../editor/fomatter/style-formatter';
 
 const selector = document.createElement('div');
 const updateEvent = new Subject<string>();

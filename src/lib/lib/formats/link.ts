@@ -1,6 +1,6 @@
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
 import { Subject } from 'rxjs';
-import { StyleFormatter } from '../toolbar/fomatter/style-formatter';
+import { StyleFormatter } from '../editor/fomatter/style-formatter';
 
 const selector = document.createElement('div');
 const updateEvent = new Subject<string>();

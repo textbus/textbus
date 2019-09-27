@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
-import { Formatter } from './fomatter/formatter';
+import { Formatter } from '../editor/fomatter/formatter';
+import { Matcher, MatchStatus } from '../matcher';
 
 export enum HandlerType {
   Button,
@@ -58,6 +59,14 @@ export interface DropdownHandlerOption {
   tooltip?: string;
   label?: string;
   match?: FormatMatch;
+}
+
+export interface Handler {
+  host: HTMLElement;
+  onAction: Observable<any>;
+  matcher: Matcher;
+
+  updateStatus(status: MatchStatus): void;
 }
 
 export type HandlerOption = DropdownHandlerOption | ButtonHandlerOption | SelectHandlerOption;

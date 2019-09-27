@@ -1,7 +1,7 @@
-import { ButtonHandlerOption } from '../help';
 import { Observable, Subject } from 'rxjs';
-import { Handler } from './help';
-import { Matcher, MatchStatus } from '../../matcher';
+
+import { ButtonHandlerOption, Handler } from './help';
+import { Matcher, MatchStatus } from '../matcher';
 
 export class ButtonHandler implements Handler {
   readonly host = document.createElement('button');

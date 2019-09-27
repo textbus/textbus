@@ -1,21 +1,21 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { Editor } from '../../editor/editor';
+import { Editor } from '../editor';
 import { MatchStatus } from '../../matcher';
+import { findBlockContainer, takeOffWrapper } from '../utils';
 
-export class ToggleBlockFormatter extends Formatter {
+export class ToggleBlockFormatter implements Formatter {
   constructor(private tagName: string) {
-    super();
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
     range.markRange();
 
     if (matchStatus.inContainer) {
-      const block = this.findBlockContainer(range.commonAncestorContainer, matchStatus.container);
+      const block = findBlockContainer(range.commonAncestorContainer, matchStatus.container);
 
       if (block === matchStatus.container) {
-        this.takeOffWrapper(editor.contentDocument, matchStatus.container as HTMLElement);
+        takeOffWrapper(editor.contentDocument, matchStatus.container as HTMLElement);
       } else {
         const newRange = editor.contentDocument.createRange();
         newRange.selectNode(block);
@@ -38,12 +38,12 @@ export class ToggleBlockFormatter extends Formatter {
             parent.appendChild(afterContents);
           }
         }
-        this.takeOffWrapper(editor.contentDocument, matchStatus.container as HTMLElement);
+        takeOffWrapper(editor.contentDocument, matchStatus.container as HTMLElement);
         newTBRange.removeMarkRange();
       }
     } else {
-      const startBlock = this.findBlockContainer(range.startContainer, editor.contentDocument.body);
-      const endBlock = this.findBlockContainer(range.endContainer, editor.contentDocument.body);
+      const startBlock = findBlockContainer(range.startContainer, editor.contentDocument.body);
+      const endBlock = findBlockContainer(range.endContainer, editor.contentDocument.body);
       const newRange = editor.contentDocument.createRange();
       newRange.setStartBefore(startBlock);
       newRange.setEndAfter(endBlock);

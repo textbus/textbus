@@ -1,15 +1,13 @@
 import { Formatter } from './formatter';
-import { dtd } from '../../editor/dtd';
 import { TBRange } from '../../range';
 import { MatchStatus } from '../../matcher';
-import { Editor } from '../../editor/editor';
+import { Editor } from '../editor';
 
-export class ListFormatter extends Formatter {
+export class ListFormatter implements Formatter {
   readonly document: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 
   constructor(private tagName: string) {
-    super();
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {

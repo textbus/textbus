@@ -1,8 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
-import { DropdownHandlerOption } from '../help';
-import { Handler } from './help';
-import { Matcher, MatchStatus } from '../../matcher';
+import { DropdownHandlerOption, Handler } from './help';
+import { Matcher, MatchStatus } from '../matcher';
 
 export class DropdownHandler implements Handler {
   host = document.createElement('span');
