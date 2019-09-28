@@ -34,7 +34,7 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
-    "@tanbo/color-picker": "^0.0.8",
+    "@tanbo/color-picker": "^0.0.9",
     "@tanbo/css-themes": "^0.0.1",
     "rxjs": "^6.5.2"
   }

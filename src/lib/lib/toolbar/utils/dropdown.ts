@@ -14,6 +14,13 @@ export class Dropdown {
     menu.appendChild(menuContents);
     this.host.appendChild(menu);
 
+    const updatePosition = () => {
+      if (this.host.classList.contains('tanbo-editor-dropdown-open')) {
+        const distance = document.body.clientWidth - (this.host.getBoundingClientRect().left + menu.offsetWidth);
+        menu.style.left = `${Math.min(0, distance)}px`;
+      }
+    };
+
     let isSelfClick = false;
     menu.addEventListener('click', () => {
       isSelfClick = true;
@@ -28,7 +35,10 @@ export class Dropdown {
     this.button.addEventListener('click', () => {
       isSelfClick = true;
       this.host.classList.toggle('tanbo-editor-dropdown-open');
+      updatePosition();
     });
+
+    window.addEventListener('resize', updatePosition);
 
     this.hideEvent.subscribe(() => {
       this.host.classList.remove('tanbo-editor-dropdown-open');
