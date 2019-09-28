@@ -136,6 +136,7 @@ export class Core {
       handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor.contentDocument, this.range));
       this.editor.contentDocument.body.focus();
     });
+    this.handlers.push(dropdown);
   }
 
   private static createSplitLine() {

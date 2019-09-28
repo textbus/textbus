@@ -25,7 +25,8 @@ export class SelectHandler {
     dropdownButton.appendChild(dropdownInner);
     dropdownButton.appendChild(dropdownArrow);
 
-    const menu = document.createDocumentFragment();
+    const menu = document.createElement('div');
+    menu.classList.add('tanbo-editor-select-menu');
 
     handler.options.forEach(option => {
       const item = new SelectOptionHandler(option);

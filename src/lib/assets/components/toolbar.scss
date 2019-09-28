@@ -72,6 +72,11 @@
   }
 }
 
+.tanbo-editor-select-menu {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 .tanbo-editor-select-menu-item {
   display: block;
   padding: 5px 15px;
@@ -198,6 +203,5 @@
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
   border-radius: 4px;
   min-width: 100%;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  overflow: hidden;
 }

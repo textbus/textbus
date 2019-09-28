@@ -10,8 +10,6 @@ export interface AttrTextField {
   label: string;
   name: string;
   placeholder: string;
-  validator: ((value: string) => boolean) | RegExp;
-  validateErrorMessage: string;
   description?: string;
 }
 

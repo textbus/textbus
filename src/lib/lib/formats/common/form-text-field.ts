@@ -14,9 +14,9 @@ export class FormTextField implements FormItem {
 
   getAttr(): AttrState {
     return {
-      name: 'name',
-      required: false,
-      value: 'value'
+      name: this.config.name,
+      required: this.config.required,
+      value: (this.host.querySelector('.tanbo-editor-form-control') as HTMLInputElement).value
     }
   }
 }

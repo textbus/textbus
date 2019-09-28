@@ -11,9 +11,7 @@ const form = new Form([{
   name: 'href',
   required: true,
   placeholder: '请输入链接地址',
-  validateErrorMessage: '请输入正确的链接地址',
-  description: '设置点击后跳转的地址',
-  validator: /http/
+  description: '设置点击后跳转的地址'
 }]);
 const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
@@ -29,5 +27,8 @@ export const linkHandler: DropdownHandlerOption = {
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
   viewContents: form.host,
+  match: {
+    tags: ['A']
+  },
   execCommand: new AttrFormatter('a', updateEvent.asObservable())
 };
