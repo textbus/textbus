@@ -7,6 +7,7 @@ export enum AttrType {
 export interface AttrTextField {
   type: AttrType.TextField;
   required: boolean;
+  label: string;
   name: string;
   placeholder: string;
   validator: ((value: string) => boolean) | RegExp;

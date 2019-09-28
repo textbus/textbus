@@ -1,0 +1,69 @@
+.tanbo-editor-form {
+  padding: 10px;
+  width: 160px;
+}
+
+.tanbo-editor-form-group {
+  margin-bottom: 10px;
+}
+
+.tanbo-editor-form-label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.tanbo-editor-form-control {
+  outline: none;
+  background-color: #fff;
+  width: 100%;
+  border: 1px solid $color-gray;
+  padding: 3px 8px;
+  line-height: 1.428;
+  font-size: 13px;
+  border-radius: 3px;
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 2px rgba(red($color-primary), green($color-primary), blue($color-primary), .5);
+    z-index: 1;
+  }
+}
+
+.tanbo-editor-form-description {
+  padding: 5px 0;
+  color: $color-gray-dark;
+  font-size: 12px;
+}
+
+.tanbo-editor-form-btn-wrap {
+  padding-top: 5px;
+}
+
+.tanbo-editor-form-submit {
+  padding: 3px 10px;
+  font-size: 13px;
+  border-radius: 3px;
+  color: #fff;
+  background-color: $color-primary;
+  border: 1px solid $color-primary;
+  cursor: pointer;
+  line-height: 1.428;
+  outline: none;
+
+  &:hover {
+    background-color: darken($color-primary, 7);
+    border-color: darken($color-primary, 7);
+  }
+
+  &:focus {
+    background-color: darken($color-primary, 10);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(red($color-primary), green($color-primary), blue($color-primary), .5);
+    border-color: darken($color-primary, 7);
+  }
+
+  &:active {
+    background-color: darken($color-primary, 15);
+    border-color: darken($color-primary, 7);
+  }
+}

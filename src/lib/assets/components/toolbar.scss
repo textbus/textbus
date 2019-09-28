@@ -12,13 +12,13 @@
   }
 }
 
-.tanbo-editor-toolbar-split-line {
+.tanbo-editor-split-line {
   display: inline-block;
   height: 1em;
   width: 8px;
 }
 
-.tanbo-editor-toolbar-handler {
+.tanbo-editor-handler {
   font-size: 14px;
   background: none;
   border: none;
@@ -45,24 +45,24 @@
   }
 }
 
-.tanbo-editor-toolbar-select {
+.tanbo-editor-select {
   position: relative;
   display: inline-block;
 
-  &.tanbo-editor-toolbar-select-open {
+  &.tanbo-editor-select-open {
 
-    > .tanbo-editor-toolbar-handler {
+    > .tanbo-editor-handler {
       background-color: #fff;
     }
 
-    .tanbo-editor-toolbar-select-menu {
+    .tanbo-editor-select-menu {
       transform: scaleY(1);
       z-index: 1;
     }
   }
 }
 
-.tanbo-editor-toolbar-select-button {
+.tanbo-editor-select-button {
   width: 110px;
   display: inline-flex;
   justify-content: space-between;
@@ -76,7 +76,7 @@
   }
 }
 
-.tanbo-editor-toolbar-select-button-caret {
+.tanbo-editor-select-button-caret {
   &:after {
     content: "";
     display: inline-block;
@@ -89,7 +89,7 @@
   }
 }
 
-.tanbo-editor-toolbar-select-menu {
+.tanbo-editor-select-menu {
   position: absolute;
   left: 0;
   top: 100%;
@@ -104,7 +104,7 @@
   padding-bottom: 5px;
 }
 
-.tanbo-editor-toolbar-select-menu-item {
+.tanbo-editor-select-menu-item {
   display: block;
   padding: 5px 15px;
   background: none;
@@ -151,7 +151,7 @@
   }
 }
 
-.tanbo-editor-toolbar-font {
+.tanbo-editor-font {
   &-sans-serif {
     font-family: sans-serif;
   }
@@ -185,7 +185,7 @@
   }
 }
 
-.tanbo-editor-toolbar-text {
+.tanbo-editor-text {
   &-left {
     text-align: left;
   }
@@ -203,23 +203,23 @@
   }
 }
 
-.tanbo-editor-toolbar-dropdown {
+.tanbo-editor-dropdown {
   position: relative;
   display: inline-block;
 
-  &.tanbo-editor-toolbar-dropdown-open {
-    > .tanbo-editor-toolbar-handler {
+  &.tanbo-editor-dropdown-open {
+    > .tanbo-editor-handler {
       background-color: #fff;
     }
 
-    .tanbo-editor-toolbar-dropdown-menu {
+    .tanbo-editor-dropdown-menu {
       transform: scaleY(1);
       z-index: 1;
     }
   }
 }
 
-.tanbo-editor-toolbar-dropdown-menu {
+.tanbo-editor-dropdown-menu {
   position: absolute;
   left: 0;
   top: 100%;

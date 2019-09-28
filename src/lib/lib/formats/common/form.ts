@@ -9,6 +9,7 @@ export class Form {
   private items: FormItem[] = [];
 
   constructor(forms: Array<AttrTextField | AttrOptions | AttrSequence>) {
+    this.host.classList.add('tanbo-editor-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:

@@ -7,10 +7,12 @@ import { AttrFormatter } from '../editor/fomatter/attr-formatter';
 
 const form = new Form([{
   type: AttrType.TextField,
+  label: '链接地址',
   name: 'href',
   required: true,
   placeholder: '请输入链接地址',
   validateErrorMessage: '请输入正确的链接地址',
+  description: '设置点击后跳转的地址',
   validator: /http/
 }]);
 const updateEvent = new Subject<AttrState[]>();

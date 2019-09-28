@@ -15,7 +15,7 @@ export class ButtonHandler implements Handler {
     this.host.type = 'button';
     this.host.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     this.host.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
-    this.host.classList.add('tanbo-editor-toolbar-handler', ...(handler.classes || []));
+    this.host.classList.add('tanbo-editor-handler', ...(handler.classes || []));
     this.host.addEventListener('click', () => {
       this.eventSource.next();
     });
@@ -23,9 +23,9 @@ export class ButtonHandler implements Handler {
 
   updateStatus(status: MatchStatus): void {
     if (status.inContainer || status.matchAllChild) {
-      this.host.classList.add('tanbo-editor-toolbar-handler-active');
+      this.host.classList.add('tanbo-editor-handler-active');
     } else {
-      this.host.classList.remove('tanbo-editor-toolbar-handler-active');
+      this.host.classList.remove('tanbo-editor-handler-active');
     }
   }
 }

@@ -14,28 +14,28 @@ export class DropdownHandler implements Handler {
     this.matcher = new Matcher(handler.match);
     const dropdown = this.host;
 
-    dropdown.classList.add('tanbo-editor-toolbar-dropdown');
+    dropdown.classList.add('tanbo-editor-dropdown');
 
     const dropdownButton = document.createElement('button');
     dropdownButton.type = 'button';
     dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     dropdownButton.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
-    dropdownButton.classList.add('tanbo-editor-toolbar-handler', ...(handler.classes || []));
+    dropdownButton.classList.add('tanbo-editor-handler', ...(handler.classes || []));
 
     let isSelfClick = false;
     document.addEventListener('click', () => {
       if (!isSelfClick) {
-        dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+        dropdown.classList.remove('tanbo-editor-dropdown-open');
       }
       isSelfClick = false;
     });
     handler.onHide.subscribe(() => {
       this.eventSource.next();
-      dropdown.classList.remove('tanbo-editor-toolbar-dropdown-open');
+      dropdown.classList.remove('tanbo-editor-dropdown-open');
     });
     dropdownButton.addEventListener('click', () => {
       isSelfClick = true;
-      dropdown.classList.toggle('tanbo-editor-toolbar-dropdown-open');
+      dropdown.classList.toggle('tanbo-editor-dropdown-open');
     });
 
     const dropdownMenu = document.createElement('div');
@@ -43,7 +43,7 @@ export class DropdownHandler implements Handler {
       isSelfClick = true;
     });
 
-    dropdownMenu.classList.add('tanbo-editor-toolbar-dropdown-menu');
+    dropdownMenu.classList.add('tanbo-editor-dropdown-menu');
     dropdownMenu.appendChild(handler.viewContents);
 
     dropdown.appendChild(dropdownButton);
