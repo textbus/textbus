@@ -45,23 +45,6 @@
   }
 }
 
-.tanbo-editor-select {
-  position: relative;
-  display: inline-block;
-
-  &.tanbo-editor-select-open {
-
-    > .tanbo-editor-handler {
-      background-color: #fff;
-    }
-
-    .tanbo-editor-select-menu {
-      transform: scaleY(1);
-      z-index: 1;
-    }
-  }
-}
-
 .tanbo-editor-select-button {
   width: 110px;
   display: inline-flex;
@@ -87,21 +70,6 @@
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;
   }
-}
-
-.tanbo-editor-select-menu {
-  position: absolute;
-  left: 0;
-  top: 100%;
-  transform-origin: 0 0;
-  transition: transform .1s;
-  transform: scaleY(0);
-  background-color: rgba(255, 255, 255, .96);
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
-  border-radius: 4px;
-  min-width: 100%;
-  padding-top: 5px;
-  padding-bottom: 5px;
 }
 
 .tanbo-editor-select-menu-item {
