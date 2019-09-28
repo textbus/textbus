@@ -1,16 +1,15 @@
-import { Observable, Subject } from 'rxjs';
+import { merge, Observable, Subject } from 'rxjs';
 
 import { SelectHandlerOption, SelectHandlerItemOption, Handler } from './help';
 import { Matcher, MatchStatus } from '../matcher';
 import { Formatter } from '../editor/fomatter/formatter';
+import { Dropdown } from './utils/dropdown';
 
 export class SelectHandler {
-  readonly host = document.createElement('span');
+  readonly host: HTMLElement;
   options: SelectOptionHandler[] = [];
 
   constructor(private handler: SelectHandlerOption) {
-    const dropdown = this.host;
-    dropdown.classList.add('tanbo-editor-select');
 
     const dropdownButton = document.createElement('button');
     dropdownButton.type = 'button';
@@ -25,23 +24,12 @@ export class SelectHandler {
 
     dropdownButton.appendChild(dropdownInner);
     dropdownButton.appendChild(dropdownArrow);
-    let isSelfClick = false;
-    document.addEventListener('click', () => {
-      if (!isSelfClick) {
-        dropdown.classList.remove('tanbo-editor-select-open');
-      }
-      isSelfClick = false;
-    });
-    dropdownButton.addEventListener('click', () => {
-      isSelfClick = true;
-      dropdown.classList.toggle('tanbo-editor-select-open');
-    });
 
-    const dropdownMenu = document.createElement('div');
-    dropdownMenu.classList.add('tanbo-editor-select-menu');
+    const menu = document.createDocumentFragment();
+
     handler.options.forEach(option => {
       const item = new SelectOptionHandler(option);
-      dropdownMenu.appendChild(item.host);
+      menu.appendChild(item.host);
       if (option.default) {
         dropdownInner.innerText = option.label;
       }
@@ -51,8 +39,11 @@ export class SelectHandler {
       this.options.push(item);
     });
 
-    dropdown.appendChild(dropdownButton);
-    dropdown.appendChild(dropdownMenu);
+    this.host = new Dropdown(
+      dropdownButton,
+      menu,
+      merge(...this.options.map(item => item.onAction))
+    ).host;
   }
 }
 
