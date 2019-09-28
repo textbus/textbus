@@ -1,14 +1,14 @@
-import { AttrOptions, AttrTextField, AttrSequence, FormItem, AttrType, AttrState } from './help';
+import { AttrOptions, AttrTextField, AttrSwitch, FormItem, AttrType, AttrState } from './help';
 import { FormTextField } from './form-text-field';
 import { FormOptions } from './form-options';
-import { FormSequence } from './form-sequence';
+import { FormSwitch } from './form-switch';
 
 export class Form {
   onSubmit: (attrs: AttrState[]) => void;
   readonly host = document.createElement('form');
   private items: FormItem[] = [];
 
-  constructor(forms: Array<AttrTextField | AttrOptions | AttrSequence>) {
+  constructor(forms: Array<AttrTextField | AttrOptions | AttrSwitch>) {
     this.host.classList.add('tanbo-editor-form');
     forms.forEach(attr => {
       switch (attr.type) {
@@ -18,8 +18,8 @@ export class Form {
         case AttrType.Options:
           this.items.push(new FormOptions(attr));
           break;
-        case AttrType.Sequence:
-          this.items.push(new FormSequence(attr));
+        case AttrType.Switch:
+          this.items.push(new FormSwitch(attr));
           break;
       }
     });

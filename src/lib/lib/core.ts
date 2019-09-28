@@ -141,7 +141,7 @@ export class Core {
 
   private static createSplitLine() {
     const splitLine = document.createElement('span');
-    splitLine.classList.add('tanbo-editor-toolbar-split-line');
+    splitLine.classList.add('tanbo-editor-split-line');
     return splitLine;
   }
 }

@@ -4,7 +4,7 @@ import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { Editor } from '../editor';
 import { MatchStatus } from '../../matcher';
-import { AttrState } from '../../formats/common/help';
+import { AttrState } from '../../formats/forms/help';
 
 export class AttrFormatter implements Formatter {
   private attrs: AttrState[] = [];

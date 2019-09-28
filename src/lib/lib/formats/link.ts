@@ -1,17 +1,29 @@
 import { Subject } from 'rxjs';
 
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
-import { Form } from './common/form';
-import { AttrState, AttrType } from './common/help';
+import { Form } from './forms/form';
+import { AttrState, AttrType } from './forms/help';
 import { AttrFormatter } from '../editor/fomatter/attr-formatter';
 
 const form = new Form([{
   type: AttrType.TextField,
-  label: '链接地址',
+  label: '跳转链接地址',
   name: 'href',
   required: true,
-  placeholder: '请输入链接地址',
-  description: '设置点击后跳转的地址'
+  placeholder: '请输入链接地址'
+}, {
+  type: AttrType.Options,
+  label: '跳转方式',
+  name: 'target',
+  required: true,
+  values: [{
+    label: '当前窗口',
+    value: '_self',
+    default: true
+  }, {
+    label: '新窗口',
+    value: '_blank'
+  }]
 }]);
 const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();

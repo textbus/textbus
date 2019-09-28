@@ -1,22 +1,30 @@
-import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
 import { Subject } from 'rxjs';
-import { StyleFormatter } from '../editor/fomatter/style-formatter';
 
-const selector = document.createElement('div');
-const updateEvent = new Subject<string>();
+import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
+import { Form } from './forms/form';
+import { AttrState, AttrType } from './forms/help';
+import { AttrFormatter } from '../editor/fomatter/attr-formatter';
+
+const form = new Form([{
+  type: AttrType.TextField,
+  label: '图片链接地址',
+  name: 'src',
+  required: true,
+  placeholder: '请输入链接地址'
+}]);
+const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
 
-selector.innerHTML = `
-<ul>
-  <li></li>
-</ul>
-`;
+form.onSubmit = function (attrs) {
+  updateEvent.next(attrs);
+  hideEvent.next();
+};
 
 export const imageHandler: DropdownHandlerOption = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-image'],
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
-  viewContents: selector,
-  execCommand: new StyleFormatter('color', updateEvent.asObservable())
+  viewContents: form.host,
+  execCommand: new AttrFormatter('img', updateEvent.asObservable())
 };

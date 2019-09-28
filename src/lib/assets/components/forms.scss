@@ -1,6 +1,7 @@
 .tanbo-editor-form {
   padding: 15px;
-  width: 160px;
+  min-width: 160px;
+  user-select: none;
 }
 
 .tanbo-editor-form-group {
@@ -10,6 +11,13 @@
 .tanbo-editor-form-label {
   margin-bottom: 5px;
   font-weight: bold;
+}
+
+.tanbo-editor-form-control-wrap {
+  white-space: nowrap;
+  label {
+    margin-right: 10px;
+  }
 }
 
 .tanbo-editor-form-control {

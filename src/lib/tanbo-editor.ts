@@ -43,8 +43,8 @@ export function createEditor(selector: string | HTMLElement) {
         superscriptHandler,
         subscriptHandler
       ], [
-        backgroundHandler,
-        colorHandler
+        colorHandler,
+        backgroundHandler
       ], [
         fontFamilyHandler
       ], [

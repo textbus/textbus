@@ -1,7 +1,7 @@
 export enum AttrType {
   TextField,
   Options,
-  Sequence
+  Switch
 }
 
 export interface AttrTextField {
@@ -10,17 +10,28 @@ export interface AttrTextField {
   label: string;
   name: string;
   placeholder: string;
-  description?: string;
+}
+
+export interface AttrOption {
+  label: string;
+  value: string | number | boolean;
+  default?: boolean;
 }
 
 export interface AttrOptions {
   type: AttrType.Options;
   required: boolean;
+  label: string;
+  name: string;
+  values: AttrOption[];
 }
 
-export interface AttrSequence {
-  type: AttrType.Sequence;
+export interface AttrSwitch {
+  type: AttrType.Switch;
   required: boolean;
+  label: string;
+  name: string;
+  checked: boolean;
 }
 
 export interface AttrState {

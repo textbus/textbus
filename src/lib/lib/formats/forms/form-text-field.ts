@@ -7,8 +7,9 @@ export class FormTextField implements FormItem {
     this.host.classList.add('tanbo-editor-form-group');
     this.host.innerHTML = `
     <div class="tanbo-editor-form-label">${config.label}</div>
-    <div><input class="tanbo-editor-form-control" name="${config.name}" placeholder="${config.placeholder || ''}" type="text"></div>
-    <div class="tanbo-editor-form-description">${config.description || ''}</div>
+    <div class="tanbo-editor-form-control-wrap">
+      <input class="tanbo-editor-form-control" placeholder="${config.placeholder || ''}" type="text">
+    </div>
     `;
   }
 
