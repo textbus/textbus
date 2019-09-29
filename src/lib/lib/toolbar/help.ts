@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Formatter } from '../frame/fomatter/formatter';
 import { Matcher, MatchStatus } from '../matcher';
+import { EventDelegate } from '../help';
 
 export enum HandlerType {
   Button,
@@ -51,7 +52,7 @@ export interface SelectHandlerOption {
 
 export interface DropdownHandlerView {
   host: HTMLElement | DocumentFragment;
-
+  setEventDelegator?(delegate: EventDelegate): void;
   updateStateByElement(el: HTMLElement): void;
 }
 

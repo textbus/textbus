@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { DropdownHandlerOption, Handler } from './help';
 import { Matcher, MatchStatus } from '../matcher';
 import { Dropdown } from './utils/dropdown';
+import { EventDelegate } from '../help';
 
 export class DropdownHandler implements Handler {
   host: HTMLElement;
@@ -11,7 +12,7 @@ export class DropdownHandler implements Handler {
   private dropdownButton = document.createElement('button');
   private dropdown: Dropdown;
 
-  constructor(private handler: DropdownHandlerOption) {
+  constructor(private handler: DropdownHandlerOption, private delegate: EventDelegate) {
     this.onCompleted = handler.onHide;
 
     this.matcher = new Matcher(handler.match);
@@ -22,6 +23,10 @@ export class DropdownHandler implements Handler {
     this.dropdownButton.classList.add('tanbo-editor-handler', ...(handler.classes || []));
     this.dropdown = new Dropdown(this.dropdownButton, handler.viewer.host, handler.onHide);
     this.host = this.dropdown.host;
+
+    if (typeof handler.viewer.setEventDelegator === 'function') {
+      handler.viewer.setEventDelegator(delegate);
+    }
   }
 
   updateStatus(status: MatchStatus): void {

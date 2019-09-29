@@ -20,11 +20,12 @@ import { alignHandler } from './lib/formats/align';
 import { linkHandler } from './lib/formats/link';
 import { tableHandler } from './lib/formats/table';
 import { cleanHandler } from './lib/formats/clean';
+import { EditorOptions } from './lib/help';
 
 export * from './public-api';
 
-export function createEditor(selector: string | HTMLElement) {
-  return new Editor(selector, {
+export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
+  const op: EditorOptions = {
     handlers: [
       [
         hHandler
@@ -60,5 +61,7 @@ export function createEditor(selector: string | HTMLElement) {
         cleanHandler
       ]
     ]
-  });
+  };
+
+  return new Editor(selector, Object.assign(op, options));
 }

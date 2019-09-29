@@ -4,18 +4,22 @@ import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
 import { DropdownHandlerView } from '../../toolbar/help';
 import { FormHidden } from './form-hidden';
+import { EventDelegate } from '../../help';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
   readonly host = document.createElement('form');
   private items: FormItem[] = [];
+  private delegator: EventDelegate;
 
   constructor(forms: Array<AttrConfig>) {
     this.host.classList.add('tanbo-editor-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
-          this.items.push(new FormTextField(attr));
+          this.items.push(new FormTextField(attr, (type: string) => {
+            return this.delegator.dispatchEvent(type);
+          }));
           break;
         case AttrType.Options:
           this.items.push(new FormOptions(attr));
@@ -48,6 +52,10 @@ export class Form implements DropdownHandlerView {
       }
       ev.preventDefault();
     });
+  }
+
+  setEventDelegator(delegate: EventDelegate): void {
+    this.delegator = delegate;
   }
 
   updateStateByElement(el: HTMLElement): void {

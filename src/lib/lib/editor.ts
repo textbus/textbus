@@ -1,8 +1,8 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { Frame } from './frame/frame';
-import { EditorOptions } from './help';
+import { EditorOptions, EventDelegate } from './help';
 import { Paths } from './paths/paths';
 import {
   ButtonHandlerOption,
@@ -16,8 +16,9 @@ import { ButtonHandler } from './toolbar/button-handler';
 import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
+import { fromPromise } from 'rxjs/internal-compatibility';
 
-export class Editor {
+export class Editor implements EventDelegate {
   readonly host = document.createElement('div');
   readonly editor = new Frame();
   readonly paths = new Paths();
@@ -98,6 +99,20 @@ export class Editor {
     });
   }
 
+  dispatchEvent(type: string): Observable<string> {
+    if (typeof this.options.uploader === 'function') {
+      const result = this.options.uploader(type);
+      if (result instanceof Observable) {
+        return result;
+      } else if (result instanceof Promise) {
+        return fromPromise(result);
+      } else if (typeof result === 'string') {
+        return of(result);
+      }
+    }
+    return of('');
+  }
+
   private updateToolbarStatus(range: Range) {
     this.handlers.forEach(handler => {
       handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
@@ -129,7 +144,7 @@ export class Editor {
   }
 
   private addDropdownHandler(handler: DropdownHandlerOption) {
-    const dropdown = new DropdownHandler(handler);
+    const dropdown = new DropdownHandler(handler, this);
     this.toolbar.appendChild(dropdown.host);
     dropdown.onCompleted.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
