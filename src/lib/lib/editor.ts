@@ -1,4 +1,4 @@
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, from } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { Frame } from './frame/frame';
@@ -16,7 +16,6 @@ import { ButtonHandler } from './toolbar/button-handler';
 import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
-import { fromPromise } from 'rxjs/internal-compatibility';
 
 export class Editor implements EventDelegate {
   readonly host = document.createElement('div');
@@ -105,7 +104,7 @@ export class Editor implements EventDelegate {
       if (result instanceof Observable) {
         return result;
       } else if (result instanceof Promise) {
-        return fromPromise(result);
+        return from(result);
       } else if (typeof result === 'string') {
         return of(result);
       }
