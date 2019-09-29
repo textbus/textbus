@@ -12,7 +12,10 @@ export class FormOptions implements FormItem {
     <div class="tanbo-editor-form-label">${config.label}</div>
     <div class="tanbo-editor-form-control-wrap">${
       config.values.map(c => {
-        return `<label><input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}"> ${c.label}</label>`;
+        return `<label>
+                  <input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}">
+                  ${c.label}
+                 </label>`;
       }).join('')
       }
     </div>
