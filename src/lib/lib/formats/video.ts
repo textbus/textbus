@@ -17,6 +17,10 @@ const form = new Form([{
   required: true,
   checked: false,
   name: 'autoplay'
+}, {
+  type: AttrType.Hidden,
+  name: 'controls',
+  value: 'controls'
 }]);
 const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
@@ -31,6 +35,6 @@ export const videoHandler: DropdownHandlerOption = {
   classes: ['tanbo-editor-icon-video'],
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
-  viewContents: form.host,
+  viewer: form,
   execCommand: new AttrFormatter('color', updateEvent.asObservable())
 };

@@ -1,7 +1,8 @@
 export enum AttrType {
   TextField,
   Options,
-  Switch
+  Switch,
+  Hidden
 }
 
 export interface AttrTextField {
@@ -12,7 +13,7 @@ export interface AttrTextField {
   placeholder: string;
 }
 
-export interface AttrOption {
+export interface AttrOptionsItem {
   label: string;
   value: string | number | boolean;
   default?: boolean;
@@ -23,7 +24,7 @@ export interface AttrOptions {
   required: boolean;
   label: string;
   name: string;
-  values: AttrOption[];
+  values: AttrOptionsItem[];
 }
 
 export interface AttrSwitch {
@@ -34,14 +35,25 @@ export interface AttrSwitch {
   checked: boolean;
 }
 
+export interface AttrHidden {
+  type: AttrType.Hidden;
+  name: string;
+  value: string | number | boolean;
+}
+
+export type AttrConfig = AttrTextField | AttrOptions | AttrSwitch | AttrHidden;
+
 export interface AttrState {
   name: string;
   required: boolean;
-  value: string | boolean | number | Array<number | string | boolean>;
+  value: string | boolean | number;
 }
 
 export interface FormItem {
   host: HTMLElement;
+  name: string;
+
+  update(value: any): void;
 
   getAttr(): AttrState;
 }

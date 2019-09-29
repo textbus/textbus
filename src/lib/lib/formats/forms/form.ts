@@ -1,14 +1,16 @@
-import { AttrOptions, AttrTextField, AttrSwitch, FormItem, AttrType, AttrState } from './help';
+import { FormItem, AttrType, AttrState, AttrConfig } from './help';
 import { FormTextField } from './form-text-field';
 import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
+import { DropdownHandlerView } from '../../toolbar/help';
+import { FormHidden } from './form-hidden';
 
-export class Form {
+export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
   readonly host = document.createElement('form');
   private items: FormItem[] = [];
 
-  constructor(forms: Array<AttrTextField | AttrOptions | AttrSwitch>) {
+  constructor(forms: Array<AttrConfig>) {
     this.host.classList.add('tanbo-editor-form');
     forms.forEach(attr => {
       switch (attr.type) {
@@ -21,6 +23,9 @@ export class Form {
         case AttrType.Switch:
           this.items.push(new FormSwitch(attr));
           break;
+        case AttrType.Hidden:
+          this.items.push(new FormHidden(attr));
+          break
       }
     });
     this.items.forEach(item => {
@@ -42,6 +47,12 @@ export class Form {
         }));
       }
       ev.preventDefault();
+    });
+  }
+
+  updateStateByElement(el: HTMLElement): void {
+    this.items.forEach(item => {
+      item.update(el.getAttribute(item.name));
     });
   }
 }

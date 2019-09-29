@@ -20,6 +20,29 @@ export class AttrFormatter implements Formatter {
   }
 
   format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
-    console.log(range, this.attrs)
+    function setAttr(el: HTMLElement, attr: AttrState) {
+      const isBooleanValue = typeof attr.value === 'boolean';
+      let value = attr.value;
+      if (isBooleanValue) {
+        if (attr.value) {
+          value = attr.name;
+        } else {
+          return;
+        }
+      }
+      el.setAttribute(attr.name, value + '');
+    }
+
+    if (matchStatus.inContainer) {
+      this.attrs.forEach(item => {
+        setAttr(matchStatus.container as HTMLElement, item);
+      });
+    } else {
+      const container = document.createElement(this.tagName);
+      this.attrs.forEach(item => {
+        setAttr(container, item);
+      });
+      range.rawRange.surroundContents(container);
+    }
   }
 }

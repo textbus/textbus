@@ -10,7 +10,7 @@ export enum HandlerType {
 }
 
 export interface FormatMatchStyles {
-  [key: string]: number | string | Array<number | string>;
+  [key: string]: number | string | RegExp | Array<number | string | RegExp>;
 }
 
 export interface FormatAttr {
@@ -49,9 +49,15 @@ export interface SelectHandlerOption {
   tooltip?: string;
 }
 
+export interface DropdownHandlerView {
+  host: HTMLElement | DocumentFragment;
+
+  updateStateByElement(el: HTMLElement): void;
+}
+
 export interface DropdownHandlerOption {
   type: HandlerType.Dropdown;
-  viewContents: HTMLElement | DocumentFragment;
+  viewer: DropdownHandlerView;
   execCommand: Formatter;
   onHide: Observable<void>;
   classes?: string[];

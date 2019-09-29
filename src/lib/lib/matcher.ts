@@ -37,12 +37,17 @@ export class Matcher {
           return Object.keys(config.styles).map(key => {
             const optionValue = (Array.isArray(config.styles[key]) ?
               config.styles[key] :
-              [config.styles[key]]) as Array<string | number>;
+              [config.styles[key]]) as Array<string | number | RegExp>;
             let styleValue = elementStyles[key];
             if (key === 'fontFamily' && typeof styleValue === 'string') {
               styleValue = styleValue.replace(/['"]/g, '');
             }
-            return optionValue.indexOf(styleValue) > -1;
+            return optionValue.map(v => {
+              if (v instanceof RegExp) {
+                return v.test(styleValue);
+              }
+              return v === styleValue;
+            }).indexOf(true) > -1;
           }).indexOf(false) === -1;
         }
         return false;

@@ -2,8 +2,11 @@ import { AttrOptions, AttrState, FormItem } from './help';
 
 export class FormOptions implements FormItem {
   host = document.createElement('div');
+  name: string;
+  private readonly inputs: HTMLInputElement[];
 
   constructor(private config: AttrOptions) {
+    this.name = config.name;
     this.host.classList.add('tanbo-editor-form-group');
     this.host.innerHTML = `
     <div class="tanbo-editor-form-label">${config.label}</div>
@@ -14,10 +17,30 @@ export class FormOptions implements FormItem {
       }
     </div>
     `;
+    this.inputs = Array.from(this.host.querySelectorAll('input'));
+  }
+
+  update(value: any): void {
+    const values = this.config.values;
+    let isMatch = false;
+    for (let i = 0; i < values.length; i++) {
+      if (values[i].value === value) {
+        this.inputs[i].checked = true;
+        isMatch = true;
+        break;
+      }
+    }
+    if (!isMatch) {
+      this.config.values.forEach((item, i) => {
+        if (item.default) {
+          this.inputs[i].checked = true;
+        }
+      })
+    }
   }
 
   getAttr(): AttrState {
-    const inputs = this.host.querySelectorAll('input');
+    const inputs = this.inputs;
     let value;
     for (let i = 0; i < inputs.length; i++) {
       if (inputs[i].checked) {

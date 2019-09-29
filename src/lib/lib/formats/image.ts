@@ -25,6 +25,6 @@ export const imageHandler: DropdownHandlerOption = {
   classes: ['tanbo-editor-icon-image'],
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
-  viewContents: form.host,
+  viewer: form,
   execCommand: new AttrFormatter('img', updateEvent.asObservable())
 };

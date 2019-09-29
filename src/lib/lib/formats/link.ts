@@ -38,7 +38,7 @@ export const linkHandler: DropdownHandlerOption = {
   classes: ['tanbo-editor-icon-link'],
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
-  viewContents: form.host,
+  viewer: form,
   match: {
     tags: ['A']
   },
