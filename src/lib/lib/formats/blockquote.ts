@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { ToggleBlockFormatter } from '../editor/fomatter/toggle-block-formatter';
+import { ToggleBlockFormatter } from '../frame/fomatter/toggle-block-formatter';
 
 export const blockquoteHandler: ButtonHandlerOption = {
   type: HandlerType.Button,

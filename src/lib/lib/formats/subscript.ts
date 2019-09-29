@@ -1,5 +1,5 @@
 import { ButtonHandlerOption, HandlerType } from '../toolbar/help';
-import { InlineFormatter } from '../editor/fomatter/inline-formatter';
+import { InlineFormatter } from '../frame/fomatter/inline-formatter';
 
 export const subscriptHandler: ButtonHandlerOption = {
   type: HandlerType.Button,

@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
 import { MatchStatus } from '../../matcher';
 import { TBRange } from '../../range';
-import { Editor } from '../editor';
+import { Frame } from '../frame';
 import { matchContainerByTagName, takeOffWrapper } from '../utils';
 
 export class InlineFormatter implements Formatter {
@@ -10,8 +10,8 @@ export class InlineFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
-    this.document = editor.contentDocument;
+  format(range: TBRange, frame: Frame, matchStatus: MatchStatus) {
+    this.document = frame.contentDocument;
     const tag = this.tagName;
 
     if (matchStatus.inContainer) {

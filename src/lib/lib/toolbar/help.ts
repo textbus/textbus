@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { Formatter } from '../editor/fomatter/formatter';
+import { Formatter } from '../frame/fomatter/formatter';
 import { Matcher, MatchStatus } from '../matcher';
 
 export enum HandlerType {

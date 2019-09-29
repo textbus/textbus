@@ -1,6 +1,6 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { Editor } from '../editor';
+import { Frame } from '../frame';
 import { MatchStatus } from '../../matcher';
 import { Observable } from 'rxjs';
 
@@ -18,20 +18,20 @@ export class StyleFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: Frame, matchStatus: MatchStatus): void {
     if (range.rawRange.collapsed) {
-      const newWrap = editor.contentDocument.createElement('span');
+      const newWrap = frame.contentDocument.createElement('span');
       newWrap.style[this.name] = this.value;
       range.rawRange.surroundContents(newWrap);
       newWrap.innerHTML = '&#8203;';
     } else {
       const nodes = this.findCanApplyElements(range.commonAncestorContainer,
         range.rawRange.cloneRange(),
-        editor.contentDocument);
+        frame.contentDocument);
       range.markRange();
       nodes.forEach(node => {
         if (node.nodeType === 3) {
-          const newWrap = editor.contentDocument.createElement('span');
+          const newWrap = frame.contentDocument.createElement('span');
           newWrap.style[this.name] = this.value;
           node.parentNode.insertBefore(newWrap, node);
           newWrap.appendChild(node);

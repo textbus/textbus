@@ -1,6 +1,6 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { Editor } from '../editor';
+import { Frame } from '../frame';
 import { MatchStatus } from '../../matcher';
 import { findBlockContainer } from '../utils';
 
@@ -9,10 +9,10 @@ export class BlockStyleFormatter implements Formatter {
               private value: string | number) {
   }
 
-  format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: Frame, matchStatus: MatchStatus): void {
     const nodes = this.findCanApplyElements(range.commonAncestorContainer,
       range.rawRange.cloneRange(),
-      editor.contentDocument).map(item => {
+      frame.contentDocument).map(item => {
       return findBlockContainer(item, range.commonAncestorContainer)
     });
     ([...new Set(nodes)] as Array<HTMLElement>).forEach(node => {

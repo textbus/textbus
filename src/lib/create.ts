@@ -1,4 +1,4 @@
-import { Core } from './lib/core';
+import { Editor } from './lib/editor';
 import { boldHandler } from './lib/formats/bold';
 import { italicHandler } from './lib/formats/italic';
 import { strikeThroughHandler } from './lib/formats/strike-through';
@@ -24,7 +24,7 @@ import { cleanHandler } from './lib/formats/clean';
 export * from './public-api';
 
 export function createEditor(selector: string | HTMLElement) {
-  return new Core(selector, {
+  return new Editor(selector, {
     handlers: [
       [
         hHandler

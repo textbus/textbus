@@ -1,15 +1,15 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { MatchStatus } from '../../matcher';
-import { Editor } from '../editor';
+import { Frame } from '../frame';
 import { findBlockContainer } from '../utils';
 
 export class BlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, editor: Editor, matchStatus: MatchStatus) {
-    const doc = editor.contentDocument;
+  format(range: TBRange, frame: Frame, matchStatus: MatchStatus) {
+    const doc = frame.contentDocument;
     if (!matchStatus.inContainer) {
       range.markRange();
       const containerRange = doc.createRange();

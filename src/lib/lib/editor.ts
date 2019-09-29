@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
-import { Editor } from './editor/editor';
+import { Frame } from './frame/frame';
 import { EditorOptions } from './help';
 import { Paths } from './paths/paths';
 import {
@@ -17,9 +17,9 @@ import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
 
-export class Core {
+export class Editor {
   readonly host = document.createElement('div');
-  readonly editor = new Editor();
+  readonly editor = new Frame();
   readonly paths = new Paths();
   readonly onReady: Observable<this>;
 
@@ -91,7 +91,7 @@ export class Core {
 
   addGroup(handlers: HandlerOption[]) {
     if (!this.isFirst) {
-      this.toolbar.appendChild(Core.createSplitLine());
+      this.toolbar.appendChild(Editor.createSplitLine());
     }
     handlers.forEach(handler => {
       this.addHandler(handler);

@@ -1,6 +1,6 @@
 import { DropdownHandlerOption, DropdownHandlerView, HandlerType } from '../toolbar/help';
 import { Subject } from 'rxjs';
-import { StyleFormatter } from '../editor/fomatter/style-formatter';
+import { StyleFormatter } from '../frame/fomatter/style-formatter';
 
 class TableViewer implements DropdownHandlerView {
   host = document.createElement('div');

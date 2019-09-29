@@ -1,5 +1,5 @@
 import { HandlerType, SelectHandlerOption } from '../toolbar/help';
-import { StyleFormatter } from '../editor/fomatter/style-formatter';
+import { StyleFormatter } from '../frame/fomatter/style-formatter';
 
 export const fontFamilyHandler: SelectHandlerOption = {
   type: HandlerType.Select,

@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
-import { AttrFormatter } from '../editor/fomatter/attr-formatter';
+import { AttrFormatter } from '../frame/fomatter/attr-formatter';
 
 const form = new Form([{
   type: AttrType.TextField,

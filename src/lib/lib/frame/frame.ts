@@ -3,7 +3,7 @@ import { debounceTime, throttleTime } from 'rxjs/operators';
 
 import { template } from './template-html';
 
-export class Editor {
+export class Frame {
   readonly host = document.createElement('iframe');
   readonly onSelectionChange: Observable<Range>;
   readonly onLoad: Observable<this>;

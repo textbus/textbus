@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { Editor } from '../editor';
+import { Frame } from '../frame';
 import { MatchStatus } from '../../matcher';
 import { AttrState } from '../../formats/forms/help';
 
@@ -19,7 +19,7 @@ export class AttrFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, editor: Editor, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: Frame, matchStatus: MatchStatus): void {
     function setAttr(el: HTMLElement, attr: AttrState) {
       const isBooleanValue = typeof attr.value === 'boolean';
       let value = attr.value;
