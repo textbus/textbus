@@ -7,12 +7,12 @@ import { Dropdown } from './utils/dropdown';
 export class DropdownHandler implements Handler {
   host: HTMLElement;
   matcher: Matcher;
-  onAction: Observable<any>;
+  onCompleted: Observable<any>;
   private dropdownButton = document.createElement('button');
   private dropdown: Dropdown;
 
   constructor(private handler: DropdownHandlerOption) {
-    this.onAction = handler.onHide;
+    this.onCompleted = handler.onHide;
 
     this.matcher = new Matcher(handler.match);
     this.dropdownButton.type = 'button';

@@ -69,7 +69,7 @@ export interface DropdownHandlerOption {
 
 export interface Handler {
   host: HTMLElement;
-  onAction: Observable<any>;
+  onCompleted: Observable<any>;
   matcher: Matcher;
 
   updateStatus(status: MatchStatus): void;

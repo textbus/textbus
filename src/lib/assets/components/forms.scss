@@ -15,8 +15,39 @@
 
 .tanbo-editor-form-control-wrap {
   white-space: nowrap;
+  margin-bottom: 5px;
+  display: flex;
   label {
     margin-right: 10px;
+  }
+}
+
+.tanbo-editor-form-btn {
+  padding: 3px 6px;
+  font-size: 13px;
+  border-radius: 3px;
+  color: inherit;
+  background-color: $color-lighter;
+  border: 1px solid $color-gray;
+  cursor: pointer;
+  line-height: 1.428;
+  outline: none;
+
+  &:hover {
+    background-color: darken($color-lighter, 7);
+    border-color: darken($color-gray, 7);
+  }
+
+  &:focus {
+    background-color: darken($color-lighter, 10);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(red($color-gray), green($color-gray), blue($color-gray), .5);
+    border-color: darken($color-gray, 7);
+  }
+
+  &:active {
+    background-color: darken($color-lighter, 15);
+    border-color: darken($color-gray, 7);
   }
 }
 

@@ -6,12 +6,12 @@ import { Matcher, MatchStatus } from '../matcher';
 export class ButtonHandler implements Handler {
   readonly host = document.createElement('button');
   matcher: Matcher;
-  onAction: Observable<void>;
+  onCompleted: Observable<void>;
   private eventSource = new Subject<void>();
 
   constructor(private handler: ButtonHandlerOption) {
     this.matcher = new Matcher(handler.match);
-    this.onAction = this.eventSource.asObservable();
+    this.onCompleted = this.eventSource.asObservable();
     this.host.type = 'button';
     this.host.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     this.host.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;

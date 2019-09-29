@@ -43,14 +43,14 @@ export class SelectHandler {
     this.host = new Dropdown(
       dropdownButton,
       menu,
-      merge(...this.options.map(item => item.onAction))
+      merge(...this.options.map(item => item.onCompleted))
     ).host;
   }
 }
 
 export class SelectOptionHandler implements Handler {
   readonly host = document.createElement('button');
-  onAction: Observable<void>;
+  onCompleted: Observable<void>;
   onMatched: Observable<SelectHandlerItemOption>;
   matcher: Matcher;
   execCommand: Formatter;
@@ -58,7 +58,7 @@ export class SelectOptionHandler implements Handler {
   private matchedEvent = new Subject<SelectHandlerItemOption>();
 
   constructor(private option: SelectHandlerItemOption) {
-    this.onAction = this.eventSource.asObservable();
+    this.onCompleted = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
     this.host.classList.add('tanbo-editor-select-menu-item');
     this.host.type = 'button';

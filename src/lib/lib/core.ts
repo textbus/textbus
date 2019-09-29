@@ -106,7 +106,7 @@ export class Core {
 
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
-    button.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+    button.onCompleted.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor.contentDocument, this.range));
       this.editor.contentDocument.body.focus();
@@ -118,7 +118,7 @@ export class Core {
   private addSelectHandler(option: SelectHandlerOption) {
     const select = new SelectHandler(option);
     select.options.forEach(item => {
-      item.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+      item.onCompleted.pipe(filter(() => !!this.range)).subscribe(() => {
         const range = new TBRange(this.range, this.editor.contentDocument);
         item.execCommand.format(range, this.editor, item.matcher.match(this.editor.contentDocument, this.range));
         this.editor.contentDocument.body.focus();
@@ -131,7 +131,7 @@ export class Core {
   private addDropdownHandler(handler: DropdownHandlerOption) {
     const dropdown = new DropdownHandler(handler);
     this.toolbar.appendChild(dropdown.host);
-    dropdown.onAction.pipe(filter(() => !!this.range)).subscribe(() => {
+    dropdown.onCompleted.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
       handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor.contentDocument, this.range));
       this.editor.contentDocument.body.focus();

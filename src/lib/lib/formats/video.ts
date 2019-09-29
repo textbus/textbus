@@ -10,7 +10,10 @@ const form = new Form([{
   label: '视频链接地址',
   name: 'src',
   required: true,
-  placeholder: '请输入链接地址'
+  placeholder: '请输入链接地址',
+  canUpload: true,
+  uploadType: 'video',
+  uploadBtnText: '上传新视频'
 }, {
   type: AttrType.Switch,
   label: '是否自动播放',
@@ -36,5 +39,5 @@ export const videoHandler: DropdownHandlerOption = {
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  execCommand: new AttrFormatter('color', updateEvent.asObservable())
+  execCommand: new AttrFormatter('video', updateEvent.asObservable())
 };

@@ -11,9 +11,12 @@ export class FormTextField implements FormItem {
     this.host.innerHTML = `
     <div class="tanbo-editor-form-label">${config.label}</div>
     <div class="tanbo-editor-form-control-wrap">
-      <input class="tanbo-editor-form-control" placeholder="${config.placeholder || ''}" type="text">
-    </div>
-    `;
+      <input class="tanbo-editor-form-control" placeholder="${config.placeholder || ''}" type="text">&nbsp;
+      ${ config.canUpload ? 
+          `<button type="button" class="tanbo-editor-form-btn" title="${config.uploadBtnText || '上传'}"><span class="tanbo-editor-icon-upload"></span></button>` 
+          : ''
+      }
+    </div>`;
     this.input = this.host.querySelector('input');
   }
 

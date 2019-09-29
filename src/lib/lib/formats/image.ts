@@ -10,7 +10,10 @@ const form = new Form([{
   label: '图片链接地址',
   name: 'src',
   required: true,
-  placeholder: '请输入链接地址'
+  placeholder: '请输入链接地址',
+  canUpload: true,
+  uploadType: 'video',
+  uploadBtnText: '上传新图片'
 }]);
 const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
