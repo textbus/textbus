@@ -1,8 +1,9 @@
+import { Observable } from 'rxjs';
+
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { Frame } from '../frame';
 import { MatchStatus } from '../../matcher';
-import { Observable } from 'rxjs';
 
 export class StyleFormatter implements Formatter {
   private value: string | number;
