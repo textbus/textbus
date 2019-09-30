@@ -85,13 +85,18 @@ export class Matcher {
       }
     }
     this.matchChildNodes = [];
+    let matchAllChild: boolean;
+    if (range.collapsed) {
+      matchAllChild = false;
+    } else {
+      matchAllChild = this.matchAllChild(range, range.commonAncestorContainer) && this.matchChildNodes.length > 0;
+      this.matchChildNodes = [];
+    }
 
     return {
       inContainer,
       container: node,
-      matchAllChild: range.collapsed ?
-        false :
-        this.matchAllChild(range, range.commonAncestorContainer) && this.matchChildNodes.length > 0,
+      matchAllChild,
       range,
       config: this.config
     }
