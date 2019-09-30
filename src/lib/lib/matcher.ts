@@ -112,11 +112,11 @@ export class Matcher {
             }).indexOf(true) > -1;
             return match || this.matchAllChild(range, child);
           }
-          return false;
+          return true;
         });
-      return match.length > 0 && match.indexOf(false) === -1;
+      return match.length === 0 || match.indexOf(false) === -1;
     }
-    return false;
+    return true;
   }
 
   // private getNodePaths(node: Node, scope: Node): Node[] {
