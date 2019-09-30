@@ -31,8 +31,12 @@ export class FormTextField implements FormItem {
     }
   }
 
-  update(value: any): void {
-    this.input.value = value;
+  update(value?: any): void {
+    if (value === undefined) {
+      this.input.value = '';
+    } else {
+      this.input.value = value;
+    }
   }
 
   getAttr(): AttrState {

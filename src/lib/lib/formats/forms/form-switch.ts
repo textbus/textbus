@@ -16,8 +16,12 @@ export class FormSwitch implements FormItem {
     this.input = this.host.querySelector('input');
   }
 
-  update(value: any): void {
-    this.input.checked = value;
+  update(value?: any): void {
+    if (value === undefined) {
+      this.input.checked = this.config.checked;
+    } else {
+      this.input.checked = value;
+    }
   }
 
   getAttr(): AttrState {

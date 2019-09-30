@@ -4,6 +4,8 @@ export interface MatchStatus {
   inContainer: boolean;
   container: Node;
   matchAllChild: boolean;
+  range: Range;
+  config: FormatMatch;
 }
 
 export class Matcher {
@@ -85,7 +87,9 @@ export class Matcher {
     return {
       inContainer,
       container: node,
-      matchAllChild: range.collapsed ? false : this.matchAllChild(range, range.commonAncestorContainer)
+      matchAllChild: range.collapsed ? false : this.matchAllChild(range, range.commonAncestorContainer),
+      range,
+      config: this.config
     }
   }
 
@@ -95,7 +99,8 @@ export class Matcher {
     }
     if (node.nodeType === 1) {
       const el = node as HTMLElement;
-      return Array.from(el.childNodes)
+
+      const match = Array.from(el.childNodes)
         .filter(child => range.intersectsNode(child))
         .map(child => {
           if (child.nodeType === 3) {
@@ -108,7 +113,8 @@ export class Matcher {
             return match || this.matchAllChild(range, child);
           }
           return false;
-        }).indexOf(false) === -1;
+        });
+      return match.length > 0 && match.indexOf(false) === -1;
     }
     return false;
   }

@@ -23,7 +23,7 @@ export class FormOptions implements FormItem {
     this.inputs = Array.from(this.host.querySelectorAll('input'));
   }
 
-  update(value: any): void {
+  update(value?: any): void {
     const values = this.config.values;
     let isMatch = false;
     for (let i = 0; i < values.length; i++) {

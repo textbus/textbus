@@ -12,7 +12,7 @@ const form = new Form([{
   required: true,
   placeholder: '请输入链接地址',
   canUpload: true,
-  uploadType: 'video',
+  uploadType: 'audio',
   uploadBtnText: '上传新音频'
 }, {
   type: AttrType.Switch,

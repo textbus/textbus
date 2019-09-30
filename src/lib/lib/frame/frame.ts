@@ -1,5 +1,5 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, throttleTime } from 'rxjs/operators';
+import { debounceTime, filter, throttleTime } from 'rxjs/operators';
 
 import { template } from './template-html';
 
@@ -59,7 +59,7 @@ export class Frame {
       'selectstart',
       'focus'
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next(this.contentWindow.getSelection().getRangeAt(0));
+      this.selectionChangeEvent.next(this.contentDocument.getSelection().getRangeAt(0));
     });
     merge(...[
       'keyup',
@@ -70,6 +70,16 @@ export class Frame {
       if (!childBody.innerHTML) {
         childBody.innerHTML = '<p><br></p>';
       }
+    });
+    fromEvent(childBody, 'click').pipe(filter((ev: any) => {
+      return /video|audio|img/i.test(ev.target.tagName);
+    })).subscribe(ev => {
+      const selection = this.contentDocument.getSelection();
+      const range = this.contentDocument.createRange();
+      range.selectNode(ev.target);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      this.selectionChangeEvent.next(range);
     });
   }
 }

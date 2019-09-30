@@ -52,8 +52,9 @@ export interface SelectHandlerOption {
 
 export interface DropdownHandlerView {
   host: HTMLElement | DocumentFragment;
-  setEventDelegator?(delegate: EventDelegate): void;
   updateStateByElement(el: HTMLElement): void;
+  reset?(): void;
+  setEventDelegator?(delegate: EventDelegate): void;
 }
 
 export interface DropdownHandlerOption {

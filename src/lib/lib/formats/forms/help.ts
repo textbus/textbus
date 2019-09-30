@@ -56,7 +56,7 @@ export interface FormItem {
   host: HTMLElement;
   name: string;
 
-  update(value: any): void;
+  update(value?: any): void;
 
   getAttr(): AttrState;
 }

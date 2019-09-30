@@ -9,7 +9,9 @@ import { AttrState } from '../../formats/forms/help';
 export class AttrFormatter implements Formatter {
   private attrs: AttrState[] = [];
 
-  constructor(private tagName: string, attrs: AttrState[] | Observable<AttrState[]>) {
+  constructor(private tagName: string,
+              attrs: AttrState[] | Observable<AttrState[]>,
+              private containsChild = false) {
     if (attrs instanceof Observable) {
       attrs.subscribe(r => {
         this.attrs = r;
@@ -37,11 +39,19 @@ export class AttrFormatter implements Formatter {
       this.attrs.forEach(item => {
         setAttr(matchStatus.container as HTMLElement, item);
       });
+    } else if (matchStatus.matchAllChild) {
+      const c = (range.commonAncestorContainer as HTMLElement).children[0] as HTMLElement;
+      this.attrs.forEach(item => {
+        setAttr(c, item);
+      });
     } else {
-      const container = document.createElement(this.tagName);
+      const container = frame.contentDocument.createElement(this.tagName);
       this.attrs.forEach(item => {
         setAttr(container, item);
       });
+      if (!this.containsChild) {
+        range.rawRange.collapse();
+      }
       range.rawRange.surroundContents(container);
     }
   }

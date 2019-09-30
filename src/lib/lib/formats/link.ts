@@ -42,5 +42,5 @@ export const linkHandler: DropdownHandlerOption = {
   match: {
     tags: ['a']
   },
-  execCommand: new AttrFormatter('a', updateEvent.asObservable())
+  execCommand: new AttrFormatter('a', updateEvent.asObservable(), true)
 };

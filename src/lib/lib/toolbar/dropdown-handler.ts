@@ -33,8 +33,14 @@ export class DropdownHandler implements Handler {
     if (status.inContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
       this.handler.viewer.updateStateByElement(status.container as HTMLElement);
+    } else if (status.matchAllChild) {
+      this.dropdownButton.classList.add('tanbo-editor-handler-active');
+      this.handler.viewer.updateStateByElement(status.range.cloneContents().children[0] as HTMLElement);
     } else {
       this.dropdownButton.classList.remove('tanbo-editor-handler-active');
+      if (typeof this.handler.viewer.reset === 'function') {
+        this.handler.viewer.reset();
+      }
     }
   }
 }

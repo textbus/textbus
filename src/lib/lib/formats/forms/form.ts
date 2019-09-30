@@ -54,6 +54,18 @@ export class Form implements DropdownHandlerView {
     });
   }
 
+  reset(): void {
+    this.items.forEach(item => {
+      if(item instanceof FormTextField) {
+        item.update('');
+      } else if(item instanceof FormOptions){
+        item.update(Number.NaN);
+      } else if(item instanceof FormSwitch) {
+        item.update();
+      }
+    });
+  }
+
   setEventDelegator(delegate: EventDelegate): void {
     this.delegator = delegate;
   }
