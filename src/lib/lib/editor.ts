@@ -68,12 +68,12 @@ export class Editor implements EventDelegate {
     });
     this.editor.onSelectionChange
       .pipe(map(() => {
+        this.readyState = true;
         return this.editor.contentDocument.getSelection().getRangeAt(0).endContainer;
       }), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
     this.editor.onLoad.subscribe(() => {
-      this.readyState = true;
       this.readyEvent.next(this);
     });
   }
