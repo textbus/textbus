@@ -3,7 +3,7 @@ import { debounceTime, filter, throttleTime } from 'rxjs/operators';
 
 import { template } from './template-html';
 
-export class Frame {
+export class EditFrame {
   readonly elementRef = document.createElement('iframe');
   readonly onSelectionChange: Observable<Range>;
   readonly onLoad: Observable<this>;

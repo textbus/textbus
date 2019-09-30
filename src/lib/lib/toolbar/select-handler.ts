@@ -2,7 +2,7 @@ import { merge, Observable, Subject } from 'rxjs';
 
 import { SelectHandlerOption, SelectHandlerItemOption, Handler } from './help';
 import { Matcher, MatchStatus } from '../matcher';
-import { Formatter } from '../frame/fomatter/formatter';
+import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Dropdown } from './utils/dropdown';
 
 export class SelectHandler {

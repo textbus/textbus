@@ -1,5 +1,5 @@
 import { HandlerType, SelectHandlerOption } from '../toolbar/help';
-import { BlockStyleFormatter } from '../frame/fomatter/block-style-formatter';
+import { BlockStyleFormatter } from '../edit-frame/fomatter/block-style-formatter';
 
 export const alignHandler: SelectHandlerOption = {
   type: HandlerType.Select,

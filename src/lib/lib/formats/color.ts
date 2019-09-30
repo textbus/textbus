@@ -3,7 +3,7 @@ import { Picker, createPicker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 
 import { DropdownHandlerOption, DropdownHandlerView, HandlerType } from '../toolbar/help';
-import { StyleFormatter } from '../frame/fomatter/style-formatter';
+import { StyleFormatter } from '../edit-frame/fomatter/style-formatter';
 
 const updateEvent = new Subject<string>();
 const hideEvent = new Subject<void>();

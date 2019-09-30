@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 
 import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
-import { TableFormatter } from '../frame/fomatter/table-formatter';
+import { TableFormatter } from '../edit-frame/fomatter/table-formatter';
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
 

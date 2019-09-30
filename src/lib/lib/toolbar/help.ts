@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { Formatter } from '../frame/fomatter/formatter';
+import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Matcher, MatchStatus } from '../matcher';
 import { EventDelegate } from '../help';
 

@@ -1,7 +1,7 @@
 import { Observable, of, Subject, from } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
-import { Frame } from './frame/frame';
+import { EditFrame } from './edit-frame/edit-frame';
 import { EditorOptions, EventDelegate } from './help';
 import { Paths } from './paths/paths';
 import {
@@ -19,7 +19,7 @@ import { DropdownHandler } from './toolbar/dropdown-handler';
 
 export class Editor implements EventDelegate {
   readonly host = document.createElement('div');
-  readonly editor = new Frame();
+  readonly editor = new EditFrame();
   readonly paths = new Paths();
   readonly onReady: Observable<this>;
 
