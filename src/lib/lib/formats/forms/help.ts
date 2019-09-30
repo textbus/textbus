@@ -53,7 +53,7 @@ export interface AttrState {
 }
 
 export interface FormItem {
-  host: HTMLElement;
+  elementRef: HTMLElement;
   name: string;
 
   update(value?: any): void;

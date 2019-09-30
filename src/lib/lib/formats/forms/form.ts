@@ -8,12 +8,12 @@ import { EventDelegate } from '../../help';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
-  readonly host = document.createElement('form');
+  readonly elementRef = document.createElement('form');
   private items: FormItem[] = [];
   private delegator: EventDelegate;
 
   constructor(forms: Array<AttrConfig>) {
-    this.host.classList.add('tanbo-editor-form');
+    this.elementRef.classList.add('tanbo-editor-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
@@ -33,18 +33,18 @@ export class Form implements DropdownHandlerView {
       }
     });
     this.items.forEach(item => {
-      this.host.appendChild(item.host);
+      this.elementRef.appendChild(item.elementRef);
     });
 
-    this.host.setAttribute('novalidate', 'novalidate');
+    this.elementRef.setAttribute('novalidate', 'novalidate');
 
     const btnWrap = document.createElement('div');
     btnWrap.classList.add('tanbo-editor-form-btn-wrap');
     btnWrap.innerHTML = '<button class="tanbo-editor-form-submit" type="submit">确定</button>';
 
-    this.host.appendChild(btnWrap);
+    this.elementRef.appendChild(btnWrap);
 
-    this.host.addEventListener('submit', (ev: Event) => {
+    this.elementRef.addEventListener('submit', (ev: Event) => {
       if (typeof this.onSubmit === 'function') {
         this.onSubmit(this.items.map(item => {
           return item.getAttr();

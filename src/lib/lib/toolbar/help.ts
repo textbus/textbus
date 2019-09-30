@@ -51,7 +51,7 @@ export interface SelectHandlerOption {
 }
 
 export interface DropdownHandlerView {
-  host: HTMLElement | DocumentFragment;
+  elementRef: HTMLElement | DocumentFragment;
   updateStateByElement(el: HTMLElement): void;
   reset?(): void;
   setEventDelegator?(delegate: EventDelegate): void;
@@ -70,7 +70,7 @@ export interface DropdownHandlerOption {
 }
 
 export interface Handler {
-  host: HTMLElement;
+  elementRef: HTMLElement;
   onCompleted: Observable<any>;
   matcher: Matcher;
 

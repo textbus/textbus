@@ -1,19 +1,19 @@
 import { AttrSwitch, AttrState, FormItem } from './help';
 
 export class FormSwitch implements FormItem {
-  host = document.createElement('div');
+  elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
 
   constructor(private config: AttrSwitch) {
     this.name = config.name;
-    this.host.classList.add('tanbo-editor-form-group');
-    this.host.innerHTML = `
+    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.innerHTML = `
     <div class="tanbo-editor-form-control-wrap">
       <label><input type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
     </div>
     `;
-    this.input = this.host.querySelector('input');
+    this.input = this.elementRef.querySelector('input');
   }
 
   update(value?: any): void {

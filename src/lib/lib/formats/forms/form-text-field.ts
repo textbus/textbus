@@ -2,15 +2,15 @@ import { AttrState, AttrTextField, FormItem } from './help';
 import { Observable } from 'rxjs';
 
 export class FormTextField implements FormItem {
-  host = document.createElement('div');
+  elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
 
   constructor(private config: AttrTextField,
               private delegate: (type: string) => Observable<string>) {
     this.name = config.name;
-    this.host.classList.add('tanbo-editor-form-group');
-    this.host.innerHTML = `
+    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.innerHTML = `
     <div class="tanbo-editor-form-label">${config.label}</div>
     <div class="tanbo-editor-form-control-wrap">
       <input class="tanbo-editor-form-control" placeholder="${config.placeholder || ''}" type="text">&nbsp;
@@ -21,9 +21,9 @@ export class FormTextField implements FormItem {
       : ''
       }
     </div>`;
-    this.input = this.host.querySelector('input');
+    this.input = this.elementRef.querySelector('input');
     if (config.canUpload) {
-      this.host.querySelector('button').addEventListener('click', () => {
+      this.elementRef.querySelector('button').addEventListener('click', () => {
         delegate(this.config.uploadType).subscribe(url => {
           this.update(url);
         });

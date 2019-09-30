@@ -6,5 +6,6 @@ dist/
 bundles/
 zip
 .idea
+.vscode
 *.swp
 *.swo

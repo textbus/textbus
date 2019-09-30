@@ -51,8 +51,8 @@ export class Editor implements EventDelegate {
     this.toolbar.classList.add('tanbo-editor-toolbar');
 
     this.host.appendChild(this.toolbar);
-    this.host.appendChild(this.editor.host);
-    this.host.appendChild(this.paths.host);
+    this.host.appendChild(this.editor.elementRef);
+    this.host.appendChild(this.paths.elementRef);
 
     this.host.classList.add('tanbo-editor-container');
     this.container.appendChild(this.host);
@@ -63,7 +63,7 @@ export class Editor implements EventDelegate {
     this.editor.onSelectionChange.pipe(debounceTime(10)).subscribe(range => {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
-      this.editor.host.dispatchEvent(event);
+      this.editor.elementRef.dispatchEvent(event);
       this.updateToolbarStatus(range);
     });
     this.editor.onSelectionChange
@@ -125,7 +125,7 @@ export class Editor implements EventDelegate {
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor.contentDocument, this.range));
       this.editor.contentDocument.body.focus();
     });
-    this.toolbar.appendChild(button.host);
+    this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
   }
 
@@ -139,12 +139,12 @@ export class Editor implements EventDelegate {
       });
       this.handlers.push(item);
     });
-    this.toolbar.appendChild(select.host);
+    this.toolbar.appendChild(select.elementRef);
   }
 
   private addDropdownHandler(handler: DropdownHandlerOption) {
     const dropdown = new DropdownHandler(handler, this);
-    this.toolbar.appendChild(dropdown.host);
+    this.toolbar.appendChild(dropdown.elementRef);
     dropdown.onCompleted.pipe(filter(() => !!this.range)).subscribe(() => {
       const range = new TBRange(this.range, this.editor.contentDocument);
       handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor.contentDocument, this.range));

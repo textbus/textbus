@@ -2,12 +2,12 @@ import { Observable, Subject } from 'rxjs';
 
 export class Paths {
   onCheck: Observable<HTMLElement>;
-  readonly host = document.createElement('div');
+  readonly elementRef = document.createElement('div');
   private checkEvent = new Subject<HTMLElement>();
 
   constructor() {
     this.onCheck = this.checkEvent.asObservable();
-    this.host.classList.add('tanbo-editor-paths');
+    this.elementRef.classList.add('tanbo-editor-paths');
   }
 
   update(node: Element) {
@@ -45,7 +45,7 @@ export class Paths {
         fragment.appendChild(split);
       }
     }
-    this.host.innerHTML = '';
-    this.host.appendChild(fragment);
+    this.elementRef.innerHTML = '';
+    this.elementRef.appendChild(fragment);
   }
 }

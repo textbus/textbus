@@ -1,14 +1,14 @@
 import { AttrOptions, AttrState, FormItem } from './help';
 
 export class FormOptions implements FormItem {
-  host = document.createElement('div');
+  elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];
 
   constructor(private config: AttrOptions) {
     this.name = config.name;
-    this.host.classList.add('tanbo-editor-form-group');
-    this.host.innerHTML = `
+    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.innerHTML = `
     <div class="tanbo-editor-form-label">${config.label}</div>
     <div class="tanbo-editor-form-control-wrap">${
       config.values.map(c => {
@@ -20,7 +20,7 @@ export class FormOptions implements FormItem {
       }
     </div>
     `;
-    this.inputs = Array.from(this.host.querySelectorAll('input'));
+    this.inputs = Array.from(this.elementRef.querySelectorAll('input'));
   }
 
   update(value?: any): void {

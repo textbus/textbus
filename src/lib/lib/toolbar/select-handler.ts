@@ -6,7 +6,7 @@ import { Formatter } from '../frame/fomatter/formatter';
 import { Dropdown } from './utils/dropdown';
 
 export class SelectHandler {
-  readonly host: HTMLElement;
+  readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
 
   constructor(private handler: SelectHandlerOption) {
@@ -30,7 +30,7 @@ export class SelectHandler {
 
     handler.options.forEach(option => {
       const item = new SelectOptionHandler(option);
-      menu.appendChild(item.host);
+      menu.appendChild(item.elementRef);
       if (option.default) {
         dropdownInner.innerText = option.label;
       }
@@ -40,16 +40,16 @@ export class SelectHandler {
       this.options.push(item);
     });
 
-    this.host = new Dropdown(
+    this.elementRef = new Dropdown(
       dropdownButton,
       menu,
       merge(...this.options.map(item => item.onCompleted))
-    ).host;
+    ).elementRef;
   }
 }
 
 export class SelectOptionHandler implements Handler {
-  readonly host = document.createElement('button');
+  readonly elementRef = document.createElement('button');
   onCompleted: Observable<void>;
   onMatched: Observable<SelectHandlerItemOption>;
   matcher: Matcher;
@@ -60,13 +60,13 @@ export class SelectOptionHandler implements Handler {
   constructor(private option: SelectHandlerItemOption) {
     this.onCompleted = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
-    this.host.classList.add('tanbo-editor-select-menu-item');
-    this.host.type = 'button';
+    this.elementRef.classList.add('tanbo-editor-select-menu-item');
+    this.elementRef.type = 'button';
     if (option.classes) {
-      this.host.classList.add(...(option.classes || []));
+      this.elementRef.classList.add(...(option.classes || []));
     }
-    this.host.innerText = option.label;
-    this.host.addEventListener('click', () => {
+    this.elementRef.innerText = option.label;
+    this.elementRef.addEventListener('click', () => {
       this.eventSource.next();
     });
     this.execCommand = option.execCommand;

@@ -4,7 +4,7 @@ import { ButtonHandlerOption, Handler } from './help';
 import { Matcher, MatchStatus } from '../matcher';
 
 export class ButtonHandler implements Handler {
-  readonly host = document.createElement('button');
+  readonly elementRef = document.createElement('button');
   matcher: Matcher;
   onCompleted: Observable<void>;
   private eventSource = new Subject<void>();
@@ -12,20 +12,20 @@ export class ButtonHandler implements Handler {
   constructor(private handler: ButtonHandlerOption) {
     this.matcher = new Matcher(handler.match);
     this.onCompleted = this.eventSource.asObservable();
-    this.host.type = 'button';
-    this.host.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
-    this.host.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
-    this.host.classList.add('tanbo-editor-handler', ...(handler.classes || []));
-    this.host.addEventListener('click', () => {
+    this.elementRef.type = 'button';
+    this.elementRef.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
+    this.elementRef.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
+    this.elementRef.classList.add('tanbo-editor-handler', ...(handler.classes || []));
+    this.elementRef.addEventListener('click', () => {
       this.eventSource.next();
     });
   }
 
   updateStatus(status: MatchStatus): void {
     if (status.inContainer || status.matchAllChild) {
-      this.host.classList.add('tanbo-editor-handler-active');
+      this.elementRef.classList.add('tanbo-editor-handler-active');
     } else {
-      this.host.classList.remove('tanbo-editor-handler-active');
+      this.elementRef.classList.remove('tanbo-editor-handler-active');
     }
   }
 }

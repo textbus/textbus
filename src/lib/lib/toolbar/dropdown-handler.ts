@@ -6,7 +6,7 @@ import { Dropdown } from './utils/dropdown';
 import { EventDelegate } from '../help';
 
 export class DropdownHandler implements Handler {
-  host: HTMLElement;
+  elementRef: HTMLElement;
   matcher: Matcher;
   onCompleted: Observable<any>;
   private dropdownButton = document.createElement('button');
@@ -21,8 +21,8 @@ export class DropdownHandler implements Handler {
     this.dropdownButton.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;
 
     this.dropdownButton.classList.add('tanbo-editor-handler', ...(handler.classes || []));
-    this.dropdown = new Dropdown(this.dropdownButton, handler.viewer.host, handler.onHide);
-    this.host = this.dropdown.host;
+    this.dropdown = new Dropdown(this.dropdownButton, handler.viewer.elementRef, handler.onHide);
+    this.elementRef = this.dropdown.elementRef;
 
     if (typeof handler.viewer.setEventDelegator === 'function') {
       handler.viewer.setEventDelegator(delegate);

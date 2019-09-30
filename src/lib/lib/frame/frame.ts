@@ -4,7 +4,7 @@ import { debounceTime, filter, throttleTime } from 'rxjs/operators';
 import { template } from './template-html';
 
 export class Frame {
-  readonly host = document.createElement('iframe');
+  readonly elementRef = document.createElement('iframe');
   readonly onSelectionChange: Observable<Range>;
   readonly onLoad: Observable<this>;
   readonly contentDocument: Document;
@@ -16,19 +16,19 @@ export class Frame {
   constructor() {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onLoad = this.loadEvent.asObservable();
-    this.host.classList.add('tanbo-editor');
+    this.elementRef.classList.add('tanbo-editor');
 
-    this.host.src = `javascript:void((function () {
+    this.elementRef.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
                       document.write('${this.editorHTML}');
                       document.close();
                     })())`;
     const self = this;
-    this.host.onload = () => {
-      self.setup(self.host.contentDocument);
-      (<any>self).contentDocument = self.host.contentDocument;
-      (<any>self).contentWindow = self.host.contentWindow;
+    this.elementRef.onload = () => {
+      self.setup(self.elementRef.contentDocument);
+      (<any>self).contentDocument = self.elementRef.contentDocument;
+      (<any>self).contentWindow = self.elementRef.contentWindow;
       this.loadEvent.next(this);
     }
   }

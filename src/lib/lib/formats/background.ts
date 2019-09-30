@@ -10,12 +10,12 @@ const hideEvent = new Subject<void>();
 
 
 class Palette implements DropdownHandlerView {
-  host = document.createElement('div');
+  elementRef = document.createElement('div');
 
   private picker: Picker;
 
   constructor() {
-    this.picker = createPicker(this.host);
+    this.picker = createPicker(this.elementRef);
     this.picker.onSelected = function (ev) {
       updateEvent.next(ev.hex);
       hideEvent.next();
