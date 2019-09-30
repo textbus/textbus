@@ -5,11 +5,11 @@ import { template } from './template-html';
 
 export class EditFrame {
   readonly elementRef = document.createElement('iframe');
-  readonly onSelectionChange: Observable<Range>;
+  readonly onSelectionChange: Observable<void>;
   readonly onLoad: Observable<this>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
-  private selectionChangeEvent = new Subject<Range>();
+  private selectionChangeEvent = new Subject<void>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
 
@@ -43,7 +43,7 @@ export class EditFrame {
     const range = this.contentDocument.createRange();
     range.selectNodeContents(node);
     selection.addRange(range);
-    this.selectionChangeEvent.next(range);
+    this.selectionChangeEvent.next();
   }
 
   private setup(childDocument: Document) {
@@ -59,7 +59,7 @@ export class EditFrame {
       'selectstart',
       'focus'
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next(this.contentDocument.getSelection().getRangeAt(0));
+      this.selectionChangeEvent.next();
     });
     merge(...[
       'keyup',
@@ -79,7 +79,7 @@ export class EditFrame {
       range.selectNode(ev.target);
       selection.removeAllRanges();
       selection.addRange(range);
-      this.selectionChangeEvent.next(range);
+      this.selectionChangeEvent.next();
     });
   }
 }
