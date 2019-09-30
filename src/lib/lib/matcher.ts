@@ -10,6 +10,7 @@ export interface MatchStatus {
 
 export class Matcher {
   private validators: Array<(node: Node) => boolean> = [];
+  private matchChildNodes: HTMLElement[] = [];
 
   constructor(private config: FormatMatch = {}) {
     if (config.tags) {
@@ -83,11 +84,14 @@ export class Matcher {
         break;
       }
     }
+    this.matchChildNodes = [];
 
     return {
       inContainer,
       container: node,
-      matchAllChild: range.collapsed ? false : this.matchAllChild(range, range.commonAncestorContainer),
+      matchAllChild: range.collapsed ?
+        false :
+        this.matchAllChild(range, range.commonAncestorContainer) && this.matchChildNodes.length > 0,
       range,
       config: this.config
     }
@@ -110,6 +114,9 @@ export class Matcher {
             const match = this.validators.map(fn => {
               return fn(child);
             }).indexOf(true) > -1;
+            if (match) {
+              this.matchChildNodes.push(child as HTMLElement);
+            }
             return match || this.matchAllChild(range, child);
           }
           return true;
