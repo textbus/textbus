@@ -6,7 +6,7 @@ export const olHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-list-numbered'],
   tooltip: '有序列表',
   match: {
-    tags: ['OL']
+    tags: ['ol']
   },
   execCommand: new ListFormatter('ol')
 };

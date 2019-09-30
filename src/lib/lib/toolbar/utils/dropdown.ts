@@ -44,8 +44,4 @@ export class Dropdown {
       this.host.classList.remove('tanbo-editor-dropdown-open');
     });
   }
-
-  open() {
-    this.host.classList.add('tanbo-editor-dropdown-open');
-  }
 }

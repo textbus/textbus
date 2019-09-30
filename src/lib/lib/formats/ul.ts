@@ -6,7 +6,7 @@ export const ulHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-list'],
   tooltip: '无序列表',
   match: {
-    tags: ['UL']
+    tags: ['ul']
   },
   execCommand: new ListFormatter('ul')
 };

@@ -6,7 +6,7 @@ export const codeHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-code'],
   tooltip: '代码',
   match: {
-    tags: ['PRE']
+    tags: ['pre']
   },
   execCommand: new ToggleBlockFormatter('pre')
 };

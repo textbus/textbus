@@ -6,7 +6,7 @@ export const superscriptHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-superscript'],
   tooltip: '上标',
   match: {
-    tags: ['SUP']
+    tags: ['sup']
   },
   execCommand: new InlineFormatter('sup')
 };

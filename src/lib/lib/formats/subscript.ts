@@ -6,7 +6,7 @@ export const subscriptHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-subscript'],
   tooltip: '下标',
   match: {
-    tags: ['SUB']
+    tags: ['sub']
   },
   execCommand: new InlineFormatter('sub')
 };

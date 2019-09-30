@@ -39,5 +39,8 @@ export const videoHandler: DropdownHandlerOption = {
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
+  match: {
+    tags: ['video']
+  },
   execCommand: new AttrFormatter('video', updateEvent.asObservable())
 };

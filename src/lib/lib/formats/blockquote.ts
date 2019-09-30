@@ -6,7 +6,7 @@ export const blockquoteHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-quotes-right'],
   tooltip: '引用',
   match: {
-    tags: ['BLOCKQUOTE']
+    tags: ['blockquote']
   },
   execCommand: new ToggleBlockFormatter('blockquote')
 };

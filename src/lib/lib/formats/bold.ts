@@ -6,7 +6,7 @@ export const boldHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-bold'],
   tooltip: '加粗',
   match: {
-    tags: ['STRONG', 'B']
+    tags: ['strong', 'b']
   },
   execCommand: new InlineFormatter('strong')
 };

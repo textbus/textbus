@@ -6,7 +6,7 @@ export const underlineHandler: ButtonHandlerOption = {
   classes: ['tanbo-editor-icon-underline'],
   tooltip: '下划线',
   match: {
-    tags: ['U']
+    tags: ['u']
   },
   execCommand: new InlineFormatter('u')
 };

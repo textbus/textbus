@@ -33,7 +33,6 @@ export class DropdownHandler implements Handler {
     if (status.inContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
       this.handler.viewer.updateStateByElement(status.container as HTMLElement);
-      this.dropdown.open();
     } else {
       this.dropdownButton.classList.remove('tanbo-editor-handler-active');
     }

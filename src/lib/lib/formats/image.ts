@@ -29,5 +29,8 @@ export const imageHandler: DropdownHandlerOption = {
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
+  match: {
+    tags: ['img']
+  },
   execCommand: new AttrFormatter('img', updateEvent.asObservable())
 };

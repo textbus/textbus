@@ -40,7 +40,7 @@ export const linkHandler: DropdownHandlerOption = {
   onHide: hideEvent.asObservable(),
   viewer: form,
   match: {
-    tags: ['A']
+    tags: ['a']
   },
   execCommand: new AttrFormatter('a', updateEvent.asObservable())
 };

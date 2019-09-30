@@ -39,5 +39,8 @@ export const musicHandler: DropdownHandlerOption = {
   tooltip: '音频',
   onHide: hideEvent.asObservable(),
   viewer: form,
+  match: {
+    tags: ['audio']
+  },
   execCommand: new AttrFormatter('audio', updateEvent.asObservable())
 };

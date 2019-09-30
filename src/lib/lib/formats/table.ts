@@ -18,5 +18,8 @@ export const tableHandler: DropdownHandlerOption = {
   tooltip: '表格',
   onHide: hideEvent.asObservable(),
   viewer: new TableViewer(),
+  match: {
+    tags: ['table']
+  },
   execCommand: new StyleFormatter('color', updateEvent.asObservable())
 };
