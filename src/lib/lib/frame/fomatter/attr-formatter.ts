@@ -51,8 +51,10 @@ export class AttrFormatter implements Formatter {
       });
       if (!this.containsChild) {
         range.rawRange.collapse();
+        range.rawRange.insertNode(container);
+      } else {
+        range.rawRange.surroundContents(container);
       }
-      range.rawRange.surroundContents(container);
     }
   }
 }

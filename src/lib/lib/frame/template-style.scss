@@ -1,6 +1,9 @@
 @import "~@tanbo/css-themes/themes/scss/default";
 
-html { height: 100% }
+html {
+  height: 100%
+}
+
 body {
   min-height: 100%;
   font-size: 14px;
@@ -11,6 +14,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+
 p {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -55,5 +59,130 @@ pre {
 }
 
 code, kbd, pre, samp {
-  font-family: Microsoft YaHei Mono,Menlo,Monaco,Consolas,Courier New,monospace;
+  font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+}
+
+
+table {
+  border-spacing: 0;
+  //border-collapse: separate;
+  //border-collapse: collapse;
+  width: 100%;
+  min-width: 100%;
+  margin-bottom: 1em;
+  background-color: #fff;
+
+  > thead {
+    > tr {
+      > th, > td {
+        text-align: left;
+        font-weight: 500;
+        padding: 8px;
+        border-bottom: 1px solid $color-gray-light;
+        background-color: $color-lighter;
+        &:first-child {
+          padding-left: 15px;
+        }
+
+        &:last-child {
+          padding-right: 15px;
+        }
+      }
+    }
+  }
+
+  > tfoot {
+    > tr {
+      > th, > td {
+        background-color: lighten($color-light, 3);
+      }
+    }
+  }
+
+  > tbody, > tfoot {
+
+    > tr {
+      > td {
+        font-weight: 400;
+        padding: 8px;
+        border-bottom: 1px solid $color-light;
+
+        &:first-child {
+          padding-left: 15px;
+        }
+
+        &:last-child {
+          padding-right: 15px;
+        }
+      }
+
+      > th {
+        font-weight: 500;
+        text-align: right;
+        padding: 8px;
+        border-bottom: 1px solid $color-light;
+
+        &:first-child {
+          padding-left: 15px;
+        }
+
+        &:last-child {
+          padding-right: 15px;
+        }
+      }
+    }
+  }
+
+  > thead, > tbody, > tfoot {
+    &:first-child {
+      > tr:first-child {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+
+        > td, > th {
+          &:first-child {
+            border-top-left-radius: 4px;
+          }
+
+          &:last-child {
+            border-top-right-radius: 4px;
+          }
+        }
+      }
+    }
+
+    &:last-child {
+      > tr:last-child {
+        > td, > th {
+          &:first-child {
+            border-bottom-left-radius: 4px;
+          }
+
+          &:last-child {
+            border-bottom-right-radius: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  > thead, > tbody, > tfoot {
+    &:first-child {
+      > tr:first-child {
+        > th, > td {
+          border-top: 1px solid $color-light;
+        }
+      }
+    }
+
+    > tr {
+      > td, > th {
+        border-left: 1px solid $color-light;
+
+        &:last-child {
+          border-right: 1px solid $color-light;
+        }
+      }
+    }
+  }
 }

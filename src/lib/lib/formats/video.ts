@@ -16,7 +16,7 @@ const form = new Form([{
   uploadBtnText: '上传新视频'
 }, {
   type: AttrType.Switch,
-  label: '是否自动播放',
+  label: '自动播放',
   required: true,
   checked: false,
   name: 'autoplay'
