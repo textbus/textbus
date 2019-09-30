@@ -52,7 +52,7 @@ export class TableFormatter implements Formatter {
 
   private createColumns(doc: Document): HTMLTableCellElement[] {
     const result = [];
-    for (let i = 0; i < this.rows; i++) {
+    for (let i = 0; i < this.cols; i++) {
       result.push(doc.createElement('td'));
     }
     return result;
