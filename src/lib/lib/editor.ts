@@ -114,9 +114,10 @@ export class Editor implements EventDelegate {
   }
 
   private updateToolbarStatus() {
-    const range = this.editor.contentDocument.getSelection().getRangeAt(0);
+    const doc = this.editor.contentDocument;
+    const range = doc.getSelection().getRangeAt(0);
     this.handlers.forEach(handler => {
-      handler.updateStatus(handler.matcher.match(this.editor.contentDocument, range));
+      handler.updateStatus(handler.matcher.match(this.editor, range));
     });
   }
 
@@ -125,7 +126,7 @@ export class Editor implements EventDelegate {
     button.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-      option.execCommand.format(range, this.editor, button.matcher.match(doc, range.rawRange));
+      option.execCommand.format(range, this.editor, button.matcher.match(this.editor, range.rawRange));
       if (option.execCommand.recordHistory) {
         this.editor.recordSnapshot();
       } else {
@@ -142,7 +143,7 @@ export class Editor implements EventDelegate {
       item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
         const doc = this.editor.contentDocument;
         const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-        item.execCommand.format(range, this.editor, item.matcher.match(doc, range.rawRange));
+        item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));
 
         if (item.execCommand.recordHistory) {
           this.editor.recordSnapshot();
@@ -161,7 +162,7 @@ export class Editor implements EventDelegate {
     dropdown.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-      handler.execCommand.format(range, this.editor, dropdown.matcher.match(doc, range.rawRange));
+      handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor, range.rawRange));
 
       if (handler.execCommand.recordHistory) {
         this.editor.recordSnapshot();

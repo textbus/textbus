@@ -39,6 +39,10 @@
   &:active {
     background-color: $color-gray-light;
   }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .tanbo-editor-select-button {

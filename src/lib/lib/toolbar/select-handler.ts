@@ -74,6 +74,7 @@ export class SelectOptionHandler implements Handler {
   }
 
   updateStatus(status: MatchStatus): void {
+    this.elementRef.disabled = status.disable;
     if (status.inContainer || status.matchAllChild) {
       this.matchedEvent.next(this.option);
     }

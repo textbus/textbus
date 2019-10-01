@@ -30,6 +30,8 @@ export class DropdownHandler implements Handler {
   }
 
   updateStatus(status: MatchStatus): void {
+    this.dropdownButton.disabled = status.disable;
+
     if (status.inContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
       this.handler.viewer.updateStateByElement(status.container as HTMLElement);

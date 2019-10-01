@@ -9,6 +9,15 @@ export class EditFrame {
   readonly onLoad: Observable<this>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
+
+  get canBack() {
+    return this.historySequence.length > 0 && this.historyIndex > 0;
+  }
+
+  get canForward() {
+    return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
+  }
+
   private selectionChangeEvent = new Subject<void>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
@@ -36,7 +45,7 @@ export class EditFrame {
   }
 
   back() {
-    if (this.historyIndex > 0 && this.historySequence.length) {
+    if (this.canBack) {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
       this.apply();
@@ -44,7 +53,7 @@ export class EditFrame {
   }
 
   forward() {
-    if (this.historyIndex <= this.historySequence.length - 2) {
+    if (this.canForward) {
       this.historyIndex++;
       this.apply();
     }

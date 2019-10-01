@@ -22,6 +22,8 @@ export class ButtonHandler implements Handler {
   }
 
   updateStatus(status: MatchStatus): void {
+    this.elementRef.disabled = status.disable;
+
     if (status.inContainer || status.matchAllChild) {
       this.elementRef.classList.add('tanbo-editor-handler-active');
     } else {

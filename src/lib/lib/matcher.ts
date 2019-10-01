@@ -1,4 +1,5 @@
 import { FormatMatch } from './toolbar/help';
+import { EditFrame } from './edit-frame/edit-frame';
 
 export interface MatchStatus {
   inContainer: boolean;
@@ -6,6 +7,7 @@ export interface MatchStatus {
   matchAllChild: boolean;
   range: Range;
   config: FormatMatch;
+  disable: boolean;
 }
 
 export class Matcher {
@@ -71,7 +73,7 @@ export class Matcher {
     }
   }
 
-  match(context: Document, range: Range): MatchStatus {
+  match(frame: EditFrame, range: Range): MatchStatus {
     let inContainer = false;
     let node = range.commonAncestorContainer;
     while (node) {
@@ -80,7 +82,7 @@ export class Matcher {
         break;
       }
       node = node.parentNode;
-      if (node === context.body) {
+      if (node === frame.contentDocument.body) {
         break;
       }
     }
@@ -98,7 +100,8 @@ export class Matcher {
       container: node,
       matchAllChild,
       range,
-      config: this.config
+      config: this.config,
+      disable: typeof this.config.canUse === 'function' ? !this.config.canUse(range, frame) : false
     }
   }
 
@@ -130,13 +133,4 @@ export class Matcher {
     }
     return true;
   }
-
-  // private getNodePaths(node: Node, scope: Node): Node[] {
-  //   const paths: Node[] = [];
-  //   while (node !== scope && node) {
-  //     paths.push(node);
-  //     node = node.parentNode;
-  //   }
-  //   return paths;
-  // }
 }

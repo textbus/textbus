@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Matcher, MatchStatus } from '../matcher';
 import { EventDelegate } from '../help';
+import { EditFrame } from '../edit-frame/edit-frame';
 
 export enum HandlerType {
   Button,
@@ -24,6 +25,7 @@ export interface FormatMatch {
   styles?: FormatMatchStyles;
   classes?: string[];
   attrs?: FormatAttr[];
+  canUse?(range: Range, frame: EditFrame): boolean;
 }
 
 export interface ButtonHandlerOption {
@@ -52,8 +54,11 @@ export interface SelectHandlerOption {
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
+
   updateStateByElement(el: HTMLElement): void;
+
   reset?(): void;
+
   setEventDelegator?(delegate: EventDelegate): void;
 }
 
