@@ -5,6 +5,8 @@ import { EditFrame } from '../edit-frame';
 import { findBlockContainer } from '../utils';
 
 export class BlockFormatter implements Formatter {
+  readonly recordHistory = true;
+
   constructor(private tagName: string) {
   }
 

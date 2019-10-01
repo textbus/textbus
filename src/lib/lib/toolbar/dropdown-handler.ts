@@ -8,12 +8,12 @@ import { EventDelegate } from '../help';
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
   matcher: Matcher;
-  onCompleted: Observable<any>;
+  onApply: Observable<any>;
   private dropdownButton = document.createElement('button');
   private dropdown: Dropdown;
 
   constructor(private handler: DropdownHandlerOption, private delegate: EventDelegate) {
-    this.onCompleted = handler.onHide;
+    this.onApply = handler.onHide;
 
     this.matcher = new Matcher(handler.match);
     this.dropdownButton.type = 'button';

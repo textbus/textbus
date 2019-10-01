@@ -71,7 +71,7 @@ export interface DropdownHandlerOption {
 
 export interface Handler {
   elementRef: HTMLElement;
-  onCompleted: Observable<any>;
+  onApply: Observable<any>;
   matcher: Matcher;
 
   updateStatus(status: MatchStatus): void;

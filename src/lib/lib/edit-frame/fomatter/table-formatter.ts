@@ -7,6 +7,7 @@ import { MatchStatus } from '../../matcher';
 import { AttrState } from '../../formats/forms/help';
 
 export class TableFormatter implements Formatter {
+  readonly recordHistory = true;
   private rows = 0;
   private cols = 0;
   private header = false;

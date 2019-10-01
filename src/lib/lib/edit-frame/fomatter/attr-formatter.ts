@@ -7,6 +7,7 @@ import { MatchStatus } from '../../matcher';
 import { AttrState } from '../../formats/forms/help';
 
 export class AttrFormatter implements Formatter {
+  readonly recordHistory = true;
   private attrs: AttrState[] = [];
 
   constructor(private tagName: string,

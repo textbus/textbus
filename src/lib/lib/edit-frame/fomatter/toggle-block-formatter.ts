@@ -5,6 +5,8 @@ import { MatchStatus } from '../../matcher';
 import { findBlockContainer, takeOffWrapper } from '../utils';
 
 export class ToggleBlockFormatter implements Formatter {
+  readonly recordHistory = true;
+
   constructor(private tagName: string) {
   }
 

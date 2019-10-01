@@ -19,7 +19,7 @@ import { DropdownHandler } from './toolbar/dropdown-handler';
 
 export class Editor implements EventDelegate {
   readonly host = document.createElement('div');
-  readonly editor = new EditFrame();
+  readonly editor: EditFrame;
   readonly paths = new Paths();
   readonly onReady: Observable<this>;
 
@@ -31,6 +31,7 @@ export class Editor implements EventDelegate {
   private readyState = false;
 
   constructor(selector: string | HTMLElement, private options: EditorOptions = {}) {
+    this.editor = new EditFrame(options.historyStackSize);
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
@@ -121,11 +122,15 @@ export class Editor implements EventDelegate {
 
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
-    button.onCompleted.pipe(filter(() => this.readyState)).subscribe(() => {
+    button.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
       option.execCommand.format(range, this.editor, button.matcher.match(doc, range.rawRange));
-      doc.body.focus();
+      if (option.execCommand.recordHistory) {
+        this.editor.recordSnapshot();
+      } else {
+        doc.body.focus();
+      }
     });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
@@ -134,11 +139,16 @@ export class Editor implements EventDelegate {
   private addSelectHandler(option: SelectHandlerOption) {
     const select = new SelectHandler(option);
     select.options.forEach(item => {
-      item.onCompleted.pipe(filter(() => this.readyState)).subscribe(() => {
+      item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
         const doc = this.editor.contentDocument;
         const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
         item.execCommand.format(range, this.editor, item.matcher.match(doc, range.rawRange));
-        this.editor.contentDocument.body.focus();
+
+        if (item.execCommand.recordHistory) {
+          this.editor.recordSnapshot();
+        } else {
+          doc.body.focus();
+        }
       });
       this.handlers.push(item);
     });
@@ -148,11 +158,16 @@ export class Editor implements EventDelegate {
   private addDropdownHandler(handler: DropdownHandlerOption) {
     const dropdown = new DropdownHandler(handler, this);
     this.toolbar.appendChild(dropdown.elementRef);
-    dropdown.onCompleted.pipe(filter(() => this.readyState)).subscribe(() => {
+    dropdown.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
       handler.execCommand.format(range, this.editor, dropdown.matcher.match(doc, range.rawRange));
-      this.editor.contentDocument.body.focus();
+
+      if (handler.execCommand.recordHistory) {
+        this.editor.recordSnapshot();
+      } else {
+        doc.body.focus();
+      }
     });
     this.handlers.push(dropdown);
   }

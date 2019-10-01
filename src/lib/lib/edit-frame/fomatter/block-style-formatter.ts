@@ -5,6 +5,8 @@ import { MatchStatus } from '../../matcher';
 import { findBlockContainer } from '../utils';
 
 export class BlockStyleFormatter implements Formatter {
+  readonly recordHistory = true;
+
   constructor(private name: string,
               private value: string | number) {
   }

@@ -1,5 +1,5 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, filter, throttleTime } from 'rxjs/operators';
+import { debounceTime, filter, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
 
@@ -12,8 +12,10 @@ export class EditFrame {
   private selectionChangeEvent = new Subject<void>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
+  private historySequence: Array<{ node: HTMLElement, innerHTML: string }> = [];
+  private historyIndex = 0;
 
-  constructor(private historyStackSize = 20) {
+  constructor(private historyStackSize = 50) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onLoad = this.loadEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor');
@@ -26,23 +28,40 @@ export class EditFrame {
                     })())`;
     const self = this;
     this.elementRef.onload = () => {
-      self.setup(self.elementRef.contentDocument);
       (<any>self).contentDocument = self.elementRef.contentDocument;
       (<any>self).contentWindow = self.elementRef.contentWindow;
+      self.setup(self.elementRef.contentDocument);
       this.loadEvent.next(this);
     }
   }
 
   back() {
-
+    if (this.historyIndex > 0 && this.historySequence.length) {
+      this.historyIndex--;
+      this.historyIndex = Math.max(0, this.historyIndex);
+      this.apply();
+    }
   }
 
   forward() {
-
+    if (this.historyIndex <= this.historySequence.length - 2) {
+      this.historyIndex++;
+      this.apply();
+    }
   }
 
-  push() {
-
+  recordSnapshot() {
+    if (this.historySequence.length !== this.historyIndex) {
+      this.historySequence.length = this.historyIndex + 1;
+    }
+    this.historySequence.push({
+      node: this.contentDocument.body.cloneNode() as HTMLElement,
+      innerHTML: this.contentDocument.body.innerHTML
+    });
+    if (this.historySequence.length > this.historyStackSize) {
+      this.historySequence.shift();
+    }
+    this.historyIndex = this.historySequence.length - 1;
   }
 
   /**
@@ -58,8 +77,20 @@ export class EditFrame {
     this.selectionChangeEvent.next();
   }
 
+  private apply() {
+    const snapshot = this.historySequence[this.historyIndex];
+    if (snapshot) {
+      Array.from(snapshot.node.attributes).forEach(attr => {
+        this.contentDocument.body.setAttribute(attr.name, attr.value);
+      });
+      this.contentDocument.body.innerHTML = snapshot.innerHTML;
+    }
+  }
+
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
+    this.autoRecordHistory(childBody);
+
     merge(...[
       'click',
       'contextmenu',
@@ -70,7 +101,7 @@ export class EditFrame {
       'mouseup',
       'selectstart',
       'focus'
-    ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100), throttleTime(100)).subscribe(() => {
+    ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100)).subscribe(() => {
       this.selectionChangeEvent.next();
     });
     merge(...[
@@ -92,6 +123,46 @@ export class EditFrame {
       selection.removeAllRanges();
       selection.addRange(range);
       this.selectionChangeEvent.next();
+    });
+    childDocument.addEventListener('keydown', (ev: KeyboardEvent) => {
+      if (ev.ctrlKey && ev.code === 'KeyZ') {
+        ev.shiftKey ? this.forward() : this.back();
+        ev.preventDefault();
+        return false;
+      }
+    });
+  }
+
+  private autoRecordHistory(body: HTMLElement) {
+    this.recordSnapshot();
+
+    let changeCount = 0;
+
+    const obs = merge(
+      fromEvent(body, 'keydown').pipe(tap(() => {
+        changeCount++;
+      }), sampleTime(5000)),
+      ...[
+        'paste',
+        'cut'
+      ].map(type => fromEvent(body, type)));
+
+
+    let sub = obs.subscribe(() => {
+      changeCount = 0;
+      this.recordSnapshot();
+    });
+
+    fromEvent(body, 'blur').subscribe(() => {
+      if (changeCount) {
+        this.recordSnapshot();
+        changeCount = 0;
+        sub.unsubscribe();
+        sub = obs.subscribe(() => {
+          changeCount = 0;
+          this.recordSnapshot();
+        });
+      }
     });
   }
 }

@@ -6,6 +6,7 @@ import { EditFrame } from '../edit-frame';
 import { MatchStatus } from '../../matcher';
 
 export class StyleFormatter implements Formatter {
+  readonly recordHistory = true;
   private value: string | number;
 
   constructor(private name: string,

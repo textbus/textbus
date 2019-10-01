@@ -4,6 +4,7 @@ import { MatchStatus } from '../../matcher';
 import { EditFrame } from '../edit-frame';
 
 export class ListFormatter implements Formatter {
+  readonly recordHistory = true;
   readonly document: Document;
   private rawTagKey = '__tanbo_editor_raw_tag__';
 

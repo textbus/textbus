@@ -5,6 +5,7 @@ import { EditFrame } from '../edit-frame';
 import { matchContainerByTagName, takeOffWrapper } from '../utils';
 
 export class InlineFormatter implements Formatter {
+  readonly recordHistory = true;
   private document: Document;
 
   constructor(private tagName: string) {
