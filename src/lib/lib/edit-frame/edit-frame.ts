@@ -13,7 +13,7 @@ export class EditFrame {
   private loadEvent = new Subject<this>();
   private editorHTML = template;
 
-  constructor() {
+  constructor(private historyStackSize = 20) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onLoad = this.loadEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor');
@@ -31,6 +31,18 @@ export class EditFrame {
       (<any>self).contentWindow = self.elementRef.contentWindow;
       this.loadEvent.next(this);
     }
+  }
+
+  back() {
+
+  }
+
+  forward() {
+
+  }
+
+  push() {
+
   }
 
   /**

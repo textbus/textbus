@@ -12,6 +12,8 @@ export { codeHandler } from './code';
 export { colorHandler } from './color';
 export { fontFamilyHandler } from './font-family';
 export { hHandler } from './h';
+export { historyBackHandler } from './history-back';
+export { historyForwardHandler } from './history-forward';
 export { imageHandler } from './image';
 export { italicHandler } from './italic';
 export { linkHandler } from './link';
