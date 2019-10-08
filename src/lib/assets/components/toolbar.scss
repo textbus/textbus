@@ -205,3 +205,24 @@
   min-width: 100%;
   overflow: hidden;
 }
+
+.tanbo-editor-action-sheet-menu {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.tanbo-editor-action-sheet-item {
+  display: block;
+  padding: 5px 15px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  outline: none;
+  font-size: 1em;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    color: $color-primary;
+  }
+}

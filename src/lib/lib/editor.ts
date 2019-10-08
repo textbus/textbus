@@ -10,12 +10,14 @@ import {
   HandlerOption,
   HandlerType,
   SelectHandlerOption,
-  Handler
+  Handler,
+  ActionSheetHandlerOption
 } from './toolbar/help';
 import { ButtonHandler } from './toolbar/button-handler';
 import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
+import { ActionSheetHandler } from './toolbar/action-sheet-handler';
 
 export class Editor implements EventDelegate {
   readonly host = document.createElement('div');
@@ -81,12 +83,18 @@ export class Editor implements EventDelegate {
 
   addHandler(option: HandlerOption) {
     this.isFirst = false;
-    if (option.type === HandlerType.Button) {
-      this.addButtonHandler(option);
-    } else if (option.type === HandlerType.Select) {
-      this.addSelectHandler(option);
-    } else if (option.type === HandlerType.Dropdown) {
-      this.addDropdownHandler(option);
+    switch (option.type) {
+      case HandlerType.Button:
+        this.addButtonHandler(option);
+        break;
+      case HandlerType.Select:
+        this.addSelectHandler(option);
+        break;
+      case HandlerType.Dropdown:
+        this.addDropdownHandler(option);
+        break;
+      case HandlerType.ActionSheet:
+      this.addActionSheetHandler(option);
     }
   }
 
@@ -171,6 +179,25 @@ export class Editor implements EventDelegate {
       }
     });
     this.handlers.push(dropdown);
+  }
+
+  private addActionSheetHandler(handler: ActionSheetHandlerOption) {
+    const actionSheet = new ActionSheetHandler(handler);
+    this.toolbar.appendChild(actionSheet.elementRef);
+    actionSheet.options.forEach(item => {
+      item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
+        const doc = this.editor.contentDocument;
+        const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
+        item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));
+
+        if (item.execCommand.recordHistory) {
+          this.editor.recordSnapshot();
+        } else {
+          doc.body.focus();
+        }
+      });
+      this.handlers.push(item);
+    });
   }
 
   private static createSplitLine() {

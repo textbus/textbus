@@ -8,7 +8,8 @@ import { EditFrame } from '../edit-frame/edit-frame';
 export enum HandlerType {
   Button,
   Select,
-  Dropdown
+  Dropdown,
+  ActionSheet
 }
 
 export interface FormatMatchStyles {
@@ -25,6 +26,7 @@ export interface FormatMatch {
   styles?: FormatMatchStyles;
   classes?: string[];
   attrs?: FormatAttr[];
+
   canUse?(range: Range, frame: EditFrame): boolean;
 }
 
@@ -74,6 +76,20 @@ export interface DropdownHandlerOption {
   match?: FormatMatch;
 }
 
+export interface ActionSheetHandlerItemOption {
+  execCommand: Formatter;
+  label: string;
+  match?: FormatMatch;
+  classes?: string[];
+}
+
+export interface ActionSheetHandlerOption {
+  type: HandlerType.ActionSheet;
+  actions: ActionSheetHandlerItemOption[];
+  classes?: string[];
+  tooltip?: string;
+}
+
 export interface Handler {
   elementRef: HTMLElement;
   onApply: Observable<any>;
@@ -82,4 +98,8 @@ export interface Handler {
   updateStatus(status: MatchStatus): void;
 }
 
-export type HandlerOption = DropdownHandlerOption | ButtonHandlerOption | SelectHandlerOption;
+export type HandlerOption =
+  DropdownHandlerOption
+  | ButtonHandlerOption
+  | SelectHandlerOption
+  | ActionSheetHandlerOption;

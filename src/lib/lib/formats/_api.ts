@@ -23,6 +23,7 @@ export { strikeThroughHandler } from './strike-through';
 export { subscriptHandler } from './subscript';
 export { superscriptHandler } from './superscript';
 export { tableHandler } from './table';
+export { tableEditHandler } from './table-edit';
 export { ulHandler } from './ul';
 export { underlineHandler } from './underline';
 export { videoHandler } from './video';

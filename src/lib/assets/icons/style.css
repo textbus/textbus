@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?pv7nsp') format('truetype'),
-    url('fonts/tanbo-editor.woff?pv7nsp') format('woff'),
-    url('fonts/tanbo-editor.svg?pv7nsp#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?jtre05') format('truetype'),
+    url('fonts/tanbo-editor.woff?jtre05') format('woff'),
+    url('fonts/tanbo-editor.svg?jtre05#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -47,6 +47,12 @@
 }
 .tanbo-editor-icon-upload:before {
   content: "\e961";
+}
+.tanbo-editor-icon-history-back:before {
+  content: "\e967";
+}
+.tanbo-editor-icon-history-forward:before {
+  content: "\e968";
 }
 .tanbo-editor-icon-quotes-right:before {
   content: "\e978";
@@ -96,9 +102,48 @@
 .tanbo-editor-icon-code:before {
   content: "\ea80";
 }
-.tanbo-editor-icon-history-back:before {
-  content: "\e967";
+.tanbo-editor-icon-table-edit:before {
+  content: "\e903";
 }
-.tanbo-editor-icon-history-forward:before {
-  content: "\e968";
+.tanbo-editor-icon-table-split-columns:before {
+  content: "\e904";
+}
+.tanbo-editor-icon-table-split-rows:before {
+  content: "\e905";
+}
+.tanbo-editor-icon-table-delete-row-top:before {
+  content: "\e906";
+}
+.tanbo-editor-icon-table-delete-row-bottom:before {
+  content: "\e907";
+}
+.tanbo-editor-icon-table-delete-column-right:before {
+  content: "\e908";
+}
+.tanbo-editor-icon-table-delete-column-left:before {
+  content: "\e909";
+}
+.tanbo-editor-icon-table-add-row-top:before {
+  content: "\e90a";
+}
+.tanbo-editor-icon-table-add-row-bottom:before {
+  content: "\e90b";
+}
+.tanbo-editor-icon-table-merge-top:before {
+  content: "\e90c";
+}
+.tanbo-editor-icon-table-merge-bottom:before {
+  content: "\e90e";
+}
+.tanbo-editor-icon-table-merge-right:before {
+  content: "\e90f";
+}
+.tanbo-editor-icon-table-merge-left:before {
+  content: "\e910";
+}
+.tanbo-editor-icon-table-add-column-right:before {
+  content: "\e912";
+}
+.tanbo-editor-icon-table-add-column-left:before {
+  content: "\e914";
 }

@@ -23,6 +23,7 @@ import {
   videoHandler,
   alignHandler,
   tableHandler,
+  tableEditHandler,
   cleanHandler
 } from './lib/formats/_api';
 
@@ -62,7 +63,8 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ], [
         alignHandler
       ], [
-        tableHandler
+        tableHandler,
+        tableEditHandler
       ], [
         cleanHandler
       ]
