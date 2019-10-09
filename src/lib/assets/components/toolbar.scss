@@ -6,6 +6,7 @@
   font-size: 14px;
   color: $color-default;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  user-select: none;
 }
 
 .tanbo-editor-split-line {
@@ -39,6 +40,7 @@
   &:active {
     background-color: $color-gray-light;
   }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -79,7 +81,7 @@
 
 .tanbo-editor-select-menu-item {
   display: block;
-  padding: 5px 15px;
+  padding: 3px 20px;
   background: none;
   border: none;
   width: 100%;
@@ -89,8 +91,13 @@
   cursor: pointer;
   white-space: nowrap;
 
+  &:before {
+    margin-right: .5em;
+  }
+
   &:hover {
-    color: $color-primary;
+    color: #fff;
+    background-color: $color-primary;
   }
 
   &-h1 {
@@ -222,7 +229,13 @@
   font-size: 1em;
   cursor: pointer;
   white-space: nowrap;
+
   &:hover {
-    color: $color-primary;
+    color: #fff;
+    background-color: $color-primary;
+  }
+
+  &:before {
+    margin-right: .5em;
   }
 }

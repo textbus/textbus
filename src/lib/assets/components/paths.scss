@@ -3,6 +3,7 @@
   padding: 4px 15px;
   font-size: 12px;
   background-color: lighten($color-lighter, 1);
+  user-select: none;
   &:before {
     content: "路径：";
   }

@@ -6,7 +6,7 @@ export const alignHandler: SelectHandlerOption = {
   tooltip: '对齐方式',
   options: [
     {
-      label: ' 左对齐',
+      label: '左对齐',
       classes: ['tanbo-editor-icon-paragraph-left'],
       match: {
         styles: {
@@ -16,7 +16,7 @@ export const alignHandler: SelectHandlerOption = {
       execCommand: new BlockStyleFormatter('textAlign', 'left'),
       default: true
     }, {
-      label: ' 右对齐',
+      label: '右对齐',
       classes: ['tanbo-editor-icon-paragraph-right'],
       match: {
         styles: {
@@ -25,7 +25,7 @@ export const alignHandler: SelectHandlerOption = {
       },
       execCommand: new BlockStyleFormatter('textAlign', 'right'),
     }, {
-      label: ' 居中对齐',
+      label: '居中对齐',
       classes: ['tanbo-editor-icon-paragraph-center'],
       match: {
         styles: {
@@ -34,7 +34,7 @@ export const alignHandler: SelectHandlerOption = {
       },
       execCommand: new BlockStyleFormatter('textAlign', 'center'),
     }, {
-      label: ' 分散对齐',
+      label: '分散对齐',
       classes: ['tanbo-editor-icon-paragraph-justify'],
       match: {
         styles: {
