@@ -5,6 +5,7 @@ tsconfig.json
 tsconfig-build.json
 webpack.config.js
 webpack-sass.config.js
+webpack-template-style.config.js
 gulpfile.js
 .gitignore
 .npmignore
