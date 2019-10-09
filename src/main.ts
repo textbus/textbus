@@ -12,6 +12,8 @@ const editor = createEditor('#editor', {
   content: '<html><body><div>测试</div></body></html>'
 });
 
+editor.updateContentHTML('<p>test</p>')
+
 editor.onChange.subscribe(result => {
   console.log(result);
 });

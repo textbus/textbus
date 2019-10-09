@@ -20,23 +20,23 @@ import { DropdownHandler } from './toolbar/dropdown-handler';
 import { ActionSheetHandler } from './toolbar/action-sheet-handler';
 
 export class Editor implements EventDelegate {
-  onReady: Observable<this>;
   onChange: Observable<string>;
-  readonly host = document.createElement('div');
-  readonly editor: EditFrame;
-  readonly paths = new Paths();
+  readonly elementRef = document.createElement('div');
 
-  private toolbar = document.createElement('div');
-  private container: HTMLElement;
+  private readonly editor: EditFrame;
+  private readonly paths = new Paths();
+  private readonly toolbar = document.createElement('div');
+  private readonly container: HTMLElement;
+  private readonly handlers: Handler[] = [];
   private isFirst = true;
-  private handlers: Handler[] = [];
+  private canApplyAction = false;
+
+  private changeEvent = new Subject<string>();
+  private tasks: Array<() => void> = [];
+
   private readyState = false;
 
-  private readyEvent = new Subject<this>();
-  private changeEvent = new Subject<string>();
-
   constructor(selector: string | HTMLElement, private options: EditorOptions = {}) {
-    this.onReady = this.readyEvent.asObservable();
     this.onChange = this.changeEvent.asObservable();
     this.editor = new EditFrame(options.historyStackSize, options.content);
     if (typeof selector === 'string') {
@@ -56,12 +56,12 @@ export class Editor implements EventDelegate {
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
 
-    this.host.appendChild(this.toolbar);
-    this.host.appendChild(this.editor.elementRef);
-    this.host.appendChild(this.paths.elementRef);
+    this.elementRef.appendChild(this.toolbar);
+    this.elementRef.appendChild(this.editor.elementRef);
+    this.elementRef.appendChild(this.paths.elementRef);
 
-    this.host.classList.add('tanbo-editor-container');
-    this.container.appendChild(this.host);
+    this.elementRef.classList.add('tanbo-editor-container');
+    this.container.appendChild(this.elementRef);
 
     this.paths.onCheck.subscribe(node => {
       this.editor.updateSelectionByElement(node);
@@ -74,13 +74,14 @@ export class Editor implements EventDelegate {
     });
     this.editor.onSelectionChange
       .pipe(map(() => {
-        this.readyState = true;
+        this.canApplyAction = true;
         return this.editor.contentDocument.getSelection().getRangeAt(0).endContainer;
       }), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
-    this.editor.onLoad.subscribe(() => {
-      this.readyEvent.next(this);
+    this.editor.onReady.subscribe(() => {
+      this.tasks.forEach(fn => fn());
+      this.readyState = true;
     });
     this.editor.contentChange.subscribe(result => {
       this.changeEvent.next(result);
@@ -128,7 +129,13 @@ export class Editor implements EventDelegate {
   }
 
   updateContentHTML(html: string) {
-    this.editor.setContents(html);
+    if (!this.readyState) {
+      this.tasks.push(() => {
+        this.editor.updateContents(html);
+      });
+      return;
+    }
+    this.editor.updateContents(html);
   }
 
   private updateToolbarStatus() {
@@ -141,7 +148,7 @@ export class Editor implements EventDelegate {
 
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
-    button.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
+    button.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor, range.rawRange));
@@ -158,7 +165,7 @@ export class Editor implements EventDelegate {
   private addSelectHandler(option: SelectHandlerOption) {
     const select = new SelectHandler(option);
     select.options.forEach(item => {
-      item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
+      item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
         const doc = this.editor.contentDocument;
         const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
         item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));
@@ -177,7 +184,7 @@ export class Editor implements EventDelegate {
   private addDropdownHandler(handler: DropdownHandlerOption) {
     const dropdown = new DropdownHandler(handler, this);
     this.toolbar.appendChild(dropdown.elementRef);
-    dropdown.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
+    dropdown.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
       const doc = this.editor.contentDocument;
       const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
       handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor, range.rawRange));
@@ -195,7 +202,7 @@ export class Editor implements EventDelegate {
     const actionSheet = new ActionSheetHandler(handler);
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
-      item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
+      item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
         const doc = this.editor.contentDocument;
         const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
         item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));

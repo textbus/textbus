@@ -6,7 +6,7 @@ import { template } from './template-html';
 export class EditFrame {
   readonly elementRef = document.createElement('iframe');
   readonly onSelectionChange: Observable<void>;
-  readonly onLoad: Observable<this>;
+  readonly onReady: Observable<this>;
   readonly contentChange: Observable<string>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
@@ -21,33 +21,29 @@ export class EditFrame {
 
   private selectionChangeEvent = new Subject<void>();
   private contentChangeEvent = new Subject<string>();
-  private loadEvent = new Subject<this>();
+  private readyEvent = new Subject<this>();
   private editorHTML = template;
   private historySequence: Array<{ node: HTMLElement, innerHTML: string }> = [];
   private historyIndex = 0;
 
   private canPublishChangeEvent = false;
-  private readyState = false;
-
-  private contents: string;
 
   constructor(private historyStackSize = 50, private defaultContents = '<p><br></p>') {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.contentChange = this.contentChangeEvent.asObservable();
-    this.onLoad = this.loadEvent.asObservable();
+    this.onReady = this.readyEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor');
-    this.contents = defaultContents;
 
     this.elementRef.onload = () => {
       (<any>this).contentDocument = this.elementRef.contentDocument;
       (<any>this).contentWindow = this.elementRef.contentWindow;
       (<any>this).contentDocument.body.contentEditable = true;
-      (<any>this).contentDocument.body.innerHTML = this.contents;
-      this.readyState = true;
-      this.setContents(this.contents);
+      (<any>this).contentDocument.body.innerHTML = defaultContents;
       this.setup(this.elementRef.contentDocument);
-      this.autoRecordHistory(this.elementRef.contentDocument.body);
-      this.loadEvent.next(this);
+      this.writeContents(defaultContents).then(() => {
+        this.autoRecordHistory(this.elementRef.contentDocument.body);
+        this.readyEvent.next(this);
+      });
     };
     this.elementRef.src = `javascript:void((function () {
                       document.open();
@@ -86,8 +82,6 @@ export class EditFrame {
       this.historySequence.shift();
     }
     this.historyIndex = this.historySequence.length - 1;
-
-    this.dispatchContentChangeEvent();
   }
 
   /**
@@ -103,25 +97,37 @@ export class EditFrame {
     this.selectionChangeEvent.next();
   }
 
-  setContents(html: string) {
-    const temporaryIframe = document.createElement('iframe');
-    temporaryIframe.onload = () => {
-      this.contents = temporaryIframe.contentDocument.body.innerHTML;
-      if (this.readyState) {
-        this.contentDocument.body.innerHTML = this.contents;
-        this.recordSnapshot();
-      }
-      document.body.removeChild(temporaryIframe);
-    };
-    temporaryIframe.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width:0; height:0; opacity:0';
-    temporaryIframe.src = `javascript:void((function () {
+  updateContents(html: string) {
+    this.writeContents(html).then(() => {
+      this.recordSnapshot();
+      this.dispatchContentChangeEvent();
+    });
+  }
+
+  private writeContents(html: string): Promise<void> {
+    return new Promise<void>(resolve => {
+      const temporaryIframe = document.createElement('iframe');
+      temporaryIframe.onload = () => {
+        this.contentDocument.body.innerHTML = temporaryIframe.contentDocument.body.innerHTML;
+        document.body.removeChild(temporaryIframe);
+        resolve();
+      };
+      temporaryIframe.style.cssText =
+        'position: absolute;' +
+        'left: -9999px;' +
+        'top: -9999px;' +
+        'width:0;' +
+        'height:0;' +
+        'opacity:0';
+      temporaryIframe.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
                       document.write('${html}');
                       document.close();
                     })())`;
 
-    document.body.appendChild(temporaryIframe);
+      document.body.appendChild(temporaryIframe);
+    });
   }
 
   private dispatchContentChangeEvent() {
@@ -201,7 +207,7 @@ ${body.outerHTML}
   private autoRecordHistory(body: HTMLElement) {
     this.canPublishChangeEvent = true;
     let changeCount = 0;
-
+    this.recordSnapshot();
     const obs = merge(
       fromEvent(body, 'keydown').pipe(tap(() => {
         changeCount++;
@@ -211,21 +217,23 @@ ${body.outerHTML}
         'cut'
       ].map(type => fromEvent(body, type)));
 
+    const subscribe = () => {
+      return obs.subscribe(() => {
+        changeCount = 0;
+        this.recordSnapshot();
+        this.dispatchContentChangeEvent();
+      });
+    };
 
-    let sub = obs.subscribe(() => {
-      changeCount = 0;
-      this.recordSnapshot();
-    });
+    let sub = subscribe();
 
     fromEvent(body, 'blur').subscribe(() => {
       if (changeCount) {
         this.recordSnapshot();
+        this.dispatchContentChangeEvent();
         changeCount = 0;
         sub.unsubscribe();
-        sub = obs.subscribe(() => {
-          changeCount = 0;
-          this.recordSnapshot();
-        });
+        sub = subscribe();
       }
     });
   }
