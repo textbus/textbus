@@ -44,8 +44,8 @@ export class EditFrame {
       (<any>this).contentDocument.body.contentEditable = true;
       (<any>this).contentDocument.body.innerHTML = this.contents;
       this.readyState = true;
-      this.setup(this.elementRef.contentDocument);
       this.setContents(this.contents);
+      this.setup(this.elementRef.contentDocument);
       this.autoRecordHistory(this.elementRef.contentDocument.body);
       this.loadEvent.next(this);
     };
