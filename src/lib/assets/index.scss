@@ -1,6 +1,8 @@
 @import "~@tanbo/css-themes/themes/scss/default";
 @import "~@tanbo/color-picker/bundles/color-picker.min.css";
 
+@import "./icons/style.css";
+
 @import "./components/mixin";
 @import "./components/container";
 @import "./components/editor";

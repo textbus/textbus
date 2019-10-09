@@ -24,6 +24,14 @@ module.exports = {
           }
         }
       }, 'sass-loader']
+    }, {
+      test: /\.(woff2?|eot|ttf|otf|svg)(\?.*)?$/,
+      use: [{
+        loader: 'url-loader',
+        options: {
+          limit: 100000
+        }
+      }],
     }]
   },
   plugins: [
