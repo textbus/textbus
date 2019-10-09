@@ -1,4 +1,4 @@
-import { Observable, of, Subject, from } from 'rxjs';
+import { Observable, of, from, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { EditFrame } from './edit-frame/edit-frame';
@@ -20,20 +20,25 @@ import { DropdownHandler } from './toolbar/dropdown-handler';
 import { ActionSheetHandler } from './toolbar/action-sheet-handler';
 
 export class Editor implements EventDelegate {
+  onReady: Observable<this>;
+  onChange: Observable<string>;
   readonly host = document.createElement('div');
   readonly editor: EditFrame;
   readonly paths = new Paths();
-  readonly onReady: Observable<this>;
 
   private toolbar = document.createElement('div');
   private container: HTMLElement;
-  private readyEvent = new Subject<this>();
   private isFirst = true;
   private handlers: Handler[] = [];
   private readyState = false;
 
+  private readyEvent = new Subject<this>();
+  private changeEvent = new Subject<string>();
+
   constructor(selector: string | HTMLElement, private options: EditorOptions = {}) {
-    this.editor = new EditFrame(options.historyStackSize);
+    this.onReady = this.readyEvent.asObservable();
+    this.onChange = this.changeEvent.asObservable();
+    this.editor = new EditFrame(options.historyStackSize, options.content);
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
@@ -48,8 +53,6 @@ export class Editor implements EventDelegate {
         }
       });
     }
-
-    this.onReady = this.readyEvent.asObservable();
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
 
@@ -79,6 +82,9 @@ export class Editor implements EventDelegate {
     this.editor.onLoad.subscribe(() => {
       this.readyEvent.next(this);
     });
+    this.editor.contentChange.subscribe(result => {
+      this.changeEvent.next(result);
+    });
   }
 
   addHandler(option: HandlerOption) {
@@ -94,7 +100,7 @@ export class Editor implements EventDelegate {
         this.addDropdownHandler(option);
         break;
       case HandlerType.ActionSheet:
-      this.addActionSheetHandler(option);
+        this.addActionSheetHandler(option);
     }
   }
 

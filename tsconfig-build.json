@@ -10,7 +10,8 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
-    "outDir": "bundles/"
+    "outDir": "bundles/",
+    "downlevelIteration": true
   },
   "include": [
     "src/lib/"

@@ -1,0 +1,15 @@
+.DS_Store
+node_modules/
+src/
+tsconfig.json
+tsconfig-build.json
+webpack.config.js
+webpack-sass.config.js
+gulpfile.js
+.gitignore
+.npmignore
+npm-debug.log
+package-lock.json
+.idea
+*.swp
+*.swo

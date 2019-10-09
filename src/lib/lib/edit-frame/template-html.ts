@@ -13,6 +13,6 @@ export const template = `
     ${styles}
   </style>
 </head>
-<body contenteditable><p><br></p></body>
+<body><p><br></p></body>
 </html>
 `;

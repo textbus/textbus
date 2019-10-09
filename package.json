@@ -1,11 +1,15 @@
 {
   "name": "@tanbo/editor",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "",
-  "main": "index.js",
+  "main": "./bundles/index.js",
+  "module": "./bundles/index.js",
+  "typings": "./bundles/index.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:lib": "rimraf bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json",
+    "publish:lib": "npm run build:lib && npm publish --access=public"
   },
   "author": "tanbo",
   "license": "ISC",
@@ -14,8 +18,10 @@
     "autoprefixer": "^9.6.1",
     "css-loader": "^3.1.0",
     "file-loader": "^4.1.0",
+    "gulp": "^4.0.2",
     "highlight.js": "^9.15.9",
     "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "node-sass": "^4.12.0",
     "open": "^6.4.0",
     "postcss": "^7.0.17",
@@ -34,7 +40,7 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
-    "@tanbo/color": "0.0.2",
+    "@tanbo/color": "^0.0.2",
     "@tanbo/color-picker": "^0.0.13",
     "@tanbo/css-themes": "^0.0.1",
     "rxjs": "^6.5.2"

@@ -7,6 +7,7 @@ export class EditFrame {
   readonly elementRef = document.createElement('iframe');
   readonly onSelectionChange: Observable<void>;
   readonly onLoad: Observable<this>;
+  readonly contentChange: Observable<string>;
   readonly contentDocument: Document;
   readonly contentWindow: Window;
 
@@ -19,26 +20,31 @@ export class EditFrame {
   }
 
   private selectionChangeEvent = new Subject<void>();
+  private contentChangeEvent = new Subject<string>();
   private loadEvent = new Subject<this>();
   private editorHTML = template;
   private historySequence: Array<{ node: HTMLElement, innerHTML: string }> = [];
   private historyIndex = 0;
 
-  constructor(private historyStackSize = 50) {
+  private canPublishChangeEvent = false;
+
+  constructor(private historyStackSize = 50, private defaultContents?: string) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
+    this.contentChange = this.contentChangeEvent.asObservable();
     this.onLoad = this.loadEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor');
 
     this.elementRef.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
-                      document.write('${this.editorHTML}');
+                      document.write('${defaultContents || this.editorHTML}');
                       document.close();
                     })())`;
     const self = this;
     this.elementRef.onload = () => {
       (<any>self).contentDocument = self.elementRef.contentDocument;
       (<any>self).contentWindow = self.elementRef.contentWindow;
+      (<any>self).contentDocument.body.contentEditable = true;
       self.setup(self.elementRef.contentDocument);
       this.loadEvent.next(this);
     }
@@ -71,6 +77,8 @@ export class EditFrame {
       this.historySequence.shift();
     }
     this.historyIndex = this.historySequence.length - 1;
+
+    this.dispatchContentChangeEvent();
   }
 
   /**
@@ -86,6 +94,24 @@ export class EditFrame {
     this.selectionChangeEvent.next();
   }
 
+  private dispatchContentChangeEvent() {
+    if (!this.canPublishChangeEvent) {
+      return;
+    }
+    const head = this.contentDocument.head;
+    const body = this.contentDocument.body.cloneNode(true) as HTMLElement;
+
+    body.removeAttribute('contentEditable');
+
+    this.contentChangeEvent.next(`
+<!DOCTYPE html>
+<html lang="zh">
+${head.outerHTML}
+${body.outerHTML}
+</html>
+`);
+  }
+
   private apply() {
     const snapshot = this.historySequence[this.historyIndex];
     if (snapshot) {
@@ -93,6 +119,7 @@ export class EditFrame {
         this.contentDocument.body.setAttribute(attr.name, attr.value);
       });
       this.contentDocument.body.innerHTML = snapshot.innerHTML;
+      this.dispatchContentChangeEvent();
     }
   }
 
@@ -144,6 +171,7 @@ export class EditFrame {
 
   private autoRecordHistory(body: HTMLElement) {
     this.recordSnapshot();
+    this.canPublishChangeEvent = true;
 
     let changeCount = 0;
 
