@@ -8,7 +8,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'bundles/lib/edit-frame/'),
-    filename: "template-html.js"
+    filename: "template-html.js",
+    libraryTarget: 'umd'
   },
   optimization: {
     minimize: false

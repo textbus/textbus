@@ -13,6 +13,6 @@ export const template = `
     ${styles}
   </style>
 </head>
-<body><p><br></p></body>
+<body></body>
 </html>
 `;

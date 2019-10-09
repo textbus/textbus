@@ -27,27 +27,36 @@ export class EditFrame {
   private historyIndex = 0;
 
   private canPublishChangeEvent = false;
+  private readyState = false;
 
-  constructor(private historyStackSize = 50, private defaultContents?: string) {
+  private contents: string;
+
+  constructor(private historyStackSize = 50, private defaultContents = '<p><br></p>') {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.contentChange = this.contentChangeEvent.asObservable();
     this.onLoad = this.loadEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor');
+    this.contents = defaultContents;
 
+    this.elementRef.onload = () => {
+      (<any>this).contentDocument = this.elementRef.contentDocument;
+      (<any>this).contentWindow = this.elementRef.contentWindow;
+      (<any>this).contentDocument.body.contentEditable = true;
+      (<any>this).contentDocument.body.innerHTML = this.contents;
+      this.readyState = true;
+      this.setup(this.elementRef.contentDocument);
+      this.setContents(this.contents);
+      this.autoRecordHistory(this.elementRef.contentDocument.body);
+      this.loadEvent.next(this);
+    };
     this.elementRef.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
-                      document.write('${defaultContents || this.editorHTML}');
+                      document.write('${this.editorHTML}');
                       document.close();
                     })())`;
-    const self = this;
-    this.elementRef.onload = () => {
-      (<any>self).contentDocument = self.elementRef.contentDocument;
-      (<any>self).contentWindow = self.elementRef.contentWindow;
-      (<any>self).contentDocument.body.contentEditable = true;
-      self.setup(self.elementRef.contentDocument);
-      this.loadEvent.next(this);
-    }
+
+
   }
 
   back() {
@@ -94,6 +103,27 @@ export class EditFrame {
     this.selectionChangeEvent.next();
   }
 
+  setContents(html: string) {
+    const temporaryIframe = document.createElement('iframe');
+    temporaryIframe.onload = () => {
+      this.contents = temporaryIframe.contentDocument.body.innerHTML;
+      if (this.readyState) {
+        this.contentDocument.body.innerHTML = this.contents;
+        this.recordSnapshot();
+      }
+      document.body.removeChild(temporaryIframe);
+    };
+    temporaryIframe.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width:0; height:0; opacity:0';
+    temporaryIframe.src = `javascript:void((function () {
+                      document.open();
+                      document.domain = '${document.domain}';
+                      document.write('${html}');
+                      document.close();
+                    })())`;
+
+    document.body.appendChild(temporaryIframe);
+  }
+
   private dispatchContentChangeEvent() {
     if (!this.canPublishChangeEvent) {
       return;
@@ -125,7 +155,6 @@ ${body.outerHTML}
 
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
-    this.autoRecordHistory(childBody);
 
     merge(...[
       'click',
@@ -170,9 +199,7 @@ ${body.outerHTML}
   }
 
   private autoRecordHistory(body: HTMLElement) {
-    this.recordSnapshot();
     this.canPublishChangeEvent = true;
-
     let changeCount = 0;
 
     const obs = merge(

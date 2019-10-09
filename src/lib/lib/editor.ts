@@ -127,6 +127,10 @@ export class Editor implements EventDelegate {
     return of('');
   }
 
+  updateContentHTML(html: string) {
+    this.editor.setContents(html);
+  }
+
   private updateToolbarStatus() {
     const doc = this.editor.contentDocument;
     const range = doc.getSelection().getRangeAt(0);
