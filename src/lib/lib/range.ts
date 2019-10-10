@@ -28,34 +28,29 @@ export class TBRange {
     const beforeRange = this.context.createRange();
     const afterRange = this.context.createRange();
 
-    if (rawRange.startContainer.nodeType === 3) {
+    if (rawRange.startContainer.nodeType === 3 &&
+      rawRange.startOffset !== 0 &&
+      rawRange.startOffset !== rawRange.startContainer.textContent.length) {
       const startParent = rawRange.startContainer.parentNode;
       beforeRange.setStart(rawRange.startContainer, 0);
       beforeRange.setEnd(rawRange.startContainer, rawRange.startOffset);
       const contents = beforeRange.extractContents();
-      if (contents.textContent) {
-        startParent.insertBefore(contents, rawRange.startContainer);
-        // 当内容被完全提取后，会留下一个空的，鼠标不能选中的脏文本节点，这会影响程序判断，所以这里需要删除掉
-        if (rawRange.startContainer.textContent === '') {
-          rawRange.startContainer.parentNode.removeChild(rawRange.startContainer);
-        }
-      }
+      startParent.insertBefore(contents, rawRange.startContainer);
     }
 
-    if (rawRange.endContainer.nodeType === 3) {
+    if (rawRange.endContainer.nodeType === 3 &&
+      rawRange.endOffset !== 0 &&
+      rawRange.endOffset !== rawRange.endContainer.textContent.length) {
       const nextSibling = rawRange.endContainer.nextSibling;
       const endParent = rawRange.endContainer.parentNode;
 
       afterRange.setStart(rawRange.endContainer, rawRange.endOffset);
       afterRange.setEndAfter(rawRange.endContainer);
       const contents = afterRange.extractContents();
-      // 确保不是一个空的脏文本节点时，再插入到文档中
-      if (contents.textContent) {
-        if (nextSibling) {
-          endParent.insertBefore(contents, nextSibling);
-        } else {
-          endParent.appendChild(contents);
-        }
+      if (nextSibling) {
+        endParent.insertBefore(contents, nextSibling);
+      } else {
+        endParent.appendChild(contents);
       }
     }
   }

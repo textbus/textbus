@@ -13,43 +13,38 @@
     }
   </style>
   <script>
-    // window.onload = function () {
-    //   var boxes = document.querySelectorAll('div');
-    //   document.body.onmouseup = function () {
-    //     setTimeout(function () {
-    //       var selection = document.getSelection();
-    //       var rawRange = selection.getRangeAt(0);
-    //       console.log(rawRange);
-    //       selection.removeAllRanges();
-    //
-    //       var range = document.createRange();
-    //
-    //       range.selectNode(boxes[0]);
-    //       range.setEnd(boxes[0], 3);
-    //       selection.addRange(range);
-    //
-    //       // range.selectNodeContents(boxes[1]);
-    //       // selection.addRange(range.cloneRange());
-    //       //
-    //       // range.selectNodeContents(boxes[2]);
-    //       // range.setStartBefore(boxes[2]);
-    //       // selection.addRange(range.cloneRange());
-    //       //
-    //       // range.selectNodeContents(boxes[3]);
-    //       // range.setEndAfter(boxes[3]);
-    //       // selection.addRange(range.cloneRange());
-    //       console.log(range);
-    //     }, 200);
-    //   }
-    // }
+    window.onload = function () {
+      var boxes = document.querySelectorAll('div');
+      document.body.onmouseup = function () {
+        setTimeout(function () {
+          var selection = document.getSelection();
+          var rawRange = selection.getRangeAt(0);
+          console.log(rawRange);
+          selection.removeAllRanges();
+
+          var range = document.createRange();
+          var node = boxes[0].childNodes[0];
+          range.setStart(node, 0);
+          range.setEnd(node, node.textContent.length);
+          selection.addRange(range);
+
+          // range.selectNodeContents(boxes[1]);
+          // selection.addRange(range.cloneRange());
+          //
+          // range.selectNodeContents(boxes[2]);
+          // range.setStartBefore(boxes[2]);
+          // selection.addRange(range.cloneRange());
+          //
+          // range.selectNodeContents(boxes[3]);
+          // range.setEndAfter(boxes[3]);
+          // selection.addRange(range.cloneRange());
+          console.log(range);
+        }, 200);
+      }
+    }
   </script>
 </head>
 <body contenteditable>
-<div>_______<span>aaaaaaa</span></div>
-<div>_______<span>aaaaaaa</span></div>
-<div>_______<span>aaaaaaa</span></div>
-<div>_______<span>aaaaaaa</span></div>
-
-<div>fdsafdasf<span>fdsad<i>fdsafd</i></span></div>
+<div>1234<span>fdsad<i>fdsafd</i></span></div>
 </body>
 </html>

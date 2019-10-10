@@ -9,10 +9,10 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: '<html><body><div>测试</div></body></html>'
+  content: '<html><body><div>fdsafdasfdsafdsafdsa</div></body></html>'
 });
 
-editor.updateContentHTML('<p>test</p>')
+// editor.updateContentHTML('<p>test</p>')
 
 editor.onChange.subscribe(result => {
   console.log(result);
