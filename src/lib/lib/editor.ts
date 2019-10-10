@@ -138,6 +138,16 @@ export class Editor implements EventDelegate {
     this.editor.updateContents(html);
   }
 
+  focus() {
+    if (!this.readyState) {
+      this.tasks.push(() => {
+        this.editor.contentDocument.body.focus();
+      });
+      return;
+    }
+    this.editor.contentDocument.body.focus();
+  }
+
   private updateToolbarStatus() {
     const doc = this.editor.contentDocument;
     const range = doc.getSelection().getRangeAt(0);
