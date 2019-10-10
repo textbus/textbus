@@ -8,16 +8,12 @@ export enum TableEditActions {
   AddColumnToRight,
   AddRowToTop,
   AddRowToBottom,
-  mergeCellToLeft,
-  mergeCellToRight,
-  mergeCellToTop,
-  mergeCellToBottom,
+  mergeCells,
+  splitCells,
   deleteTopRow,
   deleteBottomRow,
   deleteLeftColumn,
-  deleteRightColumn,
-  splitRows,
-  splitColumns
+  deleteRightColumn
 }
 
 export class TableEditFormatter implements Formatter {

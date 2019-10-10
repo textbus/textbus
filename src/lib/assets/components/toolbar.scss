@@ -90,6 +90,7 @@
   font-size: 1em;
   cursor: pointer;
   white-space: nowrap;
+  line-height: inherit;
 
   &:before {
     margin-right: .5em;
@@ -229,6 +230,7 @@
   font-size: 1em;
   cursor: pointer;
   white-space: nowrap;
+  line-height: inherit;
 
   &:hover {
     color: #fff;
@@ -237,5 +239,7 @@
 
   &:before {
     margin-right: .5em;
+    font-size: 1.2em;
+    vertical-align: middle;
   }
 }

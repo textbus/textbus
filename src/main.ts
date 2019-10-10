@@ -8,15 +8,14 @@ const editor = createEditor('#editor', {
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';
-  },
-  content: '<html><body><div>fdsafdasfdsafdsafdsa</div></body></html>'
+  }
 });
 
 // editor.updateContentHTML('<p>test</p>')
 
-editor.onChange.subscribe(result => {
-  console.log(result);
-});
+// editor.onChange.subscribe(result => {
+//   console.log(result);
+// });
 
 // setTimeout(() => {
 //   editor.updateContentHTML(`<html><body><div>测试</div></body></html>`)

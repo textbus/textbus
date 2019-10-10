@@ -22,22 +22,6 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.AddRowToBottom),
     classes: ['tanbo-editor-icon-table-add-row-bottom']
   }, {
-    label: '向左合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.mergeCellToLeft),
-    classes: ['tanbo-editor-icon-table-merge-left']
-  }, {
-    label: '向右合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.mergeCellToRight),
-    classes: ['tanbo-editor-icon-table-merge-right']
-  }, {
-    label: '向上合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.mergeCellToTop),
-    classes: ['tanbo-editor-icon-table-merge-top']
-  }, {
-    label: '向下合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.mergeCellToBottom),
-    classes: ['tanbo-editor-icon-table-merge-bottom']
-  }, {
     label: '删除左边列',
     execCommand: new TableEditFormatter(TableEditActions.deleteLeftColumn),
     classes: ['tanbo-editor-icon-table-delete-column-left']
@@ -54,12 +38,12 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.deleteBottomRow),
     classes: ['tanbo-editor-icon-table-delete-row-bottom']
   }, {
-    label: '拆分列',
-    execCommand: new TableEditFormatter(TableEditActions.splitColumns),
+    label: '合并单元格',
+    execCommand: new TableEditFormatter(TableEditActions.mergeCells),
     classes: ['tanbo-editor-icon-table-split-columns']
   }, {
-    label: '拆分行',
-    execCommand: new TableEditFormatter(TableEditActions.splitRows),
-    classes: ['tanbo-editor-icon-table-split-rows']
+    label: '取消合并单元格',
+    execCommand: new TableEditFormatter(TableEditActions.splitCells),
+    classes: ['tanbo-editor-icon-table']
   }]
 };
