@@ -79,7 +79,8 @@
   padding-bottom: 5px;
 }
 
-.tanbo-editor-select-menu-item {
+
+.tanbo-editor-select-menu-item, .tanbo-editor-action-sheet-item {
   display: block;
   padding: 3px 20px;
   background: none;
@@ -92,15 +93,19 @@
   white-space: nowrap;
   line-height: inherit;
 
-  &:before {
-    margin-right: .5em;
-  }
-
   &:hover {
     color: #fff;
     background-color: $color-primary;
   }
 
+  &:before {
+    margin-right: .5em;
+    //font-size: 1.2em;
+    vertical-align: middle;
+  }
+}
+
+.tanbo-editor-select-menu-item {
   &-h1 {
     font-size: 2em;
     font-weight: bold;
@@ -217,29 +222,4 @@
 .tanbo-editor-action-sheet-menu {
   padding-top: 5px;
   padding-bottom: 5px;
-}
-
-.tanbo-editor-action-sheet-item {
-  display: block;
-  padding: 3px 20px;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  outline: none;
-  font-size: 1em;
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: inherit;
-
-  &:hover {
-    color: #fff;
-    background-color: $color-primary;
-  }
-
-  &:before {
-    margin-right: .5em;
-    font-size: 1.2em;
-    vertical-align: middle;
-  }
 }
