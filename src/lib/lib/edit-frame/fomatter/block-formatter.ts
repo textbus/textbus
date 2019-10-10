@@ -10,9 +10,9 @@ export class BlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription) {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription) {
     const doc = frame.contentDocument;
-    if (!matchStatus.inContainer) {
+    if (!matchDescription.inSingleContainer) {
       range.markRange();
       const containerRange = doc.createRange();
       const container = findBlockContainer(range.commonAncestorContainer, doc.body);

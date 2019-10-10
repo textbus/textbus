@@ -11,19 +11,19 @@ export class InlineFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription) {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription) {
     this.document = frame.contentDocument;
     const tag = this.tagName;
 
-    if (matchStatus.inContainer) {
+    if (matchDescription.inSingleContainer) {
       if (range.rawRange.collapsed) {
         return;
       }
-      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchStatus.container as HTMLElement);
+      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchDescription.container as HTMLElement);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      takeOffWrapper(this.document, matchStatus.container as HTMLElement);
+      takeOffWrapper(this.document, matchDescription.container as HTMLElement);
       before.detach();
       after.detach();
       range.removeMarkRange();
@@ -40,7 +40,7 @@ export class InlineFormatter implements Formatter {
         range.markRange();
         const current = range.rawRange;
 
-        if (matchStatus.matchAllChild) {
+        if (matchDescription.overlap) {
           this.unWrap(current, tag);
         } else {
           this.unWrap(current, tag);

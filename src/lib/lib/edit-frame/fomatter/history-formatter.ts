@@ -9,7 +9,7 @@ export class HistoryFormatter implements Formatter {
   constructor(private action: 'forward' | 'back') {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
     switch (this.action) {
       case 'back':
         frame.back();

@@ -11,7 +11,7 @@ export class ListFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
   }
 
   // format(doc: Document): Range {

@@ -21,10 +21,10 @@ export class ButtonHandler implements Handler {
     });
   }
 
-  updateStatus(status: MatchDescription): void {
-    this.elementRef.disabled = status.disable;
+  updateStatus(matchDescription: MatchDescription): void {
+    this.elementRef.disabled = matchDescription.disable;
 
-    if (status.inContainer || status.matchAllChild) {
+    if (matchDescription.inSingleContainer || matchDescription.overlap) {
       this.elementRef.classList.add('tanbo-editor-handler-active');
     } else {
       this.elementRef.classList.remove('tanbo-editor-handler-active');

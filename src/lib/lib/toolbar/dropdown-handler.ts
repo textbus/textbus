@@ -29,15 +29,14 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(status: MatchDescription): void {
-    this.dropdownButton.disabled = status.disable;
-
-    if (status.inContainer) {
+  updateStatus(matchDescription: MatchDescription): void {
+    this.dropdownButton.disabled = matchDescription.disable;
+    if (matchDescription.inSingleContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
-      this.handler.viewer.updateStateByElement(status.container as HTMLElement);
-    } else if (status.matchAllChild) {
+      this.handler.viewer.updateStateByElement(matchDescription.container as HTMLElement);
+    } else if (matchDescription.overlap) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
-      this.handler.viewer.updateStateByElement(status.range.cloneContents().children[0] as HTMLElement);
+      this.handler.viewer.updateStateByElement(matchDescription.range.cloneContents().children[0] as HTMLElement);
     } else {
       this.dropdownButton.classList.remove('tanbo-editor-handler-active');
       if (typeof this.handler.viewer.reset === 'function') {

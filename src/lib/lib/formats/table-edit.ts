@@ -1,7 +1,7 @@
 import { ActionSheetHandlerOption, HandlerType } from '../toolbar/help';
 import { TableEditActions, TableEditFormatter } from '../edit-frame/fomatter/table-edit-formatter';
 import { EditFrame } from '../edit-frame/edit-frame';
-import { MatchStatus } from '../matcher';
+import { MatchState } from '../matcher';
 
 export const tableEditHandler: ActionSheetHandlerOption = {
   type: HandlerType.ActionSheet,
@@ -12,8 +12,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.AddColumnToLeft),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-add-column-left']
@@ -22,8 +22,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.AddColumnToRight),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-add-column-right']
@@ -32,8 +32,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.AddRowToTop),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-add-row-top']
@@ -42,8 +42,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.AddRowToBottom),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-add-row-bottom']
@@ -52,8 +52,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.deleteLeftColumn),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-column-left']
@@ -62,8 +62,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.deleteRightColumn),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-column-right']
@@ -72,8 +72,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.deleteTopRow),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-row-top']
@@ -82,8 +82,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.deleteBottomRow),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-row-bottom']
@@ -92,8 +92,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.mergeCells),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table-split-columns']
@@ -102,8 +102,8 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     execCommand: new TableEditFormatter(TableEditActions.splitCells),
     match: {
       tags: ['td', 'th'],
-      canUse(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean {
-        return matchStatus.inContainer;
+      canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
+        return matchState.inSingleContainer;
       }
     },
     classes: ['tanbo-editor-icon-table']

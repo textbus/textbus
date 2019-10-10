@@ -5,5 +5,5 @@ import { EditFrame } from '../edit-frame';
 export interface Formatter {
   recordHistory: boolean;
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void;
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void;
 }

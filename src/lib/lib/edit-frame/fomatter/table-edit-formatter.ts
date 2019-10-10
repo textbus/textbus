@@ -22,7 +22,7 @@ export class TableEditFormatter implements Formatter {
   constructor(private type: TableEditActions) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
     console.log(this.type);
   }
 }

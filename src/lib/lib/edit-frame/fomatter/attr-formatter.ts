@@ -22,7 +22,7 @@ export class AttrFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
     function setAttr(el: HTMLElement, attr: AttrState) {
       const isBooleanValue = typeof attr.value === 'boolean';
       let value = attr.value;
@@ -36,11 +36,11 @@ export class AttrFormatter implements Formatter {
       el.setAttribute(attr.name, value + '');
     }
 
-    if (matchStatus.inContainer) {
+    if (matchDescription.inSingleContainer) {
       this.attrs.forEach(item => {
-        setAttr(matchStatus.container as HTMLElement, item);
+        setAttr(matchDescription.container as HTMLElement, item);
       });
-    } else if (matchStatus.matchAllChild) {
+    } else if (matchDescription.overlap) {
       const c = (range.commonAncestorContainer as HTMLElement).children[0] as HTMLElement;
       this.attrs.forEach(item => {
         setAttr(c, item);

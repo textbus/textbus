@@ -10,28 +10,28 @@ export class ToggleBlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
     range.markRange();
 
-    if (matchStatus.inContainer) {
-      const block = findBlockContainer(range.commonAncestorContainer, matchStatus.container);
+    if (matchDescription.inSingleContainer) {
+      const block = findBlockContainer(range.commonAncestorContainer, matchDescription.container);
 
-      if (block === matchStatus.container) {
-        takeOffWrapper(frame.contentDocument, matchStatus.container as HTMLElement);
+      if (block === matchDescription.container) {
+        takeOffWrapper(frame.contentDocument, matchDescription.container as HTMLElement);
       } else {
         const newRange = frame.contentDocument.createRange();
         newRange.selectNode(block);
-        const parent = matchStatus.container.parentNode;
-        const next = matchStatus.container.nextSibling;
+        const parent = matchDescription.container.parentNode;
+        const next = matchDescription.container.nextSibling;
 
         const newTBRange = new TBRange(newRange, frame.contentDocument);
 
-        const {before, after} = newTBRange.getRangesAfterAndBeforeWithinContainer(matchStatus.container);
+        const {before, after} = newTBRange.getRangesAfterAndBeforeWithinContainer(matchDescription.container);
 
         const beforeContents = before.extractContents();
         const afterContents = after.extractContents();
         if (beforeContents.textContent) {
-          parent.insertBefore(beforeContents, matchStatus.container);
+          parent.insertBefore(beforeContents, matchDescription.container);
         }
         if (afterContents.textContent) {
           if (next) {
@@ -40,7 +40,7 @@ export class ToggleBlockFormatter implements Formatter {
             parent.appendChild(afterContents);
           }
         }
-        takeOffWrapper(frame.contentDocument, matchStatus.container as HTMLElement);
+        takeOffWrapper(frame.contentDocument, matchDescription.container as HTMLElement);
         newTBRange.removeMarkRange();
       }
     } else {

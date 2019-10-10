@@ -73,9 +73,9 @@ export class SelectOptionHandler implements Handler {
     this.matcher = new Matcher(option.match);
   }
 
-  updateStatus(status: MatchDescription): void {
-    this.elementRef.disabled = status.disable;
-    if (status.inContainer || status.matchAllChild) {
+  updateStatus(matchDescription: MatchDescription): void {
+    this.elementRef.disabled = matchDescription.disable;
+    if (matchDescription.inSingleContainer || matchDescription.overlap) {
       this.matchedEvent.next(this.option);
     }
   }

@@ -164,9 +164,8 @@ export class Editor implements EventDelegate {
       option.execCommand.format(range, this.editor, button.matcher.match(this.editor, range.rawRange));
       if (option.execCommand.recordHistory) {
         this.editor.recordSnapshot();
-      } else {
-        doc.body.focus();
       }
+      doc.body.focus();
     });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
@@ -182,9 +181,8 @@ export class Editor implements EventDelegate {
 
         if (item.execCommand.recordHistory) {
           this.editor.recordSnapshot();
-        } else {
-          doc.body.focus();
         }
+        doc.body.focus();
       });
       this.handlers.push(item);
     });
@@ -201,9 +199,8 @@ export class Editor implements EventDelegate {
 
       if (handler.execCommand.recordHistory) {
         this.editor.recordSnapshot();
-      } else {
-        doc.body.focus();
       }
+      doc.body.focus();
     });
     this.handlers.push(dropdown);
   }
@@ -219,9 +216,8 @@ export class Editor implements EventDelegate {
 
         if (item.execCommand.recordHistory) {
           this.editor.recordSnapshot();
-        } else {
-          doc.body.focus();
         }
+        doc.body.focus();
       });
       this.handlers.push(item);
     });

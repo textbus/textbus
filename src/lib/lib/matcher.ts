@@ -1,13 +1,13 @@
 import { FormatMatch } from './toolbar/help';
 import { EditFrame } from './edit-frame/edit-frame';
 
-export interface MatchStatus {
-  inContainer: boolean;
-  matchAllChild: boolean;
+export interface MatchState {
+  inSingleContainer: boolean;
+  overlap: boolean;
+  contain: boolean;
 }
 
-
-export interface MatchDescription extends MatchStatus {
+export interface MatchDescription extends MatchState {
   container: Node;
   range: Range;
   config: FormatMatch;
@@ -78,11 +78,11 @@ export class Matcher {
   }
 
   match(frame: EditFrame, range: Range): MatchDescription {
-    let inContainer = false;
+    let inSingleContainer = false;
     let node = range.commonAncestorContainer;
     while (node) {
       if (this.validators.map(fn => fn(node)).indexOf(true) > -1) {
-        inContainer = true;
+        inSingleContainer = true;
         break;
       }
       node = node.parentNode;
@@ -91,23 +91,29 @@ export class Matcher {
       }
     }
     this.matchChildNodes = [];
-    let matchAllChild: boolean;
+    let overlap: boolean;
+    let contain: boolean;
     if (range.collapsed) {
-      matchAllChild = false;
+      overlap = inSingleContainer;
+      contain = false;
     } else {
-      matchAllChild = this.matchAllChild(range, range.commonAncestorContainer) && this.matchChildNodes.length > 0;
+      const match = this.matchAllChild(range, range.commonAncestorContainer);
+      overlap = match && this.matchChildNodes.length > 0;
+      contain = !match && this.matchChildNodes.length > 0;
       this.matchChildNodes = [];
     }
 
     return {
-      inContainer,
+      inSingleContainer,
       container: node,
-      matchAllChild,
+      overlap,
+      contain,
       range,
       config: this.config,
       disable: typeof this.config.canUse === 'function' ? !this.config.canUse(range, frame, {
-        inContainer,
-        matchAllChild
+        inSingleContainer: inSingleContainer,
+        contain,
+        overlap
       }) : false
     }
   }

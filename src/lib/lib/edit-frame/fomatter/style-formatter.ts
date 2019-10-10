@@ -20,7 +20,7 @@ export class StyleFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
     if (range.rawRange.collapsed) {
       const newWrap = frame.contentDocument.createElement('span');
       newWrap.style[this.name] = this.value;
