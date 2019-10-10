@@ -35,7 +35,19 @@ module.exports = {
             return [require('autoprefixer')];
           }
         }
-      }, 'sass-loader']
+      }, 'sass-loader'],
+      include: [path.resolve(__dirname, 'src/lib/assets/')]
+    }, {
+      test: /\.s?css$/,
+      loader: ['to-string-loader', 'css-loader', {
+        loader: 'postcss-loader',
+        options: {
+          plugins() {
+            return [require('autoprefixer')];
+          }
+        }
+      }, 'sass-loader'],
+      include: [path.resolve(__dirname, 'src/lib/lib/')]
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
       use: [{

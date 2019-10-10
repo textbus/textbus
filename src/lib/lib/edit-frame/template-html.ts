@@ -1,4 +1,5 @@
-const styles = require('!!to-string-loader!!css-loader!!sass-loader!./template-style.scss');
+// @ts-ignore
+import styles from './template-style.scss';
 
 export const template = `
 <!DOCTYPE html>
