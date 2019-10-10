@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 
 export enum TableEditActions {
   AddColumnToLeft,
@@ -22,6 +22,7 @@ export class TableEditFormatter implements Formatter {
   constructor(private type: TableEditActions) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
+    console.log(this.type);
   }
 }

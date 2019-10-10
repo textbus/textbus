@@ -1,9 +1,9 @@
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
 
 export interface Formatter {
   recordHistory: boolean;
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void;
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void;
 }

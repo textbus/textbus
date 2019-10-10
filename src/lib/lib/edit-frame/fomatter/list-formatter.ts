@@ -1,6 +1,6 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 import { EditFrame } from '../edit-frame';
 
 export class ListFormatter implements Formatter {
@@ -11,7 +11,7 @@ export class ListFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
   }
 
   // format(doc: Document): Range {

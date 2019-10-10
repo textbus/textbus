@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { DropdownHandlerOption, Handler } from './help';
-import { Matcher, MatchStatus } from '../matcher';
+import { Matcher, MatchDescription } from '../matcher';
 import { Dropdown } from './utils/dropdown';
 import { EventDelegate } from '../help';
 
@@ -29,7 +29,7 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(status: MatchStatus): void {
+  updateStatus(status: MatchDescription): void {
     this.dropdownButton.disabled = status.disable;
 
     if (status.inContainer) {

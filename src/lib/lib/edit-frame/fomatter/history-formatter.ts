@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 
 export class HistoryFormatter implements Formatter {
   readonly recordHistory = false;
@@ -9,7 +9,7 @@ export class HistoryFormatter implements Formatter {
   constructor(private action: 'forward' | 'back') {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
     switch (this.action) {
       case 'back':
         frame.back();

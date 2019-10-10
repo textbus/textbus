@@ -1,5 +1,5 @@
 import { Formatter } from './formatter';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
 import { matchContainerByTagName, takeOffWrapper } from '../utils';
@@ -11,7 +11,7 @@ export class InlineFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus) {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription) {
     this.document = frame.contentDocument;
     const tag = this.tagName;
 

@@ -1,6 +1,6 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 import { EditFrame } from '../edit-frame';
 import { findBlockContainer } from '../utils';
 
@@ -10,7 +10,7 @@ export class BlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus) {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription) {
     const doc = frame.contentDocument;
     if (!matchStatus.inContainer) {
       range.markRange();

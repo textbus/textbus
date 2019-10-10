@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 
 export class StyleFormatter implements Formatter {
   readonly recordHistory = true;
@@ -20,7 +20,7 @@ export class StyleFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
     if (range.rawRange.collapsed) {
       const newWrap = frame.contentDocument.createElement('span');
       newWrap.style[this.name] = this.value;

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Formatter } from '../edit-frame/fomatter/formatter';
-import { Matcher, MatchStatus } from '../matcher';
+import { Matcher, MatchDescription, MatchStatus } from '../matcher';
 import { EventDelegate } from '../help';
 import { EditFrame } from '../edit-frame/edit-frame';
 
@@ -27,7 +27,7 @@ export interface FormatMatch {
   classes?: string[];
   attrs?: FormatAttr[];
 
-  canUse?(range: Range, frame: EditFrame): boolean;
+  canUse?(range: Range, frame: EditFrame, matchStatus: MatchStatus): boolean;
 }
 
 export interface ButtonHandlerOption {
@@ -95,7 +95,7 @@ export interface Handler {
   onApply: Observable<any>;
   matcher: Matcher;
 
-  updateStatus(status: MatchStatus): void;
+  updateStatus(status: MatchDescription): void;
 }
 
 export type HandlerOption =

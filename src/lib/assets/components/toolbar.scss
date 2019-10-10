@@ -98,6 +98,13 @@
     background-color: $color-primary;
   }
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: inherit;
+    color: inherit;
+  }
+
   &:before {
     margin-right: .5em;
     //font-size: 1.2em;

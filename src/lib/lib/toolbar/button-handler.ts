@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { ButtonHandlerOption, Handler } from './help';
-import { Matcher, MatchStatus } from '../matcher';
+import { Matcher, MatchDescription } from '../matcher';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -21,7 +21,7 @@ export class ButtonHandler implements Handler {
     });
   }
 
-  updateStatus(status: MatchStatus): void {
+  updateStatus(status: MatchDescription): void {
     this.elementRef.disabled = status.disable;
 
     if (status.inContainer || status.matchAllChild) {

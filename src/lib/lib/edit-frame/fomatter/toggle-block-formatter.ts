@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchStatus } from '../../matcher';
+import { MatchDescription } from '../../matcher';
 import { findBlockContainer, takeOffWrapper } from '../utils';
 
 export class ToggleBlockFormatter implements Formatter {
@@ -10,7 +10,7 @@ export class ToggleBlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchStatus: MatchStatus): void {
+  format(range: TBRange, frame: EditFrame, matchStatus: MatchDescription): void {
     range.markRange();
 
     if (matchStatus.inContainer) {

@@ -3,8 +3,12 @@ import { EditFrame } from './edit-frame/edit-frame';
 
 export interface MatchStatus {
   inContainer: boolean;
-  container: Node;
   matchAllChild: boolean;
+}
+
+
+export interface MatchDescription extends MatchStatus {
+  container: Node;
   range: Range;
   config: FormatMatch;
   disable: boolean;
@@ -73,7 +77,7 @@ export class Matcher {
     }
   }
 
-  match(frame: EditFrame, range: Range): MatchStatus {
+  match(frame: EditFrame, range: Range): MatchDescription {
     let inContainer = false;
     let node = range.commonAncestorContainer;
     while (node) {
@@ -101,7 +105,10 @@ export class Matcher {
       matchAllChild,
       range,
       config: this.config,
-      disable: typeof this.config.canUse === 'function' ? !this.config.canUse(range, frame) : false
+      disable: typeof this.config.canUse === 'function' ? !this.config.canUse(range, frame, {
+        inContainer,
+        matchAllChild
+      }) : false
     }
   }
 
