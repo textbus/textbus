@@ -2,9 +2,9 @@
   "name": "@tanbo/editor",
   "version": "0.0.1-alpha.7",
   "description": "",
-  "main": "./bundles/index.js",
-  "module": "./bundles/index.js",
-  "typings": "./bundles/index.d.ts",
+  "main": "./bundles/public-api.js",
+  "module": "./bundles/public-api.js",
+  "typings": "./bundles/public-api.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
     "test": "echo \"Error: no test specified\" && exit 1",
