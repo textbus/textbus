@@ -4,7 +4,7 @@ import { debounceTime, sampleTime, tap } from 'rxjs/operators';
 import { template } from './template-html';
 
 export interface Hooks {
-  onInit?(frameDoc: Document, container: HTMLElement): void;
+  onInit?(frameWindow: Window, frameDocument: Document, frameContainer: HTMLElement): void;
 
   onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }
@@ -71,7 +71,7 @@ export class EditFrame {
     }
     this.hooksList.push(hook);
     if (typeof hook.onInit === 'function') {
-      hook.onInit(this.contentDocument, this.elementRef);
+      hook.onInit(this.contentWindow, this.contentDocument, this.elementRef);
     }
   }
 

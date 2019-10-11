@@ -1,33 +1,37 @@
+import { fromEvent, merge, Subscription } from 'rxjs';
+
 import { ActionSheetHandlerOption, HandlerType } from '../toolbar/help';
 import { TableEditActions, TableEditFormatter } from '../edit-frame/fomatter/table-edit-formatter';
 import { EditFrame, Hooks } from '../edit-frame/edit-frame';
 import { MatchState } from '../matcher';
-import { fromEvent, merge } from 'rxjs';
 import { findElementByTagName } from '../edit-frame/utils';
 
 class TableEditHook implements Hooks {
   private id = ('id' + Math.random()).replace(/\./, '');
 
-  onInit(childDocument: Document, container: HTMLElement): void {
-    const childBody = childDocument.body;
+  onInit(frameWindow: Window, frameDocument: Document, frameContainer: HTMLElement): void {
+    const childBody = frameDocument.body;
     let insertMask = false;
     let mask = document.createElement('div');
     mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none;';
 
     let insertStyle = false;
-    let style = childDocument.createElement('style');
+    let style = frameDocument.createElement('style');
     style.id = this.id;
     style.innerText = '::selection { background: transparent; }';
 
+    let unBindScroll: Subscription;
+
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
       if (insertStyle) {
-        childDocument.getSelection().removeAllRanges();
-        childDocument.head.removeChild(style);
+        frameDocument.getSelection().removeAllRanges();
+        frameDocument.head.removeChild(style);
         insertStyle = false;
       }
       if (insertMask) {
-        container.removeChild(mask);
+        frameContainer.removeChild(mask);
         insertMask = false;
+        unBindScroll && unBindScroll.unsubscribe();
       }
       const startTd = findElementByTagName(Array.from(startEvent.composedPath()) as Array<Node>, 'td');
       let targetTd: HTMLElement;
@@ -35,29 +39,49 @@ class TableEditHook implements Hooks {
         return;
       }
 
+      let left: number;
+      let top: number;
+      let width: number;
+      let height: number;
+
+      function setStyle() {
+        if (!targetTd) {
+          return;
+        }
+        const startPosition = startTd.getBoundingClientRect();
+        const targetPosition = targetTd.getBoundingClientRect();
+
+        left = Math.min(startPosition.left, targetPosition.left);
+        top = Math.min(startPosition.top, targetPosition.top);
+        width = Math.max(startPosition.right, targetPosition.right) - left;
+        height = Math.max(startPosition.bottom, targetPosition.bottom) - top;
+
+        mask.style.left = left + 'px';
+        mask.style.top = top + 'px';
+        mask.style.width = width + 'px';
+        mask.style.height = height + 'px';
+      }
+
+      unBindScroll = merge(...[
+        'scroll',
+        'resize'
+      ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
+        setStyle();
+      });
+
+
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
         targetTd = findElementByTagName(Array.from(mouseoverEvent.composedPath()) as Array<Node>, 'td') || targetTd;
         if (targetTd) {
           if (targetTd !== startTd) {
-            childDocument.head.appendChild(style);
+            frameDocument.head.appendChild(style);
             insertStyle = true;
           }
           if (!insertMask) {
-            container.appendChild(mask);
+            frameContainer.appendChild(mask);
             insertMask = true;
           }
-          const startPosition = startTd.getBoundingClientRect();
-          const targetPosition = targetTd.getBoundingClientRect();
-
-          const left = Math.min(startPosition.left, targetPosition.left);
-          const top = Math.min(startPosition.top, targetPosition.top);
-          const width = Math.max(startPosition.right, targetPosition.right) - left;
-          const height = Math.max(startPosition.bottom, targetPosition.bottom) - top;
-
-          mask.style.left = left + 'px';
-          mask.style.top = top + 'px';
-          mask.style.width = width + 'px';
-          mask.style.height = height + 'px';
+          setStyle();
         }
       });
 

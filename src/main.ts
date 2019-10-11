@@ -42,15 +42,81 @@ const editor = createEditor('#editor', {
   </tr>
   </tbody>
 </table>
+<table>
+  <tbody>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td colspan="2">1</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  </tbody>
+</table>
+<table>
+  <tbody>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td colspan="2">1</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  </tbody>
+</table>
 <p><br></p>
 `
 });
 
-editor.updateContentHTML('<p>test</p>')
-
-editor.onChange.subscribe(result => {
-  console.log(result);
-});
+// editor.updateContentHTML('<p>test</p>')
+//
+// editor.onChange.subscribe(result => {
+//   console.log(result);
+// });
 
 // setTimeout(() => {
 //   editor.updateContentHTML(`<html><body><div>测试</div></body></html>`)
