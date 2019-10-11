@@ -1,7 +1,7 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchDescription } from '../../matcher';
+import { MatchDelta } from '../../matcher';
 import { findBlockContainer } from '../utils';
 
 export class BlockStyleFormatter implements Formatter {
@@ -11,7 +11,7 @@ export class BlockStyleFormatter implements Formatter {
               private value: string | number) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
     const nodes = this.findCanApplyElements(range.commonAncestorContainer,
       range.rawRange.cloneRange(),
       frame.contentDocument).map(item => {

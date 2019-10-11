@@ -7,7 +7,7 @@ export interface MatchState {
   contain: boolean;
 }
 
-export interface MatchDescription extends MatchState {
+export interface MatchDelta extends MatchState {
   container: Node;
   range: Range;
   config: FormatMatch;
@@ -77,7 +77,7 @@ export class Matcher {
     }
   }
 
-  match(frame: EditFrame, range: Range): MatchDescription {
+  match(frame: EditFrame, range: Range): MatchDelta {
     let inSingleContainer = false;
     let node = range.commonAncestorContainer;
     while (node) {

@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { ButtonHandlerOption, Handler } from './help';
-import { Matcher, MatchDescription } from '../matcher';
+import { Matcher, MatchDelta } from '../matcher';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -21,10 +21,10 @@ export class ButtonHandler implements Handler {
     });
   }
 
-  updateStatus(matchDescription: MatchDescription): void {
-    this.elementRef.disabled = matchDescription.disable;
+  updateStatus(matchDelta: MatchDelta): void {
+    this.elementRef.disabled = matchDelta.disable;
 
-    if (matchDescription.inSingleContainer || matchDescription.overlap) {
+    if (matchDelta.inSingleContainer || matchDelta.overlap) {
       this.elementRef.classList.add('tanbo-editor-handler-active');
     } else {
       this.elementRef.classList.remove('tanbo-editor-handler-active');

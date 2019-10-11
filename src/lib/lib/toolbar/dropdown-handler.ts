@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { DropdownHandlerOption, Handler } from './help';
-import { Matcher, MatchDescription } from '../matcher';
+import { Matcher, MatchDelta } from '../matcher';
 import { Dropdown } from './utils/dropdown';
 import { EventDelegate } from '../help';
 
@@ -29,14 +29,14 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(matchDescription: MatchDescription): void {
-    this.dropdownButton.disabled = matchDescription.disable;
-    if (matchDescription.inSingleContainer) {
+  updateStatus(matchDelta: MatchDelta): void {
+    this.dropdownButton.disabled = matchDelta.disable;
+    if (matchDelta.inSingleContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
-      this.handler.viewer.updateStateByElement(matchDescription.container as HTMLElement);
-    } else if (matchDescription.overlap) {
+      this.handler.viewer.updateStateByElement(matchDelta.container as HTMLElement);
+    } else if (matchDelta.overlap) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
-      this.handler.viewer.updateStateByElement(matchDescription.range.cloneContents().children[0] as HTMLElement);
+      this.handler.viewer.updateStateByElement(matchDelta.range.cloneContents().children[0] as HTMLElement);
     } else {
       this.dropdownButton.classList.remove('tanbo-editor-handler-active');
       if (typeof this.handler.viewer.reset === 'function') {

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchDescription } from '../../matcher';
+import { MatchDelta } from '../../matcher';
 import { AttrState } from '../../formats/forms/help';
 
 export class TableFormatter implements Formatter {
@@ -22,7 +22,7 @@ export class TableFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
     range.rawRange.collapse();
     const doc = frame.contentDocument;
     const table = doc.createElement('table');

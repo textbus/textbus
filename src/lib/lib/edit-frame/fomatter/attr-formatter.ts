@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
-import { MatchDescription } from '../../matcher';
+import { MatchDelta } from '../../matcher';
 import { AttrState } from '../../formats/forms/help';
 
 export class AttrFormatter implements Formatter {
@@ -22,7 +22,7 @@ export class AttrFormatter implements Formatter {
     }
   }
 
-  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription): void {
+  format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
     function setAttr(el: HTMLElement, attr: AttrState) {
       const isBooleanValue = typeof attr.value === 'boolean';
       let value = attr.value;
@@ -36,11 +36,11 @@ export class AttrFormatter implements Formatter {
       el.setAttribute(attr.name, value + '');
     }
 
-    if (matchDescription.inSingleContainer) {
+    if (matchDelta.inSingleContainer) {
       this.attrs.forEach(item => {
-        setAttr(matchDescription.container as HTMLElement, item);
+        setAttr(matchDelta.container as HTMLElement, item);
       });
-    } else if (matchDescription.overlap) {
+    } else if (matchDelta.overlap) {
       const c = (range.commonAncestorContainer as HTMLElement).children[0] as HTMLElement;
       this.attrs.forEach(item => {
         setAttr(c, item);

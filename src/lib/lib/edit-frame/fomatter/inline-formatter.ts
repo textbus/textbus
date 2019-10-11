@@ -1,5 +1,5 @@
 import { Formatter } from './formatter';
-import { MatchDescription } from '../../matcher';
+import { MatchDelta } from '../../matcher';
 import { TBRange } from '../../range';
 import { EditFrame } from '../edit-frame';
 import { matchContainerByTagName, takeOffWrapper } from '../utils';
@@ -11,19 +11,19 @@ export class InlineFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription) {
+  format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta) {
     this.document = frame.contentDocument;
     const tag = this.tagName;
 
-    if (matchDescription.inSingleContainer) {
+    if (matchDelta.inSingleContainer) {
       if (range.rawRange.collapsed) {
         return;
       }
-      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchDescription.container as HTMLElement);
+      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchDelta.container as HTMLElement);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      takeOffWrapper(this.document, matchDescription.container as HTMLElement);
+      takeOffWrapper(this.document, matchDelta.container as HTMLElement);
       before.detach();
       after.detach();
       range.removeMarkRange();
@@ -40,7 +40,7 @@ export class InlineFormatter implements Formatter {
         range.markRange();
         const current = range.rawRange;
 
-        if (matchDescription.overlap) {
+        if (matchDelta.overlap) {
           this.unWrap(current, tag);
         } else {
           this.unWrap(current, tag);

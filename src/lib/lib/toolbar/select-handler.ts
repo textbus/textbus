@@ -1,7 +1,7 @@
 import { merge, Observable, Subject } from 'rxjs';
 
 import { SelectHandlerOption, SelectHandlerItemOption, Handler } from './help';
-import { Matcher, MatchDescription } from '../matcher';
+import { Matcher, MatchDelta } from '../matcher';
 import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Dropdown } from './utils/dropdown';
 
@@ -73,9 +73,9 @@ export class SelectOptionHandler implements Handler {
     this.matcher = new Matcher(option.match);
   }
 
-  updateStatus(matchDescription: MatchDescription): void {
-    this.elementRef.disabled = matchDescription.disable;
-    if (matchDescription.inSingleContainer || matchDescription.overlap) {
+  updateStatus(matchDelta: MatchDelta): void {
+    this.elementRef.disabled = matchDelta.disable;
+    if (matchDelta.inSingleContainer || matchDelta.overlap) {
       this.matchedEvent.next(this.option);
     }
   }

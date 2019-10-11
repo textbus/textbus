@@ -1,6 +1,6 @@
 import { Formatter } from './formatter';
 import { TBRange } from '../../range';
-import { MatchDescription } from '../../matcher';
+import { MatchDelta } from '../../matcher';
 import { EditFrame } from '../edit-frame';
 import { findBlockContainer } from '../utils';
 
@@ -10,9 +10,9 @@ export class BlockFormatter implements Formatter {
   constructor(private tagName: string) {
   }
 
-  format(range: TBRange, frame: EditFrame, matchDescription: MatchDescription) {
+  format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta) {
     const doc = frame.contentDocument;
-    if (!matchDescription.inSingleContainer) {
+    if (!matchDelta.inSingleContainer) {
       range.markRange();
       const containerRange = doc.createRange();
       const container = findBlockContainer(range.commonAncestorContainer, doc.body);

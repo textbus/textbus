@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Formatter } from '../edit-frame/fomatter/formatter';
-import { Matcher, MatchDescription, MatchState } from '../matcher';
+import { Matcher, MatchDelta, MatchState } from '../matcher';
 import { EventDelegate } from '../help';
 import { EditFrame } from '../edit-frame/edit-frame';
 
@@ -95,7 +95,7 @@ export interface Handler {
   onApply: Observable<any>;
   matcher: Matcher;
 
-  updateStatus(desc: MatchDescription): void;
+  updateStatus(desc: MatchDelta): void;
 }
 
 export type HandlerOption =
