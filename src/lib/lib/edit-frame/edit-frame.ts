@@ -2,6 +2,7 @@ import { Subject, merge, fromEvent, Observable } from 'rxjs';
 import { debounceTime, filter, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
+import { findElementByTagName } from './utils';
 
 export class EditFrame {
   readonly elementRef = document.createElement('iframe');
@@ -162,6 +163,68 @@ ${body.outerHTML}
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
 
+    // 如果选区是表格，需要对此作处理
+    let insertMask = false;
+    let mask = childDocument.createElement('div');
+    mask.style.cssText = 'position: fixed; background: rgba(0,0,0,.1); pointer-events: none;';
+
+    let insertStyle = false;
+    let style = childDocument.createElement('style');
+    style.innerText = '::selection { background: transparent; }';
+
+    fromEvent(childBody, 'mousedown').subscribe(startEvent => {
+      if (insertStyle) {
+        childDocument.getSelection().removeAllRanges();
+        childDocument.head.removeChild(style);
+        insertStyle = false;
+      }
+      if (insertMask) {
+        childBody.removeChild(mask);
+        insertMask = false;
+      }
+      const startTd = findElementByTagName(Array.from(startEvent.composedPath()) as Array<Node>, 'td');
+      let targetTd: HTMLElement;
+      if (!startTd) {
+        return;
+      }
+
+      const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
+        targetTd = findElementByTagName(Array.from(mouseoverEvent.composedPath()) as Array<Node>, 'td') || targetTd;
+        if (targetTd) {
+          if (targetTd !== startTd) {
+            childDocument.head.appendChild(style);
+            insertStyle = true;
+          }
+          if (!insertMask) {
+            childBody.appendChild(mask);
+            insertMask = true;
+          }
+          const startPosition = startTd.getBoundingClientRect();
+          const targetPosition = targetTd.getBoundingClientRect();
+
+          const left = Math.min(startPosition.left, targetPosition.left);
+          const top = Math.min(startPosition.top, targetPosition.top);
+          const width = Math.max(startPosition.right, targetPosition.right) - left;
+          const height = Math.max(startPosition.bottom, targetPosition.bottom) - top;
+
+          mask.style.left = left + 'px';
+          mask.style.top = top + 'px';
+          mask.style.width = width + 'px';
+          mask.style.height = height + 'px';
+        }
+      });
+
+      const unBindMouseup = merge(...[
+        'mouseleave',
+        'mouseup'
+      ].map(type => fromEvent(childBody, type))).subscribe(() => {
+        unBindMouseover.unsubscribe();
+        unBindMouseup.unsubscribe();
+      });
+    });
+
+
+    // 兼听可能引起选区变化的事件，并发出通知
     merge(...[
       'click',
       'contextmenu',
@@ -175,6 +238,7 @@ ${body.outerHTML}
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100)).subscribe(() => {
       this.selectionChangeEvent.next();
     });
+    // 兼听可能引起编辑区空白的事件，并重新设置默认值
     merge(...[
       'keyup',
       'paste',
@@ -185,6 +249,7 @@ ${body.outerHTML}
         childBody.innerHTML = '<p><br></p>';
       }
     });
+    // 当点击视频、音频、图片时，自动选中该标签
     fromEvent(childBody, 'click').pipe(filter((ev: any) => {
       return /video|audio|img/i.test(ev.target.tagName);
     })).subscribe(ev => {
@@ -195,6 +260,7 @@ ${body.outerHTML}
       selection.addRange(range);
       this.selectionChangeEvent.next();
     });
+    // 禁用默认的历史记录回退及前进功能
     childDocument.addEventListener('keydown', (ev: KeyboardEvent) => {
       if (ev.ctrlKey && ev.code === 'KeyZ') {
         ev.shiftKey ? this.forward() : this.back();

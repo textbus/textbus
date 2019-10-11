@@ -11,7 +11,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '在左边添加列',
     execCommand: new TableEditFormatter(TableEditActions.AddColumnToLeft),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -21,7 +21,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '在右边添加列',
     execCommand: new TableEditFormatter(TableEditActions.AddColumnToRight),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -31,7 +31,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '在上边添加行',
     execCommand: new TableEditFormatter(TableEditActions.AddRowToTop),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -41,7 +41,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '在下边添加行',
     execCommand: new TableEditFormatter(TableEditActions.AddRowToBottom),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -51,7 +51,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '删除左边列',
     execCommand: new TableEditFormatter(TableEditActions.deleteLeftColumn),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -61,7 +61,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '删除右边列',
     execCommand: new TableEditFormatter(TableEditActions.deleteRightColumn),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -71,7 +71,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '删除上边行',
     execCommand: new TableEditFormatter(TableEditActions.deleteTopRow),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -81,7 +81,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '删除下边行',
     execCommand: new TableEditFormatter(TableEditActions.deleteBottomRow),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -91,7 +91,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '合并单元格',
     execCommand: new TableEditFormatter(TableEditActions.mergeCells),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }
@@ -101,7 +101,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     label: '取消合并单元格',
     execCommand: new TableEditFormatter(TableEditActions.splitCells),
     match: {
-      tags: ['td', 'th'],
+      tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
         return matchState.inSingleContainer;
       }

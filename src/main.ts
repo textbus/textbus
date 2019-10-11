@@ -8,7 +8,43 @@ const editor = createEditor('#editor', {
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';
-  }
+  },
+  content: `<table>
+  <tbody>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+  </tr>
+  </tbody>
+</table>
+<p><br></p>
+`
 });
 
 // editor.updateContentHTML('<p>test</p>')

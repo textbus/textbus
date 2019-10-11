@@ -20,6 +20,16 @@ export function findEmptyContainer(node: Node): Node {
   return findEmptyContainer(node.parentNode);
 }
 
+export function findElementByTagName(nodes: Node[], tagName: string): HTMLElement {
+  const reg = new RegExp(`^${tagName}$`, 'i');
+  for (const node of nodes) {
+    if (node.nodeType === 1 && reg.test((node as HTMLElement).tagName)) {
+      return node as HTMLElement;
+    }
+  }
+  return null;
+}
+
 export function createContainerByDtdRule(context: Document, tagName: string): { newNode: HTMLElement, contentsContainer: HTMLElement } {
   const wrapper = context.createElement(tagName);
   let container = wrapper;

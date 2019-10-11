@@ -23,6 +23,6 @@ export class TableEditFormatter implements Formatter {
   }
 
   format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
-    console.log(this.type);
+    console.log(range.rawRange);
   }
 }
