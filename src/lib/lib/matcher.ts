@@ -111,7 +111,7 @@ export class Matcher {
       range,
       config: this.config,
       disable: typeof this.config.canUse === 'function' ? !this.config.canUse(range, frame, {
-        inSingleContainer: inSingleContainer,
+        inSingleContainer,
         contain,
         overlap
       }) : false
