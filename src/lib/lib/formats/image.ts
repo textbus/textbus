@@ -4,6 +4,7 @@ import { DropdownHandlerOption, HandlerType } from '../toolbar/help';
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
 import { AttrFormatter } from '../edit-frame/fomatter/attr-formatter';
+import { SourceHook } from './hooks/source-hook';
 
 const form = new Form([{
   type: AttrType.TextField,
@@ -29,6 +30,7 @@ export const imageHandler: DropdownHandlerOption = {
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
+  hooks: new SourceHook(),
   match: {
     tags: ['img']
   },

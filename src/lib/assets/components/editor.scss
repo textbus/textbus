@@ -1,4 +1,8 @@
-.tanbo-editor {
+.tanbo-editor-wrap {
+  position: relative;
+}
+
+.tanbo-editor-frame {
   border: none;
   width: 100%;
   display: block;

@@ -1,11 +1,16 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, filter, sampleTime, tap } from 'rxjs/operators';
+import { debounceTime, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
-import { findElementByTagName } from './utils';
+
+export interface Hooks {
+  onInit?(frameDoc: Document, container: HTMLElement): void;
+
+  onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
+}
 
 export class EditFrame {
-  readonly elementRef = document.createElement('iframe');
+  readonly elementRef = document.createElement('div');
   readonly onSelectionChange: Observable<void>;
   readonly onReady: Observable<this>;
   readonly contentChange: Observable<string>;
@@ -20,12 +25,14 @@ export class EditFrame {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
+  private frame = document.createElement('iframe');
   private selectionChangeEvent = new Subject<void>();
   private contentChangeEvent = new Subject<string>();
   private readyEvent = new Subject<this>();
   private editorHTML = template;
   private historySequence: Array<{ node: HTMLElement, innerHTML: string }> = [];
   private historyIndex = 0;
+  private hooksList: Array<Hooks> = [];
 
   private canPublishChangeEvent = false;
 
@@ -33,20 +40,22 @@ export class EditFrame {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.contentChange = this.contentChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
-    this.elementRef.classList.add('tanbo-editor');
+    this.elementRef.classList.add('tanbo-editor-wrap');
+    this.frame.classList.add('tanbo-editor-frame');
+    this.elementRef.appendChild(this.frame);
 
-    this.elementRef.onload = () => {
-      (<any>this).contentDocument = this.elementRef.contentDocument;
-      (<any>this).contentWindow = this.elementRef.contentWindow;
+    this.frame.onload = () => {
+      (<any>this).contentDocument = this.frame.contentDocument;
+      (<any>this).contentWindow = this.frame.contentWindow;
       (<any>this).contentDocument.body.contentEditable = true;
       (<any>this).contentDocument.body.innerHTML = defaultContents;
-      this.setup(this.elementRef.contentDocument);
+      this.setup(this.frame.contentDocument);
       this.writeContents(defaultContents).then(() => {
-        this.autoRecordHistory(this.elementRef.contentDocument.body);
+        this.autoRecordHistory(this.frame.contentDocument.body);
         this.readyEvent.next(this);
       });
     };
-    this.elementRef.src = `javascript:void((function () {
+    this.frame.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
                       document.write('${this.editorHTML}');
@@ -54,6 +63,16 @@ export class EditFrame {
                     })())`;
 
 
+  }
+
+  use(hook: Hooks) {
+    if (this.hooksList.indexOf(hook) > -1) {
+      return;
+    }
+    this.hooksList.push(hook);
+    if (typeof hook.onInit === 'function') {
+      hook.onInit(this.contentDocument, this.elementRef);
+    }
   }
 
   back() {
@@ -83,6 +102,7 @@ export class EditFrame {
       this.historySequence.shift();
     }
     this.historyIndex = this.historySequence.length - 1;
+    this.dispatchContentChangeEvent();
   }
 
   /**
@@ -101,7 +121,6 @@ export class EditFrame {
   updateContents(html: string) {
     this.writeContents(html).then(() => {
       this.recordSnapshot();
-      this.dispatchContentChangeEvent();
     });
   }
 
@@ -135,8 +154,14 @@ export class EditFrame {
     if (!this.canPublishChangeEvent) {
       return;
     }
-    const head = this.contentDocument.head;
-    const body = this.contentDocument.body.cloneNode(true) as HTMLElement;
+    const head = this.contentDocument.head.cloneNode(true) as HTMLHeadElement;
+    const body = this.contentDocument.body.cloneNode(true) as HTMLBodyElement;
+
+    this.hooksList.filter(hook => {
+      return typeof hook.onOutput === 'function';
+    }).forEach(hook => {
+      hook.onOutput(head, body);
+    });
 
     body.removeAttribute('contentEditable');
 
@@ -163,67 +188,6 @@ ${body.outerHTML}
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
 
-    // 如果选区是表格，需要对此作处理
-    let insertMask = false;
-    let mask = childDocument.createElement('div');
-    mask.style.cssText = 'position: fixed; background: rgba(0,0,0,.1); pointer-events: none;';
-
-    let insertStyle = false;
-    let style = childDocument.createElement('style');
-    style.innerText = '::selection { background: transparent; }';
-
-    fromEvent(childBody, 'mousedown').subscribe(startEvent => {
-      if (insertStyle) {
-        childDocument.getSelection().removeAllRanges();
-        childDocument.head.removeChild(style);
-        insertStyle = false;
-      }
-      if (insertMask) {
-        childBody.removeChild(mask);
-        insertMask = false;
-      }
-      const startTd = findElementByTagName(Array.from(startEvent.composedPath()) as Array<Node>, 'td');
-      let targetTd: HTMLElement;
-      if (!startTd) {
-        return;
-      }
-
-      const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
-        targetTd = findElementByTagName(Array.from(mouseoverEvent.composedPath()) as Array<Node>, 'td') || targetTd;
-        if (targetTd) {
-          if (targetTd !== startTd) {
-            childDocument.head.appendChild(style);
-            insertStyle = true;
-          }
-          if (!insertMask) {
-            childBody.appendChild(mask);
-            insertMask = true;
-          }
-          const startPosition = startTd.getBoundingClientRect();
-          const targetPosition = targetTd.getBoundingClientRect();
-
-          const left = Math.min(startPosition.left, targetPosition.left);
-          const top = Math.min(startPosition.top, targetPosition.top);
-          const width = Math.max(startPosition.right, targetPosition.right) - left;
-          const height = Math.max(startPosition.bottom, targetPosition.bottom) - top;
-
-          mask.style.left = left + 'px';
-          mask.style.top = top + 'px';
-          mask.style.width = width + 'px';
-          mask.style.height = height + 'px';
-        }
-      });
-
-      const unBindMouseup = merge(...[
-        'mouseleave',
-        'mouseup'
-      ].map(type => fromEvent(childBody, type))).subscribe(() => {
-        unBindMouseover.unsubscribe();
-        unBindMouseup.unsubscribe();
-      });
-    });
-
-
     // 兼听可能引起选区变化的事件，并发出通知
     merge(...[
       'click',
@@ -249,17 +213,7 @@ ${body.outerHTML}
         childBody.innerHTML = '<p><br></p>';
       }
     });
-    // 当点击视频、音频、图片时，自动选中该标签
-    fromEvent(childBody, 'click').pipe(filter((ev: any) => {
-      return /video|audio|img/i.test(ev.target.tagName);
-    })).subscribe(ev => {
-      const selection = this.contentDocument.getSelection();
-      const range = this.contentDocument.createRange();
-      range.selectNode(ev.target);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      this.selectionChangeEvent.next();
-    });
+
     // 禁用默认的历史记录回退及前进功能
     childDocument.addEventListener('keydown', (ev: KeyboardEvent) => {
       if (ev.ctrlKey && ev.code === 'KeyZ') {
@@ -271,9 +225,9 @@ ${body.outerHTML}
   }
 
   private autoRecordHistory(body: HTMLElement) {
+    this.recordSnapshot();
     this.canPublishChangeEvent = true;
     let changeCount = 0;
-    this.recordSnapshot();
     const obs = merge(
       fromEvent(body, 'keydown').pipe(tap(() => {
         changeCount++;
@@ -287,7 +241,6 @@ ${body.outerHTML}
       return obs.subscribe(() => {
         changeCount = 0;
         this.recordSnapshot();
-        this.dispatchContentChangeEvent();
       });
     };
 
@@ -296,7 +249,6 @@ ${body.outerHTML}
     fromEvent(body, 'blur').subscribe(() => {
       if (changeCount) {
         this.recordSnapshot();
-        this.dispatchContentChangeEvent();
         changeCount = 0;
         sub.unsubscribe();
         sub = subscribe();

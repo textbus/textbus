@@ -103,6 +103,12 @@ export class Editor implements EventDelegate {
       case HandlerType.ActionSheet:
         this.addActionSheetHandler(option);
     }
+
+    if (option.hooks) {
+      this.run(() => {
+        this.editor.use(option.hooks);
+      });
+    }
   }
 
   addGroup(handlers: HandlerOption[]) {
@@ -129,23 +135,23 @@ export class Editor implements EventDelegate {
   }
 
   updateContentHTML(html: string) {
-    if (!this.readyState) {
-      this.tasks.push(() => {
-        this.editor.updateContents(html);
-      });
-      return;
-    }
-    this.editor.updateContents(html);
+    this.run(() => {
+      this.editor.updateContents(html);
+    });
   }
 
   focus() {
+    this.run(() => {
+      this.editor.contentDocument.body.focus();
+    });
+  }
+
+  private run(fn: () => void) {
     if (!this.readyState) {
-      this.tasks.push(() => {
-        this.editor.contentDocument.body.focus();
-      });
+      this.tasks.push(fn);
       return;
     }
-    this.editor.contentDocument.body.focus();
+    fn();
   }
 
   private updateToolbarStatus() {

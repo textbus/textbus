@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Matcher, MatchDelta, MatchState } from '../matcher';
 import { EventDelegate } from '../help';
-import { EditFrame } from '../edit-frame/edit-frame';
+import { EditFrame, Hooks } from '../edit-frame/edit-frame';
 
 export enum HandlerType {
   Button,
@@ -37,6 +37,7 @@ export interface ButtonHandlerOption {
   label?: string;
   classes?: string[];
   tooltip?: string;
+  hooks?: Hooks;
 }
 
 export interface SelectHandlerItemOption {
@@ -52,6 +53,7 @@ export interface SelectHandlerOption {
   options: SelectHandlerItemOption[];
   classes?: string[];
   tooltip?: string;
+  hooks?: Hooks;
 }
 
 export interface DropdownHandlerView {
@@ -74,6 +76,7 @@ export interface DropdownHandlerOption {
   tooltip?: string;
   label?: string;
   match?: FormatMatch;
+  hooks?: Hooks;
 }
 
 export interface ActionSheetHandlerItemOption {
@@ -88,6 +91,7 @@ export interface ActionSheetHandlerOption {
   actions: ActionSheetHandlerItemOption[];
   classes?: string[];
   tooltip?: string;
+  hooks?: Hooks;
 }
 
 export interface Handler {
