@@ -1,17 +1,21 @@
 import { fromEvent, merge, Subscription } from 'rxjs';
 
-import { Hooks } from '../../edit-frame/edit-frame';
 import { findElementByTagName } from '../../edit-frame/utils';
+import { EditContext, Hooks } from '../../help';
+import { MatchDelta } from '../../matcher';
 
 export class TableEditHook implements Hooks {
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
+  private selectedCells: HTMLTableCellElement[] = [];
 
   constructor() {
     this.mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none;';
   }
 
-  onInit(frameWindow: Window, frameDocument: Document, frameContainer: HTMLElement): void {
+  onInit(frameContainer: HTMLElement, context: EditContext): void {
+    const frameDocument = context.document;
+    const frameWindow = context.window;
     const childBody = frameDocument.body;
     let insertMask = false;
     let insertStyle = false;
@@ -48,7 +52,7 @@ export class TableEditHook implements Hooks {
         'resize'
       ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
         if (targetTd) {
-          this.setMaskStyle(cells, startTd, targetTd);
+          this.setRangesAndUpdateMaskStyle(cells, startTd, targetTd);
         }
       });
 
@@ -69,7 +73,7 @@ export class TableEditHook implements Hooks {
             frameContainer.appendChild(this.mask);
             insertMask = true;
           }
-          this.setMaskStyle(cells, startTd, targetTd);
+          this.setRangesAndUpdateMaskStyle(cells, startTd, targetTd);
         }
       });
 
@@ -84,6 +88,13 @@ export class TableEditHook implements Hooks {
 
   }
 
+  onApply(range: Range, matchDelta: MatchDelta, context: EditContext): Range | Range[] {
+    if (matchDelta.inSingleContainer) {
+      console.log(range);
+    }
+    return range;
+  }
+
   onOutput(head: HTMLHeadElement, body: HTMLBodyElement): void {
     const style = head.querySelector('#' + this.id);
     if (style) {
@@ -91,14 +102,21 @@ export class TableEditHook implements Hooks {
     }
   }
 
-  private setMaskStyle(cells: HTMLTableCellElement[][], start: HTMLTableCellElement, target: HTMLTableCellElement) {
-    const startPosition = this.findCellPosition(cells, start);
-    const endPosition = this.findCellPosition(cells, target);
+  private setRangesAndUpdateMaskStyle(cells: HTMLTableCellElement[][], startCell: HTMLTableCellElement, endCell: HTMLTableCellElement) {
+    const startPosition = this.findCellPosition(cells, startCell);
+    const endPosition = this.findCellPosition(cells, endCell);
 
     const minColumnIndex = Math.min(startPosition.columnIndex, endPosition.columnIndex);
     const maxColumnIndex = Math.max(startPosition.columnIndex, endPosition.columnIndex);
     const minRowIndex = Math.min(startPosition.rowIndex, endPosition.rowIndex);
     const maxRowIndex = Math.max(startPosition.rowIndex, endPosition.rowIndex);
+
+    console.log({
+      minColumnIndex,
+      maxColumnIndex,
+      minRowIndex,
+      maxRowIndex
+    })
 
     const top = Math.min(...cells[minRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => cell.getBoundingClientRect().top));
     const left = Math.min(...cells.slice(minRowIndex, maxRowIndex + 1).map(row => row[minColumnIndex].getBoundingClientRect().left));

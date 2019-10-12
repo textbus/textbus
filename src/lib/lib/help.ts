@@ -1,5 +1,7 @@
-import { HandlerOption } from './toolbar/help';
 import { Observable } from 'rxjs';
+
+import { HandlerOption } from './toolbar/help';
+import { MatchDelta } from './matcher';
 
 export interface EditorOptions {
   historyStackSize?: number;
@@ -11,4 +13,15 @@ export interface EditorOptions {
 
 export interface EventDelegate {
   dispatchEvent(type: string): Observable<string>
+}
+
+export interface EditContext {
+  document: Document;
+  window: Window;
+}
+
+export interface Hooks {
+  onInit?(frameContainer: HTMLElement, context: EditContext): void;
+  onApply?(range: Range, matchDelta: MatchDelta, context: EditContext): Range | Range[];
+  onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }

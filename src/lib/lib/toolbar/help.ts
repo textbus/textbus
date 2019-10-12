@@ -2,8 +2,8 @@ import { Observable } from 'rxjs';
 
 import { Formatter } from '../edit-frame/fomatter/formatter';
 import { Matcher, MatchDelta, MatchState } from '../matcher';
-import { EventDelegate } from '../help';
-import { EditFrame, Hooks } from '../edit-frame/edit-frame';
+import { EventDelegate, Hooks } from '../help';
+import { EditFrame } from '../edit-frame/edit-frame';
 
 export enum HandlerType {
   Button,

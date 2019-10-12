@@ -2,7 +2,7 @@ import { Observable, of, from, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { EditFrame } from './edit-frame/edit-frame';
-import { EditorOptions, EventDelegate } from './help';
+import { EditContext, EditorOptions, EventDelegate, Hooks } from './help';
 import { Paths } from './paths/paths';
 import {
   ButtonHandlerOption,
@@ -18,6 +18,7 @@ import { SelectHandler } from './toolbar/select-handler';
 import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
 import { ActionSheetHandler } from './toolbar/action-sheet-handler';
+import { MatchDelta } from './matcher';
 
 export class Editor implements EventDelegate {
   onChange: Observable<string>;
@@ -33,6 +34,11 @@ export class Editor implements EventDelegate {
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
+  private hooksList: Hooks[] = [{
+    onApply(range: Range): Range | Range[] {
+      return range;
+    }
+  }];
 
   private readyState = false;
 
@@ -106,6 +112,7 @@ export class Editor implements EventDelegate {
 
     if (option.hooks) {
       this.run(() => {
+        this.hooksList.push(option.hooks);
         this.editor.use(option.hooks);
       });
     }
@@ -155,8 +162,7 @@ export class Editor implements EventDelegate {
   }
 
   private updateToolbarStatus() {
-
-    const ranges = this.getRanges();
+    const ranges = this.editor.getRanges();
     this.handlers.forEach(handler => {
       const delta = ranges.map(range => {
         return handler.matcher.match(this.editor, range);
@@ -217,23 +223,26 @@ export class Editor implements EventDelegate {
 
   private apply(handler: Handler) {
     const doc = this.editor.contentDocument;
-    this.getRanges().forEach(range => {
-      const tbRange = new TBRange(range, doc);
-      handler.execCommand.format(tbRange, this.editor, handler.matcher.match(this.editor, tbRange.rawRange));
+    this.editor.getRanges().forEach(range => {
+      this.hooksList.filter(hooks => typeof hooks.onApply === 'function').reduce((previousValue, currentValue) => {
+        return previousValue.map(tbRange => {
+          const matchDelta = handler.matcher.match(this.editor, tbRange.rawRange);
+          const ranges = currentValue.onApply(tbRange.rawRange, matchDelta, {
+            window: this.editor.contentWindow,
+            document: this.editor.contentDocument
+          });
+          return Array.isArray(ranges) ? ranges : [ranges];
+        }).reduce((p, v) => {
+          return p.concat(v);
+        }).map(r => new TBRange(r, doc));
+      }, [new TBRange(range, doc)]).forEach(tbRange => {
+        handler.execCommand.format(tbRange, this.editor, handler.matcher.match(this.editor, tbRange.rawRange));
+      });
     });
     if (handler.execCommand.recordHistory) {
       this.editor.recordSnapshot();
     }
     doc.body.focus();
-  }
-
-  private getRanges(): Range[] {
-    const selection = this.editor.contentDocument.getSelection();
-    const ranges = [];
-    for (let i = 0; i < selection.rangeCount; i++) {
-      ranges.push(selection.getRangeAt(i));
-    }
-    return ranges;
   }
 
   private static createSplitLine() {

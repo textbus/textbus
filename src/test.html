@@ -30,11 +30,16 @@
           console.log(rawRange);
           selection.removeAllRanges();
 
-          var range = document.createRange();
-          var node = boxes[0].childNodes[0];
-          range.setStart(node, 0);
-          range.setEnd(node, node.textContent.length);
-          selection.addRange(range);
+          // var range = document.createRange();
+          // var node = boxes[0].childNodes[0];
+          // range.setStart(node, 0);
+          // range.setEnd(node, node.textContent.length);
+          // selection.addRange(range);
+
+          var range2 = document.createRange();
+
+          range2.selectNodeContents(boxes[0].childNodes[3]);
+          selection.addRange(range2);
 
           // range.selectNodeContents(boxes[1]);
           // selection.addRange(range.cloneRange());
@@ -46,7 +51,7 @@
           // range.selectNodeContents(boxes[3]);
           // range.setEndAfter(boxes[3]);
           // selection.addRange(range.cloneRange());
-          console.log(range);
+          // console.log(range);
         }, 200);
       }
     }
@@ -60,7 +65,12 @@ tuyityui
   <strong>aaa</strong>bbb<strong>aaa</strong>
 </p>
 
-<div>1234<span>fdsad<i>fdsafd</i></span></div>
+<div>4444
+  <p>111</p>
+  <p>222</p>
+  <p>333</p>
+  <p>444</p>
+</div>
 
 </body>
 </html>

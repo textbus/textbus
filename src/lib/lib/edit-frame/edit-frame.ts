@@ -2,12 +2,7 @@ import { Subject, merge, fromEvent, Observable } from 'rxjs';
 import { debounceTime, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
-
-export interface Hooks {
-  onInit?(frameWindow: Window, frameDocument: Document, frameContainer: HTMLElement): void;
-
-  onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
-}
+import { Hooks } from '../help';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -71,7 +66,10 @@ export class EditFrame {
     }
     this.hooksList.push(hook);
     if (typeof hook.onInit === 'function') {
-      hook.onInit(this.contentWindow, this.contentDocument, this.elementRef);
+      hook.onInit(this.elementRef, {
+        document: this.contentDocument,
+        window: this.contentWindow
+      });
     }
   }
 
@@ -122,6 +120,15 @@ export class EditFrame {
     this.writeContents(html).then(() => {
       this.recordSnapshot();
     });
+  }
+
+  getRanges(): Range[] {
+    const selection = this.contentDocument.getSelection();
+    const ranges = [];
+    for (let i = 0; i < selection.rangeCount; i++) {
+      ranges.push(selection.getRangeAt(i));
+    }
+    return ranges;
   }
 
   private writeContents(html: string): Promise<void> {

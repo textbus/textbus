@@ -9,5 +9,5 @@ export { TableFormatter } from './fomatter/table-formatter';
 export { TableEditActions, TableEditFormatter } from './fomatter/table-edit-formatter';
 export { ToggleBlockFormatter } from './fomatter/toggle-block-formatter';
 export { dtd } from './dtd';
-export { EditFrame, Hooks } from './edit-frame';
+export { EditFrame } from './edit-frame';
 export * from './utils';
