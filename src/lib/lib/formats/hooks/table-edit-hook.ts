@@ -4,6 +4,14 @@ import { findElementByTagName } from '../../edit-frame/utils';
 import { EditContext, Hooks } from '../../help';
 import { MatchDelta } from '../../matcher';
 
+interface CellPosition {
+  element: HTMLTableCellElement;
+  rowIndex: number;
+  columnIndex: number;
+  colSpan: number;
+  rowSpan: number;
+}
+
 export class TableEditHook implements Hooks {
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
@@ -26,6 +34,7 @@ export class TableEditHook implements Hooks {
     let unBindScroll: Subscription;
 
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
+      this.selectedCells = [];
       if (insertStyle) {
         frameDocument.getSelection().removeAllRanges();
         frameDocument.head.removeChild(style);
@@ -44,7 +53,7 @@ export class TableEditHook implements Hooks {
         return;
       }
 
-      const cells = this.serialize(startTable);
+      const cellMatrix = this.serialize(startTable);
 
 
       unBindScroll = merge(...[
@@ -52,7 +61,7 @@ export class TableEditHook implements Hooks {
         'resize'
       ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
         if (targetTd) {
-          this.setRangesAndUpdateMaskStyle(cells, startTd, targetTd);
+          this.findSelectedCellsAndUpdateMaskStyle(cellMatrix, startTd, targetTd);
         }
       });
 
@@ -73,7 +82,7 @@ export class TableEditHook implements Hooks {
             frameContainer.appendChild(this.mask);
             insertMask = true;
           }
-          this.setRangesAndUpdateMaskStyle(cells, startTd, targetTd);
+          this.findSelectedCellsAndUpdateMaskStyle(cellMatrix, startTd, targetTd);
         }
       });
 
@@ -89,8 +98,12 @@ export class TableEditHook implements Hooks {
   }
 
   onApply(range: Range, matchDelta: MatchDelta, context: EditContext): Range | Range[] {
-    if (matchDelta.inSingleContainer) {
-      console.log(range);
+    if (this.selectedCells.length) {
+      return this.selectedCells.map(cell => {
+        const range = context.document.createRange();
+        range.selectNodeContents(cell);
+        return range;
+      });
     }
     return range;
   }
@@ -102,40 +115,75 @@ export class TableEditHook implements Hooks {
     }
   }
 
-  private setRangesAndUpdateMaskStyle(cells: HTMLTableCellElement[][], startCell: HTMLTableCellElement, endCell: HTMLTableCellElement) {
-    const startPosition = this.findCellPosition(cells, startCell);
-    const endPosition = this.findCellPosition(cells, endCell);
+  private findSelectedCellsAndUpdateMaskStyle(cellMatrix: CellPosition[][],
+                                              startCell: HTMLTableCellElement,
+                                              endCell: HTMLTableCellElement) {
+    const startPosition = this.findCellPosition(cellMatrix, startCell);
+    const endPosition = this.findCellPosition(cellMatrix, endCell);
 
     const minColumnIndex = Math.min(startPosition.columnIndex, endPosition.columnIndex);
     const maxColumnIndex = Math.max(startPosition.columnIndex, endPosition.columnIndex);
     const minRowIndex = Math.min(startPosition.rowIndex, endPosition.rowIndex);
     const maxRowIndex = Math.max(startPosition.rowIndex, endPosition.rowIndex);
 
-    console.log({
-      minColumnIndex,
-      maxColumnIndex,
-      minRowIndex,
-      maxRowIndex
-    })
+    const top = cellMatrix[minRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
+      return {
+        top: cell.element.getBoundingClientRect().top,
+        cell
+      }
+    }).sort((n, m) => {
+      return n.top - m.top;
+    }).shift();
 
-    const top = Math.min(...cells[minRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => cell.getBoundingClientRect().top));
-    const left = Math.min(...cells.slice(minRowIndex, maxRowIndex + 1).map(row => row[minColumnIndex].getBoundingClientRect().left));
-    const width = Math.max(...cells.slice(minRowIndex, maxRowIndex + 1).map(row => row[maxColumnIndex].getBoundingClientRect().right - left));
-    const height = Math.max(...cells[maxRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => cell.getBoundingClientRect().bottom - top));
+    const left = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
+      return {
+        left: row[minColumnIndex].element.getBoundingClientRect().left,
+        cell: row[minColumnIndex]
+      }
+    }).sort((n, m) => {
+      return n.left - m.left;
+    }).shift();
+    const width = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
+      return {
+        width: row[maxColumnIndex].element.getBoundingClientRect().right - left.left,
+        cell: row[maxColumnIndex]
+      }
+    }).sort((n, m) => {
+      return n.width - m.width;
+    }).pop();
+    const height = cellMatrix[maxRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
+      return {
+        height: cell.element.getBoundingClientRect().bottom - top.top,
+        cell
+      }
+    }).sort((n, m) => {
+      return n.height - m.height;
+    }).pop();
 
-    this.mask.style.left = left + 'px';
-    this.mask.style.top = top + 'px';
-    this.mask.style.width = width + 'px';
-    this.mask.style.height = height + 'px';
+    this.mask.style.left = left.left + 'px';
+    this.mask.style.top = top.top + 'px';
+    this.mask.style.width = width.width + 'px';
+    this.mask.style.height = height.height + 'px';
+
+
+    const selectedCells = cellMatrix.slice(top.cell.rowIndex,
+      height.cell.rowIndex + height.cell.rowSpan).map(columns => {
+      return columns.slice(left.cell.columnIndex + left.cell.colSpan - left.cell.element.colSpan,
+        width.cell.columnIndex + width.cell.colSpan);
+    }).reduce((a, b) => {
+      return a.concat(b);
+    }).map(item => item.element);
+
+    this.selectedCells = Array.from(new Set(selectedCells));
   }
 
-  private findCellPosition(cells: HTMLTableCellElement[][],
+  private findCellPosition(cellMatrix: CellPosition[][],
                            cell: HTMLTableCellElement): { rowIndex: number, columnIndex: number } {
     let startRow: number;
     let startColumn: number;
 
-    for (let rowIndex = 0; rowIndex < cells.length; rowIndex++) {
-      let index = cells[rowIndex].indexOf(cell);
+    for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
+      let index = cellMatrix[rowIndex].map(item => item.element).indexOf(cell);
       if (index > -1) {
         startRow = rowIndex;
         startColumn = index;
@@ -147,7 +195,7 @@ export class TableEditHook implements Hooks {
     };
   }
 
-  private serialize(table: HTMLTableElement): HTMLTableCellElement[][] {
+  private serialize(table: HTMLTableElement): CellPosition[][] {
     const rows: HTMLTableCellElement[][] = [];
 
     if (table.tHead) {
@@ -184,7 +232,7 @@ export class TableEditHook implements Hooks {
         const cell = cells[columnIndex];
         if (cell) {
           if (cell.colSpan > 1) {
-            cells.splice(columnIndex, 0, {
+            cells.splice(columnIndex + 1, 0, {
               element: cell.element,
               colSpan: cell.colSpan - 1,
               rowSpan: cell.rowSpan
@@ -197,8 +245,6 @@ export class TableEditHook implements Hooks {
               rowSpan: cell.rowSpan - 1
             });
           }
-          cell.colSpan--;
-          cell.rowSpan--;
           return true;
         }
         return false;
@@ -206,8 +252,16 @@ export class TableEditHook implements Hooks {
       columnIndex++;
     } while (stop);
 
-    return normalizeRows.map(cells => {
-      return cells.map(cell => cell.element);
+    return normalizeRows.map((cells, rowIndex) => {
+      return cells.map((cell, columnIndex) => {
+        return {
+          element: cell.element,
+          rowIndex,
+          columnIndex,
+          colSpan: cell.colSpan,
+          rowSpan: cell.rowSpan
+        };
+      })
     });
   }
 }
