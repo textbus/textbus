@@ -20,10 +20,13 @@ export function findEmptyContainer(node: Node): Node {
   return findEmptyContainer(node.parentNode);
 }
 
-export function findElementByTagName(nodes: Node[], tagName: string): HTMLElement {
-  const reg = new RegExp(`^${tagName}$`, 'i');
+export function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLElement {
+  if (!Array.isArray(tagName)) {
+    tagName = [tagName];
+  }
+  const regs = tagName.map(tagName => new RegExp(`^${tagName}$`, 'i'));
   for (const node of nodes) {
-    if (node.nodeType === 1 && reg.test((node as HTMLElement).tagName)) {
+    if (node.nodeType === 1 && regs.map(reg => reg.test((node as HTMLElement).tagName)).indexOf(true) > -1) {
       return node as HTMLElement;
     }
   }

@@ -33,12 +33,16 @@ class TableEditHook implements Hooks {
         insertMask = false;
         unBindScroll && unBindScroll.unsubscribe();
       }
-      const startTd = findElementByTagName(Array.from(startEvent.composedPath()) as Array<Node>, 'td');
+      const startPaths = Array.from(startEvent.composedPath()) as Array<Node>;
+      const startTd = findElementByTagName(startPaths, ['td', 'th']);
+      const startTable = findElementByTagName(startPaths, 'table') as HTMLTableElement;
       let targetTd: HTMLElement;
-      if (!startTd) {
+      if (!startTd || !startTable) {
         return;
       }
 
+      const cells = this.serialize(startTable);
+      console.log(cells);
       let left: number;
       let top: number;
       let width: number;
@@ -71,7 +75,12 @@ class TableEditHook implements Hooks {
 
 
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
-        targetTd = findElementByTagName(Array.from(mouseoverEvent.composedPath()) as Array<Node>, 'td') || targetTd;
+        const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
+        const currentTable = findElementByTagName(paths, 'table');
+        if (currentTable !== startTable) {
+          return;
+        }
+        targetTd = findElementByTagName(paths, ['td', 'th']) || targetTd;
         if (targetTd) {
           if (targetTd !== startTd) {
             frameDocument.head.appendChild(style);
@@ -101,6 +110,70 @@ class TableEditHook implements Hooks {
     if (style) {
       style.parentNode.removeChild(style);
     }
+  }
+
+  private serialize(table: HTMLTableElement): HTMLTableCellElement[][] {
+    const rows: HTMLTableCellElement[][] = [];
+
+    if (table.tHead) {
+      Array.from(table.tHead.rows).forEach(tr => {
+        rows.push(Array.from(tr.cells));
+      });
+    }
+
+    if (table.tBodies) {
+      Array.from(table.tBodies).forEach(tbody => {
+        Array.from(tbody.rows).forEach(tr => {
+          rows.push(Array.from(tr.cells));
+        });
+      });
+    }
+    if (table.tFoot) {
+      Array.from(table.tFoot.rows).forEach(tr => {
+        rows.push(Array.from(tr.cells));
+      });
+    }
+    let stop = false;
+    let columnIndex = 0;
+    const normalizeRows = rows.map(cells => {
+      return cells.map(cell => {
+        return {
+          element: cell,
+          rowSpan: cell.rowSpan,
+          colSpan: cell.colSpan
+        };
+      });
+    });
+    do {
+      stop = normalizeRows.map((cells, rowIndex) => {
+        const cell = cells[columnIndex];
+        if (cell) {
+          if (cell.colSpan > 1) {
+            cells.splice(columnIndex, 0, {
+              element: cell.element,
+              colSpan: cell.colSpan - 1,
+              rowSpan: cell.rowSpan
+            });
+          }
+          if (cell.rowSpan > 1) {
+            normalizeRows[rowIndex + 1].splice(columnIndex, 0, {
+              element: cell.element,
+              colSpan: cell.colSpan,
+              rowSpan: cell.rowSpan - 1
+            });
+          }
+          cell.colSpan--;
+          cell.rowSpan--;
+          return true;
+        }
+        return false;
+      }).indexOf(true) > -1;
+      columnIndex++;
+    } while (stop);
+
+    return normalizeRows.map(cells => {
+      return cells.map(cell => cell.element);
+    });
   }
 }
 

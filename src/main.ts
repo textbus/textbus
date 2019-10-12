@@ -12,80 +12,11 @@ const editor = createEditor('#editor', {
   content: `<table>
   <tbody>
   <tr>
-    <td>1</td>
-    <td>2</td>
+    <td rowspan="2" colspan="2">1</td>
     <td>3</td>
     <td>4</td>
   </tr>
   <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td colspan="2">1</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  </tbody>
-</table>
-<table>
-  <tbody>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td colspan="2">1</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  </tbody>
-</table>
-<table>
-  <tbody>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
     <td>3</td>
     <td>4</td>
   </tr>
