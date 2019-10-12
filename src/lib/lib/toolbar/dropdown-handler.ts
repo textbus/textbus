@@ -4,11 +4,13 @@ import { DropdownHandlerOption, Handler } from './help';
 import { Matcher, MatchDelta } from '../matcher';
 import { Dropdown } from './utils/dropdown';
 import { EventDelegate } from '../help';
+import { Formatter } from '../edit-frame/_api';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
   matcher: Matcher;
   onApply: Observable<any>;
+  execCommand: Formatter;
   private dropdownButton = document.createElement('button');
   private dropdown: Dropdown;
 
@@ -16,6 +18,7 @@ export class DropdownHandler implements Handler {
     this.onApply = handler.onHide;
 
     this.matcher = new Matcher(handler.match);
+    this.execCommand = handler.execCommand;
     this.dropdownButton.type = 'button';
     this.dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
     this.dropdownButton.innerText = (handler.label === null || handler.label === undefined) ? '' : handler.label;

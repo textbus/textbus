@@ -30,9 +30,12 @@ export interface FormatMatch {
   canUse?(range: Range, frame: EditFrame, matchState: MatchState): boolean;
 }
 
-export interface ButtonHandlerOption {
-  type: HandlerType.Button;
+export interface Commander {
   execCommand: Formatter;
+}
+
+export interface ButtonHandlerOption extends Commander {
+  type: HandlerType.Button;
   match?: FormatMatch;
   label?: string;
   classes?: string[];
@@ -40,8 +43,7 @@ export interface ButtonHandlerOption {
   hooks?: Hooks;
 }
 
-export interface SelectHandlerItemOption {
-  execCommand: Formatter;
+export interface SelectHandlerItemOption extends Commander {
   label: string;
   match?: FormatMatch;
   classes?: string[];
@@ -66,10 +68,9 @@ export interface DropdownHandlerView {
   setEventDelegator?(delegate: EventDelegate): void;
 }
 
-export interface DropdownHandlerOption {
+export interface DropdownHandlerOption extends Commander {
   type: HandlerType.Dropdown;
   viewer: DropdownHandlerView;
-  execCommand: Formatter;
   onHide: Observable<void>;
   classes?: string[];
   format?: string;
@@ -79,8 +80,7 @@ export interface DropdownHandlerOption {
   hooks?: Hooks;
 }
 
-export interface ActionSheetHandlerItemOption {
-  execCommand: Formatter;
+export interface ActionSheetHandlerItemOption extends Commander {
   label: string;
   match?: FormatMatch;
   classes?: string[];
@@ -98,7 +98,7 @@ export interface Handler {
   elementRef: HTMLElement;
   onApply: Observable<any>;
   matcher: Matcher;
-
+  execCommand: Formatter;
   updateStatus(desc: MatchDelta): void;
 }
 

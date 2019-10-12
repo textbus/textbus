@@ -155,23 +155,30 @@ export class Editor implements EventDelegate {
   }
 
   private updateToolbarStatus() {
-    const doc = this.editor.contentDocument;
-    const range = doc.getSelection().getRangeAt(0);
+
+    const ranges = this.getRanges();
     this.handlers.forEach(handler => {
-      handler.updateStatus(handler.matcher.match(this.editor, range));
+      const delta = ranges.map(range => {
+        return handler.matcher.match(this.editor, range);
+      }).reduce((previousValue, currentValue) => {
+        return {
+          inSingleContainer: previousValue.inSingleContainer && currentValue.inSingleContainer,
+          overlap: previousValue.overlap && currentValue.overlap,
+          contain: previousValue.contain || currentValue.contain,
+          container: currentValue.container,
+          config: currentValue.config,
+          disable: previousValue.disable || currentValue.disable,
+          range: currentValue.range
+        };
+      });
+      handler.updateStatus(delta);
     });
   }
 
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
     button.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-      const doc = this.editor.contentDocument;
-      const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-      option.execCommand.format(range, this.editor, button.matcher.match(this.editor, range.rawRange));
-      if (option.execCommand.recordHistory) {
-        this.editor.recordSnapshot();
-      }
-      doc.body.focus();
+      this.apply(button);
     });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
@@ -181,14 +188,7 @@ export class Editor implements EventDelegate {
     const select = new SelectHandler(option);
     select.options.forEach(item => {
       item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-        const doc = this.editor.contentDocument;
-        const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-        item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));
-
-        if (item.execCommand.recordHistory) {
-          this.editor.recordSnapshot();
-        }
-        doc.body.focus();
+        this.apply(item);
       });
       this.handlers.push(item);
     });
@@ -199,14 +199,7 @@ export class Editor implements EventDelegate {
     const dropdown = new DropdownHandler(handler, this);
     this.toolbar.appendChild(dropdown.elementRef);
     dropdown.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-      const doc = this.editor.contentDocument;
-      const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-      handler.execCommand.format(range, this.editor, dropdown.matcher.match(this.editor, range.rawRange));
-
-      if (handler.execCommand.recordHistory) {
-        this.editor.recordSnapshot();
-      }
-      doc.body.focus();
+      this.apply(dropdown);
     });
     this.handlers.push(dropdown);
   }
@@ -216,17 +209,31 @@ export class Editor implements EventDelegate {
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
       item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-        const doc = this.editor.contentDocument;
-        const range = new TBRange(doc.getSelection().getRangeAt(0), doc);
-        item.execCommand.format(range, this.editor, item.matcher.match(this.editor, range.rawRange));
-
-        if (item.execCommand.recordHistory) {
-          this.editor.recordSnapshot();
-        }
-        doc.body.focus();
+        this.apply(item);
       });
       this.handlers.push(item);
     });
+  }
+
+  private apply(handler: Handler) {
+    const doc = this.editor.contentDocument;
+    this.getRanges().forEach(range => {
+      const tbRange = new TBRange(range, doc);
+      handler.execCommand.format(tbRange, this.editor, handler.matcher.match(this.editor, tbRange.rawRange));
+    });
+    if (handler.execCommand.recordHistory) {
+      this.editor.recordSnapshot();
+    }
+    doc.body.focus();
+  }
+
+  private getRanges(): Range[] {
+    const selection = this.editor.contentDocument.getSelection();
+    const ranges = [];
+    for (let i = 0; i < selection.rangeCount; i++) {
+      ranges.push(selection.getRangeAt(i));
+    }
+    return ranges;
   }
 
   private static createSplitLine() {
