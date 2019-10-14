@@ -27,7 +27,7 @@ export class TableEditHook implements Hooks {
   private bottom: CellPosition;
 
   constructor() {
-    this.mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none;';
+    this.mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none; transition: all .1s';
   }
 
   setup(frameContainer: HTMLElement, context: EditContext): void {
