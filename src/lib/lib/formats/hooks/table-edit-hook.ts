@@ -2,7 +2,6 @@ import { fromEvent, merge, Subscription } from 'rxjs';
 
 import { findElementByTagName } from '../../edit-frame/utils';
 import { EditContext, Hooks } from '../../help';
-import { MatchDelta } from '../../matcher';
 
 interface CellPosition {
   element: HTMLTableCellElement;
@@ -21,7 +20,7 @@ export class TableEditHook implements Hooks {
     this.mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none;';
   }
 
-  onInit(frameContainer: HTMLElement, context: EditContext): void {
+  setup(frameContainer: HTMLElement, context: EditContext): void {
     const frameDocument = context.document;
     const frameWindow = context.window;
     const childBody = frameDocument.body;
@@ -97,7 +96,7 @@ export class TableEditHook implements Hooks {
 
   }
 
-  onApply(range: Range, matchDelta: MatchDelta, context: EditContext): Range | Range[] {
+  onSelectionChange(range: Range, context: EditContext): Range | Range[] {
     if (this.selectedCells.length) {
       return this.selectedCells.map(cell => {
         const range = context.document.createRange();

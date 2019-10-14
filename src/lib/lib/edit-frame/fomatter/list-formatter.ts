@@ -12,6 +12,7 @@ export class ListFormatter implements Formatter {
   }
 
   format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
+    range.markRange();
   }
 
   // format(doc: Document): Range {

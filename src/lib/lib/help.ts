@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs';
 
 import { HandlerOption } from './toolbar/help';
-import { MatchDelta } from './matcher';
 
 export interface EditorOptions {
   historyStackSize?: number;
@@ -21,7 +20,8 @@ export interface EditContext {
 }
 
 export interface Hooks {
-  onInit?(frameContainer: HTMLElement, context: EditContext): void;
-  onApply?(range: Range, matchDelta: MatchDelta, context: EditContext): Range | Range[];
+  setup?(frameContainer: HTMLElement, context: EditContext): void;
+  onSelectionChange?(range: Range, context: EditContext): Range | Range[];
+  onApplied?(frameContainer: HTMLElement, context: EditContext): void;
   onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }

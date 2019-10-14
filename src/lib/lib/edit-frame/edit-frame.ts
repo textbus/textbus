@@ -6,7 +6,7 @@ import { Hooks } from '../help';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
-  readonly onSelectionChange: Observable<void>;
+  readonly onSelectionChange: Observable<Range[]>;
   readonly onReady: Observable<this>;
   readonly contentChange: Observable<string>;
   readonly contentDocument: Document;
@@ -21,7 +21,7 @@ export class EditFrame {
   }
 
   private frame = document.createElement('iframe');
-  private selectionChangeEvent = new Subject<void>();
+  private selectionChangeEvent = new Subject<Range[]>();
   private contentChangeEvent = new Subject<string>();
   private readyEvent = new Subject<this>();
   private editorHTML = template;
@@ -65,8 +65,8 @@ export class EditFrame {
       return;
     }
     this.hooksList.push(hook);
-    if (typeof hook.onInit === 'function') {
-      hook.onInit(this.elementRef, {
+    if (typeof hook.setup === 'function') {
+      hook.setup(this.elementRef, {
         document: this.contentDocument,
         window: this.contentWindow
       });
@@ -113,7 +113,7 @@ export class EditFrame {
     const range = this.contentDocument.createRange();
     range.selectNodeContents(node);
     selection.addRange(range);
-    this.selectionChangeEvent.next();
+    this.selectionChangeEvent.next(this.getRanges());
   }
 
   updateContents(html: string) {
@@ -127,6 +127,24 @@ export class EditFrame {
     const ranges = [];
     for (let i = 0; i < selection.rangeCount; i++) {
       ranges.push(selection.getRangeAt(i));
+    }
+    const selectionChangeHooks = this.hooksList.filter(hooks => typeof hooks.onSelectionChange === 'function');
+    if (selectionChangeHooks.length) {
+      return ranges.map(range => {
+        return selectionChangeHooks.reduce((previousValue, currentValue) => {
+          return previousValue.map(r => {
+            const ranges = currentValue.onSelectionChange(r, {
+              window: this.contentWindow,
+              document: this.contentDocument
+            });
+            return Array.isArray(ranges) ? ranges : [ranges];
+          }).reduce((p, v) => {
+            return p.concat(v);
+          });
+        }, [range]);
+      }).reduce((p, v) => {
+        return p.concat(v);
+      })
     }
     return ranges;
   }
@@ -207,7 +225,7 @@ ${body.outerHTML}
       'selectstart',
       'focus'
     ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next();
+      this.selectionChangeEvent.next(this.getRanges());
     });
     // 兼听可能引起编辑区空白的事件，并重新设置默认值
     merge(...[
