@@ -17,3 +17,5 @@ export class SourceHook implements Hooks {
     });
   }
 }
+
+export const sourceHook = new SourceHook();

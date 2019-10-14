@@ -36,7 +36,7 @@ export class DropdownHandler implements Handler {
     this.dropdownButton.disabled = matchDelta.disable;
     if (matchDelta.inSingleContainer) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
-      this.handler.viewer.updateStateByElement(matchDelta.container as HTMLElement);
+      this.handler.viewer.updateStateByElement(matchDelta.scopeContainer as HTMLElement);
     } else if (matchDelta.overlap) {
       this.dropdownButton.classList.add('tanbo-editor-handler-active');
       this.handler.viewer.updateStateByElement(matchDelta.range.cloneContents().children[0] as HTMLElement);

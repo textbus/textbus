@@ -14,24 +14,24 @@ export class ToggleBlockFormatter implements Formatter {
     range.markRange();
 
     if (matchDelta.inSingleContainer) {
-      const block = findBlockContainer(range.commonAncestorContainer, matchDelta.container);
+      const block = findBlockContainer(range.commonAncestorContainer, matchDelta.scopeContainer);
 
-      if (block === matchDelta.container) {
-        takeOffWrapper(frame.contentDocument, matchDelta.container as HTMLElement);
+      if (block === matchDelta.scopeContainer) {
+        takeOffWrapper(frame.contentDocument, matchDelta.scopeContainer);
       } else {
         const newRange = frame.contentDocument.createRange();
         newRange.selectNode(block);
-        const parent = matchDelta.container.parentNode;
-        const next = matchDelta.container.nextSibling;
+        const parent = matchDelta.scopeContainer.parentNode;
+        const next = matchDelta.scopeContainer.nextSibling;
 
         const newTBRange = new TBRange(newRange, frame.contentDocument);
 
-        const {before, after} = newTBRange.getRangesAfterAndBeforeWithinContainer(matchDelta.container);
+        const {before, after} = newTBRange.getRangesAfterAndBeforeWithinContainer(matchDelta.scopeContainer);
 
         const beforeContents = before.extractContents();
         const afterContents = after.extractContents();
         if (beforeContents.textContent) {
-          parent.insertBefore(beforeContents, matchDelta.container);
+          parent.insertBefore(beforeContents, matchDelta.scopeContainer);
         }
         if (afterContents.textContent) {
           if (next) {
@@ -40,7 +40,7 @@ export class ToggleBlockFormatter implements Formatter {
             parent.appendChild(afterContents);
           }
         }
-        takeOffWrapper(frame.contentDocument, matchDelta.container as HTMLElement);
+        takeOffWrapper(frame.contentDocument, matchDelta.scopeContainer);
         newTBRange.removeMarkRange();
       }
     } else {

@@ -38,7 +38,7 @@ export class AttrFormatter implements Formatter {
 
     if (matchDelta.inSingleContainer) {
       this.attrs.forEach(item => {
-        setAttr(matchDelta.container as HTMLElement, item);
+        setAttr(matchDelta.scopeContainer as HTMLElement, item);
       });
     } else if (matchDelta.overlap) {
       const c = (range.commonAncestorContainer as HTMLElement).children[0] as HTMLElement;

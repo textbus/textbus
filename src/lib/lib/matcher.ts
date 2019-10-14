@@ -8,7 +8,7 @@ export interface MatchState {
 }
 
 export interface MatchDelta extends MatchState {
-  container: Node;
+  scopeContainer: HTMLElement;
   range: Range;
   config: FormatMatch;
   disable: boolean;
@@ -91,21 +91,20 @@ export class Matcher {
       }
     }
     this.matchChildNodes = [];
-    let overlap: boolean;
+    let overlap = inSingleContainer;
     let contain: boolean;
     if (range.collapsed) {
-      overlap = inSingleContainer;
       contain = false;
     } else {
       const match = this.matchAllChild(range, range.commonAncestorContainer);
-      overlap = match && this.matchChildNodes.length > 0;
+      overlap = match && this.matchChildNodes.length > 0 || overlap;
       contain = !match && this.matchChildNodes.length > 0;
       this.matchChildNodes = [];
     }
 
     return {
       inSingleContainer,
-      container: node,
+      scopeContainer: node as HTMLElement,
       overlap,
       contain,
       range,

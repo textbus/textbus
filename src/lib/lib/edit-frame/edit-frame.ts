@@ -1,8 +1,9 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { Hooks } from '../help';
+import { Matcher } from '../matcher';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -60,13 +61,10 @@ export class EditFrame {
 
   }
 
-  use(hook: Hooks) {
-    if (this.hooksList.indexOf(hook) > -1) {
-      return;
-    }
-    this.hooksList.push(hook);
-    if (typeof hook.setup === 'function') {
-      hook.setup(this.elementRef, {
+  use(hooks: Hooks) {
+    this.hooksList.push(hooks);
+    if (typeof hooks.setup === 'function') {
+      hooks.setup(this.elementRef, {
         document: this.contentDocument,
         window: this.contentWindow
       });
@@ -133,6 +131,17 @@ export class EditFrame {
       return ranges.map(range => {
         return selectionChangeHooks.reduce((previousValue, currentValue) => {
           return previousValue.map(r => {
+            if (currentValue.matcher instanceof Matcher) {
+              const matchDelta = currentValue.matcher.match(this, r);
+              if (matchDelta.overlap || matchDelta.contain) {
+                const ranges = currentValue.onSelectionChange(r, {
+                  window: this.contentWindow,
+                  document: this.contentDocument
+                });
+                return Array.isArray(ranges) ? ranges : [ranges];
+              }
+              return [r];
+            }
             const ranges = currentValue.onSelectionChange(r, {
               window: this.contentWindow,
               document: this.contentDocument
@@ -182,10 +191,10 @@ export class EditFrame {
     const head = this.contentDocument.head.cloneNode(true) as HTMLHeadElement;
     const body = this.contentDocument.body.cloneNode(true) as HTMLBodyElement;
 
-    this.hooksList.filter(hook => {
-      return typeof hook.onOutput === 'function';
-    }).forEach(hook => {
-      hook.onOutput(head, body);
+    this.hooksList.filter(hooks => {
+      return typeof hooks.onOutput === 'function';
+    }).forEach(hooks => {
+      hooks.onOutput(head, body);
     });
 
     body.removeAttribute('contentEditable');
@@ -224,7 +233,7 @@ ${body.outerHTML}
       'mouseup',
       'selectstart',
       'focus'
-    ].map(type => fromEvent(childBody, type))).pipe(debounceTime(100)).subscribe(() => {
+    ].map(type => fromEvent(childBody, type))).pipe(auditTime(100)).subscribe(() => {
       this.selectionChangeEvent.next(this.getRanges());
     });
     // 兼听可能引起编辑区空白的事件，并重新设置默认值

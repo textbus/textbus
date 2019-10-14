@@ -2,6 +2,7 @@ import { fromEvent, merge, Subscription } from 'rxjs';
 
 import { findElementByTagName } from '../../edit-frame/utils';
 import { EditContext, Hooks } from '../../help';
+import { Matcher } from '../../matcher';
 
 interface CellPosition {
   element: HTMLTableCellElement;
@@ -12,6 +13,10 @@ interface CellPosition {
 }
 
 export class TableEditHook implements Hooks {
+  matcher = new Matcher({
+    tags: ['table']
+  });
+
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
   private selectedCells: HTMLTableCellElement[] = [];
@@ -112,6 +117,9 @@ export class TableEditHook implements Hooks {
     if (style) {
       style.parentNode.removeChild(style);
     }
+  }
+
+  onApplied(frameContainer: HTMLElement, context: EditContext): void {
   }
 
   private findSelectedCellsAndUpdateMaskStyle(cellMatrix: CellPosition[][],

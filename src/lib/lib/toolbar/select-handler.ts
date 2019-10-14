@@ -75,7 +75,7 @@ export class SelectOptionHandler implements Handler {
 
   updateStatus(matchDelta: MatchDelta): void {
     this.elementRef.disabled = matchDelta.disable;
-    if (matchDelta.inSingleContainer || matchDelta.overlap) {
+    if (matchDelta.overlap) {
       this.matchedEvent.next(this.option);
     }
   }

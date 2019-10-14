@@ -73,9 +73,9 @@ export class Editor implements EventDelegate {
       this.updateToolbarStatus(ranges);
     });
     this.editor.onSelectionChange
-      .pipe(map(() => {
+      .pipe(map(ranges => {
         this.canApplyAction = true;
-        return this.editor.contentDocument.getSelection().getRangeAt(0).endContainer;
+        return ranges[ranges.length - 1].endContainer;
       }), distinctUntilChanged()).subscribe(node => {
       this.paths.update(node as Element);
     });
@@ -103,7 +103,6 @@ export class Editor implements EventDelegate {
       case HandlerType.ActionSheet:
         this.addActionSheetHandler(option);
     }
-
     if (option.hooks) {
       this.run(() => {
         this.editor.use(option.hooks);
@@ -163,7 +162,7 @@ export class Editor implements EventDelegate {
           inSingleContainer: previousValue.inSingleContainer && currentValue.inSingleContainer,
           overlap: previousValue.overlap && currentValue.overlap,
           contain: previousValue.contain || currentValue.contain,
-          container: currentValue.container,
+          scopeContainer: currentValue.scopeContainer,
           config: currentValue.config,
           disable: previousValue.disable || currentValue.disable,
           range: currentValue.range
@@ -193,8 +192,8 @@ export class Editor implements EventDelegate {
     this.toolbar.appendChild(select.elementRef);
   }
 
-  private addDropdownHandler(handler: DropdownHandlerOption) {
-    const dropdown = new DropdownHandler(handler, this);
+  private addDropdownHandler(option: DropdownHandlerOption) {
+    const dropdown = new DropdownHandler(option, this);
     this.toolbar.appendChild(dropdown.elementRef);
     dropdown.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
       this.apply(dropdown);
@@ -202,8 +201,8 @@ export class Editor implements EventDelegate {
     this.handlers.push(dropdown);
   }
 
-  private addActionSheetHandler(handler: ActionSheetHandlerOption) {
-    const actionSheet = new ActionSheetHandler(handler);
+  private addActionSheetHandler(option: ActionSheetHandlerOption) {
+    const actionSheet = new ActionSheetHandler(option);
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
       item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
@@ -214,15 +213,23 @@ export class Editor implements EventDelegate {
   }
 
   private apply(handler: Handler) {
-    const doc = this.editor.contentDocument;
-    this.editor.getRanges().forEach(range => {
-      const tbRange = new TBRange(range, this.editor.contentDocument);
-      handler.execCommand.format(tbRange, this.editor, handler.matcher.match(this.editor, tbRange.rawRange));
+    const matches = this.editor.getRanges().map(r => {
+      return {
+        range: new TBRange(r, this.editor.contentDocument),
+        matchDelta: handler.matcher.match(this.editor, r)
+      };
     });
+
+    const overlap = matches.map(item => item.matchDelta.overlap).reduce((p, n) => p && n);
+    matches.forEach(item => {
+      item.matchDelta.overlap = overlap;
+      handler.execCommand.format(item.range, this.editor, item.matchDelta);
+    });
+
     if (handler.execCommand.recordHistory) {
       this.editor.recordSnapshot();
     }
-    doc.body.focus();
+    this.focus();
   }
 
   private static createSplitLine() {

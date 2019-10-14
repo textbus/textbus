@@ -19,11 +19,11 @@ export class InlineFormatter implements Formatter {
       if (range.rawRange.collapsed) {
         return;
       }
-      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchDelta.container as HTMLElement);
+      const {before, after} = range.getRangesAfterAndBeforeWithinContainer(matchDelta.scopeContainer);
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      takeOffWrapper(this.document, matchDelta.container as HTMLElement);
+      takeOffWrapper(this.document, matchDelta.scopeContainer);
       before.detach();
       after.detach();
       range.removeMarkRange();
