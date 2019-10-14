@@ -3,6 +3,7 @@ import { fromEvent, merge, Subscription } from 'rxjs';
 import { findElementByTagName } from '../../edit-frame/utils';
 import { EditContext, Hooks } from '../../help';
 import { Matcher } from '../../matcher';
+import { Formatter } from '../../edit-frame/fomatter/formatter';
 
 interface CellPosition {
   element: HTMLTableCellElement;
@@ -20,6 +21,10 @@ export class TableEditHook implements Hooks {
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
   private selectedCells: HTMLTableCellElement[] = [];
+  private left: CellPosition;
+  private right: CellPosition;
+  private top: CellPosition;
+  private bottom: CellPosition;
 
   constructor() {
     this.mask.style.cssText = 'position: absolute; background: rgba(18,150,219,.1); pointer-events: none;';
@@ -112,6 +117,10 @@ export class TableEditHook implements Hooks {
     return range;
   }
 
+  onApply(range: Range, formatter: Formatter, context: EditContext): boolean {
+    return false;
+  }
+
   onOutput(head: HTMLHeadElement, body: HTMLBodyElement): void {
     const style = head.querySelector('#' + this.id);
     if (style) {
@@ -150,7 +159,7 @@ export class TableEditHook implements Hooks {
     }).sort((n, m) => {
       return n.left - m.left;
     }).shift();
-    const width = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
+    const right = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
       return {
         width: row[maxColumnIndex].element.getBoundingClientRect().right - left.left,
         cell: row[maxColumnIndex]
@@ -158,7 +167,7 @@ export class TableEditHook implements Hooks {
     }).sort((n, m) => {
       return n.width - m.width;
     }).pop();
-    const height = cellMatrix[maxRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
+    const bottom = cellMatrix[maxRowIndex].slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
       return {
         height: cell.element.getBoundingClientRect().bottom - top.top,
         cell
@@ -169,19 +178,23 @@ export class TableEditHook implements Hooks {
 
     this.mask.style.left = left.left + 'px';
     this.mask.style.top = top.top + 'px';
-    this.mask.style.width = width.width + 'px';
-    this.mask.style.height = height.height + 'px';
+    this.mask.style.width = right.width + 'px';
+    this.mask.style.height = bottom.height + 'px';
 
 
     const selectedCells = cellMatrix.slice(top.cell.rowIndex,
-      height.cell.rowIndex + height.cell.rowSpan).map(columns => {
+      bottom.cell.rowIndex + bottom.cell.rowSpan).map(columns => {
       return columns.slice(left.cell.columnIndex + left.cell.colSpan - left.cell.element.colSpan,
-        width.cell.columnIndex + width.cell.colSpan);
+        right.cell.columnIndex + right.cell.colSpan);
     }).reduce((a, b) => {
       return a.concat(b);
     }).map(item => item.element);
 
     this.selectedCells = Array.from(new Set(selectedCells));
+    this.left = left.cell;
+    this.right = right.cell;
+    this.top = top.cell;
+    this.bottom = bottom.cell;
   }
 
   private findCellPosition(cellMatrix: CellPosition[][],

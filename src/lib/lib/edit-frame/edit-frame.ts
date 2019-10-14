@@ -4,6 +4,8 @@ import { auditTime, sampleTime, tap } from 'rxjs/operators';
 import { template } from './template-html';
 import { Hooks } from '../help';
 import { Matcher } from '../matcher';
+import { TBRange } from '../range';
+import { Formatter } from './fomatter/formatter';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -75,30 +77,15 @@ export class EditFrame {
     if (this.canBack) {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
-      this.apply();
+      this.applyHistory();
     }
   }
 
   forward() {
     if (this.canForward) {
       this.historyIndex++;
-      this.apply();
+      this.applyHistory();
     }
-  }
-
-  recordSnapshot() {
-    if (this.historySequence.length !== this.historyIndex) {
-      this.historySequence.length = this.historyIndex + 1;
-    }
-    this.historySequence.push({
-      node: this.contentDocument.body.cloneNode() as HTMLElement,
-      innerHTML: this.contentDocument.body.innerHTML
-    });
-    if (this.historySequence.length > this.historyStackSize) {
-      this.historySequence.shift();
-    }
-    this.historyIndex = this.historySequence.length - 1;
-    this.dispatchContentChangeEvent();
   }
 
   /**
@@ -158,6 +145,59 @@ export class EditFrame {
     return ranges;
   }
 
+  apply(formatter: Formatter, matcher: Matcher, hooks: Hooks = {
+    onApply(): boolean {
+      return true;
+    }
+  }) {
+    const matches = this.getRanges().map(r => {
+      return {
+        range: new TBRange(r, this.contentDocument),
+        matchDelta: matcher.match(this, r)
+      };
+    }).filter(item => {
+      if (item.matchDelta.overlap || item.matchDelta.contain) {
+        return hooks.onApply(item.range.rawRange, formatter, {
+          document: this.contentDocument,
+          window: this.contentWindow
+        });
+      }
+      return true;
+    });
+    if (matches.length) {
+      const overlap = matches.map(item => item.matchDelta.overlap).reduce((p, n) => p && n);
+      matches.forEach(item => {
+        item.matchDelta.overlap = overlap;
+        formatter.format(item.range, this, item.matchDelta);
+      });
+
+      if (formatter.recordHistory) {
+        this.recordSnapshot();
+      }
+    }
+
+    this.focus();
+  }
+
+  focus() {
+    this.contentDocument.body.focus();
+  }
+
+  private recordSnapshot() {
+    if (this.historySequence.length !== this.historyIndex) {
+      this.historySequence.length = this.historyIndex + 1;
+    }
+    this.historySequence.push({
+      node: this.contentDocument.body.cloneNode() as HTMLElement,
+      innerHTML: this.contentDocument.body.innerHTML
+    });
+    if (this.historySequence.length > this.historyStackSize) {
+      this.historySequence.shift();
+    }
+    this.historyIndex = this.historySequence.length - 1;
+    this.dispatchContentChangeEvent();
+  }
+
   private writeContents(html: string): Promise<void> {
     return new Promise<void>(resolve => {
       const temporaryIframe = document.createElement('iframe');
@@ -208,7 +248,7 @@ ${body.outerHTML}
 `);
   }
 
-  private apply() {
+  private applyHistory() {
     const snapshot = this.historySequence[this.historyIndex];
     if (snapshot) {
       Array.from(snapshot.node.attributes).forEach(attr => {

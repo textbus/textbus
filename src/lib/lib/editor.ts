@@ -15,7 +15,6 @@ import {
 } from './toolbar/help';
 import { ButtonHandler } from './toolbar/button-handler';
 import { SelectHandler } from './toolbar/select-handler';
-import { TBRange } from './range';
 import { DropdownHandler } from './toolbar/dropdown-handler';
 import { ActionSheetHandler } from './toolbar/action-sheet-handler';
 
@@ -141,7 +140,7 @@ export class Editor implements EventDelegate {
 
   focus() {
     this.run(() => {
-      this.editor.contentDocument.body.focus();
+      this.editor.focus();
     });
   }
 
@@ -175,7 +174,7 @@ export class Editor implements EventDelegate {
   private addButtonHandler(option: ButtonHandlerOption) {
     const button = new ButtonHandler(option);
     button.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-      this.apply(button);
+      this.editor.apply(button.execCommand, button.matcher, option.hooks);
     });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
@@ -185,7 +184,7 @@ export class Editor implements EventDelegate {
     const select = new SelectHandler(option);
     select.options.forEach(item => {
       item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-        this.apply(item);
+        this.editor.apply(item.execCommand, item.matcher, option.hooks);
       });
       this.handlers.push(item);
     });
@@ -196,7 +195,7 @@ export class Editor implements EventDelegate {
     const dropdown = new DropdownHandler(option, this);
     this.toolbar.appendChild(dropdown.elementRef);
     dropdown.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-      this.apply(dropdown);
+      this.editor.apply(dropdown.execCommand, dropdown.matcher, option.hooks);
     });
     this.handlers.push(dropdown);
   }
@@ -206,30 +205,10 @@ export class Editor implements EventDelegate {
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
       item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-        this.apply(item);
+        this.editor.apply(item.execCommand, item.matcher, option.hooks);
       });
       this.handlers.push(item);
     });
-  }
-
-  private apply(handler: Handler) {
-    const matches = this.editor.getRanges().map(r => {
-      return {
-        range: new TBRange(r, this.editor.contentDocument),
-        matchDelta: handler.matcher.match(this.editor, r)
-      };
-    });
-
-    const overlap = matches.map(item => item.matchDelta.overlap).reduce((p, n) => p && n);
-    matches.forEach(item => {
-      item.matchDelta.overlap = overlap;
-      handler.execCommand.format(item.range, this.editor, item.matchDelta);
-    });
-
-    if (handler.execCommand.recordHistory) {
-      this.editor.recordSnapshot();
-    }
-    this.focus();
   }
 
   private static createSplitLine() {

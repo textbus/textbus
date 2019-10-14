@@ -15,7 +15,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-add-column-left']
@@ -25,7 +25,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-add-column-right']
@@ -35,7 +35,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-add-row-top']
@@ -45,7 +45,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-add-row-bottom']
@@ -55,7 +55,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-column-left']
@@ -65,7 +65,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-column-right']
@@ -75,7 +75,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-row-top']
@@ -85,7 +85,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-delete-row-bottom']
@@ -95,7 +95,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table-split-columns']
@@ -105,7 +105,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
-        return matchState.inSingleContainer;
+        return matchState.overlap;
       }
     },
     classes: ['tanbo-editor-icon-table']
