@@ -145,38 +145,36 @@ export class EditFrame {
     return ranges;
   }
 
-  apply(formatter: Formatter, matcher: Matcher, hooks: Hooks = {
-    onApply(): boolean {
-      return true;
-    }
-  }) {
-    const matches = this.getRanges().map(r => {
-      return {
-        range: new TBRange(r, this.contentDocument),
-        matchDelta: matcher.match(this, r)
-      };
-    }).filter(item => {
-      if (item.matchDelta.overlap || item.matchDelta.contain) {
-        return hooks.onApply(item.range.rawRange, formatter, {
-          document: this.contentDocument,
-          window: this.contentWindow
-        });
-      }
-      return true;
-    });
-    if (matches.length) {
+  apply(formatter: Formatter, matcher: Matcher, hooks: Hooks = {}) {
+    const ranges = this.getRanges();
+    if (typeof hooks.onApply === 'function') {
+      hooks.onApply(ranges, formatter, {
+        document: this.contentDocument,
+        window: this.contentWindow
+      })
+    } else {
+      const matches = ranges.map(item => {
+        return {
+          range: new TBRange(item, this.contentDocument),
+          matchDelta: matcher.match(this, item)
+        }
+      });
       const overlap = matches.map(item => item.matchDelta.overlap).reduce((p, n) => p && n);
       matches.forEach(item => {
         item.matchDelta.overlap = overlap;
         formatter.format(item.range, this, item.matchDelta);
       });
-
-      if (formatter.recordHistory) {
-        this.recordSnapshot();
-      }
     }
-
+    if (formatter.recordHistory) {
+      this.recordSnapshot();
+    }
     this.focus();
+    if (typeof hooks.onApplied === 'function') {
+      hooks.onApplied(this.elementRef, {
+        window: this.contentWindow,
+        document: this.contentDocument
+      });
+    }
   }
 
   focus() {

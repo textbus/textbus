@@ -30,7 +30,7 @@ export interface Hooks {
 
   onSelectionChange?(range: Range, context: EditContext): Range | Range[];
 
-  onApply?(range: Range, formatter: Formatter, context: EditContext): boolean;
+  onApply?(ranges: Range[], formatter: Formatter, context: EditContext): void;
 
   onApplied?(frameContainer: HTMLElement, context: EditContext): void;
 

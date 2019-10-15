@@ -51,7 +51,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-add-row-bottom']
   }, {
     label: '删除左边列',
-    execCommand: new TableEditFormatter(TableEditActions.deleteLeftColumn),
+    execCommand: new TableEditFormatter(TableEditActions.DeleteLeftColumn),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
@@ -61,7 +61,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-delete-column-left']
   }, {
     label: '删除右边列',
-    execCommand: new TableEditFormatter(TableEditActions.deleteRightColumn),
+    execCommand: new TableEditFormatter(TableEditActions.DeleteRightColumn),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
@@ -71,7 +71,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-delete-column-right']
   }, {
     label: '删除上边行',
-    execCommand: new TableEditFormatter(TableEditActions.deleteTopRow),
+    execCommand: new TableEditFormatter(TableEditActions.DeleteTopRow),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
@@ -81,7 +81,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-delete-row-top']
   }, {
     label: '删除下边行',
-    execCommand: new TableEditFormatter(TableEditActions.deleteBottomRow),
+    execCommand: new TableEditFormatter(TableEditActions.DeleteBottomRow),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
@@ -91,7 +91,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-delete-row-bottom']
   }, {
     label: '合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.mergeCells),
+    execCommand: new TableEditFormatter(TableEditActions.MergeCells),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
@@ -101,7 +101,7 @@ export const tableEditHandler: ActionSheetHandlerOption = {
     classes: ['tanbo-editor-icon-table-split-columns']
   }, {
     label: '取消合并单元格',
-    execCommand: new TableEditFormatter(TableEditActions.splitCells),
+    execCommand: new TableEditFormatter(TableEditActions.SplitCells),
     match: {
       tags: ['table'],
       canUse(range: Range, frame: EditFrame, matchState: MatchState): boolean {
