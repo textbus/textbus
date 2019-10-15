@@ -1,11 +1,16 @@
 import { Formatter } from './formatter';
 
 export interface CellPosition {
-  element: HTMLTableCellElement;
-  rowIndex: number;
-  columnIndex: number;
+  cellElement: HTMLTableCellElement;
   columnToEndOffset: number;
   rowToEndOffset: number;
+  rowIndex?: number;
+  columnIndex?: number;
+}
+
+export interface RowPosition {
+  rowElement: HTMLTableRowElement;
+  cells: CellPosition[];
 }
 
 export enum TableEditActions {
@@ -30,10 +35,10 @@ export class TableEditFormatter implements Formatter {
   format(): void {
   }
 
-  addColumnToLeft(cellMatrix: CellPosition[][], index: number) {
+  addColumnToLeft(cellMatrix: RowPosition[], index: number) {
     cellMatrix.forEach(row => {
-      const el = row[index].element;
-      if (el.colSpan > row[index].columnToEndOffset) {
+      const el = row.cells[index].cellElement;
+      if (el.colSpan > row.cells[index].columnToEndOffset) {
         el.colSpan++;
       } else {
         el.parentNode.insertBefore(document.createElement(el.tagName), el);
@@ -41,11 +46,11 @@ export class TableEditFormatter implements Formatter {
     });
   }
 
-  addColumnToRight(cellMatrix: CellPosition[][], index: number) {
+  addColumnToRight(cellMatrix: RowPosition[], index: number) {
     cellMatrix.forEach(row => {
-      const el = row[index].element;
+      const el = row.cells[index].cellElement;
       const newNode = document.createElement(el.tagName);
-      if (row[index].columnToEndOffset > 1) {
+      if (row.cells[index].columnToEndOffset > 1) {
         el.colSpan++;
       } else if (el.nextElementSibling) {
         el.parentNode.insertBefore(newNode, el.nextElementSibling);
@@ -55,7 +60,29 @@ export class TableEditFormatter implements Formatter {
     });
   }
 
-  addRowToTop() {
+  addRowToTop(cellMatrix: RowPosition[], index: number) {
+    const tr = document.createElement('tr');
+    cellMatrix[index].rowElement.parentNode.insertBefore(tr, cellMatrix[index].rowElement);
+    const tagName = cellMatrix[index].cells[0].cellElement.tagName;
+    if (index === 0) {
+      cellMatrix[index].cells.forEach(() => {
+        tr.appendChild(document.createElement(tagName));
+      });
+    } else {
+      console.log(cellMatrix[index - 1].cells);
+      cellMatrix[index - 1].cells.forEach(cell => {
+        if (cell.rowToEndOffset === 1) {
+          const el = document.createElement(tagName) as HTMLTableCellElement;
+          el.colSpan = cell.cellElement.colSpan;
+          tr.appendChild(el);
+        } else {
+          if (cell.columnToEndOffset === 1) {
+            cell.cellElement.rowSpan++;
+          }
+        }
+      });
+    }
+
   }
 
   addRowToBottom() {

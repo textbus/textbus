@@ -20,21 +20,15 @@ const editor = createEditor('#editor', {
   </tr>
   <tr>
     <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
+    <td colspan="3" rowspan="3">2</td>
     <td>5</td>
   </tr>
   <tr>
     <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
     <td>5</td>
   </tr>
   <tr>
     <td>1</td>
-    <td colspan="3">2</td>
     <td>5</td>
   </tr>
   <tr>
