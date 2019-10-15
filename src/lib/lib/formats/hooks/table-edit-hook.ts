@@ -292,44 +292,41 @@ export class TableEditHook implements Hooks {
     }
     let stop = false;
     let columnIndex = 0;
-
+    const marks: string[] = [];
     do {
       stop = rows.map((row, rowIndex) => {
-        console.log(rowIndex);
         const cell = row.cells[columnIndex];
         if (cell) {
-          if ((cell.columnToEndOffset > 1 || cell.rowToEndOffset > 1) &&
-            cell.columnToEndOffset === cell.cellElement.colSpan &&
-            cell.rowToEndOffset === cell.cellElement.rowSpan) {
-
-            for (let i = 1; i < cell.rowToEndOffset; i++) {
-              const cells = rows[rowIndex + i - 1];
-              for (let j = 1; j < cell.columnToEndOffset; j++) {
-                const newCell = {
-                  cellElement: cell.cellElement,
-                  columnToEndOffset: cell.columnToEndOffset - j,
-                  rowToEndOffset: cell.rowToEndOffset - i
-                };
-                console.log(newCell);
-                cells.cells.splice(j + columnIndex - 1, 0, newCell);
-              }
+          let columnToEndOffset: number;
+          let rowToEndOffset: number;
+          let mark: string;
+          if (cell.rowToEndOffset > 1) {
+            columnToEndOffset = cell.columnToEndOffset;
+            rowToEndOffset = cell.rowToEndOffset - 1;
+            mark = `${columnToEndOffset}*${rowToEndOffset}`;
+            if (marks.indexOf(mark) === -1) {
+              rows[rowIndex + 1].cells.splice(columnIndex, 0, {
+                cellElement: cell.cellElement,
+                columnToEndOffset,
+                rowToEndOffset
+              });
+              marks.push(mark);
             }
           }
+          if (cell.columnToEndOffset > 1) {
+            columnToEndOffset = cell.columnToEndOffset - 1;
+            rowToEndOffset = cell.rowToEndOffset;
 
-          // if (cell.rowToEndOffset > 1 && cell.cellElement.colSpan === cell.columnToEndOffset) {
-          //   rows[rowIndex + 1].cells.splice(columnIndex, 0, {
-          //     cellElement: cell.cellElement,
-          //     columnToEndOffset: cell.columnToEndOffset,
-          //     rowToEndOffset: cell.rowToEndOffset - 1
-          //   });
-          // }
-          // if (cell.columnToEndOffset > 1 && cell.cellElement.rowSpan === cell.rowToEndOffset) {
-          //   row.cells.splice(columnIndex + 1, 0, {
-          //     cellElement: cell.cellElement,
-          //     columnToEndOffset: cell.columnToEndOffset - 1,
-          //     rowToEndOffset: cell.rowToEndOffset
-          //   });
-          // }
+            mark = `${columnToEndOffset}*${rowToEndOffset}`;
+            if (marks.indexOf(mark) === -1) {
+              row.cells.splice(columnIndex + 1, 0, {
+                cellElement: cell.cellElement,
+                columnToEndOffset,
+                rowToEndOffset
+              });
+              marks.push(mark);
+            }
+          }
           return true;
         }
         return false;
