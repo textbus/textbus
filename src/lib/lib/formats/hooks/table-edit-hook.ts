@@ -179,7 +179,6 @@ export class TableEditHook implements Hooks {
     const maxColumnIndex = Math.max(startPosition.columnIndex, endPosition.columnIndex);
     const minRowIndex = Math.min(startPosition.rowIndex, endPosition.rowIndex);
     const maxRowIndex = Math.max(startPosition.rowIndex, endPosition.rowIndex);
-
     const top = cellMatrix[minRowIndex].cells.slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
       return {
         top: cell.cellElement.getBoundingClientRect().top,

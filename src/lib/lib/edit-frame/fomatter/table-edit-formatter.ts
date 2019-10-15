@@ -36,9 +36,10 @@ export class TableEditFormatter implements Formatter {
   }
 
   addColumnToLeft(cellMatrix: RowPosition[], index: number) {
+    console.log(index)
     cellMatrix.forEach(row => {
       const el = row.cells[index].cellElement;
-      if (el.colSpan > row.cells[index].columnToEndOffset) {
+      if (el.colSpan > row.cells[index].columnToEndOffset && row.cells[index].rowToEndOffset === 1) {
         el.colSpan++;
       } else {
         el.parentNode.insertBefore(document.createElement(el.tagName), el);
@@ -61,19 +62,18 @@ export class TableEditFormatter implements Formatter {
   }
 
   addRowToTop(cellMatrix: RowPosition[], index: number) {
+    console.log(index)
     const tr = document.createElement('tr');
-    cellMatrix[index].rowElement.parentNode.insertBefore(tr, cellMatrix[index].rowElement);
+
     const tagName = cellMatrix[index].cells[0].cellElement.tagName;
     if (index === 0) {
       cellMatrix[index].cells.forEach(() => {
         tr.appendChild(document.createElement(tagName));
       });
     } else {
-      console.log(cellMatrix[index - 1].cells);
       cellMatrix[index - 1].cells.forEach(cell => {
         if (cell.rowToEndOffset === 1) {
           const el = document.createElement(tagName) as HTMLTableCellElement;
-          el.colSpan = cell.cellElement.colSpan;
           tr.appendChild(el);
         } else {
           if (cell.columnToEndOffset === 1) {
@@ -82,7 +82,7 @@ export class TableEditFormatter implements Formatter {
         }
       });
     }
-
+    cellMatrix[index].rowElement.parentNode.insertBefore(tr, cellMatrix[index].rowElement);
   }
 
   addRowToBottom() {
