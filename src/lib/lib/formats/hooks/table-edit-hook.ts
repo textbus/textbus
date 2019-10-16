@@ -132,7 +132,13 @@ export class TableEditHook implements Hooks {
           formatter.addRowToBottom(this.cellMatrix, this.endPosition.rowIndex);
           break;
         case TableEditActions.MergeCells:
-          formatter.mergeCells();
+          this.startCell = this.endCell = formatter.mergeCells(
+            this.cellMatrix,
+            this.startPosition.rowIndex,
+            this.startPosition.columnIndex,
+            this.endPosition.rowIndex,
+            this.endPosition.columnIndex
+          );
           break;
         case TableEditActions.SplitCells:
           formatter.splitCells();
@@ -213,25 +219,7 @@ export class TableEditHook implements Hooks {
     startPosition: CellPosition,
     endPosition: CellPosition
   } {
-    // console.log(minRow, minColumn, maxRow, maxColumn);
     const cellMatrix = this.cellMatrix;
-
-    // const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
-    // if (x1) {
-    //   return this.findSelectedRange(minRow, minColumn + x1, maxRow, maxColumn);
-    // }
-    // const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
-    // if (x2) {
-    //   return this.findSelectedRange(minRow, minColumn, maxRow, maxColumn + x2);
-    // }
-    // const y1 = -Math.max(...cellMatrix[minRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
-    // if (y1) {
-    //   return this.findSelectedRange(minRow + y1, minColumn, maxRow, maxColumn);
-    // }
-    // const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.cellElement.rowSpan - (cell.rowOffset + 1)));
-    // if (y2) {
-    //   return this.findSelectedRange(minRow, minColumn, maxRow + y2, maxColumn);
-    // }
 
     const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
     const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
@@ -252,22 +240,24 @@ export class TableEditHook implements Hooks {
     const cellMatrix = this.cellMatrix;
     let minRow: number, maxRow: number, minColumn: number, maxColumn: number;
 
-    for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
+    forA:for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
       const cells = cellMatrix[rowIndex].cells;
       for (let colIndex = 0; colIndex < cells.length; colIndex++) {
         if (cells[colIndex].cellElement === cell) {
           minRow = rowIndex;
           minColumn = colIndex;
+          break forA;
         }
       }
     }
 
-    for (let rowIndex = cellMatrix.length - 1; rowIndex > -1; rowIndex--) {
+    forB:for (let rowIndex = cellMatrix.length - 1; rowIndex > -1; rowIndex--) {
       const cells = cellMatrix[rowIndex].cells;
       for (let colIndex = cells.length - 1; colIndex > -1; colIndex--) {
         if (cells[colIndex].cellElement === cell) {
           maxRow = rowIndex;
           maxColumn = colIndex;
+          break forB;
         }
       }
     }
@@ -343,9 +333,11 @@ export class TableEditHook implements Hooks {
           if (cell.rowOffset + 1 < cell.cellElement.rowSpan) {
             mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
-              rows[rowIndex + 1].cells.splice(columnIndex, 0, {
-                beforeCell: rows[rowIndex + 1].cells[columnIndex].beforeCell,
-                afterCell: rows[rowIndex + 1].cells[columnIndex - 1].afterCell,
+              const nextRow = rows[rowIndex + 1];
+              const newRowBeforeColumn = nextRow.cells[columnIndex - 1];
+              nextRow.cells.splice(columnIndex, 0, {
+                beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cellElement : null,
+                afterCell: newRowBeforeColumn ? newRowBeforeColumn.afterCell : null,
                 rowElement: rows[rowIndex + 1].rowElement,
                 cellElement: cell.cellElement,
                 columnOffset: cell.columnOffset,
@@ -360,7 +352,6 @@ export class TableEditHook implements Hooks {
       }).indexOf(true) > -1;
       columnIndex++;
     } while (stop);
-
     return rows;
   }
 }

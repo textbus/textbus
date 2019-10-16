@@ -77,16 +77,9 @@ table {
       > th, > td {
         text-align: left;
         font-weight: 500;
-        padding: 8px;
+        padding: 8px 15px;
         border-bottom: 1px solid $color-gray-light;
         background-color: $color-lighter;
-        &:first-child {
-          padding-left: 15px;
-        }
-
-        &:last-child {
-          padding-right: 15px;
-        }
       }
     }
   }
@@ -104,31 +97,15 @@ table {
     > tr {
       > td {
         font-weight: 400;
-        padding: 8px;
+        padding: 8px 15px;
         border-bottom: 1px solid $color-light;
-
-        &:first-child {
-          padding-left: 15px;
-        }
-
-        &:last-child {
-          padding-right: 15px;
-        }
       }
 
       > th {
         font-weight: 500;
         text-align: right;
-        padding: 8px;
+        padding: 8px 15px;
         border-bottom: 1px solid $color-light;
-
-        &:first-child {
-          padding-left: 15px;
-        }
-
-        &:last-child {
-          padding-right: 15px;
-        }
       }
     }
   }

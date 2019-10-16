@@ -140,7 +140,19 @@ export class TableEditFormatter implements Formatter {
     }
   }
 
-  mergeCells() {
+  mergeCells(cellMatrix: RowPosition[], minRow: number, minColumn: number, maxRow: number, maxColumn: number): HTMLTableCellElement {
+    const cells = cellMatrix.slice(minRow, maxRow + 1)
+      .map(row => row.cells.slice(minColumn, maxColumn + 1).map(cell => cell.cellElement))
+      .reduce((p, n) => {
+        return p.concat(n);
+      });
+    const newNode = cells.shift();
+    newNode.rowSpan = maxRow - minRow + 1;
+    newNode.colSpan = maxColumn - minColumn + 1;
+    Array.from(new Set(cells)).forEach(cell => {
+      cell.parentNode.removeChild(cell);
+    });
+    return newNode;
   }
 
   splitCells() {
