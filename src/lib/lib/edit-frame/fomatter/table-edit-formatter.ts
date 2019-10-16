@@ -95,7 +95,7 @@ export class TableEditFormatter implements Formatter {
     const tr = document.createElement('tr');
     const row = cellMatrix[index];
     const tagName = row.cells[0].cellElement.tagName;
-    if (index === 0 || index === cellMatrix.length) {
+    if (index === 0) {
       cellMatrix[0].cells.forEach(() => {
         tr.appendChild(document.createElement(tagName));
       });
