@@ -299,6 +299,10 @@ export class TableEditHook implements Hooks {
           let columnToEndOffset: number;
           let rowToEndOffset: number;
           let mark: string;
+
+          cell.rowIndex = rowIndex;
+          cell.columnIndex = columnIndex;
+
           if (cell.rowToEndOffset > 1) {
             columnToEndOffset = cell.columnToEndOffset;
             rowToEndOffset = cell.rowToEndOffset - 1;
@@ -333,17 +337,6 @@ export class TableEditHook implements Hooks {
       columnIndex++;
     } while (stop);
 
-    return rows.map((row, rowIndex) => {
-      row.cells = row.cells.map((cell, columnIndex) => {
-        return {
-          cellElement: cell.cellElement,
-          rowIndex,
-          columnIndex,
-          columnToEndOffset: cell.columnToEndOffset,
-          rowToEndOffset: cell.rowToEndOffset
-        };
-      });
-      return row;
-    });
+    return rows;
   }
 }
