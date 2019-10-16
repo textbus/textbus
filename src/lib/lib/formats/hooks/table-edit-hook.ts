@@ -302,7 +302,7 @@ export class TableEditHook implements Hooks {
           if (cell.rowToEndOffset > 1) {
             columnToEndOffset = cell.columnToEndOffset;
             rowToEndOffset = cell.rowToEndOffset - 1;
-            mark = `${columnToEndOffset}*${rowToEndOffset}`;
+            mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
               rows[rowIndex + 1].cells.splice(columnIndex, 0, {
                 cellElement: cell.cellElement,
@@ -316,7 +316,7 @@ export class TableEditHook implements Hooks {
             columnToEndOffset = cell.columnToEndOffset - 1;
             rowToEndOffset = cell.rowToEndOffset;
 
-            mark = `${columnToEndOffset}*${rowToEndOffset}`;
+            mark = `${rowIndex}*${columnIndex + 1}`;
             if (marks.indexOf(mark) === -1) {
               row.cells.splice(columnIndex + 1, 0, {
                 cellElement: cell.cellElement,
