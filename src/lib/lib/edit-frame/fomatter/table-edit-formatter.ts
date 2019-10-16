@@ -56,7 +56,8 @@ export class TableEditFormatter implements Formatter {
         const cell = row.cells[index];
         if (cell.columnOffset === 0) {
           const el = document.createElement(cell.cellElement.tagName);
-          row.rowElement.insertBefore(el, cell.cellElement);
+          row.rowElement.insertBefore(el,
+            cell.cellElement.parentNode === row.rowElement ? cell.cellElement : cell.afterCell);
         } else if (cell.rowOffset === 0) {
           cell.cellElement.colSpan++;
         }
