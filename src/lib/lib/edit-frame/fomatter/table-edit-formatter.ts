@@ -114,7 +114,30 @@ export class TableEditFormatter implements Formatter {
     row.rowElement.parentNode.insertBefore(tr, row.rowElement);
   }
 
-  addRowToBottom() {
+  addRowToBottom(cellMatrix: RowPosition[], index: number) {
+    const tr = document.createElement('tr');
+    const row = cellMatrix[index];
+    const tagName = row.cells[0].cellElement.tagName;
+    if (index === cellMatrix.length) {
+      cellMatrix[0].cells.forEach(() => {
+        tr.appendChild(document.createElement(tagName));
+      });
+    } else {
+      row.cells.forEach(cell => {
+        if (cell.rowOffset < cell.cellElement.rowSpan - 1) {
+          if (cell.columnOffset === 0) {
+            cell.cellElement.rowSpan++;
+          }
+        } else {
+          tr.appendChild(document.createElement(tagName));
+        }
+      });
+    }
+    if (row.afterRow) {
+      row.rowElement.parentNode.insertBefore(tr, row.afterRow);
+    } else {
+      row.rowElement.parentNode.appendChild(tr);
+    }
   }
 
   mergeCells() {

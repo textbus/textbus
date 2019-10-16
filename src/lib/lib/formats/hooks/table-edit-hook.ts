@@ -129,7 +129,7 @@ export class TableEditHook implements Hooks {
           formatter.addRowToTop(this.cellMatrix, this.startPosition.rowIndex);
           break;
         case TableEditActions.AddRowToBottom:
-          formatter.addRowToBottom();
+          formatter.addRowToBottom(this.cellMatrix, this.endPosition.rowIndex);
           break;
         case TableEditActions.MergeCells:
           formatter.mergeCells();
