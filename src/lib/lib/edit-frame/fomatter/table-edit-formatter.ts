@@ -92,27 +92,26 @@ export class TableEditFormatter implements Formatter {
   }
 
   addRowToTop(cellMatrix: RowPosition[], index: number) {
-    console.log(index)
     const tr = document.createElement('tr');
-
-    const tagName = cellMatrix[index].cells[0].cellElement.tagName;
-    if (index === 0) {
-      cellMatrix[index].cells.forEach(() => {
+    const row = cellMatrix[index];
+    const tagName = row.cells[0].cellElement.tagName;
+    if (index === 0 || index === cellMatrix.length) {
+      cellMatrix[0].cells.forEach(() => {
         tr.appendChild(document.createElement(tagName));
       });
+
     } else {
-      cellMatrix[index - 1].cells.forEach(cell => {
-        if (cell.rowOffset === 1) {
-          const el = document.createElement(tagName) as HTMLTableCellElement;
-          tr.appendChild(el);
-        } else {
-          if (cell.columnOffset === 1) {
+      row.cells.forEach(cell => {
+        if (cell.rowOffset > 0) {
+          if (cell.columnOffset === 0) {
             cell.cellElement.rowSpan++;
           }
+        } else {
+          tr.appendChild(document.createElement(tagName));
         }
       });
     }
-    cellMatrix[index].rowElement.parentNode.insertBefore(tr, cellMatrix[index].rowElement);
+    row.rowElement.parentNode.insertBefore(tr, row.rowElement);
   }
 
   addRowToBottom() {
