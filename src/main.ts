@@ -9,43 +9,7 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: `<table>
-  <tbody>
-  <tr>
-    <td>0</td>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-    <td colspan="2">4</td>
-  </tr>
-  <tr>
-    <td>2</td>
-    <td colspan="3" rowspan="3">2</td>
-    <td>5</td>
-  </tr>
-  <tr>
-    <td>3</td>
-    <td>5</td>
-  </tr>
-  <tr>
-    <td>4</td>
-    <td>5</td>
-  </tr>
-  <tr>
-    <td>5</td>
-    <td>2</td>
-    <td>3</td>
-    <td>4</td>
-    <td>5</td>
-  </tr>
-  </tbody>
-</table>
+  content: `<table>  <tbody>  <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr>    <td></td><td rowspan="1" colspan="4"></td>        <td>2</td>    <td>3</td>    <td>4</td>  </tr>  <tr>    <td></td><td></td><td></td><td>1</td>    <td>2</td>    <td>3</td>    <td colspan="2">4</td>  </tr>  <tr>    <td></td><td></td><td></td><td>2</td>    <td colspan="3" rowspan="3">2</td>    <td>5</td>  </tr>  <tr>    <td></td><td rowspan="3" colspan="1"></td><td></td><td>3</td>    <td>5</td>  </tr>  <tr>    <td></td><td></td><td>4</td>    <td>5</td>  </tr>  <tr>    <td></td><td></td><td>5</td>    <td>2</td>    <td>3</td>    <td>4</td>    <td>5</td>  </tr>  </tbody></table>
 <p><br></p>
 `
 });

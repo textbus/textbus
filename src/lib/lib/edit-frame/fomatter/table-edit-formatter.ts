@@ -146,10 +146,11 @@ export class TableEditFormatter implements Formatter {
       .reduce((p, n) => {
         return p.concat(n);
       });
-    const newNode = cells.shift();
+    const selectedCells = Array.from(new Set(cells));
+    const newNode = selectedCells.shift();
     newNode.rowSpan = maxRow - minRow + 1;
     newNode.colSpan = maxColumn - minColumn + 1;
-    Array.from(new Set(cells)).forEach(cell => {
+    selectedCells.forEach(cell => {
       cell.parentNode.removeChild(cell);
     });
     return newNode;
