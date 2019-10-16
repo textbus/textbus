@@ -67,14 +67,26 @@ export class TableEditFormatter implements Formatter {
 
   addColumnToRight(cellMatrix: RowPosition[], index: number) {
     cellMatrix.forEach(row => {
-      const el = row.cells[index].cellElement;
-      const newNode = document.createElement(el.tagName);
-      if (row.cells[index].columnOffset > 1) {
-        el.colSpan++;
-      } else if (el.nextElementSibling) {
-        el.parentNode.insertBefore(newNode, el.nextElementSibling);
+      if (index === row.cells.length) {
+        const cell = row.cells[index];
+        const element = cell.cellElement;
+        const newNode = document.createElement(element.tagName);
+        row.rowElement.appendChild(newNode)
       } else {
-        el.parentNode.appendChild(newNode);
+        const cell = row.cells[index];
+
+        if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
+          if (cell.rowOffset === 0) {
+            cell.cellElement.colSpan++;
+          }
+        } else {
+          const newNode = document.createElement(cell.cellElement.tagName);
+          if (cell.afterCell) {
+            cell.rowElement.insertBefore(newNode, cell.afterCell);
+          } else {
+            cell.rowElement.appendChild(newNode);
+          }
+        }
       }
     });
   }
