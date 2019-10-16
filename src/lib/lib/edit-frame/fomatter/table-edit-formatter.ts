@@ -2,8 +2,8 @@ import { Formatter } from './formatter';
 
 export interface CellPosition {
   cellElement: HTMLTableCellElement;
-  columnToEndOffset: number;
-  rowToEndOffset: number;
+  columnOffset: number;
+  rowOffset: number;
   rowIndex?: number;
   columnIndex?: number;
 }
@@ -39,7 +39,7 @@ export class TableEditFormatter implements Formatter {
     console.log(index)
     cellMatrix.forEach(row => {
       const el = row.cells[index].cellElement;
-      if (el.colSpan > row.cells[index].columnToEndOffset && row.cells[index].rowToEndOffset === 1) {
+      if (el.colSpan > row.cells[index].columnOffset && row.cells[index].rowOffset === 1) {
         el.colSpan++;
       } else {
         el.parentNode.insertBefore(document.createElement(el.tagName), el);
@@ -51,7 +51,7 @@ export class TableEditFormatter implements Formatter {
     cellMatrix.forEach(row => {
       const el = row.cells[index].cellElement;
       const newNode = document.createElement(el.tagName);
-      if (row.cells[index].columnToEndOffset > 1) {
+      if (row.cells[index].columnOffset > 1) {
         el.colSpan++;
       } else if (el.nextElementSibling) {
         el.parentNode.insertBefore(newNode, el.nextElementSibling);
@@ -72,11 +72,11 @@ export class TableEditFormatter implements Formatter {
       });
     } else {
       cellMatrix[index - 1].cells.forEach(cell => {
-        if (cell.rowToEndOffset === 1) {
+        if (cell.rowOffset === 1) {
           const el = document.createElement(tagName) as HTMLTableCellElement;
           tr.appendChild(el);
         } else {
-          if (cell.columnToEndOffset === 1) {
+          if (cell.columnOffset === 1) {
             cell.cellElement.rowSpan++;
           }
         }

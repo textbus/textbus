@@ -12,27 +12,33 @@ const editor = createEditor('#editor', {
   content: `<table>
   <tbody>
   <tr>
+    <td>0</td>
     <td>1</td>
     <td>2</td>
     <td>3</td>
     <td>4</td>
-    <td>5</td>
   </tr>
   <tr>
     <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td colspan="2">4</td>
+  </tr>
+  <tr>
+    <td>2</td>
     <td colspan="3" rowspan="3">2</td>
     <td>5</td>
   </tr>
   <tr>
-    <td>1</td>
+    <td>3</td>
     <td>5</td>
   </tr>
   <tr>
-    <td>1</td>
+    <td>4</td>
     <td>5</td>
   </tr>
   <tr>
-    <td>1</td>
+    <td>5</td>
     <td>2</td>
     <td>3</td>
     <td>4</td>

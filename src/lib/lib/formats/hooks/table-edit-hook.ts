@@ -6,6 +6,7 @@ import { Matcher } from '../../matcher';
 import { Formatter } from '../../edit-frame/fomatter/formatter';
 import { TableEditActions, TableEditFormatter, CellPosition } from '../../edit-frame/_api';
 import { RowPosition } from '../../edit-frame/fomatter/table-edit-formatter';
+import { min } from 'rxjs/operators';
 
 export class TableEditHook implements Hooks {
   matcher = new Matcher({
@@ -16,10 +17,8 @@ export class TableEditHook implements Hooks {
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
   private selectedCells: HTMLTableCellElement[] = [];
-  private left: CellPosition;
-  private right: CellPosition;
-  private top: CellPosition;
-  private bottom: CellPosition;
+  private startPosition: CellPosition;
+  private endPosition: CellPosition;
 
   private tableElement: HTMLTableElement;
   private startCell: HTMLTableCellElement;
@@ -71,7 +70,7 @@ export class TableEditHook implements Hooks {
         'resize'
       ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
         if (this.endCell) {
-          this.setSelectedCellsAndUpdateMaskStyle(this.cellMatrix, this.startCell, this.endCell);
+          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
         }
       });
 
@@ -92,7 +91,7 @@ export class TableEditHook implements Hooks {
             frameContainer.appendChild(this.mask);
             insertMask = true;
           }
-          this.setSelectedCellsAndUpdateMaskStyle(this.cellMatrix, this.startCell, this.endCell);
+          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
         }
       });
 
@@ -122,13 +121,13 @@ export class TableEditHook implements Hooks {
     if (formatter instanceof TableEditFormatter) {
       switch (formatter.type) {
         case TableEditActions.AddColumnToLeft:
-          formatter.addColumnToLeft(this.cellMatrix, this.left.columnIndex);
+          formatter.addColumnToLeft(this.cellMatrix, this.startPosition.columnIndex);
           break;
         case TableEditActions.AddColumnToRight:
-          formatter.addColumnToRight(this.cellMatrix, this.right.columnIndex + this.right.columnToEndOffset - 1);
+          formatter.addColumnToRight(this.cellMatrix, this.endPosition.columnIndex);
           break;
         case TableEditActions.AddRowToTop:
-          formatter.addRowToTop(this.cellMatrix, this.top.rowIndex);
+          formatter.addRowToTop(this.cellMatrix, this.startPosition.rowIndex);
           break;
         case TableEditActions.AddRowToBottom:
           formatter.addRowToBottom();
@@ -166,97 +165,120 @@ export class TableEditHook implements Hooks {
 
   onApplied(): void {
     this.cellMatrix = this.serialize(this.tableElement);
-    this.setSelectedCellsAndUpdateMaskStyle(this.cellMatrix, this.startCell, this.endCell);
+    this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
   }
 
-  private setSelectedCellsAndUpdateMaskStyle(cellMatrix: RowPosition[],
-                                             startCell: HTMLTableCellElement,
-                                             endCell: HTMLTableCellElement) {
-    const startPosition = this.findCellPosition(cellMatrix, startCell);
-    const endPosition = this.findCellPosition(cellMatrix, endCell);
+  private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
+                                             cell2: HTMLTableCellElement) {
 
-    const minColumnIndex = Math.min(startPosition.columnIndex, endPosition.columnIndex);
-    const maxColumnIndex = Math.max(startPosition.columnIndex, endPosition.columnIndex);
-    const minRowIndex = Math.min(startPosition.rowIndex, endPosition.rowIndex);
-    const maxRowIndex = Math.max(startPosition.rowIndex, endPosition.rowIndex);
-    const top = cellMatrix[minRowIndex].cells.slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
-      return {
-        top: cell.cellElement.getBoundingClientRect().top,
-        cell
-      }
-    }).sort((n, m) => {
-      return n.top - m.top;
-    }).shift();
+    const p1 = this.findCellPosition(cell1);
+    const p2 = this.findCellPosition(cell2);
 
-    const left = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
-      return {
-        left: row.cells[minColumnIndex].cellElement.getBoundingClientRect().left,
-        cell: row.cells[minColumnIndex]
-      }
-    }).sort((n, m) => {
-      return n.left - m.left;
-    }).shift();
+    const minRow = Math.min(p1.minRow, p2.minRow);
+    const minColumn = Math.min(p1.minColumn, p2.minColumn);
+    const maxRow = Math.max(p1.maxRow, p2.maxRow);
+    const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
 
-    const right = cellMatrix.slice(minRowIndex, maxRowIndex + 1).map(row => {
-      return {
-        width: row.cells[maxColumnIndex].cellElement.getBoundingClientRect().right - left.left,
-        cell: row.cells[maxColumnIndex]
-      }
-    }).sort((n, m) => {
-      return n.width - m.width;
-    }).pop();
+    // console.log(` ${minRow} row ${minColumn} col 到 ${maxRow} row ${maxColumn} col`);
 
-    const bottom = cellMatrix[maxRowIndex].cells.slice(minColumnIndex, maxColumnIndex + 1).map(cell => {
-      return {
-        height: cell.cellElement.getBoundingClientRect().bottom - top.top,
-        cell
-      }
-    }).sort((n, m) => {
-      return n.height - m.height;
-    }).pop();
+    const {startPosition, endPosition} = this.findSelectedRange(minRow, minColumn, maxRow, maxColumn);
 
-    const startRect = this.startCell.getBoundingClientRect();
-    this.firstMask.style.left = startRect.left - left.left + 'px';
-    this.firstMask.style.top = startRect.top - top.top + 'px';
-    this.firstMask.style.width = startRect.width + 'px';
-    this.firstMask.style.height = startRect.height + 'px';
+    const startRect = startPosition.cellElement.getBoundingClientRect();
+    const endRect = endPosition.cellElement.getBoundingClientRect();
 
-    this.mask.style.left = left.left + 'px';
-    this.mask.style.top = top.top + 'px';
-    this.mask.style.width = right.width + 'px';
-    this.mask.style.height = bottom.height + 'px';
+    const rawStartRect = this.startCell.getBoundingClientRect();
 
-    const selectedCells = cellMatrix.slice(top.cell.rowIndex,
-      bottom.cell.rowIndex + bottom.cell.rowToEndOffset).map(columns => {
-      return columns.cells.slice(left.cell.columnIndex + left.cell.columnToEndOffset - left.cell.cellElement.colSpan,
-        right.cell.columnIndex + right.cell.columnToEndOffset);
+    this.firstMask.style.left = rawStartRect.left - startRect.left + 'px';
+    this.firstMask.style.top = rawStartRect.top - startRect.top + 'px';
+    this.firstMask.style.width = rawStartRect.width + 'px';
+    this.firstMask.style.height = rawStartRect.height + 'px';
+
+    this.mask.style.left = startRect.left + 'px';
+    this.mask.style.top = startRect.top + 'px';
+    this.mask.style.width = endRect.right - startRect.left + 'px';
+    this.mask.style.height = endRect.bottom - startRect.top + 'px';
+
+
+    const selectedCells = this.cellMatrix.slice(startPosition.rowIndex, endPosition.rowIndex + 1).map(row => {
+      return row.cells.slice(startPosition.columnIndex, endPosition.columnIndex + 1);
     }).reduce((a, b) => {
       return a.concat(b);
     }).map(item => item.cellElement);
 
     this.selectedCells = Array.from(new Set(selectedCells));
-    this.left = left.cell;
-    this.right = right.cell;
-    this.top = top.cell;
-    this.bottom = bottom.cell;
+    this.startPosition = startPosition;
+    this.endPosition = endPosition;
   }
 
-  private findCellPosition(cellMatrix: RowPosition[],
-                           cell: HTMLTableCellElement): { rowIndex: number, columnIndex: number } {
-    let startRow: number;
-    let startColumn: number;
+  private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): {
+    startPosition: CellPosition,
+    endPosition: CellPosition
+  } {
+    // console.log(minRow, minColumn, maxRow, maxColumn);
+    const cellMatrix = this.cellMatrix;
+
+    // const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
+    // if (x1) {
+    //   return this.findSelectedRange(minRow, minColumn + x1, maxRow, maxColumn);
+    // }
+    // const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
+    // if (x2) {
+    //   return this.findSelectedRange(minRow, minColumn, maxRow, maxColumn + x2);
+    // }
+    // const y1 = -Math.max(...cellMatrix[minRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
+    // if (y1) {
+    //   return this.findSelectedRange(minRow + y1, minColumn, maxRow, maxColumn);
+    // }
+    // const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.cellElement.rowSpan - (cell.rowOffset + 1)));
+    // if (y2) {
+    //   return this.findSelectedRange(minRow, minColumn, maxRow + y2, maxColumn);
+    // }
+
+    const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
+    const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
+    const y1 = -Math.max(...cellMatrix[minRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
+    const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.cellElement.rowSpan - (cell.rowOffset + 1)));
+
+    if (x1 || y1 || x2 || y2) {
+      return this.findSelectedRange(minRow + y1, minColumn + x1, maxRow + y2, maxColumn + x2);
+    }
+
+    return {
+      startPosition: cellMatrix[minRow].cells[minColumn],
+      endPosition: cellMatrix[maxRow].cells[maxColumn]
+    }
+  }
+
+  private findCellPosition(cell: HTMLTableCellElement) {
+    const cellMatrix = this.cellMatrix;
+    let minRow: number, maxRow: number, minColumn: number, maxColumn: number;
 
     for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
-      const index = cellMatrix[rowIndex].cells.map(item => item.cellElement).indexOf(cell);
-      if (index > -1) {
-        startRow = rowIndex;
-        startColumn = index;
+      const cells = cellMatrix[rowIndex].cells;
+      for (let colIndex = 0; colIndex < cells.length; colIndex++) {
+        if (cells[colIndex].cellElement === cell) {
+          minRow = rowIndex;
+          minColumn = colIndex;
+        }
       }
     }
+
+    for (let rowIndex = cellMatrix.length - 1; rowIndex > -1; rowIndex--) {
+      const cells = cellMatrix[rowIndex].cells;
+      for (let colIndex = cells.length - 1; colIndex > -1; colIndex--) {
+        if (cells[colIndex].cellElement === cell) {
+          maxRow = rowIndex;
+          maxColumn = colIndex;
+        }
+      }
+    }
+
     return {
-      rowIndex: startRow,
-      columnIndex: startColumn
-    };
+      minRow,
+      maxRow,
+      minColumn,
+      maxColumn
+    }
   }
 
   private serialize(table: HTMLTableElement): RowPosition[] {
@@ -269,8 +291,8 @@ export class TableEditHook implements Hooks {
           cells: Array.from(tr.cells).map(cell => {
             return {
               cellElement: cell,
-              rowToEndOffset: cell.rowSpan,
-              columnToEndOffset: cell.colSpan
+              rowOffset: 0,
+              columnOffset: 0
             }
           })
         }
@@ -296,36 +318,28 @@ export class TableEditHook implements Hooks {
       stop = rows.map((row, rowIndex) => {
         const cell = row.cells[columnIndex];
         if (cell) {
-          let columnToEndOffset: number;
-          let rowToEndOffset: number;
           let mark: string;
-
           cell.rowIndex = rowIndex;
           cell.columnIndex = columnIndex;
 
-          if (cell.rowToEndOffset > 1) {
-            columnToEndOffset = cell.columnToEndOffset;
-            rowToEndOffset = cell.rowToEndOffset - 1;
+          if (cell.rowOffset + 1 < cell.cellElement.rowSpan) {
             mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
               rows[rowIndex + 1].cells.splice(columnIndex, 0, {
                 cellElement: cell.cellElement,
-                columnToEndOffset,
-                rowToEndOffset
+                columnOffset: cell.columnOffset,
+                rowOffset: cell.rowOffset + 1
               });
               marks.push(mark);
             }
           }
-          if (cell.columnToEndOffset > 1) {
-            columnToEndOffset = cell.columnToEndOffset - 1;
-            rowToEndOffset = cell.rowToEndOffset;
-
+          if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
             mark = `${rowIndex}*${columnIndex + 1}`;
             if (marks.indexOf(mark) === -1) {
               row.cells.splice(columnIndex + 1, 0, {
                 cellElement: cell.cellElement,
-                columnToEndOffset,
-                rowToEndOffset
+                columnOffset: cell.columnOffset + 1,
+                rowOffset: cell.rowOffset
               });
               marks.push(mark);
             }

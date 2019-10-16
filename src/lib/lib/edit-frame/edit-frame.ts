@@ -114,7 +114,7 @@ export class EditFrame {
       ranges.push(selection.getRangeAt(i));
     }
     const selectionChangeHooks = this.hooksList.filter(hooks => typeof hooks.onSelectionChange === 'function');
-    if (selectionChangeHooks.length) {
+    if (selectionChangeHooks.length && ranges.length) {
       return ranges.map(range => {
         return selectionChangeHooks.reduce((previousValue, currentValue) => {
           return previousValue.map(r => {
