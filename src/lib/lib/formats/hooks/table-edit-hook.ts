@@ -6,7 +6,6 @@ import { Matcher } from '../../matcher';
 import { Formatter } from '../../edit-frame/fomatter/formatter';
 import { TableEditActions, TableEditFormatter, CellPosition } from '../../edit-frame/_api';
 import { RowPosition } from '../../edit-frame/fomatter/table-edit-formatter';
-import { min } from 'rxjs/operators';
 
 export class TableEditHook implements Hooks {
   matcher = new Matcher({
@@ -287,9 +286,14 @@ export class TableEditHook implements Hooks {
     function splitRows(rows: HTMLCollectionOf<HTMLTableRowElement>): RowPosition[] {
       return Array.from(rows).map(tr => {
         return {
+          beforeRow: tr.previousElementSibling,
+          afterRow: tr.nextElementSibling,
           rowElement: tr,
           cells: Array.from(tr.cells).map(cell => {
             return {
+              rowElement: tr,
+              beforeCell: cell.previousElementSibling,
+              afterCell: cell.nextElementSibling,
               cellElement: cell,
               rowOffset: 0,
               columnOffset: 0
@@ -322,24 +326,30 @@ export class TableEditHook implements Hooks {
           cell.rowIndex = rowIndex;
           cell.columnIndex = columnIndex;
 
-          if (cell.rowOffset + 1 < cell.cellElement.rowSpan) {
-            mark = `${rowIndex + 1}*${columnIndex}`;
-            if (marks.indexOf(mark) === -1) {
-              rows[rowIndex + 1].cells.splice(columnIndex, 0, {
-                cellElement: cell.cellElement,
-                columnOffset: cell.columnOffset,
-                rowOffset: cell.rowOffset + 1
-              });
-              marks.push(mark);
-            }
-          }
           if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
             mark = `${rowIndex}*${columnIndex + 1}`;
             if (marks.indexOf(mark) === -1) {
               row.cells.splice(columnIndex + 1, 0, {
+                beforeCell: cell.beforeCell,
+                afterCell: cell.afterCell,
+                rowElement: row.rowElement,
                 cellElement: cell.cellElement,
                 columnOffset: cell.columnOffset + 1,
                 rowOffset: cell.rowOffset
+              });
+              marks.push(mark);
+            }
+          }
+          if (cell.rowOffset + 1 < cell.cellElement.rowSpan) {
+            mark = `${rowIndex + 1}*${columnIndex}`;
+            if (marks.indexOf(mark) === -1) {
+              rows[rowIndex + 1].cells.splice(columnIndex, 0, {
+                beforeCell: rows[rowIndex + 1].cells[columnIndex].beforeCell,
+                afterCell: rows[rowIndex + 1].cells[columnIndex - 1].afterCell,
+                rowElement: rows[rowIndex + 1].rowElement,
+                cellElement: cell.cellElement,
+                columnOffset: cell.columnOffset,
+                rowOffset: cell.rowOffset + 1
               });
               marks.push(mark);
             }

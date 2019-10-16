@@ -1,6 +1,9 @@
 import { Formatter } from './formatter';
 
 export interface CellPosition {
+  rowElement: HTMLTableRowElement;
+  beforeCell: Element;
+  afterCell: Element;
   cellElement: HTMLTableCellElement;
   columnOffset: number;
   rowOffset: number;
@@ -9,6 +12,8 @@ export interface CellPosition {
 }
 
 export interface RowPosition {
+  beforeRow: Element;
+  afterRow: Element;
   rowElement: HTMLTableRowElement;
   cells: CellPosition[];
 }
@@ -36,13 +41,25 @@ export class TableEditFormatter implements Formatter {
   }
 
   addColumnToLeft(cellMatrix: RowPosition[], index: number) {
-    console.log(index)
     cellMatrix.forEach(row => {
-      const el = row.cells[index].cellElement;
-      if (el.colSpan > row.cells[index].columnOffset && row.cells[index].rowOffset === 1) {
-        el.colSpan++;
+      if (index === 0) {
+        const cell = row.cells[index];
+        const element = cell.cellElement;
+        const next = row.rowElement.children[0];
+        const newNode = document.createElement(element.tagName);
+        if (next) {
+          row.rowElement.insertBefore(newNode, next);
+        } else {
+          row.rowElement.appendChild(newNode)
+        }
       } else {
-        el.parentNode.insertBefore(document.createElement(el.tagName), el);
+        const cell = row.cells[index];
+        if (cell.columnOffset === 0) {
+          const el = document.createElement(cell.cellElement.tagName);
+          row.rowElement.insertBefore(el, cell.cellElement);
+        } else if (cell.rowOffset === 0) {
+          cell.cellElement.colSpan++;
+        }
       }
     });
   }
