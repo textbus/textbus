@@ -242,15 +242,18 @@ export class TableEditHook implements Hooks {
 
   private animate(start: ElementPosition, target: ElementPosition, firstCellPosition: ElementPosition) {
     cancelAnimationFrame(this.animateId);
+    function toInt(n: number) {
+      return n < 0 ? Math.ceil(n) : Math.floor(n);
+    }
     let step = 0;
     const maxStep = 6;
     const animate = () => {
       step++;
       const ratio = this.animateBezier.update(step / maxStep);
-      const left = start.left + (target.left - start.left) * ratio;
-      const top = start.top + (target.top - start.top) * ratio;
-      const width = start.width + (target.width - start.width) * ratio;
-      const height = start.height + (target.height - start.height) * ratio;
+      const left = start.left + toInt((target.left - start.left) * ratio);
+      const top = start.top + toInt((target.top - start.top) * ratio);
+      const width = start.width + toInt((target.width - start.width) * ratio);
+      const height = start.height + toInt((target.height - start.height) * ratio);
 
       this.mask.style.left = left + 'px';
       this.mask.style.top = top + 'px';
