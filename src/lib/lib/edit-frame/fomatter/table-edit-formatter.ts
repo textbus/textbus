@@ -206,7 +206,7 @@ export class TableEditFormatter implements Formatter {
           }
         }
       } else if (cell.columnOffset === 0) {
-          cell.cellElement.rowSpan--;
+        cell.cellElement.rowSpan--;
       }
     });
     cellMatrix[index - 1].rowElement.parentNode.removeChild(cellMatrix[index - 1].rowElement);
