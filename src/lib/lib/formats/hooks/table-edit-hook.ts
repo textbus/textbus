@@ -141,7 +141,15 @@ export class TableEditHook implements Hooks {
           );
           break;
         case TableEditActions.SplitCells:
-          formatter.splitCells();
+          const {startCell, endCell} = formatter.splitCells(
+            this.cellMatrix,
+            this.startPosition.rowIndex,
+            this.startPosition.columnIndex,
+            this.endPosition.rowIndex,
+            this.endPosition.columnIndex
+          );
+          this.startCell = startCell;
+          this.endCell = endCell;
           break;
         case TableEditActions.DeleteTopRow:
           formatter.deleteTopRow();
@@ -337,9 +345,10 @@ export class TableEditHook implements Hooks {
             if (marks.indexOf(mark) === -1) {
               const nextRow = rows[rowIndex + 1];
               const newRowBeforeColumn = nextRow.cells[columnIndex - 1];
+              const newRowAfterColumn = nextRow.cells[columnIndex];
               nextRow.cells.splice(columnIndex, 0, {
                 beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cellElement : null,
-                afterCell: newRowBeforeColumn ? newRowBeforeColumn.afterCell : null,
+                afterCell: newRowAfterColumn ? newRowAfterColumn.cellElement : null,
                 rowElement: rows[rowIndex + 1].rowElement,
                 cellElement: cell.cellElement,
                 columnOffset: cell.columnOffset,

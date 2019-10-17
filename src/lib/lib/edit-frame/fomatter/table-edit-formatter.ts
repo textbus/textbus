@@ -156,7 +156,31 @@ export class TableEditFormatter implements Formatter {
     return newNode;
   }
 
-  splitCells() {
+  splitCells(cellMatrix: RowPosition[], minRow: number, minColumn: number, maxRow: number, maxColumn: number): {
+    startCell: HTMLTableCellElement,
+    endCell: HTMLTableCellElement
+  } {
+
+    const cells = cellMatrix.slice(minRow, maxRow + 1)
+      .map(row => row.cells.slice(minColumn, maxColumn + 1).map(cell => {
+        if (cell.rowOffset !== 0 || cell.columnOffset !== 0) {
+          cell.cellElement.colSpan = cell.cellElement.rowSpan = 1;
+          const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+          if (cell.afterCell) {
+            cell.rowElement.insertBefore(newNode, cell.afterCell);
+          } else {
+            cell.rowElement.appendChild(newNode);
+          }
+          cell.cellElement = newNode;
+        }
+        return cell;
+      })).reduce((p, c) => {
+        return p.concat(c);
+      });
+    return {
+      startCell: cells[0].cellElement,
+      endCell: cells[cells.length - 1].cellElement
+    }
   }
 
   deleteTopRow() {
