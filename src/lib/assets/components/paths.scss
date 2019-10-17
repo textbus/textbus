@@ -4,27 +4,27 @@
   font-size: 12px;
   background-color: lighten($color-lighter, 1);
   user-select: none;
+  color: $color-default;
   &:before {
     content: "路径：";
   }
 }
 
 .tanbo-editor-paths-link {
-  color: $color-primary;
+  color: inherit;
+  font-weight: bold;
   text-decoration: none;
-  background-color: #fff;
+  background: none;
   border-radius: 5px;
-  border: 1px solid $color-light;
+  border: none;
   outline: none;
   cursor: pointer;
-  &:active {
-    background-color: $color-lighter;
+  &:hover {
+    color: $color-primary;
   }
 }
 
 .tanbo-editor-paths-split {
   font-size: .8em;
   color: $color-gray-dark;
-  margin-left: 3px;
-  margin-right: 3px;
 }

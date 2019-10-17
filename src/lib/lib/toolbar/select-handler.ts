@@ -11,22 +11,11 @@ export class SelectHandler {
 
   constructor(private handler: SelectHandlerOption) {
 
-    const dropdownButton = document.createElement('button');
-    dropdownButton.type = 'button';
-    dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
-    dropdownButton.classList.add('tanbo-editor-handler');
-    dropdownButton.classList.add('tanbo-editor-select-button');
-
     const dropdownInner = document.createElement('span');
-    const dropdownArrow = document.createElement('span');
-    dropdownInner.classList.add('tanbo-editor-select-button-inner');
-    dropdownArrow.classList.add('tanbo-editor-select-button-caret');
-
-    dropdownButton.appendChild(dropdownInner);
-    dropdownButton.appendChild(dropdownArrow);
+    dropdownInner.classList.add('tanbo-editor-select-button');
 
     const menu = document.createElement('div');
-    menu.classList.add('tanbo-editor-select-menu');
+    menu.classList.add('tanbo-editor-toolbar-menu');
 
     handler.options.forEach(option => {
       const item = new SelectOptionHandler(option);
@@ -41,9 +30,10 @@ export class SelectHandler {
     });
 
     this.elementRef = new Dropdown(
-      dropdownButton,
+      dropdownInner,
       menu,
-      merge(...this.options.map(item => item.onApply))
+      merge(...this.options.map(item => item.onApply)),
+      handler.tooltip
     ).elementRef;
   }
 }
@@ -60,7 +50,7 @@ export class SelectOptionHandler implements Handler {
   constructor(private option: SelectHandlerItemOption) {
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
-    this.elementRef.classList.add('tanbo-editor-select-menu-item');
+    this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
     if (option.classes) {
       this.elementRef.classList.add(...(option.classes || []));

@@ -11,13 +11,11 @@ export class ActionSheetHandler {
 
   constructor(private handler: ActionSheetHandlerOption) {
 
-    const dropdownButton = document.createElement('button');
-    dropdownButton.type = 'button';
-    dropdownButton.title = (handler.tooltip === null || handler.tooltip === undefined) ? '' : handler.tooltip;
-    dropdownButton.classList.add('tanbo-editor-handler', ...handler.classes || []);
+    const dropdownButton = document.createElement('span');
+    dropdownButton.classList.add(...handler.classes || []);
 
     const menu = document.createElement('div');
-    menu.classList.add('tanbo-editor-action-sheet-menu');
+    menu.classList.add('tanbo-editor-toolbar-menu');
 
     handler.actions.forEach(option => {
       const item = new ActionSheetOptionHandler(option);
@@ -28,7 +26,8 @@ export class ActionSheetHandler {
     this.elementRef = new Dropdown(
       dropdownButton,
       menu,
-      merge(...this.options.map(item => item.onApply))
+      merge(...this.options.map(item => item.onApply)),
+      handler.tooltip
     ).elementRef;
   }
 }
@@ -45,7 +44,7 @@ export class ActionSheetOptionHandler implements Handler {
   constructor(private option: SelectHandlerItemOption) {
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
-    this.elementRef.classList.add('tanbo-editor-action-sheet-item');
+    this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
     if (option.classes) {
       this.elementRef.classList.add(...(option.classes || []));
