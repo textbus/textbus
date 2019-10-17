@@ -183,7 +183,35 @@ export class TableEditFormatter implements Formatter {
     }
   }
 
-  deleteTopRow() {
+  deleteTopRow(cellMatrix: RowPosition[], index: number) {
+    if (index === 0) {
+      return;
+    }
+    cellMatrix[index - 1].cells.forEach((cell, cellIndex) => {
+      if (cell.rowOffset === 0) {
+        if (cell.columnOffset === 0) {
+
+          cell.rowElement.removeChild(cell.cellElement);
+
+          if (cell.cellElement.rowSpan > 1) {
+            const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+            newNode.rowSpan = cell.cellElement.rowSpan - 1;
+            newNode.colSpan = cell.cellElement.colSpan;
+            const newPosition = cellMatrix[index].cells[cellIndex];
+            if (newPosition.afterCell) {
+              newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
+            } else {
+              newPosition.rowElement.appendChild(newNode);
+            }
+          }
+        }
+      } else {
+        if (cell.columnOffset === 0) {
+          cell.cellElement.rowSpan--;
+        }
+      }
+    });
+    cellMatrix[index - 1].rowElement.parentNode.removeChild(cellMatrix[index - 1].rowElement);
   }
 
   deleteBottomRow() {

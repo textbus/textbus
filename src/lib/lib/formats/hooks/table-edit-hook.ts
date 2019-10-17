@@ -152,7 +152,7 @@ export class TableEditHook implements Hooks {
           this.endCell = endCell;
           break;
         case TableEditActions.DeleteTopRow:
-          formatter.deleteTopRow();
+          formatter.deleteTopRow(this.cellMatrix, this.startPosition.rowIndex);
           break;
         case TableEditActions.DeleteBottomRow:
           formatter.deleteBottomRow();
