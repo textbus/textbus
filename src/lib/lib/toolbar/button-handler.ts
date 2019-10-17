@@ -17,8 +17,11 @@ export class ButtonHandler implements Handler {
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = handler.tooltip || '';
-    this.elementRef.innerText = handler.label || '';
-    this.elementRef.classList.add('tanbo-editor-handler', ...(handler.classes || []));
+    this.elementRef.classList.add('tanbo-editor-handler');
+    const inner = document.createElement('span');
+    inner.innerText = handler.label || '';
+    inner.classList.add(...(handler.classes || []));
+    this.elementRef.appendChild(inner);
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next();
     });
