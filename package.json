@@ -46,6 +46,7 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
+    "@tanbo/bezier": "0.0.1",
     "@tanbo/color": "^0.0.2",
     "@tanbo/color-picker": "^0.0.13",
     "@tanbo/css-themes": "^0.0.1",

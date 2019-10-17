@@ -1,4 +1,5 @@
 import { fromEvent, merge, Subscription } from 'rxjs';
+import { CubicBezier } from '@tanbo/bezier';
 
 import { findElementByTagName } from '../../edit-frame/utils';
 import { EditContext, Hooks } from '../../help';
@@ -6,6 +7,13 @@ import { Matcher } from '../../matcher';
 import { Formatter } from '../../edit-frame/fomatter/formatter';
 import { TableEditActions, TableEditFormatter, CellPosition } from '../../edit-frame/_api';
 import { RowPosition } from '../../edit-frame/fomatter/table-edit-formatter';
+
+interface ElementPosition {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
 export class TableEditHook implements Hooks {
   matcher = new Matcher({
@@ -23,9 +31,11 @@ export class TableEditHook implements Hooks {
   private startCell: HTMLTableCellElement;
   private endCell: HTMLTableCellElement;
   private cellMatrix: RowPosition[] = [];
+  private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
+  private animateId: number;
 
   constructor() {
-    this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; transition: all .1s; overflow: hidden';
+    this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
     this.firstMask.style.cssText = 'position: absolute; box-shadow: 0 0 0 9999px rgba(18,150,219,.1); contain: style';
     this.mask.appendChild(this.firstMask);
   }
@@ -192,25 +202,32 @@ export class TableEditHook implements Hooks {
     const maxRow = Math.max(p1.maxRow, p2.maxRow);
     const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
 
-    // console.log(` ${minRow} row ${minColumn} col 到 ${maxRow} row ${maxColumn} col`);
-
     const {startPosition, endPosition} = this.findSelectedRange(minRow, minColumn, maxRow, maxColumn);
 
     const startRect = startPosition.cellElement.getBoundingClientRect();
     const endRect = endPosition.cellElement.getBoundingClientRect();
 
-    const rawStartRect = this.startCell.getBoundingClientRect();
+    const firstCellRect = this.startCell.getBoundingClientRect();
 
-    this.firstMask.style.left = rawStartRect.left - startRect.left + 'px';
-    this.firstMask.style.top = rawStartRect.top - startRect.top + 'px';
-    this.firstMask.style.width = rawStartRect.width + 'px';
-    this.firstMask.style.height = rawStartRect.height + 'px';
+    this.firstMask.style.width = firstCellRect.width + 'px';
+    this.firstMask.style.height = firstCellRect.height + 'px';
 
-    this.mask.style.left = startRect.left + 'px';
-    this.mask.style.top = startRect.top + 'px';
-    this.mask.style.width = endRect.right - startRect.left + 'px';
-    this.mask.style.height = endRect.bottom - startRect.top + 'px';
-
+    this.animate({
+      left: this.mask.offsetLeft,
+      top: this.mask.offsetTop,
+      width: this.mask.offsetWidth,
+      height: this.mask.offsetHeight
+    }, {
+      left: startRect.left,
+      top: startRect.top,
+      width: endRect.right - startRect.left,
+      height: endRect.bottom - startRect.top
+    }, {
+      left: firstCellRect.left - startRect.left,
+      top: firstCellRect.top - startRect.top,
+      width: firstCellRect.width,
+      height: firstCellRect.height
+    });
 
     const selectedCells = this.cellMatrix.slice(startPosition.rowIndex, endPosition.rowIndex + 1).map(row => {
       return row.cells.slice(startPosition.columnIndex, endPosition.columnIndex + 1);
@@ -221,6 +238,32 @@ export class TableEditHook implements Hooks {
     this.selectedCells = Array.from(new Set(selectedCells));
     this.startPosition = startPosition;
     this.endPosition = endPosition;
+  }
+
+  private animate(start: ElementPosition, target: ElementPosition, firstCellPosition: ElementPosition) {
+    cancelAnimationFrame(this.animateId);
+    let step = 0;
+    const maxStep = 6;
+    const animate = () => {
+      step++;
+      const ratio = this.animateBezier.update(step / maxStep);
+      const left = start.left + (target.left - start.left) * ratio;
+      const top = start.top + (target.top - start.top) * ratio;
+      const width = start.width + (target.width - start.width) * ratio;
+      const height = start.height + (target.height - start.height) * ratio;
+
+      this.mask.style.left = left + 'px';
+      this.mask.style.top = top + 'px';
+      this.mask.style.width = width + 'px';
+      this.mask.style.height = height + 'px';
+
+      this.firstMask.style.left = target.left - left + firstCellPosition.left + 'px';
+      this.firstMask.style.top = target.top - top + firstCellPosition.top + 'px';
+      if (step < maxStep) {
+        this.animateId = requestAnimationFrame(animate);
+      }
+    };
+    this.animateId = requestAnimationFrame(animate);
   }
 
   private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): {
