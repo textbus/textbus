@@ -11,13 +11,13 @@ export class ToggleBlockFormatter implements Formatter {
   }
 
   format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
-    range.markRange();
+    range.mark();
 
     if (matchDelta.inSingleContainer) {
       const block = findBlockContainer(range.commonAncestorContainer, matchDelta.scopeContainer);
 
       if (block === matchDelta.scopeContainer) {
-        takeOffWrapper(frame.contentDocument, matchDelta.scopeContainer);
+        takeOffWrapper(matchDelta.scopeContainer);
       } else {
         const newRange = frame.contentDocument.createRange();
         newRange.selectNode(block);
@@ -40,8 +40,8 @@ export class ToggleBlockFormatter implements Formatter {
             parent.appendChild(afterContents);
           }
         }
-        takeOffWrapper(frame.contentDocument, matchDelta.scopeContainer);
-        newTBRange.removeMarkRange();
+        takeOffWrapper(matchDelta.scopeContainer);
+        newTBRange.removeMarksAndRestoreRange();
       }
     } else {
       const startBlock = findBlockContainer(range.startContainer, frame.contentDocument.body);
@@ -52,6 +52,6 @@ export class ToggleBlockFormatter implements Formatter {
       const newWrap = frame.contentDocument.createElement(this.tagName);
       newRange.surroundContents(newWrap);
     }
-    range.removeMarkRange();
+    range.removeMarksAndRestoreRange();
   }
 }

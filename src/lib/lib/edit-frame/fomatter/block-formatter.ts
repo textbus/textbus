@@ -13,7 +13,7 @@ export class BlockFormatter implements Formatter {
   format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta) {
     const doc = frame.contentDocument;
     if (!matchDelta.inSingleContainer) {
-      range.markRange();
+      range.mark();
       const containerRange = doc.createRange();
       const container = findBlockContainer(range.commonAncestorContainer, doc.body);
       containerRange.selectNodeContents(container);
@@ -22,7 +22,7 @@ export class BlockFormatter implements Formatter {
       if (container !== doc.body) {
         container.parentNode.replaceChild(newContainer, container);
       }
-      range.removeMarkRange();
+      range.removeMarksAndRestoreRange();
     }
   }
 }

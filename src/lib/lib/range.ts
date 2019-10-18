@@ -60,7 +60,7 @@ export class TBRange {
     }
   }
 
-  markRange() {
+  mark() {
     if (!this.marked) {
       const {startContainer, endContainer, startOffset, endOffset} = this.rawRange;
 
@@ -92,7 +92,7 @@ export class TBRange {
     return this;
   }
 
-  removeMarkRange() {
+  removeMarksAndRestoreRange() {
     if (this.marked) {
       const s = this.findEmptyContainer(this.startMark);
       const e = this.findEmptyContainer(this.endMark);
@@ -116,7 +116,7 @@ export class TBRange {
 
     beforeRange.setStartBefore(scope);
     afterRange.setEndAfter(scope);
-    this.markRange();
+    this.mark();
     beforeRange.setEndBefore(this.startMark);
     afterRange.setStartAfter(this.endMark);
     return {

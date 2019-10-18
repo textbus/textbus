@@ -2,112 +2,117 @@ import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { MatchDelta } from '../../matcher';
 import { EditFrame } from '../edit-frame';
+import { matchContainerByTagName, takeOffWrapper } from '../utils';
+import { dtd } from '../dtd';
 
 export class ListFormatter implements Formatter {
   readonly recordHistory = true;
   readonly document: Document;
-  private rawTagKey = '__tanbo_editor_raw_tag__';
 
   constructor(private tagName: string) {
   }
 
   format(range: TBRange, frame: EditFrame, matchDelta: MatchDelta): void {
-    range.markRange();
+    range.mark();
+    if (matchDelta.overlap) {
+      if (matchDelta.inSingleContainer) {
+        const container = matchContainerByTagName(
+          matchDelta.scopeContainer,
+          this.tagName,
+          frame.contentDocument.body) as HTMLElement;
+        this.unList(range.rawRange, container);
+      } else {
+        this.findContainer(range.commonAncestorContainer as Element).forEach(item => {
+          this.unList(range.rawRange, item);
+        });
+      }
+    }
+
+    range.removeMarksAndRestoreRange();
   }
 
-  // format(doc: Document): Range {
-  //   (this as { document: Document }).document = doc;
-  //   const selection = doc.getSelection();
-  //   const rawRange = selection.getRangeAt(0);
-  //   const tag = this.tagName;
-  //   const parentTagContainer = this.matchContainerByTagName(
-  //     rawRange.commonAncestorContainer as HTMLElement,
-  //     tag,
-  //     this.document.body) as HTMLElement;
-  //   if (parentTagContainer) {
-  //     console.log('b1');
-  //     const cacheMark = this.splitBySelectedRange(rawRange, rawRange.commonAncestorContainer);
-  //     const parent = parentTagContainer.parentNode;
-  //     const block = this.findBlockContainer(rawRange.commonAncestorContainer as HTMLElement, parentTagContainer);
-  //     const containerRange = this.document.createRange();
-  //     const nextSibling = parentTagContainer.nextSibling;
-  //     const rawTag = parentTagContainer[this.rawTagKey];
-  //     if (parentTagContainer === block) {
-  //       containerRange.selectNodeContents(block);
-  //     } else {
-  //       containerRange.selectNode(block);
-  //     }
-  //
-  //     const {before, current, after, startMark, endMark} = this.splitBySelectedRange(containerRange, parentTagContainer);
-  //
-  //     const beforeContents = before.extractContents();
-  //     const afterContents = after.extractContents();
-  //
-  //     if (nextSibling) {
-  //       if (beforeContents.textContent) {
-  //         parent.insertBefore(beforeContents, nextSibling);
-  //       }
-  //       if (rawTag) {
-  //         const wrapper = this.document.createElement(rawTag);
-  //         wrapper.appendChild(current.extractContents());
-  //         parent.insertBefore(wrapper, nextSibling);
-  //       } else {
-  //         parent.insertBefore(current.extractContents(), nextSibling);
-  //       }
-  //       if (afterContents.textContent) {
-  //         parent.insertBefore(afterContents, nextSibling);
-  //       }
-  //     } else {
-  //       if (beforeContents.textContent) {
-  //         parent.appendChild(beforeContents);
-  //       }
-  //       if (rawTag) {
-  //         const wrapper = this.document.createElement(rawTag);
-  //         wrapper.appendChild(current.extractContents());
-  //         parent.insertBefore(wrapper, nextSibling);
-  //       } else {
-  //         parent.insertBefore(current.extractContents(), nextSibling);
-  //       }
-  //       if (afterContents.textContent) {
-  //         parent.appendChild(afterContents);
-  //       }
-  //     }
-  //     const s = this.findEmptyContainer(cacheMark.startMark);
-  //     const e = this.findEmptyContainer(cacheMark.endMark);
-  //     rawRange.setStartAfter(s);
-  //     rawRange.setEndBefore(e);
-  //     s.parentNode.removeChild(s);
-  //     e.parentNode.removeChild(e);
-  //     const ss = this.findEmptyContainer(startMark);
-  //     const ee = this.findEmptyContainer(endMark);
-  //     ss.parentNode.removeChild(ss);
-  //     ee.parentNode.removeChild(ee);
-  //   } else {
-  //
-  //     console.log('b2');
-  //     const {startMark, current, endMark} = this.splitBySelectedRange(rawRange, rawRange.commonAncestorContainer);
-  //     const containerRange = this.document.createRange();
-  //     const container = this.findBlockContainer(rawRange.commonAncestorContainer, this.document.body);
-  //     containerRange.selectNodeContents(container);
-  //     const newContainer = this.createContainerByDtdRule(tag);
-  //     newContainer.contentsContainer[this.rawTagKey] = (container as HTMLElement).tagName;
-  //
-  //     // if(container === this.document.body) {
-  //     //
-  //     // }
-  //
-  //     container.parentNode.insertBefore(newContainer.contentsContainer, container);
-  //     newContainer.newNode.appendChild(container);
-  //     // containerRange.surroundContents(newContainer.newNode);
-  //     // newNode.parentNode.replaceChild(newContainer.contentsContainer, newNode);
-  //
-  //     const s = this.findEmptyContainer(startMark);
-  //     const e = this.findEmptyContainer(endMark);
-  //     current.setStartAfter(s);
-  //     current.setEndBefore(e);
-  //     s.parentNode.removeChild(s);
-  //     e.parentNode.removeChild(e);
-  //   }
-  //   return rawRange;
-  // }
+  private findContainer(scope: Element): Element[] {
+    const result: Element[] = [];
+    Array.from(scope.children).forEach(node => {
+      if (node.tagName.toLowerCase() === this.tagName) {
+        result.push(node);
+      } else {
+        result.push(...this.findContainer(node));
+      }
+    });
+    return result;
+  }
+
+  private unList(range: Range, container: Element) {
+    const list = Array.from(container.children);
+    const before: Element[] = [];
+    const after: Element[] = [];
+
+    while (list[0] && !range.intersectsNode(list[0])) {
+      before.push(list.shift());
+    }
+
+    while (list[list.length - 1] && !range.intersectsNode(list[list.length - 1])) {
+      after.unshift(list.pop());
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    list.map(li => {
+      const elements: HTMLParagraphElement[] = [];
+      let paragraph: HTMLParagraphElement = document.createElement('p');
+
+      const nodes = Array.from(li.childNodes);
+
+      while (nodes.length) {
+        const node = nodes.shift();
+        if (node.nodeType !== 1) {
+          paragraph.appendChild(node);
+        } else {
+          const tagName = (node as HTMLElement).tagName.toLowerCase();
+          if (/inline/.test(dtd[tagName].display)) {
+            paragraph.appendChild(node);
+          } else {
+            elements.push(paragraph);
+            paragraph = document.createElement('p');
+            if (tagName !== 'p') {
+              Array.from(node.childNodes).forEach(n => paragraph.appendChild(n));
+              elements.push(paragraph);
+              paragraph = document.createElement('p');
+            } else {
+              elements.push(node as HTMLParagraphElement);
+            }
+          }
+        }
+      }
+      if (paragraph.childNodes.length) {
+        elements.push(paragraph);
+      }
+      li.parentNode.removeChild(li);
+      return elements;
+    }).reduce((a, b) => {
+      return a.concat(b);
+    }, []).forEach(p => fragment.appendChild(p));
+
+    const nextSibling = container.nextSibling;
+
+    if (nextSibling) {
+      container.parentNode.insertBefore(fragment, nextSibling);
+    } else {
+      container.parentNode.appendChild(fragment);
+    }
+
+    if (after.length) {
+      const newList = container.cloneNode();
+      after.forEach(li => newList.appendChild(li));
+      if (nextSibling) {
+        container.parentNode.insertBefore(newList, nextSibling);
+      } else {
+        container.parentNode.appendChild(newList);
+      }
+    }
+    if (before.length === 0) {
+      takeOffWrapper(container);
+    }
+  }
 }

@@ -23,10 +23,10 @@ export class InlineFormatter implements Formatter {
 
       this.wrap(before, tag);
       this.wrap(after, tag);
-      takeOffWrapper(this.document, matchDelta.scopeContainer);
+      takeOffWrapper(matchDelta.scopeContainer);
       before.detach();
       after.detach();
-      range.removeMarkRange();
+      range.removeMarksAndRestoreRange();
     } else {
       if (range.commonAncestorContainer.nodeType === 3) {
         const newWrap = this.document.createElement(tag);
@@ -37,7 +37,7 @@ export class InlineFormatter implements Formatter {
           range.rawRange.selectNodeContents(newWrap);
         }
       } else if (range.commonAncestorContainer.nodeType === 1) {
-        range.markRange();
+        range.mark();
         const current = range.rawRange;
 
         if (matchDelta.overlap) {
@@ -47,7 +47,7 @@ export class InlineFormatter implements Formatter {
           range.apply();
           this.wrap(current, tag);
         }
-        range.removeMarkRange();
+        range.removeMarksAndRestoreRange();
       }
     }
   }
@@ -90,7 +90,7 @@ export class InlineFormatter implements Formatter {
     Array.from((range.commonAncestorContainer as HTMLElement).getElementsByTagName(tag))
       .filter(item => range.intersectsNode(item))
       .forEach(item => {
-        takeOffWrapper(this.document, item);
+        takeOffWrapper(item);
       });
   }
 

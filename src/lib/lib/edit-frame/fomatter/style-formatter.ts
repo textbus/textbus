@@ -30,7 +30,7 @@ export class StyleFormatter implements Formatter {
       const nodes = this.findCanApplyElements(range.commonAncestorContainer,
         range.rawRange.cloneRange(),
         frame.contentDocument);
-      range.markRange();
+      range.mark();
       nodes.forEach(node => {
         if (node.nodeType === 3) {
           const newWrap = frame.contentDocument.createElement('span');
@@ -45,7 +45,7 @@ export class StyleFormatter implements Formatter {
           });
         }
       });
-      range.removeMarkRange();
+      range.removeMarksAndRestoreRange();
     }
   }
 

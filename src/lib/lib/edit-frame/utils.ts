@@ -67,8 +67,8 @@ export function findBlockContainer(node: Node, scope: Node): Node {
   return scope;
 }
 
-export function takeOffWrapper(context: Document, el: Element) {
-  const fragment = context.createDocumentFragment();
+export function takeOffWrapper(el: Element) {
+  const fragment = document.createDocumentFragment();
   Array.from(el.childNodes).forEach(item => {
     fragment.appendChild(item);
   });
