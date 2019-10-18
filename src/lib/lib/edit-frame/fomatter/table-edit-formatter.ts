@@ -265,5 +265,22 @@ export class TableEditFormatter implements Formatter {
     if (index === cellMatrix[0].cells.length - 1) {
       return;
     }
+    cellMatrix.forEach(row => {
+      const cell = row.cells[index + 1];
+      if (cell.rowOffset === 0) {
+        if (cell.columnOffset > 0) {
+          cell.cellElement.colSpan--;
+        } else {
+          if (cell.cellElement.colSpan > 1) {
+            const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+            newNode.colSpan = cell.cellElement.colSpan - 1;
+            newNode.rowSpan = cell.cellElement.rowSpan;
+            cell.rowElement.replaceChild(newNode, cell.cellElement);
+          } else {
+            cell.rowElement.removeChild(cell.cellElement);
+          }
+        }
+      }
+    });
   }
 }
