@@ -1,4 +1,4 @@
-import { fromEvent, merge, Subscription } from 'rxjs';
+import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
 import { findElementByTagName } from '../../edit-frame/utils';
@@ -50,8 +50,14 @@ export class TableEditHook implements Hooks {
     style.id = this.id;
     style.innerText = '::selection { background: transparent; }';
 
-    let unBindScroll: Subscription;
-
+    merge(...[
+      'scroll',
+      'resize'
+    ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
+      if (this.endCell) {
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      }
+    });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
       this.selectedCells = [];
       if (insertStyle) {
@@ -59,30 +65,27 @@ export class TableEditHook implements Hooks {
         frameDocument.head.removeChild(style);
         insertStyle = false;
       }
-      if (insertMask) {
-        frameContainer.removeChild(this.mask);
-        insertMask = false;
-        unBindScroll && unBindScroll.unsubscribe();
-      }
+
       const startPaths = Array.from(startEvent.composedPath()) as Array<Node>;
-      this.startCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
+      this.startCell = this.endCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
       this.tableElement = findElementByTagName(startPaths, 'table') as HTMLTableElement;
       if (!this.startCell || !this.tableElement) {
         return;
       }
-
+      if (!insertMask) {
+        frameContainer.appendChild(this.mask);
+        insertMask = true;
+        const initRect = this.startCell.getBoundingClientRect();
+        this.mask.style.left = initRect.left + 'px';
+        this.mask.style.top = initRect.top + 'px';
+        this.mask.style.width = this.firstMask.style.width = initRect.width + 'px';
+        this.mask.style.height = this.firstMask.style.height = initRect.height + 'px';
+        this.firstMask.style.left = '0px';
+        this.firstMask.style.top = '0px';
+      } else {
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      }
       this.cellMatrix = this.serialize(this.tableElement);
-
-
-      unBindScroll = merge(...[
-        'scroll',
-        'resize'
-      ].map(type => fromEvent(frameWindow, type))).subscribe(() => {
-        if (this.endCell) {
-          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
-        }
-      });
-
 
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
         const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
@@ -95,10 +98,6 @@ export class TableEditHook implements Hooks {
           if (this.endCell !== this.startCell) {
             frameDocument.head.appendChild(style);
             insertStyle = true;
-          }
-          if (!insertMask) {
-            frameContainer.appendChild(this.mask);
-            insertMask = true;
           }
           this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
         }
@@ -242,9 +241,11 @@ export class TableEditHook implements Hooks {
 
   private animate(start: ElementPosition, target: ElementPosition, firstCellPosition: ElementPosition) {
     cancelAnimationFrame(this.animateId);
+
     function toInt(n: number) {
       return n < 0 ? Math.ceil(n) : Math.floor(n);
     }
+
     let step = 0;
     const maxStep = 6;
     const animate = () => {

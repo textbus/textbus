@@ -26,6 +26,8 @@ export class ListFormatter implements Formatter {
           this.unList(range.rawRange, item);
         });
       }
+    } else {
+
     }
 
     range.removeMarksAndRestoreRange();
