@@ -187,11 +187,10 @@ export class TableEditFormatter implements Formatter {
     if (index === 0) {
       return;
     }
-    cellMatrix[index - 1].cells.forEach((cell, cellIndex) => {
+    const prevRow = cellMatrix[index - 1];
+    prevRow.cells.forEach((cell, cellIndex) => {
       if (cell.rowOffset === 0) {
         if (cell.columnOffset === 0) {
-
-          cell.rowElement.removeChild(cell.cellElement);
 
           if (cell.cellElement.rowSpan > 1) {
             const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
@@ -209,10 +208,35 @@ export class TableEditFormatter implements Formatter {
         cell.cellElement.rowSpan--;
       }
     });
-    cellMatrix[index - 1].rowElement.parentNode.removeChild(cellMatrix[index - 1].rowElement);
+    prevRow.rowElement.parentNode.removeChild(prevRow.rowElement);
   }
 
-  deleteBottomRow() {
+  deleteBottomRow(cellMatrix: RowPosition[], index: number) {
+    if (index === cellMatrix.length - 1) {
+      return;
+    }
+    const nextRow = cellMatrix[index + 1];
+    nextRow.cells.forEach((cell, cellIndex) => {
+      if (cell.rowOffset > 0 && cell.columnOffset === 0) {
+        cell.cellElement.rowSpan--;
+
+      } else if (cell.rowOffset === 0 && cell.columnOffset === 0) {
+
+        if (cell.cellElement.rowSpan > 1) {
+          const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+          newNode.rowSpan = cell.cellElement.rowSpan - 1;
+          newNode.colSpan = cell.cellElement.colSpan;
+
+          const newPosition = cellMatrix[index + 2].cells[cellIndex];
+          if (newPosition.afterCell) {
+            newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
+          } else {
+            newPosition.rowElement.appendChild(newNode);
+          }
+        }
+      }
+    });
+    nextRow.rowElement.parentNode.removeChild(nextRow.rowElement);
   }
 
   deleteLeftColumn() {
