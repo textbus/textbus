@@ -6,6 +6,7 @@ import { Hooks } from '../help';
 import { Matcher } from '../matcher';
 import { TBRange } from '../range';
 import { Formatter } from './fomatter/formatter';
+import { Cursor } from './cursor';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -23,6 +24,7 @@ export class EditFrame {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
+  private cursor = new Cursor();
   private frame = document.createElement('iframe');
   private selectionChangeEvent = new Subject<Range[]>();
   private contentChangeEvent = new Subject<string>();
@@ -41,11 +43,12 @@ export class EditFrame {
     this.elementRef.classList.add('tanbo-editor-wrap');
     this.frame.classList.add('tanbo-editor-frame');
     this.elementRef.appendChild(this.frame);
-
+    this.elementRef.appendChild(this.cursor.elementRef)
+    this.cursor.show();
     this.frame.onload = () => {
       (<any>this).contentDocument = this.frame.contentDocument;
       (<any>this).contentWindow = this.frame.contentWindow;
-      (<any>this).contentDocument.body.contentEditable = true;
+      // (<any>this).contentDocument.body.contentEditable = true;
       (<any>this).contentDocument.body.innerHTML = defaultContents;
       this.setup(this.frame.contentDocument);
       this.writeContents(defaultContents).then(() => {
@@ -261,6 +264,7 @@ ${body.outerHTML}
     const childBody = childDocument.body;
 
     fromEvent(childDocument, 'selectionchange').pipe(map(() => {
+      this.cursor.updatePosition(childDocument.getSelection().getRangeAt(0).getBoundingClientRect());
       if (!childBody.innerHTML) {
         childBody.innerHTML = '<p><br></p>';
       }
