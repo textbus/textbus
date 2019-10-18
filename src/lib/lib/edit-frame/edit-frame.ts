@@ -1,5 +1,5 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { auditTime, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, map, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { Hooks } from '../help';
@@ -260,30 +260,12 @@ ${body.outerHTML}
   private setup(childDocument: Document) {
     const childBody = childDocument.body;
 
-    // 兼听可能引起选区变化的事件，并发出通知
-    merge(...[
-      'click',
-      'contextmenu',
-      'mousedown',
-      'keydown',
-      'keyup',
-      'keypress',
-      'mouseup',
-      'selectstart',
-      'focus'
-    ].map(type => fromEvent(childBody, type))).pipe(auditTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next(this.getRanges());
-    });
-    // 兼听可能引起编辑区空白的事件，并重新设置默认值
-    merge(...[
-      'keyup',
-      'paste',
-      'cut',
-      'focus'
-    ].map(type => fromEvent(childBody, type))).subscribe(() => {
+    fromEvent(childDocument, 'selectionchange').pipe(map(() => {
       if (!childBody.innerHTML) {
         childBody.innerHTML = '<p><br></p>';
       }
+    })).pipe(auditTime(100)).subscribe(() => {
+      this.selectionChangeEvent.next(this.getRanges());
     });
 
     // 禁用默认的历史记录回退及前进功能
