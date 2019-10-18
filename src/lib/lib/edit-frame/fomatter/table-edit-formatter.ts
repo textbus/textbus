@@ -189,23 +189,20 @@ export class TableEditFormatter implements Formatter {
     }
     const prevRow = cellMatrix[index - 1];
     prevRow.cells.forEach((cell, cellIndex) => {
-      if (cell.rowOffset === 0) {
-        if (cell.columnOffset === 0) {
-
-          if (cell.cellElement.rowSpan > 1) {
-            const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
-            newNode.rowSpan = cell.cellElement.rowSpan - 1;
-            newNode.colSpan = cell.cellElement.colSpan;
-            const newPosition = cellMatrix[index].cells[cellIndex];
-            if (newPosition.afterCell) {
-              newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
-            } else {
-              newPosition.rowElement.appendChild(newNode);
-            }
+      if (cell.columnOffset === 0) {
+        if (cell.rowOffset === 0 && cell.cellElement.rowSpan > 1) {
+          const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+          newNode.rowSpan = cell.cellElement.rowSpan - 1;
+          newNode.colSpan = cell.cellElement.colSpan;
+          const newPosition = cellMatrix[index].cells[cellIndex];
+          if (newPosition.afterCell) {
+            newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
+          } else {
+            newPosition.rowElement.appendChild(newNode);
           }
+        } else {
+          cell.cellElement.rowSpan--;
         }
-      } else if (cell.columnOffset === 0) {
-        cell.cellElement.rowSpan--;
       }
     });
     prevRow.rowElement.parentNode.removeChild(prevRow.rowElement);
@@ -217,21 +214,23 @@ export class TableEditFormatter implements Formatter {
     }
     const nextRow = cellMatrix[index + 1];
     nextRow.cells.forEach((cell, cellIndex) => {
-      if (cell.rowOffset > 0 && cell.columnOffset === 0) {
-        cell.cellElement.rowSpan--;
+      if (cell.columnOffset === 0) {
+        if (cell.rowOffset > 0) {
+          cell.cellElement.rowSpan--;
 
-      } else if (cell.rowOffset === 0 && cell.columnOffset === 0) {
+        } else if (cell.rowOffset === 0) {
 
-        if (cell.cellElement.rowSpan > 1) {
-          const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
-          newNode.rowSpan = cell.cellElement.rowSpan - 1;
-          newNode.colSpan = cell.cellElement.colSpan;
+          if (cell.cellElement.rowSpan > 1) {
+            const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+            newNode.rowSpan = cell.cellElement.rowSpan - 1;
+            newNode.colSpan = cell.cellElement.colSpan;
 
-          const newPosition = cellMatrix[index + 2].cells[cellIndex];
-          if (newPosition.afterCell) {
-            newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
-          } else {
-            newPosition.rowElement.appendChild(newNode);
+            const newPosition = cellMatrix[index + 2].cells[cellIndex];
+            if (newPosition.afterCell) {
+              newPosition.rowElement.insertBefore(newNode, newPosition.afterCell);
+            } else {
+              newPosition.rowElement.appendChild(newNode);
+            }
           }
         }
       }
@@ -239,9 +238,32 @@ export class TableEditFormatter implements Formatter {
     nextRow.rowElement.parentNode.removeChild(nextRow.rowElement);
   }
 
-  deleteLeftColumn() {
+  deleteLeftColumn(cellMatrix: RowPosition[], index: number) {
+    if (index === 0) {
+      return;
+    }
+    cellMatrix.forEach(row => {
+      const cell = row.cells[index - 1];
+      if (cell.rowOffset === 0) {
+        if (cell.columnOffset > 0) {
+          cell.cellElement.colSpan--;
+        } else {
+          if (cell.cellElement.colSpan > 1) {
+            const newNode = document.createElement(cell.cellElement.tagName) as HTMLTableCellElement;
+            newNode.colSpan = cell.cellElement.colSpan - 1;
+            newNode.rowSpan = cell.cellElement.rowSpan;
+            cell.rowElement.replaceChild(newNode, cell.cellElement);
+          } else {
+            cell.rowElement.removeChild(cell.cellElement);
+          }
+        }
+      }
+    });
   }
 
-  deleteRightColumn() {
+  deleteRightColumn(cellMatrix: RowPosition[], index: number) {
+    if (index === cellMatrix[0].cells.length - 1) {
+      return;
+    }
   }
 }

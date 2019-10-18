@@ -168,10 +168,10 @@ export class TableEditHook implements Hooks {
           formatter.deleteBottomRow(this.cellMatrix, this.endPosition.rowIndex);
           break;
         case TableEditActions.DeleteLeftColumn:
-          formatter.deleteLeftColumn();
+          formatter.deleteLeftColumn(this.cellMatrix, this.startPosition.columnIndex);
           break;
         case TableEditActions.DeleteRightColumn:
-          formatter.deleteRightColumn();
+          formatter.deleteRightColumn(this.cellMatrix, this.endPosition.columnIndex);
           break;
       }
       return false;
