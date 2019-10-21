@@ -2,7 +2,7 @@ import { Formatter } from './formatter';
 import { TBRange } from '../../range';
 import { MatchDelta } from '../../matcher';
 import { EditFrame } from '../edit-frame';
-import { matchContainerByTagName, takeOffWrapper } from '../utils';
+import { findBlockContainer, matchContainerByTagName, takeOffWrapper } from '../utils';
 import { dtd } from '../dtd';
 
 export class ListFormatter implements Formatter {
@@ -27,7 +27,25 @@ export class ListFormatter implements Formatter {
         });
       }
     } else {
+      const wrap = document.createElement(this.tagName);
+      let li = document.createElement('li');
 
+      const selectedNodes = Array.from((findBlockContainer(
+        range.commonAncestorContainer,
+        frame.contentDocument.body) as HTMLElement).childNodes)
+        .filter(node => range.rawRange.intersectsNode(node));
+      const position = selectedNodes[0];
+      position.parentNode.insertBefore(wrap, position);
+      selectedNodes.forEach(node => {
+        li.appendChild(node);
+        if (node.nodeType === 1 && !/inline/.test(dtd[(node as HTMLElement).tagName.toLowerCase()].display)) {
+          wrap.appendChild(li);
+          li = document.createElement('li');
+        }
+      });
+      if (li.childNodes.length) {
+        wrap.appendChild(li);
+      }
     }
 
     range.removeMarksAndRestoreRange();
@@ -94,7 +112,9 @@ export class ListFormatter implements Formatter {
       return elements;
     }).reduce((a, b) => {
       return a.concat(b);
-    }, []).forEach(p => fragment.appendChild(p));
+    }, []).filter(p => {
+      return p.innerText && !/^\s+$/.test(p.innerText);
+    }).forEach(p => fragment.appendChild(p));
 
     const nextSibling = container.nextSibling;
 
