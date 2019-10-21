@@ -43,8 +43,7 @@ export class EditFrame {
     this.elementRef.classList.add('tanbo-editor-wrap');
     this.frame.classList.add('tanbo-editor-frame');
     this.elementRef.appendChild(this.frame);
-    this.elementRef.appendChild(this.cursor.elementRef)
-    this.cursor.show();
+    this.elementRef.appendChild(this.cursor.elementRef);
     this.frame.onload = () => {
       (<any>this).contentDocument = this.frame.contentDocument;
       (<any>this).contentWindow = this.frame.contentWindow;
@@ -264,7 +263,7 @@ ${body.outerHTML}
     const childBody = childDocument.body;
 
     fromEvent(childDocument, 'selectionchange').pipe(map(() => {
-      this.cursor.updatePosition(childDocument.getSelection().getRangeAt(0).getBoundingClientRect());
+      this.cursor.show(childDocument.getSelection().getRangeAt(0).getBoundingClientRect());
       if (!childBody.innerHTML) {
         childBody.innerHTML = '<p><br></p>';
       }
