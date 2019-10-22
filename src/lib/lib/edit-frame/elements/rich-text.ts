@@ -1,21 +1,40 @@
-import { Observable } from 'rxjs';
-import { TBElement } from './element';
+import { Observable, Subject } from 'rxjs';
+import { TBNode } from './element';
 
-export class RichText implements TBElement {
+export class RichText implements TBNode {
   get length() {
     return this.text.length;
   }
 
-  text: string;
-
-  onDestroy: Observable<this>;
+  onDestroy: Observable<void>;
   onContentChange: Observable<this>;
 
-  destroy(): void {
+  private destroyEvent = new Subject<void>();
+  private contentChangeEvent = new Subject<this>();
 
+  constructor(public text = '') {
+    this.onContentChange = this.contentChangeEvent.asObservable();
+    this.onDestroy = this.destroyEvent.asObservable();
   }
 
-  render(): void {
+  destroy(): void {
+    this.destroyEvent.next();
+  }
 
+  render(): Node {
+    return document.createTextNode(this.text);
+  }
+
+  addContent(char: string, atIndex = this.length) {
+    const before = this.text.slice(0, atIndex);
+    const after = this.text.slice(atIndex);
+    this.text = before + char + after;
+    this.contentChangeEvent.next(this);
+  }
+
+  deleteContent(startIndex: number, endIndex = this.length) {
+    const before = this.text.slice(0, startIndex);
+    const after = this.text.slice(endIndex);
+    this.text = before + after;
   }
 }

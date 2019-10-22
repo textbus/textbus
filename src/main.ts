@@ -12,8 +12,7 @@ const editor = createEditor('#editor', {
   content: `
   <ol>
   <li>0001</li><li>0002</li><li>0003</li><li>0004</li><li>0005</li>
-</ol>
-<ol>
+</ol>4<ol>
   <li>0001</li><li>0002</li><li>0003</li><li>0004</li><li>0005</li>
 </ol>
 `

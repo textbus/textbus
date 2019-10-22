@@ -7,6 +7,7 @@ import { Matcher } from '../matcher';
 import { TBRange } from '../range';
 import { Formatter } from './fomatter/formatter';
 import { Cursor } from './cursor';
+import { RootElement } from './elements/root-element';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -54,7 +55,9 @@ export class EditFrame {
 
 
       this.setup(this.frame.contentDocument);
-      this.writeContents(defaultContents).then(() => {
+      this.writeContents(defaultContents).then((body) => {
+        const root = new RootElement();
+        root.setContents(body);
         this.autoRecordHistory(this.frame.contentDocument.body);
         this.readyEvent.next(this);
       });
@@ -202,13 +205,13 @@ export class EditFrame {
     this.dispatchContentChangeEvent();
   }
 
-  private writeContents(html: string): Promise<void> {
-    return new Promise<void>(resolve => {
+  private writeContents(html: string) {
+    return new Promise<HTMLElement>(resolve => {
       const temporaryIframe = document.createElement('iframe');
       temporaryIframe.onload = () => {
-        this.contentDocument.body.innerHTML = temporaryIframe.contentDocument.body.innerHTML;
+        const body = temporaryIframe.contentDocument.body;
         document.body.removeChild(temporaryIframe);
-        resolve();
+        resolve(body);
       };
       temporaryIframe.style.cssText =
         'position: absolute;' +

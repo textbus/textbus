@@ -1,8 +1,11 @@
-import { Observable, Subject, Subscription } from 'rxjs';
-
 import { TBEvenNode, TBNode } from './element';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { RichText } from './rich-text';
+import { dtd } from '../dtd';
+import { InlineElement } from './inline-element';
+import { BlockElement } from './block-element';
 
-export class BlockElement implements TBEvenNode {
+export class RootElement implements TBEvenNode {
   get length() {
     return this.children.reduce((p, n) => p + n.length, 0);
   }
@@ -18,6 +21,11 @@ export class BlockElement implements TBEvenNode {
   constructor() {
     this.onContentChange = this.contentChangeEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
+  }
+
+  setContents(el: HTMLElement) {
+    this.createNodeTree(el, this);
+    console.log(this);
   }
 
   destroy(): void {
@@ -40,5 +48,24 @@ export class BlockElement implements TBEvenNode {
       }
       this.subMap.delete(node);
     }));
+  }
+
+  private createNodeTree(from: Element, context: TBEvenNode) {
+    Array.from(from.childNodes).forEach(node => {
+      if (node.nodeType === 3) {
+        if (node.textContent.length) {
+          context.addNode(new RichText(node.textContent));
+        }
+      } else if (node.nodeType === 1) {
+        let newNode: TBEvenNode;
+        if (/inline/.test(dtd[(node as HTMLElement).tagName.toLowerCase()].display)) {
+          newNode = new InlineElement()
+        } else {
+          newNode = new BlockElement();
+        }
+        this.createNodeTree(node as Element, newNode);
+        context.addNode(newNode);
+      }
+    });
   }
 }
