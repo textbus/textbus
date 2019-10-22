@@ -1,5 +1,5 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { auditTime, map, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, filter, map, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { Hooks } from '../help';
@@ -24,7 +24,7 @@ export class EditFrame {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
-  private cursor = new Cursor();
+  private cursor: Cursor;
   private frame = document.createElement('iframe');
   private selectionChangeEvent = new Subject<Range[]>();
   private contentChangeEvent = new Subject<string>();
@@ -43,12 +43,16 @@ export class EditFrame {
     this.elementRef.classList.add('tanbo-editor-wrap');
     this.frame.classList.add('tanbo-editor-frame');
     this.elementRef.appendChild(this.frame);
-    this.elementRef.appendChild(this.cursor.elementRef);
     this.frame.onload = () => {
       (<any>this).contentDocument = this.frame.contentDocument;
       (<any>this).contentWindow = this.frame.contentWindow;
       // (<any>this).contentDocument.body.contentEditable = true;
       (<any>this).contentDocument.body.innerHTML = defaultContents;
+
+      this.cursor = new Cursor(this.contentDocument);
+      this.elementRef.appendChild(this.cursor.elementRef);
+
+
       this.setup(this.frame.contentDocument);
       this.writeContents(defaultContents).then(() => {
         this.autoRecordHistory(this.frame.contentDocument.body);
@@ -263,12 +267,13 @@ ${body.outerHTML}
     const childBody = childDocument.body;
 
     fromEvent(childDocument, 'selectionchange').pipe(map(() => {
-      this.cursor.show(childDocument.getSelection().getRangeAt(0).getBoundingClientRect());
       if (!childBody.innerHTML) {
         childBody.innerHTML = '<p><br></p>';
       }
     })).pipe(auditTime(100)).subscribe(() => {
-      this.selectionChangeEvent.next(this.getRanges());
+      if (this.contentDocument.getSelection().rangeCount) {
+        this.selectionChangeEvent.next(this.getRanges());
+      }
     });
 
     // 禁用默认的历史记录回退及前进功能
