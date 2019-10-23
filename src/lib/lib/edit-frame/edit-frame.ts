@@ -50,6 +50,7 @@ export class EditFrame {
       // (<any>this).contentDocument.body.contentEditable = true;
       (<any>this).contentDocument.body.innerHTML = defaultContents;
 
+
       this.cursor = new Cursor(this.contentDocument);
       this.elementRef.appendChild(this.cursor.elementRef);
 
