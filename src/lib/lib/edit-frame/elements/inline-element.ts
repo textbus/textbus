@@ -1,21 +1,25 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
-import { TBEvenNode, TBNode } from './element';
+import { Attr, Style, TBEvenNode, TBNode } from './element';
 
 export class InlineElement implements TBEvenNode {
   get length() {
     return this.children.reduce((p, n) => p + n.length, 0);
   }
 
+  attrs: Attr[] = [];
+  styles: Style[] = [];
+  classes: string[] = [];
+  elementRef: Node;
   onDestroy: Observable<void>;
   onContentChange: Observable<this>;
 
   private children: Array<TBNode> = [];
   private destroyEvent = new Subject<void>();
   private contentChangeEvent = new Subject<this>();
-  private subMap = new Map<TBNode, Subscription>();
+  private subMap = new Map<TBNode, Subscription[]>();
 
-  constructor() {
+  constructor(public parentNode: TBEvenNode, public tagName: string) {
     this.onContentChange = this.contentChangeEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
   }
@@ -24,21 +28,28 @@ export class InlineElement implements TBEvenNode {
     this.destroyEvent.next();
   }
 
-  render(): DocumentFragment {
+  render(limitParent?: Node): Node {
+    this.elementRef = limitParent || this.elementRef || document.createElement(this.tagName);
+    (this.elementRef as HTMLElement).innerHTML = '';
     return this.children.reduce((previousValue, currentValue) => {
       previousValue.appendChild(currentValue.render());
       return previousValue
-    }, document.createDocumentFragment());
+    }, this.elementRef);
   }
 
-  addNode(node: TBNode, atIndex = this.children.length - 1) {
+  addNode(node: TBNode, atIndex = this.children.length) {
     this.children.splice(atIndex, 0, node);
-    this.subMap.set(node, node.onDestroy.subscribe(() => {
-      const index = this.children.indexOf(node);
-      if (index > -1) {
-        this.children.splice(index, 1);
-      }
-      this.subMap.delete(node);
-    }));
+    this.subMap.set(node, [
+      node.onDestroy.subscribe(() => {
+        const index = this.children.indexOf(node);
+        if (index > -1) {
+          this.children.splice(index, 1);
+        }
+        this.subMap.delete(node);
+      }),
+      node.onContentChange.subscribe(() => {
+        this.render();
+      })
+    ]);
   }
 }

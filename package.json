@@ -14,7 +14,6 @@
   "author": "tanbo",
   "license": "ISC",
   "devDependencies": {
-    "@cnpm/hybrid-bridge": "",
     "@types/node": "^12.7.1",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^9.6.1",

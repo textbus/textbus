@@ -6,8 +6,8 @@ import { Hooks } from '../help';
 import { Matcher } from '../matcher';
 import { TBRange } from '../range';
 import { Formatter } from './fomatter/formatter';
-import { Cursor } from './cursor';
 import { RootElement } from './elements/root-element';
+import { TBSelection } from './selection/selection';
 
 export class EditFrame {
   readonly elementRef = document.createElement('div');
@@ -25,7 +25,7 @@ export class EditFrame {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
-  private cursor: Cursor;
+  private selection: TBSelection;
   private frame = document.createElement('iframe');
   private selectionChangeEvent = new Subject<Range[]>();
   private contentChangeEvent = new Subject<string>();
@@ -48,17 +48,17 @@ export class EditFrame {
       (<any>this).contentDocument = this.frame.contentDocument;
       (<any>this).contentWindow = this.frame.contentWindow;
       // (<any>this).contentDocument.body.contentEditable = true;
-      (<any>this).contentDocument.body.innerHTML = defaultContents;
+      // (<any>this).contentDocument.body.innerHTML = defaultContents;
 
-
-      this.cursor = new Cursor(this.contentDocument);
-      this.elementRef.appendChild(this.cursor.elementRef);
+      // this.selection = new TBSelection(this.contentDocument);
+      // this.elementRef.appendChild(this.cursor.elementRef);
 
 
       this.setup(this.frame.contentDocument);
       this.writeContents(defaultContents).then((body) => {
-        const root = new RootElement();
-        root.setContents(body);
+        // const root = new RootElement(this.cursor);
+        // root.setContents(body);
+        // (<any>this).contentDocument.body.appendChild(root.render());
         this.autoRecordHistory(this.frame.contentDocument.body);
         this.readyEvent.next(this);
       });

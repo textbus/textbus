@@ -4,6 +4,7 @@ import { TBNode } from './element';
 
 export class SourceElement implements TBNode {
   readonly length = 1;
+  elementRef: Node;
   onDestroy: Observable<void>;
   onContentChange: Observable<this>;
   private destroyEvent = new Subject<void>();

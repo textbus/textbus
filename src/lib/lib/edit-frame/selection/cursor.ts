@@ -39,7 +39,7 @@ export class Cursor {
 
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
-    fromEvent(this.input, 'input').subscribe(() => {
+    fromEvent(this.input, 'compositionend').subscribe(() => {
       this.inputEvent.next(this.input.value);
       this.input.value = '';
     });
@@ -56,15 +56,6 @@ export class Cursor {
     fromEvent(context, 'mouseup').subscribe(() => {
       this.flashing = true;
     });
-    fromEvent(context, 'selectionchange').subscribe(() => {
-      const selection = this.context.getSelection();
-      if (selection.isCollapsed) {
-        this.show(selection.getRangeAt(0).getBoundingClientRect());
-        this.input.focus()
-      } else {
-        this.hide();
-      }
-    });
   }
 
   show(position: { left: number; top: number }) {
@@ -77,7 +68,7 @@ export class Cursor {
       this.timer = setTimeout(toggleShowHide, 400);
     };
     this.timer = setTimeout(toggleShowHide, 400);
-
+    this.input.focus();
   }
 
   hide() {
