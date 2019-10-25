@@ -5,6 +5,7 @@ export const textWidthHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '字间距',
   classes: ['tanbo-editor-icon-text-width'],
+  mini: true,
   options: [
     {
       label: '1px',

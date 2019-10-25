@@ -56,6 +56,7 @@ export interface SelectHandlerOption {
   classes?: string[];
   tooltip?: string;
   hooks?: Hooks;
+  mini?: boolean;
 }
 
 export interface DropdownHandlerView {

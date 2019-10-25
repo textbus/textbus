@@ -55,6 +55,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+  &:before {
+    margin-right: 5px;
+  }
+  &-mini {
+    width: auto;
+  }
 }
 
 

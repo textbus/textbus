@@ -5,6 +5,7 @@ export const fontSizeHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '字体大小',
   classes: ['tanbo-editor-icon-font-size'],
+  mini: true,
   options: [
     {
       label: '12px',

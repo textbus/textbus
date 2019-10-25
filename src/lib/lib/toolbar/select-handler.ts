@@ -12,7 +12,8 @@ export class SelectHandler {
   constructor(private handler: SelectHandlerOption) {
 
     const dropdownInner = document.createElement('span');
-    dropdownInner.classList.add('tanbo-editor-select-button');
+    dropdownInner.classList.add('tanbo-editor-select-button', ...handler.classes || []);
+    handler.mini && dropdownInner.classList.add('tanbo-editor-select-button-mini');
 
     const menu = document.createElement('div');
     menu.classList.add('tanbo-editor-toolbar-menu');
