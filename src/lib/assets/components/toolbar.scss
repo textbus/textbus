@@ -19,10 +19,10 @@
   font-size: 14px;
   background: none;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
   line-height: 1;
   padding: 5px;
-  border-radius: 3px;
   color: $color-default;
 
   &-active {
@@ -55,9 +55,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+
   &:before {
+    font-size: .6em;
     margin-right: 5px;
   }
+
   &-mini {
     width: auto;
   }
@@ -67,6 +70,7 @@
 .tanbo-editor-toolbar-menu {
   padding-top: 5px;
   padding-bottom: 5px;
+
   &-item {
     display: block;
     padding: 3px 20px;
@@ -184,6 +188,19 @@
   }
 }
 
+@each $t in 12, 13, 14, 16, 18, 20, 24, 36, 48, 72 {
+  .tanbo-editor-font-size-#{$t} {
+    font-size: #{$t}px;
+  }
+}
+
+//@each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
+//  //str-index()
+//  .tanbo-editor-line-heigth-#{$t}em {
+//    line-height: #{$t}em;
+//  }
+//}
+
 .tanbo-editor-dropdown {
   position: relative;
   display: inline-block;
@@ -202,6 +219,7 @@
 
 .tanbo-editor-dropdown-caret {
   margin-left: 2px;
+
   &:after {
     content: "";
     display: inline-block;
@@ -225,6 +243,7 @@
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
   border-radius: 4px;
   min-width: 100%;
-  overflow: hidden;
   font-size: 13px;
+  max-height: 300px;
+  overflow-y: auto;
 }

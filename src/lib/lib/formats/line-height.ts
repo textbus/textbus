@@ -18,28 +18,28 @@ export const lineHeightHandler: SelectHandlerOption = {
     {
       label: '1.2',
       match: {
-        styles: {lineHeight: '1.2em'}
+        styles: {lineHeight: '1_2em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.2em'),
     },
     {
       label: '1.4',
       match: {
-        styles: {lineHeight: '1.4em'}
+        styles: {lineHeight: '1_4em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.4em'),
     },
     {
       label: '1.6',
       match: {
-        styles: {lineHeight: '1.6em'}
+        styles: {lineHeight: '1_6em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.6em'),
     },
     {
       label: '1.8',
       match: {
-        styles: {lineHeight: '1.8em'}
+        styles: {lineHeight: '1_8em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.8em'),
     },

@@ -8,61 +8,47 @@ export const textWidthHandler: SelectHandlerOption = {
   mini: true,
   options: [
     {
-      label: '1px',
+      label: '0px',
       match: {
-        styles: {lineHeight: '1px'}
+        styles: {letterSpacing: '0px'}
       },
-      execCommand: new StyleFormatter('t', '1px'),
+      execCommand: new StyleFormatter('letterSpacing', '0px'),
       default: true
     },
     {
-      label: '1.2',
+      label: '1px',
       match: {
-        styles: {lineHeight: '1.2em'}
+        styles: {letterSpacing: '1px'}
       },
-      execCommand: new StyleFormatter('lineHeight', '1.2em'),
+      execCommand: new StyleFormatter('letterSpacing', '1px'),
     },
     {
-      label: '1.4',
+      label: '2px',
       match: {
-        styles: {lineHeight: '1.4em'}
+        styles: {letterSpacing: '2px'}
       },
-      execCommand: new StyleFormatter('lineHeight', '1.4em'),
+      execCommand: new StyleFormatter('letterSpacing', '2px'),
     },
     {
-      label: '1.6',
+      label: '3px',
       match: {
-        styles: {lineHeight: '1.6em'}
+        styles: {letterSpacing: '3px'}
       },
-      execCommand: new StyleFormatter('lineHeight', '1.6em'),
+      execCommand: new StyleFormatter('letterSpacing', '3px'),
     },
     {
-      label: '1.8',
+      label: '4px',
       match: {
-        styles: {lineHeight: '1.8em'}
+        styles: {letterSpacing: '4px'}
       },
-      execCommand: new StyleFormatter('lineHeight', '1.8em'),
+      execCommand: new StyleFormatter('letterSpacing', '4px'),
     },
     {
-      label: '2',
+      label: '5px',
       match: {
-        styles: {lineHeight: '2em'}
+        styles: {letterSpacing: '5px'}
       },
-      execCommand: new StyleFormatter('lineHeight', '2em'),
-    },
-    {
-      label: '3',
-      match: {
-        styles: {lineHeight: '3em'}
-      },
-      execCommand: new StyleFormatter('lineHeight', '3em'),
-    },
-    {
-      label: '4',
-      match: {
-        styles: {lineHeight: '4em'}
-      },
-      execCommand: new StyleFormatter('lineHeight', '4em'),
+      execCommand: new StyleFormatter('letterSpacing', '5px'),
     }
   ]
 };
