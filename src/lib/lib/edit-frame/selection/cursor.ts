@@ -31,7 +31,7 @@ export class Cursor {
     this.onDelete = this.deleteEvent.asObservable();
 
     this.elementRef.style.cssText = 'position: absolute; width: 0; height:18px; pointer-events: none;';
-    this.cursor.style.cssText = 'width: 2px; height: 100%; background: #000; position: absolute; left:0; top:0;';
+    this.cursor.style.cssText = 'width: 2px; height: 100%; background: #000; position: absolute; left:0; top:0; box-shadow: 0 0 3px rgba(255,255,255,.3)';
     this.inputWrap.style.cssText = 'width: 2px; height: 0; position: absolute; overflow: hidden';
     this.input.style.cssText = 'width: 2000px; padding: 0; background: red; border: none; outline: none; position: absolute; left:0; top:0';
 
