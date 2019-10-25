@@ -1,5 +1,5 @@
 import { Subject, merge, fromEvent, Observable } from 'rxjs';
-import { auditTime, filter, map, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, map, sampleTime, tap } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { Hooks } from '../help';
@@ -50,15 +50,12 @@ export class EditFrame {
       // (<any>this).contentDocument.body.contentEditable = true;
       // (<any>this).contentDocument.body.innerHTML = defaultContents;
 
-      // this.selection = new TBSelection(this.contentDocument);
-      // this.elementRef.appendChild(this.cursor.elementRef);
-
-
       this.setup(this.frame.contentDocument);
       this.writeContents(defaultContents).then((body) => {
-        // const root = new RootElement(this.cursor);
-        // root.setContents(body);
-        // (<any>this).contentDocument.body.appendChild(root.render());
+        const root = new RootElement(this.contentDocument);
+        root.setContents(body);
+        this.contentDocument.body.appendChild(root.render());
+        this.elementRef.appendChild(root.selection.cursorElementRef);
         this.autoRecordHistory(this.frame.contentDocument.body);
         this.readyEvent.next(this);
       });

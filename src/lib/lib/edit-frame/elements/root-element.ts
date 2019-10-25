@@ -4,7 +4,7 @@ import { RichText } from './rich-text';
 import { dtd } from '../dtd';
 import { InlineElement } from './inline-element';
 import { BlockElement } from './block-element';
-import { Cursor } from '../selection/cursor';
+import { TBSelection } from '../selection/selection';
 
 export class RootElement implements TBEvenNode {
   get length() {
@@ -19,12 +19,14 @@ export class RootElement implements TBEvenNode {
   classes: string[] = [];
   parentNode: TBEvenNode = null;
   tagName = '#root';
+  selection: TBSelection;
   private children: Array<TBNode> = [];
   private destroyEvent = new Subject<void>();
   private contentChangeEvent = new Subject<this>();
   private subMap = new Map<TBNode, Subscription>();
 
-  constructor(private cursor: Cursor) {
+  constructor(private context: Document) {
+    this.selection = new TBSelection(context, this);
     this.onContentChange = this.contentChangeEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
   }
@@ -61,7 +63,7 @@ export class RootElement implements TBEvenNode {
     Array.from(from.childNodes).forEach(node => {
       if (node.nodeType === 3) {
         if (node.textContent.length) {
-          context.addNode(new RichText(node.textContent, this.cursor));
+          context.addNode(new RichText(node.textContent));
         }
       } else if (node.nodeType === 1) {
         let newNode: TBEvenNode;

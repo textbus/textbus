@@ -1,6 +1,5 @@
 import { Observable, Subject } from 'rxjs';
 import { TBNode } from './element';
-import { Cursor } from '../selection/cursor';
 
 export class RichText implements TBNode {
   get length() {
@@ -14,13 +13,9 @@ export class RichText implements TBNode {
   private destroyEvent = new Subject<void>();
   private contentChangeEvent = new Subject<this>();
 
-  constructor(public text = '', private cursor: Cursor) {
+  constructor(public text = '') {
     this.onContentChange = this.contentChangeEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
-    this.cursor.onInput.subscribe(value => {
-      this.text += value;
-      this.contentChangeEvent.next(this);
-    });
   }
 
   destroy(): void {

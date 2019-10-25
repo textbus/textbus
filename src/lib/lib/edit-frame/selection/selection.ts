@@ -4,6 +4,7 @@ import { fromEvent } from 'rxjs';
 
 
 export class TBSelection {
+  cursorElementRef: HTMLElement;
   inputNode: Node;
   private cursor: Cursor;
 
@@ -11,7 +12,7 @@ export class TBSelection {
 
   constructor(private context: Document, private doc: RootElement) {
     this.cursor = new Cursor(context);
-
+    this.cursorElementRef = this.cursor.elementRef;
     fromEvent(context, 'selectstart').subscribe(() => {
       this.selection = context.getSelection();
     });
