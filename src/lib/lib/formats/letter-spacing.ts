@@ -1,7 +1,7 @@
 import { HandlerType, SelectHandlerOption } from '../toolbar/help';
 import { StyleFormatter } from '../edit-frame/fomatter/style-formatter';
 
-export const textWidthHandler: SelectHandlerOption = {
+export const letterSpacingHandler: SelectHandlerOption = {
   type: HandlerType.Select,
   tooltip: '字间距',
   classes: ['tanbo-editor-icon-text-width'],
@@ -10,7 +10,7 @@ export const textWidthHandler: SelectHandlerOption = {
     {
       label: '0px',
       match: {
-        styles: {letterSpacing: '0px'}
+        styles: {letterSpacing: ['', '0px']}
       },
       execCommand: new StyleFormatter('letterSpacing', '0px'),
       default: true

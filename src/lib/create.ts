@@ -24,7 +24,7 @@ import {
   alignHandler,
   tableHandler,
   tableEditHandler,
-  cleanHandler, fontSizeHandler, lineHeightHandler, textWidthHandler
+  cleanHandler, fontSizeHandler, lineHeightHandler, letterSpacingHandler
 } from './lib/formats/_api';
 
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
@@ -50,7 +50,7 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ], [
         fontSizeHandler,
         lineHeightHandler,
-        textWidthHandler
+        letterSpacingHandler
       ], [
         superscriptHandler,
         subscriptHandler

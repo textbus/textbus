@@ -8,7 +8,7 @@ export const lineHeightHandler: SelectHandlerOption = {
   mini: true,
   options: [
     {
-      label: '1',
+      label: '1x',
       match: {
         styles: {lineHeight: '1em'}
       },
@@ -16,49 +16,49 @@ export const lineHeightHandler: SelectHandlerOption = {
       default: true
     },
     {
-      label: '1.2',
+      label: '1.2x',
       match: {
         styles: {lineHeight: '1_2em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.2em'),
     },
     {
-      label: '1.4',
+      label: '1.4x',
       match: {
         styles: {lineHeight: '1_4em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.4em'),
     },
     {
-      label: '1.6',
+      label: '1.6x',
       match: {
         styles: {lineHeight: '1_6em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.6em'),
     },
     {
-      label: '1.8',
+      label: '1.8x',
       match: {
         styles: {lineHeight: '1_8em'}
       },
       execCommand: new StyleFormatter('lineHeight', '1.8em'),
     },
     {
-      label: '2',
+      label: '2x',
       match: {
         styles: {lineHeight: '2em'}
       },
       execCommand: new StyleFormatter('lineHeight', '2em'),
     },
     {
-      label: '3',
+      label: '3x',
       match: {
         styles: {lineHeight: '3em'}
       },
       execCommand: new StyleFormatter('lineHeight', '3em'),
     },
     {
-      label: '4',
+      label: '4x',
       match: {
         styles: {lineHeight: '4em'}
       },
