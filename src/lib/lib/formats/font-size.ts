@@ -79,14 +79,6 @@ export const fontSizeHandler: SelectHandlerOption = {
       },
       classes: ['tanbo-editor-font-size-48'],
       execCommand: new StyleFormatter('fontSize', '48px')
-    },
-    {
-      label: '72px',
-      match: {
-        styles: {fontSize: '72px'}
-      },
-      classes: ['tanbo-editor-font-size-72'],
-      execCommand: new StyleFormatter('fontSize', '72px')
-    },
+    }
   ]
 };

@@ -188,7 +188,7 @@
   }
 }
 
-@each $t in 12, 13, 14, 16, 18, 20, 24, 36, 48, 72 {
+@each $t in 12, 13, 14, 16, 18, 20, 24, 36, 48 {
   .tanbo-editor-font-size-#{$t} {
     font-size: #{$t}px;
   }
@@ -242,6 +242,4 @@
   border-radius: 4px;
   min-width: 100%;
   font-size: 13px;
-  max-height: 300px;
-  overflow-y: auto;
 }

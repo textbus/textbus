@@ -17,8 +17,6 @@ export interface TBNode {
   onContentChange: Observable<this>;
 
   destroy(): void;
-
-  render(limitParent?: Node): Node;
 }
 
 export interface TBElement extends TBNode {
@@ -31,4 +29,8 @@ export interface TBElement extends TBNode {
 
 export interface TBEvenNode extends TBElement {
   addNode(node: TBNode, atIndex?: number): void;
+}
+
+export interface TBBlockElement extends TBEvenNode {
+  render(limitParent?: Node): Node;
 }
