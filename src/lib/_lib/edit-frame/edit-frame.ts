@@ -6,7 +6,7 @@ import { Hooks } from '../help';
 import { Matcher } from '../matcher';
 import { TBRange } from '../range';
 import { Formatter } from './fomatter/formatter';
-import { RootElement } from './elements/root-element';
+import { RootElement } from './parser/root-element';
 import { TBSelection } from './selection/selection';
 
 export class EditFrame {
@@ -54,7 +54,7 @@ export class EditFrame {
       this.writeContents(defaultContents).then((body) => {
         const root = new RootElement(this.contentDocument);
         root.setContents(body);
-        this.contentDocument.body.appendChild(root.render());
+        // this.contentDocument.body.appendChild();
         this.elementRef.appendChild(root.selection.cursorElementRef);
         this.autoRecordHistory(this.frame.contentDocument.body);
         this.readyEvent.next(this);

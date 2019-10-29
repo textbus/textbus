@@ -1,14 +1,14 @@
 import { Observable, Subject } from 'rxjs';
 
-import { TBNode } from './element';
+import { TBEvent, TBNode } from './element';
 
 export class SourceElement implements TBNode {
   readonly length = 1;
   elementRef: Node;
   onDestroy: Observable<void>;
-  onContentChange: Observable<this>;
+  onContentChange: Observable<TBEvent>;
   private destroyEvent = new Subject<void>();
-  private contentChangeEvent = new Subject<this>();
+  private contentChangeEvent = new Subject<TBEvent>();
 
   constructor() {
     this.onContentChange = this.contentChangeEvent.asObservable();
@@ -17,9 +17,5 @@ export class SourceElement implements TBNode {
 
   destroy(): void {
 
-  }
-
-  render(): DocumentFragment | Node {
-    return document.createElement('div');
   }
 }

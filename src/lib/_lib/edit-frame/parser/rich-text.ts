@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { TBNode } from './element';
+import { TBNode, TBEvent } from './element';
 
 export class RichText implements TBNode {
   get length() {
@@ -8,10 +8,10 @@ export class RichText implements TBNode {
 
   elementRef: Node;
   onDestroy: Observable<void>;
-  onContentChange: Observable<this>;
+  onContentChange: Observable<TBEvent>;
 
   private destroyEvent = new Subject<void>();
-  private contentChangeEvent = new Subject<this>();
+  private contentChangeEvent = new Subject<TBEvent>();
 
   constructor(public text = '') {
     this.onContentChange = this.contentChangeEvent.asObservable();
@@ -22,16 +22,13 @@ export class RichText implements TBNode {
     this.destroyEvent.next();
   }
 
-  render(): Node {
-    this.elementRef = document.createTextNode(this.text);
-    return this.elementRef;
-  }
-
   addContent(char: string, atIndex = this.length) {
     const before = this.text.slice(0, atIndex);
     const after = this.text.slice(atIndex);
     this.text = before + char + after;
-    this.contentChangeEvent.next(this);
+    this.contentChangeEvent.next({
+      target: this
+    });
   }
 
   deleteContent(startIndex: number, endIndex = this.length) {

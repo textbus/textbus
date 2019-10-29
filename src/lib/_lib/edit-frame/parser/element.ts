@@ -1,30 +1,26 @@
 import { Observable } from 'rxjs';
 
-export interface Attr {
-  name: string;
-  value?: string;
+export interface TBEvent {
+  target: TBNode;
 }
 
-export interface Style {
-  name: string,
-  value: string | number;
+export interface StyleRange {
+  beginIndex: number;
+  closeIndex: number;
 }
 
 export interface TBNode {
   elementRef: Node;
   length: number;
   onDestroy: Observable<void>;
-  onContentChange: Observable<this>;
+  onContentChange: Observable<TBEvent>;
 
   destroy(): void;
 }
 
 export interface TBElement extends TBNode {
-  tagName: string;
-  parentNode: TBEvenNode;
-  attrs: Array<Attr>;
-  classes: string[];
-  styles: Array<Style>;
+  // tagName: string;
+  // parentNode: TBEvenNode;
 }
 
 export interface TBEvenNode extends TBElement {
@@ -32,5 +28,5 @@ export interface TBEvenNode extends TBElement {
 }
 
 export interface TBBlockElement extends TBEvenNode {
-  render(limitParent?: Node): Node;
+  styleMatrix: Map<string, StyleRange[]>;
 }

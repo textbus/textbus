@@ -31,6 +31,7 @@ export interface FormatMatch {
 }
 
 export interface Commander {
+  registerName?: string;
   execCommand: Formatter;
 }
 

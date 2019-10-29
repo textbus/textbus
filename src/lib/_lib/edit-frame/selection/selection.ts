@@ -1,5 +1,5 @@
 import { Cursor } from './cursor';
-import { RootElement } from '../elements/root-element';
+import { RootElement } from '../parser/root-element';
 import { fromEvent } from 'rxjs';
 
 

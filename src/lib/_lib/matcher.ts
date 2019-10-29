@@ -117,6 +117,10 @@ export class Matcher {
     }
   }
 
+  matchNode(node: Node) {
+    return this.validators.map(fn => fn(node)).includes(true);
+  }
+
   private matchAllChild(range: Range, node: Node): boolean {
     if (node.nodeType === 3) {
       return false;
