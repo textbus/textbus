@@ -12,12 +12,13 @@ export class RootElement extends BlockElement {
   }
 
   setContents(el: HTMLElement) {
-    this.createNodeTree(el, this);
+    const len = this.createNodeTree(el, this);
+    this.mergeStyleByNode(this, el, 0, len);
     console.log(this);
   }
 
-  private createNodeTree(from: Element, context: BlockElement, fromSelf = true) {
-    const len = Array.from(from.childNodes).reduce((value, node) => {
+  private createNodeTree(from: Element, context: BlockElement) {
+    return Array.from(from.childNodes).reduce((value, node) => {
       if (node.nodeType === 3) {
         context.contents.add(node.textContent);
         return node.textContent.length + value;
@@ -26,22 +27,19 @@ export class RootElement extends BlockElement {
         let len: number;
         if (/inline/.test(dtd[tagName].display)) {
           let start = context.length;
-          len = this.createNodeTree(node as Element, context, false);
+          len = this.createNodeTree(node as Element, context);
           this.mergeStyleByNode(context, node, start, len);
         } else {
           const newBlock = dtd[tagName].limitChildren ? new BlockElement(tagName) : new BlockElement();
           len = this.createNodeTree(node as Element, newBlock);
           this.mergeStyleByNode(context, node, context.length, len);
+          this.mergeStyleByNode(newBlock, node, 0, len);
           context.contents.add(newBlock);
         }
         return len + value;
       }
       return value;
     }, 0);
-    if (fromSelf) {
-      this.mergeStyleByNode(context, from, 0, len);
-    }
-    return len;
   }
 
   private mergeStyleByNode(context: BlockElement, by: Node, startIndex: number, len: number) {
