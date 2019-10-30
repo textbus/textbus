@@ -6,17 +6,22 @@ import { TBSelection } from '../selection/selection';
 export class Viewer {
   elementRef = document.createElement('div');
   onSelectionChange: Observable<Selection>;
+  onReady: Observable<Document>;
 
   private selectionChangeEvent = new Subject<Selection>();
+  private readyEvent = new Subject<Document>();
   private frame = document.createElement('iframe');
   private selection: TBSelection;
 
   constructor() {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
+    this.onReady = this.readyEvent.asObservable();
     this.frame.onload = () => {
-      this.selection = new TBSelection(this.frame.contentDocument);
+      const doc = this.frame.contentDocument;
+      this.selection = new TBSelection(doc);
+      this.readyEvent.next(doc);
       this.elementRef.appendChild(this.selection.cursorElementRef);
-      this.setup(this.frame.contentDocument);
+      this.setup(doc);
     };
     this.frame.src = `javascript:void((function () {
                       document.open();

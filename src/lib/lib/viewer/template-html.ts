@@ -14,6 +14,6 @@ export const template = `
     ${styles}
   </style>
 </head>
-<body>fdsafdas</body>
+<body></body>
 </html>
 `;
