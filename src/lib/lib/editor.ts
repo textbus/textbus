@@ -43,7 +43,7 @@ export class Editor {
       });
     }
 
-    zip(this.writeContents(options.content || '01<strong>23<span style="font-weight: normal">45</span>67</strong>89'), this.viewer.onReady).subscribe(result => {
+    zip(this.writeContents(options.content || '<p>01<strong>23<span style="font-weight: normal">45</span>67</strong>89</p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootElement(result[1], this.handlers);
       vDom.setContents(result[0]);
       // this.viewer.

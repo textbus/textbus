@@ -27,11 +27,9 @@ export class RootElement extends BlockElement {
         if (/inline/.test(dtd[tagName].display)) {
           let start = context.length;
           len = this.createNodeTree(node as Element, context, false);
-          // console.log(node, start, len)
           this.mergeStyleByNode(context, node, start, len);
         } else {
           const newBlock = dtd[tagName].limitChildren ? new BlockElement(tagName) : new BlockElement();
-          // const newBlock = new BlockElement(tagName);
           len = this.createNodeTree(node as Element, newBlock);
           this.mergeStyleByNode(context, node, context.length, len);
           context.contents.add(newBlock);
@@ -47,7 +45,6 @@ export class RootElement extends BlockElement {
   }
 
   private mergeStyleByNode(context: BlockElement, by: Node, startIndex: number, len: number) {
-    console.log(arguments)
     return this.registries.map(item => {
       return {
         token: item,
@@ -68,10 +65,10 @@ export class RootElement extends BlockElement {
         let index = oldStyle.length - 1;
         while (index >= 0) {
           const item = oldStyle[index];
-          if (styleMarks.length < item.endIndex + 1) {
-            styleMarks.length = item.endIndex + 1;
+          if (styleMarks.length < item.endIndex) {
+            styleMarks.length = item.endIndex;
           }
-          styleMarks.fill(item.state, item.startIndex, item.endIndex + 1);
+          styleMarks.fill(item.state, item.startIndex, item.endIndex);
           index--;
         }
         let newStyleRange: StyleRange = null;
@@ -84,18 +81,18 @@ export class RootElement extends BlockElement {
             newStyleRange = {
               state: item,
               startIndex: i,
-              endIndex: i
+              endIndex: i + 1
             };
             styleMatrix.push(newStyleRange);
             continue;
           }
           if (item === newStyleRange.state) {
-            newStyleRange.endIndex = i;
+            newStyleRange.endIndex = i + 1;
           } else {
             newStyleRange = {
               state: item,
               startIndex: i,
-              endIndex: i
+              endIndex: i + 1
             };
             styleMatrix.push(newStyleRange);
           }
