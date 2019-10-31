@@ -5,7 +5,7 @@ import { Viewer } from './viewer/viewer';
 import { ButtonConfig, HandlerConfig, HandlerType } from './toolbar/help';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
-import { RootElement } from './vnode/root-element';
+import { Parser } from './parser/parser';
 
 
 export interface EditorOptions {
@@ -42,11 +42,12 @@ export class Editor {
         }
       });
     }
-
-    zip(this.writeContents(options.content || '<p>01<strong>23<span style="font-weight: normal">45</span>67</strong>89</p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new RootElement(result[1], this.handlers);
+    const defaultHTML = '<p>01<strong>23<span style="font-weight: normal">4<i>5</i></span><i>67</i></strong>89</p>'
+    this.viewer.text = defaultHTML;
+    zip(this.writeContents(options.content || defaultHTML), this.viewer.onReady).subscribe(result => {
+      const vDom = new Parser(result[1], this.handlers);
       vDom.setContents(result[0]);
-      // this.viewer.
+
     });
 
     this.toolbar.classList.add('tanbo-editor-toolbar');

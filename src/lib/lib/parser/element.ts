@@ -1,15 +1,8 @@
 import { Observable } from 'rxjs';
 import { Handler } from '../toolbar/handlers/help';
-import { MatchState } from '../matcher/matcher';
 
 export interface TBEvent {
   target: TBNode;
-}
-
-export interface StyleRange {
-  state: MatchState;
-  startIndex: number;
-  endIndex: number;
 }
 
 export interface TBNode {
@@ -31,5 +24,4 @@ export interface TBEvenNode extends TBElement {
 }
 
 export interface TBBlockElement extends TBEvenNode {
-  styleMatrix: Map<Handler, StyleRange[]>;
 }
