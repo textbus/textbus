@@ -30,8 +30,9 @@ export class Parser extends Fragment {
         } else {
           const newBlock = dtd[tagName].limitChildren ? new Fragment(tagName) : new Fragment();
           len = this.parse(node as Element, newBlock);
-          this.mergeStyleByNode(context, node, context.length, len);
+          // this.mergeStyleByNode(context, node, context.length, len);
           this.mergeStyleByNode(newBlock, node, 0, len);
+          this.mergeStyleByChild(context, newBlock, context.length);
           context.contents.add(newBlock);
         }
         return len + value;
@@ -40,15 +41,34 @@ export class Parser extends Fragment {
     }, 0);
   }
 
+  private mergeStyleByChild(context: Fragment, child: Fragment, offset: number) {
+    Array.from(child.styleMatrix.keys()).forEach(token => {
+      const ranges = child.styleMatrix.get(token);
+      const styleRanges: StyleRange[] = [];
+      ranges.forEach(range => {
+        const newRange = range.clone();
+        newRange.startIndex += offset;
+        newRange.endIndex += offset;
+        styleRanges.push(newRange);
+      });
+      const oldStyleRanges = context.styleMatrix.get(token);
+      if (oldStyleRanges) {
+        oldStyleRanges.concat(styleRanges);
+      } else {
+        context.styleMatrix.set(token, styleRanges);
+      }
+    });
+  }
+
   private mergeStyleByNode(context: Fragment, by: Node, startIndex: number, len: number) {
-    return this.registries.map(item => {
+    this.registries.map(item => {
       return {
         token: item,
         state: item.matcher.matchNode(by)
       };
     }).filter(item => item.state !== MatchState.Normal).forEach(item => {
       const oldStyle = context.styleMatrix.get(item.token);
-      let styleMatrix: StyleRange[] = [];
+      let styleRanges: StyleRange[] = [];
 
       const newRange = new StyleRange(startIndex, startIndex + len, item.state, item.token, context);
       if (oldStyle) {
@@ -82,20 +102,20 @@ export class Parser extends Fragment {
           }
           if (!newStyleRange) {
             newStyleRange = new StyleRange(i, i + 1, mark, item.token, context);
-            styleMatrix.push(newStyleRange);
+            styleRanges.push(newStyleRange);
             continue;
           }
           if (mark === newStyleRange.state) {
             newStyleRange.endIndex = i + 1;
           } else {
             newStyleRange = new StyleRange(i, i + 1, mark, item.token, context);
-            styleMatrix.push(newStyleRange);
+            styleRanges.push(newStyleRange);
           }
         }
       } else {
-        styleMatrix.push(newRange);
+        styleRanges.push(newRange);
       }
-      context.styleMatrix.set(item.token, styleMatrix);
+      context.styleMatrix.set(item.token, styleRanges);
     })
   }
 }
