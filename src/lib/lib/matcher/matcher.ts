@@ -5,7 +5,7 @@ export enum MatchState {
 }
 
 export interface MatchRule {
-  tags?: string[];
+  tags?: string[] | RegExp;
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   classes?: string[];
   attrs?: Array<{ key: string; value?: string | string[] }>;
@@ -22,7 +22,8 @@ export class Matcher {
     if (rule.tags) {
       this.validators.push(node => {
         if (node.nodeType === 1) {
-          return rule.tags.includes((node as HTMLElement).tagName.toLowerCase());
+          const tagName = (node as HTMLElement).tagName.toLowerCase();
+          return Array.isArray(rule.tags) ? rule.tags.includes(tagName) : rule.tags.test(tagName);
         }
         return false;
       });

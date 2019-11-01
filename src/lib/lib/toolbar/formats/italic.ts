@@ -14,5 +14,5 @@ export const italic: ButtonConfig = {
       fontStyle: /(?!italic).+/
     }
   },
-  execCommand: new Inline()
+  execCommand: new Inline('em')
 };
