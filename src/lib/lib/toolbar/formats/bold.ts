@@ -14,5 +14,5 @@ export const bold: ButtonConfig = {
       fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
     }
   },
-  execCommand: new Inline('strong')
+  execCommand: new Inline('strong', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'])
 };

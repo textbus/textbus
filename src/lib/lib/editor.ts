@@ -42,7 +42,7 @@ export class Editor {
         }
       });
     }
-    const defaultHTML = '<p>01<strong>23<span style="font-weight: normal">4<i>5</i></span><i>67</i></strong>89</p>'
+    const defaultHTML = '<h2>aaa<strong>bbb</strong>ccc</h2><p>01<strong>23<span style="font-weight: normal">4<i>5</i></span><i>67</i></strong>89</p>'
     this.viewer.text = defaultHTML;
     zip(this.writeContents(options.content || defaultHTML), this.viewer.onReady).subscribe(result => {
       const vDom = new Parser(result[1], this.handlers);

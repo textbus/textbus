@@ -41,7 +41,7 @@ export class Fragment implements Sliceable {
   }
 
   render() {
-    const dom = document.createDocumentFragment();
+    const dom = document.createElement(this.tagName);
     const formatTree = this.buildFormatTree();
     let index = 0;
     for (const fragment of this.contents) {
@@ -76,18 +76,34 @@ export class Fragment implements Sliceable {
         end = format.formatRange.endIndex;
         const str = content.slice(start, end);
         start = end;
-        const parent = format.formatRange.handler.execCommand.command(
+        const parent = format.formatRange.handler.execCommand.render(
           format.formatRange.state,
           format.formatRange.context
-          );
-        this.makeDomNode(format.children, str).forEach(child => parent.appendChild(child));
-        nodes.push(parent);
+        );
+        this.makeDomNode(format.children, str).forEach(child => {
+          if (parent) {
+            parent.appendChild(child)
+          } else {
+            nodes.push(child);
+          }
+        });
+        if (parent) {
+          nodes.push(parent);
+        }
       } else {
         nodes.push(document.createTextNode(content.slice(start, content.length)));
         start = content.length;
       }
     }
-    return nodes;
+    return nodes.reduce((result, next) => {
+      const last = result[result.length - 1];
+      if (last && last.nodeType === 3 && next.nodeType === 3) {
+        last.textContent = last.textContent + next.textContent;
+      } else {
+        result.push(next);
+      }
+      return result;
+    }, [] as Node[]);
   }
 
   mergeFormat(format: FormatRange) {

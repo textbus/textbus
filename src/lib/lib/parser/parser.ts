@@ -5,7 +5,7 @@ import { MatchState } from '../matcher/matcher';
 
 export class Parser extends Fragment {
   constructor(private context: Document, private registries: Handler[] = []) {
-    super('#root');
+    super('body');
   }
 
   setContents(el: HTMLElement) {
@@ -28,7 +28,8 @@ export class Parser extends Fragment {
           len = this.parse(node as Element, context);
           this.mergeFormatsByNode(context, node, start, len);
         } else {
-          const newBlock = dtd[tagName].limitChildren ? new Fragment(tagName) : new Fragment();
+          const newBlock = new Fragment(tagName);
+          // const newBlock = dtd[tagName].limitChildren ? new Fragment(tagName) : new Fragment();
           len = this.parse(node as Element, newBlock);
           this.mergeFormatsByNode(newBlock, node, 0, len);
           context.contents.add(newBlock);
