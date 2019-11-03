@@ -58,9 +58,10 @@ export class Cursor {
     });
   }
 
-  show(position: { left: number; top: number }) {
+  show(position: ClientRect) {
     this.elementRef.style.left = position.left + 'px';
     this.elementRef.style.top = position.top + 'px';
+    this.elementRef.style.height = position.height + 'px';
     this.display = true;
     clearTimeout(this.timer);
     const toggleShowHide = () => {
