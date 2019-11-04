@@ -16,7 +16,7 @@ export class Cursor {
 
   private set display(v: boolean) {
     this._display = v;
-    this.cursor.style.display = v ? 'block' : 'none';
+    this.cursor.style.visibility = v ? 'visible' : 'hidden';
   }
 
   private get display() {
@@ -30,10 +30,10 @@ export class Cursor {
     this.onInput = this.inputEvent.asObservable();
     this.onDelete = this.deleteEvent.asObservable();
 
-    this.elementRef.style.cssText = 'position: absolute; width: 0; height:18px; pointer-events: none;';
-    this.cursor.style.cssText = 'width: 2px; height: 100%; background: #000; position: absolute; left:0; top:0; box-shadow: 0 0 3px rgba(255,255,255,.3)';
-    this.inputWrap.style.cssText = 'width: 2px; height: 0; position: absolute; overflow: hidden';
-    this.input.style.cssText = 'width: 2000px; padding: 0; background: red; border: none; outline: none; position: absolute; left:0; top:0';
+    this.elementRef.classList.add('tanbo-editor-selection');
+    this.cursor.classList.add('tanbo-editor-cursor');
+    this.inputWrap.classList.add('tanbo-editor-input-wrap');
+    this.input.classList.add('tanbo-editor-input');
 
     this.inputWrap.appendChild(this.input);
 

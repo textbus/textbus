@@ -1,0 +1,33 @@
+.tanbo-editor-selection {
+  position: absolute;
+  width: 0;
+  height:18px;
+  pointer-events: none;
+}
+
+.tanbo-editor-cursor {
+  width: 2px;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  left:0;
+  top:0;
+  box-shadow: 0 0 3px rgba(255,255,255,.3);
+}
+
+.tanbo-editor-input-wrap {
+  width: 2px;
+  height: 0;
+  position: absolute;
+  overflow: hidden;
+}
+
+.tanbo-editor-input {
+  width: 2000px;
+  padding: 0;
+  border: none;
+  outline: none;
+  position: absolute;
+  left:0;
+  top:0;
+}
