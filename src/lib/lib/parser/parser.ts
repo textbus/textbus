@@ -2,42 +2,50 @@ import { dtd } from '../dtd';
 import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
+import { SingleNode } from './single-node';
 
 export class Parser extends Fragment {
   constructor(private context: Document, private registries: Handler[] = []) {
-    super('body');
+    super('#root');
   }
 
   setContents(el: HTMLElement) {
-    const len = this.parse(el, this);
+    const len = Array.from(el.childNodes).reduce((len, node) => {
+      return len + this.parse(node, this);
+    }, 0);
     this.mergeFormatsByNode(this, el, 0, len);
-    const result = this.render();
-    document.body.appendChild(result)
   }
 
-  private parse(from: Element, context: Fragment) {
-    return Array.from(from.childNodes).reduce((value, node) => {
-      if (node.nodeType === 3) {
-        context.contents.add(node.textContent);
-        return node.textContent.length + value;
-      } else if (node.nodeType === 1) {
-        const tagName = (node as HTMLElement).tagName.toLowerCase();
-        let len: number;
-        if (/inline/.test(dtd[tagName].display)) {
-          let start = context.length;
-          len = this.parse(node as Element, context);
-          this.mergeFormatsByNode(context, node, start, len);
+  private parse(from: Node, context: Fragment): number {
+    if (from.nodeType === 3) {
+      const textContent = from.textContent;
+      context.contents.add(textContent);
+      return textContent.length;
+    } else if (from.nodeType === 1) {
+      const tagName = (from as HTMLElement).tagName.toLowerCase();
+      if (/inline/.test(dtd[tagName].display)) {
+        const start = context.length;
+        if (dtd[tagName].type === 'single') {
+          const attrs = Array.from((from as HTMLElement).attributes);
+          const newSingle = new SingleNode(tagName, attrs);
+          context.contents.add(newSingle);
+          return 1;
         } else {
-          const newBlock = new Fragment(tagName);
-          // const newBlock = dtd[tagName].limitChildren ? new Fragment(tagName) : new Fragment();
-          len = this.parse(node as Element, newBlock);
-          this.mergeFormatsByNode(newBlock, node, 0, len);
-          context.contents.add(newBlock);
+          const len = this.parse(from, context);
+          this.mergeFormatsByNode(context, from, start, len);
+          return len;
         }
-        return len + value;
+      } else {
+        const newBlock = new Fragment(tagName);
+
+        const len = Array.from(from.childNodes).reduce((len, node) => {
+          return len + this.parse(node, newBlock);
+        }, 0);
+        this.mergeFormatsByNode(newBlock, from, 0, len);
+        context.contents.add(newBlock);
+        return len;
       }
-      return value;
-    }, 0);
+    }
   }
 
   private mergeFormatsByNode(context: Fragment, by: Node, startIndex: number, len: number) {

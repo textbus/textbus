@@ -58,7 +58,7 @@ export class Cursor {
     });
   }
 
-  show(position: ClientRect) {
+  show(position: { left: number, top: number, height: number }) {
     this.elementRef.style.left = position.left + 'px';
     this.elementRef.style.top = position.top + 'px';
     this.elementRef.style.height = position.height + 'px';

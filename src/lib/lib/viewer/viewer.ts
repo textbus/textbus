@@ -4,7 +4,6 @@ import { template } from './template-html';
 import { TBSelection } from '../selection/selection';
 
 export class Viewer {
-  text = '';
   elementRef = document.createElement('div');
   onSelectionChange: Observable<Selection>;
   onReady: Observable<Document>;
@@ -19,7 +18,6 @@ export class Viewer {
     this.onReady = this.readyEvent.asObservable();
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
-      doc.body.innerHTML = this.text;
       this.selection = new TBSelection(doc);
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.selection.cursorElementRef);
@@ -42,5 +40,9 @@ export class Viewer {
     // fromEvent(doc, 'selectionchange').subscribe(() => {
     //   this.selectionChangeEvent.next(doc.getSelection());
     // });
+  }
+
+  updateContents(node: Node) {
+    this.frame.contentDocument.body.appendChild(node);
   }
 }

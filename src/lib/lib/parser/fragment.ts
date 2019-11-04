@@ -2,6 +2,7 @@ import { Contents, Sliceable } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { FormatTree } from './format-tree';
+import { SingleNode } from './single-node';
 
 export class FormatRange {
   get length() {
@@ -41,7 +42,7 @@ export class Fragment implements Sliceable {
   }
 
   render() {
-    const dom = document.createElement(this.tagName);
+    const dom = this.tagName === '#root' ? document.createDocumentFragment() : document.createElement(this.tagName);
     const formatTree = this.buildFormatTree();
     let index = 0;
     for (const fragment of this.contents) {
@@ -54,9 +55,9 @@ export class Fragment implements Sliceable {
           return format.formatRange.startIndex >= fragmentStartIndex && format.formatRange.endIndex <= fragmentEndIndex;
         });
         this.makeDomNode(formatTreeList, fragment).forEach(node => dom.appendChild(node));
-      } else if (fragment instanceof Fragment) {
-        const childBlock = fragment.render();
-        dom.appendChild(childBlock);
+      } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
+        const childNode = fragment.render();
+        dom.appendChild(childNode);
       }
     }
     return dom;

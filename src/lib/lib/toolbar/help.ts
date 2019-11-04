@@ -26,9 +26,19 @@ export interface DropdownConfig {
 
 }
 
+export interface ActionConfig {
+  execCommand: Commander;
+  label?: string;
+  classes?: string[]
+  match?: MatchRule;
+}
+
 export interface ActionSheetConfig {
   type: HandlerType.ActionSheet;
-
+  actions: ActionConfig[];
+  label?: string;
+  classes?: string[];
+  tooltip?: string;
 }
 
 export type HandlerConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;

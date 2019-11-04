@@ -1,11 +1,11 @@
 import { Observable, zip } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { Viewer } from './viewer/viewer';
-import { ButtonConfig, HandlerConfig, HandlerType } from './toolbar/help';
+import { ActionSheetConfig, ButtonConfig, HandlerConfig, HandlerType } from './toolbar/help';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { Parser } from './parser/parser';
+import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 
 
 export interface EditorOptions {
@@ -42,12 +42,11 @@ export class Editor {
         }
       });
     }
-    const defaultHTML = '<h2>aaa<strong>bbb</strong>ccc</h2><p>01<strong>23<span style="font-weight: normal">4<i>5</i></span><i>67</i></strong>89</p>'
-    this.viewer.text = defaultHTML;
-    zip(this.writeContents(options.content || defaultHTML), this.viewer.onReady).subscribe(result => {
+
+    zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new Parser(result[1], this.handlers);
       vDom.setContents(result[0]);
-
+      this.viewer.updateContents(vDom.render());
     });
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
@@ -72,8 +71,8 @@ export class Editor {
       // case HandlerType.Dropdown:
       //   this.addDropdownHandler(option);
       //   break;
-      // case HandlerType.ActionSheet:
-      //   this.addActionSheetHandler(option);
+      case HandlerType.ActionSheet:
+        this.addActionSheetHandler(option);
     }
     // if (option.hooks) {
     //   this.run(() => {
@@ -98,6 +97,17 @@ export class Editor {
     // });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
+  }
+
+  private addActionSheetHandler(option: ActionSheetConfig) {
+    const actionSheet = new ActionSheetHandler(option);
+    this.toolbar.appendChild(actionSheet.elementRef);
+    // actionSheet.options.forEach(item => {
+    //   item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
+    //     this.editor.apply(item.execCommand, item.matcher, option.hooks);
+    //   });
+    //   this.handlers.push(item);
+    // });
   }
 
   private writeContents(html: string) {
