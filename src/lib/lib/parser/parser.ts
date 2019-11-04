@@ -31,17 +31,27 @@ export class Parser extends Fragment {
           context.contents.add(newSingle);
           return 1;
         } else {
-          const len = this.parse(from, context);
+          const len = Array.from(from.childNodes).reduce((len, node) => {
+            return len + this.parse(node, context);
+          }, 0);
           this.mergeFormatsByNode(context, from, start, len);
           return len;
         }
       } else {
         const newBlock = new Fragment(tagName);
-
-        const len = Array.from(from.childNodes).reduce((len, node) => {
+        let nodes: Node[];
+        if (dtd[tagName].limitChildren) {
+          nodes = Array.from((from as HTMLElement).children).filter(el => {
+            return dtd[tagName].limitChildren.includes(el.tagName.toLowerCase());
+          });
+        } else {
+          nodes = Array.from(from.childNodes);
+        }
+        const len = nodes.reduce((len, node) => {
           return len + this.parse(node, newBlock);
         }, 0);
         this.mergeFormatsByNode(newBlock, from, 0, len);
+        newBlock.parent = context;
         context.contents.add(newBlock);
         return len;
       }

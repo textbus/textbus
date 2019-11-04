@@ -1,7 +1,7 @@
 import { Observable, zip } from 'rxjs';
 
-import { Viewer } from './viewer/viewer';
-import { ActionSheetConfig, ButtonConfig, HandlerConfig, HandlerType } from './toolbar/help';
+import { ViewRenderer } from './viewer/view-renderer';
+import { ActionSheetConfig, ButtonConfig, HandlerConfig, HandlerType, Hooks } from './toolbar/help';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { Parser } from './parser/parser';
@@ -21,11 +21,14 @@ export interface EditorOptions {
 export class Editor {
   readonly elementRef = document.createElement('div');
 
-  private viewer = new Viewer();
+  private viewer = new ViewRenderer();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
   private readonly handlers: Handler[] = [];
+
+  private tasks: Array<() => void> = [];
   private isFirst = true;
+  private readyState = false;
 
   constructor(selector: string | HTMLElement, options: EditorOptions = {}) {
     if (typeof selector === 'string') {
@@ -46,7 +49,9 @@ export class Editor {
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new Parser(result[1], this.handlers);
       vDom.setContents(result[0]);
-      this.viewer.updateContents(vDom.render());
+      this.viewer.render(vDom);
+      this.tasks.forEach(fn => fn());
+      this.readyState = true;
     });
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
@@ -74,11 +79,11 @@ export class Editor {
       case HandlerType.ActionSheet:
         this.addActionSheetHandler(option);
     }
-    // if (option.hooks) {
-    //   this.run(() => {
-    //     this.editor.use(option.hooks);
-    //   });
-    // }
+    if (option.hooks) {
+      this.run(() => {
+        this.viewer.use(option.hooks);
+      });
+    }
   }
 
   addGroup(handlers: HandlerConfig[]) {
@@ -102,12 +107,12 @@ export class Editor {
   private addActionSheetHandler(option: ActionSheetConfig) {
     const actionSheet = new ActionSheetHandler(option);
     this.toolbar.appendChild(actionSheet.elementRef);
-    // actionSheet.options.forEach(item => {
-    //   item.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-    //     this.editor.apply(item.execCommand, item.matcher, option.hooks);
-    //   });
-    //   this.handlers.push(item);
-    // });
+    actionSheet.options.forEach(item => {
+      item.onApply.subscribe(() => {
+        this.viewer.apply(item.execCommand);
+      });
+      this.handlers.push(item);
+    });
   }
 
   private writeContents(html: string) {
@@ -134,6 +139,14 @@ export class Editor {
 
       document.body.appendChild(temporaryIframe);
     });
+  }
+
+  private run(fn: () => void) {
+    if (!this.readyState) {
+      this.tasks.push(fn);
+      return;
+    }
+    fn();
   }
 
   private static createSplitLine() {

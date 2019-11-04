@@ -1,4 +1,4 @@
-import { Inline } from '../../commands/inline';
+import { InlineCommander } from '../../commands/inline-commander';
 import { ButtonConfig, HandlerType } from '../help';
 
 export const italic: ButtonConfig = {
@@ -14,5 +14,5 @@ export const italic: ButtonConfig = {
       fontStyle: /(?!italic).+/
     }
   },
-  execCommand: new Inline('em')
+  execCommand: new InlineCommander('em')
 };

@@ -1,4 +1,4 @@
-import { Inline } from '../../commands/inline';
+import { InlineCommander } from '../../commands/inline-commander';
 import { ButtonConfig, HandlerType } from '../help';
 
 export const bold: ButtonConfig = {
@@ -14,5 +14,5 @@ export const bold: ButtonConfig = {
       fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
     }
   },
-  execCommand: new Inline('strong', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'])
+  execCommand: new InlineCommander('strong', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'])
 };

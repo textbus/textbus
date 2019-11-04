@@ -3,6 +3,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { FormatTree } from './format-tree';
 import { SingleNode } from './single-node';
+import { FORMAT_TREE, FRAGMENT_CONTEXT } from './help';
 
 export class FormatRange {
   get length() {
@@ -25,6 +26,8 @@ export class Fragment implements Sliceable {
   get length() {
     return this.contents.length;
   }
+
+  parent: Fragment = null;
 
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
@@ -54,12 +57,16 @@ export class Fragment implements Sliceable {
         const formatTreeList = formatTree.filter(format => {
           return format.formatRange.startIndex >= fragmentStartIndex && format.formatRange.endIndex <= fragmentEndIndex;
         });
-        this.makeDomNode(formatTreeList, fragment).forEach(node => dom.appendChild(node));
+        this.makeDomNode(formatTreeList, fragment).forEach(node => {
+          (node as any)[FRAGMENT_CONTEXT] = this;
+          dom.appendChild(node);
+        });
       } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
         const childNode = fragment.render();
         dom.appendChild(childNode);
       }
     }
+    (dom as any)[FRAGMENT_CONTEXT] = this;
     return dom;
   }
 
@@ -71,7 +78,10 @@ export class Fragment implements Sliceable {
       const format = formatTreeList.shift();
       if (format) {
         if (format.formatRange.startIndex > start) {
-          nodes.push(document.createTextNode(content.slice(start, format.formatRange.startIndex)));
+          const txt = content.slice(start, format.formatRange.startIndex);
+          const newNode = document.createTextNode(txt);
+          (newNode as any)[FORMAT_TREE] = new FormatTree(new FormatRange(start, txt.length, null, null, this));
+          nodes.push(newNode);
           start = format.formatRange.startIndex;
         }
         end = format.formatRange.endIndex;
@@ -89,10 +99,14 @@ export class Fragment implements Sliceable {
           }
         });
         if (parent) {
+          (parent as any)[FORMAT_TREE] = format;
           nodes.push(parent);
         }
       } else {
-        nodes.push(document.createTextNode(content.slice(start, content.length)));
+        const txt = content.slice(start, content.length);
+        const newNode = document.createTextNode(txt);
+        (newNode as any)[FORMAT_TREE] = new FormatTree(new FormatRange(start, txt.length, null, null, this));
+        nodes.push(newNode);
         start = content.length;
       }
     }
@@ -187,6 +201,7 @@ export class Fragment implements Sliceable {
             newFormatRange.endIndex = lastVDom.formatRange.length;
           }
           const newNode = new FormatTree(newFormatRange);
+          newNode.parent = lastVDom;
           lastVDom.children.push(newNode);
           depthTree.push(newNode);
         } else {
