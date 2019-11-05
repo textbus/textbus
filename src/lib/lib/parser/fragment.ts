@@ -1,9 +1,9 @@
-import { Contents, Sliceable } from './contents';
+import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { VirtualDom, VirtualNode } from './virtual-dom';
-import { SingleNode } from './single-node';
 import { FORMAT_TREE, FRAGMENT_CONTEXT } from './help';
+import { ViewNode } from './view-node';
 
 export class FormatRange {
   get length() {
@@ -22,25 +22,18 @@ export class FormatRange {
   }
 }
 
-export class Fragment implements Sliceable {
+export class Fragment extends ViewNode {
   elementRef: HTMLElement;
-
-  get length() {
-    return this.contents.length;
-  }
 
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
   constructor(public tagName = 'p', public parent: Fragment) {
+    super();
   }
 
   apply(format: FormatRange) {
     this.mergeFormat(format);
-  }
-
-  slice(startIndex: number, endIndex: number): Sliceable {
-    return this.contents.slice(startIndex, endIndex);
   }
 
   render() {
@@ -109,8 +102,7 @@ export class Fragment implements Sliceable {
         const str = content.slice(start, end);
         start = end;
         const parent = virtualNode.formatRange.handler.execCommand.render(
-          virtualNode.formatRange.state,
-          virtualNode.formatRange.context
+          virtualNode.formatRange.state
         );
         if (parent) {
           (parent as any)[FORMAT_TREE] = virtualNode;

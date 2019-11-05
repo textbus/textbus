@@ -1,14 +1,9 @@
-import { Sliceable } from './contents';
 import { Attr } from './help';
+import { ViewNode } from './view-node';
 
-export class SingleNode implements Sliceable {
-  readonly length = 1;
-
+export class SingleNode extends ViewNode {
   constructor(private tagName: string, private attrs: Attr[] = []) {
-  }
-
-  slice(startIndex: number, endIndex: number): Sliceable {
-    return new SingleNode(this.tagName, this.attrs);
+    super();
   }
 
   render() {

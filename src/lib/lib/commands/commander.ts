@@ -6,5 +6,5 @@ import { Handler } from '../toolbar/handlers/help';
 export interface Commander {
   command(selection: TBSelection, context: Fragment, handler: Handler): void;
 
-  render(state: MatchState, context: Fragment): Element;
+  render(state: MatchState): Element;
 }

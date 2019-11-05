@@ -3,19 +3,19 @@ import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
-import { Contents } from './contents';
-
-const c = new Contents();
-console.log(c)
-c.add('0123456789');
-c.add(new SingleNode('img'))
-const cc = new Contents();
-cc.add(c);
-const ccc = new Contents();
-ccc.add(cc);
-for (let i = 0; i < ccc.length; i++) {
-  console.log(ccc.getContentAtIndex(i))
-}
+// import { Contents } from './contents';
+//
+// const c = new Contents();
+// console.log(c)
+// c.add('0123456789');
+// c.add(new SingleNode('img'))
+// const cc = new Contents();
+// cc.add(c);
+// const ccc = new Contents();
+// ccc.add(cc);
+// for (let i = 0; i < ccc.length; i++) {
+//   console.log(ccc.getContentAtIndex(i))
+// }
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {

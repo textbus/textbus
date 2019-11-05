@@ -1,5 +1,6 @@
 import { FormatRange } from './fragment';
 import { Contents } from './contents';
+import { ViewNode } from './view-node';
 
 export class VirtualNode {
   elementRef: Node;
@@ -16,15 +17,42 @@ export class VirtualDom {
   }
 
   build(contents: Contents) {
+    const vDom = this.createVDom();
+
+    this.render(vDom, contents);
+  }
+
+  private render(vDomList: VirtualNode[], contents: Contents) {
     const fragment = document.createDocumentFragment();
-    const depth: Node[] = [];
     let currentNode: Node;
+    let firstVDom = vDomList.shift();
     for (let i = 0; i < contents.length; i++) {
       const ch = contents.getContentAtIndex(i);
-      // console.log(ch);
+      if (typeof ch === 'string') {
+        if (firstVDom && i < firstVDom.formatRange.startIndex) {
+          if (!currentNode) {
+            currentNode = document.createTextNode('');
+            fragment.appendChild(currentNode);
+          }
+          currentNode.textContent.concat(ch);
+        } else {
+          const container = firstVDom.formatRange.handler.execCommand.render(
+            firstVDom.formatRange.state
+          );
+          fragment.appendChild(container);
+          const newContents = new Contents();
+          contents.slice(firstVDom.formatRange.startIndex,
+            firstVDom.formatRange.endIndex).forEach(item => newContents.add(item));
+          container.appendChild(this.render(firstVDom.children, newContents))
+        }
+      } else if (ch instanceof ViewNode) {
+        fragment.appendChild(ch.render());
+      }
     }
+    return fragment;
+  }
 
-
+  private createVDom() {
     // 把扁平交叉的生效规则变更为嵌套虚拟 DOM 节点，方便渲染实际 DOM
     const canApplyStyles = this.formats;
     const tree: VirtualNode[] = [];

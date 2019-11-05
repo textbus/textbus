@@ -1,15 +1,11 @@
-export interface Sliceable {
-  length: number;
+import { ViewNode } from './view-node';
 
-  slice(startIndex: number, endIndex: number): Sliceable;
-}
-
-export class Contents implements Iterable<Sliceable> {
+export class Contents implements Iterable<string | ViewNode> {
   get length() {
     return this.elements.reduce((p, n) => p + n.length, 0);
   }
 
-  private elements: Array<Sliceable> = [];
+  private elements: Array<string | ViewNode> = [];
   private forOfIndex = 0;
 
   [Symbol.iterator]() {
@@ -32,7 +28,7 @@ export class Contents implements Iterable<Sliceable> {
     };
   }
 
-  add(content: Sliceable) {
+  add(content: string | ViewNode) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -44,19 +40,21 @@ export class Contents implements Iterable<Sliceable> {
 
   slice(startIndex: number, endIndex = this.length) {
     let index = 0;
-    const result: Sliceable[] = [];
+    const result: Array<string | ViewNode> = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
       index += el.length;
-      if (startIndex >= fragmentStartIndex && endIndex <= fragmentEndIndex) {
-        result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
-        // if (el instanceof Contents) {
-        //   const c = el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex));
-        //   result.push(...c);
-        // } else {
-        //   result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
-        // }
+      if (startIndex >= fragmentStartIndex) {
+        if (endIndex <= fragmentEndIndex) {
+          if (typeof el === 'string') {
+            result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
+          } else {
+            result.push(el);
+          }
+        } else {
+          break;
+        }
       }
     }
     return result;
