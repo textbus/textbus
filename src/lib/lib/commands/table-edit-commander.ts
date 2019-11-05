@@ -38,7 +38,7 @@ export class TableEditCommander implements Commander {
   }
 
   command(selection: TBSelection, context: Fragment): TBSelection {
-    console.log(arguments)
+    console.log(selection)
     return selection;
   }
 }

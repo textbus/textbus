@@ -13,7 +13,7 @@ export class TBRange {
 
   constructor(private range: Range) {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
-    // this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
+    this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
     this.startFragment = range.startContainer[FRAGMENT_CONTEXT];
     this.endFragment = range.endContainer[FRAGMENT_CONTEXT];
     this.commonFragment = TBRange.getCommonFragment(range.commonAncestorContainer);

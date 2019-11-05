@@ -55,10 +55,10 @@ export class Fragment implements Sliceable {
         const fragmentEndIndex = fragmentStartIndex + fragment.length;
 
         const formatTreeList = formatTree.filter(format => {
-          return format.formatRange.startIndex >= fragmentStartIndex && format.formatRange.endIndex <= fragmentEndIndex;
+          return format.formatRange.startIndex >= fragmentStartIndex &&
+            format.formatRange.endIndex <= fragmentEndIndex;
         });
-        this.makeDomNode(formatTreeList, fragment).forEach(node => {
-          (node as any)[FRAGMENT_CONTEXT] = this;
+        this.makeDomNode(formatTreeList, fragment, null).forEach(node => {
           dom.appendChild(node);
         });
       } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
@@ -70,7 +70,7 @@ export class Fragment implements Sliceable {
     return dom;
   }
 
-  makeDomNode(formatTreeList: FormatTree[], content: string): Node[] {
+  makeDomNode(formatTreeList: FormatTree[], content: string, parentFormat: FormatTree): Node[] {
     const nodes: Node[] = [];
     let start = 0;
     let end = content.length;
@@ -80,7 +80,11 @@ export class Fragment implements Sliceable {
         if (format.formatRange.startIndex > start) {
           const txt = content.slice(start, format.formatRange.startIndex);
           const newNode = document.createTextNode(txt);
-          (newNode as any)[FORMAT_TREE] = new FormatTree(new FormatRange(start, txt.length, null, null, this));
+          (newNode as any)[FORMAT_TREE] = new FormatTree(
+            new FormatRange(start, txt.length, null, null, this),
+            parentFormat
+          );
+          (newNode as any)[FRAGMENT_CONTEXT] = this;
           nodes.push(newNode);
           start = format.formatRange.startIndex;
         }
@@ -91,21 +95,28 @@ export class Fragment implements Sliceable {
           format.formatRange.state,
           format.formatRange.context
         );
-        this.makeDomNode(format.children, str).forEach(child => {
-          if (parent) {
-            parent.appendChild(child)
-          } else {
-            nodes.push(child);
-          }
-        });
         if (parent) {
           (parent as any)[FORMAT_TREE] = format;
+          (parent as any)[FRAGMENT_CONTEXT] = this;
           nodes.push(parent);
+          this.makeDomNode(format.children, str, format).forEach(child => {
+            parent.appendChild(child)
+          });
+        } else {
+          this.makeDomNode(format.children, str, format).forEach(child => {
+            nodes.push(child);
+          });
         }
+
+
       } else {
         const txt = content.slice(start, content.length);
         const newNode = document.createTextNode(txt);
-        (newNode as any)[FORMAT_TREE] = new FormatTree(new FormatRange(start, txt.length, null, null, this));
+        (newNode as any)[FORMAT_TREE] = new FormatTree(
+          new FormatRange(start, txt.length, null, null, this),
+          parentFormat
+        );
+        (newNode as any)[FRAGMENT_CONTEXT] = this;
         nodes.push(newNode);
         start = content.length;
       }
@@ -200,18 +211,17 @@ export class Fragment implements Sliceable {
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = lastVDom.formatRange.length;
           }
-          const newNode = new FormatTree(newFormatRange);
-          newNode.parent = lastVDom;
+          const newNode = new FormatTree(newFormatRange, lastVDom);
           lastVDom.children.push(newNode);
           depthTree.push(newNode);
         } else {
           depthTree.pop();
-          const newNode = new FormatTree(item);
+          const newNode = new FormatTree(item, null);
           tree.push(newNode);
           depthTree.push(newNode);
         }
       } else {
-        const newNode = new FormatTree(item);
+        const newNode = new FormatTree(item, null);
         tree.push(newNode);
         depthTree.push(newNode);
       }
