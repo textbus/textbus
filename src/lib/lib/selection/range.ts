@@ -1,12 +1,12 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange, Fragment } from '../parser/fragment';
-import { FormatTree } from '../parser/format-tree';
+import { VirtualNode } from '../parser/virtual-dom';
 import { FORMAT_TREE, FRAGMENT_CONTEXT } from '../parser/help';
 
 export class TBRange {
   startIndex: number;
   endIndex: number;
-  commonFragment: Fragment;
+  commonAncestorFragment: Fragment;
   startFragment: Fragment;
   endFragment: Fragment;
   formatMatrix = new Map<Handler, FormatRange>();
@@ -16,11 +16,15 @@ export class TBRange {
     this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
     this.startFragment = range.startContainer[FRAGMENT_CONTEXT];
     this.endFragment = range.endContainer[FRAGMENT_CONTEXT];
-    this.commonFragment = TBRange.getCommonFragment(range.commonAncestorContainer);
+    this.commonAncestorFragment = TBRange.getCommonFragment(range.commonAncestorContainer);
+  }
+
+  apply() {
+
   }
 
   private static getIndex(node: Node): number {
-    let formatTree: FormatTree = node[FORMAT_TREE];
+    let formatTree: VirtualNode = node[FORMAT_TREE];
     let index = 0;
     while (formatTree) {
       index += formatTree.formatRange.startIndex;

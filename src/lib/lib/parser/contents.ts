@@ -17,8 +17,8 @@ export class Contents implements Iterable<Sliceable> {
   }
 
   next() {
-    if (this.forOfIndex < this.elements.length) {
-      const value = this.elements[this.forOfIndex];
+    if (this.forOfIndex < this.length) {
+      const value = this.getContentAtIndex(this.forOfIndex);
       this.forOfIndex++;
       return {
         done: false,
@@ -44,15 +44,25 @@ export class Contents implements Iterable<Sliceable> {
 
   slice(startIndex: number, endIndex = this.length) {
     let index = 0;
-    const result = new Contents();
+    const result: Sliceable[] = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
       index += el.length;
-      if (fragmentStartIndex >= startIndex && fragmentEndIndex <= endIndex) {
-        result.add(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(fragmentEndIndex, endIndex)));
+      if (startIndex >= fragmentStartIndex && endIndex <= fragmentEndIndex) {
+        result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
+        // if (el instanceof Contents) {
+        //   const c = el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex));
+        //   result.push(...c);
+        // } else {
+        //   result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
+        // }
       }
     }
     return result;
+  }
+
+  getContentAtIndex(index: number) {
+    return this.slice(index, index + 1)[0];
   }
 }

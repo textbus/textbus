@@ -1,7 +1,7 @@
 import { Contents, Sliceable } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { FormatTree } from './format-tree';
+import { VirtualDom, VirtualNode } from './virtual-dom';
 import { SingleNode } from './single-node';
 import { FORMAT_TREE, FRAGMENT_CONTEXT } from './help';
 
@@ -23,21 +23,20 @@ export class FormatRange {
 }
 
 export class Fragment implements Sliceable {
+  elementRef: HTMLElement;
+
   get length() {
     return this.contents.length;
   }
 
-  parent: Fragment = null;
-
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
-  constructor(public tagName = 'p') {
+  constructor(public tagName = 'p', public parent: Fragment) {
   }
 
   apply(format: FormatRange) {
     this.mergeFormat(format);
-    return this.render();
   }
 
   slice(startIndex: number, endIndex: number): Sliceable {
@@ -45,78 +44,97 @@ export class Fragment implements Sliceable {
   }
 
   render() {
-    const dom = this.tagName === '#root' ? document.createDocumentFragment() : document.createElement(this.tagName);
-    const formatTree = this.buildFormatTree();
-    let index = 0;
-    for (const fragment of this.contents) {
-      if (typeof fragment === 'string') {
+    const dom = document.createElement(this.tagName);
+    this.elementRef = dom;
 
-        const fragmentStartIndex = index;
-        const fragmentEndIndex = fragmentStartIndex + fragment.length;
-
-        const formatTreeList = formatTree.filter(format => {
-          return format.formatRange.startIndex >= fragmentStartIndex &&
-            format.formatRange.endIndex <= fragmentEndIndex;
-        });
-        this.makeDomNode(formatTreeList, fragment, null).forEach(node => {
-          dom.appendChild(node);
-        });
-      } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
-        const childNode = fragment.render();
-        dom.appendChild(childNode);
+    let formats: FormatRange[] = [];
+    // 检出所有生效规则
+    this.formatMatrix.forEach(value => {
+      formats = formats.concat(value);
+    });
+    // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
+    const canApplyFormats = formats.sort((n, m) => {
+      const a = n.startIndex - m.startIndex;
+      if (a === 0) {
+        return m.endIndex - n.endIndex;
       }
-    }
-    (dom as any)[FRAGMENT_CONTEXT] = this;
+      return a;
+    }).map(item => item.clone());
+
+    const virtualNodeTree = new VirtualDom(canApplyFormats).build(this.contents);
+    // let index = 0;
+    // for (const fragment of this.contents) {
+    //   if (typeof fragment === 'string') {
+    //
+    //     const fragmentStartIndex = index;
+    //     const fragmentEndIndex = fragmentStartIndex + fragment.length;
+    //
+    //     const formatTreeList = virtualNodeTree.filter(format => {
+    //       return format.formatRange.startIndex >= fragmentStartIndex &&
+    //         format.formatRange.endIndex <= fragmentEndIndex;
+    //     });
+    //     this.makeDomNode(formatTreeList, fragment, null).forEach(node => {
+    //       dom.appendChild(node);
+    //     });
+    //   } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
+    //     const childNode = fragment.render();
+    //     dom.appendChild(childNode);
+    //   }
+    // }
+    // (dom as any)[FRAGMENT_CONTEXT] = this;
     return dom;
   }
 
-  makeDomNode(formatTreeList: FormatTree[], content: string, parentFormat: FormatTree): Node[] {
+  makeDomNode(virtualNodeTreeList: VirtualNode[], content: string, parentFormat: VirtualNode): Node[] {
     const nodes: Node[] = [];
     let start = 0;
     let end = content.length;
     while (start < content.length) {
-      const format = formatTreeList.shift();
-      if (format) {
-        if (format.formatRange.startIndex > start) {
-          const txt = content.slice(start, format.formatRange.startIndex);
+      const virtualNode = virtualNodeTreeList.shift();
+      if (virtualNode) {
+        if (virtualNode.formatRange.startIndex > start) {
+          const txt = content.slice(start, virtualNode.formatRange.startIndex);
           const newNode = document.createTextNode(txt);
-          (newNode as any)[FORMAT_TREE] = new FormatTree(
+          const vNode = new VirtualNode(
             new FormatRange(start, txt.length, null, null, this),
             parentFormat
           );
+          vNode.elementRef = newNode;
+          (newNode as any)[FORMAT_TREE] = vNode;
           (newNode as any)[FRAGMENT_CONTEXT] = this;
           nodes.push(newNode);
-          start = format.formatRange.startIndex;
+          start = virtualNode.formatRange.startIndex;
         }
-        end = format.formatRange.endIndex;
+        end = virtualNode.formatRange.endIndex;
         const str = content.slice(start, end);
         start = end;
-        const parent = format.formatRange.handler.execCommand.render(
-          format.formatRange.state,
-          format.formatRange.context
+        const parent = virtualNode.formatRange.handler.execCommand.render(
+          virtualNode.formatRange.state,
+          virtualNode.formatRange.context
         );
         if (parent) {
-          (parent as any)[FORMAT_TREE] = format;
+          (parent as any)[FORMAT_TREE] = virtualNode;
           (parent as any)[FRAGMENT_CONTEXT] = this;
+          virtualNode.elementRef = parent;
           nodes.push(parent);
-          this.makeDomNode(format.children, str, format).forEach(child => {
+          this.makeDomNode(virtualNode.children, str, virtualNode).forEach(child => {
             parent.appendChild(child)
           });
         } else {
-          this.makeDomNode(format.children, str, format).forEach(child => {
+          this.makeDomNode(virtualNode.children, str, virtualNode).forEach(child => {
             nodes.push(child);
           });
         }
-
-
       } else {
         const txt = content.slice(start, content.length);
         const newNode = document.createTextNode(txt);
-        (newNode as any)[FORMAT_TREE] = new FormatTree(
+        const vNode = new VirtualNode(
           new FormatRange(start, txt.length, null, null, this),
           parentFormat
         );
+        (newNode as any)[FORMAT_TREE] = vNode;
         (newNode as any)[FRAGMENT_CONTEXT] = this;
+        vNode.elementRef = newNode;
         nodes.push(newNode);
         start = content.length;
       }
@@ -125,6 +143,7 @@ export class Fragment implements Sliceable {
       const last = result[result.length - 1];
       if (last && last.nodeType === 3 && next.nodeType === 3) {
         last.textContent = last.textContent + next.textContent;
+        ((last as any)[FORMAT_TREE] as VirtualNode).formatRange.endIndex = last.textContent.length;
       } else {
         result.push(next);
       }
@@ -171,61 +190,5 @@ export class Fragment implements Sliceable {
       formatRanges.push(format);
     }
     this.formatMatrix.set(format.handler, formatRanges);
-  }
-
-  private buildFormatTree(): Array<FormatTree> {
-    let formats: FormatRange[] = [];
-    // 检出所有生效规则
-    this.formatMatrix.forEach(value => {
-      formats = formats.concat(value);
-    });
-    // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
-    const canApplyStyles = formats.sort((n, m) => {
-      const a = n.startIndex - m.startIndex;
-      if (a === 0) {
-        return m.endIndex - n.endIndex;
-      }
-      return a;
-    }).map(item => item.clone());
-
-    // 把扁平交叉的生效规则变更为嵌套虚拟 DOM 节点，方便渲染实际 DOM
-    const tree: FormatTree[] = [];
-    const depthTree: FormatTree[] = [];
-
-    for (let i = 0; i < canApplyStyles.length; i++) {
-      const item = canApplyStyles[i];
-      let lastVDom = depthTree[depthTree.length - 1];
-      if (lastVDom) {
-        if (item.startIndex < lastVDom.formatRange.endIndex) {
-          const newFormatRange = item.clone();
-          if (lastVDom.formatRange.endIndex < newFormatRange.endIndex) {
-            newFormatRange.endIndex = lastVDom.formatRange.endIndex;
-            const len = newFormatRange.length;
-            newFormatRange.endIndex = lastVDom.formatRange.length;
-            newFormatRange.startIndex = newFormatRange.endIndex - len;
-            const c = item.clone();
-            c.startIndex = lastVDom.formatRange.endIndex;
-            canApplyStyles[i] = c;
-            i--;
-          } else if (item.endIndex === lastVDom.formatRange.endIndex) {
-            newFormatRange.startIndex = 0;
-            newFormatRange.endIndex = lastVDom.formatRange.length;
-          }
-          const newNode = new FormatTree(newFormatRange, lastVDom);
-          lastVDom.children.push(newNode);
-          depthTree.push(newNode);
-        } else {
-          depthTree.pop();
-          const newNode = new FormatTree(item, null);
-          tree.push(newNode);
-          depthTree.push(newNode);
-        }
-      } else {
-        const newNode = new FormatTree(item, null);
-        tree.push(newNode);
-        depthTree.push(newNode);
-      }
-    }
-    return tree;
   }
 }

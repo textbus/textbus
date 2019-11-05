@@ -1,6 +1,7 @@
 import { Commander } from './commander';
 import { TBSelection } from '../selection/selection';
 import { Fragment } from '../parser/fragment';
+import { MatchState } from '../matcher/matcher';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -38,7 +39,10 @@ export class TableEditCommander implements Commander {
   }
 
   command(selection: TBSelection, context: Fragment): TBSelection {
-    console.log(selection)
     return selection;
+  }
+
+  render(state: MatchState, context: Fragment): Element {
+    return null;
   }
 }

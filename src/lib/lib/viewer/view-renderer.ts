@@ -6,6 +6,7 @@ import { Hooks } from '../toolbar/help';
 import { Commander } from '../commands/commander';
 import { Parser } from '../parser/parser';
 import { FRAGMENT_CONTEXT } from '../parser/help';
+import { Handler } from '../toolbar/handlers/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -65,7 +66,13 @@ export class ViewRenderer {
     }
   }
 
-  apply(commander: Commander) {
-    commander.command(this.selection, this.selection.commonFragment);
+  apply(handler: Handler) {
+    const commonAncestorFragment = this.selection.commonAncestorFragment;
+    console.log(this.selection)
+    const oldEl = commonAncestorFragment.elementRef;
+    handler.execCommand.command(this.selection, commonAncestorFragment, handler);
+    const newNode = commonAncestorFragment.render();
+    oldEl.parentNode.replaceChild(newNode, oldEl);
+    this.selection.apply();
   }
 }

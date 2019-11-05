@@ -11,7 +11,7 @@ const editor = createEditor('#editor', {
   },
   content: `
 <p>
-012<strong>345</strong>678
+012<strong>345</strong>678 <img src="/aaa" alt="">
 </p>
 `
 });

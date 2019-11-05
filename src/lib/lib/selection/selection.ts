@@ -6,9 +6,7 @@ import { TBRange } from './range';
 export class TBSelection {
   cursorElementRef: HTMLElement;
   onSelectionChange: Observable<Selection>;
-  commonFragment: Fragment;
-  anchorFragment: Fragment;
-  focusFragment: Fragment;
+  commonAncestorFragment: Fragment;
 
   ranges: TBRange[] = [];
 
@@ -41,8 +39,14 @@ export class TBSelection {
         this.cursor.hide();
       }
       this.ranges = this.makeRanges();
-      this.commonFragment = this.getCommonFragment(this.ranges);
+      this.commonAncestorFragment = this.getCommonFragment(this.ranges);
       this.selectionChangeEvent.next(this.selection);
+    });
+  }
+
+  apply() {
+    this.ranges.forEach(range => {
+      range.apply();
     });
   }
 
@@ -58,14 +62,14 @@ export class TBSelection {
     return ranges;
   }
 
-  getCommonFragment(ranges: TBRange[]): Fragment {
+  private getCommonFragment(ranges: TBRange[]): Fragment {
     if (ranges.length === 1) {
-      return ranges[0].commonFragment;
+      return ranges[0].commonAncestorFragment;
     }
 
     const depth: Fragment[][] = [];
 
-    ranges.map(range => range.commonFragment).forEach(fragment => {
+    ranges.map(range => range.commonAncestorFragment).forEach(fragment => {
       const tree = [];
       while (fragment) {
         tree.push(fragment);

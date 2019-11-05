@@ -47,7 +47,7 @@ export class Editor {
     }
 
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new Parser(result[1], this.handlers);
+      const vDom = new Parser(this.handlers);
       vDom.setContents(result[0]);
       this.viewer.render(vDom);
       this.tasks.forEach(fn => fn());
@@ -97,9 +97,9 @@ export class Editor {
 
   private addButtonHandler(option: ButtonConfig) {
     const button = new ButtonHandler(option);
-    // button.onApply.pipe(filter(() => this.canApplyAction)).subscribe(() => {
-    //   this.editor.apply(button.execCommand, button.matcher, option.hooks);
-    // });
+    button.onApply.subscribe(() => {
+      this.viewer.apply(button);
+    });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
   }
@@ -109,7 +109,7 @@ export class Editor {
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
       item.onApply.subscribe(() => {
-        this.viewer.apply(item.execCommand);
+        this.viewer.apply(item);
       });
       this.handlers.push(item);
     });
