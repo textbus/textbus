@@ -37,7 +37,7 @@ export class Parser extends Fragment {
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();
       if (/inline/.test(dtd[tagName].display)) {
-        const start = context.length;
+        const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
           const attrs = Array.from((from as HTMLElement).attributes);
           const newSingle = new SingleNode(tagName, attrs);

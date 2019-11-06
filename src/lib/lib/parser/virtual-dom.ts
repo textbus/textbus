@@ -19,7 +19,7 @@ export class VirtualDom {
   build(contents: Contents) {
     const vDom = this.createVDom();
 
-    this.render(vDom, contents);
+    return this.render(vDom, contents);
   }
 
   private render(vDomList: VirtualNode[], contents: Contents) {
@@ -29,21 +29,32 @@ export class VirtualDom {
     for (let i = 0; i < contents.length; i++) {
       const ch = contents.getContentAtIndex(i);
       if (typeof ch === 'string') {
-        if (firstVDom && i < firstVDom.formatRange.startIndex) {
+        if (firstVDom) {
+          if (i < firstVDom.formatRange.startIndex) {
+            if (!currentNode) {
+              currentNode = document.createTextNode('');
+              fragment.appendChild(currentNode);
+            }
+            currentNode.textContent += ch;
+          } else {
+            currentNode = null;
+            const container = firstVDom.formatRange.handler.execCommand.render(
+              firstVDom.formatRange.state
+            );
+            fragment.appendChild(container);
+            const newContents = new Contents();
+            contents.slice(firstVDom.formatRange.startIndex,
+              firstVDom.formatRange.endIndex).forEach(item => newContents.add(item));
+            container.appendChild(this.render(firstVDom.children, newContents));
+            i = firstVDom.formatRange.endIndex - 1;
+            firstVDom = vDomList.shift();
+          }
+        } else {
           if (!currentNode) {
             currentNode = document.createTextNode('');
             fragment.appendChild(currentNode);
           }
-          currentNode.textContent.concat(ch);
-        } else {
-          const container = firstVDom.formatRange.handler.execCommand.render(
-            firstVDom.formatRange.state
-          );
-          fragment.appendChild(container);
-          const newContents = new Contents();
-          contents.slice(firstVDom.formatRange.startIndex,
-            firstVDom.formatRange.endIndex).forEach(item => newContents.add(item));
-          container.appendChild(this.render(firstVDom.children, newContents))
+          currentNode.textContent += ch;
         }
       } else if (ch instanceof ViewNode) {
         fragment.appendChild(ch.render());

@@ -1,8 +1,7 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { VirtualDom, VirtualNode } from './virtual-dom';
-import { FORMAT_TREE, FRAGMENT_CONTEXT } from './help';
+import { VirtualDom } from './virtual-dom';
 import { ViewNode } from './view-node';
 
 export class FormatRange {
@@ -54,93 +53,8 @@ export class Fragment extends ViewNode {
       return a;
     }).map(item => item.clone());
 
-    const virtualNodeTree = new VirtualDom(canApplyFormats).build(this.contents);
-    // let index = 0;
-    // for (const fragment of this.contents) {
-    //   if (typeof fragment === 'string') {
-    //
-    //     const fragmentStartIndex = index;
-    //     const fragmentEndIndex = fragmentStartIndex + fragment.length;
-    //
-    //     const formatTreeList = virtualNodeTree.filter(format => {
-    //       return format.formatRange.startIndex >= fragmentStartIndex &&
-    //         format.formatRange.endIndex <= fragmentEndIndex;
-    //     });
-    //     this.makeDomNode(formatTreeList, fragment, null).forEach(node => {
-    //       dom.appendChild(node);
-    //     });
-    //   } else if (fragment instanceof Fragment || fragment instanceof SingleNode) {
-    //     const childNode = fragment.render();
-    //     dom.appendChild(childNode);
-    //   }
-    // }
-    // (dom as any)[FRAGMENT_CONTEXT] = this;
+    dom.appendChild(new VirtualDom(canApplyFormats).build(this.contents));
     return dom;
-  }
-
-  makeDomNode(virtualNodeTreeList: VirtualNode[], content: string, parentFormat: VirtualNode): Node[] {
-    const nodes: Node[] = [];
-    let start = 0;
-    let end = content.length;
-    while (start < content.length) {
-      const virtualNode = virtualNodeTreeList.shift();
-      if (virtualNode) {
-        if (virtualNode.formatRange.startIndex > start) {
-          const txt = content.slice(start, virtualNode.formatRange.startIndex);
-          const newNode = document.createTextNode(txt);
-          const vNode = new VirtualNode(
-            new FormatRange(start, txt.length, null, null, this),
-            parentFormat
-          );
-          vNode.elementRef = newNode;
-          (newNode as any)[FORMAT_TREE] = vNode;
-          (newNode as any)[FRAGMENT_CONTEXT] = this;
-          nodes.push(newNode);
-          start = virtualNode.formatRange.startIndex;
-        }
-        end = virtualNode.formatRange.endIndex;
-        const str = content.slice(start, end);
-        start = end;
-        const parent = virtualNode.formatRange.handler.execCommand.render(
-          virtualNode.formatRange.state
-        );
-        if (parent) {
-          (parent as any)[FORMAT_TREE] = virtualNode;
-          (parent as any)[FRAGMENT_CONTEXT] = this;
-          virtualNode.elementRef = parent;
-          nodes.push(parent);
-          this.makeDomNode(virtualNode.children, str, virtualNode).forEach(child => {
-            parent.appendChild(child)
-          });
-        } else {
-          this.makeDomNode(virtualNode.children, str, virtualNode).forEach(child => {
-            nodes.push(child);
-          });
-        }
-      } else {
-        const txt = content.slice(start, content.length);
-        const newNode = document.createTextNode(txt);
-        const vNode = new VirtualNode(
-          new FormatRange(start, txt.length, null, null, this),
-          parentFormat
-        );
-        (newNode as any)[FORMAT_TREE] = vNode;
-        (newNode as any)[FRAGMENT_CONTEXT] = this;
-        vNode.elementRef = newNode;
-        nodes.push(newNode);
-        start = content.length;
-      }
-    }
-    return nodes.reduce((result, next) => {
-      const last = result[result.length - 1];
-      if (last && last.nodeType === 3 && next.nodeType === 3) {
-        last.textContent = last.textContent + next.textContent;
-        ((last as any)[FORMAT_TREE] as VirtualNode).formatRange.endIndex = last.textContent.length;
-      } else {
-        result.push(next);
-      }
-      return result;
-    }, [] as Node[]);
   }
 
   mergeFormat(format: FormatRange) {

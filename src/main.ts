@@ -9,11 +9,7 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: `
-<p>
-012<strong>345</strong>678 <img src="/aaa" alt="">
-</p>
-`
+  content: `012<strong>345</strong>678<img src="/aaa" alt="">`
 });
 
 // editor.updateContentHTML('<p>p1<span>p-span</span></p><span>span3</span><span>span4</span><p>p2</p><span>span1</span><span>span2</span>')

@@ -52,8 +52,6 @@ export class Contents implements Iterable<string | ViewNode> {
           } else {
             result.push(el);
           }
-        } else {
-          break;
         }
       }
     }
