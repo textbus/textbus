@@ -3,9 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { template } from './template-html';
 import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
-import { Commander } from '../commands/commander';
 import { Parser } from '../parser/parser';
-import { FRAGMENT_CONTEXT } from '../parser/help';
 import { Handler } from '../toolbar/handlers/help';
 
 export class ViewRenderer {
@@ -51,9 +49,7 @@ export class ViewRenderer {
   }
 
   render(vDom: Parser) {
-    this.contentDocument.body.innerHTML = '';
-    this.contentDocument.body[FRAGMENT_CONTEXT] = vDom;
-    this.contentDocument.body.appendChild(vDom.render());
+    this.contentDocument.documentElement.replaceChild(vDom.render(), this.contentDocument.body);
   }
 
   use(hooks: Hooks) {
@@ -68,7 +64,6 @@ export class ViewRenderer {
 
   apply(handler: Handler) {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
-    console.log(this.selection)
     const oldEl = commonAncestorFragment.elementRef;
     handler.execCommand.command(this.selection, commonAncestorFragment, handler);
     const newNode = commonAncestorFragment.render();

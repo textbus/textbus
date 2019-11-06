@@ -6,7 +6,7 @@ import { SingleNode } from './single-node';
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
-    super('main', null);
+    super('body', null);
   }
 
   setContents(el: HTMLElement) {

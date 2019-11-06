@@ -1,9 +1,9 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { VirtualDom } from './virtual-dom';
+import { VirtualElementNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
-import { FRAGMENT_CONTEXT } from './help';
+import { FRAGMENT_CONTEXT, VIRTUAL_NODE } from './help';
 
 export class FormatRange {
   get length() {
@@ -55,8 +55,48 @@ export class Fragment extends ViewNode {
       return a;
     }).map(item => item.clone());
 
-    dom.appendChild(new VirtualDom(canApplyFormats, this).build(this.contents));
+    const vDom = this.createVDom(canApplyFormats);
+    const a = this.view(vDom, this.contents);
+    console.log(a);
+    dom.appendChild(a);
     return dom;
+  }
+
+  private view(vDom: VirtualNode, contents: Contents) {
+    const fragment = document.createDocumentFragment();
+
+    if (vDom instanceof VirtualElementNode) {
+      vDom.children.forEach(vNode => {
+        const c = new Contents();
+        contents.slice(vNode.formatRange.startIndex, vNode.formatRange.endIndex).forEach(item => c.add(item));
+        this.view(vNode, c);
+      });
+    } else {
+      const ff = contents.slice(vDom.formatRange.startIndex, vDom.formatRange.endIndex);
+      ff.forEach(item => {
+        if (typeof item === 'string') {
+          let currentNode: Node;
+          if (vDom.formatRange.handler) {
+            currentNode = vDom.formatRange.handler.execCommand.render(vDom.formatRange.state);
+            const newContents = new Contents();
+            newContents.add(item);
+            currentNode.appendChild(this.view(vDom, contents));
+
+          } else {
+            currentNode = document.createTextNode(item);
+          }
+          currentNode[VIRTUAL_NODE] = vDom;
+          vDom.elementRef = currentNode;
+          fragment.appendChild(currentNode);
+        } else if (item instanceof ViewNode) {
+          const container = item.render();
+          fragment.appendChild(container);
+        }
+      });
+    }
+
+
+    return fragment;
   }
 
   mergeFormat(format: FormatRange) {
@@ -98,5 +138,46 @@ export class Fragment extends ViewNode {
       formatRanges.push(format);
     }
     this.formatMatrix.set(format.handler, formatRanges);
+  }
+
+  private createVDom(formatRanges: FormatRange[]) {
+    const root = new VirtualElementNode(new FormatRange(0, this.contents.length, null, null, this), null);
+    this.build(formatRanges,
+      root,
+      0,
+      this.contents.length
+    );
+    return root;
+  }
+
+  private build(formatRanges: FormatRange[], parent: VirtualElementNode, index: number, length: number) {
+    while (index < length) {
+      let firstRange = formatRanges.shift();
+      if (firstRange) {
+        if (index < firstRange.startIndex) {
+          parent.children.push(new VirtualNode(new FormatRange(index, firstRange.startIndex, null, null, this), parent));
+        }
+        const container = new VirtualElementNode(firstRange, parent);
+        const childFormatRanges: FormatRange[] = [];
+        while (true) {
+          const f = formatRanges[0];
+          if (f && f.endIndex < firstRange.endIndex) {
+            childFormatRanges.push(formatRanges.shift());
+          } else {
+            break;
+          }
+        }
+        if (childFormatRanges.length) {
+          this.build(childFormatRanges, container, index, firstRange.endIndex);
+        } else {
+          container.children.push(new VirtualNode(new FormatRange(firstRange.startIndex, firstRange.endIndex, null, null, this), parent))
+        }
+        parent.children.push(container);
+        index = firstRange.endIndex;
+      } else {
+        parent.children.push(new VirtualNode(new FormatRange(index, length, null, null, this), parent));
+        break;
+      }
+    }
   }
 }

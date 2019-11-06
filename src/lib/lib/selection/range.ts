@@ -1,6 +1,6 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange, Fragment } from '../parser/fragment';
-import { VirtualNode } from '../parser/virtual-dom';
+import { VirtualElementNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE, FRAGMENT_CONTEXT } from '../parser/help';
 
 export class TBRange {
@@ -14,17 +14,17 @@ export class TBRange {
   constructor(private range: Range) {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
     this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
-    this.startFragment = range.startContainer[FRAGMENT_CONTEXT];
-    this.endFragment = range.endContainer[FRAGMENT_CONTEXT];
+    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
+    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
     this.commonAncestorFragment = TBRange.getCommonFragment(range.commonAncestorContainer);
   }
 
   apply() {
-
+    console.log(this)
   }
 
   private static getIndex(node: Node): number {
-    let vNode: VirtualNode = node[VIRTUAL_NODE];
+    let vNode: VirtualElementNode = node[VIRTUAL_NODE];
     let index = 0;
     while (vNode) {
       index += vNode.formatRange.startIndex;
