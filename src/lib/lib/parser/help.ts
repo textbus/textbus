@@ -4,4 +4,4 @@ export interface Attr {
 }
 
 export const FRAGMENT_CONTEXT = '__fragment_context__';
-export const FORMAT_TREE = '__format_tree__';
+export const VIRTUAL_NODE = '__virtual_node__';

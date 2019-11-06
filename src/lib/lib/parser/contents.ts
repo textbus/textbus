@@ -45,15 +45,17 @@ export class Contents implements Iterable<string | ViewNode> {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
       index += el.length;
-      if (startIndex >= fragmentStartIndex) {
-        if (endIndex <= fragmentEndIndex) {
-          if (typeof el === 'string') {
-            result.push(el.slice(Math.max(startIndex, fragmentStartIndex), Math.min(endIndex, fragmentEndIndex)));
-          } else {
-            result.push(el);
-          }
+
+      if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
+        if (typeof el === 'string') {
+          const min = Math.max(0, startIndex - fragmentStartIndex);
+          const max = Math.min(fragmentEndIndex, endIndex) - fragmentStartIndex;
+          result.push(el.slice(min, max));
+        } else {
+          result.push(el);
         }
       }
+
     }
     return result;
   }

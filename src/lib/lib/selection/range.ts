@@ -1,7 +1,7 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { VirtualNode } from '../parser/virtual-dom';
-import { FORMAT_TREE, FRAGMENT_CONTEXT } from '../parser/help';
+import { VIRTUAL_NODE, FRAGMENT_CONTEXT } from '../parser/help';
 
 export class TBRange {
   startIndex: number;
@@ -24,11 +24,11 @@ export class TBRange {
   }
 
   private static getIndex(node: Node): number {
-    let formatTree: VirtualNode = node[FORMAT_TREE];
+    let vNode: VirtualNode = node[VIRTUAL_NODE];
     let index = 0;
-    while (formatTree) {
-      index += formatTree.formatRange.startIndex;
-      formatTree = formatTree.parent;
+    while (vNode) {
+      index += vNode.formatRange.startIndex;
+      vNode = vNode.parent;
     }
     return index;
   }

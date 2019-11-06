@@ -3,23 +3,10 @@ import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
-// import { Contents } from './contents';
-//
-// const c = new Contents();
-// console.log(c)
-// c.add('0123456789');
-// c.add(new SingleNode('img'))
-// const cc = new Contents();
-// cc.add(c);
-// const ccc = new Contents();
-// ccc.add(cc);
-// for (let i = 0; i < ccc.length; i++) {
-//   console.log(ccc.getContentAtIndex(i))
-// }
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
-    super('div', null);
+    super('main', null);
   }
 
   setContents(el: HTMLElement) {
@@ -60,12 +47,12 @@ export class Parser extends Fragment {
         } else {
           nodes = Array.from(from.childNodes);
         }
-        const len = nodes.reduce((len, node) => {
-          return len + this.parse(node, newBlock);
-        }, 0);
-        this.mergeFormatsByNode(newBlock, from, 0, len);
+        nodes.forEach(node => {
+          this.parse(node, newBlock);
+        });
+        this.mergeFormatsByNode(newBlock, from, 0, newBlock.contents.length);
         context.contents.add(newBlock);
-        return len;
+        return newBlock.contents.length;
       }
     }
   }

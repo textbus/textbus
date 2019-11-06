@@ -1,6 +1,7 @@
-import { FormatRange } from './fragment';
+import { FormatRange, Fragment } from './fragment';
 import { Contents } from './contents';
 import { ViewNode } from './view-node';
+import { VIRTUAL_NODE } from './help';
 
 export class VirtualNode {
   elementRef: Node;
@@ -12,17 +13,16 @@ export class VirtualNode {
 }
 
 export class VirtualDom {
-  constructor(private formats: FormatRange[]) {
-
+  constructor(private formats: FormatRange[], private context: Fragment) {
   }
 
   build(contents: Contents) {
     const vDom = this.createVDom();
 
-    return this.render(vDom, contents);
+    return this.render(vDom, contents, null);
   }
 
-  private render(vDomList: VirtualNode[], contents: Contents) {
+  private render(vDomList: VirtualNode[], contents: Contents, parent: VirtualNode) {
     const fragment = document.createDocumentFragment();
     let currentNode: Node;
     let firstVDom = vDomList.shift();
@@ -33,6 +33,9 @@ export class VirtualDom {
           if (i < firstVDom.formatRange.startIndex) {
             if (!currentNode) {
               currentNode = document.createTextNode('');
+              const vNode = new VirtualNode(new FormatRange(i, i + 1, null, null, this.context), parent);
+              vNode.elementRef = currentNode;
+              currentNode[VIRTUAL_NODE] = vNode;
               fragment.appendChild(currentNode);
             }
             currentNode.textContent += ch;
@@ -41,22 +44,30 @@ export class VirtualDom {
             const container = firstVDom.formatRange.handler.execCommand.render(
               firstVDom.formatRange.state
             );
+            const vNode = new VirtualNode(new FormatRange(i, i + 1, null, null, this.context), parent);
+            vNode.elementRef = container;
+            container[VIRTUAL_NODE] = vNode;
             fragment.appendChild(container);
             const newContents = new Contents();
             contents.slice(firstVDom.formatRange.startIndex,
               firstVDom.formatRange.endIndex).forEach(item => newContents.add(item));
-            container.appendChild(this.render(firstVDom.children, newContents));
+
+            container.appendChild(this.render(firstVDom.children, newContents, vNode));
             i = firstVDom.formatRange.endIndex - 1;
             firstVDom = vDomList.shift();
           }
         } else {
           if (!currentNode) {
             currentNode = document.createTextNode('');
+            const vNode = new VirtualNode(new FormatRange(i, i + 1, null, null, this.context), parent);
+            vNode.elementRef = currentNode;
+            currentNode[VIRTUAL_NODE] = vNode;
             fragment.appendChild(currentNode);
           }
           currentNode.textContent += ch;
         }
       } else if (ch instanceof ViewNode) {
+        currentNode = null;
         fragment.appendChild(ch.render());
       }
     }

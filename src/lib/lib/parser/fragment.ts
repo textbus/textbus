@@ -3,6 +3,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { VirtualDom } from './virtual-dom';
 import { ViewNode } from './view-node';
+import { FRAGMENT_CONTEXT } from './help';
 
 export class FormatRange {
   get length() {
@@ -37,6 +38,7 @@ export class Fragment extends ViewNode {
 
   render() {
     const dom = document.createElement(this.tagName);
+    dom[FRAGMENT_CONTEXT] = this;
     this.elementRef = dom;
 
     let formats: FormatRange[] = [];
@@ -53,7 +55,7 @@ export class Fragment extends ViewNode {
       return a;
     }).map(item => item.clone());
 
-    dom.appendChild(new VirtualDom(canApplyFormats).build(this.contents));
+    dom.appendChild(new VirtualDom(canApplyFormats, this).build(this.contents));
     return dom;
   }
 
