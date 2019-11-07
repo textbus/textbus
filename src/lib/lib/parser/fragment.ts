@@ -28,6 +28,8 @@ export class Fragment extends ViewNode {
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
+  children: VirtualNode[] = [];
+
   constructor(public tagName = 'p', public parent: Fragment) {
     super();
   }
@@ -59,9 +61,9 @@ export class Fragment extends ViewNode {
     }).map(item => item.clone());
 
     const vDom = this.createVDom(canApplyFormats);
-    const view = this.viewBuilder(vDom, this.contents);
-
-    dom.appendChild(view);
+    const r = this.viewBuilder(vDom, this.contents);
+    this.children = r.newNodes;
+    dom.appendChild(r.fragment);
     return dom;
   }
 
@@ -117,26 +119,31 @@ export class Fragment extends ViewNode {
    */
   private viewBuilder(vNode: VirtualNode, contents: Contents) {
     const fragment = document.createDocumentFragment();
-
+    const newNodes: VirtualNode[] = [];
     if (vNode instanceof VirtualElementNode) {
       let container: DocumentFragment | HTMLElement = fragment;
       if (vNode.formatRange.handler) {
         container = vNode.formatRange.handler.execCommand.render(vNode.formatRange.state);
         fragment.appendChild(container);
       }
+      newNodes.push(vNode);
+      const nodes: VirtualNode[] = [];
       vNode.children.forEach(vNode => {
-        const view = this.viewBuilder(vNode, contents);
-        container.appendChild(view);
+        const r = this.viewBuilder(vNode, contents);
+        container.appendChild(r.fragment);
+        nodes.push(...r.newNodes);
       });
+      vNode.children = nodes;
     } else {
       const c = contents.slice(vNode.formatRange.startIndex, vNode.formatRange.endIndex);
-      const index = vNode.parent.children.indexOf(vNode);
-      const vNodes: VirtualNode[] = [];
       let i = 0;
       c.forEach(item => {
-        const newFormatRange = new FormatRange(i, item.length, null, null, vNode.formatRange.context);
+        const newFormatRange = new FormatRange(
+          i + vNode.formatRange.startIndex,
+          item.length + vNode.formatRange.startIndex,
+          null, null, vNode.formatRange.context);
         const v = new VirtualNode(newFormatRange, vNode.parent);
-        vNodes.push(v);
+        newNodes.push(v);
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
           currentNode[VIRTUAL_NODE] = vNode;
@@ -148,11 +155,12 @@ export class Fragment extends ViewNode {
         }
         i += item.length;
       });
-
-      vNode.parent.children.splice(index, 1, ...vNodes);
     }
 
-    return fragment;
+    return {
+      fragment,
+      newNodes
+    };
   }
 
   /**
@@ -161,7 +169,7 @@ export class Fragment extends ViewNode {
    */
   private createVDom(formatRanges: FormatRange[]) {
     const root = new VirtualElementNode(new FormatRange(0, this.contents.length, null, null, this), null);
-    this.build(formatRanges,
+    this.vDomBuilder(formatRanges,
       root,
       0,
       this.contents.length
@@ -176,7 +184,7 @@ export class Fragment extends ViewNode {
    * @param startIndex 生成范围的开始索引
    * @param endIndex 生成范围的结束位置
    */
-  private build(formatRanges: FormatRange[], parent: VirtualElementNode, startIndex: number, endIndex: number) {
+  private vDomBuilder(formatRanges: FormatRange[], parent: VirtualElementNode, startIndex: number, endIndex: number) {
     while (startIndex < endIndex) {
       let firstRange = formatRanges.shift();
       if (firstRange) {
@@ -195,7 +203,7 @@ export class Fragment extends ViewNode {
           }
         }
         if (childFormatRanges.length) {
-          this.build(childFormatRanges, container, startIndex, firstRange.endIndex);
+          this.vDomBuilder(childFormatRanges, container, startIndex, firstRange.endIndex);
         } else {
           const f = new FormatRange(firstRange.startIndex, firstRange.endIndex, null, null, this);
           container.children.push(new VirtualNode(f, parent))
