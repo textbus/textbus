@@ -1,4 +1,15 @@
 import { Observable } from 'rxjs';
+import { EventDelegate } from '../../help';
+
+export interface DropdownHandlerView {
+  elementRef: HTMLElement | DocumentFragment;
+
+  updateStateByElement(el: HTMLElement): void;
+
+  reset?(): void;
+
+  setEventDelegator?(delegate: EventDelegate): void;
+}
 
 export class Dropdown {
   readonly elementRef = document.createElement('span');

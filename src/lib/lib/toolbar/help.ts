@@ -1,5 +1,7 @@
-import { Matcher, MatchRule } from '../matcher/matcher';
+import { MatchRule } from '../matcher/matcher';
 import { Commander } from '../commands/commander';
+import { Observable } from 'rxjs';
+import { DropdownHandlerView } from './handlers/utils/dropdown';
 
 export interface EditContext {
   document: Document;
@@ -38,15 +40,34 @@ export interface ButtonConfig {
   hooks?: Hooks;
 }
 
+export interface SelectOptionConfig {
+  execCommand: Commander;
+  label?: string;
+  classes?: string[];
+  match?: MatchRule;
+  default?: boolean
+}
+
 export interface SelectConfig {
   type: HandlerType.Select;
+  options: SelectOptionConfig[];
+  classes?: string[];
+  mini?: boolean;
+  tooltip?: string;
   hooks?: Hooks;
 }
 
 export interface DropdownConfig {
   type: HandlerType.Dropdown;
+  viewer: DropdownHandlerView;
+  onHide: Observable<void>;
+  execCommand: Commander;
+  classes?: string[];
+  format?: string;
+  tooltip?: string;
+  label?: string;
+  match?: MatchRule;
   hooks?: Hooks;
-
 }
 
 export interface ActionConfig {
@@ -66,4 +87,8 @@ export interface ActionSheetConfig {
 }
 
 export type HandlerConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;
+
+export interface EventDelegate {
+  dispatchEvent(type: string): Observable<string>
+}
 

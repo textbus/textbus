@@ -3,7 +3,7 @@ import { CubicBezier } from '@tanbo/bezier';
 
 import { findElementByTagName } from '../utils/utils';
 import { EditContext, Hooks } from '../help';
-import { TableEditActions, CellPosition, RowPosition } from '../../commands/table-edit-commander';
+import { CellPosition, RowPosition } from '../../commands/table-edit-commander';
 import { Matcher } from '../../matcher/matcher';
 
 interface ElementPosition {

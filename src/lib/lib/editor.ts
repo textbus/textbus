@@ -1,12 +1,21 @@
 import { Observable, zip } from 'rxjs';
 
 import { ViewRenderer } from './viewer/view-renderer';
-import { ActionSheetConfig, ButtonConfig, HandlerConfig, HandlerType, Hooks } from './toolbar/help';
+import {
+  ActionSheetConfig,
+  ButtonConfig,
+  DropdownConfig, EventDelegate,
+  HandlerConfig,
+  HandlerType,
+  SelectConfig
+} from './toolbar/help';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { Parser } from './parser/parser';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { TBSelection } from './selection/selection';
+import { SelectHandler } from './toolbar/handlers/select-handler';
+import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 
 
 export interface EditorOptions {
@@ -19,7 +28,7 @@ export interface EditorOptions {
   placeholder?: string;
 }
 
-export class Editor {
+export class Editor implements EventDelegate {
   readonly elementRef = document.createElement('div');
 
   private viewer = new ViewRenderer();
@@ -84,12 +93,12 @@ export class Editor {
       case HandlerType.Button:
         this.addButtonHandler(option);
         break;
-      // case HandlerType.Select:
-      //   this.addSelectHandler(option);
-      //   break;
-      // case HandlerType.Dropdown:
-      //   this.addDropdownHandler(option);
-      //   break;
+      case HandlerType.Select:
+        this.addSelectHandler(option);
+        break;
+      case HandlerType.Dropdown:
+        this.addDropdownHandler(option);
+        break;
       case HandlerType.ActionSheet:
         this.addActionSheetHandler(option);
     }
@@ -107,6 +116,30 @@ export class Editor {
     handlers.forEach(handler => {
       this.addHandler(handler);
     });
+  }
+
+  dispatchEvent(type: string): Observable<string> {
+    return new Observable();
+  }
+
+  private addDropdownHandler(option: DropdownConfig) {
+    const dropdown = new DropdownHandler(option, this);
+    this.toolbar.appendChild(dropdown.elementRef);
+    dropdown.onApply.subscribe(() => {
+      this.viewer.apply(dropdown);
+    });
+    this.handlers.push(dropdown);
+  }
+
+  private addSelectHandler(option: SelectConfig) {
+    const select = new SelectHandler(option);
+    select.options.forEach(item => {
+      item.onApply.subscribe(() => {
+        this.viewer.apply(item);
+      });
+      this.handlers.push(item);
+    });
+    this.toolbar.appendChild(select.elementRef);
   }
 
   private addButtonHandler(option: ButtonConfig) {

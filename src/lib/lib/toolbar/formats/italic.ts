@@ -1,7 +1,7 @@
 import { InlineCommander } from '../../commands/inline-commander';
 import { ButtonConfig, HandlerType } from '../help';
 
-export const italic: ButtonConfig = {
+export const italicHandler: ButtonConfig = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-italic'],
   tooltip: '斜体',

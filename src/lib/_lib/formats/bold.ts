@@ -3,8 +3,8 @@ import { InlineFormatter } from '../edit-frame/fomatter/inline-formatter';
 
 export const boldHandler: ButtonHandlerOption = {
   type: HandlerType.Button,
-  registerName: 'bold',
-  classes: ['tanbo-editor-icon-bold'],
+  registerName: 'boldHandler',
+  classes: ['tanbo-editor-icon-boldHandler'],
   tooltip: '加粗',
   match: {
     tags: ['strong', 'b']

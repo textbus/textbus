@@ -22,7 +22,7 @@ export class Matcher {
   private validators: Array<(node: Node) => boolean> = [];
   private excludeValidators: Array<(node: Node) => boolean> = [];
 
-  constructor(private rule: MatchRule) {
+  constructor(private rule: MatchRule = {}) {
     if (rule.tags) {
       this.validators.push(node => {
         if (node.nodeType === 1) {

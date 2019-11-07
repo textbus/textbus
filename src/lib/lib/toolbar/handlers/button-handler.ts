@@ -35,14 +35,4 @@ export class ButtonHandler implements Handler {
       this.elementRef.classList.remove('tanbo-editor-handler-active');
     }
   }
-
-  // updateStatus(matchDelta: MatchDelta): void {
-  //   this.elementRef.disabled = matchDelta.disable;
-  //
-  //   if (matchDelta.overlap) {
-  //     this.elementRef.classList.add('tanbo-editor-handler-active');
-  //   } else {
-  //     this.elementRef.classList.remove('tanbo-editor-handler-active');
-  //   }
-  // }
 }
