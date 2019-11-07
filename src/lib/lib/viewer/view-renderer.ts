@@ -66,9 +66,7 @@ export class ViewRenderer {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const oldEl = commonAncestorFragment.elementRef;
 
-    const overlap = this.selection.ranges.reduce((v, next) => {
-      return v && next.commonAncestorFragment.queryState(next.startIndex, next.endIndex, handler);
-    }, true);
+    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
 
     handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
     const newNode = commonAncestorFragment.render();

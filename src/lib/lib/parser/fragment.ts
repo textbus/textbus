@@ -38,20 +38,6 @@ export class Fragment extends ViewNode {
     this.mergeFormat(format, true);
   }
 
-  queryState(startIndex: number, endIndex: number, handler: Handler) {
-    const formatRanges = this.formatMatrix.get(handler);
-
-    if (formatRanges) {
-      if (startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex) {
-        if (startIndex === endIndex) {
-          return startIndex !== formatRanges[0].startIndex;
-        }
-        return true;
-      }
-    }
-    return false;
-  }
-
   /**
    * 渲染 DOM
    */

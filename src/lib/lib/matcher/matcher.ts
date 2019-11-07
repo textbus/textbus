@@ -1,3 +1,8 @@
+import { TBSelection } from '../selection/selection';
+import { Handler } from '../toolbar/handlers/help';
+import { Fragment } from '../parser/fragment';
+import { TBRange } from '../selection/range';
+
 export enum MatchState {
   Matched = 'Matched',
   Normal = 'Normal',
@@ -6,6 +11,12 @@ export enum MatchState {
 
 export interface MatchDelta {
   overlap: boolean;
+  fromRange: TBRange;
+}
+
+export interface CommonMatchDelta {
+  overlap: boolean;
+  srcStates: MatchDelta[];
 }
 
 export interface MatchRule {
@@ -59,6 +70,73 @@ export class Matcher {
       return MatchState.Exclude;
     }
     return this.validators.map(fn => fn(node)).includes(true) ? MatchState.Matched : MatchState.Normal;
+  }
+
+  queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
+    const srcStates: MatchDelta[] = selection.ranges.map(range => {
+      const overlap = this.overlap(
+        range.startIndex,
+        range.endIndex,
+        range.commonAncestorFragment,
+        handler);
+      return {
+        overlap,
+        fromRange: range
+      };
+    });
+    return {
+      overlap: srcStates.reduce((v, n) => v && n.overlap, true),
+      srcStates
+    }
+  }
+
+  private overlap(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): boolean {
+    const overlapSelf = this.matchStateByRange(startIndex, endIndex, fragment, handler);
+    if (overlapSelf) {
+      return fragment.contents.slice(startIndex, endIndex).filter(item => {
+        return item instanceof Fragment;
+      }).reduce((value, ff) => {
+        return value && this.overlap(0, (ff as Fragment).contents.length, (ff as Fragment), handler);
+      }, true);
+    }
+    return this.inSingleContainer(startIndex, endIndex, fragment, handler);
+  }
+
+  private inSingleContainer(startIndex: number,
+                            endIndex: number,
+                            fragment: Fragment,
+                            handler: Handler): boolean {
+    while (true) {
+      const inContainer = this.matchStateByRange(startIndex, endIndex, fragment, handler);
+      if (inContainer) {
+        return true;
+      } else {
+        if (fragment.parent) {
+          startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
+          endIndex = startIndex + 1;
+          fragment = fragment.parent;
+        } else {
+          break;
+        }
+      }
+    }
+    return false;
+  }
+
+  private matchStateByRange(startIndex: number,
+                            endIndex: number,
+                            fragment: Fragment,
+                            handler: Handler): boolean {
+    if (this.matchNode(fragment.elementRef) === MatchState.Matched) {
+      return true;
+    }
+    const formatRanges = fragment.formatMatrix.get(handler);
+    if (formatRanges) {
+      if (formatRanges[0].state === MatchState.Matched) {
+        return startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex;
+      }
+    }
+    return false;
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {

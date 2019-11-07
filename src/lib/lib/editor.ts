@@ -80,9 +80,7 @@ export class Editor implements EventDelegate {
 
   updateHandlerState(selection: TBSelection) {
     this.handlers.forEach(handler => {
-      const overlap = selection.ranges.reduce((v, next) => {
-        return v && next.commonAncestorFragment.queryState(next.startIndex, next.endIndex, handler);
-      }, true);
+      const overlap = handler.matcher.queryState(selection, handler).overlap;
       handler.updateStatus(overlap);
     });
   }
