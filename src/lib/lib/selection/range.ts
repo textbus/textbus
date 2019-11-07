@@ -1,6 +1,6 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange, Fragment } from '../parser/fragment';
-import { VirtualElementNode } from '../parser/virtual-dom';
+import { VirtualElementNode, VirtualNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE, FRAGMENT_CONTEXT } from '../parser/help';
 
 export class TBRange {
@@ -9,10 +9,10 @@ export class TBRange {
   commonAncestorFragment: Fragment;
   startFragment: Fragment;
   endFragment: Fragment;
-  formatMatrix = new Map<Handler, FormatRange>();
 
   constructor(private range: Range) {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
+
     this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
     this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
     this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
@@ -20,17 +20,43 @@ export class TBRange {
   }
 
   apply() {
-    console.log(this)
+    const start = this.findPosition(
+      this.startFragment.children,
+      this.startIndex,
+      function (startIndex, endIndex, i) {
+        return startIndex <= i && endIndex > i;
+      });
+    const end = this.findPosition(
+      this.endFragment.children,
+      this.endIndex,
+      function (startIndex, endIndex, i) {
+        return startIndex < i && endIndex >= i;
+      });
+    this.range.setStart(start.node, start.position);
+    this.range.setEnd(end.node, end.position);
+  }
+
+  private findPosition(vNodes: VirtualNode[],
+                       index: number,
+                       fn: (startIndex: number,
+                            endIndex: number,
+                            target: number) => boolean): { node: Node, position: number } {
+    for (const item of vNodes) {
+      if (fn(item.formatRange.startIndex, item.formatRange.endIndex, index)) {
+        if (item instanceof VirtualElementNode) {
+          return this.findPosition(item.children, index, fn);
+        } else if (item instanceof VirtualNode) {
+          return {
+            node: item.elementRef,
+            position: index - item.formatRange.startIndex
+          };
+        }
+      }
+    }
   }
 
   private static getIndex(node: Node): number {
-    let vNode: VirtualElementNode = node[VIRTUAL_NODE];
-    let index = 0;
-    while (vNode) {
-      index += vNode.formatRange.startIndex;
-      vNode = vNode.parent;
-    }
-    return index;
+    return (node[VIRTUAL_NODE] as VirtualNode).formatRange.startIndex
   }
 
   private static getCommonFragment(node: Node): Fragment {

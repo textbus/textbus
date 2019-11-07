@@ -124,6 +124,8 @@ export class Fragment extends ViewNode {
       let container: DocumentFragment | HTMLElement = fragment;
       if (vNode.formatRange.handler) {
         container = vNode.formatRange.handler.execCommand.render(vNode.formatRange.state);
+        container[VIRTUAL_NODE] = vNode;
+        vNode.elementRef = container;
         fragment.appendChild(container);
       }
       newNodes.push(vNode);
@@ -142,12 +144,13 @@ export class Fragment extends ViewNode {
           i + vNode.formatRange.startIndex,
           item.length + vNode.formatRange.startIndex,
           null, null, vNode.formatRange.context);
+
         const v = new VirtualNode(newFormatRange, vNode.parent);
         newNodes.push(v);
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
-          currentNode[VIRTUAL_NODE] = vNode;
-          vNode.elementRef = currentNode;
+          currentNode[VIRTUAL_NODE] = v;
+          v.elementRef = currentNode;
           fragment.appendChild(currentNode);
         } else if (item instanceof ViewNode) {
           const container = item.render();
@@ -203,7 +206,7 @@ export class Fragment extends ViewNode {
           }
         }
         if (childFormatRanges.length) {
-          this.vDomBuilder(childFormatRanges, container, startIndex, firstRange.endIndex);
+          this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
         } else {
           const f = new FormatRange(firstRange.startIndex, firstRange.endIndex, null, null, this);
           container.children.push(new VirtualNode(f, parent))
