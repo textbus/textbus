@@ -34,8 +34,13 @@ export class Fragment extends ViewNode {
     super();
   }
 
+  apply(format: FormatRange) {
+    this.mergeFormat(format, true);
+  }
+
   queryState(startIndex: number, endIndex: number, handler: Handler) {
     const formatRanges = this.formatMatrix.get(handler);
+
     if (formatRanges) {
       if (startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex) {
         if (startIndex === endIndex) {
@@ -47,15 +52,11 @@ export class Fragment extends ViewNode {
     return false;
   }
 
-  apply(format: FormatRange) {
-    this.mergeFormat(format, true);
-  }
-
   /**
    * 渲染 DOM
    */
-  render() {
-    const dom = document.createElement(this.tagName);
+  render(tagName?: string) {
+    const dom = document.createElement(tagName || this.tagName);
     dom[FRAGMENT_CONTEXT] = this;
     this.elementRef = dom;
 
