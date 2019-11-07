@@ -42,7 +42,7 @@ export class TableEditCommander implements Commander {
     return selection;
   }
 
-  render(state: MatchState): Element {
+  render(state: MatchState): HTMLElement {
     return null;
   }
 }

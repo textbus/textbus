@@ -18,7 +18,7 @@ export class InlineCommander implements Commander {
     ));
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): Element {
+  render(state: MatchState, rawElement?: HTMLElement): HTMLElement {
     switch (state) {
       case MatchState.Exclude:
         if (rawElement) {
