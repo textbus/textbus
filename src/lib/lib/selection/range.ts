@@ -32,7 +32,7 @@ export class TBRange {
   private findPosition(vNodes: VirtualNode[],
                        index: number): { node: Node, position: number } {
     for (const item of vNodes) {
-      if (index > item.formatRange.startIndex && index <= item.formatRange.endIndex) {
+      if (index >= item.formatRange.startIndex && index <= item.formatRange.endIndex) {
         if (item instanceof VirtualElementNode) {
           return this.findPosition(item.children, index);
         } else if (item instanceof VirtualNode) {
