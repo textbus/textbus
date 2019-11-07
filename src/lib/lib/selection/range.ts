@@ -1,5 +1,4 @@
-import { Handler } from '../toolbar/handlers/help';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { VirtualElementNode, VirtualNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE, FRAGMENT_CONTEXT } from '../parser/help';
 

@@ -26,7 +26,7 @@
       background-color: #f00;
       width: 400px;
       height: 400px;
-      box-shadow: 100px 100px 30px 100px rgba(0,0,0,.1);
+      box-shadow: 100px 100px 30px 100px rgba(0, 0, 0, .1);
     }
   </style>
   <script>
@@ -62,6 +62,35 @@
           // selection.addRange(range.cloneRange());
           // console.log(range);
         }, 200);
+      }
+    }
+    var a = {
+      "message": "获取成功",
+      "success": true,
+      "data": {
+        "available": true,
+        "group": "",
+        "id": "10",
+        "level": 2,
+        "name": "南宁",
+        "prefix": "N",
+        "setting": {
+          "banshi": {
+            "type": "h5",
+            "url": "https://aigx.cloudbae.cn:10001/adapter/app/access/token?appUrl\u003dhttps://nnapp.cloudbae.cn:38080/nnbs/page/bs/index",
+            "vailable": true
+          },
+          "find": {"type": "h5", "url": "", "vailable": true},
+          "home": {"type": "local", "url": "", "vailable": true},
+          "profile": {"type": "local", "url": "", "vailable": true},
+          "yima": {
+            "type": "h5",
+            "url": "https://aigx.cloudbae.cn:8500/waiting;from\u003d5",
+            "vailable": false,
+            "version": "0.0.0.1"
+          }
+        },
+        "tag": {"colorBg": "", "colorText": "", "text": ""}
       }
     }
   </script>
