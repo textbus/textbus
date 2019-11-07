@@ -8,11 +8,11 @@ export class InlineCommander implements Commander {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, context: Fragment, handler: Handler) {
+  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean) {
     context.apply(new FormatRange(
       selection.firstRange.startIndex,
       selection.firstRange.endIndex,
-      MatchState.Matched,
+      overlap ? MatchState.Normal : MatchState.Matched,
       handler,
       context
     ));

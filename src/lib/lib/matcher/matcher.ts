@@ -4,6 +4,10 @@ export enum MatchState {
   Exclude = 'Exclude'
 }
 
+export interface MatchDelta {
+  overlap: boolean;
+}
+
 export interface MatchRule {
   tags?: string[] | RegExp;
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };

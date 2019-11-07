@@ -6,6 +6,7 @@ import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { Parser } from './parser/parser';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
+import { TBSelection } from './selection/selection';
 
 
 export interface EditorOptions {
@@ -54,6 +55,10 @@ export class Editor {
       this.readyState = true;
     });
 
+    this.viewer.onSelectionChange.subscribe(selection => {
+      this.updateHandlerState(selection);
+    });
+
     this.toolbar.classList.add('tanbo-editor-toolbar');
 
     this.elementRef.appendChild(this.toolbar);
@@ -62,6 +67,15 @@ export class Editor {
 
     this.elementRef.classList.add('tanbo-editor-container');
     this.container.appendChild(this.elementRef);
+  }
+
+  updateHandlerState(selection: TBSelection) {
+    this.handlers.forEach(handler => {
+      const overlap = selection.ranges.reduce((v, next) => {
+        return v && next.commonAncestorFragment.queryState(next.startIndex, next.endIndex, handler);
+      }, true);
+      handler.updateStatus(overlap);
+    });
   }
 
   addHandler(option: HandlerConfig) {

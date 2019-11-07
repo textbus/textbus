@@ -34,8 +34,21 @@ export class Fragment extends ViewNode {
     super();
   }
 
+  queryState(startIndex: number, endIndex: number, handler: Handler) {
+    const formatRanges = this.formatMatrix.get(handler);
+    if (formatRanges) {
+      if (startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex) {
+        if (startIndex === endIndex) {
+          return startIndex !== formatRanges[0].startIndex;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
   apply(format: FormatRange) {
-    this.mergeFormat(format);
+    this.mergeFormat(format, true);
   }
 
   /**
@@ -70,14 +83,19 @@ export class Fragment extends ViewNode {
   /**
    * 合并当前片段的格式化信息
    * @param format
+   * @param priority
    */
-  mergeFormat(format: FormatRange) {
+  mergeFormat(format: FormatRange, priority = false) {
     const oldFormats = this.formatMatrix.get(format.handler);
     let formatRanges: FormatRange[] = [];
 
     if (oldFormats) {
       const styleMarks: MatchState[] = [];
-      oldFormats.push(format);
+      if (priority) {
+        oldFormats.unshift(format);
+      } else {
+        oldFormats.push(format);
+      }
       let index = oldFormats.length - 1;
       while (index >= 0) {
         const item = oldFormats[index];
@@ -109,7 +127,12 @@ export class Fragment extends ViewNode {
     } else {
       formatRanges.push(format);
     }
-    this.formatMatrix.set(format.handler, formatRanges);
+    const ff = formatRanges.filter(f => f.state !== MatchState.Normal);
+    if (ff.length) {
+      this.formatMatrix.set(format.handler, ff);
+    } else {
+      this.formatMatrix.delete(format.handler);
+    }
   }
 
   /**

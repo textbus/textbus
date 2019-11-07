@@ -58,4 +58,8 @@ export class ActionSheetOptionHandler implements Handler {
     this.execCommand = option.execCommand;
     this.matcher = new Matcher(option.match);
   }
+
+  updateStatus(h: boolean): void {
+
+  }
 }

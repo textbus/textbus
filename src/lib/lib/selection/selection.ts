@@ -5,7 +5,7 @@ import { TBRange } from './range';
 
 export class TBSelection {
   cursorElementRef: HTMLElement;
-  onSelectionChange: Observable<Selection>;
+  onSelectionChange: Observable<TBSelection>;
   commonAncestorFragment: Fragment;
 
   ranges: TBRange[] = [];
@@ -17,7 +17,7 @@ export class TBSelection {
   private cursor: Cursor;
 
   private selection: Selection;
-  private selectionChangeEvent = new Subject<Selection>();
+  private selectionChangeEvent = new Subject<TBSelection>();
 
   constructor(private context: Document) {
     this.cursor = new Cursor(context);
@@ -40,7 +40,7 @@ export class TBSelection {
       }
       this.ranges = this.makeRanges();
       this.commonAncestorFragment = this.getCommonFragment(this.ranges);
-      this.selectionChangeEvent.next(this.selection);
+      this.selectionChangeEvent.next(this);
     });
   }
 

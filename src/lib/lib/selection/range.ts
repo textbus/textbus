@@ -21,29 +21,20 @@ export class TBRange {
   apply() {
     const start = this.findPosition(
       this.startFragment.children,
-      this.startIndex,
-      function (startIndex, endIndex, i) {
-        return startIndex <= i && endIndex > i;
-      });
+      this.startIndex);
     const end = this.findPosition(
       this.endFragment.children,
-      this.endIndex,
-      function (startIndex, endIndex, i) {
-        return startIndex < i && endIndex >= i;
-      });
+      this.endIndex);
     this.range.setStart(start.node, start.position);
     this.range.setEnd(end.node, end.position);
   }
 
   private findPosition(vNodes: VirtualNode[],
-                       index: number,
-                       fn: (startIndex: number,
-                            endIndex: number,
-                            target: number) => boolean): { node: Node, position: number } {
+                       index: number): { node: Node, position: number } {
     for (const item of vNodes) {
-      if (fn(item.formatRange.startIndex, item.formatRange.endIndex, index)) {
+      if (index > item.formatRange.startIndex && index <= item.formatRange.endIndex) {
         if (item instanceof VirtualElementNode) {
-          return this.findPosition(item.children, index, fn);
+          return this.findPosition(item.children, index);
         } else if (item instanceof VirtualNode) {
           return {
             node: item.elementRef,

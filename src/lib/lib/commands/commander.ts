@@ -4,7 +4,7 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
 export interface Commander {
-  command(selection: TBSelection, context: Fragment, handler: Handler): void;
+  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void;
 
   render(state: MatchState): HTMLElement;
 }

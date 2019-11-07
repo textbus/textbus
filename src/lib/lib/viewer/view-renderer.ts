@@ -8,13 +8,13 @@ import { Handler } from '../toolbar/handlers/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
-  onSelectionChange: Observable<Selection>;
+  onSelectionChange: Observable<TBSelection>;
   onReady: Observable<Document>;
 
   contentWindow: Window;
   contentDocument: Document;
 
-  private selectionChangeEvent = new Subject<Selection>();
+  private selectionChangeEvent = new Subject<TBSelection>();
   private readyEvent = new Subject<Document>();
   private frame = document.createElement('iframe');
   private selection: TBSelection;
@@ -65,7 +65,12 @@ export class ViewRenderer {
   apply(handler: Handler) {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const oldEl = commonAncestorFragment.elementRef;
-    handler.execCommand.command(this.selection, commonAncestorFragment, handler);
+
+    const overlap = this.selection.ranges.reduce((v, next) => {
+      return v && next.commonAncestorFragment.queryState(next.startIndex, next.endIndex, handler);
+    }, true);
+
+    handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
     const newNode = commonAncestorFragment.render();
     oldEl.parentNode.replaceChild(newNode, oldEl);
     this.selection.apply();
