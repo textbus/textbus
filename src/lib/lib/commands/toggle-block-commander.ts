@@ -9,7 +9,7 @@ export class ToggleBlockCommander implements Commander {
   }
 
   command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
-    context.tagName = overlap ? 'p' : this.tagName;
+    // context.tagName = overlap ? 'p' : this.tagName;
   }
 
   render(state: MatchState): HTMLElement {

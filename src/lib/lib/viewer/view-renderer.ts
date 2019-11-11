@@ -5,6 +5,7 @@ import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
 import { Parser } from '../parser/parser';
 import { Handler } from '../toolbar/handlers/help';
+import { FRAGMENT_CONTEXT } from '../parser/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -49,7 +50,8 @@ export class ViewRenderer {
   }
 
   render(vDom: Parser) {
-    this.contentDocument.documentElement.replaceChild(vDom.render(), this.contentDocument.body);
+    this.contentDocument.body[FRAGMENT_CONTEXT] = vDom;
+    this.contentDocument.body.appendChild(vDom.render());
   }
 
   use(hooks: Hooks) {
@@ -64,13 +66,14 @@ export class ViewRenderer {
 
   apply(handler: Handler) {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
-    const oldEl = commonAncestorFragment.elementRef;
-
-    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
-
-    handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
-    const newNode = commonAncestorFragment.render();
-    oldEl.parentNode.replaceChild(newNode, oldEl);
-    this.selection.apply();
+    console.log(commonAncestorFragment)
+    // const oldEl = commonAncestorFragment.elementRef;
+    // //
+    // const overlap = handler.matcher.queryState(this.selection, handler).overlap;
+    //
+    // handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
+    // const newNode = commonAncestorFragment.render();
+    // oldEl.parentNode.replaceChild(newNode, oldEl);
+    // this.selection.apply();
   }
 }

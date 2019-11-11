@@ -39,7 +39,7 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
         historyForwardHandler
       ],
       [
-        // hHandler
+        hHandler
       ], [
         boldHandler,
         italicHandler,

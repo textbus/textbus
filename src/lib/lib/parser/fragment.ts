@@ -3,13 +3,9 @@ import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { VirtualElementNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
-import { FRAGMENT_CONTEXT, VIRTUAL_NODE } from './help';
+import { VIRTUAL_NODE } from './help';
 
 export class FormatRange {
-  get length() {
-    return this.endIndex - this.startIndex || 0;
-  }
-
   constructor(public startIndex: number,
               public endIndex: number,
               public state: MatchState,
@@ -23,14 +19,12 @@ export class FormatRange {
 }
 
 export class Fragment extends ViewNode {
-  elementRef: HTMLElement;
-
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
   children: VirtualNode[] = [];
 
-  constructor(public tagName = 'p', public parent: Fragment) {
+  constructor(public parent: Fragment) {
     super();
   }
 
@@ -42,9 +36,6 @@ export class Fragment extends ViewNode {
    * 渲染 DOM
    */
   render(tagName?: string) {
-    const dom = document.createElement(tagName || this.tagName);
-    dom[FRAGMENT_CONTEXT] = this;
-    this.elementRef = dom;
 
     let formats: FormatRange[] = [];
     // 检出所有生效规则
@@ -55,7 +46,11 @@ export class Fragment extends ViewNode {
     const canApplyFormats = formats.sort((n, m) => {
       const a = n.startIndex - m.startIndex;
       if (a === 0) {
-        return m.endIndex - n.endIndex;
+        const b = m.endIndex - n.endIndex;
+        if (b === 0) {
+          return n.handler.priority - m.handler.priority;
+        }
+        return b;
       }
       return a;
     }).map(item => item.clone());
@@ -63,8 +58,7 @@ export class Fragment extends ViewNode {
     const vDom = this.createVDom(canApplyFormats);
     const r = this.viewBuilder(vDom, this.contents);
     this.children = r.newNodes;
-    dom.appendChild(r.fragment);
-    return dom;
+    return r.fragment;
   }
 
   /**

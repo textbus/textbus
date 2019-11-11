@@ -16,6 +16,7 @@ import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { TBSelection } from './selection/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
+import { defaultHandlers } from './default-handlers';
 
 
 export interface EditorOptions {
@@ -34,7 +35,7 @@ export class Editor implements EventDelegate {
   private viewer = new ViewRenderer();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [];
+  private readonly handlers: Handler[] = [...defaultHandlers];
 
   private tasks: Array<() => void> = [];
   private isFirst = true;

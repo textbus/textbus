@@ -12,6 +12,6 @@ export class BlockCommander implements Commander {
   }
 
   render(state: MatchState): HTMLElement {
-    return null;
+    return document.createElement(this.tagName);
   }
 }

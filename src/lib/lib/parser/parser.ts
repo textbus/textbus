@@ -6,7 +6,7 @@ import { SingleNode } from './single-node';
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
-    super('body', null);
+    super(null);
   }
 
   setContents(el: HTMLElement) {
@@ -38,7 +38,7 @@ export class Parser extends Fragment {
           return len;
         }
       } else {
-        const newBlock = new Fragment(tagName, context);
+        const newBlock = new Fragment(context);
         let nodes: Node[];
         if (dtd[tagName].limitChildren) {
           nodes = Array.from((from as HTMLElement).children).filter(el => {
@@ -64,7 +64,12 @@ export class Parser extends Fragment {
         state: item.matcher.matchNode(by)
       };
     }).filter(item => item.state !== MatchState.Normal).forEach(item => {
-      const newRange = new FormatRange(startIndex, startIndex + len, item.state, item.token, context);
+      const newRange = new FormatRange(
+        startIndex,
+        startIndex + len,
+        item.state,
+        item.token,
+        context);
       context.mergeFormat(newRange);
     })
   }

@@ -127,9 +127,9 @@ export class Matcher {
                             endIndex: number,
                             fragment: Fragment,
                             handler: Handler): boolean {
-    if (handler.matcher.matchNode(fragment.elementRef) === MatchState.Matched) {
-      return true;
-    }
+    // if (handler.matcher.matchNode(fragment.elementRef) === MatchState.Matched) {
+    //   return true;
+    // }
     const formatRanges = fragment.formatMatrix.get(handler);
     if (formatRanges) {
       if (formatRanges[0].state === MatchState.Matched) {
