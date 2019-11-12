@@ -1,4 +1,4 @@
-import { ActionSheetConfig, HandlerType } from '../help';
+import { ActionSheetConfig, blockHandlerPriority, HandlerType } from '../help';
 import { TableEditCommander, TableEditActions } from '../../commands/table-edit-commander';
 import { TableEditHook } from '../hooks/table-edit-hook';
 
@@ -10,6 +10,7 @@ export const tableEditHandler: ActionSheetConfig = {
   actions: [{
     label: '在左边添加列',
     execCommand: new TableEditCommander(TableEditActions.AddColumnToLeft),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -17,6 +18,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '在右边添加列',
     execCommand: new TableEditCommander(TableEditActions.AddColumnToRight),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -24,6 +26,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '在上边添加行',
     execCommand: new TableEditCommander(TableEditActions.AddRowToTop),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -31,6 +34,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '在下边添加行',
     execCommand: new TableEditCommander(TableEditActions.AddRowToBottom),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -38,6 +42,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '删除左边列',
     execCommand: new TableEditCommander(TableEditActions.DeleteLeftColumn),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -45,6 +50,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '删除右边列',
     execCommand: new TableEditCommander(TableEditActions.DeleteRightColumn),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -52,6 +58,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '删除上边行',
     execCommand: new TableEditCommander(TableEditActions.DeleteTopRow),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -59,6 +66,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '删除下边行',
     execCommand: new TableEditCommander(TableEditActions.DeleteBottomRow),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -66,6 +74,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '合并单元格',
     execCommand: new TableEditCommander(TableEditActions.MergeCells),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },
@@ -73,6 +82,7 @@ export const tableEditHandler: ActionSheetConfig = {
   }, {
     label: '取消合并单元格',
     execCommand: new TableEditCommander(TableEditActions.SplitCells),
+    priority: blockHandlerPriority,
     match: {
       tags: ['table']
     },

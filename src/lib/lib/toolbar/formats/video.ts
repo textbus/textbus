@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, HandlerType, inlineHandlerPriority } from '../help';
 import { sourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
 
@@ -37,6 +37,7 @@ form.onSubmit = function (attrs) {
 export const videoHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-video'],
+  priority: inlineHandlerPriority,
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,

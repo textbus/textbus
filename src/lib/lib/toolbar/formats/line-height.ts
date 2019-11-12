@@ -1,4 +1,4 @@
-import { HandlerType, SelectConfig } from '../help';
+import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const lineHeightHandler: SelectConfig = {
@@ -9,6 +9,7 @@ export const lineHeightHandler: SelectConfig = {
   options: [
     {
       label: '1x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '1em'}
       },
@@ -17,6 +18,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '1.2x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '1_2em'}
       },
@@ -24,6 +26,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '1.4x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '1_4em'}
       },
@@ -31,6 +34,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '1.6x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '1_6em'}
       },
@@ -38,6 +42,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '1.8x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '1_8em'}
       },
@@ -45,6 +50,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '2x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '2em'}
       },
@@ -52,6 +58,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '3x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '3em'}
       },
@@ -59,6 +66,7 @@ export const lineHeightHandler: SelectConfig = {
     },
     {
       label: '4x',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '4em'}
       },

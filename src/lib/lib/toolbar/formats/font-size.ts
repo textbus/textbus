@@ -1,4 +1,4 @@
-import { HandlerType, SelectConfig } from '../help';
+import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const fontSizeHandler: SelectConfig = {
@@ -9,6 +9,7 @@ export const fontSizeHandler: SelectConfig = {
   options: [
     {
       label: '12px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '12px'}
       },
@@ -17,6 +18,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '13px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '13px'}
       },
@@ -25,6 +27,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '14px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '14px'}
       },
@@ -34,6 +37,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '16px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '16px'}
       },
@@ -42,6 +46,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '18px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '18px'}
       },
@@ -50,6 +55,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '20px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '20px'}
       },
@@ -58,6 +64,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '24px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {fontSize: '24px'}
       },
@@ -66,6 +73,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '36px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '36px'}
       },
@@ -74,6 +82,7 @@ export const fontSizeHandler: SelectConfig = {
     },
     {
       label: '48px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {lineHeight: '48px'}
       },

@@ -11,28 +11,30 @@ export class DropdownHandler implements Handler {
   matcher: Matcher;
   onApply: Observable<any>;
   execCommand: Commander;
+  priority: number;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
-  constructor(private handler: DropdownConfig, private delegate: EventDelegate) {
-    this.onApply = handler.onHide;
+  constructor(private config: DropdownConfig, private delegate: EventDelegate) {
+    this.onApply = config.onHide;
+    this.priority = config.priority
 
-    this.matcher = new Matcher(handler.match);
-    this.execCommand = handler.execCommand;
-    this.dropdownButton.innerText = handler.label || '';
+    this.matcher = new Matcher(config.match);
+    this.execCommand = config.execCommand;
+    this.dropdownButton.innerText = config.label || '';
 
-    this.dropdownButton.classList.add(...(handler.classes || []));
+    this.dropdownButton.classList.add(...(config.classes || []));
 
     this.dropdown = new Dropdown(
       this.dropdownButton,
-      handler.viewer.elementRef,
-      handler.onHide,
-      handler.tooltip
+      config.viewer.elementRef,
+      config.onHide,
+      config.tooltip
     );
     this.elementRef = this.dropdown.elementRef;
 
-    if (typeof handler.viewer.setEventDelegator === 'function') {
-      handler.viewer.setEventDelegator(delegate);
+    if (typeof config.viewer.setEventDelegator === 'function') {
+      config.viewer.setEventDelegator(delegate);
     }
   }
 

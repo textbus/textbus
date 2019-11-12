@@ -1,7 +1,9 @@
-import { Handler } from './toolbar/handlers/help';
 import { Observable } from 'rxjs';
+
+import { Handler } from './toolbar/handlers/help';
 import { Matcher } from './matcher/matcher';
 import { Commander } from './commands/commander';
+import { defaultHandlerPriority } from './toolbar/help';
 
 class DefaultCommander implements Commander {
   constructor(private tagName: string) {
@@ -18,7 +20,7 @@ class DefaultCommander implements Commander {
 class DefaultHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<void>;
-
+  priority = defaultHandlerPriority;
   constructor(public execCommand: Commander,
               public matcher: Matcher) {
   }

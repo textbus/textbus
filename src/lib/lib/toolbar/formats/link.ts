@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, HandlerType, inlineHandlerPriority } from '../help';
 import { AttrCommander } from '../../commands/attr-commander';
 
 const form = new Form([{
@@ -36,6 +36,7 @@ form.onSubmit = function (attrs) {
 export const linkHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-link'],
+  priority: inlineHandlerPriority,
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
   viewer: form,

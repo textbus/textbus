@@ -1,4 +1,4 @@
-import { HandlerType, SelectConfig } from '../help';
+import { HandlerType, SelectConfig, propertyHandlerPriority } from '../help';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
 
 export const alignHandler: SelectConfig = {
@@ -8,6 +8,7 @@ export const alignHandler: SelectConfig = {
     {
       label: '左对齐',
       classes: ['tanbo-editor-icon-paragraph-left'],
+      priority: propertyHandlerPriority,
       match: {
         styles: {
           textAlign: ['', 'left']
@@ -18,6 +19,7 @@ export const alignHandler: SelectConfig = {
     }, {
       label: '右对齐',
       classes: ['tanbo-editor-icon-paragraph-right'],
+      priority: propertyHandlerPriority,
       match: {
         styles: {
           textAlign: 'right'
@@ -27,6 +29,7 @@ export const alignHandler: SelectConfig = {
     }, {
       label: '居中对齐',
       classes: ['tanbo-editor-icon-paragraph-center'],
+      priority: propertyHandlerPriority,
       match: {
         styles: {
           textAlign: 'center'
@@ -36,6 +39,7 @@ export const alignHandler: SelectConfig = {
     }, {
       label: '分散对齐',
       classes: ['tanbo-editor-icon-paragraph-justify'],
+      priority: propertyHandlerPriority,
       match: {
         styles: {
           textAlign: 'justify'

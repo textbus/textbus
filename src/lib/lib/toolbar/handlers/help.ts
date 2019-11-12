@@ -9,5 +9,5 @@ export interface Handler {
   matcher: Matcher;
   execCommand: Commander;
   updateStatus(h: boolean): void;
-  priority?: number;
+  priority: number;
 }

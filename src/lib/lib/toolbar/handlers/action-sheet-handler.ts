@@ -11,15 +11,15 @@ export class ActionSheetHandler {
   readonly elementRef: HTMLElement;
   options: ActionSheetOptionHandler[] = [];
 
-  constructor(private handler: ActionSheetConfig) {
+  constructor(private config: ActionSheetConfig) {
 
     const dropdownButton = document.createElement('span');
-    dropdownButton.classList.add(...handler.classes || []);
+    dropdownButton.classList.add(...config.classes || []);
 
     const menu = document.createElement('div');
     menu.classList.add('tanbo-editor-toolbar-menu');
 
-    handler.actions.forEach(option => {
+    config.actions.forEach(option => {
       const item = new ActionSheetOptionHandler(option);
       menu.appendChild(item.elementRef);
       this.options.push(item);
@@ -29,7 +29,7 @@ export class ActionSheetHandler {
       dropdownButton,
       menu,
       merge(...this.options.map(item => item.onApply)),
-      handler.tooltip
+      config.tooltip
     ).elementRef;
   }
 }
@@ -40,10 +40,12 @@ export class ActionSheetOptionHandler implements Handler {
   onMatched: Observable<ActionConfig>;
   matcher: Matcher;
   execCommand: Commander;
+  priority: number;
   private eventSource = new Subject<void>();
   private matchedEvent = new Subject<ActionConfig>();
 
   constructor(private option: ActionConfig) {
+    this.priority = option.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');

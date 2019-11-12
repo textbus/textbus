@@ -19,6 +19,7 @@ export class FormatRange {
 }
 
 export class Fragment extends ViewNode {
+  elements: Node[] = [];
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
@@ -58,6 +59,7 @@ export class Fragment extends ViewNode {
     const vDom = this.createVDom(canApplyFormats);
     const r = this.viewBuilder(vDom, this.contents);
     this.children = r.newNodes;
+    this.elements = Array.from(r.fragment.childNodes);
     return r.fragment;
   }
 
@@ -128,7 +130,7 @@ export class Fragment extends ViewNode {
       let container: DocumentFragment | HTMLElement = fragment;
       if (vNode.formatRange.handler) {
         container = vNode.formatRange.handler.execCommand.render(vNode.formatRange.state);
-        container[VIRTUAL_NODE] = vNode;
+        container[VIRTUAL_NODE] = [vNode];
         vNode.elementRef = container;
         fragment.appendChild(container);
       }
@@ -153,7 +155,7 @@ export class Fragment extends ViewNode {
         newNodes.push(v);
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
-          currentNode[VIRTUAL_NODE] = v;
+          currentNode[VIRTUAL_NODE] = [v];
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
         } else if (item instanceof ViewNode) {

@@ -10,9 +10,11 @@ export class ButtonHandler implements Handler {
   matcher: Matcher;
   onApply: Observable<void>;
   execCommand: Commander;
+  priority: number;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
+    this.priority = config.priority;
     this.matcher = new Matcher(config.match);
     this.execCommand = config.execCommand;
     this.onApply = this.eventSource.asObservable();

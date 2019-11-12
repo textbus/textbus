@@ -46,10 +46,12 @@ export class SelectOptionHandler implements Handler {
   onMatched: Observable<SelectOptionConfig>;
   matcher: Matcher;
   execCommand: Commander;
+  priority: number;
   private eventSource = new Subject<void>();
   private matchedEvent = new Subject<SelectOptionConfig>();
 
   constructor(private option: SelectOptionConfig) {
+    this.priority = option.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');

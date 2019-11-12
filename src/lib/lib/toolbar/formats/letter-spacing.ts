@@ -1,4 +1,4 @@
-import { HandlerType, SelectConfig } from '../help';
+import {  HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const letterSpacingHandler: SelectConfig = {
@@ -9,6 +9,7 @@ export const letterSpacingHandler: SelectConfig = {
   options: [
     {
       label: '0px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: ['', '0px']}
       },
@@ -17,6 +18,7 @@ export const letterSpacingHandler: SelectConfig = {
     },
     {
       label: '1px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: '1px'}
       },
@@ -24,6 +26,7 @@ export const letterSpacingHandler: SelectConfig = {
     },
     {
       label: '2px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: '2px'}
       },
@@ -31,6 +34,7 @@ export const letterSpacingHandler: SelectConfig = {
     },
     {
       label: '3px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: '3px'}
       },
@@ -38,6 +42,7 @@ export const letterSpacingHandler: SelectConfig = {
     },
     {
       label: '4px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: '4px'}
       },
@@ -45,6 +50,7 @@ export const letterSpacingHandler: SelectConfig = {
     },
     {
       label: '5px',
+      priority: propertyHandlerPriority,
       match: {
         styles: {letterSpacing: '5px'}
       },

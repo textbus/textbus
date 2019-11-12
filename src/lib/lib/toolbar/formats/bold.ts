@@ -1,10 +1,11 @@
 import { InlineCommander } from '../../commands/inline-commander';
-import { ButtonConfig, HandlerType } from '../help';
+import { ButtonConfig, HandlerType, inlineHandlerPriority } from '../help';
 
 export const boldHandler: ButtonConfig = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-bold'],
   tooltip: '加粗',
+  priority: inlineHandlerPriority,
   match: {
     tags: ['strong', 'b', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],
     styles: {

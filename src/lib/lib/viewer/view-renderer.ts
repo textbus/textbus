@@ -66,14 +66,16 @@ export class ViewRenderer {
 
   apply(handler: Handler) {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
-    console.log(commonAncestorFragment)
-    // const oldEl = commonAncestorFragment.elementRef;
+    const oldFragment = commonAncestorFragment.elements;
+    const parent = oldFragment[0].parentNode;
     // //
-    // const overlap = handler.matcher.queryState(this.selection, handler).overlap;
+    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
     //
-    // handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
-    // const newNode = commonAncestorFragment.render();
+    handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
+    const newFragment = commonAncestorFragment.render();
+    parent.insertBefore(newFragment, oldFragment[0]);
+    oldFragment.forEach(n => parent.removeChild(n));
     // oldEl.parentNode.replaceChild(newNode, oldEl);
-    // this.selection.apply();
+    this.selection.apply();
   }
 }

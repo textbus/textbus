@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, HandlerType, inlineHandlerPriority } from '../help';
 import { sourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
 
@@ -27,6 +27,7 @@ form.onSubmit = function (attrs) {
 export const imageHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-image'],
+  priority: inlineHandlerPriority,
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,

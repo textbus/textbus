@@ -33,6 +33,7 @@ export enum HandlerType {
 export interface ButtonConfig {
   type: HandlerType.Button;
   execCommand: Commander;
+  priority: number;
   label?: string;
   classes?: string[];
   tooltip?: string;
@@ -42,6 +43,7 @@ export interface ButtonConfig {
 
 export interface SelectOptionConfig {
   execCommand: Commander;
+  priority: number;
   label?: string;
   classes?: string[];
   match?: MatchRule;
@@ -62,6 +64,7 @@ export interface DropdownConfig {
   viewer: DropdownHandlerView;
   onHide: Observable<void>;
   execCommand: Commander;
+  priority: number;
   classes?: string[];
   format?: string;
   tooltip?: string;
@@ -72,6 +75,7 @@ export interface DropdownConfig {
 
 export interface ActionConfig {
   execCommand: Commander;
+  priority: number;
   label?: string;
   classes?: string[]
   match?: MatchRule;
@@ -91,4 +95,9 @@ export type HandlerConfig = ButtonConfig | SelectConfig | DropdownConfig | Actio
 export interface EventDelegate {
   dispatchEvent(type: string): Observable<string>
 }
+
+export const defaultHandlerPriority = 0;
+export const blockHandlerPriority = 100;
+export const inlineHandlerPriority = 200;
+export const propertyHandlerPriority = 300;
 

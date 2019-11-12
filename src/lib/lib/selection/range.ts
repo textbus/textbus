@@ -13,8 +13,8 @@ export class TBRange {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
 
     this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
-    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
-    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualElementNode).formatRange.context;
+    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualElementNode[])[0].formatRange.context;
+    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualElementNode[])[0].formatRange.context;
     this.commonAncestorFragment = TBRange.getCommonFragment(range.commonAncestorContainer);
   }
 
@@ -46,7 +46,7 @@ export class TBRange {
   }
 
   private static getIndex(node: Node): number {
-    return (node[VIRTUAL_NODE] as VirtualNode).formatRange.startIndex
+    return (node[VIRTUAL_NODE] as VirtualNode[])[0].formatRange.startIndex
   }
 
   private static getCommonFragment(node: Node): Fragment {
