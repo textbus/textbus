@@ -60,6 +60,17 @@ export class Contents implements Iterable<string | ViewNode> {
     return result;
   }
 
+  find(element: ViewNode): number {
+    let index = 0;
+    for (const item of this.elements) {
+      if (item === element) {
+        return index;
+      }
+      index += item.length;
+    }
+    return -1;
+  }
+
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0];
   }

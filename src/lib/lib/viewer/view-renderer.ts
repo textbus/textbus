@@ -68,13 +68,17 @@ export class ViewRenderer {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const oldFragment = commonAncestorFragment.elements;
     const parent = oldFragment[0].parentNode;
-    // //
+
     const overlap = handler.matcher.queryState(this.selection, handler).overlap;
-    //
     handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
     const newFragment = commonAncestorFragment.render();
     parent.insertBefore(newFragment, oldFragment[0]);
-    oldFragment.forEach(n => parent.removeChild(n));
+    try {
+      oldFragment.forEach(n => n.parentNode && n.parentNode.removeChild(n));
+    } catch (e) {
+      console.log(parent, oldFragment)
+    }
+
     // oldEl.parentNode.replaceChild(newNode, oldEl);
     this.selection.apply();
   }

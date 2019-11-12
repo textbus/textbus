@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
@@ -12,7 +12,7 @@ export class ToggleBlockCommander implements Commander {
     // context.tagName = overlap ? 'p' : this.tagName;
   }
 
-  render(state: MatchState): HTMLElement {
-    return null;
+  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+    return;
   }
 }

@@ -1,9 +1,19 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { VirtualElementNode, VirtualNode } from './virtual-dom';
+import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
-import { VIRTUAL_NODE } from './help';
+import { FRAGMENT_CONTEXT, VIRTUAL_NODE } from './help';
+import { ReplaceModel, ChildSlotModel } from '../commands/commander';
+import { TBRange } from '../selection/range';
+
+export interface Update {
+  range: TBRange;
+  handler: Handler;
+  state: MatchState;
+  useValue?: any;
+  canSurroundBlockElement?: boolean;
+}
 
 export class FormatRange {
   constructor(public startIndex: number,
@@ -23,20 +33,50 @@ export class Fragment extends ViewNode {
   contents = new Contents();
   formatMatrix = new Map<Handler, FormatRange[]>();
 
-  children: VirtualNode[] = [];
+  children: Array<VirtualNode | VirtualContainerNode> = [];
 
   constructor(public parent: Fragment) {
     super();
   }
 
-  apply(format: FormatRange) {
-    this.mergeFormat(format, true);
+  apply(update: Update) {
+    // if (canSurroundBlockElement) {
+    //   this.mergeFormat(format, true);
+    // } else {
+    //
+    //   const children = this.contents.slice(format.startIndex, format.endIndex);
+    //   let index = 0;
+    //   const formats: FormatRange[] = [];
+    //   let childFormat: FormatRange;
+    //   children.forEach(item => {
+    //     if (item instanceof Fragment) {
+    //       const c = format.clone();
+    //       c.startIndex = 0;
+    //       c.endIndex = item.contents.length;
+    //       item.apply(c, canSurroundBlockElement);
+    //     } else if (item) {
+    //       if (!childFormat) {
+    //         childFormat = new FormatRange(
+    //           format.startIndex + index,
+    //           format.startIndex + index + item.length,
+    //           format.state,
+    //           format.handler,
+    //           format.context);
+    //         formats.push(childFormat);
+    //       } else {
+    //         childFormat.endIndex = format.startIndex + index + item.length;
+    //       }
+    //     }
+    //     index += item.length;
+    //   });
+    //   formats.forEach(f => this.mergeFormat(f, true))
+    // }
   }
 
   /**
    * 渲染 DOM
    */
-  render(tagName?: string) {
+  render() {
 
     let formats: FormatRange[] = [];
     // 检出所有生效规则
@@ -66,15 +106,15 @@ export class Fragment extends ViewNode {
   /**
    * 合并当前片段的格式化信息
    * @param format
-   * @param priority
+   * @param highestPriority
    */
-  mergeFormat(format: FormatRange, priority = false) {
+  mergeFormat(format: FormatRange, highestPriority = false) {
     const oldFormats = this.formatMatrix.get(format.handler);
     let formatRanges: FormatRange[] = [];
 
     if (oldFormats) {
       const styleMarks: MatchState[] = [];
-      if (priority) {
+      if (highestPriority) {
         oldFormats.unshift(format);
       } else {
         oldFormats.push(format);
@@ -126,36 +166,61 @@ export class Fragment extends ViewNode {
   private viewBuilder(vNode: VirtualNode, contents: Contents) {
     const fragment = document.createDocumentFragment();
     const newNodes: VirtualNode[] = [];
-    if (vNode instanceof VirtualElementNode) {
-      let container: DocumentFragment | HTMLElement = fragment;
-      if (vNode.formatRange.handler) {
-        container = vNode.formatRange.handler.execCommand.render(vNode.formatRange.state);
-        container[VIRTUAL_NODE] = [vNode];
-        vNode.elementRef = container;
+    if (vNode instanceof VirtualContainerNode) {
+      const nodes: VirtualNode[] = [];
+      let container: HTMLElement;
+      let slotContainer: HTMLElement;
+      vNode.formats.reduce((node, next) => {
+        if (next.handler) {
+          const renderModel = next.handler.execCommand.render(next.state, node);
+          if (renderModel instanceof ReplaceModel) {
+            container = renderModel.replaceElement;
+            container[VIRTUAL_NODE] = vNode;
+            container[FRAGMENT_CONTEXT] = this;
+            vNode.elementRef = container;
+            slotContainer = container;
+            return renderModel.replaceElement;
+          } else if (renderModel instanceof ChildSlotModel) {
+            if (node) {
+              node.appendChild(renderModel.slotElement);
+            } else {
+              container = renderModel.slotElement;
+            }
+            slotContainer = renderModel.slotElement;
+            slotContainer[VIRTUAL_NODE] = vNode;
+            slotContainer[FRAGMENT_CONTEXT] = this;
+            vNode.elementRef = slotContainer;
+            return renderModel.slotElement;
+          }
+        }
+        return node;
+      }, (null as HTMLElement));
+
+      if (container) {
         fragment.appendChild(container);
       }
-      newNodes.push(vNode);
-      const nodes: VirtualNode[] = [];
       vNode.children.forEach(vNode => {
         const r = this.viewBuilder(vNode, contents);
-        container.appendChild(r.fragment);
+        (slotContainer || fragment).appendChild(r.fragment);
         nodes.push(...r.newNodes);
       });
+      newNodes.push(vNode);
       vNode.children = nodes;
     } else {
-      const c = contents.slice(vNode.formatRange.startIndex, vNode.formatRange.endIndex);
+      const c = contents.slice(vNode.formats[0].startIndex, vNode.formats[0].endIndex);
       let i = 0;
       c.forEach(item => {
         const newFormatRange = new FormatRange(
-          i + vNode.formatRange.startIndex,
-          item.length + vNode.formatRange.startIndex,
-          null, null, vNode.formatRange.context);
+          i + vNode.formats[0].startIndex,
+          item.length + vNode.formats[0].startIndex,
+          null, null, vNode.formats[0].context);
 
-        const v = new VirtualNode(newFormatRange, vNode.parent);
+        const v = new VirtualNode([newFormatRange], vNode.parent);
         newNodes.push(v);
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
-          currentNode[VIRTUAL_NODE] = [v];
+          currentNode[VIRTUAL_NODE] = v;
+          currentNode[FRAGMENT_CONTEXT] = this;
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
         } else if (item instanceof ViewNode) {
@@ -177,7 +242,7 @@ export class Fragment extends ViewNode {
    * @param formatRanges 可应用的格式化数据
    */
   private createVDom(formatRanges: FormatRange[]) {
-    const root = new VirtualElementNode(new FormatRange(0, this.contents.length, null, null, this), null);
+    const root = new VirtualContainerNode([new FormatRange(0, this.contents.length, null, null, this)], null);
     this.vDomBuilder(formatRanges,
       root,
       0,
@@ -193,20 +258,37 @@ export class Fragment extends ViewNode {
    * @param startIndex 生成范围的开始索引
    * @param endIndex 生成范围的结束位置
    */
-  private vDomBuilder(formatRanges: FormatRange[], parent: VirtualElementNode, startIndex: number, endIndex: number) {
+  private vDomBuilder(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
     while (startIndex < endIndex) {
       let firstRange = formatRanges.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
           const f = new FormatRange(startIndex, firstRange.startIndex, null, null, this);
-          parent.children.push(new VirtualNode(f, parent));
+          parent.children.push(new VirtualNode([f], parent));
         }
-        const container = new VirtualElementNode(firstRange, parent);
+        const container = new VirtualContainerNode([firstRange], parent);
         const childFormatRanges: FormatRange[] = [];
         while (true) {
           const f = formatRanges[0];
-          if (f && f.endIndex <= firstRange.endIndex) {
-            childFormatRanges.push(formatRanges.shift());
+          if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {
+            container.formats.push(formatRanges.shift());
+          } else {
+            break;
+          }
+        }
+        let index = 0;
+        while (true) {
+          const f = formatRanges[index];
+          if (f && f.startIndex <= firstRange.endIndex) {
+            if (f.endIndex <= firstRange.endIndex) {
+              childFormatRanges.push(formatRanges.shift());
+            } else {
+              const cloneRange = f.clone();
+              cloneRange.endIndex = firstRange.endIndex;
+              childFormatRanges.push(cloneRange);
+              f.startIndex = firstRange.endIndex;
+              index++;
+            }
           } else {
             break;
           }
@@ -215,12 +297,12 @@ export class Fragment extends ViewNode {
           this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
         } else {
           const f = new FormatRange(firstRange.startIndex, firstRange.endIndex, null, null, this);
-          container.children.push(new VirtualNode(f, parent))
+          container.children.push(new VirtualNode([f], parent))
         }
         parent.children.push(container);
         startIndex = firstRange.endIndex;
       } else {
-        parent.children.push(new VirtualNode(new FormatRange(startIndex, endIndex, null, null, this), parent));
+        parent.children.push(new VirtualNode([new FormatRange(startIndex, endIndex, null, null, this)], parent));
         break;
       }
     }

@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
@@ -9,21 +9,19 @@ export class BlockCommander implements Commander {
   }
 
   command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
-    debugger;
-    context.apply(new FormatRange(
-      selection.firstRange.startIndex,
-      selection.firstRange.endIndex,
-      overlap ? MatchState.Normal : MatchState.Matched,
-      handler,
-      context
-    ));
+    // context.apply(new FormatRange(
+    //   selection.firstRange.startIndex,
+    //   selection.firstRange.endIndex,
+    //   overlap ? MatchState.Normal : MatchState.Matched,
+    //   handler,
+    //   context
+    // ));
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): HTMLElement {
-    // console.log(rawElement, this)
+  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
     if (rawElement && rawElement.tagName.toLowerCase() === this.tagName) {
-      return rawElement;
+      return null;
     }
-    return document.createElement(this.tagName);
+    return new ReplaceModel(document.createElement(this.tagName));
   }
 }

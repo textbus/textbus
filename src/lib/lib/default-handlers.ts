@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 
 import { Handler } from './toolbar/handlers/help';
-import { Matcher } from './matcher/matcher';
-import { Commander } from './commands/commander';
+import { Matcher, MatchState } from './matcher/matcher';
+import { Commander, ReplaceModel } from './commands/commander';
 import { defaultHandlerPriority } from './toolbar/help';
 
 class DefaultCommander implements Commander {
@@ -12,8 +12,8 @@ class DefaultCommander implements Commander {
   command(): void {
   }
 
-  render(): HTMLElement {
-    return document.createElement(this.tagName);
+  render(): ReplaceModel {
+    return new ReplaceModel(document.createElement(this.tagName));
   }
 }
 

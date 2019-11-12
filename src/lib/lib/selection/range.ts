@@ -1,6 +1,6 @@
 import { Fragment } from '../parser/fragment';
-import { VirtualElementNode, VirtualNode } from '../parser/virtual-dom';
-import { VIRTUAL_NODE, FRAGMENT_CONTEXT } from '../parser/help';
+import { VirtualContainerNode, VirtualNode } from '../parser/virtual-dom';
+import { FRAGMENT_CONTEXT, VIRTUAL_NODE } from '../parser/help';
 
 export class TBRange {
   startIndex: number;
@@ -13,8 +13,8 @@ export class TBRange {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
 
     this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
-    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualElementNode[])[0].formatRange.context;
-    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualElementNode[])[0].formatRange.context;
+    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context;
+    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context;
     this.commonAncestorFragment = TBRange.getCommonFragment(range.commonAncestorContainer);
   }
 
@@ -32,13 +32,13 @@ export class TBRange {
   private findPosition(vNodes: VirtualNode[],
                        index: number): { node: Node, position: number } {
     for (const item of vNodes) {
-      if (index >= item.formatRange.startIndex && index <= item.formatRange.endIndex) {
-        if (item instanceof VirtualElementNode) {
+      if (index >= item.formats[0].startIndex && index <= item.formats[0].endIndex) {
+        if (item instanceof VirtualContainerNode) {
           return this.findPosition(item.children, index);
         } else if (item instanceof VirtualNode) {
           return {
             node: item.elementRef,
-            position: index - item.formatRange.startIndex
+            position: index - item.formats[0].startIndex
           };
         }
       }
@@ -46,13 +46,14 @@ export class TBRange {
   }
 
   private static getIndex(node: Node): number {
-    return (node[VIRTUAL_NODE] as VirtualNode[])[0].formatRange.startIndex
+    return (node[VIRTUAL_NODE] as VirtualNode).formats[0].startIndex
   }
 
   private static getCommonFragment(node: Node): Fragment {
     while (node) {
-      if (node[FRAGMENT_CONTEXT]) {
-        return node[FRAGMENT_CONTEXT];
+      const fragment = node[FRAGMENT_CONTEXT] as Fragment;
+      if (fragment) {
+        return fragment;
       }
       node = node.parentNode;
     }

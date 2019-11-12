@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../selection/selection';
 import { Fragment } from '../parser/fragment';
 import { MatchState } from '../matcher/matcher';
@@ -42,7 +42,7 @@ export class TableEditCommander implements Commander {
     return selection;
   }
 
-  render(state: MatchState): HTMLElement {
-    return null;
+  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+    return;
   }
 }

@@ -3,11 +3,11 @@ import { FormatRange } from './fragment';
 export class VirtualNode {
   elementRef: Node;
 
-  constructor(public formatRange: FormatRange,
-              public parent: VirtualElementNode) {
+  constructor(public formats: FormatRange[],
+              public parent: VirtualContainerNode) {
   }
 }
 
-export class VirtualElementNode extends VirtualNode {
-  children: Array<VirtualElementNode | VirtualNode> = [];
+export class VirtualContainerNode extends VirtualNode {
+  children: Array<VirtualContainerNode | VirtualNode> = [];
 }

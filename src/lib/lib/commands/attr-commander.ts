@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
@@ -15,7 +15,7 @@ export class AttrCommander implements Commander {
   command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
   }
 
-  render(state: MatchState): HTMLElement {
-    return null;
+  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+    return;
   }
 }

@@ -1,6 +1,6 @@
-import { Commander } from './commander';
+import { ChildSlotModel, Commander } from './commander';
 import { MatchState } from '../matcher/matcher';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
@@ -9,16 +9,16 @@ export class InlineCommander implements Commander {
   }
 
   command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean) {
-    context.apply(new FormatRange(
-      selection.firstRange.startIndex,
-      selection.firstRange.endIndex,
-      overlap ? MatchState.Normal : MatchState.Matched,
-      handler,
-      context
-    ));
+    selection.ranges.forEach(range => {
+      context.apply({
+        range,
+        handler,
+        state: overlap ? MatchState.Normal : MatchState.Matched
+      });
+    })
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): HTMLElement {
+  render(state: MatchState, rawElement?: HTMLElement) {
     switch (state) {
       case MatchState.Exclude:
         if (rawElement) {
@@ -27,10 +27,11 @@ export class InlineCommander implements Commander {
         } else {
           const node = document.createElement('span');
           node.style.fontWeight = 'normal';
-          return node;
+          return new ChildSlotModel(node);
         }
       case MatchState.Matched:
-        return document.createElement(this.tagName);
+        return new ChildSlotModel(document.createElement(this.tagName));
     }
+    return null;
   }
 }

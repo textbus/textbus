@@ -91,6 +91,8 @@ export class Matcher {
   }
 
   private overlap(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): boolean {
+    const contents = fragment.contents.slice(startIndex, endIndex);
+
     const overlapSelf = this.matchStateByRange(startIndex, endIndex, fragment, handler);
     if (overlapSelf) {
       return fragment.contents.slice(startIndex, endIndex).filter(item => {
@@ -127,9 +129,6 @@ export class Matcher {
                             endIndex: number,
                             fragment: Fragment,
                             handler: Handler): boolean {
-    // if (handler.matcher.matchNode(fragment.elementRef) === MatchState.Matched) {
-    //   return true;
-    // }
     const formatRanges = fragment.formatMatrix.get(handler);
     if (formatRanges) {
       if (formatRanges[0].state === MatchState.Matched) {
