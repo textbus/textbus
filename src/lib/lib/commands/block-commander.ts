@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -12,13 +12,13 @@ export class BlockCommander implements Commander {
     // context.apply(new FormatRange(
     //   selection.firstRange.startIndex,
     //   selection.firstRange.endIndex,
-    //   overlap ? MatchState.Normal : MatchState.Matched,
+    //   overlap ? FormatState.Invalid : FormatState.Valid,
     //   handler,
     //   context
     // ));
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
     if (rawElement && rawElement.tagName.toLowerCase() === this.tagName) {
       return null;
     }

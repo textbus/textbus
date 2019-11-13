@@ -3,9 +3,9 @@ import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../selection/range';
 
-export enum MatchState {
-  Matched = 'Matched',
-  Normal = 'Normal',
+export enum FormatState {
+  Valid = 'Valid',
+  Invalid = 'Invalid',
   Exclude = 'Exclude'
 }
 
@@ -64,12 +64,12 @@ export class Matcher {
     }
   }
 
-  matchNode(node: Node): MatchState {
+  matchNode(node: Node): FormatState {
     const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
     if (exclude) {
-      return MatchState.Exclude;
+      return FormatState.Exclude;
     }
-    return this.validators.map(fn => fn(node)).includes(true) ? MatchState.Matched : MatchState.Normal;
+    return this.validators.map(fn => fn(node)).includes(true) ? FormatState.Valid : FormatState.Invalid;
   }
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
@@ -132,7 +132,7 @@ export class Matcher {
                             handler: Handler): boolean {
     const formatRanges = fragment.formatMatrix.get(handler);
     if (formatRanges) {
-      if (formatRanges[0].state === MatchState.Matched) {
+      if (formatRanges[0].state === FormatState.Valid) {
         return startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex;
       }
     }

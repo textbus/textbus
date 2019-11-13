@@ -1,7 +1,7 @@
 import { dtd } from '../dtd';
 import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
 
 export class Parser extends Fragment {
@@ -63,7 +63,7 @@ export class Parser extends Fragment {
         token: item,
         state: item.matcher.matchNode(by)
       };
-    }).filter(item => item.state !== MatchState.Normal).forEach(item => {
+    }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
       const newRange = new FormatRange(
         startIndex,
         startIndex + len,

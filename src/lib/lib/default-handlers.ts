@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Handler } from './toolbar/handlers/help';
-import { Matcher, MatchState } from './matcher/matcher';
+import { Matcher, FormatState } from './matcher/matcher';
 import { Commander, ReplaceModel } from './commands/commander';
 import { defaultHandlerPriority } from './toolbar/help';
 

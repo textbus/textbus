@@ -1,5 +1,5 @@
 import { ChildSlotModel, Commander } from './commander';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { FormatRange } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -14,7 +14,7 @@ export class InlineCommander implements Commander {
         const r = new FormatRange(
           item.startIndex,
           item.endIndex,
-          overlap ? MatchState.Normal : MatchState.Matched,
+          overlap ? FormatState.Invalid : FormatState.Valid,
           handler,
           item.context
         );
@@ -23,9 +23,9 @@ export class InlineCommander implements Commander {
     })
   }
 
-  render(state: MatchState, rawElement?: HTMLElement) {
+  render(state: FormatState, rawElement?: HTMLElement) {
     switch (state) {
-      case MatchState.Exclude:
+      case FormatState.Exclude:
         if (rawElement) {
           rawElement.style.fontWeight = 'normal';
           break;
@@ -34,7 +34,7 @@ export class InlineCommander implements Commander {
           node.style.fontWeight = 'normal';
           return new ChildSlotModel(node);
         }
-      case MatchState.Matched:
+      case FormatState.Valid:
         return new ChildSlotModel(document.createElement(this.tagName));
     }
     return null;

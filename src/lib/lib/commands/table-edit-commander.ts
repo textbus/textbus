@@ -1,7 +1,7 @@
 import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../selection/selection';
 import { Fragment } from '../parser/fragment';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -42,7 +42,7 @@ export class TableEditCommander implements Commander {
     return selection;
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
     return;
   }
 }

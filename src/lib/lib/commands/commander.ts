@@ -1,4 +1,4 @@
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
@@ -15,5 +15,5 @@ export class ChildSlotModel {
 export interface Commander {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void;
 
-  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel | ChildSlotModel | null;
+  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel | ChildSlotModel | null;
 }

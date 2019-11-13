@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -11,7 +11,7 @@ export class ListCommander implements Commander {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
   }
 
-  render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {
+  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
     return;
   }
 }

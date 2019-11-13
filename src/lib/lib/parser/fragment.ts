@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { MatchState } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
@@ -9,7 +9,7 @@ import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 export class FormatRange {
   constructor(public startIndex: number,
               public endIndex: number,
-              public state: MatchState,
+              public state: FormatState,
               public handler: Handler,
               public context: Fragment) {
   }
@@ -109,7 +109,7 @@ export class Fragment extends ViewNode {
     let formatRanges: FormatRange[] = [];
 
     if (oldFormats) {
-      const styleMarks: MatchState[] = [];
+      const styleMarks: FormatState[] = [];
       if (highestPriority) {
         oldFormats.unshift(format);
       } else {
@@ -146,7 +146,7 @@ export class Fragment extends ViewNode {
     } else {
       formatRanges.push(format);
     }
-    const ff = formatRanges.filter(f => f.state !== MatchState.Normal);
+    const ff = formatRanges.filter(f => f.state !== FormatState.Invalid);
     if (ff.length) {
       this.formatMatrix.set(format.handler, ff);
     } else {
