@@ -17,3 +17,7 @@ export interface Commander {
 
   render(state: FormatState, rawElement?: HTMLElement): ReplaceModel | ChildSlotModel | null;
 }
+
+export interface UpdateCommander extends Commander {
+  updateValue(value: string): void;
+}

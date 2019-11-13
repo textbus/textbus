@@ -1,12 +1,15 @@
-import { Commander, ReplaceModel } from './commander';
+import { ReplaceModel, UpdateCommander } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class BlockStyleCommander implements Commander {
+export class BlockStyleCommander implements UpdateCommander {
   constructor(private name: string,
               private value: string | number) {
+  }
+
+  updateValue(value: string) {
+    this.value = value;
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {

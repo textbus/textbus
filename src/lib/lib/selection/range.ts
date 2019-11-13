@@ -35,6 +35,28 @@ export class TBRange {
     this.range.setEnd(end.node, end.position);
   }
 
+  getCommonAncestorFragmentScope() {
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    let startIndex = this.startIndex;
+    let endIndex = this.endIndex;
+
+    while (startFragment !== this.commonAncestorFragment) {
+      startIndex = startFragment.parent.contents.find(startFragment);
+      startFragment = startFragment.parent;
+    }
+
+    while (endFragment !== this.commonAncestorFragment) {
+      endIndex = endFragment.parent.contents.find(endFragment);
+      endFragment = endFragment.parent;
+    }
+
+    return {
+      startIndex,
+      endIndex
+    }
+  }
+
   getSelectedScope(): SelectedScope[] {
     const start: SelectedScope[] = [];
     const end: SelectedScope[] = [];

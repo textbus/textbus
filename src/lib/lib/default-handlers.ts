@@ -29,7 +29,7 @@ class DefaultHandler implements Handler {
   }
 }
 
-export const defaultHandlers: Handler[] = 'h1,h2,h3,h4,h5,h5,p,table,thead,tbody,tfoot,tr,td'.split(',').map(tag => {
+export const defaultHandlers: Handler[] = 'h1,h2,h3,h4,h5,h5,p,table,thead,tbody,tfoot,tr,td,ul,ol,li'.split(',').map(tag => {
   return new DefaultHandler(new DefaultCommander(tag), new Matcher({
     tags: [tag]
   }));

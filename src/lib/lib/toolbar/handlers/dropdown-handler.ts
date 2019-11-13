@@ -17,7 +17,7 @@ export class DropdownHandler implements Handler {
 
   constructor(private config: DropdownConfig, private delegate: EventDelegate) {
     this.onApply = config.onHide;
-    this.priority = config.priority
+    this.priority = config.priority;
 
     this.matcher = new Matcher(config.match);
     this.execCommand = config.execCommand;

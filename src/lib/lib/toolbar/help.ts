@@ -1,5 +1,5 @@
 import { MatchRule } from '../matcher/matcher';
-import { Commander } from '../commands/commander';
+import { Commander, UpdateCommander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 
@@ -42,16 +42,17 @@ export interface ButtonConfig {
 }
 
 export interface SelectOptionConfig {
-  execCommand: Commander;
-  priority: number;
+  value: any;
   label?: string;
   classes?: string[];
   match?: MatchRule;
-  default?: boolean
+  default?: boolean;
 }
 
 export interface SelectConfig {
   type: HandlerType.Select;
+  execCommand: UpdateCommander;
+  priority: number;
   options: SelectOptionConfig[];
   classes?: string[];
   mini?: boolean;

@@ -4,13 +4,21 @@ import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { SelectConfig, SelectOptionConfig } from '../help';
 import { Matcher } from '../../matcher/matcher';
-import { Commander } from '../../commands/commander';
+import { UpdateCommander } from '../../commands/commander';
 
-export class SelectHandler {
+export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
+  matcher: Matcher = new Matcher();
+  onApply: Observable<any>;
+  execCommand: UpdateCommander;
+  priority: number;
+  private applyEventSource = new Subject<any>();
 
   constructor(private handler: SelectConfig) {
+    this.priority = handler.priority;
+    this.execCommand = handler.execCommand;
+    this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');
     dropdownInner.classList.add('tanbo-editor-select-button', ...handler.classes || []);
@@ -25,8 +33,10 @@ export class SelectHandler {
       if (option.default) {
         dropdownInner.innerText = option.label;
       }
-      item.onMatched.subscribe(option => {
-        dropdownInner.innerText = option.label;
+
+      item.onCheck.subscribe(v => {
+        this.execCommand.updateValue(v.value);
+        this.applyEventSource.next();
       });
       this.options.push(item);
     });
@@ -34,26 +44,24 @@ export class SelectHandler {
     this.elementRef = new Dropdown(
       dropdownInner,
       menu,
-      merge(...this.options.map(item => item.onApply)),
+      merge(...this.options.map(item => item.onCheck)),
       handler.tooltip
     ).elementRef;
   }
+
+  updateStatus(h: boolean): void {
+  }
 }
 
-export class SelectOptionHandler implements Handler {
+export class SelectOptionHandler {
   readonly elementRef = document.createElement('button');
-  onApply: Observable<void>;
-  onMatched: Observable<SelectOptionConfig>;
+  onCheck: Observable<SelectOptionConfig>;
   matcher: Matcher;
-  execCommand: Commander;
-  priority: number;
-  private eventSource = new Subject<void>();
-  private matchedEvent = new Subject<SelectOptionConfig>();
+  private eventSource = new Subject<SelectOptionConfig>();
 
   constructor(private option: SelectOptionConfig) {
-    this.priority = option.priority;
-    this.onApply = this.eventSource.asObservable();
-    this.onMatched = this.matchedEvent.asObservable();
+    this.onCheck = this.eventSource.asObservable();
+
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
     if (option.classes) {
@@ -61,19 +69,8 @@ export class SelectOptionHandler implements Handler {
     }
     this.elementRef.innerText = option.label;
     this.elementRef.addEventListener('click', () => {
-      this.eventSource.next();
+      this.eventSource.next(option);
     });
-    this.execCommand = option.execCommand;
     this.matcher = new Matcher(option.match);
   }
-
-  updateStatus(h: boolean): void {
-  }
-
-  // updateStatus(matchDelta: MatchDelta): void {
-  //   this.elementRef.disabled = matchDelta.disable;
-  //   if (matchDelta.overlap) {
-  //     this.matchedEvent.next(this.option);
-  //   }
-  // }
 }

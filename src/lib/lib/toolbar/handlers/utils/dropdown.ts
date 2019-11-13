@@ -30,7 +30,7 @@ export class Dropdown {
 
   constructor(private inner: HTMLElement,
               private menuContents: HTMLElement | DocumentFragment,
-              private hideEvent: Observable<void>,
+              private hideEvent: Observable<any>,
               private tooltip = '') {
     this.elementRef.classList.add('tanbo-editor-dropdown');
 

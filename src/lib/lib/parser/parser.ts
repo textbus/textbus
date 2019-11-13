@@ -10,10 +10,59 @@ export class Parser extends Fragment {
   }
 
   setContents(el: HTMLElement) {
-    const len = Array.from(el.childNodes).reduce((len, node) => {
+    const flatTree = this.flat(el);
+    const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.parse(node, this);
     }, 0);
     this.mergeFormatsByNode(this, el, 0, len);
+  }
+
+  private flat(el: HTMLElement, limit = 'p'): Node {
+    const nodes = document.createDocumentFragment();
+    let newBlock: HTMLElement;
+    Array.from(el.childNodes).filter(node => {
+      if (node.nodeType === 3) {
+        return /\S+/.test(node.textContent);
+      }
+      return true;
+    }).forEach(node => {
+      if (node.nodeType === 1) {
+        const tagName = (node as HTMLElement).tagName.toLowerCase();
+        if (/inline/.test(dtd[tagName].display)) {
+          if (!newBlock) {
+            newBlock = document.createElement(limit);
+            nodes.appendChild(newBlock);
+          }
+          newBlock.appendChild(node);
+        } else {
+          newBlock = null;
+          const limitChildren = dtd[tagName].limitChildren;
+          if (limitChildren) {
+            for (const t of Array.from((node as HTMLElement).children).map(n => n.tagName.toLowerCase())) {
+              if (limitChildren.indexOf(t) > -1) {
+                const n = node.cloneNode();
+                nodes.appendChild(n);
+                Array.from(this.flat(node as HTMLElement).childNodes).forEach(node => {
+                  const item = document.createElement(t);
+                  item.appendChild(node);
+                  n.appendChild(item);
+                });
+                return;
+              }
+            }
+          }
+          nodes.appendChild(this.flat(node as HTMLElement));
+        }
+      } else {
+        if (!newBlock) {
+          newBlock = document.createElement(limit);
+          nodes.appendChild(newBlock);
+        }
+        newBlock.appendChild(node);
+      }
+    });
+
+    return nodes;
   }
 
   private parse(from: Node, context: Fragment): number {

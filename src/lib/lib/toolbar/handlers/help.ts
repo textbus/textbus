@@ -8,6 +8,6 @@ export interface Handler {
   onApply: Observable<any>;
   matcher: Matcher;
   execCommand: Commander;
-  updateStatus(h: boolean): void;
+  updateStatus(h: boolean|boolean[]): void;
   priority: number;
 }

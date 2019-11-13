@@ -83,6 +83,15 @@ export class Editor implements EventDelegate {
     this.handlers.forEach(handler => {
       const overlap = handler.matcher.queryState(selection, handler).overlap;
       handler.updateStatus(overlap);
+      // if (Array.isArray(handler.matcher)) {
+      //   const overlap = handler.matcher.map(m => {
+      //     return m.queryState(selection, handler).overlap;
+      //   });
+      //   handler.updateStatus(overlap);
+      // } else {
+      //   const overlap = handler.matcher.queryState(selection, handler).overlap;
+      //   handler.updateStatus(overlap);
+      // }
     });
   }
 
@@ -132,12 +141,10 @@ export class Editor implements EventDelegate {
 
   private addSelectHandler(option: SelectConfig) {
     const select = new SelectHandler(option);
-    select.options.forEach(item => {
-      item.onApply.subscribe(() => {
-        this.viewer.apply(item);
-      });
-      this.handlers.push(item);
+    select.onApply.subscribe(() => {
+      this.viewer.apply(select);
     });
+    this.handlers.push(select);
     this.toolbar.appendChild(select.elementRef);
   }
 
