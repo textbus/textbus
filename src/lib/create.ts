@@ -52,9 +52,9 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
         olHandler,
         ulHandler
       ], [
-        // fontSizeHandler,
-        // lineHeightHandler,
-        // letterSpacingHandler
+        fontSizeHandler,
+        lineHeightHandler,
+        letterSpacingHandler
       ], [
         superscriptHandler,
         subscriptHandler
@@ -62,14 +62,14 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
         colorHandler,
         backgroundHandler
       ], [
-        // fontFamilyHandler
+        fontFamilyHandler
       ], [
         linkHandler,
         imageHandler,
         musicHandler,
         videoHandler
       ], [
-        // alignHandler
+        alignHandler
       ], [
         tableHandler,
         tableEditHandler
