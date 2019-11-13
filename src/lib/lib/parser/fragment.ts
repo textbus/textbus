@@ -179,7 +179,6 @@ export class Fragment extends ViewNode {
           if (renderModel instanceof ReplaceModel) {
             container = renderModel.replaceElement;
             container[VIRTUAL_NODE] = vNode;
-            // container[FRAGMENT_CONTEXT] = this;
             vNode.elementRef = container;
             slotContainer = container;
             return renderModel.replaceElement;
@@ -191,7 +190,6 @@ export class Fragment extends ViewNode {
             }
             slotContainer = renderModel.slotElement;
             slotContainer[VIRTUAL_NODE] = vNode;
-            // slotContainer[FRAGMENT_CONTEXT] = this;
             vNode.elementRef = slotContainer;
             return renderModel.slotElement;
           }
@@ -223,7 +221,6 @@ export class Fragment extends ViewNode {
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
           currentNode[VIRTUAL_NODE] = v;
-          // currentNode[FRAGMENT_CONTEXT] = this;
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
         } else if (item instanceof ViewNode) {

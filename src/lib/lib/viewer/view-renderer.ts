@@ -5,7 +5,6 @@ import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
 import { Parser } from '../parser/parser';
 import { Handler } from '../toolbar/handlers/help';
-// import { FRAGMENT_CONTEXT } from '../parser/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -50,7 +49,6 @@ export class ViewRenderer {
   }
 
   render(vDom: Parser) {
-    // this.contentDocument.body[FRAGMENT_CONTEXT] = vDom;
     this.contentDocument.body.appendChild(vDom.render());
   }
 
