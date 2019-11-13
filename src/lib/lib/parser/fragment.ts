@@ -3,17 +3,8 @@ import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
-import { FRAGMENT_CONTEXT, VIRTUAL_NODE } from './help';
+import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
-import { TBRange } from '../selection/range';
-
-export interface Update {
-  range: TBRange;
-  handler: Handler;
-  state: MatchState;
-  useValue?: any;
-  canSurroundBlockElement?: boolean;
-}
 
 export class FormatRange {
   constructor(public startIndex: number,
@@ -39,38 +30,38 @@ export class Fragment extends ViewNode {
     super();
   }
 
-  apply(update: Update) {
-    // if (canSurroundBlockElement) {
-    //   this.mergeFormat(format, true);
-    // } else {
-    //
-    //   const children = this.contents.slice(format.startIndex, format.endIndex);
-    //   let index = 0;
-    //   const formats: FormatRange[] = [];
-    //   let childFormat: FormatRange;
-    //   children.forEach(item => {
-    //     if (item instanceof Fragment) {
-    //       const c = format.clone();
-    //       c.startIndex = 0;
-    //       c.endIndex = item.contents.length;
-    //       item.apply(c, canSurroundBlockElement);
-    //     } else if (item) {
-    //       if (!childFormat) {
-    //         childFormat = new FormatRange(
-    //           format.startIndex + index,
-    //           format.startIndex + index + item.length,
-    //           format.state,
-    //           format.handler,
-    //           format.context);
-    //         formats.push(childFormat);
-    //       } else {
-    //         childFormat.endIndex = format.startIndex + index + item.length;
-    //       }
-    //     }
-    //     index += item.length;
-    //   });
-    //   formats.forEach(f => this.mergeFormat(f, true))
-    // }
+  apply(format: FormatRange, canSurroundBlockElement = true) {
+    if (canSurroundBlockElement) {
+      this.mergeFormat(format, true);
+    } else {
+
+      const children = this.contents.slice(format.startIndex, format.endIndex);
+      let index = 0;
+      const formats: FormatRange[] = [];
+      let childFormat: FormatRange;
+      children.forEach(item => {
+        if (item instanceof Fragment) {
+          const c = format.clone();
+          c.startIndex = 0;
+          c.endIndex = item.contents.length;
+          item.apply(c, canSurroundBlockElement);
+        } else if (item) {
+          if (!childFormat) {
+            childFormat = new FormatRange(
+              format.startIndex + index,
+              format.startIndex + index + item.length,
+              format.state,
+              format.handler,
+              format.context);
+            formats.push(childFormat);
+          } else {
+            childFormat.endIndex = format.startIndex + index + item.length;
+          }
+        }
+        index += item.length;
+      });
+      formats.forEach(f => this.mergeFormat(f, true))
+    }
   }
 
   /**
@@ -158,6 +149,18 @@ export class Fragment extends ViewNode {
     }
   }
 
+  destroyView() {
+    this.contents.getFragments().forEach(f => f.destroyView());
+    this.elements.forEach(el => {
+      try {
+        el.parentNode && el.parentNode.removeChild(el)
+      } catch (e) {
+        console.log(this, el)
+      }
+    });
+    this.elements = [];
+  }
+
   /**
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode
@@ -176,7 +179,7 @@ export class Fragment extends ViewNode {
           if (renderModel instanceof ReplaceModel) {
             container = renderModel.replaceElement;
             container[VIRTUAL_NODE] = vNode;
-            container[FRAGMENT_CONTEXT] = this;
+            // container[FRAGMENT_CONTEXT] = this;
             vNode.elementRef = container;
             slotContainer = container;
             return renderModel.replaceElement;
@@ -188,7 +191,7 @@ export class Fragment extends ViewNode {
             }
             slotContainer = renderModel.slotElement;
             slotContainer[VIRTUAL_NODE] = vNode;
-            slotContainer[FRAGMENT_CONTEXT] = this;
+            // slotContainer[FRAGMENT_CONTEXT] = this;
             vNode.elementRef = slotContainer;
             return renderModel.slotElement;
           }
@@ -220,7 +223,7 @@ export class Fragment extends ViewNode {
         if (typeof item === 'string') {
           let currentNode = document.createTextNode(item);
           currentNode[VIRTUAL_NODE] = v;
-          currentNode[FRAGMENT_CONTEXT] = this;
+          // currentNode[FRAGMENT_CONTEXT] = this;
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
         } else if (item instanceof ViewNode) {

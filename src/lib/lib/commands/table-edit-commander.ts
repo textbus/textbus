@@ -38,7 +38,7 @@ export class TableEditCommander implements Commander {
   constructor(private type: TableEditActions) {
   }
 
-  command(selection: TBSelection, context: Fragment): TBSelection {
+  command(selection: TBSelection): TBSelection {
     return selection;
   }
 

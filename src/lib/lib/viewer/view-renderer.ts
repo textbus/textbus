@@ -5,7 +5,7 @@ import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
 import { Parser } from '../parser/parser';
 import { Handler } from '../toolbar/handlers/help';
-import { FRAGMENT_CONTEXT } from '../parser/help';
+// import { FRAGMENT_CONTEXT } from '../parser/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -50,7 +50,7 @@ export class ViewRenderer {
   }
 
   render(vDom: Parser) {
-    this.contentDocument.body[FRAGMENT_CONTEXT] = vDom;
+    // this.contentDocument.body[FRAGMENT_CONTEXT] = vDom;
     this.contentDocument.body.appendChild(vDom.render());
   }
 
@@ -69,17 +69,20 @@ export class ViewRenderer {
     const oldFragment = commonAncestorFragment.elements;
     const parent = oldFragment[0].parentNode;
 
+    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+
+    commonAncestorFragment.destroyView();
+
     const overlap = handler.matcher.queryState(this.selection, handler).overlap;
-    handler.execCommand.command(this.selection, commonAncestorFragment, handler, overlap);
+    handler.execCommand.command(this.selection, handler, overlap);
     const newFragment = commonAncestorFragment.render();
-    parent.insertBefore(newFragment, oldFragment[0]);
-    try {
-      oldFragment.forEach(n => n.parentNode && n.parentNode.removeChild(n));
-    } catch (e) {
-      console.log(parent, oldFragment)
+
+    if (nextSibling) {
+      parent.insertBefore(newFragment, nextSibling);
+    } else {
+      parent.appendChild(newFragment);
     }
 
-    // oldEl.parentNode.replaceChild(newNode, oldEl);
     this.selection.apply();
   }
 }

@@ -11,7 +11,7 @@ export class StyleCommander implements Commander {
               value: string | number | Observable<string | number>) {
   }
 
-  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
   }
 
   render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {

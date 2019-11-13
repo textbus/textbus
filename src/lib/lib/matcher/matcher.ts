@@ -74,11 +74,14 @@ export class Matcher {
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
-      const overlap = this.overlap(
-        range.startIndex,
-        range.endIndex,
-        range.commonAncestorFragment,
-        handler);
+      const matches = range.getSelectedScope().map(s => {
+        return this.overlap(
+          s.startIndex,
+          s.endIndex,
+          s.context,
+          handler);
+      });
+      const overlap = matches.length && !matches.includes(false);
       return {
         overlap,
         fromRange: range
@@ -91,8 +94,6 @@ export class Matcher {
   }
 
   private overlap(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): boolean {
-    const contents = fragment.contents.slice(startIndex, endIndex);
-
     const overlapSelf = this.matchStateByRange(startIndex, endIndex, fragment, handler);
     if (overlapSelf) {
       return fragment.contents.slice(startIndex, endIndex).filter(item => {

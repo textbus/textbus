@@ -1,6 +1,6 @@
 import { ChildSlotModel, Commander } from './commander';
 import { MatchState } from '../matcher/matcher';
-import { Fragment } from '../parser/fragment';
+import { FormatRange } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
@@ -8,12 +8,17 @@ export class InlineCommander implements Commander {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean) {
+  command(selection: TBSelection, handler: Handler, overlap: boolean) {
     selection.ranges.forEach(range => {
-      context.apply({
-        range,
-        handler,
-        state: overlap ? MatchState.Normal : MatchState.Matched
+      range.getSelectedScope().forEach(item => {
+        const r = new FormatRange(
+          item.startIndex,
+          item.endIndex,
+          overlap ? MatchState.Normal : MatchState.Matched,
+          handler,
+          item.context
+        );
+        item.context.apply(r, false);
       });
     })
   }

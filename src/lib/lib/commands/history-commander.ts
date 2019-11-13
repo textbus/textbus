@@ -8,7 +8,7 @@ export class HistoryCommander implements Commander {
   constructor(private action: 'forward' | 'back') {
   }
 
-  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
   }
 
   render(state: MatchState, rawElement?: HTMLElement): ReplaceModel {

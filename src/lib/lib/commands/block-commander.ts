@@ -8,7 +8,7 @@ export class BlockCommander implements Commander {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, context: Fragment, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     // context.apply(new FormatRange(
     //   selection.firstRange.startIndex,
     //   selection.firstRange.endIndex,

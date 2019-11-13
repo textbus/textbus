@@ -1,4 +1,5 @@
 import { ViewNode } from './view-node';
+import { Fragment } from './fragment';
 
 export class Contents implements Iterable<string | ViewNode> {
   get length() {
@@ -58,6 +59,10 @@ export class Contents implements Iterable<string | ViewNode> {
 
     }
     return result;
+  }
+
+  getFragments(): Fragment[] {
+    return this.elements.filter(i => i instanceof Fragment) as Fragment[];
   }
 
   find(element: ViewNode): number {
