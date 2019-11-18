@@ -68,10 +68,9 @@ export class ViewRenderer {
     const parent = oldFragment[0].parentNode;
 
     const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
 
     commonAncestorFragment.destroyView();
-
-    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
     handler.execCommand.command(this.selection, handler, overlap);
     const newFragment = commonAncestorFragment.render();
 

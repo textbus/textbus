@@ -74,14 +74,38 @@ export class Matcher {
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
-      const matches = range.getSelectedScope().map(s => {
-        return this.overlap(
-          s.startIndex,
-          s.endIndex,
-          s.context,
-          handler);
+      const states: FormatState[] = [];
+      range.getSelectedScope().forEach(s => {
+        if (s.startIndex === s.endIndex) {
+          const state = this.getStatesByRange(s.startIndex,
+            s.endIndex,
+            s.context,
+            handler);
+          if (state !== FormatState.Invalid) {
+            states.push(state);
+          }
+        } else {
+          states.push(this.getStatesByRange(s.startIndex,
+            s.endIndex,
+            s.context,
+            handler));
+        }
       });
-      const overlap = matches.length && !matches.includes(false);
+      let state = Matcher.mergeStates(states);
+
+      let overlap: boolean;
+      switch (state) {
+        case FormatState.Exclude:
+          overlap = false;
+          break;
+        case FormatState.Valid:
+          overlap = true;
+          break;
+        case FormatState.Invalid:
+          overlap = Matcher.inSingleContainer(range.commonAncestorFragment.parent, handler);
+          break;
+      }
+
       return {
         overlap,
         fromRange: range
@@ -93,50 +117,37 @@ export class Matcher {
     }
   }
 
-  private overlap(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): boolean {
-    const overlapSelf = this.matchStateByRange(startIndex, endIndex, fragment, handler);
-    if (overlapSelf) {
-      return fragment.contents.slice(startIndex, endIndex).filter(item => {
-        return item instanceof Fragment;
-      }).reduce((value, ff) => {
-        return value && this.overlap(0, (ff as Fragment).contents.length, (ff as Fragment), handler);
-      }, true);
-    }
-    return this.inSingleContainer(startIndex, endIndex, fragment, handler);
-  }
+  private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler) {
+    const formatRanges = fragment.formatMatrix.get(handler) || [];
+    const childContents = fragment.contents.slice(startIndex, endIndex);
 
-  private inSingleContainer(startIndex: number,
-                            endIndex: number,
-                            fragment: Fragment,
-                            handler: Handler): boolean {
-    while (true) {
-      const inContainer = this.matchStateByRange(startIndex, endIndex, fragment, handler);
-      if (inContainer) {
-        return true;
-      } else {
-        if (fragment.parent) {
-          startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
-          endIndex = startIndex + 1;
-          fragment = fragment.parent;
-        } else {
-          break;
+    if (startIndex === endIndex) {
+      for (const format of formatRanges) {
+        if (startIndex > format.startIndex && startIndex <= format.endIndex) {
+          return format.state;
         }
       }
+      return FormatState.Invalid;
     }
-    return false;
-  }
 
-  private matchStateByRange(startIndex: number,
-                            endIndex: number,
-                            fragment: Fragment,
-                            handler: Handler): boolean {
-    const formatRanges = fragment.formatMatrix.get(handler);
-    if (formatRanges) {
-      if (formatRanges[0].state === FormatState.Valid) {
-        return startIndex >= formatRanges[0].startIndex && endIndex <= formatRanges[0].endIndex;
+    const states: FormatState[] = [];
+    let index = startIndex;
+    for (const child of childContents) {
+      if (typeof child === 'string') {
+        for (const format of formatRanges) {
+          if (index >= format.startIndex || index + child.length <= format.endIndex) {
+            if (format.state === FormatState.Exclude) {
+              return FormatState.Exclude;
+            } else {
+              states.push(format.state);
+            }
+          }
+        }
+      } else if (child instanceof Fragment) {
+        states.push(this.getStatesByRange(0, child.contents.length, child, handler));
       }
     }
-    return false;
+    return Matcher.mergeStates(states);
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
@@ -186,5 +197,39 @@ export class Matcher {
       }
       return false;
     }
+  }
+
+  private static mergeStates(states: FormatState[]) {
+    if (states.includes(FormatState.Exclude)) {
+      return FormatState.Exclude;
+    } else if (states.includes(FormatState.Invalid)) {
+      return FormatState.Invalid;
+    }
+    return states.length ? FormatState.Valid : FormatState.Invalid;
+  }
+
+  private static inSingleContainer(fragment: Fragment,
+                                   handler: Handler): boolean {
+
+    while (fragment && fragment.parent) {
+      let startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
+      let endIndex = startIndex + 1;
+
+      const formatRanges = fragment.formatMatrix.get(handler) || [];
+      const states: FormatState[] = [];
+      for (const f of formatRanges) {
+        if (startIndex >= f.startIndex || endIndex <= f.endIndex) {
+          states.push(f.state);
+        }
+      }
+      if (states.includes(FormatState.Exclude)) {
+        return false;
+      } else if (states.includes(FormatState.Valid)) {
+        return true;
+      } else {
+        fragment = fragment.parent;
+      }
+    }
+    return false;
   }
 }
