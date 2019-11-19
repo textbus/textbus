@@ -13,8 +13,9 @@ const editor = createEditor('#editor', {
 <strong>111</strong>
   <ul>
   <strong>test</strong>
-  <li>aaa</li>
+  <li><a href="javascript:;">aaa</a></li>
   <li>bbb</li>
+  <li><img src="http://121.43.187.16/open-platform/static/img/logo04.c43a9376db1f80ca39f2e28c210fe10e.png" alt=""></li>
 </ul>
 `
 });

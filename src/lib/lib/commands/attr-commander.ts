@@ -16,6 +16,6 @@ export class AttrCommander implements Commander {
   }
 
   render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
-    return;
+    return new ReplaceModel(document.createElement(this.tagName));
   }
 }

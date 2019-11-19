@@ -14,9 +14,9 @@ export class InlineCommander implements Commander {
         const r = new FormatRange(
           item.startIndex,
           item.endIndex,
-          overlap ? FormatState.Invalid : FormatState.Valid,
           handler,
-          item.context
+          item.context,
+          overlap ? FormatState.Invalid : FormatState.Valid
         );
         item.context.apply(r, false);
       });

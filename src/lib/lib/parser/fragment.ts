@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState } from '../matcher/matcher';
+import { FormatState, MatchDescription } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
@@ -9,13 +9,14 @@ import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 export class FormatRange {
   constructor(public startIndex: number,
               public endIndex: number,
-              public state: FormatState,
               public handler: Handler,
-              public context: Fragment) {
+              public context: Fragment,
+              public state: FormatState,
+              public matchDescription?: MatchDescription) {
   }
 
   clone() {
-    return new FormatRange(this.startIndex, this.endIndex, this.state, this.handler, this.context);
+    return new FormatRange(this.startIndex, this.endIndex, this.handler, this.context, this.state, this.matchDescription,);
   }
 }
 
@@ -55,9 +56,10 @@ export class Fragment extends ViewNode {
             childFormat = new FormatRange(
               format.startIndex + index,
               format.startIndex + index + item.length,
-              format.state,
               format.handler,
-              format.context);
+              format.context,
+              format.state,
+              format.matchDescription,);
             formats.push(childFormat);
           } else {
             childFormat.endIndex = format.startIndex + index + item.length;
@@ -109,7 +111,7 @@ export class Fragment extends ViewNode {
     let formatRanges: FormatRange[] = [];
 
     if (oldFormats) {
-      const styleMarks: FormatState[] = [];
+      const styleMarks: Array<{state: FormatState, desc: MatchDescription}> = [];
       if (highestPriority) {
         oldFormats.unshift(format);
       } else {
@@ -121,7 +123,10 @@ export class Fragment extends ViewNode {
         if (styleMarks.length < item.endIndex) {
           styleMarks.length = item.endIndex;
         }
-        styleMarks.fill(item.state, item.startIndex, item.endIndex);
+        styleMarks.fill({
+          state: item.state,
+          desc: item.matchDescription
+        }, item.startIndex, item.endIndex);
         index--;
       }
       let newFormatRange: FormatRange = null;
@@ -132,14 +137,14 @@ export class Fragment extends ViewNode {
           continue;
         }
         if (!newFormatRange) {
-          newFormatRange = new FormatRange(i, i + 1, mark, format.handler, this);
+          newFormatRange = new FormatRange(i, i + 1, format.handler, this, mark.state, format.matchDescription);
           formatRanges.push(newFormatRange);
           continue;
         }
-        if (mark === newFormatRange.state) {
+        if (mark.state === newFormatRange.state && mark.desc === newFormatRange.matchDescription) {
           newFormatRange.endIndex = i + 1;
         } else {
-          newFormatRange = new FormatRange(i, i + 1, mark, format.handler, this);
+          newFormatRange = new FormatRange(i, i + 1, format.handler, this, mark.state, format.matchDescription);
           formatRanges.push(newFormatRange);
         }
       }
@@ -180,7 +185,7 @@ export class Fragment extends ViewNode {
       let slotContainer: HTMLElement;
       vNode.formats.reduce((node, next) => {
         if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, node);
+          const renderModel = next.handler.execCommand.render(next.state, node, next.matchDescription);
           if (renderModel instanceof ReplaceModel) {
             container = renderModel.replaceElement;
             container[VIRTUAL_NODE] = vNode;
@@ -219,7 +224,10 @@ export class Fragment extends ViewNode {
         const newFormatRange = new FormatRange(
           i + vNode.formats[0].startIndex,
           item.length + vNode.formats[0].startIndex,
-          null, null, vNode.formats[0].context);
+          null,
+          vNode.formats[0].context,
+          null,
+          null);
 
         const v = new VirtualNode([newFormatRange], vNode.parent);
         newNodes.push(v);
@@ -247,7 +255,7 @@ export class Fragment extends ViewNode {
    * @param formatRanges 可应用的格式化数据
    */
   private createVDom(formatRanges: FormatRange[]) {
-    const root = new VirtualContainerNode([new FormatRange(0, this.contents.length, null, null, this)], null);
+    const root = new VirtualContainerNode([new FormatRange(0, this.contents.length, null, this, null, null)], null);
     this.vDomBuilder(formatRanges,
       root,
       0,
@@ -268,7 +276,7 @@ export class Fragment extends ViewNode {
       let firstRange = formatRanges.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
-          const f = new FormatRange(startIndex, firstRange.startIndex, null, null, this);
+          const f = new FormatRange(startIndex, firstRange.startIndex, null, this, null, null);
           parent.children.push(new VirtualNode([f], parent));
         }
         const container = new VirtualContainerNode([firstRange], parent);
@@ -301,13 +309,13 @@ export class Fragment extends ViewNode {
         if (childFormatRanges.length) {
           this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
         } else {
-          const f = new FormatRange(firstRange.startIndex, firstRange.endIndex, null, null, this);
+          const f = new FormatRange(firstRange.startIndex, firstRange.endIndex, null, this, null, null);
           container.children.push(new VirtualNode([f], parent))
         }
         parent.children.push(container);
         startIndex = firstRange.endIndex;
       } else {
-        parent.children.push(new VirtualNode([new FormatRange(startIndex, endIndex, null, null, this)], parent));
+        parent.children.push(new VirtualNode([new FormatRange(startIndex, endIndex, null, this, null, null)], parent));
         break;
       }
     }

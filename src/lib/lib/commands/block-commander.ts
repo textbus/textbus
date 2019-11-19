@@ -19,16 +19,17 @@ export class BlockCommander implements UpdateCommander {
         const f = new FormatRange(
           0,
           range.commonAncestorFragment.contents.length,
-          FormatState.Valid,
           handler,
-          range.commonAncestorFragment);
+          range.commonAncestorFragment,
+          FormatState.Valid
+        );
         range.commonAncestorFragment.apply(f, true);
       } else {
         const scope = range.getCommonAncestorFragmentScope();
         const contents = range.commonAncestorFragment.contents.slice(scope.startIndex, scope.endIndex);
         contents.forEach(item => {
           if (item instanceof Fragment) {
-            item.apply(new FormatRange(0, item.contents.length, FormatState.Valid, handler, item), true);
+            item.apply(new FormatRange(0, item.contents.length, handler, item, FormatState.Valid), true);
           }
         })
       }

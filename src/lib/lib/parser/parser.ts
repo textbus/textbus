@@ -110,15 +110,17 @@ export class Parser extends Fragment {
     this.registries.map(item => {
       return {
         token: item,
-        state: item.matcher.matchNode(by)
+        ...item.matcher.matchNode(by)
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
       const newRange = new FormatRange(
         startIndex,
         startIndex + len,
-        item.state,
         item.token,
-        context);
+        context,
+        item.state,
+        item.matchDescription
+      );
       context.mergeFormat(newRange);
     })
   }

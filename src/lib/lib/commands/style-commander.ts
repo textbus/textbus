@@ -21,9 +21,9 @@ export class StyleCommander implements UpdateCommander {
         const r = new FormatRange(
           item.startIndex,
           item.endIndex,
-          FormatState.Valid,
           handler,
-          item.context
+          item.context,
+          FormatState.Valid
         );
         item.context.apply(r, false);
       });
