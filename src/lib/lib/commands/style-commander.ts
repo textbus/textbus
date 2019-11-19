@@ -1,21 +1,14 @@
-import { Observable } from 'rxjs';
-
 import { ChildSlotModel, UpdateCommander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/fragment';
+import { dtd } from '../dtd';
 
 export class StyleCommander implements UpdateCommander {
   private value: string | number;
 
-  constructor(private name: string,
-              value: string | number | Observable<string | number>) {
-    if (value instanceof Observable) {
-      value.subscribe(v => this.value = v);
-    } else {
-      this.value = value;
-    }
+  constructor(private name: string, private canApplyBlockElement = true) {
   }
 
   updateValue(value: string | number) {
@@ -39,8 +32,13 @@ export class StyleCommander implements UpdateCommander {
 
   render(state: FormatState, rawElement?: HTMLElement): ChildSlotModel {
     if (rawElement) {
-      rawElement.style[this.name] = this.value;
-      return null;
+      if (this.canApplyBlockElement) {
+        rawElement.style[this.name] = this.value;
+        return null;
+      } else if (/inline/.test(dtd[rawElement.tagName.toLowerCase()].display)) {
+        rawElement.style[this.name] = this.value;
+        return null;
+      }
     }
     const el = document.createElement('span');
     el.style[this.name] = this.value;

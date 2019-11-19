@@ -5,7 +5,7 @@ export const fontFamilyHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字体',
   priority: propertyHandlerPriority,
-  execCommand: new StyleCommander('fontFamily', ''),
+  execCommand: new StyleCommander('fontFamily'),
   options: [
     {
       label: 'sans-serif',

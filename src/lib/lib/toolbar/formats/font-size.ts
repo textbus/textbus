@@ -5,7 +5,7 @@ export const fontSizeHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字体大小',
   classes: ['tanbo-editor-icon-font-size'],
-  execCommand: new StyleCommander('fontSize', ''),
+  execCommand: new StyleCommander('fontSize'),
   priority: propertyHandlerPriority,
   mini: true,
   options: [

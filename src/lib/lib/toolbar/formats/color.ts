@@ -5,10 +5,9 @@ import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { DropdownConfig, HandlerType, propertyHandlerPriority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
+const commander = new StyleCommander('color', false);
 
-const updateEvent = new Subject<string>();
 const hideEvent = new Subject<void>();
-
 
 class Palette implements DropdownHandlerView {
   elementRef = document.createElement('div');
@@ -18,7 +17,7 @@ class Palette implements DropdownHandlerView {
   constructor() {
     this.picker = createPicker(this.elementRef);
     this.picker.onSelected = function (ev) {
-      updateEvent.next(ev.hex);
+      commander.updateValue(ev.hex);
       hideEvent.next();
     };
   }
@@ -46,5 +45,5 @@ export const colorHandler: DropdownConfig = {
       color: /.+/
     }
   },
-  execCommand: new StyleCommander('color', updateEvent.asObservable())
+  execCommand: commander
 };

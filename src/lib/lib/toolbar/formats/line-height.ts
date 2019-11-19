@@ -5,7 +5,7 @@ export const lineHeightHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '行高',
   classes: ['tanbo-editor-icon-line-height'],
-  execCommand: new StyleCommander('lineHeight', ''),
+  execCommand: new StyleCommander('lineHeight'),
   mini: true,
   priority: propertyHandlerPriority,
   options: [

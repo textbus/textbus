@@ -5,7 +5,7 @@ export const letterSpacingHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字间距',
   priority: propertyHandlerPriority,
-  execCommand: new StyleCommander('letterSpacing', ''),
+  execCommand: new StyleCommander('letterSpacing'),
   classes: ['tanbo-editor-icon-text-width'],
   mini: true,
   options: [
