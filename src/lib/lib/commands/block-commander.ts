@@ -22,13 +22,13 @@ export class BlockCommander implements UpdateCommander {
           FormatState.Valid,
           handler,
           range.commonAncestorFragment);
-        range.commonAncestorFragment.apply(f);
+        range.commonAncestorFragment.apply(f, true);
       } else {
         const scope = range.getCommonAncestorFragmentScope();
         const contents = range.commonAncestorFragment.contents.slice(scope.startIndex, scope.endIndex);
         contents.forEach(item => {
           if (item instanceof Fragment) {
-            item.apply(new FormatRange(0, item.contents.length, FormatState.Valid, handler, item));
+            item.apply(new FormatRange(0, item.contents.length, FormatState.Valid, handler, item), true);
           }
         })
       }

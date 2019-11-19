@@ -35,7 +35,7 @@ export class Fragment extends ViewNode {
    * @param format 新格式的应用范围
    * @param canSurroundBlockElement 是否可以包含块级节点，如 strong 不可以包含 p，则应传入 false
    */
-  apply(format: FormatRange, canSurroundBlockElement = true) {
+  apply(format: FormatRange, canSurroundBlockElement: boolean) {
     if (canSurroundBlockElement) {
       this.mergeFormat(format, true);
     } else {

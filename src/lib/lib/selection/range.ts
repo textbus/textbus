@@ -64,6 +64,15 @@ export class TBRange {
     let endFragment = this.endFragment;
     let startIndex = this.startIndex;
     let endIndex = this.endIndex;
+
+    if (startFragment === this.commonAncestorFragment &&
+      endFragment === this.commonAncestorFragment &&
+      startIndex === endIndex) {
+      return [{
+        startIndex, endIndex, context: startFragment
+      }];
+    }
+
     while (startFragment !== this.commonAncestorFragment) {
       start.push({
         startIndex,
@@ -86,7 +95,9 @@ export class TBRange {
       startIndex,
       endIndex,
       context: this.commonAncestorFragment
-    }, ...end];
+    }, ...end].filter(item => {
+      return item.startIndex < item.endIndex
+    });
   }
 
   private findPosition(vNodes: VirtualNode[],

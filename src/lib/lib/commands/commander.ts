@@ -12,10 +12,12 @@ export class ChildSlotModel {
   }
 }
 
+export type RenderModel = ReplaceModel | ChildSlotModel | null;
+
 export interface Commander {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void;
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel | ChildSlotModel | null;
+  render(state: FormatState, rawElement?: HTMLElement): RenderModel;
 }
 
 export interface UpdateCommander extends Commander {
