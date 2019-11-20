@@ -113,7 +113,7 @@ export class Matcher {
             handler));
         }
       });
-      console.log(states)
+
       let state = Matcher.mergeStates(states);
       let overlap: boolean;
       switch (state) {

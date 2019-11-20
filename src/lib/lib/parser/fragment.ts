@@ -166,6 +166,7 @@ export class Fragment extends ViewNode {
         const mark = formatMarks[i];
 
         if (!mark) {
+          newFormatRange = null;
           continue;
         }
         if (!newFormatRange) {
