@@ -169,7 +169,9 @@ export class Fragment extends ViewNode {
           formatRanges.push(newFormatRange);
           continue;
         }
-        if (mark.state === newFormatRange.state && mark.cacheData.equal(newFormatRange.cacheData)) {
+        if (mark.state === newFormatRange.state &&
+          (!mark.cacheData && !newFormatRange.cacheData ||
+            mark.cacheData.equal(newFormatRange.cacheData))) {
           newFormatRange.endIndex = i + 1;
         } else {
           newFormatRange = new FormatRange({

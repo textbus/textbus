@@ -9,22 +9,12 @@ export interface EditContext {
 }
 
 export interface Hooks {
-  // matcher?: Matcher;
-
   setup?(frameContainer: HTMLElement, context: EditContext): void;
-
-  // onSelectionChange?(range: Range, context: EditContext): Range | Range[];
-
-  // onApply?(ranges: Range[], formatter: Formatter, context: EditContext): void;
-
-  onApplied?(frameContainer: HTMLElement, context: EditContext): void;
-
-  onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }
 
 export class CacheData {
-  constructor(public attrs?: Map<string, string>,
-              public style?: { name: string, value: string | number }) {
+  constructor(public attrs: Map<string, string>,
+              public style: { name: string, value: string | number }) {
   }
 
   equal(data: CacheData) {

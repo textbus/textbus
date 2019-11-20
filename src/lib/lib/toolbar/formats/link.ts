@@ -4,6 +4,7 @@ import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, inlineHandlerPriority } from '../help';
 import { AttrCommander } from '../../commands/attr-commander';
+import { LinkHook } from '../hooks/link-hook';
 
 const form = new Form([{
   type: AttrType.TextField,
@@ -42,6 +43,7 @@ export const linkHandler: DropdownConfig = {
   cacheData: {
     attrs: ['href', 'target']
   },
+  hooks: new LinkHook(),
   viewer: form,
   match: {
     tags: ['a']
