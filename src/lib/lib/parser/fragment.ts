@@ -26,7 +26,7 @@ export class FormatRange {
   matchDescription?: MatchDescription;
   cacheData?: CacheData;
 
-  constructor(private params: FormatRangeParams) {
+  constructor(private params: FormatRangeParams | FormatRange) {
     this.startIndex = params.startIndex;
     this.endIndex = params.endIndex;
     this.handler = params.handler;
@@ -37,7 +37,7 @@ export class FormatRange {
   }
 
   clone() {
-    return new FormatRange(this.params);
+    return new FormatRange(this);
   }
 }
 
@@ -134,7 +134,7 @@ export class Fragment extends ViewNode {
     let formatRanges: FormatRange[] = [];
 
     if (oldFormats) {
-      const styleMarks: Array<{ state: FormatState, desc: MatchDescription }> = [];
+      const formatMarks: Array<FormatRange> = [];
       if (highestPriority) {
         oldFormats.unshift(format);
       } else {
@@ -143,18 +143,15 @@ export class Fragment extends ViewNode {
       let index = oldFormats.length - 1;
       while (index >= 0) {
         const item = oldFormats[index];
-        if (styleMarks.length < item.endIndex) {
-          styleMarks.length = item.endIndex;
+        if (formatMarks.length < item.endIndex) {
+          formatMarks.length = item.endIndex;
         }
-        styleMarks.fill({
-          state: item.state,
-          desc: item.matchDescription
-        }, item.startIndex, item.endIndex);
+        formatMarks.fill(item, item.startIndex, item.endIndex);
         index--;
       }
       let newFormatRange: FormatRange = null;
-      for (let i = 0; i < styleMarks.length; i++) {
-        const mark = styleMarks[i];
+      for (let i = 0; i < formatMarks.length; i++) {
+        const mark = formatMarks[i];
 
         if (!mark) {
           continue;
@@ -163,26 +160,26 @@ export class Fragment extends ViewNode {
           newFormatRange = new FormatRange({
             startIndex: i,
             endIndex: i + 1,
-            handler: format.handler,
+            handler: mark.handler,
             context: this,
             state: mark.state,
-            matchDescription: format.matchDescription,
-            cacheData: format.cacheData
+            matchDescription: mark.matchDescription,
+            cacheData: mark.cacheData
           });
           formatRanges.push(newFormatRange);
           continue;
         }
-        if (mark.state === newFormatRange.state && mark.desc === newFormatRange.matchDescription) {
+        if (mark.state === newFormatRange.state && mark.cacheData.equal(newFormatRange.cacheData)) {
           newFormatRange.endIndex = i + 1;
         } else {
           newFormatRange = new FormatRange({
             startIndex: i,
             endIndex: i + 1,
-            handler: format.handler,
+            handler: mark.handler,
             context: this,
             state: mark.state,
-            matchDescription: format.matchDescription,
-            cacheData: format.cacheData
+            matchDescription: mark.matchDescription,
+            cacheData: mark.cacheData
           });
           formatRanges.push(newFormatRange);
         }
@@ -343,7 +340,7 @@ export class Fragment extends ViewNode {
         let index = 0;
         while (true) {
           const f = formatRanges[index];
-          if (f && f.startIndex <= firstRange.endIndex) {
+          if (f && f.startIndex < firstRange.endIndex) {
             if (f.endIndex <= firstRange.endIndex) {
               childFormatRanges.push(formatRanges.shift());
             } else {

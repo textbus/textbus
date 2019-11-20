@@ -132,20 +132,19 @@ export class Parser extends Fragment {
     if (!config) {
       return null;
     }
-    const data: CacheData = {};
+    const attrs = new Map<string, string>();
     if (config.attrs) {
-      const attrs = new Map<string, string>();
       config.attrs.forEach(key => {
         attrs.set(key, node.getAttribute(key));
       });
-      data.attrs = attrs;
     }
+    let style: { name: string, value: string } = null;
     if (config.styleName) {
-      data.styles = {
+      style = {
         name: config.styleName,
         value: node.style[config.styleName]
       };
     }
-    return data;
+    return new CacheData(attrs.size ? attrs : null, style);
   }
 }

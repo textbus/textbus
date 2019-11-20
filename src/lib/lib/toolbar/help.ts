@@ -22,9 +22,31 @@ export interface Hooks {
   onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }
 
-export interface CacheData {
-  attrs?: Map<string, string>;
-  styles?: { name: string, value: string | number };
+export class CacheData {
+  constructor(public attrs?: Map<string, string>,
+              public style?: { name: string, value: string | number }) {
+  }
+
+  equal(data: CacheData) {
+    if (data === this) {
+      return true;
+    }
+    if (data.attrs === this.attrs && data.style === this.style) {
+      return true;
+    }
+    if (data.attrs && this.attrs) {
+      if (data.attrs.size !== this.attrs.size) {
+        return false;
+      }
+      return Array.from(data.attrs.keys()).reduce((v, key) => {
+        return v && data.attrs.get(key) === this.attrs.get(key);
+      }, true);
+    }
+    if (data.style && this.style) {
+      return data.style.name === this.style.name && data.style.value === this.style.value;
+    }
+    return false;
+  }
 }
 
 export interface CacheDataConfig {
