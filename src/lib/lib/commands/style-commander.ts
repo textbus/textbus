@@ -1,11 +1,11 @@
-import { ChildSlotModel, UpdateCommander } from './commander';
+import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/fragment';
 import { dtd } from '../dtd';
 
-export class StyleCommander implements UpdateCommander {
+export class StyleCommander implements Commander<string | number> {
   private value: string | number;
 
   constructor(private name: string, private canApplyBlockElement = true) {
@@ -18,13 +18,13 @@ export class StyleCommander implements UpdateCommander {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        const r = new FormatRange(
-          item.startIndex,
-          item.endIndex,
+        const r = new FormatRange({
+          startIndex: item.startIndex,
+          endIndex: item.endIndex,
           handler,
-          item.context,
-          FormatState.Valid
-        );
+          context: item.context,
+          state: FormatState.Valid
+        });
         item.context.apply(r, false);
       });
     });

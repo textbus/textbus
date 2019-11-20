@@ -15,7 +15,7 @@ const editor = createEditor('#editor', {
   <strong>test</strong>
   <li><a href="javascript:;">aaa</a></li>
   <li>bbb</li>
-  <li><img src="http://121.43.187.16/open-platform/static/img/logo04.c43a9376db1f80ca39f2e28c210fe10e.png" alt=""></li>
+  <li><img src="https://www.tanboui.com/static/img/logo2.558fcff8d5b49909b4db53f3ca66e823.png" alt=""></li>
 </ul>
 `
 });

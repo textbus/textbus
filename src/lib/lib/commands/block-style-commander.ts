@@ -1,9 +1,9 @@
-import { ReplaceModel, UpdateCommander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class BlockStyleCommander implements UpdateCommander {
+export class BlockStyleCommander implements Commander<string> {
   constructor(private name: string,
               private value: string | number) {
   }

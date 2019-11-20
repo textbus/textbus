@@ -35,5 +35,5 @@ export const imageHandler: DropdownConfig = {
   match: {
     tags: ['img']
   },
-  execCommand: new AttrCommander('img', updateEvent.asObservable())
+  execCommand: new AttrCommander('img')
 };

@@ -45,5 +45,5 @@ export const musicHandler: DropdownConfig = {
   match: {
     tags: ['audio']
   },
-  execCommand: new AttrCommander('audio', updateEvent.asObservable())
+  execCommand: new AttrCommander('audio')
 };

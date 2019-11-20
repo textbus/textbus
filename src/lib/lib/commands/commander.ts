@@ -1,6 +1,7 @@
-import { FormatState, MatchDescription } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
+import { CacheData } from '../toolbar/help';
 
 export class ReplaceModel {
   constructor(public replaceElement: HTMLElement) {
@@ -14,12 +15,10 @@ export class ChildSlotModel {
 
 export type RenderModel = ReplaceModel | ChildSlotModel | null;
 
-export interface Commander {
+export interface Commander<T = any> {
+  updateValue?(value: T): void;
+
   command(selection: TBSelection, handler: Handler, overlap: boolean): void;
 
-  render(state: FormatState, rawElement?: HTMLElement, matchDesc?: MatchDescription): RenderModel;
-}
-
-export interface UpdateCommander extends Commander {
-  updateValue(value: string): void;
+  render(state: FormatState, rawElement?: HTMLElement, matchDesc?: CacheData): RenderModel;
 }

@@ -4,7 +4,7 @@ import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class ListCommander implements Commander {
+export class ListCommander implements Commander<any> {
   constructor(private tagName: string) {
   }
 

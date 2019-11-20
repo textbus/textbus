@@ -39,9 +39,12 @@ export const linkHandler: DropdownConfig = {
   priority: inlineHandlerPriority,
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
+  cacheData: {
+    attrs: ['href', 'target']
+  },
   viewer: form,
   match: {
     tags: ['a']
   },
-  execCommand: new AttrCommander('a', updateEvent.asObservable(), true)
+  execCommand: new AttrCommander('a')
 };

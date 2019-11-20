@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EventDelegate } from '../help';
+import { CacheDataConfig, DropdownConfig, EventDelegate } from '../help';
 import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 
@@ -12,12 +12,14 @@ export class DropdownHandler implements Handler {
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
+  cacheDataConfig: CacheDataConfig;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
   constructor(private config: DropdownConfig, private delegate: EventDelegate) {
     this.onApply = config.onHide;
     this.priority = config.priority;
+    this.cacheDataConfig = config.cacheData;
 
     this.matcher = new Matcher(config.match);
     this.execCommand = config.execCommand;

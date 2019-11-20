@@ -1,6 +1,6 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { ActionSheetConfig, ActionConfig } from '../help';
+import { ActionSheetConfig, ActionConfig, CacheDataConfig } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
@@ -41,6 +41,7 @@ export class ActionSheetOptionHandler implements Handler {
   matcher: Matcher;
   execCommand: Commander;
   priority: number;
+  cacheDataConfig: CacheDataConfig;
   private eventSource = new Subject<void>();
   private matchedEvent = new Subject<ActionConfig>();
 

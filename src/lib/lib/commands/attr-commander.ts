@@ -1,21 +1,33 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { Observable } from 'rxjs';
 import { AttrState } from '../toolbar/formats/forms/help';
+import { CacheData } from '../toolbar/help';
 
-export class AttrCommander implements Commander {
-  constructor(private tagName: string,
-              attrs: AttrState[] | Observable<AttrState[]>,
-              private containsChild = false) {
+export class AttrCommander implements Commander<AttrState[]> {
+
+  private attrs: AttrState[] = [];
+
+  constructor(private tagName: string) {
+  }
+
+  updateValue(value: AttrState[]): void {
+    this.attrs = value;
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
-    return new ReplaceModel(document.createElement(this.tagName));
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
+    const el = document.createElement(this.tagName);
+    if (cacheData && cacheData.attrs) {
+      cacheData.attrs.forEach((value, key) => {
+        if (value) {
+          el.setAttribute(key, value);
+        }
+      })
+    }
+    return new ReplaceModel(el);
   }
 }

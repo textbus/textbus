@@ -3,6 +3,7 @@ import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
+import { CacheData, CacheDataConfig } from '../toolbar/help';
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
@@ -110,18 +111,41 @@ export class Parser extends Fragment {
     this.registries.map(item => {
       return {
         token: item,
-        ...item.matcher.matchNode(by)
+        ...item.matcher.matchNode(by),
+        cacheData: by.nodeType === 1 ? this.getPreCacheData(by as HTMLElement, item.cacheDataConfig) : null
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
-      const newRange = new FormatRange(
+      const newRange = new FormatRange({
         startIndex,
-        startIndex + len,
-        item.token,
+        endIndex: startIndex + len,
+        handler: item.token,
         context,
-        item.state,
-        item.matchDescription
-      );
+        state: item.state,
+        matchDescription: item.matchDescription,
+        cacheData: item.cacheData
+      });
       context.mergeFormat(newRange);
     })
+  }
+
+  private getPreCacheData(node: HTMLElement, config?: CacheDataConfig): CacheData {
+    if (!config) {
+      return null;
+    }
+    const data: CacheData = {};
+    if (config.attrs) {
+      const attrs = new Map<string, string>();
+      config.attrs.forEach(key => {
+        attrs.set(key, node.getAttribute(key));
+      });
+      data.attrs = attrs;
+    }
+    if (config.styleName) {
+      data.styles = {
+        name: config.styleName,
+        value: node.style[config.styleName]
+      };
+    }
+    return data;
   }
 }

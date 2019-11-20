@@ -34,7 +34,7 @@ export enum TableEditActions {
   DeleteRightColumn
 }
 
-export class TableEditCommander implements Commander {
+export class TableEditCommander implements Commander<any> {
   constructor(private type: TableEditActions) {
   }
 

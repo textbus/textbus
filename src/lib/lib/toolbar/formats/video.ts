@@ -45,5 +45,5 @@ export const videoHandler: DropdownConfig = {
   match: {
     tags: ['video']
   },
-  execCommand: new AttrCommander('video', updateEvent.asObservable())
+  execCommand: new AttrCommander('video')
 };

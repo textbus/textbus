@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 
 import { Handler } from './toolbar/handlers/help';
-import { FormatState, MatchDescription, Matcher } from './matcher/matcher';
+import { Matcher } from './matcher/matcher';
 import { Commander, ReplaceModel } from './commands/commander';
-import { defaultHandlerPriority, propertyHandlerPriority } from './toolbar/help';
+import { CacheDataConfig, defaultHandlerPriority } from './toolbar/help';
 
 class DefaultTagCommander implements Commander {
   constructor(private tagName: string) {
@@ -17,39 +17,11 @@ class DefaultTagCommander implements Commander {
   }
 }
 
-class DefaultAttrCommander implements Commander {
-  constructor(private name: string) {
-  }
-
-  command(): void {
-  }
-
-  render(state: FormatState, rawElement?: HTMLElement, matchDesc?: MatchDescription): null {
-    if (rawElement && matchDesc && matchDesc.attribute) {
-      rawElement.setAttribute(this.name, matchDesc.attribute.value);
-    }
-    return null;
-  }
-}
-
 class DefaultTagsHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<void>;
-  priority = propertyHandlerPriority;
-
-  constructor(public execCommand: Commander,
-              public matcher: Matcher) {
-  }
-
-  updateStatus(h: boolean): void {
-  }
-}
-
-class DefaultAttrsHandler implements Handler {
-  elementRef: HTMLElement;
-  onApply: Observable<void>;
   priority = defaultHandlerPriority;
-
+  cacheDataConfig: CacheDataConfig;
   constructor(public execCommand: Commander,
               public matcher: Matcher) {
   }
@@ -63,12 +35,5 @@ export const defaultHandlers: Handler[] = [
     return new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
       tags: [tag]
     }));
-  }),
-  ...'href,target,title,colspan,rowspan'.split(',').map(key => {
-    return new DefaultAttrsHandler(new DefaultAttrCommander(key), new Matcher({
-      attrs: [{
-        key
-      }]
-    }))
   })
 ];

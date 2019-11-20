@@ -4,20 +4,20 @@ import { FormatRange } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class InlineCommander implements Commander {
+export class InlineCommander implements Commander<any> {
   constructor(private tagName: string) {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        const r = new FormatRange(
-          item.startIndex,
-          item.endIndex,
+        const r = new FormatRange({
+          startIndex: item.startIndex,
+          endIndex: item.endIndex,
           handler,
-          item.context,
-          overlap ? FormatState.Invalid : FormatState.Valid
-        );
+          context: item.context,
+          state: overlap ? FormatState.Invalid : FormatState.Valid
+        });
         item.context.apply(r, false);
       });
     })

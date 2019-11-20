@@ -1,5 +1,5 @@
 import { MatchRule } from '../matcher/matcher';
-import { Commander, UpdateCommander } from '../commands/commander';
+import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 
@@ -22,6 +22,16 @@ export interface Hooks {
   onOutput?(head: HTMLHeadElement, body: HTMLBodyElement): void;
 }
 
+export interface CacheData {
+  attrs?: Map<string, string>;
+  styles?: { name: string, value: string | number };
+}
+
+export interface CacheDataConfig {
+  attrs?: string[];
+  styleName?: string;
+}
+
 
 export enum HandlerType {
   Button,
@@ -34,6 +44,7 @@ export interface ButtonConfig {
   type: HandlerType.Button;
   execCommand: Commander;
   priority: number;
+  cacheData?: CacheDataConfig;
   label?: string;
   classes?: string[];
   tooltip?: string;
@@ -51,9 +62,10 @@ export interface SelectOptionConfig {
 
 export interface SelectConfig {
   type: HandlerType.Select;
-  execCommand: UpdateCommander;
+  execCommand: Commander;
   priority: number;
   options: SelectOptionConfig[];
+  cacheData?: CacheDataConfig;
   classes?: string[];
   mini?: boolean;
   tooltip?: string;
@@ -66,6 +78,7 @@ export interface DropdownConfig {
   onHide: Observable<void>;
   execCommand: Commander;
   priority: number;
+  cacheData?: CacheDataConfig;
   classes?: string[];
   format?: string;
   tooltip?: string;
@@ -77,6 +90,7 @@ export interface DropdownConfig {
 export interface ActionConfig {
   execCommand: Commander;
   priority: number;
+  cacheData?: CacheDataConfig;
   label?: string;
   classes?: string[]
   match?: MatchRule;

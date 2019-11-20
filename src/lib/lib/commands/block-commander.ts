@@ -1,10 +1,10 @@
-import { ReplaceModel, UpdateCommander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class BlockCommander implements UpdateCommander {
+export class BlockCommander implements Commander<string> {
 
   constructor(private tagName: string) {
   }
@@ -16,20 +16,26 @@ export class BlockCommander implements UpdateCommander {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.forEach(range => {
       if (range.commonAncestorFragment === range.startFragment && range.commonAncestorFragment === range.endFragment) {
-        const f = new FormatRange(
-          0,
-          range.commonAncestorFragment.contents.length,
+        const f = new FormatRange({
+          startIndex: 0,
+          endIndex: range.commonAncestorFragment.contents.length,
           handler,
-          range.commonAncestorFragment,
-          FormatState.Valid
-        );
+          context: range.commonAncestorFragment,
+          state: FormatState.Valid
+        });
         range.commonAncestorFragment.apply(f, true);
       } else {
         const scope = range.getCommonAncestorFragmentScope();
         const contents = range.commonAncestorFragment.contents.slice(scope.startIndex, scope.endIndex);
         contents.forEach(item => {
           if (item instanceof Fragment) {
-            item.apply(new FormatRange(0, item.contents.length, handler, item, FormatState.Valid), true);
+            item.apply(new FormatRange({
+              startIndex: 0,
+              endIndex: item.contents.length,
+              handler,
+              context: item,
+              state: FormatState.Valid
+            }), true);
           }
         })
       }
