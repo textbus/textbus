@@ -15,6 +15,12 @@ export class TBRange {
   startFragment: Fragment;
   endFragment: Fragment;
 
+  get collapsed() {
+    return this.startFragment === this.commonAncestorFragment &&
+      this.endFragment === this.commonAncestorFragment &&
+      this.startIndex === this.endIndex;
+  }
+
   constructor(private range: Range) {
     this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
 
@@ -24,15 +30,17 @@ export class TBRange {
     this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
-  apply() {
+  apply(offset = 0) {
     const start = this.findPosition(
       this.startFragment.children,
       this.startIndex);
     const end = this.findPosition(
       this.endFragment.children,
       this.endIndex);
-    this.range.setStart(start.node, start.position);
-    this.range.setEnd(end.node, end.position);
+    this.startIndex += offset;
+    this.endIndex += offset;
+    this.range.setStart(start.node, start.position + offset);
+    this.range.setEnd(end.node, end.position + offset);
   }
 
   getCommonAncestorFragmentScope() {

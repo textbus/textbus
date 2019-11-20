@@ -27,13 +27,22 @@ export class ViewRenderer {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
-      this.selection = new TBSelection(doc);
-      this.readyEvent.next(doc);
-      this.elementRef.appendChild(this.selection.cursorElementRef);
 
-      this.selection.onSelectionChange.subscribe(s => {
+      const selection = new TBSelection(doc);
+
+      this.selection = selection;
+      this.readyEvent.next(doc);
+      this.elementRef.appendChild(selection.cursorElementRef);
+
+
+      selection.onSelectionChange.subscribe(s => {
         this.selectionChangeEvent.next(s);
-      })
+      });
+      selection.cursor.onInput.subscribe(v => {
+        if (selection.collapsed) {
+          this.updateContents(v);
+        }
+      });
     };
     this.frame.src = `javascript:void((function () {
                       document.open();
@@ -62,6 +71,25 @@ export class ViewRenderer {
     }
   }
 
+  private updateContents(content: string) {
+    const startIndex = this.selection.firstRange.startIndex;
+    const commonAncestorFragment = this.selection.commonAncestorFragment;
+    commonAncestorFragment.insert(content, startIndex);
+    const oldFragment = commonAncestorFragment.elements;
+    const parent = oldFragment[0].parentNode;
+
+    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+    commonAncestorFragment.destroyView();
+    const newFragment = commonAncestorFragment.render();
+
+    if (nextSibling) {
+      parent.insertBefore(newFragment, nextSibling);
+    } else {
+      parent.appendChild(newFragment);
+    }
+    this.selection.apply(content.length);
+  }
+
   apply(handler: Handler) {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const oldFragment = commonAncestorFragment.elements;
@@ -69,7 +97,7 @@ export class ViewRenderer {
 
     const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
     const overlap = handler.matcher.queryState(this.selection, handler).overlap;
-
+    console.log(overlap)
     commonAncestorFragment.destroyView();
     handler.execCommand.command(this.selection, handler, overlap);
     const newFragment = commonAncestorFragment.render();

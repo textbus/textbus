@@ -94,6 +94,18 @@ export class Fragment extends ViewNode {
     }
   }
 
+  insert(content: string, index: number) {
+    this.contents.insert(content, index);
+    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
+      if (format.startIndex > index) {
+        format.startIndex += content.length;
+      }
+      if (format.endIndex >= index) {
+        format.endIndex += content.length;
+      }
+    });
+  }
+
   /**
    * 渲染 DOM
    */

@@ -29,6 +29,25 @@ export class Contents implements Iterable<string | ViewNode> {
     };
   }
 
+  insert(content: string, index: number) {
+    let i = 0;
+    let ii = 0;
+    for (const el of this.elements) {
+      if (index >= i) {
+        if (index <= i + el.length) {
+          if (typeof el === 'string') {
+            const newStr = [el.slice(0, index), content, el.slice(index)].join('');
+            this.elements.splice(ii, 1, newStr)
+          }
+        } else {
+          break;
+        }
+      }
+      ii++;
+      i += el.length;
+    }
+  }
+
   add(content: string | ViewNode) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];

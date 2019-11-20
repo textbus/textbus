@@ -1,5 +1,5 @@
 import { Cursor } from './cursor';
-import { fromEvent, Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, of, Subject } from 'rxjs';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from './range';
 
@@ -14,7 +14,11 @@ export class TBSelection {
     return this.ranges[0] || null;
   }
 
-  private cursor: Cursor;
+  get collapsed() {
+    return this.ranges.length === 1 && this.firstRange.collapsed;
+  }
+
+  readonly cursor: Cursor;
 
   private selection: Selection;
   private selectionChangeEvent = new Subject<TBSelection>();
@@ -44,9 +48,9 @@ export class TBSelection {
     });
   }
 
-  apply() {
+  apply(offset = 0) {
     this.ranges.forEach(range => {
-      range.apply();
+      range.apply(offset);
     });
   }
 

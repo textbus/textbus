@@ -113,8 +113,8 @@ export class Matcher {
             handler));
         }
       });
+      console.log(states)
       let state = Matcher.mergeStates(states);
-
       let overlap: boolean;
       switch (state) {
         case FormatState.Exclude:
@@ -157,7 +157,7 @@ export class Matcher {
     for (const child of childContents) {
       if (typeof child === 'string') {
         for (const format of formatRanges) {
-          if (index >= format.startIndex || index + child.length <= format.endIndex) {
+          if (index >= format.startIndex && index + child.length <= format.endIndex) {
             if (format.state === FormatState.Exclude) {
               return FormatState.Exclude;
             } else {
