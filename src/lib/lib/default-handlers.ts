@@ -3,7 +3,8 @@ import { Observable } from 'rxjs';
 import { Handler } from './toolbar/handlers/help';
 import { Matcher } from './matcher/matcher';
 import { Commander, ReplaceModel } from './commands/commander';
-import { CacheDataConfig, defaultHandlerPriority } from './toolbar/help';
+import { defaultHandlerPriority } from './toolbar/help';
+import { CacheDataConfig } from './toolbar/utils/cache-data';
 
 class DefaultTagCommander implements Commander {
   constructor(private tagName: string) {
@@ -24,9 +25,6 @@ class DefaultTagsHandler implements Handler {
   cacheDataConfig: CacheDataConfig;
   constructor(public execCommand: Commander,
               public matcher: Matcher) {
-  }
-
-  updateStatus(h: boolean): void {
   }
 }
 

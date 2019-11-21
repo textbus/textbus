@@ -1,7 +1,7 @@
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { CacheData } from '../toolbar/help';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class ReplaceModel {
   constructor(public replaceElement: HTMLElement) {

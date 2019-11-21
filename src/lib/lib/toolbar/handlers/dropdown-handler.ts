@@ -2,9 +2,10 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { CacheDataConfig, DropdownConfig, EventDelegate } from '../help';
-import { Matcher } from '../../matcher/matcher';
+import { DropdownConfig, EventDelegate } from '../help';
+import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
+import { CacheDataConfig } from '../utils/cache-data';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
@@ -40,22 +41,6 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(h: boolean): void {
+  updateStatus(commonMatchDelta: CommonMatchDelta): void {
   }
-
-  // updateStatus(matchDelta: MatchDelta): void {
-  //   this.dropdown.disabled = matchDelta.disable;
-  //   if (matchDelta.inSingleContainer) {
-  //     this.dropdown.highlight = true;
-  //     this.handler.viewer.updateStateByElement(matchDelta.scopeContainer as HTMLElement);
-  //   } else if (matchDelta.overlap) {
-  //     this.dropdown.highlight = true;
-  //     this.handler.viewer.updateStateByElement(matchDelta.range.cloneContents().children[0] as HTMLElement);
-  //   } else {
-  //     this.dropdown.highlight = false;
-  //     if (typeof this.handler.viewer.reset === 'function') {
-  //       this.handler.viewer.reset();
-  //     }
-  //   }
-  // }
 }

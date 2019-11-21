@@ -1,7 +1,8 @@
-import { MatchRule } from '../matcher/matcher';
+import { CommonMatchDelta, MatchRule } from '../matcher/matcher';
 import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
+import { CacheData, CacheDataConfig } from './utils/cache-data';
 
 export interface EditContext {
   document: Document;
@@ -11,39 +12,6 @@ export interface EditContext {
 export interface Hooks {
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 }
-
-export class CacheData {
-  constructor(public attrs: Map<string, string>,
-              public style: { name: string, value: string | number }) {
-  }
-
-  equal(data: CacheData) {
-    if (data === this) {
-      return true;
-    }
-    if (data.attrs === this.attrs && data.style === this.style) {
-      return true;
-    }
-    if (data.attrs && this.attrs) {
-      if (data.attrs.size !== this.attrs.size) {
-        return false;
-      }
-      return Array.from(data.attrs.keys()).reduce((v, key) => {
-        return v && data.attrs.get(key) === this.attrs.get(key);
-      }, true);
-    }
-    if (data.style && this.style) {
-      return data.style.name === this.style.name && data.style.value === this.style.value;
-    }
-    return false;
-  }
-}
-
-export interface CacheDataConfig {
-  attrs?: string[];
-  styleName?: string;
-}
-
 
 export enum HandlerType {
   Button,
@@ -68,7 +36,6 @@ export interface SelectOptionConfig {
   value: any;
   label?: string;
   classes?: string[];
-  match?: MatchRule;
   default?: boolean;
 }
 
@@ -76,8 +43,10 @@ export interface SelectConfig {
   type: HandlerType.Select;
   execCommand: Commander;
   priority: number;
+  cacheData: CacheDataConfig;
   options: SelectOptionConfig[];
-  cacheData?: CacheDataConfig;
+  highlight(options: SelectOptionConfig[], data: CacheData): SelectOptionConfig;
+  match?: MatchRule;
   classes?: string[];
   mini?: boolean;
   tooltip?: string;

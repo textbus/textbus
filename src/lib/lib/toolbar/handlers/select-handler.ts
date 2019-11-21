@@ -2,27 +2,32 @@ import { merge, Observable, Subject } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { CacheDataConfig, SelectConfig, SelectOptionConfig } from '../help';
-import { Matcher } from '../../matcher/matcher';
+import { SelectConfig, SelectOptionConfig } from '../help';
+import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
+import { CacheDataConfig } from '../utils/cache-data';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
-  matcher: Matcher = new Matcher();
+  matcher: Matcher;
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
   cacheDataConfig: CacheDataConfig;
   private applyEventSource = new Subject<any>();
+  private value = '';
+  private textContainer: HTMLElement;
 
   constructor(private config: SelectConfig) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
+    this.matcher = new Matcher(config.match);
     this.cacheDataConfig = config.cacheData;
     this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');
+    this.textContainer = dropdownInner;
     dropdownInner.classList.add('tanbo-editor-select-button', ...config.classes || []);
     config.mini && dropdownInner.classList.add('tanbo-editor-select-button-mini');
 
@@ -37,6 +42,7 @@ export class SelectHandler implements Handler {
       }
 
       item.onCheck.subscribe(v => {
+        this.value = v.value;
         this.execCommand.updateValue(v.value);
         this.applyEventSource.next();
       });
@@ -51,14 +57,31 @@ export class SelectHandler implements Handler {
     ).elementRef;
   }
 
-  updateStatus(h: boolean): void {
+  updateStatus(commonMatchDelta: CommonMatchDelta): void {
+    console.log(commonMatchDelta)
+    if (commonMatchDelta.cacheData) {
+      const option = this.config.highlight(this.config.options, commonMatchDelta.cacheData);
+      if (option) {
+        this.textContainer.innerText = option.label;
+        return;
+      }
+    }
+    let defaultOption: SelectOptionConfig;
+    for (const op of this.config.options) {
+      if (op.default) {
+        defaultOption = op;
+        break;
+      }
+    }
+    if (defaultOption) {
+      this.textContainer.innerText = defaultOption.label;
+    }
   }
 }
 
 export class SelectOptionHandler {
   readonly elementRef = document.createElement('button');
   onCheck: Observable<SelectOptionConfig>;
-  matcher: Matcher;
   private eventSource = new Subject<SelectOptionConfig>();
 
   constructor(private option: SelectOptionConfig) {
@@ -73,6 +96,5 @@ export class SelectOptionHandler {
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next(option);
     });
-    this.matcher = new Matcher(option.match);
   }
 }

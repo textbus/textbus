@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
-import { CacheData } from '../toolbar/help';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class AttrCommander implements Commander<AttrState[]> {
 

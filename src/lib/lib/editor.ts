@@ -17,6 +17,7 @@ import { TBSelection } from './selection/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
+import { auditTime } from 'rxjs/operators';
 
 
 export interface EditorOptions {
@@ -65,7 +66,7 @@ export class Editor implements EventDelegate {
       this.readyState = true;
     });
 
-    this.viewer.onSelectionChange.subscribe(selection => {
+    this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
       this.updateHandlerState(selection);
     });
 
@@ -80,18 +81,9 @@ export class Editor implements EventDelegate {
   }
 
   updateHandlerState(selection: TBSelection) {
-    this.handlers.forEach(handler => {
-      const overlap = handler.matcher.queryState(selection, handler).overlap;
-      handler.updateStatus(overlap);
-      // if (Array.isArray(handler.matcher)) {
-      //   const overlap = handler.matcher.map(m => {
-      //     return m.queryState(selection, handler).overlap;
-      //   });
-      //   handler.updateStatus(overlap);
-      // } else {
-      //   const overlap = handler.matcher.queryState(selection, handler).overlap;
-      //   handler.updateStatus(overlap);
-      // }
+    this.handlers.filter(h => typeof h.updateStatus === 'function').forEach(handler => {
+      const s = handler.matcher.queryState(selection, handler);
+      handler.updateStatus(s);
     });
   }
 

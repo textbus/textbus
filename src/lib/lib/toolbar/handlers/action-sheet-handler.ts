@@ -1,11 +1,12 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { ActionSheetConfig, ActionConfig, CacheDataConfig } from '../help';
+import { ActionSheetConfig, ActionConfig } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
-import { Matcher } from '../../matcher/matcher';
+import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
+import { CacheDataConfig } from '../utils/cache-data';
 
 export class ActionSheetHandler {
   readonly elementRef: HTMLElement;
@@ -62,7 +63,6 @@ export class ActionSheetOptionHandler implements Handler {
     this.matcher = new Matcher(option.match);
   }
 
-  updateStatus(h: boolean): void {
-
+  updateStatus(commonMatchDelta: CommonMatchDelta): void {
   }
 }

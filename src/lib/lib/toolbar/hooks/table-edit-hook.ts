@@ -1,7 +1,6 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { findElementByTagName } from '../utils/utils';
 import { EditContext, Hooks } from '../help';
 import { CellPosition, RowPosition } from '../../commands/table-edit-commander';
 import { Matcher } from '../../matcher/matcher';
@@ -11,6 +10,19 @@ interface ElementPosition {
   top: number;
   width: number;
   height: number;
+}
+
+function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLElement {
+  if (!Array.isArray(tagName)) {
+    tagName = [tagName];
+  }
+  const regs = tagName.map(tagName => new RegExp(`^${tagName}$`, 'i'));
+  for (const node of nodes) {
+    if (node.nodeType === 1 && regs.map(reg => reg.test((node as HTMLElement).tagName)).indexOf(true) > -1) {
+      return node as HTMLElement;
+    }
+  }
+  return null;
 }
 
 export class TableEditHook implements Hooks {

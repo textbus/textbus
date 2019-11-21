@@ -3,7 +3,7 @@ import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
-import { CacheData, CacheDataConfig } from '../toolbar/help';
+import { CacheData, CacheDataConfig } from '../toolbar/utils/cache-data';
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
@@ -145,6 +145,10 @@ export class Parser extends Fragment {
         value: node.style[config.styleName]
       };
     }
-    return new CacheData(attrs.size ? attrs : null, style);
+    return new CacheData({
+      tag: config.tag ? node.tagName.toLowerCase() : null,
+      attrs: attrs.size ? attrs : null,
+      style
+    });
   }
 }

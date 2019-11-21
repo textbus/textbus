@@ -5,7 +5,7 @@ import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
-import { CacheData } from '../toolbar/help';
+import { CacheDataParams, CacheData } from '../toolbar/utils/cache-data';
 
 export interface FormatRangeParams {
   startIndex: number;
@@ -13,8 +13,8 @@ export interface FormatRangeParams {
   handler: Handler;
   context: Fragment;
   state: FormatState;
+  cacheData?: CacheDataParams;
   matchDescription?: MatchDescription;
-  cacheData?: CacheData;
 }
 
 export class FormatRange {
@@ -23,8 +23,8 @@ export class FormatRange {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  matchDescription?: MatchDescription;
   cacheData?: CacheData;
+  matchDescription?: MatchDescription;
 
   constructor(private params: FormatRangeParams | FormatRange) {
     this.startIndex = params.startIndex;
@@ -33,7 +33,7 @@ export class FormatRange {
     this.context = params.context;
     this.state = params.state;
     this.matchDescription = params.matchDescription;
-    this.cacheData = params.cacheData;
+    this.cacheData = params.cacheData && new CacheData(params.cacheData);
   }
 
   clone() {
@@ -182,9 +182,10 @@ export class Fragment extends ViewNode {
           formatRanges.push(newFormatRange);
           continue;
         }
-        if (mark.state === newFormatRange.state &&
-          (!mark.cacheData && !newFormatRange.cacheData ||
-            mark.cacheData.equal(newFormatRange.cacheData))) {
+        if (mark.state === newFormatRange.state && (
+          mark.cacheData &&
+          newFormatRange.cacheData &&
+            mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === !newFormatRange.cacheData)) {
           newFormatRange.endIndex = i + 1;
         } else {
           newFormatRange = new FormatRange({
@@ -277,7 +278,8 @@ export class Fragment extends ViewNode {
           endIndex: item.length + vNode.formats[0].startIndex,
           handler: null,
           context: vNode.formats[0].context,
-          state: null
+          state: null,
+          cacheData: null
         });
 
         const v = new VirtualNode([newFormatRange], vNode.parent);
@@ -311,7 +313,8 @@ export class Fragment extends ViewNode {
       endIndex: this.contents.length,
       handler: null,
       context: this,
-      state: null
+      state: null,
+      cacheData: null
     })], null);
     this.vDomBuilder(formatRanges,
       root,
@@ -338,7 +341,8 @@ export class Fragment extends ViewNode {
             endIndex: firstRange.startIndex,
             handler: null,
             context: this,
-            state: null
+            state: null,
+            cacheData: null
           });
           parent.children.push(new VirtualNode([f], parent));
         }
@@ -377,7 +381,8 @@ export class Fragment extends ViewNode {
             endIndex: firstRange.endIndex,
             handler: null,
             context: this,
-            state: null
+            state: null,
+            cacheData: null
           });
           container.children.push(new VirtualNode([f], parent))
         }
@@ -389,7 +394,8 @@ export class Fragment extends ViewNode {
           endIndex,
           handler: null,
           context: this,
-          state: null
+          state: null,
+          cacheData: null
         })], parent));
         break;
       }

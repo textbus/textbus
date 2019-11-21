@@ -2,6 +2,13 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../selection/range';
+import { CacheData } from '../toolbar/utils/cache-data';
+import { blockHandlerPriority } from '../toolbar/help';
+
+interface MatchData {
+  state: FormatState;
+  cacheData: CacheData;
+}
 
 export enum FormatState {
   Valid = 'Valid',
@@ -12,6 +19,7 @@ export enum FormatState {
 export interface MatchDelta {
   overlap: boolean;
   fromRange: TBRange;
+  cacheData: CacheData;
 }
 
 export interface MatchDescription {
@@ -24,6 +32,7 @@ export interface MatchDescription {
 export interface CommonMatchDelta {
   overlap: boolean;
   srcStates: MatchDelta[];
+  cacheData: CacheData;
 }
 
 export interface MatchRule {
@@ -96,15 +105,15 @@ export class Matcher {
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
-      const states: FormatState[] = [];
+      const states: MatchData[] = [];
       range.getSelectedScope().forEach(s => {
         if (s.startIndex === s.endIndex) {
-          const state = this.getStatesByRange(s.startIndex,
+          const matchData = this.getStatesByRange(s.startIndex,
             s.endIndex,
             s.context,
             handler);
-          if (state !== FormatState.Invalid) {
-            states.push(state);
+          if (matchData.state !== FormatState.Invalid) {
+            states.push(matchData);
           }
         } else {
           states.push(this.getStatesByRange(s.startIndex,
@@ -116,7 +125,7 @@ export class Matcher {
 
       let state = Matcher.mergeStates(states);
       let overlap: boolean;
-      switch (state) {
+      switch (state.state) {
         case FormatState.Exclude:
           overlap = false;
           break;
@@ -130,38 +139,63 @@ export class Matcher {
 
       return {
         overlap,
-        fromRange: range
+        fromRange: range,
+        cacheData: state.cacheData
       };
     });
     return {
       overlap: srcStates.reduce((v, n) => v && n.overlap, true),
-      srcStates
+      srcStates,
+      cacheData: srcStates[0].cacheData
     }
   }
 
-  private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler) {
+  private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
     const formatRanges = fragment.formatMatrix.get(handler) || [];
     const childContents = fragment.contents.slice(startIndex, endIndex);
 
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
+        // 如果为块级元素，则需要从第 0 位开始匹配，否则从第一位
+        if (format.startIndex === 0 &&
+          format.endIndex === fragment.contents.length &&
+          format.handler.priority === blockHandlerPriority) {
+          if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
+            return {
+              state: format.state,
+              cacheData: format.cacheData ? format.cacheData.clone() : null
+            };
+          }
+        }
         if (startIndex > format.startIndex && startIndex <= format.endIndex) {
-          return format.state;
+          return {
+            state: format.state,
+            cacheData: format.cacheData ? format.cacheData.clone() : null
+          };
         }
       }
-      return FormatState.Invalid;
+      return {
+        state: FormatState.Invalid,
+        cacheData: null
+      };
     }
 
-    const states: FormatState[] = [];
+    const states: Array<MatchData> = [];
     let index = startIndex;
     for (const child of childContents) {
       if (typeof child === 'string') {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
             if (format.state === FormatState.Exclude) {
-              return FormatState.Exclude;
+              return {
+                state: FormatState.Exclude,
+                cacheData: format.cacheData ? format.cacheData.clone() : null
+              };
             } else {
-              states.push(format.state);
+              states.push({
+                state: format.state,
+                cacheData: format.cacheData ? format.cacheData.clone() : null
+              });
             }
           }
         }
@@ -256,13 +290,29 @@ export class Matcher {
     }
   }
 
-  private static mergeStates(states: FormatState[]) {
-    if (states.includes(FormatState.Exclude)) {
-      return FormatState.Exclude;
-    } else if (states.includes(FormatState.Invalid)) {
-      return FormatState.Invalid;
+  private static mergeStates(states: MatchData[]): MatchData {
+    for (const item of states) {
+      if (item.state === FormatState.Exclude) {
+        return {
+          state: FormatState.Exclude,
+          cacheData: item.cacheData ? item.cacheData.clone() : null
+        };
+      } else if (item.state === FormatState.Invalid) {
+        return {
+          state: FormatState.Invalid,
+          cacheData: item.cacheData ? item.cacheData.clone() : null
+        };
+      }
     }
-    return states.length ? FormatState.Valid : FormatState.Invalid;
+    const last = states[states.length - 1];
+
+    return states.length ? {
+      state: FormatState.Valid,
+      cacheData: last.cacheData ? last.cacheData.clone() : null
+    } : {
+      state: FormatState.Invalid,
+      cacheData: null
+    };
   }
 
   private static inSingleContainer(fragment: Fragment,

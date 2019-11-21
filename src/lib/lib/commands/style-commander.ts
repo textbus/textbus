@@ -23,7 +23,10 @@ export class StyleCommander implements Commander<string | number> {
           endIndex: item.endIndex,
           handler,
           context: item.context,
-          state: FormatState.Valid
+          state: FormatState.Valid,
+          cacheData: {
+            style: {name: this.name, value: this.value}
+          }
         });
         item.context.apply(r, false);
       });
@@ -31,6 +34,9 @@ export class StyleCommander implements Commander<string | number> {
   }
 
   render(state: FormatState, rawElement?: HTMLElement): ChildSlotModel {
+    if (!this.value) {
+      return null;
+    }
     if (rawElement) {
       if (this.canApplyBlockElement) {
         rawElement.style[this.name] = this.value;

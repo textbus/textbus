@@ -21,7 +21,10 @@ export class BlockCommander implements Commander<string> {
           endIndex: range.commonAncestorFragment.contents.length,
           handler,
           context: range.commonAncestorFragment,
-          state: FormatState.Valid
+          state: FormatState.Valid,
+          cacheData: {
+            tag: this.tagName
+          }
         });
         range.commonAncestorFragment.apply(f, true);
       } else {
@@ -34,7 +37,10 @@ export class BlockCommander implements Commander<string> {
               endIndex: item.contents.length,
               handler,
               context: item,
-              state: FormatState.Valid
+              state: FormatState.Valid,
+              cacheData: {
+                tag: this.tagName
+              }
             }), true);
           }
         })
