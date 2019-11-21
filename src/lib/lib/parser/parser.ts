@@ -111,7 +111,7 @@ export class Parser extends Fragment {
     this.registries.map(item => {
       return {
         token: item,
-        ...item.matcher.matchNode(by),
+        state: item.matcher.matchNode(by),
         cacheData: by.nodeType === 1 ? this.getPreCacheData(by as HTMLElement, item.cacheDataConfig) : null
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
@@ -121,7 +121,6 @@ export class Parser extends Fragment {
         handler: item.token,
         context,
         state: item.state,
-        matchDescription: item.matchDescription,
         cacheData: item.cacheData
       });
       context.mergeFormat(newRange);

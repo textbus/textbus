@@ -22,13 +22,6 @@ export interface MatchDelta {
   cacheData: CacheData;
 }
 
-export interface MatchDescription {
-  tagName?: string;
-  className?: string;
-  style?: { key: string; value: string | number };
-  attribute?: { key: string; value: string };
-}
-
 export interface CommonMatchDelta {
   overlap: boolean;
   srcStates: MatchDelta[];
@@ -46,19 +39,15 @@ export interface MatchRule {
 }
 
 export class Matcher {
-  private validators: Array<(node: Node, desc: MatchDescription) => boolean> = [];
-  private excludeValidators: Array<(node: Node, desc: MatchDescription) => boolean> = [];
+  private validators: Array<(node: Node) => boolean> = [];
+  private excludeValidators: Array<(node: Node) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.tags) {
-      this.validators.push((node, desc) => {
+      this.validators.push(node => {
         if (node.nodeType === 1) {
           const tagName = (node as HTMLElement).tagName.toLowerCase();
-          const r = Array.isArray(rule.tags) ? rule.tags.includes(tagName) : rule.tags.test(tagName);
-          if (r) {
-            desc.tagName = tagName;
-            return r;
-          }
+          return Array.isArray(rule.tags) ? rule.tags.includes(tagName) : rule.tags.test(tagName);
         }
         return false;
       });
@@ -84,23 +73,12 @@ export class Matcher {
     }
   }
 
-  matchNode(node: Node): { state: FormatState, matchDescription: MatchDescription } {
-    const excludeMatchDesc = {};
-    const matchDesc = {};
-    const exclude = this.excludeValidators.map(fn => fn(node, excludeMatchDesc)).includes(true);
+  matchNode(node: Node): FormatState {
+    const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
     if (exclude) {
-      return {
-        state: FormatState.Exclude,
-        matchDescription: excludeMatchDesc
-      };
+      return FormatState.Exclude;
     }
-    const state = this.validators.map(fn => fn(node, matchDesc)).includes(true) ?
-      FormatState.Valid :
-      FormatState.Invalid;
-    return {
-      state,
-      matchDescription: matchDesc
-    };
+    return this.validators.map(fn => fn(node)).includes(true) ? FormatState.Valid : FormatState.Invalid;
   }
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
@@ -207,60 +185,35 @@ export class Matcher {
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: Node, desc: MatchDescription) => {
+    return (node: Node) => {
       if (node.nodeType === 1) {
-        for (const attr of attrs) {
-          let b: boolean;
+        return attrs.map(attr => {
           if (attr.value) {
-            const v = (node as HTMLElement).getAttribute(attr.key);
-            if (Array.isArray(attr.value)) {
-              b = attr.value.includes(v);
-            } else {
-              b = v === attr.value;
-            }
-            if (b) {
-              desc.attribute = {
-                key: attr.key,
-                value: v
-              };
-              return true;
-            }
-          } else {
-            b = (node as HTMLElement).hasAttribute(attr.key);
-            if (b) {
-              desc.attribute = {
-                key: attr.key,
-                value: (node as HTMLElement).getAttribute(attr.key)
-              };
-              return true;
-            }
+            return (node as HTMLElement).getAttribute(attr.key) === attr.value;
           }
-        }
+          return (node as HTMLElement).hasAttribute(attr.key);
+        }).includes(true);
       }
       return false;
     }
   }
 
   private makeClassNameMatcher(classes: string[]) {
-    return (node: Node, desc: MatchDescription) => {
+    return (node: Node) => {
       if (node.nodeType === 1) {
-        for (const className of classes) {
-          const b = (node as HTMLElement).classList.contains(className);
-          if (b) {
-            desc.className = className;
-            return true;
-          }
-        }
+        return classes.map(className => {
+          return (node as HTMLElement).classList.contains(className);
+        }).includes(true);
       }
       return false;
     };
   }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: Node, desc: MatchDescription) => {
+    return (node: Node) => {
       if (node.nodeType === 1) {
         const elementStyles = (node as HTMLElement).style;
-        for (const key of Object.keys(styles)) {
+        return !Object.keys(styles).map(key => {
           const optionValue = (Array.isArray(styles[key]) ?
             styles[key] :
             [styles[key]]) as Array<string | number | RegExp>;
@@ -268,23 +221,13 @@ export class Matcher {
           if (key === 'fontFamily' && typeof styleValue === 'string') {
             styleValue = styleValue.replace(/['"]/g, '');
           }
-          for (const v of optionValue) {
-            let b: boolean;
+          return optionValue.map(v => {
             if (v instanceof RegExp) {
-              b = v.test(styleValue);
-            } else {
-
-              b = v === styleValue;
+              return v.test(styleValue);
             }
-            if (b) {
-              desc.style = {
-                key,
-                value: styleValue
-              };
-              return b;
-            }
-          }
-        }
+            return v === styleValue;
+          }).includes(true);
+        }).includes(false);
       }
       return false;
     }

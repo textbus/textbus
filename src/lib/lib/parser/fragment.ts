@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState, MatchDescription } from '../matcher/matcher';
+import { FormatState } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
@@ -15,7 +15,6 @@ export interface FormatRangeParams {
   context: Fragment;
   state: FormatState;
   cacheData?: CacheDataParams;
-  matchDescription?: MatchDescription;
 }
 
 export class FormatRange {
@@ -25,7 +24,6 @@ export class FormatRange {
   context: Fragment;
   state: FormatState;
   cacheData?: CacheData;
-  matchDescription?: MatchDescription;
 
   constructor(private params: FormatRangeParams | FormatRange) {
     this.startIndex = params.startIndex;
@@ -33,7 +31,6 @@ export class FormatRange {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.matchDescription = params.matchDescription;
     this.cacheData = params.cacheData && new CacheData(params.cacheData);
   }
 
@@ -81,7 +78,6 @@ export class Fragment extends ViewNode {
               handler: format.handler,
               context: format.context,
               state: format.state,
-              matchDescription: format.matchDescription,
               cacheData: format.cacheData
             });
             formats.push(childFormat);
@@ -183,7 +179,6 @@ export class Fragment extends ViewNode {
             handler: mark.handler,
             context: this,
             state: mark.state,
-            matchDescription: mark.matchDescription,
             cacheData: mark.cacheData
           });
           formatRanges.push(newFormatRange);
@@ -201,7 +196,6 @@ export class Fragment extends ViewNode {
             handler: mark.handler,
             context: this,
             state: mark.state,
-            matchDescription: mark.matchDescription,
             cacheData: mark.cacheData
           });
           formatRanges.push(newFormatRange);
