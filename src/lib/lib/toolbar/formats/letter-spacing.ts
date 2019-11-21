@@ -1,10 +1,10 @@
-import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const letterSpacingHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字间距',
-  priority: propertyHandlerPriority,
+  priority: Priority.Property,
   execCommand: new StyleCommander('letterSpacing'),
   classes: ['tanbo-editor-icon-text-width'],
   highlight(options, cacheData) {
@@ -14,12 +14,12 @@ export const letterSpacingHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     styleName: 'letterSpacing'
   },
   match: {
     styles: {
-      letterSpacing: ['', '0px', '1px', '2px', '3px', '4px', '5px']
+      letterSpacing: ['0px', '1px', '2px', '3px', '4px', '5px']
     }
   },
   mini: true,

@@ -1,10 +1,10 @@
-import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const fontFamilyHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字体',
-  priority: propertyHandlerPriority,
+  priority: Priority.Inline,
   execCommand: new StyleCommander('fontFamily'),
   highlight(options, cacheData) {
     for (const option of options) {
@@ -13,12 +13,12 @@ export const fontFamilyHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     styleName: 'fontFamily'
   },
   match: {
     styles: {
-      fontFamily: ['', 'sans-serif', 'SimSun', 'SimHei', 'Microsoft YaHei', 'KaiTi', 'FangSong', 'Arial', 'Times New Roman']
+      fontFamily: ['sans-serif', 'SimSun', 'SimHei', 'Microsoft YaHei', 'KaiTi', 'FangSong', 'Arial', 'Times New Roman']
     }
   },
   options: [

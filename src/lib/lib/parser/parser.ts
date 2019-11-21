@@ -3,7 +3,7 @@ import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
-import { CacheData, CacheDataConfig } from '../toolbar/utils/cache-data';
+import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 
 export class Parser extends Fragment {
   constructor(private registries: Handler[] = []) {
@@ -127,7 +127,7 @@ export class Parser extends Fragment {
     })
   }
 
-  private getPreCacheData(node: HTMLElement, config?: CacheDataConfig): CacheData {
+  private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {
     if (!config) {
       return null;
     }

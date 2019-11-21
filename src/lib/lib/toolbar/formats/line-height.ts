@@ -1,4 +1,4 @@
-import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const lineHeightHandler: SelectConfig = {
@@ -7,6 +7,7 @@ export const lineHeightHandler: SelectConfig = {
   classes: ['tanbo-editor-icon-line-height'],
   execCommand: new StyleCommander('lineHeight'),
   mini: true,
+  priority: Priority.Property,
   highlight(options, cacheData) {
     for (const option of options) {
       if (option.value === cacheData.style.value) {
@@ -14,7 +15,7 @@ export const lineHeightHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     styleName: 'lineHeight'
   },
   match: {
@@ -22,7 +23,6 @@ export const lineHeightHandler: SelectConfig = {
       lineHeight: ['1em', '1.2em', '1.4em', '1.6em', '1.8em', '2em', '3em', '4em']
     }
   },
-  priority: propertyHandlerPriority,
   options: [
     {
       label: '1x',

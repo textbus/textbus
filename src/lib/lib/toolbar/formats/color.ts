@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
-import { Picker, createPicker } from '@tanbo/color-picker';
+import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { DropdownConfig, HandlerType, propertyHandlerPriority } from '../help';
+import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { CacheData } from '../utils/cache-data';
 
@@ -38,9 +38,12 @@ export const colorHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-color'],
   tooltip: '文字颜色',
-  priority: propertyHandlerPriority,
+  priority: Priority.Property,
   onHide: hideEvent.asObservable(),
   viewer: new Palette(),
+  editable: {
+    styleName: 'color'
+  },
   match: {
     styles: {
       color: /.+/

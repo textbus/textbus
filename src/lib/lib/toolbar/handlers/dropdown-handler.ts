@@ -5,7 +5,7 @@ import { Dropdown } from './utils/dropdown';
 import { DropdownConfig, EventDelegate } from '../help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { CacheDataConfig } from '../utils/cache-data';
+import { EditableOptions } from '../utils/cache-data';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
@@ -13,14 +13,14 @@ export class DropdownHandler implements Handler {
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: CacheDataConfig;
+  cacheDataConfig: EditableOptions;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
   constructor(private config: DropdownConfig, private delegate: EventDelegate) {
     this.onApply = config.onHide;
     this.priority = config.priority;
-    this.cacheDataConfig = config.cacheData;
+    this.cacheDataConfig = config.editable;
 
     this.matcher = new Matcher(config.match);
     this.execCommand = config.execCommand;

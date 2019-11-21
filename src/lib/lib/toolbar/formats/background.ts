@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
-import { Picker, createPicker } from '@tanbo/color-picker';
+import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
-import { DropdownConfig, HandlerType, propertyHandlerPriority } from '../help';
+import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { CacheData } from '../utils/cache-data';
@@ -38,10 +38,13 @@ class Palette implements DropdownHandlerView {
 export const backgroundHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-background-color'],
-  priority: propertyHandlerPriority,
+  priority: Priority.Property,
   tooltip: '背景颜色',
   onHide: hideEvent.asObservable(),
   viewer: new Palette(),
+  editable: {
+    styleName: 'backgroundColor'
+  },
   match: {
     styles: {
       backgroundColor: /.+/

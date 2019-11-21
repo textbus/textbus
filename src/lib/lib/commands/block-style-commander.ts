@@ -14,12 +14,32 @@ export class BlockStyleCommander implements Commander<string> {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
-    selection.ranges.forEach(range => {
-      range.commonAncestorFragment.apply(new FormatRange({
+    selection.ranges.reduce((v, n) => {
+      const contents = n.commonAncestorFragment.contents;
+      if (!n.commonAncestorFragment.parent) {
+        return v.concat(contents.getFragments());
+      } else {
+        if (n.startFragment === n.commonAncestorFragment || n.endFragment === n.commonAncestorFragment) {
+          v.push(n.commonAncestorFragment);
+        } else {
+          n.getSelectedScope().map(f => f.context).forEach(f => {
+            while (f) {
+              if (f.parent === n.commonAncestorFragment) {
+                v.push(f);
+                break;
+              }
+              f = f.parent;
+            }
+          });
+        }
+      }
+      return v;
+    }, []).forEach(f => {
+      f.apply(new FormatRange({
         startIndex: 0,
-        endIndex: range.commonAncestorFragment.contents.length,
+        endIndex: f.contents.length,
         state: FormatState.Valid,
-        context: range.commonAncestorFragment,
+        context: f,
         handler,
         cacheData: {
           style: {
@@ -32,6 +52,9 @@ export class BlockStyleCommander implements Commander<string> {
   }
 
   render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
-    return;
+    if (rawElement) {
+      rawElement.style[this.name] = this.value;
+    }
+    return null;
   }
 }

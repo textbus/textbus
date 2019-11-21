@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
 import { AttrState, AttrType } from './forms/help';
-import { DropdownConfig, HandlerType, inlineHandlerPriority } from '../help';
+import { DropdownConfig, HandlerType, Priority } from '../help';
 import { sourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
 
@@ -37,11 +37,14 @@ form.onSubmit = function (attrs) {
 export const musicHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-music'],
-  priority: inlineHandlerPriority,
+  priority: Priority.Inline,
   tooltip: '音频',
   onHide: hideEvent.asObservable(),
   viewer: form,
   hooks: sourceHook,
+  editable: {
+    attrs: ['src', 'autoplay', 'controls']
+  },
   match: {
     tags: ['audio']
   },

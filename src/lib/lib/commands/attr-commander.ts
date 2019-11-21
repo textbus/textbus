@@ -1,4 +1,4 @@
-import { Commander, ReplaceModel } from './commander';
+import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -19,7 +19,7 @@ export class AttrCommander implements Commander<AttrState[]> {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
     const el = document.createElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
@@ -28,6 +28,6 @@ export class AttrCommander implements Commander<AttrState[]> {
         }
       })
     }
-    return new ReplaceModel(el);
+    return new ChildSlotModel(el);
   }
 }

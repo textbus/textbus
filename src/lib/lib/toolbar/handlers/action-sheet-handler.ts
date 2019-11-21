@@ -6,7 +6,7 @@ import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { CacheDataConfig } from '../utils/cache-data';
+import { EditableOptions } from '../utils/cache-data';
 
 export class ActionSheetHandler {
   readonly elementRef: HTMLElement;
@@ -42,7 +42,7 @@ export class ActionSheetOptionHandler implements Handler {
   matcher: Matcher;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: CacheDataConfig;
+  cacheDataConfig: EditableOptions;
   private eventSource = new Subject<void>();
   private matchedEvent = new Subject<ActionConfig>();
 

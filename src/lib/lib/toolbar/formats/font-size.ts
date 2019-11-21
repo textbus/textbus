@@ -1,4 +1,4 @@
-import { HandlerType, propertyHandlerPriority, SelectConfig } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 
 export const fontSizeHandler: SelectConfig = {
@@ -6,7 +6,7 @@ export const fontSizeHandler: SelectConfig = {
   tooltip: '字体大小',
   classes: ['tanbo-editor-icon-font-size'],
   execCommand: new StyleCommander('fontSize'),
-  priority: propertyHandlerPriority,
+  priority: Priority.Property,
   highlight(options, cacheData) {
     for (const option of options) {
       if (option.value === cacheData.style.value) {
@@ -14,7 +14,7 @@ export const fontSizeHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     styleName: 'fontSize'
   },
   match: {

@@ -3,7 +3,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../selection/range';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { blockHandlerPriority } from '../toolbar/help';
+import { Priority } from '../toolbar/help';
 
 interface MatchData {
   state: FormatState;
@@ -137,7 +137,7 @@ export class Matcher {
         // 如果为块级元素，则需要从第 0 位开始匹配，否则从第一位
         if (format.startIndex === 0 &&
           format.endIndex === fragment.contents.length &&
-          format.handler.priority === blockHandlerPriority) {
+          (format.handler.priority === Priority.Block || format.handler.priority === Priority.BlockStyle)) {
           if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
             return {
               state: format.state,

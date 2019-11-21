@@ -5,7 +5,7 @@ import { Dropdown } from './utils/dropdown';
 import { SelectConfig, SelectOptionConfig } from '../help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { CacheDataConfig } from '../utils/cache-data';
+import { EditableOptions } from '../utils/cache-data';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -14,7 +14,7 @@ export class SelectHandler implements Handler {
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: CacheDataConfig;
+  cacheDataConfig: EditableOptions;
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
@@ -23,7 +23,7 @@ export class SelectHandler implements Handler {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
     this.matcher = new Matcher(config.match);
-    this.cacheDataConfig = config.cacheData;
+    this.cacheDataConfig = config.editable;
     this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');

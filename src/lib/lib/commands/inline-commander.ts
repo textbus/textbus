@@ -16,7 +16,10 @@ export class InlineCommander implements Commander<any> {
           endIndex: item.endIndex,
           handler,
           context: item.context,
-          state: overlap ? FormatState.Invalid : FormatState.Valid
+          state: overlap ? FormatState.Invalid : FormatState.Valid,
+          cacheData: {
+            tag: this.tagName
+          }
         });
         item.context.apply(r, false);
       });

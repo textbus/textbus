@@ -1,4 +1,4 @@
-export interface CacheDataConfig {
+export interface EditableOptions {
   tag?: boolean;
   attrs?: string[];
   styleName?: string;

@@ -1,4 +1,4 @@
-import { HandlerType, SelectConfig, propertyHandlerPriority } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
 
 const commander = new BlockStyleCommander('textAlign', '');
@@ -6,7 +6,7 @@ const commander = new BlockStyleCommander('textAlign', '');
 export const alignHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '对齐方式',
-  priority: propertyHandlerPriority,
+  priority: Priority.BlockStyle,
   execCommand: commander,
   highlight(options, cacheData) {
     for (const option of options) {
@@ -15,12 +15,12 @@ export const alignHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     styleName: 'textAlign'
   },
   match: {
     styles: {
-      textAlign: ['', 'left', 'right', 'center', 'justify']
+      textAlign: ['left', 'right', 'center', 'justify']
     }
   },
   options: [

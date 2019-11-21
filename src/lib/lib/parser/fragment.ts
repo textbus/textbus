@@ -6,7 +6,7 @@ import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 import { CacheDataParams, CacheData } from '../toolbar/utils/cache-data';
-import { blockHandlerPriority } from '../toolbar/help';
+import { Priority } from '../toolbar/help';
 
 export interface FormatRangeParams {
   startIndex: number;
@@ -14,7 +14,7 @@ export interface FormatRangeParams {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData?: CacheDataParams;
+  cacheData: CacheDataParams;
 }
 
 export class FormatRange {
@@ -23,7 +23,7 @@ export class FormatRange {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData?: CacheData;
+  cacheData: CacheData;
 
   constructor(private params: FormatRangeParams | FormatRange) {
     this.startIndex = params.startIndex;
@@ -94,7 +94,7 @@ export class Fragment extends ViewNode {
   insert(content: string, index: number) {
     this.contents.insert(content, index);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if (format.handler.priority === blockHandlerPriority) {
+      if (format.handler.priority === Priority.Block) {
         if (format.startIndex > index) {
           format.startIndex += content.length;
         }
@@ -276,7 +276,7 @@ export class Fragment extends ViewNode {
       c.forEach(item => {
         const newFormatRange = new FormatRange({
           startIndex: i + vNode.formats[0].startIndex,
-          endIndex: item.length + vNode.formats[0].startIndex,
+          endIndex: i + vNode.formats[0].startIndex + item.length,
           handler: null,
           context: vNode.formats[0].context,
           state: null,

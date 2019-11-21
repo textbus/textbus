@@ -4,7 +4,7 @@ import { ButtonConfig } from '../help';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { CacheDataConfig } from '../utils/cache-data';
+import { EditableOptions } from '../utils/cache-data';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -12,12 +12,12 @@ export class ButtonHandler implements Handler {
   onApply: Observable<void>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: CacheDataConfig;
+  cacheDataConfig: EditableOptions;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
     this.priority = config.priority;
-    this.cacheDataConfig = config.cacheData;
+    this.cacheDataConfig = config.editable;
 
     this.matcher = new Matcher(config.match);
     this.execCommand = config.execCommand;

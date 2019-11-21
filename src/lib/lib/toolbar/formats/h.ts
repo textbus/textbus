@@ -1,10 +1,10 @@
-import { blockHandlerPriority, HandlerType, SelectConfig } from '../help';
+import { HandlerType, Priority, SelectConfig } from '../help';
 import { BlockCommander } from '../../commands/block-commander';
 
 export const hHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '标题',
-  priority: blockHandlerPriority,
+  priority: Priority.Block,
   execCommand: new BlockCommander('p'),
   highlight(options, cacheData) {
     for (const option of options) {
@@ -13,7 +13,7 @@ export const hHandler: SelectConfig = {
       }
     }
   },
-  cacheData: {
+  editable: {
     tag: true
   },
   match: {

@@ -1,11 +1,14 @@
 import { InlineCommander } from '../../commands/inline-commander';
-import { ButtonConfig, HandlerType, inlineHandlerPriority } from '../help';
+import { ButtonConfig, HandlerType, Priority } from '../help';
 
 export const italicHandler: ButtonConfig = {
   type: HandlerType.Button,
   classes: ['tanbo-editor-icon-italic'],
-  priority: inlineHandlerPriority,
+  priority: Priority.Inline,
   tooltip: '斜体',
+  editable: {
+    tag: true
+  },
   match: {
     tags: ['em', 'i'],
     styles: {

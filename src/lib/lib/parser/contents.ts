@@ -95,7 +95,34 @@ export class Contents implements Iterable<string | ViewNode> {
     return -1;
   }
 
+  getIndexByNode(element: ViewNode) {
+    let index = 0;
+    for (const item of this.elements) {
+      if (item === element) {
+        return index;
+      }
+      if (item instanceof Fragment) {
+        index += item.contents.getAllChildContentsLength();
+      } else {
+        index += item.length;
+      }
+    }
+    return -1;
+  }
+
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0];
+  }
+
+  getAllChildContentsLength() {
+    let length = 0;
+    for (const item of this.elements) {
+      if (item instanceof Fragment) {
+        length += item.contents.getAllChildContentsLength();
+      } else {
+        length += item.length
+      }
+    }
+    return length;
   }
 }
