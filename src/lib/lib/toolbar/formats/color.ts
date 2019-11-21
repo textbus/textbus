@@ -24,7 +24,7 @@ class Palette implements DropdownHandlerView {
   }
 
   update(d?: CacheData): void {
-    const color = d ? (d.style.value + '') : '';
+    const color = d ? (d.style.value + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;
     } else if (/^rgba?/.test(color)) {

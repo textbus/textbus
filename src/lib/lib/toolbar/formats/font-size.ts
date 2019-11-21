@@ -8,7 +8,6 @@ export const fontSizeHandler: SelectConfig = {
   execCommand: new StyleCommander('fontSize'),
   priority: propertyHandlerPriority,
   highlight(options, cacheData) {
-    console.log(cacheData)
     for (const option of options) {
       if (option.value === cacheData.style.value) {
         return option;
