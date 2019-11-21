@@ -5,6 +5,7 @@ import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../../help';
 import { DropdownHandlerView } from '../../handlers/utils/dropdown';
+import { CacheData } from '../../utils/cache-data';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
@@ -56,11 +57,11 @@ export class Form implements DropdownHandlerView {
 
   reset(): void {
     this.items.forEach(item => {
-      if(item instanceof FormTextField) {
+      if (item instanceof FormTextField) {
         item.update('');
-      } else if(item instanceof FormOptions){
+      } else if (item instanceof FormOptions) {
         item.update(Number.NaN);
-      } else if(item instanceof FormSwitch) {
+      } else if (item instanceof FormSwitch) {
         item.update();
       }
     });
@@ -70,9 +71,9 @@ export class Form implements DropdownHandlerView {
     this.delegator = delegate;
   }
 
-  updateStateByElement(el: HTMLElement): void {
+  update(d: CacheData): void {
     this.items.forEach(item => {
-      item.update(el.getAttribute(item.name));
+      item.update(d ? d.attrs.get(item.name) : '');
     });
   }
 }

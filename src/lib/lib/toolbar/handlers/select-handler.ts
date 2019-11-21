@@ -58,7 +58,6 @@ export class SelectHandler implements Handler {
   }
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    console.log(commonMatchDelta)
     if (commonMatchDelta.cacheData) {
       const option = this.config.highlight(this.config.options, commonMatchDelta.cacheData);
       if (option) {

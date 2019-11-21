@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
 import { EventDelegate } from '../../help';
+import { CacheData } from '../../utils/cache-data';
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
 
-  updateStateByElement(el: HTMLElement): void;
+  update(value?: CacheData): void;
 
   reset?(): void;
 

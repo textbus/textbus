@@ -42,5 +42,11 @@ export class DropdownHandler implements Handler {
   }
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {
+    this.config.viewer.update(commonMatchDelta.cacheData);
+    if (commonMatchDelta.overlap) {
+      this.dropdownButton.classList.add('tanbo-editor-handler-active');
+    } else {
+      this.dropdownButton.classList.remove('tanbo-editor-handler-active');
+    }
   }
 }
