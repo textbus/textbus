@@ -6,6 +6,7 @@ import { ViewNode } from './view-node';
 import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 import { CacheDataParams, CacheData } from '../toolbar/utils/cache-data';
+import { blockHandlerPriority } from '../toolbar/help';
 
 export interface FormatRangeParams {
   startIndex: number;
@@ -97,8 +98,14 @@ export class Fragment extends ViewNode {
   insert(content: string, index: number) {
     this.contents.insert(content, index);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if (format.startIndex > index) {
-        format.startIndex += content.length;
+      if (format.handler.priority === blockHandlerPriority) {
+        if (format.startIndex > index) {
+          format.startIndex += content.length;
+        }
+      } else {
+        if (format.startIndex >= index) {
+          format.startIndex += content.length;
+        }
       }
       if (format.endIndex >= index) {
         format.endIndex += content.length;
@@ -185,7 +192,7 @@ export class Fragment extends ViewNode {
         if (mark.state === newFormatRange.state && (
           mark.cacheData &&
           newFormatRange.cacheData &&
-            mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === !newFormatRange.cacheData)) {
+          mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === !newFormatRange.cacheData)) {
           newFormatRange.endIndex = i + 1;
         } else {
           newFormatRange = new FormatRange({
