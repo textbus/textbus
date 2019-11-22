@@ -6,6 +6,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { RootFragment } from '../parser/root-fragment';
 
 export class HistoryCommander implements Commander<any> {
+  recordHistory = false;
   constructor(private action: 'forward' | 'back') {
   }
 

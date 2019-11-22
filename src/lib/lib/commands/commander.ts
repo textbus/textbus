@@ -16,6 +16,8 @@ export class ChildSlotModel {
 export type RenderModel = ReplaceModel | ChildSlotModel | null;
 
 export interface Commander<T = any> {
+  recordHistory: boolean;
+
   updateValue?(value: T): void;
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void;

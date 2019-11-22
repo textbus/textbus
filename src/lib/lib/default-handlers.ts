@@ -7,6 +7,7 @@ import { Priority } from './toolbar/help';
 import { EditableOptions } from './toolbar/utils/cache-data';
 
 class DefaultTagCommander implements Commander {
+  recordHistory = false;
   constructor(private tagName: string) {
   }
 

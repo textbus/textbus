@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 import { template } from './template-html';
 import { TBSelection } from '../selection/selection';
@@ -6,15 +6,18 @@ import { Hooks } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
+import { sampleTime } from 'rxjs/operators';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
   onSelectionChange: Observable<TBSelection>;
+  onUserWrite: Observable<void>;
   onReady: Observable<Document>;
 
   contentWindow: Window;
   contentDocument: Document;
 
+  private userWriteEvent = new Subject<void>();
   private selectionChangeEvent = new Subject<TBSelection>();
   private readyEvent = new Subject<Document>();
   private frame = document.createElement('iframe');
@@ -22,6 +25,7 @@ export class ViewRenderer {
   private hooksList: Hooks[] = [];
 
   constructor() {
+    this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
     this.frame.onload = () => {
@@ -77,11 +81,6 @@ export class ViewRenderer {
     return this.selection;
   }
 
-  useSelection(selection: TBSelection) {
-    this.selection = selection;
-    selection.apply();
-  }
-
   apply(handler: Handler) {
     const state = handler.matcher.queryState(this.selection, handler).state;
     if (state === MatchState.Disabled) {
@@ -123,5 +122,6 @@ export class ViewRenderer {
       parent.appendChild(newFragment);
     }
     this.selection.apply(content.length);
+    this.userWriteEvent.next();
   }
 }

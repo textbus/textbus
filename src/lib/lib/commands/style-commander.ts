@@ -6,6 +6,7 @@ import { FormatRange } from '../parser/fragment';
 import { dtd } from '../dtd';
 
 export class StyleCommander implements Commander<string | number> {
+  recordHistory = true;
   private value: string | number;
 
   constructor(private name: string, private canApplyBlockElement = true) {

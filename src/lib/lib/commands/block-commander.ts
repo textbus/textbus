@@ -7,6 +7,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 
 export class BlockCommander implements Commander<string> {
 
+  recordHistory = true;
   constructor(private tagName: string) {
   }
 

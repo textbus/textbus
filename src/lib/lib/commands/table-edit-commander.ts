@@ -35,6 +35,7 @@ export enum TableEditActions {
 }
 
 export class TableEditCommander implements Commander<any> {
+  recordHistory = true;
   constructor(private type: TableEditActions) {
   }
 

@@ -5,6 +5,7 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
 export class BlockStyleCommander implements Commander<string> {
+  recordHistory = true;
   constructor(private name: string,
               private value: string | number) {
   }
