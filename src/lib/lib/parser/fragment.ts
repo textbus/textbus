@@ -94,7 +94,7 @@ export class Fragment extends ViewNode {
   insert(content: string, index: number) {
     this.contents.insert(content, index);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if (format.handler.priority === Priority.Block) {
+      if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
         if (format.startIndex > index) {
           format.startIndex += content.length;
         }
