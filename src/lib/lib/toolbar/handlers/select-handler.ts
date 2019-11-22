@@ -22,7 +22,7 @@ export class SelectHandler implements Handler {
   constructor(private config: SelectConfig) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
-    this.matcher = new Matcher(config.match);
+    this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.cacheDataConfig = config.editable;
     this.onApply = this.applyEventSource.asObservable();
 

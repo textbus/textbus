@@ -1,24 +1,29 @@
-import { Observable, zip } from 'rxjs';
+import { Observable, Subject, zip } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 
-import { ViewRenderer } from './viewer/view-renderer';
 import {
   ActionSheetConfig,
   ButtonConfig,
-  DropdownConfig, EventDelegate,
+  DropdownConfig,
+  EventDelegate,
   HandlerConfig,
   HandlerType,
   SelectConfig
 } from './toolbar/help';
+import { ViewRenderer } from './viewer/view-renderer';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
-import { Parser } from './parser/parser';
+import { RootFragment } from './parser/root-fragment';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { TBSelection } from './selection/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
-import { auditTime } from 'rxjs/operators';
 
+export interface Snapshot {
+  doc: RootFragment;
+  selection: TBSelection;
+}
 
 export interface EditorOptions {
   historyStackSize?: number;
@@ -31,23 +36,40 @@ export interface EditorOptions {
 }
 
 export class Editor implements EventDelegate {
+  onChange: Observable<string>;
   readonly elementRef = document.createElement('div');
 
-  private viewer = new ViewRenderer();
+  get canBack() {
+    return this.historySequence.length > 0 && this.historyIndex > 0;
+  }
+
+  get canForward() {
+    return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
+  }
+
+  private historySequence: Array<Snapshot> = [];
+  private historyIndex = 0;
+  private readonly historyStackSize: number;
+
+  private root: RootFragment;
+  private readonly viewer = new ViewRenderer();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
   private readonly handlers: Handler[] = [...defaultHandlers];
 
+  private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
   private isFirst = true;
   private readyState = false;
 
   constructor(selector: string | HTMLElement, options: EditorOptions = {}) {
+    this.onChange = this.changeEvent.asObservable();
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
       this.container = selector;
     }
+    this.historyStackSize = options.historyStackSize || 50;
     if (Array.isArray(options.handlers)) {
       options.handlers.forEach(handler => {
         if (Array.isArray(handler)) {
@@ -59,7 +81,8 @@ export class Editor implements EventDelegate {
     }
 
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new Parser(this.handlers);
+      const vDom = new RootFragment(this.handlers, this);
+      this.root = vDom;
       vDom.setContents(result[0]);
       this.viewer.render(vDom);
       this.tasks.forEach(fn => fn());
@@ -120,6 +143,42 @@ export class Editor implements EventDelegate {
 
   dispatchEvent(type: string): Observable<string> {
     return new Observable();
+  }
+
+  getPreviousSnapshot() {
+    if (this.canBack) {
+      this.historyIndex--;
+      this.historyIndex = Math.max(0, this.historyIndex);
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  getNextSnapshot() {
+    if (this.canForward) {
+      this.historyIndex++;
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  private recordSnapshot() {
+    if (this.historySequence.length !== this.historyIndex) {
+      this.historySequence.length = this.historyIndex + 1;
+    }
+    this.historySequence.push({
+      doc: this.root.clone(),
+      selection: this.viewer.cloneSelection()
+    });
+    if (this.historySequence.length > this.historyStackSize) {
+      this.historySequence.shift();
+    }
+    this.historyIndex = this.historySequence.length - 1;
+    this.dispatchContentChangeEvent();
+  }
+
+  private dispatchContentChangeEvent() {
+    this.changeEvent.next(this.viewer.contentDocument.documentElement.outerHTML);
   }
 
   private addDropdownHandler(option: DropdownConfig) {

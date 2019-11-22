@@ -1,4 +1,4 @@
-import { MatchRule } from '../matcher/matcher';
+import { Matcher, MatchRule } from '../matcher/matcher';
 import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
@@ -36,7 +36,7 @@ export interface ButtonConfig {
   label?: string;
   classes?: string[];
   tooltip?: string;
-  match?: MatchRule;
+  match?: MatchRule | Matcher;
   hooks?: Hooks;
 }
 
@@ -56,7 +56,7 @@ export interface SelectConfig {
 
   highlight(options: SelectOptionConfig[], data: CacheData): SelectOptionConfig;
 
-  match?: MatchRule;
+  match?: MatchRule | Matcher;
   classes?: string[];
   mini?: boolean;
   tooltip?: string;
@@ -74,7 +74,7 @@ export interface DropdownConfig {
   format?: string;
   tooltip?: string;
   label?: string;
-  match?: MatchRule;
+  match?: MatchRule | Matcher;
   hooks?: Hooks;
 }
 
@@ -84,7 +84,7 @@ export interface ActionConfig {
   editable: EditableOptions;
   label?: string;
   classes?: string[]
-  match?: MatchRule;
+  match?: MatchRule | Matcher;
 }
 
 export interface ActionSheetConfig {
