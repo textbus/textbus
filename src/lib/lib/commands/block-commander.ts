@@ -3,6 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class BlockCommander implements Commander<string> {
 
@@ -48,10 +49,7 @@ export class BlockCommander implements Commander<string> {
     })
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
-    if (rawElement && rawElement.tagName.toLowerCase() === this.tagName) {
-      return null;
-    }
-    return new ReplaceModel(document.createElement(this.tagName));
+  render(state: FormatState, rawElement?: HTMLElement, data?: CacheData): ReplaceModel {
+    return new ReplaceModel(document.createElement(data ? data.tag : this.tagName));
   }
 }
