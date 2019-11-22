@@ -5,6 +5,7 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 
 export class ToggleBlockCommander implements Commander<any> {
+  recordHistory = true;
   constructor(private tagName: string) {
   }
 

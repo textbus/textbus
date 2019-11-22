@@ -8,6 +8,7 @@ import { Contents } from '../parser/contents';
 import { SingleNode } from '../parser/single-node';
 
 export class CodeCommander implements Commander<any> {
+  recordHistory = true;
   private tagName = 'pre';
   private elements: SingleNode[] = [];
 

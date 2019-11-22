@@ -1,5 +1,5 @@
-import { Observable, Subject, zip } from 'rxjs';
-import { auditTime } from 'rxjs/operators';
+import { Observable, Subject, Subscription, zip } from 'rxjs';
+import { auditTime, sampleTime, tap } from 'rxjs/operators';
 
 import {
   ActionSheetConfig,
@@ -62,6 +62,8 @@ export class Editor implements EventDelegate {
   private isFirst = true;
   private readyState = false;
 
+  private sub: Subscription;
+
   constructor(selector: string | HTMLElement, options: EditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable();
     if (typeof selector === 'string') {
@@ -85,6 +87,7 @@ export class Editor implements EventDelegate {
       this.root = vDom;
       vDom.setContents(result[0]);
       this.viewer.render(vDom);
+      this.recordSnapshot();
       this.tasks.forEach(fn => fn());
       this.readyState = true;
     });
@@ -92,6 +95,8 @@ export class Editor implements EventDelegate {
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
       this.updateHandlerState(selection);
     });
+
+    this.listenUserWriteEvent();
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
 
@@ -186,6 +191,11 @@ export class Editor implements EventDelegate {
     this.toolbar.appendChild(dropdown.elementRef);
     dropdown.onApply.subscribe(() => {
       this.viewer.apply(dropdown);
+
+      if (dropdown.execCommand.recordHistory) {
+        this.recordSnapshot();
+        this.listenUserWriteEvent();
+      }
     });
     this.handlers.push(dropdown);
   }
@@ -194,6 +204,11 @@ export class Editor implements EventDelegate {
     const select = new SelectHandler(option);
     select.onApply.subscribe(() => {
       this.viewer.apply(select);
+
+      if (select.execCommand.recordHistory) {
+        this.recordSnapshot();
+        this.listenUserWriteEvent();
+      }
     });
     this.handlers.push(select);
     this.toolbar.appendChild(select.elementRef);
@@ -203,6 +218,10 @@ export class Editor implements EventDelegate {
     const button = new ButtonHandler(option);
     button.onApply.subscribe(() => {
       this.viewer.apply(button);
+      if (button.execCommand.recordHistory) {
+        this.recordSnapshot();
+        this.listenUserWriteEvent();
+      }
     });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
@@ -214,6 +233,10 @@ export class Editor implements EventDelegate {
     actionSheet.options.forEach(item => {
       item.onApply.subscribe(() => {
         this.viewer.apply(item);
+        if (item.execCommand.recordHistory) {
+          this.recordSnapshot();
+          this.listenUserWriteEvent();
+        }
       });
       this.handlers.push(item);
     });
@@ -251,6 +274,18 @@ export class Editor implements EventDelegate {
       return;
     }
     fn();
+  }
+
+  private listenUserWriteEvent() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+    this.sub = this.viewer.onUserWrite.pipe(tap(() => {
+      this.dispatchContentChangeEvent();
+    })).pipe(sampleTime(5000)).subscribe(() => {
+      this.recordSnapshot();
+      this.updateHandlerState(this.viewer.cloneSelection());
+    });
   }
 
   private static createSplitLine() {

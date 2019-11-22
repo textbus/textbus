@@ -6,7 +6,7 @@ import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 
 export class AttrCommander implements Commander<AttrState[]> {
-
+  recordHistory = true;
   private attrs: AttrState[] = [];
 
   constructor(private tagName: string) {
