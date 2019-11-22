@@ -131,7 +131,6 @@ export class Fragment extends ViewNode {
       }
       return a;
     }).map(item => item.clone());
-    console.log(canApplyFormats.map(i => i.clone()))
     const vDom = this.createVDom(canApplyFormats);
     const r = this.viewBuilder(vDom, this.contents);
     this.children = r.newNodes;
