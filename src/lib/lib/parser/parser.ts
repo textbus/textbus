@@ -84,7 +84,7 @@ export class Parser extends Fragment {
           const len = Array.from(from.childNodes).reduce((len, node) => {
             return len + this.parse(node, context);
           }, 0);
-          this.mergeFormatsByNode(context, from, start, len);
+          this.mergeFormatsByNode(context, from as HTMLElement, start, len);
           return len;
         }
       } else {
@@ -100,19 +100,19 @@ export class Parser extends Fragment {
         nodes.forEach(node => {
           this.parse(node, newBlock);
         });
-        this.mergeFormatsByNode(newBlock, from, 0, newBlock.contents.length);
+        this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contents.length);
         context.contents.add(newBlock);
         return newBlock.contents.length;
       }
     }
   }
 
-  private mergeFormatsByNode(context: Fragment, by: Node, startIndex: number, len: number) {
+  private mergeFormatsByNode(context: Fragment, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
         token: item,
         state: item.matcher.matchNode(by),
-        cacheData: by.nodeType === 1 ? this.getPreCacheData(by as HTMLElement, item.cacheDataConfig) : null
+        cacheData: this.getPreCacheData(by, item.cacheDataConfig)
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
       const newRange = new FormatRange({

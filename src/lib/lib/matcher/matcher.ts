@@ -10,6 +10,12 @@ interface MatchData {
   cacheData: CacheData;
 }
 
+export enum MatchState {
+  Highlight = 'Highlight',
+  Normal = 'Normal',
+  Disabled = 'Disabled'
+}
+
 export enum FormatState {
   Valid = 'Valid',
   Invalid = 'Invalid',
@@ -17,13 +23,13 @@ export enum FormatState {
 }
 
 export interface MatchDelta {
-  overlap: boolean;
+  state: MatchState;
   fromRange: TBRange;
   cacheData: CacheData;
 }
 
 export interface CommonMatchDelta {
-  overlap: boolean;
+  state: MatchState;
   srcStates: MatchDelta[];
   cacheData: CacheData;
 }
@@ -36,21 +42,17 @@ export interface MatchRule {
   excludeStyles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   excludeClasses?: string[];
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
+  noContainTags?: string[] | RegExp;
+  noInTags?: string[] | RegExp;
 }
 
 export class Matcher {
-  private validators: Array<(node: Node) => boolean> = [];
-  private excludeValidators: Array<(node: Node) => boolean> = [];
+  private validators: Array<(node: HTMLElement) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.tags) {
-      this.validators.push(node => {
-        if (node.nodeType === 1) {
-          const tagName = (node as HTMLElement).tagName.toLowerCase();
-          return Array.isArray(rule.tags) ? rule.tags.includes(tagName) : rule.tags.test(tagName);
-        }
-        return false;
-      });
+      this.validators.push(this.makeTagsMatcher(rule.tags));
     }
     if (rule.classes) {
       this.validators.push(this.makeClassNameMatcher(rule.classes));
@@ -73,7 +75,7 @@ export class Matcher {
     }
   }
 
-  matchNode(node: Node): FormatState {
+  matchNode(node: HTMLElement): FormatState {
     const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
     if (exclude) {
       return FormatState.Exclude;
@@ -83,6 +85,17 @@ export class Matcher {
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
+
+      const isDisable = this.getDisableStateByRange(range);
+
+      if (isDisable) {
+        return {
+          state: MatchState.Disabled,
+          fromRange: range,
+          cacheData: null
+        };
+      }
+
       const states: MatchData[] = [];
       range.getSelectedScope().forEach(s => {
         if (s.startIndex === s.endIndex) {
@@ -116,16 +129,70 @@ export class Matcher {
       }
 
       return {
-        overlap,
+        state: overlap ? MatchState.Highlight : MatchState.Normal,
         fromRange: range,
         cacheData: state.cacheData
       };
     });
+    let isDisable = false;
+
+    for (const i of srcStates) {
+      if (i.state === MatchState.Disabled) {
+        isDisable = true;
+        break;
+      }
+    }
     return {
-      overlap: srcStates.reduce((v, n) => v && n.overlap, true),
+      state: isDisable ? MatchState.Disabled :
+        srcStates.reduce((v, n) => v && n.state === MatchState.Highlight, true) ?
+          MatchState.Highlight :
+          MatchState.Normal,
       srcStates,
       cacheData: srcStates[0].cacheData
     }
+  }
+
+  private getDisableStateByRange(range: TBRange) {
+    return this.isInTag(range.commonAncestorFragment) ||
+      this.isContainTag(range.commonAncestorFragment, range.getCommonAncestorFragmentScope());
+  }
+
+  private isInTag(fragment: Fragment): boolean {
+    if (!fragment) {
+      return false;
+    }
+    return this.isDisable(fragment, this.rule.noInTags) || this.isInTag(fragment.parent);
+  }
+
+  private isContainTag(fragment: Fragment, position: { startIndex: number, endIndex: number }): boolean {
+    const elements = fragment.contents.slice(position.startIndex, position.endIndex)
+      .filter(item => item instanceof Fragment) as Fragment[];
+    for (let el of elements) {
+      if (this.isDisable(el, this.rule.noContainTags) ||
+        this.isContainTag(el, {startIndex: 0, endIndex: el.contents.length})) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private isDisable(fragment: Fragment, tags: string[] | RegExp) {
+    const formats = Array.from(fragment.formatMatrix.values())
+      .reduce((v, n) => v.concat(n), [])
+      .filter(item => [Priority.Default, Priority.Block].includes(item.handler.priority));
+
+    for (const f of formats) {
+      if (Array.isArray(tags)) {
+        if (tags.includes(f.cacheData.tag)) {
+          return true;
+        }
+      } else if (tags instanceof RegExp) {
+        if (tags.test(f.cacheData.tag)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
@@ -184,35 +251,39 @@ export class Matcher {
     return Matcher.mergeStates(states);
   }
 
-  private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: Node) => {
+  private makeTagsMatcher(tags: string[] | RegExp) {
+    return (node: HTMLElement) => {
       if (node.nodeType === 1) {
-        return attrs.map(attr => {
-          if (attr.value) {
-            return (node as HTMLElement).getAttribute(attr.key) === attr.value;
-          }
-          return (node as HTMLElement).hasAttribute(attr.key);
-        }).includes(true);
-      }
-      return false;
-    }
-  }
-
-  private makeClassNameMatcher(classes: string[]) {
-    return (node: Node) => {
-      if (node.nodeType === 1) {
-        return classes.map(className => {
-          return (node as HTMLElement).classList.contains(className);
-        }).includes(true);
+        const tagName = node.tagName.toLowerCase();
+        return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
       }
       return false;
     };
   }
 
+  private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
+    return (node: HTMLElement) => {
+      return attrs.map(attr => {
+        if (attr.value) {
+          return node.getAttribute(attr.key) === attr.value;
+        }
+        return node.hasAttribute(attr.key);
+      }).includes(true);
+    }
+  }
+
+  private makeClassNameMatcher(classes: string[]) {
+    return (node: HTMLElement) => {
+      return classes.map(className => {
+        return node.classList.contains(className);
+      }).includes(true);
+    };
+  }
+
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: Node) => {
+    return (node: HTMLElement) => {
       if (node.nodeType === 1) {
-        const elementStyles = (node as HTMLElement).style;
+        const elementStyles = node.style;
         return !Object.keys(styles).map(key => {
           const optionValue = (Array.isArray(styles[key]) ?
             styles[key] :

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { DropdownConfig, EventDelegate } from '../help';
-import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
+import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 
@@ -43,10 +43,16 @@ export class DropdownHandler implements Handler {
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {
     this.config.viewer.update(commonMatchDelta.cacheData);
-    if (commonMatchDelta.overlap) {
-      this.dropdownButton.classList.add('tanbo-editor-handler-active');
-    } else {
-      this.dropdownButton.classList.remove('tanbo-editor-handler-active');
+    switch (commonMatchDelta.state) {
+      case MatchState.Highlight:
+        this.dropdown.highlight = true;
+        break;
+      case MatchState.Normal:
+        this.dropdown.highlight = false;
+        break;
+      case MatchState.Disabled:
+        this.dropdown.disabled = true;
+        break
     }
   }
 }

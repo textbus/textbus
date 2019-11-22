@@ -22,7 +22,9 @@ class DefaultTagsHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<void>;
   priority = Priority.Default;
-  cacheDataConfig: EditableOptions;
+  cacheDataConfig: EditableOptions = {
+    tag: true
+  };
   constructor(public execCommand: Commander,
               public matcher: Matcher) {
   }

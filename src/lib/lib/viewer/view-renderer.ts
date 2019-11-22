@@ -5,6 +5,7 @@ import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
 import { Parser } from '../parser/parser';
 import { Handler } from '../toolbar/handlers/help';
+import { MatchState } from '../matcher/matcher';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -91,12 +92,16 @@ export class ViewRenderer {
   }
 
   apply(handler: Handler) {
+    const state = handler.matcher.queryState(this.selection, handler).state;
+    if(state === MatchState.Disabled){
+      return;
+    }
+    const overlap = state === MatchState.Highlight;
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const oldFragment = commonAncestorFragment.elements;
     const parent = oldFragment[0].parentNode;
 
     const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-    const overlap = handler.matcher.queryState(this.selection, handler).overlap;
     commonAncestorFragment.destroyView();
     handler.execCommand.command(this.selection, handler, overlap);
     const newFragment = commonAncestorFragment.render();
