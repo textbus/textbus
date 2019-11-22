@@ -22,7 +22,7 @@ export class DropdownHandler implements Handler {
     this.priority = config.priority;
     this.cacheDataConfig = config.editable;
 
-    this.matcher = new Matcher(config.match);
+    this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.execCommand = config.execCommand;
     this.dropdownButton.innerText = config.label || '';
 

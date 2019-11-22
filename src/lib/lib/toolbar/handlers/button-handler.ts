@@ -19,7 +19,7 @@ export class ButtonHandler implements Handler {
     this.priority = config.priority;
     this.cacheDataConfig = config.editable;
 
-    this.matcher = new Matcher(config.match);
+    this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.execCommand = config.execCommand;
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';

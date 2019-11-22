@@ -1,5 +1,6 @@
 import { ButtonConfig, HandlerType, Priority } from '../help';
 import { HistoryCommander } from '../../commands/history-commander';
+import { HistoryMatcher } from '../../matcher/history-matcher';
 
 export const historyBackHandler: ButtonConfig = {
   type: HandlerType.Button,
@@ -7,10 +8,6 @@ export const historyBackHandler: ButtonConfig = {
   priority: Priority.Block,
   tooltip: '撤消',
   editable: null,
-  // match: {
-  //   canUse(range: Range, frame: EditFrame): boolean {
-  //     return frame.canForward;
-  //   }
-  // },
+  match: new HistoryMatcher('back'),
   execCommand: new HistoryCommander('back')
 };

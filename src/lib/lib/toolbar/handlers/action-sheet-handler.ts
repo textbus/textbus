@@ -60,7 +60,7 @@ export class ActionSheetOptionHandler implements Handler {
       this.eventSource.next();
     });
     this.execCommand = option.execCommand;
-    this.matcher = new Matcher(option.match);
+    this.matcher = (option.match instanceof Matcher) ? option.match : new Matcher(option.match);
   }
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {

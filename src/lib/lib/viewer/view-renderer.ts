@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { template } from './template-html';
 import { TBSelection } from '../selection/selection';
 import { Hooks } from '../toolbar/help';
-import { Parser } from '../parser/parser';
+import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 
@@ -58,7 +58,8 @@ export class ViewRenderer {
     this.elementRef.appendChild(this.frame);
   }
 
-  render(vDom: Parser) {
+  render(vDom: RootFragment) {
+    this.contentDocument.body.innerHTML = '';
     this.contentDocument.body.appendChild(vDom.render());
   }
 
@@ -72,28 +73,18 @@ export class ViewRenderer {
     }
   }
 
-  private updateContents(content: string) {
-    const startIndex = this.selection.firstRange.startIndex;
-    const commonAncestorFragment = this.selection.commonAncestorFragment;
-    commonAncestorFragment.insert(content, startIndex);
-    const oldFragment = commonAncestorFragment.elements;
-    const parent = oldFragment[0].parentNode;
+  cloneSelection() {
+    return this.selection;
+  }
 
-    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-    commonAncestorFragment.destroyView();
-    const newFragment = commonAncestorFragment.render();
-
-    if (nextSibling) {
-      parent.insertBefore(newFragment, nextSibling);
-    } else {
-      parent.appendChild(newFragment);
-    }
-    this.selection.apply(content.length);
+  useSelection(selection: TBSelection) {
+    this.selection = selection;
+    selection.apply();
   }
 
   apply(handler: Handler) {
     const state = handler.matcher.queryState(this.selection, handler).state;
-    if(state === MatchState.Disabled){
+    if (state === MatchState.Disabled) {
       return;
     }
     const overlap = state === MatchState.Highlight;
@@ -113,5 +104,24 @@ export class ViewRenderer {
     }
 
     this.selection.apply();
+  }
+
+  private updateContents(content: string) {
+    const startIndex = this.selection.firstRange.startIndex;
+    const commonAncestorFragment = this.selection.commonAncestorFragment;
+    commonAncestorFragment.insert(content, startIndex);
+    const oldFragment = commonAncestorFragment.elements;
+    const parent = oldFragment[0].parentNode;
+
+    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+    commonAncestorFragment.destroyView();
+    const newFragment = commonAncestorFragment.render();
+
+    if (nextSibling) {
+      parent.insertBefore(newFragment, nextSibling);
+    } else {
+      parent.appendChild(newFragment);
+    }
+    this.selection.apply(content.length);
   }
 }

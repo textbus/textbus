@@ -4,9 +4,10 @@ import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { SingleNode } from './single-node';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
+import { Editor } from '../editor';
 
-export class Parser extends Fragment {
-  constructor(private registries: Handler[] = []) {
+export class RootFragment extends Fragment {
+  constructor(private registries: Handler[] = [], public editor: Editor) {
     super(null);
   }
 
@@ -16,6 +17,10 @@ export class Parser extends Fragment {
       return len + this.parse(node, this);
     }, 0);
     this.mergeFormatsByNode(this, el, 0, len);
+  }
+
+  clone() {
+    return this;
   }
 
   private flat(el: HTMLElement, limit = 'p'): Node {
