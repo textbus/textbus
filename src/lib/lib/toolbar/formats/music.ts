@@ -1,10 +1,12 @@
 import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
-import { AttrState, AttrType } from './forms/help';
+import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { sourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
+
+const commander = new AttrCommander('audio');
 
 const form = new Form([{
   type: AttrType.TextField,
@@ -26,11 +28,10 @@ const form = new Form([{
   name: 'controls',
   value: 'controls'
 }]);
-const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
 
 form.onSubmit = function (attrs) {
-  updateEvent.next(attrs);
+  commander.updateValue(attrs);
   hideEvent.next();
 };
 
@@ -48,5 +49,5 @@ export const musicHandler: DropdownConfig = {
   match: {
     tags: ['audio']
   },
-  execCommand: new AttrCommander('audio')
+  execCommand: commander
 };
