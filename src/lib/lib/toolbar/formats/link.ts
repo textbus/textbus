@@ -1,10 +1,12 @@
 import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
-import { AttrState, AttrType } from './forms/help';
+import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { AttrCommander } from '../../commands/attr-commander';
 import { LinkHook } from '../hooks/link-hook';
+
+const commander = new AttrCommander('a');
 
 const form = new Form([{
   type: AttrType.TextField,
@@ -26,11 +28,10 @@ const form = new Form([{
     value: '_blank'
   }]
 }]);
-const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
 
 form.onSubmit = function (attrs) {
-  updateEvent.next(attrs);
+  commander.updateValue(attrs);
   hideEvent.next();
 };
 
@@ -48,5 +49,5 @@ export const linkHandler: DropdownConfig = {
   match: {
     tags: ['a']
   },
-  execCommand: new AttrCommander('a')
+  execCommand: commander
 };
