@@ -1,9 +1,10 @@
-import { ChildSlotModel, Commander } from './commander';
+import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { SingleNode } from '../parser/single-node';
 import { FormatRange } from '../parser/fragment';
 
 export class AttrCommander implements Commander<AttrState[]> {
@@ -18,42 +19,76 @@ export class AttrCommander implements Commander<AttrState[]> {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+    const attrs = new Map<string, string>();
+    this.attrs.forEach(attr => {
+      attrs.set(attr.name, attr.value.toString());
+    });
     selection.ranges.forEach(range => {
       if (range.collapsed) {
-        const formats = range.commonAncestorFragment.formatMatrix.get(handler);
-        if (formats) {
-          for (const format of formats) {
-            if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-              const attrs = new Map<string, string>();
-              this.attrs.forEach(attr => {
-                attrs.set(attr.name, attr.value.toString());
-              });
-              format.cacheData.attrs = attrs
+        if (overlap) {
+          const formats = range.commonAncestorFragment.formatMatrix.get(handler);
+          if (formats) {
+            for (const format of formats) {
+              if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
+                format.cacheData.attrs = attrs
+              }
             }
           }
+        } else {
+          Array.from(range.commonAncestorFragment.formatMatrix.values()).reduce((v, n) => {
+            return v.concat(n);
+          }, []).forEach(format => {
+            if (format.endIndex >= range.endIndex) {
+              format.endIndex++;
+            }
+            if (format.startIndex > range.startIndex) {
+              format.startIndex++;
+            }
+          });
+          const newNode = new SingleNode(range.commonAncestorFragment);
+          newNode.formatMatrix.set(handler, [new FormatRange({
+            startIndex: 0,
+            endIndex: 1,
+            handler,
+            state: FormatState.Valid,
+            context: newNode,
+            cacheData: new CacheData({
+              attrs
+            })
+          })]);
+          range.commonAncestorFragment.contents.insert(newNode, range.startIndex);
+          range.startIndex++;
+          range.endIndex++;
         }
         return;
       }
       range.getSelectedScope().forEach(item => {
-        const attrs = new Map<string, string>();
-        this.attrs.forEach(attr => {
-          attrs.set(attr.name, attr.value.toString());
-        });
-        item.context.apply(new FormatRange({
-          startIndex: item.startIndex,
-          endIndex: item.endIndex,
-          context: item.context,
-          state: FormatState.Valid,
-          handler,
-          cacheData: new CacheData({
-            attrs
+        let index = 0;
+        item.context.contents.slice(item.startIndex, item.endIndex)
+          .forEach(node => {
+            if (node instanceof SingleNode) {
+              node.formatMatrix.get(handler).forEach(format => {
+                format.cacheData.attrs = attrs;
+              });
+            } else if (typeof node === 'string') {
+              item.context.apply(new FormatRange({
+                startIndex: item.startIndex + index,
+                endIndex: item.endIndex + index,
+                handler,
+                state: FormatState.Valid,
+                context: item.context,
+                cacheData: new CacheData({
+                  attrs
+                })
+              }), false);
+            }
+            index += node.length;
           })
-        }), true)
       });
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
     const el = document.createElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
@@ -62,6 +97,6 @@ export class AttrCommander implements Commander<AttrState[]> {
         }
       })
     }
-    return new ChildSlotModel(el);
+    return new ReplaceModel(el);
   }
 }

@@ -8,6 +8,9 @@ export class VirtualNode {
   }
 }
 
+export class VirtualObjectNode extends VirtualNode {
+}
+
 export class VirtualContainerNode extends VirtualNode {
   children: Array<VirtualContainerNode | VirtualNode> = [];
 }

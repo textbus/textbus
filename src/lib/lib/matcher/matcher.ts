@@ -4,6 +4,7 @@ import { Fragment } from '../parser/fragment';
 import { TBRange } from '../selection/range';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
+import { SingleNode } from '../parser/single-node';
 
 interface MatchData {
   state: FormatState;
@@ -84,6 +85,13 @@ export class Matcher {
   }
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
+    if (!selection.rangeCount) {
+      return {
+        srcStates: [],
+        state: MatchState.Normal,
+        cacheData: null
+      };
+    }
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
 
       const isDisable = this.getDisableStateByRange(range);
@@ -142,6 +150,7 @@ export class Matcher {
         break;
       }
     }
+
     return {
       state: isDisable ? MatchState.Disabled :
         srcStates.reduce((v, n) => v && n.state === MatchState.Highlight, true) ?
@@ -246,6 +255,18 @@ export class Matcher {
         }
       } else if (child instanceof Fragment) {
         states.push(this.getStatesByRange(0, child.contents.length, child, handler));
+      } else if (child instanceof SingleNode) {
+        const formats = child.formatMatrix.get(handler);
+        if (formats && formats[0]) {
+          return {
+            state: formats[0].state,
+            cacheData: formats[0].cacheData
+          };
+        }
+        return {
+          state: FormatState.Invalid,
+          cacheData: null
+        }
       }
     }
     return Matcher.mergeStates(states);

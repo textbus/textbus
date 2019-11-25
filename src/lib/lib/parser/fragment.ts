@@ -7,12 +7,13 @@ import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 import { CacheDataParams, CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
+import { SingleNode } from './single-node';
 
 export interface FormatRangeParams {
   startIndex: number;
   endIndex: number;
   handler: Handler;
-  context: Fragment;
+  context: Fragment | SingleNode;
   state: FormatState;
   cacheData: CacheDataParams;
 }
@@ -21,7 +22,7 @@ export class FormatRange {
   startIndex: number;
   endIndex: number;
   handler: Handler;
-  context: Fragment;
+  context: Fragment | SingleNode;
   state: FormatState;
   cacheData: CacheData;
 
@@ -40,10 +41,9 @@ export class FormatRange {
 }
 
 export class Fragment extends ViewNode {
+  readonly length = 1;
   elements: Node[] = [];
   contents = new Contents();
-  formatMatrix = new Map<Handler, FormatRange[]>();
-
   children: Array<VirtualNode | VirtualContainerNode> = [];
 
   constructor(public parent: Fragment) {
@@ -113,102 +113,13 @@ export class Fragment extends ViewNode {
    * 渲染 DOM
    */
   render() {
+    const canApplyFormats = this.getCanApplyFormats();
 
-    let formats: FormatRange[] = [];
-    // 检出所有生效规则
-    this.formatMatrix.forEach(value => {
-      formats = formats.concat(value);
-    });
-    // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
-    const canApplyFormats = formats.sort((n, m) => {
-      const a = n.startIndex - m.startIndex;
-      if (a === 0) {
-        const b = m.endIndex - n.endIndex;
-        if (b === 0) {
-          return n.handler.priority - m.handler.priority;
-        }
-        return b;
-      }
-      return a;
-    }).map(item => item.clone());
     const vDom = this.createVDom(canApplyFormats);
     const r = this.viewBuilder(vDom, this.contents);
     this.children = r.newNodes;
     this.elements = Array.from(r.fragment.childNodes);
     return r.fragment;
-  }
-
-  /**
-   * 合并当前片段的格式化信息
-   * @param format
-   * @param highestPriority
-   */
-  mergeFormat(format: FormatRange, highestPriority = false) {
-    const oldFormats = this.formatMatrix.get(format.handler);
-    let formatRanges: FormatRange[] = [];
-
-    if (oldFormats) {
-      const formatMarks: Array<FormatRange> = [];
-      if (highestPriority) {
-        oldFormats.unshift(format);
-      } else {
-        oldFormats.push(format);
-      }
-      let index = oldFormats.length - 1;
-      while (index >= 0) {
-        const item = oldFormats[index];
-        if (formatMarks.length < item.endIndex) {
-          formatMarks.length = item.endIndex;
-        }
-        formatMarks.fill(item, item.startIndex, item.endIndex);
-        index--;
-      }
-      let newFormatRange: FormatRange = null;
-      for (let i = 0; i < formatMarks.length; i++) {
-        const mark = formatMarks[i];
-
-        if (!mark) {
-          newFormatRange = null;
-          continue;
-        }
-        if (!newFormatRange) {
-          newFormatRange = new FormatRange({
-            startIndex: i,
-            endIndex: i + 1,
-            handler: mark.handler,
-            context: this,
-            state: mark.state,
-            cacheData: mark.cacheData
-          });
-          formatRanges.push(newFormatRange);
-          continue;
-        }
-        if (mark.state === newFormatRange.state && (
-          mark.cacheData &&
-          newFormatRange.cacheData &&
-          mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === !newFormatRange.cacheData)) {
-          newFormatRange.endIndex = i + 1;
-        } else {
-          newFormatRange = new FormatRange({
-            startIndex: i,
-            endIndex: i + 1,
-            handler: mark.handler,
-            context: this,
-            state: mark.state,
-            cacheData: mark.cacheData
-          });
-          formatRanges.push(newFormatRange);
-        }
-      }
-    } else {
-      formatRanges.push(format);
-    }
-    const ff = formatRanges.filter(f => f.state !== FormatState.Invalid);
-    if (ff.length) {
-      this.formatMatrix.set(format.handler, ff);
-    } else {
-      this.formatMatrix.delete(format.handler);
-    }
   }
 
   destroyView() {
@@ -273,18 +184,18 @@ export class Fragment extends ViewNode {
       const c = contents.slice(vNode.formats[0].startIndex, vNode.formats[0].endIndex);
       let i = 0;
       c.forEach(item => {
-        const newFormatRange = new FormatRange({
-          startIndex: i + vNode.formats[0].startIndex,
-          endIndex: i + vNode.formats[0].startIndex + item.length,
-          handler: null,
-          context: vNode.formats[0].context,
-          state: null,
-          cacheData: null
-        });
 
-        const v = new VirtualNode([newFormatRange], vNode.parent);
-        newNodes.push(v);
         if (typeof item === 'string') {
+          const newFormatRange = new FormatRange({
+            startIndex: i + vNode.formats[0].startIndex,
+            endIndex: i + vNode.formats[0].startIndex + item.length,
+            handler: null,
+            context: vNode.formats[0].context,
+            state: null,
+            cacheData: null
+          });
+          const v = new VirtualNode([newFormatRange], vNode.parent);
+          newNodes.push(v);
           let currentNode = document.createTextNode(item);
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;

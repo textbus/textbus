@@ -10,6 +10,13 @@ export class HistoryMatcher extends Matcher {
   }
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
+    if (!selection.rangeCount) {
+      return {
+        srcStates: [],
+        state: MatchState.Normal,
+        cacheData: null
+      };
+    }
     const root = HistoryMatcher.getRootFragment(selection.commonAncestorFragment) as RootFragment;
     switch (this.type) {
       case 'back':

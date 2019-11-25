@@ -64,11 +64,11 @@ export class CodeCommander implements Commander<any> {
     const newContents = new Contents();
     contents.slice(0).forEach(item => {
       if (item instanceof Fragment) {
-        if (newContents.length > 0) {
-          const el = new SingleNode('br');
-          this.elements.push(el);
-          newContents.add(el);
-        }
+        // if (newContents.length > 0) {
+        //   const el = new SingleNode();
+        //   this.elements.push(el);
+        //   newContents.add(el);
+        // }
         this.toCode(item.contents).slice(0).forEach(item => newContents.add(item));
       } else {
         newContents.add(item);

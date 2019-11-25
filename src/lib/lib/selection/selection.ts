@@ -1,5 +1,5 @@
 import { Cursor } from './cursor';
-import { fromEvent, Observable, of, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from './range';
 
@@ -9,6 +9,10 @@ export class TBSelection {
   commonAncestorFragment: Fragment;
 
   ranges: TBRange[] = [];
+
+  get rangeCount() {
+    return this.ranges.length;
+  }
 
   get firstRange() {
     return this.ranges[0] || null;
@@ -28,17 +32,23 @@ export class TBSelection {
     this.cursorElementRef = this.cursor.elementRef;
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
 
-    fromEvent(context, 'selectstart').subscribe(() => {
+    const sub = merge(...['selectstart', 'mousedown'].map(type => fromEvent(context, type))).subscribe(() => {
       this.selection = context.getSelection();
+      sub.unsubscribe();
     });
 
     fromEvent(context, 'selectionchange').subscribe(() => {
+      if (!this.selection) {
+        return;
+      }
       if (this.selection.isCollapsed) {
-        let rect = this.selection.getRangeAt(0).getBoundingClientRect();
-        if (!rect.height) {
-          rect = (this.selection.focusNode as HTMLElement).getBoundingClientRect();
+        if (this.selection.rangeCount) {
+          let rect = this.selection.getRangeAt(0).getBoundingClientRect();
+          if (!rect.height) {
+            rect = (this.selection.focusNode as HTMLElement).getBoundingClientRect();
+          }
+          this.cursor.show(rect);
         }
-        this.cursor.show(rect);
       } else {
         this.cursor.hide();
       }

@@ -7,6 +7,7 @@ import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { sampleTime } from 'rxjs/operators';
+import { VIRTUAL_NODE } from '../parser/help';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -63,6 +64,7 @@ export class ViewRenderer {
   }
 
   render(vDom: RootFragment) {
+    this.contentDocument.body[VIRTUAL_NODE] = vDom;
     this.contentDocument.body.innerHTML = '';
     this.contentDocument.body.appendChild(vDom.render());
   }

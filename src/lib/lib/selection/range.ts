@@ -1,6 +1,7 @@
 import { Fragment } from '../parser/fragment';
-import { VirtualContainerNode, VirtualNode } from '../parser/virtual-dom';
+import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE } from '../parser/help';
+import { SingleNode } from '../parser/single-node';
 
 export interface SelectedScope {
   startIndex: number;
@@ -22,15 +23,16 @@ export class TBRange {
   }
 
   constructor(private range: Range) {
-    this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
-
-    this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
-    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context;
-    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context;
+    console.log(555)
+    this.startIndex = TBRange.getIndex(range.startContainer) + TBRange.getOffset(range.startContainer, range.startOffset);
+    this.endIndex = TBRange.getIndex(range.endContainer) + TBRange.getOffset(range.endContainer, range.endOffset - 1) + 1;
+    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment;
+    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment;
     this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
   apply(offset = 0) {
+    console.log(this.startFragment, this.endFragment)
     const start = this.findPosition(
       this.startFragment.children,
       this.startIndex);
@@ -39,8 +41,17 @@ export class TBRange {
       this.endIndex);
     this.startIndex += offset;
     this.endIndex += offset;
-    this.range.setStart(start.node, start.position + offset);
-    this.range.setEnd(end.node, end.position + offset);
+
+    if (start.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
+      this.range.selectNode(start.node);
+    } else {
+      this.range.setStart(start.node, start.position + offset);
+    }
+    if (end.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
+      this.range.selectNode(end.node);
+    } else {
+      this.range.setEnd(end.node, end.position + offset);
+    }
   }
 
   getCommonAncestorContentsScope() {
@@ -132,6 +143,7 @@ export class TBRange {
 
   private findPosition(vNodes: VirtualNode[],
                        index: number): { node: Node, position: number } {
+    console.log(vNodes)
     for (const item of vNodes) {
       if (index >= item.formats[0].startIndex && index <= item.formats[0].endIndex) {
         if (item instanceof VirtualContainerNode) {
@@ -148,6 +160,14 @@ export class TBRange {
 
   private static getIndex(node: Node): number {
     return (node[VIRTUAL_NODE] as VirtualNode).formats[0].startIndex
+  }
+
+  private static getOffset(node: Node, offset: number) {
+    if (node.nodeType === 1) {
+      const context = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode).formats[0].context;
+      return ((node[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment).contents.find(context);
+    }
+    return offset;
   }
 
   private static getCommonFragment(startFragment: Fragment, endFragment: Fragment): Fragment {
