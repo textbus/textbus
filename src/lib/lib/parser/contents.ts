@@ -29,18 +29,27 @@ export class Contents implements Iterable<string | ViewNode> {
     };
   }
 
-  insert(content: string, index: number) {
+  insert(content: string | ViewNode, index: number) {
+    if (index >= this.length) {
+      this.elements.push(content);
+      return;
+    }
     let i = 0;
     let ii = 0;
     for (const el of this.elements) {
       if (index >= i) {
-        if (index <= i + el.length) {
-          if (typeof el === 'string') {
+        if (i > index) {
+          break;
+        }
+        if (el instanceof ViewNode) {
+          if (index === i + el.length) {
+            this.elements.splice(ii, 0, content);
+          }
+        } else {
+          if (index < i + el.length) {
             const newStr = [el.slice(0, index), content, el.slice(index)].join('');
             this.elements.splice(ii, 1, newStr)
           }
-        } else {
-          break;
         }
       }
       ii++;

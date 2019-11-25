@@ -55,7 +55,7 @@ export class Editor implements EventDelegate {
   private readonly viewer = new ViewRenderer();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [...defaultHandlers];
+  private readonly handlers: Handler[] = [];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];

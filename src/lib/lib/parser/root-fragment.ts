@@ -2,9 +2,9 @@ import { dtd } from '../dtd';
 import { Fragment, FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
-import { SingleNode } from './single-node';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Editor } from '../editor';
+import { SingleNode } from './single-node';
 
 export class RootFragment extends Fragment {
   constructor(private registries: Handler[] = [], public editor: Editor) {
@@ -81,9 +81,9 @@ export class RootFragment extends Fragment {
       if (/inline/.test(dtd[tagName].display)) {
         const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
-          const attrs = Array.from((from as HTMLElement).attributes);
-          const newSingle = new SingleNode(tagName, attrs);
+          const newSingle = new SingleNode(context);
           context.contents.add(newSingle);
+          this.mergeFormatsByNode(newSingle, from as HTMLElement, 0, 1);
           return 1;
         } else {
           const len = Array.from(from.childNodes).reduce((len, node) => {
@@ -112,7 +112,7 @@ export class RootFragment extends Fragment {
     }
   }
 
-  private mergeFormatsByNode(context: Fragment, by: HTMLElement, startIndex: number, len: number) {
+  private mergeFormatsByNode(context: Fragment|SingleNode, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
         token: item,
@@ -128,7 +128,7 @@ export class RootFragment extends Fragment {
         state: item.state,
         cacheData: item.cacheData
       });
-      context.mergeFormat(newRange);
+      context.mergeFormat(newRange, false);
     })
   }
 

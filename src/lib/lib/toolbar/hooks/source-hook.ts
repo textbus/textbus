@@ -6,7 +6,7 @@ export class SourceHook implements Hooks {
   setup(frameContainer: HTMLElement, context: EditContext): void {
     // 当点击视频、音频、图片时，自动选中该标签
     const frameDocument = context.document;
-    fromEvent(frameDocument.body, 'click').pipe(filter((ev: any) => {
+    fromEvent(frameDocument.body, 'mousedown').pipe(filter((ev: any) => {
       return /video|audio|img/i.test(ev.target.tagName);
     })).subscribe(ev => {
       const selection = frameDocument.getSelection();

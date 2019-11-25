@@ -51,7 +51,7 @@ export class Cursor {
     });
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
-      this.context.getSelection().removeAllRanges();
+      // this.context.getSelection().removeAllRanges();
     });
     fromEvent(context, 'mouseup').subscribe(() => {
       this.flashing = true;

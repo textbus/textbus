@@ -23,13 +23,13 @@ export class CacheData {
 
   clone() {
     const attrs = new Map<string, string>();
-    this.params.attrs && this.params.attrs.forEach((value, key) => {
+    this.attrs && this.attrs.forEach((value, key) => {
       attrs.set(key, value);
     });
     return new CacheData({
-      tag: this.params.tag,
+      tag: this.tag,
       attrs: attrs.size ? attrs : null,
-      style: this.params.style ? {name: this.params.style.name, value: this.params.style.value} : null
+      style: this.style ? {name: this.style.name, value: this.style.value} : null
     });
   }
 
