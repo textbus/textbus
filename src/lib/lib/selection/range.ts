@@ -22,10 +22,21 @@ export class TBRange {
   }
 
   constructor(private range: Range) {
-    this.startIndex = TBRange.getIndex(range.startContainer) + TBRange.getOffset(range.startContainer, range.startOffset);
-    this.endIndex = TBRange.getIndex(range.endContainer) + TBRange.getOffset(range.endContainer, range.endOffset - 1) + 1;
-    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment;
-    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment;
+    if (range.startContainer.nodeType === 3) {
+      this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
+    } else if (range.startContainer.nodeType === 1) {
+      this.startIndex = TBRange.getIndex(range.startContainer) +
+        TBRange.getOffset(range.startContainer, range.startOffset);
+    }
+    if (range.endContainer.nodeType === 3) {
+      this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
+    } else if (range.endContainer.nodeType === 1) {
+      this.endIndex = TBRange.getIndex(range.endContainer) +
+        TBRange.getOffset(range.endContainer, range.endOffset);
+    }
+
+    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).context;
+    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).context;
     this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
@@ -166,6 +177,9 @@ export class TBRange {
 
   private static getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
+      if (node.childNodes.length === offset) {
+        return (node[VIRTUAL_NODE] as VirtualNode).context.contents.length;
+      }
       const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
       return (node[VIRTUAL_NODE] as VirtualNode).context.contents.find(childVNode.context);
     }
