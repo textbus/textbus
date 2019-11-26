@@ -61,6 +61,7 @@ export class Editor implements EventDelegate {
   private tasks: Array<() => void> = [];
   private isFirst = true;
   private readyState = false;
+  private selection: TBSelection;
 
   private sub: Subscription;
 
@@ -94,6 +95,10 @@ export class Editor implements EventDelegate {
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
       this.readyState = true;
+      this.selection = selection;
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.elementRef.dispatchEvent(event);
       this.updateHandlerState(selection);
     });
 
@@ -103,7 +108,6 @@ export class Editor implements EventDelegate {
 
     this.elementRef.appendChild(this.toolbar);
     this.elementRef.appendChild(this.viewer.elementRef);
-    // this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tanbo-editor-container');
     this.container.appendChild(this.elementRef);
