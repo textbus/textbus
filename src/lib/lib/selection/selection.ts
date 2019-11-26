@@ -1,5 +1,6 @@
-import { Cursor } from './cursor';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
+
+import { Cursor } from './cursor';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from './range';
 
