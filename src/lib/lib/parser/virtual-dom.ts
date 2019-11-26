@@ -1,9 +1,10 @@
-import { FormatRange } from './fragment';
+import { FormatRange, Fragment } from './fragment';
 
 export class VirtualNode {
   elementRef: Node;
 
   constructor(public formats: FormatRange[],
+              public context: Fragment,
               public parent: VirtualContainerNode) {
   }
 }

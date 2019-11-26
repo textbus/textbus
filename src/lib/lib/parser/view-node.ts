@@ -1,12 +1,13 @@
 import { FormatRange } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
+import { VirtualNode } from './virtual-dom';
 
 export abstract class ViewNode {
   readonly length = 1;
 
   formatMatrix = new Map<Handler, FormatRange[]>();
-
+  abstract virtualNode: VirtualNode;
   abstract render(): Node;
 
   getCanApplyFormats() {

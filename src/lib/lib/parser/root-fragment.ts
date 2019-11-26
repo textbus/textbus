@@ -81,9 +81,9 @@ export class RootFragment extends Fragment {
       if (/inline/.test(dtd[tagName].display)) {
         const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
-          const newSingle = new SingleNode(context);
+          const newSingle = new SingleNode(context, tagName);
           context.contents.add(newSingle);
-          this.mergeFormatsByNode(newSingle, from as HTMLElement, 0, 1);
+          this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
           return 1;
         } else {
           const len = Array.from(from.childNodes).reduce((len, node) => {
