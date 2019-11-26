@@ -47,8 +47,12 @@ export class Contents implements Iterable<string | ViewNode> {
           }
         } else {
           if (index < i + el.length) {
-            const newStr = [el.slice(0, index), content, el.slice(index)].join('');
-            this.elements.splice(ii, 1, newStr)
+            const cc = [el.slice(0, index), content, el.slice(index)];
+            if (content instanceof ViewNode) {
+              this.elements.splice(ii, 1, ...cc);
+            } else {
+              this.elements.splice(ii, 1, cc.join(''));
+            }
           }
         }
       }
