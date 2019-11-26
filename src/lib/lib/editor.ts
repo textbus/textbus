@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription, zip } from 'rxjs';
+import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import { auditTime, sampleTime, tap } from 'rxjs/operators';
 
 import {
@@ -55,7 +55,7 @@ export class Editor implements EventDelegate {
   private readonly viewer = new ViewRenderer();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [];
+  private readonly handlers: Handler[] = [...defaultHandlers];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
@@ -64,7 +64,7 @@ export class Editor implements EventDelegate {
 
   private sub: Subscription;
 
-  constructor(selector: string | HTMLElement, options: EditorOptions = {}) {
+  constructor(private selector: string | HTMLElement, private options: EditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable();
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
@@ -80,6 +80,7 @@ export class Editor implements EventDelegate {
           this.addHandler(handler);
         }
       });
+      this.listenUserAction();
     }
 
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
@@ -89,10 +90,10 @@ export class Editor implements EventDelegate {
       this.viewer.render(vDom);
       this.recordSnapshot();
       this.tasks.forEach(fn => fn());
-      this.readyState = true;
     });
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
+      this.readyState = true;
       this.updateHandlerState(selection);
     });
 
@@ -115,7 +116,39 @@ export class Editor implements EventDelegate {
     });
   }
 
-  addHandler(option: HandlerConfig) {
+
+  dispatchEvent(type: string): Observable<string> {
+    if (typeof this.options.uploader === 'function') {
+      const result = this.options.uploader(type);
+      if (result instanceof Observable) {
+        return result;
+      } else if (result instanceof Promise) {
+        return from(result);
+      } else if (typeof result === 'string') {
+        return of(result);
+      }
+    }
+    return of('');
+  }
+
+  getPreviousSnapshot() {
+    if (this.canBack) {
+      this.historyIndex--;
+      this.historyIndex = Math.max(0, this.historyIndex);
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  getNextSnapshot() {
+    if (this.canForward) {
+      this.historyIndex++;
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  private addHandler(option: HandlerConfig) {
     this.isFirst = false;
     switch (option.type) {
       case HandlerType.Button:
@@ -137,34 +170,13 @@ export class Editor implements EventDelegate {
     }
   }
 
-  addGroup(handlers: HandlerConfig[]) {
+  private addGroup(handlers: HandlerConfig[]) {
     if (!this.isFirst) {
       this.toolbar.appendChild(Editor.createSplitLine());
     }
     handlers.forEach(handler => {
       this.addHandler(handler);
     });
-  }
-
-  dispatchEvent(type: string): Observable<string> {
-    return new Observable();
-  }
-
-  getPreviousSnapshot() {
-    if (this.canBack) {
-      this.historyIndex--;
-      this.historyIndex = Math.max(0, this.historyIndex);
-      return this.historySequence[this.historyIndex];
-    }
-    return null;
-  }
-
-  getNextSnapshot() {
-    if (this.canForward) {
-      this.historyIndex++;
-      return this.historySequence[this.historyIndex];
-    }
-    return null;
   }
 
   private recordSnapshot() {
@@ -189,40 +201,17 @@ export class Editor implements EventDelegate {
   private addDropdownHandler(option: DropdownConfig) {
     const dropdown = new DropdownHandler(option, this);
     this.toolbar.appendChild(dropdown.elementRef);
-    dropdown.onApply.subscribe(() => {
-      this.viewer.apply(dropdown);
-
-      if (dropdown.execCommand.recordHistory) {
-        this.recordSnapshot();
-        this.listenUserWriteEvent();
-      }
-    });
     this.handlers.push(dropdown);
   }
 
   private addSelectHandler(option: SelectConfig) {
     const select = new SelectHandler(option);
-    select.onApply.subscribe(() => {
-      this.viewer.apply(select);
-
-      if (select.execCommand.recordHistory) {
-        this.recordSnapshot();
-        this.listenUserWriteEvent();
-      }
-    });
     this.handlers.push(select);
     this.toolbar.appendChild(select.elementRef);
   }
 
   private addButtonHandler(option: ButtonConfig) {
     const button = new ButtonHandler(option);
-    button.onApply.subscribe(() => {
-      this.viewer.apply(button);
-      if (button.execCommand.recordHistory) {
-        this.recordSnapshot();
-        this.listenUserWriteEvent();
-      }
-    });
     this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
   }
@@ -231,14 +220,21 @@ export class Editor implements EventDelegate {
     const actionSheet = new ActionSheetHandler(option);
     this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
-      item.onApply.subscribe(() => {
-        this.viewer.apply(item);
-        if (item.execCommand.recordHistory) {
-          this.recordSnapshot();
-          this.listenUserWriteEvent();
-        }
-      });
       this.handlers.push(item);
+    });
+  }
+
+  private listenUserAction() {
+    this.handlers.forEach(item => {
+      if (item.onApply instanceof Observable) {
+        item.onApply.subscribe(() => {
+          this.viewer.apply(item);
+          if (item.execCommand.recordHistory) {
+            this.recordSnapshot();
+            this.listenUserWriteEvent();
+          }
+        });
+      }
     });
   }
 

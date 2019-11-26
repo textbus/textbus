@@ -31,6 +31,13 @@ export class Contents implements Iterable<string | ViewNode> {
 
   insert(content: string | ViewNode, index: number) {
     if (index >= this.length) {
+      if (typeof content === 'string') {
+        const last = this.elements[this.elements.length - 1];
+        if (typeof last === 'string') {
+          this.elements[this.elements.length - 1] = last + content;
+          return;
+        }
+      }
       this.elements.push(content);
       return;
     }
