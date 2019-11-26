@@ -5,17 +5,19 @@ import { VIRTUAL_NODE } from './help';
 import { VirtualObjectNode } from './virtual-dom';
 
 export class SingleNode extends ViewNode {
-  constructor(public parent: Fragment) {
+  virtualNode: VirtualObjectNode;
+  constructor(public parent: Fragment, public tagName: string) {
     super();
   }
 
-  render(): Node {
+  render(): HTMLElement {
     let container: HTMLElement;
     let slotContainer: HTMLElement;
 
     const canApplyFormats = this.getCanApplyFormats();
 
-    const vNode = new VirtualObjectNode(canApplyFormats, null);
+    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null);
+    this.virtualNode = vNode;
     return canApplyFormats.reduce((node, next) => {
       if (next.handler) {
         const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
@@ -38,6 +40,6 @@ export class SingleNode extends ViewNode {
         }
       }
       return node;
-    }, (null as HTMLElement)) || document.createDocumentFragment();
+    }, document.createElement(this.tagName));
   }
 }

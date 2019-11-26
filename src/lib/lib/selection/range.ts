@@ -1,7 +1,6 @@
 import { Fragment } from '../parser/fragment';
 import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE } from '../parser/help';
-import { SingleNode } from '../parser/single-node';
 
 export interface SelectedScope {
   startIndex: number;
@@ -23,7 +22,6 @@ export class TBRange {
   }
 
   constructor(private range: Range) {
-    console.log(555)
     this.startIndex = TBRange.getIndex(range.startContainer) + TBRange.getOffset(range.startContainer, range.startOffset);
     this.endIndex = TBRange.getIndex(range.endContainer) + TBRange.getOffset(range.endContainer, range.endOffset - 1) + 1;
     this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment;
@@ -32,12 +30,11 @@ export class TBRange {
   }
 
   apply(offset = 0) {
-    console.log(this.startFragment, this.endFragment)
     const start = this.findPosition(
-      this.startFragment.children,
+      this.startFragment.virtualNode.children,
       this.startIndex);
     const end = this.findPosition(
-      this.endFragment.children,
+      this.endFragment.virtualNode.children,
       this.endIndex);
     this.startIndex += offset;
     this.endIndex += offset;
@@ -143,15 +140,20 @@ export class TBRange {
 
   private findPosition(vNodes: VirtualNode[],
                        index: number): { node: Node, position: number } {
-    console.log(vNodes)
     for (const item of vNodes) {
-      if (index >= item.formats[0].startIndex && index <= item.formats[0].endIndex) {
+      let i = index;
+      if (i >= item.formats[0].startIndex && i <= item.formats[0].endIndex) {
         if (item instanceof VirtualContainerNode) {
-          return this.findPosition(item.children, index);
+          return this.findPosition(item.children, i);
+        } else if (item instanceof VirtualObjectNode) {
+          return {
+            node: item.elementRef,
+            position: i
+          }
         } else if (item instanceof VirtualNode) {
           return {
             node: item.elementRef,
-            position: index - item.formats[0].startIndex
+            position: i - item.formats[0].startIndex
           };
         }
       }
@@ -164,8 +166,8 @@ export class TBRange {
 
   private static getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
-      const context = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode).formats[0].context;
-      return ((node[VIRTUAL_NODE] as VirtualNode).formats[0].context as Fragment).contents.find(context);
+      const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
+      return (node[VIRTUAL_NODE] as VirtualNode).context.contents.find(childVNode.context);
     }
     return offset;
   }

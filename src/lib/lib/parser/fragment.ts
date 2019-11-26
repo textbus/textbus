@@ -44,7 +44,7 @@ export class Fragment extends ViewNode {
   readonly length = 1;
   elements: Node[] = [];
   contents = new Contents();
-  children: Array<VirtualNode | VirtualContainerNode> = [];
+  virtualNode: VirtualContainerNode;
 
   constructor(public parent: Fragment) {
     super();
@@ -116,8 +116,8 @@ export class Fragment extends ViewNode {
     const canApplyFormats = this.getCanApplyFormats();
 
     const vDom = this.createVDom(canApplyFormats);
+    this.virtualNode = vDom;
     const r = this.viewBuilder(vDom, this.contents);
-    this.children = r.newNodes;
     this.elements = Array.from(r.fragment.childNodes);
     return r.fragment;
   }
@@ -194,7 +194,7 @@ export class Fragment extends ViewNode {
             state: null,
             cacheData: null
           });
-          const v = new VirtualNode([newFormatRange], vNode.parent);
+          const v = new VirtualNode([newFormatRange], this, vNode.parent);
           newNodes.push(v);
           let currentNode = document.createTextNode(item);
           currentNode[VIRTUAL_NODE] = v;
@@ -203,6 +203,9 @@ export class Fragment extends ViewNode {
         } else if (item instanceof ViewNode) {
           const container = item.render();
           fragment.appendChild(container);
+          if (item instanceof SingleNode && container) {
+            newNodes.push(container[VIRTUAL_NODE]);
+          }
         }
         i += item.length;
       });
@@ -226,7 +229,7 @@ export class Fragment extends ViewNode {
       context: this,
       state: null,
       cacheData: null
-    })], null);
+    })], this, null);
     this.vDomBuilder(formatRanges,
       root,
       0,
@@ -255,9 +258,9 @@ export class Fragment extends ViewNode {
             state: null,
             cacheData: null
           });
-          parent.children.push(new VirtualNode([f], parent));
+          parent.children.push(new VirtualNode([f], this, parent));
         }
-        const container = new VirtualContainerNode([firstRange], parent);
+        const container = new VirtualContainerNode([firstRange], this, parent);
         const childFormatRanges: FormatRange[] = [];
         while (true) {
           const f = formatRanges[0];
@@ -295,7 +298,7 @@ export class Fragment extends ViewNode {
             state: null,
             cacheData: null
           });
-          container.children.push(new VirtualNode([f], parent))
+          container.children.push(new VirtualNode([f], this, parent))
         }
         parent.children.push(container);
         startIndex = firstRange.endIndex;
@@ -307,7 +310,7 @@ export class Fragment extends ViewNode {
           context: this,
           state: null,
           cacheData: null
-        })], parent));
+        })], this, parent));
         break;
       }
     }

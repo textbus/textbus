@@ -64,9 +64,9 @@ export class ViewRenderer {
   }
 
   render(vDom: RootFragment) {
-    this.contentDocument.body[VIRTUAL_NODE] = vDom;
     this.contentDocument.body.innerHTML = '';
     this.contentDocument.body.appendChild(vDom.render());
+    this.contentDocument.body[VIRTUAL_NODE] = vDom.virtualNode;
   }
 
   use(hooks: Hooks) {

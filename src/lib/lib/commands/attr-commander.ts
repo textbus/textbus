@@ -45,10 +45,10 @@ export class AttrCommander implements Commander<AttrState[]> {
               format.startIndex++;
             }
           });
-          const newNode = new SingleNode(range.commonAncestorFragment);
+          const newNode = new SingleNode(range.commonAncestorFragment, this.tagName);
           newNode.formatMatrix.set(handler, [new FormatRange({
-            startIndex: 0,
-            endIndex: 1,
+            startIndex: range.startIndex,
+            endIndex: range.startIndex + 1,
             handler,
             state: FormatState.Valid,
             context: newNode,
