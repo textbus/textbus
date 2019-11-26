@@ -4,6 +4,7 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/fragment';
 import { dtd } from '../dtd';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class StyleCommander implements Commander<string | number> {
   recordHistory = true;
@@ -34,21 +35,21 @@ export class StyleCommander implements Commander<string | number> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ChildSlotModel {
-    if (!this.value) {
-      return null;
-    }
-    if (rawElement) {
-      if (this.canApplyBlockElement) {
-        rawElement.style[this.name] = this.value;
-        return null;
-      } else if (/inline/.test(dtd[rawElement.tagName.toLowerCase()].display)) {
-        rawElement.style[this.name] = this.value;
-        return null;
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
+    if (cacheData && cacheData.style) {
+      if (rawElement) {
+        if (this.canApplyBlockElement) {
+          rawElement.style[cacheData.style.name] = cacheData.style.value;
+          return null;
+        } else if (/inline/.test(dtd[rawElement.tagName.toLowerCase()].display)) {
+          rawElement.style[cacheData.style.name] = cacheData.style.value;
+          return null;
+        }
       }
+      const el = document.createElement('span');
+      el.style[cacheData.style.name] = cacheData.style.value;
+      return new ChildSlotModel(el);
     }
-    const el = document.createElement('span');
-    el.style[this.name] = this.value;
-    return new ChildSlotModel(el);
+    return null;
   }
 }

@@ -78,7 +78,7 @@ export abstract class ViewNode {
         if (mark.state === newFormatRange.state && (
           mark.cacheData &&
           newFormatRange.cacheData &&
-          mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === !newFormatRange.cacheData)) {
+          mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === true && !newFormatRange.cacheData === true)) {
           newFormatRange.endIndex = i + 1;
         } else {
           newFormatRange = new FormatRange({
