@@ -1,12 +1,12 @@
-import { ViewNode } from './view-node';
+import { View } from './view';
 import { Fragment } from './fragment';
 
-export class Contents implements Iterable<string | ViewNode> {
+export class Contents implements Iterable<string | View> {
   get length() {
     return this.elements.reduce((p, n) => p + n.length, 0);
   }
 
-  private elements: Array<string | ViewNode> = [];
+  private elements: Array<string | View> = [];
   private forOfIndex = 0;
 
   [Symbol.iterator]() {
@@ -29,7 +29,7 @@ export class Contents implements Iterable<string | ViewNode> {
     };
   }
 
-  insert(content: string | ViewNode, index: number) {
+  insert(content: string | View, index: number) {
     if (index >= this.length) {
       if (typeof content === 'string') {
         const last = this.elements[this.elements.length - 1];
@@ -48,14 +48,14 @@ export class Contents implements Iterable<string | ViewNode> {
         if (i > index) {
           break;
         }
-        if (el instanceof ViewNode) {
+        if (el instanceof View) {
           if (index === i + el.length) {
             this.elements.splice(ii, 0, content);
           }
         } else {
           if (index < i + el.length) {
             const cc = [el.slice(0, index), content, el.slice(index)];
-            if (content instanceof ViewNode) {
+            if (content instanceof View) {
               this.elements.splice(ii, 1, ...cc);
             } else {
               this.elements.splice(ii, 1, cc.join(''));
@@ -68,7 +68,7 @@ export class Contents implements Iterable<string | ViewNode> {
     }
   }
 
-  add(content: string | ViewNode) {
+  add(content: string | View) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -80,7 +80,7 @@ export class Contents implements Iterable<string | ViewNode> {
 
   slice(startIndex: number, endIndex = this.length) {
     let index = 0;
-    const result: Array<string | ViewNode> = [];
+    const result: Array<string | View> = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
@@ -104,7 +104,7 @@ export class Contents implements Iterable<string | ViewNode> {
     return this.elements.filter(i => i instanceof Fragment) as Fragment[];
   }
 
-  find(element: ViewNode): number {
+  find(element: View): number {
     let index = 0;
     for (const item of this.elements) {
       if (item === element) {
@@ -115,7 +115,7 @@ export class Contents implements Iterable<string | ViewNode> {
     return -1;
   }
 
-  getIndexByNode(element: ViewNode) {
+  getIndexByNode(element: View) {
     let index = 0;
     for (const item of this.elements) {
       if (item === element) {

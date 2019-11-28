@@ -4,7 +4,7 @@ import { Fragment } from '../parser/fragment';
 import { TBRange } from '../selection/range';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
-import { SingleNode } from '../parser/single-node';
+import { Single } from '../parser/single';
 
 interface MatchData {
   state: FormatState;
@@ -255,7 +255,7 @@ export class Matcher {
         }
       } else if (child instanceof Fragment) {
         states.push(this.getStatesByRange(0, child.contents.length, child, handler));
-      } else if (child instanceof SingleNode) {
+      } else if (child instanceof Single) {
         const formats = child.formatMatrix.get(handler);
         if (formats && formats[0]) {
           return {

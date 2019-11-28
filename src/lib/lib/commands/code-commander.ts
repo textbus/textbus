@@ -5,12 +5,12 @@ import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
-import { SingleNode } from '../parser/single-node';
+import { Single } from '../parser/single';
 
 export class CodeCommander implements Commander<any> {
   recordHistory = true;
   private tagName = 'pre';
-  private elements: SingleNode[] = [];
+  private elements: Single[] = [];
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.forEach(range => {
@@ -20,7 +20,7 @@ export class CodeCommander implements Commander<any> {
       this.elements = [];
       let index = 0;
       for (const i of newContents) {
-        if (i instanceof SingleNode && this.elements.includes(i)) {
+        if (i instanceof Single && this.elements.includes(i)) {
           if (position.startIndex < index) {
             position.startIndex++;
             position.endIndex++;

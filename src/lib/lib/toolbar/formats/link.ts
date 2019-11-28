@@ -3,10 +3,10 @@ import { Subject } from 'rxjs';
 import { Form } from './forms/form';
 import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
-import { AttrCommander } from '../../commands/attr-commander';
 import { LinkHook } from '../hooks/link-hook';
+import { LinkCommander } from '../../commands/link-commander';
 
-const commander = new AttrCommander('a');
+const commander = new LinkCommander();
 
 const form = new Form([{
   type: AttrType.TextField,

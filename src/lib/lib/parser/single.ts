@@ -1,10 +1,10 @@
-import { ViewNode } from './view-node';
+import { View } from './view';
 import { Fragment } from './fragment';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from './help';
 import { VirtualObjectNode } from './virtual-dom';
 
-export class SingleNode extends ViewNode {
+export class Single extends View {
   virtualNode: VirtualObjectNode;
   constructor(public parent: Fragment, public tagName: string) {
     super();

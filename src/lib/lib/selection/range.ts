@@ -62,6 +62,18 @@ export class TBRange {
     }
   }
 
+  collapse(toEnd = false) {
+    if (toEnd) {
+      this.startIndex = this.endIndex;
+      this.startFragment = this.endFragment;
+      this.commonAncestorFragment = this.endFragment;
+    } else {
+      this.endFragment = this.startFragment;
+      this.endIndex = this.startIndex;
+      this.commonAncestorFragment = this.startFragment;
+    }
+  }
+
   getCommonAncestorContentsScope() {
     let startFragment = this.startFragment;
     let endFragment = this.endFragment;
@@ -181,7 +193,7 @@ export class TBRange {
         return (node[VIRTUAL_NODE] as VirtualNode).context.contents.length;
       }
       const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
-      return (node[VIRTUAL_NODE] as VirtualNode).context.contents.find(childVNode.context);
+      return childVNode.formats[0].startIndex;
     }
     return offset;
   }
