@@ -91,7 +91,7 @@ export class Fragment extends View {
     }
   }
 
-  insert(content: string, index: number) {
+  insert(content: string | View, index: number) {
     this.contents.insert(content, index);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
       if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
@@ -244,7 +244,7 @@ export class Fragment extends View {
    * @param endIndex 生成范围的结束位置
    */
   private vDomBuilder(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
-    while (startIndex < endIndex) {
+    while (startIndex <= endIndex) {
       let firstRange = formatRanges.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
