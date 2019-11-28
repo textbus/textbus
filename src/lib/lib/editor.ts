@@ -19,6 +19,7 @@ import { TBSelection } from './selection/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
+import { Paths } from './paths/paths';
 
 export interface Snapshot {
   doc: RootFragment;
@@ -53,6 +54,7 @@ export class Editor implements EventDelegate {
 
   private root: RootFragment;
   private readonly viewer = new ViewRenderer();
+  private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
   private readonly handlers: Handler[] = [...defaultHandlers];
@@ -99,6 +101,7 @@ export class Editor implements EventDelegate {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
+      this.paths.update(selection.focusNode);
       this.updateHandlerState(selection);
     });
 
@@ -108,6 +111,7 @@ export class Editor implements EventDelegate {
 
     this.elementRef.appendChild(this.toolbar);
     this.elementRef.appendChild(this.viewer.elementRef);
+    this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tanbo-editor-container');
     this.container.appendChild(this.elementRef);

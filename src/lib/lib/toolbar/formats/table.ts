@@ -1,9 +1,11 @@
 import { Subject } from 'rxjs';
 
 import { Form } from './forms/form';
-import { AttrState, AttrType } from './forms/help';
+import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { TableCommander } from '../../commands/table-commander';
+
+const commander = new TableCommander();
 
 const form = new Form([{
   type: AttrType.TextField,
@@ -25,11 +27,10 @@ const form = new Form([{
   name: 'header'
 }]);
 
-const updateEvent = new Subject<AttrState[]>();
 const hideEvent = new Subject<void>();
 
 form.onSubmit = function (attrs) {
-  updateEvent.next(attrs);
+  commander.updateValue(attrs);
   hideEvent.next();
 };
 
@@ -43,5 +44,5 @@ export const tableHandler: DropdownConfig = {
   editable: {
     tag: true
   },
-  execCommand: new TableCommander(updateEvent.asObservable())
+  execCommand: commander
 };

@@ -23,6 +23,10 @@ export class TBSelection {
     return this.ranges.length === 1 && this.firstRange.collapsed;
   }
 
+  get focusNode() {
+    return this.selection.focusNode;
+  }
+
   readonly cursor: Cursor;
 
   private selection: Selection;
@@ -63,6 +67,13 @@ export class TBSelection {
     this.ranges.forEach(range => {
       range.apply(offset);
     });
+  }
+
+  collapse(toEnd = false) {
+    toEnd ? this.selection.collapseToEnd() : this.selection.collapseToStart();
+    this.ranges = this.makeRanges();
+    this.commonAncestorFragment = this.getCommonFragment(this.ranges);
+    this.selectionChangeEvent.next(this);
   }
 
   private makeRanges() {

@@ -10,14 +10,14 @@ export class Paths {
     this.elementRef.classList.add('tanbo-editor-paths');
   }
 
-  update(node: Element) {
+  update(node: Node) {
     const fragment = document.createDocumentFragment();
     const elements: HTMLElement[] = [];
     while (node) {
       if (node.nodeType !== 1) {
         node = node.parentNode as HTMLElement;
       } else {
-        const tagName = node.tagName;
+        const tagName = (node as HTMLElement).tagName;
         if (tagName && tagName !== 'HTML') {
           const link = document.createElement('button');
           link.type = 'button';
