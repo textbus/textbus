@@ -37,6 +37,7 @@ export class TableCommander implements Commander<AttrState[]> {
     }
     const tbody = this.createBody(table, handler);
     table.contents.add(tbody);
+    // TODO 此处会把表格插入到 p|h1~h6 标签之内，后续处理
     context.insert(table, selection.firstRange.startIndex);
   }
 
