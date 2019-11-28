@@ -3,7 +3,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { VirtualNode } from './virtual-dom';
 
-export abstract class ViewNode {
+export abstract class View {
   readonly length = 1;
 
   formatMatrix = new Map<Handler, FormatRange[]>();

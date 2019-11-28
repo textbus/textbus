@@ -7,12 +7,10 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/fragment';
 
-export class AttrCommander implements Commander<AttrState[]> {
+export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;
   private attrs: AttrState[] = [];
-
-  constructor(private tagName: string) {
-  }
+  private tagName = 'a';
 
   updateValue(value: AttrState[]): void {
     this.attrs = value;
@@ -70,6 +68,17 @@ export class AttrCommander implements Commander<AttrState[]> {
               node.formatMatrix.get(handler).forEach(format => {
                 format.cacheData.attrs = attrs;
               });
+            } else if (typeof node === 'string') {
+              item.context.apply(new FormatRange({
+                startIndex: item.startIndex + index,
+                endIndex: item.endIndex + index,
+                handler,
+                state: FormatState.Valid,
+                context: item.context,
+                cacheData: new CacheData({
+                  attrs
+                })
+              }), false);
             }
             index += node.length;
           })

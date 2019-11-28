@@ -2,18 +2,18 @@ import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
-import { ViewNode } from './view-node';
+import { View } from './view';
 import { VIRTUAL_NODE } from './help';
 import { ReplaceModel, ChildSlotModel } from '../commands/commander';
 import { CacheDataParams, CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
-import { SingleNode } from './single-node';
+import { Single } from './single';
 
 export interface FormatRangeParams {
   startIndex: number;
   endIndex: number;
   handler: Handler;
-  context: Fragment | SingleNode;
+  context: Fragment | Single;
   state: FormatState;
   cacheData: CacheDataParams;
 }
@@ -22,7 +22,7 @@ export class FormatRange {
   startIndex: number;
   endIndex: number;
   handler: Handler;
-  context: Fragment | SingleNode;
+  context: Fragment | Single;
   state: FormatState;
   cacheData: CacheData;
 
@@ -40,7 +40,7 @@ export class FormatRange {
   }
 }
 
-export class Fragment extends ViewNode {
+export class Fragment extends View {
   readonly length = 1;
   elements: Node[] = [];
   contents = new Contents();
@@ -200,12 +200,10 @@ export class Fragment extends ViewNode {
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
-        } else if (item instanceof ViewNode) {
+        } else if (item instanceof View) {
           const container = item.render();
           fragment.appendChild(container);
-          if (item instanceof SingleNode && container) {
-            newNodes.push(container[VIRTUAL_NODE]);
-          }
+          newNodes.push(item.virtualNode);
         }
         i += item.length;
       });

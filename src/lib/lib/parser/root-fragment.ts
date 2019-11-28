@@ -4,7 +4,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Editor } from '../editor';
-import { SingleNode } from './single-node';
+import { Single } from './single';
 
 export class RootFragment extends Fragment {
   constructor(private registries: Handler[] = [], public editor: Editor) {
@@ -81,7 +81,7 @@ export class RootFragment extends Fragment {
       if (/inline/.test(dtd[tagName].display)) {
         const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
-          const newSingle = new SingleNode(context, tagName);
+          const newSingle = new Single(context, tagName);
           context.contents.add(newSingle);
           this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
           return 1;
@@ -112,7 +112,7 @@ export class RootFragment extends Fragment {
     }
   }
 
-  private mergeFormatsByNode(context: Fragment|SingleNode, by: HTMLElement, startIndex: number, len: number) {
+  private mergeFormatsByNode(context: Fragment|Single, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
         token: item,
