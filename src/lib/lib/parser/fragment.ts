@@ -93,19 +93,33 @@ export class Fragment extends View {
 
   insert(content: string | View, index: number) {
     this.contents.insert(content, index);
+    const newFormats: FormatRange[] = [];
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
       if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
-        if (format.startIndex > index) {
-          format.startIndex += content.length;
-        }
-      } else {
-        if (format.startIndex >= index) {
-          format.startIndex += content.length;
-        }
-      }
-      if (format.endIndex >= index) {
         format.endIndex += content.length;
+      } else {
+        if (content instanceof Fragment && format.startIndex < index && format.endIndex > index) {
+          newFormats.push(new FormatRange({
+            startIndex: index + 1,
+            endIndex: format.endIndex + 1,
+            state: format.state,
+            handler: format.handler,
+            context: this,
+            cacheData: format.cacheData.clone()
+          }));
+          format.endIndex = index;
+        } else {
+          if (format.startIndex >= index) {
+            format.startIndex += content.length;
+          }
+          if (format.endIndex >= index) {
+            format.endIndex += content.length;
+          }
+        }
       }
+    });
+    newFormats.forEach(f => {
+      this.mergeFormat(f, true);
     });
   }
 
