@@ -222,7 +222,7 @@ export class Fragment extends View {
           newNodes.push(v);
           // 防止 html 实体及 unicode 字符原样输出
           const template = document.createElement('div');
-          template.innerHTML = item.replace(/\s\s+/, str => {
+          template.innerHTML = item.replace(/\s\s+/g, str => {
             return ' ' + Array.from({
               length: str.length - 1
             }).fill('&nbsp;').join('');

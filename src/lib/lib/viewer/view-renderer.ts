@@ -9,9 +9,6 @@ import { MatchState } from '../matcher/matcher';
 import { VIRTUAL_NODE } from '../parser/help';
 import { Cursor, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
-import { FormatRange, Fragment } from '../parser/fragment';
-import { Contents } from '../parser/contents';
-import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -30,8 +27,6 @@ export class ViewRenderer {
   private hooksList: Hooks[] = [];
 
   private cursor: Cursor;
-  private cacheFragment: Fragment;
-  private cacheSelection: TBSelection;
 
   constructor() {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -49,17 +44,8 @@ export class ViewRenderer {
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.cursor.elementRef);
 
-      selection.onSelectionChange.pipe(
-        tap(s => {
-          this.selectionChangeEvent.next(s);
-        }),
-        map(s => {
-          return s.commonAncestorFragment;
-        }),
-        distinctUntilChanged()
-      ).subscribe(f => {
-        this.cacheFragment = f.clone();
-        this.cacheSelection = selection.clone();
+      selection.onSelectionChange.subscribe(s => {
+        this.selectionChangeEvent.next(s);
       });
 
       this.cursor.onInput.subscribe(v => {
@@ -160,11 +146,10 @@ export class ViewRenderer {
   }
 
   private updateContents(ev: InputEvent) {
-    const startIndex = this.cacheSelection.firstRange.startIndex;
+    const startIndex = ev.selection.firstRange.startIndex;
     const commonAncestorFragment = this.selection.commonAncestorFragment;
-    const old = this.cacheFragment.clone();
-    commonAncestorFragment.contents = old.contents;
-    commonAncestorFragment.formatMatrix = old.formatMatrix;
+    commonAncestorFragment.contents = ev.fragment.contents;
+    commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
 
     commonAncestorFragment.insert(ev.value, startIndex);
     const oldFragment = commonAncestorFragment.elements;

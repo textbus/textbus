@@ -1,9 +1,12 @@
-import { fromEvent, Observable, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, race, Subject } from 'rxjs';
 import { TBSelection } from './selection';
+import { Fragment } from '../parser/fragment';
 
 export interface InputEvent {
   value: string;
   offset: number;
+  fragment: Fragment;
+  selection: TBSelection;
 }
 
 export class Cursor {
@@ -36,6 +39,9 @@ export class Cursor {
   private _display = true;
   private flashing = true;
 
+  private inputStartSelection: TBSelection;
+  private editingFragment: Fragment;
+
   constructor(private context: Document, private selection: TBSelection) {
     this.onInput = this.inputEvent.asObservable();
     this.onDelete = this.deleteEvent.asObservable();
@@ -51,11 +57,19 @@ export class Cursor {
 
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
-    fromEvent(this.input, 'input').subscribe(() => {
+    merge(...[
+      'input',
+    ].map(type => fromEvent(this.input, type))).subscribe(() => {
       this.inputEvent.next({
         value: this.input.value,
-        offset: this.input.selectionStart
+        offset: this.input.selectionStart,
+        selection: this.inputStartSelection.clone(),
+        fragment: this.editingFragment.clone()
       });
+    });
+
+    fromEvent(this.input, 'focus').subscribe(() => {
+      this.focus()
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {
@@ -69,7 +83,7 @@ export class Cursor {
     });
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
-      this.focus();
+      // this.focus();
       // this.context.getSelection().removeAllRanges();
     });
     fromEvent(context, 'mouseup').subscribe(() => {
@@ -92,6 +106,8 @@ export class Cursor {
   }
 
   private focus() {
+    this.inputStartSelection = this.selection.clone();
+    this.editingFragment = this.selection.commonAncestorFragment.clone();
     this.input.value = '';
     this.focusEvent.next();
   }
