@@ -161,23 +161,6 @@ export class Fragment extends View {
    * 渲染 DOM
    */
   render(): DocumentFragment {
-    // if (!this.contents.length) {
-    //   const cloneFragment = this.clone();
-    //   cloneFragment.insert(new Single(this, 'br'), 0);
-    //   const f = cloneFragment.render();
-    //   this.virtualNode = cloneFragment.virtualNode;
-    //   this.elements = cloneFragment.elements;
-    //   return f;
-    // }
-    if (!this.contents.length) {
-      // this.insert(new Single(this, 'br'), 0);
-      // const cloneFragment = this.clone();
-      // cloneFragment.insert(new Single(this, 'br'), 0);
-      // const f = cloneFragment.render();
-      // this.virtualNode = cloneFragment.virtualNode;
-      // this.elements = cloneFragment.elements;
-      // return f;
-    }
     const canApplyFormats = this.getCanApplyFormats();
 
     const vDom = this.createVDom(canApplyFormats);
