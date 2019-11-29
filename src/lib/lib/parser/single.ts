@@ -6,6 +6,7 @@ import { VirtualObjectNode } from './virtual-dom';
 
 export class Single extends View {
   virtualNode: VirtualObjectNode;
+
   constructor(public parent: Fragment, public tagName: string) {
     super();
   }
@@ -19,8 +20,8 @@ export class Single extends View {
     let slotContainer: HTMLElement;
 
     const canApplyFormats = this.getCanApplyFormats();
-
-    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null, 0, 1);
+    const index = this.parent.contents.find(this);
+    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null, index, index + 1);
     const el = document.createElement(this.tagName);
     vNode.elementRef = el;
     el[VIRTUAL_NODE] = vNode;
