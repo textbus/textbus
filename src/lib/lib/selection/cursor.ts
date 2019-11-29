@@ -160,7 +160,6 @@ export class Cursor {
     this.elementRef.style.left = style.left + 'px';
     this.elementRef.style.top = style.top + 'px';
     this.elementRef.style.height = style.height + 'px';
-    this.input.style.fontSize = style.fontSize;
     this.input.style.lineHeight = style.lineHeight;
     this.inputWrap.style.top = style.fontSize;
     this.display = true;
