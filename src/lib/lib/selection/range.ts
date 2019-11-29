@@ -41,7 +41,9 @@ export class TBRange {
   }
 
   clone() {
-    return new TBRange(this.rawRange);
+    const r = new TBRange(this.rawRange);
+    Object.assign(r, this);
+    return r;
   }
 
   apply(offset = 0) {
