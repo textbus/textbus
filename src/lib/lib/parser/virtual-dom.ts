@@ -5,7 +5,9 @@ export class VirtualNode {
 
   constructor(public formats: FormatRange[],
               public context: Fragment,
-              public parent: VirtualContainerNode) {
+              public parent: VirtualContainerNode,
+              public startIndex: number,
+              public endIndex: number) {
   }
 }
 

@@ -101,7 +101,16 @@ export class Cursor {
           if (!rect.height) {
             rect = (s.focusNode as HTMLElement).getBoundingClientRect();
           }
-          this.show(rect);
+          if (!rect.height) {
+            const style = getComputedStyle(s.focusNode as HTMLElement);
+            this.show({
+              left: rect.left,
+              top: rect.top,
+              height: Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight)
+            })
+          } else {
+            this.show(rect);
+          }
         }
       } else {
         this.hide();
