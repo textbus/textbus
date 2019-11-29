@@ -78,8 +78,10 @@ export class Cursor {
     });
 
     fromEvent(this.input, 'keydown').subscribe((ev: KeyboardEvent) => {
-      if (ev.key === 'Backspace') {
+      if (ev.key === 'Backspace' && !this.input.value.length) {
         this.deleteEvent.next();
+        this.inputStartSelection = selection.clone();
+        this.editingFragment = selection.commonAncestorFragment.clone();
       }
     });
     fromEvent(context, 'mousedown').subscribe(() => {

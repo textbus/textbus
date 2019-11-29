@@ -15,7 +15,7 @@ const editor = createEditor('#editor', {
   <strong>test</strong>
   <li><a href="/a">aaa</a><a href="/a">bbb</a></li>
   <li><a href="/a">aaa</a><a href="/b">bbb</a></li>
-  <li>bbb</li>
+  <li>b</li>
 </ul>
 <table><tbody><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></tbody></table>
 `
