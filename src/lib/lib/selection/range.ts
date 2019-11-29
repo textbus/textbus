@@ -56,12 +56,12 @@ export class TBRange {
     this.startIndex += offset;
     this.endIndex += offset;
     if (start.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
-      this.rawRange.selectNode(start.node);
+      this.rawRange.setStartBefore(start.node);
     } else {
       this.rawRange.setStart(start.node, start.position);
     }
     if (end.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
-      this.rawRange.selectNode(end.node);
+      this.rawRange.setEndAfter(end.node);
     } else {
       this.rawRange.setEnd(end.node, end.position);
     }
