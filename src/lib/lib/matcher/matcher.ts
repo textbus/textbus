@@ -191,13 +191,15 @@ export class Matcher {
       .filter(item => [Priority.Default, Priority.Block].includes(item.handler.priority));
 
     for (const f of formats) {
-      if (Array.isArray(tags)) {
-        if (tags.includes(f.cacheData.tag)) {
-          return true;
-        }
-      } else if (tags instanceof RegExp) {
-        if (tags.test(f.cacheData.tag)) {
-          return true;
+      if (f.cacheData) {
+        if (Array.isArray(tags)) {
+          if (tags.includes(f.cacheData.tag)) {
+            return true;
+          }
+        } else if (tags instanceof RegExp) {
+          if (tags.test(f.cacheData.tag)) {
+            return true;
+          }
         }
       }
     }

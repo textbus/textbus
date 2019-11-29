@@ -1,9 +1,8 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext, Hooks } from '../help';
+import { EditContext, Hooks, LimitHooksContext } from '../help';
 import { CellPosition, RowPosition } from '../../commands/table-edit-commander';
-import { Matcher } from '../../matcher/matcher';
 
 interface ElementPosition {
   left: number;
@@ -26,9 +25,9 @@ function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLEl
 }
 
 export class TableEditHook implements Hooks {
-  matcher = new Matcher({
-    tags: ['table']
-  });
+  context: LimitHooksContext = {
+    inTags: ['td']
+  };
 
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
@@ -124,10 +123,10 @@ export class TableEditHook implements Hooks {
 
   }
 
-  onSelectionChange(range: Range, context: EditContext): Range | Range[] {
+  onSelectionChange(range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
       return this.selectedCells.map(cell => {
-        const range = context.document.createRange();
+        const range = doc.createRange();
         range.selectNodeContents(cell);
         return range;
       });
