@@ -89,7 +89,7 @@ export class RootFragment extends Fragment {
   private parse(from: Node, context: Fragment): number {
     if (from.nodeType === 3) {
       const textContent = from.textContent;
-      context.contents.add(textContent);
+      context.contents.add(textContent.replace(/&nbsp;/g, ' '));
       return textContent.length;
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();

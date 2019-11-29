@@ -1,8 +1,13 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { TBSelection } from './selection';
 
+export interface InputEvent {
+  value: string;
+  offset: number;
+}
+
 export class Cursor {
-  onInput: Observable<string>;
+  onInput: Observable<InputEvent>;
   onDelete: Observable<void>;
   onFocus: Observable<void>;
   onBlur: Observable<void>;
@@ -12,7 +17,7 @@ export class Cursor {
   private cursor = document.createElement('span');
   private inputWrap = document.createElement('span');
 
-  private inputEvent = new Subject<string>();
+  private inputEvent = new Subject<InputEvent>();
   private deleteEvent = new Subject<void>();
   private focusEvent = new Subject<void>();
   private blurEvent = new Subject<void>();
@@ -47,7 +52,10 @@ export class Cursor {
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
     fromEvent(this.input, 'input').subscribe(() => {
-      this.inputEvent.next(this.input.value);
+      this.inputEvent.next({
+        value: this.input.value,
+        offset: this.input.selectionStart
+      });
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {

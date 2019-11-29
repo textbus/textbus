@@ -220,7 +220,14 @@ export class Fragment extends View {
           });
           const v = new VirtualNode([newFormatRange], this, vNode.parent);
           newNodes.push(v);
-          let currentNode = document.createTextNode(item);
+          // 防止 html 实体及 unicode 字符原样输出
+          const template = document.createElement('div');
+          template.innerHTML = item.replace(/\s\s+/, str => {
+            return ' ' + Array.from({
+              length: str.length - 1
+            }).fill('&nbsp;').join('');
+          }).replace(/\s$/, '&nbsp;');
+          let currentNode = template.childNodes[0];
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
           fragment.appendChild(currentNode);
