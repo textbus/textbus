@@ -98,7 +98,7 @@ export class Fragment extends View {
       if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
         format.endIndex += content.length;
       } else {
-        if (content instanceof Fragment && format.startIndex < index && format.endIndex > index) {
+        if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
           newFormats.push(new FormatRange({
             startIndex: index + 1,
             endIndex: format.endIndex + 1,

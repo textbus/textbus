@@ -13,6 +13,7 @@ export class RootFragment extends Fragment {
 
   setContents(el: HTMLElement) {
     const flatTree = this.flat(el);
+    console.log(flatTree)
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.parse(node, this);
     }, 0);
@@ -23,52 +24,67 @@ export class RootFragment extends Fragment {
     return this;
   }
 
-  private flat(el: HTMLElement, limit = 'p'): Node {
-    const nodes = document.createDocumentFragment();
-    let newBlock: HTMLElement;
-    Array.from(el.childNodes).filter(node => {
+  private flat(el: HTMLElement): Node {
+    const fragment = document.createDocumentFragment();
+    const limitChildren = dtd[el.tagName.toLowerCase()].limitChildren || [];
+
+    const findChildTag = (node: HTMLElement) => {
+      for (const t of Array.from(node.children).map(n => n.tagName.toLowerCase())) {
+        if (limitChildren.indexOf(t) > -1) {
+          return t;
+        }
+      }
+      return '';
+    };
+    let limitChildTag = findChildTag(el);
+
+    const nodes = Array.from(el.childNodes).filter(node => {
       if (node.nodeType === 3) {
         return /\S+/.test(node.textContent);
       }
-      return true;
-    }).forEach(node => {
+      return node.nodeType === 1;
+    });
+
+    let newBlock: HTMLElement;
+    for (const node of nodes) {
       if (node.nodeType === 1) {
         const tagName = (node as HTMLElement).tagName.toLowerCase();
-        if (/inline/.test(dtd[tagName].display)) {
-          if (!newBlock) {
-            newBlock = document.createElement(limit);
-            nodes.appendChild(newBlock);
+        if (limitChildTag) {
+          if (tagName === limitChildTag) {
+            const cloneContainer = node.cloneNode();
+            fragment.appendChild(cloneContainer);
+            Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+          } else {
+            const temporaryContainer = document.createElement(limitChildTag);
+            temporaryContainer.appendChild(node);
+            const container = document.createElement(limitChildTag);
+            fragment.appendChild(container);
+            Array.from(this.flat(temporaryContainer as HTMLElement).childNodes).forEach(c => container.appendChild(c));
           }
-          newBlock.appendChild(node);
         } else {
-          newBlock = null;
-          const limitChildren = dtd[tagName].limitChildren;
-          if (limitChildren) {
-            for (const t of Array.from((node as HTMLElement).children).map(n => n.tagName.toLowerCase())) {
-              if (limitChildren.indexOf(t) > -1) {
-                const n = node.cloneNode();
-                nodes.appendChild(n);
-                Array.from(this.flat(node as HTMLElement).childNodes).forEach(node => {
-                  const item = document.createElement(t);
-                  item.appendChild(node);
-                  n.appendChild(item);
-                });
-                return;
-              }
+          if (/inline/.test(dtd[tagName].display)) {
+            if (!newBlock) {
+              newBlock = document.createElement('p');
+              fragment.appendChild(newBlock);
             }
+            newBlock.appendChild(node);
+          } else {
+            newBlock = null;
+            const cloneContainer = node.cloneNode();
+            fragment.appendChild(cloneContainer);
+            Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
           }
-          nodes.appendChild(this.flat(node as HTMLElement));
         }
       } else {
         if (!newBlock) {
-          newBlock = document.createElement(limit);
-          nodes.appendChild(newBlock);
+          newBlock = document.createElement('p');
+          fragment.appendChild(newBlock);
         }
         newBlock.appendChild(node);
       }
-    });
+    }
 
-    return nodes;
+    return fragment;
   }
 
   private parse(from: Node, context: Fragment): number {
@@ -112,7 +128,7 @@ export class RootFragment extends Fragment {
     }
   }
 
-  private mergeFormatsByNode(context: Fragment|Single, by: HTMLElement, startIndex: number, len: number) {
+  private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
         token: item,

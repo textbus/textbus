@@ -21,22 +21,22 @@ export class TBRange {
       this.startIndex === this.endIndex;
   }
 
-  constructor(private range: Range) {
-    if (range.startContainer.nodeType === 3) {
-      this.startIndex = TBRange.getIndex(range.startContainer) + range.startOffset;
-    } else if (range.startContainer.nodeType === 1) {
-      this.startIndex = TBRange.getIndex(range.startContainer) +
-        TBRange.getOffset(range.startContainer, range.startOffset);
+  constructor(public rawRange: Range) {
+    if (rawRange.startContainer.nodeType === 3) {
+      this.startIndex = TBRange.getIndex(rawRange.startContainer) + rawRange.startOffset;
+    } else if (rawRange.startContainer.nodeType === 1) {
+      this.startIndex = TBRange.getIndex(rawRange.startContainer) +
+        TBRange.getOffset(rawRange.startContainer, rawRange.startOffset);
     }
-    if (range.endContainer.nodeType === 3) {
-      this.endIndex = TBRange.getIndex(range.endContainer) + range.endOffset;
-    } else if (range.endContainer.nodeType === 1) {
-      this.endIndex = TBRange.getIndex(range.endContainer) +
-        TBRange.getOffset(range.endContainer, range.endOffset);
+    if (rawRange.endContainer.nodeType === 3) {
+      this.endIndex = TBRange.getIndex(rawRange.endContainer) + rawRange.endOffset;
+    } else if (rawRange.endContainer.nodeType === 1) {
+      this.endIndex = TBRange.getIndex(rawRange.endContainer) +
+        TBRange.getOffset(rawRange.endContainer, rawRange.endOffset);
     }
 
-    this.startFragment = (range.startContainer[VIRTUAL_NODE] as VirtualNode).context;
-    this.endFragment = (range.endContainer[VIRTUAL_NODE] as VirtualNode).context;
+    this.startFragment = (rawRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
+    this.endFragment = (rawRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
     this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
@@ -51,14 +51,14 @@ export class TBRange {
     this.endIndex += offset;
 
     if (start.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
-      this.range.selectNode(start.node);
+      this.rawRange.selectNode(start.node);
     } else {
-      this.range.setStart(start.node, start.position + offset);
+      this.rawRange.setStart(start.node, start.position + offset);
     }
     if (end.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
-      this.range.selectNode(end.node);
+      this.rawRange.selectNode(end.node);
     } else {
-      this.range.setEnd(end.node, end.position + offset);
+      this.rawRange.setEnd(end.node, end.position + offset);
     }
   }
 

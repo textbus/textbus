@@ -1,15 +1,16 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 
-import { Cursor } from './cursor';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from './range';
 
 export class TBSelection {
-  cursorElementRef: HTMLElement;
   onSelectionChange: Observable<TBSelection>;
-  commonAncestorFragment: Fragment;
 
   ranges: TBRange[] = [];
+
+  get commonAncestorFragment() {
+    return this.getCommonFragment();
+  };
 
   get rangeCount() {
     return this.ranges.length;
@@ -27,40 +28,25 @@ export class TBSelection {
     return this.selection.focusNode;
   }
 
-  readonly cursor: Cursor;
-
   private selection: Selection;
   private selectionChangeEvent = new Subject<TBSelection>();
 
-  constructor(private context: Document) {
-    this.cursor = new Cursor(context);
-    this.cursorElementRef = this.cursor.elementRef;
+  constructor(private context: Document, private listenEvent = false) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
+    if (listenEvent) {
+      const sub = merge(...['selectstart', 'mousedown'].map(type => fromEvent(context, type))).subscribe(() => {
+        this.selection = context.getSelection();
+        sub.unsubscribe();
+      });
 
-    const sub = merge(...['selectstart', 'mousedown'].map(type => fromEvent(context, type))).subscribe(() => {
-      this.selection = context.getSelection();
-      sub.unsubscribe();
-    });
-
-    fromEvent(context, 'selectionchange').subscribe(() => {
-      if (!this.selection) {
-        return;
-      }
-      if (this.selection.isCollapsed) {
-        if (this.selection.rangeCount) {
-          let rect = this.selection.getRangeAt(0).getBoundingClientRect();
-          if (!rect.height) {
-            rect = (this.selection.focusNode as HTMLElement).getBoundingClientRect();
-          }
-          this.cursor.show(rect);
+      fromEvent(context, 'selectionchange').subscribe(() => {
+        if (!this.selection) {
+          return;
         }
-      } else {
-        this.cursor.hide();
-      }
-      this.ranges = this.makeRanges();
-      this.commonAncestorFragment = this.getCommonFragment(this.ranges);
-      this.selectionChangeEvent.next(this);
-    });
+        this.ranges = this.makeRanges();
+        this.selectionChangeEvent.next(this);
+      });
+    }
   }
 
   apply(offset = 0) {
@@ -72,7 +58,6 @@ export class TBSelection {
   collapse(toEnd = false) {
     toEnd ? this.selection.collapseToEnd() : this.selection.collapseToStart();
     this.ranges = this.makeRanges();
-    this.commonAncestorFragment = this.getCommonFragment(this.ranges);
     this.selectionChangeEvent.next(this);
   }
 
@@ -88,7 +73,8 @@ export class TBSelection {
     return ranges;
   }
 
-  private getCommonFragment(ranges: TBRange[]): Fragment {
+  private getCommonFragment(): Fragment {
+    const ranges = this.ranges || [];
     if (ranges.length === 1) {
       return ranges[0].commonAncestorFragment;
     }
