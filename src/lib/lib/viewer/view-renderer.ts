@@ -7,7 +7,7 @@ import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { VIRTUAL_NODE } from '../parser/help';
-import { Cursor } from '../selection/cursor';
+import { Cursor, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
 import { FormatRange, Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
@@ -61,10 +61,6 @@ export class ViewRenderer {
         this.cacheFragment = f.clone();
         this.cacheSelection = selection.clone();
       });
-
-      // this.cursor.onBlur.subscribe(() => {
-      //
-      // });
 
       this.cursor.onInput.subscribe(v => {
         if (selection.collapsed) {
@@ -163,14 +159,14 @@ export class ViewRenderer {
     this.selection.apply();
   }
 
-  private updateContents(content: string) {
+  private updateContents(ev: InputEvent) {
     const startIndex = this.cacheSelection.firstRange.startIndex;
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     const old = this.cacheFragment.clone();
     commonAncestorFragment.contents = old.contents;
     commonAncestorFragment.formatMatrix = old.formatMatrix;
 
-    commonAncestorFragment.insert(content, startIndex);
+    commonAncestorFragment.insert(ev.value, startIndex);
     const oldFragment = commonAncestorFragment.elements;
     const parent = oldFragment[0].parentNode;
 
@@ -185,7 +181,7 @@ export class ViewRenderer {
     }
     this.selection.firstRange.startIndex = startIndex;
     this.selection.firstRange.endIndex = startIndex;
-    this.selection.apply(content.length);
+    this.selection.apply(ev.offset);
     this.userWriteEvent.next();
   }
 }
