@@ -208,7 +208,6 @@ export class Fragment extends View {
       const c = contents.slice(vNode.formats[0].startIndex, vNode.formats[0].endIndex);
       let i = 0;
       c.forEach(item => {
-
         if (typeof item === 'string') {
           const newFormatRange = new FormatRange({
             startIndex: i + vNode.formats[0].startIndex,

@@ -79,6 +79,9 @@ export class Contents implements Iterable<string | View> {
   }
 
   slice(startIndex: number, endIndex = this.length) {
+    if (startIndex >= endIndex) {
+      return [];
+    }
     let index = 0;
     const result: Array<string | View> = [];
     for (const el of this.elements) {
@@ -149,7 +152,7 @@ export class Contents implements Iterable<string | View> {
   clone(): Contents {
     const newContents = new Contents();
     this.elements.forEach(item => {
-      if(typeof item === 'string'){
+      if (typeof item === 'string') {
         newContents.add(item);
       } else {
         // item.
