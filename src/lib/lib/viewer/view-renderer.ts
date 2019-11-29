@@ -53,6 +53,23 @@ export class ViewRenderer {
           this.updateContents(v);
         }
       });
+      this.cursor.onDelete.subscribe(() => {
+        const commonAncestorFragment = this.selection.commonAncestorFragment;
+        commonAncestorFragment.delete(this.selection.firstRange.startIndex - 1, 1);
+        const oldFragment = commonAncestorFragment.elements;
+        const parent = oldFragment[0].parentNode;
+
+        const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+        commonAncestorFragment.destroyView();
+        const newFragment = commonAncestorFragment.render();
+
+        if (nextSibling) {
+          parent.insertBefore(newFragment, nextSibling);
+        } else {
+          parent.appendChild(newFragment);
+        }
+        this.selection.apply(-1);
+      });
     };
     this.frame.src = `javascript:void((function () {
                       document.open();

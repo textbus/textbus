@@ -103,6 +103,20 @@ export class Contents implements Iterable<string | View> {
     return result;
   }
 
+  delete(startIndex: number, length: number) {
+    if (length < 0) {
+      return;
+    }
+    const elements = this.slice(0, startIndex).concat(this.slice(startIndex + length, this.length));
+    this.elements = [];
+    elements.forEach(item => this.add(item));
+  }
+
+  splice(startIndex: number, length: number, newContents: string | View) {
+    this.delete(startIndex, length);
+    this.insert(newContents, startIndex);
+  }
+
   getFragments(): Fragment[] {
     return this.elements.filter(i => i instanceof Fragment) as Fragment[];
   }
@@ -155,7 +169,7 @@ export class Contents implements Iterable<string | View> {
       if (typeof item === 'string') {
         newContents.add(item);
       } else {
-        // item.
+        newContents.add(item.clone());
       }
     });
     return newContents;

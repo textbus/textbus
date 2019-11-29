@@ -133,6 +133,30 @@ export class Fragment extends View {
     });
   }
 
+  delete(startIndex: number, length: number) {
+    if (length <= 0) {
+      return;
+    }
+    this.contents.delete(startIndex, length);
+    const ff = new Map<Handler, FormatRange[]>();
+    Array.from(this.formatMatrix.keys()).forEach(key => {
+      const formats = this.formatMatrix.get(key).filter(format => {
+        if (format.endIndex > startIndex) {
+          format.endIndex -= length;
+        }
+        if (format.startIndex >= format.endIndex) {
+          return [Priority.Default, Priority.Block, Priority.BlockStyle].indexOf(format.handler.priority) &&
+            format.startIndex === format.endIndex;
+        }
+        return true;
+      });
+      if (formats.length) {
+        ff.set(key, formats);
+      }
+    });
+    this.formatMatrix = ff;
+  }
+
   /**
    * 渲染 DOM
    */

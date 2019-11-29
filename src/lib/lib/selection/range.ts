@@ -49,22 +49,22 @@ export class TBRange {
   apply(offset = 0) {
     const start = this.findPosition(
       this.startFragment.virtualNode.children,
-      this.startIndex);
+      this.startIndex + offset);
     const end = this.findPosition(
       this.endFragment.virtualNode.children,
-      this.endIndex);
+      this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
 
     if (start.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
       this.rawRange.selectNode(start.node);
     } else {
-      this.rawRange.setStart(start.node, start.position + offset);
+      this.rawRange.setStart(start.node, start.position);
     }
     if (end.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
       this.rawRange.selectNode(end.node);
     } else {
-      this.rawRange.setEnd(end.node, end.position + offset);
+      this.rawRange.setEnd(end.node, end.position);
     }
   }
 
@@ -173,7 +173,13 @@ export class TBRange {
       let i = index;
       if (i >= item.formats[0].startIndex && i <= item.formats[0].endIndex) {
         if (item instanceof VirtualContainerNode) {
-          return this.findPosition(item.children, i);
+          if (item.children.length) {
+            return this.findPosition(item.children, i);
+          }
+          return {
+            node: item.elementRef,
+            position: i
+          }
         } else if (item instanceof VirtualObjectNode) {
           return {
             node: item.elementRef,
