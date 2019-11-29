@@ -162,7 +162,6 @@ export class Fragment extends View {
    */
   render(): DocumentFragment {
     const canApplyFormats = this.getCanApplyFormats();
-    console.log(canApplyFormats)
     const vDom = this.createVDom(canApplyFormats);
     this.virtualNode = vDom;
     const r = this.viewBuilder(vDom, this.contents);
