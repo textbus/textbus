@@ -10,6 +10,10 @@ export class Single extends View {
     super();
   }
 
+  clone(): Single {
+    return new Single(this.parent, this.tagName);
+  }
+
   render(): HTMLElement {
     let container: HTMLElement;
     let slotContainer: HTMLElement;

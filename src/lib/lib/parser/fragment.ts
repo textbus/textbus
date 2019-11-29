@@ -50,6 +50,16 @@ export class Fragment extends View {
     super();
   }
 
+  clone(): Fragment {
+    const ff = new Fragment(this.parent);
+    ff.contents = this.contents.clone();
+    ff.formatMatrix = new Map<Handler, FormatRange[]>();
+    Array.from(this.formatMatrix.keys()).forEach(key => {
+      ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => f.clone()));
+    });
+    return ff;
+  }
+
   /**
    * 给当前片段应用新的格式
    * @param format 新格式的应用范围

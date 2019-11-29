@@ -40,6 +40,10 @@ export class TBRange {
     this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
+  clone() {
+    return new TBRange(this.rawRange);
+  }
+
   apply(offset = 0) {
     const start = this.findPosition(
       this.startFragment.virtualNode.children,

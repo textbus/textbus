@@ -145,4 +145,16 @@ export class Contents implements Iterable<string | View> {
     }
     return length;
   }
+
+  clone(): Contents {
+    const newContents = new Contents();
+    this.elements.forEach(item => {
+      if(typeof item === 'string'){
+        newContents.add(item);
+      } else {
+        // item.
+      }
+    });
+    return newContents;
+  }
 }
