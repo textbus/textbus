@@ -9,6 +9,9 @@ import { MatchState } from '../matcher/matcher';
 import { VIRTUAL_NODE } from '../parser/help';
 import { Cursor } from '../selection/cursor';
 import { TBRange } from '../selection/range';
+import { FormatRange, Fragment } from '../parser/fragment';
+import { Contents } from '../parser/contents';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -27,6 +30,8 @@ export class ViewRenderer {
   private hooksList: Hooks[] = [];
 
   private cursor: Cursor;
+  private cacheFragment: Fragment;
+  private cacheSelection: TBSelection;
 
   constructor() {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -37,27 +42,30 @@ export class ViewRenderer {
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
 
-      this.cursor = new Cursor(doc);
       const selection = new TBSelection(doc, true);
+      this.cursor = new Cursor(doc, selection);
 
       this.selection = selection;
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.cursor.elementRef);
 
-      selection.onSelectionChange.subscribe(s => {
-        if (s.collapsed) {
-          if (s.rangeCount) {
-            let rect = s.firstRange.rawRange.getBoundingClientRect();
-            if (!rect.height) {
-              rect = (this.selection.focusNode as HTMLElement).getBoundingClientRect();
-            }
-            this.cursor.show(rect);
-          }
-        } else {
-          this.cursor.hide();
-        }
-        this.selectionChangeEvent.next(s);
+      selection.onSelectionChange.pipe(
+        tap(s => {
+          this.selectionChangeEvent.next(s);
+        }),
+        map(s => {
+          return s.commonAncestorFragment;
+        }),
+        distinctUntilChanged()
+      ).subscribe(f => {
+        this.cacheFragment = f.clone();
+        this.cacheSelection = selection.clone();
       });
+
+      // this.cursor.onBlur.subscribe(() => {
+      //
+      // });
+
       this.cursor.onInput.subscribe(v => {
         if (selection.collapsed) {
           this.updateContents(v);
@@ -156,8 +164,12 @@ export class ViewRenderer {
   }
 
   private updateContents(content: string) {
-    const startIndex = this.selection.firstRange.startIndex;
+    const startIndex = this.cacheSelection.firstRange.startIndex;
     const commonAncestorFragment = this.selection.commonAncestorFragment;
+    const old = this.cacheFragment.clone();
+    commonAncestorFragment.contents = old.contents;
+    commonAncestorFragment.formatMatrix = old.formatMatrix;
+
     commonAncestorFragment.insert(content, startIndex);
     const oldFragment = commonAncestorFragment.elements;
     const parent = oldFragment[0].parentNode;
@@ -171,6 +183,8 @@ export class ViewRenderer {
     } else {
       parent.appendChild(newFragment);
     }
+    this.selection.firstRange.startIndex = startIndex;
+    this.selection.firstRange.endIndex = startIndex;
     this.selection.apply(content.length);
     this.userWriteEvent.next();
   }

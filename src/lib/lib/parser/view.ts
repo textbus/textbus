@@ -8,7 +8,10 @@ export abstract class View {
 
   formatMatrix = new Map<Handler, FormatRange[]>();
   abstract virtualNode: VirtualNode;
+
   abstract render(): Node;
+
+  abstract clone(): View;
 
   getCanApplyFormats() {
     let formats: FormatRange[] = [];

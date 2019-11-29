@@ -49,6 +49,12 @@ export class TBSelection {
     }
   }
 
+  clone() {
+    const t = new TBSelection(this.context);
+    t.ranges = this.ranges.map(r => r.clone());
+    return t;
+  }
+
   apply(offset = 0) {
     this.ranges.forEach(range => {
       range.apply(offset);
