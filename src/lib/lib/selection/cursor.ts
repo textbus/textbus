@@ -9,6 +9,14 @@ export interface InputEvent {
   selection: TBSelection;
 }
 
+interface CursorStyle {
+  left: number;
+  top: number;
+  height: number;
+  fontSize: string;
+  lineHeight: string;
+}
+
 export class Cursor {
   onInput: Observable<InputEvent>;
   onDelete: Observable<void>;
@@ -96,28 +104,44 @@ export class Cursor {
       if (s.collapsed) {
         if (s.rangeCount) {
           const focusNode = s.focusNode;
+          let style: CursorStyle;
+          console.log(s.focusNode)
+          const computedStyle = getComputedStyle((focusNode.nodeType === 1 ? focusNode : focusNode.parentNode) as HTMLElement);
           if (focusNode.nodeType === 3) {
-            this.show(s.firstRange.rawRange.getBoundingClientRect());
+            const rect = s.firstRange.rawRange.getBoundingClientRect();
+            style = {
+              left: rect.left,
+              top: rect.top,
+              height: rect.height,
+              fontSize: computedStyle.fontSize,
+              lineHeight: computedStyle.lineHeight
+            };
+
           } else {
-            let p: any = {};
             if (focusNode.childNodes.length) {
               const rect = (focusNode.childNodes[s.firstRange.rawRange.startOffset - 1] as HTMLElement).getBoundingClientRect();
-              p = {
+              style = {
                 left: rect.right,
                 top: rect.top,
-                height: rect.height
+                height: rect.height,
+                fontSize: computedStyle.fontSize,
+                lineHeight: computedStyle.lineHeight
               }
             } else {
-              p = (focusNode as HTMLElement).getBoundingClientRect();
+              const rect = (focusNode as HTMLElement).getBoundingClientRect();
+              style = {
+                left: rect.left,
+                top: rect.top,
+                height: rect.height,
+                fontSize: computedStyle.fontSize,
+                lineHeight: computedStyle.lineHeight
+              };
             }
-            if (!p.height) {
-              const style = getComputedStyle(s.focusNode as HTMLElement);
-              p.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
-              this.show(p)
-            } else {
-              this.show(p);
+            if (!style.height) {
+              style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
             }
           }
+          this.show(style);
         }
       } else {
         this.hide();
@@ -132,10 +156,13 @@ export class Cursor {
     this.focusEvent.next();
   }
 
-  private show(position: { left: number, top: number, height: number }) {
-    this.elementRef.style.left = position.left + 'px';
-    this.elementRef.style.top = position.top + 'px';
-    this.elementRef.style.height = position.height + 'px';
+  private show(style: CursorStyle) {
+    this.elementRef.style.left = style.left + 'px';
+    this.elementRef.style.top = style.top + 'px';
+    this.elementRef.style.height = style.height + 'px';
+    this.input.style.fontSize = style.fontSize;
+    this.input.style.lineHeight = style.lineHeight;
+    this.inputWrap.style.top = style.fontSize;
     this.display = true;
     clearTimeout(this.timer);
     const toggleShowHide = () => {
