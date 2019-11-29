@@ -39,7 +39,6 @@ export class ViewRenderer {
 
       const selection = new TBSelection(doc, true);
       this.cursor = new Cursor(doc, selection);
-
       this.selection = selection;
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.cursor.elementRef);
@@ -54,10 +53,8 @@ export class ViewRenderer {
         }
       });
       this.cursor.onDelete.subscribe(() => {
-        const commonAncestorFragment = this.selection.commonAncestorFragment;
-        let startIndex = this.selection.firstRange.startIndex;
-        if (startIndex > 0) {
-          commonAncestorFragment.delete(this.selection.firstRange.startIndex - 1, 1);
+        function reRender(range: TBRange) {
+          const commonAncestorFragment = range.commonAncestorFragment;
           const oldFragment = commonAncestorFragment.elements;
           const parent = oldFragment[0].parentNode;
 
@@ -70,9 +67,33 @@ export class ViewRenderer {
           } else {
             parent.appendChild(newFragment);
           }
-          this.selection.apply(-1);
         }
 
+        this.selection.ranges.forEach(range => {
+
+          if (range.collapsed) {
+            if (range.startIndex > 0) {
+              range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+              reRender(range);
+              this.selection.apply(-1);
+            }
+            return;
+          } else {
+            range.getSelectedScope().forEach(s => {
+              const isDelete = s.startIndex === 0 && s.endIndex === s.context.contents.length;
+              s.context.delete(s.startIndex, s.endIndex);
+              if (isDelete) {
+                const index = s.context.parent.contents.find(s.context);
+                s.context.parent.delete(index, 1);
+              }
+            });
+            // if (range.endFragment !== range.commonAncestorFragment) {
+            //
+            // }
+            reRender(range);
+            this.selection.collapse();
+          }
+        });
       });
     };
     this.frame.src = `javascript:void((function () {

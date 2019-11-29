@@ -14,6 +14,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+
 ::selection {
   background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
 }
@@ -21,11 +22,6 @@ body {
 p {
   margin-top: 5px;
   margin-bottom: 5px;
-  &:before {
-    content: "";
-    display: inline-block;
-    height: 1em;
-  }
 }
 
 blockquote {
@@ -169,5 +165,13 @@ table {
         }
       }
     }
+  }
+}
+
+p, td {
+  &:before {
+    content: "";
+    display: inline-block;
+    height: 1em;
   }
 }
