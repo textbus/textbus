@@ -87,8 +87,6 @@ export class Cursor {
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
       selection.removeAllRanges();
-      // this.focus();
-      // this.context.getSelection().removeAllRanges();
     });
     fromEvent(context, 'mouseup').subscribe(() => {
       this.flashing = true;
@@ -97,19 +95,28 @@ export class Cursor {
     selection.onSelectionChange.subscribe(s => {
       if (s.collapsed) {
         if (s.rangeCount) {
-          let rect = s.firstRange.rawRange.getBoundingClientRect();
-          if (!rect.height) {
-            rect = (s.focusNode as HTMLElement).getBoundingClientRect();
-          }
-          if (!rect.height) {
-            const style = getComputedStyle(s.focusNode as HTMLElement);
-            this.show({
-              left: rect.left,
-              top: rect.top,
-              height: Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight)
-            })
+          const focusNode = s.focusNode;
+          if (focusNode.nodeType === 3) {
+            this.show(s.firstRange.rawRange.getBoundingClientRect());
           } else {
-            this.show(rect);
+            let p: any = {};
+            if (focusNode.childNodes.length) {
+              const rect = (focusNode.childNodes[s.firstRange.rawRange.startOffset - 1] as HTMLElement).getBoundingClientRect();
+              p = {
+                left: rect.right,
+                top: rect.top,
+                height: rect.height
+              }
+            } else {
+              p = (focusNode as HTMLElement).getBoundingClientRect();
+            }
+            if (!p.height) {
+              const style = getComputedStyle(s.focusNode as HTMLElement);
+              p.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
+              this.show(p)
+            } else {
+              this.show(p);
+            }
           }
         }
       } else {

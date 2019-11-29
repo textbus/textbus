@@ -12,6 +12,7 @@ export class InlineCommander implements Commander<any> {
   command(selection: TBSelection, handler: Handler, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
+        console.log(item)
         const r = new FormatRange({
           startIndex: item.startIndex,
           endIndex: item.endIndex,

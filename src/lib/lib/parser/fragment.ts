@@ -162,7 +162,7 @@ export class Fragment extends View {
    */
   render(): DocumentFragment {
     const canApplyFormats = this.getCanApplyFormats();
-
+    console.log(canApplyFormats)
     const vDom = this.createVDom(canApplyFormats);
     this.virtualNode = vDom;
     const r = this.viewBuilder(vDom, this.contents);
@@ -317,7 +317,7 @@ export class Fragment extends View {
           });
           parent.children.push(new VirtualNode([f], this, parent, startIndex, firstRange.startIndex));
         }
-        const container = new VirtualContainerNode([firstRange], this, parent, startIndex, firstRange.endIndex);
+        const container = new VirtualContainerNode([firstRange], this, parent, firstRange.startIndex, firstRange.endIndex);
         const childFormatRanges: FormatRange[] = [];
         while (true) {
           const f = formatRanges[0];
@@ -355,7 +355,7 @@ export class Fragment extends View {
             state: null,
             cacheData: null
           });
-          container.children.push(new VirtualNode([f], this, parent, startIndex, firstRange.endIndex))
+          container.children.push(new VirtualNode([f], this, parent, firstRange.startIndex, firstRange.endIndex))
         }
         parent.children.push(container);
         startIndex = firstRange.endIndex;
