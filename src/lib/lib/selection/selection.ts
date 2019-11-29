@@ -49,6 +49,11 @@ export class TBSelection {
     }
   }
 
+  removeAllRanges() {
+    this.selection.removeAllRanges();
+    this.ranges = [];
+  }
+
   clone() {
     const t = new TBSelection(this.context);
     t.ranges = this.ranges.map(r => r.clone());

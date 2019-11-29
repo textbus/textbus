@@ -73,6 +73,7 @@ export class Cursor {
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {
+      this.hide();
       this.blurEvent.next();
     });
 
@@ -83,6 +84,7 @@ export class Cursor {
     });
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
+      selection.removeAllRanges();
       // this.focus();
       // this.context.getSelection().removeAllRanges();
     });
