@@ -20,7 +20,10 @@ export class Single extends View {
 
     const canApplyFormats = this.getCanApplyFormats();
 
-    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null);
+    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null, 0, 1);
+    const el = document.createElement(this.tagName);
+    vNode.elementRef = el;
+    el[VIRTUAL_NODE] = vNode;
     this.virtualNode = vNode;
     return canApplyFormats.reduce((node, next) => {
       if (next.handler) {
@@ -44,6 +47,6 @@ export class Single extends View {
         }
       }
       return node;
-    }, document.createElement(this.tagName));
+    }, el);
   }
 }

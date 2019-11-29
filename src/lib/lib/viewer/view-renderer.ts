@@ -55,20 +55,24 @@ export class ViewRenderer {
       });
       this.cursor.onDelete.subscribe(() => {
         const commonAncestorFragment = this.selection.commonAncestorFragment;
-        commonAncestorFragment.delete(this.selection.firstRange.startIndex - 1, 1);
-        const oldFragment = commonAncestorFragment.elements;
-        const parent = oldFragment[0].parentNode;
+        let startIndex = this.selection.firstRange.startIndex;
+        if (startIndex > 0) {
+          commonAncestorFragment.delete(this.selection.firstRange.startIndex - 1, 1);
+          const oldFragment = commonAncestorFragment.elements;
+          const parent = oldFragment[0].parentNode;
 
-        const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-        commonAncestorFragment.destroyView();
-        const newFragment = commonAncestorFragment.render();
+          const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+          commonAncestorFragment.destroyView();
+          const newFragment = commonAncestorFragment.render();
 
-        if (nextSibling) {
-          parent.insertBefore(newFragment, nextSibling);
-        } else {
-          parent.appendChild(newFragment);
+          if (nextSibling) {
+            parent.insertBefore(newFragment, nextSibling);
+          } else {
+            parent.appendChild(newFragment);
+          }
+          this.selection.apply(-1);
         }
-        this.selection.apply(-1);
+
       });
     };
     this.frame.src = `javascript:void((function () {

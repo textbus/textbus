@@ -55,7 +55,6 @@ export class TBRange {
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
-
     if (start.node[VIRTUAL_NODE] instanceof VirtualObjectNode) {
       this.rawRange.selectNode(start.node);
     } else {
@@ -171,7 +170,7 @@ export class TBRange {
                        index: number): { node: Node, position: number } {
     for (const item of vNodes) {
       let i = index;
-      if (i >= item.formats[0].startIndex && i <= item.formats[0].endIndex) {
+      if (i >= item.startIndex && i <= item.endIndex) {
         if (item instanceof VirtualContainerNode) {
           if (item.children.length) {
             return this.findPosition(item.children, i);
@@ -188,7 +187,7 @@ export class TBRange {
         } else if (item instanceof VirtualNode) {
           return {
             node: item.elementRef,
-            position: i - item.formats[0].startIndex
+            position: i - item.startIndex
           };
         }
       }
@@ -196,7 +195,7 @@ export class TBRange {
   }
 
   private static getIndex(node: Node): number {
-    return (node[VIRTUAL_NODE] as VirtualNode).formats[0].startIndex
+    return (node[VIRTUAL_NODE] as VirtualNode).startIndex
   }
 
   private static getOffset(node: Node, offset: number) {
@@ -205,7 +204,7 @@ export class TBRange {
         return (node[VIRTUAL_NODE] as VirtualNode).context.contents.length;
       }
       const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
-      return childVNode.formats[0].startIndex;
+      return childVNode.startIndex;
     }
     return offset;
   }

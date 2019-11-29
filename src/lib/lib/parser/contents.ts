@@ -35,8 +35,8 @@ export class Contents implements Iterable<string | View> {
         const last = this.elements[this.elements.length - 1];
         if (typeof last === 'string') {
           this.elements[this.elements.length - 1] = last + content;
-          return;
         }
+        return;
       }
       this.elements.push(content);
       return;
