@@ -1,10 +1,11 @@
 import { dtd } from '../dtd';
-import { Fragment, FormatRange } from './fragment';
+import { Fragment } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Editor } from '../editor';
 import { Single } from './single';
+import { FormatRange } from './format-range';
 
 export class RootFragment extends Fragment {
   constructor(private registries: Handler[] = [], public editor: Editor) {

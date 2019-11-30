@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/fragment';
+import { FormatRange } from '../parser/format-range';
 
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;

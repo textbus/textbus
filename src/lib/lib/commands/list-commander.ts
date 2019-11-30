@@ -1,6 +1,6 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { Fragment } from '../parser/fragment';
+import { FormatRange } from '../parser/format-range';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 

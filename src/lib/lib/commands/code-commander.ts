@@ -3,9 +3,10 @@ import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Single } from '../parser/single';
+import { FormatRange } from '../parser/format-range';
 
 export class CodeCommander implements Commander<any> {
   recordHistory = true;

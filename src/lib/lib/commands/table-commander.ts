@@ -3,8 +3,9 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { FormatRange } from '../parser/format-range';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;

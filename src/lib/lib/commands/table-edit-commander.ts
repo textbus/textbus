@@ -1,6 +1,6 @@
 import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../selection/selection';
-import { Fragment } from '../parser/fragment';
+import { FormatRange } from '../parser/format-range';
 import { FormatState } from '../matcher/matcher';
 
 export interface CellPosition {

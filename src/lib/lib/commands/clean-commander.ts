@@ -2,8 +2,9 @@ import { Commander } from './commander';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { FormatState } from '../matcher/matcher';
+import { FormatRange } from '../parser/format-range';
 
 export class CleanCommander implements Commander<void> {
   recordHistory = true;

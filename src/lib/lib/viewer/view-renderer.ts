@@ -73,11 +73,24 @@ export class ViewRenderer {
               } else {
                 s.context.delete(s.startIndex, s.endIndex - s.startIndex);
               }
-
             });
-            // if (range.endFragment !== range.commonAncestorFragment) {
-            //
-            // }
+            if (range.endFragment !== range.startFragment) {
+              const endContents = range.endFragment.contents;
+              const endFormats = range.endFragment.formatMatrix;
+              for (const item of endContents) {
+                range.startFragment.contents.add(item);
+              }
+              console.log(endFormats)
+              Array.from(endFormats.values()).reduce((v, n) => {
+                return v.concat(n);
+              }, []).forEach(f => {
+                console.log([Priority.Inline, Priority.Property], f.handler.priority)
+                if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
+                  console.log(f);
+                  range.startFragment.mergeFormat(f, true);
+                }
+              })
+            }
             ViewRenderer.reRender(range.commonAncestorFragment);
             this.selection.collapse();
           }
