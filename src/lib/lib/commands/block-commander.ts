@@ -1,9 +1,10 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange, Fragment } from '../parser/fragment';
+import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { FormatRange } from '../parser/format-range';
 
 export class BlockCommander implements Commander<string> {
 

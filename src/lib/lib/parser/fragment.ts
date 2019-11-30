@@ -1,44 +1,11 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState } from '../matcher/matcher';
 import { VirtualContainerNode, VirtualNode } from './virtual-dom';
 import { View } from './view';
 import { VIRTUAL_NODE } from './help';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
-import { CacheData, CacheDataParams } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
-import { Single } from './single';
-
-export interface FormatRangeParams {
-  startIndex: number;
-  endIndex: number;
-  handler: Handler;
-  context: Fragment | Single;
-  state: FormatState;
-  cacheData: CacheDataParams;
-}
-
-export class FormatRange {
-  startIndex: number;
-  endIndex: number;
-  handler: Handler;
-  context: Fragment | Single;
-  state: FormatState;
-  cacheData: CacheData;
-
-  constructor(private params: FormatRangeParams | FormatRange) {
-    this.startIndex = params.startIndex;
-    this.endIndex = params.endIndex;
-    this.handler = params.handler;
-    this.context = params.context;
-    this.state = params.state;
-    this.cacheData = params.cacheData && new CacheData(params.cacheData);
-  }
-
-  clone() {
-    return new FormatRange(this);
-  }
-}
+import { FormatRange } from './format-range';
 
 export class Fragment extends View {
   readonly length = 1;
