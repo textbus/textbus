@@ -70,9 +70,9 @@ export class CodeCommander implements Commander<any> {
         //   this.elements.push(el);
         //   newContents.add(el);
         // }
-        this.toCode(item.contents).slice(0).forEach(item => newContents.add(item));
+        this.toCode(item.contents).slice(0).forEach(item => newContents.append(item));
       } else {
-        newContents.add(item);
+        newContents.append(item);
       }
     });
     return newContents;

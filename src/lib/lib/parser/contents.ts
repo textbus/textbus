@@ -68,7 +68,7 @@ export class Contents implements Iterable<string | View> {
     }
   }
 
-  add(content: string | View) {
+  append(content: string | View) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -109,7 +109,7 @@ export class Contents implements Iterable<string | View> {
     }
     const elements = this.slice(0, startIndex).concat(this.slice(startIndex + length, this.length));
     this.elements = [];
-    elements.forEach(item => this.add(item));
+    elements.forEach(item => this.append(item));
   }
 
   splice(startIndex: number, length: number, newContents: string | View) {
@@ -167,9 +167,9 @@ export class Contents implements Iterable<string | View> {
     const newContents = new Contents();
     this.elements.forEach(item => {
       if (typeof item === 'string') {
-        newContents.add(item);
+        newContents.append(item);
       } else {
-        newContents.add(item.clone());
+        newContents.append(item.clone());
       }
     });
     return newContents;
