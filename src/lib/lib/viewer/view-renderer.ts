@@ -67,11 +67,13 @@ export class ViewRenderer {
           } else {
             range.getSelectedScope().forEach(s => {
               const isDelete = s.startIndex === 0 && s.endIndex === s.context.contents.length;
-              s.context.delete(s.startIndex, s.endIndex);
               if (isDelete) {
                 const index = s.context.parent.contents.find(s.context);
                 s.context.parent.delete(index, 1);
+              } else {
+                s.context.delete(s.startIndex, s.endIndex - s.startIndex);
               }
+
             });
             // if (range.endFragment !== range.commonAncestorFragment) {
             //
