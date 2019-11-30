@@ -9,6 +9,7 @@ import { MatchState } from '../matcher/matcher';
 import { VIRTUAL_NODE } from '../parser/help';
 import { Cursor, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
+import { Fragment } from '../parser/fragment';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -53,28 +54,13 @@ export class ViewRenderer {
         }
       });
       this.cursor.onDelete.subscribe(() => {
-        function reRender(range: TBRange) {
-          const commonAncestorFragment = range.commonAncestorFragment;
-          const oldFragment = commonAncestorFragment.elements;
-          const parent = oldFragment[0].parentNode;
-
-          const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-          commonAncestorFragment.destroyView();
-          const newFragment = commonAncestorFragment.render();
-
-          if (nextSibling) {
-            parent.insertBefore(newFragment, nextSibling);
-          } else {
-            parent.appendChild(newFragment);
-          }
-        }
 
         this.selection.ranges.forEach(range => {
 
           if (range.collapsed) {
             if (range.startIndex > 0) {
               range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-              reRender(range);
+              ViewRenderer.reRender(range.commonAncestorFragment);
               this.selection.apply(-1);
             }
             return;
@@ -90,7 +76,7 @@ export class ViewRenderer {
             // if (range.endFragment !== range.commonAncestorFragment) {
             //
             // }
-            reRender(range);
+            ViewRenderer.reRender(range.commonAncestorFragment);
             this.selection.collapse();
           }
         });
@@ -135,11 +121,6 @@ export class ViewRenderer {
       return;
     }
     const overlap = state === MatchState.Highlight;
-    const commonAncestorFragment = this.selection.commonAncestorFragment;
-    const oldFragment = commonAncestorFragment.elements;
-    const parent = oldFragment[0].parentNode;
-
-    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
 
     let selection = this.selection;
 
@@ -170,21 +151,26 @@ export class ViewRenderer {
         }, []).map(r => new TBRange(r));
         selection = new TBSelection(this.contentDocument);
         selection.ranges = ranges;
-        console.log(ranges);
       }
     });
-
     handler.execCommand.command(selection, handler, overlap);
-    commonAncestorFragment.destroyView();
-    const newFragment = commonAncestorFragment.render();
+    ViewRenderer.reRender(selection.commonAncestorFragment);
+    this.selection.apply();
+  }
+
+  private static reRender(fragment: Fragment) {
+    const oldFragment = fragment.elements;
+    const parent = oldFragment[0].parentNode;
+
+    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+    fragment.destroyView();
+    const newFragment = fragment.render();
 
     if (nextSibling) {
       parent.insertBefore(newFragment, nextSibling);
     } else {
       parent.appendChild(newFragment);
     }
-
-    this.selection.apply();
   }
 
   private updateContents(ev: InputEvent) {
@@ -194,18 +180,8 @@ export class ViewRenderer {
     commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
 
     commonAncestorFragment.insert(ev.value, startIndex);
-    const oldFragment = commonAncestorFragment.elements;
-    const parent = oldFragment[0].parentNode;
+    ViewRenderer.reRender(commonAncestorFragment);
 
-    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-    commonAncestorFragment.destroyView();
-    const newFragment = commonAncestorFragment.render();
-
-    if (nextSibling) {
-      parent.insertBefore(newFragment, nextSibling);
-    } else {
-      parent.appendChild(newFragment);
-    }
     this.selection.firstRange.startIndex = startIndex;
     this.selection.firstRange.endIndex = startIndex;
     this.selection.apply(ev.offset);
