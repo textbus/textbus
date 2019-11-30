@@ -20,6 +20,10 @@ export class TBSelection {
     return this.ranges[0] || null;
   }
 
+  get lastRange() {
+    return this.ranges[this.ranges.length - 1] || null;
+  }
+
   get collapsed() {
     return this.ranges.length === 1 && this.firstRange.collapsed;
   }
@@ -67,9 +71,10 @@ export class TBSelection {
   }
 
   collapse(toEnd = false) {
-    toEnd ? this.selection.collapseToEnd() : this.selection.collapseToStart();
-    this.ranges = this.makeRanges();
-    this.selectionChangeEvent.next(this);
+    const range = toEnd ? this.lastRange : this.firstRange;
+    range.collapse(toEnd);
+    this.ranges = [range];
+    this.apply();
   }
 
   private makeRanges() {
