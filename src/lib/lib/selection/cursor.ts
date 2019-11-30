@@ -1,4 +1,4 @@
-import { fromEvent, merge, Observable, race, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
 
