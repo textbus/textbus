@@ -174,6 +174,18 @@ export class Fragment extends View {
     this.elements = [];
   }
 
+  destroy() {
+    this.contents.getFragments().forEach(f => f.destroy());
+    this.destroyView();
+    const index = this.parent.contents.find(this);
+    this.parent.delete(index, 1);
+    this.formatMatrix = null;
+    this.contents = null;
+    this.virtualNode = null;
+    this.elements = null;
+    this.parent = null;
+  }
+
   /**
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode

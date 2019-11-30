@@ -72,7 +72,11 @@ export class RootFragment extends Fragment {
             newBlock = null;
             const cloneContainer = node.cloneNode();
             fragment.appendChild(cloneContainer);
-            Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+            if (/p|h[1-6]/i.test((node as HTMLElement).tagName)) {
+              Array.from(node.childNodes).forEach(c => cloneContainer.appendChild(c));
+            } else {
+              Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+            }
           }
         }
       } else {
