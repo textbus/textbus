@@ -1,4 +1,4 @@
-import { FormatRange } from './format-range';
+import { FormatRange } from './format';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { VirtualNode } from './virtual-dom';

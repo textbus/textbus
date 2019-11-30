@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format-range';
+import { FormatRange } from '../parser/format';
 
 export class AttrCommander implements Commander<AttrState[]> {
   recordHistory = true;
