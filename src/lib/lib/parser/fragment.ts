@@ -5,7 +5,7 @@ import { View } from './view';
 import { VIRTUAL_NODE } from './help';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { Priority } from '../toolbar/help';
-import { FormatRange } from './format-range';
+import { FormatRange } from './format';
 
 export class Fragment extends View {
   readonly length = 1;

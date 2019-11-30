@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { FormatRange } from '../parser/format-range';
+import { FormatRange } from '../parser/format';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;

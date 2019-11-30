@@ -1,5 +1,5 @@
 import { Fragment } from './fragment';
-import { FormatRange } from './format-range';
+import { FormatRange } from './format';
 
 export class VirtualNode {
   elementRef: Node;

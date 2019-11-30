@@ -6,7 +6,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format-range';
+import { FormatRange } from '../parser/format';
 
 export class CodeCommander implements Commander<any> {
   recordHistory = true;

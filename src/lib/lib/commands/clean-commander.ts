@@ -4,7 +4,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
 import { Fragment } from '../parser/fragment';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format-range';
+import { FormatRange } from '../parser/format';
 
 export class CleanCommander implements Commander<void> {
   recordHistory = true;
