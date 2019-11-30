@@ -20,10 +20,10 @@ export class RootFragment extends Fragment {
     this.mergeFormatsByNode(this, el, 0, len);
   }
 
-  clone() {
-    return this;
-  }
-
+  /**
+   * 把一段 html 格式化成符合标准的结构，如 ul > a 改成 ul > li > p > a
+   * @param el
+   */
   private flat(el: HTMLElement): Node {
     const fragment = document.createDocumentFragment();
     const limitChildren = dtd[el.tagName.toLowerCase()].limitChildren || [];
@@ -87,10 +87,15 @@ export class RootFragment extends Fragment {
     return fragment;
   }
 
+  /**
+   * 把 DOM 结构转化成编辑器可用的数据结构
+   * @param from 要采集数据的 DOM 节点
+   * @param context 采集后数据存放的片段
+   */
   private parse(from: Node, context: Fragment): number {
     if (from.nodeType === 3) {
       const textContent = from.textContent;
-      context.contents.add(textContent.replace(/&nbsp;/g, ' '));
+      context.contents.append(textContent.replace(/&nbsp;/g, ' '));
       return textContent.length;
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();
@@ -98,7 +103,7 @@ export class RootFragment extends Fragment {
         const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
           const newSingle = new Single(context, tagName);
-          context.contents.add(newSingle);
+          context.contents.append(newSingle);
           this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
           return 1;
         } else {
@@ -122,7 +127,7 @@ export class RootFragment extends Fragment {
           this.parse(node, newBlock);
         });
         this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contents.length);
-        context.contents.add(newBlock);
+        context.contents.append(newBlock);
         return newBlock.contents.length;
       }
     }

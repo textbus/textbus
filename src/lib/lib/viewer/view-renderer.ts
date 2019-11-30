@@ -75,21 +75,23 @@ export class ViewRenderer {
               }
             });
             if (range.endFragment !== range.startFragment) {
+              const startLength = range.startFragment.contents.length;
               const endContents = range.endFragment.contents;
               const endFormats = range.endFragment.formatMatrix;
               for (const item of endContents) {
-                range.startFragment.contents.add(item);
+                range.startFragment.append(item);
               }
-              console.log(endFormats)
               Array.from(endFormats.values()).reduce((v, n) => {
                 return v.concat(n);
               }, []).forEach(f => {
-                console.log([Priority.Inline, Priority.Property], f.handler.priority)
                 if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
-                  console.log(f);
-                  range.startFragment.mergeFormat(f, true);
+                  const ff = f.clone();
+                  ff.startIndex += startLength;
+                  ff.endIndex += startLength;
+                  range.startFragment.mergeFormat(ff, true);
                 }
-              })
+              });
+              this.clean(range.endFragment);
             }
             ViewRenderer.reRender(range.commonAncestorFragment);
             this.selection.collapse();
@@ -171,6 +173,14 @@ export class ViewRenderer {
     handler.execCommand.command(selection, handler, overlap);
     ViewRenderer.reRender(selection.commonAncestorFragment);
     this.selection.apply();
+  }
+
+  private clean(fragment: Fragment) {
+    const parent = fragment.parent;
+    parent.delete(parent.contents.find(fragment), 1);
+    if (!parent.contents.length) {
+      this.clean(parent);
+    }
   }
 
   private static reRender(fragment: Fragment) {

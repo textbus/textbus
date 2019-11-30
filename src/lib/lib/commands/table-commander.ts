@@ -34,10 +34,10 @@ export class TableCommander implements Commander<AttrState[]> {
     }));
     if (this.header) {
       const thead = this.createHeader(table, handler);
-      table.contents.add(thead);
+      table.contents.append(thead);
     }
     const tbody = this.createBody(table, handler);
-    table.contents.add(tbody);
+    table.contents.append(tbody);
     // TODO 此处会把表格插入到 p|h1~h6 标签之内，后续处理
     context.insert(table, selection.firstRange.startIndex);
   }
@@ -71,7 +71,7 @@ export class TableCommander implements Commander<AttrState[]> {
           tag: 'tr'
         }
       }));
-      tbody.contents.add(tr);
+      tbody.contents.append(tr);
       for (let j = 0; j < this.cols; j++) {
         const td = new Fragment(tr);
         td.mergeFormat(new FormatRange({
@@ -84,7 +84,7 @@ export class TableCommander implements Commander<AttrState[]> {
             tag: 'td'
           }
         }));
-        tr.contents.add(td);
+        tr.contents.append(td);
       }
     }
 
@@ -114,7 +114,7 @@ export class TableCommander implements Commander<AttrState[]> {
         tag: 'tr'
       }
     }));
-    thead.contents.add(tr);
+    thead.contents.append(tr);
     for (let i = 0; i < this.cols; i++) {
       const th = new Fragment(tr);
       th.mergeFormat(new FormatRange({
@@ -127,7 +127,7 @@ export class TableCommander implements Commander<AttrState[]> {
           tag: 'th'
         }
       }));
-      tr.contents.add(th);
+      tr.contents.append(th);
     }
     return thead;
   }

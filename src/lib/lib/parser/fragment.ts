@@ -100,22 +100,48 @@ export class Fragment extends View {
     });
   }
 
+  append(content: string | View) {
+    this.contents.append(content);
+    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
+      if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
+        format.endIndex += content.length;
+      }
+    })
+  }
+
   delete(startIndex: number, length: number) {
     if (length <= 0) {
       return;
     }
     this.contents.delete(startIndex, length);
+    const endIndex = startIndex + length;
     const ff = new Map<Handler, FormatRange[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
-      const formats = this.formatMatrix.get(key).filter(format => {
-        if (format.endIndex > startIndex) {
+      const formats: FormatRange[] = [];
+      this.formatMatrix.get(key).forEach(format => {
+        if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority)) {
           format.endIndex -= length;
+          formats.push(format);
+        } else {
+          if (format.endIndex <= startIndex) {
+            // 在选区之前
+            formats.push(format);
+          } else if (format.startIndex > endIndex) {
+            // 在选区这后
+            format.startIndex -= length;
+            format.endIndex -= length;
+            formats.push(format);
+          } else {
+            if (format.startIndex < startIndex) {
+              format.endIndex = Math.max(startIndex, format.endIndex - length);
+              formats.push(format);
+            } else if (format.endIndex > endIndex) {
+              format.startIndex = startIndex;
+              format.endIndex = startIndex + format.endIndex - endIndex;
+              formats.push(format);
+            }
+          }
         }
-        if (format.startIndex >= format.endIndex) {
-          return [Priority.Default, Priority.Block, Priority.BlockStyle].indexOf(format.handler.priority) &&
-            format.startIndex === format.endIndex;
-        }
-        return true;
       });
       if (formats.length) {
         ff.set(key, formats);

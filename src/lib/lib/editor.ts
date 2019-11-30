@@ -20,9 +20,10 @@ import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
 import { Paths } from './paths/paths';
+import { Fragment } from './parser/fragment';
 
 export interface Snapshot {
-  doc: RootFragment;
+  doc: Fragment;
   selection: TBSelection;
 }
 
