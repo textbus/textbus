@@ -105,7 +105,6 @@ export class Cursor {
         if (s.rangeCount) {
           const focusNode = s.focusNode;
           let style: CursorStyle;
-          console.log(s.focusNode)
           const computedStyle = getComputedStyle((focusNode.nodeType === 1 ? focusNode : focusNode.parentNode) as HTMLElement);
           if (focusNode.nodeType === 3) {
             const rect = s.firstRange.rawRange.getBoundingClientRect();
