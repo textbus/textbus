@@ -54,49 +54,7 @@ export class ViewRenderer {
         }
       });
       this.cursor.onDelete.subscribe(() => {
-
-        this.selection.ranges.forEach(range => {
-
-          if (range.collapsed) {
-            if (range.startIndex > 0) {
-              range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-              ViewRenderer.reRender(range.commonAncestorFragment);
-              this.selection.apply(-1);
-            }
-            return;
-          } else {
-            range.getSelectedScope().forEach(s => {
-              const isDelete = s.startIndex === 0 && s.endIndex === s.context.contents.length;
-              if (isDelete) {
-                const index = s.context.parent.contents.find(s.context);
-                s.context.parent.delete(index, 1);
-              } else {
-                s.context.delete(s.startIndex, s.endIndex - s.startIndex);
-              }
-            });
-            if (range.endFragment !== range.startFragment) {
-              const startLength = range.startFragment.contents.length;
-              const endContents = range.endFragment.contents;
-              const endFormats = range.endFragment.formatMatrix;
-              for (const item of endContents) {
-                range.startFragment.append(item);
-              }
-              Array.from(endFormats.values()).reduce((v, n) => {
-                return v.concat(n);
-              }, []).forEach(f => {
-                if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
-                  const ff = f.clone();
-                  ff.startIndex += startLength;
-                  ff.endIndex += startLength;
-                  range.startFragment.mergeFormat(ff, true);
-                }
-              });
-              this.clean(range.endFragment);
-            }
-            ViewRenderer.reRender(range.commonAncestorFragment);
-            this.selection.collapse();
-          }
-        });
+        this.deleteContents();
       });
     };
     this.frame.src = `javascript:void((function () {
@@ -175,26 +133,135 @@ export class ViewRenderer {
     this.selection.apply();
   }
 
-  private clean(fragment: Fragment) {
-    const parent = fragment.parent;
-    parent.delete(parent.contents.find(fragment), 1);
-    if (!parent.contents.length) {
-      this.clean(parent);
-    }
+  private deleteContents() {
+    this.selection.ranges.forEach(range => {
+      if (range.collapsed) {
+        if (range.startIndex > 0) {
+          range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+          ViewRenderer.reRender(range.commonAncestorFragment);
+          this.selection.apply(-1);
+        } else {
+          const position = this.clean(range.startFragment);
+          this.selection.firstRange.startFragment = position.selectFragment;
+          this.selection.firstRange.startIndex = position.index;
+          this.selection.collapse();
+        }
+      } else {
+        let isDeletedEnd = false;
+        range.getSelectedScope().forEach(s => {
+          const isDelete = s.startIndex === 0 && s.endIndex === s.context.contents.length;
+          if (isDelete && s.context !== range.startFragment) {
+            if (s.context === range.endFragment) {
+              isDeletedEnd = true;
+            }
+            this.clean(s.context);
+          } else {
+            s.context.delete(s.startIndex, s.endIndex - s.startIndex);
+          }
+        });
+        if (range.endFragment !== range.startFragment && !isDeletedEnd) {
+          const startLength = range.startFragment.contents.length;
+          const endContents = range.endFragment.contents;
+          const endFormats = range.endFragment.formatMatrix;
+          for (const item of endContents) {
+            range.startFragment.append(item);
+          }
+          Array.from(endFormats.values()).reduce((v, n) => {
+            return v.concat(n);
+          }, []).forEach(f => {
+            if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
+              const ff = f.clone();
+              ff.startIndex += startLength;
+              ff.endIndex += startLength;
+              range.startFragment.mergeFormat(ff, true);
+            }
+          });
+          this.clean(range.endFragment);
+        }
+        ViewRenderer.reRender(range.commonAncestorFragment);
+        this.selection.collapse();
+      }
+    });
   }
 
-  private static reRender(fragment: Fragment) {
-    const oldFragment = fragment.elements;
-    const parent = oldFragment[0].parentNode;
+  private clean(fragment: Fragment): { selectFragment: Fragment, context: Fragment, index: number } {
+    const parent = fragment.parent;
+    const index = parent.contents.find(fragment);
+    fragment.destroy();
+    if (!parent.contents.length) {
+      return this.clean(parent);
+    }
 
-    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-    fragment.destroyView();
-    const newFragment = fragment.render();
+    const findLastChild = (f: Fragment): { fragment: Fragment, index: number } => {
+      const last = f.contents.getContentAtIndex(f.contents.length - 1);
+      if (last instanceof Fragment) {
+        return findLastChild(last);
+      }
+      return {
+        fragment: f,
+        index: f.contents.length
+      }
+    };
 
-    if (nextSibling) {
-      parent.insertBefore(newFragment, nextSibling);
+    const findFirstChild = (f: Fragment): Fragment => {
+      const first = f.contents.getContentAtIndex(0);
+      if (first instanceof Fragment) {
+        return findFirstChild(first);
+      }
+      return f;
+    };
+
+    const findParent = (f: Fragment): { fragment: Fragment, index: number } => {
+      const index = f.parent.contents.find(f);
+      if (index === 0) {
+        return findParent(f.parent);
+      }
+      return {
+        fragment: f,
+        index
+      };
+    };
+
+    if (index === 0) {
+      const parentContext = parent.parent ? findParent(parent) : {fragment: parent, index: 0};
+      if (!parentContext.fragment.parent && parentContext.index === 0) {
+        const f = findFirstChild(parentContext.fragment);
+        return {
+          selectFragment: f,
+          context: parentContext.fragment,
+          index: 0
+        }
+      } else {
+        const item = parentContext.fragment.contents.getContentAtIndex(parentContext.index);
+        if (item instanceof Fragment) {
+          const childContext = findLastChild(item);
+          return {
+            selectFragment: childContext.fragment,
+            context: parentContext.fragment,
+            index: childContext.index
+          }
+        }
+        return {
+          selectFragment: parentContext.fragment,
+          context: parentContext.fragment,
+          index: parentContext.index
+        }
+      }
     } else {
-      parent.appendChild(newFragment);
+      const item = parent.contents.getContentAtIndex(index - 1);
+      if (item instanceof Fragment) {
+        const childContext = findLastChild(item);
+        return {
+          selectFragment: childContext.fragment,
+          context: parent,
+          index: childContext.index
+        }
+      }
+      return {
+        selectFragment: parent,
+        context: parent,
+        index: index - 1
+      }
     }
   }
 
@@ -211,5 +278,20 @@ export class ViewRenderer {
     this.selection.firstRange.endIndex = startIndex;
     this.selection.apply(ev.offset);
     this.userWriteEvent.next();
+  }
+
+  private static reRender(fragment: Fragment) {
+    const oldFragment = fragment.elements;
+    const parent = oldFragment[0].parentNode;
+
+    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
+    fragment.destroyView();
+    const newFragment = fragment.render();
+
+    if (nextSibling) {
+      parent.insertBefore(newFragment, nextSibling);
+    } else {
+      parent.appendChild(newFragment);
+    }
   }
 }
