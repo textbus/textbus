@@ -79,6 +79,10 @@ export class TableEditHook implements Hooks {
       this.startCell = this.endCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
       this.tableElement = findElementByTagName(startPaths, 'table') as HTMLTableElement;
       if (!this.startCell || !this.tableElement) {
+        if (insertMask) {
+          insertMask = false;
+          frameContainer.removeChild(this.mask);
+        }
         return;
       }
       if (!insertMask) {
