@@ -3,6 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { FormatRange } from '../parser/format';
 import { TBSelection } from '../selection/selection';
 import { Handler } from '../toolbar/handlers/help';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class InlineCommander implements Commander<any> {
   recordHistory = true;
@@ -27,7 +28,7 @@ export class InlineCommander implements Commander<any> {
     })
   }
 
-  render(state: FormatState, rawElement?: HTMLElement) {
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData) {
     switch (state) {
       case FormatState.Exclude:
         if (rawElement) {
@@ -39,7 +40,7 @@ export class InlineCommander implements Commander<any> {
           return new ChildSlotModel(node);
         }
       case FormatState.Valid:
-        return new ChildSlotModel(document.createElement(this.tagName));
+        return new ChildSlotModel(document.createElement(cacheData.tag));
     }
     return null;
   }

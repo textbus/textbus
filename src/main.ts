@@ -18,7 +18,6 @@ const editor = createEditor('#editor', {
   <li>0</li>
 </ul>
 <p>333</p>
-<table><tbody><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></tbody></table>
 `
 });
 

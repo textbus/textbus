@@ -42,20 +42,28 @@ export class CacheData {
     }
     const left = data.params;
     const right = this;
-    if (left.attrs === right.attrs && left.style === right.style) {
+    return left.tag === right.tag &&
+      CacheData.equalAttrs(left.attrs, right.attrs) &&
+      CacheData.equalStyle(left.style, right.style);
+  }
+
+  private static equalAttrs(left: Map<string, string>, right: Map<string, string>) {
+    if (left === right || !left === !right) {
       return true;
     }
-    if (left.attrs && right.attrs) {
-      if (left.attrs.size !== right.attrs.size) {
-        return false;
-      }
-      return Array.from(left.attrs.keys()).reduce((v, key) => {
-        return v && left.attrs.get(key) === right.attrs.get(key);
-      }, true);
+    if (left.size !== right.size) {
+      return false;
     }
-    if (left.style && right.style) {
-      return left.style.name === right.style.name && left.style.value === right.style.value;
+    return Array.from(left.keys()).reduce((v, key) => {
+      return v && left.get(key) === right.get(key);
+    }, true);
+  }
+
+  private static equalStyle(left: { name: string, value: string | number },
+                            right: { name: string, value: string | number }) {
+    if (left === right || !left === !right) {
+      return true;
     }
-    return false;
+    return left.name === right.name && left.value === right.value;
   }
 }
