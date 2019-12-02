@@ -6,6 +6,7 @@ import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { FormatRange } from '../parser/format';
+import { Single } from '../parser/single';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -84,6 +85,7 @@ export class TableCommander implements Commander<AttrState[]> {
             tag: 'td'
           }
         }));
+        td.append(new Single(td, 'br'));
         tr.contents.append(td);
       }
     }
@@ -127,6 +129,7 @@ export class TableCommander implements Commander<AttrState[]> {
           tag: 'th'
         }
       }));
+      th.append(new Single(th, 'br'));
       tr.contents.append(th);
     }
     return thead;

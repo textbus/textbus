@@ -14,6 +14,7 @@ export class RootFragment extends Fragment {
 
   setContents(el: HTMLElement) {
     const flatTree = this.flat(el);
+    console.log(flatTree)
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.parse(node, this);
     }, 0);
@@ -53,7 +54,11 @@ export class RootFragment extends Fragment {
           if (tagName === limitChildTag) {
             const cloneContainer = node.cloneNode();
             fragment.appendChild(cloneContainer);
-            Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+            if ((node as HTMLElement).tagName.toLowerCase() === 'td' && node.childNodes.length === 0) {
+              cloneContainer.appendChild(document.createElement('br'));
+            } else {
+              Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+            }
           } else {
             const temporaryContainer = document.createElement(limitChildTag);
             temporaryContainer.appendChild(node);

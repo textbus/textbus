@@ -168,15 +168,6 @@ table {
   }
 }
 
-p, td {
-  &:before {
-    content: "";
-    display: inline-block;
-    height: 1em;
-  }
-}
-
-
 [style*=color]:not([style*=background-color]) a {
   color: inherit;
 }
