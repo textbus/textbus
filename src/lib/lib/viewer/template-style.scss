@@ -175,3 +175,8 @@ p, td {
     height: 1em;
   }
 }
+
+
+[style*=color]:not([style*=background-color]) a {
+  color: inherit;
+}
