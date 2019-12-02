@@ -49,7 +49,7 @@ export class Contents implements Iterable<string | View> {
           break;
         }
         if (el instanceof View) {
-          if (index === i + el.length) {
+          if (index === i) {
             this.elements.splice(ii, 0, content);
           }
         } else {
