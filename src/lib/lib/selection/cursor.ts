@@ -117,7 +117,7 @@ export class Cursor {
             };
 
           } else {
-            if (focusNode.childNodes.length) {
+            if (focusNode.childNodes.length && s.firstRange.rawRange.startOffset > 0) {
               const rect = (focusNode.childNodes[s.firstRange.rawRange.startOffset - 1] as HTMLElement).getBoundingClientRect();
               style = {
                 left: rect.right,
