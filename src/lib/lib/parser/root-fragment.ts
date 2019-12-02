@@ -13,7 +13,7 @@ export class RootFragment extends Fragment {
   }
 
   setContents(el: HTMLElement) {
-    const flatTree = this.flat(el);
+    const flatTree = this.normalize(el);
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.parse(node, this);
     }, 0);
@@ -24,7 +24,7 @@ export class RootFragment extends Fragment {
    * 把一段 html 格式化成符合标准的结构，如 ul > a 改成 ul > li > p > a
    * @param el
    */
-  private flat(el: HTMLElement): Node {
+  private normalize(el: HTMLElement): Node {
     const fragment = document.createDocumentFragment();
     const limitChildren = dtd[el.tagName.toLowerCase()].limitChildren || [];
 
@@ -56,14 +56,14 @@ export class RootFragment extends Fragment {
             if ((node as HTMLElement).tagName.toLowerCase() === 'td' && node.childNodes.length === 0) {
               cloneContainer.appendChild(document.createElement('br'));
             } else {
-              Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+              Array.from(this.normalize(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
             }
           } else {
             const temporaryContainer = document.createElement(limitChildTag);
             temporaryContainer.appendChild(node);
             const container = document.createElement(limitChildTag);
             fragment.appendChild(container);
-            Array.from(this.flat(temporaryContainer as HTMLElement).childNodes).forEach(c => container.appendChild(c));
+            Array.from(this.normalize(temporaryContainer as HTMLElement).childNodes).forEach(c => container.appendChild(c));
           }
         } else {
           if (/inline/.test(dtd[tagName].display)) {
@@ -79,7 +79,7 @@ export class RootFragment extends Fragment {
             if (/p|h[1-6]/i.test((node as HTMLElement).tagName)) {
               Array.from(node.childNodes).forEach(c => cloneContainer.appendChild(c));
             } else {
-              Array.from(this.flat(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
+              Array.from(this.normalize(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
             }
           }
         }
