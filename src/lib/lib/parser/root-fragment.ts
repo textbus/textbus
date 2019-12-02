@@ -14,7 +14,6 @@ export class RootFragment extends Fragment {
 
   setContents(el: HTMLElement) {
     const flatTree = this.flat(el);
-    console.log(flatTree)
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.parse(node, this);
     }, 0);
