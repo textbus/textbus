@@ -50,10 +50,21 @@ export class Contents implements Iterable<string | View> {
         }
         if (el instanceof View) {
           if (index === i) {
-            this.elements.splice(ii, 0, content);
+            if (ii === 0) {
+              this.elements.unshift(content);
+            } else {
+              const prev = this.elements[ii - 1];
+              if (typeof prev === 'string') {
+                this.elements[ii - 1] = prev + content;
+              } else {
+                this.elements.splice(ii, 0, content);
+              }
+            }
           }
         } else {
-          if (index < i + el.length) {
+          if (index === i) {
+            this.elements.splice(ii, 1, content + el);
+          } else if (index < i + el.length) {
             const cc = [el.slice(0, index), content, el.slice(index)];
             if (content instanceof View) {
               this.elements.splice(ii, 1, ...cc);
