@@ -117,8 +117,29 @@ export class Cursor {
             };
 
           } else {
-            if (focusNode.childNodes.length && s.firstRange.rawRange.startOffset > 0) {
-              const rect = (focusNode.childNodes[s.firstRange.rawRange.startOffset - 1] as HTMLElement).getBoundingClientRect();
+            if (focusNode.childNodes.length) {
+              let child = focusNode.childNodes[s.firstRange.rawRange.startOffset] as HTMLElement;
+              let rect: ClientRect;
+              if (child) {
+                if (child.nodeType === 1) {
+                  rect = child.getBoundingClientRect();
+                } else {
+                  let range = document.createRange();
+                  range.setStart(child, 0);
+                  range.collapse();
+                  rect = range.getBoundingClientRect();
+                }
+              } else {
+                child = focusNode.lastChild as HTMLElement;
+                if (child.nodeType === 1) {
+                  rect = child.getBoundingClientRect();
+                } else {
+                  let range = document.createRange();
+                  range.setStart(child, 0);
+                  range.collapse();
+                  rect = range.getBoundingClientRect();
+                }
+              }
               style = {
                 left: rect.right,
                 top: rect.top,
