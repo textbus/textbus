@@ -48,7 +48,7 @@ export class CacheData {
   }
 
   private static equalAttrs(left: Map<string, string>, right: Map<string, string>) {
-    if (left === right || !left === !right) {
+    if (left === right || !left === true && !right === true) {
       return true;
     }
     if (left.size !== right.size) {
@@ -61,7 +61,7 @@ export class CacheData {
 
   private static equalStyle(left: { name: string, value: string | number },
                             right: { name: string, value: string | number }) {
-    if (left === right || !left === !right) {
+    if (left === right || !left === true && !right === true) {
       return true;
     }
     return left.name === right.name && left.value === right.value;
