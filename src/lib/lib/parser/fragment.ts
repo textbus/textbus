@@ -117,6 +117,11 @@ export class Fragment extends View {
     if (length <= 0) {
       return;
     }
+    this.contents.slice(startIndex, startIndex + length).forEach(item => {
+      if (item instanceof Fragment) {
+        item.destroyView();
+      }
+    });
     this.contents.delete(startIndex, length);
     const endIndex = startIndex + length;
     const ff = new Map<Handler, FormatRange[]>();

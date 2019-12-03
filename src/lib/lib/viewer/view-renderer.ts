@@ -218,7 +218,7 @@ export class ViewRenderer {
             if (s.context === range.endFragment) {
               isDeletedEnd = true;
             }
-            this.clean(s.context);
+            this.deleteEmptyFragment(s.context);
           } else {
             s.context.delete(s.startIndex, s.endIndex - s.startIndex);
           }
@@ -240,7 +240,7 @@ export class ViewRenderer {
               range.startFragment.mergeFormat(ff, true);
             }
           });
-          this.clean(range.endFragment);
+          this.deleteEmptyFragment(range.endFragment);
         }
         ViewRenderer.rerender(range.commonAncestorFragment);
         this.selection.collapse();
@@ -253,87 +253,6 @@ export class ViewRenderer {
     fragment.destroy();
     if (parent && !parent.contents.length) {
       this.deleteEmptyFragment(parent);
-    }
-  }
-
-  private clean(fragment: Fragment): { selectFragment: Fragment, context: Fragment, index: number } {
-    const parent = fragment.parent;
-    const index = parent.contents.find(fragment);
-    fragment.destroy();
-    if (!parent.contents.length) {
-      return this.clean(parent);
-    }
-
-    const findLastChild = (f: Fragment): { fragment: Fragment, index: number } => {
-      const last = f.contents.getContentAtIndex(f.contents.length - 1);
-      if (last instanceof Fragment) {
-        return findLastChild(last);
-      }
-      return {
-        fragment: f,
-        index: f.contents.length
-      }
-    };
-
-    const findFirstChild = (f: Fragment): Fragment => {
-      const first = f.contents.getContentAtIndex(0);
-      if (first instanceof Fragment) {
-        return findFirstChild(first);
-      }
-      return f;
-    };
-
-    const findParent = (f: Fragment): { fragment: Fragment, index: number } => {
-      const index = f.parent.contents.find(f);
-      if (index === 0) {
-        return findParent(f.parent);
-      }
-      return {
-        fragment: f,
-        index
-      };
-    };
-
-    if (index === 0) {
-      const parentContext = parent.parent ? findParent(parent) : {fragment: parent, index: 0};
-      if (!parentContext.fragment.parent && parentContext.index === 0) {
-        const f = findFirstChild(parentContext.fragment);
-        return {
-          selectFragment: f,
-          context: parentContext.fragment,
-          index: 0
-        }
-      } else {
-        const item = parentContext.fragment.contents.getContentAtIndex(parentContext.index);
-        if (item instanceof Fragment) {
-          const childContext = findLastChild(item);
-          return {
-            selectFragment: childContext.fragment,
-            context: parentContext.fragment,
-            index: childContext.index
-          }
-        }
-        return {
-          selectFragment: parentContext.fragment,
-          context: parentContext.fragment,
-          index: parentContext.index
-        }
-      }
-    } else {
-      const item = parent.contents.getContentAtIndex(index - 1);
-      if (item instanceof Fragment) {
-        const childContext = findLastChild(item);
-        return {
-          selectFragment: childContext.fragment,
-          context: parent,
-          index: childContext.index
-        }
-      }
-      return {
-        selectFragment: parent,
-        context: parent,
-        index: index - 1
-      }
     }
   }
 
