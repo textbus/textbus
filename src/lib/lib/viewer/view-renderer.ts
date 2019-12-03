@@ -69,9 +69,9 @@ export class ViewRenderer {
     this.elementRef.appendChild(this.frame);
   }
 
-  render(vDom: RootFragment) {
+  render(rootFragment: RootFragment) {
     this.contentDocument.body.innerHTML = '';
-    vDom.render(this.contentDocument.body);
+    rootFragment.render(this.contentDocument.body);
   }
 
   use(hooks: Hooks) {
