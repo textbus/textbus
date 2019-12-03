@@ -68,6 +68,11 @@ export class Cursor {
     merge(...[
       'input',
     ].map(type => fromEvent(this.input, type))).subscribe(() => {
+      if (!this.selection.collapsed) {
+        this.deleteEvent.next();
+        this.inputStartSelection = selection.clone();
+        this.editingFragment = selection.commonAncestorFragment.clone();
+      }
       this.inputEvent.next({
         value: this.input.value,
         offset: this.input.selectionStart,
@@ -101,68 +106,29 @@ export class Cursor {
     });
 
     selection.onSelectionChange.subscribe(s => {
+      if (!s.rangeCount) {
+        return;
+      }
+      const startContainer = s.firstRange.rawRange.startContainer;
+      const range = document.createRange();
+      range.setStart(startContainer, s.firstRange.rawRange.startOffset);
+      range.collapse();
+      const rect = range.getBoundingClientRect();
+      const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
+      const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
+      let style: CursorStyle = {
+        left: Math.max(rect.left, rect2.left),
+        top: Math.max(rect.top, rect2.top),
+        height: rect.height,
+        fontSize: computedStyle.fontSize,
+        lineHeight: Number.parseInt(computedStyle.fontSize) * Number.parseFloat(computedStyle.lineHeight) + ''
+      };
+      if (!style.height) {
+        style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
+      }
+      this.updateCursorPosition(style);
       if (s.collapsed) {
-        if (s.rangeCount) {
-          const focusNode = s.focusNode;
-          let style: CursorStyle;
-          const computedStyle = getComputedStyle((focusNode.nodeType === 1 ? focusNode : focusNode.parentNode) as HTMLElement);
-          if (focusNode.nodeType === 3) {
-            const rect = s.firstRange.rawRange.getBoundingClientRect();
-            style = {
-              left: rect.left,
-              top: rect.top,
-              height: rect.height,
-              fontSize: computedStyle.fontSize,
-              lineHeight: computedStyle.lineHeight
-            };
-
-          } else {
-            if (focusNode.childNodes.length) {
-              let child = focusNode.childNodes[s.firstRange.rawRange.startOffset] as HTMLElement;
-              let rect: ClientRect;
-              if (child) {
-                if (child.nodeType === 1) {
-                  rect = child.getBoundingClientRect();
-                } else {
-                  let range = document.createRange();
-                  range.setStart(child, 0);
-                  range.collapse();
-                  rect = range.getBoundingClientRect();
-                }
-              } else {
-                child = focusNode.lastChild as HTMLElement;
-                if (child.nodeType === 1) {
-                  rect = child.getBoundingClientRect();
-                } else {
-                  let range = document.createRange();
-                  range.setStart(child, 0);
-                  range.collapse();
-                  rect = range.getBoundingClientRect();
-                }
-              }
-              style = {
-                left: rect.right,
-                top: rect.top,
-                height: rect.height,
-                fontSize: computedStyle.fontSize,
-                lineHeight: computedStyle.lineHeight
-              }
-            } else {
-              const rect = (focusNode as HTMLElement).getBoundingClientRect();
-              style = {
-                left: rect.left,
-                top: rect.top,
-                height: rect.height,
-                fontSize: computedStyle.fontSize,
-                lineHeight: computedStyle.lineHeight
-              };
-            }
-            if (!style.height) {
-              style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
-            }
-          }
-          this.show(style);
-        }
+        this.show();
       } else {
         this.hide();
       }
@@ -176,12 +142,15 @@ export class Cursor {
     this.focusEvent.next();
   }
 
-  private show(style: CursorStyle) {
+  private updateCursorPosition(style: CursorStyle) {
     this.elementRef.style.left = style.left + 'px';
     this.elementRef.style.top = style.top + 'px';
     this.elementRef.style.height = style.height + 'px';
     this.input.style.lineHeight = style.lineHeight;
-    this.inputWrap.style.top = style.fontSize;
+    // this.inputWrap.style.top = style.fontSize;
+  }
+
+  private show() {
     this.display = true;
     clearTimeout(this.timer);
     const toggleShowHide = () => {
