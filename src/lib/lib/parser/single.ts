@@ -3,6 +3,8 @@ import { Fragment } from './fragment';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from './help';
 import { VirtualObjectNode } from './virtual-dom';
+import { Handler } from '../toolbar/handlers/help';
+import { FormatRange } from './format';
 
 export class Single extends View {
   virtualNode: VirtualObjectNode;
@@ -12,7 +14,14 @@ export class Single extends View {
   }
 
   clone(): Single {
-    return new Single(this.parent, this.tagName);
+    const s = new Single(this.parent, this.tagName);
+    s.formatMatrix = new Map<Handler, FormatRange[]>();
+    Array.from(this.formatMatrix.keys()).forEach(key => {
+      s.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
+        return f.clone();
+      }));
+    });
+    return s;
   }
 
   render(host: HTMLElement) {

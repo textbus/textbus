@@ -77,7 +77,7 @@ export class Cursor {
     });
 
     fromEvent(this.input, 'focus').subscribe(() => {
-      this.focus()
+      this.focus();
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {

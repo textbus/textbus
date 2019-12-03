@@ -26,7 +26,9 @@ export class Fragment extends View {
     ff.contents = this.contents.clone();
     ff.formatMatrix = new Map<Handler, FormatRange[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
-      ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => f.clone()));
+      ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
+        return f.clone();
+      }));
     });
     return ff;
   }
