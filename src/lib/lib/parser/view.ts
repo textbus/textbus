@@ -9,7 +9,7 @@ export abstract class View {
   formatMatrix = new Map<Handler, FormatRange[]>();
   abstract virtualNode: VirtualNode;
 
-  abstract render(): Node;
+  abstract render(host: HTMLElement): void;
 
   abstract clone(): View;
 

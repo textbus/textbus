@@ -6,7 +6,6 @@ import { Hooks, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { VIRTUAL_NODE } from '../parser/help';
 import { Cursor, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
 import { Fragment } from '../parser/fragment';
@@ -72,8 +71,7 @@ export class ViewRenderer {
 
   render(vDom: RootFragment) {
     this.contentDocument.body.innerHTML = '';
-    this.contentDocument.body.appendChild(vDom.render());
-    this.contentDocument.body[VIRTUAL_NODE] = vDom.virtualNode;
+    vDom.render(this.contentDocument.body);
   }
 
   use(hooks: Hooks) {
@@ -282,12 +280,6 @@ export class ViewRenderer {
 
   private static rerender(fragment: Fragment) {
     const position = fragment.destroyView();
-    const newFragment = fragment.render();
-
-    if (position.nextSibling) {
-      position.parentNode.insertBefore(newFragment, position.nextSibling);
-    } else {
-      position.parentNode.appendChild(newFragment);
-    }
+    fragment.render(position.parentNode, position.nextSibling);
   }
 }

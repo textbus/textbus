@@ -9,9 +9,11 @@ import { FormatRange } from './format';
 
 export class Fragment extends View {
   readonly length = 1;
-  elements: Node[] = [];
   contents = new Contents();
   virtualNode: VirtualContainerNode;
+
+  private host: HTMLElement;
+  private elements: Node[] = [];
 
   constructor(public parent: Fragment) {
     super();
@@ -151,31 +153,31 @@ export class Fragment extends View {
   }
 
   /**
-   * 渲染 DOM
+   * 渲染 DOM 到指定容器
+   * @param host
+   * @param nextSibling
    */
-  render(): DocumentFragment {
+  render(host: HTMLElement, nextSibling?: Node) {
     const canApplyFormats = this.getCanApplyFormats();
     const vDom = this.createVDom(canApplyFormats);
     this.virtualNode = vDom;
-    const r = this.viewBuilder(vDom, this.contents);
-    this.elements = Array.from(r.fragment.childNodes);
-    return r.fragment;
+    this.elements = [];
+    this.host = host;
+    host[VIRTUAL_NODE] = vDom;
+    this.viewBuilder(vDom, this.contents, host, nextSibling);
   }
 
   destroyView() {
     this.contents.getFragments().forEach(f => f.destroyView());
-    let parentNode: HTMLElement = null;
     let nextSibling: Node = null;
     this.elements.forEach(el => {
       if (el.parentNode) {
-        parentNode = el.parentNode as HTMLElement;
         nextSibling = el.nextSibling;
-        parentNode.removeChild(el);
+        el.parentNode.removeChild(el);
       }
     });
-    this.elements = [];
     return {
-      parentNode,
+      parentNode: this.host,
       nextSibling
     };
   }
@@ -188,7 +190,6 @@ export class Fragment extends View {
     this.formatMatrix = null;
     this.contents = null;
     this.virtualNode = null;
-    this.elements = null;
     this.parent = null;
   }
 
@@ -196,9 +197,10 @@ export class Fragment extends View {
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode
    * @param contents
+   * @param host
+   * @param nextSibling
    */
-  private viewBuilder(vNode: VirtualNode, contents: Contents) {
-    const fragment = document.createDocumentFragment();
+  private viewBuilder(vNode: VirtualNode, contents: Contents, host: HTMLElement, nextSibling?: Node) {
     const newNodes: VirtualNode[] = [];
     if (vNode instanceof VirtualContainerNode) {
       const nodes: VirtualNode[] = [];
@@ -229,12 +231,16 @@ export class Fragment extends View {
       }, (null as HTMLElement));
 
       if (container) {
-        fragment.appendChild(container);
+        this.elements.push(container);
+        if (nextSibling) {
+          host.insertBefore(container, nextSibling);
+        } else {
+          host.appendChild(container);
+        }
       }
       vNode.children.forEach(vNode => {
-        const r = this.viewBuilder(vNode, contents);
-        (slotContainer || fragment).appendChild(r.fragment);
-        nodes.push(...r.newNodes);
+        const newNodes = this.viewBuilder(vNode, contents, slotContainer || host, nextSibling);
+        nodes.push(...newNodes);
       });
       newNodes.push(vNode);
       vNode.children = nodes;
@@ -268,20 +274,21 @@ export class Fragment extends View {
           let currentNode = template.childNodes[0];
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
-          fragment.appendChild(currentNode);
+          if (nextSibling) {
+            this.elements.push(currentNode);
+            host.insertBefore(currentNode, nextSibling);
+          } else {
+            host.appendChild(currentNode);
+          }
         } else if (item instanceof View) {
-          const container = item.render();
-          fragment.appendChild(container);
+          item.render(host);
           newNodes.push(item.virtualNode);
         }
         i += item.length;
       });
     }
 
-    return {
-      fragment,
-      newNodes
-    };
+    return newNodes;
   }
 
   /**
