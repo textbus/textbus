@@ -164,14 +164,20 @@ export class Fragment extends View {
 
   destroyView() {
     this.contents.getFragments().forEach(f => f.destroyView());
+    let parentNode: HTMLElement = null;
+    let nextSibling: Node = null;
     this.elements.forEach(el => {
-      try {
-        el.parentNode && el.parentNode.removeChild(el)
-      } catch (e) {
-        console.log(this, el)
+      if (el.parentNode) {
+        parentNode = el.parentNode as HTMLElement;
+        nextSibling = el.nextSibling;
+        parentNode.removeChild(el);
       }
     });
     this.elements = [];
+    return {
+      parentNode,
+      nextSibling
+    };
   }
 
   destroy() {

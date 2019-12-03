@@ -129,7 +129,7 @@ export class ViewRenderer {
       }
     });
     handler.execCommand.command(selection, handler, overlap);
-    ViewRenderer.reRender(selection.commonAncestorFragment);
+    ViewRenderer.rerender(selection.commonAncestorFragment);
     this.selection.apply();
   }
 
@@ -138,7 +138,7 @@ export class ViewRenderer {
       if (range.collapsed) {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-          ViewRenderer.reRender(range.commonAncestorFragment);
+          ViewRenderer.rerender(range.commonAncestorFragment);
           this.selection.apply(-1);
         } else {
           const position = this.clean(range.startFragment);
@@ -178,7 +178,7 @@ export class ViewRenderer {
           });
           this.clean(range.endFragment);
         }
-        ViewRenderer.reRender(range.commonAncestorFragment);
+        ViewRenderer.rerender(range.commonAncestorFragment);
         this.selection.collapse();
       }
     });
@@ -272,7 +272,7 @@ export class ViewRenderer {
     commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
 
     commonAncestorFragment.insert(ev.value, startIndex);
-    ViewRenderer.reRender(commonAncestorFragment);
+    ViewRenderer.rerender(commonAncestorFragment);
 
     this.selection.firstRange.startIndex = startIndex;
     this.selection.firstRange.endIndex = startIndex;
@@ -280,18 +280,14 @@ export class ViewRenderer {
     this.userWriteEvent.next();
   }
 
-  private static reRender(fragment: Fragment) {
-    const oldFragment = fragment.elements;
-    const parent = oldFragment[0].parentNode;
-
-    const nextSibling = oldFragment[oldFragment.length - 1].nextSibling;
-    fragment.destroyView();
+  private static rerender(fragment: Fragment) {
+    const position = fragment.destroyView();
     const newFragment = fragment.render();
 
-    if (nextSibling) {
-      parent.insertBefore(newFragment, nextSibling);
+    if (position.nextSibling) {
+      position.parentNode.insertBefore(newFragment, position.nextSibling);
     } else {
-      parent.appendChild(newFragment);
+      position.parentNode.appendChild(newFragment);
     }
   }
 }
