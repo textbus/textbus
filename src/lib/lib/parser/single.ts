@@ -15,7 +15,7 @@ export class Single extends View {
     return new Single(this.parent, this.tagName);
   }
 
-  render(): HTMLElement {
+  render(host: HTMLElement) {
     let container: HTMLElement;
     let slotContainer: HTMLElement;
 
@@ -26,7 +26,7 @@ export class Single extends View {
     vNode.elementRef = el;
     el[VIRTUAL_NODE] = vNode;
     this.virtualNode = vNode;
-    return canApplyFormats.reduce((node, next) => {
+    const node = canApplyFormats.reduce((node, next) => {
       if (next.handler) {
         const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
         if (renderModel instanceof ReplaceModel) {
@@ -49,5 +49,8 @@ export class Single extends View {
       }
       return node;
     }, el);
+    if (node) {
+      host.appendChild(node);
+    }
   }
 }
