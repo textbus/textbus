@@ -280,6 +280,6 @@ export class ViewRenderer {
 
   private static rerender(fragment: Fragment) {
     const position = fragment.destroyView();
-    fragment.render(position.parentNode, position.nextSibling);
+    fragment.render(position.host, position.nextSibling);
   }
 }

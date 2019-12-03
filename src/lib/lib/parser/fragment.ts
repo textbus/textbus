@@ -177,7 +177,7 @@ export class Fragment extends View {
       }
     });
     return {
-      parentNode: this.host,
+      host: this.host,
       nextSibling
     };
   }
