@@ -5,10 +5,17 @@ import { TBSelection } from '../selection/selection';
 import { Hooks, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
-import { MatchState } from '../matcher/matcher';
+import { FormatState, Matcher, MatchState } from '../matcher/matcher';
 import { Cursor, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
 import { Fragment } from '../parser/fragment';
+import { FormatRange } from '../parser/format';
+import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
+
+interface Position {
+  fragment: Fragment,
+  position: number;
+}
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -139,9 +146,68 @@ export class ViewRenderer {
           ViewRenderer.rerender(range.commonAncestorFragment);
           this.selection.apply(-1);
         } else {
-          const position = this.clean(range.startFragment);
-          this.selection.firstRange.startFragment = position.selectFragment;
-          this.selection.firstRange.startIndex = position.index;
+          const rerenderFragment = this.findRerenderFragment(range.startFragment);
+          const firstRange = this.selection.firstRange;
+          if (range.startFragment.contents.length) {
+            if (!rerenderFragment.fragment.parent && rerenderFragment.position === 0) {
+              const startFragment = new Fragment(rerenderFragment.fragment);
+              startFragment.mergeFormat(new FormatRange({
+                startIndex: 0,
+                endIndex: 0,
+                handler: new DefaultTagsHandler(new DefaultTagCommander('p'), new Matcher({
+                  tags: ['p']
+                })),
+                state: FormatState.Valid,
+                context: startFragment,
+                cacheData: {
+                  tag: 'p'
+                }
+              }), true);
+              rerenderFragment.fragment.insert(startFragment, 0);
+              this.moveContentsToFragment(range.startFragment, 0, startFragment);
+              this.deleteEmptyFragment(range.startFragment);
+              firstRange.startFragment = startFragment;
+              firstRange.startIndex = 0;
+            } else {
+              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.position - 1);
+              this.moveContentsToFragment(range.startFragment, p.position, p.fragment);
+              this.deleteEmptyFragment(range.startFragment);
+              firstRange.startFragment = p.fragment;
+              firstRange.startIndex = p.position;
+            }
+          } else {
+            if (rerenderFragment.position === 0) {
+              this.deleteEmptyFragment(range.startFragment);
+              if (rerenderFragment.fragment.contents.length) {
+                const p = this.findFirstChild(rerenderFragment.fragment);
+                firstRange.startFragment = p.fragment;
+                firstRange.startIndex = 0;
+              } else {
+                const startFragment = new Fragment(rerenderFragment.fragment);
+                startFragment.mergeFormat(new FormatRange({
+                  startIndex: 0,
+                  endIndex: 0,
+                  handler: new DefaultTagsHandler(new DefaultTagCommander('p'), new Matcher({
+                    tags: ['p']
+                  })),
+                  state: FormatState.Valid,
+                  context: startFragment,
+                  cacheData: {
+                    tag: 'p'
+                  }
+                }), true);
+                rerenderFragment.fragment.insert(startFragment, 0);
+                firstRange.startFragment = startFragment;
+                firstRange.startIndex = 0;
+              }
+            } else {
+              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.position - 1);
+              this.deleteEmptyFragment(range.startFragment);
+              firstRange.startFragment = p.fragment;
+              firstRange.startIndex = p.position;
+            }
+          }
+          ViewRenderer.rerender(rerenderFragment.fragment);
           this.selection.collapse();
         }
       } else {
@@ -180,6 +246,14 @@ export class ViewRenderer {
         this.selection.collapse();
       }
     });
+  }
+
+  private deleteEmptyFragment(fragment: Fragment) {
+    const parent = fragment.parent;
+    fragment.destroy();
+    if (parent && !parent.contents.length) {
+      this.deleteEmptyFragment(parent);
+    }
   }
 
   private clean(fragment: Fragment): { selectFragment: Fragment, context: Fragment, index: number } {
@@ -261,6 +335,61 @@ export class ViewRenderer {
         index: index - 1
       }
     }
+  }
+
+  private moveContentsToFragment(oldFragment: Fragment, offset: number, target: Fragment) {
+    for (const item of oldFragment.contents) {
+      target.append(item);
+    }
+    Array.from(oldFragment.formatMatrix.values()).reduce((v, n) => {
+      return v.concat(n);
+    }, []).forEach(f => {
+      if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
+        const ff = f.clone();
+        ff.startIndex += offset;
+        ff.endIndex += offset;
+        target.mergeFormat(ff, true);
+      }
+    });
+  }
+
+  private findRerenderFragment(start: Fragment): Position {
+    if (!start.parent) {
+      return {
+        fragment: start,
+        position: 0
+      }
+    }
+    const index = start.parent.contents.find(start);
+    if (index === 0) {
+      return this.findRerenderFragment(start.parent);
+    }
+    return {
+      position: index,
+      fragment: start.parent
+    };
+  }
+
+  private findLastChild(fragment: Fragment, index: number): Position {
+    const last = fragment.contents.getContentAtIndex(index);
+    if (last instanceof Fragment) {
+      return this.findLastChild(last, last.contents.length - 1);
+    }
+    return {
+      position: fragment.contents.length,
+      fragment
+    }
+  }
+
+  private findFirstChild(fragment: Fragment): Position {
+    const first = fragment.contents.getContentAtIndex(0);
+    if (first instanceof Fragment) {
+      return this.findFirstChild(first);
+    }
+    return {
+      position: 0,
+      fragment
+    };
   }
 
   private updateContents(ev: InputEvent) {

@@ -15,6 +15,8 @@ export class Fragment extends View {
   private host: HTMLElement;
   private elements: Node[] = [];
 
+  private destroyed = false;
+
   constructor(public parent: Fragment) {
     super();
   }
@@ -183,14 +185,20 @@ export class Fragment extends View {
   }
 
   destroy() {
+    if (this.destroyed) {
+      return;
+    }
     this.contents.getFragments().forEach(f => f.destroy());
     this.destroyView();
-    const index = this.parent.contents.find(this);
-    this.parent.delete(index, 1);
-    this.formatMatrix = null;
-    this.contents = null;
+    if (this.parent) {
+      const index = this.parent.contents.find(this);
+      this.parent.delete(index, 1);
+    }
+    this.formatMatrix.clear();
+    this.contents = new Contents();
     this.virtualNode = null;
     this.parent = null;
+    this.destroyed = true;
   }
 
   /**
@@ -239,7 +247,12 @@ export class Fragment extends View {
         }
       }
       vNode.children.forEach(vNode => {
-        const newNodes = this.viewBuilder(vNode, contents, slotContainer || host, nextSibling);
+        let newNodes: VirtualNode[];
+        if (slotContainer) {
+          newNodes = this.viewBuilder(vNode, contents, slotContainer);
+        } else {
+          newNodes = this.viewBuilder(vNode, contents, host, nextSibling);
+        }
         nodes.push(...newNodes);
       });
       newNodes.push(vNode);

@@ -6,7 +6,7 @@ import { Commander, ReplaceModel } from './commands/commander';
 import { Priority } from './toolbar/help';
 import { EditableOptions } from './toolbar/utils/cache-data';
 
-class DefaultTagCommander implements Commander {
+export class DefaultTagCommander implements Commander {
   recordHistory = false;
   constructor(private tagName: string) {
   }
@@ -19,7 +19,7 @@ class DefaultTagCommander implements Commander {
   }
 }
 
-class DefaultTagsHandler implements Handler {
+export class DefaultTagsHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<void>;
   priority = Priority.Default;
