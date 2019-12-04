@@ -121,8 +121,7 @@ export class Matcher {
             handler));
         }
       });
-
-      let state = Matcher.mergeStates(states);
+      let state = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
       let overlap: boolean;
       switch (state.state) {
         case FormatState.Exclude:
@@ -208,8 +207,6 @@ export class Matcher {
 
   private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
     const formatRanges = fragment.formatMatrix.get(handler) || [];
-    const childContents = fragment.contents.slice(startIndex, endIndex);
-
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         // 如果为块级元素，则需要从第 0 位开始匹配，否则从第一位
@@ -236,6 +233,7 @@ export class Matcher {
       };
     }
 
+    const childContents = fragment.contents.slice(startIndex, endIndex);
     const states: Array<MatchData> = [];
     let index = startIndex;
     for (const child of childContents) {
@@ -253,10 +251,17 @@ export class Matcher {
                 cacheData: format.cacheData ? format.cacheData.clone() : null
               });
             }
+          } else {
+            states.push({
+              state: FormatState.Invalid,
+              cacheData: null
+            })
           }
         }
       } else if (child instanceof Fragment) {
-        states.push(this.getStatesByRange(0, child.contents.length, child, handler));
+        if (child.contents.length) {
+          states.push(this.getStatesByRange(0, child.contents.length, child, handler));
+        }
       } else if (child instanceof Single) {
         const formats = child.formatMatrix.get(handler);
         if (formats && formats[0]) {
@@ -264,10 +269,6 @@ export class Matcher {
             state: formats[0].state,
             cacheData: formats[0].cacheData
           };
-        }
-        return {
-          state: FormatState.Invalid,
-          cacheData: null
         }
       }
     }
@@ -328,6 +329,7 @@ export class Matcher {
   }
 
   private static mergeStates(states: MatchData[]): MatchData {
+    states = states.filter(i => i);
     for (const item of states) {
       if (item.state === FormatState.Exclude) {
         return {
@@ -346,10 +348,7 @@ export class Matcher {
     return states.length ? {
       state: FormatState.Valid,
       cacheData: last.cacheData ? last.cacheData.clone() : null
-    } : {
-      state: FormatState.Invalid,
-      cacheData: null
-    };
+    } : null;
   }
 
   private static inSingleContainer(fragment: Fragment,
