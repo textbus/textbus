@@ -10,8 +10,8 @@ const editor = createEditor('#editor', {
     return '/test';
   },
   content: `
-<p>3333<strong>333</strong><br></p>
-<p><strong>4444444</strong><br></p>
+<strong>111</strong>
+<p>333</p>
 `
 });
 

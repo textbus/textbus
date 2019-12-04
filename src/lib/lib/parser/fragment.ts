@@ -25,11 +25,11 @@ export class Fragment extends View {
   clone(): Fragment {
     const ff = new Fragment(this.parent);
     ff.contents = this.contents.clone();
-    for (const item of ff.contents) {
+    ff.contents.slice(0).filter(item => {
       if (item instanceof Single || item instanceof Fragment) {
         item.parent = ff;
       }
-    }
+    });
     ff.formatMatrix = new Map<Handler, FormatRange[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {

@@ -93,7 +93,7 @@ export class ViewRenderer {
   }
 
   cloneSelection() {
-    return this.selection;
+    return this.selection.clone();
   }
 
   apply(handler: Handler) {
@@ -321,24 +321,15 @@ export class ViewRenderer {
   private updateContents(ev: InputEvent) {
     const startIndex = ev.selection.firstRange.startIndex;
     const commonAncestorFragment = this.selection.commonAncestorFragment;
+
     commonAncestorFragment.contents = ev.fragment.contents;
     commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
+
     let index = 0;
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
           const s = new Single(ev.fragment, 'br');
-          const newFormatRange = new FormatRange({
-            startIndex: index + startIndex,
-            endIndex: index + startIndex + 1,
-            handler: new DefaultTagsHandler(new DefaultTagCommander('br'), new Matcher()),
-            context: ev.fragment,
-            state: FormatState.Valid,
-            cacheData: {
-              tag: 'br'
-            }
-          });
-          s.mergeFormat(newFormatRange, true);
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
