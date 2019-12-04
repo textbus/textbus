@@ -32,33 +32,7 @@ export class LinkCommander implements Commander<AttrState[]> {
               }
             }
           }
-        } else {
-          Array.from(range.commonAncestorFragment.formatMatrix.values()).reduce((v, n) => {
-            return v.concat(n);
-          }, []).forEach(format => {
-            if (format.endIndex >= range.endIndex) {
-              format.endIndex++;
-            }
-            if (format.startIndex > range.startIndex) {
-              format.startIndex++;
-            }
-          });
-          const newNode = new Single(range.commonAncestorFragment, this.tagName);
-          newNode.formatMatrix.set(handler, [new FormatRange({
-            startIndex: range.startIndex,
-            endIndex: range.startIndex + 1,
-            handler,
-            state: FormatState.Valid,
-            context: newNode,
-            cacheData: new CacheData({
-              attrs
-            })
-          })]);
-          range.commonAncestorFragment.contents.insert(newNode, range.startIndex);
-          range.startIndex++;
-          range.endIndex++;
         }
-        return;
       }
       range.getSelectedScope().forEach(item => {
         let index = 0;
