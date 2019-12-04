@@ -11,6 +11,7 @@ import { TBRange } from '../selection/range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
 import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
+import { Single } from '../parser/single';
 
 interface Position {
   fragment: Fragment,
@@ -146,10 +147,15 @@ export class ViewRenderer {
           ViewRenderer.rerender(range.commonAncestorFragment);
           this.selection.apply(-1);
         } else {
+          const firstContent = range.startFragment.contents.getContentAtIndex(0);
+          if (firstContent instanceof Single && firstContent.tagName === 'br') {
+            range.startFragment.delete(0, 1);
+          }
           const rerenderFragment = this.findRerenderFragment(range.startFragment);
           const firstRange = this.selection.firstRange;
           if (range.startFragment.contents.length) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.position === 0) {
+
               const startFragment = new Fragment(rerenderFragment.fragment);
               startFragment.mergeFormat(new FormatRange({
                 startIndex: 0,
@@ -176,6 +182,7 @@ export class ViewRenderer {
               firstRange.startIndex = p.position;
             }
           } else {
+
             if (rerenderFragment.position === 0) {
               this.deleteEmptyFragment(range.startFragment);
               if (rerenderFragment.fragment.contents.length) {
@@ -316,8 +323,31 @@ export class ViewRenderer {
     const commonAncestorFragment = this.selection.commonAncestorFragment;
     commonAncestorFragment.contents = ev.fragment.contents;
     commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
-
-    commonAncestorFragment.insert(ev.value, startIndex);
+    let index = 0;
+    ev.value.replace(/\n+|[^\n]+/g, (str) => {
+      if (/\n+/.test(str)) {
+        for (let i = 0; i < str.length; i++) {
+          const s = new Single(ev.fragment, 'br');
+          const newFormatRange = new FormatRange({
+            startIndex: index + startIndex,
+            endIndex: index + startIndex + 1,
+            handler: new DefaultTagsHandler(new DefaultTagCommander('br'), new Matcher()),
+            context: ev.fragment,
+            state: FormatState.Valid,
+            cacheData: {
+              tag: 'br'
+            }
+          });
+          s.mergeFormat(newFormatRange, true);
+          commonAncestorFragment.insert(s, index + startIndex);
+          index++;
+        }
+      } else {
+        commonAncestorFragment.insert(str, startIndex + index);
+        index += str.length;
+      }
+      return str;
+    });
     ViewRenderer.rerender(commonAncestorFragment);
 
     this.selection.firstRange.startIndex = startIndex;

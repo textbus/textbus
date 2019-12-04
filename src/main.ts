@@ -10,14 +10,8 @@ const editor = createEditor('#editor', {
     return '/test';
   },
   content: `
-<strong>111</strong>
-  <ul>
-  <strong>test</strong>
-  <li><a href="/a">aaa</a><a href="/a">bbb</a></li>
-  <li><a href="/a">aaa</a><a href="/b">bbb</a></li>
-  <li>0</li>
-</ul>
-<p>333</p>
+<p>333<br></p>
+<p>444<br></p>
 `
 });
 

@@ -32,7 +32,7 @@ export class DefaultTagsHandler implements Handler {
 }
 
 export const defaultHandlers: Handler[] = [
-  ...'h1,h2,h3,h4,h5,h5,p,table,thead,tbody,tfoot,tr,td,ul,ol,li'.split(',').map(tag => {
+  ...'h1,h2,h3,h4,h5,h5,p,table,thead,tbody,tfoot,tr,td,ul,ol,li,br'.split(',').map(tag => {
     return new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
       tags: [tag]
     }));
