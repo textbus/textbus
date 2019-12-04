@@ -252,7 +252,9 @@ export class Fragment extends View {
       }, (null as HTMLElement));
 
       if (container) {
-        this.elements.push(container);
+        if (host === this.host) {
+          this.elements.push(container);
+        }
         if (nextSibling) {
           host.insertBefore(container, nextSibling);
         } else {
@@ -301,7 +303,9 @@ export class Fragment extends View {
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
           if (nextSibling) {
-            this.elements.push(currentNode);
+            if (host === this.host) {
+              this.elements.push(currentNode);
+            }
             host.insertBefore(currentNode, nextSibling);
           } else {
             host.appendChild(currentNode);
