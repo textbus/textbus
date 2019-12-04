@@ -110,10 +110,16 @@ export class Cursor {
         return;
       }
       const startContainer = s.firstRange.rawRange.startContainer;
+      const startOffset = s.firstRange.rawRange.startOffset;
       const range = document.createRange();
-      range.setStart(startContainer, s.firstRange.rawRange.startOffset);
+      range.setStart(startContainer, startOffset);
       range.collapse();
-      const rect = range.getBoundingClientRect();
+      let rect = range.getBoundingClientRect();
+      if (startContainer.nodeType === 1 &&
+        startContainer.childNodes[startOffset] &&
+        startContainer.childNodes[startOffset].nodeName.toLowerCase() === 'br') {
+        rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+      }
       const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
       const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
       let style: CursorStyle = {
