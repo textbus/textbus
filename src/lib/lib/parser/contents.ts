@@ -50,7 +50,7 @@ export class Contents implements Iterable<string | View> {
         }
         if (el instanceof View && index === i) {
           const prev = this.elements[ii - 1];
-          if (typeof prev === 'string') {
+          if (typeof prev === 'string' && typeof content === 'string') {
             this.elements[ii - 1] = prev + content;
           } else {
             if (i === 0) {
@@ -61,8 +61,8 @@ export class Contents implements Iterable<string | View> {
           }
           break;
         } else if (typeof el === 'string') {
-          if (index >= i && index <= i + el.length) {
-            const cc = [el.slice(0, index - i), content, el.slice(index - i)];
+          if (index >= i && index < i + el.length) {
+            const cc = [el.slice(0, index - i), content, el.slice(index - i)].filter(i => i);
             if (content instanceof View) {
               this.elements.splice(ii, 1, ...cc);
             } else {
