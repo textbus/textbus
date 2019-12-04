@@ -258,6 +258,12 @@ export class Matcher {
             })
           }
         }
+        if (!formatRanges.length) {
+          return {
+            state: FormatState.Invalid,
+            cacheData: null
+          };
+        }
       } else if (child instanceof Fragment) {
         if (child.contents.length) {
           states.push(this.getStatesByRange(0, child.contents.length, child, handler));
@@ -271,6 +277,7 @@ export class Matcher {
           };
         }
       }
+      index += child.length;
     }
     return Matcher.mergeStates(states);
   }
