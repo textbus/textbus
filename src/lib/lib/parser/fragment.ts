@@ -6,6 +6,7 @@ import { VIRTUAL_NODE } from './help';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { Priority } from '../toolbar/help';
 import { FormatRange } from './format';
+import { Single } from './single';
 
 export class Fragment extends View {
   readonly length = 1;
@@ -24,6 +25,11 @@ export class Fragment extends View {
   clone(): Fragment {
     const ff = new Fragment(this.parent);
     ff.contents = this.contents.clone();
+    for (const item of ff.contents) {
+      if (item instanceof Single || item instanceof Fragment) {
+        item.parent = ff;
+      }
+    }
     ff.formatMatrix = new Map<Handler, FormatRange[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
