@@ -1,4 +1,4 @@
-import { fromEvent, merge, Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject } from 'rxjs';
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
 
@@ -52,6 +52,8 @@ export class Cursor {
   private inputStartSelection: TBSelection;
   private editingFragment: Fragment;
 
+  private isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
+
   constructor(private context: Document, private selection: TBSelection) {
     this.onInput = this.inputEvent.asObservable();
     this.onDelete = this.deleteEvent.asObservable();
@@ -102,7 +104,7 @@ export class Cursor {
         this.deleteEvent.next();
         this.inputStartSelection = selection.clone();
         this.editingFragment = selection.commonAncestorFragment.clone();
-      } else if(ev.key === 'Enter' && !ev.shiftKey) {
+      } else if (ev.key === 'Enter' && !ev.shiftKey) {
         this.input.value = '';
         this.input.blur();
         this.newLineEvent.next();
@@ -166,11 +168,13 @@ export class Cursor {
     if (!style.height) {
       style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
     }
+    if (this.isWindows) {
+      this.inputWrap.style.top = style.fontSize;
+    }
     this.elementRef.style.left = style.left + 'px';
     this.elementRef.style.top = style.top + 'px';
     this.elementRef.style.height = style.height + 'px';
     this.input.style.lineHeight = style.lineHeight;
-    // this.inputWrap.style.top = style.fontSize;
   }
 
   private show() {
