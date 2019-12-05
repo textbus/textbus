@@ -64,7 +64,7 @@ export class ViewRenderer {
         this.deleteContents();
       });
       this.cursor.onNewLine.subscribe(() => {
-        if (!this.selection.collapse) {
+        if (!this.selection.collapsed) {
           this.deleteContents();
         }
         this.createNewLine();
@@ -295,6 +295,8 @@ export class ViewRenderer {
             }
           });
           this.deleteEmptyFragment(range.endFragment);
+          range.endFragment = range.startFragment;
+          range.endIndex = range.startIndex;
         }
         ViewRenderer.rerender(range.commonAncestorFragment);
         this.selection.collapse();

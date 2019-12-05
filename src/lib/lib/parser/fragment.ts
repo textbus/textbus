@@ -135,7 +135,7 @@ export class Fragment extends View {
     this.contents.append(content);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
       if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
-        (typeof content === 'string' || content instanceof Single && format.endIndex === length)) {
+        (content instanceof Single && format.endIndex === length)) {
         format.endIndex += content.length;
       }
     })

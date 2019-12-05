@@ -68,9 +68,7 @@ export class Cursor {
 
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
-    merge(...[
-      'input',
-    ].map(type => fromEvent(this.input, type))).subscribe(() => {
+    fromEvent(this.input, 'input').subscribe(() => {
       if (!this.selection.collapsed) {
         this.deleteEvent.next();
         this.inputStartSelection = selection.clone();
@@ -88,6 +86,12 @@ export class Cursor {
       this.focus();
     });
 
+    fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
+      // console.log(ev.clipboardData)
+      // const v = ev.clipboardData.getData('Text');
+      // console.log(JSON.stringify(v));
+    });
+
     fromEvent(this.input, 'blur').subscribe(() => {
       this.hide();
       this.blurEvent.next();
@@ -98,7 +102,7 @@ export class Cursor {
         this.deleteEvent.next();
         this.inputStartSelection = selection.clone();
         this.editingFragment = selection.commonAncestorFragment.clone();
-      } else if(ev.key === 'Enter' && !ev.ctrlKey) {
+      } else if(ev.key === 'Enter' && !ev.shiftKey) {
         this.input.value = '';
         this.newLineEvent.next();
         this.focus();

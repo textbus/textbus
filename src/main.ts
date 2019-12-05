@@ -9,7 +9,9 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: `1
+  content: `
+<strong>111</strong>
+<p>333</p>
 `
 });
 
