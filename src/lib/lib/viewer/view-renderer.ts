@@ -14,7 +14,7 @@ import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
 import { Single } from '../parser/single';
 
 interface Position {
-  fragment: Fragment,
+  fragment: Fragment;
   position: number;
 }
 
