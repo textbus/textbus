@@ -349,6 +349,11 @@ export class ViewRenderer {
     const last = fragment.contents.getContentAtIndex(index);
     if (last instanceof Fragment) {
       return this.findLastChild(last, last.contents.length - 1);
+    } else if (last instanceof Single && last.tagName === 'br') {
+      return {
+        position: fragment.contents.length - 1,
+        fragment
+      };
     }
     return {
       position: fragment.contents.length,

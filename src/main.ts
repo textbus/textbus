@@ -11,7 +11,6 @@ const editor = createEditor('#editor', {
   },
   content: `
 <strong>111</strong>
-<p>333</p>
 `
 });
 
