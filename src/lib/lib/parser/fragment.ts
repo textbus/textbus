@@ -22,6 +22,9 @@ export class Fragment extends View {
     super();
   }
 
+  /**
+   * 克隆当前片段的副本
+   */
   clone(): Fragment {
     const ff = new Fragment(this.parent);
     ff.contents = this.contents.clone();
@@ -80,7 +83,15 @@ export class Fragment extends View {
     }
   }
 
+  /**
+   * 在当前片段的指定位置插入内容
+   * @param content
+   * @param index
+   */
   insert(content: string | View, index: number) {
+    if (content instanceof Single || content instanceof Fragment) {
+      content.parent = this;
+    }
     this.contents.insert(content, index);
     const newFormats: FormatRange[] = [];
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
@@ -98,7 +109,7 @@ export class Fragment extends View {
           }));
           format.endIndex = index;
         } else {
-          if (format.startIndex >= index) {
+          if (format.startIndex >= index && format.startIndex > 0) {
             format.startIndex += content.length;
           }
           if (format.endIndex >= index) {
@@ -112,34 +123,70 @@ export class Fragment extends View {
     });
   }
 
+  /**
+   * 在当前版本的最后增加内容
+   * @param content
+   */
   append(content: string | View) {
+    if (content instanceof Single || content instanceof Fragment) {
+      content.parent = this;
+    }
+    const length = this.contents.length;
     this.contents.append(content);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
+        (typeof content === 'string' || content instanceof Single && format.endIndex === length)) {
         format.endIndex += content.length;
       }
     })
   }
 
+  /**
+   *
+   * @param startIndex
+   * @param length
+   */
   delete(startIndex: number, length: number) {
-    if (length <= 0) {
-      return;
-    }
+    const ff = new Fragment(null);
+
     this.contents.slice(startIndex, startIndex + length).forEach(item => {
       if (item instanceof Fragment) {
         item.destroyView();
       }
     });
-    this.contents.delete(startIndex, length);
+    this.contents.delete(startIndex, length).forEach(item => {
+      if (typeof item === 'string') {
+        ff.append(item);
+      } else if (item instanceof Single || item instanceof Fragment) {
+        const c = item.clone();
+        c.parent = ff;
+        ff.append(c);
+        if (item instanceof Fragment) {
+          item.destroyView();
+        }
+      }
+    });
     const endIndex = startIndex + length;
-    const ff = new Map<Handler, FormatRange[]>();
+    const formatMatrix = new Map<Handler, FormatRange[]>();
+
     Array.from(this.formatMatrix.keys()).forEach(key => {
       const formats: FormatRange[] = [];
+      const newFragmentFormats: FormatRange[] = [];
       this.formatMatrix.get(key).forEach(format => {
+        const cloneFormat = format.clone();
+        cloneFormat.startIndex = 0;
         if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority)) {
+          cloneFormat.endIndex = ff.contents.length;
+          newFragmentFormats.push(cloneFormat);
+
           format.endIndex -= length;
           formats.push(format);
         } else {
+          if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
+            cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
+            cloneFormat.endIndex = Math.min(format.endIndex - startIndex, ff.contents.length);
+            newFragmentFormats.push(cloneFormat);
+          }
           if (format.endIndex <= startIndex) {
             // 在选区之前
             formats.push(format);
@@ -156,15 +203,22 @@ export class Fragment extends View {
               format.startIndex = startIndex;
               format.endIndex = startIndex + format.endIndex - endIndex;
               formats.push(format);
+            } else if (format.startIndex === 0 && startIndex === 0) {
+              format.startIndex = format.endIndex = 0;
+              formats.push(format);
             }
           }
         }
       });
       if (formats.length) {
-        ff.set(key, formats);
+        formatMatrix.set(key, formats);
+      }
+      if (newFragmentFormats) {
+        ff.formatMatrix.set(key, newFragmentFormats);
       }
     });
-    this.formatMatrix = ff;
+    this.formatMatrix = formatMatrix;
+    return ff;
   }
 
   /**

@@ -15,9 +15,9 @@ export class RootFragment extends Fragment {
   setContents(el: HTMLElement) {
     const flatTree = this.normalize(el);
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
-      const childFragment = new Fragment(this);
-      this.contents.append(childFragment);
-      return len + this.parse(node, childFragment);
+      // const childFragment = new Fragment(this);
+      // this.contents.append(childFragment);
+      return len + this.parse(node, this);
     }, 0);
     this.mergeFormatsByNode(this, el, 0, len);
   }

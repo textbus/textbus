@@ -22,6 +22,7 @@ export class Cursor {
   onDelete: Observable<void>;
   onFocus: Observable<void>;
   onBlur: Observable<void>;
+  onNewLine: Observable<void>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -32,6 +33,7 @@ export class Cursor {
   private deleteEvent = new Subject<void>();
   private focusEvent = new Subject<void>();
   private blurEvent = new Subject<void>();
+  private newLineEvent = new Subject<void>();
 
   private timer: any = null;
 
@@ -55,6 +57,7 @@ export class Cursor {
     this.onDelete = this.deleteEvent.asObservable();
     this.onFocus = this.focusEvent.asObservable();
     this.onBlur = this.blurEvent.asObservable();
+    this.onNewLine = this.newLineEvent.asObservable();
 
     this.elementRef.classList.add('tanbo-editor-selection');
     this.cursor.classList.add('tanbo-editor-cursor');
@@ -95,6 +98,11 @@ export class Cursor {
         this.deleteEvent.next();
         this.inputStartSelection = selection.clone();
         this.editingFragment = selection.commonAncestorFragment.clone();
+      } else if(ev.key === 'Enter' && !ev.ctrlKey) {
+        this.input.value = '';
+        this.newLineEvent.next();
+        this.focus();
+        ev.preventDefault();
       }
     });
     fromEvent(context, 'mousedown').subscribe(() => {

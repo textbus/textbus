@@ -11,9 +11,12 @@ export interface SelectedScope {
 export class TBRange {
   startIndex: number;
   endIndex: number;
-  commonAncestorFragment: Fragment;
   startFragment: Fragment;
   endFragment: Fragment;
+
+  get commonAncestorFragment() {
+    return TBRange.getCommonFragment(this.startFragment, this.endFragment);
+  }
 
   get collapsed() {
     return this.startFragment === this.commonAncestorFragment &&
@@ -37,7 +40,6 @@ export class TBRange {
 
     this.startFragment = (rawRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
     this.endFragment = (rawRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
-    this.commonAncestorFragment = TBRange.getCommonFragment(this.startFragment, this.endFragment);
   }
 
   clone() {
@@ -63,11 +65,9 @@ export class TBRange {
     if (toEnd) {
       this.startIndex = this.endIndex;
       this.startFragment = this.endFragment;
-      this.commonAncestorFragment = this.endFragment;
     } else {
       this.endFragment = this.startFragment;
       this.endIndex = this.startIndex;
-      this.commonAncestorFragment = this.startFragment;
     }
   }
 

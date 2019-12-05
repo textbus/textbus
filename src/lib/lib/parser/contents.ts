@@ -116,15 +116,17 @@ export class Contents implements Iterable<string | View> {
     if (length < 0) {
       return;
     }
+    const discardedContents = this.slice(startIndex, startIndex + length);
     const elements = this.slice(0, startIndex).concat(this.slice(startIndex + length, this.length));
     this.elements = [];
     elements.forEach(item => this.append(item));
+    return discardedContents;
   }
 
-  splice(startIndex: number, length: number, newContents: string | View) {
-    this.delete(startIndex, length);
-    this.insert(newContents, startIndex);
-  }
+  // splice(startIndex: number, length: number, newContents: string | View) {
+  //   this.delete(startIndex, length);
+  //   this.insert(newContents, startIndex);
+  // }
 
   getFragments(): Fragment[] {
     return this.elements.filter(i => i instanceof Fragment) as Fragment[];

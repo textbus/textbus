@@ -63,6 +63,12 @@ export class ViewRenderer {
       this.cursor.onDelete.subscribe(() => {
         this.deleteContents();
       });
+      this.cursor.onNewLine.subscribe(() => {
+        if (!this.selection.collapse) {
+          this.deleteContents();
+        }
+        this.createNewLine();
+      });
     };
     this.frame.src = `javascript:void((function () {
                       document.open();
@@ -139,11 +145,52 @@ export class ViewRenderer {
     this.selection.apply();
   }
 
+  private createNewLine() {
+    const selection = this.selection;
+    selection.ranges.forEach(range => {
+      const commonAncestorFragment = range.commonAncestorFragment;
+      const afterFragment = commonAncestorFragment.delete(range.startIndex,
+        commonAncestorFragment.contents.length - range.startIndex);
+      if (!commonAncestorFragment.contents.length) {
+        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+      }
+      const index = commonAncestorFragment.parent.contents.find(commonAncestorFragment);
+      const formatMatrix = new Map<Handler, FormatRange[]>();
+      Array.from(afterFragment.formatMatrix.keys()).filter(key => {
+        return ![Priority.Default, Priority.Block, Priority.BlockStyle].includes(key.priority);
+      }).forEach(key => {
+        formatMatrix.set(key, afterFragment.formatMatrix.get(key));
+      });
+      afterFragment.formatMatrix = formatMatrix;
+      afterFragment.mergeFormat(new FormatRange({
+        startIndex: 0,
+        endIndex: afterFragment.contents.length,
+        state: FormatState.Valid,
+        context: afterFragment,
+        handler: new DefaultTagsHandler(new DefaultTagCommander('p'), null),
+        cacheData: {
+          tag: 'p'
+        }
+      }));
+      if (!afterFragment.contents.length) {
+        afterFragment.append(new Single(afterFragment, 'br'));
+      }
+      commonAncestorFragment.parent.insert(afterFragment, index + 1);
+      range.startFragment = range.endFragment = afterFragment;
+      range.startIndex = range.endIndex = 0;
+      ViewRenderer.rerender(commonAncestorFragment.parent);
+    });
+    this.selection.apply();
+  }
+
   private deleteContents() {
     this.selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+          if (!range.commonAncestorFragment.contents.length) {
+            range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
+          }
           ViewRenderer.rerender(range.commonAncestorFragment);
           this.selection.apply(-1);
         } else {
@@ -182,7 +229,6 @@ export class ViewRenderer {
               firstRange.startIndex = p.position;
             }
           } else {
-
             if (rerenderFragment.position === 0) {
               this.deleteEmptyFragment(range.startFragment);
               if (rerenderFragment.fragment.contents.length) {
@@ -203,6 +249,7 @@ export class ViewRenderer {
                     tag: 'p'
                   }
                 }), true);
+                startFragment.append(new Single(startFragment, 'br'));
                 rerenderFragment.fragment.insert(startFragment, 0);
                 firstRange.startFragment = startFragment;
                 firstRange.startIndex = 0;
