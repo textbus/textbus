@@ -118,34 +118,15 @@ export class Cursor {
       this.flashing = true;
     });
 
+    fromEvent(context, 'scroll').subscribe(() => {
+      this.updateCursorPosition();
+    });
+
     selection.onSelectionChange.subscribe(s => {
       if (!s.rangeCount) {
         return;
       }
-      const startContainer = s.firstRange.rawRange.startContainer;
-      const startOffset = s.firstRange.rawRange.startOffset;
-      const range = document.createRange();
-      range.setStart(startContainer, startOffset);
-      range.collapse();
-      let rect = range.getBoundingClientRect();
-      if (startContainer.nodeType === 1 &&
-        startContainer.childNodes[startOffset] &&
-        startContainer.childNodes[startOffset].nodeName.toLowerCase() === 'br') {
-        rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
-      }
-      const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
-      const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
-      let style: CursorStyle = {
-        left: Math.max(rect.left, rect2.left),
-        top: Math.max(rect.top, rect2.top),
-        height: rect.height,
-        fontSize: computedStyle.fontSize,
-        lineHeight: Number.parseInt(computedStyle.fontSize) * Number.parseFloat(computedStyle.lineHeight) + ''
-      };
-      if (!style.height) {
-        style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
-      }
-      this.updateCursorPosition(style);
+      this.updateCursorPosition();
       if (s.collapsed) {
         this.show();
       } else {
@@ -161,7 +142,30 @@ export class Cursor {
     this.focusEvent.next();
   }
 
-  private updateCursorPosition(style: CursorStyle) {
+  private updateCursorPosition() {
+    const startContainer = this.selection.firstRange.rawRange.startContainer;
+    const startOffset = this.selection.firstRange.rawRange.startOffset;
+    const range = document.createRange();
+    range.setStart(startContainer, startOffset);
+    range.collapse();
+    let rect = range.getBoundingClientRect();
+    if (startContainer.nodeType === 1 &&
+      startContainer.childNodes[startOffset] &&
+      startContainer.childNodes[startOffset].nodeName.toLowerCase() === 'br') {
+      rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+    }
+    const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
+    const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
+    let style: CursorStyle = {
+      left: Math.max(rect.left, rect2.left),
+      top: Math.max(rect.top, rect2.top),
+      height: rect.height,
+      fontSize: computedStyle.fontSize,
+      lineHeight: Number.parseInt(computedStyle.fontSize) * Number.parseFloat(computedStyle.lineHeight) + ''
+    };
+    if (!style.height) {
+      style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
+    }
     this.elementRef.style.left = style.left + 'px';
     this.elementRef.style.top = style.top + 'px';
     this.elementRef.style.height = style.height + 'px';
