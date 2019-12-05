@@ -157,7 +157,7 @@ export class ViewRenderer {
       const index = commonAncestorFragment.parent.contents.find(commonAncestorFragment);
       const formatMatrix = new Map<Handler, FormatRange[]>();
       Array.from(afterFragment.formatMatrix.keys()).filter(key => {
-        return ![Priority.Default, Priority.Block, Priority.BlockStyle].includes(key.priority);
+        return ![Priority.Default, Priority.Block].includes(key.priority);
       }).forEach(key => {
         formatMatrix.set(key, afterFragment.formatMatrix.get(key));
       });
