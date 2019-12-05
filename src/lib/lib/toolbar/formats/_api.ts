@@ -16,6 +16,7 @@ export { hHandler } from './h';
 export { historyBackHandler } from './history-back';
 export { historyForwardHandler } from './history-forward';
 export { imageHandler } from './image';
+export { indentHandler } from './indent';
 export { italicHandler } from './italic';
 export { letterSpacingHandler } from './letter-spacing';
 export { lineHeightHandler } from './line-height';

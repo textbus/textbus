@@ -15,6 +15,7 @@ import {
   historyBackHandler,
   historyForwardHandler,
   imageHandler,
+  indentHandler,
   italicHandler,
   letterSpacingHandler,
   lineHeightHandler,
@@ -54,7 +55,8 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ], [
         fontSizeHandler,
         lineHeightHandler,
-        letterSpacingHandler
+        letterSpacingHandler,
+        indentHandler
       ], [
         superscriptHandler,
         subscriptHandler
