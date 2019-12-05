@@ -378,7 +378,7 @@ export class ViewRenderer {
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new Single(ev.fragment, 'br');
+          const s = new Single(commonAncestorFragment, 'br');
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
@@ -388,10 +388,15 @@ export class ViewRenderer {
       }
       return str;
     });
-    ViewRenderer.rerender(commonAncestorFragment);
 
     this.selection.firstRange.startIndex = startIndex;
     this.selection.firstRange.endIndex = startIndex;
+    const last = commonAncestorFragment.contents.getContentAtIndex(commonAncestorFragment.contents.length - 1);
+    if (startIndex + ev.offset === commonAncestorFragment.contents.length &&
+      last instanceof Single && last.tagName === 'br') {
+      commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+    }
+    ViewRenderer.rerender(commonAncestorFragment);
     this.selection.apply(ev.offset);
     this.userWriteEvent.next();
   }
