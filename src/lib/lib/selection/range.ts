@@ -2,6 +2,11 @@ import { Fragment } from '../parser/fragment';
 import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../parser/virtual-dom';
 import { VIRTUAL_NODE } from '../parser/help';
 
+export interface TBRangePosition {
+  fragment: Fragment;
+  index: number;
+}
+
 export interface SelectedScope {
   startIndex: number;
   endIndex: number;

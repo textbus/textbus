@@ -6,13 +6,12 @@ import { Hooks, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState, Matcher, MatchState } from '../matcher/matcher';
-import { Cursor, CursorMoveDirection, InputEvent } from '../selection/cursor';
-import { TBRange } from '../selection/range';
+import { Cursor, CursorMoveDirection, CursorMoveType, InputEvent } from '../selection/cursor';
+import { TBRange, TBRangePosition } from '../selection/range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
 import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
 import { Single } from '../parser/single';
-import { CursorPosition } from '../selection/utils';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -146,31 +145,31 @@ export class ViewRenderer {
   }
 
   private moveCursor(direction: CursorMoveDirection) {
-    // this.selection.ranges.forEach(range => {
-    //   let p: CursorPosition;
-    //   switch (direction.type) {
-    //     case CursorMoveType.Left:
-    //       p = findPosition(range.startFragment, range.startIndex - 1);
-    //       range.startFragment = p.fragment;
-    //       range.startIndex = p.index;
-    //       if (!direction.ctrlKey) {
-    //         range.endFragment = p.fragment;
-    //         range.endIndex = p.index;
-    //       }
-    //       break;
-    //     case CursorMoveType.Right:
-    //       p = findPosition(range.endFragment, range.endIndex + 1);
-    //       range.startFragment = p.fragment;
-    //       range.startIndex = p.index;
-    //       range.endFragment = p.fragment;
-    //       range.endIndex = p.index;
-    //       console.log(p)
-    //       // if (!direction.ctrlKey) {
-    //       //
-    //       // }
-    //       break;
-    //   }
-    // });
+    this.selection.ranges.forEach(range => {
+      let p: TBRangePosition;
+      switch (direction.type) {
+        // case CursorMoveType.Left:
+        //   p = this.getNextPosition();
+        //   range.startFragment = p.fragment;
+        //   range.startIndex = p.index;
+        //   if (!direction.ctrlKey) {
+        //     range.endFragment = p.fragment;
+        //     range.endIndex = p.index;
+        //   }
+        //   break;
+        case CursorMoveType.Right:
+          p = ViewRenderer.getNextPosition(range);
+          range.startFragment = p.fragment;
+          range.startIndex = p.index;
+          range.endFragment = p.fragment;
+          range.endIndex = p.index;
+          console.log(p)
+          // if (!direction.ctrlKey) {
+          //
+          // }
+          break;
+      }
+    });
     this.selection.apply();
   }
 
@@ -357,7 +356,7 @@ export class ViewRenderer {
     });
   }
 
-  private findRerenderFragment(start: Fragment): CursorPosition {
+  private findRerenderFragment(start: Fragment): TBRangePosition {
     if (!start.parent) {
       return {
         fragment: start,
@@ -374,7 +373,7 @@ export class ViewRenderer {
     };
   }
 
-  private findLastChild(fragment: Fragment, index: number): CursorPosition {
+  private findLastChild(fragment: Fragment, index: number): TBRangePosition {
     const last = fragment.contents.getContentAtIndex(index);
     if (last instanceof Fragment) {
       return this.findLastChild(last, last.contents.length - 1);
@@ -390,7 +389,7 @@ export class ViewRenderer {
     }
   }
 
-  private findFirstChild(fragment: Fragment): CursorPosition {
+  private findFirstChild(fragment: Fragment): TBRangePosition {
     const first = fragment.contents.getContentAtIndex(0);
     if (first instanceof Fragment) {
       return this.findFirstChild(first);
@@ -438,5 +437,48 @@ export class ViewRenderer {
   private static rerender(fragment: Fragment) {
     const position = fragment.destroyView();
     fragment.render(position.host, position.nextSibling);
+  }
+
+  private static getNextPosition(range: TBRange): TBRangePosition {
+    const currentFragment = range.endFragment;
+    const offset = range.endIndex;
+    if (offset < currentFragment.contents.length) {
+      return {
+        fragment: currentFragment,
+        index: offset + 1
+      }
+    }
+    let fragment = currentFragment;
+    while (fragment.parent) {
+      const index = fragment.getIndexInParent();
+      if (index === fragment.parent.contents.length - 1) {
+        fragment = fragment.parent;
+      } else {
+        let next = fragment.parent.contents.getContentAtIndex(index + 1);
+        if (next instanceof Fragment) {
+          while (next) {
+            const first = (next as Fragment).contents.getContentAtIndex(0);
+            if (first instanceof Fragment) {
+              next = first;
+            } else {
+              return {
+                fragment: next as Fragment,
+                index: 0
+              }
+            }
+          }
+
+        } else {
+          return {
+            fragment: fragment.parent,
+            index: index + 1
+          }
+        }
+      }
+    }
+    return {
+      fragment,
+      index: fragment.contents.length
+    }
   }
 }

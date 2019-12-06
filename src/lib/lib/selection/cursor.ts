@@ -129,8 +129,7 @@ export class Cursor {
         this.focus();
         ev.preventDefault();
       } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(ev.key)) {
-        // this.inputStartSelection = selection.clone();
-        // this.editingFragment = selection.commonAncestorFragment.clone();
+
         const typeMap = {
           ArrowUp: CursorMoveType.Up,
           ArrowDown: CursorMoveType.Down,
@@ -143,6 +142,8 @@ export class Cursor {
           ctrlKey: ev.ctrlKey,
           altKey: ev.altKey
         });
+        this.inputStartSelection = selection.clone();
+        this.editingFragment = selection.commonAncestorFragment.clone();
       }
     });
     fromEvent(context, 'mousedown').subscribe(() => {
