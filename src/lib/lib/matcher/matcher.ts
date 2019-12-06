@@ -209,7 +209,7 @@ export class Matcher {
     const formatRanges = fragment.formatMatrix.get(handler) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
-        // 如果为块级元素，则需要从第 0 位开始匹配，否则从第一位
+        // 如果为块级元素，则需要从第 0 位开始匹配
         if (format.startIndex === 0 &&
           format.endIndex === fragment.contents.length &&
           (format.handler.priority === Priority.Block || format.handler.priority === Priority.BlockStyle)) {
@@ -220,7 +220,7 @@ export class Matcher {
             };
           }
         }
-        if (startIndex > format.startIndex && startIndex <= format.endIndex) {
+        if ((startIndex === 0 && startIndex === format.startIndex) || (startIndex > format.startIndex && startIndex <= format.endIndex)) {
           return {
             state: format.state,
             cacheData: format.cacheData ? format.cacheData.clone() : null
