@@ -2,13 +2,6 @@ import { fromEvent, Observable, Subject } from 'rxjs';
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
 
-export interface InputEvent {
-  value: string;
-  offset: number;
-  fragment: Fragment;
-  selection: TBSelection;
-}
-
 interface CursorStyle {
   left: number;
   top: number;
@@ -17,12 +10,35 @@ interface CursorStyle {
   lineHeight: string;
 }
 
+export interface InputEvent {
+  value: string;
+  offset: number;
+  fragment: Fragment;
+  selection: TBSelection;
+}
+
+export enum CursorMoveType {
+  Left,
+  Right,
+  Up,
+  Down
+}
+
+export interface CursorMoveDelta {
+  type: CursorMoveType,
+  shiftKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
+}
+
+
 export class Cursor {
   onInput: Observable<InputEvent>;
   onDelete: Observable<void>;
   onFocus: Observable<void>;
   onBlur: Observable<void>;
   onNewLine: Observable<void>;
+  onMove: Observable<CursorMoveDelta>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -34,6 +50,7 @@ export class Cursor {
   private focusEvent = new Subject<void>();
   private blurEvent = new Subject<void>();
   private newLineEvent = new Subject<void>();
+  private moveEvent = new Subject<CursorMoveDelta>();
 
   private timer: any = null;
 
@@ -110,6 +127,21 @@ export class Cursor {
         this.newLineEvent.next();
         this.focus();
         ev.preventDefault();
+      } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(ev.key)) {
+        // this.inputStartSelection = selection.clone();
+        // this.editingFragment = selection.commonAncestorFragment.clone();
+        const typeMap = {
+          ArrowUp: CursorMoveType.Up,
+          ArrowDown: CursorMoveType.Down,
+          ArrowLeft: CursorMoveType.Left,
+          ArrowRight: CursorMoveType.Right
+        };
+        this.moveEvent.next({
+          type: typeMap[ev.key],
+          shiftKey: ev.shiftKey,
+          ctrlKey: ev.ctrlKey,
+          altKey: ev.altKey
+        });
       }
     });
     fromEvent(context, 'mousedown').subscribe(() => {

@@ -49,16 +49,16 @@ export class TBRange {
   }
 
   apply(offset = 0) {
-    const start = this.findPosition(
+    const start = this.findFocusNodeAndOffset(
       this.startFragment.virtualNode.children,
       this.startIndex + offset);
-    const end = this.findPosition(
+    const end = this.findFocusNodeAndOffset(
       this.endFragment.virtualNode.children,
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
-    this.rawRange.setStart(start.node, start.position);
-    this.rawRange.setEnd(end.node, end.position);
+    this.rawRange.setStart(start.node, start.offset);
+    this.rawRange.setEnd(end.node, end.offset);
   }
 
   collapse(toEnd = false) {
@@ -100,12 +100,12 @@ export class TBRange {
     let endIndex = this.endIndex;
 
     while (startFragment !== this.commonAncestorFragment) {
-      startIndex = startFragment.parent.contents.find(startFragment);
+      startIndex = startFragment.getIndexInParent();
       startFragment = startFragment.parent;
     }
 
     while (endFragment !== this.commonAncestorFragment) {
-      endIndex = endFragment.parent.contents.find(endFragment);
+      endIndex = endFragment.getIndexInParent();
       endFragment = endFragment.parent;
     }
 
@@ -137,7 +137,7 @@ export class TBRange {
         endIndex: startFragment.contents.length,
         context: startFragment
       });
-      startIndex = startFragment.parent.contents.find(startFragment) + 1;
+      startIndex = startFragment.getIndexInParent() + 1;
       startFragment = startFragment.parent;
     }
     while (endFragment !== this.commonAncestorFragment) {
@@ -146,7 +146,7 @@ export class TBRange {
         endIndex,
         context: endFragment
       });
-      endIndex = endFragment.parent.contents.find(endFragment);
+      endIndex = endFragment.getIndexInParent();
       endFragment = endFragment.parent;
     }
     return [...start, {
@@ -158,30 +158,30 @@ export class TBRange {
     });
   }
 
-  private findPosition(vNodes: VirtualNode[],
-                       i: number): { node: Node, position: number } {
+  private findFocusNodeAndOffset(vNodes: VirtualNode[],
+                                 i: number): { node: Node, offset: number } {
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
       const toEnd = i === item.endIndex && index === vNodes.length - 1;
       if (i >= item.startIndex && i < item.endIndex || toEnd) {
         if (item instanceof VirtualContainerNode) {
           if (item.children.length) {
-            return this.findPosition(item.children, i);
+            return this.findFocusNodeAndOffset(item.children, i);
           }
           return {
             node: item.elementRef,
-            position: i
+            offset: i
           }
         } else if (item instanceof VirtualObjectNode) {
           const index = Array.from(item.elementRef.parentNode.childNodes).indexOf(item.elementRef as ChildNode);
           return {
             node: item.elementRef.parentNode,
-            position: toEnd ? index + 1 : index
+            offset: toEnd ? index + 1 : index
           }
         } else if (item instanceof VirtualNode) {
           return {
             node: item.elementRef,
-            position: i - item.startIndex
+            offset: i - item.startIndex
           };
         }
       }

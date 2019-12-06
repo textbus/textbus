@@ -12,11 +12,7 @@ import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
 import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
 import { Single } from '../parser/single';
-
-interface Position {
-  fragment: Fragment;
-  position: number;
-}
+import { CursorPosition } from '../selection/utils';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -154,7 +150,7 @@ export class ViewRenderer {
       if (!commonAncestorFragment.contents.length) {
         commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
       }
-      const index = commonAncestorFragment.parent.contents.find(commonAncestorFragment);
+      const index = commonAncestorFragment.getIndexInParent();
       const formatMatrix = new Map<Handler, FormatRange[]>();
       Array.from(afterFragment.formatMatrix.keys()).filter(key => {
         return ![Priority.Default, Priority.Block].includes(key.priority);
@@ -201,7 +197,7 @@ export class ViewRenderer {
           const rerenderFragment = this.findRerenderFragment(range.startFragment);
           const firstRange = this.selection.firstRange;
           if (range.startFragment.contents.length) {
-            if (!rerenderFragment.fragment.parent && rerenderFragment.position === 0) {
+            if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
 
               const startFragment = new Fragment(rerenderFragment.fragment);
               startFragment.mergeFormat(new FormatRange({
@@ -222,14 +218,14 @@ export class ViewRenderer {
               firstRange.startFragment = startFragment;
               firstRange.startIndex = 0;
             } else {
-              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.position - 1);
-              this.moveContentsToFragment(range.startFragment, p.position, p.fragment);
+              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.index - 1);
+              this.moveContentsToFragment(range.startFragment, p.index, p.fragment);
               this.deleteEmptyFragment(range.startFragment);
               firstRange.startFragment = p.fragment;
-              firstRange.startIndex = p.position;
+              firstRange.startIndex = p.index;
             }
           } else {
-            if (rerenderFragment.position === 0) {
+            if (rerenderFragment.index === 0) {
               this.deleteEmptyFragment(range.startFragment);
               if (rerenderFragment.fragment.contents.length) {
                 const p = this.findFirstChild(rerenderFragment.fragment);
@@ -255,10 +251,10 @@ export class ViewRenderer {
                 firstRange.startIndex = 0;
               }
             } else {
-              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.position - 1);
+              const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.index - 1);
               this.deleteEmptyFragment(range.startFragment);
               firstRange.startFragment = p.fragment;
-              firstRange.startIndex = p.position;
+              firstRange.startIndex = p.index;
             }
           }
           ViewRenderer.rerender(rerenderFragment.fragment);
@@ -328,46 +324,46 @@ export class ViewRenderer {
     });
   }
 
-  private findRerenderFragment(start: Fragment): Position {
+  private findRerenderFragment(start: Fragment): CursorPosition {
     if (!start.parent) {
       return {
         fragment: start,
-        position: 0
+        index: 0
       }
     }
-    const index = start.parent.contents.find(start);
+    const index = start.getIndexInParent();
     if (index === 0) {
       return this.findRerenderFragment(start.parent);
     }
     return {
-      position: index,
+      index,
       fragment: start.parent
     };
   }
 
-  private findLastChild(fragment: Fragment, index: number): Position {
+  private findLastChild(fragment: Fragment, index: number): CursorPosition {
     const last = fragment.contents.getContentAtIndex(index);
     if (last instanceof Fragment) {
       return this.findLastChild(last, last.contents.length - 1);
     } else if (last instanceof Single && last.tagName === 'br') {
       return {
-        position: fragment.contents.length - 1,
+        index: fragment.contents.length - 1,
         fragment
       };
     }
     return {
-      position: fragment.contents.length,
+      index: fragment.contents.length,
       fragment
     }
   }
 
-  private findFirstChild(fragment: Fragment): Position {
+  private findFirstChild(fragment: Fragment): CursorPosition {
     const first = fragment.contents.getContentAtIndex(0);
     if (first instanceof Fragment) {
       return this.findFirstChild(first);
     }
     return {
-      position: 0,
+      index: 0,
       fragment
     };
   }

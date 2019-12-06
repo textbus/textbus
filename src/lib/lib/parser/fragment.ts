@@ -258,7 +258,7 @@ export class Fragment extends View {
     this.contents.getFragments().forEach(f => f.destroy());
     this.destroyView();
     if (this.parent) {
-      const index = this.parent.contents.find(this);
+      const index = this.getIndexInParent();
       this.parent.delete(index, 1);
     }
     this.formatMatrix.clear();
@@ -266,6 +266,17 @@ export class Fragment extends View {
     this.virtualNode = null;
     this.parent = null;
     this.destroyed = true;
+  }
+
+  getIndexInParent() {
+    if (this.parent) {
+      let i = this.parent.contents.find(this);
+      if (i < 0) {
+        throw new Error(`it's parent fragment is incorrect!`);
+      }
+      return i;
+    }
+    return -1;
   }
 
   /**
