@@ -6,7 +6,7 @@ import { Hooks, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState, Matcher, MatchState } from '../matcher/matcher';
-import { Cursor, InputEvent } from '../selection/cursor';
+import { Cursor, CursorMoveDirection, InputEvent } from '../selection/cursor';
 import { TBRange } from '../selection/range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
@@ -65,7 +65,11 @@ export class ViewRenderer {
         }
         this.createNewLine();
       });
+      this.cursor.onMove.subscribe(direction => {
+        this.moveCursor(direction);
+      });
     };
+    // this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
@@ -138,6 +142,35 @@ export class ViewRenderer {
     });
     handler.execCommand.command(selection, handler, overlap);
     ViewRenderer.rerender(selection.commonAncestorFragment);
+    this.selection.apply();
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    // this.selection.ranges.forEach(range => {
+    //   let p: CursorPosition;
+    //   switch (direction.type) {
+    //     case CursorMoveType.Left:
+    //       p = findPosition(range.startFragment, range.startIndex - 1);
+    //       range.startFragment = p.fragment;
+    //       range.startIndex = p.index;
+    //       if (!direction.ctrlKey) {
+    //         range.endFragment = p.fragment;
+    //         range.endIndex = p.index;
+    //       }
+    //       break;
+    //     case CursorMoveType.Right:
+    //       p = findPosition(range.endFragment, range.endIndex + 1);
+    //       range.startFragment = p.fragment;
+    //       range.startIndex = p.index;
+    //       range.endFragment = p.fragment;
+    //       range.endIndex = p.index;
+    //       console.log(p)
+    //       // if (!direction.ctrlKey) {
+    //       //
+    //       // }
+    //       break;
+    //   }
+    // });
     this.selection.apply();
   }
 

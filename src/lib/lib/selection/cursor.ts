@@ -18,13 +18,13 @@ export interface InputEvent {
 }
 
 export enum CursorMoveType {
-  Left,
-  Right,
-  Up,
-  Down
+  Left = 'Left',
+  Right = 'Right',
+  Up = 'Up',
+  Down = 'Down'
 }
 
-export interface CursorMoveDelta {
+export interface CursorMoveDirection {
   type: CursorMoveType,
   shiftKey: boolean;
   ctrlKey: boolean;
@@ -38,7 +38,7 @@ export class Cursor {
   onFocus: Observable<void>;
   onBlur: Observable<void>;
   onNewLine: Observable<void>;
-  onMove: Observable<CursorMoveDelta>;
+  onMove: Observable<CursorMoveDirection>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -50,7 +50,7 @@ export class Cursor {
   private focusEvent = new Subject<void>();
   private blurEvent = new Subject<void>();
   private newLineEvent = new Subject<void>();
-  private moveEvent = new Subject<CursorMoveDelta>();
+  private moveEvent = new Subject<CursorMoveDirection>();
 
   private timer: any = null;
 
@@ -77,6 +77,7 @@ export class Cursor {
     this.onFocus = this.focusEvent.asObservable();
     this.onBlur = this.blurEvent.asObservable();
     this.onNewLine = this.newLineEvent.asObservable();
+    this.onMove = this.moveEvent.asObservable();
 
     this.elementRef.classList.add('tanbo-editor-selection');
     this.cursor.classList.add('tanbo-editor-cursor');
@@ -177,6 +178,9 @@ export class Cursor {
   }
 
   private updateCursorPosition() {
+    if (!this.selection || !this.selection.firstRange) {
+      return;
+    }
     const startContainer = this.selection.firstRange.rawRange.startContainer;
     const startOffset = this.selection.firstRange.rawRange.startOffset;
     const range = document.createRange();
