@@ -1,5 +1,5 @@
 .tanbo-editor-toolbar {
-  padding: 8px 15px;
+  padding: 8px 15px 3px;
   background-color: $color-light;
   border-bottom: 1px solid $color-gray-light;
   min-height: 24px;
@@ -9,10 +9,14 @@
   user-select: none;
 }
 
-.tanbo-editor-split-line {
+.tanbo-editor-toolbar-group {
+  margin-right: 8px;
+  margin-bottom: 5px;
   display: inline-block;
-  height: 1em;
-  width: 8px;
+  border-radius: 5px;
+  &:last-child {
+    margin-left: 0;
+  }
 }
 
 .tanbo-editor-handler {
@@ -34,6 +38,7 @@
   }
 
   &:focus {
+    position: relative;
     @include focus($color-primary);
   }
 
@@ -202,6 +207,10 @@
 .tanbo-editor-dropdown {
   position: relative;
   display: inline-block;
+
+  &:focus-within {
+    z-index: 1;
+  }
 
   &.tanbo-editor-dropdown-open {
     > .tanbo-editor-handler {

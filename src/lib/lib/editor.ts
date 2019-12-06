@@ -62,7 +62,6 @@ export class Editor implements EventDelegate {
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
-  private isFirst = true;
   private readyState = false;
   private selection: TBSelection;
 
@@ -76,17 +75,7 @@ export class Editor implements EventDelegate {
       this.container = selector;
     }
     this.historyStackSize = options.historyStackSize || 50;
-    if (Array.isArray(options.handlers)) {
-      options.handlers.forEach(handler => {
-        if (Array.isArray(handler)) {
-          this.addGroup(handler);
-        } else {
-          this.addHandler(handler);
-        }
-      });
-      this.listenUserAction();
-    }
-
+    this.appendHandler(options.handlers);
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootFragment(this.handlers, this);
       this.root = vDom;
@@ -157,34 +146,44 @@ export class Editor implements EventDelegate {
     return null;
   }
 
-  private addHandler(option: HandlerConfig) {
-    this.isFirst = false;
-    switch (option.type) {
-      case HandlerType.Button:
-        this.addButtonHandler(option);
-        break;
-      case HandlerType.Select:
-        this.addSelectHandler(option);
-        break;
-      case HandlerType.Dropdown:
-        this.addDropdownHandler(option);
-        break;
-      case HandlerType.ActionSheet:
-        this.addActionSheetHandler(option);
+  private appendHandler(handlers: (HandlerConfig | HandlerConfig[])[]) {
+    if (Array.isArray(handlers)) {
+      handlers.forEach(handler => {
+        const group = document.createElement('span');
+        group.classList.add('tanbo-editor-toolbar-group');
+        if (Array.isArray(handler)) {
+          this.createHandlers(handler).forEach(el => group.appendChild(el));
+        } else {
+          group.appendChild(this.createHandler(handler));
+        }
+        this.toolbar.appendChild(group);
+      });
+      this.listenUserAction();
     }
+  }
+
+  private createHandler(option: HandlerConfig) {
     if (option.hooks) {
       this.run(() => {
         this.viewer.use(option.hooks);
       });
     }
+    switch (option.type) {
+      case HandlerType.Button:
+        return this.addButtonHandler(option);
+      case HandlerType.Select:
+        return this.addSelectHandler(option);
+      case HandlerType.Dropdown:
+        return this.addDropdownHandler(option);
+      case HandlerType.ActionSheet:
+        return this.addActionSheetHandler(option);
+    }
+    return null;
   }
 
-  private addGroup(handlers: HandlerConfig[]) {
-    if (!this.isFirst) {
-      this.toolbar.appendChild(Editor.createSplitLine());
-    }
-    handlers.forEach(handler => {
-      this.addHandler(handler);
+  private createHandlers(handlers: HandlerConfig[]) {
+    return handlers.map(handler => {
+      return this.createHandler(handler);
     });
   }
 
@@ -209,28 +208,28 @@ export class Editor implements EventDelegate {
 
   private addDropdownHandler(option: DropdownConfig) {
     const dropdown = new DropdownHandler(option, this);
-    this.toolbar.appendChild(dropdown.elementRef);
     this.handlers.push(dropdown);
+    return dropdown.elementRef;
   }
 
   private addSelectHandler(option: SelectConfig) {
     const select = new SelectHandler(option);
     this.handlers.push(select);
-    this.toolbar.appendChild(select.elementRef);
+    return select.elementRef;
   }
 
   private addButtonHandler(option: ButtonConfig) {
     const button = new ButtonHandler(option);
-    this.toolbar.appendChild(button.elementRef);
     this.handlers.push(button);
+    return button.elementRef;
   }
 
   private addActionSheetHandler(option: ActionSheetConfig) {
     const actionSheet = new ActionSheetHandler(option);
-    this.toolbar.appendChild(actionSheet.elementRef);
     actionSheet.options.forEach(item => {
       this.handlers.push(item);
     });
+    return actionSheet.elementRef;
   }
 
   private listenUserAction() {
@@ -291,11 +290,5 @@ export class Editor implements EventDelegate {
       this.recordSnapshot();
       this.updateHandlerState(this.viewer.cloneSelection());
     });
-  }
-
-  private static createSplitLine() {
-    const splitLine = document.createElement('span');
-    splitLine.classList.add('tanbo-editor-split-line');
-    return splitLine;
   }
 }
