@@ -1,6 +1,8 @@
 .tanbo-editor-wrap {
   position: relative;
   overflow: hidden;
+  border-left: 1px solid $color-light;
+  border-right: 1px solid $color-light;
 }
 
 .tanbo-editor-frame {
