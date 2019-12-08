@@ -5,6 +5,9 @@
   background-color: lighten($color-lighter, 1);
   user-select: none;
   color: $color-default;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   &:before {
     content: "路径：";
   }
