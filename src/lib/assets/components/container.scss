@@ -1,12 +1,10 @@
 .tanbo-editor-container {
   background-color: #fff;
-  //border: 1px solid $color-gray-light;
-  border-radius: 4px;
-  //overflow: hidden;
 
   > div:first-child {
     border-radius: 5px 5px 0 0;
   }
+
   > div:last-child {
     border-radius: 0 0 5px 5px;
   }

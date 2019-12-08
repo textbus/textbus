@@ -25,20 +25,29 @@ export class ViewRenderer {
   private userWriteEvent = new Subject<void>();
   private selectionChangeEvent = new Subject<TBSelection>();
   private readyEvent = new Subject<Document>();
+
   private frame = document.createElement('iframe');
   private selection: TBSelection;
   private hooksList: Hooks[] = [];
 
   private cursor: Cursor;
 
-  constructor() {
+  constructor(docStyle = false) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
+
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
+
+      if (docStyle) {
+        const body = this.contentDocument.body;
+        const html = this.contentDocument.documentElement;
+        html.style.cssText = 'background: #eee; padding: 20px 0';
+        body.style.cssText = 'width: 600px; box-shadow: 1px 3px 3px rgba(0,0,0,.2); margin: 0 auto; background: #fff; padding: 20px 15px; border-radius: 3px';
+      }
 
       const selection = new TBSelection(doc, true);
       this.cursor = new Cursor(doc, selection);
@@ -140,7 +149,7 @@ export class ViewRenderer {
       }
     });
     handler.execCommand.command(selection, handler, overlap);
-    ViewRenderer.rerender(selection.commonAncestorFragment);
+    this.rerender(selection.commonAncestorFragment);
     this.selection.apply();
   }
 
@@ -206,7 +215,7 @@ export class ViewRenderer {
       commonAncestorFragment.parent.insert(afterFragment, index + 1);
       range.startFragment = range.endFragment = afterFragment;
       range.startIndex = range.endIndex = 0;
-      ViewRenderer.rerender(commonAncestorFragment.parent);
+      this.rerender(commonAncestorFragment.parent);
     });
     this.selection.apply();
   }
@@ -219,7 +228,7 @@ export class ViewRenderer {
           if (!range.commonAncestorFragment.contents.length) {
             range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
           }
-          ViewRenderer.rerender(range.commonAncestorFragment);
+          this.rerender(range.commonAncestorFragment);
           this.selection.apply(-1);
         } else {
           const firstContent = range.startFragment.contents.getContentAtIndex(0);
@@ -289,7 +298,7 @@ export class ViewRenderer {
               firstRange.startIndex = p.index;
             }
           }
-          ViewRenderer.rerender(rerenderFragment.fragment);
+          this.rerender(rerenderFragment.fragment);
           this.selection.collapse();
         }
       } else {
@@ -326,7 +335,7 @@ export class ViewRenderer {
           range.endFragment = range.startFragment;
           range.endIndex = range.startIndex;
         }
-        ViewRenderer.rerender(range.commonAncestorFragment);
+        this.rerender(range.commonAncestorFragment);
         this.selection.collapse();
       }
     });
@@ -429,14 +438,15 @@ export class ViewRenderer {
       last instanceof Single && last.tagName === 'br') {
       commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
     }
-    ViewRenderer.rerender(commonAncestorFragment);
+    this.rerender(commonAncestorFragment);
     this.selection.apply(ev.offset);
     this.userWriteEvent.next();
   }
 
-  private static rerender(fragment: Fragment) {
+  private rerender(fragment: Fragment) {
     const position = fragment.destroyView();
     fragment.render(position.host, position.nextSibling);
+    this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
   }
 
   private static getNextPosition(range: TBRange): TBRangePosition {

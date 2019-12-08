@@ -31,6 +31,7 @@ export interface EditorOptions {
   historyStackSize?: number;
   handlers?: (HandlerConfig | HandlerConfig[])[];
   content?: string;
+  docStyle?: boolean;
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
@@ -54,7 +55,7 @@ export class Editor implements EventDelegate {
   private readonly historyStackSize: number;
 
   private root: RootFragment;
-  private readonly viewer = new ViewRenderer();
+  private readonly viewer = new ViewRenderer(this.options.docStyle);
   private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
   private readonly container: HTMLElement;
