@@ -39,6 +39,7 @@ export class Cursor {
   onBlur: Observable<void>;
   onNewLine: Observable<void>;
   onMove: Observable<CursorMoveDirection>;
+  onSelectAll: Observable<void>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -51,6 +52,7 @@ export class Cursor {
   private blurEvent = new Subject<void>();
   private newLineEvent = new Subject<void>();
   private moveEvent = new Subject<CursorMoveDirection>();
+  private selectAllEvent = new Subject<void>();
 
   private timer: any = null;
 
@@ -70,6 +72,7 @@ export class Cursor {
   private editingFragment: Fragment;
 
   private isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
+  private isMac = /mac os/i.test(navigator.userAgent);
 
   constructor(private context: Document, private selection: TBSelection) {
     this.onInput = this.inputEvent.asObservable();
@@ -78,6 +81,7 @@ export class Cursor {
     this.onBlur = this.blurEvent.asObservable();
     this.onNewLine = this.newLineEvent.asObservable();
     this.onMove = this.moveEvent.asObservable();
+    this.onSelectAll = this.selectAllEvent.asObservable();
 
     this.elementRef.classList.add('tanbo-editor-selection');
     this.cursor.classList.add('tanbo-editor-cursor');
@@ -144,6 +148,9 @@ export class Cursor {
         });
         this.inputStartSelection = selection.clone();
         this.editingFragment = selection.commonAncestorFragment.clone();
+      } else if (ev.key === 'a' && (this.isMac ? ev.metaKey : ev.ctrlKey)) {
+        this.input.value = '';
+        this.selectAllEvent.next();
       }
     });
     fromEvent(context, 'mousedown').subscribe(() => {

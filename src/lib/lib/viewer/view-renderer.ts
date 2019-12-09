@@ -69,6 +69,19 @@ export class ViewRenderer {
       this.cursor.onMove.subscribe(direction => {
         this.moveCursor(direction);
       });
+      this.cursor.onSelectAll.subscribe(() => {
+        const r = this.selection.firstRange;
+        let fragment: Fragment = r.startFragment;
+        while (fragment.parent) {
+          fragment = fragment.parent;
+        }
+        r.startFragment = fragment;
+        r.endFragment = fragment;
+        r.startIndex = 0;
+        r.endIndex = r.commonAncestorFragment.contents.length;
+        this.selection.ranges = [r];
+        this.selection.apply();
+      });
     };
     // this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
