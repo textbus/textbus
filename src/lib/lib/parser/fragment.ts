@@ -149,11 +149,11 @@ export class Fragment extends View {
   delete(startIndex: number, length: number) {
     const ff = new Fragment(null);
 
-    this.contents.slice(startIndex, startIndex + length).forEach(item => {
-      if (item instanceof Fragment) {
-        item.destroyView();
-      }
-    });
+    // this.contents.slice(startIndex, startIndex + length).forEach(item => {
+    //   if (item instanceof Fragment) {
+    //     item.destroyView();
+    //   }
+    // });
     this.contents.delete(startIndex, length).forEach(item => {
       if (typeof item === 'string') {
         ff.append(item);

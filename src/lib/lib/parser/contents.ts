@@ -10,6 +10,7 @@ export class Contents implements Iterable<string | View> {
   private forOfIndex = 0;
 
   [Symbol.iterator]() {
+    this.forOfIndex = 0;
     return this;
   }
 
@@ -22,7 +23,6 @@ export class Contents implements Iterable<string | View> {
         value
       };
     }
-    this.forOfIndex = 0;
     return {
       done: true,
       value: undefined
