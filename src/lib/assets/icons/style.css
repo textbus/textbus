@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?zi3g7l') format('truetype'),
-    url('fonts/tanbo-editor.woff?zi3g7l') format('woff'),
-    url('fonts/tanbo-editor.svg?zi3g7l#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?aubctx') format('truetype'),
+    url('fonts/tanbo-editor.woff?aubctx') format('woff'),
+    url('fonts/tanbo-editor.svg?aubctx#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,27 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tanbo-editor-icon-text-indent:before {
+  content: "\e90e";
+}
+.tanbo-editor-icon-arrow-right:before {
+  content: "\e50f";
+}
+.tanbo-editor-icon-background-color:before {
+  content: "\e900";
+}
+.tanbo-editor-icon-color:before {
+  content: "\e901";
+}
+.tanbo-editor-icon-clean:before {
+  content: "\e902";
+}
+.tanbo-editor-icon-table-edit:before {
+  content: "\e903";
+}
+.tanbo-editor-icon-table-split-columns:before {
+  content: "\e904";
+}
 .tanbo-editor-icon-table-delete-row-top:before {
   content: "\e905";
 }
@@ -47,18 +68,6 @@
 }
 .tanbo-editor-icon-table-add-column-left:before {
   content: "\e90c";
-}
-.tanbo-editor-icon-arrow-right:before {
-  content: "\e50f";
-}
-.tanbo-editor-icon-background-color:before {
-  content: "\e900";
-}
-.tanbo-editor-icon-color:before {
-  content: "\e901";
-}
-.tanbo-editor-icon-clean:before {
-  content: "\e902";
 }
 .tanbo-editor-icon-image:before {
   content: "\e90d";
@@ -90,7 +99,16 @@
 .tanbo-editor-icon-link:before {
   content: "\e9cb";
 }
-.tanbo-editor-icon-bold:before {
+.tanbo-editor-icon-line-height:before {
+  content: "\ea5f";
+}
+.tanbo-editor-icon-text-width:before {
+  content: "\ea60";
+}
+.tanbo-editor-icon-font-size:before {
+  content: "\ea61";
+}
+.tanbo-editor-icon-boldHandler:before {
   content: "\ea62";
 }
 .tanbo-editor-icon-underline:before {
@@ -111,6 +129,12 @@
 .tanbo-editor-icon-table:before {
   content: "\ea71";
 }
+.tanbo-editor-icon-ltr:before {
+  content: "\ea74";
+}
+.tanbo-editor-icon-rtl:before {
+  content: "\ea75";
+}
 .tanbo-editor-icon-paragraph-left:before {
   content: "\ea77";
 }
@@ -123,27 +147,15 @@
 .tanbo-editor-icon-paragraph-justify:before {
   content: "\ea7a";
 }
+.tanbo-editor-icon-paragraph-justify11:before {
+  content: "\ea7b";
+}
+.tanbo-editor-icon-paragraph-justify2:before {
+  content: "\ea7c";
+}
+.tanbo-editor-icon-paragraph-justify3:before {
+  content: "\ea7d";
+}
 .tanbo-editor-icon-code:before {
   content: "\ea80";
-}
-.tanbo-editor-icon-table-edit:before {
-  content: "\e903";
-}
-.tanbo-editor-icon-table-split-columns:before {
-  content: "\e904";
-}
-.tanbo-editor-icon-line-height:before {
-  content: "\ea5f";
-}
-.tanbo-editor-icon-text-width:before {
-  content: "\ea60";
-}
-.tanbo-editor-icon-font-size:before {
-  content: "\ea61";
-}
-.tanbo-editor-icon-ltr:before {
-  content: "\ea74";
-}
-.tanbo-editor-icon-rtl:before {
-  content: "\ea75";
 }

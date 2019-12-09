@@ -7,6 +7,7 @@ export const indentHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '首行缩进',
   priority: Priority.BlockStyle,
+  classes: ['tanbo-editor-icon-text-indent'],
   execCommand: commander,
   mini: true,
   highlight(options, cacheData) {
