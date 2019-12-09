@@ -5,6 +5,7 @@ import { TBRange } from '../selection/range';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
+import { FormatRange } from '../parser/format';
 
 interface MatchData {
   state: FormatState;
@@ -122,21 +123,15 @@ export class Matcher {
         }
       });
       let state = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
-      let overlap: boolean;
-      switch (state.state) {
-        case FormatState.Exclude:
-          overlap = false;
-          break;
-        case FormatState.Valid:
-          overlap = true;
-          break;
-        case FormatState.Invalid:
-          overlap = Matcher.inSingleContainer(range.commonAncestorFragment.parent, handler);
-          break;
+      if (state.state === FormatState.Invalid) {
+        state = Matcher.inSingleContainer(range.commonAncestorFragment,
+          handler,
+          0,
+          range.commonAncestorFragment.contents.length);
       }
 
       return {
-        state: overlap ? MatchState.Highlight : MatchState.Normal,
+        state: state.state === FormatState.Valid ? MatchState.Highlight : MatchState.Normal,
         fromRange: range,
         cacheData: state.cacheData
       };
@@ -359,27 +354,43 @@ export class Matcher {
   }
 
   private static inSingleContainer(fragment: Fragment,
-                                   handler: Handler): boolean {
+                                   handler: Handler, startIndex: number, endIndex: number): MatchData {
 
-    while (fragment && fragment.parent) {
-      let startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
-      let endIndex = startIndex + 1;
-
+    while (true) {
       const formatRanges = fragment.formatMatrix.get(handler) || [];
-      const states: FormatState[] = [];
+      const states: FormatRange[] = [];
       for (const f of formatRanges) {
         if (startIndex >= f.startIndex || endIndex <= f.endIndex) {
-          states.push(f.state);
+          states.push(f);
         }
       }
-      if (states.includes(FormatState.Exclude)) {
-        return false;
-      } else if (states.includes(FormatState.Valid)) {
-        return true;
-      } else {
+      for (const item of states) {
+        if (item.state === FormatState.Exclude) {
+          return {
+            state: FormatState.Exclude,
+            cacheData: item.cacheData.clone()
+          }
+        }
+      }
+      for (const item of states) {
+        if (item.state === FormatState.Valid) {
+          return {
+            state: FormatState.Valid,
+            cacheData: item.cacheData.clone()
+          }
+        }
+      }
+      if (fragment.parent) {
+        startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
+        endIndex = startIndex + 1;
         fragment = fragment.parent;
+      } else {
+        break;
       }
     }
-    return false;
+    return {
+      state: FormatState.Invalid,
+      cacheData: null
+    };
   }
 }
