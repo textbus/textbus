@@ -167,7 +167,6 @@ export class ViewRenderer {
           range.startIndex = p.index;
           range.endFragment = p.fragment;
           range.endIndex = p.index;
-          console.log(p)
           // if (!direction.ctrlKey) {
           //
           // }
@@ -327,9 +326,10 @@ export class ViewRenderer {
             }
           });
           this.deleteEmptyFragment(range.endFragment);
-          range.endFragment = range.startFragment;
-          range.endIndex = range.startIndex;
+
         }
+        range.endFragment = range.startFragment;
+        range.endIndex = range.startIndex;
         this.rerender(range.commonAncestorFragment);
         this.selection.collapse();
       }

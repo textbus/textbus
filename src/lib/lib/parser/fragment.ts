@@ -250,7 +250,7 @@ export class Fragment extends View {
     });
     return {
       host: this.host,
-      nextSibling
+      nextSibling: (nextSibling && nextSibling.parentNode === this.host) ? nextSibling : null
     };
   }
 
