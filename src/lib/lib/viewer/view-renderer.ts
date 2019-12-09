@@ -449,7 +449,11 @@ export class ViewRenderer {
 
   private static getNextPosition(range: TBRange): TBRangePosition {
     const currentFragment = range.endFragment;
-    const offset = range.endIndex;
+    let offset = range.endIndex;
+    const c = currentFragment.contents.getContentAtIndex(offset);
+    if (c instanceof Single && c.tagName === 'br') {
+      offset++;
+    }
     if (offset < currentFragment.contents.length) {
       return {
         fragment: currentFragment,
@@ -485,8 +489,8 @@ export class ViewRenderer {
       }
     }
     return {
-      fragment,
-      index: fragment.contents.length
+      fragment: currentFragment,
+      index: currentFragment.contents.length
     }
   }
 }
