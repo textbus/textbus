@@ -449,8 +449,8 @@ export class ViewRenderer {
   }
 
   private static getPreviousPosition(range: TBRange) {
-    const currentFragment = range.endFragment;
-    let offset = range.endIndex;
+    const currentFragment = range.startFragment;
+    let offset = range.startIndex;
     if (offset === currentFragment.contents.length) {
       const c = currentFragment.contents.getContentAtIndex(offset - 1);
       if (c instanceof Single && c.tagName === 'br') {
