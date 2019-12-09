@@ -240,11 +240,11 @@ export class Fragment extends View {
     let nextSibling: Node = null;
     this.contents.getFragments().forEach(f => {
       const p = f.destroyView();
-      nextSibling = p.nextSibling;
+      nextSibling = p.nextSibling || nextSibling;
     });
     this.elements.forEach(el => {
       if (el.parentNode) {
-        nextSibling = el.nextSibling;
+        nextSibling = el.nextSibling || nextSibling;
         el.parentNode.removeChild(el);
       }
     });
