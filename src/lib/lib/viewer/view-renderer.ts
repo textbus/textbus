@@ -151,15 +151,16 @@ export class ViewRenderer {
     this.selection.ranges.forEach(range => {
       let p: TBRangePosition;
       switch (direction.type) {
-        // case CursorMoveType.Left:
-        //   p = this.getNextPosition();
-        //   range.startFragment = p.fragment;
-        //   range.startIndex = p.index;
-        //   if (!direction.ctrlKey) {
-        //     range.endFragment = p.fragment;
-        //     range.endIndex = p.index;
-        //   }
-        //   break;
+        case CursorMoveType.Left:
+          p = ViewRenderer.getPreviousPosition(range);
+          range.startFragment = p.fragment;
+          range.startIndex = p.index;
+          range.endFragment = p.fragment;
+          range.endIndex = p.index;
+          // if (!direction.ctrlKey) {
+          //
+          // }
+          break;
         case CursorMoveType.Right:
           p = ViewRenderer.getNextPosition(range);
           range.startFragment = p.fragment;
@@ -445,6 +446,56 @@ export class ViewRenderer {
 
   private updateFrameHeight() {
     this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
+  }
+
+  private static getPreviousPosition(range: TBRange) {
+    const currentFragment = range.endFragment;
+    let offset = range.endIndex;
+    if (offset === currentFragment.contents.length) {
+      const c = currentFragment.contents.getContentAtIndex(offset - 1);
+      if (c instanceof Single && c.tagName === 'br') {
+        offset--;
+      }
+    }
+    if (offset > 0) {
+      return {
+        fragment: currentFragment,
+        index: offset - 1
+      }
+    }
+
+    let fragment = currentFragment;
+    while (fragment.parent) {
+      const index = fragment.getIndexInParent();
+      if (index === 0) {
+        fragment = fragment.parent;
+      } else {
+        let prev = fragment.parent.contents.getContentAtIndex(index - 1);
+        if (prev instanceof Fragment) {
+          while (prev) {
+            const last = (prev as Fragment).contents.getContentAtIndex((prev as Fragment).contents.length - 1);
+            if (last instanceof Fragment) {
+              prev = last;
+            } else {
+              return {
+                fragment: prev as Fragment,
+                index: (prev as Fragment).contents.length
+              }
+            }
+          }
+
+        } else {
+          return {
+            fragment: fragment.parent,
+            index: index - 1
+          }
+        }
+      }
+    }
+    return {
+      fragment: currentFragment,
+      index: 0
+    }
   }
 
   private static getNextPosition(range: TBRange): TBRangePosition {
