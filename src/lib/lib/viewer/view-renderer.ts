@@ -32,7 +32,7 @@ export class ViewRenderer {
 
   private cursor: Cursor;
 
-  constructor(docStyle = false) {
+  constructor() {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
@@ -41,13 +41,6 @@ export class ViewRenderer {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
-
-      if (docStyle) {
-        const body = this.contentDocument.body;
-        const html = this.contentDocument.documentElement;
-        html.style.cssText = 'background: #eee; padding: 20px 0';
-        body.style.cssText = 'width: 600px; box-shadow: 1px 3px 3px rgba(0,0,0,.2); margin: 0 auto; background: #fff; padding: 20px 15px; border-radius: 3px';
-      }
 
       const selection = new TBSelection(doc, true);
       this.cursor = new Cursor(doc, selection);
@@ -94,6 +87,7 @@ export class ViewRenderer {
   render(rootFragment: RootFragment) {
     this.contentDocument.body.innerHTML = '';
     rootFragment.render(this.contentDocument.body);
+    this.updateFrameHeight();
   }
 
   use(hooks: Hooks) {
@@ -446,6 +440,10 @@ export class ViewRenderer {
   private rerender(fragment: Fragment) {
     const position = fragment.destroyView();
     fragment.render(position.host, position.nextSibling);
+    this.updateFrameHeight();
+  }
+
+  private updateFrameHeight() {
     this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
   }
 

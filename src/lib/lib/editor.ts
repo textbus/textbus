@@ -55,9 +55,10 @@ export class Editor implements EventDelegate {
   private readonly historyStackSize: number;
 
   private root: RootFragment;
-  private readonly viewer = new ViewRenderer(this.options.docStyle);
+  private readonly viewer = new ViewRenderer();
   private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
+  private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
   private readonly handlers: Handler[] = [...defaultHandlers];
 
@@ -99,13 +100,20 @@ export class Editor implements EventDelegate {
     this.listenUserWriteEvent();
 
     this.toolbar.classList.add('tanbo-editor-toolbar');
+    this.frameContainer.classList.add('tanbo-editor-frame-container');
 
     this.elementRef.appendChild(this.toolbar);
-    this.elementRef.appendChild(this.viewer.elementRef);
+    this.elementRef.appendChild(this.frameContainer);
+    this.frameContainer.appendChild(this.viewer.elementRef);
     this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tanbo-editor-container');
     this.container.appendChild(this.elementRef);
+
+    if (options.docStyle) {
+      this.frameContainer.style.padding = '20px 0';
+      this.viewer.elementRef.style.cssText = 'width: 600px;';
+    }
   }
 
   updateHandlerState(selection: TBSelection) {
