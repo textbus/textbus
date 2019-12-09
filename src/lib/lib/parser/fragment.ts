@@ -237,8 +237,11 @@ export class Fragment extends View {
   }
 
   destroyView() {
-    this.contents.getFragments().forEach(f => f.destroyView());
     let nextSibling: Node = null;
+    this.contents.getFragments().forEach(f => {
+      const p = f.destroyView();
+      nextSibling = p.nextSibling;
+    });
     this.elements.forEach(el => {
       if (el.parentNode) {
         nextSibling = el.nextSibling;
@@ -256,10 +259,11 @@ export class Fragment extends View {
       return;
     }
     this.contents.getFragments().forEach(f => f.destroy());
-    this.destroyView();
     if (this.parent) {
       const index = this.getIndexInParent();
       this.parent.delete(index, 1);
+    } else {
+      this.destroyView();
     }
     this.formatMatrix.clear();
     this.contents = new Contents();
@@ -376,7 +380,11 @@ export class Fragment extends View {
             host.appendChild(currentNode);
           }
         } else if (item instanceof View) {
-          item.render(host);
+          if (item instanceof Fragment) {
+            item.render(host, nextSibling);
+          } else {
+            item.render(host);
+          }
           newNodes.push(item.virtualNode);
         }
         i += item.length;

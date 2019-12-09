@@ -440,6 +440,7 @@ export class ViewRenderer {
 
   private rerender(fragment: Fragment) {
     const position = fragment.destroyView();
+    console.log(position)
     fragment.render(position.host, position.nextSibling);
     this.updateFrameHeight();
   }
