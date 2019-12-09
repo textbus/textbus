@@ -343,6 +343,9 @@ export class ViewRenderer {
         }
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;
+        if (range.startFragment.contents.length === 0) {
+          range.startFragment.append(new Single(range.startFragment, 'br'));
+        }
         this.rerender(range.commonAncestorFragment);
         this.selection.collapse();
       }
