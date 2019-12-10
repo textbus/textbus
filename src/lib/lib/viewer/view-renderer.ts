@@ -78,7 +78,7 @@ export class ViewRenderer {
         }
         firstRange.startFragment = firstRange.endFragment = f;
         firstRange.startIndex = 0;
-        firstRange.endIndex = f.contents.getAllChildContentsLength();
+        firstRange.endIndex = f.contents.length;
         this.selection.addRange(firstRange);
         this.selection.apply();
       });
