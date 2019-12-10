@@ -5,13 +5,13 @@ import { createEditor } from './lib/create';
 import './lib/assets/index.scss';
 
 const editor = createEditor('#editor', {
-  docStyle: false,
+  docStyle: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';
   },
   content: `
-<p>111<strong>222</strong>333<strong>444</strong>555</p>
+<p>11111111111111111</p>
   `
 });
 

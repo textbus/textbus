@@ -517,10 +517,13 @@ export class ViewRenderer {
   private static getNextPosition(range: TBRange): TBRangePosition {
     const currentFragment = range.endFragment;
     let offset = range.endIndex;
-    const c = currentFragment.contents.getContentAtIndex(offset);
-    if (c instanceof Single && c.tagName === 'br') {
-      offset++;
+    if (offset === currentFragment.contents.length - 1) {
+      const c = currentFragment.contents.getContentAtIndex(offset);
+      if (c instanceof Single && c.tagName === 'br') {
+        offset++;
+      }
     }
+
     if (offset < currentFragment.contents.length) {
       return {
         fragment: currentFragment,
@@ -555,9 +558,14 @@ export class ViewRenderer {
         }
       }
     }
+    let index = currentFragment.contents.length;
+    const c = currentFragment.contents.getContentAtIndex(index - 1);
+    if (c instanceof Single && c.tagName === 'br') {
+      index--;
+    }
     return {
       fragment: currentFragment,
-      index: currentFragment.contents.length
+      index
     }
   }
 }
