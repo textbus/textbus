@@ -138,7 +138,7 @@ export class RootFragment extends Fragment {
         });
         this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contents.length);
         context.contents.append(newBlock);
-        return newBlock.contents.length;
+        return 1;
       }
     }
   }
