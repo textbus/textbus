@@ -76,9 +76,14 @@ export class ViewRenderer {
         while (f.parent) {
           f = f.parent;
         }
-        firstRange.startFragment = firstRange.endFragment = f;
+
+        const startPosition = this.findFirstChild(f);
+        const endPosition = this.findLastChild(f, f.contents.length - 1);
+
+        firstRange.startFragment = startPosition.fragment;
+        firstRange.endFragment = endPosition.fragment;
         firstRange.startIndex = 0;
-        firstRange.endIndex = f.contents.length;
+        firstRange.endIndex = endPosition.index;
         this.selection.addRange(firstRange);
         this.selection.apply();
       });
