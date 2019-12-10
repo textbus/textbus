@@ -63,7 +63,6 @@ export class TBSelection {
   }
 
   addRange(range: TBRange) {
-    console.log(range)
     this.selection.addRange(range.rawRange);
     this._ranges.push(range);
   }

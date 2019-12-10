@@ -168,12 +168,17 @@ export class TBRange {
     let endIndex = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
-      if (item instanceof VirtualContainerNode && item.context.virtualNode === item && endIndex === i - 1) {
-        const index = Array.from(item.elementRef.parentNode.childNodes).indexOf(item.elementRef as ChildNode);
-        return {
-          node: item.elementRef.parentNode,
-          offset: index === vNodes.length - 1 ? index + 1 : index
+      if (item instanceof VirtualContainerNode && item.context.virtualNode === item) {
+        if (endIndex === i) {
+          const childNodes = Array.from(item.elementRef.parentNode.childNodes);
+          const index = childNodes.indexOf(item.elementRef as ChildNode);
+          return {
+            node: item.elementRef.parentNode,
+            offset: index
+          }
         }
+        endIndex++;
+        continue;
       }
       endIndex = item.endIndex;
 
@@ -201,6 +206,13 @@ export class TBRange {
         }
       }
     }
+    const last = vNodes[vNodes.length - 1];
+    const childNodes = Array.from(last.elementRef.parentNode.childNodes);
+    const index = childNodes.indexOf(last.elementRef as ChildNode);
+    return {
+      node: last.elementRef.parentNode,
+      offset: index + 1
+    };
   }
 
   private static getIndex(node: Node): number {
