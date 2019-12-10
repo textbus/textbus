@@ -250,6 +250,11 @@ export class Matcher {
                 cacheData: format.cacheData ? format.cacheData.clone() : null
               });
             }
+          } else {
+            states.push({
+              state: FormatState.Invalid,
+              cacheData: null
+            })
           }
         }
         if (!formatRanges.length) {
