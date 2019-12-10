@@ -1,6 +1,7 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
+import { filter } from 'rxjs/operators';
 
 interface CursorStyle {
   left: number;
@@ -120,8 +121,18 @@ export class Cursor {
       this.hide();
       this.blurEvent.next();
     });
+    let isWriting = false;
+    fromEvent(this.input, 'compositionstart').subscribe(() => {
+      isWriting = true;
+    });
 
-    fromEvent(this.input, 'keydown').subscribe((ev: KeyboardEvent) => {
+    fromEvent(this.input, 'compositionend').subscribe(() => {
+      isWriting = false;
+    });
+
+    fromEvent(this.input, 'keydown').pipe(filter(() => {
+      return !isWriting || !this.input.value;
+    })).subscribe((ev: KeyboardEvent) => {
       if (ev.key === 'Backspace' && !this.input.value.length) {
         this.deleteEvent.next();
         this.inputStartSelection = selection.clone();
