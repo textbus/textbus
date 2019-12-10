@@ -357,7 +357,6 @@ export class Fragment extends View {
           const v = new VirtualNode(
             [newFormatRange],
             this,
-            vNode.parent,
             newFormatRange.startIndex,
             newFormatRange.endIndex);
           newNodes.push(v);
@@ -410,7 +409,7 @@ export class Fragment extends View {
       }
     });
 
-    const root = new VirtualContainerNode(containerFormatRanges, this, null, 0, this.contents.length);
+    const root = new VirtualContainerNode(containerFormatRanges, this, 0, this.contents.length);
     this.vDomBuilder(childFormatRanges,
       root,
       0,
@@ -436,7 +435,7 @@ export class Fragment extends View {
         context: this,
         state: null,
         cacheData: null
-      })], this, parent, startIndex, endIndex));
+      })], this, startIndex, endIndex));
       return;
     }
     while (startIndex < endIndex) {
@@ -451,9 +450,9 @@ export class Fragment extends View {
             state: null,
             cacheData: null
           });
-          parent.children.push(new VirtualNode([f], this, parent, startIndex, firstRange.startIndex));
+          parent.children.push(new VirtualNode([f], this, startIndex, firstRange.startIndex));
         }
-        const container = new VirtualContainerNode([firstRange], this, parent, firstRange.startIndex, firstRange.endIndex);
+        const container = new VirtualContainerNode([firstRange], this, firstRange.startIndex, firstRange.endIndex);
         const childFormatRanges: FormatRange[] = [];
         while (true) {
           const f = formatRanges[0];
@@ -491,7 +490,7 @@ export class Fragment extends View {
             state: null,
             cacheData: null
           });
-          container.children.push(new VirtualNode([f], this, parent, firstRange.startIndex, firstRange.endIndex))
+          container.children.push(new VirtualNode([f], this, firstRange.startIndex, firstRange.endIndex))
         }
         parent.children.push(container);
         startIndex = firstRange.endIndex;
@@ -503,7 +502,7 @@ export class Fragment extends View {
           context: this,
           state: null,
           cacheData: null
-        })], this, parent, startIndex, endIndex));
+        })], this, startIndex, endIndex));
         break;
       }
     }

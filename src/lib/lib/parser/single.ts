@@ -30,7 +30,7 @@ export class Single extends View {
 
     const canApplyFormats = this.getCanApplyFormats();
     const index = this.parent.contents.find(this);
-    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, null, index, index + 1);
+    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, index, index + 1);
     const el = document.createElement(this.tagName);
     vNode.elementRef = el;
     el[VIRTUAL_NODE] = vNode;
