@@ -70,16 +70,16 @@ export class ViewRenderer {
         this.moveCursor(direction);
       });
       this.cursor.onSelectAll.subscribe(() => {
-        const r = this.selection.firstRange;
-        let fragment: Fragment = r.startFragment;
-        while (fragment.parent) {
-          fragment = fragment.parent;
+        const firstRange = this.selection.firstRange;
+        this.selection.removeAllRanges();
+        let f = firstRange.startFragment;
+        while (f.parent) {
+          f = f.parent;
         }
-        r.startFragment = fragment;
-        r.endFragment = fragment;
-        r.startIndex = 0;
-        r.endIndex = r.commonAncestorFragment.contents.length;
-        this.selection.ranges = [r];
+        firstRange.startFragment = firstRange.endFragment = f;
+        firstRange.startIndex = 0;
+        firstRange.endIndex = f.contents.getAllChildContentsLength();
+        this.selection.addRange(firstRange);
         this.selection.apply();
       });
     };
@@ -152,7 +152,8 @@ export class ViewRenderer {
           return v.concat(n);
         }, []).map(r => new TBRange(r));
         selection = new TBSelection(this.contentDocument);
-        selection.ranges = ranges;
+        selection.removeAllRanges();
+        ranges.forEach(r => selection.addRange(r));
       }
     });
     handler.execCommand.command(selection, handler, overlap);

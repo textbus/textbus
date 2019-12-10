@@ -6,7 +6,9 @@ import { TBRange } from './range';
 export class TBSelection {
   onSelectionChange: Observable<TBSelection>;
 
-  ranges: TBRange[] = [];
+  get ranges(): TBRange[] {
+    return this._ranges;
+  };
 
   get commonAncestorFragment() {
     return this.getCommonFragment();
@@ -35,6 +37,8 @@ export class TBSelection {
   private selection: Selection;
   private selectionChangeEvent = new Subject<TBSelection>();
 
+  private _ranges: TBRange[] = [];
+
   constructor(private context: Document, private listenEvent = false) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     if (listenEvent) {
@@ -47,7 +51,7 @@ export class TBSelection {
         if (!this.selection) {
           return;
         }
-        this.ranges = this.makeRanges();
+        this._ranges = this.makeRanges();
         this.selectionChangeEvent.next(this);
       });
     }
@@ -55,12 +59,18 @@ export class TBSelection {
 
   removeAllRanges() {
     this.selection.removeAllRanges();
-    this.ranges = [];
+    this._ranges = [];
+  }
+
+  addRange(range: TBRange) {
+    console.log(range)
+    this.selection.addRange(range.rawRange);
+    this._ranges.push(range);
   }
 
   clone() {
     const t = new TBSelection(this.context);
-    t.ranges = this.ranges.map(r => r.clone());
+    t._ranges = this.ranges.map(r => r.clone());
     return t;
   }
 
@@ -73,14 +83,14 @@ export class TBSelection {
   collapse(toEnd = false) {
     const range = toEnd ? this.lastRange : this.firstRange;
     range.collapse(toEnd);
-    this.ranges = [range];
+    this._ranges = [range];
     this.apply();
   }
 
   private makeRanges() {
     const selection = this.selection;
     const ranges = [];
-    if (selection.rangeCount) {
+    if (selection && selection.rangeCount) {
       for (let i = 0; i < selection.rangeCount; i++) {
         const range = selection.getRangeAt(i);
         ranges.push(new TBRange(range));

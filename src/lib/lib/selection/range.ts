@@ -165,29 +165,36 @@ export class TBRange {
 
   private findFocusNodeAndOffset(vNodes: VirtualNode[],
                                  i: number): { node: Node, offset: number } {
+    let ii = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
       const toEnd = i === item.endIndex && index === vNodes.length - 1;
-      if (i >= item.startIndex && i < item.endIndex || toEnd) {
-        if (item instanceof VirtualContainerNode) {
-          if (item.children.length) {
-            return this.findFocusNodeAndOffset(item.children, i);
+
+      if (item instanceof VirtualContainerNode) {
+        const childLength = item.context.contents.getAllChildContentsLength();
+        if (childLength) {
+          if (i >= ii && i <= ii + childLength) {
+            return this.findFocusNodeAndOffset(item.children, i - ii);
+          } else {
+            ii += childLength;
           }
-          return {
-            node: item.elementRef,
-            offset: i
+        }
+      } else {
+        if (i >= item.startIndex && i < item.endIndex || toEnd) {
+          if (item instanceof VirtualObjectNode) {
+            const index = Array.from(item.elementRef.parentNode.childNodes).indexOf(item.elementRef as ChildNode);
+            return {
+              node: item.elementRef.parentNode,
+              offset: toEnd ? index + 1 : index
+            }
+          } else if (item instanceof VirtualNode) {
+            return {
+              node: item.elementRef,
+              offset: i - item.startIndex
+            };
           }
-        } else if (item instanceof VirtualObjectNode) {
-          const index = Array.from(item.elementRef.parentNode.childNodes).indexOf(item.elementRef as ChildNode);
-          return {
-            node: item.elementRef.parentNode,
-            offset: toEnd ? index + 1 : index
-          }
-        } else if (item instanceof VirtualNode) {
-          return {
-            node: item.elementRef,
-            offset: i - item.startIndex
-          };
+        } else {
+          ii += item.endIndex - item.startIndex;
         }
       }
     }
