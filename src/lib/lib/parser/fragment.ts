@@ -233,6 +233,7 @@ export class Fragment extends View {
     this.elements = [];
     this.host = host;
     host[VIRTUAL_NODE] = vDom;
+    console.log(this, vDom)
     this.viewBuilder(vDom, this.contents, host, nextSibling);
   }
 
@@ -399,15 +400,19 @@ export class Fragment extends View {
    * @param formatRanges 可应用的格式化数据
    */
   private createVDom(formatRanges: FormatRange[]) {
-    const root = new VirtualContainerNode([new FormatRange({
-      startIndex: 0,
-      endIndex: this.contents.length,
-      handler: null,
-      context: this,
-      state: null,
-      cacheData: null
-    })], this, null, 0, this.contents.length);
-    this.vDomBuilder(formatRanges,
+    const containerFormatRanges: FormatRange[] = [];
+    const childFormatRanges: FormatRange[] = [];
+
+    formatRanges.forEach(format => {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority)) {
+        containerFormatRanges.push(format);
+      } else {
+        childFormatRanges.push(format);
+      }
+    });
+
+    const root = new VirtualContainerNode(containerFormatRanges, this, null, 0, this.contents.length);
+    this.vDomBuilder(childFormatRanges,
       root,
       0,
       this.contents.length
@@ -423,7 +428,19 @@ export class Fragment extends View {
    * @param endIndex 生成范围的结束位置
    */
   private vDomBuilder(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
-    while (startIndex <= endIndex) {
+    if (startIndex === 0 && endIndex === 0) {
+      // 兼容空标签节点
+      parent.children.push(new VirtualNode([new FormatRange({
+        startIndex,
+        endIndex,
+        handler: null,
+        context: this,
+        state: null,
+        cacheData: null
+      })], this, parent, startIndex, endIndex));
+      return;
+    }
+    while (startIndex < endIndex) {
       let firstRange = formatRanges.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
