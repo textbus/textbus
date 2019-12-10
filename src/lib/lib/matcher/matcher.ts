@@ -124,10 +124,17 @@ export class Matcher {
       });
       let state = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
       if (state.state === FormatState.Invalid) {
-        state = Matcher.inSingleContainer(range.commonAncestorFragment,
-          handler,
-          0,
-          range.commonAncestorFragment.contents.length);
+        if (range.collapsed) {
+          state = Matcher.inSingleContainer(range.commonAncestorFragment,
+            handler,
+            range.startIndex,
+            range.endIndex);
+        } else {
+          state = Matcher.inSingleContainer(range.commonAncestorFragment,
+            handler,
+            0,
+            range.commonAncestorFragment.contents.length);
+        }
       }
 
       return {
@@ -364,7 +371,7 @@ export class Matcher {
       const formatRanges = fragment.formatMatrix.get(handler) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
-        if (startIndex >= f.startIndex || endIndex <= f.endIndex) {
+        if (startIndex > f.startIndex && endIndex <= f.endIndex) {
           states.push(f);
         }
       }
