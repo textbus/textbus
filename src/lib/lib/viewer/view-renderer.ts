@@ -70,22 +70,10 @@ export class ViewRenderer {
         this.moveCursor(direction);
       });
       this.cursor.onSelectAll.subscribe(() => {
-        const firstRange = this.selection.firstRange;
-        this.selection.removeAllRanges();
-        let f = firstRange.startFragment;
-        while (f.parent) {
-          f = f.parent;
-        }
-
-        const startPosition = this.findFirstChild(f);
-        const endPosition = this.findLastChild(f, f.contents.length - 1);
-
-        firstRange.startFragment = startPosition.fragment;
-        firstRange.endFragment = endPosition.fragment;
-        firstRange.startIndex = 0;
-        firstRange.endIndex = endPosition.index;
-        this.selection.addRange(firstRange);
-        this.selection.apply();
+        this.selectAll();
+      });
+      this.cursor.onPaste.subscribe(v => {
+        this.paste(v);
       });
     };
     // this.frame.setAttribute('scrolling', 'no');
@@ -163,6 +151,32 @@ export class ViewRenderer {
     });
     handler.execCommand.command(selection, handler, overlap);
     this.rerender(selection.commonAncestorFragment);
+    this.selection.apply();
+  }
+
+  private paste(v: string) {
+    if (!this.selection.collapsed) {
+      this.deleteContents();
+    }
+    console.log(v);
+  }
+
+  private selectAll() {
+    const firstRange = this.selection.firstRange;
+    this.selection.removeAllRanges();
+    let f = firstRange.startFragment;
+    while (f.parent) {
+      f = f.parent;
+    }
+
+    const startPosition = this.findFirstChild(f);
+    const endPosition = this.findLastChild(f, f.contents.length - 1);
+
+    firstRange.startFragment = startPosition.fragment;
+    firstRange.endFragment = endPosition.fragment;
+    firstRange.startIndex = 0;
+    firstRange.endIndex = endPosition.index;
+    this.selection.addRange(firstRange);
     this.selection.apply();
   }
 

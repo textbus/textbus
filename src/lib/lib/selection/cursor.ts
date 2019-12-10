@@ -41,6 +41,7 @@ export class Cursor {
   onNewLine: Observable<void>;
   onMove: Observable<CursorMoveDirection>;
   onSelectAll: Observable<void>;
+  onPaste: Observable<string>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -54,6 +55,7 @@ export class Cursor {
   private newLineEvent = new Subject<void>();
   private moveEvent = new Subject<CursorMoveDirection>();
   private selectAllEvent = new Subject<void>();
+  private pasteEvent = new Subject<string>();
 
   private timer: any = null;
 
@@ -83,6 +85,7 @@ export class Cursor {
     this.onNewLine = this.newLineEvent.asObservable();
     this.onMove = this.moveEvent.asObservable();
     this.onSelectAll = this.selectAllEvent.asObservable();
+    this.onPaste = this.pasteEvent.asObservable();
 
     this.elementRef.classList.add('tanbo-editor-selection');
     this.cursor.classList.add('tanbo-editor-cursor');
@@ -112,9 +115,9 @@ export class Cursor {
     });
 
     fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
-      // console.log(ev.clipboardData)
-      // const v = ev.clipboardData.getData('Text');
-      // console.log(JSON.stringify(v));
+      const v = ev.clipboardData.getData('Text');
+      this.pasteEvent.next(v);
+      ev.preventDefault();
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {
