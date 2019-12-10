@@ -11,12 +11,12 @@ export class ToggleBlockCommander implements Commander<any> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.forEach(range => {
-      const formatMatrix = range.commonAncestorFragment.formatMatrix;
-      Array.from(formatMatrix.keys()).forEach(key => {
-        if (key.execCommand instanceof ToggleBlockCommander && key !== handler) {
-          formatMatrix.delete(key);
-        }
-      });
+      // const formatMatrix = range.commonAncestorFragment.formatMatrix;
+      // Array.from(formatMatrix.keys()).forEach(key => {
+      //   if (key.execCommand instanceof ToggleBlockCommander && key !== handler) {
+      //     formatMatrix.delete(key);
+      //   }
+      // });
       range.commonAncestorFragment.apply(new FormatRange({
         startIndex: 0,
         endIndex: range.commonAncestorFragment.contents.length,

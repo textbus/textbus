@@ -11,11 +11,7 @@ const editor = createEditor('#editor', {
     return '/test';
   },
   content: `
-  <p>111</p>
-  
-  <p>222</p>
-  <p><br></p>
-  <p>444</p>
+<p>111<strong>222</strong>333<strong>444</strong>555</p>
   `
 });
 

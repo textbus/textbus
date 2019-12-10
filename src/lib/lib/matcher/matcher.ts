@@ -201,7 +201,7 @@ export class Matcher {
   }
 
   private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
-    const formatRanges = fragment.formatMatrix.get(handler) || [];
+    let formatRanges = fragment.formatMatrix.get(handler) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         // 如果为块级元素，则需要从第 0 位开始匹配
@@ -231,6 +231,10 @@ export class Matcher {
     const childContents = fragment.contents.slice(startIndex, endIndex);
     const states: Array<MatchData> = [];
     let index = startIndex;
+
+    formatRanges = formatRanges.filter(item => {
+      return !(item.endIndex <= startIndex || item.startIndex >= endIndex);
+    });
     for (const child of childContents) {
       if (typeof child === 'string') {
         for (const format of formatRanges) {
@@ -246,11 +250,6 @@ export class Matcher {
                 cacheData: format.cacheData ? format.cacheData.clone() : null
               });
             }
-          } else {
-            states.push({
-              state: FormatState.Invalid,
-              cacheData: null
-            })
           }
         }
         if (!formatRanges.length) {
