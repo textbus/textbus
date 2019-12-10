@@ -146,6 +146,7 @@ export class Cursor {
           ctrlKey: ev.ctrlKey,
           altKey: ev.altKey
         });
+        this.input.value = '';
         this.inputStartSelection = selection.clone();
         this.editingFragment = selection.commonAncestorFragment.clone();
       } else if (ev.key === 'a' && (this.isMac ? ev.metaKey : ev.ctrlKey)) {

@@ -467,12 +467,7 @@ export class ViewRenderer {
   private static getPreviousPosition(range: TBRange) {
     const currentFragment = range.startFragment;
     let offset = range.startIndex;
-    if (offset === currentFragment.contents.length) {
-      const c = currentFragment.contents.getContentAtIndex(offset - 1);
-      if (c instanceof Single && c.tagName === 'br') {
-        offset--;
-      }
-    }
+
     if (offset > 0) {
       return {
         fragment: currentFragment,
@@ -493,9 +488,14 @@ export class ViewRenderer {
             if (last instanceof Fragment) {
               prev = last;
             } else {
+              let len = (prev as Fragment).contents.length;
+              const c = (prev as Fragment).contents.getContentAtIndex(len - 1);
+              if (c instanceof Single && c.tagName === 'br') {
+                len--;
+              }
               return {
                 fragment: prev as Fragment,
-                index: (prev as Fragment).contents.length
+                index: len
               }
             }
           }
