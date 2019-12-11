@@ -403,7 +403,8 @@ export class Fragment extends View {
     const childFormatRanges: FormatRange[] = [];
 
     formatRanges.forEach(format => {
-      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority)) {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
+        format.startIndex === 0 && format.endIndex === this.contents.length) {
         containerFormatRanges.push(format);
       } else {
         childFormatRanges.push(format);

@@ -160,31 +160,29 @@ export class ViewRenderer {
       this.deleteContents();
     }
     const firstRange = this.selection.firstRange;
-    console.log(el)
     const fragment = this.parser.parse(el, new Fragment(null));
-    console.log(fragment)
-    // const contents = fragment.contents.slice(0);
-    // const last = contents[contents.length - 1] as Fragment;
-    //
-    // const first = contents.shift();
-    // const commonAncestorFragment = this.selection.commonAncestorFragment;
-    // if (first instanceof Fragment) {
-    //   this.moveContentsToFragment(first, commonAncestorFragment, firstRange.startIndex);
-    // }
-    // if (contents.length) {
-    //   let index = commonAncestorFragment.getIndexInParent();
-    //   contents.forEach(item => {
-    //     commonAncestorFragment.parent.insert(item, index);
-    //     index++;
-    //   });
-    //   this.rerender(commonAncestorFragment.parent);
-    //   // const p = this.findLastChild(last, last.contents.length - 1);
-    //   // firstRange.startFragment = firstRange.endFragment = p.fragment;
-    //   // firstRange.startIndex = firstRange.endIndex = p.index;
-    //   // this.selection.apply();
-    // } else {
-    //   this.rerender(commonAncestorFragment);
-    // }
+    const contents = fragment.contents.slice(0);
+    const last = contents[contents.length - 1] as Fragment;
+
+    const first = contents.shift();
+    const commonAncestorFragment = this.selection.commonAncestorFragment;
+    if (first instanceof Fragment) {
+      this.moveContentsToFragment(first, commonAncestorFragment, firstRange.startIndex);
+    }
+    if (contents.length) {
+      let index = commonAncestorFragment.getIndexInParent();
+      contents.forEach(item => {
+        commonAncestorFragment.parent.insert(item, index);
+        index++;
+      });
+      this.rerender(commonAncestorFragment.parent);
+      // const p = this.findLastChild(last, last.contents.length - 1);
+      // firstRange.startFragment = firstRange.endFragment = p.fragment;
+      // firstRange.startIndex = firstRange.endIndex = p.index;
+      // this.selection.apply();
+    } else {
+      this.rerender(commonAncestorFragment);
+    }
   }
 
   private selectAll() {

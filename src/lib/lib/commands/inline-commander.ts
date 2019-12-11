@@ -7,6 +7,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 
 export class InlineCommander implements Commander<any> {
   recordHistory = true;
+
   constructor(private tagName: string) {
   }
 
@@ -40,7 +41,12 @@ export class InlineCommander implements Commander<any> {
           return new ChildSlotModel(node);
         }
       case FormatState.Valid:
-        return new ChildSlotModel(document.createElement(cacheData.tag));
+        if (this.tagName === 'strong') {
+          if (/h[1-6]|th/.test(cacheData.tag)) {
+            return null;
+          }
+        }
+        return new ChildSlotModel(document.createElement(this.tagName));
     }
     return null;
   }

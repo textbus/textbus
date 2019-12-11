@@ -9,9 +9,7 @@ const editor = createEditor('#editor', {
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';
-  },
-  content: `<p>111<strong>222</strong></p><p><strong><br></strong></p><p><strong>魂牵梦萦</strong></p><p><strong><br></strong></p><p><strong><br></strong></p><p><strong><br></strong></p><p><strong>魂牵梦萦<br></strong></p>
-  `
+  }
 });
 
 // editor.updateContentHTML('<p>p1<span>p-span</span></p><span>span3</span><span>span4</span><p>p2</p><span>span1</span><span>span2</span>')
