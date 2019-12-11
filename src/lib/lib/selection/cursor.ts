@@ -41,7 +41,7 @@ export class Cursor {
   onNewLine: Observable<void>;
   onMove: Observable<CursorMoveDirection>;
   onSelectAll: Observable<void>;
-  onPaste: Observable<string>;
+  onPaste: Observable<HTMLElement>;
   readonly elementRef = document.createElement('div');
 
   private input = document.createElement('textarea');
@@ -55,7 +55,7 @@ export class Cursor {
   private newLineEvent = new Subject<void>();
   private moveEvent = new Subject<CursorMoveDirection>();
   private selectAllEvent = new Subject<void>();
-  private pasteEvent = new Subject<string>();
+  private pasteEvent = new Subject<HTMLElement>();
 
   private timer: any = null;
 
@@ -114,10 +114,16 @@ export class Cursor {
       this.focus();
     });
 
-    fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
-      const v = ev.clipboardData.getData('Text');
-      this.pasteEvent.next(v);
-      ev.preventDefault();
+    fromEvent(this.input, 'paste').subscribe(() => {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+      div.contentEditable = 'true';
+      document.body.appendChild(div);
+      div.focus();
+      setTimeout(() => {
+        this.pasteEvent.next(div);
+        document.body.removeChild(div);
+      });
     });
 
     fromEvent(this.input, 'blur').subscribe(() => {

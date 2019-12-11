@@ -234,6 +234,7 @@ export class Fragment extends View {
     this.host = host;
     host[VIRTUAL_NODE] = vDom;
     this.viewBuilder(vDom, this.contents, host, nextSibling);
+    return host;
   }
 
   destroyView() {

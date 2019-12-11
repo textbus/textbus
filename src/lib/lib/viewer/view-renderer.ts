@@ -12,6 +12,7 @@ import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
 import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
 import { Single } from '../parser/single';
+import { Parser } from '../parser/parser';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -32,7 +33,7 @@ export class ViewRenderer {
 
   private cursor: Cursor;
 
-  constructor() {
+  constructor(private parser: Parser) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
@@ -72,8 +73,8 @@ export class ViewRenderer {
       this.cursor.onSelectAll.subscribe(() => {
         this.selectAll();
       });
-      this.cursor.onPaste.subscribe(v => {
-        this.paste(v);
+      this.cursor.onPaste.subscribe(el => {
+        this.paste(el);
       });
     };
     // this.frame.setAttribute('scrolling', 'no');
@@ -154,11 +155,36 @@ export class ViewRenderer {
     this.selection.apply();
   }
 
-  private paste(v: string) {
+  private paste(el: HTMLElement) {
     if (!this.selection.collapsed) {
       this.deleteContents();
     }
-    console.log(v);
+    const firstRange = this.selection.firstRange;
+    console.log(el)
+    const fragment = this.parser.parse(el, new Fragment(null));
+    console.log(fragment)
+    // const contents = fragment.contents.slice(0);
+    // const last = contents[contents.length - 1] as Fragment;
+    //
+    // const first = contents.shift();
+    // const commonAncestorFragment = this.selection.commonAncestorFragment;
+    // if (first instanceof Fragment) {
+    //   this.moveContentsToFragment(first, commonAncestorFragment, firstRange.startIndex);
+    // }
+    // if (contents.length) {
+    //   let index = commonAncestorFragment.getIndexInParent();
+    //   contents.forEach(item => {
+    //     commonAncestorFragment.parent.insert(item, index);
+    //     index++;
+    //   });
+    //   this.rerender(commonAncestorFragment.parent);
+    //   // const p = this.findLastChild(last, last.contents.length - 1);
+    //   // firstRange.startFragment = firstRange.endFragment = p.fragment;
+    //   // firstRange.startIndex = firstRange.endIndex = p.index;
+    //   // this.selection.apply();
+    // } else {
+    //   this.rerender(commonAncestorFragment);
+    // }
   }
 
   private selectAll() {
@@ -281,13 +307,13 @@ export class ViewRenderer {
                 }
               }), true);
               rerenderFragment.fragment.insert(startFragment, 0);
-              this.moveContentsToFragment(range.startFragment, 0, startFragment);
+              this.moveContentsToFragment(range.startFragment, startFragment, 0);
               this.deleteEmptyFragment(range.startFragment);
               firstRange.startFragment = startFragment;
               firstRange.startIndex = 0;
             } else {
               const p = this.findLastChild(rerenderFragment.fragment, rerenderFragment.index - 1);
-              this.moveContentsToFragment(range.startFragment, p.index, p.fragment);
+              this.moveContentsToFragment(range.startFragment, p.fragment, p.index);
               this.deleteEmptyFragment(range.startFragment);
               firstRange.startFragment = p.fragment;
               firstRange.startIndex = p.index;
@@ -380,7 +406,7 @@ export class ViewRenderer {
     }
   }
 
-  private moveContentsToFragment(oldFragment: Fragment, offset: number, target: Fragment) {
+  private moveContentsToFragment(oldFragment: Fragment, target: Fragment, startIndex: number) {
     for (const item of oldFragment.contents) {
       target.append(item);
     }
@@ -389,8 +415,8 @@ export class ViewRenderer {
     }, []).forEach(f => {
       if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
         const ff = f.clone();
-        ff.startIndex += offset;
-        ff.endIndex += offset;
+        ff.startIndex += startIndex;
+        ff.endIndex += startIndex;
         target.mergeFormat(ff, true);
       }
     });

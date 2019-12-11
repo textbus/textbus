@@ -21,6 +21,7 @@ import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
+import { Parser } from './parser/parser';
 
 export interface Snapshot {
   doc: Fragment;
@@ -55,7 +56,7 @@ export class Editor implements EventDelegate {
   private readonly historyStackSize: number;
 
   private root: RootFragment;
-  private readonly viewer = new ViewRenderer();
+  private readonly viewer: ViewRenderer;
   private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
@@ -77,9 +78,11 @@ export class Editor implements EventDelegate {
       this.container = selector;
     }
     this.historyStackSize = options.historyStackSize || 50;
-    this.appendHandler(options.handlers);
+    this.createToolbar(options.handlers);
+    const parser = new Parser(this.handlers);
+    this.viewer = new ViewRenderer(parser);
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new RootFragment(this.handlers, this);
+      const vDom = new RootFragment(parser, this);
       this.root = vDom;
       vDom.setContents(result[0]);
       this.viewer.render(vDom);
@@ -155,7 +158,7 @@ export class Editor implements EventDelegate {
     return null;
   }
 
-  private appendHandler(handlers: (HandlerConfig | HandlerConfig[])[]) {
+  private createToolbar(handlers: (HandlerConfig | HandlerConfig[])[]) {
     if (Array.isArray(handlers)) {
       handlers.forEach(handler => {
         const group = document.createElement('span');
