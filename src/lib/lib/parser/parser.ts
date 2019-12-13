@@ -32,6 +32,9 @@ export class Parser {
       return textContent.length;
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();
+      if (dtd[tagName].display === 'none') {
+        return 0;
+      }
       if (/inline/.test(dtd[tagName].display)) {
         const start = context.contents.length;
         if (dtd[tagName].type === 'single') {
@@ -163,7 +166,7 @@ export class Parser {
 
   private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {
     if (!config) {
-      return null;
+      return new CacheData();
     }
     const attrs = new Map<string, string>();
     if (config.attrs) {

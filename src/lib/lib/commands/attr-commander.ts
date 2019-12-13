@@ -81,7 +81,9 @@ export class AttrCommander implements Commander<AttrState[]> {
     const el = document.createElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
-        el.setAttribute(key, value);
+        if (value !== null) {
+          el.setAttribute(key, value);
+        }
       })
     }
     return new ReplaceModel(el);
