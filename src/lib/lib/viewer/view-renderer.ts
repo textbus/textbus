@@ -161,27 +161,44 @@ export class ViewRenderer {
     }
     const firstRange = this.selection.firstRange;
     const fragment = this.parser.parse(el, new Fragment(null));
-    const contents = fragment.contents.slice(0);
-    const last = contents[contents.length - 1] as Fragment;
+    const newContents = fragment.contents.slice(0);
+    const last = newContents[newContents.length - 1] as Fragment;
 
-    const first = contents.shift();
     const commonAncestorFragment = this.selection.commonAncestorFragment;
-    if (first instanceof Fragment) {
-      this.moveContentsToFragment(first, commonAncestorFragment, firstRange.startIndex);
+    const firstChild = commonAncestorFragment.contents.getContentAtIndex(0);
+    const isEmpty = commonAncestorFragment.contents.length === 0 ||
+      commonAncestorFragment.contents.length === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
+
+    let index = commonAncestorFragment.getIndexInParent();
+
+    if (isEmpty) {
+      commonAncestorFragment.parent.delete(index, 1);
+    } else {
+      let startIndex = firstRange.startIndex;
+      this.createNewLine();
+      firstRange.startFragment = firstRange.endFragment = commonAncestorFragment;
+      firstRange.startIndex = firstRange.endIndex = startIndex;
+      const firstContent = newContents.shift();
+      if (firstContent instanceof Fragment) {
+        this.moveContentsToFragment(firstContent, commonAncestorFragment, startIndex);
+        if (!newContents.length) {
+          firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contents.length;
+        }
+      }
     }
-    if (contents.length) {
-      let index = commonAncestorFragment.getIndexInParent();
-      contents.forEach(item => {
-        commonAncestorFragment.parent.insert(item, index);
+    if (newContents.length) {
+      newContents.forEach(item => {
+        commonAncestorFragment.parent.insert(item, index + 1);
         index++;
       });
       this.rerender(commonAncestorFragment.parent);
-      // const p = this.findLastChild(last, last.contents.length - 1);
-      // firstRange.startFragment = firstRange.endFragment = p.fragment;
-      // firstRange.startIndex = firstRange.endIndex = p.index;
-      // this.selection.apply();
+      const p = this.findLastChild(last, last.contents.length - 1);
+      firstRange.startFragment = firstRange.endFragment = p.fragment;
+      firstRange.startIndex = firstRange.endIndex = p.index;
+      this.selection.apply();
     } else {
       this.rerender(commonAncestorFragment);
+      this.selection.apply();
     }
   }
 
