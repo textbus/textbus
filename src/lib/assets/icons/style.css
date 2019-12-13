@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?67onwe') format('truetype'),
-    url('fonts/tanbo-editor.woff?67onwe') format('woff'),
-    url('fonts/tanbo-editor.svg?67onwe#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?apqf5f') format('truetype'),
+    url('fonts/tanbo-editor.woff?apqf5f') format('woff'),
+    url('fonts/tanbo-editor.svg?apqf5f#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tanbo-editor-icon-paint-brush:before {
+  content: "\e90f";
+}
 .tanbo-editor-icon-text-indent:before {
   content: "\e90e";
 }

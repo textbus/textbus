@@ -1,7 +1,7 @@
 import { HandlerType, Priority, SelectConfig } from '../help';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
 
-const commander = new BlockStyleCommander('textAlign', '');
+const commander = new BlockStyleCommander('textAlign');
 
 export const alignHandler: SelectConfig = {
   type: HandlerType.Select,

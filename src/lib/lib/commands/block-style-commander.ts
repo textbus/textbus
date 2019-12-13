@@ -6,8 +6,8 @@ import { Handler } from '../toolbar/handlers/help';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
-  constructor(private name: string,
-              private value: string | number) {
+  private value: string | number;
+  constructor(private name: string) {
   }
 
   updateValue(value: string) {

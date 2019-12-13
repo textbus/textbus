@@ -2,11 +2,11 @@ import { Subject } from 'rxjs';
 import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownConfig, HandlerType, Priority } from '../help';
+import { StyleCommander } from '../../commands/style-commander';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { CacheData } from '../utils/cache-data';
-import { BlockStyleCommander } from '../../commands/block-style-commander';
 
-const commander = new BlockStyleCommander('backgroundColor');
+const commander = new StyleCommander('backgroundColor', false);
 
 const hideEvent = new Subject<void>();
 
@@ -35,11 +35,11 @@ class Palette implements DropdownHandlerView {
   }
 }
 
-export const backgroundHandler: DropdownConfig = {
+export const textBackgroundHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-paint-brush'],
+  classes: ['tanbo-editor-icon-background-color'],
   priority: Priority.Property,
-  tooltip: '背景颜色',
+  tooltip: '文字背景颜色',
   onHide: hideEvent.asObservable(),
   viewer: new Palette(),
   editable: {

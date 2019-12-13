@@ -43,7 +43,7 @@ export class ViewRenderer {
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
 
-      const selection = new TBSelection(doc, true);
+      const selection = new TBSelection(doc);
       this.cursor = new Cursor(doc, selection);
       this.selection = selection;
       this.readyEvent.next(doc);
@@ -77,7 +77,7 @@ export class ViewRenderer {
         this.paste(el);
       });
     };
-    // this.frame.setAttribute('scrolling', 'no');
+    this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
                       document.open();
                       document.domain = '${document.domain}';
@@ -119,11 +119,11 @@ export class ViewRenderer {
     const overlap = state === MatchState.Highlight;
 
     let selection = this.selection;
-
+    const oldSelection = selection.clone();
     this.hooksList.filter(hook => {
-      return typeof hook.onSelectionChange === 'function' && hook.context;
+      return typeof hook.preApply === 'function' && hook.context;
     }).forEach(hook => {
-      const match = this.selection.ranges.map(range => {
+      const match = selection.ranges.map(range => {
         let fragment = range.startFragment;
         while (fragment) {
           const is = Array.from(fragment.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(f => {
@@ -140,18 +140,19 @@ export class ViewRenderer {
       });
       if (match.length && !match.includes(false)) {
         const ranges = selection.ranges.map(r => {
-          const rr = hook.onSelectionChange(r.rawRange, this.contentDocument);
+          const rr = hook.preApply(r.rawRange, this.contentDocument);
           return Array.isArray(rr) ? rr : [rr];
         }).reduce((v, n) => {
           return v.concat(n);
         }, []).map(r => new TBRange(r));
-        selection = new TBSelection(this.contentDocument);
         selection.removeAllRanges();
         ranges.forEach(r => selection.addRange(r));
       }
     });
     handler.execCommand.command(selection, handler, overlap);
     this.rerender(selection.commonAncestorFragment);
+    selection.removeAllRanges();
+    selection.addRange(oldSelection.firstRange);
     this.selection.apply();
   }
 

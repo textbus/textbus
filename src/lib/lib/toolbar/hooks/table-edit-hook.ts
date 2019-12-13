@@ -127,7 +127,7 @@ export class TableEditHook implements Hooks {
 
   }
 
-  onSelectionChange(range: Range, doc: Document): Range | Range[] {
+  preApply(range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
       return this.selectedCells.map(cell => {
         const range = doc.createRange();

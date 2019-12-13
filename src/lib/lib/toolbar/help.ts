@@ -28,7 +28,7 @@ export interface Hooks {
 
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
-  onSelectionChange?(range: Range, doc: Document): Range | Range[];
+  preApply?(range: Range, doc: Document): Range | Range[];
 }
 
 export enum HandlerType {

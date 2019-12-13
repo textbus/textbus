@@ -27,6 +27,7 @@ import {
   superscriptHandler,
   tableHandler,
   tableEditHandler,
+  textBackgroundHandler,
   ulHandler,
   underlineHandler,
   videoHandler
@@ -62,6 +63,7 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
         subscriptHandler
       ], [
         colorHandler,
+        textBackgroundHandler,
         backgroundHandler
       ], [
         fontFamilyHandler

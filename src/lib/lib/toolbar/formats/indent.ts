@@ -1,7 +1,7 @@
 import { HandlerType, Priority, SelectConfig } from '../help';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
 
-const commander = new BlockStyleCommander('textIndent', '');
+const commander = new BlockStyleCommander('textIndent');
 
 export const indentHandler: SelectConfig = {
   type: HandlerType.Select,

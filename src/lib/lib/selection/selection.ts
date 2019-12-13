@@ -39,9 +39,9 @@ export class TBSelection {
 
   private _ranges: TBRange[] = [];
 
-  constructor(private context: Document, private listenEvent = false) {
+  constructor(private context?: Document) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
-    if (listenEvent) {
+    if (context) {
       const sub = merge(...['selectstart', 'mousedown'].map(type => fromEvent(context, type))).subscribe(() => {
         this.selection = context.getSelection();
         sub.unsubscribe();
@@ -68,7 +68,7 @@ export class TBSelection {
   }
 
   clone() {
-    const t = new TBSelection(this.context);
+    const t = new TBSelection();
     t._ranges = this.ranges.map(r => r.clone());
     return t;
   }
@@ -118,7 +118,7 @@ export class TBSelection {
     let fragment: Fragment = null;
 
     while (true) {
-      const firstFragments = depth.map(arr => arr.shift());
+      const firstFragments = depth.map(arr => arr.pop()).filter(i => i);
       if (firstFragments.length === depth.length) {
         if (new Set(firstFragments).size === 1) {
           fragment = firstFragments[0];

@@ -1,7 +1,8 @@
-import { Commander, ReplaceModel } from './commander';
+import { Commander } from './commander';
 import { TBSelection } from '../selection/selection';
-import { FormatRange } from '../parser/format';
 import { FormatState } from '../matcher/matcher';
+import { CacheData } from '../toolbar/utils/cache-data';
+import { Handler } from '../toolbar/handlers/help';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -36,14 +37,15 @@ export enum TableEditActions {
 
 export class TableEditCommander implements Commander<any> {
   recordHistory = true;
+
   constructor(private type: TableEditActions) {
   }
 
-  command(selection: TBSelection): TBSelection {
-    return selection;
+  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+    console.log(333)
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
-    return;
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): null {
+    return null;
   }
 }

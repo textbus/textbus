@@ -50,6 +50,7 @@ export const defaultHandlers: Handler[] = [
     return new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
       tags: [tag]
     }), {
+      tag: true,
       attrs: ['rowspan', 'colspan']
     })
   })
