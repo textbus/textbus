@@ -15,7 +15,7 @@ import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { RootFragment } from './parser/root-fragment';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
-import { TBSelection } from './selection/selection';
+import { TBSelection } from './viewer/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
@@ -96,7 +96,7 @@ export class Editor implements EventDelegate {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
-      this.paths.update(selection.focusNode);
+      this.paths.update(this.viewer.nativeSelection.focusNode);
       this.updateHandlerState(selection);
     });
 
@@ -175,9 +175,9 @@ export class Editor implements EventDelegate {
   }
 
   private createHandler(option: HandlerConfig) {
-    if (option.hooks) {
+    if (option.hook) {
       this.run(() => {
-        this.viewer.use(option.hooks);
+        this.viewer.use(option.hook);
       });
     }
     switch (option.type) {

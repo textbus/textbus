@@ -1,10 +1,7 @@
-import { fromEvent, merge, Observable, Subject } from 'rxjs';
-
 import { Fragment } from '../parser/fragment';
 import { TBRange } from './range';
 
 export class TBSelection {
-  onSelectionChange: Observable<TBSelection>;
 
   get ranges(): TBRange[] {
     return this._ranges;
@@ -30,40 +27,13 @@ export class TBSelection {
     return this.ranges.length === 1 && this.firstRange.collapsed;
   }
 
-  get focusNode() {
-    return this.selection.focusNode;
-  }
-
-  private selection: Selection;
-  private selectionChangeEvent = new Subject<TBSelection>();
-
   private _ranges: TBRange[] = [];
 
-  constructor(private context?: Document) {
-    this.onSelectionChange = this.selectionChangeEvent.asObservable();
-    if (context) {
-      const sub = merge(...['selectstart', 'mousedown'].map(type => fromEvent(context, type))).subscribe(() => {
-        this.selection = context.getSelection();
-        sub.unsubscribe();
-      });
-
-      fromEvent(context, 'selectionchange').subscribe(() => {
-        if (!this.selection) {
-          return;
-        }
-        this._ranges = this.makeRanges();
-        this.selectionChangeEvent.next(this);
-      });
-    }
-  }
-
   removeAllRanges() {
-    this.selection.removeAllRanges();
     this._ranges = [];
   }
 
   addRange(range: TBRange) {
-    this.selection.addRange(range.rawRange);
     this._ranges.push(range);
   }
 
@@ -84,18 +54,6 @@ export class TBSelection {
     range.collapse(toEnd);
     this._ranges = [range];
     this.apply();
-  }
-
-  private makeRanges() {
-    const selection = this.selection;
-    const ranges = [];
-    if (selection && selection.rangeCount) {
-      for (let i = 0; i < selection.rangeCount; i++) {
-        const range = selection.getRangeAt(i);
-        ranges.push(new TBRange(range));
-      }
-    }
-    return ranges;
   }
 
   private getCommonFragment(): Fragment {

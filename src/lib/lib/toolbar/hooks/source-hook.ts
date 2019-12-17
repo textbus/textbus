@@ -1,8 +1,8 @@
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { EditContext, Hooks } from '../help';
+import { EditContext, Hook } from '../help';
 
-export class SourceHook implements Hooks {
+export class SourceHook implements Hook {
   setup(frameContainer: HTMLElement, context: EditContext): void {
     // 当点击视频、音频、图片时，自动选中该标签
     const frameDocument = context.document;

@@ -6,7 +6,7 @@ export const tableEditHandler: ActionSheetConfig = {
   type: HandlerType.ActionSheet,
   classes: ['tanbo-editor-icon-table-edit'],
   tooltip: '编辑表格',
-  hooks: new TableEditHook(),
+  hook: new TableEditHook(),
   actions: [{
     label: '在左边添加列',
     execCommand: new TableEditCommander(TableEditActions.AddColumnToLeft),

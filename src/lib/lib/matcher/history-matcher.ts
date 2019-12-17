@@ -1,5 +1,5 @@
 import { CommonMatchDelta, Matcher, MatchState } from './matcher';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { RootFragment } from '../parser/root-fragment';

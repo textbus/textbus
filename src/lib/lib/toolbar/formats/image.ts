@@ -33,7 +33,7 @@ export const imageHandler: DropdownConfig = {
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  hooks: sourceHook,
+  hook: sourceHook,
   editable: {
     attrs: ['src']
   },

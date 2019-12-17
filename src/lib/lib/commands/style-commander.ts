@@ -1,6 +1,6 @@
 import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/format';
 import { dtd } from '../dtd';

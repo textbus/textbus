@@ -1,7 +1,7 @@
 import { Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { Fragment } from '../parser/fragment';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { RootFragment } from '../parser/root-fragment';
 

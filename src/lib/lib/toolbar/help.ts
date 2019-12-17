@@ -3,7 +3,7 @@ import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { CacheData, EditableOptions } from './utils/cache-data';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 
 export enum Priority {
   Default = 0,
@@ -18,17 +18,12 @@ export interface EditContext {
   window: Window;
 }
 
-export interface LimitHooksContext {
-  inTags: string[];
-}
-
-
-export interface Hooks {
-  context?: LimitHooksContext;
-
+export interface Hook {
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
-  preApply?(range: Range, doc: Document): Range | Range[];
+  onSelectionChange?(range: Range, doc: Document): Range | Range[];
+
+  onViewChange?(): void;
 }
 
 export enum HandlerType {
@@ -47,7 +42,7 @@ export interface ButtonConfig {
   classes?: string[];
   tooltip?: string;
   match?: MatchRule | Matcher;
-  hooks?: Hooks;
+  hook?: Hook;
 }
 
 export interface SelectOptionConfig {
@@ -70,7 +65,7 @@ export interface SelectConfig {
   classes?: string[];
   mini?: boolean;
   tooltip?: string;
-  hooks?: Hooks;
+  hook?: Hook;
 }
 
 export interface DropdownConfig {
@@ -85,7 +80,7 @@ export interface DropdownConfig {
   tooltip?: string;
   label?: string;
   match?: MatchRule | Matcher;
-  hooks?: Hooks;
+  hook?: Hook;
 }
 
 export interface ActionConfig {
@@ -103,7 +98,7 @@ export interface ActionSheetConfig {
   label?: string;
   classes?: string[];
   tooltip?: string;
-  hooks?: Hooks;
+  hook?: Hook;
 }
 
 export type HandlerConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;

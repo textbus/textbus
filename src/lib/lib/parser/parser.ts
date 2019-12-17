@@ -12,7 +12,6 @@ export class Parser {
 
   parse(element: HTMLElement, context: Fragment) {
     const flatTree = this.normalize(element);
-    console.log(flatTree)
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.transform(node, context);
     }, 0);

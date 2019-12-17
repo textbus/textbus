@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
 import { Fragment } from '../parser/fragment';

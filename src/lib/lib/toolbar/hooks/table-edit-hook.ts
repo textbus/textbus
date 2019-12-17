@@ -1,8 +1,8 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext, Hooks, LimitHooksContext } from '../help';
-import { CellPosition, RowPosition } from '../../commands/table-edit-commander';
+import { EditContext, Hook } from '../help';
+import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 
 interface ElementPosition {
   left: number;
@@ -24,11 +24,7 @@ function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLEl
   return null;
 }
 
-export class TableEditHook implements Hooks {
-  context: LimitHooksContext = {
-    inTags: ['td']
-  };
-
+export class TableEditHook implements Hook {
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
@@ -69,6 +65,8 @@ export class TableEditHook implements Hooks {
     });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
       this.selectedCells = [];
+      this.startPosition = null;
+      this.endPosition = null;
       if (insertStyle) {
         frameDocument.getSelection().removeAllRanges();
         frameDocument.head.removeChild(style);
@@ -127,8 +125,11 @@ export class TableEditHook implements Hooks {
 
   }
 
-  preApply(range: Range, doc: Document): Range | Range[] {
+  onSelectionChange(range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
+      if (this.selectedCells.length === 1) {
+        return range;
+      }
       return this.selectedCells.map(cell => {
         const range = doc.createRange();
         range.selectNodeContents(cell);
@@ -191,16 +192,13 @@ export class TableEditHook implements Hooks {
   //   return true;
   // }
 
-  onOutput(head: HTMLHeadElement, body: HTMLBodyElement): void {
-    const style = head.querySelector('#' + this.id);
-    if (style) {
-      style.parentNode.removeChild(style);
+  onViewChange(): void {
+    if (this.startPosition && this.endPosition) {
+      this.cellMatrix = this.serialize(this.tableElement);
+      const startCell = this.cellMatrix[this.startPosition.rowIndex].cells[this.startPosition.columnIndex].cellElement;
+      const endCell = this.cellMatrix[this.endPosition.rowIndex].cells[this.endPosition.columnIndex].cellElement;
+      this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
     }
-  }
-
-  onApplied(): void {
-    this.cellMatrix = this.serialize(this.tableElement);
-    this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
@@ -283,10 +281,7 @@ export class TableEditHook implements Hooks {
     this.animateId = requestAnimationFrame(animate);
   }
 
-  private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): {
-    startPosition: CellPosition,
-    endPosition: CellPosition
-  } {
+  private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableSelectionRange {
     const cellMatrix = this.cellMatrix;
 
     const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));

@@ -42,7 +42,7 @@ export const videoHandler: DropdownConfig = {
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  hooks: sourceHook,
+  hook: sourceHook,
   editable: {
     attrs: ['src', 'autoplay', 'controls']
   },

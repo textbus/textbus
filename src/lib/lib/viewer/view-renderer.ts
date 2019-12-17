@@ -1,13 +1,13 @@
-import { Observable, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 
 import { template } from './template-html';
-import { TBSelection } from '../selection/selection';
-import { Hooks, Priority } from '../toolbar/help';
+import { TBSelection } from './selection';
+import { Hook, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState, Matcher, MatchState } from '../matcher/matcher';
-import { Cursor, CursorMoveDirection, CursorMoveType, InputEvent } from '../selection/cursor';
-import { TBRange, TBRangePosition } from '../selection/range';
+import { Cursor, CursorMoveDirection, CursorMoveType, InputEvent } from './cursor';
+import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
 import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
@@ -22,14 +22,15 @@ export class ViewRenderer {
 
   contentWindow: Window;
   contentDocument: Document;
+  nativeSelection: Selection;
 
   private userWriteEvent = new Subject<void>();
   private selectionChangeEvent = new Subject<TBSelection>();
   private readyEvent = new Subject<Document>();
 
   private frame = document.createElement('iframe');
-  private selection: TBSelection;
-  private hooksList: Hooks[] = [];
+  private selection = new TBSelection();
+  private hooks: Hook[] = [];
 
   private cursor: Cursor;
 
@@ -42,19 +43,44 @@ export class ViewRenderer {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
+      this.cursor = new Cursor(doc);
 
-      const selection = new TBSelection(doc);
-      this.cursor = new Cursor(doc, selection);
-      this.selection = selection;
+      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
+        .subscribe(() => {
+          this.nativeSelection = this.contentDocument.getSelection();
+          this.nativeSelection.removeAllRanges();
+        });
+
+      fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+        const tbSelection = new TBSelection();
+        const ranges: Range[] = [];
+        if (this.nativeSelection.rangeCount) {
+          for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
+            ranges.push(this.nativeSelection.getRangeAt(i));
+          }
+        }
+        ranges.forEach(range => {
+          this.hooks.filter(hook => typeof hook.onSelectionChange === 'function').forEach(hook => {
+            const r = hook.onSelectionChange(range, this.contentDocument);
+            if (Array.isArray(r)) {
+              r.forEach(rr => {
+                tbSelection.addRange(new TBRange(rr));
+              })
+            } else {
+              tbSelection.addRange(new TBRange(r));
+            }
+          })
+        });
+        this.selection = tbSelection;
+        this.cursor.updateStateBySelection(tbSelection);
+        this.selectionChangeEvent.next(tbSelection);
+      });
+
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.cursor.elementRef);
 
-      selection.onSelectionChange.subscribe(s => {
-        this.selectionChangeEvent.next(s);
-      });
-
       this.cursor.onInput.subscribe(v => {
-        if (selection.collapsed) {
+        if (this.selection.collapsed) {
           this.updateContents(v);
         }
       });
@@ -97,10 +123,10 @@ export class ViewRenderer {
     this.updateFrameHeight();
   }
 
-  use(hooks: Hooks) {
-    this.hooksList.push(hooks);
-    if (typeof hooks.setup === 'function') {
-      hooks.setup(this.elementRef, {
+  use(hook: Hook) {
+    this.hooks.push(hook);
+    if (typeof hook.setup === 'function') {
+      hook.setup(this.elementRef, {
         document: this.contentDocument,
         window: this.contentWindow
       });
@@ -119,41 +145,11 @@ export class ViewRenderer {
     const overlap = state === MatchState.Highlight;
 
     let selection = this.selection;
-    const oldSelection = selection.clone();
-    this.hooksList.filter(hook => {
-      return typeof hook.preApply === 'function' && hook.context;
-    }).forEach(hook => {
-      const match = selection.ranges.map(range => {
-        let fragment = range.startFragment;
-        while (fragment) {
-          const is = Array.from(fragment.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(f => {
-            return [Priority.Block, Priority.Default].includes(f.handler.priority);
-          }).filter(f => {
-            return f.cacheData && hook.context.inTags.includes(f.cacheData.tag)
-          }).length > 0;
-          if (is) {
-            return true;
-          }
-          fragment = fragment.parent;
-        }
-        return false;
-      });
-      if (match.length && !match.includes(false)) {
-        const ranges = selection.ranges.map(r => {
-          const rr = hook.preApply(r.rawRange, this.contentDocument);
-          return Array.isArray(rr) ? rr : [rr];
-        }).reduce((v, n) => {
-          return v.concat(n);
-        }, []).map(r => new TBRange(r));
-        selection.removeAllRanges();
-        ranges.forEach(r => selection.addRange(r));
-      }
-    });
     handler.execCommand.command(selection, handler, overlap);
     this.rerender(selection.commonAncestorFragment);
-    selection.removeAllRanges();
-    selection.addRange(oldSelection.firstRange);
-    this.selection.apply();
+    selection.apply();
+    this.viewChanged();
+    this.selectionChangeEvent.next(this.selection);
   }
 
   private paste(el: HTMLElement) {
@@ -201,6 +197,8 @@ export class ViewRenderer {
       this.rerender(commonAncestorFragment);
       this.selection.apply();
     }
+
+    this.viewChanged();
   }
 
   private selectAll() {
@@ -287,6 +285,7 @@ export class ViewRenderer {
       this.rerender(commonAncestorFragment.parent);
     });
     this.selection.apply();
+    this.viewChanged();
   }
 
   private deleteContents() {
@@ -412,6 +411,8 @@ export class ViewRenderer {
         this.selection.collapse();
       }
     });
+
+    this.viewChanged();
   }
 
   private deleteEmptyFragment(fragment: Fragment) {
@@ -514,6 +515,8 @@ export class ViewRenderer {
     this.rerender(commonAncestorFragment);
     this.selection.apply(ev.offset);
     this.userWriteEvent.next();
+
+    this.viewChanged();
   }
 
   private rerender(fragment: Fragment) {
@@ -629,5 +632,13 @@ export class ViewRenderer {
       fragment: currentFragment,
       index
     }
+  }
+
+  private viewChanged() {
+    this.hooks.forEach(hook => {
+      if (typeof hook.onViewChange === 'function') {
+        hook.onViewChange();
+      }
+    });
   }
 }

@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
@@ -13,6 +13,11 @@ export interface CellPosition {
   rowOffset: number;
   rowIndex?: number;
   columnIndex?: number;
+}
+
+export interface TableSelectionRange {
+  startPosition: CellPosition;
+  endPosition: CellPosition;
 }
 
 export interface RowPosition {

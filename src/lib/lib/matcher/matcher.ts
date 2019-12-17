@@ -1,7 +1,7 @@
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
-import { TBRange } from '../selection/range';
+import { TBRange } from '../viewer/range';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';

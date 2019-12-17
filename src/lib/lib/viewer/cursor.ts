@@ -1,7 +1,8 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
-import { filter } from 'rxjs/operators';
 
 interface CursorStyle {
   left: number;
@@ -72,12 +73,13 @@ export class Cursor {
   private flashing = true;
 
   private inputStartSelection: TBSelection;
+  private selection: TBSelection;
   private editingFragment: Fragment;
 
   private isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
   private isMac = /mac os/i.test(navigator.userAgent);
 
-  constructor(private context: Document, private selection: TBSelection) {
+  constructor(private context: Document) {
     this.onInput = this.inputEvent.asObservable();
     this.onDelete = this.deleteEvent.asObservable();
     this.onFocus = this.focusEvent.asObservable();
@@ -99,8 +101,8 @@ export class Cursor {
     fromEvent(this.input, 'input').subscribe(() => {
       if (!this.selection.collapsed) {
         this.deleteEvent.next();
-        this.inputStartSelection = selection.clone();
-        this.editingFragment = selection.commonAncestorFragment.clone();
+        this.inputStartSelection = this.selection.clone();
+        this.editingFragment = this.selection.commonAncestorFragment.clone();
       }
       this.inputEvent.next({
         value: this.input.value,
@@ -144,8 +146,8 @@ export class Cursor {
     })).subscribe((ev: KeyboardEvent) => {
       if (ev.key === 'Backspace' && !this.input.value.length) {
         this.deleteEvent.next();
-        this.inputStartSelection = selection.clone();
-        this.editingFragment = selection.commonAncestorFragment.clone();
+        this.inputStartSelection = this.selection.clone();
+        this.editingFragment = this.selection.commonAncestorFragment.clone();
       } else if (ev.key === 'Enter' && !ev.shiftKey) {
         this.input.value = '';
         this.input.blur();
@@ -167,8 +169,8 @@ export class Cursor {
           altKey: ev.altKey
         });
         this.input.value = '';
-        this.inputStartSelection = selection.clone();
-        this.editingFragment = selection.commonAncestorFragment.clone();
+        this.inputStartSelection = this.selection.clone();
+        this.editingFragment = this.selection.commonAncestorFragment.clone();
       } else if (ev.key === 'a' && (this.isMac ? ev.metaKey : ev.ctrlKey)) {
         this.input.value = '';
         this.selectAllEvent.next();
@@ -176,7 +178,6 @@ export class Cursor {
     });
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
-      selection.removeAllRanges();
     });
     fromEvent(context, 'mouseup').subscribe(() => {
       this.flashing = true;
@@ -185,18 +186,19 @@ export class Cursor {
     fromEvent(context, 'scroll').subscribe(() => {
       this.updateCursorPosition();
     });
+  }
 
-    selection.onSelectionChange.subscribe(s => {
-      if (!s.rangeCount) {
-        return;
-      }
-      this.updateCursorPosition();
-      if (s.collapsed) {
-        this.show();
-      } else {
-        this.hide();
-      }
-    })
+  updateStateBySelection(selection: TBSelection) {
+    this.selection = selection;
+    if (!selection.rangeCount) {
+      return;
+    }
+    this.updateCursorPosition();
+    if (selection.collapsed) {
+      this.show();
+    } else {
+      this.hide();
+    }
   }
 
   private focus() {

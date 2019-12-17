@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { TBSelection } from '../selection/selection';
+import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';

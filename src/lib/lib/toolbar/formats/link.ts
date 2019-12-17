@@ -44,7 +44,7 @@ export const linkHandler: DropdownConfig = {
   editable: {
     attrs: ['href', 'target']
   },
-  hooks: new LinkHook(),
+  hook: new LinkHook(),
   viewer: form,
   match: {
     tags: ['a']
