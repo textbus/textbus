@@ -30,6 +30,10 @@ export class TBRange {
   }
 
   constructor(public rawRange: Range) {
+
+    if (/快捷键定制/.test(rawRange.commonAncestorContainer['innerHTML'])) {
+      debugger;
+    }
     if (rawRange.startContainer.nodeType === 3) {
       this.startIndex = TBRange.getIndex(rawRange.startContainer) + rawRange.startOffset;
     } else if (rawRange.startContainer.nodeType === 1) {
