@@ -243,7 +243,7 @@ export class Matcher {
       return !(item.endIndex <= startIndex || item.startIndex >= endIndex);
     });
     for (const child of childContents) {
-      if (typeof child === 'string') {
+      if (typeof child === 'string' || child instanceof Single) {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
             if (format.state === FormatState.Exclude) {
@@ -264,6 +264,15 @@ export class Matcher {
             })
           }
         }
+        if (child instanceof Single) {
+          const formats = child.formatMatrix.get(handler);
+          if (formats && formats[0]) {
+            return {
+              state: formats[0].state,
+              cacheData: formats[0].cacheData
+            };
+          }
+        }
         if (!formatRanges.length) {
           return {
             state: FormatState.Invalid,
@@ -273,14 +282,6 @@ export class Matcher {
       } else if (child instanceof Fragment) {
         if (child.contents.length) {
           states.push(this.getStatesByRange(0, child.contents.length, child, handler));
-        }
-      } else if (child instanceof Single) {
-        const formats = child.formatMatrix.get(handler);
-        if (formats && formats[0]) {
-          return {
-            state: formats[0].state,
-            cacheData: formats[0].cacheData
-          };
         }
       }
       index += child.length;
