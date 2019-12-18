@@ -185,7 +185,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     if (index === 0) {
       cellMatrix[0].cells.forEach(() => {
         const td = TableEditCommander.createCell('td', tr);
-        tr.append(new Fragment(td));
+        tr.append(td);
       });
     } else {
       row.cells.forEach(cell => {
