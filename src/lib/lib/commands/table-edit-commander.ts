@@ -10,6 +10,7 @@ import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
 import { defaultHandlersMap } from '../default-handlers';
 import { TBRange } from '../viewer/range';
+import { Priority } from '../toolbar/help';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -55,7 +56,7 @@ export interface TableEditParams {
 
 export class TableEditCommander implements Commander<TableEditParams> {
   recordHistory = true;
-  params: TableEditParams;
+  private params: TableEditParams;
 
   constructor(private type: TableEditActions) {
   }
@@ -64,7 +65,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     this.params = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
     let range: TBRange;
     switch (this.type) {
       case TableEditActions.AddColumnToLeft:
@@ -113,6 +114,18 @@ export class TableEditCommander implements Commander<TableEditParams> {
         this.deleteRightColumn();
         break;
     }
+    let f = selection.commonAncestorFragment;
+    while (f) {
+      const isTr = Array.from(f.formatMatrix.values())
+        .reduce((r, n) => r.concat(n), [])
+        .filter(h => h.handler.priority === Priority.Default)
+        .map(h => h.cacheData.tag)
+        .includes('tr');
+      if (isTr) {
+        return f.parent;
+      }
+      f = f.parent;
+    }
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): null {
@@ -136,8 +149,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
       }
     });
-    this.params.startPosition.columnIndex++;
-    this.params.endPosition.columnIndex++;
+    if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
+      this.params.startPosition.columnIndex++;
+    } else {
+      this.params.startPosition.columnIndex++;
+      this.params.endPosition.columnIndex++;
+    }
   }
 
   private addColumnToRight() {
@@ -193,8 +210,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
       handler: defaultHandlersMap.get('tr')
     }));
     fragment.parent.insert(tr, fragment.getIndexInParent());
-    this.params.startPosition.rowIndex++;
-    this.params.endPosition.rowIndex++;
+    if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
+      this.params.startPosition.rowIndex++;
+    } else {
+      this.params.startPosition.rowIndex++;
+      this.params.endPosition.rowIndex++;
+    }
   }
 
   private addRowToBottom() {
@@ -318,8 +339,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
       }
     });
     prevRowFragment.parent.delete(prevRowFragment.getIndexInParent(), 1);
-    this.params.startPosition.rowIndex--;
-    this.params.endPosition.rowIndex--;
+    if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
+      this.params.startPosition.rowIndex--;
+    } else {
+      this.params.startPosition.rowIndex--;
+      this.params.endPosition.rowIndex--;
+    }
   }
 
   private deleteBottomRow() {
@@ -385,8 +410,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
       }
     });
-    this.params.startPosition.columnIndex--;
-    this.params.endPosition.columnIndex--;
+    if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
+      this.params.startPosition.columnIndex--;
+    } else {
+      this.params.startPosition.columnIndex--;
+      this.params.endPosition.columnIndex--;
+    }
   }
 
   private deleteRightColumn() {

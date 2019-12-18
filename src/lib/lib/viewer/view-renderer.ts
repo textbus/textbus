@@ -147,8 +147,8 @@ export class ViewRenderer {
       handler.hook.onApply(handler.execCommand);
     }
     let selection = this.selection;
-    handler.execCommand.command(selection, handler, overlap);
-    this.rerender(selection.commonAncestorFragment);
+    const renderFragment = handler.execCommand.command(selection, handler, overlap);
+    this.rerender(renderFragment || selection.commonAncestorFragment);
     selection.apply();
     this.viewChanged();
     this.selectionChangeEvent.next(this.selection);

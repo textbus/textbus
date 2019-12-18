@@ -94,10 +94,9 @@ export class TableEditHook implements Hook {
         this.mask.style.height = this.firstMask.style.height = initRect.height + 'px';
         this.firstMask.style.left = '0px';
         this.firstMask.style.top = '0px';
-      } else {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
       }
       this.cellMatrix = this.serialize(this.tableElement);
+      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
 
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
         const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
@@ -146,56 +145,6 @@ export class TableEditHook implements Hook {
       startPosition: this.startPosition,
       endPosition: this.endPosition
     });
-    // if (formatter instanceof TableEditFormatter) {
-    //   switch (formatter.type) {
-    //     case TableEditActions.AddColumnToLeft:
-    //       formatter.addColumnToLeft(this.cellMatrix, this.startPosition.columnIndex);
-    //       break;
-    //     case TableEditActions.AddColumnToRight:
-    //       formatter.addColumnToRight(this.cellMatrix, this.endPosition.columnIndex);
-    //       break;
-    //     case TableEditActions.AddRowToTop:
-    //       formatter.addRowToTop(this.cellMatrix, this.startPosition.rowIndex);
-    //       break;
-    //     case TableEditActions.AddRowToBottom:
-    //       formatter.addRowToBottom(this.cellMatrix, this.endPosition.rowIndex);
-    //       break;
-    //     case TableEditActions.MergeCells:
-    //       this.startCell = this.endCell = formatter.mergeCells(
-    //         this.cellMatrix,
-    //         this.startPosition.rowIndex,
-    //         this.startPosition.columnIndex,
-    //         this.endPosition.rowIndex,
-    //         this.endPosition.columnIndex
-    //       );
-    //       break;
-    //     case TableEditActions.SplitCells:
-    //       const {startCell, endCell} = formatter.splitCells(
-    //         this.cellMatrix,
-    //         this.startPosition.rowIndex,
-    //         this.startPosition.columnIndex,
-    //         this.endPosition.rowIndex,
-    //         this.endPosition.columnIndex
-    //       );
-    //       this.startCell = startCell;
-    //       this.endCell = endCell;
-    //       break;
-    //     case TableEditActions.DeleteTopRow:
-    //       formatter.deleteTopRow(this.cellMatrix, this.startPosition.rowIndex);
-    //       break;
-    //     case TableEditActions.DeleteBottomRow:
-    //       formatter.deleteBottomRow(this.cellMatrix, this.endPosition.rowIndex);
-    //       break;
-    //     case TableEditActions.DeleteLeftColumn:
-    //       formatter.deleteLeftColumn(this.cellMatrix, this.startPosition.columnIndex);
-    //       break;
-    //     case TableEditActions.DeleteRightColumn:
-    //       formatter.deleteRightColumn(this.cellMatrix, this.endPosition.columnIndex);
-    //       break;
-    //   }
-    //   return false;
-    // }
-    // return true;
   }
 
   onViewChange(): void {
