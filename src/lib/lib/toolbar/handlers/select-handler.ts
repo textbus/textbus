@@ -2,7 +2,7 @@ import { merge, Observable, Subject } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { SelectConfig, SelectOptionConfig } from '../help';
+import { Hook, SelectConfig, SelectOptionConfig } from '../help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
@@ -15,6 +15,7 @@ export class SelectHandler implements Handler {
   execCommand: Commander;
   priority: number;
   cacheDataConfig: EditableOptions;
+  hook: Hook;
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
@@ -22,6 +23,7 @@ export class SelectHandler implements Handler {
   constructor(private config: SelectConfig) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
+    this.hook = config.hook;
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.cacheDataConfig = config.editable;
     this.onApply = this.applyEventSource.asObservable();

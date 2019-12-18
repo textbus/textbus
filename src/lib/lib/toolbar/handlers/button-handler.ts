@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ButtonConfig } from '../help';
+import { ButtonConfig, Hook } from '../help';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
@@ -13,11 +13,13 @@ export class ButtonHandler implements Handler {
   execCommand: Commander;
   priority: number;
   cacheDataConfig: EditableOptions;
+  hook: Hook;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
     this.priority = config.priority;
     this.cacheDataConfig = config.editable;
+    this.hook = config.hook;
 
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.execCommand = config.execCommand;

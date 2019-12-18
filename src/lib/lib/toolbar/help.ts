@@ -3,7 +3,6 @@ import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { CacheData, EditableOptions } from './utils/cache-data';
-import { TBSelection } from '../viewer/selection';
 
 export enum Priority {
   Default = 0,
@@ -21,9 +20,11 @@ export interface EditContext {
 export interface Hook {
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
-  onSelectionChange?(range: Range, doc: Document): Range | Range[];
+  onSelectionChange?(range: Range, document: Document): Range | Range[];
 
   onViewChange?(): void;
+
+  onApply?(commander: Commander): void;
 }
 
 export enum HandlerType {

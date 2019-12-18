@@ -39,19 +39,25 @@ export class DefaultTagsHandler implements Handler {
   }
 }
 
+export const defaultHandlersMap = new Map<string, Handler>();
+
 
 export const defaultHandlers: Handler[] = [
   ...'h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,ul,ol,li,br'.split(',').map(tag => {
-    return new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
+    const h = new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
       tags: [tag]
     }));
+    defaultHandlersMap.set(tag, h);
+    return h;
   }),
   ...'th,td'.split(',').map(tag => {
-    return new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
+    const h =  new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
       tags: [tag]
     }), {
       tag: true,
       attrs: ['rowspan', 'colspan']
-    })
+    });
+    defaultHandlersMap.set(tag, h);
+    return h;
   })
 ];

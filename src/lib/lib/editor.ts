@@ -1,5 +1,5 @@
 import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
-import { auditTime, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, filter, sampleTime, tap } from 'rxjs/operators';
 
 import {
   ActionSheetConfig,
@@ -247,7 +247,7 @@ export class Editor implements EventDelegate {
   private listenUserAction() {
     this.handlers.forEach(item => {
       if (item.onApply instanceof Observable) {
-        item.onApply.subscribe(() => {
+        item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
           this.viewer.apply(item);
           if (item.execCommand.recordHistory) {
             this.recordSnapshot();

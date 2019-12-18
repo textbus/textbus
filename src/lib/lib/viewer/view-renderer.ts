@@ -10,7 +10,7 @@ import { Cursor, CursorMoveDirection, CursorMoveType, InputEvent } from './curso
 import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
-import { DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
+import { defaultHandlersMap, DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
 import { Single } from '../parser/single';
 import { Parser } from '../parser/parser';
 
@@ -143,7 +143,9 @@ export class ViewRenderer {
       return;
     }
     const overlap = state === MatchState.Highlight;
-
+    if (handler.hook && typeof handler.hook.onApply === 'function') {
+      handler.hook.onApply(handler.execCommand);
+    }
     let selection = this.selection;
     handler.execCommand.command(selection, handler, overlap);
     this.rerender(selection.commonAncestorFragment);
@@ -312,9 +314,7 @@ export class ViewRenderer {
               startFragment.mergeFormat(new FormatRange({
                 startIndex: 0,
                 endIndex: 0,
-                handler: new DefaultTagsHandler(new DefaultTagCommander('p'), new Matcher({
-                  tags: ['p']
-                })),
+                handler: defaultHandlersMap.get('p'),
                 state: FormatState.Valid,
                 context: startFragment,
                 cacheData: {
@@ -345,9 +345,7 @@ export class ViewRenderer {
                 startFragment.mergeFormat(new FormatRange({
                   startIndex: 0,
                   endIndex: 0,
-                  handler: new DefaultTagsHandler(new DefaultTagCommander('p'), new Matcher({
-                    tags: ['p']
-                  })),
+                  handler: defaultHandlersMap.get('p'),
                   state: FormatState.Valid,
                   context: startFragment,
                   cacheData: {
@@ -529,6 +527,14 @@ export class ViewRenderer {
     this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
   }
 
+  private viewChanged() {
+    this.hooks.forEach(hook => {
+      if (typeof hook.onViewChange === 'function') {
+        hook.onViewChange();
+      }
+    });
+  }
+
   private static getPreviousPosition(range: TBRange) {
     const currentFragment = range.startFragment;
     let offset = range.startIndex;
@@ -634,11 +640,4 @@ export class ViewRenderer {
     }
   }
 
-  private viewChanged() {
-    this.hooks.forEach(hook => {
-      if (typeof hook.onViewChange === 'function') {
-        hook.onViewChange();
-      }
-    });
-  }
 }

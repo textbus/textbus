@@ -1,6 +1,6 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { ActionSheetConfig, ActionConfig } from '../help';
+import { ActionSheetConfig, ActionConfig, Hook } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
@@ -21,7 +21,7 @@ export class ActionSheetHandler {
     menu.classList.add('tanbo-editor-toolbar-menu');
 
     config.actions.forEach(option => {
-      const item = new ActionSheetOptionHandler(option);
+      const item = new ActionSheetOptionHandler(option, config.hook);
       menu.appendChild(item.elementRef);
       this.options.push(item);
     });
@@ -46,7 +46,7 @@ export class ActionSheetOptionHandler implements Handler {
   private eventSource = new Subject<void>();
   private matchedEvent = new Subject<ActionConfig>();
 
-  constructor(private option: ActionConfig) {
+  constructor(private option: ActionConfig, public hook: Hook) {
     this.priority = option.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();

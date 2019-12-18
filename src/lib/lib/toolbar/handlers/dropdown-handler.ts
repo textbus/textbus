@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EventDelegate } from '../help';
+import { DropdownConfig, EventDelegate, Hook } from '../help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
@@ -14,6 +14,7 @@ export class DropdownHandler implements Handler {
   execCommand: Commander;
   priority: number;
   cacheDataConfig: EditableOptions;
+  hook: Hook;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
@@ -21,6 +22,7 @@ export class DropdownHandler implements Handler {
     this.onApply = config.onHide;
     this.priority = config.priority;
     this.cacheDataConfig = config.editable;
+    this.hook = config.hook;
 
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
     this.execCommand = config.execCommand;

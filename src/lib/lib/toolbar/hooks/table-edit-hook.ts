@@ -3,6 +3,7 @@ import { CubicBezier } from '@tanbo/bezier';
 
 import { EditContext, Hook } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
+import { Commander } from '../../commands/commander';
 
 interface ElementPosition {
   left: number;
@@ -139,58 +140,63 @@ export class TableEditHook implements Hook {
     return range;
   }
 
-  // onApply(range: Range[], formatter: Formatter, context: EditContext): boolean {
-  //   if (formatter instanceof TableEditFormatter) {
-  //     switch (formatter.type) {
-  //       case TableEditActions.AddColumnToLeft:
-  //         formatter.addColumnToLeft(this.cellMatrix, this.startPosition.columnIndex);
-  //         break;
-  //       case TableEditActions.AddColumnToRight:
-  //         formatter.addColumnToRight(this.cellMatrix, this.endPosition.columnIndex);
-  //         break;
-  //       case TableEditActions.AddRowToTop:
-  //         formatter.addRowToTop(this.cellMatrix, this.startPosition.rowIndex);
-  //         break;
-  //       case TableEditActions.AddRowToBottom:
-  //         formatter.addRowToBottom(this.cellMatrix, this.endPosition.rowIndex);
-  //         break;
-  //       case TableEditActions.MergeCells:
-  //         this.startCell = this.endCell = formatter.mergeCells(
-  //           this.cellMatrix,
-  //           this.startPosition.rowIndex,
-  //           this.startPosition.columnIndex,
-  //           this.endPosition.rowIndex,
-  //           this.endPosition.columnIndex
-  //         );
-  //         break;
-  //       case TableEditActions.SplitCells:
-  //         const {startCell, endCell} = formatter.splitCells(
-  //           this.cellMatrix,
-  //           this.startPosition.rowIndex,
-  //           this.startPosition.columnIndex,
-  //           this.endPosition.rowIndex,
-  //           this.endPosition.columnIndex
-  //         );
-  //         this.startCell = startCell;
-  //         this.endCell = endCell;
-  //         break;
-  //       case TableEditActions.DeleteTopRow:
-  //         formatter.deleteTopRow(this.cellMatrix, this.startPosition.rowIndex);
-  //         break;
-  //       case TableEditActions.DeleteBottomRow:
-  //         formatter.deleteBottomRow(this.cellMatrix, this.endPosition.rowIndex);
-  //         break;
-  //       case TableEditActions.DeleteLeftColumn:
-  //         formatter.deleteLeftColumn(this.cellMatrix, this.startPosition.columnIndex);
-  //         break;
-  //       case TableEditActions.DeleteRightColumn:
-  //         formatter.deleteRightColumn(this.cellMatrix, this.endPosition.columnIndex);
-  //         break;
-  //     }
-  //     return false;
-  //   }
-  //   return true;
-  // }
+  onApply(commander: Commander) {
+    commander.updateValue({
+      cellMatrix: this.cellMatrix,
+      startPosition: this.startPosition,
+      endPosition: this.endPosition
+    });
+    // if (formatter instanceof TableEditFormatter) {
+    //   switch (formatter.type) {
+    //     case TableEditActions.AddColumnToLeft:
+    //       formatter.addColumnToLeft(this.cellMatrix, this.startPosition.columnIndex);
+    //       break;
+    //     case TableEditActions.AddColumnToRight:
+    //       formatter.addColumnToRight(this.cellMatrix, this.endPosition.columnIndex);
+    //       break;
+    //     case TableEditActions.AddRowToTop:
+    //       formatter.addRowToTop(this.cellMatrix, this.startPosition.rowIndex);
+    //       break;
+    //     case TableEditActions.AddRowToBottom:
+    //       formatter.addRowToBottom(this.cellMatrix, this.endPosition.rowIndex);
+    //       break;
+    //     case TableEditActions.MergeCells:
+    //       this.startCell = this.endCell = formatter.mergeCells(
+    //         this.cellMatrix,
+    //         this.startPosition.rowIndex,
+    //         this.startPosition.columnIndex,
+    //         this.endPosition.rowIndex,
+    //         this.endPosition.columnIndex
+    //       );
+    //       break;
+    //     case TableEditActions.SplitCells:
+    //       const {startCell, endCell} = formatter.splitCells(
+    //         this.cellMatrix,
+    //         this.startPosition.rowIndex,
+    //         this.startPosition.columnIndex,
+    //         this.endPosition.rowIndex,
+    //         this.endPosition.columnIndex
+    //       );
+    //       this.startCell = startCell;
+    //       this.endCell = endCell;
+    //       break;
+    //     case TableEditActions.DeleteTopRow:
+    //       formatter.deleteTopRow(this.cellMatrix, this.startPosition.rowIndex);
+    //       break;
+    //     case TableEditActions.DeleteBottomRow:
+    //       formatter.deleteBottomRow(this.cellMatrix, this.endPosition.rowIndex);
+    //       break;
+    //     case TableEditActions.DeleteLeftColumn:
+    //       formatter.deleteLeftColumn(this.cellMatrix, this.startPosition.columnIndex);
+    //       break;
+    //     case TableEditActions.DeleteRightColumn:
+    //       formatter.deleteRightColumn(this.cellMatrix, this.endPosition.columnIndex);
+    //       break;
+    //   }
+    //   return false;
+    // }
+    // return true;
+  }
 
   onViewChange(): void {
     if (this.startPosition && this.endPosition) {
