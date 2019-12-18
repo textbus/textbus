@@ -232,7 +232,6 @@ export class Fragment extends View {
     this.virtualNode = vDom;
     this.elements = [];
     this.host = host;
-    host[VIRTUAL_NODE] = vDom;
     this.viewBuilder(vDom, this.contents, host, nextSibling);
     return host;
   }
@@ -331,6 +330,7 @@ export class Fragment extends View {
           host.appendChild(container);
         }
       }
+
       vNode.children.forEach(vNode => {
         let newNodes: VirtualNode[];
         if (slotContainer) {
