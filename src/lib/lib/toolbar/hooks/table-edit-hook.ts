@@ -197,6 +197,8 @@ export class TableEditHook implements Hook {
       this.cellMatrix = this.serialize(this.tableElement);
       const startCell = this.cellMatrix[this.startPosition.rowIndex].cells[this.startPosition.columnIndex].cellElement;
       const endCell = this.cellMatrix[this.endPosition.rowIndex].cells[this.endPosition.columnIndex].cellElement;
+      this.startCell = startCell;
+      this.endCell = endCell;
       this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
     }
   }
@@ -206,12 +208,10 @@ export class TableEditHook implements Hook {
 
     const p1 = this.findCellPosition(cell1);
     const p2 = this.findCellPosition(cell2);
-
     const minRow = Math.min(p1.minRow, p2.minRow);
     const minColumn = Math.min(p1.minColumn, p2.minColumn);
     const maxRow = Math.max(p1.maxRow, p2.maxRow);
     const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
-
     const {startPosition, endPosition} = this.findSelectedRange(minRow, minColumn, maxRow, maxColumn);
 
     const startRect = startPosition.cellElement.getBoundingClientRect();
@@ -283,7 +283,6 @@ export class TableEditHook implements Hook {
 
   private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableSelectionRange {
     const cellMatrix = this.cellMatrix;
-
     const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
     const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1)
       .map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
