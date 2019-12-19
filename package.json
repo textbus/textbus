@@ -1,5 +1,5 @@
 {
-  "name": "@tanbo/editor",
+  "name": "@tanbo/tbus",
   "version": "0.0.1-alpha.7",
   "description": "",
   "main": "./bundles/public-api.js",
