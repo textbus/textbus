@@ -9,7 +9,6 @@ import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
 import { defaultHandlersMap } from '../default-handlers';
-import { TBRange } from '../viewer/range';
 import { Priority } from '../toolbar/help';
 
 export interface CellPosition {
@@ -66,7 +65,6 @@ export class TableEditCommander implements Commander<TableEditParams> {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
-    let range: TBRange;
     switch (this.type) {
       case TableEditActions.AddColumnToLeft:
         this.addColumnToLeft();
@@ -81,25 +79,10 @@ export class TableEditCommander implements Commander<TableEditParams> {
         this.addRowToBottom();
         break;
       case TableEditActions.MergeCells:
-        const f = this.mergeCells();
-        range = selection.firstRange;
-        selection.removeAllRanges();
-        range.startFragment = range.endFragment = f;
-        range.startIndex = 0;
-        range.endIndex = f.contents.length;
-        selection.addRange(range);
+        this.mergeCells(selection);
         break;
       case TableEditActions.SplitCells:
-        const fragments = this.splitCells();
-        const firstRange = selection.firstRange;
-        selection.removeAllRanges();
-        fragments.forEach(f => {
-          const range = firstRange.clone();
-          range.startIndex = 0;
-          range.endIndex = f.contents.length;
-          range.startFragment = range.endFragment = f;
-          selection.addRange(range);
-        });
+        this.splitCells(selection);
         break;
       case TableEditActions.DeleteTopRow:
         this.deleteTopRow();
@@ -249,7 +232,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     fragment.parent.insert(tr, fragment.getIndexInParent() + 1);
   }
 
-  private mergeCells() {
+  private mergeCells(selection: TBSelection) {
     const cellMatrix = this.params.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
@@ -271,17 +254,23 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cellFragment = (cell[VIRTUAL_NODE] as VirtualNode).context;
       cellFragment.parent.delete(cellFragment.getIndexInParent(), 1);
     });
-    return fragment;
+
+    const range = selection.firstRange;
+    selection.removeAllRanges();
+    range.startFragment = range.endFragment = fragment;
+    range.startIndex = 0;
+    range.endIndex = fragment.contents.length;
+    selection.addRange(range);
   }
 
-  private splitCells() {
+  private splitCells(selection: TBSelection) {
     const cellMatrix = this.params.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
     const maxRow = this.params.endPosition.rowIndex;
     const maxColumn = this.params.endPosition.columnIndex;
 
-    return cellMatrix.slice(minRow, maxRow + 1)
+    const fragments = cellMatrix.slice(minRow, maxRow + 1)
       .map(row => row.cells.slice(minColumn, maxColumn + 1))
       .reduce((p, c) => {
         return p.concat(c);
@@ -305,6 +294,16 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
         return fragment;
       });
+
+    const firstRange = selection.firstRange;
+    selection.removeAllRanges();
+    fragments.forEach(f => {
+      const range = firstRange.clone();
+      range.startIndex = 0;
+      range.endIndex = f.contents.length;
+      range.startFragment = range.endFragment = f;
+      selection.addRange(range);
+    });
   }
 
   private deleteTopRow() {
