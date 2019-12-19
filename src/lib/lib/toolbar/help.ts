@@ -85,17 +85,18 @@ export interface DropdownConfig {
 }
 
 export interface ActionConfig {
-  execCommand: Commander;
-  priority: Priority;
-  editable: EditableOptions;
+  value?: any;
   label?: string;
-  classes?: string[]
-  match?: MatchRule | Matcher;
+  classes?: string[];
 }
 
 export interface ActionSheetConfig {
   type: HandlerType.ActionSheet;
   actions: ActionConfig[];
+  editable: EditableOptions;
+  execCommand: Commander & { actionType: any };
+  priority: Priority;
+  match?: MatchRule | Matcher;
   label?: string;
   classes?: string[];
   tooltip?: string;

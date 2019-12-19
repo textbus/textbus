@@ -7,95 +7,51 @@ export const tableEditHandler: ActionSheetConfig = {
   classes: ['tanbo-editor-icon-table-edit'],
   tooltip: '编辑表格',
   hook: new TableEditHook(),
+  execCommand: new TableEditCommander(),
+  editable: null,
+  priority: Priority.Block,
+  match: {
+    tags: ['td', 'th']
+  },
   actions: [{
     label: '在左边添加列',
-    execCommand: new TableEditCommander(TableEditActions.AddColumnToLeft),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.AddColumnToLeft,
     classes: ['tanbo-editor-icon-table-add-column-left']
   }, {
     label: '在右边添加列',
-    execCommand: new TableEditCommander(TableEditActions.AddColumnToRight),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.AddColumnToRight,
     classes: ['tanbo-editor-icon-table-add-column-right']
   }, {
     label: '在上边添加行',
-    execCommand: new TableEditCommander(TableEditActions.AddRowToTop),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.AddRowToTop,
     classes: ['tanbo-editor-icon-table-add-row-top']
   }, {
     label: '在下边添加行',
-    execCommand: new TableEditCommander(TableEditActions.AddRowToBottom),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.AddRowToBottom,
     classes: ['tanbo-editor-icon-table-add-row-bottom']
   }, {
     label: '删除左边列',
-    execCommand: new TableEditCommander(TableEditActions.DeleteLeftColumn),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.DeleteLeftColumn,
     classes: ['tanbo-editor-icon-table-delete-column-left']
   }, {
     label: '删除右边列',
-    execCommand: new TableEditCommander(TableEditActions.DeleteRightColumn),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.DeleteRightColumn,
     classes: ['tanbo-editor-icon-table-delete-column-right']
   }, {
     label: '删除上边行',
-    execCommand: new TableEditCommander(TableEditActions.DeleteTopRow),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.DeleteTopRow,
     classes: ['tanbo-editor-icon-table-delete-row-top']
   }, {
     label: '删除下边行',
-    execCommand: new TableEditCommander(TableEditActions.DeleteBottomRow),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.DeleteBottomRow,
     classes: ['tanbo-editor-icon-table-delete-row-bottom']
   }, {
     label: '合并单元格',
-    execCommand: new TableEditCommander(TableEditActions.MergeCells),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.MergeCells,
     classes: ['tanbo-editor-icon-table-split-columns']
   }, {
     label: '取消合并单元格',
-    execCommand: new TableEditCommander(TableEditActions.SplitCells),
-    priority: Priority.Block,
-    editable: null,
-    match: {
-      tags: ['table']
-    },
+    value: TableEditActions.SplitCells,
     classes: ['tanbo-editor-icon-table']
   }]
 };

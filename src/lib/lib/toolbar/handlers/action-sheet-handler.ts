@@ -4,15 +4,32 @@ import { ActionSheetConfig, ActionConfig, Hook } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
-import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
+import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
+import { map } from 'rxjs/operators';
 
-export class ActionSheetHandler {
+export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;
-  options: ActionSheetOptionHandler[] = [];
+  onMatched: Observable<ActionConfig>;
+  onApply: Observable<any>;
+  matcher: Matcher;
+  execCommand: Commander;
+  priority: number;
+  cacheDataConfig: EditableOptions;
+  hook: Hook;
+
+  private matchedEvent = new Subject<ActionConfig>();
+  private options: ActionSheetOptionHandler[] = [];
+  private eventSource = new Subject<any>();
 
   constructor(private config: ActionSheetConfig) {
+    this.priority = config.priority;
+    this.onApply = this.eventSource.asObservable();
+    this.onMatched = this.matchedEvent.asObservable();
+    this.execCommand = config.execCommand;
+    this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
+    this.hook = config.hook;
 
     const dropdownButton = document.createElement('span');
     dropdownButton.classList.add(...config.classes || []);
@@ -21,7 +38,7 @@ export class ActionSheetHandler {
     menu.classList.add('tanbo-editor-toolbar-menu');
 
     config.actions.forEach(option => {
-      const item = new ActionSheetOptionHandler(option, config.hook);
+      const item = new ActionSheetOptionHandler(option);
       menu.appendChild(item.elementRef);
       this.options.push(item);
     });
@@ -29,27 +46,23 @@ export class ActionSheetHandler {
     this.elementRef = new Dropdown(
       dropdownButton,
       menu,
-      merge(...this.options.map(item => item.onApply)),
+      merge(...this.options.map(item => item.onCheck)).pipe(map(v => {
+        config.execCommand.actionType = v;
+        this.eventSource.next();
+        return v;
+      })),
       config.tooltip
     ).elementRef;
   }
 }
 
-export class ActionSheetOptionHandler implements Handler {
+export class ActionSheetOptionHandler {
   readonly elementRef = document.createElement('button');
-  onApply: Observable<void>;
-  onMatched: Observable<ActionConfig>;
-  matcher: Matcher;
-  execCommand: Commander;
-  priority: number;
-  cacheDataConfig: EditableOptions;
-  private eventSource = new Subject<void>();
-  private matchedEvent = new Subject<ActionConfig>();
+  onCheck: Observable<any>;
+  private eventSource = new Subject<any>();
 
-  constructor(private option: ActionConfig, public hook: Hook) {
-    this.priority = option.priority;
-    this.onApply = this.eventSource.asObservable();
-    this.onMatched = this.matchedEvent.asObservable();
+  constructor(private option: ActionConfig) {
+    this.onCheck = this.eventSource.asObservable();
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
     if (option.classes) {
@@ -57,12 +70,7 @@ export class ActionSheetOptionHandler implements Handler {
     }
     this.elementRef.innerText = option.label;
     this.elementRef.addEventListener('click', () => {
-      this.eventSource.next();
+      this.eventSource.next(option.value);
     });
-    this.execCommand = option.execCommand;
-    this.matcher = (option.match instanceof Matcher) ? option.match : new Matcher(option.match);
-  }
-
-  updateStatus(commonMatchDelta: CommonMatchDelta): void {
   }
 }

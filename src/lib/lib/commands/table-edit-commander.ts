@@ -55,17 +55,15 @@ export interface TableEditParams {
 
 export class TableEditCommander implements Commander<TableEditParams> {
   recordHistory = true;
+  actionType: TableEditActions;
   private params: TableEditParams;
-
-  constructor(private type: TableEditActions) {
-  }
 
   updateValue(value: TableEditParams): void {
     this.params = value;
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
-    switch (this.type) {
+    switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
         this.addColumnToLeft();
         break;

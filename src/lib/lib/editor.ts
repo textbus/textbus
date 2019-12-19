@@ -238,9 +238,10 @@ export class Editor implements EventDelegate {
 
   private addActionSheetHandler(option: ActionSheetConfig) {
     const actionSheet = new ActionSheetHandler(option);
-    actionSheet.options.forEach(item => {
-      this.handlers.push(item);
-    });
+    // actionSheet.options.forEach(item => {
+    //   this.handlers.push(item);
+    // });
+    this.handlers.push(actionSheet);
     return actionSheet.elementRef;
   }
 
