@@ -39,7 +39,7 @@ export interface EditorOptions {
   placeholder?: string;
 }
 
-export class Editor implements EventDelegate {
+export class TBus implements EventDelegate {
   onChange: Observable<string>;
   readonly elementRef = document.createElement('div');
 

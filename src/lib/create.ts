@@ -1,5 +1,5 @@
-import { Editor } from './lib/editor';
-import { EditorOptions } from './lib/editor';
+import { TBus } from './lib/tbus';
+import { EditorOptions } from './lib/tbus';
 
 import {
   alignHandler,
@@ -83,5 +83,5 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
     ]
   };
 
-  return new Editor(selector, Object.assign(op, options));
+  return new TBus(selector, Object.assign(op, options));
 }

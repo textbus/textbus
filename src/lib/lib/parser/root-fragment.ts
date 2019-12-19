@@ -1,5 +1,5 @@
 import { Fragment } from './fragment';
-import { Editor } from '../editor';
+import { TBus } from '../tbus';
 import { Parser } from './parser';
 import { VIRTUAL_NODE } from './help';
 import { defaultHandlersMap } from '../default-handlers';
@@ -8,7 +8,7 @@ import { FormatRange } from './format';
 import { FormatState } from '../matcher/matcher';
 
 export class RootFragment extends Fragment {
-  constructor(private parser: Parser, public editor: Editor) {
+  constructor(private parser: Parser, public editor: TBus) {
     super(null);
   }
 
