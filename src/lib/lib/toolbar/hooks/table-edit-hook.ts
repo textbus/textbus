@@ -6,6 +6,11 @@ import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/t
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { ViewRenderer } from '../../viewer/view-renderer';
+import { Single } from '../../parser/single';
+import { Fragment } from '../../parser/fragment';
+import { FormatRange } from '../../parser/format';
+import { defaultHandlers } from '../../default-handlers';
+import { FormatState } from '../../matcher/matcher';
 
 interface ElementPosition {
   left: number;
@@ -165,8 +170,37 @@ export class TableEditHook implements Hook {
     }
   }
 
-  onEnter(viewer: ViewRenderer, next: () => void): void {
-    console.log(333);
+  onDelete(viewer: ViewRenderer, next: () => void): void {
+    const selection = viewer.selection;
+
+    const findCell = (fragment: Fragment): Fragment => {
+      if (!fragment) {
+        return null;
+      }
+      const formatRange = fragment.formatMatrix.get(defaultHandlers)[0];
+      if (/td|th/i.test(formatRange.cacheData.tag)) {
+        return fragment;
+      }
+      return findCell(fragment.parent);
+    };
+    selection.ranges.forEach(range => {
+      if (range.collapsed) {
+        const cellFragment = findCell(range.startFragment);
+        if (cellFragment) {
+          const position = viewer.findFirstChild(cellFragment);
+          if (range.startIndex === 0 && position.fragment === range.startFragment) {
+            const firstContent = range.startFragment.contents.getContentAtIndex(0);
+            if (firstContent instanceof Single && firstContent.tagName === 'br' ||
+              range.startFragment.contents.length === 0) {
+              cellFragment.delete(0);
+              cellFragment.append(new Single(range.startFragment, 'br'));
+              range.startIndex = range.endIndex = 1;
+              range.startFragment = range.endFragment = cellFragment;
+            }
+          }
+        }
+      }
+    });
     next()
   }
 
