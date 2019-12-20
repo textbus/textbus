@@ -112,12 +112,12 @@ export class Contents implements Iterable<string | View> {
     return result;
   }
 
-  delete(startIndex: number, length: number) {
-    if (length < 0) {
-      return;
+  delete(startIndex: number, endIndex: number) {
+    if (endIndex <= startIndex) {
+      return [];
     }
-    const discardedContents = this.slice(startIndex, startIndex + length);
-    const elements = this.slice(0, startIndex).concat(this.slice(startIndex + length, this.length));
+    const discardedContents = this.slice(startIndex, endIndex);
+    const elements = this.slice(0, startIndex).concat(this.slice(endIndex, this.length));
     this.elements = [];
     elements.forEach(item => this.append(item));
     return discardedContents;

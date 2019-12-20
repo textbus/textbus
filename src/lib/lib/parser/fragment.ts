@@ -144,9 +144,12 @@ export class Fragment extends View {
   /**
    *
    * @param startIndex
-   * @param length
+   * @param endIndex
    */
-  delete(startIndex: number, length: number) {
+  delete(startIndex: number, endIndex = this.contents.length) {
+    if (endIndex <= startIndex) {
+      return;
+    }
     const ff = new Fragment(null);
 
     // this.contents.slice(startIndex, startIndex + length).forEach(item => {
@@ -154,7 +157,7 @@ export class Fragment extends View {
     //     item.destroyView();
     //   }
     // });
-    this.contents.delete(startIndex, length).forEach(item => {
+    this.contents.delete(startIndex, endIndex).forEach(item => {
       if (typeof item === 'string') {
         ff.append(item);
       } else if (item instanceof Single || item instanceof Fragment) {
@@ -166,7 +169,6 @@ export class Fragment extends View {
         }
       }
     });
-    const endIndex = startIndex + length;
     const formatMatrix = new Map<Handler, FormatRange[]>();
 
     Array.from(this.formatMatrix.keys()).forEach(key => {
@@ -261,7 +263,7 @@ export class Fragment extends View {
     this.contents.getFragments().forEach(f => f.destroy());
     if (this.parent) {
       const index = this.getIndexInParent();
-      this.parent.delete(index, 1);
+      this.parent.delete(index, index + 1);
     } else {
       this.destroyView();
     }

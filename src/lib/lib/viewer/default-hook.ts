@@ -63,7 +63,7 @@ export class DefaultHook implements Hook {
     let index = commonAncestorFragment.getIndexInParent();
 
     if (isEmpty) {
-      commonAncestorFragment.parent.delete(index, 1);
+      commonAncestorFragment.parent.delete(index, index+1);
     } else {
       let startIndex = firstRange.startIndex;
       this.onEnter(viewer, function () {
@@ -99,7 +99,7 @@ export class DefaultHook implements Hook {
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
       const afterFragment = commonAncestorFragment.delete(range.startIndex,
-        commonAncestorFragment.contents.length - range.startIndex);
+        commonAncestorFragment.contents.length);
       if (!commonAncestorFragment.contents.length) {
         commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
       }
@@ -137,7 +137,7 @@ export class DefaultHook implements Hook {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (range.startIndex > 0) {
-          range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+          range.commonAncestorFragment.delete(range.startIndex - 1, range.startIndex);
           if (!range.commonAncestorFragment.contents.length) {
             range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
           }
@@ -220,7 +220,7 @@ export class DefaultHook implements Hook {
             }
             viewer.deleteEmptyFragment(s.context);
           } else {
-            s.context.delete(s.startIndex, s.endIndex - s.startIndex);
+            s.context.delete(s.startIndex, s.endIndex);
           }
         });
         if (range.endFragment !== range.startFragment && !isDeletedEnd) {

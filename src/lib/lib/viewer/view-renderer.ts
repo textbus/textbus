@@ -192,6 +192,7 @@ export class ViewRenderer {
   }
 
   moveContentsToFragment(oldFragment: Fragment, target: Fragment, startIndex: number) {
+    target.delete(startIndex);
     for (const item of oldFragment.contents) {
       target.append(item);
     }

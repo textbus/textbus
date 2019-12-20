@@ -26,14 +26,14 @@ export class BlockCommander implements Commander<string> {
           if (item.context !== range.commonAncestorFragment) {
             if (item.startIndex !== 0) {
               let startIndex = this.findStartIndex(item.context, item.startIndex);
-              this.format(item.context, startIndex, item.endIndex - startIndex, handler);
+              this.format(item.context, startIndex, item.endIndex, handler);
             } else {
               const endIndex = this.findEndIndex(item.context, item.endIndex);
               this.format(item.context, 0, endIndex, handler);
             }
           } else {
             const scope = range.getCommonAncestorFragmentScope();
-            this.format(range.commonAncestorFragment, scope.startIndex, scope.endIndex - scope.startIndex, handler);
+            this.format(range.commonAncestorFragment, scope.startIndex, scope.endIndex, handler);
           }
         });
       }
@@ -44,9 +44,9 @@ export class BlockCommander implements Commander<string> {
     return new ReplaceModel(document.createElement(data ? data.tag : this.tagName));
   }
 
-  private format(fragment: Fragment, startIndex: number, len: number, handler: Handler) {
+  private format(fragment: Fragment, startIndex: number, endIndex: number, handler: Handler) {
     if (this.hasFragment(fragment)) {
-      const ff = fragment.delete(startIndex, len);
+      const ff = fragment.delete(startIndex, endIndex);
       this.childContentToFragmentAndApplyFormat(ff, handler);
       Array.from(ff.contents).forEach((child, i) => {
         fragment.insert(child, startIndex + i);

@@ -5,6 +5,7 @@ import { EditContext } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
+import { ViewRenderer } from '../../viewer/view-renderer';
 
 interface ElementPosition {
   left: number;
@@ -162,6 +163,11 @@ export class TableEditHook implements Hook {
       this.endCell = endCell;
       this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
     }
+  }
+
+  onEnter(viewer: ViewRenderer, next: () => void): void {
+    console.log(333);
+    next()
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,

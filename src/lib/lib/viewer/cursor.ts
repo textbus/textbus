@@ -150,7 +150,7 @@ export class Cursor {
         this.editingFragment = this.selection.commonAncestorFragment.clone();
       } else if (ev.key === 'Enter' && !ev.shiftKey) {
         this.input.value = '';
-        this.input.blur();
+        // this.input.blur();
         this.newLineEvent.next();
         this.focus();
         ev.preventDefault();

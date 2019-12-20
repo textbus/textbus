@@ -188,7 +188,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         tag: 'tr'
       },
       context: tr,
-      handler:defaultHandlers
+      handler: defaultHandlers
     }));
     fragment.parent.insert(tr, fragment.getIndexInParent());
     if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
@@ -250,7 +250,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
     formatRange.cacheData.attrs.set('colspan', maxColumn - minColumn + 1 + '');
     selectedCells.forEach(cell => {
       const cellFragment = (cell[VIRTUAL_NODE] as VirtualNode).context;
-      cellFragment.parent.delete(cellFragment.getIndexInParent(), 1);
+      const i = cellFragment.getIndexInParent();
+      cellFragment.parent.delete(i, i + 1);
     });
 
     const range = selection.firstRange;
@@ -335,7 +336,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
       }
     });
-    prevRowFragment.parent.delete(prevRowFragment.getIndexInParent(), 1);
+    const i = prevRowFragment.getIndexInParent();
+    prevRowFragment.parent.delete(i, i + 1);
     if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
       this.params.startPosition.rowIndex--;
     } else {
@@ -378,7 +380,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
       }
     });
-    nextRowFragment.parent.delete(nextRowFragment.getIndexInParent(), 1);
+    const i = nextRowFragment.getIndexInParent();
+    nextRowFragment.parent.delete(i, i + 1);
   }
 
   private deleteLeftColumn() {
@@ -399,10 +402,10 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const index = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
-            rowFragment.delete(index, 1);
+            rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
-            rowFragment.delete(index, 1);
+            rowFragment.delete(index, index + 1);
           }
         }
       }
@@ -432,10 +435,10 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const index = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
-            rowFragment.delete(index, 1);
+            rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
-            rowFragment.delete(index, 1);
+            rowFragment.delete(index, index + 1);
           }
         }
       }
