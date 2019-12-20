@@ -110,6 +110,11 @@ export class TableEditHook implements Hook {
           if (this.endCell !== this.startCell) {
             frameDocument.head.appendChild(style);
             insertStyle = true;
+          } else {
+            if (insertStyle) {
+              frameDocument.head.removeChild(style);
+              insertStyle = false;
+            }
           }
           this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
         }
