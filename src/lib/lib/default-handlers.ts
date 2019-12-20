@@ -2,21 +2,18 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './toolbar/handlers/help';
 import { FormatState, Matcher } from './matcher/matcher';
-import { Commander, ReplaceModel } from './commands/commander';
+import { ChildSlotModel, Commander } from './commands/commander';
 import { Priority } from './toolbar/help';
 import { CacheData, EditableOptions } from './toolbar/utils/cache-data';
 
 export class DefaultTagCommander implements Commander {
   recordHistory = false;
 
-  constructor(private tagName: string) {
-  }
-
   command(): void {
   }
 
-  render(state: FormatState, element?: HTMLElement, cacheData?: CacheData): ReplaceModel {
-    const el = document.createElement(this.tagName);
+  render(state: FormatState, element?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
+    const el = document.createElement(cacheData.tag);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
         if (value !== null) {
@@ -24,7 +21,7 @@ export class DefaultTagCommander implements Commander {
         }
       })
     }
-    return new ReplaceModel(el);
+    return new ChildSlotModel(el);
   }
 }
 
@@ -33,31 +30,23 @@ export class DefaultTagsHandler implements Handler {
   onApply: Observable<void>;
   priority = Priority.Default;
 
-  constructor(public execCommand: Commander,
-              public matcher: Matcher,
-              public cacheDataConfig: EditableOptions = {tag: true}) {
+  matcher = new Matcher({
+    tags: 'h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,td,th,ul,ol,li,br'.split(',')
+  });
+
+  editableOptions(el: HTMLElement): EditableOptions {
+    if (/td|th/i.test(el.tagName)) {
+      return {
+        tag: true,
+        attrs: ['rowspan', 'colspan']
+      }
+    }
+    return {
+      tag: true
+    }
   }
+
+  execCommand = new DefaultTagCommander();
 }
 
-export const defaultHandlersMap = new Map<string, Handler>();
-
-
-export const defaultHandlers: Handler[] = [
-  ...'h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,ul,ol,li,br'.split(',').map(tag => {
-    const h = new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
-      tags: [tag]
-    }));
-    defaultHandlersMap.set(tag, h);
-    return h;
-  }),
-  ...'th,td'.split(',').map(tag => {
-    const h =  new DefaultTagsHandler(new DefaultTagCommander(tag), new Matcher({
-      tags: [tag]
-    }), {
-      tag: true,
-      attrs: ['rowspan', 'colspan']
-    });
-    defaultHandlersMap.set(tag, h);
-    return h;
-  })
-];
+export const defaultHandlers = new DefaultTagsHandler();

@@ -24,6 +24,8 @@ export interface Hook {
 
   onViewChange?(): void;
 
+  onDelete?(): void;
+
   onApply?(commander: Commander): void;
 }
 
@@ -38,7 +40,7 @@ export interface ButtonConfig {
   type: HandlerType.Button;
   execCommand: Commander;
   priority: Priority;
-  editable: EditableOptions;
+  editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   label?: string;
   classes?: string[];
   tooltip?: string;
@@ -57,7 +59,7 @@ export interface SelectConfig {
   type: HandlerType.Select;
   execCommand: Commander;
   priority: Priority;
-  editable: EditableOptions;
+  editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   options: SelectOptionConfig[];
 
   highlight(options: SelectOptionConfig[], data: CacheData): SelectOptionConfig;
@@ -75,7 +77,7 @@ export interface DropdownConfig {
   onHide: Observable<void>;
   execCommand: Commander;
   priority: Priority;
-  editable: EditableOptions;
+  editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   classes?: string[];
   format?: string;
   tooltip?: string;
@@ -93,7 +95,7 @@ export interface ActionConfig {
 export interface ActionSheetConfig {
   type: HandlerType.ActionSheet;
   actions: ActionConfig[];
-  editable: EditableOptions;
+  editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   execCommand: Commander & { actionType: any };
   priority: Priority;
   match?: MatchRule | Matcher;

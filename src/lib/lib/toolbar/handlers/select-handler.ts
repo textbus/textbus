@@ -14,7 +14,7 @@ export class SelectHandler implements Handler {
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
   private applyEventSource = new Subject<any>();
   private value = '';
@@ -25,7 +25,7 @@ export class SelectHandler implements Handler {
     this.execCommand = config.execCommand;
     this.hook = config.hook;
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);
-    this.cacheDataConfig = config.editable;
+    this.editableOptions = config.editable;
     this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');

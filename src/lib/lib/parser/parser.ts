@@ -148,7 +148,11 @@ export class Parser {
       return {
         token: item,
         state: item.matcher.matchNode(by),
-        cacheData: this.getPreCacheData(by, item.cacheDataConfig)
+        cacheData: this.getPreCacheData(by,
+          typeof item.editableOptions === 'function'
+            ? item.editableOptions(by)
+            : item.editableOptions
+        )
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
       const newRange = new FormatRange({

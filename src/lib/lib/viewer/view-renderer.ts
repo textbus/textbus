@@ -5,12 +5,12 @@ import { TBSelection } from './selection';
 import { Hook, Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState, Matcher, MatchState } from '../matcher/matcher';
+import { FormatState, MatchState } from '../matcher/matcher';
 import { Cursor, CursorMoveDirection, CursorMoveType, InputEvent } from './cursor';
 import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { FormatRange } from '../parser/format';
-import { defaultHandlersMap, DefaultTagCommander, DefaultTagsHandler } from '../default-handlers';
+import { defaultHandlers } from '../default-handlers';
 import { Single } from '../parser/single';
 import { Parser } from '../parser/parser';
 
@@ -273,7 +273,7 @@ export class ViewRenderer {
         endIndex: afterFragment.contents.length,
         state: FormatState.Valid,
         context: afterFragment,
-        handler: new DefaultTagsHandler(new DefaultTagCommander('p'), null),
+        handler: defaultHandlers,
         cacheData: {
           tag: 'p'
         }
@@ -314,7 +314,7 @@ export class ViewRenderer {
               startFragment.mergeFormat(new FormatRange({
                 startIndex: 0,
                 endIndex: 0,
-                handler: defaultHandlersMap.get('p'),
+                handler: defaultHandlers,
                 state: FormatState.Valid,
                 context: startFragment,
                 cacheData: {
@@ -345,7 +345,7 @@ export class ViewRenderer {
                 startFragment.mergeFormat(new FormatRange({
                   startIndex: 0,
                   endIndex: 0,
-                  handler: defaultHandlersMap.get('p'),
+                  handler: defaultHandlers,
                   state: FormatState.Valid,
                   context: startFragment,
                   cacheData: {

@@ -2,7 +2,7 @@ import { Fragment } from './fragment';
 import { TBus } from '../tbus';
 import { Parser } from './parser';
 import { VIRTUAL_NODE } from './help';
-import { defaultHandlersMap } from '../default-handlers';
+import { defaultHandlers } from '../default-handlers';
 import { Single } from './single';
 import { FormatRange } from './format';
 import { FormatState } from '../matcher/matcher';
@@ -24,14 +24,15 @@ export class RootFragment extends Fragment {
       state: FormatState.Valid,
       startIndex: 0,
       endIndex: 1,
-      handler: defaultHandlersMap.get('p'),
+      handler: defaultHandlers,
       context: newFragment,
       cacheData: {
         tag: 'p'
       }
     }));
     if (last instanceof Fragment) {
-      if (!last.formatMatrix.get(defaultHandlersMap.get('p'))) {
+      const formatRange = last.formatMatrix.get(defaultHandlers);
+      if (!formatRange || formatRange[formatRange.length - 1].cacheData.tag === 'p') {
         this.append(newFragment);
       }
     } else {

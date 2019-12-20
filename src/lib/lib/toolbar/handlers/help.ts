@@ -11,7 +11,8 @@ export interface Handler {
   matcher: Matcher;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook?: Hook;
+
   updateStatus?(commonMatchDelta: CommonMatchDelta): void;
 }

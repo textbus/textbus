@@ -13,7 +13,7 @@ export class DropdownHandler implements Handler {
   onApply: Observable<any>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
@@ -21,7 +21,7 @@ export class DropdownHandler implements Handler {
   constructor(private config: DropdownConfig, private delegate: EventDelegate) {
     this.onApply = config.onHide;
     this.priority = config.priority;
-    this.cacheDataConfig = config.editable;
+    this.editableOptions = config.editable;
     this.hook = config.hook;
 
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);

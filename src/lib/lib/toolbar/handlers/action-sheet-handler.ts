@@ -16,7 +16,7 @@ export class ActionSheetHandler implements Handler {
   matcher: Matcher;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
 
   private matchedEvent = new Subject<ActionConfig>();

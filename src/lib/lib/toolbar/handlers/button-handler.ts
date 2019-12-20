@@ -12,13 +12,13 @@ export class ButtonHandler implements Handler {
   onApply: Observable<void>;
   execCommand: Commander;
   priority: number;
-  cacheDataConfig: EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
     this.priority = config.priority;
-    this.cacheDataConfig = config.editable;
+    this.editableOptions = config.editable;
     this.hook = config.hook;
 
     this.matcher = (config.match instanceof Matcher) ? config.match : new Matcher(config.match);

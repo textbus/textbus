@@ -61,7 +61,7 @@ export class TBus implements EventDelegate {
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [...defaultHandlers];
+  private readonly handlers: Handler[] = [defaultHandlers];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
