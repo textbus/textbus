@@ -2,10 +2,11 @@ import { merge, Observable, Subject } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { Hook, SelectConfig, SelectOptionConfig } from '../help';
+import { SelectConfig, SelectOptionConfig } from '../help';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
+import { Hook } from '../../viewer/help';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;

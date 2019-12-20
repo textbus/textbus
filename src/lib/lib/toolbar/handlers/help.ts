@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Commander } from '../../commands/commander';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { EditableOptions } from '../utils/cache-data';
-import { Hook } from '../help';
+import { Hook } from '../../viewer/help';
 
 export interface Handler {
   elementRef: HTMLElement;

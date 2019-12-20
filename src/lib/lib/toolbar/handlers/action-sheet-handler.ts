@@ -1,6 +1,6 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { ActionSheetConfig, ActionConfig, Hook } from '../help';
+import { ActionSheetConfig, ActionConfig } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
@@ -8,6 +8,7 @@ import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { map } from 'rxjs/operators';
+import { Hook } from '../../viewer/help';
 
 export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;

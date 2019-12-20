@@ -1,4 +1,5 @@
-import { EditContext, Hook } from '../help';
+import { EditContext } from '../help';
+import { Hook } from '../../viewer/help';
 
 export class LinkHook implements Hook {
   setup(frameContainer: HTMLElement, context: EditContext): void {

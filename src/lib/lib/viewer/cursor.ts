@@ -12,7 +12,7 @@ interface CursorStyle {
   lineHeight: string;
 }
 
-export interface InputEvent {
+export interface TBInputEvent {
   value: string;
   offset: number;
   fragment: Fragment;
@@ -35,7 +35,7 @@ export interface CursorMoveDirection {
 
 
 export class Cursor {
-  onInput: Observable<InputEvent>;
+  onInput: Observable<TBInputEvent>;
   onDelete: Observable<void>;
   onFocus: Observable<void>;
   onBlur: Observable<void>;
@@ -49,7 +49,7 @@ export class Cursor {
   private cursor = document.createElement('span');
   private inputWrap = document.createElement('span');
 
-  private inputEvent = new Subject<InputEvent>();
+  private inputEvent = new Subject<TBInputEvent>();
   private deleteEvent = new Subject<void>();
   private focusEvent = new Subject<void>();
   private blurEvent = new Subject<void>();

@@ -1,6 +1,7 @@
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { EditContext, Hook } from '../help';
+import { EditContext } from '../help';
+import { Hook } from '../../viewer/help';
 
 export class SourceHook implements Hook {
   setup(frameContainer: HTMLElement, context: EditContext): void {

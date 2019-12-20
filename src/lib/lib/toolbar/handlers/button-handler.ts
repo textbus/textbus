@@ -1,10 +1,11 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ButtonConfig, Hook } from '../help';
+import { ButtonConfig } from '../help';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
+import { Hook } from '../../viewer/help';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');

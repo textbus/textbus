@@ -1,9 +1,10 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext, Hook } from '../help';
+import { EditContext } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
+import { Hook } from '../../viewer/help';
 
 interface ElementPosition {
   left: number;
