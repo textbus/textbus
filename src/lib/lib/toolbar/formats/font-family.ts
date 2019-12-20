@@ -52,6 +52,14 @@ export const fontFamilyHandler: SelectConfig = {
       classes: ['tanbo-editor-font-Arial'],
       value: 'Arial'
     }, {
+      label: 'Helvetica',
+      classes: ['tanbo-editor-font-Helvetica'],
+      value: 'Helvetica'
+    }, {
+      label: 'Impact',
+      classes: ['tanbo-editor-font-Impact'],
+      value: 'Impact'
+    }, {
       label: 'Times New Roman',
       classes: ['tanbo-editor-font-Times-New-Roman'],
       value: 'Times New Roman'
