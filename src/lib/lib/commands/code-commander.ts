@@ -8,7 +8,7 @@ import { Contents } from '../parser/contents';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
 
-export class CodeCommander implements Commander<any> {
+export class CodeCommander implements Commander {
   recordHistory = true;
   private tagName = 'pre';
   private elements: Single[] = [];

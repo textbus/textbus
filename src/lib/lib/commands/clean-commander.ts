@@ -6,7 +6,7 @@ import { Fragment } from '../parser/fragment';
 import { FormatState } from '../matcher/matcher';
 import { FormatRange } from '../parser/format';
 
-export class CleanCommander implements Commander<void> {
+export class CleanCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {

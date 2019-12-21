@@ -1,5 +1,5 @@
-import { InlineCommander } from '../../commands/inline-commander';
 import { ButtonConfig, HandlerType, Priority } from '../help';
+import { BoldCommander } from '../../commands/bold-commander';
 
 export const boldHandler: ButtonConfig = {
   type: HandlerType.Button,
@@ -19,5 +19,5 @@ export const boldHandler: ButtonConfig = {
     },
     noInTags: ['pre']
   },
-  execCommand: new InlineCommander('strong')
+  execCommand: new BoldCommander()
 };

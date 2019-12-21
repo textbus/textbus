@@ -5,7 +5,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 
-export class InlineCommander implements Commander<any> {
+export class InlineCommander implements Commander {
   recordHistory = true;
 
   constructor(private tagName: string) {
@@ -30,24 +30,6 @@ export class InlineCommander implements Commander<any> {
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData) {
-    switch (state) {
-      case FormatState.Exclude:
-        if (rawElement) {
-          rawElement.style.fontWeight = 'normal';
-          break;
-        } else {
-          const node = document.createElement('span');
-          node.style.fontWeight = 'normal';
-          return new ChildSlotModel(node);
-        }
-      case FormatState.Valid:
-        if (this.tagName === 'strong') {
-          if (/h[1-6]|th/.test(cacheData.tag)) {
-            return null;
-          }
-        }
-        return new ChildSlotModel(document.createElement(this.tagName));
-    }
-    return null;
+    return new ChildSlotModel(document.createElement(this.tagName));
   }
 }

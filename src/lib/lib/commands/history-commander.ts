@@ -5,7 +5,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { RootFragment } from '../parser/root-fragment';
 
-export class HistoryCommander implements Commander<any> {
+export class HistoryCommander implements Commander {
   recordHistory = false;
   constructor(private action: 'forward' | 'back') {
   }

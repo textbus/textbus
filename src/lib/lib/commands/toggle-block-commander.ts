@@ -4,7 +4,7 @@ import { FormatRange } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 
-export class ToggleBlockCommander implements Commander<any> {
+export class ToggleBlockCommander implements Commander {
   recordHistory = true;
   constructor(private tagName: string) {
   }
