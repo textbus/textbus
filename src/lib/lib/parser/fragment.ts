@@ -147,11 +147,11 @@ export class Fragment extends View {
    * @param endIndex
    */
   delete(startIndex: number, endIndex = this.contents.length) {
-    if (endIndex <= startIndex) {
-      return;
-    }
-    const ff = new Fragment(null);
 
+    const ff = new Fragment(null);
+    if (endIndex <= startIndex) {
+      return ff;
+    }
     // this.contents.slice(startIndex, startIndex + length).forEach(item => {
     //   if (item instanceof Fragment) {
     //     item.destroyView();
@@ -164,9 +164,9 @@ export class Fragment extends View {
         const c = item.clone();
         c.parent = ff;
         ff.append(c);
-        if (item instanceof Fragment) {
-          item.destroyView();
-        }
+        // if (item instanceof Fragment) {
+        //   item.destroyView();
+        // }
       }
     });
     const formatMatrix = new Map<Handler, FormatRange[]>();
