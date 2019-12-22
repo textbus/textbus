@@ -260,12 +260,11 @@ export class Fragment extends View {
     if (this.destroyed) {
       return;
     }
+    this.destroyView();
     this.contents.getFragments().forEach(f => f.destroy());
     if (this.parent) {
       const index = this.getIndexInParent();
-      this.parent.delete(index, index + 1);
-    } else {
-      this.destroyView();
+      this.parent.delete(index, index + 1)
     }
     this.formatMatrix.clear();
     this.contents = new Contents();

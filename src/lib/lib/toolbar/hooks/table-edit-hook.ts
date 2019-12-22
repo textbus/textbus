@@ -174,7 +174,7 @@ export class TableEditHook implements Hook {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {
-      if (!fragment) {
+      if (!fragment || !fragment.parent) {
         return null;
       }
       const formatRange = fragment.formatMatrix.get(defaultHandlers)[0];

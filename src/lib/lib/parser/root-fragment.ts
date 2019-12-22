@@ -17,25 +17,19 @@ export class RootFragment extends Fragment {
   }
 
   render(host: HTMLElement, nextSibling?: Node): HTMLElement {
-    const last = this.contents.getContentAtIndex(this.contents.length - 1);
-    const newFragment = new Fragment(this);
-    newFragment.append(new Single(newFragment, 'br'));
-    newFragment.mergeFormat(new FormatRange({
-      state: FormatState.Valid,
-      startIndex: 0,
-      endIndex: 1,
-      handler: defaultHandlers,
-      context: newFragment,
-      cacheData: {
-        tag: 'p'
-      }
-    }));
-    if (last instanceof Fragment) {
-      const formatRange = last.formatMatrix.get(defaultHandlers);
-      if (!formatRange || formatRange[formatRange.length - 1].cacheData.tag === 'p') {
-        this.append(newFragment);
-      }
-    } else {
+    if (this.contents.length === 0) {
+      const newFragment = new Fragment(this);
+      newFragment.append(new Single(newFragment, 'br'));
+      newFragment.mergeFormat(new FormatRange({
+        state: FormatState.Valid,
+        startIndex: 0,
+        endIndex: 1,
+        handler: defaultHandlers,
+        context: newFragment,
+        cacheData: {
+          tag: 'p'
+        }
+      }));
       this.append(newFragment);
     }
     const dom = super.render(host, nextSibling);
