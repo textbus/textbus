@@ -10,7 +10,8 @@ export const boldHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['strong', 'b', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],
+    extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],
+    tags: ['strong', 'b'],
     styles: {
       fontWeight: ['bold', '500', '600', '700', '800', '900']
     },

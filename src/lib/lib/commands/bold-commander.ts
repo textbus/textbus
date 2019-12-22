@@ -30,9 +30,6 @@ export class BoldCommander implements Commander {
           return new ChildSlotModel(node);
         }
       case FormatState.Valid:
-        if (/h[1-6]|th/.test(cacheData.tag)) {
-          return null;
-        }
         return new ChildSlotModel(document.createElement('strong'));
     }
     return null;
@@ -41,9 +38,9 @@ export class BoldCommander implements Commander {
   private apply(scope: SelectedScope, handler: Handler, overlap: boolean) {
     const children = scope.context.contents.slice(scope.startIndex, scope.endIndex);
     let state: FormatState;
-    const tagName = (scope.context.virtualNode.elementRef as HTMLElement).tagName.toLowerCase();
-    if (/h[1-6]|th/i.test(tagName)) {
-      state = overlap ? FormatState.Exclude : FormatState.Valid;
+    const el = BoldCommander.findBoldParent(scope.context.virtualNode.elementRef as HTMLElement);
+    if (el) {
+      state = overlap ? FormatState.Exclude : FormatState.Inherit;
     } else {
       state = overlap ? FormatState.Invalid : FormatState.Valid
     }
@@ -66,7 +63,7 @@ export class BoldCommander implements Commander {
             context: scope.context,
             state,
             cacheData: {
-              tag: tagName
+              tag: el ? el.tagName.toLowerCase() : 'strong'
             }
           });
           formats.push(childFormat);
@@ -77,5 +74,15 @@ export class BoldCommander implements Commander {
       index += item.length;
     });
     formats.forEach(f => scope.context.mergeFormat(f, true))
+  }
+
+  private static findBoldParent(node: HTMLElement) {
+    while (node) {
+      if (/h[1-6]|th/i.test(node.tagName)) {
+        return node;
+      }
+      node = node.parentNode as HTMLElement
+    }
+    return null;
   }
 }

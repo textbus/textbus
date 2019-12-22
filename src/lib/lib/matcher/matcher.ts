@@ -21,7 +21,8 @@ export enum MatchState {
 export enum FormatState {
   Valid = 'Valid',
   Invalid = 'Invalid',
-  Exclude = 'Exclude'
+  Exclude = 'Exclude',
+  Inherit = 'Inherit'
 }
 
 export interface MatchDelta {
@@ -37,6 +38,7 @@ export interface CommonMatchDelta {
 }
 
 export interface MatchRule {
+  extendTags?: string[] | RegExp;
   tags?: string[] | RegExp;
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   classes?: string[];
@@ -49,10 +51,14 @@ export interface MatchRule {
 }
 
 export class Matcher {
+  private inheritValidators: Array<(node: HTMLElement) => boolean> = [];
   private validators: Array<(node: HTMLElement) => boolean> = [];
   private excludeValidators: Array<(node: HTMLElement) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
+    if (rule.extendTags) {
+      this.inheritValidators.push(this.makeTagsMatcher(rule.extendTags));
+    }
     if (rule.tags) {
       this.validators.push(this.makeTagsMatcher(rule.tags));
     }
@@ -81,6 +87,10 @@ export class Matcher {
     const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
     if (exclude) {
       return FormatState.Exclude;
+    }
+    const inherit = this.inheritValidators.map(fn => fn(node)).includes(true);
+    if (inherit) {
+      return FormatState.Inherit;
     }
     return this.validators.map(fn => fn(node)).includes(true) ? FormatState.Valid : FormatState.Invalid;
   }
@@ -122,25 +132,25 @@ export class Matcher {
             handler));
         }
       });
-      let state = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
-      if (state.state === FormatState.Invalid) {
+      let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
+      if (mergedState.state === FormatState.Invalid) {
         if (range.collapsed) {
-          state = Matcher.inSingleContainer(range.commonAncestorFragment,
+          mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
             handler,
             range.startIndex,
             range.endIndex);
         } else {
-          state = Matcher.inSingleContainer(range.commonAncestorFragment,
+          mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
             handler,
             0,
             range.commonAncestorFragment.contents.length);
         }
       }
-
       return {
-        state: state.state === FormatState.Valid ? MatchState.Highlight : MatchState.Normal,
+        state: (mergedState.state === FormatState.Valid || mergedState.state === FormatState.Inherit) ?
+          MatchState.Highlight : MatchState.Normal,
         fromRange: range,
-        cacheData: state.cacheData
+        cacheData: mergedState.cacheData
       };
     });
     let isDisable = false;
@@ -360,7 +370,7 @@ export class Matcher {
     const last = states[states.length - 1];
 
     return states.length ? {
-      state: FormatState.Valid,
+      state: last.state,
       cacheData: last.cacheData ? last.cacheData.clone() : null
     } : null;
   }

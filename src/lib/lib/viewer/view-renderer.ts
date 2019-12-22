@@ -63,16 +63,21 @@ export class ViewRenderer {
           }
         }
         ranges.forEach(range => {
-          this.hooks.filter(hook => typeof hook.onSelectionChange === 'function').forEach(hook => {
-            const r = hook.onSelectionChange(range, this.contentDocument);
-            if (Array.isArray(r)) {
-              r.forEach(rr => {
-                tbSelection.addRange(new TBRange(rr));
-              })
-            } else {
-              tbSelection.addRange(new TBRange(r));
-            }
-          })
+          const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
+          if (hooks.length) {
+            hooks.forEach(hook => {
+              const r = hook.onSelectionChange(range, this.contentDocument);
+              if (Array.isArray(r)) {
+                r.forEach(rr => {
+                  tbSelection.addRange(new TBRange(rr));
+                })
+              } else {
+                tbSelection.addRange(new TBRange(r));
+              }
+            })
+          } else {
+            tbSelection.addRange(new TBRange(range));
+          }
         });
         this.selection = tbSelection;
         this.cursor.updateStateBySelection(tbSelection);
