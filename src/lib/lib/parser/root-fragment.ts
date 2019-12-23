@@ -8,7 +8,7 @@ import { FormatRange } from './format';
 import { FormatState } from '../matcher/matcher';
 
 export class RootFragment extends Fragment {
-  constructor(private parser: Parser, public editor: TBus) {
+  constructor(public parser: Parser, public editor: TBus) {
     super(null);
   }
 

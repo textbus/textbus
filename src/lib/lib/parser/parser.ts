@@ -6,6 +6,12 @@ import { FormatRange } from './format';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
 
+export interface ParseState {
+  token: Handler;
+  state: FormatState;
+  cacheData: CacheData;
+}
+
 export class Parser {
   constructor(private registries: Handler[] = []) {
   }
@@ -17,6 +23,44 @@ export class Parser {
     }, 0);
     this.mergeFormatsByNode(context, element, 0, len);
     return context;
+  }
+
+  getFormatStateByNode(node: HTMLElement): ParseState[] {
+    return this.registries.map(item => {
+      return {
+        token: item,
+        state: item.matcher.matchNode(node),
+        cacheData: this.getPreCacheData(node,
+          typeof item.editableOptions === 'function'
+            ? item.editableOptions(node)
+            : item.editableOptions
+        )
+      };
+    }).filter(item => item.state !== FormatState.Invalid);
+  }
+
+  private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
+    this.registries.map(item => {
+      return {
+        token: item,
+        state: item.matcher.matchNode(by),
+        cacheData: this.getPreCacheData(by,
+          typeof item.editableOptions === 'function'
+            ? item.editableOptions(by)
+            : item.editableOptions
+        )
+      };
+    }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
+      const newRange = new FormatRange({
+        startIndex,
+        endIndex: startIndex + len,
+        handler: item.token,
+        context,
+        state: item.state,
+        cacheData: item.cacheData
+      });
+      context.mergeFormat(newRange, false);
+    })
   }
 
   /**
@@ -141,30 +185,6 @@ export class Parser {
     }
 
     return fragment;
-  }
-
-  private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
-    this.registries.map(item => {
-      return {
-        token: item,
-        state: item.matcher.matchNode(by),
-        cacheData: this.getPreCacheData(by,
-          typeof item.editableOptions === 'function'
-            ? item.editableOptions(by)
-            : item.editableOptions
-        )
-      };
-    }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
-      const newRange = new FormatRange({
-        startIndex,
-        endIndex: startIndex + len,
-        handler: item.token,
-        context,
-        state: item.state,
-        cacheData: item.cacheData
-      });
-      context.mergeFormat(newRange, false);
-    })
   }
 
   private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {

@@ -162,14 +162,22 @@ export class Matcher {
       }
     }
 
-    return {
+    const result = {
       state: isDisable ? MatchState.Disabled :
         srcStates.reduce((v, n) => v && n.state === MatchState.Highlight, true) ?
           MatchState.Highlight :
           MatchState.Normal,
       srcStates,
       cacheData: srcStates[0].cacheData
+    };
+
+    if (result.state === MatchState.Normal && this.rule.extendTags) {
+      const m = new Matcher({
+        tags: this.rule.extendTags
+      });
+      return m.queryState(selection, handler);
     }
+    return result;
   }
 
   private getDisableStateByRange(range: TBRange) {

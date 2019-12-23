@@ -7,6 +7,8 @@ import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { Priority } from '../toolbar/help';
 import { FormatRange } from './format';
 import { Single } from './single';
+import { RootFragment } from './root-fragment';
+import { Parser, ParseState } from './parser';
 
 export class Fragment extends View {
   readonly length = 1;
@@ -152,11 +154,6 @@ export class Fragment extends View {
     if (endIndex <= startIndex) {
       return ff;
     }
-    // this.contents.slice(startIndex, startIndex + length).forEach(item => {
-    //   if (item instanceof Fragment) {
-    //     item.destroyView();
-    //   }
-    // });
     this.contents.delete(startIndex, endIndex).forEach(item => {
       if (typeof item === 'string') {
         ff.append(item);
@@ -164,9 +161,6 @@ export class Fragment extends View {
         const c = item.clone();
         c.parent = ff;
         ff.append(c);
-        // if (item instanceof Fragment) {
-        //   item.destroyView();
-        // }
       }
     });
     const formatMatrix = new Map<Handler, FormatRange[]>();
@@ -234,7 +228,11 @@ export class Fragment extends View {
     this.virtualNode = vDom;
     this.elements = [];
     this.host = host;
-    this.viewBuilder(vDom, this.contents, host, nextSibling);
+    let fragment: Fragment = this;
+    while (fragment.parent) {
+      fragment = fragment.parent;
+    }
+    this.viewBuilder(vDom, this.contents, (fragment as RootFragment).parser, host, nextSibling);
     return host;
   }
 
@@ -288,19 +286,23 @@ export class Fragment extends View {
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode
    * @param contents
+   * @param parser
    * @param host
    * @param nextSibling
    */
-  private viewBuilder(vNode: VirtualNode, contents: Contents, host: HTMLElement, nextSibling?: Node) {
+  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser, host: HTMLElement, nextSibling?: Node) {
     const newNodes: VirtualNode[] = [];
     if (vNode instanceof VirtualContainerNode) {
       const nodes: VirtualNode[] = [];
       let container: HTMLElement;
       let slotContainer: HTMLElement;
+      const newFormatStates: ParseState[][] = [];
       vNode.formats.reduce((node, next) => {
         if (next.handler) {
           const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
           if (renderModel instanceof ReplaceModel) {
+            newFormatStates.length = 0;
+            newFormatStates.push(parser.getFormatStateByNode(renderModel.replaceElement));
             container = renderModel.replaceElement;
             container[VIRTUAL_NODE] = vNode;
             vNode.elementRef = container;
@@ -312,6 +314,7 @@ export class Fragment extends View {
             } else {
               container = renderModel.slotElement;
             }
+            newFormatStates.push(parser.getFormatStateByNode(renderModel.slotElement));
             slotContainer = renderModel.slotElement;
             slotContainer[VIRTUAL_NODE] = vNode;
             vNode.elementRef = slotContainer;
@@ -320,6 +323,19 @@ export class Fragment extends View {
         }
         return node;
       }, (null as HTMLElement));
+
+      newFormatStates.forEach(formats => {
+        formats.forEach(item => {
+          vNode.context.mergeFormat(new FormatRange({
+            startIndex: vNode.startIndex,
+            endIndex: vNode.endIndex,
+            state: item.state,
+            handler: item.token,
+            context: vNode.context,
+            cacheData: item.cacheData
+          }), true);
+        })
+      });
 
       if (container) {
         if (host === this.host) {
@@ -335,9 +351,9 @@ export class Fragment extends View {
       vNode.children.forEach(vNode => {
         let newNodes: VirtualNode[];
         if (slotContainer) {
-          newNodes = this.viewBuilder(vNode, contents, slotContainer);
+          newNodes = this.viewBuilder(vNode, contents, parser, slotContainer);
         } else {
-          newNodes = this.viewBuilder(vNode, contents, host, nextSibling);
+          newNodes = this.viewBuilder(vNode, contents, parser, host, nextSibling);
         }
         nodes.push(...newNodes);
       });
