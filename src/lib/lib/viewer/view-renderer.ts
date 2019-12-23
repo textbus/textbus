@@ -24,7 +24,7 @@ export class ViewRenderer {
   contentDocument: Document;
   nativeSelection: Selection;
 
-  selection = new TBSelection();
+  selection: TBSelection;
 
   private userWriteEvent = new Subject<void>();
   private selectionChangeEvent = new Subject<TBSelection>();
@@ -32,6 +32,7 @@ export class ViewRenderer {
 
   private frame = document.createElement('iframe');
   private hooks: Hook[] = [defaultHook];
+  private root: RootFragment;
 
   private cursor: Cursor;
 
@@ -44,6 +45,7 @@ export class ViewRenderer {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
+      this.selection = new TBSelection(doc);
       this.cursor = new Cursor(doc);
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.cursor.elementRef);
@@ -55,7 +57,7 @@ export class ViewRenderer {
         });
 
       fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
-        const tbSelection = new TBSelection();
+        const tbSelection = new TBSelection(doc);
         const ranges: Range[] = [];
         if (this.nativeSelection.rangeCount) {
           for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
@@ -121,6 +123,7 @@ export class ViewRenderer {
   }
 
   render(rootFragment: RootFragment) {
+    this.root = rootFragment;
     this.contentDocument.body.innerHTML = '';
     rootFragment.render(this.contentDocument.body);
     this.updateFrameHeight();
@@ -151,7 +154,7 @@ export class ViewRenderer {
       handler.hook.onApply(handler.execCommand);
     }
     let selection = this.selection;
-    const renderFragment = handler.execCommand.command(selection, handler, overlap);
+    const renderFragment = handler.execCommand.command(selection, handler, overlap, this.root);
     this.rerender(renderFragment || selection.commonAncestorFragment);
     selection.apply();
     this.viewChanged();

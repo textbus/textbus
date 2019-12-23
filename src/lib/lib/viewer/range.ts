@@ -30,21 +30,24 @@ export class TBRange {
   }
 
   constructor(public rawRange: Range) {
-    if (rawRange.startContainer.nodeType === 3) {
-      this.startIndex = TBRange.getIndex(rawRange.startContainer) + rawRange.startOffset;
-    } else if (rawRange.startContainer.nodeType === 1) {
-      this.startIndex = TBRange.getIndex(rawRange.startContainer) +
-        TBRange.getOffset(rawRange.startContainer, rawRange.startOffset);
-    }
-    if (rawRange.endContainer.nodeType === 3) {
-      this.endIndex = TBRange.getIndex(rawRange.endContainer) + rawRange.endOffset;
-    } else if (rawRange.endContainer.nodeType === 1) {
-      this.endIndex = TBRange.getIndex(rawRange.endContainer) +
-        TBRange.getOffset(rawRange.endContainer, rawRange.endOffset);
-    }
+    if ([1, 3].includes(rawRange.commonAncestorContainer.nodeType)) {
 
-    this.startFragment = (rawRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
-    this.endFragment = (rawRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
+      if (rawRange.startContainer.nodeType === 3) {
+        this.startIndex = TBRange.getIndex(rawRange.startContainer) + rawRange.startOffset;
+      } else if (rawRange.startContainer.nodeType === 1) {
+        this.startIndex = TBRange.getIndex(rawRange.startContainer) +
+          TBRange.getOffset(rawRange.startContainer, rawRange.startOffset);
+      }
+      if (rawRange.endContainer.nodeType === 3) {
+        this.endIndex = TBRange.getIndex(rawRange.endContainer) + rawRange.endOffset;
+      } else if (rawRange.endContainer.nodeType === 1) {
+        this.endIndex = TBRange.getIndex(rawRange.endContainer) +
+          TBRange.getOffset(rawRange.endContainer, rawRange.endOffset);
+      }
+
+      this.startFragment = (rawRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
+      this.endFragment = (rawRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
+    }
   }
 
   clone() {

@@ -5,6 +5,7 @@ import { FormatState, Matcher } from './matcher/matcher';
 import { ChildSlotModel, Commander } from './commands/commander';
 import { Priority } from './toolbar/help';
 import { CacheData, EditableOptions } from './toolbar/utils/cache-data';
+import { TBus } from './tbus';
 
 export class DefaultTagCommander implements Commander {
   recordHistory = false;
@@ -29,6 +30,7 @@ export class DefaultTagsHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<void>;
   priority = Priority.Default;
+  context: TBus;
 
   matcher = new Matcher({
     tags: 'h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,td,th,ul,ol,li,br'.split(',')

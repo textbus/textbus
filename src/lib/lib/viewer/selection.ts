@@ -1,5 +1,10 @@
 import { Fragment } from '../parser/fragment';
-import { TBRange } from './range';
+import { TBRange, TBRangePosition } from './range';
+
+export interface RangePosition {
+  startPaths: number[];
+  endPaths: number[];
+}
 
 export class TBSelection {
 
@@ -29,6 +34,9 @@ export class TBSelection {
 
   private _ranges: TBRange[] = [];
 
+  constructor(private context: Document) {
+  }
+
   removeAllRanges() {
     this._ranges = [];
   }
@@ -38,7 +46,7 @@ export class TBSelection {
   }
 
   clone() {
-    const t = new TBSelection();
+    const t = new TBSelection(this.context);
     t._ranges = this.ranges.map(r => r.clone());
     return t;
   }
@@ -54,6 +62,76 @@ export class TBSelection {
     range.collapse(toEnd);
     this._ranges = [range];
     this.apply();
+  }
+
+  getRangePaths(): Array<RangePosition> {
+    const getPaths = (fragment: Fragment): number[] => {
+      const paths = [];
+      while (fragment.parent) {
+        paths.push(fragment.getIndexInParent());
+        fragment = fragment.parent;
+      }
+      return paths.reverse();
+    };
+    return this.ranges.map<RangePosition>(range => {
+      const paths = getPaths(range.startFragment);
+      paths.push(range.startIndex);
+      if (range.collapsed) {
+        return {
+          startPaths: paths,
+          endPaths: paths
+        }
+      } else {
+        const endPaths = getPaths(range.endFragment);
+        endPaths.push(range.endIndex);
+        return {
+          startPaths: paths,
+          endPaths
+        }
+      }
+    });
+  }
+
+  usePaths(paths: RangePosition[], fragment: Fragment) {
+
+    const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
+      let f = fragment;
+      let len = position.length;
+      for (let i = 0; i < position.length; i++) {
+        if (i === len - 1) {
+          return {
+            fragment: f,
+            index: position[i]
+          }
+        } else {
+          f = f.contents.getContentAtIndex(position[i]) as Fragment;
+        }
+      }
+    };
+
+    this.removeAllRanges();
+    const selection = this.context.getSelection();
+    selection.removeAllRanges();
+    paths.filter(r => r.startPaths.length).forEach(rangePosition => {
+      const start = findPosition(rangePosition.startPaths, fragment);
+      const nativeRange = this.context.createRange();
+      selection.addRange(nativeRange);
+      const range = new TBRange(nativeRange);
+
+      range.startIndex = start.index;
+      range.startFragment = start.fragment;
+
+      if (rangePosition.endPaths === rangePosition.startPaths) {
+        range.endIndex = start.index;
+        range.endFragment = start.fragment;
+      } else {
+        const end = findPosition(rangePosition.endPaths, fragment);
+        range.endIndex = end.index;
+        range.endFragment = end.fragment;
+      }
+      this.addRange(range);
+    });
+
   }
 
   private getCommonFragment(): Fragment {

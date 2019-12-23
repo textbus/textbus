@@ -7,28 +7,24 @@ import { RootFragment } from '../parser/root-fragment';
 
 export class HistoryCommander implements Commander {
   recordHistory = false;
+
   constructor(private action: 'forward' | 'back') {
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
-    const commonAncestorFragment = selection.commonAncestorFragment;
-    const root = HistoryCommander.getRootFragment(commonAncestorFragment) as RootFragment;
-    const snapshot = this.action === 'back' ? root.editor.getPreviousSnapshot() : root.editor.getNextSnapshot();
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): Fragment {
+    const snapshot = this.action === 'back' ?
+      rootFragment.editor.getPreviousSnapshot() :
+      rootFragment.editor.getNextSnapshot();
     if (snapshot) {
-      Object.assign(selection, snapshot.selection);
-      root.contents = snapshot.doc.contents;
-      root.formatMatrix = snapshot.doc.formatMatrix;
+      rootFragment.destroyView();
+      rootFragment.contents = snapshot.doc.contents;
+      rootFragment.formatMatrix = snapshot.doc.formatMatrix;
+      selection.usePaths(snapshot.paths, snapshot.doc);
     }
+    return rootFragment;
   }
 
   render(state: FormatState, rawElement?: HTMLElement): null {
     return null;
-  }
-
-  private static getRootFragment(fragment: Fragment) {
-    while (fragment.parent) {
-      fragment = fragment.parent;
-    }
-    return fragment;
   }
 }

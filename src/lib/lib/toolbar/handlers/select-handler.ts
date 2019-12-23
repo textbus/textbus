@@ -7,6 +7,7 @@ import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { Hook } from '../../viewer/help';
+import { TBus } from '../../tbus';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -21,7 +22,7 @@ export class SelectHandler implements Handler {
   private value = '';
   private textContainer: HTMLElement;
 
-  constructor(private config: SelectConfig) {
+  constructor(private config: SelectConfig, public context: TBus) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
     this.hook = config.hook;

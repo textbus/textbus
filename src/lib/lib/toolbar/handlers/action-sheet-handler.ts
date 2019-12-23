@@ -9,6 +9,7 @@ import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { map } from 'rxjs/operators';
 import { Hook } from '../../viewer/help';
+import { TBus } from '../../tbus';
 
 export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -24,7 +25,7 @@ export class ActionSheetHandler implements Handler {
   private options: ActionSheetOptionHandler[] = [];
   private eventSource = new Subject<any>();
 
-  constructor(private config: ActionSheetConfig) {
+  constructor(private config: ActionSheetConfig, public context: TBus) {
     this.priority = config.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();

@@ -7,6 +7,7 @@ import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { Hook } from '../../viewer/help';
+import { TBus } from '../../tbus';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
@@ -19,7 +20,7 @@ export class DropdownHandler implements Handler {
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
-  constructor(private config: DropdownConfig, private delegate: EventDelegate) {
+  constructor(private config: DropdownConfig, private delegate: EventDelegate, public context: TBus) {
     this.onApply = config.onHide;
     this.priority = config.priority;
     this.editableOptions = config.editable;

@@ -1,21 +1,13 @@
 import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import { auditTime, filter, sampleTime, tap } from 'rxjs/operators';
 
-import {
-  ActionSheetConfig,
-  ButtonConfig,
-  DropdownConfig,
-  EventDelegate,
-  HandlerConfig,
-  HandlerType,
-  SelectConfig
-} from './toolbar/help';
+import { EventDelegate, HandlerConfig, HandlerType } from './toolbar/help';
 import { ViewRenderer } from './viewer/view-renderer';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { RootFragment } from './parser/root-fragment';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
-import { TBSelection } from './viewer/selection';
+import { RangePosition, TBSelection } from './viewer/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
@@ -25,7 +17,7 @@ import { Parser } from './parser/parser';
 
 export interface Snapshot {
   doc: Fragment;
-  selection: TBSelection;
+  paths: RangePosition[];
 }
 
 export interface EditorOptions {
@@ -180,17 +172,23 @@ export class TBus implements EventDelegate {
         this.viewer.use(option.hook);
       });
     }
+    let h: Handler;
     switch (option.type) {
       case HandlerType.Button:
-        return this.addButtonHandler(option);
+        h = new ButtonHandler(option, this);
+        break;
       case HandlerType.Select:
-        return this.addSelectHandler(option);
+        h = new SelectHandler(option, this);
+        break;
       case HandlerType.Dropdown:
-        return this.addDropdownHandler(option);
+        h = new DropdownHandler(option, this, this);
+        break;
       case HandlerType.ActionSheet:
-        return this.addActionSheetHandler(option);
+        h = new ActionSheetHandler(option, this);
+        break;
     }
-    return null;
+    this.handlers.push(h);
+    return h.elementRef;
   }
 
   private createHandlers(handlers: HandlerConfig[]) {
@@ -205,7 +203,7 @@ export class TBus implements EventDelegate {
     }
     this.historySequence.push({
       doc: this.root.clone(),
-      selection: this.viewer.cloneSelection()
+      paths: this.viewer.selection.getRangePaths()
     });
     if (this.historySequence.length > this.historyStackSize) {
       this.historySequence.shift();
@@ -218,33 +216,6 @@ export class TBus implements EventDelegate {
     this.changeEvent.next(this.viewer.contentDocument.documentElement.outerHTML);
   }
 
-  private addDropdownHandler(option: DropdownConfig) {
-    const dropdown = new DropdownHandler(option, this);
-    this.handlers.push(dropdown);
-    return dropdown.elementRef;
-  }
-
-  private addSelectHandler(option: SelectConfig) {
-    const select = new SelectHandler(option);
-    this.handlers.push(select);
-    return select.elementRef;
-  }
-
-  private addButtonHandler(option: ButtonConfig) {
-    const button = new ButtonHandler(option);
-    this.handlers.push(button);
-    return button.elementRef;
-  }
-
-  private addActionSheetHandler(option: ActionSheetConfig) {
-    const actionSheet = new ActionSheetHandler(option);
-    // actionSheet.options.forEach(item => {
-    //   this.handlers.push(item);
-    // });
-    this.handlers.push(actionSheet);
-    return actionSheet.elementRef;
-  }
-
   private listenUserAction() {
     this.handlers.forEach(item => {
       if (item.onApply instanceof Observable) {
@@ -254,6 +225,7 @@ export class TBus implements EventDelegate {
             this.recordSnapshot();
             this.listenUserWriteEvent();
           }
+          // this.updateHandlerState(this.selection);
         });
       }
     });
