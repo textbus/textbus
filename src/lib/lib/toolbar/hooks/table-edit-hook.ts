@@ -183,25 +183,46 @@ export class TableEditHook implements Hook {
       }
       return findCell(fragment.parent);
     };
-    selection.ranges.forEach(range => {
+
+    const deleteEmptyFragment = (fragment: Fragment, scope: Fragment) => {
+      if (fragment === scope) {
+        return;
+      }
+      const parent = fragment.parent;
+      fragment.destroy();
+      if (parent && parent.contents.length === 0) {
+        deleteEmptyFragment(parent, scope);
+      }
+    };
+
+    if (selection.collapsed) {
+      const range = selection.firstRange;
       if (range.collapsed) {
         const cellFragment = findCell(range.startFragment);
         if (cellFragment) {
-          const position = viewer.findFirstChild(cellFragment);
+          const position = viewer.findFirstPosition(cellFragment);
           if (range.startIndex === 0 && position.fragment === range.startFragment) {
             const firstContent = range.startFragment.contents.getContentAtIndex(0);
             if (firstContent instanceof Single && firstContent.tagName === 'br' ||
               range.startFragment.contents.length === 0) {
-              cellFragment.delete(0);
-              cellFragment.append(new Single(range.startFragment, 'br'));
-              range.startIndex = range.endIndex = 1;
-              range.startFragment = range.endFragment = cellFragment;
+              deleteEmptyFragment(range.startFragment, cellFragment);
+              range.startIndex = range.endIndex = 0;
+              if (cellFragment.contents.length) {
+                const newPosition = viewer.findFirstPosition(cellFragment);
+                range.startFragment = range.endFragment = newPosition.fragment;
+              } else {
+                cellFragment.append(new Single(range.startFragment, 'br'));
+                range.startFragment = range.endFragment = cellFragment;
+              }
+              viewer.rerender(cellFragment);
+              selection.apply();
             }
+            return;
           }
         }
       }
-    });
-    next()
+    }
+    next();
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,

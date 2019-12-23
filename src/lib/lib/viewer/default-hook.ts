@@ -180,7 +180,7 @@ export class DefaultHook implements Hook {
             if (rerenderFragment.index === 0) {
               viewer.deleteEmptyFragment(range.startFragment);
               if (rerenderFragment.fragment.contents.length) {
-                const p = viewer.findFirstChild(rerenderFragment.fragment);
+                const p = viewer.findFirstPosition(rerenderFragment.fragment);
                 firstRange.startFragment = p.fragment;
                 firstRange.startIndex = 0;
               } else {

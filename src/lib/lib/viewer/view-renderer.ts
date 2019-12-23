@@ -238,10 +238,10 @@ export class ViewRenderer {
     };
   }
 
-  findFirstChild(fragment: Fragment): TBRangePosition {
+  findFirstPosition(fragment: Fragment): TBRangePosition {
     const first = fragment.contents.getContentAtIndex(0);
     if (first instanceof Fragment) {
-      return this.findFirstChild(first);
+      return this.findFirstPosition(first);
     }
     return {
       index: 0,
@@ -288,7 +288,7 @@ export class ViewRenderer {
       f = f.parent;
     }
 
-    const startPosition = this.findFirstChild(f);
+    const startPosition = this.findFirstPosition(f);
     const endPosition = this.findLastChild(f, f.contents.length - 1);
 
     firstRange.startFragment = startPosition.fragment;
