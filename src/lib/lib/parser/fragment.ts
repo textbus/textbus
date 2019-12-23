@@ -232,6 +232,7 @@ export class Fragment extends View {
     while (fragment.parent) {
       fragment = fragment.parent;
     }
+    this.formatMatrix.clear();
     this.viewBuilder(vDom, this.contents, (fragment as RootFragment).parser, host, nextSibling);
     return host;
   }
@@ -348,12 +349,15 @@ export class Fragment extends View {
         }
       }
 
-      vNode.children.forEach(vNode => {
+      vNode.children.forEach(childVNode => {
         let newNodes: VirtualNode[];
+        if (childVNode.context !== vNode.context) {
+          childVNode.context.formatMatrix.clear();
+        }
         if (slotContainer) {
-          newNodes = this.viewBuilder(vNode, contents, parser, slotContainer);
+          newNodes = this.viewBuilder(childVNode, contents, parser, slotContainer);
         } else {
-          newNodes = this.viewBuilder(vNode, contents, parser, host, nextSibling);
+          newNodes = this.viewBuilder(childVNode, contents, parser, host, nextSibling);
         }
         nodes.push(...newNodes);
       });
