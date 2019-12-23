@@ -161,6 +161,9 @@ export class Fragment extends View {
         const c = item.clone();
         c.parent = ff;
         ff.append(c);
+        if (item instanceof Fragment) {
+          item.destroyView();
+        }
       }
     });
     const formatMatrix = new Map<Handler, FormatRange[]>();
@@ -263,7 +266,7 @@ export class Fragment extends View {
     this.contents.getFragments().forEach(f => f.destroy());
     if (this.parent) {
       const index = this.getIndexInParent();
-      this.parent.delete(index, index + 1)
+      this.parent.delete(index, index + 1);
     }
     this.formatMatrix.clear();
     this.contents = new Contents();
