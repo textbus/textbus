@@ -73,7 +73,7 @@ export class Form implements DropdownHandlerView {
 
   update(d: CacheData): void {
     this.items.forEach(item => {
-      item.update(d ? d.attrs.get(item.name) : '');
+      item.update((d && d.attrs) ? d.attrs.get(item.name) : '');
     });
   }
 }

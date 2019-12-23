@@ -21,7 +21,9 @@ export class TableCommander implements Commander<AttrState[]> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
     selection.collapse();
-    const context = selection.firstRange.startFragment.parent;
+    const firstRange = selection.firstRange;
+    const fragment = firstRange.startFragment;
+    const context = fragment.parent;
     const table = new Fragment(context);
     table.mergeFormat(new FormatRange({
       startIndex: 0,
@@ -40,11 +42,25 @@ export class TableCommander implements Commander<AttrState[]> {
     const tbody = this.createBody(table, handler);
     table.contents.append(tbody);
     context.insert(table, selection.firstRange.startFragment.getIndexInParent() + 1);
+    const first = fragment.contents.getContentAtIndex(0);
+    if (fragment.contents.length === 0 || first instanceof Single && first.tagName === 'br') {
+      fragment.destroy();
+    }
+    firstRange.startIndex = firstRange.endIndex = 0;
+    firstRange.startFragment = firstRange.endFragment = this.findFirstPosition(table);
     return context;
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
     return new ReplaceModel(document.createElement(cacheData.tag));
+  }
+
+  private findFirstPosition(fragment: Fragment): Fragment {
+    const first = fragment.contents.getContentAtIndex(0);
+    if (first instanceof Fragment) {
+      return this.findFirstPosition(first);
+    }
+    return fragment;
   }
 
   private createBody(parent: Fragment, handler: Handler) {
