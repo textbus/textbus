@@ -1,7 +1,7 @@
 import { Fragment } from '../parser/fragment';
 import { TBRange, TBRangePosition } from './range';
 
-export interface RangePosition {
+export interface RangePath {
   startPaths: number[];
   endPaths: number[];
 }
@@ -64,7 +64,7 @@ export class TBSelection {
     this.apply();
   }
 
-  getRangePaths(): Array<RangePosition> {
+  getRangePaths(): Array<RangePath> {
     const getPaths = (fragment: Fragment): number[] => {
       const paths = [];
       while (fragment.parent) {
@@ -73,7 +73,7 @@ export class TBSelection {
       }
       return paths.reverse();
     };
-    return this.ranges.map<RangePosition>(range => {
+    return this.ranges.map<RangePath>(range => {
       const paths = getPaths(range.startFragment);
       paths.push(range.startIndex);
       if (range.collapsed) {
@@ -92,7 +92,7 @@ export class TBSelection {
     });
   }
 
-  usePaths(paths: RangePosition[], fragment: Fragment) {
+  usePaths(paths: RangePath[], fragment: Fragment) {
 
     const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
       let f = fragment;

@@ -29,29 +29,29 @@ export class TBRange {
       this.startIndex === this.endIndex;
   }
 
-  constructor(public rawRange: Range) {
-    if ([1, 3].includes(rawRange.commonAncestorContainer.nodeType)) {
+  constructor(public nativeRange: Range) {
+    if ([1, 3].includes(nativeRange.commonAncestorContainer.nodeType)) {
 
-      if (rawRange.startContainer.nodeType === 3) {
-        this.startIndex = TBRange.getIndex(rawRange.startContainer) + rawRange.startOffset;
-      } else if (rawRange.startContainer.nodeType === 1) {
-        this.startIndex = TBRange.getIndex(rawRange.startContainer) +
-          TBRange.getOffset(rawRange.startContainer, rawRange.startOffset);
+      if (nativeRange.startContainer.nodeType === 3) {
+        this.startIndex = TBRange.getIndex(nativeRange.startContainer) + nativeRange.startOffset;
+      } else if (nativeRange.startContainer.nodeType === 1) {
+        this.startIndex = TBRange.getIndex(nativeRange.startContainer) +
+          TBRange.getOffset(nativeRange.startContainer, nativeRange.startOffset);
       }
-      if (rawRange.endContainer.nodeType === 3) {
-        this.endIndex = TBRange.getIndex(rawRange.endContainer) + rawRange.endOffset;
-      } else if (rawRange.endContainer.nodeType === 1) {
-        this.endIndex = TBRange.getIndex(rawRange.endContainer) +
-          TBRange.getOffset(rawRange.endContainer, rawRange.endOffset);
+      if (nativeRange.endContainer.nodeType === 3) {
+        this.endIndex = TBRange.getIndex(nativeRange.endContainer) + nativeRange.endOffset;
+      } else if (nativeRange.endContainer.nodeType === 1) {
+        this.endIndex = TBRange.getIndex(nativeRange.endContainer) +
+          TBRange.getOffset(nativeRange.endContainer, nativeRange.endOffset);
       }
 
-      this.startFragment = (rawRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
-      this.endFragment = (rawRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
+      this.startFragment = (nativeRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
+      this.endFragment = (nativeRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
     }
   }
 
   clone() {
-    const r = new TBRange(this.rawRange.cloneRange());
+    const r = new TBRange(this.nativeRange.cloneRange());
     Object.assign(r, this);
     return r;
   }
@@ -65,8 +65,8 @@ export class TBRange {
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
-    this.rawRange.setStart(start.node, start.offset);
-    this.rawRange.setEnd(end.node, end.offset);
+    this.nativeRange.setStart(start.node, start.offset);
+    this.nativeRange.setEnd(end.node, end.offset);
   }
 
   collapse(toEnd = false) {

@@ -7,7 +7,7 @@ import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { RootFragment } from './parser/root-fragment';
 import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
-import { RangePosition, TBSelection } from './viewer/selection';
+import { RangePath, TBSelection } from './viewer/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { defaultHandlers } from './default-handlers';
@@ -17,7 +17,7 @@ import { Parser } from './parser/parser';
 
 export interface Snapshot {
   doc: Fragment;
-  paths: RangePosition[];
+  paths: RangePath[];
 }
 
 export interface EditorOptions {

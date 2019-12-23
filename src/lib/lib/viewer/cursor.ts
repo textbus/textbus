@@ -212,8 +212,8 @@ export class Cursor {
     if (!this.selection || !this.selection.firstRange) {
       return;
     }
-    const startContainer = this.selection.firstRange.rawRange.startContainer;
-    const startOffset = this.selection.firstRange.rawRange.startOffset;
+    const startContainer = this.selection.firstRange.nativeRange.startContainer;
+    const startOffset = this.selection.firstRange.nativeRange.startOffset;
     const range = document.createRange();
     range.setStart(startContainer, startOffset);
     range.collapse();
