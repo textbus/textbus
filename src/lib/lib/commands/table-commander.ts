@@ -19,9 +19,9 @@ export class TableCommander implements Commander<AttrState[]> {
     this.init(value);
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
     selection.collapse();
-    const context = selection.firstRange.startFragment;
+    const context = selection.firstRange.startFragment.parent;
     const table = new Fragment(context);
     table.mergeFormat(new FormatRange({
       startIndex: 0,
@@ -39,8 +39,8 @@ export class TableCommander implements Commander<AttrState[]> {
     }
     const tbody = this.createBody(table, handler);
     table.contents.append(tbody);
-    // TODO 此处会把表格插入到 p|h1~h6 标签之内，后续处理
-    context.insert(table, selection.firstRange.startIndex);
+    context.insert(table, selection.firstRange.startFragment.getIndexInParent() + 1);
+    return context;
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
