@@ -61,9 +61,9 @@ export class DefaultHook implements Hook {
       commonAncestorFragment.contents.length === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
 
     let index = commonAncestorFragment.getIndexInParent();
-
+    const parent = commonAncestorFragment.parent;
     if (isEmpty) {
-      commonAncestorFragment.parent.delete(index, index+1);
+      parent.delete(index, index + 1);
     } else {
       let startIndex = firstRange.startIndex;
       this.onEnter(viewer, function () {
@@ -80,10 +80,10 @@ export class DefaultHook implements Hook {
     }
     if (newContents.length) {
       newContents.forEach(item => {
-        commonAncestorFragment.parent.insert(item, index + 1);
+        parent.insert(item, isEmpty ? index : index + 1);
         index++;
       });
-      viewer.rerender(commonAncestorFragment.parent);
+      viewer.rerender(parent);
       const p = viewer.findLastChild(last, last.contents.length - 1);
       firstRange.startFragment = firstRange.endFragment = p.fragment;
       firstRange.startIndex = firstRange.endIndex = p.index;
