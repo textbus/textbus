@@ -117,33 +117,10 @@ export class Matcher {
 
       const states: MatchData[] = [];
       range.getSelectedScope().forEach(s => {
-        // if (s.startIndex === s.endIndex) {
-        //   const matchData = this.getStatesByRange(s.startIndex,
-        //     s.endIndex,
-        //     s.context,
-        //     handler);
-        //   if (matchData.state !== FormatState.Invalid) {
-        //     states.push(matchData);
-        //   }
-        // } else {
-        //   const state = this.getStatesByRange(s.startIndex,
-        //     s.endIndex,
-        //     s.context,
-        //     handler);
-        //   if (state.state === FormatState.Invalid) {
-        //     const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
-        //     if (inSingleContainer.state === FormatState.Invalid) {
-        //       states.push(state);
-        //     } else {
-        //       states.push(inSingleContainer);
-        //     }
-        //   }
-        // }
         const state = this.getStatesByRange(s.startIndex,
           s.endIndex,
           s.context,
           handler);
-        console.log(s, state)
         if (state.state === FormatState.Invalid) {
           const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
           if (inSingleContainer.state === FormatState.Invalid) {
@@ -156,19 +133,6 @@ export class Matcher {
         }
       });
       let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
-      // if (mergedState.state === FormatState.Invalid) {
-      //   if (range.collapsed) {
-      //     mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
-      //       handler,
-      //       range.startIndex,
-      //       range.endIndex);
-      //   } else {
-      //     mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
-      //       handler,
-      //       0,
-      //       range.commonAncestorFragment.contents.length);
-      //   }
-      // }
       return {
         state: (mergedState.state === FormatState.Valid || mergedState.state === FormatState.Inherit) ?
           MatchState.Highlight : MatchState.Normal,
@@ -270,7 +234,6 @@ export class Matcher {
     const childContents = fragment.contents.slice(startIndex, endIndex);
     const states: Array<MatchData> = [];
     let index = startIndex;
-
     formatRanges = formatRanges.filter(item => {
       return !(item.endIndex <= startIndex || item.startIndex >= endIndex);
     });
@@ -393,7 +356,7 @@ export class Matcher {
 
     return states.length ? {
       state: last.state,
-      cacheData: last.cacheData ? last.cacheData.clone() : null
+      cacheData: states.length === 1 && last.cacheData ? last.cacheData.clone() : null
     } : null;
   }
 

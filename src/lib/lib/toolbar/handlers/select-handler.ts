@@ -73,10 +73,8 @@ export class SelectHandler implements Handler {
         return;
       }
     }
-    if (commonMatchDelta.state === MatchState.Disabled) {
-      this.dropdown.disabled = true;
-      this.dropdown.highlight = false;
-    }
+    this.dropdown.highlight = false;
+    this.dropdown.disabled = commonMatchDelta.state === MatchState.Disabled;
     let defaultOption: SelectOptionConfig;
     for (const op of this.config.options) {
       if (op.default) {

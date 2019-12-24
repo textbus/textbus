@@ -36,7 +36,50 @@ import {
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   const op: EditorOptions = {
     handlers: [
-      hHandler
+      [
+        historyBackHandler,
+        historyForwardHandler
+      ],
+      [
+        hHandler
+      ], [
+        boldHandler,
+        italicHandler,
+        strikeThroughHandler,
+        underlineHandler,
+      ], [
+        blockquoteHandler,
+        codeHandler
+      ], [
+        olHandler,
+        ulHandler
+      ], [
+        fontSizeHandler,
+        lineHeightHandler,
+        letterSpacingHandler,
+        indentHandler
+      ], [
+        superscriptHandler,
+        subscriptHandler
+      ], [
+        colorHandler,
+        textBackgroundHandler,
+        backgroundHandler
+      ], [
+        fontFamilyHandler
+      ], [
+        linkHandler,
+        imageHandler,
+        musicHandler,
+        videoHandler
+      ], [
+        alignHandler
+      ], [
+        tableHandler,
+        tableEditHandler
+      ], [
+        cleanHandler
+      ]
     ]
   };
 
