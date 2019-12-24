@@ -19,7 +19,8 @@ export const fontFamilyHandler: SelectConfig = {
   match: {
     styles: {
       fontFamily: ['sans-serif', 'SimSun', 'SimHei', 'Microsoft YaHei', 'KaiTi', 'FangSong', 'Arial', 'Times New Roman']
-    }
+    },
+    noInTags: ['pre']
   },
   options: [
     {

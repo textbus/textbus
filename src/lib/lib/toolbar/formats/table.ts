@@ -44,5 +44,8 @@ export const tableHandler: DropdownConfig = {
   editable: {
     tag: true
   },
+  match: {
+    noInTags: ['pre']
+  },
   execCommand: commander
 };

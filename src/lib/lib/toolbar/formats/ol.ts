@@ -10,7 +10,8 @@ export const olHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['ol']
+    tags: ['ol'],
+    noInTags: ['pre']
   },
   execCommand: new ListCommander('ol')
 };

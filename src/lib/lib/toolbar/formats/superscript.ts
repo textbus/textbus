@@ -10,7 +10,8 @@ export const superscriptHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['sup']
+    tags: ['sup'],
+    noInTags: ['pre']
   },
   execCommand: new InlineCommander('sup')
 };

@@ -11,7 +11,8 @@ export const tableEditHandler: ActionSheetConfig = {
   editable: null,
   priority: Priority.Block,
   match: {
-    tags: ['td', 'th']
+    tags: ['td', 'th'],
+    noInTags: ['pre']
   },
   actions: [{
     label: '在左边添加列',

@@ -10,7 +10,8 @@ export const subscriptHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['sub']
+    tags: ['sub'],
+    noInTags: ['pre']
   },
   execCommand: new InlineCommander('sub')
 };

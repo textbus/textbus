@@ -20,7 +20,8 @@ export const letterSpacingHandler: SelectConfig = {
   match: {
     styles: {
       letterSpacing: ['0px', '1px', '2px', '3px', '4px', '5px']
-    }
+    },
+    noInTags: ['pre']
   },
   mini: true,
   options: [

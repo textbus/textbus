@@ -3,7 +3,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { SelectConfig, SelectOptionConfig } from '../help';
-import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
+import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { Hook } from '../../viewer/help';
@@ -21,6 +21,7 @@ export class SelectHandler implements Handler {
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
+  private dropdown: Dropdown;
 
   constructor(private config: SelectConfig, public context: TBus) {
     this.priority = config.priority;
@@ -53,12 +54,13 @@ export class SelectHandler implements Handler {
       this.options.push(item);
     });
 
-    this.elementRef = new Dropdown(
+    this.dropdown = new Dropdown(
       dropdownInner,
       menu,
       merge(...this.options.map(item => item.onCheck)),
       config.tooltip
-    ).elementRef;
+    );
+    this.elementRef = this.dropdown.elementRef;
   }
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {
@@ -66,8 +68,14 @@ export class SelectHandler implements Handler {
       const option = this.config.highlight(this.config.options, commonMatchDelta.cacheData);
       if (option) {
         this.textContainer.innerText = option.label;
+        this.dropdown.disabled = false;
+        this.dropdown.highlight = true;
         return;
       }
+    }
+    if (commonMatchDelta.state === MatchState.Disabled) {
+      this.dropdown.disabled = true;
+      this.dropdown.highlight = false;
     }
     let defaultOption: SelectOptionConfig;
     for (const op of this.config.options) {

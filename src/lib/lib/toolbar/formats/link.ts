@@ -47,7 +47,8 @@ export const linkHandler: DropdownConfig = {
   hook: new LinkHook(),
   viewer: form,
   match: {
-    tags: ['a']
+    tags: ['a'],
+    noInTags: ['pre']
   },
   execCommand: commander
 };

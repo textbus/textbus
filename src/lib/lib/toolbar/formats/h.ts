@@ -17,7 +17,8 @@ export const hHandler: SelectConfig = {
     tag: true
   },
   match: {
-    tags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']
+    tags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'],
+    noInTags: ['pre']
   },
   options: [{
     label: '标题1',

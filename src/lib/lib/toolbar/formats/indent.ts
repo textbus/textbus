@@ -23,7 +23,8 @@ export const indentHandler: SelectConfig = {
   match: {
     styles: {
       textAlign: /.+/
-    }
+    },
+    noInTags: ['pre']
   },
   options: [
     {

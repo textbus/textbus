@@ -10,7 +10,8 @@ export const strikeThroughHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['strike', 'del', 's']
+    tags: ['strike', 'del', 's'],
+    noInTags: ['pre']
   },
   execCommand: new InlineCommander('del')
 };

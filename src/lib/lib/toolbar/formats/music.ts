@@ -47,7 +47,8 @@ export const musicHandler: DropdownConfig = {
     attrs: ['src', 'autoplay', 'controls']
   },
   match: {
-    tags: ['audio']
+    tags: ['audio'],
+    noInTags: ['pre']
   },
   execCommand: commander
 };

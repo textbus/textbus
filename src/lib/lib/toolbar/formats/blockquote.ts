@@ -8,7 +8,7 @@ export const blockquoteHandler: ButtonConfig = {
   priority: Priority.Block,
   match: {
     tags: ['blockquote'],
-    noInTags: ['table']
+    noInTags: ['table', 'pre']
   },
   editable: {
     tag: true

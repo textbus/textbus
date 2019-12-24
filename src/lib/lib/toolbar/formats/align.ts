@@ -21,7 +21,8 @@ export const alignHandler: SelectConfig = {
   match: {
     styles: {
       textAlign: ['left', 'right', 'center', 'justify']
-    }
+    },
+    noInTags: ['pre']
   },
   options: [
     {

@@ -38,7 +38,8 @@ export const imageHandler: DropdownConfig = {
     attrs: ['src']
   },
   match: {
-    tags: ['img']
+    tags: ['img'],
+    noInTags: ['pre']
   },
   execCommand: commander
 };

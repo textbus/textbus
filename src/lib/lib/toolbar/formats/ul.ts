@@ -10,7 +10,8 @@ export const ulHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['ul']
+    tags: ['ul'],
+    noInTags: ['pre']
   },
   execCommand: new ListCommander('ul')
 };

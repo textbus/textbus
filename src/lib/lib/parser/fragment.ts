@@ -378,6 +378,7 @@ export class Fragment extends View {
             return renderModel.slotElement;
           }
         }
+        newFormatStates.push(parser.getFormatStateByNode(node));
         return node;
       }, (null as HTMLElement));
 

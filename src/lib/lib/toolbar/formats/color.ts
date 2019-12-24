@@ -47,7 +47,8 @@ export const colorHandler: DropdownConfig = {
   match: {
     styles: {
       color: /.+/
-    }
+    },
+    noInTags: ['pre']
   },
   execCommand: commander
 };

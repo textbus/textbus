@@ -20,7 +20,8 @@ export const fontSizeHandler: SelectConfig = {
   match: {
     styles: {
       fontSize: ['12px', '13px', '14px', '16px', '18px', '20px', '24px', '36px', '48px']
-    }
+    },
+    noInTags: ['pre']
   },
   mini: true,
   options: [

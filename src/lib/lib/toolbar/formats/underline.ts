@@ -10,7 +10,8 @@ export const underlineHandler: ButtonConfig = {
     tag: true
   },
   match: {
-    tags: ['u']
+    tags: ['u'],
+    noInTags: ['pre']
   },
   execCommand: new InlineCommander('u')
 };

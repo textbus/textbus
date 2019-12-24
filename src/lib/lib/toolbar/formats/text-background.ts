@@ -48,7 +48,8 @@ export const textBackgroundHandler: DropdownConfig = {
   match: {
     styles: {
       backgroundColor: /.+/
-    }
+    },
+    noInTags: ['pre']
   },
   execCommand: commander
 };

@@ -21,7 +21,8 @@ export const lineHeightHandler: SelectConfig = {
   match: {
     styles: {
       lineHeight: ['1em', '1.2em', '1.4em', '1.6em', '1.8em', '2em', '3em', '4em']
-    }
+    },
+    noInTags: ['pre']
   },
   options: [
     {

@@ -49,13 +49,16 @@ export class DropdownHandler implements Handler {
     this.config.viewer.update(commonMatchDelta.cacheData);
     switch (commonMatchDelta.state) {
       case MatchState.Highlight:
+        this.dropdown.disabled = false;
         this.dropdown.highlight = true;
         break;
       case MatchState.Normal:
+        this.dropdown.disabled = false;
         this.dropdown.highlight = false;
         break;
       case MatchState.Disabled:
         this.dropdown.disabled = true;
+        this.dropdown.highlight = false;
         break
     }
   }

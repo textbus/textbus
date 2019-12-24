@@ -47,7 +47,8 @@ export const videoHandler: DropdownConfig = {
     attrs: ['src', 'autoplay', 'controls']
   },
   match: {
-    tags: ['video']
+    tags: ['video'],
+    noInTags: ['pre']
   },
   execCommand: commander
 };

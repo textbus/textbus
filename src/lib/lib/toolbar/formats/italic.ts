@@ -16,7 +16,8 @@ export const italicHandler: ButtonConfig = {
     },
     excludeStyles: {
       fontStyle: /(?!italic).+/
-    }
+    },
+    noInTags: ['pre']
   },
   execCommand: new InlineCommander('em')
 };
