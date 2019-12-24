@@ -150,6 +150,8 @@ export class Matcher {
           } else {
             states.push(inSingleContainer);
           }
+        } else {
+          states.push(state);
         }
       });
       let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};

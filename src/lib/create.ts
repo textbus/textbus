@@ -36,7 +36,7 @@ import {
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   const op: EditorOptions = {
     handlers: [
-      blockquoteHandler,
+      colorHandler,
 
     ]
   };
