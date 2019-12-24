@@ -117,35 +117,55 @@ export class Matcher {
 
       const states: MatchData[] = [];
       range.getSelectedScope().forEach(s => {
-        if (s.startIndex === s.endIndex) {
-          const matchData = this.getStatesByRange(s.startIndex,
-            s.endIndex,
-            s.context,
-            handler);
-          if (matchData.state !== FormatState.Invalid) {
-            states.push(matchData);
+        // if (s.startIndex === s.endIndex) {
+        //   const matchData = this.getStatesByRange(s.startIndex,
+        //     s.endIndex,
+        //     s.context,
+        //     handler);
+        //   if (matchData.state !== FormatState.Invalid) {
+        //     states.push(matchData);
+        //   }
+        // } else {
+        //   const state = this.getStatesByRange(s.startIndex,
+        //     s.endIndex,
+        //     s.context,
+        //     handler);
+        //   if (state.state === FormatState.Invalid) {
+        //     const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
+        //     if (inSingleContainer.state === FormatState.Invalid) {
+        //       states.push(state);
+        //     } else {
+        //       states.push(inSingleContainer);
+        //     }
+        //   }
+        // }
+        const state = this.getStatesByRange(s.startIndex,
+          s.endIndex,
+          s.context,
+          handler);
+        if (state.state === FormatState.Invalid) {
+          const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
+          if (inSingleContainer.state === FormatState.Invalid) {
+            states.push(state);
+          } else {
+            states.push(inSingleContainer);
           }
-        } else {
-          states.push(this.getStatesByRange(s.startIndex,
-            s.endIndex,
-            s.context,
-            handler));
         }
       });
       let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
-      if (mergedState.state === FormatState.Invalid) {
-        if (range.collapsed) {
-          mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
-            handler,
-            range.startIndex,
-            range.endIndex);
-        } else {
-          mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
-            handler,
-            0,
-            range.commonAncestorFragment.contents.length);
-        }
-      }
+      // if (mergedState.state === FormatState.Invalid) {
+      //   if (range.collapsed) {
+      //     mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
+      //       handler,
+      //       range.startIndex,
+      //       range.endIndex);
+      //   } else {
+      //     mergedState = Matcher.inSingleContainer(range.commonAncestorFragment,
+      //       handler,
+      //       0,
+      //       range.commonAncestorFragment.contents.length);
+      //   }
+      // }
       return {
         state: (mergedState.state === FormatState.Valid || mergedState.state === FormatState.Inherit) ?
           MatchState.Highlight : MatchState.Normal,
@@ -154,7 +174,6 @@ export class Matcher {
       };
     });
     let isDisable = false;
-
     for (const i of srcStates) {
       if (i.state === MatchState.Disabled) {
         isDisable = true;
@@ -162,7 +181,7 @@ export class Matcher {
       }
     }
 
-    const result = {
+    return {
       state: isDisable ? MatchState.Disabled :
         srcStates.reduce((v, n) => v && n.state === MatchState.Highlight, true) ?
           MatchState.Highlight :
@@ -170,14 +189,6 @@ export class Matcher {
       srcStates,
       cacheData: srcStates[0].cacheData
     };
-
-    if (result.state === MatchState.Normal && this.rule.extendTags) {
-      const m = new Matcher({
-        tags: this.rule.extendTags
-      });
-      return m.queryState(selection, handler);
-    }
-    return result;
   }
 
   private getDisableStateByRange(range: TBRange) {
@@ -390,7 +401,7 @@ export class Matcher {
       const formatRanges = fragment.formatMatrix.get(handler) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
-        if (startIndex > f.startIndex && endIndex <= f.endIndex) {
+        if (startIndex >= f.startIndex && endIndex <= f.endIndex) {
           states.push(f);
         }
       }

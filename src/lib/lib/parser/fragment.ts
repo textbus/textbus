@@ -126,21 +126,74 @@ export class Fragment extends View {
   }
 
   /**
-   * 在当前版本的最后增加内容
+   * 在当前片段的最后增加内容
    * @param content
+   * @param insertAdjacentInlineFormat
    */
-  append(content: string | View) {
+  append(content: string | View, insertAdjacentInlineFormat = false) {
     if (content instanceof Single || content instanceof Fragment) {
       content.parent = this;
     }
     const length = this.contents.length;
     this.contents.append(content);
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
-        (content instanceof Single && format.endIndex === length)) {
+      const priorities = [Priority.Default, Priority.Block, Priority.BlockStyle];
+      if (insertAdjacentInlineFormat) {
+        priorities.push(Priority.Property, Priority.Inline);
+      }
+      if (priorities.includes(format.handler.priority) || (content instanceof Single && format.endIndex === length)) {
         format.endIndex += content.length;
       }
     })
+  }
+
+  insertFragmentContents(fragment: Fragment, index: number) {
+    const contentsLength = fragment.contents.length;
+    const elements = fragment.contents.slice(0).map(content => {
+      if (content instanceof Single || content instanceof Fragment) {
+        content.parent = this;
+      }
+      return content;
+    });
+    this.contents.insertElements(elements, index);
+    Array.from(this.formatMatrix.keys()).forEach(key => {
+      const formatRanges = this.formatMatrix.get(key);
+      if ([Priority.Inline, Priority.Property].includes(key.priority)) {
+        const newRanges: FormatRange[] = [];
+        formatRanges.forEach(format => {
+          if (format.startIndex < index && format.endIndex > index) {
+            const f = format.clone();
+            f.startIndex = index;
+            format.endIndex = index;
+            newRanges.push(format, f);
+          } else {
+            newRanges.push(format);
+          }
+        });
+        newRanges.forEach(format => {
+          if (format.startIndex === index) {
+            format.startIndex += contentsLength;
+            format.endIndex += contentsLength;
+          }
+        });
+        this.formatMatrix.set(key, newRanges);
+      } else {
+        formatRanges.forEach(format => {
+          format.endIndex += contentsLength;
+        })
+      }
+    });
+    Array.from(fragment.formatMatrix.keys())
+      .filter(key => [Priority.Inline, Priority.Property].includes(key.priority))
+      .forEach(key => {
+        const formatRanges = fragment.formatMatrix.get(key);
+        formatRanges.forEach(format => {
+          const c = format.clone();
+          c.startIndex += index;
+          c.endIndex += index;
+          this.mergeFormat(c, true);
+        });
+      });
   }
 
   /**
@@ -158,9 +211,9 @@ export class Fragment extends View {
       if (typeof item === 'string') {
         ff.append(item);
       } else if (item instanceof Single || item instanceof Fragment) {
-        const c = item.clone();
-        c.parent = ff;
-        ff.append(c);
+        // const c = item.clone();
+        // c.parent = ff;
+        ff.append(item);
         if (item instanceof Fragment) {
           item.destroyView();
         }

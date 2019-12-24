@@ -123,6 +123,13 @@ export class Contents implements Iterable<string | View> {
     return discardedContents;
   }
 
+  insertElements(contents: Array<string | View>, index: number) {
+    contents.forEach(item => {
+      this.insert(item, index);
+      index += item.length;
+    });
+  }
+
   // splice(startIndex: number, length: number, newContents: string | View) {
   //   this.delete(startIndex, length);
   //   this.insert(newContents, startIndex);

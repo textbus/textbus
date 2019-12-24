@@ -86,12 +86,12 @@ export class TBRange {
     let endIndex = this.endIndex;
 
     while (startFragment !== this.commonAncestorFragment) {
-      startIndex += startFragment.parent.contents.getIndexByNode(startFragment);
+      startIndex += startFragment.getIndexInParent();
       startFragment = startFragment.parent;
     }
 
     while (endFragment !== this.commonAncestorFragment) {
-      endIndex += endFragment.parent.contents.getIndexByNode(endFragment);
+      endIndex += endFragment.getIndexInParent();
       endFragment = endFragment.parent;
     }
 
