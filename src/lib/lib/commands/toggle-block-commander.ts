@@ -135,20 +135,37 @@ export class ToggleBlockCommander implements Commander {
           fragments.push(newFragment.parent);
         } else {
           const index = range.getCommonAncestorFragmentScope().startIndex;
-          range.getSelectedScope().forEach(item => {
+          const scopes = range.getSelectedScope();
+          scopes.forEach(item => {
             if (item.context === range.startFragment || item.context === range.endFragment) {
               const index = item.context.getIndexInParent();
               const parent = item.context.parent;
               item.context.parent.delete(index, index + 1);
               newFragment.append(item.context);
-              this.deleteEmptyFragment(parent, commonAncestorFragment);
-            } else if (item.context.parent === commonAncestorFragment) {
+              const s = this.deleteEmptyFragment(parent, commonAncestorFragment);
+              if (s === commonAncestorFragment) {
+                scopes.forEach(i => {
+                  i.startIndex--;
+                  i.endIndex--;
+                })
+              }
+            } else if (item.context === commonAncestorFragment) {
+              newFragment.append(item.context.delete(item.startIndex, item.endIndex));
+              scopes.forEach(i => {
+                i.startIndex--;
+                i.endIndex--;
+              })
+            } else {
               const index = item.context.getIndexInParent();
               item.context.parent.delete(index, 1);
               newFragment.append(item.context);
-            } else {
-              newFragment.append(item.context.delete(item.startIndex, item.endIndex));
-              this.deleteEmptyFragment(item.context, commonAncestorFragment);
+              const s = this.deleteEmptyFragment(item.context, commonAncestorFragment);
+              if (s === commonAncestorFragment) {
+                scopes.forEach(i => {
+                  i.startIndex--;
+                  i.endIndex--;
+                })
+              }
             }
           });
           commonAncestorFragment.insert(newFragment, index);
@@ -192,7 +209,7 @@ export class ToggleBlockCommander implements Commander {
 
   private deleteEmptyFragment(fragment: Fragment, scope: Fragment) {
     if (fragment === scope) {
-      return;
+      return fragment;
     }
     if (fragment.contents.length === 0) {
       const parent = fragment.parent;
