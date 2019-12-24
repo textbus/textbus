@@ -7,7 +7,8 @@ export const blockquoteHandler: ButtonConfig = {
   tooltip: '引用',
   priority: Priority.Block,
   match: {
-    tags: ['blockquote']
+    tags: ['blockquote'],
+    noInTags: ['table']
   },
   editable: {
     tag: true
