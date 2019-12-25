@@ -74,11 +74,14 @@ export class DefaultHook implements Hook {
       });
       firstRange.startFragment = firstRange.endFragment = commonAncestorFragment;
       firstRange.startIndex = firstRange.endIndex = startIndex;
-      const firstContent = newContents.shift();
+      const firstContent = newContents[0];
       if (firstContent instanceof Fragment) {
-        viewer.moveContentsToFragment(firstContent, commonAncestorFragment, startIndex);
-        if (!newContents.length) {
-          firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
+        if (!(firstContent.getContentAtIndex(0) instanceof Fragment)) {
+          newContents.shift();
+          viewer.moveContentsToFragment(firstContent, commonAncestorFragment, startIndex);
+          if (!newContents.length) {
+            firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
+          }
         }
       }
     }
