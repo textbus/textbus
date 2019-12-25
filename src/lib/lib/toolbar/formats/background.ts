@@ -5,6 +5,7 @@ import { DropdownConfig, HandlerType, Priority } from '../help';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { CacheData } from '../utils/cache-data';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
+import { dtd } from '../../dtd';
 
 const commander = new BlockStyleCommander('backgroundColor');
 
@@ -49,7 +50,10 @@ export const backgroundHandler: DropdownConfig = {
     styles: {
       backgroundColor: /.+/
     },
-    noInTags: ['pre']
+    noInTags: ['pre'],
+    filter(node) {
+      return dtd[node.tagName.toLowerCase()].display !== 'inline';
+    }
   },
   execCommand: commander
 };

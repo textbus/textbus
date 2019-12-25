@@ -512,14 +512,12 @@ export class Fragment extends View {
             newFormatRange.startIndex,
             newFormatRange.endIndex);
           newNodes.push(v);
-          // 防止 html 实体及 unicode 字符原样输出
-          const template = document.createElement('div');
-          template.innerHTML = item.replace(/\s\s+/g, str => {
+          const str = item.replace(/\s\s+/g, str => {
             return ' ' + Array.from({
               length: str.length - 1
-            }).fill('&nbsp;').join('');
-          }).replace(/\s$/, '&nbsp;');
-          let currentNode = template.childNodes[0];
+            }).fill('\u00a0').join('');
+          }).replace(/\s$/, '\u00a0');
+          let currentNode = document.createTextNode(str);
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
           if (nextSibling) {

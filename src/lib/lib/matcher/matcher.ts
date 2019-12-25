@@ -38,16 +38,17 @@ export interface CommonMatchDelta {
 }
 
 export interface MatchRule {
-  extendTags?: string[] | RegExp;
   tags?: string[] | RegExp;
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   classes?: string[];
   attrs?: Array<{ key: string; value?: string | string[] }>;
+  extendTags?: string[] | RegExp;
   excludeStyles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   excludeClasses?: string[];
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   noContainTags?: string[] | RegExp;
   noInTags?: string[] | RegExp;
+  filter?: (node: HTMLElement) => boolean;
 }
 
 export class Matcher {
@@ -71,7 +72,9 @@ export class Matcher {
     if (rule.attrs) {
       this.validators.push(this.makeAttrsMatcher(rule.attrs));
     }
-
+    if (rule.filter) {
+      this.excludeValidators.push(rule.filter);
+    }
     if (rule.excludeClasses) {
       this.excludeValidators.push(this.makeClassNameMatcher(rule.excludeClasses));
     }

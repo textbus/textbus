@@ -4,6 +4,7 @@ import { FormatRange } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
@@ -55,9 +56,9 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
+  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
     if (rawElement) {
-      rawElement.style[this.name] = this.value;
+      rawElement.style[cacheData.style.name] = cacheData.style.value;
     }
     return null;
   }
