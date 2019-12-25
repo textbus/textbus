@@ -142,7 +142,7 @@ export class Parser {
       if (node.nodeType === 1) {
         const tagName = (node as HTMLElement).tagName.toLowerCase();
         if (limitChildTag) {
-          if (tagName === limitChildTag) {
+          if (limitChildren.includes(tagName)) {
             const cloneContainer = node.cloneNode();
             fragment.appendChild(cloneContainer);
             if ((node as HTMLElement).tagName.toLowerCase() === 'td' && node.childNodes.length === 0) {
