@@ -22,13 +22,12 @@ export class CleanCommander implements Commander {
   }
 
   private clean(fragment: Fragment, startIndex: number, endIndex: number) {
-    const formatMatrix = fragment.formatMatrix;
     fragment.sliceContents(startIndex, endIndex).forEach(item => {
       if (item instanceof Fragment) {
         this.clean(item, 0, item.contentLength);
       }
     });
-    Array.from(formatMatrix.keys()).filter(handler => {
+    fragment.getFormatHandlers().filter(handler => {
       return ![Priority.Default, Priority.Block, Priority.BlockStyle].includes(handler.priority);
     }).forEach(handler => {
       fragment.apply(new FormatRange({

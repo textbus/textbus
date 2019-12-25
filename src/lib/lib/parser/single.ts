@@ -5,12 +5,38 @@ import { VIRTUAL_NODE } from './help';
 import { VirtualObjectNode } from './virtual-dom';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from './format';
+import { getCanApplyFormats, mergeFormat } from './utils';
 
 export class Single extends View {
   virtualNode: VirtualObjectNode;
+  private formatMatrix = new Map<Handler, FormatRange[]>();
 
   constructor(public parent: Fragment, public tagName: string) {
     super();
+  }
+
+  getFormatRangesByHandler(handler: Handler) {
+    return this.formatMatrix.get(handler);
+  }
+
+  cleanFormats() {
+    this.formatMatrix.clear();
+  }
+
+  getFormatHandlers() {
+    return Array.from(this.formatMatrix.keys());
+  }
+
+  getFormatRanges() {
+    return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
+  }
+
+  mergeFormat(format: FormatRange, important = false) {
+    mergeFormat(this.formatMatrix, format, important);
+  }
+
+  setFormats(key: Handler, formatRanges: FormatRange[]) {
+    this.formatMatrix.set(key, formatRanges);
   }
 
   clone(): Single {
@@ -61,5 +87,9 @@ export class Single extends View {
     if (node) {
       host.appendChild(node);
     }
+  }
+
+  private getCanApplyFormats() {
+    return getCanApplyFormats(this.formatMatrix);
   }
 }

@@ -177,7 +177,7 @@ export class TableEditHook implements Hook {
       if (!fragment || !fragment.parent) {
         return null;
       }
-      const formatRange = fragment.formatMatrix.get(defaultHandlers)[0];
+      const formatRange = fragment.getFormatRangesByHandler(defaultHandlers)[0];
       if (/td|th/i.test(formatRange.cacheData.tag)) {
         return fragment;
       }

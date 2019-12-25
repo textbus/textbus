@@ -55,7 +55,7 @@ export class ToggleBlockCommander implements Commander {
         this.unwrapChild(f, 0, f.contentLength, handler, range);
       }
     });
-    const formatRanges = fragment.formatMatrix.get(handler);
+    const formatRanges = fragment.getFormatRangesByHandler(handler);
     if (formatRanges && formatRanges.length) {
       const parent = fragment.parent;
       const index = fragment.getIndexInParent();
@@ -73,7 +73,7 @@ export class ToggleBlockCommander implements Commander {
   }
 
   private unwrapParent(fragment: Fragment, handler: Handler): Fragment {
-    const formatRanges = fragment.formatMatrix.get(handler);
+    const formatRanges = fragment.getFormatRangesByHandler(handler);
     if (formatRanges && formatRanges.length) {
       const parent = fragment.parent;
       const index = fragment.getIndexInParent();

@@ -9,6 +9,7 @@ import { FormatRange } from './format';
 import { Single } from './single';
 import { RootFragment } from './root-fragment';
 import { Parser, ParseState } from './parser';
+import { getCanApplyFormats, mergeFormat } from './utils';
 
 export class Fragment extends View {
   readonly length = 1;
@@ -18,6 +19,7 @@ export class Fragment extends View {
     return this.contents.length;
   }
 
+  private formatMatrix = new Map<Handler, FormatRange[]>();
   private contents = new Contents();
 
   private host: HTMLElement;
@@ -27,6 +29,37 @@ export class Fragment extends View {
 
   constructor(public parent: Fragment) {
     super();
+  }
+
+  getFormatRangesByHandler(handler: Handler) {
+    return this.formatMatrix.get(handler);
+  }
+
+  cleanFormats() {
+    this.formatMatrix.clear();
+  }
+
+  getFormatHandlers() {
+    return Array.from(this.formatMatrix.keys());
+  }
+
+  getFormatRanges() {
+    return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
+  }
+
+  useFormats(formats: Map<Handler, FormatRange[]>) {
+    this.formatMatrix = new Map<Handler, FormatRange[]>();
+    Array.from(formats.keys()).forEach(key => {
+      this.formatMatrix.set(key, formats.get(key).map(i => i.clone()));
+    });
+  }
+
+  getFormatMatrix() {
+    const formatMatrix = new Map<Handler, FormatRange[]>();
+    Array.from(this.formatMatrix.keys()).forEach(key => {
+      this.formatMatrix.set(key, this.formatMatrix.get(key).map(i => i.clone()));
+    });
+    return formatMatrix;
   }
 
   /**
@@ -334,6 +367,14 @@ export class Fragment extends View {
       host: this.host,
       nextSibling: (nextSibling && nextSibling.parentNode === this.host) ? nextSibling : null
     };
+  }
+
+  mergeFormat(format: FormatRange, important = false) {
+    mergeFormat(this.formatMatrix, format, important);
+  }
+
+  private getCanApplyFormats() {
+    return getCanApplyFormats(this.formatMatrix);
   }
 
   destroy() {

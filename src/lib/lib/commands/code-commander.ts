@@ -36,7 +36,7 @@ export class CodeCommander implements Commander {
       const c = new Contents();
       c.insertElements(newContents, 0);
       range.commonAncestorFragment.useContents(c);
-      range.commonAncestorFragment.formatMatrix.clear();
+      range.commonAncestorFragment.cleanFormats();
 
       range.startFragment = range.commonAncestorFragment;
       range.endFragment = range.commonAncestorFragment;

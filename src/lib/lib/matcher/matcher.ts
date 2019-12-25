@@ -183,8 +183,7 @@ export class Matcher {
   }
 
   private isDisable(fragment: Fragment, tags: string[] | RegExp) {
-    const formats = Array.from(fragment.formatMatrix.values())
-      .reduce((v, n) => v.concat(n), [])
+    const formats = fragment.getFormatRanges()
       .filter(item => [Priority.Default, Priority.Block].includes(item.handler.priority));
 
     for (const f of formats) {
@@ -204,7 +203,7 @@ export class Matcher {
   }
 
   private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
-    let formatRanges = fragment.formatMatrix.get(handler) || [];
+    let formatRanges = fragment.getFormatRangesByHandler(handler) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         // 如果为块级元素，则需要从第 0 位开始匹配
@@ -260,7 +259,7 @@ export class Matcher {
           }
         }
         if (child instanceof Single) {
-          const formats = child.formatMatrix.get(handler);
+          const formats = child.getFormatRangesByHandler(handler);
           if (formats && formats[0]) {
             return {
               state: formats[0].state,
@@ -364,13 +363,14 @@ export class Matcher {
                                    handler: Handler, startIndex: number, endIndex: number): MatchData {
 
     while (true) {
-      const formatRanges = fragment.formatMatrix.get(handler) || [];
+      const formatRanges = fragment.getFormatRangesByHandler(handler) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
         if (startIndex >= f.startIndex && endIndex <= f.endIndex) {
           states.push(f);
         }
       }
+
       for (const item of states) {
         if (item.state === FormatState.Exclude) {
           return {

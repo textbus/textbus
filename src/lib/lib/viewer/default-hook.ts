@@ -19,7 +19,7 @@ export class DefaultHook implements Hook {
     const c = new Contents();
     ev.fragment.sliceContents(0).forEach(i => c.append(i));
     commonAncestorFragment.useContents(c);
-    commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
+    commonAncestorFragment.useFormats(ev.fragment.getFormatMatrix());
 
     let index = 0;
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
@@ -107,12 +107,12 @@ export class DefaultHook implements Hook {
       }
       const index = commonAncestorFragment.getIndexInParent();
       const formatMatrix = new Map<Handler, FormatRange[]>();
-      Array.from(afterFragment.formatMatrix.keys()).filter(key => {
+      afterFragment.getFormatHandlers().filter(key => {
         return ![Priority.Default, Priority.Block].includes(key.priority);
       }).forEach(key => {
-        formatMatrix.set(key, afterFragment.formatMatrix.get(key));
+        formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
       });
-      afterFragment.formatMatrix = formatMatrix;
+      afterFragment.useFormats(formatMatrix);
       afterFragment.mergeFormat(new FormatRange({
         startIndex: 0,
         endIndex: afterFragment.contentLength,
@@ -228,11 +228,10 @@ export class DefaultHook implements Hook {
         if (range.endFragment !== range.startFragment && !isDeletedEnd) {
           const startLength = range.startFragment.contentLength;
           const endContents = range.endFragment.sliceContents(0);
-          const endFormats = range.endFragment.formatMatrix;
           for (const item of endContents) {
             range.startFragment.append(item);
           }
-          Array.from(endFormats.values()).reduce((v, n) => {
+          range.endFragment.getFormatRanges().reduce((v, n) => {
             return v.concat(n);
           }, []).forEach(f => {
             if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {

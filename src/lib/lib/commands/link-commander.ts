@@ -24,7 +24,7 @@ export class LinkCommander implements Commander<AttrState[]> {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
-          const formats = range.commonAncestorFragment.formatMatrix.get(handler);
+          const formats = range.commonAncestorFragment.getFormatRangesByHandler(handler);
           if (formats) {
             for (const format of formats) {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
@@ -39,7 +39,7 @@ export class LinkCommander implements Commander<AttrState[]> {
         item.context.sliceContents(item.startIndex, item.endIndex)
           .forEach(node => {
             if (node instanceof Single) {
-              node.formatMatrix.get(handler).forEach(format => {
+              node.getFormatRangesByHandler(handler).forEach(format => {
                 format.cacheData.attrs = attrs;
               });
             } else if (typeof node === 'string') {

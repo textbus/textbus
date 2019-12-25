@@ -205,9 +205,7 @@ export class ViewRenderer {
     for (const item of oldFragment.sliceContents(0)) {
       target.append(item);
     }
-    Array.from(oldFragment.formatMatrix.values()).reduce((v, n) => {
-      return v.concat(n);
-    }, []).forEach(f => {
+    oldFragment.getFormatRanges().forEach(f => {
       if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
         const ff = f.clone();
         ff.startIndex += startIndex;
