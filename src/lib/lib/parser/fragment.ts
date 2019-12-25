@@ -57,7 +57,7 @@ export class Fragment extends View {
   getFormatMatrix() {
     const formatMatrix = new Map<Handler, FormatRange[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
-      this.formatMatrix.set(key, this.formatMatrix.get(key).map(i => i.clone()));
+      formatMatrix.set(key, this.formatMatrix.get(key).map(i => i.clone()));
     });
     return formatMatrix;
   }
