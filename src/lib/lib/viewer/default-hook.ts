@@ -16,7 +16,9 @@ export class DefaultHook implements Hook {
     const selection = viewer.selection;
     const commonAncestorFragment = selection.commonAncestorFragment;
 
-    commonAncestorFragment.contents = ev.fragment.contents;
+    const c = new Contents();
+    ev.fragment.sliceContents(0).forEach(i => c.append(i));
+    commonAncestorFragment.useContents(c);
     commonAncestorFragment.formatMatrix = ev.fragment.formatMatrix;
 
     let index = 0;
@@ -36,8 +38,8 @@ export class DefaultHook implements Hook {
 
     selection.firstRange.startIndex = startIndex;
     selection.firstRange.endIndex = startIndex;
-    const last = commonAncestorFragment.contents.getContentAtIndex(commonAncestorFragment.contents.length - 1);
-    if (startIndex + ev.offset === commonAncestorFragment.contents.length &&
+    const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
+    if (startIndex + ev.offset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
       commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
     }
@@ -56,9 +58,9 @@ export class DefaultHook implements Hook {
     const last = newContents[newContents.length - 1] as Fragment;
 
     const commonAncestorFragment = selection.commonAncestorFragment;
-    const firstChild = commonAncestorFragment.contents.getContentAtIndex(0);
-    const isEmpty = commonAncestorFragment.contents.length === 0 ||
-      commonAncestorFragment.contents.length === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
+    const firstChild = commonAncestorFragment.getContentAtIndex(0);
+    const isEmpty = commonAncestorFragment.contentLength === 0 ||
+      commonAncestorFragment.contentLength === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
 
     let index = commonAncestorFragment.getIndexInParent();
     const parent = commonAncestorFragment.parent;
@@ -74,7 +76,7 @@ export class DefaultHook implements Hook {
       if (firstContent instanceof Fragment) {
         viewer.moveContentsToFragment(firstContent, commonAncestorFragment, startIndex);
         if (!newContents.length) {
-          firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contents.length;
+          firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
         }
       }
     }
@@ -84,7 +86,7 @@ export class DefaultHook implements Hook {
         index++;
       });
       viewer.rerender(parent);
-      const p = viewer.findLastChild(last, last.contents.length - 1);
+      const p = viewer.findLastChild(last, last.contentLength - 1);
       firstRange.startFragment = firstRange.endFragment = p.fragment;
       firstRange.startIndex = firstRange.endIndex = p.index;
       selection.apply();
@@ -99,8 +101,8 @@ export class DefaultHook implements Hook {
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
       const afterFragment = commonAncestorFragment.delete(range.startIndex,
-        commonAncestorFragment.contents.length);
-      if (!commonAncestorFragment.contents.length) {
+        commonAncestorFragment.contentLength);
+      if (!commonAncestorFragment.contentLength) {
         commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
       }
       const index = commonAncestorFragment.getIndexInParent();
@@ -113,7 +115,7 @@ export class DefaultHook implements Hook {
       afterFragment.formatMatrix = formatMatrix;
       afterFragment.mergeFormat(new FormatRange({
         startIndex: 0,
-        endIndex: afterFragment.contents.length,
+        endIndex: afterFragment.contentLength,
         state: FormatState.Valid,
         context: afterFragment,
         handler: defaultHandlers,
@@ -121,7 +123,7 @@ export class DefaultHook implements Hook {
           tag: 'p'
         }
       }));
-      if (!afterFragment.contents.length) {
+      if (!afterFragment.contentLength) {
         afterFragment.append(new Single(afterFragment, 'br'));
       }
       commonAncestorFragment.parent.insert(afterFragment, index + 1);
@@ -138,19 +140,19 @@ export class DefaultHook implements Hook {
       if (range.collapsed) {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, range.startIndex);
-          if (!range.commonAncestorFragment.contents.length) {
+          if (!range.commonAncestorFragment.contentLength) {
             range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
           }
           viewer.rerender(range.commonAncestorFragment);
           selection.apply(-1);
         } else {
-          const firstContent = range.startFragment.contents.getContentAtIndex(0);
+          const firstContent = range.startFragment.getContentAtIndex(0);
           if (firstContent instanceof Single && firstContent.tagName === 'br') {
             range.startFragment.delete(0, 1);
           }
           const rerenderFragment = viewer.findRerenderFragment(range.startFragment);
           const firstRange = selection.firstRange;
-          if (range.startFragment.contents.length) {
+          if (range.startFragment.contentLength) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
 
               const startFragment = new Fragment(rerenderFragment.fragment);
@@ -179,7 +181,7 @@ export class DefaultHook implements Hook {
           } else {
             if (rerenderFragment.index === 0) {
               viewer.deleteEmptyFragment(range.startFragment);
-              if (rerenderFragment.fragment.contents.length) {
+              if (rerenderFragment.fragment.contentLength) {
                 const p = viewer.findFirstPosition(rerenderFragment.fragment);
                 firstRange.startFragment = p.fragment;
                 firstRange.startIndex = 0;
@@ -213,7 +215,7 @@ export class DefaultHook implements Hook {
       } else {
         let isDeletedEnd = false;
         range.getSelectedScope().forEach(s => {
-          const isDelete = s.startIndex === 0 && s.endIndex === s.context.contents.length;
+          const isDelete = s.startIndex === 0 && s.endIndex === s.context.contentLength;
           if (isDelete && s.context !== range.startFragment) {
             if (s.context === range.endFragment) {
               isDeletedEnd = true;
@@ -224,8 +226,8 @@ export class DefaultHook implements Hook {
           }
         });
         if (range.endFragment !== range.startFragment && !isDeletedEnd) {
-          const startLength = range.startFragment.contents.length;
-          const endContents = range.endFragment.contents;
+          const startLength = range.startFragment.contentLength;
+          const endContents = range.endFragment.sliceContents(0);
           const endFormats = range.endFragment.formatMatrix;
           for (const item of endContents) {
             range.startFragment.append(item);
@@ -245,7 +247,7 @@ export class DefaultHook implements Hook {
         }
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;
-        if (range.startFragment.contents.length === 0) {
+        if (range.startFragment.contentLength === 0) {
           range.startFragment.append(new Single(range.startFragment, 'br'));
         }
         viewer.rerender(range.commonAncestorFragment);

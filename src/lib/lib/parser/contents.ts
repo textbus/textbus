@@ -157,7 +157,7 @@ export class Contents implements Iterable<string | View> {
         return index;
       }
       if (item instanceof Fragment) {
-        index += item.contents.getAllChildContentsLength();
+        index += item.getAllChildContentsLength();
       } else {
         index += item.length;
       }
@@ -173,7 +173,7 @@ export class Contents implements Iterable<string | View> {
     let length = 0;
     for (const item of this.elements) {
       if (item instanceof Fragment) {
-        length += item.contents.getAllChildContentsLength();
+        length += item.getAllChildContentsLength();
       } else {
         length += item.length
       }

@@ -7,6 +7,7 @@ import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
+import { View } from '../parser/view';
 
 export class CodeCommander implements Commander {
   recordHistory = true;
@@ -17,7 +18,7 @@ export class CodeCommander implements Commander {
     selection.ranges.forEach(range => {
       const position = range.getCommonAncestorContentsScope();
 
-      const newContents = this.toCode(range.commonAncestorFragment.contents);
+      const newContents = this.toCode(range.commonAncestorFragment.sliceContents(0));
       this.elements = [];
       let index = 0;
       for (const i of newContents) {
@@ -32,7 +33,9 @@ export class CodeCommander implements Commander {
         index++;
       }
 
-      range.commonAncestorFragment.contents = newContents;
+      const c = new Contents();
+      c.insertElements(newContents, 0);
+      range.commonAncestorFragment.useContents(c);
       range.commonAncestorFragment.formatMatrix.clear();
 
       range.startFragment = range.commonAncestorFragment;
@@ -43,7 +46,7 @@ export class CodeCommander implements Commander {
 
       range.commonAncestorFragment.apply(new FormatRange({
         startIndex: 0,
-        endIndex: range.commonAncestorFragment.contents.length,
+        endIndex: range.commonAncestorFragment.contentLength,
         state: overlap ? FormatState.Invalid : FormatState.Valid,
         handler,
         context: range.commonAncestorFragment,
@@ -61,8 +64,8 @@ export class CodeCommander implements Commander {
     return null;
   }
 
-  private toCode(contents: Contents): Contents {
-    const newContents = new Contents();
+  private toCode(contents: Array<string | View>) {
+    const newContents: Array<string | View> = [];
     contents.slice(0).forEach(item => {
       if (item instanceof Fragment) {
         // if (newContents.length > 0) {
@@ -70,9 +73,9 @@ export class CodeCommander implements Commander {
         //   this.elements.push(el);
         //   newContents.add(el);
         // }
-        this.toCode(item.contents).slice(0).forEach(item => newContents.append(item));
+        this.toCode(item.sliceContents(0)).slice(0).forEach(item => newContents.push(item));
       } else {
-        newContents.append(item);
+        newContents.push(item);
       }
     });
     return newContents;

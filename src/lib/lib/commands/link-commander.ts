@@ -36,7 +36,7 @@ export class LinkCommander implements Commander<AttrState[]> {
       }
       range.getSelectedScope().forEach(item => {
         let index = 0;
-        item.context.contents.slice(item.startIndex, item.endIndex)
+        item.context.sliceContents(item.startIndex, item.endIndex)
           .forEach(node => {
             if (node instanceof Single) {
               node.formatMatrix.get(handler).forEach(format => {

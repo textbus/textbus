@@ -12,8 +12,13 @@ import { Parser, ParseState } from './parser';
 
 export class Fragment extends View {
   readonly length = 1;
-  contents = new Contents();
   virtualNode: VirtualContainerNode;
+
+  get contentLength() {
+    return this.contents.length;
+  }
+
+  private contents = new Contents();
 
   private host: HTMLElement;
   private elements: Node[] = [];
@@ -42,6 +47,14 @@ export class Fragment extends View {
       }));
     });
     return ff;
+  }
+
+  useContents(contents: Contents) {
+    this.contents = contents;
+  }
+
+  sliceContents(startIndex: number, endIndex?: number) {
+    return this.contents.slice(startIndex, endIndex);
   }
 
   /**
@@ -145,6 +158,18 @@ export class Fragment extends View {
         format.endIndex += content.length;
       }
     })
+  }
+
+  getContentAtIndex(index: number) {
+    return this.contents.getContentAtIndex(index);
+  }
+
+  find(el: View) {
+    return this.contents.find(el);
+  }
+
+  getAllChildContentsLength() {
+    return this.contents.getAllChildContentsLength();
   }
 
   insertFragmentContents(fragment: Fragment, index: number) {

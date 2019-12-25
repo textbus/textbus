@@ -104,7 +104,7 @@ export class TBSelection {
             index: position[i]
           }
         } else {
-          f = f.contents.getContentAtIndex(position[i]) as Fragment;
+          f = f.getContentAtIndex(position[i]) as Fragment;
         }
       }
     };

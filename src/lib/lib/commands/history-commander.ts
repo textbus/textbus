@@ -4,6 +4,7 @@ import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { RootFragment } from '../parser/root-fragment';
+import { Contents } from '../parser/contents';
 
 export class HistoryCommander implements Commander {
   recordHistory = false;
@@ -17,8 +18,8 @@ export class HistoryCommander implements Commander {
       rootFragment.editor.getNextSnapshot();
     if (snapshot) {
       rootFragment.destroyView();
-      rootFragment.contents = snapshot.doc.contents;
-      rootFragment.formatMatrix = snapshot.doc.formatMatrix;
+      rootFragment.useContents(new Contents());
+      rootFragment.insertFragmentContents(snapshot.doc, 0);
       selection.usePaths(snapshot.paths, snapshot.doc);
     }
     return rootFragment;

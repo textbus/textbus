@@ -48,8 +48,10 @@ export class BlockCommander implements Commander<string> {
     if (this.hasFragment(fragment)) {
       const ff = fragment.delete(startIndex, endIndex);
       this.childContentToFragmentAndApplyFormat(ff, handler);
-      Array.from(ff.contents).forEach((child, i) => {
-        fragment.insert(child, startIndex + i);
+      let len = 0;
+      ff.sliceContents(0).forEach(child => {
+        fragment.insert(child, startIndex + len);
+        len += child.length;
       });
     } else {
       this.useFormat(fragment, handler);
@@ -57,31 +59,29 @@ export class BlockCommander implements Commander<string> {
   }
 
   private findStartIndex(fragment: Fragment, max: number): number {
-    let i = 0;
     let index = 0;
-    for (const item of fragment.contents) {
+    for (let i = 0; i < fragment.contentLength; i++) {
+      const item = fragment.getContentAtIndex(i);
       if (item instanceof Fragment) {
         index = i;
+        if (i >= max) {
+          return i;
+        }
       }
-      if (i >= max) {
-        return index;
-      }
-      i++;
     }
     return index;
   }
 
   private findEndIndex(fragment: Fragment, min: number): number {
     let i = min;
-    const len = fragment.contents.length;
+    const len = fragment.contentLength;
     while (true) {
-      const next = fragment.contents.getContentAtIndex(i);
+      const next = fragment.getContentAtIndex(i);
       if (next instanceof Fragment || i === len) {
         return i;
       }
       i++;
     }
-    return i;
   }
 
   private childContentToFragmentAndApplyFormat(fragment: Fragment, handler: Handler) {
@@ -90,16 +90,18 @@ export class BlockCommander implements Commander<string> {
       this.useFormat(fragment, handler);
       return;
     }
-    while (fragment.contents.length) {
+    while (fragment.contentLength) {
       let i = 0;
-      for (const item of fragment.contents) {
+      const contentLength = fragment.contentLength;
+      for (; i < contentLength; i++) {
+        const item = fragment.getContentAtIndex(i);
         if (item instanceof Fragment) {
           if (i > 0) {
             contents.push(fragment.delete(0, i));
             continue;
           }
           this.childContentToFragmentAndApplyFormat(item, handler);
-          contents.push(fragment.delete(0, 1).contents.getContentAtIndex(0) as Fragment);
+          contents.push(fragment.delete(0, 1).getContentAtIndex(0) as Fragment);
         } else {
           i++;
         }
@@ -109,7 +111,7 @@ export class BlockCommander implements Commander<string> {
       }
     }
 
-    fragment.contents = new Contents();
+    fragment.useContents(new Contents());
     contents.forEach(i => {
       if (!this.hasFragment(i)) {
         this.useFormat(i, handler)
@@ -121,7 +123,7 @@ export class BlockCommander implements Commander<string> {
   private useFormat(fragment: Fragment, handler: Handler) {
     fragment.apply(new FormatRange({
       startIndex: 0,
-      endIndex: fragment.contents.length,
+      endIndex: fragment.contentLength,
       state: FormatState.Valid,
       context: fragment,
       handler,
@@ -133,8 +135,8 @@ export class BlockCommander implements Commander<string> {
   }
 
   private hasFragment(fragment: Fragment) {
-    for (const i of fragment.contents) {
-      if (i instanceof Fragment) {
+    for (let i = 0; i < fragment.contentLength; i++) {
+      if (fragment.getContentAtIndex(i) instanceof Fragment) {
         return true;
       }
     }

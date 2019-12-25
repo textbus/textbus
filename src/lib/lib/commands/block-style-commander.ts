@@ -3,10 +3,12 @@ import { FormatState } from '../matcher/matcher';
 import { FormatRange } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
+import { Contents } from '../parser/contents';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
   private value: string | number;
+
   constructor(private name: string) {
   }
 
@@ -16,7 +18,8 @@ export class BlockStyleCommander implements Commander<string> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.reduce((v, n) => {
-      const contents = n.commonAncestorFragment.contents;
+      const contents = new Contents();
+      contents.insertElements(n.commonAncestorFragment.sliceContents(0), 0);
       if (!n.commonAncestorFragment.parent) {
         return v.concat(contents.getFragments());
       } else {

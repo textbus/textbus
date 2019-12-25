@@ -182,7 +182,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
     tr.mergeFormat(new FormatRange({
       startIndex: 0,
-      endIndex: tr.contents.length,
+      endIndex: tr.contentLength,
       state: FormatState.Valid,
       cacheData: {
         tag: 'tr'
@@ -219,7 +219,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     });
     tr.mergeFormat(new FormatRange({
       startIndex: 0,
-      endIndex: tr.contents.length,
+      endIndex: tr.contentLength,
       state: FormatState.Valid,
       cacheData: {
         tag: 'tr'
@@ -258,7 +258,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     selection.removeAllRanges();
     range.startFragment = range.endFragment = fragment;
     range.startIndex = 0;
-    range.endIndex = fragment.contents.length;
+    range.endIndex = fragment.contentLength;
     selection.addRange(range);
   }
 
@@ -287,7 +287,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
             const index = (cell.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
-            rowFragment.insert(newCellFragment, rowFragment.contents.length);
+            rowFragment.insert(newCellFragment, rowFragment.contentLength);
           }
           return newCellFragment;
         }
@@ -299,7 +299,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     fragments.forEach(f => {
       const range = firstRange.clone();
       range.startIndex = 0;
-      range.endIndex = f.contents.length;
+      range.endIndex = f.contentLength;
       range.startFragment = range.endFragment = f;
       selection.addRange(range);
     });
@@ -327,7 +327,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
             const index = (newPosition.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
-            rowFragment.insert(newCellFragment, rowFragment.contents.length);
+            rowFragment.insert(newCellFragment, rowFragment.contentLength);
           }
         } else {
           const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode)
@@ -374,7 +374,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
               const index = (newPosition.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
               rowFragment.insert(newCellFragment, index);
             } else {
-              rowFragment.insert(newCellFragment, rowFragment.contents.length);
+              rowFragment.insert(newCellFragment, rowFragment.contentLength);
             }
           }
         }

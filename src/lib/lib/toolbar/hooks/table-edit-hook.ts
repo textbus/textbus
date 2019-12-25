@@ -190,7 +190,7 @@ export class TableEditHook implements Hook {
       }
       const parent = fragment.parent;
       fragment.destroy();
-      if (parent && parent.contents.length === 0) {
+      if (parent && parent.contentLength === 0) {
         deleteEmptyFragment(parent, scope);
       }
     };
@@ -202,12 +202,12 @@ export class TableEditHook implements Hook {
         if (cellFragment) {
           const position = viewer.findFirstPosition(cellFragment);
           if (range.startIndex === 0 && position.fragment === range.startFragment) {
-            const firstContent = range.startFragment.contents.getContentAtIndex(0);
+            const firstContent = range.startFragment.getContentAtIndex(0);
             if (firstContent instanceof Single && firstContent.tagName === 'br' ||
-              range.startFragment.contents.length === 0) {
+              range.startFragment.contentLength === 0) {
               deleteEmptyFragment(range.startFragment, cellFragment);
               range.startIndex = range.endIndex = 0;
-              if (cellFragment.contents.length) {
+              if (cellFragment.contentLength) {
                 const newPosition = viewer.findFirstPosition(cellFragment);
                 range.startFragment = range.endFragment = newPosition.fragment;
               } else {

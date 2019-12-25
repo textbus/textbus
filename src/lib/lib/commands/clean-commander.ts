@@ -23,9 +23,9 @@ export class CleanCommander implements Commander {
 
   private clean(fragment: Fragment, startIndex: number, endIndex: number) {
     const formatMatrix = fragment.formatMatrix;
-    fragment.contents.slice(startIndex, endIndex).forEach(item => {
+    fragment.sliceContents(startIndex, endIndex).forEach(item => {
       if (item instanceof Fragment) {
-        this.clean(item, 0, item.contents.length);
+        this.clean(item, 0, item.contentLength);
       }
     });
     Array.from(formatMatrix.keys()).filter(handler => {

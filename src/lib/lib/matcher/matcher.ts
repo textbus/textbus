@@ -171,11 +171,11 @@ export class Matcher {
   }
 
   private isContainTag(fragment: Fragment, position: { startIndex: number, endIndex: number }): boolean {
-    const elements = fragment.contents.slice(position.startIndex, position.endIndex)
+    const elements = fragment.sliceContents(position.startIndex, position.endIndex)
       .filter(item => item instanceof Fragment) as Fragment[];
     for (let el of elements) {
       if (this.isDisable(el, this.rule.noContainTags) ||
-        this.isContainTag(el, {startIndex: 0, endIndex: el.contents.length})) {
+        this.isContainTag(el, {startIndex: 0, endIndex: el.contentLength})) {
         return true;
       }
     }
@@ -209,7 +209,7 @@ export class Matcher {
       for (const format of formatRanges) {
         // 如果为块级元素，则需要从第 0 位开始匹配
         if (format.startIndex === 0 &&
-          format.endIndex === fragment.contents.length &&
+          format.endIndex === fragment.contentLength &&
           (format.handler.priority === Priority.Block || format.handler.priority === Priority.BlockStyle)) {
           if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
             return {
@@ -231,7 +231,7 @@ export class Matcher {
       };
     }
 
-    const childContents = fragment.contents.slice(startIndex, endIndex);
+    const childContents = fragment.sliceContents(startIndex, endIndex);
     const states: Array<MatchData> = [];
     let index = startIndex;
     formatRanges = formatRanges.filter(item => {
@@ -275,8 +275,8 @@ export class Matcher {
           };
         }
       } else if (child instanceof Fragment) {
-        if (child.contents.length) {
-          states.push(this.getStatesByRange(0, child.contents.length, child, handler));
+        if (child.contentLength) {
+          states.push(this.getStatesByRange(0, child.contentLength, child, handler));
         }
       }
       index += child.length;
@@ -388,7 +388,7 @@ export class Matcher {
         }
       }
       if (fragment.parent) {
-        startIndex = Array.from(fragment.parent.contents).indexOf(fragment);
+        startIndex = fragment.parent.sliceContents(0).indexOf(fragment);
         endIndex = startIndex + 1;
         fragment = fragment.parent;
       } else {

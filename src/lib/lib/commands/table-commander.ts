@@ -37,13 +37,13 @@ export class TableCommander implements Commander<AttrState[]> {
     }));
     if (this.header) {
       const thead = this.createHeader(table, handler);
-      table.contents.append(thead);
+      table.append(thead);
     }
     const tbody = this.createBody(table, handler);
-    table.contents.append(tbody);
+    table.append(tbody);
     context.insert(table, selection.firstRange.startFragment.getIndexInParent() + 1);
-    const first = fragment.contents.getContentAtIndex(0);
-    if (fragment.contents.length === 0 || first instanceof Single && first.tagName === 'br') {
+    const first = fragment.getContentAtIndex(0);
+    if (fragment.contentLength === 0 || first instanceof Single && first.tagName === 'br') {
       fragment.destroy();
     }
     firstRange.startIndex = firstRange.endIndex = 0;
@@ -56,7 +56,7 @@ export class TableCommander implements Commander<AttrState[]> {
   }
 
   private findFirstPosition(fragment: Fragment): Fragment {
-    const first = fragment.contents.getContentAtIndex(0);
+    const first = fragment.getContentAtIndex(0);
     if (first instanceof Fragment) {
       return this.findFirstPosition(first);
     }
@@ -88,7 +88,7 @@ export class TableCommander implements Commander<AttrState[]> {
           tag: 'tr'
         }
       }));
-      tbody.contents.append(tr);
+      tbody.append(tr);
       for (let j = 0; j < this.cols; j++) {
         const td = new Fragment(tr);
         td.mergeFormat(new FormatRange({
@@ -102,7 +102,7 @@ export class TableCommander implements Commander<AttrState[]> {
           }
         }));
         td.append(new Single(td, 'br'));
-        tr.contents.append(td);
+        tr.append(td);
       }
     }
 
@@ -132,7 +132,7 @@ export class TableCommander implements Commander<AttrState[]> {
         tag: 'tr'
       }
     }));
-    thead.contents.append(tr);
+    thead.append(tr);
     for (let i = 0; i < this.cols; i++) {
       const th = new Fragment(tr);
       th.mergeFormat(new FormatRange({
@@ -146,7 +146,7 @@ export class TableCommander implements Commander<AttrState[]> {
         }
       }));
       th.append(new Single(th, 'br'));
-      tr.contents.append(th);
+      tr.append(th);
     }
     return thead;
   }

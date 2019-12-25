@@ -50,9 +50,9 @@ export class ToggleBlockCommander implements Commander {
                       endIndex: number,
                       handler: Handler,
                       range: TBRange) {
-    fragment.contents.slice(startIndex, endIndex).forEach(f => {
+    fragment.sliceContents(startIndex, endIndex).forEach(f => {
       if (f instanceof Fragment) {
-        this.unwrapChild(f, 0, f.contents.length, handler, range);
+        this.unwrapChild(f, 0, f.contentLength, handler, range);
       }
     });
     const formatRanges = fragment.formatMatrix.get(handler);
@@ -211,7 +211,7 @@ export class ToggleBlockCommander implements Commander {
     if (fragment === scope) {
       return fragment;
     }
-    if (fragment.contents.length === 0) {
+    if (fragment.contentLength === 0) {
       const parent = fragment.parent;
       fragment.destroy();
       this.deleteEmptyFragment(parent, scope);

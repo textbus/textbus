@@ -13,6 +13,7 @@ import { Single } from '../parser/single';
 import { Parser } from '../parser/parser';
 import { Hook } from './help';
 import { defaultHook } from './default-hook';
+import { Contents } from '../parser/contents';
 
 export class ViewRenderer {
   elementRef = document.createElement('div');
@@ -184,24 +185,24 @@ export class ViewRenderer {
   }
 
   findLastChild(fragment: Fragment, index: number): TBRangePosition {
-    const last = fragment.contents.getContentAtIndex(index);
+    const last = fragment.getContentAtIndex(index);
     if (last instanceof Fragment) {
-      return this.findLastChild(last, last.contents.length - 1);
+      return this.findLastChild(last, last.contentLength - 1);
     } else if (last instanceof Single && last.tagName === 'br') {
       return {
-        index: fragment.contents.length - 1,
+        index: fragment.contentLength - 1,
         fragment
       };
     }
     return {
-      index: fragment.contents.length,
+      index: fragment.contentLength,
       fragment
     }
   }
 
   moveContentsToFragment(oldFragment: Fragment, target: Fragment, startIndex: number) {
     target.delete(startIndex);
-    for (const item of oldFragment.contents) {
+    for (const item of oldFragment.sliceContents(0)) {
       target.append(item);
     }
     Array.from(oldFragment.formatMatrix.values()).reduce((v, n) => {
@@ -219,7 +220,7 @@ export class ViewRenderer {
   deleteEmptyFragment(fragment: Fragment) {
     const parent = fragment.parent;
     fragment.destroy();
-    if (parent && !parent.contents.length) {
+    if (parent && !parent.contentLength) {
       this.deleteEmptyFragment(parent);
     }
   }
@@ -242,7 +243,7 @@ export class ViewRenderer {
   }
 
   findFirstPosition(fragment: Fragment): TBRangePosition {
-    const first = fragment.contents.getContentAtIndex(0);
+    const first = fragment.getContentAtIndex(0);
     if (first instanceof Fragment) {
       return this.findFirstPosition(first);
     }
@@ -269,10 +270,12 @@ export class ViewRenderer {
 
   private paste(el: HTMLElement) {
     const fragment = this.parser.parse(el, new Fragment(null));
+    const c = new Contents();
+    c.insertElements(fragment.sliceContents(0), 0);
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onPaste(fragment.contents, this, () => {
+      hook.onPaste(c, this, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -292,7 +295,7 @@ export class ViewRenderer {
     }
 
     const startPosition = this.findFirstPosition(f);
-    const endPosition = this.findLastChild(f, f.contents.length - 1);
+    const endPosition = this.findLastChild(f, f.contentLength - 1);
 
     firstRange.startFragment = startPosition.fragment;
     firstRange.endFragment = endPosition.fragment;
@@ -375,15 +378,15 @@ export class ViewRenderer {
       if (index === 0) {
         fragment = fragment.parent;
       } else {
-        let prev = fragment.parent.contents.getContentAtIndex(index - 1);
+        let prev = fragment.parent.getContentAtIndex(index - 1);
         if (prev instanceof Fragment) {
           while (prev) {
-            const last = (prev as Fragment).contents.getContentAtIndex((prev as Fragment).contents.length - 1);
+            const last = (prev as Fragment).getContentAtIndex((prev as Fragment).contentLength - 1);
             if (last instanceof Fragment) {
               prev = last;
             } else {
-              let len = (prev as Fragment).contents.length;
-              const c = (prev as Fragment).contents.getContentAtIndex(len - 1);
+              let len = (prev as Fragment).contentLength;
+              const c = (prev as Fragment).getContentAtIndex(len - 1);
               if (c instanceof Single && c.tagName === 'br') {
                 len--;
               }
@@ -411,14 +414,14 @@ export class ViewRenderer {
   private static getNextPosition(range: TBRange): TBRangePosition {
     const currentFragment = range.endFragment;
     let offset = range.endIndex;
-    if (offset === currentFragment.contents.length - 1) {
-      const c = currentFragment.contents.getContentAtIndex(offset);
+    if (offset === currentFragment.contentLength - 1) {
+      const c = currentFragment.getContentAtIndex(offset);
       if (c instanceof Single && c.tagName === 'br') {
         offset++;
       }
     }
 
-    if (offset < currentFragment.contents.length) {
+    if (offset < currentFragment.contentLength) {
       return {
         fragment: currentFragment,
         index: offset + 1
@@ -427,13 +430,13 @@ export class ViewRenderer {
     let fragment = currentFragment;
     while (fragment.parent) {
       const index = fragment.getIndexInParent();
-      if (index === fragment.parent.contents.length - 1) {
+      if (index === fragment.parent.contentLength - 1) {
         fragment = fragment.parent;
       } else {
-        let next = fragment.parent.contents.getContentAtIndex(index + 1);
+        let next = fragment.parent.getContentAtIndex(index + 1);
         if (next instanceof Fragment) {
           while (next) {
-            const first = (next as Fragment).contents.getContentAtIndex(0);
+            const first = (next as Fragment).getContentAtIndex(0);
             if (first instanceof Fragment) {
               next = first;
             } else {
@@ -452,8 +455,8 @@ export class ViewRenderer {
         }
       }
     }
-    let index = currentFragment.contents.length;
-    const c = currentFragment.contents.getContentAtIndex(index - 1);
+    let index = currentFragment.contentLength;
+    const c = currentFragment.getContentAtIndex(index - 1);
     if (c instanceof Single && c.tagName === 'br') {
       index--;
     }

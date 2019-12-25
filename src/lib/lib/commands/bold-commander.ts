@@ -36,7 +36,7 @@ export class BoldCommander implements Commander {
   }
 
   private apply(scope: SelectedScope, handler: Handler, overlap: boolean) {
-    const children = scope.context.contents.slice(scope.startIndex, scope.endIndex);
+    const children = scope.context.sliceContents(scope.startIndex, scope.endIndex);
     let state: FormatState;
     const el = BoldCommander.findBoldParent(scope.context.virtualNode.elementRef as HTMLElement);
     if (el) {
@@ -52,7 +52,7 @@ export class BoldCommander implements Commander {
         this.apply({
           context: item,
           startIndex: 0,
-          endIndex: item.contents.length
+          endIndex: item.contentLength
         }, handler, overlap);
       } else if (item) {
         if (!childFormat) {

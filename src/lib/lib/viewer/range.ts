@@ -142,7 +142,7 @@ export class TBRange {
     while (startFragment !== this.commonAncestorFragment) {
       start.push({
         startIndex,
-        endIndex: startFragment.contents.length,
+        endIndex: startFragment.contentLength,
         context: startFragment
       });
       startIndex = startFragment.getIndexInParent() + 1;
@@ -225,7 +225,7 @@ export class TBRange {
   private static getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
       if (node.childNodes.length === offset) {
-        return (node[VIRTUAL_NODE] as VirtualNode).context.contents.length;
+        return (node[VIRTUAL_NODE] as VirtualNode).context.contentLength;
       }
       const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
       return childVNode.startIndex;

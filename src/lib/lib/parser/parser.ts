@@ -71,7 +71,7 @@ export class Parser {
   private transform(from: Node, context: Fragment): number {
     if (from.nodeType === 3) {
       const textContent = from.textContent;
-      context.contents.append(textContent.replace(/&nbsp;/g, ' '));
+      context.append(textContent.replace(/&nbsp;/g, ' '));
       return textContent.length;
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();
@@ -79,10 +79,10 @@ export class Parser {
         return 0;
       }
       if (/inline/.test(dtd[tagName].display)) {
-        const start = context.contents.length;
+        const start = context.contentLength;
         if (dtd[tagName].type === 'single') {
           const newSingle = new Single(context, tagName);
-          context.contents.append(newSingle);
+          context.append(newSingle);
           this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
           return 1;
         } else {
@@ -105,8 +105,8 @@ export class Parser {
         nodes.forEach(node => {
           this.transform(node, newBlock);
         });
-        this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contents.length);
-        context.contents.append(newBlock);
+        this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contentLength);
+        context.append(newBlock);
         return 1;
       }
     }

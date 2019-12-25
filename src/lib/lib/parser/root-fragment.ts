@@ -17,7 +17,7 @@ export class RootFragment extends Fragment {
   }
 
   render(host: HTMLElement, nextSibling?: Node): HTMLElement {
-    if (this.contents.length === 0) {
+    if (this.contentLength === 0) {
       const newFragment = new Fragment(this);
       newFragment.append(new Single(newFragment, 'br'));
       newFragment.mergeFormat(new FormatRange({

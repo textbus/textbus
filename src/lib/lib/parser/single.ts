@@ -29,7 +29,7 @@ export class Single extends View {
     let slotContainer: HTMLElement;
 
     const canApplyFormats = this.getCanApplyFormats();
-    const index = this.parent.contents.find(this);
+    const index = this.parent.find(this);
     const vNode = new VirtualObjectNode(canApplyFormats, this.parent, index, index + 1);
     const el = document.createElement(this.tagName);
     vNode.elementRef = el;
