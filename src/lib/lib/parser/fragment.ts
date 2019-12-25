@@ -84,6 +84,11 @@ export class Fragment extends View {
 
   useContents(contents: Contents) {
     this.contents = contents;
+    contents.slice(0).forEach(i => {
+      if (i instanceof Single || i instanceof Fragment) {
+        i.parent = this;
+      }
+    });
   }
 
   sliceContents(startIndex: number, endIndex?: number) {
