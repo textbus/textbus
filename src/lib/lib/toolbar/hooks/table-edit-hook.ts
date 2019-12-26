@@ -8,9 +8,7 @@ import { Hook } from '../../viewer/help';
 import { ViewRenderer } from '../../viewer/view-renderer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
-import { FormatRange } from '../../parser/format';
 import { defaultHandlers } from '../../default-handlers';
-import { FormatState } from '../../matcher/matcher';
 
 interface ElementPosition {
   left: number;

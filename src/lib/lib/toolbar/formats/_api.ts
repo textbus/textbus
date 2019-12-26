@@ -4,7 +4,7 @@ export { FormOptions } from './forms/form-options';
 export { FormSwitch } from './forms/form-switch';
 export { FormTextField } from './forms/form-text-field';
 export { alignHandler } from './align';
-export { backgroundHandler } from './background';
+export { blockBackgroundHandler } from './block-background';
 export { blockquoteHandler } from './blockquote';
 export { boldHandler } from './bold';
 export { cleanHandler } from './clean';

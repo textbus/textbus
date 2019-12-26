@@ -36,21 +36,14 @@ export class StyleCommander implements Commander<string | number> {
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
-    // if (cacheData && cacheData.style) {
-    //   if (rawElement) {
-    //     if (dtd[rawElement.tagName.toLowerCase()].limitChildren ||
-    //       this.canApplyBlockElement ||
-    //       /inline/.test(dtd[rawElement.tagName.toLowerCase()].display)) {
-    //       rawElement.style[cacheData.style.name] = cacheData.style.value;
-    //       return null;
-    //     }
-    //   }
-    //   const el = document.createElement('span');
-    //   el.style[cacheData.style.name] = cacheData.style.value;
-    //   return new ChildSlotModel(el);
-    // }
-    if (rawElement) {
-      rawElement.style[this.name] = this.value;
+    if (cacheData && cacheData.style) {
+      if (rawElement) {
+        rawElement.style[cacheData.style.name] = cacheData.style.value;
+        return null;
+      }
+      const el = document.createElement('span');
+      el.style[cacheData.style.name] = cacheData.style.value;
+      return new ChildSlotModel(el);
     }
     return null;
   }

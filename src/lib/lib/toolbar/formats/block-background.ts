@@ -36,7 +36,7 @@ class Palette implements DropdownHandlerView {
   }
 }
 
-export const backgroundHandler: DropdownConfig = {
+export const blockBackgroundHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tanbo-editor-icon-paint-brush'],
   priority: Priority.BlockStyle,

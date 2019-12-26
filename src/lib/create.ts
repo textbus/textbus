@@ -3,7 +3,7 @@ import { EditorOptions } from './lib/tbus';
 
 import {
   alignHandler,
-  backgroundHandler,
+  blockBackgroundHandler,
   blockquoteHandler,
   boldHandler,
   cleanHandler,
@@ -64,7 +64,7 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ], [
         colorHandler,
         textBackgroundHandler,
-        backgroundHandler
+        blockBackgroundHandler
       ], [
         fontFamilyHandler
       ], [
