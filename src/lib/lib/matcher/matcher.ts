@@ -72,9 +72,6 @@ export class Matcher {
     if (rule.attrs) {
       this.validators.push(this.makeAttrsMatcher(rule.attrs));
     }
-    if (rule.filter) {
-      this.excludeValidators.push(rule.filter);
-    }
     if (rule.excludeClasses) {
       this.excludeValidators.push(this.makeClassNameMatcher(rule.excludeClasses));
     }
@@ -87,6 +84,12 @@ export class Matcher {
   }
 
   matchNode(node: HTMLElement): FormatState {
+    if (this.rule.filter) {
+      const b = this.rule.filter(node);
+      if (!b) {
+        return FormatState.Invalid;
+      }
+    }
     const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
     if (exclude) {
       return FormatState.Exclude;
