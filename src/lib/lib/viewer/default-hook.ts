@@ -105,36 +105,46 @@ export class DefaultHook implements Hook {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
-      const afterFragment = commonAncestorFragment.delete(range.startIndex,
-        commonAncestorFragment.contentLength);
-      if (!commonAncestorFragment.contentLength) {
-        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
-      }
-      const index = commonAncestorFragment.getIndexInParent();
-      const formatMatrix = new Map<Handler, FormatRange[]>();
-      afterFragment.getFormatHandlers().filter(key => {
-        return ![Priority.Default, Priority.Block].includes(key.priority);
-      }).forEach(key => {
-        formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
-      });
-      afterFragment.useFormats(formatMatrix);
-      afterFragment.mergeFormat(new FormatRange({
-        startIndex: 0,
-        endIndex: afterFragment.contentLength,
-        state: FormatState.Valid,
-        context: afterFragment,
-        handler: defaultHandlers,
-        cacheData: {
-          tag: 'p'
+      if (/th|td/i.test(commonAncestorFragment.virtualNode.elementRef.nodeName)) {
+        if (range.endIndex === commonAncestorFragment.contentLength) {
+          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
         }
-      }));
-      if (!afterFragment.contentLength) {
-        afterFragment.append(new Single(afterFragment, 'br'));
+        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+        range.startIndex = range.endIndex = range.endIndex + 1;
+        viewer.rerender(commonAncestorFragment);
+        viewer.selection.apply();
+      } else {
+        const afterFragment = commonAncestorFragment.delete(range.startIndex,
+          commonAncestorFragment.contentLength);
+        if (!commonAncestorFragment.contentLength) {
+          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+        }
+        const index = commonAncestorFragment.getIndexInParent();
+        const formatMatrix = new Map<Handler, FormatRange[]>();
+        afterFragment.getFormatHandlers().filter(key => {
+          return ![Priority.Default, Priority.Block].includes(key.priority);
+        }).forEach(key => {
+          formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
+        });
+        afterFragment.useFormats(formatMatrix);
+        afterFragment.mergeFormat(new FormatRange({
+          startIndex: 0,
+          endIndex: afterFragment.contentLength,
+          state: FormatState.Valid,
+          context: afterFragment,
+          handler: defaultHandlers,
+          cacheData: {
+            tag: 'p'
+          }
+        }));
+        if (!afterFragment.contentLength) {
+          afterFragment.append(new Single(afterFragment, 'br'));
+        }
+        commonAncestorFragment.parent.insert(afterFragment, index + 1);
+        range.startFragment = range.endFragment = afterFragment;
+        range.startIndex = range.endIndex = 0;
+        viewer.rerender(commonAncestorFragment.parent);
       }
-      commonAncestorFragment.parent.insert(afterFragment, index + 1);
-      range.startFragment = range.endFragment = afterFragment;
-      range.startIndex = range.endIndex = 0;
-      viewer.rerender(commonAncestorFragment.parent);
     });
     selection.apply();
   }
