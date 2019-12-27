@@ -175,14 +175,7 @@ export class TableEditHook implements Hook {
       if (!fragment || !fragment.parent) {
         return null;
       }
-      const isCell = fragment.getFormatRanges().filter(range => {
-        if ([Priority.Default, Priority.Block].includes(range.handler.priority)) {
-          if (range.state !== FormatState.Invalid && /th|td/i.test(range?.cacheData?.tag)) {
-            return true;
-          }
-        }
-        return false;
-      }).length === 1;
+      const isCell = /th|td/i.test(fragment?.virtualNode?.elementRef.nodeName);
       if (isCell) {
         return fragment;
       }
