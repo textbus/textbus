@@ -1,14 +1,14 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext } from '../help';
+import { EditContext, Priority } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { ViewRenderer } from '../../viewer/view-renderer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
-import { defaultHandlers } from '../../default-handlers';
+import { FormatState } from '../../matcher/matcher';
 
 interface ElementPosition {
   left: number;
@@ -175,8 +175,15 @@ export class TableEditHook implements Hook {
       if (!fragment || !fragment.parent) {
         return null;
       }
-      const formatRange = fragment.getFormatRangesByHandler(defaultHandlers)[0];
-      if (/td|th/i.test(formatRange.cacheData.tag)) {
+      const isCell = fragment.getFormatRanges().filter(range => {
+        if ([Priority.Default, Priority.Block].includes(range.handler.priority)) {
+          if (range.state !== FormatState.Invalid && /th|td/i.test(range?.cacheData?.tag)) {
+            return true;
+          }
+        }
+        return false;
+      }).length === 1;
+      if (isCell) {
         return fragment;
       }
       return findCell(fragment.parent);
