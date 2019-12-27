@@ -8,5 +8,5 @@ export * from './lib/viewer/_api';
 
 export * from './lib/default-handlers';
 export * from './lib/dtd';
-export * from './lib/tbus';
+export * from './lib/editor';
 export { createEditor } from './create';

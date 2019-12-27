@@ -28,18 +28,22 @@ export const indentHandler: SelectConfig = {
   },
   options: [
     {
-      label: '0x',
+      label: '0',
       value: '0',
+      classes: ['tanbo-editor-text-indent-0'],
       default: true
     }, {
-      label: '1x',
+      label: '1',
       value: '1em',
+      classes: ['tanbo-editor-text-indent-1'],
       default: true
     }, {
-      label: '2x',
+      label: '2',
+      classes: ['tanbo-editor-text-indent-2'],
       value: '2em',
     }, {
-      label: '4x',
+      label: '4',
+      classes: ['tanbo-editor-text-indent-4'],
       value: '4em'
     }
   ]

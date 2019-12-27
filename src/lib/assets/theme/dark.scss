@@ -1,31 +1,35 @@
-.tanbo-editor-toolbar {
-  background-color: $color-darker;
-  border-color: $color-darker;
-}
-
-.tanbo-editor-handler {
-  color: $color-gray;
-  &-active {
-    color: $color-primary;
+.tanbo-editor-container.tanbo-editor-theme-dark {
+  .tanbo-editor-toolbar {
+    background-color: $color-darker;
+    border-color: $color-darker;
   }
 
-  &:focus {
-    position: relative;
-    @include focus($color-primary);
+  .tanbo-editor-handler {
+    color: $color-gray;
+
+    &-active {
+      color: $color-primary;
+    }
+
+    &:focus {
+      position: relative;
+      @include focus($color-primary);
+    }
+
+    &:active {
+      color: inherit;
+      background-color: $color-gray;
+    }
   }
 
-  &:active {
-    color: inherit;
+  .tanbo-editor-dropdown.tanbo-editor-dropdown-open > .tanbo-editor-handler {
     background-color: $color-gray;
+    color: $color-darker;
   }
-}
-.tanbo-editor-dropdown.tanbo-editor-dropdown-open > .tanbo-editor-handler {
-  background-color: $color-gray;
-  color: $color-darker;
-}
 
-.tanbo-editor-paths {
-  background-color: lighten($color-darker, 8);
-  border-color: lighten($color-darker, 8);
-  color: $color-gray-dark;
+  .tanbo-editor-paths {
+    background-color: lighten($color-darker, 8);
+    border-color: lighten($color-darker, 8);
+    color: $color-gray-dark;
+  }
 }

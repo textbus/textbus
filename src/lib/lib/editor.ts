@@ -24,14 +24,15 @@ export interface EditorOptions {
   historyStackSize?: number;
   handlers?: (HandlerConfig | HandlerConfig[])[];
   content?: string;
-  docStyle?: boolean;
+  usePaperModel?: boolean;
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
+  theme?: string;
   placeholder?: string;
 }
 
-export class TBus implements EventDelegate {
+export class Editor implements EventDelegate {
   onChange: Observable<string>;
   readonly elementRef = document.createElement('div');
 
@@ -103,9 +104,12 @@ export class TBus implements EventDelegate {
     this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tanbo-editor-container');
+    if (options.theme) {
+      this.elementRef.classList.add('tanbo-editor-theme-' + options.theme);
+    }
     this.container.appendChild(this.elementRef);
 
-    if (options.docStyle) {
+    if (options.usePaperModel) {
       this.frameContainer.style.padding = '20px 0';
       this.viewer.elementRef.style.cssText = 'width: 600px;';
     }

@@ -28,26 +28,32 @@ export const letterSpacingHandler: SelectConfig = {
     {
       label: '0px',
       value: '0px',
+      classes: ['tanbo-editor-letter-spacing-0'],
       default: true
     },
     {
       label: '1px',
+      classes: ['tanbo-editor-letter-spacing-1'],
       value: '1px',
     },
     {
       label: '2px',
+      classes: ['tanbo-editor-letter-spacing-2'],
       value: '2px',
     },
     {
       label: '3px',
+      classes: ['tanbo-editor-letter-spacing-3'],
       value: '3px',
     },
     {
       label: '4px',
+      classes: ['tanbo-editor-letter-spacing-4'],
       value: '4px',
     },
     {
       label: '5px',
+      classes: ['tanbo-editor-letter-spacing-5'],
       value: '5px',
     }
   ]

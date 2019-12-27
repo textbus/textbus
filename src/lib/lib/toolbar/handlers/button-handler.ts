@@ -6,7 +6,7 @@ import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { Hook } from '../../viewer/help';
-import { TBus } from '../../tbus';
+import { Editor } from '../../editor';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -18,7 +18,7 @@ export class ButtonHandler implements Handler {
   hook: Hook;
   private eventSource = new Subject<void>();
 
-  constructor(private config: ButtonConfig, public context: TBus) {
+  constructor(private config: ButtonConfig, public context: Editor) {
     this.priority = config.priority;
     this.editableOptions = config.editable;
     this.hook = config.hook;

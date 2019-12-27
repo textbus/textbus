@@ -211,10 +211,62 @@
   }
 }
 
-//@each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
-//  //str-index()
-//
-//}
+@each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
+  .tanbo-editor-line-height-#{str-replace($t + '', '.', '_')} {
+    &:before {
+      content: "";
+      margin-right: 10px;
+      margin-left: -10px;
+      line-height: $t + em;
+      width: 9px;
+      height: $t + em;
+      border-style: solid;
+      border-color: rgba(0, 0, 0, 0.3);
+      border-width: 1px 0;
+      display: inline-block;
+      vertical-align: middle;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0.3) 4px, rgba(0, 0, 0, .3) 5px, rgba(0, 0, 0, 0) 5px);
+    }
+  }
+}
+
+@each $t in 0, 1, 2, 3, 4, 5 {
+  .tanbo-editor-letter-spacing-#{$t} {
+    font-variant-numeric: tabular-nums;
+
+    &:after {
+      display: inline-block;
+      background-color: rgba(0, 0, 0, .06);
+      border: 1px solid rgba(0, 0, 0, .1);
+      border-radius: 5px;
+      padding: 4px 10px;
+      margin-left: 10px;
+      content: 'xxxxxx';
+      letter-spacing: $t + px;
+    }
+  }
+}
+
+@each $t in 0, 1, 2, 4 {
+  .tanbo-editor-text-indent-#{$t} {
+    font-variant-numeric: tabular-nums;
+
+    &:after {
+      line-height: 1;
+      display: inline-block;
+      background-color: rgba(0, 0, 0, .06);
+      border: 1px solid rgba(0, 0, 0, .1);
+      border-radius: 5px;
+      padding: 4px 10px;
+      word-break: break-all;
+      white-space: normal;
+      width: 100px;
+      text-indent: $t + em;
+      margin-left: 10px;
+      content: 'xxxxxxxxxxxxxxxxxxxxx';
+    }
+  }
+}
 
 .tanbo-editor-dropdown {
   position: relative;
