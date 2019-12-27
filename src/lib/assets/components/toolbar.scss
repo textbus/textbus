@@ -207,6 +207,7 @@
 
 @each $t in 12, 13, 14, 16, 18, 20, 24, 36, 48 {
   .tanbo-editor-font-size-#{$t} {
+    line-height: 1.2;
     font-size: #{$t}px;
   }
 }
@@ -235,6 +236,7 @@
     font-variant-numeric: tabular-nums;
 
     &:after {
+      line-height: 1;
       display: inline-block;
       background-color: rgba(0, 0, 0, .06);
       border: 1px solid rgba(0, 0, 0, .1);

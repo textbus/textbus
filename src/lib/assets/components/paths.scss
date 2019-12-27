@@ -1,6 +1,9 @@
 .tanbo-editor-paths {
   border: 1px solid $color-light;
-  padding: 4px 15px;
+  box-sizing: border-box;
+  height: 30px;
+  line-height: 20px;
+  padding: 5px 15px;
   font-size: 12px;
   background-color: lighten($color-lighter, 1);
   user-select: none;
