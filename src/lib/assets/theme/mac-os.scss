@@ -11,12 +11,12 @@
         margin-left: -1px;
       }
 
-      &:last-of-type {
+      &:last-child {
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
       }
 
-      &:first-of-type {
+      &:first-child {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }
@@ -27,12 +27,12 @@
         margin-left: -1px;
       }
 
-      &:last-of-type .tanbo-editor-handler {
+      &:last-child .tanbo-editor-handler {
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
       }
 
-      &:first-of-type .tanbo-editor-handler {
+      &:first-child .tanbo-editor-handler {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }

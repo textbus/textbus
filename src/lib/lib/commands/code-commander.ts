@@ -4,80 +4,55 @@ import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Fragment } from '../parser/fragment';
-import { Contents } from '../parser/contents';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
-import { View } from '../parser/view';
 
-export class CodeCommander implements Commander {
+export class CodeCommander implements Commander<string> {
   recordHistory = true;
   private tagName = 'pre';
-  private elements: Single[] = [];
+  private lang = '';
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
-    selection.ranges.forEach(range => {
-      const position = range.getCommonAncestorContentsScope();
+  updateValue(value: string): void {
+    this.lang = value;
+  }
 
-      const newContents = this.toCode(range.commonAncestorFragment.sliceContents(0));
-      this.elements = [];
-      let index = 0;
-      for (const i of newContents) {
-        if (i instanceof Single && this.elements.includes(i)) {
-          if (position.startIndex < index) {
-            position.startIndex++;
-            position.endIndex++;
-          } else if (position.endIndex < index) {
-            position.endIndex++;
-          }
-        }
-        index++;
-      }
-
-      const c = new Contents();
-      c.insertElements(newContents, 0);
-      range.commonAncestorFragment.useContents(c);
-      range.commonAncestorFragment.cleanFormats();
-
-      range.startFragment = range.commonAncestorFragment;
-      range.endFragment = range.commonAncestorFragment;
-
-      range.startIndex = position.startIndex;
-      range.endIndex = position.endIndex;
-
-      range.commonAncestorFragment.apply(new FormatRange({
+  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
+    if (!overlap) {
+      selection.collapse();
+      const firstRange = selection.firstRange;
+      const fragment = firstRange.startFragment;
+      const context = fragment.parent;
+      const pre = new Fragment(context);
+      pre.mergeFormat(new FormatRange({
         startIndex: 0,
-        endIndex: range.commonAncestorFragment.contentLength,
-        state: overlap ? FormatState.Invalid : FormatState.Valid,
+        endIndex: 0,
+        state: FormatState.Valid,
+        context: pre,
         handler,
-        context: range.commonAncestorFragment,
         cacheData: {
-          tag: this.tagName
+          tag: 'pre'
         }
-      }), true)
-    });
+      }));
+      pre.append(new Single(pre, 'br'));
+      context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);
+      const first = fragment.getContentAtIndex(0);
+      if (fragment.contentLength === 0 || first instanceof Single && first.tagName === 'br') {
+        fragment.destroy();
+      }
+      firstRange.startIndex = firstRange.endIndex = 0;
+      firstRange.startFragment = firstRange.endFragment = pre;
+      return context;
+    }
   }
 
   render(state: FormatState, rawElement?: HTMLElement, matchDesc?: CacheData): ReplaceModel {
     if (state === FormatState.Valid) {
-      return new ReplaceModel(document.createElement(this.tagName));
+      const el = document.createElement(this.tagName);
+      if (this.lang) {
+        el.setAttribute('lang', this.lang);
+      }
+      return new ReplaceModel(el);
     }
     return null;
-  }
-
-  private toCode(contents: Array<string | View>) {
-    const newContents: Array<string | View> = [];
-    contents.slice(0).forEach(item => {
-      if (item instanceof Fragment) {
-        // if (newContents.length > 0) {
-        //   const el = new SingleNode();
-        //   this.elements.push(el);
-        //   newContents.add(el);
-        // }
-        this.toCode(item.sliceContents(0)).slice(0).forEach(item => newContents.push(item));
-      } else {
-        newContents.push(item);
-      }
-    });
-    return newContents;
   }
 }

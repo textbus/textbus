@@ -48,7 +48,8 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
         strikeThroughHandler,
         underlineHandler,
       ], [
-        blockquoteHandler,
+        blockquoteHandler
+      ], [
         codeHandler
       ], [
         olHandler,

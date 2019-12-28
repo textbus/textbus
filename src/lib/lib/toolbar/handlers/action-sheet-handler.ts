@@ -4,7 +4,7 @@ import { ActionSheetConfig, ActionConfig } from '../help';
 
 import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
-import { Matcher } from '../../matcher/matcher';
+import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/cache-data';
 import { map } from 'rxjs/operators';
@@ -24,6 +24,7 @@ export class ActionSheetHandler implements Handler {
   private matchedEvent = new Subject<ActionConfig>();
   private options: ActionSheetOptionHandler[] = [];
   private eventSource = new Subject<any>();
+  private dropdown: Dropdown;
 
   constructor(private config: ActionSheetConfig, public context: Editor) {
     this.priority = config.priority;
@@ -45,7 +46,7 @@ export class ActionSheetHandler implements Handler {
       this.options.push(item);
     });
 
-    this.elementRef = new Dropdown(
+    this.dropdown = new Dropdown(
       dropdownButton,
       menu,
       merge(...this.options.map(item => item.onCheck)).pipe(map(v => {
@@ -54,7 +55,25 @@ export class ActionSheetHandler implements Handler {
         return v;
       })),
       config.tooltip
-    ).elementRef;
+    );
+    this.elementRef = this.dropdown.elementRef;
+  }
+
+  updateStatus(commonMatchDelta: CommonMatchDelta): void {
+    switch (commonMatchDelta.state) {
+      case MatchState.Highlight:
+        this.dropdown.disabled = false;
+        this.dropdown.highlight = true;
+        break;
+      case MatchState.Normal:
+        this.dropdown.disabled = false;
+        this.dropdown.highlight = false;
+        break;
+      case MatchState.Disabled:
+        this.dropdown.disabled = true;
+        this.dropdown.highlight = false;
+        break
+    }
   }
 }
 

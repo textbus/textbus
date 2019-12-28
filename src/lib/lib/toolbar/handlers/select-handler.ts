@@ -43,7 +43,7 @@ export class SelectHandler implements Handler {
       const item = new SelectOptionHandler(option);
       menu.appendChild(item.elementRef);
       if (option.default) {
-        dropdownInner.innerText = option.label;
+        dropdownInner.innerText = option.label || option.value;
       }
 
       item.onCheck.subscribe(v => {
@@ -67,7 +67,7 @@ export class SelectHandler implements Handler {
     if (commonMatchDelta.cacheData) {
       const option = this.config.highlight(this.config.options, commonMatchDelta.cacheData);
       if (option) {
-        this.textContainer.innerText = option.label;
+        this.textContainer.innerText = option.label || option.value;
         this.dropdown.disabled = false;
         this.dropdown.highlight = true;
         return;
@@ -83,7 +83,7 @@ export class SelectHandler implements Handler {
       }
     }
     if (defaultOption) {
-      this.textContainer.innerText = defaultOption.label;
+      this.textContainer.innerText = defaultOption.label || defaultOption.value;
     }
   }
 }
@@ -101,7 +101,7 @@ export class SelectOptionHandler {
     if (option.classes) {
       this.elementRef.classList.add(...(option.classes || []));
     }
-    this.elementRef.innerText = option.label;
+    this.elementRef.innerText = option.label || option.value;
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next(option);
     });

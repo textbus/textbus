@@ -26,43 +26,43 @@ export const lineHeightHandler: SelectConfig = {
   },
   options: [
     {
-      label: '1',
+      label: '1x',
       classes: ['tanbo-editor-line-height-1'],
       value: '1em',
       default: true
     },
     {
-      label: '1.2',
+      label: '1.2x',
       classes: ['tanbo-editor-line-height-1_2'],
       value: '1.2em'
     },
     {
-      label: '1.4',
+      label: '1.4x',
       classes: ['tanbo-editor-line-height-1_4'],
       value: '1.4em'
     },
     {
-      label: '1.6',
+      label: '1.6x',
       classes: ['tanbo-editor-line-height-1_6'],
       value: '1.6em'
     },
     {
-      label: '1.8',
+      label: '1.8x',
       classes: ['tanbo-editor-line-height-1_8'],
       value: '1.8em'
     },
     {
-      label: '2',
+      label: '2x',
       classes: ['tanbo-editor-line-height-2'],
       value: '2em'
     },
     {
-      label: '3',
+      label: '3x',
       classes: ['tanbo-editor-line-height-3'],
       value: '3em'
     },
     {
-      label: '4',
+      label: '4x',
       classes: ['tanbo-editor-line-height-4'],
       value: '4em'
     }

@@ -32,7 +32,8 @@
   line-height: 1;
   padding: 5px;
   color: $color-default;
-
+  height: 28px;
+  vertical-align: middle;
   &-active {
     color: $color-primary;
   }
@@ -43,6 +44,7 @@
 
   &:focus {
     position: relative;
+    z-index: 1;
     @include focus($color-primary);
   }
 
@@ -312,7 +314,7 @@
   transform-origin: 0 0;
   transition: transform .1s;
   transform: scaleY(0);
-  background-color: rgba(255, 255, 255, .96);
+  background-color: rgba(252, 252, 251, .96);
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
   border-radius: 4px;
   min-width: 100%;
