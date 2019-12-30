@@ -16,7 +16,7 @@ export class RootFragment extends Fragment {
     this.parser.parse(el, this);
   }
 
-  render(host: HTMLElement, nextSibling?: Node): HTMLElement {
+  render(host: HTMLElement): HTMLElement {
     if (this.contentLength === 0) {
       const newFragment = new Fragment(this);
       newFragment.append(new Single(newFragment, 'br'));
@@ -32,7 +32,7 @@ export class RootFragment extends Fragment {
       }));
       this.append(newFragment);
     }
-    const dom = super.render(host, nextSibling);
+    const dom = super.render(host);
     host[VIRTUAL_NODE] = this.virtualNode;
     return dom;
   }

@@ -155,17 +155,15 @@ export class ViewRenderer {
       handler.hook.onApply(handler.execCommand);
     }
     let selection = this.selection;
-    const renderFragment = handler.execCommand.command(selection, handler, overlap, this.root);
-    this.rerender(renderFragment || selection.commonAncestorFragment);
+    handler.execCommand.command(selection, handler, overlap, this.root);
+    this.rerender();
     selection.apply();
     this.viewChanged();
     this.selectionChangeEvent.next(this.selection);
   }
 
-  rerender(fragment: Fragment) {
-    const position = fragment.destroyView();
-    fragment.render(position.host, position.nextSibling);
-    this.updateFrameHeight();
+  rerender() {
+    this.root.render(this.contentDocument.body);
   }
 
 

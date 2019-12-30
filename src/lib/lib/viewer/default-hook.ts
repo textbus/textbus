@@ -45,7 +45,7 @@ export class DefaultHook implements Hook {
       last instanceof Single && last.tagName === 'br') {
       commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
     }
-    viewer.rerender(selection.commonAncestorFragment);
+    viewer.rerender();
     viewer.selection.apply(ev.offset);
     next();
   }
@@ -90,13 +90,13 @@ export class DefaultHook implements Hook {
         parent.insert(item, isEmpty ? index : index + 1);
         index++;
       });
-      viewer.rerender(parent);
+      viewer.rerender();
       const p = viewer.findLastChild(last, last.contentLength - 1);
       firstRange.startFragment = firstRange.endFragment = p.fragment;
       firstRange.startIndex = firstRange.endIndex = p.index;
       selection.apply();
     } else {
-      viewer.rerender(commonAncestorFragment);
+      viewer.rerender();
       selection.apply();
     }
   }
@@ -111,7 +111,7 @@ export class DefaultHook implements Hook {
         }
         commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
         range.startIndex = range.endIndex = range.endIndex + 1;
-        viewer.rerender(commonAncestorFragment);
+        viewer.rerender();
         viewer.selection.apply();
       } else {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
@@ -143,7 +143,7 @@ export class DefaultHook implements Hook {
         commonAncestorFragment.parent.insert(afterFragment, index + 1);
         range.startFragment = range.endFragment = afterFragment;
         range.startIndex = range.endIndex = 0;
-        viewer.rerender(commonAncestorFragment.parent);
+        viewer.rerender();
       }
     });
     selection.apply();
@@ -158,7 +158,7 @@ export class DefaultHook implements Hook {
           if (!range.commonAncestorFragment.contentLength) {
             range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
           }
-          viewer.rerender(range.commonAncestorFragment);
+          viewer.rerender();
           selection.apply(-1);
         } else {
           const firstContent = range.startFragment.getContentAtIndex(0);
@@ -224,7 +224,7 @@ export class DefaultHook implements Hook {
               firstRange.startIndex = p.index;
             }
           }
-          viewer.rerender(rerenderFragment.fragment);
+          viewer.rerender();
           selection.collapse();
         }
       } else {
@@ -264,7 +264,7 @@ export class DefaultHook implements Hook {
         if (range.startFragment.contentLength === 0) {
           range.startFragment.append(new Single(range.startFragment, 'br'));
         }
-        viewer.rerender(range.commonAncestorFragment);
+        viewer.rerender();
         selection.collapse();
       }
     });

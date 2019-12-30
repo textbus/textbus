@@ -212,7 +212,7 @@ export class TableEditHook implements Hook {
                 cellFragment.append(new Single(range.startFragment, 'br'));
                 range.startFragment = range.endFragment = cellFragment;
               }
-              viewer.rerender(cellFragment);
+              viewer.rerender();
               selection.apply();
             }
             return;

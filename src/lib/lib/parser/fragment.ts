@@ -48,6 +48,8 @@ export class Fragment extends View {
   }
 
   useFormats(formats: Map<Handler, FormatRange[]>) {
+    this.markDirty();
+
     this.formatMatrix = new Map<Handler, FormatRange[]>();
     Array.from(formats.keys()).forEach(key => {
       this.formatMatrix.set(key, formats.get(key).map(i => i.clone()));
@@ -83,6 +85,7 @@ export class Fragment extends View {
   }
 
   useContents(contents: Contents) {
+    this.markDirty();
     this.contents = contents;
     contents.slice(0).forEach(i => {
       if (i instanceof Single || i instanceof Fragment) {
@@ -101,6 +104,8 @@ export class Fragment extends View {
    * @param canSurroundBlockElement 是否可以包含块级节点，如 strong 不可以包含 p，则应传入 false
    */
   apply(format: FormatRange, canSurroundBlockElement: boolean) {
+    this.markDirty();
+
     if (canSurroundBlockElement) {
       this.mergeFormat(format, true);
     } else {
@@ -142,6 +147,7 @@ export class Fragment extends View {
    * @param index
    */
   insert(content: string | View, index: number) {
+    this.markDirty();
     if (content instanceof Single || content instanceof Fragment) {
       content.parent = this;
     }
@@ -182,6 +188,8 @@ export class Fragment extends View {
    * @param insertAdjacentInlineFormat
    */
   append(content: string | View, insertAdjacentInlineFormat = false) {
+    this.markDirty();
+
     if (content instanceof Single || content instanceof Fragment) {
       content.parent = this;
     }
@@ -211,6 +219,7 @@ export class Fragment extends View {
   }
 
   insertFragmentContents(fragment: Fragment, index: number) {
+    this.markDirty();
     const contentsLength = fragment.contents.length;
     const elements = fragment.contents.slice(0).map(content => {
       if (content instanceof Single || content instanceof Fragment) {
@@ -257,6 +266,8 @@ export class Fragment extends View {
           this.mergeFormat(c, true);
         });
       });
+    fragment.cleanFormats();
+    fragment.useContents(new Contents());
   }
 
   /**
@@ -265,11 +276,11 @@ export class Fragment extends View {
    * @param endIndex
    */
   delete(startIndex: number, endIndex = this.contents.length) {
-
     const ff = new Fragment(null);
     if (endIndex <= startIndex) {
       return ff;
     }
+    this.markDirty();
     this.contents.delete(startIndex, endIndex).forEach(item => {
       if (typeof item === 'string') {
         ff.append(item);
@@ -339,20 +350,28 @@ export class Fragment extends View {
   /**
    * 渲染 DOM 到指定容器
    * @param host
-   * @param nextSibling
    */
-  render(host: HTMLElement, nextSibling?: Node) {
-    const canApplyFormats = this.getCanApplyFormats();
-    const vDom = this.createVDom(canApplyFormats);
-    this.virtualNode = vDom;
-    this.elements = [];
-    this.host = host;
-    let fragment: Fragment = this;
-    while (fragment.parent) {
-      fragment = fragment.parent;
+  render(host: HTMLElement) {
+    if (this.dirty) {
+      if (this.dataChanged) {
+        const canApplyFormats = this.getCanApplyFormats();
+        const vDom = this.createVDom(canApplyFormats);
+        this.virtualNode = vDom;
+        this.elements = [];
+        this.host = host;
+        let fragment: Fragment = this;
+        while (fragment.parent) {
+          fragment = fragment.parent;
+        }
+        this.formatMatrix.clear();
+        this.viewBuilder(vDom, this.contents, (fragment as RootFragment).parser, host);
+      } else {
+        this.contents.getFragments().forEach(f => {
+          f.render(f.host);
+        });
+      }
     }
-    this.formatMatrix.clear();
-    this.viewBuilder(vDom, this.contents, (fragment as RootFragment).parser, host, nextSibling);
+    this.viewRendered();
     return host;
   }
 
@@ -375,11 +394,8 @@ export class Fragment extends View {
   }
 
   mergeFormat(format: FormatRange, important = false) {
+    this.markDirty();
     mergeFormat(this.formatMatrix, format, important);
-  }
-
-  private getCanApplyFormats() {
-    return getCanApplyFormats(this.formatMatrix);
   }
 
   destroy() {
@@ -410,15 +426,18 @@ export class Fragment extends View {
     return -1;
   }
 
+  private getCanApplyFormats() {
+    return getCanApplyFormats(this.formatMatrix);
+  }
+
   /**
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode
    * @param contents
    * @param parser
    * @param host
-   * @param nextSibling
    */
-  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser, host: HTMLElement, nextSibling?: Node) {
+  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser, host: HTMLElement) {
     const newNodes: VirtualNode[] = [];
     if (vNode instanceof VirtualContainerNode) {
       const nodes: VirtualNode[] = [];
@@ -472,11 +491,7 @@ export class Fragment extends View {
         if (host === this.host) {
           this.elements.push(container);
         }
-        if (nextSibling) {
-          host.insertBefore(container, nextSibling);
-        } else {
-          host.appendChild(container);
-        }
+        host.appendChild(container);
       }
 
       vNode.children.forEach(childVNode => {
@@ -484,11 +499,7 @@ export class Fragment extends View {
         if (childVNode.context !== vNode.context) {
           childVNode.context.formatMatrix.clear();
         }
-        if (slotContainer) {
-          newNodes = this.viewBuilder(childVNode, contents, parser, slotContainer);
-        } else {
-          newNodes = this.viewBuilder(childVNode, contents, parser, host, nextSibling);
-        }
+        newNodes = this.viewBuilder(childVNode, contents, parser, slotContainer || host);
         nodes.push(...newNodes);
       });
       newNodes.push(vNode);
@@ -520,20 +531,12 @@ export class Fragment extends View {
           let currentNode = document.createTextNode(str);
           currentNode[VIRTUAL_NODE] = v;
           v.elementRef = currentNode;
-          if (nextSibling) {
-            if (host === this.host) {
-              this.elements.push(currentNode);
-            }
-            host.insertBefore(currentNode, nextSibling);
-          } else {
-            host.appendChild(currentNode);
+          if (host === this.host) {
+            this.elements.push(currentNode);
           }
+          host.appendChild(currentNode);
         } else if (item instanceof View) {
-          if (item instanceof Fragment) {
-            item.render(host, nextSibling);
-          } else {
-            item.render(host);
-          }
+          item.render(host);
           newNodes.push(item.virtualNode);
         }
         i += item.length;

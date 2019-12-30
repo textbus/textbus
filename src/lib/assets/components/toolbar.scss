@@ -30,9 +30,11 @@
   border-radius: 5px;
   cursor: pointer;
   line-height: 1;
-  padding: 5px;
+  padding: 0 5px;
   color: $color-default;
   height: 28px;
+  display: inline-flex;
+  align-items: center;
   vertical-align: middle;
   &-active {
     color: $color-primary;
@@ -66,7 +68,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-
+  height: 28px;
+  line-height: 26px;
   &:before {
     font-size: .6em;
     margin-right: 5px;
