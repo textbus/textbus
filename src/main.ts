@@ -12,7 +12,7 @@ const editor = createEditor('#editor', {
     return '/test';
   },
   content: `
-  <p>0<strong>1<em>2<s>3<u>4567</u></s><u>89A</u></em>B</strong></p>
+  <p><strong>aaa<em>bbb</em></strong><em>ccc</em></p>
   `
 });
 

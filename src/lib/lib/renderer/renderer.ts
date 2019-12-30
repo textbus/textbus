@@ -91,11 +91,12 @@ export class Renderer {
     let depthVNodes: VirtualContainerNode[] = [parent];
 
 
-    while (startIndex < endIndex) {
+    let min = startIndex;
+    let max = startIndex;
+    primary:while (startIndex < endIndex) {
       let isSplit = false;
       const vNodes: VirtualContainerNode[] = [];
       depthVNodes.forEach(item => {
-        console.log(item.endIndex, startIndex)
         if (item.endIndex === startIndex) {
           isSplit = true;
         }
@@ -103,12 +104,11 @@ export class Renderer {
           if (item.endIndex > startIndex) {
             item.endIndex = startIndex;
             formatRanges.unshift(...item.formats.map(f => {
-              f.endIndex = startIndex;
               const c = f.clone();
               c.startIndex = startIndex;
+              f.endIndex = startIndex;
               return c;
             }));
-            console.log(item, startIndex)
           }
         } else {
           if (item.endIndex > startIndex) {
@@ -117,38 +117,54 @@ export class Renderer {
         }
       });
       depthVNodes = vNodes;
-      let min = startIndex;
-      let max = endIndex;
+
+      const selectedFormats: FormatRange[] = [];
+
       while (true) {
         const first = formatRanges[0];
         if (first) {
-          if (first.startIndex === startIndex) {
-            max = Math.min(max, first.endIndex);
+          if (startIndex < first.startIndex && selectedFormats.length === 0) {
             const p = depthVNodes[depthVNodes.length - 1];
-            const vNode = new VirtualContainerNode([first], this.context, startIndex, first.endIndex);
-            p.children.push(vNode);
-            depthVNodes.push(vNode);
-            formatRanges.shift();
-            continue;
-          } else {
-            min = startIndex;
+            console.log(startIndex)
+            p.children.push(new VirtualNode([new FormatRange({
+              startIndex,
+              endIndex: first.startIndex + 1,
+              state: FormatState.Valid,
+              context: this.context,
+              cacheData: null,
+              handler: null
+            })], this.context, startIndex, first.startIndex + 1));
             startIndex = first.startIndex;
-            max = Math.min(max, first.startIndex);
+            // startIndex++;
+            continue primary;
+          } else if (first.startIndex === startIndex) {
+            selectedFormats.push(formatRanges.shift());
+            continue;
           }
         }
-        const last = depthVNodes[depthVNodes.length - 1];
-        let textVNode = new VirtualNode([new FormatRange({
-          startIndex: min,
-          endIndex: max,
-          state: FormatState.Valid,
-          handler: null,
-          cacheData: null,
-          context: this.context
-        })], this.context, min, max);
-        last.children.push(textVNode);
-        startIndex = max;
         break;
       }
+      const sortedFormats = selectedFormats.sort((n, m) => {
+        return n.endIndex - m.endIndex;
+      });
+
+      while (sortedFormats.length) {
+        const p = depthVNodes[depthVNodes.length - 1];
+        const first = sortedFormats.shift();
+        const vNode = new VirtualContainerNode([first], this.context, first.startIndex, first.endIndex);
+        p.children.push(vNode);
+        depthVNodes.push(vNode);
+      }
+      // const p = depthVNodes[depthVNodes.length - 1];
+      // p.children.push(new VirtualNode([new FormatRange({
+      //   startIndex: min,
+      //   endIndex: max,
+      //   state: FormatState.Valid,
+      //   context: this.context,
+      //   cacheData: null,
+      //   handler: null
+      // })], this.context, min, max));
+      startIndex++;
     }
   }
 
