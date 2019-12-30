@@ -1,7 +1,7 @@
 import { Commander } from '../commands/commander';
 import { EditContext } from '../toolbar/help';
 import { TBInputEvent } from './cursor';
-import { ViewRenderer } from './view-renderer';
+import { Viewer } from './viewer';
 import { Contents } from '../parser/contents';
 
 export interface Hook {
@@ -30,21 +30,21 @@ export interface Hook {
    * @param viewer 视图渲染器
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onInput?(ev: TBInputEvent, viewer: ViewRenderer, next: () => void): void;
+  onInput?(ev: TBInputEvent, viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户输入回车时调用
    * @param viewer 视图渲染器
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onEnter?(viewer: ViewRenderer, next: () => void): void;
+  onEnter?(viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户删除内容时调用
    * @param viewer 视图渲染器
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onDelete?(viewer: ViewRenderer, next: () => void): void;
+  onDelete?(viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户粘贴内容时调用
@@ -52,7 +52,7 @@ export interface Hook {
    * @param viewer 视图渲染器
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(contents: Contents, viewer: ViewRenderer, next: () => void): void;
+  onPaste?(contents: Contents, viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户应用某个命令时调用

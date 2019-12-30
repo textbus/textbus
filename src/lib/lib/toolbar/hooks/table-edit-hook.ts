@@ -5,7 +5,7 @@ import { EditContext, Priority } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
-import { ViewRenderer } from '../../viewer/view-renderer';
+import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
 import { FormatState } from '../../matcher/matcher';
@@ -168,7 +168,7 @@ export class TableEditHook implements Hook {
     }
   }
 
-  onDelete(viewer: ViewRenderer, next: () => void): void {
+  onDelete(viewer: Viewer, next: () => void): void {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {

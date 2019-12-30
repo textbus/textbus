@@ -15,7 +15,7 @@ import { Hook } from './help';
 import { defaultHook } from './default-hook';
 import { Contents } from '../parser/contents';
 
-export class ViewRenderer {
+export class Viewer {
   elementRef = document.createElement('div');
   onSelectionChange: Observable<TBSelection>;
   onUserWrite: Observable<void>;
@@ -306,7 +306,7 @@ export class ViewRenderer {
       let p: TBRangePosition;
       switch (direction.type) {
         case CursorMoveType.Left:
-          p = ViewRenderer.getPreviousPosition(range);
+          p = Viewer.getPreviousPosition(range);
           range.startFragment = p.fragment;
           range.startIndex = p.index;
           range.endFragment = p.fragment;
@@ -316,7 +316,7 @@ export class ViewRenderer {
           // }
           break;
         case CursorMoveType.Right:
-          p = ViewRenderer.getNextPosition(range);
+          p = Viewer.getNextPosition(range);
           range.startFragment = p.fragment;
           range.startIndex = p.index;
           range.endFragment = p.fragment;

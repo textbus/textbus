@@ -2,7 +2,7 @@ import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import { auditTime, filter, sampleTime, tap } from 'rxjs/operators';
 
 import { EventDelegate, HandlerConfig, HandlerType } from './toolbar/help';
-import { ViewRenderer } from './viewer/view-renderer';
+import { Viewer } from './viewer/viewer';
 import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { RootFragment } from './parser/root-fragment';
@@ -49,7 +49,7 @@ export class Editor implements EventDelegate {
   private readonly historyStackSize: number;
 
   private root: RootFragment;
-  private readonly viewer: ViewRenderer;
+  private readonly viewer: Viewer;
   private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
@@ -73,7 +73,7 @@ export class Editor implements EventDelegate {
     this.historyStackSize = options.historyStackSize || 50;
     this.createToolbar(options.handlers);
     const parser = new Parser(this.handlers);
-    this.viewer = new ViewRenderer(parser);
+    this.viewer = new Viewer(parser);
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootFragment(parser, this);
       this.root = vDom;

@@ -1,7 +1,7 @@
 import { Hook } from './help';
 import { Single } from '../parser/single';
 import { TBInputEvent } from './cursor';
-import { ViewRenderer } from './view-renderer';
+import { Viewer } from './viewer';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Handler } from '../toolbar/handlers/help';
@@ -11,7 +11,7 @@ import { FormatState } from '../matcher/matcher';
 import { defaultHandlers } from '../default-handlers';
 
 export class DefaultHook implements Hook {
-  onInput(ev: TBInputEvent, viewer: ViewRenderer, next: () => void): void {
+  onInput(ev: TBInputEvent, viewer: Viewer, next: () => void): void {
     const startIndex = ev.selection.firstRange.startIndex;
     const selection = viewer.selection;
     const commonAncestorFragment = selection.commonAncestorFragment;
@@ -50,7 +50,7 @@ export class DefaultHook implements Hook {
     next();
   }
 
-  onPaste(contents: Contents, viewer: ViewRenderer, next: () => void): void {
+  onPaste(contents: Contents, viewer: Viewer, next: () => void): void {
     const selection = viewer.selection;
     if (!viewer.selection.collapsed) {
       viewer.deleteContents();
@@ -101,7 +101,7 @@ export class DefaultHook implements Hook {
     }
   }
 
-  onEnter(viewer: ViewRenderer, next: () => void): void {
+  onEnter(viewer: Viewer, next: () => void): void {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
@@ -149,7 +149,7 @@ export class DefaultHook implements Hook {
     selection.apply();
   }
 
-  onDelete(viewer: ViewRenderer, next: () => void): void {
+  onDelete(viewer: Viewer, next: () => void): void {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
