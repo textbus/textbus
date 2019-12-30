@@ -10,10 +10,10 @@ import { Cursor, CursorMoveDirection, CursorMoveType, TBInputEvent } from './cur
 import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
-import { Parser } from '../parser/parser';
 import { Hook } from './help';
 import { defaultHook } from './default-hook';
 import { Contents } from '../parser/contents';
+import { Editor } from '../editor';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -37,7 +37,7 @@ export class Viewer {
 
   private cursor: Cursor;
 
-  constructor(private parser: Parser) {
+  constructor(private editor: Editor) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
@@ -265,7 +265,7 @@ export class Viewer {
   }
 
   private paste(el: HTMLElement) {
-    const fragment = this.parser.parse(el, new Fragment(null));
+    const fragment = this.editor.parser.parse(el, new Fragment(null));
     const c = new Contents();
     c.insertElements(fragment.sliceContents(0), 0);
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');

@@ -1,19 +1,18 @@
 import { Fragment } from './fragment';
 import { Editor } from '../editor';
-import { Parser } from './parser';
 import { VIRTUAL_NODE } from './help';
-import { defaultHandlers } from '../default-handlers';
+import { defaultTagsHandler } from '../default-tags-handler';
 import { Single } from './single';
 import { FormatRange } from './format';
 import { FormatState } from '../matcher/matcher';
 
 export class RootFragment extends Fragment {
-  constructor(public parser: Parser, public editor: Editor) {
+  constructor(public editor: Editor) {
     super(null);
   }
 
   setContents(el: HTMLElement) {
-    this.parser.parse(el, this);
+    this.editor.parser.parse(el, this);
   }
 
   render(host: HTMLElement): HTMLElement {
@@ -24,7 +23,7 @@ export class RootFragment extends Fragment {
         state: FormatState.Valid,
         startIndex: 0,
         endIndex: 1,
-        handler: defaultHandlers,
+        handler: defaultTagsHandler,
         context: newFragment,
         cacheData: {
           tag: 'p'

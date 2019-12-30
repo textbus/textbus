@@ -8,7 +8,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { FormatState } from '../matcher/matcher';
-import { defaultHandlers } from '../default-handlers';
+import { defaultTagsHandler } from '../default-tags-handler';
 
 export class DefaultHook implements Hook {
   onInput(ev: TBInputEvent, viewer: Viewer, next: () => void): void {
@@ -132,7 +132,7 @@ export class DefaultHook implements Hook {
           endIndex: afterFragment.contentLength,
           state: FormatState.Valid,
           context: afterFragment,
-          handler: defaultHandlers,
+          handler: defaultTagsHandler,
           cacheData: {
             tag: 'p'
           }
@@ -174,7 +174,7 @@ export class DefaultHook implements Hook {
               startFragment.mergeFormat(new FormatRange({
                 startIndex: 0,
                 endIndex: 0,
-                handler: defaultHandlers,
+                handler: defaultTagsHandler,
                 state: FormatState.Valid,
                 context: startFragment,
                 cacheData: {
@@ -205,7 +205,7 @@ export class DefaultHook implements Hook {
                 startFragment.mergeFormat(new FormatRange({
                   startIndex: 0,
                   endIndex: 0,
-                  handler: defaultHandlers,
+                  handler: defaultTagsHandler,
                   state: FormatState.Valid,
                   context: startFragment,
                   cacheData: {

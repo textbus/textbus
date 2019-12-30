@@ -1,4 +1,5 @@
-import { VirtualNode } from './virtual-dom';
+import { VirtualNode } from '../renderer/virtual-dom';
+import { Renderer } from '../renderer/renderer';
 
 export abstract class View {
   readonly length = 1;

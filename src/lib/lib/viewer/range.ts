@@ -1,5 +1,5 @@
 import { Fragment } from '../parser/fragment';
-import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../parser/virtual-dom';
+import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../renderer/virtual-dom';
 import { VIRTUAL_NODE } from '../parser/help';
 
 export interface TBRangePosition {

@@ -2,7 +2,7 @@ import { View } from './view';
 import { Fragment } from './fragment';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from './help';
-import { VirtualObjectNode } from './virtual-dom';
+import { VirtualObjectNode } from '../renderer/virtual-dom';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from './format';
 import { getCanApplyFormats, mergeFormat } from './utils';

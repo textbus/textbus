@@ -10,7 +10,7 @@ import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { RangePath, TBSelection } from './viewer/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
-import { defaultHandlers } from './default-handlers';
+import { defaultTagsHandler } from './default-tags-handler';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
@@ -33,7 +33,8 @@ export interface EditorOptions {
 }
 
 export class Editor implements EventDelegate {
-  onChange: Observable<string>;
+  readonly onChange: Observable<string>;
+  readonly parser: Parser;
   readonly elementRef = document.createElement('div');
 
   get canBack() {
@@ -54,7 +55,7 @@ export class Editor implements EventDelegate {
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [defaultHandlers];
+  private readonly handlers: Handler[] = [defaultTagsHandler];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
@@ -72,10 +73,10 @@ export class Editor implements EventDelegate {
     }
     this.historyStackSize = options.historyStackSize || 50;
     this.createToolbar(options.handlers);
-    const parser = new Parser(this.handlers);
-    this.viewer = new Viewer(parser);
+    this.parser = new Parser(this.handlers);
+    this.viewer = new Viewer(this);
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new RootFragment(parser, this);
+      const vDom = new RootFragment(this);
       this.root = vDom;
       vDom.setContents(result[0]);
       this.viewer.render(vDom);

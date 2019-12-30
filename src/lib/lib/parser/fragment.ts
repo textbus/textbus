@@ -1,19 +1,16 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { VirtualContainerNode, VirtualNode } from './virtual-dom';
+import { VirtualContainerNode } from '../renderer/virtual-dom';
 import { View } from './view';
-import { VIRTUAL_NODE } from './help';
-import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { Priority } from '../toolbar/help';
 import { FormatRange } from './format';
 import { Single } from './single';
-import { RootFragment } from './root-fragment';
-import { Parser, ParseState } from './parser';
 import { getCanApplyFormats, mergeFormat } from './utils';
+import { Renderer } from '../renderer/renderer';
 
 export class Fragment extends View {
-  readonly length = 1;
   virtualNode: VirtualContainerNode;
+  renderer = new Renderer(this);
 
   get contentLength() {
     return this.contents.length;
@@ -354,17 +351,17 @@ export class Fragment extends View {
   render(host: HTMLElement) {
     if (this.dirty) {
       if (this.dataChanged) {
-        const canApplyFormats = this.getCanApplyFormats();
-        const vDom = this.createVDom(canApplyFormats);
-        this.virtualNode = vDom;
-        this.elements = [];
-        this.host = host;
-        let fragment: Fragment = this;
-        while (fragment.parent) {
-          fragment = fragment.parent;
-        }
-        this.formatMatrix.clear();
-        this.viewBuilder(vDom, this.contents, (fragment as RootFragment).parser, host);
+        this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents);
+        // const vDom = this.createVDom(canApplyFormats);
+        // this.virtualNode = vDom;
+        // this.elements = [];
+        // this.host = host;
+        // let fragment: Fragment = this;
+        // while (fragment.parent) {
+        //   fragment = fragment.parent;
+        // }
+        // this.formatMatrix.clear();
+        // this.viewBuilder(vDom, this.contents, (fragment as RootFragment).editor.parser, host);
       } else {
         this.contents.getFragments().forEach(f => {
           f.render(f.host);
@@ -424,241 +421,5 @@ export class Fragment extends View {
       return i;
     }
     return -1;
-  }
-
-  private getCanApplyFormats() {
-    return getCanApplyFormats(this.formatMatrix);
-  }
-
-  /**
-   * 根据虚拟 DOM 树和内容生成真实 DOM
-   * @param vNode
-   * @param contents
-   * @param parser
-   * @param host
-   */
-  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser, host: HTMLElement) {
-    const newNodes: VirtualNode[] = [];
-    if (vNode instanceof VirtualContainerNode) {
-      const nodes: VirtualNode[] = [];
-      let container: HTMLElement;
-      let slotContainer: HTMLElement;
-      const newFormatStates: ParseState[][] = [];
-      vNode.formats.reduce((node, next) => {
-        if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
-          if (renderModel instanceof ReplaceModel) {
-            newFormatStates.length = 0;
-            newFormatStates.push(parser.getFormatStateByNode(renderModel.replaceElement));
-            container = renderModel.replaceElement;
-            container[VIRTUAL_NODE] = vNode;
-            vNode.elementRef = container;
-            slotContainer = container;
-            return renderModel.replaceElement;
-          } else if (renderModel instanceof ChildSlotModel) {
-            if (node) {
-              node.appendChild(renderModel.slotElement);
-            } else {
-              container = renderModel.slotElement;
-            }
-            newFormatStates.push(parser.getFormatStateByNode(renderModel.slotElement));
-            slotContainer = renderModel.slotElement;
-            slotContainer[VIRTUAL_NODE] = vNode;
-            vNode.elementRef = slotContainer;
-            return renderModel.slotElement;
-          }
-        }
-        if (node) {
-          newFormatStates.push(parser.getFormatStateByNode(node));
-        }
-        return node;
-      }, (null as HTMLElement));
-
-      newFormatStates.forEach(formats => {
-        formats.forEach(item => {
-          vNode.context.mergeFormat(new FormatRange({
-            startIndex: vNode.startIndex,
-            endIndex: vNode.endIndex,
-            state: item.state,
-            handler: item.token,
-            context: vNode.context,
-            cacheData: item.cacheData
-          }), true);
-        })
-      });
-
-      if (container) {
-        if (host === this.host) {
-          this.elements.push(container);
-        }
-        host.appendChild(container);
-      }
-
-      vNode.children.forEach(childVNode => {
-        let newNodes: VirtualNode[];
-        if (childVNode.context !== vNode.context) {
-          childVNode.context.formatMatrix.clear();
-        }
-        newNodes = this.viewBuilder(childVNode, contents, parser, slotContainer || host);
-        nodes.push(...newNodes);
-      });
-      newNodes.push(vNode);
-      vNode.children = nodes;
-    } else {
-      const c = contents.slice(vNode.startIndex, vNode.endIndex);
-      let i = 0;
-      c.forEach(item => {
-        if (typeof item === 'string') {
-          const newFormatRange = new FormatRange({
-            startIndex: i + vNode.startIndex,
-            endIndex: i + vNode.startIndex + item.length,
-            handler: null,
-            context: vNode.context,
-            state: null,
-            cacheData: null
-          });
-          const v = new VirtualNode(
-            [newFormatRange],
-            this,
-            newFormatRange.startIndex,
-            newFormatRange.endIndex);
-          newNodes.push(v);
-          const str = item.replace(/\s\s+/g, str => {
-            return ' ' + Array.from({
-              length: str.length - 1
-            }).fill('\u00a0').join('');
-          }).replace(/\s$/, '\u00a0');
-          let currentNode = document.createTextNode(str);
-          currentNode[VIRTUAL_NODE] = v;
-          v.elementRef = currentNode;
-          if (host === this.host) {
-            this.elements.push(currentNode);
-          }
-          host.appendChild(currentNode);
-        } else if (item instanceof View) {
-          item.render(host);
-          newNodes.push(item.virtualNode);
-        }
-        i += item.length;
-      });
-    }
-
-    return newNodes;
-  }
-
-  /**
-   * 根据可应用的格式化信息生成构建 dom 树所依赖的格式化树状数据结构
-   * @param formatRanges 可应用的格式化数据
-   */
-  private createVDom(formatRanges: FormatRange[]) {
-    const containerFormatRanges: FormatRange[] = [];
-    const childFormatRanges: FormatRange[] = [];
-
-    formatRanges.forEach(format => {
-      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
-        format.startIndex === 0 && format.endIndex === this.contents.length) {
-        containerFormatRanges.push(format);
-      } else {
-        childFormatRanges.push(format);
-      }
-    });
-
-    const root = new VirtualContainerNode(containerFormatRanges, this, 0, this.contents.length);
-    this.vDomBuilder(childFormatRanges,
-      root,
-      0,
-      this.contents.length
-    );
-    return root;
-  }
-
-  /**
-   * 根据格式化信息和范围生成树状数据结构，并把格式化信息未描述的区间设置为虚拟文本节点
-   * @param formatRanges 格式化记录数据
-   * @param parent 当前要生成树的父级
-   * @param startIndex 生成范围的开始索引
-   * @param endIndex 生成范围的结束位置
-   */
-  private vDomBuilder(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
-    if (startIndex === 0 && endIndex === 0) {
-      // 兼容空标签节点
-      parent.children.push(new VirtualNode([new FormatRange({
-        startIndex,
-        endIndex,
-        handler: null,
-        context: this,
-        state: null,
-        cacheData: null
-      })], this, startIndex, endIndex));
-      return;
-    }
-    while (startIndex < endIndex) {
-      let firstRange = formatRanges.shift();
-      if (firstRange) {
-        if (startIndex < firstRange.startIndex) {
-          const f = new FormatRange({
-            startIndex,
-            endIndex: firstRange.startIndex,
-            handler: null,
-            context: this,
-            state: null,
-            cacheData: null
-          });
-          parent.children.push(new VirtualNode([f], this, startIndex, firstRange.startIndex));
-        }
-        const container = new VirtualContainerNode([firstRange], this, firstRange.startIndex, firstRange.endIndex);
-        const childFormatRanges: FormatRange[] = [];
-        while (true) {
-          const f = formatRanges[0];
-          if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {
-            container.formats.push(formatRanges.shift());
-          } else {
-            break;
-          }
-        }
-        let index = 0;
-        while (true) {
-          const f = formatRanges[index];
-          if (f && f.startIndex < firstRange.endIndex) {
-            if (f.endIndex <= firstRange.endIndex) {
-              childFormatRanges.push(formatRanges.shift());
-            } else {
-              const cloneRange = f.clone();
-              cloneRange.endIndex = firstRange.endIndex;
-              childFormatRanges.push(cloneRange);
-              f.startIndex = firstRange.endIndex;
-              index++;
-            }
-          } else {
-            break;
-          }
-        }
-        if (childFormatRanges.length) {
-          this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
-        } else {
-          const f = new FormatRange({
-            startIndex: firstRange.startIndex,
-            endIndex: firstRange.endIndex,
-            handler: null,
-            context: this,
-            state: null,
-            cacheData: null
-          });
-          container.children.push(new VirtualNode([f], this, firstRange.startIndex, firstRange.endIndex))
-        }
-        parent.children.push(container);
-        startIndex = firstRange.endIndex;
-      } else {
-        parent.children.push(new VirtualNode([new FormatRange({
-          startIndex,
-          endIndex,
-          handler: null,
-          context: this,
-          state: null,
-          cacheData: null
-        })], this, startIndex, endIndex));
-        break;
-      }
-    }
   }
 }

@@ -51,4 +51,4 @@ export class DefaultTagsHandler implements Handler {
   execCommand = new DefaultTagCommander();
 }
 
-export const defaultHandlers = new DefaultTagsHandler();
+export const defaultTagsHandler = new DefaultTagsHandler();

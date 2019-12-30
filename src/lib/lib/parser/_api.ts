@@ -6,4 +6,3 @@ export * from './parser';
 export * from './root-fragment';
 export * from './single';
 export * from './view';
-export * from './virtual-dom';
