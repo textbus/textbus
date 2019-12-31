@@ -22,7 +22,7 @@ export interface Commander<T = any> {
 
   updateValue?(value: T): void;
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): Fragment | void;
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void;
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): RenderModel;
 }

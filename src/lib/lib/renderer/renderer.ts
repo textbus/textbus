@@ -15,6 +15,8 @@ export class Renderer {
   render(newVNode: VBlockNode, host: HTMLElement) {
     this.host = host;
     this.oldVNode = newVNode;
+    host[VIRTUAL_NODE]= newVNode;
+    newVNode.nativeElement = host;
     this.viewBuilder(newVNode, host)
   }
 

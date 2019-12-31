@@ -12,7 +12,7 @@ export class ListCommander implements Commander<any> {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
+  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     let c = selection.commonAncestorFragment;
 
     if (overlap) {
@@ -88,7 +88,6 @@ export class ListCommander implements Commander<any> {
       });
       commonAncestorFragment.insert(listFragment, position);
     });
-    return c;
   }
 
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {

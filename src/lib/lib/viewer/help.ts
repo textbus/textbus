@@ -1,8 +1,14 @@
 import { Commander } from '../commands/commander';
-import { EditContext } from '../toolbar/help';
 import { TBInputEvent } from './cursor';
 import { Viewer } from './viewer';
 import { Contents } from '../parser/contents';
+import { Editor } from '../editor';
+
+export interface EditContext {
+  document: Document;
+  window: Window;
+  editor: Editor;
+}
 
 export interface Hook {
   /**

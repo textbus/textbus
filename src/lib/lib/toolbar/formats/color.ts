@@ -6,7 +6,7 @@ import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { CacheData } from '../utils/cache-data';
 
-const commander = new StyleCommander('color', true);
+const commander = new StyleCommander('color');
 
 const hideEvent = new Subject<void>();
 

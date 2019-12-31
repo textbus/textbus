@@ -13,6 +13,34 @@ const editor = createEditor('#editor', {
   },
   content: `
   <p><strong><em>aaa</em>bbb</strong><em>ccc</em></p>
+  <table><tbody><tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  </tr><tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  </tr><tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  </tr></tbody></table>
   `
 });
 

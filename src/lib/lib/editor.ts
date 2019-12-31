@@ -77,7 +77,7 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(this.handlers);
     this.viewer = new Viewer(this, new Renderer(this.parser));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-      const vDom = new RootFragment(this);
+      const vDom = new RootFragment(this.parser);
       this.root = vDom;
       vDom.setContents(result[0]);
       this.viewer.render(vDom);

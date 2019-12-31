@@ -6,6 +6,7 @@ export * from './handlers/dropdown-handler';
 export * from './handlers/select-handler';
 export * from './handlers/help';
 
+export * from './hooks/history-hook';
 export * from './hooks/link-hook';
 export * from './hooks/source-hook';
 export * from './hooks/table-edit-hook';

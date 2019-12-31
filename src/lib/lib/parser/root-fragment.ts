@@ -1,17 +1,17 @@
 import { Fragment } from './fragment';
-import { Editor } from '../editor';
 import { defaultTagsHandler } from '../default-tags-handler';
 import { Single } from './single';
 import { FormatRange } from './format';
 import { FormatState } from '../matcher/matcher';
+import { Parser } from './parser';
 
 export class RootFragment extends Fragment {
-  constructor(public editor: Editor) {
+  constructor(public parser: Parser) {
     super(null);
   }
 
   setContents(el: HTMLElement) {
-    this.editor.parser.parse(el, this);
+    this.parser.parse(el, this);
   }
 
   createVDom() {

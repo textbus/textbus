@@ -1,10 +1,9 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
-import { Hook } from '../../viewer/help';
+import { EditContext, Hook } from '../../viewer/help';
 import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';

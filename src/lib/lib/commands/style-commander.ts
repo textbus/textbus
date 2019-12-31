@@ -3,14 +3,13 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from '../parser/format';
-import { dtd } from '../dtd';
 import { CacheData } from '../toolbar/utils/cache-data';
 
 export class StyleCommander implements Commander<string | number> {
   recordHistory = true;
   private value: string | number;
 
-  constructor(private name: string, private canApplyBlockElement = true) {
+  constructor(private name: string) {
   }
 
   updateValue(value: string | number) {

@@ -16,7 +16,7 @@ export class CodeCommander implements Commander<string> {
     this.lang = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
+  command(selection: TBSelection, handler: Handler, overlap: boolean) {
     if (!overlap) {
       selection.collapse();
       const firstRange = selection.firstRange;
@@ -41,7 +41,6 @@ export class CodeCommander implements Commander<string> {
       }
       firstRange.startIndex = firstRange.endIndex = 0;
       firstRange.startFragment = firstRange.endFragment = pre;
-      return context;
     }
   }
 

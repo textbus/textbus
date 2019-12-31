@@ -138,7 +138,8 @@ export class Viewer {
     if (typeof hook.setup === 'function') {
       hook.setup(this.elementRef, {
         document: this.contentDocument,
-        window: this.contentWindow
+        window: this.contentWindow,
+        editor: this.editor
       });
     }
   }
