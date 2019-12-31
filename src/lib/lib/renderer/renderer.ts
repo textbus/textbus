@@ -9,7 +9,6 @@ import { VIRTUAL_NODE } from '../parser/help';
 import { View } from '../parser/view';
 import { FormatState } from '../matcher/matcher';
 import { RootFragment } from '../parser/root-fragment';
-import { start } from 'repl';
 
 export class Renderer {
   private vNode: VirtualContainerNode;
@@ -18,25 +17,20 @@ export class Renderer {
   constructor(private context: Fragment) {
   }
 
-  render(formatRanges: FormatRange[], contents: Contents) {
+  render(formatRanges: FormatRange[], contents: Contents, host: HTMLElement) {
     this.vNode = this.createVDom(formatRanges, contents);
-
-    contents.slice(0).forEach(i => {
-      if (i instanceof Fragment) {
-        const div = document.createElement('div');
-        i.render(div);
-      }
-    })
+    // contents.slice(0).forEach(i => {
+    //   if (i instanceof Fragment) {
+    //     const div = document.createElement('div');
+    //     i.render(div);
+    //   }
+    // })
 
     let fragment: Fragment = this.context;
     while (fragment.parent) {
       fragment = fragment.parent;
     }
-    const div = document.createElement('div');
-    console.log(this.vNode);
-    this.viewBuilder(this.vNode, contents, (fragment as RootFragment).editor.parser, div);
-    console.log(div)
-    document.body.appendChild(div)
+    this.viewBuilder(this.vNode, contents, (fragment as RootFragment).editor.parser, host);
   }
 
   /**
@@ -88,85 +82,172 @@ export class Renderer {
       return;
     }
 
-    let depthVNodes: VirtualContainerNode[] = [parent];
-
-
-    let min = startIndex;
-    let max = startIndex;
-    primary:while (startIndex < endIndex) {
-      let isSplit = false;
-      const vNodes: VirtualContainerNode[] = [];
-      depthVNodes.forEach(item => {
-        if (item.endIndex === startIndex) {
-          isSplit = true;
+    while (startIndex < endIndex) {
+      let firstRange = formatRanges.shift();
+      if (firstRange) {
+        if (startIndex < firstRange.startIndex) {
+          const f = new FormatRange({
+            startIndex,
+            endIndex: firstRange.startIndex,
+            handler: null,
+            context: this.context,
+            state: null,
+            cacheData: null
+          });
+          parent.children.push(new VirtualNode([f], this.context, startIndex, firstRange.startIndex));
         }
-        if (isSplit) {
-          if (item.endIndex > startIndex) {
-            item.endIndex = startIndex;
-            formatRanges.unshift(...item.formats.map(f => {
-              const c = f.clone();
-              c.startIndex = startIndex;
-              f.endIndex = startIndex;
-              return c;
-            }));
+        const container = new VirtualContainerNode([firstRange], this.context, firstRange.startIndex, firstRange.endIndex);
+        const childFormatRanges: FormatRange[] = [];
+        while (true) {
+          const f = formatRanges[0];
+          if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {
+            container.formats.push(formatRanges.shift());
+          } else {
+            break;
           }
+        }
+        let index = 0;
+        while (true) {
+          const f = formatRanges[index];
+          if (f && f.startIndex < firstRange.endIndex) {
+            if (f.endIndex <= firstRange.endIndex) {
+              childFormatRanges.push(formatRanges.shift());
+            } else {
+              const cloneRange = f.clone();
+              cloneRange.endIndex = firstRange.endIndex;
+              childFormatRanges.push(cloneRange);
+              f.startIndex = firstRange.endIndex;
+              index++;
+            }
+          } else {
+            break;
+          }
+        }
+        if (childFormatRanges.length) {
+          this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
         } else {
-          if (item.endIndex > startIndex) {
-            vNodes.push(item);
-          }
+          const f = new FormatRange({
+            startIndex: firstRange.startIndex,
+            endIndex: firstRange.endIndex,
+            handler: null,
+            context: this.context,
+            state: null,
+            cacheData: null
+          });
+          container.children.push(new VirtualNode([f], this.context, firstRange.startIndex, firstRange.endIndex))
         }
-      });
-      depthVNodes = vNodes;
-
-      const selectedFormats: FormatRange[] = [];
-
-      while (true) {
-        const first = formatRanges[0];
-        if (first) {
-          if (startIndex < first.startIndex && selectedFormats.length === 0) {
-            const p = depthVNodes[depthVNodes.length - 1];
-            console.log(startIndex)
-            p.children.push(new VirtualNode([new FormatRange({
-              startIndex,
-              endIndex: first.startIndex + 1,
-              state: FormatState.Valid,
-              context: this.context,
-              cacheData: null,
-              handler: null
-            })], this.context, startIndex, first.startIndex + 1));
-            startIndex = first.startIndex;
-            // startIndex++;
-            continue primary;
-          } else if (first.startIndex === startIndex) {
-            selectedFormats.push(formatRanges.shift());
-            continue;
-          }
-        }
+        parent.children.push(container);
+        startIndex = firstRange.endIndex;
+      } else {
+        parent.children.push(new VirtualNode([new FormatRange({
+          startIndex,
+          endIndex,
+          handler: null,
+          context: this.context,
+          state: null,
+          cacheData: null
+        })], this.context, startIndex, endIndex));
         break;
       }
-      const sortedFormats = selectedFormats.sort((n, m) => {
-        return n.endIndex - m.endIndex;
-      });
-
-      while (sortedFormats.length) {
-        const p = depthVNodes[depthVNodes.length - 1];
-        const first = sortedFormats.shift();
-        const vNode = new VirtualContainerNode([first], this.context, first.startIndex, first.endIndex);
-        p.children.push(vNode);
-        depthVNodes.push(vNode);
-      }
-      // const p = depthVNodes[depthVNodes.length - 1];
-      // p.children.push(new VirtualNode([new FormatRange({
-      //   startIndex: min,
-      //   endIndex: max,
-      //   state: FormatState.Valid,
-      //   context: this.context,
-      //   cacheData: null,
-      //   handler: null
-      // })], this.context, min, max));
-      startIndex++;
     }
   }
+
+  // private vDomBuilder2(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
+  //   if (startIndex === 0 && endIndex === 0) {
+  //     // 兼容空标签节点
+  //     parent.children.push(new VirtualNode([new FormatRange({
+  //       startIndex,
+  //       endIndex,
+  //       handler: null,
+  //       context: this.context,
+  //       state: null,
+  //       cacheData: null
+  //     })], this.context, startIndex, endIndex));
+  //     return;
+  //   }
+  //
+  //   let depthVNodes: VirtualContainerNode[] = [parent];
+  //
+  //   primary:while (startIndex < endIndex) {
+  //     let max = endIndex;
+  //     let isSplit = false;
+  //     const vNodes: VirtualContainerNode[] = [];
+  //     depthVNodes.forEach(item => {
+  //       max = Math.min(max, item.endIndex);
+  //       if (item.endIndex === startIndex) {
+  //         isSplit = true;
+  //       }
+  //       if (isSplit) {
+  //         if (item.endIndex > startIndex) {
+  //           item.endIndex = startIndex;
+  //           formatRanges.unshift(...item.formats.map(f => {
+  //             const c = f.clone();
+  //             c.startIndex = startIndex;
+  //             f.endIndex = startIndex;
+  //             return c;
+  //           }));
+  //         }
+  //       } else {
+  //         if (item.endIndex > startIndex) {
+  //           vNodes.push(item);
+  //         }
+  //       }
+  //     });
+  //     depthVNodes = vNodes;
+  //
+  //     const selectedFormats: FormatRange[] = [];
+  //
+  //     while (true) {
+  //       const first = formatRanges[0];
+  //       if (first) {
+  //         if (startIndex < first.startIndex && selectedFormats.length === 0) {
+  //           const p = depthVNodes[depthVNodes.length - 1];
+  //           p.children.push(new VirtualNode([new FormatRange({
+  //             startIndex,
+  //             endIndex: first.startIndex,
+  //             state: FormatState.Valid,
+  //             context: this.context,
+  //             cacheData: null,
+  //             handler: null
+  //           })], this.context, startIndex, first.startIndex));
+  //           startIndex = first.startIndex;
+  //           continue primary;
+  //         } else if (first.startIndex === startIndex) {
+  //           selectedFormats.push(formatRanges.shift());
+  //           continue;
+  //         } else {
+  //           max = Math.min(max, first.startIndex);
+  //         }
+  //       }
+  //       break;
+  //     }
+  //     selectedFormats.sort((n, m) => {
+  //       return m.endIndex - n.endIndex;
+  //     });
+  //
+  //     while (selectedFormats.length) {
+  //       const p = depthVNodes[depthVNodes.length - 1];
+  //       const first = selectedFormats.shift();
+  //       max = Math.min(max, first.endIndex);
+  //       const vNode = new VirtualContainerNode([first], this.context, first.startIndex, first.endIndex);
+  //       while (selectedFormats[0] && selectedFormats[0].endIndex === first.endIndex) {
+  //         vNode.formats.push(selectedFormats.shift());
+  //       }
+  //       p.children.push(vNode);
+  //       depthVNodes.push(vNode);
+  //     }
+  //     const p = depthVNodes[depthVNodes.length - 1];
+  //     p.children.push(new VirtualNode([new FormatRange({
+  //       startIndex,
+  //       endIndex: max,
+  //       state: FormatState.Valid,
+  //       context: this.context,
+  //       cacheData: null,
+  //       handler: null
+  //     })], this.context, startIndex, max));
+  //     startIndex = max;
+  //   }
+  // }
 
 
   /**
