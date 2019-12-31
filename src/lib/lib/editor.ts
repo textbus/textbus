@@ -14,6 +14,7 @@ import { defaultTagsHandler } from './default-tags-handler';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
+import { Renderer } from './renderer/renderer';
 
 export interface Snapshot {
   doc: Fragment;
@@ -74,7 +75,7 @@ export class Editor implements EventDelegate {
     this.historyStackSize = options.historyStackSize || 50;
     this.createToolbar(options.handlers);
     this.parser = new Parser(this.handlers);
-    this.viewer = new Viewer(this);
+    this.viewer = new Viewer(this, new Renderer(this.parser));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootFragment(this);
       this.root = vDom;

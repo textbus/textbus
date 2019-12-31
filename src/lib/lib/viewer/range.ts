@@ -1,6 +1,6 @@
 import { Fragment } from '../parser/fragment';
-import { VirtualContainerNode, VirtualNode, VirtualObjectNode } from '../renderer/virtual-dom';
 import { VIRTUAL_NODE } from '../parser/help';
+import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
 
 export interface TBRangePosition {
   fragment: Fragment;
@@ -45,8 +45,8 @@ export class TBRange {
           TBRange.getOffset(nativeRange.endContainer, nativeRange.endOffset);
       }
 
-      this.startFragment = (nativeRange.startContainer[VIRTUAL_NODE] as VirtualNode).context;
-      this.endFragment = (nativeRange.endContainer[VIRTUAL_NODE] as VirtualNode).context;
+      this.startFragment = (nativeRange.startContainer[VIRTUAL_NODE] as VNode).context;
+      this.endFragment = (nativeRange.endContainer[VIRTUAL_NODE] as VNode).context;
     }
   }
 
@@ -58,10 +58,10 @@ export class TBRange {
 
   apply(offset = 0) {
     const start = this.findFocusNodeAndOffset(
-      this.startFragment.virtualNode.children,
+      this.startFragment.vNode.children,
       this.startIndex + offset);
     const end = this.findFocusNodeAndOffset(
-      this.endFragment.virtualNode.children,
+      this.endFragment.vNode.children,
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
@@ -166,17 +166,17 @@ export class TBRange {
     });
   }
 
-  private findFocusNodeAndOffset(vNodes: VirtualNode[],
+  private findFocusNodeAndOffset(vNodes: VNode[],
                                  i: number): { node: Node, offset: number } {
     let endIndex = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
-      if (item instanceof VirtualContainerNode && item.context.virtualNode === item) {
+      if ((item instanceof VBlockNode || item instanceof VInlineNode) && item.context.vNode === item) {
         if (endIndex === i) {
-          const childNodes = Array.from(item.elementRef.parentNode.childNodes);
-          const index = childNodes.indexOf(item.elementRef as ChildNode);
+          const childNodes = Array.from(item.nativeElement.parentNode.childNodes);
+          const index = childNodes.indexOf(item.nativeElement as ChildNode);
           return {
-            node: item.elementRef.parentNode,
+            node: item.nativeElement.parentNode,
             offset: index
           }
         }
@@ -187,47 +187,47 @@ export class TBRange {
 
       const toEnd = i === item.endIndex && index === vNodes.length - 1;
       if (i >= item.startIndex && i < item.endIndex || toEnd) {
-        if (item instanceof VirtualContainerNode) {
+        if (item instanceof VInlineNode || item instanceof VBlockNode) {
           if (item.children.length) {
             return this.findFocusNodeAndOffset(item.children, i);
           }
           return {
-            node: item.elementRef,
+            node: item.nativeElement,
             offset: i
           }
-        } else if (item instanceof VirtualObjectNode) {
-          const index = Array.from(item.elementRef.parentNode.childNodes).indexOf(item.elementRef as ChildNode);
+        } else if (item instanceof VMediaNode) {
+          const index = Array.from(item.nativeElement.parentNode.childNodes).indexOf(item.nativeElement as ChildNode);
           return {
-            node: item.elementRef.parentNode,
+            node: item.nativeElement.parentNode,
             offset: toEnd ? index + 1 : index
           }
-        } else if (item instanceof VirtualNode) {
+        } else if (item instanceof VTextNode) {
           return {
-            node: item.elementRef,
+            node: item.nativeElement,
             offset: i - item.startIndex
           };
         }
       }
     }
     const last = vNodes[vNodes.length - 1];
-    const childNodes = Array.from(last.elementRef.parentNode.childNodes);
-    const index = childNodes.indexOf(last.elementRef as ChildNode);
+    const childNodes = Array.from(last.nativeElement.parentNode.childNodes);
+    const index = childNodes.indexOf(last.nativeElement as ChildNode);
     return {
-      node: last.elementRef.parentNode,
+      node: last.nativeElement.parentNode,
       offset: index + 1
     };
   }
 
   private static getIndex(node: Node): number {
-    return (node[VIRTUAL_NODE] as VirtualNode).startIndex
+    return (node[VIRTUAL_NODE] as VNode).startIndex
   }
 
   private static getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
       if (node.childNodes.length === offset) {
-        return (node[VIRTUAL_NODE] as VirtualNode).context.contentLength;
+        return (node[VIRTUAL_NODE] as VNode).context.contentLength;
       }
-      const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VirtualNode);
+      const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VNode);
       return childVNode.startIndex;
     }
     return offset;

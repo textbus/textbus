@@ -5,11 +5,10 @@ import { Priority } from '../toolbar/help';
 import { FormatRange } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
-import { Renderer } from '../renderer/renderer';
-import { VirtualNode } from '../renderer/virtual-dom';
+import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
 
 export class Fragment extends View {
-  renderer = new Renderer(this);
+  readonly vNode: VBlockNode;
 
   get contentLength() {
     return this.contents.length;
@@ -340,23 +339,138 @@ export class Fragment extends View {
     return ff;
   }
 
-  render() {
-    this.viewRendered();
-    if (this.dirty) {
-      if (this.dataChanged) {
-        const t = this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents);
-        // this
-      } else {
-        this.contents.getFragments().forEach(f => {
-          f.render();
-        });
-      }
-    }
 
+  createVDom() {
+    const formatRanges = getCanApplyFormats(this.formatMatrix);
+    const contents = this.contents;
+    const containerFormatRanges: FormatRange[] = [];
+    const childFormatRanges: FormatRange[] = [];
+
+    formatRanges.forEach(format => {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
+        format.startIndex === 0 && format.endIndex === contents.length) {
+        containerFormatRanges.push(format);
+      } else {
+        childFormatRanges.push(format);
+      }
+    });
+
+    const root = new VBlockNode(this, containerFormatRanges);
+    this.vDomBuilder(childFormatRanges,
+      root,
+      0,
+      contents.length
+    );
+    (this as { vNode: VBlockNode }).vNode = root;
+    return root;
   }
 
+  /**
+   * 根据格式化信息和范围生成树状数据结构，并把格式化信息未描述的区间设置为虚拟文本节点
+   * @param formatRanges 格式化记录数据
+   * @param parent 当前要生成树的父级
+   * @param startIndex 生成范围的开始索引
+   * @param endIndex 生成范围的结束位置
+   */
+  private vDomBuilder(formatRanges: FormatRange[], parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
+    // if (startIndex === 0 && endIndex === 0) {
+    //   // 兼容空标签节点
+    //   parent.children.push(new VirtualNode([new FormatRange({
+    //     startIndex,
+    //     endIndex,
+    //     handler: null,
+    //     context: this.context,
+    //     state: null,
+    //     cacheData: null
+    //   })], this.context, startIndex, endIndex));
+    //   return;
+    // }
+
+    while (startIndex < endIndex) {
+      let firstRange = formatRanges.shift();
+      if (firstRange) {
+        if (startIndex < firstRange.startIndex) {
+          parent.children.push(...this.createNodesByRange(startIndex, firstRange.startIndex));
+        }
+        const container = new VInlineNode(this, [firstRange], firstRange.startIndex, firstRange.endIndex);
+        const childFormatRanges: FormatRange[] = [];
+        while (true) {
+          const f = formatRanges[0];
+          if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {
+            container.formats.push(formatRanges.shift());
+          } else {
+            break;
+          }
+        }
+        let index = 0;
+        while (true) {
+          const f = formatRanges[index];
+          if (f && f.startIndex < firstRange.endIndex) {
+            if (f.endIndex <= firstRange.endIndex) {
+              childFormatRanges.push(formatRanges.shift());
+            } else {
+              const cloneRange = f.clone();
+              cloneRange.endIndex = firstRange.endIndex;
+              childFormatRanges.push(cloneRange);
+              f.startIndex = firstRange.endIndex;
+              index++;
+            }
+          } else {
+            break;
+          }
+        }
+        if (childFormatRanges.length) {
+          this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
+        } else {
+          container.children.push(...this.createNodesByRange(firstRange.startIndex, firstRange.endIndex));
+        }
+        parent.children.push(container);
+        startIndex = firstRange.endIndex;
+      } else {
+        parent.children.push(...this.createNodesByRange(startIndex, endIndex));
+        break;
+      }
+    }
+  }
+
+  private createNodesByRange(startIndex: number, endIndex: number) {
+    const vNodes: VNode[] = [];
+
+    const c = this.sliceContents(startIndex, endIndex);
+    let i = 0;
+    c.forEach(item => {
+      if (typeof item === 'string') {
+        const v = new VTextNode(this, i + startIndex, item);
+        vNodes.push(v);
+      } else if (item instanceof View) {
+        if (item instanceof Fragment) {
+          vNodes.push(item.createVDom());
+        } else if (item instanceof Single) {
+          vNodes.push(new VMediaNode(this, item.getFormatRanges(), i + startIndex))
+        }
+      }
+      i += item.length;
+    });
+    return vNodes;
+  }
+
+  // render(host: HTMLElement) {
+  //   // this.viewRendered();
+  //   // if (this.dirty) {
+  //   //   if (this.dataChanged) {
+  //   //     const t = this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents, host);
+  //   //     // this
+  //   //   } else {
+  //   //     this.contents.getFragments().forEach(f => {
+  //   //       f.render();
+  //   //     });
+  //   //   }
+  //   // }
+  //
+  // }
+
   destroyView() {
-    this.renderer.destroy();
+    // this.renderer.destroy();
   }
 
   mergeFormat(format: FormatRange, important = false) {

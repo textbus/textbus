@@ -14,6 +14,7 @@ import { Hook } from './help';
 import { defaultHook } from './default-hook';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
+import { Renderer } from '../renderer/renderer';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -37,7 +38,8 @@ export class Viewer {
 
   private cursor: Cursor;
 
-  constructor(private editor: Editor) {
+  constructor(private editor: Editor,
+              private renderer: Renderer) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
@@ -126,7 +128,7 @@ export class Viewer {
   render(rootFragment: RootFragment) {
     this.root = rootFragment;
     this.contentDocument.body.innerHTML = '';
-    rootFragment.render(this.contentDocument.body);
+    this.renderer.render(rootFragment.createVDom(), this.contentDocument.body);
     this.updateFrameHeight();
   }
 
@@ -163,7 +165,7 @@ export class Viewer {
   }
 
   rerender() {
-    this.root.render(this.contentDocument.body);
+    // this.renderer.render(this.root.createVDom());
   }
 
 

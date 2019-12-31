@@ -1,4 +1,4 @@
-import { VirtualNode } from '../renderer/virtual-dom';
+import { VNode } from '../renderer/virtual-dom';
 
 export abstract class View {
   readonly length = 1;
@@ -16,12 +16,9 @@ export abstract class View {
   private _dirty = false;
   private _dataChanged = false;
 
-
-  abstract render(): {viewRef:DocumentFragment, vNode: VirtualNode};
-
   abstract clone(): View;
 
-  viewRendered() {
+  viewSynced() {
     this._dataChanged = false;
     this._dirty = false;
   }

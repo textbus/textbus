@@ -2,10 +2,10 @@ import { View } from './view';
 import { Fragment } from './fragment';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from './help';
-import { VirtualObjectNode } from '../renderer/virtual-dom';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatRange } from './format';
 import { getCanApplyFormats, mergeFormat } from './utils';
+import { VMediaNode } from '../renderer/virtual-dom';
 
 export class Single extends View {
   private formatMatrix = new Map<Handler, FormatRange[]>();
@@ -38,6 +38,11 @@ export class Single extends View {
     this.formatMatrix.set(key, formatRanges);
   }
 
+  // createVDom() {
+  //   const index = this.parent.find(this);
+  //   return new VMediaNode(this.parent, getCanApplyFormats(this.formatMatrix), index);
+  // }
+
   clone(): Single {
     const s = new Single(this.parent, this.tagName);
     s.formatMatrix = new Map<Handler, FormatRange[]>();
@@ -56,9 +61,9 @@ export class Single extends View {
 
     const canApplyFormats = this.getCanApplyFormats();
     const index = this.parent.find(this);
-    const vNode = new VirtualObjectNode(canApplyFormats, this.parent, index, index + 1);
+    const vNode = new VMediaNode(this.parent, canApplyFormats, index);
     const el = document.createElement(this.tagName);
-    vNode.elementRef = el;
+    // vNode.elementRef = el;
     el[VIRTUAL_NODE] = vNode;
     const node = canApplyFormats.reduce((node, next) => {
       if (next.handler) {
@@ -66,7 +71,7 @@ export class Single extends View {
         if (renderModel instanceof ReplaceModel) {
           container = renderModel.replaceElement;
           container[VIRTUAL_NODE] = vNode;
-          vNode.elementRef = container;
+          // vNode.elementRef = container;
           slotContainer = container;
           return renderModel.replaceElement;
         } else if (renderModel instanceof ChildSlotModel) {
@@ -77,7 +82,7 @@ export class Single extends View {
           }
           slotContainer = renderModel.slotElement;
           slotContainer[VIRTUAL_NODE] = vNode;
-          vNode.elementRef = slotContainer;
+          // vNode.elementRef = slotContainer;
           return renderModel.slotElement;
         }
       }

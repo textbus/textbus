@@ -38,7 +38,7 @@ export class BoldCommander implements Commander {
   private apply(scope: SelectedScope, handler: Handler, overlap: boolean) {
     const children = scope.context.sliceContents(scope.startIndex, scope.endIndex);
     let state: FormatState;
-    const el = BoldCommander.findBoldParent(scope.context.virtualNode.elementRef as HTMLElement);
+    const el = BoldCommander.findBoldParent(scope.context.vNode.nativeElement as HTMLElement);
     if (el) {
       state = overlap ? FormatState.Exclude : FormatState.Inherit;
     } else {

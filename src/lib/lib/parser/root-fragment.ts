@@ -1,6 +1,5 @@
 import { Fragment } from './fragment';
 import { Editor } from '../editor';
-import { VIRTUAL_NODE } from './help';
 import { defaultTagsHandler } from '../default-tags-handler';
 import { Single } from './single';
 import { FormatRange } from './format';
@@ -15,7 +14,7 @@ export class RootFragment extends Fragment {
     this.editor.parser.parse(el, this);
   }
 
-  render(): DocumentFragment {
+  createVDom() {
     if (this.contentLength === 0) {
       const newFragment = new Fragment(this);
       newFragment.append(new Single(newFragment, 'br'));
@@ -31,8 +30,7 @@ export class RootFragment extends Fragment {
       }));
       this.append(newFragment);
     }
-    const dom = super.render();
-    // host[VIRTUAL_NODE] = this.virtualNode;
-    return dom;
+
+    return super.createVDom();
   }
 }

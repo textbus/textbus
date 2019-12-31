@@ -4,7 +4,7 @@ import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
 import { VIRTUAL_NODE } from '../parser/help';
-import { VirtualNode } from '../renderer/virtual-dom';
+import { VNode } from '../renderer/virtual-dom';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
@@ -116,7 +116,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.startPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cells[index];
-      const fragment = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context;
+      const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
       if (index === 0) {
         fragment.parent.insert(TableEditCommander.createCell('td', fragment.parent), 0);
       } else {
@@ -141,7 +141,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.endPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cells[index];
-      const fragment = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context;
+      const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
       if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
         if (cell.rowOffset === 0) {
           const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
@@ -159,7 +159,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.startPosition.rowIndex;
 
     const row = cellMatrix[index];
-    const fragment = (row.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+    const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
     const tr = new Fragment(fragment.parent);
     if (index === 0) {
       cellMatrix[0].cells.forEach(() => {
@@ -170,7 +170,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       row.cells.forEach(cell => {
         if (cell.rowOffset > 0) {
           if (cell.columnOffset === 0) {
-            const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
+            const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
             formatRange.cacheData.attrs.set('colspan', cell.cellElement.rowSpan + 1 + '');
           }
         } else {
@@ -202,13 +202,13 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.endPosition.rowIndex;
 
     const row = cellMatrix[index];
-    const fragment = (row.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+    const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
     const tr = new Fragment(fragment.parent);
 
     row.cells.forEach(cell => {
       if (cell.rowOffset < cell.cellElement.rowSpan - 1) {
         if (cell.columnOffset === 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
+          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.set('colspan', cell.cellElement.rowSpan + 1 + '');
         }
       } else {
@@ -242,12 +242,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
       });
     const selectedCells = Array.from(new Set(cells));
     const newNode = selectedCells.shift();
-    const fragment = (newNode[VIRTUAL_NODE] as VirtualNode).context;
+    const fragment = (newNode[VIRTUAL_NODE] as VNode).context;
     const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
     formatRange.cacheData.attrs.set('rowspan', maxRow - minRow + 1 + '');
     formatRange.cacheData.attrs.set('colspan', maxColumn - minColumn + 1 + '');
     selectedCells.forEach(cell => {
-      const cellFragment = (cell[VIRTUAL_NODE] as VirtualNode).context;
+      const cellFragment = (cell[VIRTUAL_NODE] as VNode).context;
       const i = cellFragment.getIndexInParent();
       cellFragment.parent.delete(i, i + 1);
     });
@@ -272,9 +272,9 @@ export class TableEditCommander implements Commander<TableEditParams> {
       .reduce((p, c) => {
         return p.concat(c);
       }, []).map(cell => {
-        const fragment = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context;
+        const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
         if (cell.rowOffset !== 0 || cell.columnOffset !== 0) {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.delete('rowspan');
           formatRange.cacheData.attrs.delete('colspan');
@@ -282,7 +282,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const newCellFragment = TableEditCommander.createCell(formatRange.cacheData.tag, rowFragment);
 
           if (cell.afterCell) {
-            const index = (cell.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
+            const index = (cell.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
             rowFragment.insert(newCellFragment, rowFragment.contentLength);
@@ -311,24 +311,24 @@ export class TableEditCommander implements Commander<TableEditParams> {
       return;
     }
     const prevRow = cellMatrix[index - 1];
-    const prevRowFragment = (prevRow.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+    const prevRowFragment = (prevRow.rowElement[VIRTUAL_NODE] as VNode).context;
     prevRow.cells.forEach((cell, cellIndex) => {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset === 0 && cell.cellElement.rowSpan > 1) {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const newCellFragment = TableEditCommander.createCell('td',
             rowFragment,
             cell.cellElement.rowSpan - 1,
             cell.cellElement.colSpan);
           const newPosition = cellMatrix[index].cells[cellIndex];
           if (newPosition.afterCell) {
-            const index = (newPosition.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
+            const index = (newPosition.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
             rowFragment.insert(newCellFragment, rowFragment.contentLength);
           }
         } else {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode)
+          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode)
             .context.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.set('rowspan', cell.cellElement.rowSpan - 1 + '');
         }
@@ -351,25 +351,25 @@ export class TableEditCommander implements Commander<TableEditParams> {
       return;
     }
     const nextRow = cellMatrix[index + 1];
-    const nextRowFragment = (nextRow.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+    const nextRowFragment = (nextRow.rowElement[VIRTUAL_NODE] as VNode).context;
     nextRow.cells.forEach((cell, cellIndex) => {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode)
+          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode)
             .context.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.set('rowspan', cell.cellElement.rowSpan - 1 + '');
         } else if (cell.rowOffset === 0) {
           if (cell.cellElement.rowSpan > 1) {
 
             const newPosition = cellMatrix[index + 2].cells[cellIndex];
-            const rowFragment = (newPosition.rowElement[VIRTUAL_NODE] as VirtualNode).context;
+            const rowFragment = (newPosition.rowElement[VIRTUAL_NODE] as VNode).context;
             const newCellFragment = TableEditCommander.createCell('td',
               rowFragment,
               cell.cellElement.rowSpan - 1,
               cell.cellElement.colSpan);
 
             if (newPosition.afterCell) {
-              const index = (newPosition.afterCell[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
+              const index = (newPosition.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
               rowFragment.insert(newCellFragment, index);
             } else {
               rowFragment.insert(newCellFragment, rowFragment.contentLength);
@@ -393,11 +393,11 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index - 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
+          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan - 1 + '');
         } else {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VirtualNode).context;
-          const index = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
+          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
+          const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
@@ -426,11 +426,11 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index + 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
+          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
           formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan - 1 + '');
         } else {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VirtualNode).context;
-          const index = (cell.cellElement[VIRTUAL_NODE] as VirtualNode).context.getIndexInParent();
+          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
+          const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);

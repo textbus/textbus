@@ -1,14 +1,13 @@
 import { fromEvent, merge } from 'rxjs';
 import { CubicBezier } from '@tanbo/bezier';
 
-import { EditContext, Priority } from '../help';
+import { EditContext } from '../help';
 import { CellPosition, RowPosition, TableSelectionRange } from '../../commands/table-edit-commander';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
-import { FormatState } from '../../matcher/matcher';
 
 interface ElementPosition {
   left: number;
@@ -175,7 +174,7 @@ export class TableEditHook implements Hook {
       if (!fragment || !fragment.parent) {
         return null;
       }
-      const isCell = /th|td/i.test(fragment?.virtualNode?.elementRef.nodeName);
+      const isCell = /th|td/i.test(fragment?.vNode?.nativeElement.nodeName);
       if (isCell) {
         return fragment;
       }
