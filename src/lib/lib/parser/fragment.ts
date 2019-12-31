@@ -1,15 +1,14 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { VirtualContainerNode } from '../renderer/virtual-dom';
 import { View } from './view';
 import { Priority } from '../toolbar/help';
 import { FormatRange } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
 import { Renderer } from '../renderer/renderer';
+import { VirtualNode } from '../renderer/virtual-dom';
 
 export class Fragment extends View {
-  virtualNode: VirtualContainerNode;
   renderer = new Renderer(this);
 
   get contentLength() {
@@ -18,9 +17,6 @@ export class Fragment extends View {
 
   private formatMatrix = new Map<Handler, FormatRange[]>();
   private contents = new Contents();
-
-  private host: HTMLElement;
-  private elements: Node[] = [];
 
   private destroyed = false;
 
@@ -344,50 +340,23 @@ export class Fragment extends View {
     return ff;
   }
 
-  /**
-   * 渲染 DOM 到指定容器
-   * @param host
-   */
-  render(host: HTMLElement) {
+  render() {
+    this.viewRendered();
     if (this.dirty) {
       if (this.dataChanged) {
-        this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents);
-        // const vDom = this.createVDom(canApplyFormats);
-        // this.virtualNode = vDom;
-        // this.elements = [];
-        // this.host = host;
-        // let fragment: Fragment = this;
-        // while (fragment.parent) {
-        //   fragment = fragment.parent;
-        // }
-        // this.formatMatrix.clear();
-        // this.viewBuilder(vDom, this.contents, (fragment as RootFragment).editor.parser, host);
+        const t = this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents);
+        // this
       } else {
         this.contents.getFragments().forEach(f => {
-          f.render(f.host);
+          f.render();
         });
       }
     }
-    this.viewRendered();
-    return host;
+
   }
 
   destroyView() {
-    let nextSibling: Node = null;
-    this.contents.getFragments().forEach(f => {
-      const p = f.destroyView();
-      nextSibling = p.nextSibling || nextSibling;
-    });
-    this.elements.forEach(el => {
-      if (el.parentNode) {
-        nextSibling = el.nextSibling || nextSibling;
-        el.parentNode.removeChild(el);
-      }
-    });
-    return {
-      host: this.host,
-      nextSibling: (nextSibling && nextSibling.parentNode === this.host) ? nextSibling : null
-    };
+    this.renderer.destroy();
   }
 
   mergeFormat(format: FormatRange, important = false) {
@@ -407,7 +376,6 @@ export class Fragment extends View {
     }
     this.formatMatrix.clear();
     this.contents = new Contents();
-    this.virtualNode = null;
     this.parent = null;
     this.destroyed = true;
   }

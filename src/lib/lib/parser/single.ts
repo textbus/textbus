@@ -8,7 +8,6 @@ import { FormatRange } from './format';
 import { getCanApplyFormats, mergeFormat } from './utils';
 
 export class Single extends View {
-  virtualNode: VirtualObjectNode;
   private formatMatrix = new Map<Handler, FormatRange[]>();
 
   constructor(public parent: Fragment, public tagName: string) {
@@ -50,7 +49,8 @@ export class Single extends View {
     return s;
   }
 
-  render(host: HTMLElement) {
+  render() {
+    const host = document.createDocumentFragment();
     let container: HTMLElement;
     let slotContainer: HTMLElement;
 
@@ -60,7 +60,6 @@ export class Single extends View {
     const el = document.createElement(this.tagName);
     vNode.elementRef = el;
     el[VIRTUAL_NODE] = vNode;
-    this.virtualNode = vNode;
     const node = canApplyFormats.reduce((node, next) => {
       if (next.handler) {
         const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
@@ -87,6 +86,7 @@ export class Single extends View {
     if (node) {
       host.appendChild(node);
     }
+    return host;
   }
 
   private getCanApplyFormats() {

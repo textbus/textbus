@@ -1,5 +1,4 @@
 import { VirtualNode } from '../renderer/virtual-dom';
-import { Renderer } from '../renderer/renderer';
 
 export abstract class View {
   readonly length = 1;
@@ -13,13 +12,12 @@ export abstract class View {
   }
 
   abstract parent: View;
-  abstract virtualNode: VirtualNode;
 
   private _dirty = false;
   private _dataChanged = false;
 
 
-  abstract render(host: HTMLElement): void;
+  abstract render(): {viewRef:DocumentFragment, vNode: VirtualNode};
 
   abstract clone(): View;
 

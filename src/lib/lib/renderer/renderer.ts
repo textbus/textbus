@@ -1,4 +1,4 @@
-import { VirtualContainerNode, VirtualNode } from './virtual-dom';
+import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from './virtual-dom';
 import { FormatRange } from '../parser/format';
 import { Contents } from '../parser/contents';
 import { Priority } from '../toolbar/help';
@@ -7,30 +7,42 @@ import { Parser, ParseState } from '../parser/parser';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from '../parser/help';
 import { View } from '../parser/view';
-import { FormatState } from '../matcher/matcher';
-import { RootFragment } from '../parser/root-fragment';
+import { Single } from '../parser/single';
 
 export class Renderer {
-  private vNode: VirtualContainerNode;
+  private vNode: VBlockNode;
   private nativeElements: Node[] = [];
 
   constructor(private context: Fragment) {
   }
 
-  render(formatRanges: FormatRange[], contents: Contents, host: HTMLElement) {
-    this.vNode = this.createVDom(formatRanges, contents);
-    // contents.slice(0).forEach(i => {
-    //   if (i instanceof Fragment) {
-    //     const div = document.createElement('div');
-    //     i.render(div);
-    //   }
-    // })
+  // render(formatRanges: FormatRange[], contents: Contents) {
+  //   this.vNode = this.createVDom(formatRanges, contents);
+  //   // contents.slice(0).forEach(i => {
+  //   //   if (i instanceof Fragment) {
+  //   //     const div = document.createElement('div');
+  //   //     i.render(div);
+  //   //   }
+  //   // })
+  //
+  //   let fragment: Fragment = this.context;
+  //   while (fragment.parent) {
+  //     fragment = fragment.parent;
+  //   }
+  //
+  //   const f = this.viewBuilder(this.vNode, contents, (fragment as RootFragment).editor.parser);
+  //   this.nativeElements = Array.from(f.childNodes);
+  //   return {
+  //     vNode: this.vNode,
+  //     viewRef: f
+  //   };
+  // }
 
-    let fragment: Fragment = this.context;
-    while (fragment.parent) {
-      fragment = fragment.parent;
-    }
-    this.viewBuilder(this.vNode, contents, (fragment as RootFragment).editor.parser, host);
+
+  destroy() {
+    this.nativeElements.forEach(item => {
+      item.parentNode.removeChild(item);
+    });
   }
 
   /**
@@ -38,7 +50,7 @@ export class Renderer {
    * @param formatRanges 可应用的格式化数据
    * @param contents 格式化内容
    */
-  private createVDom(formatRanges: FormatRange[], contents: Contents) {
+  createVDom(formatRanges: FormatRange[], contents: Contents) {
     const containerFormatRanges: FormatRange[] = [];
     const childFormatRanges: FormatRange[] = [];
 
@@ -51,7 +63,7 @@ export class Renderer {
       }
     });
 
-    const root = new VirtualContainerNode(containerFormatRanges, this.context, 0, contents.length);
+    const root = new VBlockNode(this.context, containerFormatRanges);
     this.vDomBuilder(childFormatRanges,
       root,
       0,
@@ -68,19 +80,19 @@ export class Renderer {
    * @param startIndex 生成范围的开始索引
    * @param endIndex 生成范围的结束位置
    */
-  private vDomBuilder(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
-    if (startIndex === 0 && endIndex === 0) {
-      // 兼容空标签节点
-      parent.children.push(new VirtualNode([new FormatRange({
-        startIndex,
-        endIndex,
-        handler: null,
-        context: this.context,
-        state: null,
-        cacheData: null
-      })], this.context, startIndex, endIndex));
-      return;
-    }
+  private vDomBuilder(formatRanges: FormatRange[], parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
+    // if (startIndex === 0 && endIndex === 0) {
+    //   // 兼容空标签节点
+    //   parent.children.push(new VirtualNode([new FormatRange({
+    //     startIndex,
+    //     endIndex,
+    //     handler: null,
+    //     context: this.context,
+    //     state: null,
+    //     cacheData: null
+    //   })], this.context, startIndex, endIndex));
+    //   return;
+    // }
 
     while (startIndex < endIndex) {
       let firstRange = formatRanges.shift();
@@ -96,7 +108,7 @@ export class Renderer {
           });
           parent.children.push(new VirtualNode([f], this.context, startIndex, firstRange.startIndex));
         }
-        const container = new VirtualContainerNode([firstRange], this.context, firstRange.startIndex, firstRange.endIndex);
+        const container = new VirtualInlineNode([firstRange], this.context, firstRange.startIndex, firstRange.endIndex);
         const childFormatRanges: FormatRange[] = [];
         while (true) {
           const f = formatRanges[0];
@@ -152,113 +164,46 @@ export class Renderer {
     }
   }
 
-  // private vDomBuilder2(formatRanges: FormatRange[], parent: VirtualContainerNode, startIndex: number, endIndex: number) {
-  //   if (startIndex === 0 && endIndex === 0) {
-  //     // 兼容空标签节点
-  //     parent.children.push(new VirtualNode([new FormatRange({
-  //       startIndex,
-  //       endIndex,
-  //       handler: null,
-  //       context: this.context,
-  //       state: null,
-  //       cacheData: null
-  //     })], this.context, startIndex, endIndex));
-  //     return;
-  //   }
-  //
-  //   let depthVNodes: VirtualContainerNode[] = [parent];
-  //
-  //   primary:while (startIndex < endIndex) {
-  //     let max = endIndex;
-  //     let isSplit = false;
-  //     const vNodes: VirtualContainerNode[] = [];
-  //     depthVNodes.forEach(item => {
-  //       max = Math.min(max, item.endIndex);
-  //       if (item.endIndex === startIndex) {
-  //         isSplit = true;
-  //       }
-  //       if (isSplit) {
-  //         if (item.endIndex > startIndex) {
-  //           item.endIndex = startIndex;
-  //           formatRanges.unshift(...item.formats.map(f => {
-  //             const c = f.clone();
-  //             c.startIndex = startIndex;
-  //             f.endIndex = startIndex;
-  //             return c;
-  //           }));
-  //         }
-  //       } else {
-  //         if (item.endIndex > startIndex) {
-  //           vNodes.push(item);
-  //         }
-  //       }
-  //     });
-  //     depthVNodes = vNodes;
-  //
-  //     const selectedFormats: FormatRange[] = [];
-  //
-  //     while (true) {
-  //       const first = formatRanges[0];
-  //       if (first) {
-  //         if (startIndex < first.startIndex && selectedFormats.length === 0) {
-  //           const p = depthVNodes[depthVNodes.length - 1];
-  //           p.children.push(new VirtualNode([new FormatRange({
-  //             startIndex,
-  //             endIndex: first.startIndex,
-  //             state: FormatState.Valid,
-  //             context: this.context,
-  //             cacheData: null,
-  //             handler: null
-  //           })], this.context, startIndex, first.startIndex));
-  //           startIndex = first.startIndex;
-  //           continue primary;
-  //         } else if (first.startIndex === startIndex) {
-  //           selectedFormats.push(formatRanges.shift());
-  //           continue;
-  //         } else {
-  //           max = Math.min(max, first.startIndex);
-  //         }
-  //       }
-  //       break;
-  //     }
-  //     selectedFormats.sort((n, m) => {
-  //       return m.endIndex - n.endIndex;
-  //     });
-  //
-  //     while (selectedFormats.length) {
-  //       const p = depthVNodes[depthVNodes.length - 1];
-  //       const first = selectedFormats.shift();
-  //       max = Math.min(max, first.endIndex);
-  //       const vNode = new VirtualContainerNode([first], this.context, first.startIndex, first.endIndex);
-  //       while (selectedFormats[0] && selectedFormats[0].endIndex === first.endIndex) {
-  //         vNode.formats.push(selectedFormats.shift());
-  //       }
-  //       p.children.push(vNode);
-  //       depthVNodes.push(vNode);
-  //     }
-  //     const p = depthVNodes[depthVNodes.length - 1];
-  //     p.children.push(new VirtualNode([new FormatRange({
-  //       startIndex,
-  //       endIndex: max,
-  //       state: FormatState.Valid,
-  //       context: this.context,
-  //       cacheData: null,
-  //       handler: null
-  //     })], this.context, startIndex, max));
-  //     startIndex = max;
-  //   }
-  // }
 
+  private createNodesByRange(startIndex: number, endIndex: number) {
+    const vNodes: VNode[] = [];
+    const c = this.context.sliceContents(startIndex, endIndex);
+    let i = 0;
+    c.forEach(item => {
+      if (typeof item === 'string') {
+        const newFormatRange = new FormatRange({
+          startIndex: i + startIndex,
+          endIndex: i + startIndex + item.length,
+          handler: null,
+          context: this.context,
+          state: null,
+          cacheData: null
+        });
+        const v = new VTextNode(
+          this.context,
+          newFormatRange.startIndex,
+          newFormatRange.endIndex);
+        vNodes.push(v);
+      } else if (item instanceof View) {
+        if (item instanceof Single) {
+          vNodes.push(new VMediaNode(this.context, startIndex+i));
+        } else if (item instanceof Fragment) {
+          vNodes.push(new VBlockNode())
+        }
+      }
+      i += item.length;
+    });
+    return vNodes;
+  }
 
   /**
    * 根据虚拟 DOM 树和内容生成真实 DOM
    * @param vNode
    * @param contents
    * @param parser
-   * @param host
    */
-  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser, host: HTMLElement) {
-    const newNodes: VirtualNode[] = [];
+  private viewBuilder(vNode: VirtualNode, contents: Contents, parser: Parser) {
+    const host = document.createDocumentFragment();
     if (vNode instanceof VirtualContainerNode) {
       let container: HTMLElement;
       let slotContainer: HTMLElement;
@@ -315,9 +260,8 @@ export class Renderer {
         if (childVNode.context !== vNode.context) {
           childVNode.context.cleanFormats();
         }
-        this.viewBuilder(childVNode, contents, parser, slotContainer || host);
+        (slotContainer || host).appendChild(this.viewBuilder(childVNode, contents, parser));
       });
-      newNodes.push(vNode);
     } else {
       const c = contents.slice(vNode.startIndex, vNode.endIndex);
       let i = 0;
@@ -336,7 +280,6 @@ export class Renderer {
             this.context,
             newFormatRange.startIndex,
             newFormatRange.endIndex);
-          newNodes.push(v);
           const str = item.replace(/\s\s+/g, str => {
             return ' ' + Array.from({
               length: str.length - 1
@@ -348,13 +291,11 @@ export class Renderer {
           this.nativeElements.push(currentNode);
           host.appendChild(currentNode);
         } else if (item instanceof View) {
-          item.render(host);
-          newNodes.push(item.virtualNode);
+          host.appendChild(item.render());
         }
         i += item.length;
       });
     }
-
-    return newNodes;
+    return host;
   }
 }

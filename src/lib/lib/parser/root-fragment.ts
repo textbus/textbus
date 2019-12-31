@@ -15,7 +15,7 @@ export class RootFragment extends Fragment {
     this.editor.parser.parse(el, this);
   }
 
-  render(host: HTMLElement): HTMLElement {
+  render(): DocumentFragment {
     if (this.contentLength === 0) {
       const newFragment = new Fragment(this);
       newFragment.append(new Single(newFragment, 'br'));
@@ -31,8 +31,8 @@ export class RootFragment extends Fragment {
       }));
       this.append(newFragment);
     }
-    const dom = super.render(host);
-    host[VIRTUAL_NODE] = this.virtualNode;
+    const dom = super.render();
+    // host[VIRTUAL_NODE] = this.virtualNode;
     return dom;
   }
 }
