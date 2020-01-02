@@ -182,11 +182,13 @@ export class Fragment extends View {
     }
 
     this.contents.append(content);
-    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
-      return [Priority.Property, Priority.Inline].includes(format.handler.priority);
-    }).forEach((format: InlineFormat) => {
-      format.endIndex += content.length;
-    })
+    if (insertAdjacentInlineFormat) {
+      Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
+        return [Priority.Property, Priority.Inline].includes(format.handler.priority);
+      }).forEach((format: InlineFormat) => {
+        format.endIndex += content.length;
+      })
+    }
   }
 
   getContentAtIndex(index: number) {
