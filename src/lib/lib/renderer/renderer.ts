@@ -19,7 +19,7 @@ export class Renderer {
     this.oldVNode = newVNode;
     host[VIRTUAL_NODE] = newVNode;
     newVNode.wrapElement = host;
-    newVNode.wrapElement = host;
+    newVNode.slotElement = host;
   }
 
   private destroy() {
@@ -105,27 +105,25 @@ export class Renderer {
           vNode.context.viewSynced();
         }
         if (oldVNode) {
+          debugger
           oldVNode.destroyView();
         }
       } else {
         vNode.wrapElement = (oldVNode as VInlineNode).wrapElement;
         vNode.slotElement = (oldVNode as VInlineNode).slotElement;
+        vNode.wrapElement && (vNode.wrapElement[VIRTUAL_NODE] = vNode);
+        vNode.slotElement && (vNode.slotElement[VIRTUAL_NODE] = vNode);
         (oldVNode as VInlineNode).wrapElement = (oldVNode as VInlineNode).slotElement = null;
       }
 
       vNode.children.forEach(childVNode => {
-        if (childVNode.context !== vNode.context) {
-          // childVNode.context.useContents(new Contents());
-          childVNode.context.cleanFormats();
-        }
-
         this.diffAndUpdateView(
           childVNode,
-          (oldVNode as VBlockNode)?.children.shift(),
+          (oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode) ? oldVNode.children.shift() : null,
           vNode.slotElement as HTMLElement || host);
       });
-      if ((oldVNode as VBlockNode)?.children.length) {
-        (oldVNode as VBlockNode)?.children.forEach(i => i.destroyView());
+      if ((oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode)) {
+        oldVNode.children.forEach(i => i.destroyView());
       }
     } else if (vNode instanceof VTextNode) {
       this.renderTextNode(vNode, oldVNode, host);
@@ -143,6 +141,7 @@ export class Renderer {
       }).replace(/\s$/, '\u00a0');
       if (oldVNode instanceof VTextNode) {
         vNode.nativeElement = oldVNode.nativeElement;
+        vNode.nativeElement[VIRTUAL_NODE] = vNode;
         vNode.nativeElement.textContent = str;
         oldVNode.nativeElement = null;
       } else {
@@ -156,6 +155,7 @@ export class Renderer {
       }
     } else {
       vNode.nativeElement = oldVNode.nativeElement;
+      vNode.nativeElement[VIRTUAL_NODE] = vNode;
       (oldVNode as VTextNode).nativeElement = null;
     }
   }

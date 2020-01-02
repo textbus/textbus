@@ -2,7 +2,6 @@ import { fromEvent, merge, Observable, Subject } from 'rxjs';
 
 import { template } from './template-html';
 import { TBSelection } from './selection';
-import { Priority } from '../toolbar/help';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
@@ -92,15 +91,18 @@ export class Viewer {
 
       this.cursor.onInput.subscribe(v => {
         this.updateContents(v);
+        this.cursor.updateStateBySelection(this.selection);
       });
       this.cursor.onDelete.subscribe(() => {
         this.deleteContents();
+        this.cursor.updateStateBySelection(this.selection);
       });
       this.cursor.onNewLine.subscribe(() => {
         if (!this.selection.collapsed) {
           this.deleteContents();
         }
         this.createNewLine();
+        this.cursor.updateStateBySelection(this.selection);
       });
       this.cursor.onMove.subscribe(direction => {
         this.moveCursor(direction);

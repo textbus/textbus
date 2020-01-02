@@ -2,7 +2,7 @@ import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { View } from './view';
 import { Priority } from '../toolbar/help';
-import { BlockFormat, FormatRange, InlineFormat } from './format';
+import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
 import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
@@ -143,7 +143,7 @@ export class Fragment extends View {
     this.contents.insert(content, index);
     const newFormats: InlineFormat[] = [];
     Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
-      return !(format.handler.priority === Priority.Block || format.handler.priority === Priority.Default);
+      return format instanceof InlineFormat || format instanceof SingleFormat;
     }).forEach((format: InlineFormat) => {
       if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
         newFormats.push(new InlineFormat({

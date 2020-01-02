@@ -15,7 +15,7 @@ export class CacheData {
   attrs: Map<string, string>;
   style: { name: string, value: string | number };
 
-  constructor(private params: CacheDataParams = {}) {
+  constructor(params: CacheDataParams = {}) {
     this.tag = params.tag;
     this.attrs = params.attrs;
     this.style = params.style;
@@ -40,7 +40,7 @@ export class CacheData {
     if (!data) {
       return false;
     }
-    const left = data.params;
+    const left = data;
     const right = this;
     return left.tag === right.tag &&
       CacheData.equalAttrs(left.attrs, right.attrs) &&
