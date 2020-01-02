@@ -1,6 +1,6 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
@@ -33,11 +33,9 @@ export class ListCommander implements Commander<any> {
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
       const listFragment = new Fragment(commonAncestorFragment);
-      listFragment.mergeFormat(new FormatRange({
+      listFragment.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         context: listFragment,
-        startIndex: 0,
-        endIndex: 0,
         cacheData: {
           tag: this.tagName
         },
@@ -47,11 +45,9 @@ export class ListCommander implements Commander<any> {
         c = range.commonAncestorFragment.parent;
         const index = commonAncestorFragment.getIndexInParent();
         const li = new Fragment(listFragment);
-        li.mergeFormat(new FormatRange({
+        li.mergeFormat(new BlockFormat({
           state: FormatState.Valid,
           context: li,
-          startIndex: 0,
-          endIndex: 0,
           cacheData: {
             tag: 'li'
           },
@@ -66,11 +62,9 @@ export class ListCommander implements Commander<any> {
 
       range.getSelectedScope().forEach(item => {
         const li = new Fragment(listFragment);
-        li.mergeFormat(new FormatRange({
+        li.mergeFormat(new BlockFormat({
           state: FormatState.Valid,
           context: li,
-          startIndex: 0,
-          endIndex: 0,
           cacheData: {
             tag: 'li'
           },

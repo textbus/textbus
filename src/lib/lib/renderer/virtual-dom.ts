@@ -12,10 +12,21 @@ export class VTextNode {
               public startIndex: number,
               public text: string) {
   }
+
+  destroyView() {
+    if (this.nativeElement && this.nativeElement.parentNode) {
+      this.nativeElement.parentNode.removeChild(this.nativeElement);
+    }
+  }
 }
 
 export class VBlockNode {
-  nativeElement: Node;
+  get nativeElement() {
+    return this.slotElement;
+  }
+
+  slotElement: Node;
+  wrapElement: Node;
   readonly children: Array<VNode> = [];
   readonly startIndex = 0;
 
@@ -26,16 +37,34 @@ export class VBlockNode {
   constructor(public context: Fragment,
               public formats: FormatRange[]) {
   }
+
+
+  destroyView() {
+    if (this.wrapElement && this.wrapElement.parentNode) {
+      this.wrapElement.parentNode.removeChild(this.wrapElement);
+    }
+  }
 }
 
 export class VInlineNode {
-  nativeElement: Node;
+  get nativeElement() {
+    return this.slotElement;
+  }
+
+  slotElement: Node;
+  wrapElement: Node;
   readonly children: Array<VNode> = [];
 
   constructor(public context: Fragment,
               public formats: FormatRange[],
               public startIndex: number,
               public endIndex: number) {
+  }
+
+  destroyView() {
+    if (this.wrapElement && this.wrapElement.parentNode) {
+      this.wrapElement.parentNode.removeChild(this.wrapElement);
+    }
   }
 }
 
@@ -49,6 +78,12 @@ export class VMediaNode {
   constructor(public context: Fragment,
               public formats: FormatRange[],
               public startIndex: number) {
+  }
+
+  destroyView() {
+    if (this.nativeElement && this.nativeElement.parentNode) {
+      this.nativeElement.parentNode.removeChild(this.nativeElement);
+    }
   }
 }
 

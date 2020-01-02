@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format';
+import { InlineFormat, SingleFormat } from '../parser/format';
 
 export class AttrCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -36,17 +36,18 @@ export class AttrCommander implements Commander<AttrState[]> {
           }
         } else {
           range.commonAncestorFragment.getFormatRanges().forEach(format => {
-            if (format.endIndex >= range.endIndex) {
-              format.endIndex++;
-            }
-            if (format.startIndex > range.startIndex) {
-              format.startIndex++;
+            if (format instanceof InlineFormat) {
+              if (format.endIndex >= range.endIndex) {
+                format.endIndex++;
+              }
+              if (format.startIndex > range.startIndex) {
+                format.startIndex++;
+              }
             }
           });
           const newNode = new Single(range.commonAncestorFragment, this.tagName);
-          newNode.setFormats(handler, [new FormatRange({
+          newNode.setFormats(handler, [new SingleFormat({
             startIndex: range.startIndex,
-            endIndex: range.startIndex + 1,
             handler,
             state: FormatState.Valid,
             context: newNode,

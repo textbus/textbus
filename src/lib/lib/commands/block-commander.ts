@@ -4,7 +4,7 @@ import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { Contents } from '../parser/contents';
 
 export class BlockCommander implements Commander<string> {
@@ -121,9 +121,7 @@ export class BlockCommander implements Commander<string> {
   }
 
   private useFormat(fragment: Fragment, handler: Handler) {
-    fragment.apply(new FormatRange({
-      startIndex: 0,
-      endIndex: fragment.contentLength,
+    fragment.apply(new BlockFormat({
       state: FormatState.Valid,
       context: fragment,
       handler,

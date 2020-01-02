@@ -2,7 +2,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../viewer/range';
-import { FormatRange } from '../parser/format';
+import { BlockFormat, FormatRange } from '../parser/format';
 import { FormatState } from '../matcher/matcher';
 
 export function unwrap(selection: TBSelection, handler: Handler) {
@@ -76,9 +76,7 @@ export function wrap(selection: TBSelection, handler: Handler, tagName: string, 
     parent.insert(fragment, index);
 
     fragment.append(commonAncestorFragment);
-    fragment.apply(new FormatRange({
-      startIndex: 0,
-      endIndex: 1,
+    fragment.apply(new BlockFormat({
       state: FormatState.Valid,
       handler,
       context: fragment,
@@ -93,9 +91,7 @@ export function wrap(selection: TBSelection, handler: Handler, tagName: string, 
     selection.ranges.forEach(range => {
       let commonAncestorFragment = range.commonAncestorFragment;
       const newFragment = new Fragment(commonAncestorFragment);
-      newFragment.mergeFormat(new FormatRange({
-        startIndex: 0,
-        endIndex: 0,
+      newFragment.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         handler,
         cacheData: {

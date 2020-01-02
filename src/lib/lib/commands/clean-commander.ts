@@ -4,7 +4,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
 import { Fragment } from '../parser/fragment';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format';
+import { InlineFormat } from '../parser/format';
 
 export class CleanCommander implements Commander {
   recordHistory = true;
@@ -30,7 +30,7 @@ export class CleanCommander implements Commander {
     fragment.getFormatHandlers().filter(handler => {
       return ![Priority.Default, Priority.Block, Priority.BlockStyle].includes(handler.priority);
     }).forEach(handler => {
-      fragment.apply(new FormatRange({
+      fragment.apply(new InlineFormat({
         state: FormatState.Invalid,
         startIndex,
         endIndex,

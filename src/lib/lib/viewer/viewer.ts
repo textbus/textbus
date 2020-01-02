@@ -15,6 +15,7 @@ import { defaultHook } from './default-hook';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Renderer } from '../renderer/renderer';
+import { InlineFormat } from '../parser/format';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -166,7 +167,7 @@ export class Viewer {
   }
 
   rerender() {
-    // this.renderer.render(this.root.createVDom());
+    this.renderer.render(this.root.createVDom(), this.contentDocument.body);
   }
 
 
@@ -207,7 +208,7 @@ export class Viewer {
       target.append(item);
     }
     oldFragment.getFormatRanges().forEach(f => {
-      if ([Priority.Inline, Priority.Property].includes(f.handler.priority)) {
+      if (f instanceof InlineFormat) {
         const ff = f.clone();
         ff.startIndex += startIndex;
         ff.endIndex += startIndex;

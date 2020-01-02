@@ -1,6 +1,6 @@
 import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format';
+import { FormatRange, InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
@@ -14,7 +14,7 @@ export class InlineCommander implements Commander {
   command(selection: TBSelection, handler: Handler, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        const r = new FormatRange({
+        const r = new InlineFormat({
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           handler,

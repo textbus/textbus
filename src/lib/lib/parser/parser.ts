@@ -2,12 +2,13 @@ import { Fragment } from './fragment';
 import { dtd } from '../dtd';
 import { Single } from './single';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from './format';
+import { BlockFormat, InlineFormat, SingleFormat } from './format';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
+import { Priority } from '../toolbar/help';
 
 export interface ParseState {
-  token: Handler;
+  handler: Handler;
   state: FormatState;
   cacheData: CacheData;
 }
@@ -28,7 +29,7 @@ export class Parser {
   getFormatStateByNode(node: HTMLElement): ParseState[] {
     return this.registries.map(item => {
       return {
-        token: item,
+        handler: item,
         state: item.matcher.matchNode(node),
         cacheData: this.getPreCacheData(node,
           typeof item.editableOptions === 'function'
@@ -42,7 +43,7 @@ export class Parser {
   private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
-        token: item,
+        handler: item,
         state: item.matcher.matchNode(by),
         cacheData: this.getPreCacheData(by,
           typeof item.editableOptions === 'function'
@@ -51,15 +52,34 @@ export class Parser {
         )
       };
     }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
-      const newRange = new FormatRange({
-        startIndex,
-        endIndex: startIndex + len,
-        handler: item.token,
-        context,
-        state: item.state,
-        cacheData: item.cacheData
-      });
-      context.mergeFormat(newRange, false);
+
+      switch (item.handler.priority) {
+        case Priority.Default:
+        case Priority.Block:
+        case Priority.BlockStyle:
+          context.mergeFormat(new BlockFormat({
+            context: context as Fragment,
+            ...item
+          }), false);
+          break;
+        case Priority.Inline:
+        case Priority.Property:
+          if (context instanceof Fragment) {
+            context.mergeFormat(new InlineFormat({
+              startIndex,
+              endIndex: startIndex + len,
+              context,
+              ...item
+            }), false)
+          } else {
+            context.mergeFormat(new SingleFormat({
+              startIndex,
+              context,
+              ...item
+            }), false);
+          }
+          break;
+      }
     })
   }
 

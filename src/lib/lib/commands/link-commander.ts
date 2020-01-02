@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format';
+import { InlineFormat } from '../parser/format';
 
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -43,7 +43,7 @@ export class LinkCommander implements Commander<AttrState[]> {
                 format.cacheData.attrs = attrs;
               });
             } else if (typeof node === 'string') {
-              item.context.apply(new FormatRange({
+              item.context.apply(new InlineFormat({
                 startIndex: item.startIndex + index,
                 endIndex: item.endIndex + index,
                 handler,

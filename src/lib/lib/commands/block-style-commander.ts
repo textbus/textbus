@@ -1,6 +1,6 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
@@ -40,9 +40,7 @@ export class BlockStyleCommander implements Commander<string> {
       }
       return v;
     }, []).forEach(f => {
-      f.apply(new FormatRange({
-        startIndex: 0,
-        endIndex: f.contents.length,
+      f.apply(new BlockFormat({
         state: FormatState.Valid,
         context: f,
         handler,

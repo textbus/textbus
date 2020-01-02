@@ -1,6 +1,6 @@
 import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { FormatRange } from '../parser/format';
+import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
@@ -45,8 +45,8 @@ export class BoldCommander implements Commander {
       state = overlap ? FormatState.Invalid : FormatState.Valid
     }
     let index = 0;
-    const formats: FormatRange[] = [];
-    let childFormat: FormatRange;
+    const formats: InlineFormat[] = [];
+    let childFormat: InlineFormat;
     children.forEach(item => {
       if (item instanceof Fragment) {
         this.apply({
@@ -56,7 +56,7 @@ export class BoldCommander implements Commander {
         }, handler, overlap);
       } else if (item) {
         if (!childFormat) {
-          childFormat = new FormatRange({
+          childFormat = new InlineFormat({
             startIndex: scope.startIndex + index,
             endIndex: scope.startIndex + index + item.length,
             handler,

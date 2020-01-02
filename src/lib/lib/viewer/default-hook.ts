@@ -5,7 +5,7 @@ import { Viewer } from './viewer';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatRange } from '../parser/format';
+import { BlockFormat, FormatRange, InlineFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { FormatState } from '../matcher/matcher';
 import { defaultTagsHandler } from '../default-tags-handler';
@@ -120,16 +120,14 @@ export class DefaultHook implements Hook {
           commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
         }
         const index = commonAncestorFragment.getIndexInParent();
-        const formatMatrix = new Map<Handler, FormatRange[]>();
+        const formatMatrix = new Map<Handler, Array<InlineFormat|BlockFormat>>();
         afterFragment.getFormatHandlers().filter(key => {
           return ![Priority.Default, Priority.Block].includes(key.priority);
         }).forEach(key => {
           formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
         });
         afterFragment.useFormats(formatMatrix);
-        afterFragment.mergeFormat(new FormatRange({
-          startIndex: 0,
-          endIndex: afterFragment.contentLength,
+        afterFragment.mergeFormat(new BlockFormat({
           state: FormatState.Valid,
           context: afterFragment,
           handler: defaultTagsHandler,
@@ -171,9 +169,7 @@ export class DefaultHook implements Hook {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
 
               const startFragment = new Fragment(rerenderFragment.fragment);
-              startFragment.mergeFormat(new FormatRange({
-                startIndex: 0,
-                endIndex: 0,
+              startFragment.mergeFormat(new BlockFormat({
                 handler: defaultTagsHandler,
                 state: FormatState.Valid,
                 context: startFragment,
@@ -202,9 +198,7 @@ export class DefaultHook implements Hook {
                 firstRange.startIndex = 0;
               } else {
                 const startFragment = new Fragment(rerenderFragment.fragment);
-                startFragment.mergeFormat(new FormatRange({
-                  startIndex: 0,
-                  endIndex: 0,
+                startFragment.mergeFormat(new BlockFormat({
                   handler: defaultTagsHandler,
                   state: FormatState.Valid,
                   context: startFragment,

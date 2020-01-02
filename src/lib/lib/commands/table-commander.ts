@@ -5,7 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { Single } from '../parser/single';
 
 export class TableCommander implements Commander<AttrState[]> {
@@ -25,9 +25,7 @@ export class TableCommander implements Commander<AttrState[]> {
     const fragment = firstRange.startFragment;
     const context = fragment.parent;
     const table = new Fragment(context);
-    table.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: this.header ? 2 : 1,
+    table.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       context: table,
       handler,
@@ -65,9 +63,7 @@ export class TableCommander implements Commander<AttrState[]> {
 
   private createBody(parent: Fragment, handler: Handler) {
     const tbody = new Fragment(parent);
-    tbody.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: this.rows,
+    tbody.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       handler,
       context: tbody,
@@ -78,9 +74,7 @@ export class TableCommander implements Commander<AttrState[]> {
 
     for (let i = 0; i < this.rows; i++) {
       const tr = new Fragment(tbody);
-      tr.mergeFormat(new FormatRange({
-        startIndex: 0,
-        endIndex: this.cols,
+      tr.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         handler,
         context: tr,
@@ -91,9 +85,7 @@ export class TableCommander implements Commander<AttrState[]> {
       tbody.append(tr);
       for (let j = 0; j < this.cols; j++) {
         const td = new Fragment(tr);
-        td.mergeFormat(new FormatRange({
-          startIndex: 0,
-          endIndex: 1,
+        td.mergeFormat(new BlockFormat({
           state: FormatState.Valid,
           handler,
           context: td,
@@ -111,9 +103,7 @@ export class TableCommander implements Commander<AttrState[]> {
 
   private createHeader(parent: Fragment, handler: Handler) {
     const thead = new Fragment(parent);
-    thead.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: 1,
+    thead.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       handler,
       context: thead,
@@ -122,9 +112,7 @@ export class TableCommander implements Commander<AttrState[]> {
       }
     }));
     const tr = new Fragment(thead);
-    tr.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: this.cols,
+    tr.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       handler,
       context: tr,
@@ -135,9 +123,7 @@ export class TableCommander implements Commander<AttrState[]> {
     thead.append(tr);
     for (let i = 0; i < this.cols; i++) {
       const th = new Fragment(tr);
-      th.mergeFormat(new FormatRange({
-        startIndex: 0,
-        endIndex: 0,
+      th.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         handler,
         context: th,

@@ -7,7 +7,7 @@ import { VIRTUAL_NODE } from '../parser/help';
 import { VNode } from '../renderer/virtual-dom';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format';
+import { BlockFormat, FormatRange } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { defaultTagsHandler } from '../default-tags-handler';
 
@@ -178,9 +178,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         }
       });
     }
-    tr.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: tr.contentLength,
+    tr.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       cacheData: {
         tag: 'tr'
@@ -215,9 +213,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         tr.append(TableEditCommander.createCell('td', tr));
       }
     });
-    tr.mergeFormat(new FormatRange({
-      startIndex: 0,
-      endIndex: tr.contentLength,
+    tr.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
       cacheData: {
         tag: 'tr'
@@ -453,10 +449,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
     if (colspan) {
       attrs.set('colspan', colspan + '');
     }
-    cell.mergeFormat(new FormatRange({
+    cell.mergeFormat(new BlockFormat({
       state: FormatState.Valid,
-      startIndex: 0,
-      endIndex: 0,
       cacheData: {
         tag: tagName,
         attrs

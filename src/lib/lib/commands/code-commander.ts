@@ -5,7 +5,7 @@ import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 
 export class CodeCommander implements Commander<string> {
   recordHistory = true;
@@ -23,9 +23,7 @@ export class CodeCommander implements Commander<string> {
       const fragment = firstRange.startFragment;
       const context = fragment.parent;
       const pre = new Fragment(context);
-      pre.mergeFormat(new FormatRange({
-        startIndex: 0,
-        endIndex: 0,
+      pre.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         context: pre,
         handler,

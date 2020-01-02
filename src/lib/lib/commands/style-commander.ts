@@ -2,7 +2,7 @@ import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatRange } from '../parser/format';
+import { InlineFormat } from '../parser/format';
 import { CacheData } from '../toolbar/utils/cache-data';
 
 export class StyleCommander implements Commander<string | number> {
@@ -19,7 +19,7 @@ export class StyleCommander implements Commander<string | number> {
   command(selection: TBSelection, handler: Handler, overlap: boolean): void {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        const r = new FormatRange({
+        const r = new InlineFormat({
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           handler,

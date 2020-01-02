@@ -13,8 +13,8 @@ export abstract class View {
 
   abstract parent: View;
 
-  private _dirty = false;
-  private _dataChanged = false;
+  private _dirty = true;
+  private _dataChanged = true;
 
   abstract clone(): View;
 

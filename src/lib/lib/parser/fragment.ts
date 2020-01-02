@@ -2,7 +2,7 @@ import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
 import { View } from './view';
 import { Priority } from '../toolbar/help';
-import { FormatRange } from './format';
+import { BlockFormat, FormatRange, InlineFormat } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
 import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
@@ -14,7 +14,7 @@ export class Fragment extends View {
     return this.contents.length;
   }
 
-  private formatMatrix = new Map<Handler, FormatRange[]>();
+  private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
   private destroyed = false;
@@ -39,17 +39,17 @@ export class Fragment extends View {
     return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
   }
 
-  useFormats(formats: Map<Handler, FormatRange[]>) {
+  useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
     this.markDirty();
 
-    this.formatMatrix = new Map<Handler, FormatRange[]>();
+    this.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(formats.keys()).forEach(key => {
       this.formatMatrix.set(key, formats.get(key).map(i => i.clone()));
     });
   }
 
   getFormatMatrix() {
-    const formatMatrix = new Map<Handler, FormatRange[]>();
+    const formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       formatMatrix.set(key, this.formatMatrix.get(key).map(i => i.clone()));
     });
@@ -67,7 +67,7 @@ export class Fragment extends View {
         item.parent = ff;
       }
     });
-    ff.formatMatrix = new Map<Handler, FormatRange[]>();
+    ff.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
         return f.clone();
@@ -95,26 +95,23 @@ export class Fragment extends View {
    * @param format 新格式的应用范围
    * @param canSurroundBlockElement 是否可以包含块级节点，如 strong 不可以包含 p，则应传入 false
    */
-  apply(format: FormatRange, canSurroundBlockElement: boolean) {
+  apply(format: InlineFormat | BlockFormat, canSurroundBlockElement: boolean) {
     this.markDirty();
 
     if (canSurroundBlockElement) {
       this.mergeFormat(format, true);
     } else {
-
       const children = this.contents.slice(format.startIndex, format.endIndex);
       let index = 0;
-      const formats: FormatRange[] = [];
-      let childFormat: FormatRange;
+      const formats: Array<InlineFormat | BlockFormat> = [];
+      let childFormat: InlineFormat;
       children.forEach(item => {
         if (item instanceof Fragment) {
           const c = format.clone();
-          c.startIndex = 0;
-          c.endIndex = item.contents.length;
           item.apply(c, canSurroundBlockElement);
         } else if (item) {
           if (!childFormat) {
-            childFormat = new FormatRange({
+            childFormat = new InlineFormat({
               startIndex: format.startIndex + index,
               endIndex: format.startIndex + index + item.length,
               handler: format.handler,
@@ -144,28 +141,26 @@ export class Fragment extends View {
       content.parent = this;
     }
     this.contents.insert(content, index);
-    const newFormats: FormatRange[] = [];
-    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      if (format.handler.priority === Priority.Block || format.handler.priority === Priority.Default) {
-        format.endIndex += content.length;
+    const newFormats: InlineFormat[] = [];
+    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
+      return !(format.handler.priority === Priority.Block || format.handler.priority === Priority.Default);
+    }).forEach((format: InlineFormat) => {
+      if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
+        newFormats.push(new InlineFormat({
+          startIndex: index + 1,
+          endIndex: format.endIndex + 1,
+          state: format.state,
+          handler: format.handler,
+          context: this,
+          cacheData: format.cacheData.clone()
+        }));
+        format.endIndex = index;
       } else {
-        if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
-          newFormats.push(new FormatRange({
-            startIndex: index + 1,
-            endIndex: format.endIndex + 1,
-            state: format.state,
-            handler: format.handler,
-            context: this,
-            cacheData: format.cacheData.clone()
-          }));
-          format.endIndex = index;
-        } else {
-          if (format.startIndex >= index && format.startIndex > 0) {
-            format.startIndex += content.length;
-          }
-          if (format.endIndex >= index) {
-            format.endIndex += content.length;
-          }
+        if (format.startIndex >= index && format.startIndex > 0) {
+          format.startIndex += content.length;
+        }
+        if (format.endIndex >= index) {
+          format.endIndex += content.length;
         }
       }
     });
@@ -185,16 +180,12 @@ export class Fragment extends View {
     if (content instanceof Single || content instanceof Fragment) {
       content.parent = this;
     }
-    const length = this.contents.length;
+
     this.contents.append(content);
-    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).forEach(format => {
-      const priorities = [Priority.Default, Priority.Block, Priority.BlockStyle];
-      if (insertAdjacentInlineFormat) {
-        priorities.push(Priority.Property, Priority.Inline);
-      }
-      if (priorities.includes(format.handler.priority) || (content instanceof Single && format.endIndex === length)) {
-        format.endIndex += content.length;
-      }
+    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
+      return [Priority.Property, Priority.Inline].includes(format.handler.priority);
+    }).forEach((format: InlineFormat) => {
+      format.endIndex += content.length;
     })
   }
 
@@ -220,37 +211,34 @@ export class Fragment extends View {
       return content;
     });
     this.contents.insertElements(elements, index);
-    Array.from(this.formatMatrix.keys()).forEach(key => {
-      const formatRanges = this.formatMatrix.get(key);
-      if ([Priority.Inline, Priority.Property].includes(key.priority)) {
-        const newRanges: FormatRange[] = [];
-        formatRanges.forEach(format => {
-          if (format.startIndex < index && format.endIndex > index) {
-            const f = format.clone();
-            f.startIndex = index;
-            format.endIndex = index;
-            newRanges.push(format, f);
-          } else {
-            newRanges.push(format);
-          }
-        });
-        newRanges.forEach(format => {
-          if (format.startIndex === index) {
-            format.startIndex += contentsLength;
-            format.endIndex += contentsLength;
-          }
-        });
-        this.formatMatrix.set(key, newRanges);
-      } else {
-        formatRanges.forEach(format => {
+    Array.from(this.formatMatrix.keys()).filter(key => {
+      return [Priority.Inline, Priority.Property].includes(key.priority);
+    }).forEach(key => {
+      const formatRanges = this.formatMatrix.get(key) as InlineFormat[];
+      const newRanges: InlineFormat[] = [];
+      formatRanges.forEach(format => {
+        if (format.startIndex < index && format.endIndex > index) {
+          const f = format.clone();
+          f.startIndex = index;
+          format.endIndex = index;
+          newRanges.push(format, f);
+        } else {
+          newRanges.push(format);
+        }
+      });
+      newRanges.forEach(format => {
+        if (format.startIndex === index) {
+          format.startIndex += contentsLength;
           format.endIndex += contentsLength;
-        })
-      }
+        }
+      });
+      this.formatMatrix.set(key, newRanges);
     });
+
     Array.from(fragment.formatMatrix.keys())
       .filter(key => [Priority.Inline, Priority.Property].includes(key.priority))
       .forEach(key => {
-        const formatRanges = fragment.formatMatrix.get(key);
+        const formatRanges = fragment.formatMatrix.get(key) as InlineFormat[];
         formatRanges.forEach(format => {
           const c = format.clone();
           c.startIndex += index;
@@ -285,21 +273,18 @@ export class Fragment extends View {
         }
       }
     });
-    const formatMatrix = new Map<Handler, FormatRange[]>();
+    const formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
 
     Array.from(this.formatMatrix.keys()).forEach(key => {
-      const formats: FormatRange[] = [];
-      const newFragmentFormats: FormatRange[] = [];
+      const formats: Array<InlineFormat | BlockFormat> = [];
+      const newFragmentFormats: Array<InlineFormat | BlockFormat> = [];
       this.formatMatrix.get(key).forEach(format => {
-        const cloneFormat = format.clone();
-        cloneFormat.startIndex = 0;
-        if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority)) {
-          cloneFormat.endIndex = ff.contents.length;
-          newFragmentFormats.push(cloneFormat);
-
-          format.endIndex -= length;
+        if (format instanceof BlockFormat) {
+          newFragmentFormats.push(format.clone());
           formats.push(format);
         } else {
+          const cloneFormat = format.clone();
+          cloneFormat.startIndex = 0;
           if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
             cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
             cloneFormat.endIndex = Math.min(format.endIndex - startIndex, ff.contents.length);
@@ -341,14 +326,16 @@ export class Fragment extends View {
 
 
   createVDom() {
-    const formatRanges = getCanApplyFormats(this.formatMatrix);
+    if (!this.dataChanged) {
+      return this.vNode;
+    }
+    const formatRanges = getCanApplyFormats(this.formatMatrix) as Array<InlineFormat | BlockFormat>;
     const contents = this.contents;
-    const containerFormatRanges: FormatRange[] = [];
-    const childFormatRanges: FormatRange[] = [];
+    const containerFormatRanges: Array<InlineFormat | BlockFormat> = [];
+    const childFormatRanges: Array<InlineFormat> = [];
 
     formatRanges.forEach(format => {
-      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(format.handler.priority) ||
-        format.startIndex === 0 && format.endIndex === contents.length) {
+      if (format instanceof BlockFormat) {
         containerFormatRanges.push(format);
       } else {
         childFormatRanges.push(format);
@@ -372,7 +359,7 @@ export class Fragment extends View {
    * @param startIndex 生成范围的开始索引
    * @param endIndex 生成范围的结束位置
    */
-  private vDomBuilder(formatRanges: FormatRange[], parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
+  private vDomBuilder(formatRanges: Array<InlineFormat>, parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
     // if (startIndex === 0 && endIndex === 0) {
     //   // 兼容空标签节点
     //   parent.children.push(new VirtualNode([new FormatRange({
@@ -393,7 +380,7 @@ export class Fragment extends View {
           parent.children.push(...this.createNodesByRange(startIndex, firstRange.startIndex));
         }
         const container = new VInlineNode(this, [firstRange], firstRange.startIndex, firstRange.endIndex);
-        const childFormatRanges: FormatRange[] = [];
+        const childFormatRanges: Array<InlineFormat> = [];
         while (true) {
           const f = formatRanges[0];
           if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {

@@ -1,4 +1,4 @@
-import { FormatRange } from './format';
+import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 
@@ -10,13 +10,12 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
   });
   // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
   return formats.sort((n, m) => {
+    if (n.handler.priority !== m.handler.priority) {
+      return n.handler.priority - m.handler.priority;
+    }
     const a = n.startIndex - m.startIndex;
     if (a === 0) {
-      const b = m.endIndex - n.endIndex;
-      if (b === 0) {
-        return n.handler.priority - m.handler.priority;
-      }
-      return b;
+      return m.endIndex - n.endIndex;
     }
     return a;
   }).map(item => item.clone());
@@ -29,11 +28,21 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
  * @param important
  */
 export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatRange, important = false) {
-  const oldFormats = matrix.get(format.handler);
-  let formatRanges: FormatRange[] = [];
+
+  if (format instanceof BlockFormat || format instanceof SingleFormat) {
+    if (format.state === FormatState.Invalid) {
+      matrix.delete(format.handler);
+    } else {
+      matrix.set(format.handler, [format]);
+    }
+    return;
+  }
+
+  const oldFormats = matrix.get(format.handler) as InlineFormat[];
+  let formatRanges: InlineFormat[] = [];
 
   if (oldFormats) {
-    const formatMarks: Array<FormatRange> = [];
+    const formatMarks: Array<InlineFormat> = [];
     if (important) {
       oldFormats.unshift(format);
     } else {
@@ -48,7 +57,7 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
       formatMarks.fill(item, item.startIndex, item.endIndex);
       index--;
     }
-    let newFormatRange: FormatRange = null;
+    let newFormatRange: InlineFormat = null;
     for (let i = 0; i < formatMarks.length; i++) {
       const mark = formatMarks[i];
 
@@ -57,7 +66,7 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
         continue;
       }
       if (!newFormatRange) {
-        newFormatRange = new FormatRange({
+        newFormatRange = new InlineFormat({
           startIndex: i,
           endIndex: i + 1,
           handler: mark.handler,
@@ -74,7 +83,7 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
         mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === true && !newFormatRange.cacheData === true)) {
         newFormatRange.endIndex = i + 1;
       } else {
-        newFormatRange = new FormatRange({
+        newFormatRange = new InlineFormat({
           startIndex: i,
           endIndex: i + 1,
           handler: mark.handler,
