@@ -32,93 +32,97 @@ export class Renderer {
    */
   private diffAndUpdateView(vNode: VNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node): Node {
     if (vNode instanceof VBlockNode || vNode instanceof VInlineNode) {
-      if (!this.diff(vNode, oldVNode)) {
-        const newFormatStates: ParseState[][] = [];
-        vNode.formats.reduce((node, next) => {
-          if (next.handler) {
-            const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
-            if (renderModel instanceof ReplaceModel) {
-              newFormatStates.length = 0;
-              newFormatStates.push(this.parser.getFormatStateByNode(renderModel.replaceElement));
-              vNode.wrapElement = vNode.slotElement = renderModel.replaceElement;
-              vNode.wrapElement[VIRTUAL_NODE] = vNode;
-              return renderModel.replaceElement;
-            } else if (renderModel instanceof ChildSlotModel) {
-              if (node) {
-                node.appendChild(renderModel.slotElement);
-              } else {
-                vNode.wrapElement = renderModel.slotElement;
-              }
-              newFormatStates.push(this.parser.getFormatStateByNode(renderModel.slotElement));
-              vNode.slotElement = renderModel.slotElement;
-              vNode.slotElement[VIRTUAL_NODE] = vNode;
-              return renderModel.slotElement;
-            }
-          }
-          if (node) {
-            newFormatStates.push(this.parser.getFormatStateByNode(node));
-          }
-          return node;
-        }, (null as HTMLElement));
-
-        newFormatStates.forEach(formats => {
-          formats.forEach(item => {
-            switch (item.handler.priority) {
-              case Priority.Default:
-              case Priority.Block:
-              case Priority.BlockStyle:
-                vNode.context.mergeFormat(new BlockFormat({
-                  context: vNode.context,
-                  ...item
-                }), false);
-                break;
-              case Priority.Inline:
-              case Priority.Property:
-                vNode.context.mergeFormat(new InlineFormat({
-                  startIndex: vNode.startIndex,
-                  endIndex: vNode.endIndex,
-                  context: vNode.context,
-                  ...item
-                }), false);
-                break;
-            }
-          })
-        });
-
-        if (vNode.wrapElement) {
-          host.appendChild(vNode.wrapElement);
-        }
-        if (oldVNode instanceof VBlockNode) {
-          vNode.context.viewSynced();
-        }
-        if (oldVNode) {
-          oldVNode.destroyView();
-        }
-      } else {
-        vNode.wrapElement = (oldVNode as VInlineNode).wrapElement;
-        vNode.slotElement = (oldVNode as VInlineNode).slotElement;
-        vNode.wrapElement && (vNode.wrapElement[VIRTUAL_NODE] = vNode);
-        vNode.slotElement && (vNode.slotElement[VIRTUAL_NODE] = vNode);
-        this.insertNode(previousSibling, vNode.wrapElement, host);
-        (oldVNode as VInlineNode).wrapElement = (oldVNode as VInlineNode).slotElement = null;
-      }
-
-      let p: Node;
-      vNode.children.forEach(childVNode => {
-        p = this.diffAndUpdateView(
-          childVNode,
-          (oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode) ? oldVNode.children.shift() : null,
-          vNode.slotElement as HTMLElement || host, p);
-      });
-      if ((oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode)) {
-        oldVNode.children.forEach(i => i.destroyView());
-      }
-      return vNode.wrapElement;
+      return this.renderContainerNode(vNode, oldVNode, host, previousSibling);
     } else if (vNode instanceof VTextNode) {
       return this.renderTextNode(vNode, oldVNode, host, previousSibling);
     } else if (vNode instanceof VMediaNode) {
       // host.appendChild(vNode.)
     }
+  }
+
+  private renderContainerNode(vNode: VBlockNode | VInlineNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node) {
+    if (!this.diff(vNode, oldVNode)) {
+      const newFormatStates: ParseState[][] = [];
+      vNode.formats.reduce((node, next) => {
+        if (next.handler) {
+          const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
+          if (renderModel instanceof ReplaceModel) {
+            newFormatStates.length = 0;
+            newFormatStates.push(this.parser.getFormatStateByNode(renderModel.replaceElement));
+            vNode.wrapElement = vNode.slotElement = renderModel.replaceElement;
+            vNode.wrapElement[VIRTUAL_NODE] = vNode;
+            return renderModel.replaceElement;
+          } else if (renderModel instanceof ChildSlotModel) {
+            if (node) {
+              node.appendChild(renderModel.slotElement);
+            } else {
+              vNode.wrapElement = renderModel.slotElement;
+            }
+            newFormatStates.push(this.parser.getFormatStateByNode(renderModel.slotElement));
+            vNode.slotElement = renderModel.slotElement;
+            vNode.slotElement[VIRTUAL_NODE] = vNode;
+            return renderModel.slotElement;
+          }
+        }
+        if (node) {
+          newFormatStates.push(this.parser.getFormatStateByNode(node));
+        }
+        return node;
+      }, (null as HTMLElement));
+
+      newFormatStates.forEach(formats => {
+        formats.forEach(item => {
+          switch (item.handler.priority) {
+            case Priority.Default:
+            case Priority.Block:
+            case Priority.BlockStyle:
+              vNode.context.mergeFormat(new BlockFormat({
+                context: vNode.context,
+                ...item
+              }), false);
+              break;
+            case Priority.Inline:
+            case Priority.Property:
+              vNode.context.mergeFormat(new InlineFormat({
+                startIndex: vNode.startIndex,
+                endIndex: vNode.endIndex,
+                context: vNode.context,
+                ...item
+              }), false);
+              break;
+          }
+        })
+      });
+
+      if (vNode.wrapElement) {
+        host.appendChild(vNode.wrapElement);
+      }
+      if (oldVNode instanceof VBlockNode) {
+        vNode.context.viewSynced();
+      }
+      if (oldVNode) {
+        oldVNode.destroyView();
+      }
+    } else {
+      vNode.wrapElement = (oldVNode as VInlineNode).wrapElement;
+      vNode.slotElement = (oldVNode as VInlineNode).slotElement;
+      vNode.wrapElement && (vNode.wrapElement[VIRTUAL_NODE] = vNode);
+      vNode.slotElement && (vNode.slotElement[VIRTUAL_NODE] = vNode);
+      this.insertNode(previousSibling, vNode.wrapElement, host);
+      (oldVNode as VInlineNode).wrapElement = (oldVNode as VInlineNode).slotElement = null;
+    }
+
+    let p: Node;
+    vNode.children.forEach(childVNode => {
+      p = this.diffAndUpdateView(
+        childVNode,
+        (oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode) ? oldVNode.children.shift() : null,
+        vNode.slotElement as HTMLElement || host, p);
+    });
+    if ((oldVNode instanceof VBlockNode || oldVNode instanceof VInlineNode)) {
+      oldVNode.children.forEach(i => i.destroyView());
+    }
+    return vNode.wrapElement;
   }
 
   private renderTextNode(vNode: VTextNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node): Node {
