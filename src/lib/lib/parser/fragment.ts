@@ -435,7 +435,7 @@ export class Fragment extends View {
         if (item instanceof Fragment) {
           vNodes.push(item.createVDom());
         } else if (item instanceof Single) {
-          vNodes.push(new VMediaNode(this, item.getFormatRanges(), i + startIndex))
+          vNodes.push(new VMediaNode(this, item, item.getFormatRanges(), i + startIndex))
         }
       }
       i += item.length;

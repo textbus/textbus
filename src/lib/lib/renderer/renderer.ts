@@ -2,7 +2,7 @@ import { VBlockNode, VInlineNode, VNode, VTextNode, VMediaNode } from './virtual
 import { Parser, ParseState } from '../parser/parser';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { VIRTUAL_NODE } from '../parser/help';
-import { BlockFormat, InlineFormat } from '../parser/format';
+import { BlockFormat, InlineFormat, SingleFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 
 export class Renderer {
@@ -36,12 +36,54 @@ export class Renderer {
     } else if (vNode instanceof VTextNode) {
       return this.renderTextNode(vNode, oldVNode, host, previousSibling);
     } else if (vNode instanceof VMediaNode) {
-      // host.appendChild(vNode.)
+      return this.renderMediaNode(vNode, oldVNode, host, previousSibling);
     }
   }
 
+  private renderMediaNode(vNode: VMediaNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node): Node {
+    if (!Renderer.diff(vNode, oldVNode)) {
+      vNode.formats.reduce((node, next) => {
+        if (next.handler) {
+          const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
+          if (renderModel instanceof ReplaceModel) {
+            vNode.nativeElement = renderModel.replaceElement;
+            return renderModel.replaceElement;
+          } else if (renderModel instanceof ChildSlotModel) {
+            vNode.nativeElement = renderModel.slotElement;
+            return renderModel.slotElement;
+          }
+        }
+        return node;
+      }, (null as HTMLElement));
+
+      const startIndex = vNode.data.parent.find(vNode.data);
+      this.parser.getFormatStateByNode(vNode.nativeElement as HTMLElement).forEach(f => {
+        vNode.data.mergeFormat(new SingleFormat({
+          context: vNode.data,
+          startIndex,
+          ...f
+        }));
+      });
+      if (vNode.nativeElement) {
+        host.appendChild(vNode.nativeElement);
+      }
+      if (oldVNode instanceof VMediaNode) {
+        vNode.context.viewSynced();
+      }
+      if (oldVNode) {
+        oldVNode.destroyView();
+      }
+    } else {
+      vNode.nativeElement = (oldVNode as VMediaNode).nativeElement;
+      vNode.nativeElement && (vNode.nativeElement[VIRTUAL_NODE] = vNode);
+      Renderer.insertNode(previousSibling, vNode.nativeElement, host);
+      (oldVNode as VMediaNode).nativeElement = null;
+    }
+    return vNode.nativeElement;
+  }
+
   private renderContainerNode(vNode: VBlockNode | VInlineNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node) {
-    if (!this.diff(vNode, oldVNode)) {
+    if (!Renderer.diff(vNode, oldVNode)) {
       const newFormatStates: ParseState[][] = [];
       vNode.formats.reduce((node, next) => {
         if (next.handler) {
@@ -108,7 +150,7 @@ export class Renderer {
       vNode.slotElement = (oldVNode as VInlineNode).slotElement;
       vNode.wrapElement && (vNode.wrapElement[VIRTUAL_NODE] = vNode);
       vNode.slotElement && (vNode.slotElement[VIRTUAL_NODE] = vNode);
-      this.insertNode(previousSibling, vNode.wrapElement, host);
+      Renderer.insertNode(previousSibling, vNode.wrapElement, host);
       (oldVNode as VInlineNode).wrapElement = (oldVNode as VInlineNode).slotElement = null;
     }
 
@@ -126,7 +168,7 @@ export class Renderer {
   }
 
   private renderTextNode(vNode: VTextNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node): Node {
-    if (!this.diff(vNode, oldVNode)) {
+    if (!Renderer.diff(vNode, oldVNode)) {
       const str = vNode.text.replace(/\s\s+/g, str => {
         return ' ' + Array.from({
           length: str.length - 1
@@ -137,7 +179,7 @@ export class Renderer {
         vNode.nativeElement[VIRTUAL_NODE] = vNode;
         vNode.nativeElement.textContent = str;
         oldVNode.nativeElement = null;
-        this.insertNode(previousSibling, vNode.nativeElement, host);
+        Renderer.insertNode(previousSibling, vNode.nativeElement, host);
       } else {
         let currentNode = document.createTextNode(str);
         currentNode[VIRTUAL_NODE] = vNode;
@@ -150,13 +192,13 @@ export class Renderer {
     } else {
       vNode.nativeElement = oldVNode.nativeElement;
       vNode.nativeElement[VIRTUAL_NODE] = vNode;
-      this.insertNode(previousSibling, vNode.nativeElement, host);
+      Renderer.insertNode(previousSibling, vNode.nativeElement, host);
       (oldVNode as VTextNode).nativeElement = null;
     }
     return vNode.nativeElement;
   }
 
-  private insertNode(previousSibling: Node, newNode: Node, host: HTMLElement) {
+  private static insertNode(previousSibling: Node, newNode: Node, host: HTMLElement) {
     if (previousSibling) {
       if (previousSibling.nextSibling) {
         if (previousSibling.nextSibling !== newNode) {
@@ -174,7 +216,7 @@ export class Renderer {
     }
   }
 
-  private diff(newNode: VNode, oldNode: VNode): boolean {
+  private static diff(newNode: VNode, oldNode: VNode): boolean {
     if (newNode === oldNode) {
       return true;
     }
@@ -189,6 +231,13 @@ export class Renderer {
     if (newNode instanceof VTextNode) {
       return newNode.text === (oldNode as VTextNode).text;
     }
+
+    if (newNode instanceof VMediaNode) {
+      if (newNode.data.tagName !== (oldNode as VMediaNode).data.tagName) {
+        return false;
+      }
+    }
+
     if (newNode.formats.length !== (oldNode as VBlockNode).formats.length) {
       return false;
     }

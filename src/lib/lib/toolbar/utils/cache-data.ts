@@ -42,7 +42,7 @@ export class CacheData {
     }
     const left = data;
     const right = this;
-    return left.tag === right.tag &&
+    return left.tag == right.tag &&
       CacheData.equalAttrs(left.attrs, right.attrs) &&
       CacheData.equalStyle(left.style, right.style);
   }
