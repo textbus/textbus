@@ -21,9 +21,10 @@ export class HistoryCommander implements Commander<Editor> {
       this.editor.getPreviousSnapshot() :
       this.editor.getNextSnapshot();
     if (snapshot) {
+      rootFragment.cleanFormats();
       rootFragment.useContents(new Contents());
-      rootFragment.insertFragmentContents(snapshot.doc, 0);
-      selection.usePaths(snapshot.paths, snapshot.doc);
+      rootFragment.insertFragmentContents(snapshot.doc.clone(), 0);
+      selection.usePaths(snapshot.paths, rootFragment);
     }
   }
 

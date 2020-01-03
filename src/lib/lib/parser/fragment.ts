@@ -27,6 +27,7 @@ export class Fragment extends View {
 
   cleanFormats() {
     this.formatMatrix.clear();
+    this.markDirty(true);
   }
 
   getFormatHandlers() {

@@ -93,7 +93,6 @@ export class TBSelection {
   }
 
   usePaths(paths: RangePath[], fragment: Fragment) {
-
     const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
       let f = fragment;
       let len = position.length;
