@@ -262,7 +262,7 @@ export class Fragment extends View {
    */
   delete(startIndex: number, endIndex = this.contents.length) {
     const ff = new Fragment(null);
-    if (endIndex <= startIndex) {
+    if (endIndex < startIndex) {
       return ff;
     }
     this.markDirty();
