@@ -35,7 +35,15 @@ export class RootFragment extends Fragment {
     if (this.contentLength === 0) {
       guardLastContentEditable();
     } else if (last instanceof Fragment) {
-      if (!/p/i.test(last?.vNode?.wrapElement.nodeName)) {
+      const formats = last.getFormatRanges().filter(i => i instanceof BlockFormat);
+      let hasParagraph = false;
+      for (const item of formats) {
+        if (item.cacheData.tag === 'p') {
+          hasParagraph = true;
+          break;
+        }
+      }
+      if (!hasParagraph) {
         guardLastContentEditable();
       }
     }
