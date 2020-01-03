@@ -113,9 +113,9 @@ export class Renderer {
         }
         return node;
       }, (null as HTMLElement));
-      // if (vNode instanceof VBlockNode) {
-      //   vNode.context.cleanFormats();
-      // }
+      if (vNode instanceof VBlockNode) {
+        vNode.context.cleanFormats();
+      }
       newFormatStates.forEach(format => {
         switch (format.handler.priority) {
           case Priority.Default:
