@@ -68,22 +68,21 @@ export class Viewer {
           }
         }
         ranges.forEach(range => {
-          tbSelection.addRange(new TBRange(range));
-          // const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
-          // if (hooks.length) {
-          //   hooks.forEach(hook => {
-          //     const r = hook.onSelectionChange(range, this.contentDocument);
-          //     if (Array.isArray(r)) {
-          //       r.forEach(rr => {
-          //         tbSelection.addRange(new TBRange(rr));
-          //       })
-          //     } else {
-          //       tbSelection.addRange(new TBRange(r));
-          //     }
-          //   })
-          // } else {
-          //   tbSelection.addRange(new TBRange(range));
-          // }
+          const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
+          if (hooks.length) {
+            hooks.forEach(hook => {
+              const r = hook.onSelectionChange(range, this.contentDocument);
+              if (Array.isArray(r)) {
+                r.forEach(rr => {
+                  tbSelection.addRange(new TBRange(rr));
+                })
+              } else {
+                tbSelection.addRange(new TBRange(r));
+              }
+            })
+          } else {
+            tbSelection.addRange(new TBRange(range));
+          }
         });
         this.selection = tbSelection;
         this.cursor.updateStateBySelection(tbSelection);
@@ -171,6 +170,7 @@ export class Viewer {
 
   rerender() {
     this.renderer.render(this.root.createVDom(), this.contentDocument.body);
+    this.updateFrameHeight();
   }
 
 
@@ -468,5 +468,4 @@ export class Viewer {
       index
     }
   }
-
 }

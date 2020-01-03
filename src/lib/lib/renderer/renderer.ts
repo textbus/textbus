@@ -42,6 +42,7 @@ export class Renderer {
 
   private renderMediaNode(vNode: VMediaNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node): Node {
     if (!Renderer.diff(vNode, oldVNode)) {
+      vNode.nativeElement = document.createElement(vNode.data.tagName);
       vNode.formats.reduce((node, next) => {
         if (next.handler) {
           const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
@@ -54,17 +55,18 @@ export class Renderer {
           }
         }
         return node;
-      }, (null as HTMLElement));
+      }, vNode.nativeElement as HTMLElement);
 
-      const startIndex = vNode.data.parent.find(vNode.data);
-      this.parser.getFormatStateByNode(vNode.nativeElement as HTMLElement).forEach(f => {
-        vNode.data.mergeFormat(new SingleFormat({
-          context: vNode.data,
-          startIndex,
-          ...f
-        }));
-      });
       if (vNode.nativeElement) {
+        const startIndex = vNode.data.parent.find(vNode.data);
+        this.parser.getFormatStateByNode(vNode.nativeElement as HTMLElement).forEach(f => {
+          vNode.data.mergeFormat(new SingleFormat({
+            context: vNode.data,
+            startIndex,
+            ...f
+          }));
+        });
+        vNode.nativeElement[VIRTUAL_NODE] = vNode;
         host.appendChild(vNode.nativeElement);
       }
       if (oldVNode instanceof VMediaNode) {
@@ -84,13 +86,13 @@ export class Renderer {
 
   private renderContainerNode(vNode: VBlockNode | VInlineNode, oldVNode: VNode, host: HTMLElement, previousSibling: Node) {
     if (!Renderer.diff(vNode, oldVNode)) {
-      const newFormatStates: ParseState[][] = [];
+      const newFormatStates: ParseState[] = [];
       vNode.formats.reduce((node, next) => {
         if (next.handler) {
           const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
           if (renderModel instanceof ReplaceModel) {
             newFormatStates.length = 0;
-            newFormatStates.push(this.parser.getFormatStateByNode(renderModel.replaceElement));
+            newFormatStates.push(...this.parser.getFormatStateByNode(renderModel.replaceElement));
             vNode.wrapElement = vNode.slotElement = renderModel.replaceElement;
             vNode.wrapElement[VIRTUAL_NODE] = vNode;
             return renderModel.replaceElement;
@@ -100,40 +102,40 @@ export class Renderer {
             } else {
               vNode.wrapElement = renderModel.slotElement;
             }
-            newFormatStates.push(this.parser.getFormatStateByNode(renderModel.slotElement));
+            newFormatStates.push(...this.parser.getFormatStateByNode(renderModel.slotElement));
             vNode.slotElement = renderModel.slotElement;
             vNode.slotElement[VIRTUAL_NODE] = vNode;
             return renderModel.slotElement;
           }
         }
         if (node) {
-          newFormatStates.push(this.parser.getFormatStateByNode(node));
+          newFormatStates.push(...this.parser.getFormatStateByNode(node));
         }
         return node;
       }, (null as HTMLElement));
-
-      newFormatStates.forEach(formats => {
-        formats.forEach(item => {
-          switch (item.handler.priority) {
-            case Priority.Default:
-            case Priority.Block:
-            case Priority.BlockStyle:
-              vNode.context.mergeFormat(new BlockFormat({
-                context: vNode.context,
-                ...item
-              }), false);
-              break;
-            case Priority.Inline:
-            case Priority.Property:
-              vNode.context.mergeFormat(new InlineFormat({
-                startIndex: vNode.startIndex,
-                endIndex: vNode.endIndex,
-                context: vNode.context,
-                ...item
-              }), false);
-              break;
-          }
-        })
+      if (vNode instanceof VBlockNode) {
+        vNode.context.cleanFormats();
+      }
+      newFormatStates.forEach(format => {
+        switch (format.handler.priority) {
+          case Priority.Default:
+          case Priority.Block:
+          case Priority.BlockStyle:
+            vNode.context.mergeFormat(new BlockFormat({
+              context: vNode.context,
+              ...format
+            }), false);
+            break;
+          case Priority.Inline:
+          case Priority.Property:
+            vNode.context.mergeFormat(new InlineFormat({
+              startIndex: vNode.startIndex,
+              endIndex: vNode.endIndex,
+              context: vNode.context,
+              ...format
+            }), false);
+            break;
+        }
       });
 
       if (vNode.wrapElement) {
@@ -146,6 +148,9 @@ export class Renderer {
         oldVNode.destroyView();
       }
     } else {
+      // if (vNode instanceof VBlockNode && vNode === oldVNode) {
+      //   return oldVNode.wrapElement;
+      // }
       vNode.wrapElement = (oldVNode as VInlineNode).wrapElement;
       vNode.slotElement = (oldVNode as VInlineNode).slotElement;
       vNode.wrapElement && (vNode.wrapElement[VIRTUAL_NODE] = vNode);

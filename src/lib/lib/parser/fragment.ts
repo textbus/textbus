@@ -17,8 +17,6 @@ export class Fragment extends View {
   private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
-  private destroyed = false;
-
   constructor(public parent: Fragment) {
     super();
   }
@@ -214,7 +212,7 @@ export class Fragment extends View {
     });
     this.contents.insertElements(elements, index);
     Array.from(this.formatMatrix.keys()).filter(key => {
-      return [Priority.Inline, Priority.Property].includes(key.priority);
+      return key instanceof InlineFormat;
     }).forEach(key => {
       const formatRanges = this.formatMatrix.get(key) as InlineFormat[];
       const newRanges: InlineFormat[] = [];
@@ -238,7 +236,7 @@ export class Fragment extends View {
     });
 
     Array.from(fragment.formatMatrix.keys())
-      .filter(key => [Priority.Inline, Priority.Property].includes(key.priority))
+      .filter(key => key instanceof InlineFormat)
       .forEach(key => {
         const formatRanges = fragment.formatMatrix.get(key) as InlineFormat[];
         formatRanges.forEach(format => {
@@ -267,12 +265,7 @@ export class Fragment extends View {
       if (typeof item === 'string') {
         ff.append(item);
       } else if (item instanceof Single || item instanceof Fragment) {
-        // const c = item.clone();
-        // c.parent = ff;
         ff.append(item);
-        if (item instanceof Fragment) {
-          item.destroyView();
-        }
       }
     });
     const formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
@@ -328,9 +321,9 @@ export class Fragment extends View {
 
 
   createVDom() {
-    if (!this.dataChanged) {
-      return this.vNode;
-    }
+    // if (!this.dataChanged) {
+    //   return this.vNode;
+    // }
     const formatRanges = getCanApplyFormats(this.formatMatrix) as Array<InlineFormat | BlockFormat>;
     const contents = this.contents;
     const containerFormatRanges: Array<InlineFormat | BlockFormat> = [];
@@ -362,18 +355,11 @@ export class Fragment extends View {
    * @param endIndex 生成范围的结束位置
    */
   private vDomBuilder(formatRanges: Array<InlineFormat>, parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
-    // if (startIndex === 0 && endIndex === 0) {
-    //   // 兼容空标签节点
-    //   parent.children.push(new VirtualNode([new FormatRange({
-    //     startIndex,
-    //     endIndex,
-    //     handler: null,
-    //     context: this.context,
-    //     state: null,
-    //     cacheData: null
-    //   })], this.context, startIndex, endIndex));
-    //   return;
-    // }
+    if (startIndex === 0 && endIndex === 0) {
+      // 兼容空标签节点
+      parent.children.push(new VTextNode(this, 0, ''));
+      return;
+    }
 
     while (startIndex < endIndex) {
       let firstRange = formatRanges.shift();
@@ -435,31 +421,12 @@ export class Fragment extends View {
         if (item instanceof Fragment) {
           vNodes.push(item.createVDom());
         } else if (item instanceof Single) {
-          vNodes.push(new VMediaNode(this, item, item.getFormatRanges(), i + startIndex))
+          vNodes.push(new VMediaNode(this, item, item.getCanApplyFormats(), i + startIndex))
         }
       }
       i += item.length;
     });
     return vNodes;
-  }
-
-  // render(host: HTMLElement) {
-  //   // this.viewRendered();
-  //   // if (this.dirty) {
-  //   //   if (this.dataChanged) {
-  //   //     const t = this.renderer.render(getCanApplyFormats(this.formatMatrix), this.contents, host);
-  //   //     // this
-  //   //   } else {
-  //   //     this.contents.getFragments().forEach(f => {
-  //   //       f.render();
-  //   //     });
-  //   //   }
-  //   // }
-  //
-  // }
-
-  destroyView() {
-    // this.renderer.destroy();
   }
 
   mergeFormat(format: FormatRange, important = false) {
@@ -468,10 +435,6 @@ export class Fragment extends View {
   }
 
   destroy() {
-    if (this.destroyed) {
-      return;
-    }
-    this.destroyView();
     this.contents.getFragments().forEach(f => f.destroy());
     if (this.parent) {
       const index = this.getIndexInParent();
@@ -480,7 +443,6 @@ export class Fragment extends View {
     this.formatMatrix.clear();
     this.contents = new Contents();
     this.parent = null;
-    this.destroyed = true;
   }
 
   getIndexInParent() {
