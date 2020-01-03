@@ -220,7 +220,7 @@ export class Cursor {
     let rect = range.getBoundingClientRect();
     if (startContainer.nodeType === 1 &&
       startContainer.childNodes[startOffset] &&
-      startContainer.childNodes[startOffset].nodeName.toLowerCase() === 'br') {
+      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
       rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
     }
     const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
