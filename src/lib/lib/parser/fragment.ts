@@ -107,6 +107,10 @@ export class Fragment extends View {
       children.forEach(item => {
         if (item instanceof Fragment) {
           const c = format.clone();
+          if (c instanceof InlineFormat) {
+            c.startIndex = 0;
+            c.endIndex = item.contentLength;
+          }
           item.apply(c, canSurroundBlockElement);
         } else if (item) {
           if (!childFormat) {
