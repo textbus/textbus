@@ -9,13 +9,19 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
     formats = formats.concat(value);
   });
   // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
-  return formats.sort((n, m) => {
-    if (n.handler.priority !== m.handler.priority) {
-      return n.handler.priority - m.handler.priority;
+  return formats.sort((next, prev) => {
+    if (prev instanceof BlockFormat) {
+      if (next instanceof BlockFormat) {
+        return next.handler.priority - prev.handler.priority;
+      }
+      return 1;
+    } else if (next instanceof BlockFormat) {
+      return -1;
     }
-    const a = n.startIndex - m.startIndex;
+
+    const a = next.startIndex - prev.startIndex;
     if (a === 0) {
-      return m.endIndex - n.endIndex;
+      return next.endIndex - prev.endIndex;
     }
     return a;
   }).map(item => item.clone());
