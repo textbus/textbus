@@ -1,10 +1,10 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { BlockFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { RootFragment } from '../parser/root-fragment';
 
 export class ListCommander implements Commander<any> {
   recordHistory = true;
@@ -12,7 +12,7 @@ export class ListCommander implements Commander<any> {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void {
     let c = selection.commonAncestorFragment;
 
     if (overlap) {
@@ -32,27 +32,15 @@ export class ListCommander implements Commander<any> {
 
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
-      const listFragment = new Fragment(commonAncestorFragment);
-      listFragment.mergeFormat(new BlockFormat({
-        state: FormatState.Valid,
-        context: listFragment,
-        cacheData: {
-          tag: this.tagName
-        },
-        handler
-      }));
+      const listFragment = new Fragment(commonAncestorFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+        tag: this.tagName
+      })));
       if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {
         c = range.commonAncestorFragment.parent;
         const index = commonAncestorFragment.getIndexInParent();
-        const li = new Fragment(listFragment);
-        li.mergeFormat(new BlockFormat({
-          state: FormatState.Valid,
-          context: li,
-          cacheData: {
-            tag: 'li'
-          },
-          handler
-        }));
+        const li = new Fragment(listFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+          tag: 'li'
+        })));
         li.append(commonAncestorFragment.parent.delete(index, index + 1));
         listFragment.append(li);
         c.insert(listFragment, index);
@@ -61,15 +49,9 @@ export class ListCommander implements Commander<any> {
       const position = range.getCommonAncestorFragmentScope().startIndex;
 
       range.getSelectedScope().forEach(item => {
-        const li = new Fragment(listFragment);
-        li.mergeFormat(new BlockFormat({
-          state: FormatState.Valid,
-          context: li,
-          cacheData: {
-            tag: 'li'
-          },
-          handler
-        }));
+        const li = new Fragment(listFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+          tag: 'li'
+        })));
         if (item.context.parent === commonAncestorFragment) {
           const index = item.context.getIndexInParent();
           commonAncestorFragment.delete(index, index + 1);

@@ -16,7 +16,6 @@ export interface SingleFormatParams {
   context: Single;
   state: FormatState;
   cacheData: CacheDataParams;
-  startIndex: number;
 }
 
 export interface InlineFormatParams extends FormatParams {
@@ -74,17 +73,11 @@ export class SingleFormat {
   context: Single;
   state: FormatState;
   cacheData: CacheData;
-  startIndex: number;
-
-  get endIndex() {
-    return this.startIndex + 1;
-  }
 
   constructor(params: SingleFormatParams | SingleFormat) {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.startIndex = params.startIndex;
     this.cacheData = params.cacheData && new CacheData(params.cacheData);
   }
 
@@ -93,4 +86,4 @@ export class SingleFormat {
   }
 }
 
-export type FormatRange = BlockFormat | InlineFormat | SingleFormat;
+export type FormatRange = BlockFormat | InlineFormat;

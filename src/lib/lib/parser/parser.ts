@@ -26,6 +26,16 @@ export class Parser {
     return context;
   }
 
+  getFormatStateByData(data: CacheData): ParseState[] {
+    return this.registries.map(item => {
+      return {
+        handler: item,
+        state: item.matcher.matchData(data),
+        cacheData: new CacheData(data)
+      }
+    }).filter(item => item.state !== FormatState.Invalid);
+  }
+
   getFormatStateByNode(node: HTMLElement): ParseState[] {
     return this.registries.map(item => {
       return {
@@ -57,10 +67,18 @@ export class Parser {
         case Priority.Default:
         case Priority.Block:
         case Priority.BlockStyle:
-          context.mergeFormat(new BlockFormat({
-            context: context as Fragment,
-            ...item
-          }), false);
+          if (context instanceof Fragment) {
+            context.mergeFormat(new BlockFormat({
+              context,
+              ...item
+            }), false);
+          } else {
+            context.mergeFormat(new SingleFormat({
+              ...item,
+              context
+            }));
+          }
+
           break;
         case Priority.Inline:
         case Priority.Property:
@@ -73,7 +91,6 @@ export class Parser {
             }), false)
           } else {
             context.mergeFormat(new SingleFormat({
-              startIndex,
               context,
               ...item
             }), false);

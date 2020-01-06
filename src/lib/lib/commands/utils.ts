@@ -2,7 +2,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../viewer/range';
-import { BlockFormat, FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { FormatState } from '../matcher/matcher';
 
 export function unwrap(selection: TBSelection, handler: Handler) {

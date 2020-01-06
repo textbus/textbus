@@ -1,5 +1,3 @@
-import { VNode } from '../renderer/virtual-dom';
-
 export abstract class View {
   readonly length = 1;
 

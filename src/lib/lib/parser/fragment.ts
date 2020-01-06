@@ -6,6 +6,7 @@ import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
 import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
+import { ParseState } from './parser';
 
 export class Fragment extends View {
   readonly vNode: VBlockNode;
@@ -17,7 +18,7 @@ export class Fragment extends View {
   private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
-  constructor(public parent: Fragment) {
+  constructor(public parent: Fragment, formats?: ParseState[]) {
     super();
   }
 

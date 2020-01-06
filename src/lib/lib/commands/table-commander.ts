@@ -5,8 +5,9 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { BlockFormat } from '../parser/format';
 import { Single } from '../parser/single';
+import { RootFragment } from '../parser/root-fragment';
+import { Parser } from '../parser/parser';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -19,25 +20,19 @@ export class TableCommander implements Commander<AttrState[]> {
     this.init(value);
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): Fragment {
     selection.collapse();
     const firstRange = selection.firstRange;
     const fragment = firstRange.startFragment;
     const context = fragment.parent;
-    const table = new Fragment(context);
-    table.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      context: table,
-      handler,
-      cacheData: {
-        tag: 'table'
-      }
-    }));
+    const table = new Fragment(context, rootFragment.parser.getFormatStateByData(new CacheData({
+      tag: 'table'
+    })));
     if (this.header) {
-      const thead = this.createHeader(table, handler);
+      const thead = this.createHeader(table, rootFragment.parser);
       table.append(thead);
     }
-    const tbody = this.createBody(table, handler);
+    const tbody = this.createBody(table, rootFragment.parser);
     table.append(tbody);
     context.insert(table, selection.firstRange.startFragment.getIndexInParent() + 1);
     const first = fragment.getContentAtIndex(0);
@@ -61,39 +56,23 @@ export class TableCommander implements Commander<AttrState[]> {
     return fragment;
   }
 
-  private createBody(parent: Fragment, handler: Handler) {
-    const tbody = new Fragment(parent);
-    tbody.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      handler,
-      context: tbody,
-      cacheData: {
-        tag: 'tbody'
-      }
-    }));
+  private createBody(parent: Fragment, parser: Parser) {
+    const tbody = new Fragment(parent, parser.getFormatStateByData(new CacheData({
+      tag: 'tbody'
+    })));
 
     for (let i = 0; i < this.rows; i++) {
-      const tr = new Fragment(tbody);
-      tr.mergeFormat(new BlockFormat({
-        state: FormatState.Valid,
-        handler,
-        context: tr,
-        cacheData: {
-          tag: 'tr'
-        }
-      }));
+      const tr = new Fragment(tbody, parser.getFormatStateByData(new CacheData({
+        tag: 'tr'
+      })));
       tbody.append(tr);
       for (let j = 0; j < this.cols; j++) {
-        const td = new Fragment(tr);
-        td.mergeFormat(new BlockFormat({
-          state: FormatState.Valid,
-          handler,
-          context: td,
-          cacheData: {
-            tag: 'td'
-          }
-        }));
-        td.append(new Single(td, 'br'));
+        const td = new Fragment(tr, parser.getFormatStateByData(new CacheData({
+          tag: 'td'
+        })));
+        td.append(new Single(td, 'br', parser.getFormatStateByData(new CacheData({
+          tag: 'br'
+        }))));
         tr.append(td);
       }
     }
@@ -101,37 +80,21 @@ export class TableCommander implements Commander<AttrState[]> {
     return tbody;
   }
 
-  private createHeader(parent: Fragment, handler: Handler) {
-    const thead = new Fragment(parent);
-    thead.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      handler,
-      context: thead,
-      cacheData: {
-        tag: 'thead'
-      }
-    }));
-    const tr = new Fragment(thead);
-    tr.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      handler,
-      context: tr,
-      cacheData: {
-        tag: 'tr'
-      }
-    }));
+  private createHeader(parent: Fragment, parser: Parser) {
+    const thead = new Fragment(parent, parser.getFormatStateByData(new CacheData({
+      tag: 'thead'
+    })));
+    const tr = new Fragment(thead, parser.getFormatStateByData(new CacheData({
+      tag: 'tr'
+    })));
     thead.append(tr);
     for (let i = 0; i < this.cols; i++) {
-      const th = new Fragment(tr);
-      th.mergeFormat(new BlockFormat({
-        state: FormatState.Valid,
-        handler,
-        context: th,
-        cacheData: {
-          tag: 'th'
-        }
-      }));
-      th.append(new Single(th, 'br'));
+      const th = new Fragment(tr, parser.getFormatStateByData(new CacheData({
+        tag: 'th'
+      })));
+      th.append(new Single(th, 'br', parser.getFormatStateByData(new CacheData({
+        tag: 'br'
+      }))));
       tr.append(th);
     }
     return thead;

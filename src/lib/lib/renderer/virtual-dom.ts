@@ -1,5 +1,5 @@
 import { Fragment } from '../parser/fragment';
-import { FormatRange } from '../parser/format';
+import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
 
 export class VTextNode {
@@ -78,7 +78,7 @@ export class VMediaNode {
 
   constructor(public context: Fragment,
               public data: Single,
-              public formats: FormatRange[],
+              public formats: SingleFormat[],
               public startIndex: number) {
   }
 

@@ -7,7 +7,7 @@ import { VIRTUAL_NODE } from '../parser/help';
 import { VNode } from '../renderer/virtual-dom';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
-import { BlockFormat, FormatRange } from '../parser/format';
+import { BlockFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { defaultTagsHandler } from '../default-tags-handler';
 

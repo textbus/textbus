@@ -51,8 +51,8 @@ export const blockBackgroundHandler: DropdownConfig = {
       backgroundColor: /.+/
     },
     noInTags: ['pre'],
-    filter(node) {
-      return dtd[node.tagName.toLowerCase()].display !== 'inline';
+    filter(node: HTMLElement | CacheData) {
+      return dtd[node instanceof CacheData ? node.tag : node.tagName.toLowerCase()]?.display !== 'inline';
     }
   },
   execCommand: commander

@@ -12,6 +12,7 @@ export class Renderer {
   }
 
   render(newVNode: VBlockNode, host: HTMLElement) {
+    console.log(newVNode)
     let previousSibling: Node;
     newVNode.children.forEach(vNode => {
       previousSibling = this.diffAndUpdateView(vNode, this?.oldVNode?.children.shift(), host, previousSibling);
@@ -58,11 +59,9 @@ export class Renderer {
       }, vNode.nativeElement as HTMLElement);
 
       if (vNode.nativeElement) {
-        const startIndex = vNode.data.parent.find(vNode.data);
         this.parser.getFormatStateByNode(vNode.nativeElement as HTMLElement).forEach(f => {
           vNode.data.mergeFormat(new SingleFormat({
             context: vNode.data,
-            startIndex,
             ...f
           }));
         });

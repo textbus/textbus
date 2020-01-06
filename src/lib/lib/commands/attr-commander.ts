@@ -5,7 +5,8 @@ import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
-import { InlineFormat, SingleFormat } from '../parser/format';
+import { InlineFormat } from '../parser/format';
+import { RootFragment } from '../parser/root-fragment';
 
 export class AttrCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -18,7 +19,7 @@ export class AttrCommander implements Commander<AttrState[]> {
     this.attrs = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void {
     const attrs = new Map<string, string>();
     this.attrs.forEach(attr => {
       attrs.set(attr.name, attr.value.toString());
@@ -45,16 +46,13 @@ export class AttrCommander implements Commander<AttrState[]> {
               }
             }
           });
-          const newNode = new Single(range.commonAncestorFragment, this.tagName);
-          newNode.setFormats(handler, [new SingleFormat({
-            startIndex: range.startIndex,
-            handler,
-            state: FormatState.Valid,
-            context: newNode,
-            cacheData: new CacheData({
-              attrs
-            })
-          })]);
+          const newNode = new Single(
+            range.commonAncestorFragment,
+            this.tagName,
+            rootFragment.parser.getFormatStateByData(new CacheData({
+              tag: this.tagName
+            }))
+          );
           range.commonAncestorFragment.insert(newNode, range.startIndex);
           range.startIndex++;
           range.endIndex++;

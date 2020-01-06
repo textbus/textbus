@@ -6,7 +6,7 @@ export interface EditableOptions {
 
 export interface CacheDataParams {
   tag?: string;
-  attrs?: Map<string, string>;
+  attrs?: { [key: string]: string } | Map<string, string>;
   style?: { name: string, value: string | number };
 }
 
@@ -17,8 +17,17 @@ export class CacheData {
 
   constructor(params: CacheDataParams = {}) {
     this.tag = params.tag;
-    this.attrs = params.attrs;
     this.style = params.style;
+    if (params.attrs) {
+      if (params.attrs instanceof Map) {
+        this.attrs = params.attrs;
+      } else {
+        this.attrs = new Map<string, string>();
+        Object.keys(params.attrs).forEach(key => {
+          this.attrs.set(key, params.attrs[key]);
+        });
+      }
+    }
   }
 
   clone() {
@@ -28,7 +37,13 @@ export class CacheData {
     });
     return new CacheData({
       tag: this.tag,
-      attrs: attrs.size ? attrs : null,
+      attrs: attrs.size ? (() => {
+        const obj: { [key: string]: string } = {};
+        Array.from(attrs.keys()).map(key => {
+          obj[key] = attrs.get(key);
+        });
+        return obj;
+      })() : null,
       style: this.style ? {name: this.style.name, value: this.style.value} : null
     });
   }

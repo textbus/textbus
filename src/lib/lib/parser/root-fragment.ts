@@ -4,7 +4,7 @@ import { Single } from './single';
 import { BlockFormat } from './format';
 import { FormatState } from '../matcher/matcher';
 import { Parser } from './parser';
-import instantiate = WebAssembly.instantiate;
+import { CacheData } from '../toolbar/utils/cache-data';
 
 export class RootFragment extends Fragment {
   constructor(public parser: Parser) {
@@ -19,16 +19,12 @@ export class RootFragment extends Fragment {
     const last = this.getContentAtIndex(this.contentLength - 1);
 
     const guardLastContentEditable = () => {
-      const newFragment = new Fragment(this);
-      newFragment.append(new Single(newFragment, 'br'));
-      newFragment.mergeFormat(new BlockFormat({
-        state: FormatState.Valid,
-        handler: defaultTagsHandler,
-        context: newFragment,
-        cacheData: {
-          tag: 'p'
-        }
-      }));
+      const newFragment = new Fragment(this, this.parser.getFormatStateByData(new CacheData({
+        tag: 'p'
+      })));
+      newFragment.append(new Single(newFragment, 'br', this.parser.getFormatStateByData(new CacheData({
+        tag: 'br'
+      }))));
       this.append(newFragment);
     };
 

@@ -1,4 +1,4 @@
-import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
+import { BlockFormat, FormatRange, InlineFormat } from './format';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 
@@ -35,7 +35,7 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
  */
 export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatRange, important = false) {
 
-  if (format instanceof BlockFormat || format instanceof SingleFormat) {
+  if (format instanceof BlockFormat) {
     if (format.state === FormatState.Invalid) {
       matrix.delete(format.handler);
     } else {

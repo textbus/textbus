@@ -40,21 +40,21 @@ export interface CommonMatchDelta {
 export interface MatchRule {
   tags?: string[] | RegExp;
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
-  classes?: string[];
+  // classes?: string[];
   attrs?: Array<{ key: string; value?: string | string[] }>;
   extendTags?: string[] | RegExp;
   excludeStyles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
-  excludeClasses?: string[];
+  // excludeClasses?: string[];
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   noContainTags?: string[] | RegExp;
   noInTags?: string[] | RegExp;
-  filter?: (node: HTMLElement) => boolean;
+  filter?: (node: HTMLElement | CacheData) => boolean;
 }
 
 export class Matcher {
-  private inheritValidators: Array<(node: HTMLElement) => boolean> = [];
-  private validators: Array<(node: HTMLElement) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private validators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.extendTags) {
@@ -63,18 +63,18 @@ export class Matcher {
     if (rule.tags) {
       this.validators.push(this.makeTagsMatcher(rule.tags));
     }
-    if (rule.classes) {
-      this.validators.push(this.makeClassNameMatcher(rule.classes));
-    }
+    // if (rule.classes) {
+    //   this.validators.push(this.makeClassNameMatcher(rule.classes));
+    // }
     if (rule.styles) {
       this.validators.push(this.makeStyleMatcher(rule.styles));
     }
     if (rule.attrs) {
       this.validators.push(this.makeAttrsMatcher(rule.attrs));
     }
-    if (rule.excludeClasses) {
-      this.excludeValidators.push(this.makeClassNameMatcher(rule.excludeClasses));
-    }
+    // if (rule.excludeClasses) {
+    //   this.excludeValidators.push(this.makeClassNameMatcher(rule.excludeClasses));
+    // }
     if (rule.excludeStyles) {
       this.excludeValidators.push(this.makeStyleMatcher(rule.excludeStyles));
     }
@@ -83,22 +83,12 @@ export class Matcher {
     }
   }
 
+  matchData(data: CacheData): FormatState {
+    return this.match(data);
+  }
+
   matchNode(node: HTMLElement): FormatState {
-    if (this.rule.filter) {
-      const b = this.rule.filter(node);
-      if (!b) {
-        return FormatState.Invalid;
-      }
-    }
-    const exclude = this.excludeValidators.map(fn => fn(node)).includes(true);
-    if (exclude) {
-      return FormatState.Exclude;
-    }
-    const inherit = this.inheritValidators.map(fn => fn(node)).includes(true);
-    if (inherit) {
-      return FormatState.Inherit;
-    }
-    return this.validators.map(fn => fn(node)).includes(true) ? FormatState.Valid : FormatState.Invalid;
+    return this.match(node);
   }
 
   queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
@@ -163,6 +153,24 @@ export class Matcher {
       srcStates,
       cacheData: srcStates[0].cacheData
     };
+  }
+
+  private match(p: HTMLElement | CacheData) {
+    if (this.rule.filter) {
+      const b = this.rule.filter(p);
+      if (!b) {
+        return FormatState.Invalid;
+      }
+    }
+    const exclude = this.excludeValidators.map(fn => fn(p)).includes(true);
+    if (exclude) {
+      return FormatState.Exclude;
+    }
+    const inherit = this.inheritValidators.map(fn => fn(p)).includes(true);
+    if (inherit) {
+      return FormatState.Inherit;
+    }
+    return this.validators.map(fn => fn(p)).includes(true) ? FormatState.Valid : FormatState.Invalid;
   }
 
   private getDisableStateByRange(range: TBRange) {
@@ -291,55 +299,64 @@ export class Matcher {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement) => {
-      if (node.nodeType === 1) {
-        const tagName = node.tagName.toLowerCase();
-        return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
-      }
-      return false;
+    return (node: HTMLElement | CacheData) => {
+      const tagName = node instanceof CacheData ? node.tag : node.tagName.toLowerCase();
+      return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement) => {
+    return (node: HTMLElement | CacheData) => {
       return attrs.map(attr => {
         if (attr.value) {
-          return node.getAttribute(attr.key) === attr.value;
+          if (node instanceof CacheData) {
+            return node?.attrs.get(attr.key) === attr.value;
+          }
+          if (node instanceof HTMLElement) {
+            return node.getAttribute(attr.key) === attr.value;
+          }
+        } else {
+          if (node instanceof CacheData) {
+            return node?.attrs.has(attr.key);
+          }
+          if (node instanceof HTMLElement) {
+            return node.hasAttribute(attr.key);
+          }
         }
-        return node.hasAttribute(attr.key);
+        return false;
       }).includes(true);
     }
   }
 
-  private makeClassNameMatcher(classes: string[]) {
-    return (node: HTMLElement) => {
-      return classes.map(className => {
-        return node.classList.contains(className);
-      }).includes(true);
-    };
-  }
+  // private makeClassNameMatcher(classes: string[]) {
+  //   return (node: HTMLElement | CacheData | CacheDataParams) => {
+  //     return classes.map(className => {
+  //       return node.classList.contains(className);
+  //     }).includes(true);
+  //   };
+  // }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement) => {
-      if (node.nodeType === 1) {
-        const elementStyles = node.style;
-        return !Object.keys(styles).map(key => {
-          const optionValue = (Array.isArray(styles[key]) ?
-            styles[key] :
-            [styles[key]]) as Array<string | number | RegExp>;
-          let styleValue = elementStyles[key];
-          if (key === 'fontFamily' && typeof styleValue === 'string') {
-            styleValue = styleValue.replace(/['"]/g, '');
-          }
-          return optionValue.map(v => {
-            if (v instanceof RegExp) {
-              return v.test(styleValue);
-            }
-            return v === styleValue;
-          }).includes(true);
-        }).includes(false);
+    return (node: HTMLElement | CacheData) => {
+      const elementStyles = node.style;
+      if (!elementStyles) {
+        return false;
       }
-      return false;
+      return !Object.keys(styles).map(key => {
+        const optionValue = (Array.isArray(styles[key]) ?
+          styles[key] :
+          [styles[key]]) as Array<string | number | RegExp>;
+        let styleValue = elementStyles[key];
+        if (key === 'fontFamily' && typeof styleValue === 'string') {
+          styleValue = styleValue.replace(/['"]/g, '');
+        }
+        return optionValue.map(v => {
+          if (v instanceof RegExp) {
+            return v.test(styleValue);
+          }
+          return v === styleValue;
+        }).includes(true);
+      }).includes(false);
     }
   }
 

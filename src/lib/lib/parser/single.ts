@@ -1,14 +1,23 @@
 import { View } from './view';
 import { Fragment } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatRange } from './format';
-import { getCanApplyFormats, mergeFormat } from './utils';
+import { SingleFormat } from './format';
+import { ParseState } from './parser';
+import { FormatState } from '../matcher/matcher';
 
 export class Single extends View {
-  private formatMatrix = new Map<Handler, FormatRange[]>();
+  private formatMatrix = new Map<Handler, SingleFormat[]>();
 
-  constructor(public parent: Fragment, public tagName: string) {
+  constructor(public parent: Fragment, public tagName: string, formats?: ParseState[]) {
     super();
+    if (Array.isArray(formats)) {
+      formats.forEach(item => {
+        this.formatMatrix.set(item.handler, [new SingleFormat({
+          ...item,
+          context: this
+        })])
+      })
+    }
   }
 
   getFormatRangesByHandler(handler: Handler) {
@@ -27,17 +36,26 @@ export class Single extends View {
     return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
   }
 
-  mergeFormat(format: FormatRange, important = false) {
-    mergeFormat(this.formatMatrix, format, important);
+  mergeFormat(format: SingleFormat, important = false) {
+    if (format.state === FormatState.Invalid) {
+      this.formatMatrix.delete(format.handler);
+    } else {
+      let old = this.formatMatrix.get(format.handler);
+      if (Array.isArray(old)) {
+        important ? old.push(format) : old.unshift(format);
+      } else {
+        this.formatMatrix.set(format.handler, [format]);
+      }
+    }
   }
 
-  setFormats(key: Handler, formatRanges: FormatRange[]) {
+  setFormats(key: Handler, formatRanges: SingleFormat[]) {
     this.formatMatrix.set(key, formatRanges);
   }
 
   clone(): Single {
     const s = new Single(this.parent, this.tagName);
-    s.formatMatrix = new Map<Handler, FormatRange[]>();
+    s.formatMatrix = new Map<Handler, SingleFormat[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       s.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
         return f.clone();
@@ -47,6 +65,14 @@ export class Single extends View {
   }
 
   getCanApplyFormats() {
-    return getCanApplyFormats(this.formatMatrix);
+    let formats: SingleFormat[] = [];
+    // 检出所有生效规则
+    this.formatMatrix.forEach(value => {
+      formats = formats.concat(value);
+    });
+    formats.sort((next, prev) => {
+      return next.handler.priority - prev.handler.priority;
+    });
+    return formats;
   }
 }
