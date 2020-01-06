@@ -66,7 +66,7 @@ export class CacheData {
     if (left === right || !left === true && !right === true) {
       return true;
     }
-    if (left.size !== right.size) {
+    if (!left !== !right || left.size !== right.size) {
       return false;
     }
     return Array.from(left.keys()).reduce((v, key) => {
@@ -78,6 +78,9 @@ export class CacheData {
                             right: { name: string, value: string | number }) {
     if (left === right || !left === true && !right === true) {
       return true;
+    }
+    if (!left !== !right) {
+      return false;
     }
     return left.name === right.name && left.value === right.value;
   }

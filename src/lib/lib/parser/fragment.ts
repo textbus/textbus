@@ -20,6 +20,14 @@ export class Fragment extends View {
 
   constructor(public parent: Fragment, formats?: ParseState[]) {
     super();
+    if (Array.isArray(formats)) {
+      formats.forEach(item => {
+        this.formatMatrix.set(item.handler, [new BlockFormat({
+          ...item,
+          context: this
+        })])
+      })
+    }
   }
 
   getFormatRangesByHandler(handler: Handler) {
