@@ -7,6 +7,7 @@ import { EditContext, Hook } from '../../viewer/help';
 import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
+import { Parser } from '../../parser/parser';
 
 interface ElementPosition {
   left: number;
@@ -166,7 +167,7 @@ export class TableEditHook implements Hook {
     }
   }
 
-  onDelete(viewer: Viewer, next: () => void): void {
+  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {

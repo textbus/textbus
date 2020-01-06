@@ -3,6 +3,7 @@ import { TBInputEvent } from './cursor';
 import { Viewer } from './viewer';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
+import { Parser } from '../parser/parser';
 
 export interface EditContext {
   document: Document;
@@ -34,31 +35,35 @@ export interface Hook {
    * 当用户输入文本时调用
    * @param ev 输入文本时的事件对象
    * @param viewer 视图渲染器
+   * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onInput?(ev: TBInputEvent, viewer: Viewer, next: () => void): void;
+  onInput?(ev: TBInputEvent, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户输入回车时调用
    * @param viewer 视图渲染器
+   * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onEnter?(viewer: Viewer, next: () => void): void;
+  onEnter?(viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户删除内容时调用
    * @param viewer 视图渲染器
+   * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onDelete?(viewer: Viewer, next: () => void): void;
+  onDelete?(viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户粘贴内容时调用
    * @param contents 粘贴的内容
    * @param viewer 视图渲染器
+   * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(contents: Contents, viewer: Viewer, next: () => void): void;
+  onPaste?(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户应用某个命令时调用

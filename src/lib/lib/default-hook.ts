@@ -1,17 +1,17 @@
-import { Hook } from './help';
-import { Single } from '../parser/single';
-import { TBInputEvent } from './cursor';
-import { Viewer } from './viewer';
-import { Fragment } from '../parser/fragment';
-import { Contents } from '../parser/contents';
-import { Handler } from '../toolbar/handlers/help';
-import { BlockFormat, FormatRange, InlineFormat } from '../parser/format';
-import { Priority } from '../toolbar/help';
-import { FormatState } from '../matcher/matcher';
-import { defaultTagsHandler } from '../default-tags-handler';
+import { Hook } from './viewer/help';
+import { Single } from './parser/single';
+import { TBInputEvent } from './viewer/cursor';
+import { Viewer } from './viewer/viewer';
+import { Fragment } from './parser/fragment';
+import { Contents } from './parser/contents';
+import { Handler } from './toolbar/handlers/help';
+import { BlockFormat, InlineFormat } from './parser/format';
+import { Priority } from './toolbar/help';
+import { Parser } from './parser/parser';
+import { CacheData } from './toolbar/utils/cache-data';
 
 export class DefaultHook implements Hook {
-  onInput(ev: TBInputEvent, viewer: Viewer, next: () => void): void {
+  onInput(ev: TBInputEvent, viewer: Viewer, parser: Parser, next: () => void): void {
     const startIndex = ev.selection.firstRange.startIndex;
     const selection = viewer.selection;
     const commonAncestorFragment = selection.commonAncestorFragment;
@@ -27,7 +27,9 @@ export class DefaultHook implements Hook {
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new Single(commonAncestorFragment, 'br');
+          const s = new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+            tag: 'br'
+          })));
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
@@ -43,14 +45,16 @@ export class DefaultHook implements Hook {
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + ev.offset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
-      commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+      commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+        tag: 'br'
+      }))));
     }
     viewer.rerender();
     viewer.selection.apply(ev.offset);
     next();
   }
 
-  onPaste(contents: Contents, viewer: Viewer, next: () => void): void {
+  onPaste(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
     if (!viewer.selection.collapsed) {
       viewer.deleteContents();
@@ -70,7 +74,7 @@ export class DefaultHook implements Hook {
       parent.delete(index, index + 1);
     } else {
       let startIndex = firstRange.startIndex;
-      this.onEnter(viewer, function () {
+      this.onEnter(viewer, parser, function () {
       });
       firstRange.startFragment = firstRange.endFragment = commonAncestorFragment;
       firstRange.startIndex = firstRange.endIndex = startIndex;
@@ -101,15 +105,19 @@ export class DefaultHook implements Hook {
     }
   }
 
-  onEnter(viewer: Viewer, next: () => void): void {
+  onEnter(viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
       if (/th|td/i.test(commonAncestorFragment.vNode.nativeElement.nodeName)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+            tag: 'br'
+          }))), true);
         }
-        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+          tag: 'br'
+        }))), true);
         range.startIndex = range.endIndex = range.endIndex + 1;
         viewer.rerender();
         viewer.selection.apply();
@@ -117,26 +125,30 @@ export class DefaultHook implements Hook {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br'));
+          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+            tag: 'br'
+          }))), true);
         }
         const index = commonAncestorFragment.getIndexInParent();
-        const formatMatrix = new Map<Handler, Array<InlineFormat|BlockFormat>>();
+        const formatMatrix = new Map<Handler, Array<InlineFormat | BlockFormat>>();
         afterFragment.getFormatHandlers().filter(key => {
           return ![Priority.Default, Priority.Block].includes(key.priority);
         }).forEach(key => {
           formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
         });
         afterFragment.useFormats(formatMatrix);
-        afterFragment.mergeFormat(new BlockFormat({
-          state: FormatState.Valid,
-          context: afterFragment,
-          handler: defaultTagsHandler,
-          cacheData: {
-            tag: 'p'
-          }
-        }));
+        parser.getFormatStateByData(new CacheData({
+          tag: 'p'
+        })).forEach(item => {
+          afterFragment.mergeFormat(new BlockFormat({
+            ...item,
+            context: afterFragment
+          }))
+        });
         if (!afterFragment.contentLength) {
-          afterFragment.append(new Single(afterFragment, 'br'));
+          afterFragment.append(new Single(afterFragment, 'br', parser.getFormatStateByData(new CacheData({
+            tag: 'br'
+          }))), true);
         }
         commonAncestorFragment.parent.insert(afterFragment, index + 1);
         range.startFragment = range.endFragment = afterFragment;
@@ -147,7 +159,7 @@ export class DefaultHook implements Hook {
     selection.apply();
   }
 
-  onDelete(viewer: Viewer, next: () => void): void {
+  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
@@ -169,14 +181,14 @@ export class DefaultHook implements Hook {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
 
               const startFragment = new Fragment(rerenderFragment.fragment);
-              startFragment.mergeFormat(new BlockFormat({
-                handler: defaultTagsHandler,
-                state: FormatState.Valid,
-                context: startFragment,
-                cacheData: {
-                  tag: 'p'
-                }
-              }), true);
+              parser.getFormatStateByData(new CacheData({
+                tag: 'p'
+              })).forEach(item => {
+                startFragment.mergeFormat(new BlockFormat({
+                  ...item,
+                  context: startFragment
+                }), true)
+              });
               rerenderFragment.fragment.insert(startFragment, 0);
               viewer.moveContentsToFragment(range.startFragment, startFragment, 0);
               viewer.deleteEmptyFragment(range.startFragment);
@@ -198,14 +210,15 @@ export class DefaultHook implements Hook {
                 firstRange.startIndex = 0;
               } else {
                 const startFragment = new Fragment(rerenderFragment.fragment);
-                startFragment.mergeFormat(new BlockFormat({
-                  handler: defaultTagsHandler,
-                  state: FormatState.Valid,
-                  context: startFragment,
-                  cacheData: {
-                    tag: 'p'
-                  }
-                }), true);
+                parser.getFormatStateByData(new CacheData({
+                  tag: 'p'
+                })).forEach(item => {
+                  startFragment.mergeFormat(new BlockFormat({
+                    ...item,
+                    context: startFragment
+                  }))
+                });
+
                 startFragment.append(new Single(startFragment, 'br'));
                 rerenderFragment.fragment.insert(startFragment, 0);
                 firstRange.startFragment = startFragment;
@@ -264,5 +277,3 @@ export class DefaultHook implements Hook {
     });
   }
 }
-
-export const defaultHook = new DefaultHook();

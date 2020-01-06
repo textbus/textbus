@@ -12,9 +12,9 @@ export class Renderer {
   }
 
   render(newVNode: VBlockNode, host: HTMLElement) {
-    console.log(newVNode)
     let previousSibling: Node;
     newVNode.children.forEach(vNode => {
+      console.log((vNode as VBlockNode)?.formats, (this?.oldVNode?.children[0] as VBlockNode)?.formats);
       previousSibling = this.diffAndUpdateView(vNode, this?.oldVNode?.children.shift(), host, previousSibling);
     });
     this?.oldVNode?.children.forEach(i => i.destroyView());

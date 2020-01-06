@@ -10,7 +10,6 @@ import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { Hook } from './help';
-import { defaultHook } from './default-hook';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Renderer } from '../renderer/renderer';
@@ -33,7 +32,7 @@ export class Viewer {
   private readyEvent = new Subject<Document>();
 
   private frame = document.createElement('iframe');
-  private hooks: Hook[] = [defaultHook];
+  private hooks: Hook[] = [];
   private root: RootFragment;
 
   private cursor: Cursor;
@@ -136,8 +135,7 @@ export class Viewer {
   }
 
   use(hook: Hook) {
-    this.hooks[this.hooks.length - 1] = hook;
-    this.hooks.push(defaultHook);
+    this.hooks.push(hook);
     if (typeof hook.setup === 'function') {
       hook.setup(this.elementRef, {
         document: this.contentDocument,
@@ -178,7 +176,7 @@ export class Viewer {
     const hooks = this.hooks.filter(hook => typeof hook.onDelete === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onDelete(this, () => {
+      hook.onDelete(this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -261,7 +259,7 @@ export class Viewer {
     const hooks = this.hooks.filter(hook => typeof hook.onEnter === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onEnter(this, () => {
+      hook.onEnter(this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -278,7 +276,7 @@ export class Viewer {
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onPaste(c, this, () => {
+      hook.onPaste(c, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -341,7 +339,7 @@ export class Viewer {
     const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onInput(ev, this, () => {
+      hook.onInput(ev, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {

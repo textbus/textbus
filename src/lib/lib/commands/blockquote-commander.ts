@@ -32,7 +32,7 @@ export class BlockquoteCommander implements Commander<AttrState[]> {
     if (state === FormatState.Valid) {
       const el = document.createElement(this.tagName);
       if (cacheData.attrs && cacheData.attrs.get('cite')) {
-        el.setAttribute('cite', cacheData.attrs.get('cite'));
+        el.setAttribute('cite', cacheData.attrs.get('cite') + '');
       }
       return new ReplaceModel(el);
     }

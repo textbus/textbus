@@ -10,11 +10,11 @@ import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { RangePath, TBSelection } from './viewer/selection';
 import { SelectHandler } from './toolbar/handlers/select-handler';
 import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
-import { defaultTagsHandler } from './default-tags-handler';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
 import { Renderer } from './renderer/renderer';
+import { DefaultTagsHandler } from './default-tags-handler';
 
 export interface Snapshot {
   doc: Fragment;
@@ -56,7 +56,7 @@ export class Editor implements EventDelegate {
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [defaultTagsHandler];
+  private readonly handlers: Handler[] = [];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
@@ -73,6 +73,11 @@ export class Editor implements EventDelegate {
       this.container = selector;
     }
     this.historyStackSize = options.historyStackSize || 50;
+    const defaultHandlers = new DefaultTagsHandler();
+    this.handlers.push(defaultHandlers);
+    this.run(() => {
+      this.viewer.use(defaultHandlers.hook);
+    });
     this.createToolbar(options.handlers);
     this.parser = new Parser(this.handlers);
     this.viewer = new Viewer(this, new Renderer(this.parser));

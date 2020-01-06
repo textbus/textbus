@@ -6,13 +6,13 @@ export interface EditableOptions {
 
 export interface CacheDataParams {
   tag?: string;
-  attrs?: { [key: string]: string } | Map<string, string>;
+  attrs?: { [key: string]: string | number } | Map<string, string | number>;
   style?: { name: string, value: string | number };
 }
 
 export class CacheData {
   tag: string;
-  attrs: Map<string, string>;
+  attrs: Map<string, string | number>;
   style: { name: string, value: string | number };
 
   constructor(params: CacheDataParams = {}) {
@@ -31,14 +31,14 @@ export class CacheData {
   }
 
   clone() {
-    const attrs = new Map<string, string>();
+    const attrs = new Map<string, string | number>();
     this.attrs && this.attrs.forEach((value, key) => {
       attrs.set(key, value);
     });
     return new CacheData({
       tag: this.tag,
       attrs: attrs.size ? (() => {
-        const obj: { [key: string]: string } = {};
+        const obj: { [key: string]: string | number } = {};
         Array.from(attrs.keys()).map(key => {
           obj[key] = attrs.get(key);
         });
@@ -62,7 +62,7 @@ export class CacheData {
       CacheData.equalStyle(left.style, right.style);
   }
 
-  private static equalAttrs(left: Map<string, string>, right: Map<string, string>) {
+  private static equalAttrs(left: Map<string, string | number>, right: Map<string, string | number>) {
     if (left === right || !left === true && !right === true) {
       return true;
     }

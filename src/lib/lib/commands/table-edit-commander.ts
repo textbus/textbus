@@ -9,7 +9,8 @@ import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { BlockFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
-import { defaultTagsHandler } from '../default-tags-handler';
+import { RootFragment } from '../parser/root-fragment';
+import { Parser } from '../parser/parser';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -62,37 +63,37 @@ export class TableEditCommander implements Commander<TableEditParams> {
     this.params = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): Fragment {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): Fragment {
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
-        this.addColumnToLeft();
+        this.addColumnToLeft(rootFragment.parser);
         break;
       case TableEditActions.AddColumnToRight:
-        this.addColumnToRight();
+        this.addColumnToRight(rootFragment.parser);
         break;
       case TableEditActions.AddRowToTop:
-        this.addRowToTop();
+        this.addRowToTop(rootFragment.parser);
         break;
       case TableEditActions.AddRowToBottom:
-        this.addRowToBottom();
+        this.addRowToBottom(rootFragment.parser);
         break;
       case TableEditActions.MergeCells:
-        this.mergeCells(selection);
+        this.mergeCells(selection, rootFragment.parser);
         break;
       case TableEditActions.SplitCells:
-        this.splitCells(selection);
+        this.splitCells(selection, rootFragment.parser);
         break;
       case TableEditActions.DeleteTopRow:
-        this.deleteTopRow();
+        this.deleteTopRow(rootFragment.parser);
         break;
       case TableEditActions.DeleteBottomRow:
-        this.deleteBottomRow();
+        this.deleteBottomRow(rootFragment.parser);
         break;
       case TableEditActions.DeleteLeftColumn:
-        this.deleteLeftColumn();
+        this.deleteLeftColumn(rootFragment.parser);
         break;
       case TableEditActions.DeleteRightColumn:
-        this.deleteRightColumn();
+        this.deleteRightColumn(rootFragment.parser);
         break;
     }
     let f = selection.commonAncestorFragment;
@@ -111,20 +112,30 @@ export class TableEditCommander implements Commander<TableEditParams> {
     return null;
   }
 
-  private addColumnToLeft() {
+  private addColumnToLeft(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.startPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cells[index];
       const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
       if (index === 0) {
-        fragment.parent.insert(TableEditCommander.createCell('td', fragment.parent), 0);
+        fragment.parent.insert(TableEditCommander.createCell('td', fragment.parent, parser), 0);
       } else {
         if (cell.columnOffset === 0) {
-          fragment.parent.insert(TableEditCommander.createCell('td', fragment), fragment.getIndexInParent());
+          fragment.parent.insert(TableEditCommander.createCell('td', fragment, parser), fragment.getIndexInParent());
         } else if (cell.rowOffset === 0) {
-          const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan + 1 + '');
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              colspan: cell.cellElement.colSpan + 1,
+              rowspan: cell.cellElement.rowSpan
+            }
+          })).forEach(item => {
+            fragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: fragment
+            }))
+          });
         }
       }
     });
@@ -136,7 +147,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
   }
 
-  private addColumnToRight() {
+  private addColumnToRight(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.endPosition.columnIndex;
     cellMatrix.forEach(row => {
@@ -144,48 +155,63 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
       if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
         if (cell.rowOffset === 0) {
-          const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan + 1 + '');
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              colspan: cell.cellElement.colSpan + 1,
+              rowspan: cell.cellElement.rowSpan
+            }
+          })).forEach(item => {
+            fragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: fragment
+            }))
+          });
         }
       } else {
-        const f = TableEditCommander.createCell('td', fragment.parent);
+        const f = TableEditCommander.createCell('td', fragment.parent, parser);
         fragment.parent.insert(f, fragment.getIndexInParent() + 1);
       }
     });
   }
 
-  private addRowToTop() {
+  private addRowToTop(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.startPosition.rowIndex;
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
-    const tr = new Fragment(fragment.parent);
+    const tr = new Fragment(fragment.parent, parser.getFormatStateByData(new CacheData({
+      tag: 'tr'
+    })));
     if (index === 0) {
       cellMatrix[0].cells.forEach(() => {
-        const td = TableEditCommander.createCell('td', tr);
+        const td = TableEditCommander.createCell('td', tr, parser);
         tr.append(td);
       });
     } else {
       row.cells.forEach(cell => {
         if (cell.rowOffset > 0) {
           if (cell.columnOffset === 0) {
-            const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
-            formatRange.cacheData.attrs.set('colspan', cell.cellElement.rowSpan + 1 + '');
+            const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+            parser.getFormatStateByData(new CacheData({
+              tag: 'td',
+              attrs: {
+                rowspan: cell.cellElement.rowSpan + 1,
+                colspan: cell.cellElement.colSpan
+              }
+            })).forEach(item => {
+              cellFragment.mergeFormat(new BlockFormat({
+                ...item,
+                context: fragment
+              }))
+            });
           }
         } else {
-          tr.append(TableEditCommander.createCell('td', tr));
+          tr.append(TableEditCommander.createCell('td', tr, parser));
         }
       });
     }
-    tr.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      cacheData: {
-        tag: 'tr'
-      },
-      context: tr,
-      handler: defaultTagsHandler
-    }));
     fragment.parent.insert(tr, fragment.getIndexInParent());
     if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
       this.params.startPosition.rowIndex++;
@@ -195,36 +221,41 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
   }
 
-  private addRowToBottom() {
+  private addRowToBottom(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.endPosition.rowIndex;
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
-    const tr = new Fragment(fragment.parent);
+    const tr = new Fragment(fragment.parent, parser.getFormatStateByData(new CacheData({
+      tag: 'tr'
+    })));
 
     row.cells.forEach(cell => {
       if (cell.rowOffset < cell.cellElement.rowSpan - 1) {
         if (cell.columnOffset === 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('colspan', cell.cellElement.rowSpan + 1 + '');
+          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              colspan: cell.cellElement.colSpan + 1,
+              rowspan: cell.cellElement.rowSpan
+            }
+          })).forEach(item => {
+            cellFragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: fragment
+            }))
+          });
         }
       } else {
-        tr.append(TableEditCommander.createCell('td', tr));
+        tr.append(TableEditCommander.createCell('td', tr, parser));
       }
     });
-    tr.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      cacheData: {
-        tag: 'tr'
-      },
-      context: tr,
-      handler: defaultTagsHandler
-    }));
     fragment.parent.insert(tr, fragment.getIndexInParent() + 1);
   }
 
-  private mergeCells(selection: TBSelection) {
+  private mergeCells(selection: TBSelection, parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
@@ -239,9 +270,18 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const selectedCells = Array.from(new Set(cells));
     const newNode = selectedCells.shift();
     const fragment = (newNode[VIRTUAL_NODE] as VNode).context;
-    const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
-    formatRange.cacheData.attrs.set('rowspan', maxRow - minRow + 1 + '');
-    formatRange.cacheData.attrs.set('colspan', maxColumn - minColumn + 1 + '');
+    parser.getFormatStateByData(new CacheData({
+      tag: 'td',
+      attrs: {
+        rowspan: maxRow - minRow + 1,
+        colspan: maxColumn - minColumn + 1
+      }
+    })).forEach(item => {
+      fragment.mergeFormat(new BlockFormat({
+        ...item,
+        context: fragment
+      }))
+    });
     selectedCells.forEach(cell => {
       const cellFragment = (cell[VIRTUAL_NODE] as VNode).context;
       const i = cellFragment.getIndexInParent();
@@ -256,7 +296,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     selection.addRange(range);
   }
 
-  private splitCells(selection: TBSelection) {
+  private splitCells(selection: TBSelection, parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
@@ -271,11 +311,16 @@ export class TableEditCommander implements Commander<TableEditParams> {
         const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
         if (cell.rowOffset !== 0 || cell.columnOffset !== 0) {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
-          const formatRange = fragment.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.delete('rowspan');
-          formatRange.cacheData.attrs.delete('colspan');
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td'
+          })).forEach(item => {
+            fragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: fragment
+            }))
+          });
 
-          const newCellFragment = TableEditCommander.createCell(formatRange.cacheData.tag, rowFragment);
+          const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser);
 
           if (cell.afterCell) {
             const index = (cell.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
@@ -299,7 +344,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     });
   }
 
-  private deleteTopRow() {
+  private deleteTopRow(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.startPosition.rowIndex;
 
@@ -314,6 +359,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const newCellFragment = TableEditCommander.createCell('td',
             rowFragment,
+            parser,
             cell.cellElement.rowSpan - 1,
             cell.cellElement.colSpan);
           const newPosition = cellMatrix[index].cells[cellIndex];
@@ -324,9 +370,19 @@ export class TableEditCommander implements Commander<TableEditParams> {
             rowFragment.insert(newCellFragment, rowFragment.contentLength);
           }
         } else {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode)
-            .context.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('rowspan', cell.cellElement.rowSpan - 1 + '');
+          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              rowspan: cell.cellElement.rowSpan - 1,
+              colspan: cell.cellElement.colSpan
+            }
+          })).forEach(item => {
+            cellFragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: cellFragment
+            }))
+          });
         }
       }
     });
@@ -340,7 +396,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
   }
 
-  private deleteBottomRow() {
+  private deleteBottomRow(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.endPosition.rowIndex;
     if (index === cellMatrix.length - 1) {
@@ -351,9 +407,19 @@ export class TableEditCommander implements Commander<TableEditParams> {
     nextRow.cells.forEach((cell, cellIndex) => {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode)
-            .context.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('rowspan', cell.cellElement.rowSpan - 1 + '');
+          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              rowspan: cell.cellElement.rowSpan - 1,
+              colspan: cell.cellElement.colSpan
+            }
+          })).forEach(item => {
+            cellFragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: cellFragment
+            }))
+          });
         } else if (cell.rowOffset === 0) {
           if (cell.cellElement.rowSpan > 1) {
 
@@ -361,6 +427,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
             const rowFragment = (newPosition.rowElement[VIRTUAL_NODE] as VNode).context;
             const newCellFragment = TableEditCommander.createCell('td',
               rowFragment,
+              parser,
               cell.cellElement.rowSpan - 1,
               cell.cellElement.colSpan);
 
@@ -378,7 +445,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     nextRowFragment.parent.delete(i, i + 1);
   }
 
-  private deleteLeftColumn() {
+  private deleteLeftColumn(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.startPosition.columnIndex;
 
@@ -389,13 +456,24 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index - 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan - 1 + '');
+          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              colspan: cell.cellElement.colSpan - 1,
+              rowspan: cell.cellElement.rowSpan
+            }
+          })).forEach(item => {
+            cellFragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: cellFragment
+            }));
+          })
         } else {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
-            const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
+            const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
@@ -412,7 +490,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
   }
 
-  private deleteRightColumn() {
+  private deleteRightColumn(parser: Parser) {
     const cellMatrix = this.params.cellMatrix;
     const index = this.params.endPosition.columnIndex;
     if (index === cellMatrix[0].cells.length - 1) {
@@ -422,13 +500,24 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index + 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const formatRange = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getFormatRangesByHandler(defaultTagsHandler)[0];
-          formatRange.cacheData.attrs.set('colspan', cell.cellElement.colSpan - 1 + '');
+          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          parser.getFormatStateByData(new CacheData({
+            tag: 'td',
+            attrs: {
+              colspan: cell.cellElement.colSpan - 1,
+              rowspan: cell.cellElement.rowSpan
+            }
+          })).forEach(item => {
+            cellFragment.mergeFormat(new BlockFormat({
+              ...item,
+              context: cellFragment
+            }));
+          });
         } else {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
-            const newCellFragment = TableEditCommander.createCell('td', rowFragment, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
+            const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
@@ -439,9 +528,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     });
   }
 
-  private static createCell(tagName: string, parent: Fragment, rowspan?: number, colspan?: number) {
-    const cell = new Fragment(parent);
-    cell.append(new Single(cell, 'br'));
+  private static createCell(tagName: string, parent: Fragment, parser: Parser, rowspan?: number, colspan?: number) {
     const attrs = new Map<string, string>();
     if (rowspan) {
       attrs.set('rowspan', rowspan + '');
@@ -449,15 +536,13 @@ export class TableEditCommander implements Commander<TableEditParams> {
     if (colspan) {
       attrs.set('colspan', colspan + '');
     }
-    cell.mergeFormat(new BlockFormat({
-      state: FormatState.Valid,
-      cacheData: {
-        tag: tagName,
-        attrs
-      },
-      context: cell,
-      handler: defaultTagsHandler
-    }));
+    const cell = new Fragment(parent, parser.getFormatStateByData(new CacheData({
+      tag: tagName,
+      attrs
+    })));
+    cell.append(new Single(cell, 'br', parser.getFormatStateByData(new CacheData({
+      tag: 'br'
+    }))));
     return cell;
   }
 }

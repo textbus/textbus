@@ -79,7 +79,7 @@ export class AttrCommander implements Commander<AttrState[]> {
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
         if (value !== null) {
-          el.setAttribute(key, value);
+          el.setAttribute(key, value + '');
         }
       })
     }

@@ -1,8 +1,6 @@
 import { Fragment } from './fragment';
-import { defaultTagsHandler } from '../default-tags-handler';
 import { Single } from './single';
 import { BlockFormat } from './format';
-import { FormatState } from '../matcher/matcher';
 import { Parser } from './parser';
 import { CacheData } from '../toolbar/utils/cache-data';
 

@@ -64,7 +64,7 @@ export class LinkCommander implements Commander<AttrState[]> {
     const el = document.createElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
-        el.setAttribute(key, value);
+        el.setAttribute(key, value + '');
       })
     }
     return new ChildSlotModel(el);
