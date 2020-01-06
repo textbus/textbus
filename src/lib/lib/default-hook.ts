@@ -113,11 +113,11 @@ export class DefaultHook implements Hook {
         if (range.endIndex === commonAncestorFragment.contentLength) {
           commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
-          }))), true);
+          }))));
         }
         commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
           tag: 'br'
-        }))), true);
+        }))));
         range.startIndex = range.endIndex = range.endIndex + 1;
         viewer.rerender();
         viewer.selection.apply();
@@ -127,7 +127,7 @@ export class DefaultHook implements Hook {
         if (!commonAncestorFragment.contentLength) {
           commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
-          }))), true);
+          }))));
         }
         const index = commonAncestorFragment.getIndexInParent();
         const formatMatrix = new Map<Handler, Array<InlineFormat | BlockFormat>>();
@@ -148,7 +148,7 @@ export class DefaultHook implements Hook {
         if (!afterFragment.contentLength) {
           afterFragment.append(new Single(afterFragment, 'br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
-          }))), true);
+          }))));
         }
         commonAncestorFragment.parent.insert(afterFragment, index + 1);
         range.startFragment = range.endFragment = afterFragment;
