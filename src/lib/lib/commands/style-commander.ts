@@ -4,12 +4,13 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { InlineFormat } from '../parser/format';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { dtd } from '../dtd';
 
 export class StyleCommander implements Commander<string | number> {
   recordHistory = true;
   private value: string | number;
 
-  constructor(private name: string) {
+  constructor(private name: string, private canApplyBlockFragment = true) {
   }
 
   updateValue(value: string | number) {
@@ -37,8 +38,11 @@ export class StyleCommander implements Commander<string | number> {
   render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
     if (cacheData && cacheData.style) {
       if (rawElement) {
-        rawElement.style[cacheData.style.name] = cacheData.style.value;
-        return null;
+        const isInline = dtd[rawElement.nodeName.toLowerCase()].display === 'inline';
+        if (this.canApplyBlockFragment || isInline) {
+          rawElement.style[cacheData.style.name] = cacheData.style.value;
+          return null;
+        }
       }
       const el = document.createElement('span');
       el.style[cacheData.style.name] = cacheData.style.value;

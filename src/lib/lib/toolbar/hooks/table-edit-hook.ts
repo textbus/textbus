@@ -158,7 +158,7 @@ export class TableEditHook implements Hook {
 
   onViewChange(): void {
     if (this.startPosition && this.endPosition) {
-      this.cellMatrix = this.serialize(this.tableElement);
+      // this.cellMatrix = this.serialize(this.tableElement);
       const startCell = this.cellMatrix[this.startPosition.rowIndex].cells[this.startPosition.columnIndex].cellElement;
       const endCell = this.cellMatrix[this.endPosition.rowIndex].cells[this.endPosition.columnIndex].cellElement;
       this.startCell = startCell;

@@ -14,8 +14,8 @@ export class Renderer {
   render(newVNode: VBlockNode, host: HTMLElement) {
     let previousSibling: Node;
     newVNode.children.forEach(vNode => {
-      console.log((vNode as VBlockNode)?.formats, (this?.oldVNode?.children[0] as VBlockNode)?.formats);
-      previousSibling = this.diffAndUpdateView(vNode, this?.oldVNode?.children.shift(), host, previousSibling);
+      const old = this?.oldVNode?.children.shift();
+      previousSibling = this.diffAndUpdateView(vNode, old, host, previousSibling);
     });
     this?.oldVNode?.children.forEach(i => i.destroyView());
     this.oldVNode = newVNode;
@@ -129,7 +129,7 @@ export class Renderer {
           case Priority.Property:
             vNode.context.mergeFormat(new InlineFormat({
               startIndex: vNode.startIndex,
-              endIndex: vNode.endIndex,
+              endIndex: vNode instanceof VBlockNode ? vNode.context.contentLength : vNode.endIndex,
               context: vNode.context,
               ...format
             }), false);

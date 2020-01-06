@@ -344,7 +344,7 @@ export class Fragment extends View {
     const childFormatRanges: Array<InlineFormat> = [];
 
     formatRanges.forEach(format => {
-      if (format instanceof BlockFormat) {
+      if (format instanceof BlockFormat || (format.startIndex === 0 && format.endIndex === this.contentLength)) {
         containerFormatRanges.push(format);
       } else {
         childFormatRanges.push(format);

@@ -7,7 +7,7 @@ import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { CacheData } from '../utils/cache-data';
 import { dtd } from '../../dtd';
 
-const commander = new StyleCommander('backgroundColor');
+const commander = new StyleCommander('backgroundColor', false);
 
 const hideEvent = new Subject<void>();
 
