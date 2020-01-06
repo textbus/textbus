@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { CacheData, EditableOptions } from './utils/cache-data';
 import { Hook } from '../viewer/help';
-import { Editor } from '../editor';
 
 export enum Priority {
   Default = 0,

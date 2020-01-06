@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { Form } from './forms/form';
 import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
-import { sourceHook } from '../hooks/source-hook';
+import { SourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
 
 const commander = new AttrCommander('video');
@@ -42,7 +42,7 @@ export const videoHandler: DropdownConfig = {
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  hook: sourceHook,
+  hook: new SourceHook('video'),
   editable: {
     attrs: ['src', 'autoplay', 'controls']
   },

@@ -2,7 +2,6 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { Fragment } from '../parser/fragment';
 import { RootFragment } from '../parser/root-fragment';
 
 export class ReplaceModel {

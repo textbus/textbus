@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { Form } from './forms/form';
 import { AttrType } from './forms/help';
 import { DropdownConfig, HandlerType, Priority } from '../help';
-import { sourceHook } from '../hooks/source-hook';
+import { SourceHook } from '../hooks/source-hook';
 import { AttrCommander } from '../../commands/attr-commander';
 
 const commander = new AttrCommander('img');
@@ -33,7 +33,7 @@ export const imageHandler: DropdownConfig = {
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  hook: sourceHook,
+  hook: new SourceHook('img'),
   editable: {
     attrs: ['src']
   },
