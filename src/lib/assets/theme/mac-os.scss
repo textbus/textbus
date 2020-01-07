@@ -4,9 +4,33 @@
       background: linear-gradient(#fff 3px, #eee 17px, $color-gray-light);
       border: 1px solid darken($color-gray-light, 3);
       border-radius: 0;
+      &-active {
+        background: linear-gradient(
+                lighten($color-primary, 20) 1px,
+                lighten($color-primary, 0) 2px,
+                lighten($color-primary, 0) 21px,
+                darken($color-primary, 10) 26px
+        );
+        border-color: darken($color-primary, 8);
+        color: #fff;
+        position: relative;
+        z-index: 1;
+      }
     }
 
     > .tanbo-editor-handler {
+      &-active {
+        background: linear-gradient(
+                lighten($color-primary, 20) 1px,
+                lighten($color-primary, 0) 2px,
+                lighten($color-primary, 0) 21px,
+                darken($color-primary, 10) 26px
+        );
+        border-color: darken($color-primary, 8);
+        color: #fff;
+        position: relative;
+        z-index: 1;
+      }
       &:not(:first-child) {
         margin-left: -1px;
       }
