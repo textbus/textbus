@@ -112,9 +112,6 @@ export class Renderer {
         }
         return node;
       }, (null as HTMLElement));
-      if (vNode instanceof VBlockNode) {
-        vNode.context.cleanFormats();
-      }
       newFormatStates.forEach(format => {
         switch (format.handler.priority) {
           case Priority.Default:
@@ -123,7 +120,7 @@ export class Renderer {
             vNode.context.mergeFormat(new BlockFormat({
               context: vNode.context,
               ...format
-            }), false);
+            }), true);
             break;
           case Priority.Inline:
           case Priority.Property:
@@ -132,7 +129,7 @@ export class Renderer {
               endIndex: vNode instanceof VBlockNode ? vNode.context.contentLength : vNode.endIndex,
               context: vNode.context,
               ...format
-            }), false);
+            }), true);
             break;
         }
       });
