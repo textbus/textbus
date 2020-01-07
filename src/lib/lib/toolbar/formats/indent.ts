@@ -18,7 +18,7 @@ export const indentHandler: SelectConfig = {
     }
   },
   editable: {
-    styleName: 'textAlign'
+    styleName: 'textIndent'
   },
   match: {
     styles: {
