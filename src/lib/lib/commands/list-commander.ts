@@ -32,13 +32,13 @@ export class ListCommander implements Commander<any> {
 
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
-      const listFragment = new Fragment(commonAncestorFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+      const listFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
         tag: this.tagName
       })));
       if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {
         c = range.commonAncestorFragment.parent;
         const index = commonAncestorFragment.getIndexInParent();
-        const li = new Fragment(listFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+        const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: 'li'
         })));
         li.append(commonAncestorFragment.parent.delete(index, index + 1));
@@ -49,7 +49,7 @@ export class ListCommander implements Commander<any> {
       const position = range.getCommonAncestorFragmentScope().startIndex;
 
       range.getSelectedScope().forEach(item => {
-        const li = new Fragment(listFragment, rootFragment.parser.getFormatStateByData(new CacheData({
+        const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: 'li'
         })));
         if (item.context.parent === commonAncestorFragment) {

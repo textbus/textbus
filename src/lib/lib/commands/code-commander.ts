@@ -22,10 +22,10 @@ export class CodeCommander implements Commander<string> {
       const firstRange = selection.firstRange;
       const fragment = firstRange.startFragment;
       const context = fragment.parent;
-      const pre = new Fragment(context, rootFragment.parser.getFormatStateByData(new CacheData({
+      const pre = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
         tag: 'pre'
       })));
-      pre.append(new Single(pre, 'br', rootFragment.parser.getFormatStateByData(new CacheData({
+      pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new CacheData({
         tag: 'br'
       }))));
       context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);

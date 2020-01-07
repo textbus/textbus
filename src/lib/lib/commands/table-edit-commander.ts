@@ -119,10 +119,10 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index];
       const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
       if (index === 0) {
-        fragment.parent.insert(TableEditCommander.createCell('td', fragment.parent, parser), 0);
+        fragment.parent.insert(TableEditCommander.createCell('td', parser), 0);
       } else {
         if (cell.columnOffset === 0) {
-          fragment.parent.insert(TableEditCommander.createCell('td', fragment, parser), fragment.getIndexInParent());
+          fragment.parent.insert(TableEditCommander.createCell('td', parser), fragment.getIndexInParent());
         } else if (cell.rowOffset === 0) {
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
@@ -169,7 +169,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           });
         }
       } else {
-        const f = TableEditCommander.createCell('td', fragment.parent, parser);
+        const f = TableEditCommander.createCell('td', parser);
         fragment.parent.insert(f, fragment.getIndexInParent() + 1);
       }
     });
@@ -181,12 +181,12 @@ export class TableEditCommander implements Commander<TableEditParams> {
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
-    const tr = new Fragment(fragment.parent, parser.getFormatStateByData(new CacheData({
+    const tr = new Fragment(parser.getFormatStateByData(new CacheData({
       tag: 'tr'
     })));
     if (index === 0) {
       cellMatrix[0].cells.forEach(() => {
-        const td = TableEditCommander.createCell('td', tr, parser);
+        const td = TableEditCommander.createCell('td', parser);
         tr.append(td);
       });
     } else {
@@ -208,7 +208,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
             });
           }
         } else {
-          tr.append(TableEditCommander.createCell('td', tr, parser));
+          tr.append(TableEditCommander.createCell('td', parser));
         }
       });
     }
@@ -227,7 +227,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
-    const tr = new Fragment(fragment.parent, parser.getFormatStateByData(new CacheData({
+    const tr = new Fragment(parser.getFormatStateByData(new CacheData({
       tag: 'tr'
     })));
 
@@ -249,7 +249,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           });
         }
       } else {
-        tr.append(TableEditCommander.createCell('td', tr, parser));
+        tr.append(TableEditCommander.createCell('td', parser));
       }
     });
     fragment.parent.insert(tr, fragment.getIndexInParent() + 1);
@@ -320,7 +320,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
             }))
           });
 
-          const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser);
+          const newCellFragment = TableEditCommander.createCell('td', parser);
 
           if (cell.afterCell) {
             const index = (cell.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
@@ -358,7 +358,6 @@ export class TableEditCommander implements Commander<TableEditParams> {
         if (cell.rowOffset === 0 && cell.cellElement.rowSpan > 1) {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const newCellFragment = TableEditCommander.createCell('td',
-            rowFragment,
             parser,
             cell.cellElement.rowSpan - 1,
             cell.cellElement.colSpan);
@@ -426,7 +425,6 @@ export class TableEditCommander implements Commander<TableEditParams> {
             const newPosition = cellMatrix[index + 2].cells[cellIndex];
             const rowFragment = (newPosition.rowElement[VIRTUAL_NODE] as VNode).context;
             const newCellFragment = TableEditCommander.createCell('td',
-              rowFragment,
               parser,
               cell.cellElement.rowSpan - 1,
               cell.cellElement.colSpan);
@@ -473,7 +471,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
-            const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
+            const newCellFragment = TableEditCommander.createCell('td', parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
@@ -517,7 +515,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
           const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
-            const newCellFragment = TableEditCommander.createCell('td', rowFragment, parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
+            const newCellFragment = TableEditCommander.createCell('td', parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
             rowFragment.insert(newCellFragment, index);
           } else {
@@ -528,7 +526,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     });
   }
 
-  private static createCell(tagName: string, parent: Fragment, parser: Parser, rowspan?: number, colspan?: number) {
+  private static createCell(tagName: string, parser: Parser, rowspan?: number, colspan?: number) {
     const attrs = new Map<string, string>();
     if (rowspan) {
       attrs.set('rowspan', rowspan + '');
@@ -536,11 +534,11 @@ export class TableEditCommander implements Commander<TableEditParams> {
     if (colspan) {
       attrs.set('colspan', colspan + '');
     }
-    const cell = new Fragment(parent, parser.getFormatStateByData(new CacheData({
+    const cell = new Fragment(parser.getFormatStateByData(new CacheData({
       tag: tagName,
       attrs
     })));
-    cell.append(new Single(cell, 'br', parser.getFormatStateByData(new CacheData({
+    cell.append(new Single('br', parser.getFormatStateByData(new CacheData({
       tag: 'br'
     }))));
     return cell;

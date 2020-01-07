@@ -7,8 +7,8 @@ import { FormatState } from '../matcher/matcher';
 
 export class Single extends View {
   private formatMatrix = new Map<Handler, SingleFormat[]>();
-
-  constructor(public parent: Fragment, public tagName: string, formats?: ParseState[]) {
+  parent: Fragment;
+  constructor(public tagName: string, formats?: ParseState[]) {
     super();
     if (Array.isArray(formats)) {
       formats.forEach(item => {
@@ -54,7 +54,7 @@ export class Single extends View {
   }
 
   clone(): Single {
-    const s = new Single(this.parent, this.tagName);
+    const s = new Single(this.tagName);
     s.formatMatrix = new Map<Handler, SingleFormat[]>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       s.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {

@@ -10,7 +10,7 @@ import { ParseState } from './parser';
 
 export class Fragment extends View {
   readonly vNode: VBlockNode;
-
+  readonly parent: Fragment;
   get contentLength() {
     return this.contents.length;
   }
@@ -18,7 +18,7 @@ export class Fragment extends View {
   private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
-  constructor(public parent: Fragment, formats?: ParseState[]) {
+  constructor(formats?: ParseState[]) {
     super();
     if (Array.isArray(formats)) {
       formats.forEach(item => {
@@ -68,11 +68,11 @@ export class Fragment extends View {
    * 克隆当前片段的副本
    */
   clone(): Fragment {
-    const ff = new Fragment(this.parent);
+    const ff = new Fragment();
     ff.contents = this.contents.clone();
     ff.contents.slice(0).filter(item => {
       if (item instanceof Single || item instanceof Fragment) {
-        item.parent = ff;
+        (<{parent: Fragment}>item.parent) = ff;
       }
     });
     ff.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
@@ -89,7 +89,7 @@ export class Fragment extends View {
     this.contents = contents;
     contents.slice(0).forEach(i => {
       if (i instanceof Single || i instanceof Fragment) {
-        i.parent = this;
+        (<{parent: Fragment}>i.parent) = this;
       }
     });
   }
@@ -150,7 +150,7 @@ export class Fragment extends View {
   insert(content: string | View, index: number) {
     this.markDirty();
     if (content instanceof Single || content instanceof Fragment) {
-      content.parent = this;
+      (<{parent: Fragment}>content.parent) = this;
     }
     this.contents.insert(content, index);
     const newFormats: InlineFormat[] = [];
@@ -190,7 +190,7 @@ export class Fragment extends View {
     this.markDirty();
 
     if (content instanceof Single || content instanceof Fragment) {
-      content.parent = this;
+      (<{parent: Fragment}>content.parent) = this;
     }
 
     this.contents.append(content);
@@ -220,7 +220,7 @@ export class Fragment extends View {
     const contentsLength = fragment.contents.length;
     const elements = fragment.contents.slice(0).map(content => {
       if (content instanceof Single || content instanceof Fragment) {
-        content.parent = this;
+        (<{parent: Fragment}>content.parent) = this;
       }
       return content;
     });
@@ -456,7 +456,7 @@ export class Fragment extends View {
     }
     this.formatMatrix.clear();
     this.contents = new Contents();
-    this.parent = null;
+    (<{parent: Fragment}>this.parent) = null;
   }
 
   getIndexInParent() {

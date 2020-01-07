@@ -17,10 +17,10 @@ export class RootFragment extends Fragment {
     const last = this.getContentAtIndex(this.contentLength - 1);
 
     const guardLastContentEditable = () => {
-      const newFragment = new Fragment(this, this.parser.getFormatStateByData(new CacheData({
+      const newFragment = new Fragment(this.parser.getFormatStateByData(new CacheData({
         tag: 'p'
       })));
-      newFragment.append(new Single(newFragment, 'br', this.parser.getFormatStateByData(new CacheData({
+      newFragment.append(new Single('br', this.parser.getFormatStateByData(new CacheData({
         tag: 'br'
       }))));
       this.append(newFragment);

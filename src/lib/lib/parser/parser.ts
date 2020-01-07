@@ -118,7 +118,7 @@ export class Parser {
       if (/inline/.test(dtd[tagName].display)) {
         const start = context.contentLength;
         if (dtd[tagName].type === 'single') {
-          const newSingle = new Single(context, tagName);
+          const newSingle = new Single(tagName);
           context.append(newSingle);
           this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
           return 1;
@@ -130,7 +130,7 @@ export class Parser {
           return len;
         }
       } else {
-        const newBlock = new Fragment(context);
+        const newBlock = new Fragment();
         let nodes: Node[];
         if (dtd[tagName].limitChildren) {
           nodes = Array.from((from as HTMLElement).children).filter(el => {

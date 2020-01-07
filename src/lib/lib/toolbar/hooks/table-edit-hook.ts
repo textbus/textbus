@@ -8,6 +8,7 @@ import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
 import { Parser } from '../../parser/parser';
+import { CacheData } from '../utils/cache-data';
 
 interface ElementPosition {
   left: number;
@@ -208,7 +209,9 @@ export class TableEditHook implements Hook {
                 const newPosition = viewer.findFirstPosition(cellFragment);
                 range.startFragment = range.endFragment = newPosition.fragment;
               } else {
-                cellFragment.append(new Single(range.startFragment, 'br'));
+                cellFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+                  tag: 'br'
+                }))));
                 range.startFragment = range.endFragment = cellFragment;
               }
               viewer.rerender();

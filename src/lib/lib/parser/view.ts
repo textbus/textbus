@@ -14,6 +14,8 @@ export abstract class View {
   private _dirty = true;
   private _dataChanged = true;
 
+  private infinityLoop = false;
+
   abstract clone(): View;
 
   viewSynced() {
@@ -27,7 +29,12 @@ export abstract class View {
       this._dataChanged = true;
     }
     if (this.parent) {
+      if (this.infinityLoop) {
+        throw new Error(`The parent of the current fragment generates a circular reference!`);
+      }
+      this.infinityLoop = true;
       this.parent.markDirty(false);
+      this.infinityLoop = false;
     }
   }
 }

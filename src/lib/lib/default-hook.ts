@@ -27,7 +27,7 @@ export class DefaultHook implements Hook {
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+          const s = new Single('br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
           })));
           commonAncestorFragment.insert(s, index + startIndex);
@@ -45,7 +45,7 @@ export class DefaultHook implements Hook {
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + ev.offset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
-      commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+      commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
         tag: 'br'
       }))));
     }
@@ -111,11 +111,11 @@ export class DefaultHook implements Hook {
       const commonAncestorFragment = range.commonAncestorFragment;
       if (/th|td/i.test(commonAncestorFragment.vNode.nativeElement.nodeName)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
           }))));
         }
-        commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+        commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
           tag: 'br'
         }))));
         range.startIndex = range.endIndex = range.endIndex + 1;
@@ -125,7 +125,7 @@ export class DefaultHook implements Hook {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single(commonAncestorFragment, 'br', parser.getFormatStateByData(new CacheData({
+          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
           }))));
         }
@@ -146,7 +146,7 @@ export class DefaultHook implements Hook {
           }))
         });
         if (!afterFragment.contentLength) {
-          afterFragment.append(new Single(afterFragment, 'br', parser.getFormatStateByData(new CacheData({
+          afterFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
             tag: 'br'
           }))));
         }
@@ -166,7 +166,9 @@ export class DefaultHook implements Hook {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, range.startIndex);
           if (!range.commonAncestorFragment.contentLength) {
-            range.commonAncestorFragment.append(new Single(range.commonAncestorFragment, 'br'));
+            range.commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+              tag: 'br'
+            }))));
           }
           viewer.rerender();
           selection.apply(-1);
@@ -180,7 +182,7 @@ export class DefaultHook implements Hook {
           if (range.startFragment.contentLength) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
 
-              const startFragment = new Fragment(rerenderFragment.fragment);
+              const startFragment = new Fragment();
               parser.getFormatStateByData(new CacheData({
                 tag: 'p'
               })).forEach(item => {
@@ -209,7 +211,7 @@ export class DefaultHook implements Hook {
                 firstRange.startFragment = p.fragment;
                 firstRange.startIndex = 0;
               } else {
-                const startFragment = new Fragment(rerenderFragment.fragment);
+                const startFragment = new Fragment();
                 parser.getFormatStateByData(new CacheData({
                   tag: 'p'
                 })).forEach(item => {
@@ -219,7 +221,9 @@ export class DefaultHook implements Hook {
                   }))
                 });
 
-                startFragment.append(new Single(startFragment, 'br'));
+                startFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+                  tag: 'br'
+                }))));
                 rerenderFragment.fragment.insert(startFragment, 0);
                 firstRange.startFragment = startFragment;
                 firstRange.startIndex = 0;
@@ -269,7 +273,9 @@ export class DefaultHook implements Hook {
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;
         if (range.startFragment.contentLength === 0) {
-          range.startFragment.append(new Single(range.startFragment, 'br'));
+          range.startFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+            tag: 'br'
+          }))));
         }
         viewer.rerender();
         selection.collapse();

@@ -70,7 +70,7 @@ export function wrap(selection: TBSelection, handler: Handler, tagName: string, 
     const range = selection.firstRange;
     const commonAncestorFragment = range.commonAncestorFragment;
     const parent = commonAncestorFragment.parent;
-    const fragment = new Fragment(parent);
+    const fragment = new Fragment();
     const index = commonAncestorFragment.getIndexInParent();
     parent.delete(index, index + 1);
     parent.insert(fragment, index);
@@ -90,7 +90,7 @@ export function wrap(selection: TBSelection, handler: Handler, tagName: string, 
     const fragments: Fragment[] = [];
     selection.ranges.forEach(range => {
       let commonAncestorFragment = range.commonAncestorFragment;
-      const newFragment = new Fragment(commonAncestorFragment);
+      const newFragment = new Fragment();
       newFragment.mergeFormat(new BlockFormat({
         state: FormatState.Valid,
         handler,

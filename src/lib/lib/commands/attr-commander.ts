@@ -47,7 +47,6 @@ export class AttrCommander implements Commander<AttrState[]> {
             }
           });
           const newNode = new Single(
-            range.commonAncestorFragment,
             this.tagName,
             rootFragment.parser.getFormatStateByData(new CacheData({
               tag: this.tagName
