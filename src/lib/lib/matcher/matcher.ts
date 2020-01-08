@@ -117,9 +117,8 @@ export class Matcher {
           s.endIndex,
           s.context,
           handler);
-        if (state.state === FormatState.Invalid && s.context.parent) {
-          const index = s.context.getIndexInParent();
-          const inSingleContainer = Matcher.inSingleContainer(s.context.parent, handler, index, index + 1);
+        if (state.state === FormatState.Invalid) {
+          const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
           if (inSingleContainer.state !== FormatState.Invalid) {
             states.push(inSingleContainer);
           } else {
