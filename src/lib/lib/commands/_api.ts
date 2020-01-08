@@ -3,6 +3,7 @@ export * from './commander';
 export * from './attr-commander';
 export * from './block-commander';
 export * from './block-style-commander';
+export * from './bold-commander';
 export * from './clean-commander';
 export * from './code-commander';
 export * from './history-commander';
