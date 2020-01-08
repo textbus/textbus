@@ -150,20 +150,20 @@ export class Contents implements Iterable<string | View> {
     return -1;
   }
 
-  getIndexByNode(element: View) {
-    let index = 0;
-    for (const item of this.elements) {
-      if (item === element) {
-        return index;
-      }
-      if (item instanceof Fragment) {
-        index += item.getAllChildContentsLength();
-      } else {
-        index += item.length;
-      }
-    }
-    return -1;
-  }
+  // getIndexByNode(element: View) {
+  //   let index = 0;
+  //   for (const item of this.elements) {
+  //     if (item === element) {
+  //       return index;
+  //     }
+  //     if (item instanceof Fragment) {
+  //       index += item.getAllChildContentsLength();
+  //     } else {
+  //       index += item.length;
+  //     }
+  //   }
+  //   return -1;
+  // }
 
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0];

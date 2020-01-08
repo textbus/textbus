@@ -11,6 +11,7 @@ import { ParseState } from './parser';
 export class Fragment extends View {
   readonly vNode: VBlockNode;
   readonly parent: Fragment;
+
   get contentLength() {
     return this.contents.length;
   }
@@ -52,7 +53,10 @@ export class Fragment extends View {
 
     this.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(formats.keys()).forEach(key => {
-      this.formatMatrix.set(key, formats.get(key).map(i => i.clone()));
+      this.formatMatrix.set(key, formats.get(key).map(i => {
+        i.context = this;
+        return i.clone();
+      }));
     });
   }
 
@@ -72,13 +76,15 @@ export class Fragment extends View {
     ff.contents = this.contents.clone();
     ff.contents.slice(0).filter(item => {
       if (item instanceof Single || item instanceof Fragment) {
-        (<{parent: Fragment}>item.parent) = ff;
+        (<{ parent: Fragment }>item.parent) = ff;
       }
     });
     ff.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(this.formatMatrix.keys()).forEach(key => {
       ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
-        return f.clone();
+        const c = f.clone();
+        c.context = ff;
+        return c;
       }));
     });
     return ff;
@@ -89,7 +95,7 @@ export class Fragment extends View {
     this.contents = contents;
     contents.slice(0).forEach(i => {
       if (i instanceof Single || i instanceof Fragment) {
-        (<{parent: Fragment}>i.parent) = this;
+        (<{ parent: Fragment }>i.parent) = this;
       }
     });
   }
@@ -150,7 +156,11 @@ export class Fragment extends View {
   insert(content: string | View, index: number) {
     this.markDirty();
     if (content instanceof Single || content instanceof Fragment) {
-      (<{parent: Fragment}>content.parent) = this;
+      if (content.parent) {
+        const index = content.parent.find(content);
+        content.parent.delete(index, index + 1);
+      }
+      (<{ parent: Fragment }>content.parent) = this;
     }
     this.contents.insert(content, index);
     const newFormats: InlineFormat[] = [];
@@ -190,7 +200,11 @@ export class Fragment extends View {
     this.markDirty();
 
     if (content instanceof Single || content instanceof Fragment) {
-      (<{parent: Fragment}>content.parent) = this;
+      if (content.parent) {
+        const index = content.parent.find(content);
+        content.parent.delete(index, index + 1);
+      }
+      (<{ parent: Fragment }>content.parent) = this;
     }
 
     this.contents.append(content);
@@ -220,7 +234,11 @@ export class Fragment extends View {
     const contentsLength = fragment.contents.length;
     const elements = fragment.contents.slice(0).map(content => {
       if (content instanceof Single || content instanceof Fragment) {
-        (<{parent: Fragment}>content.parent) = this;
+        if (content.parent) {
+          const index = content.parent.find(content);
+          content.parent.delete(index, index + 1);
+        }
+        (<{ parent: Fragment }>content.parent) = this;
       }
       return content;
     });
@@ -289,7 +307,9 @@ export class Fragment extends View {
       const newFragmentFormats: Array<InlineFormat | BlockFormat> = [];
       this.formatMatrix.get(key).forEach(format => {
         if (format instanceof BlockFormat) {
-          newFragmentFormats.push(format.clone());
+          const c = format.clone();
+          c.context = ff;
+          newFragmentFormats.push(c);
           formats.push(format);
         } else {
           const cloneFormat = format.clone();
@@ -445,6 +465,7 @@ export class Fragment extends View {
 
   mergeFormat(format: FormatRange, important = false) {
     this.markDirty();
+    format.context = this;
     mergeFormat(this.formatMatrix, format, important);
   }
 
@@ -456,7 +477,7 @@ export class Fragment extends View {
     }
     this.formatMatrix.clear();
     this.contents = new Contents();
-    (<{parent: Fragment}>this.parent) = null;
+    (<{ parent: Fragment }>this.parent) = null;
   }
 
   getIndexInParent() {

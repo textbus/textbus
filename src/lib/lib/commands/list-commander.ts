@@ -5,6 +5,9 @@ import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { RootFragment } from '../parser/root-fragment';
+import { VIRTUAL_NODE } from '../parser/help';
+import { VNode } from '../renderer/virtual-dom';
+import { dtd } from '../dtd';
 
 export class ListCommander implements Commander<any> {
   recordHistory = true;
@@ -13,56 +16,93 @@ export class ListCommander implements Commander<any> {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void {
-    let c = selection.commonAncestorFragment;
-
     if (overlap) {
+      const reg = new RegExp(this.tagName, 'i');
       selection.ranges.forEach(range => {
-        range.getSelectedScope().forEach(item => {
-          const formats = item.context.getFormatRangesByHandler(handler);
-          if (formats && formats.length) {
-            const index = item.context.getIndexInParent();
-            item.context.parent.insertFragmentContents(item.context, index);
-            item.context.destroy();
+        const commonAncestorFragment = range.commonAncestorFragment;
+        let node = commonAncestorFragment.vNode.nativeElement;
+        if (reg.test(node.nodeName)) {
+          // 选中同一组列表下的多个 li
+          const scope = range.getCommonAncestorFragmentScope();
+          this.splitList(commonAncestorFragment, scope.startIndex, scope.endIndex + 1);
+          return;
+        }
+        let liFragment: Fragment;
+        while (node) {
+          if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
+            liFragment = (node[VIRTUAL_NODE] as VNode).context;
+            break;
           }
-        });
-      });
-
-      return;
-    }
-
-    selection.ranges.forEach(range => {
-      const commonAncestorFragment = range.commonAncestorFragment;
-      const listFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
-        tag: this.tagName
-      })));
-      if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {
-        c = range.commonAncestorFragment.parent;
-        const index = commonAncestorFragment.getIndexInParent();
-        const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
-          tag: 'li'
-        })));
-        li.append(commonAncestorFragment.parent.delete(index, index + 1));
-        listFragment.append(li);
-        c.insert(listFragment, index);
-        return;
-      }
-      const position = range.getCommonAncestorFragmentScope().startIndex;
-
-      range.getSelectedScope().forEach(item => {
-        const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
-          tag: 'li'
-        })));
-        if (item.context.parent === commonAncestorFragment) {
-          const index = item.context.getIndexInParent();
-          commonAncestorFragment.delete(index, index + 1);
-          li.append(item.context);
-          listFragment.append(li);
+          node = node.parentNode;
+        }
+        if (liFragment) {
+          // 选区在一个 li 下
+          const liIndex = liFragment.getIndexInParent();
+          this.splitList(liFragment.parent, liIndex, liIndex + 1);
         } else {
-          const f = item.context.delete(item.startIndex, item.endIndex);
-          li.append(f);
+          // 选区在多个列表下
+          const scope = range.getCommonAncestorFragmentScope();
+          const temporaryFragment = new Fragment();
+          range.getBlockFragmentsBySelectedScope().forEach(item => {
+            const node = item.context.vNode.nativeElement;
+            if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
+              temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
+              this.deleteEmptyFragment(item.context, commonAncestorFragment);
+            } else {
+              const p = item.context.parent;
+              temporaryFragment.append(item.context);
+              this.deleteEmptyFragment(p, commonAncestorFragment);
+            }
+          });
+          commonAncestorFragment.insertFragmentContents(temporaryFragment, scope.startIndex);
         }
       });
-      commonAncestorFragment.insert(listFragment, position);
+      return;
+    }
+    selection.ranges.forEach(range => {
+      let insertPosition = range.getCommonAncestorFragmentScope().startIndex;
+      let container = range.commonAncestorFragment;
+
+      const listGroup = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+        tag: this.tagName
+      })));
+
+      range.getBlockFragmentsBySelectedScope().forEach(item => {
+        const parent = item.context.parent;
+        if (item.startIndex === 0 && item.endIndex === item.context.contentLength) {
+          if (item.context === range.commonAncestorFragment) {
+            insertPosition = container.getIndexInParent();
+            container = container.parent;
+          }
+          const nativeElement = item.context.vNode.wrapElement;
+          if (/li/i.test(nativeElement.nodeName)) {
+            listGroup.append(item.context);
+          } else {
+            const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+              tag: 'li'
+            })));
+            li.append(item.context);
+            listGroup.append(li);
+          }
+        } else {
+          const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+            tag: 'li'
+          })));
+          li.append(item.context.delete(item.startIndex, item.endIndex));
+          listGroup.append(li);
+        }
+        this.deleteEmptyFragment(parent, container);
+      });
+      const limitChildren = dtd[container.vNode.nativeElement.nodeName.toLowerCase()]?.limitChildren;
+      if (limitChildren) {
+        const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+          tag: limitChildren[0]
+        })));
+        childFragment.append(listGroup);
+        container.insert(childFragment, insertPosition);
+        return;
+      }
+      container.insert(listGroup, insertPosition);
     });
   }
 
@@ -71,5 +111,40 @@ export class ListCommander implements Commander<any> {
       return new ReplaceModel(document.createElement(cacheData.tag));
     }
     return null;
+  }
+
+  private splitList(listGroup: Fragment, startIndex: number, endIndex: number) {
+    let index = listGroup.getIndexInParent();
+    const parent = listGroup.parent;
+    const last = listGroup.delete(endIndex, listGroup.contentLength);
+    const first = listGroup.delete(0, startIndex);
+    if (first.contentLength) {
+      parent.insert(first, index);
+      index++;
+    }
+    const temporaryFragment = new Fragment();
+    listGroup.sliceContents(0).forEach(item => {
+      if (item instanceof Fragment) {
+        temporaryFragment.insertFragmentContents(item, temporaryFragment.contentLength);
+      } else {
+        temporaryFragment.append(item);
+      }
+    });
+    if (last.contentLength) {
+      parent.insert(last, index);
+    }
+    parent.insertFragmentContents(temporaryFragment, index);
+    listGroup.destroy();
+  }
+
+  private deleteEmptyFragment(fragment: Fragment, scope: Fragment) {
+    if (!fragment || fragment === scope) {
+      return;
+    }
+    const parent = fragment.parent;
+    if (fragment.contentLength === 0) {
+      fragment.destroy();
+    }
+    this.deleteEmptyFragment(parent, scope);
   }
 }

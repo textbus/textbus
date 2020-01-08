@@ -218,6 +218,19 @@ export class Matcher {
 
   private getStatesByRange(startIndex: number, endIndex: number, fragment: Fragment, handler: Handler): MatchData {
     let formatRanges = fragment.getFormatRangesByHandler(handler) || [];
+
+    if ([Priority.Default, Priority.Block].includes(handler.priority)) {
+      if (formatRanges.length) {
+        const first = formatRanges[0];
+        if (first.state !== FormatState.Invalid) {
+          return {
+            state: first.state,
+            cacheData: first?.cacheData.clone() || null
+          }
+        }
+      }
+    }
+
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         // 如果为块级元素，则需要从第 0 位开始匹配
@@ -227,14 +240,14 @@ export class Matcher {
           if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
             return {
               state: format.state,
-              cacheData: format.cacheData ? format.cacheData.clone() : null
+              cacheData: format?.cacheData.clone() || null
             };
           }
         }
         if ((startIndex === 0 && startIndex === format.startIndex) || (startIndex > format.startIndex && startIndex <= format.endIndex)) {
           return {
             state: format.state,
-            cacheData: format.cacheData ? format.cacheData.clone() : null
+            cacheData: format?.cacheData.clone() || null
           };
         }
       }
@@ -250,6 +263,7 @@ export class Matcher {
     formatRanges = formatRanges.filter(item => {
       return !(item.endIndex <= startIndex || item.startIndex >= endIndex);
     });
+
     for (const child of childContents) {
       if (typeof child === 'string' || child instanceof Single) {
         for (const format of formatRanges) {
@@ -257,12 +271,12 @@ export class Matcher {
             if (format.state === FormatState.Exclude) {
               return {
                 state: FormatState.Exclude,
-                cacheData: format.cacheData ? format.cacheData.clone() : null
+                cacheData: format?.cacheData.clone() || null
               };
             } else {
               states.push({
                 state: format.state,
-                cacheData: format.cacheData ? format.cacheData.clone() : null
+                cacheData: format?.cacheData.clone() || null
               });
             }
           } else {

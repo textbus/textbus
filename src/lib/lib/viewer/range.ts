@@ -185,6 +185,92 @@ export class TBRange {
     });
   }
 
+  getBlockFragmentsBySelectedScope(): SelectedScope[] {
+    const start: SelectedScope[] = [];
+    const end: SelectedScope[] = [];
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    let startIndex = TBRange.findBlockStartIndex(this.startFragment, this.startIndex);
+    let endIndex = TBRange.findBlockEndIndex(this.endFragment, this.endIndex);
+
+    while (startFragment !== this.commonAncestorFragment) {
+      start.push({
+        startIndex,
+        endIndex: startFragment.contentLength,
+        context: startFragment
+      });
+      startIndex = startFragment.getIndexInParent() + 1;
+      startFragment = startFragment.parent;
+    }
+    while (endFragment !== this.commonAncestorFragment) {
+      end.push({
+        startIndex: 0,
+        endIndex,
+        context: endFragment
+      });
+      endIndex = endFragment.getIndexInParent();
+      endFragment = endFragment.parent;
+    }
+    return [...start, {
+      startIndex,
+      endIndex,
+      context: this.commonAncestorFragment
+    }, ...end].filter(item => {
+      return item.startIndex < item.endIndex
+    }).reduce((previousValue, currentValue) => {
+      return previousValue.concat(this.contentsToBlockRange(
+        currentValue.context,
+        currentValue.startIndex,
+        currentValue.endIndex));
+    }, []);
+  }
+
+  private static findBlockStartIndex(fragment: Fragment, index: number) {
+    let startIndex: number = 0;
+    for (let i = 0; i < index; i++) {
+      const item = fragment.getContentAtIndex(i);
+      if (item instanceof Fragment) {
+        startIndex = i + 1;
+      }
+    }
+    return startIndex;
+  }
+
+  private static findBlockEndIndex(fragment: Fragment, index: number) {
+    for (; index < fragment.contentLength; index++) {
+      const item = fragment.getContentAtIndex(index);
+      if (item instanceof Fragment) {
+        break;
+      }
+    }
+    return index;
+  }
+
+  private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
+    const ranges: SelectedScope[] = [];
+    let scope: SelectedScope;
+    let index = 0;
+    fragment.sliceContents(startIndex, endIndex).forEach(content => {
+      if (content instanceof Fragment) {
+        scope = null;
+        ranges.push(...this.contentsToBlockRange(content, 0, content.contentLength));
+      } else {
+        if (!scope) {
+          scope = {
+            startIndex: index,
+            endIndex: index + content.length,
+            context: fragment
+          };
+          ranges.push(scope);
+        } else {
+          scope.endIndex = index + content.length
+        }
+      }
+      index += content.length;
+    });
+    return ranges;
+  }
+
   private findFocusNodeAndOffset(vNodes: VNode[],
                                  i: number): { node: Node, offset: number } {
     let endIndex = 0;
