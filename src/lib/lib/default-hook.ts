@@ -18,7 +18,7 @@ export class DefaultHook implements Hook {
 
     const c = new Contents();
     commonAncestorFragment.useContents(c);
-    ev.fragment.sliceContents(0).forEach(i => {
+    ev.fragment.clone().sliceContents(0).forEach(i => {
       commonAncestorFragment.append(i);
     });
     commonAncestorFragment.useFormats(ev.fragment.getFormatMatrix());

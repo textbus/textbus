@@ -10,7 +10,7 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: `<p>11111</p><p>2222</p><p>3333<br></p>`
+  content: `<p>欢迎你使用&nbsp;<strong>TBus</strong>&nbsp;富文本编辑器...<br></p>`
 });
 
 // editor.updateContentHTML('<p>p1<span>p-span</span></p><span>span3</span><span>span4</span><p>p2</p><span>span1</span><span>span2</span>')
