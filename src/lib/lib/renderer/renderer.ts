@@ -174,7 +174,7 @@ export class Renderer {
         return ' ' + Array.from({
           length: str.length - 1
         }).fill('\u00a0').join('');
-      }).replace(/\s$/, '\u00a0');
+      }).replace(/^\s|\s$/g, '\u00a0');
       if (oldVNode instanceof VTextNode) {
         vNode.nativeElement = oldVNode.nativeElement;
         vNode.nativeElement[VIRTUAL_NODE] = vNode;
