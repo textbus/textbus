@@ -36,16 +36,11 @@ export class Single extends View {
     return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
   }
 
-  mergeFormat(format: SingleFormat, important = false) {
+  mergeFormat(format: SingleFormat) {
     if (format.state === FormatState.Invalid) {
       this.formatMatrix.delete(format.handler);
     } else {
-      let old = this.formatMatrix.get(format.handler);
-      if (Array.isArray(old)) {
-        important ? old.push(format) : old.unshift(format);
-      } else {
-        this.formatMatrix.set(format.handler, [format]);
-      }
+      this.formatMatrix.set(format.handler, [format]);
     }
   }
 

@@ -10,7 +10,7 @@ const editor = createEditor('#editor', {
     console.log(type);
     return '/test';
   },
-  content: `<ul><li><p>11111</p></li></ul><ul><li><p>2222</p></li></ul><ul><li><p>3333</p></li></ul><p><br></p>`
+  content: `<p>11111</p><p>2222</p><p>3333<br></p>`
 });
 
 // editor.updateContentHTML('<p>p1<span>p-span</span></p><span>span3</span><span>span4</span><p>p2</p><span>span1</span><span>span2</span>')

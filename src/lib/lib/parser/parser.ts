@@ -93,7 +93,7 @@ export class Parser {
             context.mergeFormat(new SingleFormat({
               context,
               ...item
-            }), false);
+            }));
           }
           break;
       }
