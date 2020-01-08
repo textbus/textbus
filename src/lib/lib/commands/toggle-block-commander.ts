@@ -57,6 +57,13 @@ export class ToggleBlockCommander implements Commander {
         const temporaryFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: this.tagName
         })));
+        if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {
+          const index = commonAncestorFragment.getIndexInParent();
+          const parent = commonAncestorFragment.parent;
+          temporaryFragment.append(commonAncestorFragment);
+          parent.insert(temporaryFragment, index);
+          return;
+        }
         const index = range.getCommonAncestorFragmentScope().startIndex;
         range.getBlockFragmentsBySelectedScope().forEach(item => {
           const parent = item.context.parent;
