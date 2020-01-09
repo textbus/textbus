@@ -57,7 +57,10 @@ export class Viewer {
           this.nativeSelection.removeAllRanges();
         });
 
+      let selectionChangedTimer: number;
+
       fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+        clearTimeout(selectionChangedTimer);
         const tbSelection = new TBSelection(doc);
         const ranges: Range[] = [];
         if (this.nativeSelection.rangeCount) {
@@ -94,6 +97,10 @@ export class Viewer {
       this.cursor.onDelete.subscribe(() => {
         this.deleteContents();
         this.cursor.updateStateBySelection(this.selection);
+        selectionChangedTimer = setTimeout(() => {
+          // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
+          this.selectionChangeEvent.next(this.selection);
+        });
       });
       this.cursor.onNewLine.subscribe(() => {
         if (!this.selection.collapsed) {
