@@ -49,7 +49,8 @@ export class AttrCommander implements Commander<AttrState[]> {
           const newNode = new Single(
             this.tagName,
             rootFragment.parser.getFormatStateByData(new CacheData({
-              tag: this.tagName
+              tag: this.tagName,
+              attrs
             }))
           );
           range.commonAncestorFragment.insert(newNode, range.startIndex);
