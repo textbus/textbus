@@ -5,11 +5,11 @@ import { Priority } from '../toolbar/help';
 import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
-import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
+import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
 import { ParseState } from './parser';
 
 export class Fragment extends View {
-  readonly vNode: VBlockNode;
+  readonly token: BlockToken;
   readonly parent: Fragment;
 
   get contentLength() {
@@ -386,13 +386,13 @@ export class Fragment extends View {
       }
     });
 
-    const root = new VBlockNode(this, containerFormatRanges);
+    const root = new BlockToken(this, containerFormatRanges);
     this.vDomBuilder(childFormatRanges,
       root,
       0,
       contents.length
     );
-    (this as { vNode: VBlockNode }).vNode = root;
+    (this as { token: BlockToken }).token = root;
     return root;
   }
 
@@ -403,10 +403,10 @@ export class Fragment extends View {
    * @param startIndex 生成范围的开始索引
    * @param endIndex 生成范围的结束位置
    */
-  private vDomBuilder(formatRanges: Array<InlineFormat>, parent: VBlockNode | VInlineNode, startIndex: number, endIndex: number) {
+  private vDomBuilder(formatRanges: Array<InlineFormat>, parent: BlockToken | InlineToken, startIndex: number, endIndex: number) {
     if (startIndex === 0 && endIndex === 0) {
       // 兼容空标签节点
-      parent.children.push(new VTextNode(this, 0, ''));
+      parent.children.push(new TextToken(this, 0, ''));
       return;
     }
 
@@ -416,7 +416,7 @@ export class Fragment extends View {
         if (startIndex < firstRange.startIndex) {
           parent.children.push(...this.createNodesByRange(startIndex, firstRange.startIndex));
         }
-        const container = new VInlineNode(this, [firstRange], firstRange.startIndex, firstRange.endIndex);
+        const container = new InlineToken(this, [firstRange], firstRange.startIndex, firstRange.endIndex);
         const childFormatRanges: Array<InlineFormat> = [];
         while (true) {
           const f = formatRanges[0];
@@ -458,19 +458,19 @@ export class Fragment extends View {
   }
 
   private createNodesByRange(startIndex: number, endIndex: number) {
-    const vNodes: VNode[] = [];
+    const vNodes: Token[] = [];
 
     const c = this.sliceContents(startIndex, endIndex);
     let i = 0;
     c.forEach(item => {
       if (typeof item === 'string') {
-        const v = new VTextNode(this, i + startIndex, item);
+        const v = new TextToken(this, i + startIndex, item);
         vNodes.push(v);
       } else if (item instanceof View) {
         if (item instanceof Fragment) {
           vNodes.push(item.createVDom());
         } else if (item instanceof Single) {
-          vNodes.push(new VMediaNode(this, item, item.getCanApplyFormats(), i + startIndex))
+          vNodes.push(new MediaToken(this, item, item.getCanApplyFormats(), i + startIndex))
         }
       }
       i += item.length;

@@ -3,10 +3,11 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
-import { VIRTUAL_NODE } from '../parser/help';
-import { VNode } from '../renderer/virtual-dom';
+import { TBUS_TOKEN } from '../parser/help';
+import { Token } from '../renderer/tokens';
 import { RootFragment } from '../parser/root-fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { VElement } from '../renderer/element';
 
 export class ToggleBlockCommander implements Commander {
   recordHistory = true;
@@ -19,11 +20,11 @@ export class ToggleBlockCommander implements Commander {
       const reg = new RegExp(this.tagName, 'i');
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        let node = commonAncestorFragment.vNode.nativeElement;
+        let node = commonAncestorFragment.token.nativeElement;
         let container: Fragment;
         while (node) {
           if (reg.test(node.nodeName)) {
-            container = (node[VIRTUAL_NODE] as VNode).context;
+            container = (node[TBUS_TOKEN] as Token).context;
             break;
           }
           node = node.parentNode;
@@ -38,7 +39,7 @@ export class ToggleBlockCommander implements Commander {
           const scope = range.getCommonAncestorFragmentScope();
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
-            const node = item.context.vNode.nativeElement;
+            const node = item.context.token.nativeElement;
             if (reg.test(node.parentNode.nodeName)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);
@@ -75,9 +76,9 @@ export class ToggleBlockCommander implements Commander {
     }
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): ReplaceModel {
+  render(state: FormatState): ReplaceModel {
     if (state === FormatState.Valid) {
-      return new ReplaceModel(document.createElement(this.tagName));
+      return new ReplaceModel(new VElement(this.tagName));
     }
     return null;
   }

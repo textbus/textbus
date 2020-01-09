@@ -1,1 +1,1 @@
-export const VIRTUAL_NODE = '__virtual_node__';
+export const TBUS_TOKEN = '__TBus_Token__';

@@ -7,6 +7,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
 import { InlineFormat } from '../parser/format';
 import { RootFragment } from '../parser/root-fragment';
+import { VElement } from '../renderer/element';
 
 export class AttrCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -74,12 +75,12 @@ export class AttrCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
-    const el = document.createElement(this.tagName);
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+    const el = new VElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
         if (value !== null) {
-          el.setAttribute(key, value + '');
+          el.attrs.set(key, value);
         }
       })
     }

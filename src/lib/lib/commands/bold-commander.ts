@@ -6,6 +6,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Fragment } from '../parser/fragment';
 import { SelectedScope } from '../viewer/range';
+import { VElement } from '../renderer/element';
 
 export class BoldCommander implements Commander {
   recordHistory = true;
@@ -18,19 +19,19 @@ export class BoldCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData) {
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData) {
     switch (state) {
       case FormatState.Exclude:
         if (rawElement) {
-          rawElement.style.fontWeight = 'normal';
+          rawElement.styles.set('fontWeight', 'normal');
           break;
         } else {
-          const node = document.createElement('span');
-          node.style.fontWeight = 'normal';
+          const node = new VElement('span');
+          node.styles.set('fontWeight', 'normal');
           return new ChildSlotModel(node);
         }
       case FormatState.Valid:
-        return new ChildSlotModel(document.createElement('strong'));
+        return new ChildSlotModel(new VElement('strong'));
     }
     return null;
   }
@@ -38,7 +39,7 @@ export class BoldCommander implements Commander {
   private apply(scope: SelectedScope, handler: Handler, overlap: boolean) {
     const children = scope.context.sliceContents(scope.startIndex, scope.endIndex);
     let state: FormatState;
-    const el = BoldCommander.findBoldParent(scope.context.vNode.nativeElement as HTMLElement);
+    const el = BoldCommander.findBoldParent(scope.context.token.nativeElement as HTMLElement);
     if (el) {
       state = overlap ? FormatState.Exclude : FormatState.Inherit;
     } else {

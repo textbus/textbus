@@ -1,5 +1,4 @@
 import { Commander } from './commander';
-import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { RootFragment } from '../parser/root-fragment';
@@ -28,7 +27,7 @@ export class HistoryCommander implements Commander<Editor> {
     }
   }
 
-  render(state: FormatState, rawElement?: HTMLElement): null {
+  render(): null {
     return null;
   }
 }

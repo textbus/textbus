@@ -4,6 +4,7 @@ import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { VElement } from '../renderer/element';
 
 export class InlineCommander implements Commander {
   recordHistory = true;
@@ -29,7 +30,7 @@ export class InlineCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData) {
-    return new ChildSlotModel(document.createElement(this.tagName));
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData) {
+    return new ChildSlotModel(new VElement(this.tagName));
   }
 }

@@ -7,6 +7,7 @@ import { Priority } from './toolbar/help';
 import { CacheData, EditableOptions } from './toolbar/utils/cache-data';
 import { Editor } from './editor';
 import { DefaultHook } from './default-hook';
+import { VElement } from './renderer/element';
 
 export class DefaultTagCommander implements Commander {
   recordHistory = false;
@@ -14,12 +15,12 @@ export class DefaultTagCommander implements Commander {
   command(): void {
   }
 
-  render(state: FormatState, element?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
-    const el = document.createElement(cacheData.tag);
+  render(state: FormatState, element?: VElement, cacheData?: CacheData): ChildSlotModel {
+    const el = new VElement(cacheData.tag);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
         if (value !== null) {
-          el.setAttribute(key, value + '');
+          el.attrs.set(key, value);
         }
       })
     }

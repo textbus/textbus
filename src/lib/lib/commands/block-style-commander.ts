@@ -5,6 +5,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { VElement } from '../renderer/element';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
@@ -54,9 +55,9 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
     if (rawElement) {
-      rawElement.style[cacheData.style.name] = cacheData.style.value;
+      rawElement.styles.set(cacheData.style.name, cacheData.style.value);
     }
     return null;
   }

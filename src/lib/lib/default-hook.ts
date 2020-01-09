@@ -108,7 +108,7 @@ export class DefaultHook implements Hook {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
-      if (/th|td/i.test(commonAncestorFragment.vNode.nativeElement.nodeName)) {
+      if (/th|td/i.test(commonAncestorFragment.token.nativeElement.nodeName)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
           commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
             tag: 'br'

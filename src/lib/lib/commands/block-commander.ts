@@ -6,6 +6,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { BlockFormat } from '../parser/format';
 import { Contents } from '../parser/contents';
+import { VElement } from '../renderer/element';
 
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
@@ -25,10 +26,10 @@ export class BlockCommander implements Commander<string> {
         range.getSelectedScope().forEach(item => {
           if (item.context !== range.commonAncestorFragment) {
             if (item.startIndex !== 0) {
-              let startIndex = this.findStartIndex(item.context, item.startIndex);
+              let startIndex = BlockCommander.findStartIndex(item.context, item.startIndex);
               this.format(item.context, startIndex, item.endIndex, handler);
             } else {
-              const endIndex = this.findEndIndex(item.context, item.endIndex);
+              const endIndex = BlockCommander.findEndIndex(item.context, item.endIndex);
               this.format(item.context, 0, endIndex, handler);
             }
           } else {
@@ -40,12 +41,12 @@ export class BlockCommander implements Commander<string> {
     })
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, data?: CacheData): ReplaceModel {
-    return new ReplaceModel(document.createElement(data ? data.tag : this.tagName));
+  render(state: FormatState, rawElement?: VElement, data?: CacheData): ReplaceModel {
+    return new ReplaceModel(new VElement(data ? data.tag : this.tagName));
   }
 
   private format(fragment: Fragment, startIndex: number, endIndex: number, handler: Handler) {
-    if (this.hasFragment(fragment)) {
+    if (BlockCommander.hasFragment(fragment)) {
       const ff = fragment.delete(startIndex, endIndex);
       this.childContentToFragmentAndApplyFormat(ff, handler);
       let len = 0;
@@ -58,7 +59,7 @@ export class BlockCommander implements Commander<string> {
     }
   }
 
-  private findStartIndex(fragment: Fragment, max: number): number {
+  private static findStartIndex(fragment: Fragment, max: number): number {
     let index = 0;
     for (let i = 0; i < fragment.contentLength; i++) {
       const item = fragment.getContentAtIndex(i);
@@ -72,7 +73,7 @@ export class BlockCommander implements Commander<string> {
     return index;
   }
 
-  private findEndIndex(fragment: Fragment, min: number): number {
+  private static findEndIndex(fragment: Fragment, min: number): number {
     let i = min;
     const len = fragment.contentLength;
     while (true) {
@@ -86,7 +87,7 @@ export class BlockCommander implements Commander<string> {
 
   private childContentToFragmentAndApplyFormat(fragment: Fragment, handler: Handler) {
     const contents = [];
-    if (!this.hasFragment(fragment)) {
+    if (!BlockCommander.hasFragment(fragment)) {
       this.useFormat(fragment, handler);
       return;
     }
@@ -113,7 +114,7 @@ export class BlockCommander implements Commander<string> {
 
     fragment.useContents(new Contents());
     contents.forEach(i => {
-      if (!this.hasFragment(i)) {
+      if (!BlockCommander.hasFragment(i)) {
         this.useFormat(i, handler)
       }
       fragment.append(i)
@@ -132,7 +133,7 @@ export class BlockCommander implements Commander<string> {
     return fragment;
   }
 
-  private hasFragment(fragment: Fragment) {
+  private static hasFragment(fragment: Fragment) {
     for (let i = 0; i < fragment.contentLength; i++) {
       if (fragment.getContentAtIndex(i) instanceof Fragment) {
         return true;

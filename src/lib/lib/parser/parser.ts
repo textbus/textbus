@@ -6,6 +6,7 @@ import { BlockFormat, InlineFormat, SingleFormat } from './format';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
+import { NativeElement } from '../renderer/renderer';
 
 export interface ParseState {
   handler: Handler;
@@ -36,7 +37,7 @@ export class Parser {
     }).filter(item => item.state !== FormatState.Invalid);
   }
 
-  getFormatStateByNode(node: HTMLElement): ParseState[] {
+  getFormatStateByNode(node: NativeElement): ParseState[] {
     return this.registries.map(item => {
       return {
         handler: item,
@@ -155,10 +156,10 @@ export class Parser {
    */
   private normalize(el: HTMLElement): Node {
     const fragment = document.createDocumentFragment();
-    const limitChildren = dtd[el.tagName.toLowerCase()].limitChildren || [];
+    const limitChildren = dtd[el.nodeName.toLowerCase()].limitChildren || [];
 
     const findChildTag = (node: HTMLElement) => {
-      for (const t of Array.from(node.children).map(n => n.tagName.toLowerCase())) {
+      for (const t of Array.from(node.children).map(n => n.nodeName.toLowerCase())) {
         if (limitChildren.indexOf(t) > -1) {
           return t;
         }
@@ -224,7 +225,7 @@ export class Parser {
     return fragment;
   }
 
-  private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {
+  private getPreCacheData(node: NativeElement, config?: EditableOptions): CacheData {
     if (!config) {
       return new CacheData();
     }
@@ -242,7 +243,7 @@ export class Parser {
       };
     }
     return new CacheData({
-      tag: config.tag ? node.tagName.toLowerCase() : null,
+      tag: config.tag ? node.nodeName.toLowerCase() : null,
       attrs: attrs.size ? attrs : null,
       style
     });

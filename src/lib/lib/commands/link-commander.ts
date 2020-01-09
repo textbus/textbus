@@ -6,6 +6,7 @@ import { AttrState } from '../toolbar/formats/forms/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
 import { InlineFormat } from '../parser/format';
+import { VElement } from '../renderer/element';
 
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -60,11 +61,11 @@ export class LinkCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
-    const el = document.createElement(this.tagName);
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ChildSlotModel {
+    const el = new VElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {
-        el.setAttribute(key, value + '');
+        el.attrs.set(key, value + '');
       })
     }
     return new ChildSlotModel(el);

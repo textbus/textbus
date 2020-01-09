@@ -5,9 +5,10 @@ import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { RootFragment } from '../parser/root-fragment';
-import { VIRTUAL_NODE } from '../parser/help';
-import { VNode } from '../renderer/virtual-dom';
+import { TBUS_TOKEN } from '../parser/help';
+import { Token } from '../renderer/tokens';
 import { dtd } from '../dtd';
+import { VElement } from '../renderer/element';
 
 export class ListCommander implements Commander<any> {
   recordHistory = true;
@@ -20,7 +21,7 @@ export class ListCommander implements Commander<any> {
       const reg = new RegExp(this.tagName, 'i');
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        let node = commonAncestorFragment.vNode.nativeElement;
+        let node = commonAncestorFragment.token.nativeElement;
         if (reg.test(node.nodeName)) {
           // 选中同一组列表下的多个 li
           const scope = range.getCommonAncestorFragmentScope();
@@ -30,7 +31,7 @@ export class ListCommander implements Commander<any> {
         let liFragment: Fragment;
         while (node) {
           if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
-            liFragment = (node[VIRTUAL_NODE] as VNode).context;
+            liFragment = (node[TBUS_TOKEN] as Token).context;
             break;
           }
           node = node.parentNode;
@@ -44,7 +45,7 @@ export class ListCommander implements Commander<any> {
           const scope = range.getCommonAncestorFragmentScope();
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
-            const node = item.context.vNode.nativeElement;
+            const node = item.context.token.nativeElement;
             if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);
@@ -74,7 +75,7 @@ export class ListCommander implements Commander<any> {
             insertPosition = container.getIndexInParent();
             container = container.parent;
           }
-          const nativeElement = item.context.vNode.wrapElement;
+          const nativeElement = item.context.token.wrapElement;
           if (/li/i.test(nativeElement.nodeName)) {
             listGroup.append(item.context);
           } else {
@@ -93,7 +94,7 @@ export class ListCommander implements Commander<any> {
         }
         this.deleteEmptyFragment(parent, container);
       });
-      const limitChildren = dtd[container.vNode.nativeElement.nodeName.toLowerCase()]?.limitChildren;
+      const limitChildren = dtd[container.token.nativeElement.nodeName.toLowerCase()]?.limitChildren;
       if (limitChildren) {
         const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: limitChildren[0]
@@ -106,9 +107,9 @@ export class ListCommander implements Commander<any> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
     if (state === FormatState.Valid) {
-      return new ReplaceModel(document.createElement(cacheData.tag));
+      return new ReplaceModel(new VElement(cacheData.tag));
     }
     return null;
   }

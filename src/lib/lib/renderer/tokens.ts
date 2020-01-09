@@ -1,9 +1,10 @@
 import { Fragment } from '../parser/fragment';
 import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
+import { NativeElement, NativeText } from './renderer';
 
-export class VTextNode {
-  nativeElement: Node;
+export class TextToken {
+  nativeElement: NativeText;
 
   get endIndex() {
     return this.startIndex + this.text.length;
@@ -21,14 +22,14 @@ export class VTextNode {
   }
 }
 
-export class VBlockNode {
+export class BlockToken {
   get nativeElement() {
     return this.slotElement;
   }
 
-  slotElement: Node;
-  wrapElement: Node;
-  readonly children: Array<VNode> = [];
+  slotElement: NativeElement;
+  wrapElement: NativeElement;
+  readonly children: Array<Token> = [];
   readonly startIndex = 0;
 
   get endIndex() {
@@ -47,14 +48,14 @@ export class VBlockNode {
   }
 }
 
-export class VInlineNode {
+export class InlineToken {
   get nativeElement() {
     return this.slotElement;
   }
 
-  slotElement: Node;
-  wrapElement: Node;
-  readonly children: Array<VNode> = [];
+  slotElement: NativeElement;
+  wrapElement: NativeElement;
+  readonly children: Array<Token> = [];
 
   constructor(public context: Fragment,
               public formats: FormatRange[],
@@ -69,8 +70,8 @@ export class VInlineNode {
   }
 }
 
-export class VMediaNode {
-  nativeElement: Node;
+export class MediaToken {
+  nativeElement: NativeElement;
 
   get endIndex() {
     return this.startIndex + 1;
@@ -89,4 +90,4 @@ export class VMediaNode {
   }
 }
 
-export type VNode = VTextNode | VMediaNode | VInlineNode | VBlockNode;
+export type Token = TextToken | MediaToken | InlineToken | BlockToken;

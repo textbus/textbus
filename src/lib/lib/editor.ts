@@ -13,24 +13,29 @@ import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
-import { Renderer } from './renderer/renderer';
+import { Differ } from './renderer/differ';
 import { DefaultTagsHandler } from './default-tags-handler';
+import { DefaultRenderer, Renderer } from './renderer/renderer';
 
 export interface Snapshot {
   doc: Fragment;
   paths: RangePath[];
 }
 
+export interface EditorSettings {
+  renderer?: Renderer;
+}
+
 export interface EditorOptions {
+  theme?: string;
   historyStackSize?: number;
   handlers?: (HandlerConfig | HandlerConfig[])[];
   content?: string;
   usePaperModel?: boolean;
+  settings?: EditorSettings;
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
-  theme?: string;
-  placeholder?: string;
 }
 
 export class Editor implements EventDelegate {
@@ -52,6 +57,7 @@ export class Editor implements EventDelegate {
 
   private root: RootFragment;
   private readonly viewer: Viewer;
+  private readonly renderer: Renderer;
   private readonly paths = new Paths();
   private readonly toolbar = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
@@ -80,7 +86,8 @@ export class Editor implements EventDelegate {
       this.viewer.use(defaultHandlers.hook);
     });
     this.parser = new Parser(this.handlers);
-    this.viewer = new Viewer(this, new Renderer(this.parser));
+    this.renderer = options?.settings?.renderer || new DefaultRenderer();
+    this.viewer = new Viewer(this, new Differ(this.parser, this.renderer));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootFragment(this.parser);
       this.root = vDom;

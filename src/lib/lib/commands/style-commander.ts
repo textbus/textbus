@@ -5,6 +5,7 @@ import { Handler } from '../toolbar/handlers/help';
 import { InlineFormat } from '../parser/format';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { dtd } from '../dtd';
+import { VElement } from '../renderer/element';
 
 export class StyleCommander implements Commander<string | number> {
   recordHistory = true;
@@ -35,17 +36,17 @@ export class StyleCommander implements Commander<string | number> {
     });
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ChildSlotModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ChildSlotModel {
     if (cacheData && cacheData.style) {
       if (rawElement) {
-        const isInline = dtd[rawElement.nodeName.toLowerCase()].display === 'inline';
+        const isInline = dtd[rawElement.tagName.toLowerCase()].display === 'inline';
         if (this.canApplyBlockFragment || isInline) {
-          rawElement.style[cacheData.style.name] = cacheData.style.value;
+          rawElement.styles.set(cacheData.style.name, cacheData.style.value);
           return null;
         }
       }
-      const el = document.createElement('span');
-      el.style[cacheData.style.name] = cacheData.style.value;
+      const el = new VElement('span');
+      el.styles.set(cacheData.style.name, cacheData.style.value);
       return new ChildSlotModel(el);
     }
     return null;

@@ -12,7 +12,7 @@ import { Single } from '../parser/single';
 import { Hook } from './help';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
-import { Renderer } from '../renderer/renderer';
+import { Differ } from '../renderer/differ';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -37,7 +37,7 @@ export class Viewer {
   private cursor: Cursor;
 
   constructor(private editor: Editor,
-              private renderer: Renderer) {
+              private renderer: Differ) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();

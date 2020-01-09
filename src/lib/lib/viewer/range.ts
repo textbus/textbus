@@ -1,6 +1,7 @@
 import { Fragment } from '../parser/fragment';
-import { VIRTUAL_NODE } from '../parser/help';
-import { VBlockNode, VInlineNode, VMediaNode, VNode, VTextNode } from '../renderer/virtual-dom';
+import { TBUS_TOKEN } from '../parser/help';
+import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
+import { NativeNode } from '../renderer/renderer';
 
 export interface TBRangePosition {
   fragment: Fragment;
@@ -63,8 +64,8 @@ export class TBRange {
         this.endIndex = TBRange.getOffset(nativeRange.endContainer, nativeRange.endOffset);
       }
 
-      this.startFragment = (nativeRange.startContainer[VIRTUAL_NODE] as VNode).context;
-      this.endFragment = (nativeRange.endContainer[VIRTUAL_NODE] as VNode).context;
+      this.startFragment = (nativeRange.startContainer[TBUS_TOKEN] as Token).context;
+      this.endFragment = (nativeRange.endContainer[TBUS_TOKEN] as Token).context;
     }
   }
 
@@ -76,16 +77,16 @@ export class TBRange {
 
   apply(offset = 0) {
     const start = this.findFocusNodeAndOffset(
-      this.startFragment.vNode.children,
+      this.startFragment.token.children,
       this.startIndex + offset);
     const end = this.findFocusNodeAndOffset(
-      this.endFragment.vNode.children,
+      this.endFragment.token.children,
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
 
-    this.nativeRange.setStart(start.node, start.offset);
-    this.nativeRange.setEnd(end.node, end.offset);
+    this.nativeRange.setStart(start.node as Node, start.offset);
+    this.nativeRange.setEnd(end.node as Node, end.offset);
   }
 
   collapse(toEnd = false) {
@@ -271,12 +272,12 @@ export class TBRange {
     return ranges;
   }
 
-  private findFocusNodeAndOffset(vNodes: VNode[],
-                                 i: number): { node: Node, offset: number } {
+  private findFocusNodeAndOffset(vNodes: Token[],
+                                 i: number): { node: NativeNode, offset: number } {
     let endIndex = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
-      if ((item instanceof VBlockNode || item instanceof VInlineNode) && item.context.vNode === item) {
+      if ((item instanceof BlockToken || item instanceof InlineToken) && item.context.token === item) {
         if (endIndex === i) {
           const childNodes = Array.from(item.nativeElement.parentNode.childNodes);
           const index = childNodes.indexOf(item.nativeElement as ChildNode);
@@ -292,7 +293,7 @@ export class TBRange {
 
       const toEnd = i === item.endIndex && index === vNodes.length - 1;
       if (i >= item.startIndex && i < item.endIndex || toEnd) {
-        if (item instanceof VInlineNode || item instanceof VBlockNode) {
+        if (item instanceof InlineToken || item instanceof BlockToken) {
           if (item.children.length) {
             return this.findFocusNodeAndOffset(item.children, i);
           }
@@ -300,13 +301,13 @@ export class TBRange {
             node: item.nativeElement,
             offset: i
           }
-        } else if (item instanceof VMediaNode) {
+        } else if (item instanceof MediaToken) {
           const index = Array.from(item.nativeElement.parentNode.childNodes).indexOf(item.nativeElement as ChildNode);
           return {
             node: item.nativeElement.parentNode,
             offset: toEnd ? index + 1 : index
           }
-        } else if (item instanceof VTextNode) {
+        } else if (item instanceof TextToken) {
           return {
             node: item.nativeElement,
             offset: i - item.startIndex
@@ -324,15 +325,15 @@ export class TBRange {
   }
 
   private static getIndex(node: Node): number {
-    return (node[VIRTUAL_NODE] as VNode).startIndex
+    return (node[TBUS_TOKEN] as Token).startIndex
   }
 
   private static getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
       if (node.childNodes.length === offset) {
-        return (node[VIRTUAL_NODE] as VNode).context.contentLength;
+        return (node[TBUS_TOKEN] as Token).context.contentLength;
       }
-      const childVNode = (node.childNodes[offset][VIRTUAL_NODE] as VNode);
+      const childVNode = (node.childNodes[offset][TBUS_TOKEN] as Token);
       return childVNode.startIndex;
     }
     return offset;

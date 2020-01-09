@@ -6,6 +6,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
+import { NativeElement } from '../renderer/renderer';
 
 interface MatchData {
   state: FormatState;
@@ -48,13 +49,13 @@ export interface MatchRule {
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   noContainTags?: string[] | RegExp;
   noInTags?: string[] | RegExp;
-  filter?: (node: HTMLElement | CacheData) => boolean;
+  filter?: (node: NativeElement | CacheData) => boolean;
 }
 
 export class Matcher {
-  private inheritValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
-  private validators: Array<(node: HTMLElement | CacheData) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private inheritValidators: Array<(node: NativeElement | CacheData) => boolean> = [];
+  private validators: Array<(node: NativeElement | CacheData) => boolean> = [];
+  private excludeValidators: Array<(node: NativeElement | CacheData) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.extendTags) {
@@ -87,7 +88,7 @@ export class Matcher {
     return this.match(data);
   }
 
-  matchNode(node: HTMLElement): FormatState {
+  matchNode(node: NativeElement): FormatState {
     return this.match(node);
   }
 
@@ -154,7 +155,7 @@ export class Matcher {
     };
   }
 
-  private match(p: HTMLElement | CacheData) {
+  private match(p: NativeElement | CacheData) {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
       if (!b) {
@@ -312,14 +313,14 @@ export class Matcher {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement | CacheData) => {
-      const tagName = node instanceof CacheData ? node.tag : node.tagName.toLowerCase();
+    return (node: NativeElement | CacheData) => {
+      const tagName = node instanceof CacheData ? node.tag : node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement | CacheData) => {
+    return (node: NativeElement | CacheData) => {
       return attrs.map(attr => {
         if (attr.value) {
           if (node instanceof CacheData) {
@@ -350,7 +351,7 @@ export class Matcher {
   // }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement | CacheData) => {
+    return (node: NativeElement | CacheData) => {
       const elementStyles = node.style;
       if (!elementStyles) {
         return false;

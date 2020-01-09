@@ -8,6 +8,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
 import { Parser } from '../parser/parser';
+import { VElement } from '../renderer/element';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -44,8 +45,8 @@ export class TableCommander implements Commander<AttrState[]> {
     return context;
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): ReplaceModel {
-    return new ReplaceModel(document.createElement(cacheData.tag));
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+    return new ReplaceModel(new VElement(cacheData.tag));
   }
 
   private findFirstPosition(fragment: Fragment): Fragment {

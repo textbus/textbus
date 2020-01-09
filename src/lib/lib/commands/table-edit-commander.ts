@@ -1,10 +1,9 @@
 import { Commander } from './commander';
 import { TBSelection } from '../viewer/selection';
-import { FormatState } from '../matcher/matcher';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
-import { VIRTUAL_NODE } from '../parser/help';
-import { VNode } from '../renderer/virtual-dom';
+import { TBUS_TOKEN } from '../parser/help';
+import { Token } from '../renderer/tokens';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { BlockFormat } from '../parser/format';
@@ -108,7 +107,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     }
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): null {
+  render(): null {
     return null;
   }
 
@@ -117,7 +116,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.startPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cells[index];
-      const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+      const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
       if (index === 0) {
         fragment.parent.insert(TableEditCommander.createCell('td', parser), 0);
       } else {
@@ -152,7 +151,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.endPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cells[index];
-      const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+      const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
       if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
         if (cell.rowOffset === 0) {
           parser.getFormatStateByData(new CacheData({
@@ -180,7 +179,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.startPosition.rowIndex;
 
     const row = cellMatrix[index];
-    const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
+    const fragment = (row.rowElement[TBUS_TOKEN] as Token).context;
     const tr = new Fragment(parser.getFormatStateByData(new CacheData({
       tag: 'tr'
     })));
@@ -193,7 +192,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       row.cells.forEach(cell => {
         if (cell.rowOffset > 0) {
           if (cell.columnOffset === 0) {
-            const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+            const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
             parser.getFormatStateByData(new CacheData({
               tag: 'td',
               attrs: {
@@ -226,7 +225,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const index = this.params.endPosition.rowIndex;
 
     const row = cellMatrix[index];
-    const fragment = (row.rowElement[VIRTUAL_NODE] as VNode).context;
+    const fragment = (row.rowElement[TBUS_TOKEN] as Token).context;
     const tr = new Fragment(parser.getFormatStateByData(new CacheData({
       tag: 'tr'
     })));
@@ -234,7 +233,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     row.cells.forEach(cell => {
       if (cell.rowOffset < cell.cellElement.rowSpan - 1) {
         if (cell.columnOffset === 0) {
-          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
             attrs: {
@@ -269,7 +268,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       });
     const selectedCells = Array.from(new Set(cells));
     const newNode = selectedCells.shift();
-    const fragment = (newNode[VIRTUAL_NODE] as VNode).context;
+    const fragment = (newNode[TBUS_TOKEN] as Token).context;
     parser.getFormatStateByData(new CacheData({
       tag: 'td',
       attrs: {
@@ -283,7 +282,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       }))
     });
     selectedCells.forEach(cell => {
-      const cellFragment = (cell[VIRTUAL_NODE] as VNode).context;
+      const cellFragment = (cell[TBUS_TOKEN] as Token).context;
       const i = cellFragment.getIndexInParent();
       cellFragment.parent.delete(i, i + 1);
     });
@@ -308,9 +307,9 @@ export class TableEditCommander implements Commander<TableEditParams> {
       .reduce((p, c) => {
         return p.concat(c);
       }, []).map(cell => {
-        const fragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+        const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
         if (cell.rowOffset !== 0 || cell.columnOffset !== 0) {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
+          const rowFragment = (cell.rowElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td'
           })).forEach(item => {
@@ -323,7 +322,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           const newCellFragment = TableEditCommander.createCell('td', parser);
 
           if (cell.afterCell) {
-            const index = (cell.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
+            const index = (cell.afterCell[TBUS_TOKEN] as Token).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
             rowFragment.insert(newCellFragment, rowFragment.contentLength);
@@ -352,24 +351,24 @@ export class TableEditCommander implements Commander<TableEditParams> {
       return;
     }
     const prevRow = cellMatrix[index - 1];
-    const prevRowFragment = (prevRow.rowElement[VIRTUAL_NODE] as VNode).context;
+    const prevRowFragment = (prevRow.rowElement[TBUS_TOKEN] as Token).context;
     prevRow.cells.forEach((cell, cellIndex) => {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset === 0 && cell.cellElement.rowSpan > 1) {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
+          const rowFragment = (cell.rowElement[TBUS_TOKEN] as Token).context;
           const newCellFragment = TableEditCommander.createCell('td',
             parser,
             cell.cellElement.rowSpan - 1,
             cell.cellElement.colSpan);
           const newPosition = cellMatrix[index].cells[cellIndex];
           if (newPosition.afterCell) {
-            const index = (newPosition.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
+            const index = (newPosition.afterCell[TBUS_TOKEN] as Token).context.getIndexInParent();
             rowFragment.insert(newCellFragment, index);
           } else {
             rowFragment.insert(newCellFragment, rowFragment.contentLength);
           }
         } else {
-          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
             attrs: {
@@ -402,11 +401,11 @@ export class TableEditCommander implements Commander<TableEditParams> {
       return;
     }
     const nextRow = cellMatrix[index + 1];
-    const nextRowFragment = (nextRow.rowElement[VIRTUAL_NODE] as VNode).context;
+    const nextRowFragment = (nextRow.rowElement[TBUS_TOKEN] as Token).context;
     nextRow.cells.forEach((cell, cellIndex) => {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset > 0) {
-          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
             attrs: {
@@ -423,14 +422,14 @@ export class TableEditCommander implements Commander<TableEditParams> {
           if (cell.cellElement.rowSpan > 1) {
 
             const newPosition = cellMatrix[index + 2].cells[cellIndex];
-            const rowFragment = (newPosition.rowElement[VIRTUAL_NODE] as VNode).context;
+            const rowFragment = (newPosition.rowElement[TBUS_TOKEN] as Token).context;
             const newCellFragment = TableEditCommander.createCell('td',
               parser,
               cell.cellElement.rowSpan - 1,
               cell.cellElement.colSpan);
 
             if (newPosition.afterCell) {
-              const index = (newPosition.afterCell[VIRTUAL_NODE] as VNode).context.getIndexInParent();
+              const index = (newPosition.afterCell[TBUS_TOKEN] as Token).context.getIndexInParent();
               rowFragment.insert(newCellFragment, index);
             } else {
               rowFragment.insert(newCellFragment, rowFragment.contentLength);
@@ -454,7 +453,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index - 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
             attrs: {
@@ -468,8 +467,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
             }));
           })
         } else {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
-          const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
+          const rowFragment = (cell.rowElement[TBUS_TOKEN] as Token).context;
+          const index = (cell.cellElement[TBUS_TOKEN] as Token).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);
@@ -498,7 +497,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const cell = row.cells[index + 1];
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
-          const cellFragment = (cell.cellElement[VIRTUAL_NODE] as VNode).context;
+          const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
           parser.getFormatStateByData(new CacheData({
             tag: 'td',
             attrs: {
@@ -512,8 +511,8 @@ export class TableEditCommander implements Commander<TableEditParams> {
             }));
           });
         } else {
-          const rowFragment = (cell.rowElement[VIRTUAL_NODE] as VNode).context;
-          const index = (cell.cellElement[VIRTUAL_NODE] as VNode).context.getIndexInParent();
+          const rowFragment = (cell.rowElement[TBUS_TOKEN] as Token).context;
+          const index = (cell.cellElement[TBUS_TOKEN] as Token).context.getIndexInParent();
           if (cell.cellElement.colSpan > 1) {
             const newCellFragment = TableEditCommander.createCell('td', parser, cell.cellElement.rowSpan, cell.cellElement.colSpan - 1);
             rowFragment.delete(index, index + 1);

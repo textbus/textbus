@@ -3,14 +3,15 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { RootFragment } from '../parser/root-fragment';
+import { VElement } from '../renderer/element';
 
 export class ReplaceModel {
-  constructor(public replaceElement: HTMLElement) {
+  constructor(public replaceElement: VElement) {
   }
 }
 
 export class ChildSlotModel {
-  constructor(public slotElement: HTMLElement) {
+  constructor(public slotElement: VElement) {
   }
 }
 
@@ -23,5 +24,5 @@ export interface Commander<T = any> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void;
 
-  render(state: FormatState, rawElement?: HTMLElement, cacheData?: CacheData): RenderModel;
+  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): RenderModel;
 }

@@ -6,6 +6,7 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
+import { VElement } from '../renderer/element';
 
 export class CodeCommander implements Commander<string> {
   recordHistory = true;
@@ -38,11 +39,11 @@ export class CodeCommander implements Commander<string> {
     }
   }
 
-  render(state: FormatState, rawElement?: HTMLElement, matchDesc?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, matchDesc?: CacheData): ReplaceModel {
     if (state === FormatState.Valid) {
-      const el = document.createElement(this.tagName);
+      const el = new VElement(this.tagName);
       if (this.lang) {
-        el.setAttribute('lang', this.lang);
+        el.attrs.set('lang', this.lang);
       }
       return new ReplaceModel(el);
     }
