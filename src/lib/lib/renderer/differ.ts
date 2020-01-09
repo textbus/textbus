@@ -14,6 +14,7 @@ export class Differ {
   }
 
   render(newToken: BlockToken, host: NativeElement) {
+    console.log(newToken);
     let previousSibling: NativeElement | NativeText;
     newToken.children.forEach(vNode => {
       const old = this?.oldToken?.children.shift();
@@ -113,9 +114,8 @@ export class Differ {
         token.slotElement = slot;
       }
 
-
       if (token.wrapElement) {
-        host.appendChild(token.wrapElement);
+        Differ.insertNode(previousSibling, token.wrapElement, host);
       }
       if (oldToken instanceof BlockToken) {
         token.context.viewSynced();
@@ -235,6 +235,7 @@ export class Differ {
   private createNativeElementsTree(vElement: VElement,
                                    token: BlockToken | InlineToken): { wrap: NativeElement, slot: NativeElement } {
     const wrap = this.renderer.createElement(vElement);
+    wrap[TBUS_TOKEN] = token;
     const newFormatStates = this.parser.getFormatStateByNode(wrap);
     newFormatStates.forEach(format => {
       switch (format.handler.priority) {
@@ -259,7 +260,9 @@ export class Differ {
     });
     let slot = wrap;
     vElement.childNodes.forEach(child => {
-      slot = this.createNativeElementsTree(child, token).slot;
+      const c = this.createNativeElementsTree(child, token);
+      slot = c.slot;
+      wrap.appendChild(c.wrap);
     });
     return {
       wrap,
