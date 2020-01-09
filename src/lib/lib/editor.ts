@@ -75,10 +75,10 @@ export class Editor implements EventDelegate {
     this.historyStackSize = options.historyStackSize || 50;
     const defaultHandlers = new DefaultTagsHandler();
     this.handlers.push(defaultHandlers);
+    this.createToolbar(options.handlers);
     this.run(() => {
       this.viewer.use(defaultHandlers.hook);
     });
-    this.createToolbar(options.handlers);
     this.parser = new Parser(this.handlers);
     this.viewer = new Viewer(this, new Renderer(this.parser));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
