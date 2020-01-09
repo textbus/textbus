@@ -121,7 +121,6 @@ export class DefaultHook implements Hook {
         viewer.rerender();
         viewer.selection.apply();
       } else {
-        const formatMatrix = commonAncestorFragment.getFormatMatrix();
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
@@ -130,11 +129,6 @@ export class DefaultHook implements Hook {
           }))));
         }
         const index = commonAncestorFragment.getIndexInParent();
-        Array.from(formatMatrix.keys()).filter(key => {
-          return ![Priority.Default, Priority.Block].includes(key.priority);
-        }).forEach(key => {
-          afterFragment.setFormats(key, formatMatrix.get(key));
-        });
         parser.getFormatStateByData(new CacheData({
           tag: 'p'
         })).forEach(item => {

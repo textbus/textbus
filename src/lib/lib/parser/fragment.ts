@@ -206,7 +206,9 @@ export class Fragment extends View {
     if (content instanceof Single || content instanceof Fragment) {
       if (content.parent) {
         const index = content.parent.find(content);
-        content.parent.delete(index, index + 1);
+        if (index > -1) {
+          content.parent.delete(index, index + 1);
+        }
       }
       (<{ parent: Fragment }>content.parent) = this;
     }
@@ -296,7 +298,7 @@ export class Fragment extends View {
    */
   delete(startIndex: number, endIndex = this.contents.length) {
     const ff = new Fragment(null);
-    if (endIndex < startIndex) {
+    if (endIndex < startIndex || startIndex < 0) {
       return ff;
     }
     this.markDirty();
@@ -320,6 +322,7 @@ export class Fragment extends View {
           formats.push(format);
         } else {
           const cloneFormat = format.clone();
+          cloneFormat.context = ff;
           cloneFormat.startIndex = 0;
           if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
             cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
