@@ -46,6 +46,11 @@ export class DefaultRenderer extends Renderer {
   }
 
   createTextNode(text: string): Text {
-    return document.createTextNode(text);
+    const str = text.replace(/\s\s+/g, str => {
+      return ' ' + Array.from({
+        length: str.length - 1
+      }).fill('\u00a0').join('');
+    }).replace(/^\s|\s$/g, '\u00a0');
+    return document.createTextNode(str);
   }
 }

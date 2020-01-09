@@ -150,19 +150,14 @@ export class Differ {
 
   private renderTextNode(token: TextToken, oldVNode: Token, host: NativeElement, previousSibling: NativeNode): NativeText {
     if (!Differ.diff(token, oldVNode)) {
-      const str = token.text.replace(/\s\s+/g, str => {
-        return ' ' + Array.from({
-          length: str.length - 1
-        }).fill('\u00a0').join('');
-      }).replace(/^\s|\s$/g, '\u00a0');
+      let currentNode = this.renderer.createTextNode(token.text);
       if (oldVNode instanceof TextToken) {
         token.nativeElement = oldVNode.nativeElement;
         token.nativeElement[TBUS_TOKEN] = token;
-        token.nativeElement.textContent = str;
+        token.nativeElement.textContent = currentNode.textContent;
         oldVNode.nativeElement = null;
         Differ.insertNode(previousSibling, token.nativeElement, host);
       } else {
-        let currentNode = this.renderer.createTextNode(str);
         currentNode[TBUS_TOKEN] = token;
         token.nativeElement = currentNode;
         host.appendChild(currentNode);
