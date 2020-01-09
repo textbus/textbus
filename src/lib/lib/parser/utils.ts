@@ -21,7 +21,10 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
 
     const a = next.startIndex - prev.startIndex;
     if (a === 0) {
-      return next.endIndex - prev.endIndex;
+      let b = next.endIndex - prev.endIndex;
+      if (b === 0) {
+        return next.handler.priority - prev.handler.priority;
+      }
     }
     return a;
   }).map(item => item.clone());

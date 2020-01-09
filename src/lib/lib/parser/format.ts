@@ -31,7 +31,7 @@ export class BlockFormat {
   readonly startIndex = 0;
 
   get endIndex() {
-    return this.context.contentLength;
+    return this?.context.contentLength || 0;
   }
 
   constructor(params: FormatParams | BlockFormat) {
