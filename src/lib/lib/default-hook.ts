@@ -4,8 +4,7 @@ import { TBInputEvent } from './viewer/cursor';
 import { Viewer } from './viewer/viewer';
 import { Fragment } from './parser/fragment';
 import { Contents } from './parser/contents';
-import { Handler } from './toolbar/handlers/help';
-import { BlockFormat, InlineFormat } from './parser/format';
+import { BlockFormat } from './parser/format';
 import { Priority } from './toolbar/help';
 import { Parser } from './parser/parser';
 import { CacheData } from './toolbar/utils/cache-data';
@@ -82,7 +81,7 @@ export class DefaultHook implements Hook {
       if (firstContent instanceof Fragment) {
         if (!(firstContent.getContentAtIndex(0) instanceof Fragment)) {
           newContents.shift();
-          viewer.moveContentsToFragment(firstContent, commonAncestorFragment, startIndex);
+          commonAncestorFragment.insertFragmentContents(firstContent, startIndex);
           if (!newContents.length) {
             firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
           }
@@ -122,6 +121,7 @@ export class DefaultHook implements Hook {
         viewer.rerender();
         viewer.selection.apply();
       } else {
+        const formatMatrix = commonAncestorFragment.getFormatMatrix();
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
@@ -130,13 +130,11 @@ export class DefaultHook implements Hook {
           }))));
         }
         const index = commonAncestorFragment.getIndexInParent();
-        const formatMatrix = new Map<Handler, Array<InlineFormat | BlockFormat>>();
-        afterFragment.getFormatHandlers().filter(key => {
+        Array.from(formatMatrix.keys()).filter(key => {
           return ![Priority.Default, Priority.Block].includes(key.priority);
         }).forEach(key => {
-          formatMatrix.set(key, afterFragment.getFormatRangesByHandler(key));
+          afterFragment.setFormats(key, formatMatrix.get(key));
         });
-        afterFragment.useFormats(formatMatrix);
         parser.getFormatStateByData(new CacheData({
           tag: 'p'
         })).forEach(item => {
@@ -178,10 +176,8 @@ export class DefaultHook implements Hook {
             range.startFragment.delete(0, 1);
           }
           const rerenderFragment = viewer.findRerenderFragment(range.startFragment);
-          const firstRange = selection.firstRange;
           if (range.startFragment.contentLength) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
-
               const startFragment = new Fragment();
               parser.getFormatStateByData(new CacheData({
                 tag: 'p'
@@ -191,25 +187,26 @@ export class DefaultHook implements Hook {
                   context: startFragment
                 }), true)
               });
+
               rerenderFragment.fragment.insert(startFragment, 0);
-              viewer.moveContentsToFragment(range.startFragment, startFragment, 0);
-              viewer.deleteEmptyFragment(range.startFragment);
-              firstRange.startFragment = startFragment;
-              firstRange.startIndex = 0;
+              startFragment.insertFragmentContents(range.startFragment, 0);
+              range.startFragment.cleanEmptyFragmentTreeBySelf();
+              range.startFragment = startFragment;
+              range.startIndex = 0;
             } else {
               const p = viewer.findLastChild(rerenderFragment.fragment, rerenderFragment.index - 1);
-              viewer.moveContentsToFragment(range.startFragment, p.fragment, p.index);
-              viewer.deleteEmptyFragment(range.startFragment);
-              firstRange.startFragment = p.fragment;
-              firstRange.startIndex = p.index;
+              p.fragment.insertFragmentContents(range.startFragment, p.index);
+              range.startFragment.cleanEmptyFragmentTreeBySelf();
+              range.startFragment = p.fragment;
+              range.startIndex = p.index;
             }
           } else {
             if (rerenderFragment.index === 0) {
-              viewer.deleteEmptyFragment(range.startFragment);
+              range.startFragment.cleanEmptyFragmentTreeBySelf();
               if (rerenderFragment.fragment.contentLength) {
                 const p = viewer.findFirstPosition(rerenderFragment.fragment);
-                firstRange.startFragment = p.fragment;
-                firstRange.startIndex = 0;
+                range.startFragment = p.fragment;
+                range.startIndex = 0;
               } else {
                 const startFragment = new Fragment();
                 parser.getFormatStateByData(new CacheData({
@@ -225,14 +222,14 @@ export class DefaultHook implements Hook {
                   tag: 'br'
                 }))));
                 rerenderFragment.fragment.insert(startFragment, 0);
-                firstRange.startFragment = startFragment;
-                firstRange.startIndex = 0;
+                range.startFragment = startFragment;
+                range.startIndex = 0;
               }
             } else {
               const p = viewer.findLastChild(rerenderFragment.fragment, rerenderFragment.index - 1);
-              viewer.deleteEmptyFragment(range.startFragment);
-              firstRange.startFragment = p.fragment;
-              firstRange.startIndex = p.index;
+              range.startFragment.cleanEmptyFragmentTreeBySelf();
+              range.startFragment = p.fragment;
+              range.startIndex = p.index;
             }
           }
           viewer.rerender();
@@ -246,7 +243,7 @@ export class DefaultHook implements Hook {
             if (s.context === range.endFragment) {
               isDeletedEnd = true;
             }
-            viewer.deleteEmptyFragment(s.context);
+            s.context.cleanEmptyFragmentTreeBySelf();
           } else {
             s.context.delete(s.startIndex, s.endIndex);
           }
@@ -267,8 +264,7 @@ export class DefaultHook implements Hook {
               range.startFragment.mergeFormat(ff, true);
             }
           });
-          viewer.deleteEmptyFragment(range.endFragment);
-
+          range.endFragment.cleanEmptyFragmentTreeBySelf();
         }
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;

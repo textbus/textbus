@@ -13,7 +13,6 @@ import { Hook } from './help';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Renderer } from '../renderer/renderer';
-import { InlineFormat } from '../parser/format';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -200,29 +199,6 @@ export class Viewer {
     return {
       index: fragment.contentLength,
       fragment
-    }
-  }
-
-  moveContentsToFragment(oldFragment: Fragment, target: Fragment, startIndex: number) {
-    target.delete(startIndex);
-    for (const item of oldFragment.sliceContents(0)) {
-      target.append(item);
-    }
-    oldFragment.getFormatRanges().forEach(f => {
-      if (f instanceof InlineFormat) {
-        const ff = f.clone();
-        ff.startIndex += startIndex;
-        ff.endIndex += startIndex;
-        target.mergeFormat(ff, true);
-      }
-    });
-  }
-
-  deleteEmptyFragment(fragment: Fragment) {
-    const parent = fragment.parent;
-    fragment.destroy();
-    if (parent && !parent.contentLength) {
-      this.deleteEmptyFragment(parent);
     }
   }
 
