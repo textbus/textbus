@@ -14,7 +14,6 @@ export class Differ {
   }
 
   render(newToken: BlockToken, host: NativeElement) {
-    console.log(newToken);
     let previousSibling: NativeElement | NativeText;
     newToken.children.forEach(vNode => {
       const old = this?.oldToken?.children.shift();
