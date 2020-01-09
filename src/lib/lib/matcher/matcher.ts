@@ -404,7 +404,7 @@ export class Matcher {
       const formatRanges = fragment.getFormatRangesByHandler(handler) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
-        if (startIndex >= f.startIndex && endIndex <= f.endIndex) {
+        if ((startIndex === 0 ? startIndex >= f.startIndex : startIndex > f.startIndex) && endIndex <= f.endIndex) {
           states.push(f);
         }
       }
