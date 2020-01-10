@@ -1,7 +1,6 @@
 import { Fragment } from '../parser/fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
-import { NodeRef } from '../renderer/help';
 
 export interface TBRangePosition {
   fragment: Fragment;
@@ -84,9 +83,8 @@ export class TBRange {
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
-
-    this.nativeRange.setStart(start.node.nativeElement as Node, start.offset);
-    this.nativeRange.setEnd(end.node.nativeElement as Node, end.offset);
+    this.nativeRange.setStart(start.node, start.offset);
+    this.nativeRange.setEnd(end.node, end.offset);
   }
 
   collapse(toEnd = false) {
@@ -273,7 +271,7 @@ export class TBRange {
   }
 
   private findFocusNodeAndOffset(vNodes: Token[],
-                                 i: number): { node: NodeRef, offset: number } {
+                                 i: number): { node: Node, offset: number } {
     let endIndex = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
@@ -298,7 +296,7 @@ export class TBRange {
             return this.findFocusNodeAndOffset(item.children, i);
           }
           return {
-            node: item.elementRef,
+            node: item.elementRef.nativeElement,
             offset: i
           }
         } else if (item instanceof MediaToken) {
@@ -309,7 +307,7 @@ export class TBRange {
           }
         } else if (item instanceof TextToken) {
           return {
-            node: item.elementRef,
+            node: item.elementRef.nativeElement,
             offset: i - item.startIndex
           };
         }

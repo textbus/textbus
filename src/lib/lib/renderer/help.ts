@@ -9,10 +9,6 @@ export interface ElementRef {
 
   append(newChild: NodeRef): void;
 
-  getAttribute(key: string): string;
-
-  getStyles(): { [key: string]: string };
-
   destroy(): void;
 }
 

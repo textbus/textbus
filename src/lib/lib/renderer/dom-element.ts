@@ -35,14 +35,6 @@ export class DOMElement implements ElementRef {
     this.nativeElement.appendChild(newChild.nativeElement);
   }
 
-  getAttribute(key: string): string {
-    return this.nativeElement.getAttribute(key);
-  }
-
-  getStyles(): { [p: string]: string } {
-    return this.nativeElement.style as any;
-  }
-
   destroy(): void {
     if (this.nativeElement.parentNode) {
       this.nativeElement.parentNode.removeChild(this.nativeElement);
