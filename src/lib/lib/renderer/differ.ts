@@ -5,7 +5,7 @@ import { TBUS_TOKEN } from '../parser/help';
 import { BlockFormat, InlineFormat, SingleFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { VElement } from './element';
-import { NativeElement, NativeNode, NativeText, Renderer } from './help';
+import { ElementRef, NodeRef, TextRef, Renderer } from './help';
 
 export class Differ {
   private oldToken: BlockToken;
@@ -13,16 +13,16 @@ export class Differ {
   constructor(private parser: Parser, private renderer: Renderer) {
   }
 
-  render(newToken: BlockToken, host: NativeElement) {
+  render(newToken: BlockToken, host: ElementRef) {
     newToken.children.forEach((vNode, index) => {
       const old = this?.oldToken?.children.shift();
       this.diffAndUpdateView(vNode, old, host, index);
     });
     this?.oldToken?.children.forEach(i => i.destroyView());
     this.oldToken = newToken;
-    host[TBUS_TOKEN] = newToken;
-    newToken.wrapElement = host;
-    newToken.slotElement = host;
+    host.nativeElement[TBUS_TOKEN] = newToken;
+    newToken.wrapElement = host.nativeElement;
+    newToken.slotElement = host.nativeElement;
   }
 
   /**
@@ -32,7 +32,7 @@ export class Differ {
    * @param host
    * @param position
    */
-  private diffAndUpdateView(token: Token, oldToken: Token, host: NativeElement, position: number): NativeNode {
+  private diffAndUpdateView(token: Token, oldToken: Token, host: ElementRef, position: number): NodeRef {
     if (token instanceof BlockToken || token instanceof InlineToken) {
       return this.renderContainerNode(token, oldToken, host, position);
     } else if (token instanceof TextToken) {
@@ -42,7 +42,7 @@ export class Differ {
     }
   }
 
-  private renderMediaNode(token: MediaToken, oldToken: Token, host: NativeElement, position: number): NativeElement {
+  private renderMediaNode(token: MediaToken, oldToken: Token, host: ElementRef, position: number): ElementRef {
     if (!Differ.diff(token, oldToken)) {
       let vElement = new VElement(token.data.tagName);
       token.formats.reduce((node, next) => {
@@ -58,16 +58,16 @@ export class Differ {
         }
         return node;
       }, vElement);
-      token.nativeElement = this.renderer.createElement(vElement);
-      if (token.nativeElement) {
-        this.parser.getFormatStateByNode(token.nativeElement.elementRef as HTMLElement).forEach(f => {
+      token.elementRef = this.renderer.createElement(vElement);
+      if (token.elementRef) {
+        this.parser.getFormatStateByNode(token.elementRef.nativeElement as HTMLElement).forEach(f => {
           token.data.mergeFormat(new SingleFormat({
             context: token.data,
             ...f
           }));
         });
-        token.nativeElement[TBUS_TOKEN] = token;
-        host.append(token.nativeElement);
+        token.elementRef.nativeElement[TBUS_TOKEN] = token;
+        host.append(token.elementRef);
       }
       if (oldToken instanceof MediaToken) {
         token.context.viewSynced();
@@ -76,15 +76,15 @@ export class Differ {
         oldToken.destroyView();
       }
     } else {
-      token.nativeElement = (oldToken as MediaToken).nativeElement;
-      token.nativeElement && (token.nativeElement[TBUS_TOKEN] = token);
-      Differ.insertNode(position, token.nativeElement, host);
-      (oldToken as MediaToken).nativeElement = null;
+      token.elementRef = (oldToken as MediaToken).elementRef;
+      token.elementRef && (token.elementRef.nativeElement[TBUS_TOKEN] = token);
+      host.insert(token.elementRef, position);
+      (oldToken as MediaToken).elementRef = null;
     }
-    return token.nativeElement;
+    return token.elementRef;
   }
 
-  private renderContainerNode(token: BlockToken | InlineToken, oldToken: Token, host: NativeElement, position: number) {
+  private renderContainerNode(token: BlockToken | InlineToken, oldToken: Token, host: ElementRef, position: number) {
     if (!Differ.diff(token, oldToken)) {
       let wrapElement: VElement;
       let slotElement: VElement;
@@ -113,7 +113,7 @@ export class Differ {
       }
 
       if (token.wrapElement) {
-        Differ.insertNode(position, token.wrapElement, host);
+        host.insert(token.wrapElement, position);
       }
       if (oldToken instanceof BlockToken) {
         token.context.viewSynced();
@@ -127,9 +127,9 @@ export class Differ {
       // }
       token.wrapElement = (oldToken as InlineToken).wrapElement;
       token.slotElement = (oldToken as InlineToken).slotElement;
-      token.wrapElement && (token.wrapElement[TBUS_TOKEN] = token);
-      token.slotElement && (token.slotElement[TBUS_TOKEN] = token);
-      Differ.insertNode(position, token.wrapElement, host);
+      token.wrapElement && (token.wrapElement.nativeElement[TBUS_TOKEN] = token);
+      token.slotElement && (token.slotElement.nativeElement[TBUS_TOKEN] = token);
+      host.insert(token.wrapElement, position);
       (oldToken as InlineToken).wrapElement = (oldToken as InlineToken).slotElement = null;
     }
 
@@ -145,34 +145,30 @@ export class Differ {
     return token.wrapElement;
   }
 
-  private renderTextNode(token: TextToken, oldVNode: Token, host: NativeElement, position: number): NativeText {
+  private renderTextNode(token: TextToken, oldVNode: Token, host: ElementRef, position: number): TextRef {
     if (!Differ.diff(token, oldVNode)) {
       let currentNode = this.renderer.createTextNode(token.text);
       if (oldVNode instanceof TextToken) {
-        token.nativeElement = oldVNode.nativeElement;
-        token.nativeElement[TBUS_TOKEN] = token;
-        token.nativeElement.textContent = currentNode.textContent;
-        oldVNode.nativeElement = null;
-        Differ.insertNode(position, token.nativeElement, host);
+        token.elementRef = oldVNode.elementRef;
+        token.elementRef.nativeElement[TBUS_TOKEN] = token;
+        token.elementRef.textContent = currentNode.textContent;
+        oldVNode.elementRef = null;
+        host.insert(token.elementRef, position);
       } else {
-        currentNode[TBUS_TOKEN] = token;
-        token.nativeElement = currentNode;
+        currentNode.nativeElement[TBUS_TOKEN] = token;
+        token.elementRef = currentNode;
         host.append(currentNode);
         if (oldVNode) {
           oldVNode.destroyView();
         }
       }
     } else {
-      token.nativeElement = (oldVNode as TextToken).nativeElement;
-      token.nativeElement[TBUS_TOKEN] = token;
-      Differ.insertNode(position, token.nativeElement, host);
-      (oldVNode as TextToken).nativeElement = null;
+      token.elementRef = (oldVNode as TextToken).elementRef;
+      token.elementRef.nativeElement[TBUS_TOKEN] = token;
+      host.insert(token.elementRef, position);
+      (oldVNode as TextToken).elementRef = null;
     }
-    return token.nativeElement;
-  }
-
-  private static insertNode(position: number, newNode: NativeElement | NativeText, host: NativeElement) {
-    host.insert(newNode, position);
+    return token.elementRef;
   }
 
   private static diff(token: Token, oldToken: Token): boolean {
@@ -216,10 +212,10 @@ export class Differ {
   }
 
   private createNativeElementsTree(vElement: VElement,
-                                   token: BlockToken | InlineToken): { wrap: NativeElement, slot: NativeElement } {
+                                   token: BlockToken | InlineToken): { wrap: ElementRef, slot: ElementRef } {
     const wrap = this.renderer.createElement(vElement);
-    wrap[TBUS_TOKEN] = token;
-    const newFormatStates = this.parser.getFormatStateByNode(wrap.elementRef);
+    wrap.nativeElement[TBUS_TOKEN] = token;
+    const newFormatStates = this.parser.getFormatStateByNode(wrap.nativeElement);
     newFormatStates.forEach(format => {
       switch (format.handler.priority) {
         case Priority.Default:

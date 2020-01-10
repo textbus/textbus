@@ -1,7 +1,7 @@
 import { Fragment } from '../parser/fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
-import { NativeNode } from '../renderer/help';
+import { NodeRef } from '../renderer/help';
 
 export interface TBRangePosition {
   fragment: Fragment;
@@ -85,8 +85,8 @@ export class TBRange {
     this.startIndex += offset;
     this.endIndex += offset;
 
-    this.nativeRange.setStart(start.node.elementRef as Node, start.offset);
-    this.nativeRange.setEnd(end.node.elementRef as Node, end.offset);
+    this.nativeRange.setStart(start.node.nativeElement as Node, start.offset);
+    this.nativeRange.setEnd(end.node.nativeElement as Node, end.offset);
   }
 
   collapse(toEnd = false) {
@@ -273,16 +273,16 @@ export class TBRange {
   }
 
   private findFocusNodeAndOffset(vNodes: Token[],
-                                 i: number): { node: NativeNode, offset: number } {
+                                 i: number): { node: NodeRef, offset: number } {
     let endIndex = 0;
     for (let index = 0; index < vNodes.length; index++) {
       const item = vNodes[index];
       if ((item instanceof BlockToken || item instanceof InlineToken) && item.context.token === item) {
         if (endIndex === i) {
-          const childNodes = Array.from(item.nativeElement.elementRef.parentNode.childNodes);
-          const index = childNodes.indexOf(item.nativeElement.elementRef as ChildNode);
+          const childNodes = Array.from(item.elementRef.nativeElement.parentNode.childNodes);
+          const index = childNodes.indexOf(item.elementRef.nativeElement as ChildNode);
           return {
-            node: item.nativeElement.elementRef.parentNode,
+            node: item.elementRef.nativeElement.parentNode,
             offset: index
           }
         }
@@ -298,28 +298,28 @@ export class TBRange {
             return this.findFocusNodeAndOffset(item.children, i);
           }
           return {
-            node: item.nativeElement,
+            node: item.elementRef,
             offset: i
           }
         } else if (item instanceof MediaToken) {
-          const index = Array.from(item.nativeElement.elementRef.parentNode.childNodes).indexOf(item.nativeElement.elementRef as ChildNode);
+          const index = Array.from(item.elementRef.nativeElement.parentNode.childNodes).indexOf(item.elementRef.nativeElement as ChildNode);
           return {
-            node: item.nativeElement.elementRef.parentNode,
+            node: item.elementRef.nativeElement.parentNode,
             offset: toEnd ? index + 1 : index
           }
         } else if (item instanceof TextToken) {
           return {
-            node: item.nativeElement,
+            node: item.elementRef,
             offset: i - item.startIndex
           };
         }
       }
     }
     const last = vNodes[vNodes.length - 1];
-    const childNodes = Array.from(last.nativeElement.elementRef.parentNode.childNodes);
-    const index = childNodes.indexOf(last.nativeElement.elementRef as ChildNode);
+    const childNodes = Array.from(last.elementRef.nativeElement.parentNode.childNodes);
+    const index = childNodes.indexOf(last.elementRef.nativeElement as ChildNode);
     return {
-      node: last.nativeElement.elementRef.parentNode,
+      node: last.elementRef.nativeElement.parentNode,
       offset: index + 1
     };
   }

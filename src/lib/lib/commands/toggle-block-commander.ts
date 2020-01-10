@@ -20,7 +20,7 @@ export class ToggleBlockCommander implements Commander {
       const reg = new RegExp(this.tagName, 'i');
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        let node = commonAncestorFragment.token.nativeElement;
+        let node = commonAncestorFragment.token.elementRef;
         let container: Fragment;
         while (node) {
           if (reg.test(node.name)) {
@@ -39,7 +39,7 @@ export class ToggleBlockCommander implements Commander {
           const scope = range.getCommonAncestorFragmentScope();
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
-            const node = item.context.token.nativeElement;
+            const node = item.context.token.elementRef;
             if (reg.test(node.parent.name)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);

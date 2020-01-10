@@ -1,9 +1,9 @@
 import { VElement } from './element';
-import { NativeElement, NativeText, Renderer } from './help';
+import { ElementRef, TextRef, Renderer } from './help';
 import { DOMElement, DOMText } from './dom-element';
 
 export class DefaultRenderer extends Renderer {
-  createElement(element: VElement): NativeElement {
+  createElement(element: VElement): ElementRef {
     const el = document.createElement(element.tagName);
     element.styles.forEach((value, key) => {
       el.style[key] = value;
@@ -14,7 +14,7 @@ export class DefaultRenderer extends Renderer {
     return new DOMElement(el);
   }
 
-  createTextNode(text: string): NativeText {
+  createTextNode(text: string): TextRef {
     const str = text.replace(/\s\s+/g, str => {
       return ' ' + Array.from({
         length: str.length - 1

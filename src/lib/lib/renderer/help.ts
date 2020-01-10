@@ -1,14 +1,13 @@
 import { VElement } from './element';
 
-export interface NativeElement {
-  elementRef: any;
-  name: string;
-  isEmpty: boolean;
-  parent: NativeElement;
+export interface ElementRef {
+  readonly nativeElement: any;
+  readonly name: string;
+  readonly parent: ElementRef;
 
-  insert(newChild: NativeNode, index: number): void;
+  insert(newChild: NodeRef, index: number): void;
 
-  append(newChild: NativeNode): void;
+  append(newChild: NodeRef): void;
 
   getAttribute(key: string): string;
 
@@ -17,17 +16,17 @@ export interface NativeElement {
   destroy(): void;
 }
 
-export interface NativeText {
-  elementRef: any;
+export interface TextRef {
+  readonly nativeElement: any;
+  readonly parent: ElementRef;
   textContent: string;
-  parent: NativeElement;
   destroy(): void;
 }
 
-export type NativeNode = NativeText | NativeElement;
+export type NodeRef = TextRef | ElementRef;
 
 export abstract class Renderer {
-  abstract createElement(element: VElement): NativeElement;
+  abstract createElement(element: VElement): ElementRef;
 
-  abstract createTextNode(text: string): NativeText;
+  abstract createTextNode(text: string): TextRef;
 }

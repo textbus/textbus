@@ -21,7 +21,7 @@ export class ListCommander implements Commander<any> {
       const reg = new RegExp(this.tagName, 'i');
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        let node = commonAncestorFragment.token.nativeElement;
+        let node = commonAncestorFragment.token.elementRef;
         if (reg.test(node.name)) {
           // 选中同一组列表下的多个 li
           const scope = range.getCommonAncestorFragmentScope();
@@ -45,7 +45,7 @@ export class ListCommander implements Commander<any> {
           const scope = range.getCommonAncestorFragmentScope();
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
-            const node = item.context.token.nativeElement;
+            const node = item.context.token.elementRef;
             if (/li/i.test(node.name) && reg.test(node.parent.name)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);
@@ -94,7 +94,7 @@ export class ListCommander implements Commander<any> {
         }
         this.deleteEmptyFragment(parent, container);
       });
-      const limitChildren = dtd[container.token.nativeElement.name.toLowerCase()]?.limitChildren;
+      const limitChildren = dtd[container.token.elementRef.name.toLowerCase()]?.limitChildren;
       if (limitChildren) {
         const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: limitChildren[0]

@@ -1,67 +1,80 @@
-import { NativeElement, NativeNode, NativeText } from './help';
+import { ElementRef, NodeRef, TextRef } from './help';
 
-export class DOMElement implements NativeElement {
+export class DOMElement implements ElementRef {
   get name() {
-    return this.elementRef.nodeName.toLowerCase();
-  }
-
-  get isEmpty() {
-    return !!this.elementRef.firstChild;
+    return this.nativeElement.nodeName.toLowerCase();
   }
 
   get parent() {
-    return new DOMElement(this.elementRef.parentNode);
+    return new DOMElement(this.nativeElement.parentNode as HTMLElement);
   }
 
-  constructor(public elementRef: any) {
+  constructor(public nativeElement: HTMLElement) {
   }
 
-  insert(newChild: NativeNode, index: number): void {
-
+  insert(newChild: NodeRef, index: number): void {
+    const previousSibling = this.nativeElement.childNodes[index];
+    if (previousSibling) {
+      if (previousSibling.nextSibling) {
+        if (previousSibling.nextSibling !== newChild.nativeElement) {
+          this.nativeElement.insertBefore(newChild.nativeElement, previousSibling.nextSibling);
+        }
+      } else {
+        this.append(newChild);
+      }
+    } else if (newChild.nativeElement.parentNode !== this.nativeElement) {
+      if (this.nativeElement.firstChild) {
+        this.nativeElement.appendChild(newChild.nativeElement);
+      } else {
+        this.nativeElement.insertBefore(newChild.nativeElement, this.nativeElement.firstChild);
+      }
+    }
   }
 
-  append(newChild: NativeNode): void {
-
+  append(newChild: NodeRef): void {
+    this.nativeElement.appendChild(newChild.nativeElement);
   }
 
   getAttribute(key: string): string {
-    return '';
+    return this.nativeElement.getAttribute(key);
   }
 
   getStyles(): { [p: string]: string } {
-    return this.elementRef.style as any;
+    return this.nativeElement.style as any;
   }
 
   destroy(): void {
-    if (this.elementRef.parentNode) {
-      this.elementRef.parentNode.removeChild(this.elementRef);
+    if (this.nativeElement.parentNode) {
+      this.nativeElement.parentNode.removeChild(this.nativeElement);
     }
-    this.elementRef = null;
+    this.nativeElement = null;
   }
 }
 
-export class DOMText implements NativeText {
-  set textContent(t: string) {
-    this._textContent = t;
+export class DOMText implements TextRef {
+  set textContent(v: string) {
+    this.nativeElement.textContent = v.replace(/\s\s+/g, str => {
+      return ' ' + Array.from({
+        length: str.length - 1
+      }).fill('\u00a0').join('');
+    }).replace(/^\s|\s$/g, '\u00a0');
   }
 
   get textContent() {
-    return this._textContent;
+    return this.nativeElement.textContent;
   }
 
   get parent() {
-    return new DOMElement(this.elementRef.parentNode);
+    return new DOMElement(this.nativeElement.parentNode as HTMLElement);
   }
 
-  private _textContent = '';
-
-  constructor(public elementRef: any) {
+  constructor(public nativeElement: Text) {
   }
 
   destroy(): void {
-    if (this.elementRef.parentNode) {
-      this.elementRef.parentNode.removeChild(this.elementRef);
+    if (this.nativeElement.parentNode) {
+      this.nativeElement.parentNode.removeChild(this.nativeElement);
     }
-    this.elementRef = null;
+    this.nativeElement = null;
   }
 }

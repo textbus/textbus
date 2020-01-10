@@ -1,10 +1,10 @@
 import { Fragment } from '../parser/fragment';
 import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
-import { NativeElement, NativeText } from './help';
+import { ElementRef, TextRef } from './help';
 
 export class TextToken {
-  nativeElement: NativeText;
+  elementRef: TextRef;
 
   get endIndex() {
     return this.startIndex + this.text.length;
@@ -16,17 +16,17 @@ export class TextToken {
   }
 
   destroyView() {
-    this.nativeElement.destroy();
+    this.elementRef.destroy();
   }
 }
 
 export class BlockToken {
-  get nativeElement() {
+  get elementRef() {
     return this.slotElement;
   }
 
-  slotElement: NativeElement;
-  wrapElement: NativeElement;
+  slotElement: ElementRef;
+  wrapElement: ElementRef;
   readonly children: Array<Token> = [];
   readonly startIndex = 0;
 
@@ -40,17 +40,17 @@ export class BlockToken {
 
 
   destroyView() {
-    this.nativeElement.destroy();
+    this.elementRef.destroy();
   }
 }
 
 export class InlineToken {
-  get nativeElement() {
+  get elementRef() {
     return this.slotElement;
   }
 
-  slotElement: NativeElement;
-  wrapElement: NativeElement;
+  slotElement: ElementRef;
+  wrapElement: ElementRef;
   readonly children: Array<Token> = [];
 
   constructor(public context: Fragment,
@@ -60,12 +60,12 @@ export class InlineToken {
   }
 
   destroyView() {
-    this.nativeElement.destroy();
+    this.elementRef.destroy();
   }
 }
 
 export class MediaToken {
-  nativeElement: NativeElement;
+  elementRef: ElementRef;
 
   get endIndex() {
     return this.startIndex + 1;
@@ -78,7 +78,7 @@ export class MediaToken {
   }
 
   destroyView() {
-    this.nativeElement.destroy();
+    this.elementRef.destroy();
   }
 }
 
