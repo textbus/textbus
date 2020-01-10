@@ -388,11 +388,20 @@ export class Matcher {
         };
       }
     }
+
     const last = states[states.length - 1];
+    let equal = true;
+    for (let i = 1; i < states.length; i++) {
+      const b = states[0].abstractData.equal(states[i].abstractData);
+      if (!b) {
+        equal = false;
+        break;
+      }
+    }
 
     return states.length ? {
       state: last.state,
-      abstractData: states.length === 1 && last.abstractData ? last.abstractData.clone() : null
+      abstractData: states.length && equal ? last.abstractData.clone() : null
     } : null;
   }
 
