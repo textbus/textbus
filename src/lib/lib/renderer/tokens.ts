@@ -16,7 +16,9 @@ export class TextToken {
   }
 
   destroyView() {
-    this.elementRef.destroy();
+    if (this.elementRef) {
+      this.elementRef.destroy();
+    }
   }
 }
 
@@ -40,7 +42,9 @@ export class BlockToken {
 
 
   destroyView() {
-    this.elementRef.destroy();
+    if (this.elementRef) {
+      this.elementRef.destroy();
+    }
   }
 }
 
@@ -60,7 +64,9 @@ export class InlineToken {
   }
 
   destroyView() {
-    this.elementRef.destroy();
+    if (this.elementRef) {
+      this.elementRef.destroy();
+    }
   }
 }
 
@@ -78,7 +84,9 @@ export class MediaToken {
   }
 
   destroyView() {
-    this.elementRef.destroy();
+    if (this.elementRef) {
+      this.elementRef.destroy();
+    }
   }
 }
 

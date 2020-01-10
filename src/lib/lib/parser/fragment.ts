@@ -108,6 +108,24 @@ export class Fragment extends View {
     return this.contents.slice(startIndex, endIndex);
   }
 
+  mergeMatchStates(states: ParseState[], startIndex: number, endIndex: number, canSurroundBlockElement: boolean) {
+    states.forEach(state => {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(state.handler.priority)) {
+        this.apply(new BlockFormat({
+          ...state,
+          context: this
+        }), canSurroundBlockElement);
+      } else {
+        this.apply(new InlineFormat({
+          ...state,
+          context: this,
+          startIndex,
+          endIndex
+        }), canSurroundBlockElement);
+      }
+    });
+  }
+
   /**
    * 给当前片段应用新的格式
    * @param format 新格式的应用范围

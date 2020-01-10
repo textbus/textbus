@@ -1,12 +1,11 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { Fragment } from '../parser/fragment';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
-import { BlockFormat } from '../parser/format';
-import { Contents } from '../parser/contents';
 import { VElement } from '../renderer/element';
+import { RootFragment } from '../parser/root-fragment';
+import { Fragment } from '../parser/fragment';
 
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
@@ -18,24 +17,30 @@ export class BlockCommander implements Commander<string> {
     this.tagName = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void {
     selection.ranges.forEach(range => {
       if (range.commonAncestorFragment === range.startFragment && range.commonAncestorFragment === range.endFragment) {
-        this.useFormat(range.commonAncestorFragment, handler);
+        range.commonAncestorFragment.mergeMatchStates(
+          rootFragment.parser.getFormatStateByData(new CacheData({
+            tag: this.tagName
+          })), 0, range.commonAncestorFragment.contentLength, false);
       } else {
-        range.getSelectedScope().forEach(item => {
-          if (item.context !== range.commonAncestorFragment) {
-            if (item.startIndex !== 0) {
-              let startIndex = BlockCommander.findStartIndex(item.context, item.startIndex);
-              this.format(item.context, startIndex, item.endIndex, handler);
-            } else {
-              const endIndex = BlockCommander.findEndIndex(item.context, item.endIndex);
-              this.format(item.context, 0, endIndex, handler);
-            }
-          } else {
-            const scope = range.getCommonAncestorFragmentScope();
-            this.format(range.commonAncestorFragment, scope.startIndex, scope.endIndex, handler);
-          }
+        const matchStates = rootFragment.parser.getFormatStateByData(new CacheData({
+          tag: this.tagName
+        }));
+        const parent = range.commonAncestorFragment.parent;
+        const position = range.getCommonAncestorFragmentScope().startIndex;
+        const fragments: Fragment[] = [];
+        range.getBlockFragmentsBySelectedScope().reverse().forEach(item => {
+          const fragment = new Fragment(matchStates.map(i => {
+            return Object.assign({}, i);
+          }));
+          fragment.insertFragmentContents(item.context.delete(item.startIndex, item.endIndex), 0);
+          fragments.push(fragment);
+          this.deleteEmptyFragment(item.context, parent);
+        });
+        fragments.forEach(f => {
+          parent.insert(f, position);
         });
       }
     })
@@ -45,100 +50,14 @@ export class BlockCommander implements Commander<string> {
     return new ReplaceModel(new VElement(data ? data.tag : this.tagName));
   }
 
-  private format(fragment: Fragment, startIndex: number, endIndex: number, handler: Handler) {
-    if (BlockCommander.hasFragment(fragment)) {
-      const ff = fragment.delete(startIndex, endIndex);
-      this.childContentToFragmentAndApplyFormat(ff, handler);
-      let len = 0;
-      ff.sliceContents(0).forEach(child => {
-        fragment.insert(child, startIndex + len);
-        len += child.length;
-      });
-    } else {
-      this.useFormat(fragment, handler);
-    }
-  }
-
-  private static findStartIndex(fragment: Fragment, max: number): number {
-    let index = 0;
-    for (let i = 0; i < fragment.contentLength; i++) {
-      const item = fragment.getContentAtIndex(i);
-      if (item instanceof Fragment) {
-        index = i;
-        if (i >= max) {
-          return i;
-        }
-      }
-    }
-    return index;
-  }
-
-  private static findEndIndex(fragment: Fragment, min: number): number {
-    let i = min;
-    const len = fragment.contentLength;
-    while (true) {
-      const next = fragment.getContentAtIndex(i);
-      if (next instanceof Fragment || i === len) {
-        return i;
-      }
-      i++;
-    }
-  }
-
-  private childContentToFragmentAndApplyFormat(fragment: Fragment, handler: Handler) {
-    const contents = [];
-    if (!BlockCommander.hasFragment(fragment)) {
-      this.useFormat(fragment, handler);
+  private deleteEmptyFragment(fragment: Fragment, scope: Fragment) {
+    if (!fragment || fragment === scope) {
       return;
     }
-    while (fragment.contentLength) {
-      let i = 0;
-      const contentLength = fragment.contentLength;
-      for (; i < contentLength; i++) {
-        const item = fragment.getContentAtIndex(i);
-        if (item instanceof Fragment) {
-          if (i > 0) {
-            contents.push(fragment.delete(0, i));
-            continue;
-          }
-          this.childContentToFragmentAndApplyFormat(item, handler);
-          contents.push(fragment.delete(0, 1).getContentAtIndex(0) as Fragment);
-        } else {
-          i++;
-        }
-      }
-      if (i > 0) {
-        contents.push(fragment.delete(0, i));
-      }
+    const parent = fragment.parent;
+    if (fragment.contentLength === 0) {
+      fragment.destroy();
     }
-
-    fragment.useContents(new Contents());
-    contents.forEach(i => {
-      if (!BlockCommander.hasFragment(i)) {
-        this.useFormat(i, handler)
-      }
-      fragment.append(i)
-    });
-  }
-
-  private useFormat(fragment: Fragment, handler: Handler) {
-    fragment.apply(new BlockFormat({
-      state: FormatState.Valid,
-      context: fragment,
-      handler,
-      cacheData: {
-        tag: this.tagName
-      }
-    }), true);
-    return fragment;
-  }
-
-  private static hasFragment(fragment: Fragment) {
-    for (let i = 0; i < fragment.contentLength; i++) {
-      if (fragment.getContentAtIndex(i) instanceof Fragment) {
-        return true;
-      }
-    }
-    return false;
+    this.deleteEmptyFragment(parent, scope);
   }
 }

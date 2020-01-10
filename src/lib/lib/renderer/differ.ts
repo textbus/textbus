@@ -1,11 +1,11 @@
-import { BlockToken, InlineToken, Token, TextToken, MediaToken } from './tokens';
-import { Parser } from '../parser/parser';
+import { BlockToken, InlineToken, MediaToken, TextToken, Token } from './tokens';
+import { Parser, ParseState } from '../parser/parser';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { TBUS_TOKEN } from '../parser/help';
 import { BlockFormat, InlineFormat, SingleFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { VElement } from './element';
-import { ElementRef, NodeRef, TextRef, Renderer } from './help';
+import { ElementRef, NodeRef, Renderer, TextRef } from './help';
 
 export class Differ {
   private oldToken: BlockToken;
@@ -85,6 +85,9 @@ export class Differ {
   }
 
   private renderContainerNode(token: BlockToken | InlineToken, oldToken: Token, host: ElementRef, position: number) {
+    if (token instanceof BlockToken) {
+      token.context.cleanFormats();
+    }
     if (!Differ.diff(token, oldToken)) {
       let wrapElement: VElement;
       let slotElement: VElement;
@@ -130,6 +133,10 @@ export class Differ {
       token.wrapElement && (token.wrapElement.nativeElement[TBUS_TOKEN] = token);
       token.slotElement && (token.slotElement.nativeElement[TBUS_TOKEN] = token);
       host.insert(token.wrapElement, position);
+      token.formats.forEach(format => {
+        token.context.mergeFormat(format, true);
+      });
+
       (oldToken as InlineToken).wrapElement = (oldToken as InlineToken).slotElement = null;
     }
 
@@ -216,7 +223,22 @@ export class Differ {
     const wrap = this.renderer.createElement(vElement);
     wrap.nativeElement[TBUS_TOKEN] = token;
     const newFormatStates = this.parser.getFormatStateByNode(wrap.nativeElement);
-    newFormatStates.forEach(format => {
+    this.mergeFormat(token, newFormatStates);
+
+    let slot = wrap;
+    vElement.childNodes.forEach(child => {
+      const c = this.createNativeElementsTree(child, token);
+      slot = c.slot;
+      wrap.append(c.wrap);
+    });
+    return {
+      wrap,
+      slot
+    }
+  }
+
+  private mergeFormat(token: Token, formats: ParseState[]) {
+    formats.forEach(format => {
       switch (format.handler.priority) {
         case Priority.Default:
         case Priority.Block:
@@ -237,15 +259,5 @@ export class Differ {
           break;
       }
     });
-    let slot = wrap;
-    vElement.childNodes.forEach(child => {
-      const c = this.createNativeElementsTree(child, token);
-      slot = c.slot;
-      wrap.append(c.wrap);
-    });
-    return {
-      wrap,
-      slot
-    }
   }
 }

@@ -1,20 +1,43 @@
 import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { CacheData } from '../toolbar/utils/cache-data';
+import { VElement } from '../renderer/element';
+import { RootFragment } from '../parser/root-fragment';
+import { InlineFormat } from '../parser/format';
 import { Fragment } from '../parser/fragment';
 import { SelectedScope } from '../viewer/range';
-import { VElement } from '../renderer/element';
 
 export class BoldCommander implements Commander {
   recordHistory = true;
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean) {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        this.apply(item, handler, overlap);
+        if (overlap) {
+          this.clean(item, handler);
+          return;
+        }
+        let state: FormatState;
+        const el = BoldCommander.findBoldParent(item.context.token.elementRef.nativeElement as HTMLElement);
+        if (el) {
+          state = overlap ? FormatState.Exclude : FormatState.Inherit;
+        } else {
+          state = overlap ? FormatState.Invalid : FormatState.Valid
+        }
+        if (state === FormatState.Valid) {
+          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+            tag: 'strong'
+          })), item.startIndex, item.endIndex, false);
+        } else if (state === FormatState.Exclude) {
+          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+            style: {
+              name: 'fontWeight',
+              value: 'normal'
+            }
+          })), item.startIndex, item.endIndex, false);
+        }
       });
     })
   }
@@ -36,25 +59,20 @@ export class BoldCommander implements Commander {
     return null;
   }
 
-  private apply(scope: SelectedScope, handler: Handler, overlap: boolean) {
+  private clean(scope: SelectedScope, handler: Handler) {
     const children = scope.context.sliceContents(scope.startIndex, scope.endIndex);
-    let state: FormatState;
     const el = BoldCommander.findBoldParent(scope.context.token.elementRef.nativeElement as HTMLElement);
-    if (el) {
-      state = overlap ? FormatState.Exclude : FormatState.Inherit;
-    } else {
-      state = overlap ? FormatState.Invalid : FormatState.Valid
-    }
+    let state: FormatState = el ? FormatState.Exclude : FormatState.Invalid;
     let index = 0;
     const formats: InlineFormat[] = [];
     let childFormat: InlineFormat;
     children.forEach(item => {
       if (item instanceof Fragment) {
-        this.apply({
+        this.clean({
           context: item,
           startIndex: 0,
           endIndex: item.contentLength
-        }, handler, overlap);
+        }, handler);
       } else if (item) {
         if (!childFormat) {
           childFormat = new InlineFormat({

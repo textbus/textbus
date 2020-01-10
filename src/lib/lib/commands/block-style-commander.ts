@@ -1,11 +1,12 @@
 import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
-import { BlockFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
 import { CacheData } from '../toolbar/utils/cache-data';
 import { VElement } from '../renderer/element';
+import { RootFragment } from '../parser/root-fragment';
+import { Fragment } from '../parser/fragment';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
@@ -18,7 +19,7 @@ export class BlockStyleCommander implements Commander<string> {
     this.value = value;
   }
 
-  command(selection: TBSelection, handler: Handler, overlap: boolean): void {
+  command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void {
     selection.ranges.reduce((v, n) => {
       const contents = new Contents();
       contents.insertElements(n.commonAncestorFragment.sliceContents(0), 0);
@@ -40,18 +41,13 @@ export class BlockStyleCommander implements Commander<string> {
         }
       }
       return v;
-    }, []).forEach(f => {
-      f.apply(new BlockFormat({
-        state: FormatState.Valid,
-        context: f,
-        handler,
-        cacheData: {
-          style: {
-            name: this.name,
-            value: this.value
-          }
+    }, [] as Fragment[]).forEach(f => {
+      f.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+        style: {
+          name: this.name,
+          value: this.value
         }
-      }), true)
+      })), 0, f.contentLength, true);
     });
   }
 

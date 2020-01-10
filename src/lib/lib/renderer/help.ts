@@ -16,6 +16,7 @@ export interface TextRef {
   readonly nativeElement: any;
   readonly parent: ElementRef;
   textContent: string;
+
   destroy(): void;
 }
 
