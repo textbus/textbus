@@ -19,31 +19,47 @@ export class CodeCommander implements Commander<string> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment) {
     if (!overlap) {
-      selection.collapse();
-      const firstRange = selection.firstRange;
-      const fragment = firstRange.startFragment;
-      const context = fragment.parent;
-      const pre = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
-        tag: 'pre'
-      })));
-      pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new AbstractData({
-        tag: 'br'
-      }))));
-      context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);
-      const first = fragment.getContentAtIndex(0);
-      if (fragment.contentLength === 0 || first instanceof Single && first.tagName === 'br') {
-        fragment.destroy();
-      }
-      firstRange.startIndex = firstRange.endIndex = 0;
-      firstRange.startFragment = firstRange.endFragment = pre;
+      selection.ranges.forEach(range => {
+        const fragment = range.startFragment;
+        const context = fragment.parent;
+        const pre = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+          tag: 'pre',
+          attrs: {
+            lang: this.lang
+          }
+        })));
+        pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new AbstractData({
+          tag: 'br'
+        }))));
+        context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);
+        const first = fragment.getContentAtIndex(0);
+        if (fragment.contentLength === 0 || first instanceof Single && first.tagName === 'br') {
+          fragment.destroy();
+        }
+        range.startIndex = range.endIndex = 0;
+        range.startFragment = range.endFragment = pre;
+      });
+
+    } else {
+      selection.ranges.forEach(range => {
+        range.commonAncestorFragment.mergeMatchStates(
+          rootFragment.parser.getFormatStateByData(new AbstractData({
+              tag: 'pre',
+              attrs: {
+                lang: this.lang
+              }
+            })
+          ), 0, range.commonAncestorFragment.contentLength, false);
+      });
     }
   }
 
-  render(state: FormatState, rawElement?: VElement, matchDesc?: AbstractData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
     if (state === FormatState.Valid) {
       const el = new VElement(this.tagName);
-      if (this.lang) {
-        el.attrs.set('lang', this.lang);
+      const lang = abstractData?.attrs?.get('lang');
+      if (lang) {
+        el.attrs.set('lang', lang);
       }
       return new ReplaceModel(el);
     }
