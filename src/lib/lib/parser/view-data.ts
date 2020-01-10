@@ -1,4 +1,4 @@
-export abstract class View {
+export abstract class ViewData {
   readonly length = 1;
 
   get dirty() {
@@ -9,14 +9,14 @@ export abstract class View {
     return this._dataChanged;
   }
 
-  abstract parent: View;
+  abstract parent: ViewData;
 
   private _dirty = true;
   private _dataChanged = true;
 
   private infinityLoop = false;
 
-  abstract clone(): View;
+  abstract clone(): ViewData;
 
   viewSynced() {
     this._dataChanged = false;

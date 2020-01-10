@@ -1,6 +1,6 @@
 import { VElement } from './element';
 import { ElementRef, TextRef, Renderer } from './help';
-import { DOMElement, DOMText } from './dom-element';
+import { DOMElement, DOMText, replaceEmpty } from './dom-element';
 
 export class DefaultRenderer extends Renderer {
   createElement(element: VElement): ElementRef {
@@ -15,11 +15,7 @@ export class DefaultRenderer extends Renderer {
   }
 
   createTextNode(text: string): TextRef {
-    const str = text.replace(/\s\s+/g, str => {
-      return ' ' + Array.from({
-        length: str.length - 1
-      }).fill('\u00a0').join('');
-    }).replace(/^\s|\s$/g, '\u00a0');
+    const str = replaceEmpty(text);
     return new DOMText(document.createTextNode(str));
   }
 }

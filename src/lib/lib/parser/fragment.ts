@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { Handler } from '../toolbar/handlers/help';
-import { View } from './view';
+import { ViewData } from './view-data';
 import { Priority } from '../toolbar/help';
 import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Single } from './single';
@@ -8,7 +8,7 @@ import { getCanApplyFormats, mergeFormat } from './utils';
 import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
 import { FormatDelta } from './parser';
 
-export class Fragment extends View {
+export class Fragment extends ViewData {
   readonly token: BlockToken;
   readonly parent: Fragment;
 
@@ -182,7 +182,7 @@ export class Fragment extends View {
    * @param content
    * @param index
    */
-  insert(content: string | View, index: number) {
+  insert(content: string | ViewData, index: number) {
     this.markDirty();
     if (content instanceof Single || content instanceof Fragment) {
       if (content.parent) {
@@ -225,7 +225,7 @@ export class Fragment extends View {
    * @param content
    * @param insertAdjacentInlineFormat
    */
-  append(content: string | View, insertAdjacentInlineFormat = false) {
+  append(content: string | ViewData, insertAdjacentInlineFormat = false) {
     this.markDirty();
 
     if (content instanceof Single || content instanceof Fragment) {
@@ -252,7 +252,7 @@ export class Fragment extends View {
     return this.contents.getContentAtIndex(index);
   }
 
-  find(el: View) {
+  find(el: ViewData) {
     return this.contents.find(el);
   }
 
@@ -510,7 +510,7 @@ export class Fragment extends View {
       if (typeof item === 'string') {
         const v = new TextToken(this, i + startIndex, item);
         vNodes.push(v);
-      } else if (item instanceof View) {
+      } else if (item instanceof ViewData) {
         if (item instanceof Fragment) {
           vNodes.push(item.createVDom());
         } else if (item instanceof Single) {

@@ -1,11 +1,11 @@
-import { View } from './view';
+import { ViewData } from './view-data';
 import { Fragment } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { SingleFormat } from './format';
 import { FormatDelta } from './parser';
 import { FormatState } from '../matcher/matcher';
 
-export class Single extends View {
+export class Single extends ViewData {
   private formatMatrix = new Map<Handler, SingleFormat[]>();
   parent: Fragment;
   constructor(public tagName: string, formats?: FormatDelta[]) {

@@ -1,5 +1,13 @@
 import { ElementRef, NodeRef, TextRef } from './help';
 
+export function replaceEmpty(s: string) {
+  return s.replace(/\s\s+/g, str => {
+    return ' ' + Array.from({
+      length: str.length - 1
+    }).fill('\u00a0').join('');
+  }).replace(/^\s|\s$/g, '\u00a0');
+}
+
 export class DOMElement implements ElementRef {
   get name() {
     return this.nativeElement.nodeName.toLowerCase();
@@ -45,11 +53,7 @@ export class DOMElement implements ElementRef {
 
 export class DOMText implements TextRef {
   set textContent(v: string) {
-    this.nativeElement.textContent = v.replace(/\s\s+/g, str => {
-      return ' ' + Array.from({
-        length: str.length - 1
-      }).fill('\u00a0').join('');
-    }).replace(/^\s|\s$/g, '\u00a0');
+    this.nativeElement.textContent = replaceEmpty(v);
   }
 
   get textContent() {

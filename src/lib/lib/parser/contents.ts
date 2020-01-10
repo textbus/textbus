@@ -1,12 +1,12 @@
-import { View } from './view';
+import { ViewData } from './view-data';
 import { Fragment } from './fragment';
 
-export class Contents implements Iterable<string | View> {
+export class Contents implements Iterable<string | ViewData> {
   get length() {
     return this.elements.reduce((p, n) => p + n.length, 0);
   }
 
-  private elements: Array<string | View> = [];
+  private elements: Array<string | ViewData> = [];
   private forOfIndex = 0;
 
   [Symbol.iterator]() {
@@ -29,7 +29,7 @@ export class Contents implements Iterable<string | View> {
     };
   }
 
-  insert(content: string | View, index: number) {
+  insert(content: string | ViewData, index: number) {
     if (index >= this.length) {
       if (typeof content === 'string') {
         const last = this.elements[this.elements.length - 1];
@@ -48,7 +48,7 @@ export class Contents implements Iterable<string | View> {
         if (i > index) {
           break;
         }
-        if (el instanceof View && index === i) {
+        if (el instanceof ViewData && index === i) {
           const prev = this.elements[ii - 1];
           if (typeof prev === 'string' && typeof content === 'string') {
             this.elements[ii - 1] = prev + content;
@@ -63,7 +63,7 @@ export class Contents implements Iterable<string | View> {
         } else if (typeof el === 'string') {
           if (index >= i && index < i + el.length) {
             const cc = [el.slice(0, index - i), content, el.slice(index - i)].filter(i => i);
-            if (content instanceof View) {
+            if (content instanceof ViewData) {
               this.elements.splice(ii, 1, ...cc);
             } else {
               this.elements.splice(ii, 1, cc.join(''));
@@ -77,7 +77,7 @@ export class Contents implements Iterable<string | View> {
     }
   }
 
-  append(content: string | View) {
+  append(content: string | ViewData) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -92,7 +92,7 @@ export class Contents implements Iterable<string | View> {
       return [];
     }
     let index = 0;
-    const result: Array<string | View> = [];
+    const result: Array<string | ViewData> = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
@@ -123,7 +123,7 @@ export class Contents implements Iterable<string | View> {
     return discardedContents;
   }
 
-  insertElements(contents: Array<string | View>, index: number) {
+  insertElements(contents: Array<string | ViewData>, index: number) {
     contents.forEach(item => {
       this.insert(item, index);
       index += item.length;
@@ -134,7 +134,7 @@ export class Contents implements Iterable<string | View> {
     return this.elements.filter(i => i instanceof Fragment) as Fragment[];
   }
 
-  find(element: View): number {
+  find(element: ViewData): number {
     let index = 0;
     for (const item of this.elements) {
       if (item === element) {
