@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { RootFragment } from '../parser/root-fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';
@@ -64,7 +64,7 @@ export class ListCommander implements Commander<any> {
       let insertPosition = range.getCommonAncestorFragmentScope().startIndex;
       let container = range.commonAncestorFragment;
 
-      const listGroup = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+      const listGroup = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
         tag: this.tagName
       })));
 
@@ -79,14 +79,14 @@ export class ListCommander implements Commander<any> {
           if (/li/i.test(nativeElement.name)) {
             listGroup.append(item.context);
           } else {
-            const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+            const li = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
               tag: 'li'
             })));
             li.append(item.context);
             listGroup.append(li);
           }
         } else {
-          const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+          const li = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
             tag: 'li'
           })));
           li.append(item.context.delete(item.startIndex, item.endIndex));
@@ -96,7 +96,7 @@ export class ListCommander implements Commander<any> {
       });
       const limitChildren = dtd[container.token.elementRef.name.toLowerCase()]?.limitChildren;
       if (limitChildren) {
-        const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+        const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
           tag: limitChildren[0]
         })));
         childFragment.append(listGroup);
@@ -107,7 +107,7 @@ export class ListCommander implements Commander<any> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
     if (state === FormatState.Valid) {
       return new ReplaceModel(new VElement(cacheData.tag));
     }

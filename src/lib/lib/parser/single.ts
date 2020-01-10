@@ -2,13 +2,13 @@ import { View } from './view';
 import { Fragment } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { SingleFormat } from './format';
-import { ParseState } from './parser';
+import { FormatDelta } from './parser';
 import { FormatState } from '../matcher/matcher';
 
 export class Single extends View {
   private formatMatrix = new Map<Handler, SingleFormat[]>();
   parent: Fragment;
-  constructor(public tagName: string, formats?: ParseState[]) {
+  constructor(public tagName: string, formats?: FormatDelta[]) {
     super();
     if (Array.isArray(formats)) {
       formats.forEach(item => {

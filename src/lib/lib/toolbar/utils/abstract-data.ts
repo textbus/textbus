@@ -4,18 +4,18 @@ export interface EditableOptions {
   styleName?: string;
 }
 
-export interface CacheDataParams {
+export interface AbstractDataParams {
   tag?: string;
   attrs?: { [key: string]: string | number } | Map<string, string | number>;
   style?: { name: string, value: string | number };
 }
 
-export class CacheData {
+export class AbstractData {
   tag: string;
   attrs: Map<string, string | number>;
   style: { name: string, value: string | number };
 
-  constructor(params: CacheDataParams = {}) {
+  constructor(params: AbstractDataParams = {}) {
     this.tag = params.tag;
     this.style = params.style;
     if (params.attrs) {
@@ -35,7 +35,7 @@ export class CacheData {
     this.attrs && this.attrs.forEach((value, key) => {
       attrs.set(key, value);
     });
-    return new CacheData({
+    return new AbstractData({
       tag: this.tag,
       attrs: attrs.size ? (() => {
         const obj: { [key: string]: string | number } = {};
@@ -48,7 +48,7 @@ export class CacheData {
     });
   }
 
-  equal(data: CacheData) {
+  equal(data: AbstractData) {
     if (data === this) {
       return true;
     }
@@ -58,8 +58,8 @@ export class CacheData {
     const left = data;
     const right = this;
     return left.tag == right.tag &&
-      CacheData.equalAttrs(left.attrs, right.attrs) &&
-      CacheData.equalStyle(left.style, right.style);
+      AbstractData.equalAttrs(left.attrs, right.attrs) &&
+      AbstractData.equalStyle(left.style, right.style);
   }
 
   private static equalAttrs(left: Map<string, string | number>, right: Map<string, string | number>) {

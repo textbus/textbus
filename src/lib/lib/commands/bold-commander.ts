@@ -2,7 +2,7 @@ import { ChildSlotModel, Commander } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { VElement } from '../renderer/element';
 import { RootFragment } from '../parser/root-fragment';
 import { InlineFormat } from '../parser/format';
@@ -27,11 +27,11 @@ export class BoldCommander implements Commander {
           state = overlap ? FormatState.Invalid : FormatState.Valid
         }
         if (state === FormatState.Valid) {
-          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
             tag: 'strong'
           })), item.startIndex, item.endIndex, false);
         } else if (state === FormatState.Exclude) {
-          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
             style: {
               name: 'fontWeight',
               value: 'normal'
@@ -42,7 +42,7 @@ export class BoldCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData) {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData) {
     switch (state) {
       case FormatState.Exclude:
         if (rawElement) {

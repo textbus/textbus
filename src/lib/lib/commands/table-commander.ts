@@ -4,7 +4,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
 import { Parser } from '../parser/parser';
@@ -26,7 +26,7 @@ export class TableCommander implements Commander<AttrState[]> {
     const firstRange = selection.firstRange;
     const fragment = firstRange.startFragment;
     const context = fragment.parent;
-    const table = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+    const table = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
       tag: 'table'
     })));
     if (this.header) {
@@ -45,7 +45,7 @@ export class TableCommander implements Commander<AttrState[]> {
     return context;
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
     return new ReplaceModel(new VElement(cacheData.tag));
   }
 
@@ -58,20 +58,20 @@ export class TableCommander implements Commander<AttrState[]> {
   }
 
   private createBody(parser: Parser) {
-    const tbody = new Fragment(parser.getFormatStateByData(new CacheData({
+    const tbody = new Fragment(parser.getFormatStateByData(new AbstractData({
       tag: 'tbody'
     })));
 
     for (let i = 0; i < this.rows; i++) {
-      const tr = new Fragment(parser.getFormatStateByData(new CacheData({
+      const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
         tag: 'tr'
       })));
       tbody.append(tr);
       for (let j = 0; j < this.cols; j++) {
-        const td = new Fragment(parser.getFormatStateByData(new CacheData({
+        const td = new Fragment(parser.getFormatStateByData(new AbstractData({
           tag: 'td'
         })));
-        td.append(new Single('br', parser.getFormatStateByData(new CacheData({
+        td.append(new Single('br', parser.getFormatStateByData(new AbstractData({
           tag: 'br'
         }))));
         tr.append(td);
@@ -82,18 +82,18 @@ export class TableCommander implements Commander<AttrState[]> {
   }
 
   private createHeader(parser: Parser) {
-    const thead = new Fragment(parser.getFormatStateByData(new CacheData({
+    const thead = new Fragment(parser.getFormatStateByData(new AbstractData({
       tag: 'thead'
     })));
-    const tr = new Fragment(parser.getFormatStateByData(new CacheData({
+    const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
       tag: 'tr'
     })));
     thead.append(tr);
     for (let i = 0; i < this.cols; i++) {
-      const th = new Fragment(parser.getFormatStateByData(new CacheData({
+      const th = new Fragment(parser.getFormatStateByData(new AbstractData({
         tag: 'th'
       })));
-      th.append(new Single('br', parser.getFormatStateByData(new CacheData({
+      th.append(new Single('br', parser.getFormatStateByData(new AbstractData({
         tag: 'br'
       }))));
       tr.append(th);

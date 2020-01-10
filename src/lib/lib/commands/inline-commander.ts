@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { VElement } from '../renderer/element';
 
 export class InlineCommander implements Commander {
@@ -30,7 +30,7 @@ export class InlineCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData) {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData) {
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }

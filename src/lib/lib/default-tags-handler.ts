@@ -4,7 +4,7 @@ import { Handler } from './toolbar/handlers/help';
 import { FormatState, Matcher } from './matcher/matcher';
 import { ChildSlotModel, Commander } from './commands/commander';
 import { Priority } from './toolbar/help';
-import { CacheData, EditableOptions } from './toolbar/utils/cache-data';
+import { AbstractData, EditableOptions } from './toolbar/utils/abstract-data';
 import { Editor } from './editor';
 import { DefaultHook } from './default-hook';
 import { VElement } from './renderer/element';
@@ -15,7 +15,7 @@ export class DefaultTagCommander implements Commander {
   command(): void {
   }
 
-  render(state: FormatState, element?: VElement, cacheData?: CacheData): ChildSlotModel {
+  render(state: FormatState, element?: VElement, cacheData?: AbstractData): ChildSlotModel {
     const el = new VElement(cacheData.tag);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {

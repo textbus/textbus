@@ -3,14 +3,14 @@ import { dtd } from '../dtd';
 import { Single } from './single';
 import { FormatState } from '../matcher/matcher';
 import { BlockFormat, InlineFormat, SingleFormat } from './format';
-import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
+import { AbstractData, EditableOptions } from '../toolbar/utils/abstract-data';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
 
-export interface ParseState {
+export interface FormatDelta {
   handler: Handler;
   state: FormatState;
-  cacheData: CacheData;
+  cacheData: AbstractData;
 }
 
 export class Parser {
@@ -26,17 +26,17 @@ export class Parser {
     return context;
   }
 
-  getFormatStateByData(data: CacheData): ParseState[] {
+  getFormatStateByData(data: AbstractData): FormatDelta[] {
     return this.registries.map(item => {
       return {
         handler: item,
         state: item.matcher.matchData(data),
-        cacheData: new CacheData(data)
+        cacheData: new AbstractData(data)
       }
     }).filter(item => item.state !== FormatState.Invalid);
   }
 
-  getFormatStateByNode(node: HTMLElement): ParseState[] {
+  getFormatStateByNode(node: HTMLElement): FormatDelta[] {
     return this.registries.map(item => {
       return {
         handler: item,
@@ -224,9 +224,9 @@ export class Parser {
     return fragment;
   }
 
-  private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {
+  private getPreCacheData(node: HTMLElement, config?: EditableOptions): AbstractData {
     if (!config) {
-      return new CacheData();
+      return new AbstractData();
     }
     const attrs = new Map<string, string>();
     if (config.attrs) {
@@ -241,7 +241,7 @@ export class Parser {
         value: node.style[config.styleName]
       };
     }
-    return new CacheData({
+    return new AbstractData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,
       attrs: attrs.size ? attrs : null,
       style

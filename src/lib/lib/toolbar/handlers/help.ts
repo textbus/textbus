@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Commander } from '../../commands/commander';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
-import { EditableOptions } from '../utils/cache-data';
+import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
 

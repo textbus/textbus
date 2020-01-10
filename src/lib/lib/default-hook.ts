@@ -7,7 +7,7 @@ import { Contents } from './parser/contents';
 import { BlockFormat } from './parser/format';
 import { Priority } from './toolbar/help';
 import { Parser } from './parser/parser';
-import { CacheData } from './toolbar/utils/cache-data';
+import { AbstractData } from './toolbar/utils/abstract-data';
 
 export class DefaultHook implements Hook {
   onInput(ev: TBInputEvent, viewer: Viewer, parser: Parser, next: () => void): void {
@@ -26,7 +26,7 @@ export class DefaultHook implements Hook {
     ev.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new Single('br', parser.getFormatStateByData(new CacheData({
+          const s = new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
           })));
           commonAncestorFragment.insert(s, index + startIndex);
@@ -44,7 +44,7 @@ export class DefaultHook implements Hook {
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + ev.offset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
-      commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+      commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
         tag: 'br'
       }))));
     }
@@ -110,11 +110,11 @@ export class DefaultHook implements Hook {
       const commonAncestorFragment = range.commonAncestorFragment;
       if (/th|td/i.test(commonAncestorFragment.token.elementRef.name)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
           }))));
         }
-        commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+        commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
           tag: 'br'
         }))));
         range.startIndex = range.endIndex = range.endIndex + 1;
@@ -124,12 +124,12 @@ export class DefaultHook implements Hook {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
           }))));
         }
         const index = commonAncestorFragment.getIndexInParent();
-        parser.getFormatStateByData(new CacheData({
+        parser.getFormatStateByData(new AbstractData({
           tag: 'p'
         })).forEach(item => {
           afterFragment.mergeFormat(new BlockFormat({
@@ -138,7 +138,7 @@ export class DefaultHook implements Hook {
           }))
         });
         if (!afterFragment.contentLength) {
-          afterFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+          afterFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
           }))));
         }
@@ -158,7 +158,7 @@ export class DefaultHook implements Hook {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, range.startIndex);
           if (!range.commonAncestorFragment.contentLength) {
-            range.commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+            range.commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
               tag: 'br'
             }))));
           }
@@ -173,7 +173,7 @@ export class DefaultHook implements Hook {
           if (range.startFragment.contentLength) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
               const startFragment = new Fragment();
-              parser.getFormatStateByData(new CacheData({
+              parser.getFormatStateByData(new AbstractData({
                 tag: 'p'
               })).forEach(item => {
                 startFragment.mergeFormat(new BlockFormat({
@@ -203,7 +203,7 @@ export class DefaultHook implements Hook {
                 range.startIndex = 0;
               } else {
                 const startFragment = new Fragment();
-                parser.getFormatStateByData(new CacheData({
+                parser.getFormatStateByData(new AbstractData({
                   tag: 'p'
                 })).forEach(item => {
                   startFragment.mergeFormat(new BlockFormat({
@@ -212,7 +212,7 @@ export class DefaultHook implements Hook {
                   }))
                 });
 
-                startFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+                startFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
                   tag: 'br'
                 }))));
                 rerenderFragment.fragment.insert(startFragment, 0);
@@ -263,7 +263,7 @@ export class DefaultHook implements Hook {
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;
         if (range.startFragment.contentLength === 0) {
-          range.startFragment.append(new Single('br', parser.getFormatStateByData(new CacheData({
+          range.startFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
           }))));
         }

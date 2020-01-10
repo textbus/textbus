@@ -6,7 +6,7 @@ import { Dropdown } from './utils/dropdown';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { EditableOptions } from '../utils/cache-data';
+import { EditableOptions } from '../utils/abstract-data';
 import { map } from 'rxjs/operators';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';

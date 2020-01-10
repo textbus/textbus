@@ -6,7 +6,7 @@ import { BlockFormat, FormatRange, InlineFormat, SingleFormat } from './format';
 import { Single } from './single';
 import { getCanApplyFormats, mergeFormat } from './utils';
 import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
-import { ParseState } from './parser';
+import { FormatDelta } from './parser';
 
 export class Fragment extends View {
   readonly token: BlockToken;
@@ -19,7 +19,7 @@ export class Fragment extends View {
   private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
-  constructor(formats?: ParseState[]) {
+  constructor(formats?: FormatDelta[]) {
     super();
     if (Array.isArray(formats)) {
       formats.forEach(item => {
@@ -35,17 +35,42 @@ export class Fragment extends View {
     return this.formatMatrix.get(handler);
   }
 
-  cleanFormats() {
-    this.formatMatrix.clear();
-    this.markDirty(true);
-  }
-
   getFormatHandlers() {
     return Array.from(this.formatMatrix.keys());
   }
 
   getFormatRanges() {
     return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
+  }
+
+  setFormats(key: Handler, formatRanges: FormatRange[]) {
+    this.formatMatrix.set(key, formatRanges.map(f => {
+      f.context = this;
+      return f;
+    }));
+  }
+
+  mergeMatchStates(states: FormatDelta[], startIndex: number, endIndex: number, canSurroundBlockElement: boolean) {
+    states.forEach(state => {
+      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(state.handler.priority)) {
+        this.apply(new BlockFormat({
+          ...state,
+          context: this
+        }), canSurroundBlockElement);
+      } else {
+        this.apply(new InlineFormat({
+          ...state,
+          context: this,
+          startIndex,
+          endIndex
+        }), canSurroundBlockElement);
+      }
+    });
+  }
+
+  cleanFormats() {
+    this.formatMatrix.clear();
+    this.markDirty(true);
   }
 
   useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
@@ -106,24 +131,6 @@ export class Fragment extends View {
 
   sliceContents(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
-  }
-
-  mergeMatchStates(states: ParseState[], startIndex: number, endIndex: number, canSurroundBlockElement: boolean) {
-    states.forEach(state => {
-      if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(state.handler.priority)) {
-        this.apply(new BlockFormat({
-          ...state,
-          context: this
-        }), canSurroundBlockElement);
-      } else {
-        this.apply(new InlineFormat({
-          ...state,
-          context: this,
-          startIndex,
-          endIndex
-        }), canSurroundBlockElement);
-      }
-    });
   }
 
   /**
@@ -241,23 +248,12 @@ export class Fragment extends View {
     }
   }
 
-  setFormats(key: Handler, formatRanges: FormatRange[]) {
-    this.formatMatrix.set(key, formatRanges.map(f => {
-      f.context = this;
-      return f;
-    }));
-  }
-
   getContentAtIndex(index: number) {
     return this.contents.getContentAtIndex(index);
   }
 
   find(el: View) {
     return this.contents.find(el);
-  }
-
-  getAllChildContentsLength() {
-    return this.contents.getAllChildContentsLength();
   }
 
   insertFragmentContents(fragment: Fragment, index: number) {
@@ -310,7 +306,7 @@ export class Fragment extends View {
   }
 
   /**
-   *
+   * 删除一段内容，并返回删除的片段
    * @param startIndex
    * @param endIndex
    */
@@ -389,7 +385,6 @@ export class Fragment extends View {
     }
   }
 
-
   createVDom() {
     // if (!this.dataChanged) {
     //   return this.vNode;
@@ -415,6 +410,34 @@ export class Fragment extends View {
     );
     (this as { token: BlockToken }).token = root;
     return root;
+  }
+
+  mergeFormat(format: FormatRange, important = false) {
+    this.markDirty();
+    format.context = this;
+    mergeFormat(this.formatMatrix, format, important);
+  }
+
+  destroy() {
+    this.contents.getFragments().forEach(f => f.destroy());
+    if (this.parent) {
+      const index = this.getIndexInParent();
+      this.parent.delete(index, index + 1);
+    }
+    this.formatMatrix.clear();
+    this.contents = new Contents();
+    (<{ parent: Fragment }>this.parent) = null;
+  }
+
+  getIndexInParent() {
+    if (this.parent) {
+      let i = this.parent.contents.find(this);
+      if (i < 0) {
+        throw new Error(`it's parent fragment is incorrect!`);
+      }
+      return i;
+    }
+    return -1;
   }
 
   /**
@@ -497,33 +520,5 @@ export class Fragment extends View {
       i += item.length;
     });
     return vNodes;
-  }
-
-  mergeFormat(format: FormatRange, important = false) {
-    this.markDirty();
-    format.context = this;
-    mergeFormat(this.formatMatrix, format, important);
-  }
-
-  destroy() {
-    this.contents.getFragments().forEach(f => f.destroy());
-    if (this.parent) {
-      const index = this.getIndexInParent();
-      this.parent.delete(index, index + 1);
-    }
-    this.formatMatrix.clear();
-    this.contents = new Contents();
-    (<{ parent: Fragment }>this.parent) = null;
-  }
-
-  getIndexInParent() {
-    if (this.parent) {
-      let i = this.parent.contents.find(this);
-      if (i < 0) {
-        throw new Error(`it's parent fragment is incorrect!`);
-      }
-      return i;
-    }
-    return -1;
   }
 }

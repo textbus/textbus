@@ -1,7 +1,7 @@
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { RootFragment } from '../parser/root-fragment';
 import { VElement } from '../renderer/element';
 
@@ -24,5 +24,5 @@ export interface Commander<T = any> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void;
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): RenderModel;
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): RenderModel;
 }

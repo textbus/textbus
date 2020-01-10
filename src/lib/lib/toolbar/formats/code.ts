@@ -1,6 +1,6 @@
 import { HandlerType, Priority, SelectConfig, SelectOptionConfig } from '../help';
 import { CodeCommander } from '../../commands/code-commander';
-import { CacheData } from '../utils/cache-data';
+import { AbstractData } from '../utils/abstract-data';
 
 export const codeHandler: SelectConfig = {
   type: HandlerType.Select,
@@ -16,7 +16,7 @@ export const codeHandler: SelectConfig = {
     tags: ['pre']
   },
   execCommand: new CodeCommander(),
-  highlight(options: SelectOptionConfig[], data: CacheData): SelectOptionConfig {
+  highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig {
     for (const item of options) {
       if (data.attrs.get('lang') === item.value) {
         return item;

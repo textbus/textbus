@@ -2,7 +2,7 @@ import { Matcher, MatchRule } from '../matcher/matcher';
 import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { CacheData, EditableOptions } from './utils/cache-data';
+import { AbstractData, EditableOptions } from './utils/abstract-data';
 import { Hook } from '../viewer/help';
 
 export enum Priority {
@@ -46,7 +46,7 @@ export interface SelectConfig {
   editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   options: SelectOptionConfig[];
 
-  highlight(options: SelectOptionConfig[], data: CacheData): SelectOptionConfig;
+  highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig;
 
   match?: MatchRule | Matcher;
   classes?: string[];

@@ -6,7 +6,7 @@ import { Fragment } from '../parser/fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';
 import { RootFragment } from '../parser/root-fragment';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { VElement } from '../renderer/element';
 
 export class ToggleBlockCommander implements Commander {
@@ -55,7 +55,7 @@ export class ToggleBlockCommander implements Commander {
     } else {
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        const temporaryFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+        const temporaryFragment = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
           tag: this.tagName
         })));
         if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {

@@ -4,7 +4,7 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
-import { CacheData } from '../utils/cache-data';
+import { AbstractData } from '../utils/abstract-data';
 
 const commander = new StyleCommander('color');
 
@@ -23,7 +23,7 @@ class Palette implements DropdownHandlerView {
     };
   }
 
-  update(d?: CacheData): void {
+  update(d?: AbstractData): void {
     const color = d ? (d.style.value + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;

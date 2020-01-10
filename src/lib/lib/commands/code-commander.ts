@@ -2,7 +2,7 @@ import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
@@ -23,10 +23,10 @@ export class CodeCommander implements Commander<string> {
       const firstRange = selection.firstRange;
       const fragment = firstRange.startFragment;
       const context = fragment.parent;
-      const pre = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
+      const pre = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
         tag: 'pre'
       })));
-      pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new CacheData({
+      pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new AbstractData({
         tag: 'br'
       }))));
       context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);
@@ -39,7 +39,7 @@ export class CodeCommander implements Commander<string> {
     }
   }
 
-  render(state: FormatState, rawElement?: VElement, matchDesc?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, matchDesc?: AbstractData): ReplaceModel {
     if (state === FormatState.Valid) {
       const el = new VElement(this.tagName);
       if (this.lang) {

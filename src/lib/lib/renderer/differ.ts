@@ -1,5 +1,5 @@
 import { BlockToken, InlineToken, MediaToken, TextToken, Token } from './tokens';
-import { Parser, ParseState } from '../parser/parser';
+import { Parser, FormatDelta } from '../parser/parser';
 import { ChildSlotModel, ReplaceModel } from '../commands/commander';
 import { TBUS_TOKEN } from '../parser/help';
 import { BlockFormat, InlineFormat, SingleFormat } from '../parser/format';
@@ -237,7 +237,7 @@ export class Differ {
     }
   }
 
-  private mergeFormat(token: Token, formats: ParseState[]) {
+  private mergeFormat(token: Token, formats: FormatDelta[]) {
     formats.forEach(format => {
       switch (format.handler.priority) {
         case Priority.Default:

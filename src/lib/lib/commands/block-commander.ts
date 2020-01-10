@@ -2,7 +2,7 @@ import { Commander, ReplaceModel } from './commander';
 import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { VElement } from '../renderer/element';
 import { RootFragment } from '../parser/root-fragment';
 import { Fragment } from '../parser/fragment';
@@ -21,11 +21,11 @@ export class BlockCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       if (range.commonAncestorFragment === range.startFragment && range.commonAncestorFragment === range.endFragment) {
         range.commonAncestorFragment.mergeMatchStates(
-          rootFragment.parser.getFormatStateByData(new CacheData({
+          rootFragment.parser.getFormatStateByData(new AbstractData({
             tag: this.tagName
           })), 0, range.commonAncestorFragment.contentLength, false);
       } else {
-        const matchStates = rootFragment.parser.getFormatStateByData(new CacheData({
+        const matchStates = rootFragment.parser.getFormatStateByData(new AbstractData({
           tag: this.tagName
         }));
         const parent = range.commonAncestorFragment.parent;
@@ -46,7 +46,7 @@ export class BlockCommander implements Commander<string> {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, data?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, data?: AbstractData): ReplaceModel {
     return new ReplaceModel(new VElement(data ? data.tag : this.tagName));
   }
 

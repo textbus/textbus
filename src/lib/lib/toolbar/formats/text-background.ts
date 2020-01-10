@@ -4,7 +4,7 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { CacheData } from '../utils/cache-data';
+import { AbstractData } from '../utils/abstract-data';
 import { dtd } from '../../dtd';
 
 const commander = new StyleCommander('backgroundColor', false);
@@ -24,7 +24,7 @@ class Palette implements DropdownHandlerView {
     };
   }
 
-  update(d?: CacheData): void {
+  update(d?: AbstractData): void {
     const color = d ? (d.style.value + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;
@@ -51,8 +51,8 @@ export const textBackgroundHandler: DropdownConfig = {
       backgroundColor: /.+/
     },
     noInTags: ['pre'],
-    filter(node: HTMLElement | CacheData) {
-      return dtd[node instanceof CacheData ? node.tag : node.tagName.toLowerCase()]?.display === 'inline';
+    filter(node: HTMLElement | AbstractData) {
+      return dtd[node instanceof AbstractData ? node.tag : node.tagName.toLowerCase()]?.display === 'inline';
     }
   },
   execCommand: commander

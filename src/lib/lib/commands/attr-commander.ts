@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { Single } from '../parser/single';
 import { InlineFormat } from '../parser/format';
 import { RootFragment } from '../parser/root-fragment';
@@ -49,7 +49,7 @@ export class AttrCommander implements Commander<AttrState[]> {
           });
           const newNode = new Single(
             this.tagName,
-            rootFragment.parser.getFormatStateByData(new CacheData({
+            rootFragment.parser.getFormatStateByData(new AbstractData({
               tag: this.tagName,
               attrs
             }))
@@ -75,7 +75,7 @@ export class AttrCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
     const el = new VElement(this.tagName);
     if (cacheData && cacheData.attrs) {
       cacheData.attrs.forEach((value, key) => {

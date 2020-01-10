@@ -1,6 +1,6 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
-import { CacheData, CacheDataParams } from '../toolbar/utils/cache-data';
+import { AbstractData, AbstractDataParams } from '../toolbar/utils/abstract-data';
 import { Fragment } from './fragment';
 import { Single } from './single';
 
@@ -8,14 +8,14 @@ export interface FormatParams {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: CacheDataParams;
+  cacheData: AbstractDataParams;
 }
 
 export interface SingleFormatParams {
   handler: Handler;
   context: Single;
   state: FormatState;
-  cacheData: CacheDataParams;
+  cacheData: AbstractDataParams;
 }
 
 export interface InlineFormatParams extends FormatParams {
@@ -27,7 +27,7 @@ export class BlockFormat {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: CacheData;
+  cacheData: AbstractData;
   readonly startIndex = 0;
 
   get endIndex() {
@@ -38,7 +38,7 @@ export class BlockFormat {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new CacheData(params.cacheData);
+    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
   }
 
   clone() {
@@ -52,7 +52,7 @@ export class InlineFormat {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: CacheData;
+  cacheData: AbstractData;
 
   constructor(params: InlineFormatParams | InlineFormat) {
     this.startIndex = params.startIndex;
@@ -60,7 +60,7 @@ export class InlineFormat {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new CacheData(params.cacheData);
+    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
   }
 
   clone() {
@@ -72,13 +72,13 @@ export class SingleFormat {
   handler: Handler;
   context: Single;
   state: FormatState;
-  cacheData: CacheData;
+  cacheData: AbstractData;
 
   constructor(params: SingleFormatParams | SingleFormat) {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new CacheData(params.cacheData);
+    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
   }
 
   clone() {

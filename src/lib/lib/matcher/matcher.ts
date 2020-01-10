@@ -2,14 +2,14 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../viewer/range';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
 
 interface MatchData {
   state: FormatState;
-  cacheData: CacheData;
+  cacheData: AbstractData;
 }
 
 export enum MatchState {
@@ -28,13 +28,13 @@ export enum FormatState {
 export interface MatchDelta {
   state: MatchState;
   fromRange: TBRange;
-  cacheData: CacheData;
+  cacheData: AbstractData;
 }
 
 export interface CommonMatchDelta {
   state: MatchState;
   srcStates: MatchDelta[];
-  cacheData: CacheData;
+  cacheData: AbstractData;
 }
 
 export interface MatchRule {
@@ -48,13 +48,13 @@ export interface MatchRule {
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   noContainTags?: string[] | RegExp;
   noInTags?: string[] | RegExp;
-  filter?: (node: HTMLElement | CacheData) => boolean;
+  filter?: (node: HTMLElement | AbstractData) => boolean;
 }
 
 export class Matcher {
-  private inheritValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
-  private validators: Array<(node: HTMLElement | CacheData) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
+  private validators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.extendTags) {
@@ -83,7 +83,7 @@ export class Matcher {
     }
   }
 
-  matchData(data: CacheData): FormatState {
+  matchData(data: AbstractData): FormatState {
     return this.match(data);
   }
 
@@ -154,7 +154,7 @@ export class Matcher {
     };
   }
 
-  private match(p: HTMLElement | CacheData) {
+  private match(p: HTMLElement | AbstractData) {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
       if (!b) {
@@ -312,24 +312,24 @@ export class Matcher {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement | CacheData) => {
-      const tagName = node instanceof CacheData ? node.tag : node.nodeName.toLowerCase();
+    return (node: HTMLElement | AbstractData) => {
+      const tagName = node instanceof AbstractData ? node.tag : node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement | CacheData) => {
+    return (node: HTMLElement | AbstractData) => {
       return attrs.map(attr => {
         if (attr.value) {
-          if (node instanceof CacheData) {
+          if (node instanceof AbstractData) {
             return node?.attrs.get(attr.key) === attr.value;
           }
           if (node instanceof HTMLElement) {
             return node.getAttribute(attr.key) === attr.value;
           }
         } else {
-          if (node instanceof CacheData) {
+          if (node instanceof AbstractData) {
             return node?.attrs.has(attr.key);
           }
           if (node instanceof HTMLElement) {
@@ -350,7 +350,7 @@ export class Matcher {
   // }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement | CacheData) => {
+    return (node: HTMLElement | AbstractData) => {
       const elementStyles = node.style;
       if (!elementStyles) {
         return false;

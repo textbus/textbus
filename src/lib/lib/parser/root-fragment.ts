@@ -2,7 +2,7 @@ import { Fragment } from './fragment';
 import { Single } from './single';
 import { BlockFormat } from './format';
 import { Parser } from './parser';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 
 export class RootFragment extends Fragment {
   constructor(public parser: Parser) {
@@ -17,10 +17,10 @@ export class RootFragment extends Fragment {
     const last = this.getContentAtIndex(this.contentLength - 1);
 
     const guardLastContentEditable = () => {
-      const newFragment = new Fragment(this.parser.getFormatStateByData(new CacheData({
+      const newFragment = new Fragment(this.parser.getFormatStateByData(new AbstractData({
         tag: 'p'
       })));
-      newFragment.append(new Single('br', this.parser.getFormatStateByData(new CacheData({
+      newFragment.append(new Single('br', this.parser.getFormatStateByData(new AbstractData({
         tag: 'br'
       }))));
       this.append(newFragment);

@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
-import { CacheData } from '../toolbar/utils/cache-data';
+import { AbstractData } from '../toolbar/utils/abstract-data';
 import { VElement } from '../renderer/element';
 import { RootFragment } from '../parser/root-fragment';
 import { Fragment } from '../parser/fragment';
@@ -42,7 +42,7 @@ export class BlockStyleCommander implements Commander<string> {
       }
       return v;
     }, [] as Fragment[]).forEach(f => {
-      f.mergeMatchStates(rootFragment.parser.getFormatStateByData(new CacheData({
+      f.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
         style: {
           name: this.name,
           value: this.value
@@ -51,7 +51,7 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: CacheData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
     if (rawElement) {
       rawElement.styles.set(cacheData.style.name, cacheData.style.value);
     }
