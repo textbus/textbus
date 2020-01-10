@@ -27,7 +27,7 @@ export class StyleCommander implements Commander<string | number> {
           handler,
           context: item.context,
           state: FormatState.Valid,
-          cacheData: {
+          abstractData: {
             style: {name: this.name, value: this.value}
           }
         });
@@ -36,17 +36,17 @@ export class StyleCommander implements Commander<string | number> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ChildSlotModel {
-    if (cacheData && cacheData.style) {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
+    if (abstractData && abstractData.style) {
       if (rawElement) {
         const isInline = dtd[rawElement.tagName.toLowerCase()].display === 'inline';
         if (this.canApplyBlockFragment || isInline) {
-          rawElement.styles.set(cacheData.style.name, cacheData.style.value);
+          rawElement.styles.set(abstractData.style.name, abstractData.style.value);
           return null;
         }
       }
       const el = new VElement('span');
-      el.styles.set(cacheData.style.name, cacheData.style.value);
+      el.styles.set(abstractData.style.name, abstractData.style.value);
       return new ChildSlotModel(el);
     }
     return null;

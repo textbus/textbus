@@ -29,7 +29,7 @@ export class LinkCommander implements Commander<AttrState[]> {
           if (formats) {
             for (const format of formats) {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-                format.cacheData.attrs = attrs
+                format.abstractData.attrs = attrs
               }
             }
           }
@@ -41,7 +41,7 @@ export class LinkCommander implements Commander<AttrState[]> {
           .forEach(node => {
             if (node instanceof Single) {
               node.getFormatRangesByHandler(handler).forEach(format => {
-                format.cacheData.attrs = attrs;
+                format.abstractData.attrs = attrs;
               });
             } else if (typeof node === 'string') {
               item.context.apply(new InlineFormat({
@@ -50,7 +50,7 @@ export class LinkCommander implements Commander<AttrState[]> {
                 handler,
                 state: FormatState.Valid,
                 context: item.context,
-                cacheData: new AbstractData({
+                abstractData: new AbstractData({
                   attrs
                 })
               }), false);
@@ -61,10 +61,10 @@ export class LinkCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ChildSlotModel {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
     const el = new VElement(this.tagName);
-    if (cacheData && cacheData.attrs) {
-      cacheData.attrs.forEach((value, key) => {
+    if (abstractData && abstractData.attrs) {
+      abstractData.attrs.forEach((value, key) => {
         el.attrs.set(key, value + '');
       })
     }

@@ -64,8 +64,8 @@ export class SelectHandler implements Handler {
   }
 
   updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    if (commonMatchDelta.cacheData) {
-      const option = this.config.highlight(this.config.options, commonMatchDelta.cacheData);
+    if (commonMatchDelta.abstractData) {
+      const option = this.config.highlight(this.config.options, commonMatchDelta.abstractData);
       if (option) {
         this.textContainer.innerText = option.label || option.value;
         this.dropdown.disabled = false;

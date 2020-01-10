@@ -6,9 +6,9 @@ export const fontFamilyHandler: SelectConfig = {
   tooltip: '字体',
   priority: Priority.Inline,
   execCommand: new StyleCommander('fontFamily'),
-  highlight(options, cacheData) {
+  highlight(options, abstractData) {
     for (const option of options) {
-      if (option.value === cacheData.style.value) {
+      if (option.value === abstractData.style.value) {
         return option;
       }
     }

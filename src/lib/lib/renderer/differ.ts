@@ -47,7 +47,7 @@ export class Differ {
       let vElement = new VElement(token.data.tagName);
       token.formats.reduce((node, next) => {
         if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, node, next.cacheData);
+          const renderModel = next.handler.execCommand.render(next.state, node, next.abstractData);
           if (renderModel instanceof ReplaceModel) {
             vElement = renderModel.replaceElement;
             return renderModel.replaceElement;
@@ -93,7 +93,7 @@ export class Differ {
       let slotElement: VElement;
       token.formats.reduce((vEle, next) => {
         if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, vEle, next.cacheData);
+          const renderModel = next.handler.execCommand.render(next.state, vEle, next.abstractData);
           if (renderModel instanceof ReplaceModel) {
             wrapElement = slotElement = renderModel.replaceElement;
             return renderModel.replaceElement;
@@ -211,7 +211,7 @@ export class Differ {
       }
       if (newFormat.state !== oldFormat.state ||
         newFormat.handler !== newFormat.handler ||
-        !newFormat.cacheData.equal(oldFormat.cacheData)) {
+        !newFormat.abstractData.equal(oldFormat.abstractData)) {
         return false;
       }
     }

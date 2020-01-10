@@ -32,7 +32,7 @@ export class RootFragment extends Fragment {
       const formats = last.getFormatRanges().filter(i => i instanceof BlockFormat);
       let hasParagraph = false;
       for (const item of formats) {
-        if (item.cacheData.tag === 'p') {
+        if (item.abstractData.tag === 'p') {
           hasParagraph = true;
           break;
         }

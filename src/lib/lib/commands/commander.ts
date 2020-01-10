@@ -24,5 +24,5 @@ export interface Commander<T = any> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void;
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): RenderModel;
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): RenderModel;
 }

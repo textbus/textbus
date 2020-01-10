@@ -6,9 +6,9 @@ export const hHandler: SelectConfig = {
   tooltip: '标题',
   priority: Priority.Block,
   execCommand: new BlockCommander('p'),
-  highlight(options, cacheData) {
+  highlight(options, abstractData) {
     for (const option of options) {
-      if (option.value === cacheData.tag) {
+      if (option.value === abstractData.tag) {
         return option;
       }
     }

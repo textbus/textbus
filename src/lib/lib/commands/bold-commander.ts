@@ -42,7 +42,7 @@ export class BoldCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData) {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {
     switch (state) {
       case FormatState.Exclude:
         if (rawElement) {
@@ -81,7 +81,7 @@ export class BoldCommander implements Commander {
             handler,
             context: scope.context,
             state,
-            cacheData: {
+            abstractData: {
               tag: el ? el.tagName.toLowerCase() : 'strong'
             }
           });

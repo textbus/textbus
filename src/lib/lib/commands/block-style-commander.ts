@@ -51,9 +51,9 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
     if (rawElement) {
-      rawElement.styles.set(cacheData.style.name, cacheData.style.value);
+      rawElement.styles.set(abstractData.style.name, abstractData.style.value);
     }
     return null;
   }

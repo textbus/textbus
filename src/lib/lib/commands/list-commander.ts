@@ -107,9 +107,9 @@ export class ListCommander implements Commander<any> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
     if (state === FormatState.Valid) {
-      return new ReplaceModel(new VElement(cacheData.tag));
+      return new ReplaceModel(new VElement(abstractData.tag));
     }
     return null;
   }

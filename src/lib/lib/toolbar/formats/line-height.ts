@@ -8,9 +8,9 @@ export const lineHeightHandler: SelectConfig = {
   execCommand: new StyleCommander('lineHeight'),
   mini: true,
   priority: Priority.Property,
-  highlight(options, cacheData) {
+  highlight(options, abstractData) {
     for (const option of options) {
-      if (option.value === cacheData.style.value) {
+      if (option.value === abstractData.style.value) {
         return option;
       }
     }

@@ -36,7 +36,7 @@ export class CleanCommander implements Commander {
         endIndex,
         handler: handler,
         context: fragment,
-        cacheData: null
+        abstractData: null
       }), false);
     });
   }

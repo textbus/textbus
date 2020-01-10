@@ -8,14 +8,14 @@ export interface FormatParams {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: AbstractDataParams;
+  abstractData: AbstractDataParams;
 }
 
 export interface SingleFormatParams {
   handler: Handler;
   context: Single;
   state: FormatState;
-  cacheData: AbstractDataParams;
+  abstractData: AbstractDataParams;
 }
 
 export interface InlineFormatParams extends FormatParams {
@@ -27,7 +27,7 @@ export class BlockFormat {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
   readonly startIndex = 0;
 
   get endIndex() {
@@ -38,7 +38,7 @@ export class BlockFormat {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
+    this.abstractData = params.abstractData && new AbstractData(params.abstractData);
   }
 
   clone() {
@@ -52,7 +52,7 @@ export class InlineFormat {
   handler: Handler;
   context: Fragment;
   state: FormatState;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 
   constructor(params: InlineFormatParams | InlineFormat) {
     this.startIndex = params.startIndex;
@@ -60,7 +60,7 @@ export class InlineFormat {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
+    this.abstractData = params.abstractData && new AbstractData(params.abstractData);
   }
 
   clone() {
@@ -72,13 +72,13 @@ export class SingleFormat {
   handler: Handler;
   context: Single;
   state: FormatState;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 
   constructor(params: SingleFormatParams | SingleFormat) {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.cacheData = params.cacheData && new AbstractData(params.cacheData);
+    this.abstractData = params.abstractData && new AbstractData(params.abstractData);
   }
 
   clone() {

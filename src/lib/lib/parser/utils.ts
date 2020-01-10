@@ -81,15 +81,15 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
           handler: mark.handler,
           context: mark.context,
           state: mark.state,
-          cacheData: mark.cacheData
+          abstractData: mark.abstractData
         });
         formatRanges.push(newFormatRange);
         continue;
       }
       if (mark.state === newFormatRange.state && (
-        mark.cacheData &&
-        newFormatRange.cacheData &&
-        mark.cacheData.equal(newFormatRange.cacheData) || !mark.cacheData === true && !newFormatRange.cacheData === true)) {
+        mark.abstractData &&
+        newFormatRange.abstractData &&
+        mark.abstractData.equal(newFormatRange.abstractData) || !mark.abstractData === true && !newFormatRange.abstractData === true)) {
         newFormatRange.endIndex = i + 1;
       } else {
         newFormatRange = new InlineFormat({
@@ -98,7 +98,7 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
           handler: mark.handler,
           context: mark.context,
           state: mark.state,
-          cacheData: mark.cacheData
+          abstractData: mark.abstractData
         });
         formatRanges.push(newFormatRange);
       }

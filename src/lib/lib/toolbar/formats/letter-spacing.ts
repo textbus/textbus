@@ -7,9 +7,9 @@ export const letterSpacingHandler: SelectConfig = {
   priority: Priority.Property,
   execCommand: new StyleCommander('letterSpacing'),
   classes: ['tanbo-editor-icon-text-width'],
-  highlight(options, cacheData) {
+  highlight(options, abstractData) {
     for (const option of options) {
-      if (option.value === cacheData.style.value) {
+      if (option.value === abstractData.style.value) {
         return option;
       }
     }

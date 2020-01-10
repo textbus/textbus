@@ -13,13 +13,13 @@ export class HistoryMatcher extends Matcher {
         return {
           state: handler.context.canBack ? MatchState.Normal : MatchState.Disabled,
           srcStates: [],
-          cacheData: null
+          abstractData: null
         };
       case 'forward':
         return {
           state: handler.context.canForward ? MatchState.Normal : MatchState.Disabled,
           srcStates: [],
-          cacheData: null
+          abstractData: null
         };
     }
   }

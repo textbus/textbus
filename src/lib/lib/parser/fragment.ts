@@ -164,7 +164,7 @@ export class Fragment extends View {
               handler: format.handler,
               context: format.context,
               state: format.state,
-              cacheData: format.cacheData
+              abstractData: format.abstractData
             });
             formats.push(childFormat);
           } else {
@@ -203,7 +203,7 @@ export class Fragment extends View {
           state: format.state,
           handler: format.handler,
           context: this,
-          cacheData: format.cacheData.clone()
+          abstractData: format.abstractData.clone()
         }));
         format.endIndex = index;
       } else {

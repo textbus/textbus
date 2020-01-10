@@ -10,7 +10,7 @@ import { Priority } from '../toolbar/help';
 export interface FormatDelta {
   handler: Handler;
   state: FormatState;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 }
 
 export class Parser {
@@ -31,7 +31,7 @@ export class Parser {
       return {
         handler: item,
         state: item.matcher.matchData(data),
-        cacheData: new AbstractData(data)
+        abstractData: new AbstractData(data)
       }
     }).filter(item => item.state !== FormatState.Invalid);
   }
@@ -41,7 +41,7 @@ export class Parser {
       return {
         handler: item,
         state: item.matcher.matchNode(node),
-        cacheData: this.getPreCacheData(node,
+        abstractData: this.getAbstractData(node,
           typeof item.editableOptions === 'function'
             ? item.editableOptions(node)
             : item.editableOptions
@@ -55,7 +55,7 @@ export class Parser {
       return {
         handler: item,
         state: item.matcher.matchNode(by),
-        cacheData: this.getPreCacheData(by,
+        abstractData: this.getAbstractData(by,
           typeof item.editableOptions === 'function'
             ? item.editableOptions(by)
             : item.editableOptions
@@ -224,7 +224,7 @@ export class Parser {
     return fragment;
   }
 
-  private getPreCacheData(node: HTMLElement, config?: EditableOptions): AbstractData {
+  private getAbstractData(node: HTMLElement, config?: EditableOptions): AbstractData {
     if (!config) {
       return new AbstractData();
     }

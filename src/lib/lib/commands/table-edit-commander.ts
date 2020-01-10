@@ -98,7 +98,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     let f = selection.commonAncestorFragment;
     while (f) {
       const isTr = f.getFormatRanges().filter(h => h.handler.priority === Priority.Default)
-        .map(h => h.cacheData.tag)
+        .map(h => h.abstractData.tag)
         .includes('tr');
       if (isTr) {
         return f.parent;

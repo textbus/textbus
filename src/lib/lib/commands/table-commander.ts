@@ -45,8 +45,8 @@ export class TableCommander implements Commander<AttrState[]> {
     return context;
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
-    return new ReplaceModel(new VElement(cacheData.tag));
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+    return new ReplaceModel(new VElement(abstractData.tag));
   }
 
   private findFirstPosition(fragment: Fragment): Fragment {

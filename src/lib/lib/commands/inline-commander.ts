@@ -21,7 +21,7 @@ export class InlineCommander implements Commander {
           handler,
           context: item.context,
           state: overlap ? FormatState.Invalid : FormatState.Valid,
-          cacheData: {
+          abstractData: {
             tag: this.tagName
           }
         });
@@ -30,7 +30,7 @@ export class InlineCommander implements Commander {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData) {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }

@@ -15,10 +15,10 @@ export class DefaultTagCommander implements Commander {
   command(): void {
   }
 
-  render(state: FormatState, element?: VElement, cacheData?: AbstractData): ChildSlotModel {
-    const el = new VElement(cacheData.tag);
-    if (cacheData && cacheData.attrs) {
-      cacheData.attrs.forEach((value, key) => {
+  render(state: FormatState, element?: VElement, abstractData?: AbstractData): ChildSlotModel {
+    const el = new VElement(abstractData.tag);
+    if (abstractData && abstractData.attrs) {
+      abstractData.attrs.forEach((value, key) => {
         if (value !== null) {
           el.attrs.set(key, value);
         }

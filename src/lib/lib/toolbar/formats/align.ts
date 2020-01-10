@@ -8,9 +8,9 @@ export const alignHandler: SelectConfig = {
   tooltip: '对齐方式',
   priority: Priority.BlockStyle,
   execCommand: commander,
-  highlight(options, cacheData) {
+  highlight(options, abstractData) {
     for (const option of options) {
-      if (option.value === cacheData.style.value) {
+      if (option.value === abstractData.style.value) {
         return option;
       }
     }

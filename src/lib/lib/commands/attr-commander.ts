@@ -32,7 +32,7 @@ export class AttrCommander implements Commander<AttrState[]> {
           if (formats) {
             for (const format of formats) {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-                format.cacheData.attrs = attrs
+                format.abstractData.attrs = attrs
               }
             }
           }
@@ -66,7 +66,7 @@ export class AttrCommander implements Commander<AttrState[]> {
           .forEach(node => {
             if (node instanceof Single) {
               node.getFormatRangesByHandler(handler).forEach(format => {
-                format.cacheData.attrs = attrs;
+                format.abstractData.attrs = attrs;
               });
             }
             index += node.length;
@@ -75,10 +75,10 @@ export class AttrCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, cacheData?: AbstractData): ReplaceModel {
+  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
     const el = new VElement(this.tagName);
-    if (cacheData && cacheData.attrs) {
-      cacheData.attrs.forEach((value, key) => {
+    if (abstractData && abstractData.attrs) {
+      abstractData.attrs.forEach((value, key) => {
         if (value !== null) {
           el.attrs.set(key, value);
         }

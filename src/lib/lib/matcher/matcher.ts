@@ -9,7 +9,7 @@ import { FormatRange } from '../parser/format';
 
 interface MatchData {
   state: FormatState;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 }
 
 export enum MatchState {
@@ -28,13 +28,13 @@ export enum FormatState {
 export interface MatchDelta {
   state: MatchState;
   fromRange: TBRange;
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 }
 
 export interface CommonMatchDelta {
   state: MatchState;
   srcStates: MatchDelta[];
-  cacheData: AbstractData;
+  abstractData: AbstractData;
 }
 
 export interface MatchRule {
@@ -96,7 +96,7 @@ export class Matcher {
       return {
         srcStates: [],
         state: MatchState.Normal,
-        cacheData: null
+        abstractData: null
       };
     }
     const srcStates: MatchDelta[] = selection.ranges.map(range => {
@@ -107,7 +107,7 @@ export class Matcher {
         return {
           state: MatchState.Disabled,
           fromRange: range,
-          cacheData: null
+          abstractData: null
         };
       }
 
@@ -128,12 +128,12 @@ export class Matcher {
           states.push(state);
         }
       });
-      let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, cacheData: null};
+      let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, abstractData: null};
       return {
         state: (mergedState.state === FormatState.Valid || mergedState.state === FormatState.Inherit) ?
           MatchState.Highlight : MatchState.Normal,
         fromRange: range,
-        cacheData: mergedState.cacheData
+        abstractData: mergedState.abstractData
       };
     });
     let isDisable = false;
@@ -150,7 +150,7 @@ export class Matcher {
           MatchState.Highlight :
           MatchState.Normal,
       srcStates,
-      cacheData: srcStates[0].cacheData
+      abstractData: srcStates[0].abstractData
     };
   }
 
@@ -201,13 +201,13 @@ export class Matcher {
       .filter(item => [Priority.Default, Priority.Block].includes(item.handler.priority));
 
     for (const f of formats) {
-      if (f.cacheData) {
+      if (f.abstractData) {
         if (Array.isArray(tags)) {
-          if (tags.includes(f.cacheData.tag)) {
+          if (tags.includes(f.abstractData.tag)) {
             return true;
           }
         } else if (tags instanceof RegExp) {
-          if (tags.test(f.cacheData.tag)) {
+          if (tags.test(f.abstractData.tag)) {
             return true;
           }
         }
@@ -225,7 +225,7 @@ export class Matcher {
         if (first.state !== FormatState.Invalid) {
           return {
             state: first.state,
-            cacheData: first?.cacheData.clone() || null
+            abstractData: first?.abstractData.clone() || null
           }
         }
       }
@@ -240,20 +240,20 @@ export class Matcher {
           if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
             return {
               state: format.state,
-              cacheData: format?.cacheData.clone() || null
+              abstractData: format?.abstractData.clone() || null
             };
           }
         }
         if ((startIndex === 0 && startIndex === format.startIndex) || (startIndex > format.startIndex && startIndex <= format.endIndex)) {
           return {
             state: format.state,
-            cacheData: format?.cacheData.clone() || null
+            abstractData: format?.abstractData.clone() || null
           };
         }
       }
       return {
         state: FormatState.Invalid,
-        cacheData: null
+        abstractData: null
       };
     }
 
@@ -271,18 +271,18 @@ export class Matcher {
             if (format.state === FormatState.Exclude) {
               return {
                 state: FormatState.Exclude,
-                cacheData: format?.cacheData.clone() || null
+                abstractData: format?.abstractData.clone() || null
               };
             } else {
               states.push({
                 state: format.state,
-                cacheData: format?.cacheData.clone() || null
+                abstractData: format?.abstractData.clone() || null
               });
             }
           } else {
             states.push({
               state: FormatState.Invalid,
-              cacheData: null
+              abstractData: null
             })
           }
         }
@@ -291,14 +291,14 @@ export class Matcher {
           if (formats && formats[0]) {
             return {
               state: formats[0].state,
-              cacheData: formats[0].cacheData
+              abstractData: formats[0].abstractData
             };
           }
         }
         if (!formatRanges.length) {
           return {
             state: FormatState.Invalid,
-            cacheData: null
+            abstractData: null
           };
         }
       } else if (child instanceof Fragment) {
@@ -342,7 +342,7 @@ export class Matcher {
   }
 
   // private makeClassNameMatcher(classes: string[]) {
-  //   return (node: HTMLElement | CacheData | CacheDataParams) => {
+  //   return (node: HTMLElement | abstractData | abstractDataParams) => {
   //     return classes.map(className => {
   //       return node.classList.contains(className);
   //     }).includes(true);
@@ -379,12 +379,12 @@ export class Matcher {
       if (item.state === FormatState.Exclude) {
         return {
           state: FormatState.Exclude,
-          cacheData: item.cacheData ? item.cacheData.clone() : null
+          abstractData: item.abstractData ? item.abstractData.clone() : null
         };
       } else if (item.state === FormatState.Invalid) {
         return {
           state: FormatState.Invalid,
-          cacheData: item.cacheData ? item.cacheData.clone() : null
+          abstractData: item.abstractData ? item.abstractData.clone() : null
         };
       }
     }
@@ -392,7 +392,7 @@ export class Matcher {
 
     return states.length ? {
       state: last.state,
-      cacheData: states.length === 1 && last.cacheData ? last.cacheData.clone() : null
+      abstractData: states.length === 1 && last.abstractData ? last.abstractData.clone() : null
     } : null;
   }
 
@@ -412,7 +412,7 @@ export class Matcher {
         if (item.state === FormatState.Exclude) {
           return {
             state: FormatState.Exclude,
-            cacheData: item.cacheData.clone()
+            abstractData: item.abstractData.clone()
           }
         }
       }
@@ -420,7 +420,7 @@ export class Matcher {
         if (item.state === FormatState.Valid) {
           return {
             state: FormatState.Valid,
-            cacheData: item.cacheData.clone()
+            abstractData: item.abstractData.clone()
           }
         }
       }
@@ -434,7 +434,7 @@ export class Matcher {
     }
     return {
       state: FormatState.Invalid,
-      cacheData: null
+      abstractData: null
     };
   }
 }
