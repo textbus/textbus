@@ -23,11 +23,11 @@ export class ToggleBlockCommander implements Commander {
         let node = commonAncestorFragment.token.nativeElement;
         let container: Fragment;
         while (node) {
-          if (reg.test(node.nodeName)) {
+          if (reg.test(node.name)) {
             container = (node[TBUS_TOKEN] as Token).context;
             break;
           }
-          node = node.parentNode;
+          node = node.parent;
         }
         if (container) {
           // 在一个 block 内
@@ -40,7 +40,7 @@ export class ToggleBlockCommander implements Commander {
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
             const node = item.context.token.nativeElement;
-            if (reg.test(node.parentNode.nodeName)) {
+            if (reg.test(node.parent.name)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);
             } else {

@@ -5,7 +5,6 @@ import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { EditableOptions } from '../utils/cache-data';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
-import { NativeElement } from '../../renderer/renderer';
 
 export interface Handler {
   elementRef: HTMLElement;
@@ -13,7 +12,7 @@ export interface Handler {
   matcher: Matcher;
   execCommand: Commander;
   priority: number;
-  editableOptions: ((element: NativeElement) => EditableOptions) | EditableOptions;
+  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   context: Editor;
   hook?: Hook;
 

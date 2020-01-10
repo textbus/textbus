@@ -175,7 +175,7 @@ export class TableEditHook implements Hook {
       if (!fragment || !fragment.parent) {
         return null;
       }
-      const isCell = /th|td/i.test(fragment?.token?.nativeElement.nodeName);
+      const isCell = /th|td/i.test(fragment?.token?.nativeElement.name);
       if (isCell) {
         return fragment;
       }

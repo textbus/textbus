@@ -15,7 +15,8 @@ import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
 import { Differ } from './renderer/differ';
 import { DefaultTagsHandler } from './default-tags-handler';
-import { DefaultRenderer, Renderer } from './renderer/renderer';
+import { DefaultRenderer } from './renderer/renderer';
+import { Renderer } from './renderer/help';
 
 export interface Snapshot {
   doc: Fragment;

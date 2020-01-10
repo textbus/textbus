@@ -22,7 +22,7 @@ export class ListCommander implements Commander<any> {
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
         let node = commonAncestorFragment.token.nativeElement;
-        if (reg.test(node.nodeName)) {
+        if (reg.test(node.name)) {
           // 选中同一组列表下的多个 li
           const scope = range.getCommonAncestorFragmentScope();
           this.splitList(commonAncestorFragment, scope.startIndex, scope.endIndex + 1);
@@ -30,11 +30,11 @@ export class ListCommander implements Commander<any> {
         }
         let liFragment: Fragment;
         while (node) {
-          if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
+          if (/li/i.test(node.name) && reg.test(node.parent.name)) {
             liFragment = (node[TBUS_TOKEN] as Token).context;
             break;
           }
-          node = node.parentNode;
+          node = node.parent;
         }
         if (liFragment) {
           // 选区在一个 li 下
@@ -46,7 +46,7 @@ export class ListCommander implements Commander<any> {
           const temporaryFragment = new Fragment();
           range.getBlockFragmentsBySelectedScope().forEach(item => {
             const node = item.context.token.nativeElement;
-            if (/li/i.test(node.nodeName) && reg.test(node.parentNode.nodeName)) {
+            if (/li/i.test(node.name) && reg.test(node.parent.name)) {
               temporaryFragment.insertFragmentContents(item.context, temporaryFragment.contentLength);
               this.deleteEmptyFragment(item.context, commonAncestorFragment);
             } else {
@@ -76,7 +76,7 @@ export class ListCommander implements Commander<any> {
             container = container.parent;
           }
           const nativeElement = item.context.token.wrapElement;
-          if (/li/i.test(nativeElement.nodeName)) {
+          if (/li/i.test(nativeElement.name)) {
             listGroup.append(item.context);
           } else {
             const li = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
@@ -94,7 +94,7 @@ export class ListCommander implements Commander<any> {
         }
         this.deleteEmptyFragment(parent, container);
       });
-      const limitChildren = dtd[container.token.nativeElement.nodeName.toLowerCase()]?.limitChildren;
+      const limitChildren = dtd[container.token.nativeElement.name.toLowerCase()]?.limitChildren;
       if (limitChildren) {
         const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new CacheData({
           tag: limitChildren[0]

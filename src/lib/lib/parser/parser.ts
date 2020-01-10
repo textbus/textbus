@@ -6,7 +6,6 @@ import { BlockFormat, InlineFormat, SingleFormat } from './format';
 import { CacheData, EditableOptions } from '../toolbar/utils/cache-data';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
-import { NativeElement } from '../renderer/renderer';
 
 export interface ParseState {
   handler: Handler;
@@ -37,7 +36,7 @@ export class Parser {
     }).filter(item => item.state !== FormatState.Invalid);
   }
 
-  getFormatStateByNode(node: NativeElement): ParseState[] {
+  getFormatStateByNode(node: HTMLElement): ParseState[] {
     return this.registries.map(item => {
       return {
         handler: item,
@@ -225,7 +224,7 @@ export class Parser {
     return fragment;
   }
 
-  private getPreCacheData(node: NativeElement, config?: EditableOptions): CacheData {
+  private getPreCacheData(node: HTMLElement, config?: EditableOptions): CacheData {
     if (!config) {
       return new CacheData();
     }

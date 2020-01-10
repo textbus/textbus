@@ -1,7 +1,7 @@
 import { Fragment } from '../parser/fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
-import { NativeNode } from '../renderer/renderer';
+import { NativeNode } from '../renderer/help';
 
 export interface TBRangePosition {
   fragment: Fragment;
@@ -85,8 +85,8 @@ export class TBRange {
     this.startIndex += offset;
     this.endIndex += offset;
 
-    this.nativeRange.setStart(start.node as Node, start.offset);
-    this.nativeRange.setEnd(end.node as Node, end.offset);
+    this.nativeRange.setStart(start.node.elementRef as Node, start.offset);
+    this.nativeRange.setEnd(end.node.elementRef as Node, end.offset);
   }
 
   collapse(toEnd = false) {
@@ -279,10 +279,10 @@ export class TBRange {
       const item = vNodes[index];
       if ((item instanceof BlockToken || item instanceof InlineToken) && item.context.token === item) {
         if (endIndex === i) {
-          const childNodes = Array.from(item.nativeElement.parentNode.childNodes);
-          const index = childNodes.indexOf(item.nativeElement as ChildNode);
+          const childNodes = Array.from(item.nativeElement.elementRef.parentNode.childNodes);
+          const index = childNodes.indexOf(item.nativeElement.elementRef as ChildNode);
           return {
-            node: item.nativeElement.parentNode,
+            node: item.nativeElement.elementRef.parentNode,
             offset: index
           }
         }
@@ -302,9 +302,9 @@ export class TBRange {
             offset: i
           }
         } else if (item instanceof MediaToken) {
-          const index = Array.from(item.nativeElement.parentNode.childNodes).indexOf(item.nativeElement as ChildNode);
+          const index = Array.from(item.nativeElement.elementRef.parentNode.childNodes).indexOf(item.nativeElement.elementRef as ChildNode);
           return {
-            node: item.nativeElement.parentNode,
+            node: item.nativeElement.elementRef.parentNode,
             offset: toEnd ? index + 1 : index
           }
         } else if (item instanceof TextToken) {
@@ -316,10 +316,10 @@ export class TBRange {
       }
     }
     const last = vNodes[vNodes.length - 1];
-    const childNodes = Array.from(last.nativeElement.parentNode.childNodes);
-    const index = childNodes.indexOf(last.nativeElement as ChildNode);
+    const childNodes = Array.from(last.nativeElement.elementRef.parentNode.childNodes);
+    const index = childNodes.indexOf(last.nativeElement.elementRef as ChildNode);
     return {
-      node: last.nativeElement.parentNode,
+      node: last.nativeElement.elementRef.parentNode,
       offset: index + 1
     };
   }

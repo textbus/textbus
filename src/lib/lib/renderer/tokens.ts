@@ -1,7 +1,7 @@
 import { Fragment } from '../parser/fragment';
 import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
-import { NativeElement, NativeText } from './renderer';
+import { NativeElement, NativeText } from './help';
 
 export class TextToken {
   nativeElement: NativeText;
@@ -16,9 +16,7 @@ export class TextToken {
   }
 
   destroyView() {
-    if (this.nativeElement && this.nativeElement.parentNode) {
-      this.nativeElement.parentNode.removeChild(this.nativeElement);
-    }
+    this.nativeElement.destroy();
   }
 }
 
@@ -42,9 +40,7 @@ export class BlockToken {
 
 
   destroyView() {
-    if (this.wrapElement && this.wrapElement.parentNode) {
-      this.wrapElement.parentNode.removeChild(this.wrapElement);
-    }
+    this.nativeElement.destroy();
   }
 }
 
@@ -64,9 +60,7 @@ export class InlineToken {
   }
 
   destroyView() {
-    if (this.wrapElement && this.wrapElement.parentNode) {
-      this.wrapElement.parentNode.removeChild(this.wrapElement);
-    }
+    this.nativeElement.destroy();
   }
 }
 
@@ -84,9 +78,7 @@ export class MediaToken {
   }
 
   destroyView() {
-    if (this.nativeElement && this.nativeElement.parentNode) {
-      this.nativeElement.parentNode.removeChild(this.nativeElement);
-    }
+    this.nativeElement.destroy();
   }
 }
 

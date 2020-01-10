@@ -6,7 +6,6 @@ import { CacheData } from '../toolbar/utils/cache-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
-import { NativeElement } from '../renderer/renderer';
 
 interface MatchData {
   state: FormatState;
@@ -49,13 +48,13 @@ export interface MatchRule {
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   noContainTags?: string[] | RegExp;
   noInTags?: string[] | RegExp;
-  filter?: (node: NativeElement | CacheData) => boolean;
+  filter?: (node: HTMLElement | CacheData) => boolean;
 }
 
 export class Matcher {
-  private inheritValidators: Array<(node: NativeElement | CacheData) => boolean> = [];
-  private validators: Array<(node: NativeElement | CacheData) => boolean> = [];
-  private excludeValidators: Array<(node: NativeElement | CacheData) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private validators: Array<(node: HTMLElement | CacheData) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement | CacheData) => boolean> = [];
 
   constructor(private rule: MatchRule = {}) {
     if (rule.extendTags) {
@@ -88,7 +87,7 @@ export class Matcher {
     return this.match(data);
   }
 
-  matchNode(node: NativeElement): FormatState {
+  matchNode(node: HTMLElement): FormatState {
     return this.match(node);
   }
 
@@ -155,7 +154,7 @@ export class Matcher {
     };
   }
 
-  private match(p: NativeElement | CacheData) {
+  private match(p: HTMLElement | CacheData) {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
       if (!b) {
@@ -313,14 +312,14 @@ export class Matcher {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: NativeElement | CacheData) => {
+    return (node: HTMLElement | CacheData) => {
       const tagName = node instanceof CacheData ? node.tag : node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: NativeElement | CacheData) => {
+    return (node: HTMLElement | CacheData) => {
       return attrs.map(attr => {
         if (attr.value) {
           if (node instanceof CacheData) {
@@ -351,7 +350,7 @@ export class Matcher {
   // }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: NativeElement | CacheData) => {
+    return (node: HTMLElement | CacheData) => {
       const elementStyles = node.style;
       if (!elementStyles) {
         return false;

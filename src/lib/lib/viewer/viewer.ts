@@ -13,6 +13,7 @@ import { Hook } from './help';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
+import { DOMElement } from '../renderer/dom-element';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -136,7 +137,7 @@ export class Viewer {
   render(rootFragment: RootFragment) {
     this.root = rootFragment;
     this.contentDocument.body.innerHTML = '';
-    this.renderer.render(rootFragment.createVDom(), this.contentDocument.body);
+    this.renderer.render(rootFragment.createVDom(), new DOMElement(this.contentDocument.body));
     this.updateFrameHeight();
   }
 
@@ -173,7 +174,7 @@ export class Viewer {
   }
 
   rerender() {
-    this.renderer.render(this.root.createVDom(), this.contentDocument.body);
+    this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
     this.updateFrameHeight();
   }
 
