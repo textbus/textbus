@@ -24,7 +24,7 @@ export class ToggleBlockCommander implements Commander {
         let container: Fragment;
         while (node) {
           if (reg.test(node.name)) {
-            container = (node[TBUS_TOKEN] as Token).context;
+            container = (node.nativeElement[TBUS_TOKEN] as Token).context;
             break;
           }
           node = node.parent;
