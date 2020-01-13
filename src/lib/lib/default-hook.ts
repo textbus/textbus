@@ -76,7 +76,7 @@ export class DefaultHook implements Hook {
     this.editingFragment.clone().sliceContents(0).forEach(i => {
       commonAncestorFragment.append(i);
     });
-    commonAncestorFragment.useFormats(this.editingFragment.getFormatMatrix());
+    // commonAncestorFragment.useFormats(this.editingFragment.getFormatMatrix());
 
     let index = 0;
     viewer.cursor.input.value.replace(/\n+|[^\n]+/g, (str) => {
@@ -184,6 +184,7 @@ export class DefaultHook implements Hook {
   }
 
   onDelete(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
+    viewer.cursor.cleanValue();
     this.inputStartSelection = viewer.selection.clone();
     this.editingFragment = viewer.selection.commonAncestorFragment.clone();
     const selection = viewer.selection;

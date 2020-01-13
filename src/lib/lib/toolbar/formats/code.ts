@@ -1,6 +1,7 @@
 import { HandlerType, Priority, SelectConfig, SelectOptionConfig } from '../help';
 import { CodeCommander } from '../../commands/code-commander';
 import { AbstractData } from '../utils/abstract-data';
+import { CodeHook } from '../hooks/code-hook';
 
 export const codeHandler: SelectConfig = {
   type: HandlerType.Select,
@@ -15,6 +16,7 @@ export const codeHandler: SelectConfig = {
   match: {
     tags: ['pre']
   },
+  hook: new CodeHook(),
   execCommand: new CodeCommander(),
   highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig {
     for (const item of options) {

@@ -7,7 +7,6 @@ import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
 import { VElement } from '../renderer/element';
-// import { InlineFormat } from '../parser/format';
 
 export class CodeCommander implements Commander<string> {
   recordHistory = true;
@@ -42,32 +41,6 @@ export class CodeCommander implements Commander<string> {
 
     } else {
       selection.ranges.forEach(range => {
-        // setTimeout(() => {
-        //   range.commonAncestorFragment.sliceContents(0).forEach(item => {
-        //     if (typeof item === 'string') {
-        //       item.replace(/(var)/g, (str, $1, $2) => {
-        //         console.log(str, $1, $2)
-        //         range.commonAncestorFragment.apply(new InlineFormat({
-        //           startIndex: $2,
-        //           endIndex: $1.length + $2,
-        //           state: FormatState.Valid,
-        //           handler,
-        //           context: range.commonAncestorFragment,
-        //           abstractData: {
-        //             tag: 'span',
-        //             style: {
-        //               name: 'color',
-        //               value: '#f00'
-        //             }
-        //           }
-        //         }), false);
-        //         return str;
-        //       });
-        //     }
-        //   });
-        //   console.log(range.commonAncestorFragment)
-        //   range.commonAncestorFragment.markDirty();
-        // })
         range.commonAncestorFragment.mergeMatchStates(
           rootFragment.parser.getFormatStateByData(new AbstractData({
               tag: 'pre',
@@ -86,9 +59,6 @@ export class CodeCommander implements Commander<string> {
       const lang = abstractData?.attrs?.get('lang');
       if (lang) {
         el.attrs.set('lang', lang);
-      }
-      if (abstractData.style) {
-        el.styles.set(abstractData.style.name, abstractData.style.value);
       }
       return new ReplaceModel(el);
     }
