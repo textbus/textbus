@@ -5,7 +5,7 @@ import { TBSelection } from './selection';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
-import { Cursor, CursorMoveDirection, CursorMoveType, TBInputEvent } from './cursor';
+import { Cursor } from './cursor';
 import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
@@ -14,6 +14,14 @@ import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
 import { DOMElement } from '../renderer/dom-renderer';
+import { getNextPosition, getPreviousPosition, isMac } from './tool';
+
+export interface TBInputEvent {
+  value: string;
+  offset: number;
+  fragment: Fragment;
+  selection: TBSelection;
+}
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -36,6 +44,9 @@ export class Viewer {
   private root: RootFragment;
 
   private cursor: Cursor;
+
+  private inputStartSelection: TBSelection;
+  private editingFragment: Fragment;
 
   constructor(private editor: Editor,
               private renderer: Differ) {
@@ -91,35 +102,123 @@ export class Viewer {
         this.selectionChangeEvent.next(tbSelection);
       });
 
-      this.cursor.onInput.subscribe(v => {
-        this.updateContents(v);
-        this.cursor.updateStateBySelection(this.selection);
+      this.cursor.events.onFocus.subscribe(() => {
+        this.cursor.cleanValue();
+        this.inputStartSelection = this.selection.clone();
+        this.editingFragment = this.selection.commonAncestorFragment.clone();
       });
-      this.cursor.onDelete.subscribe(() => {
-        this.deleteContents();
-        this.cursor.updateStateBySelection(this.selection);
-        selectionChangedTimer = setTimeout(() => {
-          // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
-          this.selectionChangeEvent.next(this.selection);
-        });
-      });
-      this.cursor.onNewLine.subscribe(() => {
+
+      this.cursor.events.onInput.subscribe((ev: Event) => {
         if (!this.selection.collapsed) {
           this.deleteContents();
+          this.inputStartSelection = this.selection.clone();
+          this.editingFragment = this.selection.commonAncestorFragment.clone();
         }
-        this.createNewLine();
+        const input = ev.target as HTMLInputElement;
+        this.updateContents({
+          value: input.value,
+          offset: input.selectionStart,
+          selection: this.inputStartSelection.clone(),
+          fragment: this.editingFragment.clone()
+        });
         this.cursor.updateStateBySelection(this.selection);
       });
-      this.cursor.onMove.subscribe(direction => {
-        this.moveCursor(direction);
+      this.cursor.keyMap({
+        config: {
+          key: 'Backspace'
+        },
+        action: () => {
+          this.inputStartSelection = this.selection.clone();
+          this.editingFragment = this.selection.commonAncestorFragment.clone();
+          this.deleteContents();
+          this.cursor.updateStateBySelection(this.selection);
+          selectionChangedTimer = setTimeout(() => {
+            // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
+            this.selectionChangeEvent.next(this.selection);
+          });
+        }
       });
-      this.cursor.onSelectAll.subscribe(() => {
-        this.selectAll();
+
+      this.cursor.keyMap({
+        config: {
+          key: 'Enter'
+        },
+        action: (ev: Event) => {
+          this.cursor.cleanValue();
+          ev.preventDefault();
+          if (!this.selection.collapsed) {
+            this.deleteContents();
+          }
+          this.createNewLine();
+          this.cursor.updateStateBySelection(this.selection);
+        }
       });
-      this.cursor.onPaste.subscribe(el => {
-        this.paste(el);
+
+      this.cursor.keyMap({
+        config: {
+          key: ''
+        },
+        action: () => {
+          this.selectAll();
+        }
+      });
+
+      this.cursor.keyMap({
+        config: {
+          key: 'ArrowLeft'
+        },
+        action: () => {
+          this.selection.ranges.forEach(range => {
+            const p = getPreviousPosition(range);
+            range.startFragment = p.fragment;
+            range.startIndex = p.index;
+            range.endFragment = p.fragment;
+            range.endIndex = p.index;
+          });
+          this.selection.apply();
+          this.cursor.cleanValue();
+          this.inputStartSelection = this.selection.clone();
+          this.editingFragment = this.selection.commonAncestorFragment.clone();
+        }
+      });
+      this.cursor.keyMap({
+        config: {
+          key: 'ArrowRight'
+        },
+        action: () => {
+          this.selection.ranges.forEach(range => {
+            const p = getNextPosition(range);
+            range.startFragment = p.fragment;
+            range.startIndex = p.index;
+            range.endFragment = p.fragment;
+            range.endIndex = p.index;
+          });
+        }
+      });
+
+      this.cursor.keyMap({
+        config: {
+          key: 'a',
+          metaKey: isMac,
+          ctrlKey: !isMac
+        },
+        action: () => {
+          this.selectAll();
+        }
+      });
+      this.cursor.events.onPaste.subscribe(() => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+        div.contentEditable = 'true';
+        document.body.appendChild(div);
+        div.focus();
+        setTimeout(() => {
+          this.paste(div);
+          document.body.removeChild(div);
+        });
       });
     };
+
     this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
                       document.open();
@@ -290,35 +389,6 @@ export class Viewer {
     this.selection.apply();
   }
 
-  private moveCursor(direction: CursorMoveDirection) {
-    this.selection.ranges.forEach(range => {
-      let p: TBRangePosition;
-      switch (direction.type) {
-        case CursorMoveType.Left:
-          p = Viewer.getPreviousPosition(range);
-          range.startFragment = p.fragment;
-          range.startIndex = p.index;
-          range.endFragment = p.fragment;
-          range.endIndex = p.index;
-          // if (!direction.ctrlKey) {
-          //
-          // }
-          break;
-        case CursorMoveType.Right:
-          p = Viewer.getNextPosition(range);
-          range.startFragment = p.fragment;
-          range.startIndex = p.index;
-          range.endFragment = p.fragment;
-          range.endIndex = p.index;
-          // if (!direction.ctrlKey) {
-          //
-          // }
-          break;
-      }
-    });
-    this.selection.apply();
-  }
-
   private updateContents(ev: TBInputEvent) {
     const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
     for (const hook of hooks) {
@@ -344,110 +414,5 @@ export class Viewer {
         hook.onViewChange();
       }
     });
-  }
-
-  private static getPreviousPosition(range: TBRange) {
-    const currentFragment = range.startFragment;
-    let offset = range.startIndex;
-
-    if (offset > 0) {
-      return {
-        fragment: currentFragment,
-        index: offset - 1
-      }
-    }
-
-    let fragment = currentFragment;
-    while (fragment.parent) {
-      const index = fragment.getIndexInParent();
-      if (index === 0) {
-        fragment = fragment.parent;
-      } else {
-        let prev = fragment.parent.getContentAtIndex(index - 1);
-        if (prev instanceof Fragment) {
-          while (prev) {
-            const last = (prev as Fragment).getContentAtIndex((prev as Fragment).contentLength - 1);
-            if (last instanceof Fragment) {
-              prev = last;
-            } else {
-              let len = (prev as Fragment).contentLength;
-              const c = (prev as Fragment).getContentAtIndex(len - 1);
-              if (c instanceof Single && c.tagName === 'br') {
-                len--;
-              }
-              return {
-                fragment: prev as Fragment,
-                index: len
-              }
-            }
-          }
-
-        } else {
-          return {
-            fragment: fragment.parent,
-            index: index - 1
-          }
-        }
-      }
-    }
-    return {
-      fragment: currentFragment,
-      index: 0
-    }
-  }
-
-  private static getNextPosition(range: TBRange): TBRangePosition {
-    const currentFragment = range.endFragment;
-    let offset = range.endIndex;
-    if (offset === currentFragment.contentLength - 1) {
-      const c = currentFragment.getContentAtIndex(offset);
-      if (c instanceof Single && c.tagName === 'br') {
-        offset++;
-      }
-    }
-
-    if (offset < currentFragment.contentLength) {
-      return {
-        fragment: currentFragment,
-        index: offset + 1
-      }
-    }
-    let fragment = currentFragment;
-    while (fragment.parent) {
-      const index = fragment.getIndexInParent();
-      if (index === fragment.parent.contentLength - 1) {
-        fragment = fragment.parent;
-      } else {
-        let next = fragment.parent.getContentAtIndex(index + 1);
-        if (next instanceof Fragment) {
-          while (next) {
-            const first = (next as Fragment).getContentAtIndex(0);
-            if (first instanceof Fragment) {
-              next = first;
-            } else {
-              return {
-                fragment: next as Fragment,
-                index: 0
-              }
-            }
-          }
-
-        } else {
-          return {
-            fragment: fragment.parent,
-            index: index + 1
-          }
-        }
-      }
-    }
-    let index = currentFragment.contentLength;
-    const c = currentFragment.getContentAtIndex(index - 1);
-    if (c instanceof Single && c.tagName === 'br') {
-      index--;
-    }
-    return {
-      fragment: currentFragment,
-      index
-    }
   }
 }

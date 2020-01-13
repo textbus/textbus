@@ -1,6 +1,5 @@
 import { Commander } from '../commands/commander';
-import { TBInputEvent } from './cursor';
-import { Viewer } from './viewer';
+import { TBInputEvent, Viewer } from './viewer';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Parser } from '../parser/parser';

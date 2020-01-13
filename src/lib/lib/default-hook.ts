@@ -1,7 +1,6 @@
 import { Hook } from './viewer/help';
 import { Single } from './parser/single';
-import { TBInputEvent } from './viewer/cursor';
-import { Viewer } from './viewer/viewer';
+import { TBInputEvent, Viewer } from './viewer/viewer';
 import { Fragment } from './parser/fragment';
 import { Contents } from './parser/contents';
 import { BlockFormat } from './parser/format';

@@ -47,8 +47,14 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
     return;
   }
 
-  const oldFormats = matrix.get(format.handler) as InlineFormat[];
   let formatRanges: InlineFormat[] = [];
+  const oldFormats = matrix.get(format.handler)?.filter(i => {
+    if (i instanceof InlineFormat) {
+      return true;
+    }
+    formatRanges.push(i);
+    return false;
+  }) as InlineFormat[];
 
   if (oldFormats) {
     const formatMarks: Array<InlineFormat> = [];
