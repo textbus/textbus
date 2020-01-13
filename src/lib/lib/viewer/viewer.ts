@@ -13,7 +13,7 @@ import { Hook } from './help';
 import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
-import { DOMElement } from '../renderer/dom-element';
+import { DOMElement } from '../renderer/dom-renderer';
 
 export class Viewer {
   elementRef = document.createElement('div');

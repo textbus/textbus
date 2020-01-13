@@ -1,21 +1,29 @@
 import { VElement } from './element';
-import { ElementRef, TextRef, Renderer } from './help';
-import { DOMElement, DOMText, replaceEmpty } from './dom-element';
 
-export class DefaultRenderer extends Renderer {
-  createElement(element: VElement): ElementRef {
-    const el = document.createElement(element.tagName);
-    element.styles.forEach((value, key) => {
-      el.style[key] = value;
-    });
-    element.attrs.forEach((value, key) => {
-      el.setAttribute(key, value + '');
-    });
-    return new DOMElement(el);
-  }
+export interface ElementRef {
+  readonly nativeElement: any;
+  readonly name: string;
+  readonly parent: ElementRef;
 
-  createTextNode(text: string): TextRef {
-    const str = replaceEmpty(text);
-    return new DOMText(document.createTextNode(str));
-  }
+  insert(newChild: NodeRef, index: number): void;
+
+  append(newChild: NodeRef): void;
+
+  destroy(): void;
+}
+
+export interface TextRef {
+  readonly nativeElement: any;
+  readonly parent: ElementRef;
+  textContent: string;
+
+  destroy(): void;
+}
+
+export type NodeRef = TextRef | ElementRef;
+
+export interface Renderer {
+  createElement(element: VElement): ElementRef;
+
+  createTextNode(text: string): TextRef;
 }

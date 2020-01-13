@@ -15,8 +15,8 @@ import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
 import { Differ } from './renderer/differ';
 import { DefaultTagsHandler } from './default-tags-handler';
-import { DefaultRenderer } from './renderer/renderer';
-import { Renderer } from './renderer/help';
+import { DomRenderer } from './renderer/dom-renderer';
+import { Renderer } from './renderer/renderer';
 
 export interface Snapshot {
   doc: Fragment;
@@ -87,7 +87,7 @@ export class Editor implements EventDelegate {
       this.viewer.use(defaultHandlers.hook);
     });
     this.parser = new Parser(this.handlers);
-    this.renderer = options?.settings?.renderer || new DefaultRenderer();
+    this.renderer = options?.settings?.renderer || new DomRenderer();
     this.viewer = new Viewer(this, new Differ(this.parser, this.renderer));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       const vDom = new RootFragment(this.parser);

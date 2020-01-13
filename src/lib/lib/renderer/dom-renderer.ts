@@ -1,4 +1,5 @@
-import { ElementRef, NodeRef, TextRef } from './help';
+import { VElement } from './element';
+import { ElementRef, TextRef, Renderer, NodeRef } from './renderer';
 
 export function replaceEmpty(s: string) {
   return s.replace(/\s\s+/g, str => {
@@ -21,14 +22,10 @@ export class DOMElement implements ElementRef {
   }
 
   insert(newChild: NodeRef, index: number): void {
-    const previousSibling = this.nativeElement.childNodes[index];
-    if (previousSibling) {
-      if (previousSibling.nextSibling) {
-        if (previousSibling.nextSibling !== newChild.nativeElement) {
-          this.nativeElement.insertBefore(newChild.nativeElement, previousSibling.nextSibling);
-        }
-      } else {
-        this.append(newChild);
+    const nextSibling = this.nativeElement.childNodes[index];
+    if (nextSibling) {
+      if (nextSibling !== newChild.nativeElement) {
+        this.nativeElement.insertBefore(newChild.nativeElement, nextSibling);
       }
     } else if (newChild.nativeElement.parentNode !== this.nativeElement) {
       if (this.nativeElement.firstChild) {
@@ -72,5 +69,23 @@ export class DOMText implements TextRef {
       this.nativeElement.parentNode.removeChild(this.nativeElement);
     }
     this.nativeElement = null;
+  }
+}
+
+export class DomRenderer implements Renderer {
+  createElement(element: VElement): ElementRef {
+    const el = document.createElement(element.tagName);
+    element.styles.forEach((value, key) => {
+      el.style[key] = value;
+    });
+    element.attrs.forEach((value, key) => {
+      el.setAttribute(key, value + '');
+    });
+    return new DOMElement(el);
+  }
+
+  createTextNode(text: string): TextRef {
+    const str = replaceEmpty(text);
+    return new DOMText(document.createTextNode(str));
   }
 }

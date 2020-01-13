@@ -1,7 +1,7 @@
 import { Fragment } from '../parser/fragment';
 import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
-import { ElementRef, TextRef } from './help';
+import { ElementRef, TextRef } from './renderer';
 
 export class TextToken {
   elementRef: TextRef;

@@ -5,7 +5,7 @@ import { TBUS_TOKEN } from '../parser/help';
 import { BlockFormat, InlineFormat, SingleFormat } from '../parser/format';
 import { Priority } from '../toolbar/help';
 import { VElement } from './element';
-import { ElementRef, NodeRef, Renderer, TextRef } from './help';
+import { ElementRef, NodeRef, Renderer, TextRef } from './renderer';
 
 export class Differ {
   private oldToken: BlockToken;
