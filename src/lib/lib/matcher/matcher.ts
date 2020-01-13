@@ -355,6 +355,26 @@ export class Matcher {
       if (!elementStyles) {
         return false;
       }
+      if (node instanceof AbstractData) {
+        return !Object.keys(styles).map(key => {
+          const optionValue = (Array.isArray(styles[key]) ?
+            styles[key] :
+            [styles[key]]) as Array<string | number | RegExp>;
+          let styleValue = node.style.name === key ? node.style.value + '' : '';
+          if (key === 'fontFamily' && typeof styleValue === 'string') {
+            styleValue = styleValue.replace(/['"]/g, '');
+          }
+          if (styleValue) {
+            return optionValue.map(v => {
+              if (v instanceof RegExp) {
+                return v.test(styleValue);
+              }
+              return v === styleValue;
+            }).includes(true);
+          }
+          return false;
+        }).includes(false);
+      }
       return !Object.keys(styles).map(key => {
         const optionValue = (Array.isArray(styles[key]) ?
           styles[key] :
@@ -363,12 +383,15 @@ export class Matcher {
         if (key === 'fontFamily' && typeof styleValue === 'string') {
           styleValue = styleValue.replace(/['"]/g, '');
         }
-        return optionValue.map(v => {
-          if (v instanceof RegExp) {
-            return v.test(styleValue);
-          }
-          return v === styleValue;
-        }).includes(true);
+        if (styleValue) {
+          return optionValue.map(v => {
+            if (v instanceof RegExp) {
+              return v.test(styleValue);
+            }
+            return v === styleValue;
+          }).includes(true);
+        }
+        return false;
       }).includes(false);
     }
   }
