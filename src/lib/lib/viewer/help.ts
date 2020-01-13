@@ -1,6 +1,5 @@
 import { Commander } from '../commands/commander';
-import { TBInputEvent, Viewer } from './viewer';
-import { Contents } from '../parser/contents';
+import { Viewer } from './viewer';
 import { Editor } from '../editor';
 import { Parser } from '../parser/parser';
 
@@ -18,12 +17,20 @@ export interface Hook {
    */
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
+  onSelectStart?(event: Event, selection: Selection, next: () => void): void;
+
+  onFocus?(event: Event, viewer: Viewer, next: () => void): void;
+
+  onCursorMove?(event: Event, viewer: Viewer, next: () => void): void;
+
   /**
    * 当编辑器选区变化时调用
+   * @param event
    * @param range 原始的选区
    * @param document 编辑器的 Document 对象
+   * @param next
    */
-  onSelectionChange?(range: Range, document: Document): Range | Range[];
+  onSelectionChange?(event: Event, range: Range, document: Document, next: () => void): Range | Range[];
 
   /**
    * 当编辑器视图发生变化后调用
@@ -32,37 +39,39 @@ export interface Hook {
 
   /**
    * 当用户输入文本时调用
-   * @param ev 输入文本时的事件对象
+   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onInput?(ev: TBInputEvent, viewer: Viewer, parser: Parser, next: () => void): void;
+  onInput?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户输入回车时调用
+   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onEnter?(viewer: Viewer, parser: Parser, next: () => void): void;
+  onEnter?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户删除内容时调用
+   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onDelete?(viewer: Viewer, parser: Parser, next: () => void): void;
+  onDelete?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户粘贴内容时调用
-   * @param contents 粘贴的内容
+   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void;
+  onPaste?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户应用某个命令时调用

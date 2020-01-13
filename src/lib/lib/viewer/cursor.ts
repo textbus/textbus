@@ -2,7 +2,7 @@ import { fromEvent } from 'rxjs';
 
 import { TBSelection } from './selection';
 import { Events, KeyMap } from './events';
-import { isWindows } from './tool';
+import { isWindows } from './tools';
 
 interface CursorStyle {
   left: number;
@@ -14,10 +14,10 @@ interface CursorStyle {
 
 export class Cursor {
   events: Events;
+  input = document.createElement('textarea');
 
   readonly elementRef = document.createElement('div');
 
-  private input = document.createElement('textarea');
   private cursor = document.createElement('span');
   private inputWrap = document.createElement('span');
 

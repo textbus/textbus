@@ -6,7 +6,7 @@ export interface KeyMapConfig {
   shiftKey?: boolean;
   altKey?: boolean;
   metaKey?: boolean;
-  key: string;
+  key: string | string[];
 }
 
 export interface KeyMap {
@@ -20,9 +20,6 @@ export class Events {
   onFocus: Observable<Event>;
   onBlur: Observable<Event>;
   onPaste: Observable<Event>;
-
-  // private isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
-  // private isMac = /mac os/i.test(navigator.userAgent);
 
   private keyMaps: KeyMap[] = [];
 
@@ -53,6 +50,9 @@ export class Events {
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
       const keyMaps = this.keyMaps.filter(key => {
+        if (Array.isArray(key.config.key)) {
+          return key.config.key.includes(ev.key);
+        }
         return key.config.key === ev.key;
       });
       for (const item of keyMaps) {
@@ -60,8 +60,7 @@ export class Events {
           !!item.config.ctrlKey === ev.ctrlKey &&
           !!item.config.shiftKey === ev.shiftKey &&
           !!item.config.metaKey === ev.metaKey) {
-          item.action(ev);
-          break;
+          return item.action(ev);
         }
       }
     });

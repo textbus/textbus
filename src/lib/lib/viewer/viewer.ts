@@ -6,22 +6,12 @@ import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { Cursor } from './cursor';
-import { TBRange, TBRangePosition } from './range';
-import { Fragment } from '../parser/fragment';
-import { Single } from '../parser/single';
+import { TBRange } from './range';
 import { Hook } from './help';
-import { Contents } from '../parser/contents';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
 import { DOMElement } from '../renderer/dom-renderer';
-import { getNextPosition, getPreviousPosition, isMac } from './tool';
-
-export interface TBInputEvent {
-  value: string;
-  offset: number;
-  fragment: Fragment;
-  selection: TBSelection;
-}
+import { findFirstPosition, findLastChild, isMac } from './tools';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -32,6 +22,7 @@ export class Viewer {
   contentWindow: Window;
   contentDocument: Document;
   nativeSelection: Selection;
+  cursor: Cursor;
 
   selection: TBSelection;
 
@@ -42,11 +33,6 @@ export class Viewer {
   private frame = document.createElement('iframe');
   private hooks: Hook[] = [];
   private root: RootFragment;
-
-  private cursor: Cursor;
-
-  private inputStartSelection: TBSelection;
-  private editingFragment: Fragment;
 
   constructor(private editor: Editor,
               private renderer: Differ) {
@@ -64,74 +50,34 @@ export class Viewer {
       this.elementRef.appendChild(this.cursor.elementRef);
 
       merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
-        .subscribe(() => {
+        .subscribe(ev => {
           this.nativeSelection = this.contentDocument.getSelection();
-          this.nativeSelection.removeAllRanges();
+          this.selectStart(ev);
         });
 
       let selectionChangedTimer: number;
 
-      fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+      fromEvent(this.contentDocument, 'selectionchange').subscribe(ev => {
         clearTimeout(selectionChangedTimer);
-        const tbSelection = new TBSelection(doc);
-        const ranges: Range[] = [];
-        if (this.nativeSelection.rangeCount) {
-          for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
-            ranges.push(this.nativeSelection.getRangeAt(i));
-          }
-        }
-        ranges.forEach(range => {
-          const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
-          if (hooks.length) {
-            hooks.forEach(hook => {
-              const r = hook.onSelectionChange(range, this.contentDocument);
-              if (Array.isArray(r)) {
-                r.forEach(rr => {
-                  tbSelection.addRange(new TBRange(rr));
-                })
-              } else {
-                tbSelection.addRange(new TBRange(r));
-              }
-            })
-          } else {
-            tbSelection.addRange(new TBRange(range));
-          }
-        });
-        this.selection = tbSelection;
-        this.cursor.updateStateBySelection(tbSelection);
-        this.selectionChangeEvent.next(tbSelection);
+        this.selectionChange(ev);
       });
 
-      this.cursor.events.onFocus.subscribe(() => {
-        this.cursor.cleanValue();
-        this.inputStartSelection = this.selection.clone();
-        this.editingFragment = this.selection.commonAncestorFragment.clone();
+      this.cursor.events.onFocus.subscribe(ev => {
+        this.focus(ev);
       });
 
       this.cursor.events.onInput.subscribe((ev: Event) => {
-        if (!this.selection.collapsed) {
-          this.deleteContents();
-          this.inputStartSelection = this.selection.clone();
-          this.editingFragment = this.selection.commonAncestorFragment.clone();
-        }
-        const input = ev.target as HTMLInputElement;
-        this.updateContents({
-          value: input.value,
-          offset: input.selectionStart,
-          selection: this.inputStartSelection.clone(),
-          fragment: this.editingFragment.clone()
-        });
+        this.input(ev);
         this.cursor.updateStateBySelection(this.selection);
       });
+
       this.cursor.keyMap({
         config: {
           key: 'Backspace'
         },
-        action: () => {
-          this.inputStartSelection = this.selection.clone();
-          this.editingFragment = this.selection.commonAncestorFragment.clone();
-          this.deleteContents();
-          this.cursor.updateStateBySelection(this.selection);
+
+        action: ev => {
+          this.delete(ev);
           selectionChangedTimer = setTimeout(() => {
             // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
             this.selectionChangeEvent.next(this.selection);
@@ -144,55 +90,16 @@ export class Viewer {
           key: 'Enter'
         },
         action: (ev: Event) => {
-          this.cursor.cleanValue();
-          ev.preventDefault();
-          if (!this.selection.collapsed) {
-            this.deleteContents();
-          }
-          this.createNewLine();
-          this.cursor.updateStateBySelection(this.selection);
+          this.enter(ev);
         }
       });
 
       this.cursor.keyMap({
         config: {
-          key: ''
+          key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
         },
-        action: () => {
-          this.selectAll();
-        }
-      });
-
-      this.cursor.keyMap({
-        config: {
-          key: 'ArrowLeft'
-        },
-        action: () => {
-          this.selection.ranges.forEach(range => {
-            const p = getPreviousPosition(range);
-            range.startFragment = p.fragment;
-            range.startIndex = p.index;
-            range.endFragment = p.fragment;
-            range.endIndex = p.index;
-          });
-          this.selection.apply();
-          this.cursor.cleanValue();
-          this.inputStartSelection = this.selection.clone();
-          this.editingFragment = this.selection.commonAncestorFragment.clone();
-        }
-      });
-      this.cursor.keyMap({
-        config: {
-          key: 'ArrowRight'
-        },
-        action: () => {
-          this.selection.ranges.forEach(range => {
-            const p = getNextPosition(range);
-            range.startFragment = p.fragment;
-            range.startIndex = p.index;
-            range.endFragment = p.fragment;
-            range.endIndex = p.index;
-          });
+        action: ev => {
+          this.cursorMove(ev);
         }
       });
 
@@ -206,16 +113,8 @@ export class Viewer {
           this.selectAll();
         }
       });
-      this.cursor.events.onPaste.subscribe(() => {
-        const div = document.createElement('div');
-        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-        div.contentEditable = 'true';
-        document.body.appendChild(div);
-        div.focus();
-        setTimeout(() => {
-          this.paste(div);
-          document.body.removeChild(div);
-        });
+      this.cursor.events.onPaste.subscribe(ev => {
+        this.paste(ev);
       });
     };
 
@@ -277,72 +176,116 @@ export class Viewer {
     this.updateFrameHeight();
   }
 
+  private cursorMove(event: Event) {
+    const hooks = this.hooks.filter(hook => typeof hook.onCursorMove === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onCursorMove(event, this, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
+    this.selection.apply();
+  }
 
-  deleteContents() {
+  private delete(event: Event) {
     const hooks = this.hooks.filter(hook => typeof hook.onDelete === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onDelete(this, this.root.parser, () => {
+      hook.onDelete(event, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
         break;
       }
     }
+    this.cursor.updateStateBySelection(this.selection);
+  }
 
+  private input(event: Event) {
+    const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onInput(event, this, this.root.parser, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
+  }
+
+  private focus(event: Event) {
+    const hooks = this.hooks.filter(hook => typeof hook.onFocus === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onFocus(event, this, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
+  }
+
+  private selectStart(event: Event) {
+    const hooks = this.hooks.filter(hook => typeof hook.onSelectStart === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onSelectStart(event, this.nativeSelection, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
     this.viewChanged();
   }
 
-  findLastChild(fragment: Fragment, index: number): TBRangePosition {
-    const last = fragment.getContentAtIndex(index);
-    if (last instanceof Fragment) {
-      return this.findLastChild(last, last.contentLength - 1);
-    } else if (last instanceof Single && last.tagName === 'br') {
-      return {
-        index: fragment.contentLength - 1,
-        fragment
-      };
-    }
-    return {
-      index: fragment.contentLength,
-      fragment
-    }
-  }
-
-  findRerenderFragment(start: Fragment): TBRangePosition {
-    if (!start.parent) {
-      return {
-        fragment: start,
-        index: 0
+  private selectionChange(event: Event) {
+    const tbSelection = new TBSelection(this.contentDocument);
+    const ranges: Range[] = [];
+    if (this.nativeSelection.rangeCount) {
+      for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
+        ranges.push(this.nativeSelection.getRangeAt(i));
       }
     }
-    const index = start.getIndexInParent();
-    if (index === 0) {
-      return this.findRerenderFragment(start.parent);
-    }
-    return {
-      index,
-      fragment: start.parent
-    };
+
+    let result: Range[] = [];
+    ranges.forEach(range => {
+      const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
+      for (const hook of hooks) {
+        let isLoop = false;
+        result = [];
+        const r = hook.onSelectionChange(event, range, this.contentDocument, () => {
+          isLoop = true;
+        });
+        if (Array.isArray(r)) {
+          result.push(...r);
+        } else {
+          result.push(r);
+        }
+        if (!isLoop) {
+          break;
+        }
+      }
+    });
+    result.forEach(item => {
+      tbSelection.addRange(new TBRange(item));
+    });
+
+    this.selection = tbSelection;
+    this.cursor.updateStateBySelection(this.selection);
+    this.selectionChangeEvent.next(tbSelection);
   }
 
-  findFirstPosition(fragment: Fragment): TBRangePosition {
-    const first = fragment.getContentAtIndex(0);
-    if (first instanceof Fragment) {
-      return this.findFirstPosition(first);
-    }
-    return {
-      index: 0,
-      fragment
-    };
-  }
-
-
-  private createNewLine() {
+  private enter(ev: Event) {
     const hooks = this.hooks.filter(hook => typeof hook.onEnter === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onEnter(this, this.root.parser, () => {
+      hook.onEnter(ev, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -352,14 +295,11 @@ export class Viewer {
     this.viewChanged();
   }
 
-  private paste(el: HTMLElement) {
-    const fragment = this.editor.parser.parse(el, new Fragment(null));
-    const c = new Contents();
-    c.insertElements(fragment.sliceContents(0), 0);
+  private paste(event: Event) {
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onPaste(c, this, this.root.parser, () => {
+      hook.onPaste(event, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -378,8 +318,8 @@ export class Viewer {
       f = f.parent;
     }
 
-    const startPosition = this.findFirstPosition(f);
-    const endPosition = this.findLastChild(f, f.contentLength - 1);
+    const startPosition = findFirstPosition(f);
+    const endPosition = findLastChild(f, f.contentLength - 1);
 
     firstRange.startFragment = startPosition.fragment;
     firstRange.endFragment = endPosition.fragment;
@@ -387,21 +327,6 @@ export class Viewer {
     firstRange.endIndex = endPosition.index;
     this.selection.addRange(firstRange);
     this.selection.apply();
-  }
-
-  private updateContents(ev: TBInputEvent) {
-    const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
-    for (const hook of hooks) {
-      let isLoop = false;
-      hook.onInput(ev, this, this.root.parser, () => {
-        isLoop = true;
-      });
-      if (!isLoop) {
-        break;
-      }
-    }
-    this.userWriteEvent.next();
-    this.viewChanged();
   }
 
   private updateFrameHeight() {

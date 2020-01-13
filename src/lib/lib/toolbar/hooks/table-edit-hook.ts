@@ -9,6 +9,7 @@ import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
 import { Parser } from '../../parser/parser';
 import { AbstractData } from '../utils/abstract-data';
+import { findFirstPosition } from '../../viewer/tools';
 
 interface ElementPosition {
   left: number;
@@ -135,7 +136,7 @@ export class TableEditHook implements Hook {
 
   }
 
-  onSelectionChange(range: Range, doc: Document): Range | Range[] {
+  onSelectionChange(event: Event, range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
         return range;
@@ -168,7 +169,7 @@ export class TableEditHook implements Hook {
     }
   }
 
-  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
+  onDelete(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {
@@ -198,7 +199,7 @@ export class TableEditHook implements Hook {
       if (range.collapsed) {
         const cellFragment = findCell(range.startFragment);
         if (cellFragment) {
-          const position = viewer.findFirstPosition(cellFragment);
+          const position = findFirstPosition(cellFragment);
           if (range.startIndex === 0 && position.fragment === range.startFragment) {
             const firstContent = range.startFragment.getContentAtIndex(0);
             if (firstContent instanceof Single && firstContent.tagName === 'br' ||
@@ -206,7 +207,7 @@ export class TableEditHook implements Hook {
               deleteEmptyFragment(range.startFragment, cellFragment);
               range.startIndex = range.endIndex = 0;
               if (cellFragment.contentLength) {
-                const newPosition = viewer.findFirstPosition(cellFragment);
+                const newPosition = findFirstPosition(cellFragment);
                 range.startFragment = range.endFragment = newPosition.fragment;
               } else {
                 cellFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({

@@ -107,6 +107,50 @@ export function getNextPosition(range: TBRange): TBRangePosition {
   }
 }
 
+export function findFirstPosition(fragment: Fragment): TBRangePosition {
+  const first = fragment.getContentAtIndex(0);
+  if (first instanceof Fragment) {
+    return findFirstPosition(first);
+  }
+  return {
+    index: 0,
+    fragment
+  };
+}
+
+export function findRerenderFragment(start: Fragment): TBRangePosition {
+  if (!start.parent) {
+    return {
+      fragment: start,
+      index: 0
+    }
+  }
+  const index = start.getIndexInParent();
+  if (index === 0) {
+    return findRerenderFragment(start.parent);
+  }
+  return {
+    index,
+    fragment: start.parent
+  };
+}
+
+export function findLastChild(fragment: Fragment, index: number): TBRangePosition {
+  const last = fragment.getContentAtIndex(index);
+  if (last instanceof Fragment) {
+    return findLastChild(last, last.contentLength - 1);
+  } else if (last instanceof Single && last.tagName === 'br') {
+    return {
+      index: fragment.contentLength - 1,
+      fragment
+    };
+  }
+  return {
+    index: fragment.contentLength,
+    fragment
+  }
+}
+
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
 
