@@ -312,9 +312,9 @@ export class DefaultHook implements Hook {
             tag: 'br'
           }))));
         }
-        commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+        commonAncestorFragment.insert(new Single('br', parser.getFormatStateByData(new AbstractData({
           tag: 'br'
-        }))));
+        }))), range.endIndex);
         range.startIndex = range.endIndex = range.endIndex + 1;
       } else {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,

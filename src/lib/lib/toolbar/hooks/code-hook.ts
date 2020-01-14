@@ -127,7 +127,15 @@ export class CodeHook implements Hook {
           commonAncestorFragment.apply(item, true);
         }
       });
-      const lang = (elementRef.nativeElement.getAttribute('lang') || 'bash').toLowerCase();
+      const lang = (commonAncestorFragment.getFormatRanges().map(format => {
+        if (format instanceof BlockFormat) {
+          if (format.abstractData.tag === 'pre') {
+            return format.abstractData.attrs.get('lang');
+          }
+        }
+        return '';
+      }).join('') || 'bash').toLowerCase();
+
       if (lang && hljs.getLanguage(lang)) {
         try {
           const html = hljs.highlight(lang, code).value;
@@ -135,7 +143,7 @@ export class CodeHook implements Hook {
           div.innerHTML = html;
           this.mergeStyles(0, div, commonAncestorFragment, parser);
         } catch (e) {
-          console.log(e);
+          // console.log(e);
         }
       }
     }
@@ -151,10 +159,6 @@ export class CodeHook implements Hook {
         index += (item as Text).textContent.length;
       }
     });
-
-    if (start === 0) {
-      return 0;
-    }
 
     node.classList.forEach(value => {
       for (const item of theme) {

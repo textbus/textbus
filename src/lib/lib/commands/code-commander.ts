@@ -41,14 +41,18 @@ export class CodeCommander implements Commander<string> {
 
     } else {
       selection.ranges.forEach(range => {
+        const states = rootFragment.parser.getFormatStateByData(new AbstractData({
+            tag: 'pre',
+            attrs: {
+              lang: this.lang
+            }
+          })
+        );
         range.commonAncestorFragment.mergeMatchStates(
-          rootFragment.parser.getFormatStateByData(new AbstractData({
-              tag: 'pre',
-              attrs: {
-                lang: this.lang
-              }
-            })
-          ), 0, range.commonAncestorFragment.contentLength, false);
+          states,
+          0,
+          range.commonAncestorFragment.contentLength,
+          false);
       });
     }
   }

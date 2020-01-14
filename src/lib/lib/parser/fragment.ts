@@ -158,16 +158,18 @@ export class Fragment extends ViewData {
           item.apply(c, canSurroundBlockElement);
         } else if (item) {
           if (!childFormat) {
-            childFormat = new InlineFormat({
+            childFormat = format instanceof InlineFormat ? new InlineFormat({
               startIndex: format.startIndex + index,
               endIndex: format.startIndex + index + item.length,
               handler: format.handler,
-              context: format.context,
+              context: this,
               state: format.state,
               abstractData: format.abstractData
+            }) : new BlockFormat({
+              ...format
             });
             formats.push(childFormat);
-          } else {
+          } else if (format instanceof InlineFormat) {
             childFormat.endIndex = format.startIndex + index + item.length;
           }
         }
