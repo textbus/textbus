@@ -23,10 +23,10 @@ export class Viewer {
   contentWindow: Window;
   contentDocument: Document;
   nativeSelection: Selection;
-  input: Cursor;
 
   selection: TBSelection;
 
+  private input: Cursor;
   private userWriteEvent = new Subject<void>();
   private selectionChangeEvent = new Subject<TBSelection>();
   private readyEvent = new Subject<Document>();

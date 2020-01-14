@@ -89,7 +89,7 @@ export class DefaultHook implements Hook {
     selection.firstRange.startIndex = startIndex;
     selection.firstRange.endIndex = startIndex;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + viewer.input.input.selectionStart === commonAncestorFragment.contentLength &&
+    if (startIndex + snapshot.cursorOffset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
       commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
         tag: 'br'
@@ -173,7 +173,6 @@ export class DefaultHook implements Hook {
   }
 
   onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
-    viewer.recordSnapshotFromEditingBefore();
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
@@ -186,6 +185,7 @@ export class DefaultHook implements Hook {
           }
           this.sideEffects.push(() => {
             range.apply(-1);
+            viewer.recordSnapshotFromEditingBefore();
           });
         } else {
           const firstContent = range.startFragment.getContentAtIndex(0);
@@ -252,6 +252,7 @@ export class DefaultHook implements Hook {
           range.collapse();
           this.sideEffects.push(() => {
             range.apply();
+            viewer.recordSnapshotFromEditingBefore();
           })
         }
       } else {
@@ -295,6 +296,7 @@ export class DefaultHook implements Hook {
         range.collapse();
         this.sideEffects.push(() => {
           range.apply();
+          viewer.recordSnapshotFromEditingBefore();
         })
       }
     });
