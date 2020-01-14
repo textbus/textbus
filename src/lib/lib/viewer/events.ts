@@ -60,6 +60,7 @@ export class Events {
           !!item.config.ctrlKey === ev.ctrlKey &&
           !!item.config.shiftKey === ev.shiftKey &&
           !!item.config.metaKey === ev.metaKey) {
+          ev.preventDefault();
           return item.action(ev);
         }
       }

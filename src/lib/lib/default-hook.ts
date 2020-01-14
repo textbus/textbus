@@ -1,4 +1,4 @@
-import { Hook } from './viewer/help';
+import { CursorMoveDirection, EditingSnapshot, Hook } from './viewer/help';
 import { Single } from './parser/single';
 import { Viewer } from './viewer/viewer';
 import { Fragment } from './parser/fragment';
@@ -7,7 +7,6 @@ import { BlockFormat } from './parser/format';
 import { Priority } from './toolbar/help';
 import { Parser } from './parser/parser';
 import { AbstractData } from './toolbar/utils/abstract-data';
-import { TBSelection } from './viewer/selection';
 import {
   findFirstPosition,
   findLastChild,
@@ -18,33 +17,28 @@ import {
 import { TBRangePosition } from './viewer/range';
 
 export class DefaultHook implements Hook {
-  private selection: Selection;
-  private inputStartSelection: TBSelection;
-  private editingFragment: Fragment;
+  private sideEffects: Array<() => void> = [];
 
-  onFocus(event: Event, viewer: Viewer, next: () => void): void {
-    viewer.cursor.cleanValue();
-    this.inputStartSelection = viewer.selection.clone();
-    this.editingFragment = viewer.selection.commonAncestorFragment.clone();
+  onFocus(viewer: Viewer, next: () => void): void {
+    viewer.recordSnapshotFromEditingBefore();
   }
 
-  onSelectStart(event: Event, selection: Selection, next: () => void): void {
-    this.selection = selection;
-    this.selection.removeAllRanges();
+  onSelectStart(selection: Selection, next: () => void): void {
+    selection.removeAllRanges();
   }
 
-  onCursorMove(event: KeyboardEvent, viewer: Viewer, next: () => void): void {
+  onCursorMove(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void {
     viewer.selection.ranges.forEach(range => {
       let p: TBRangePosition;
-      switch (event.key) {
-        case 'ArrowLeft':
+      switch (direction) {
+        case CursorMoveDirection.Left:
           p = getPreviousPosition(range);
           range.startFragment = p.fragment;
           range.startIndex = p.index;
           range.endFragment = p.fragment;
           range.endIndex = p.index;
           break;
-        case 'ArrowRight':
+        case CursorMoveDirection.Right:
           p = getNextPosition(range);
           range.startFragment = p.fragment;
           range.startIndex = p.index;
@@ -54,32 +48,29 @@ export class DefaultHook implements Hook {
       }
     });
     viewer.selection.apply();
-    viewer.cursor.cleanValue();
-    this.inputStartSelection = viewer.selection.clone();
-    this.editingFragment = viewer.selection.commonAncestorFragment.clone();
+    viewer.recordSnapshotFromEditingBefore();
   }
 
-  onInput(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
-    if (!viewer.selection.collapsed) {
-      this.onDelete(event, viewer, parser, () => {
-      });
-      this.inputStartSelection = viewer.selection.clone();
-      this.editingFragment = viewer.selection.commonAncestorFragment.clone();
+  onViewUpdated(viewer: Viewer, next: () => void): void {
+    while (this.sideEffects.length) {
+      this.sideEffects.shift()();
     }
+  }
 
-    const startIndex = this.inputStartSelection.firstRange.startIndex;
+  onInput(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void {
+    const startIndex = snapshot.beforeSelection.firstRange.startIndex;
     const selection = viewer.selection;
     const commonAncestorFragment = selection.commonAncestorFragment;
 
     const c = new Contents();
     commonAncestorFragment.useContents(c);
-    this.editingFragment.clone().sliceContents(0).forEach(i => {
+    snapshot.beforeFragment.clone().sliceContents(0).forEach(i => {
       commonAncestorFragment.append(i);
     });
     // commonAncestorFragment.useFormats(this.editingFragment.getFormatMatrix());
 
     let index = 0;
-    viewer.cursor.input.value.replace(/\n+|[^\n]+/g, (str) => {
+    snapshot.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
           const s = new Single('br', parser.getFormatStateByData(new AbstractData({
@@ -98,17 +89,18 @@ export class DefaultHook implements Hook {
     selection.firstRange.startIndex = startIndex;
     selection.firstRange.endIndex = startIndex;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + viewer.cursor.input.selectionStart === commonAncestorFragment.contentLength &&
+    if (startIndex + viewer.input.input.selectionStart === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
       commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
         tag: 'br'
       }))));
     }
-    viewer.rerender();
-    viewer.selection.apply(viewer.cursor.input.selectionStart);
+    this.sideEffects.push(() => {
+      viewer.selection.apply(snapshot.cursorOffset);
+    });
   }
 
-  onPaste(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
+  onPaste(viewer: Viewer, parser: Parser, next: () => void): void {
     const div = document.createElement('div');
     div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
     div.contentEditable = 'true';
@@ -121,7 +113,7 @@ export class DefaultHook implements Hook {
       document.body.removeChild(div);
       const selection = viewer.selection;
       if (!viewer.selection.collapsed) {
-        this.onDelete(event, viewer, parser, () => {
+        this.onDelete(viewer, parser, () => {
         });
       }
       const firstRange = selection.firstRange;
@@ -158,35 +150,30 @@ export class DefaultHook implements Hook {
           parent.insert(item, isEmpty ? index : index + 1);
           index++;
         });
-        viewer.rerender();
         const p = findLastChild(last, last.contentLength - 1);
         firstRange.startFragment = firstRange.endFragment = p.fragment;
         firstRange.startIndex = firstRange.endIndex = p.index;
-        selection.apply();
-      } else {
-        viewer.rerender();
-        selection.apply();
       }
+      this.sideEffects.push(() => {
+        selection.apply();
+      })
     });
-
   }
 
-  onEnter(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
-    viewer.cursor.cleanValue();
-    event.preventDefault();
+  onEnter(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void {
     if (!viewer.selection.collapsed) {
-      this.onDelete(event, viewer, parser, () => {
+      this.onDelete(viewer, parser, () => {
       });
     }
     this.newLine(viewer, parser);
-    this.inputStartSelection = viewer.selection.clone();
-    this.editingFragment = viewer.selection.commonAncestorFragment.clone();
+    viewer.recordSnapshotFromEditingBefore();
+    this.sideEffects.push(() => {
+      viewer.selection.apply();
+    });
   }
 
-  onDelete(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
-    viewer.cursor.cleanValue();
-    this.inputStartSelection = viewer.selection.clone();
-    this.editingFragment = viewer.selection.commonAncestorFragment.clone();
+  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
+    viewer.recordSnapshotFromEditingBefore();
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
@@ -197,8 +184,9 @@ export class DefaultHook implements Hook {
               tag: 'br'
             }))));
           }
-          viewer.rerender();
-          selection.apply(-1);
+          this.sideEffects.push(() => {
+            range.apply(-1);
+          });
         } else {
           const firstContent = range.startFragment.getContentAtIndex(0);
           if (firstContent instanceof Single && firstContent.tagName === 'br') {
@@ -261,8 +249,10 @@ export class DefaultHook implements Hook {
               range.startIndex = p.index;
             }
           }
-          viewer.rerender();
-          selection.collapse();
+          range.collapse();
+          this.sideEffects.push(() => {
+            range.apply();
+          })
         }
       } else {
         let isDeletedEnd = false;
@@ -302,8 +292,10 @@ export class DefaultHook implements Hook {
             tag: 'br'
           }))));
         }
-        viewer.rerender();
-        selection.collapse();
+        range.collapse();
+        this.sideEffects.push(() => {
+          range.apply();
+        })
       }
     });
   }
@@ -312,7 +304,7 @@ export class DefaultHook implements Hook {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       const commonAncestorFragment = range.commonAncestorFragment;
-      if (/th|td/i.test(commonAncestorFragment.token.elementRef.name)) {
+      if (/th|td|pre/i.test(commonAncestorFragment.token.elementRef.name)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
           commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
             tag: 'br'
@@ -322,8 +314,6 @@ export class DefaultHook implements Hook {
           tag: 'br'
         }))));
         range.startIndex = range.endIndex = range.endIndex + 1;
-        viewer.rerender();
-        viewer.selection.apply();
       } else {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
@@ -349,9 +339,7 @@ export class DefaultHook implements Hook {
         commonAncestorFragment.parent.insert(afterFragment, index + 1);
         range.startFragment = range.endFragment = afterFragment;
         range.startIndex = range.endIndex = 0;
-        viewer.rerender();
       }
     });
-    selection.apply();
   }
 }

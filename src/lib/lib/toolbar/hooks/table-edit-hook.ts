@@ -46,6 +46,8 @@ export class TableEditHook implements Hook {
   private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
   private animateId: number;
 
+  private sideEffects: Array<() => void> = [];
+
   constructor() {
     this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
     this.firstMask.style.cssText = 'position: absolute; box-shadow: 0 0 0 9999px rgba(18,150,219,.1); contain: style';
@@ -136,7 +138,14 @@ export class TableEditHook implements Hook {
 
   }
 
-  onSelectionChange(event: Event, range: Range, doc: Document): Range | Range[] {
+  onViewUpdated(viewer: Viewer, next: () => void): void {
+    while (this.sideEffects.length) {
+      this.sideEffects.shift()();
+    }
+    next();
+  }
+
+  onSelectionChange(range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
         return range;
@@ -169,7 +178,7 @@ export class TableEditHook implements Hook {
     }
   }
 
-  onDelete(event: Event, viewer: Viewer, parser: Parser, next: () => void): void {
+  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {
@@ -215,8 +224,9 @@ export class TableEditHook implements Hook {
                 }))));
                 range.startFragment = range.endFragment = cellFragment;
               }
-              viewer.rerender();
-              selection.apply();
+              this.sideEffects.push(() => {
+                selection.apply();
+              })
             }
             return;
           }

@@ -7,11 +7,12 @@ import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { Cursor } from './cursor';
 import { TBRange } from './range';
-import { Hook } from './help';
+import { CursorMoveDirection, Hook } from './help';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
 import { DOMElement } from '../renderer/dom-renderer';
 import { findFirstPosition, findLastChild, isMac } from './tools';
+import { Fragment } from '../parser/fragment';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -22,7 +23,7 @@ export class Viewer {
   contentWindow: Window;
   contentDocument: Document;
   nativeSelection: Selection;
-  cursor: Cursor;
+  input: Cursor;
 
   selection: TBSelection;
 
@@ -33,6 +34,9 @@ export class Viewer {
   private frame = document.createElement('iframe');
   private hooks: Hook[] = [];
   private root: RootFragment;
+
+  private selectionSnapshot: TBSelection;
+  private fragmentSnapshot: Fragment;
 
   constructor(private editor: Editor,
               private renderer: Differ) {
@@ -45,39 +49,39 @@ export class Viewer {
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
       this.selection = new TBSelection(doc);
-      this.cursor = new Cursor(doc);
+      this.input = new Cursor(doc);
       this.readyEvent.next(doc);
-      this.elementRef.appendChild(this.cursor.elementRef);
+      this.elementRef.appendChild(this.input.elementRef);
 
       merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
-        .subscribe(ev => {
+        .subscribe(() => {
           this.nativeSelection = this.contentDocument.getSelection();
-          this.selectStart(ev);
+          this.invokeSelectStartHooks();
         });
 
       let selectionChangedTimer: number;
 
-      fromEvent(this.contentDocument, 'selectionchange').subscribe(ev => {
+      fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
         clearTimeout(selectionChangedTimer);
-        this.selectionChange(ev);
+        this.invokeSelectionChangeHooks();
       });
 
-      this.cursor.events.onFocus.subscribe(ev => {
-        this.focus(ev);
+      this.input.events.onFocus.subscribe(() => {
+        this.invokeFocusHooks();
       });
 
-      this.cursor.events.onInput.subscribe((ev: Event) => {
-        this.input(ev);
-        this.cursor.updateStateBySelection(this.selection);
+      this.input.events.onInput.subscribe(() => {
+        this.invokeInputHooks();
+        this.input.updateStateBySelection(this.selection);
       });
 
-      this.cursor.keyMap({
+      this.input.keyMap({
         config: {
           key: 'Backspace'
         },
 
-        action: ev => {
-          this.delete(ev);
+        action: () => {
+          this.invokeDeleteHooks();
           selectionChangedTimer = setTimeout(() => {
             // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
             this.selectionChangeEvent.next(this.selection);
@@ -85,25 +89,31 @@ export class Viewer {
         }
       });
 
-      this.cursor.keyMap({
+      this.input.keyMap({
         config: {
           key: 'Enter'
         },
-        action: (ev: Event) => {
-          this.enter(ev);
+        action: () => {
+          this.invokeEnterHooks();
         }
       });
 
-      this.cursor.keyMap({
+      this.input.keyMap({
         config: {
           key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
         },
-        action: ev => {
-          this.cursorMove(ev);
+        action: (ev: KeyboardEvent) => {
+          const map: { [key: string]: CursorMoveDirection } = {
+            ArrowLeft: CursorMoveDirection.Left,
+            ArrowRight: CursorMoveDirection.Right,
+            ArrowUp: CursorMoveDirection.Up,
+            ArrowDown: CursorMoveDirection.Down
+          };
+          this.invokeCursorMoveHooks(map[ev.key]);
         }
       });
 
-      this.cursor.keyMap({
+      this.input.keyMap({
         config: {
           key: 'a',
           metaKey: isMac,
@@ -113,8 +123,8 @@ export class Viewer {
           this.selectAll();
         }
       });
-      this.cursor.events.onPaste.subscribe(ev => {
-        this.paste(ev);
+      this.input.events.onPaste.subscribe(() => {
+        this.invokePasteHooks();
       });
     };
 
@@ -166,21 +176,29 @@ export class Viewer {
     let selection = this.selection;
     handler.execCommand.command(selection, handler, overlap, this.root);
     this.rerender();
-    selection.apply();
-    this.viewChanged();
-    this.selectionChangeEvent.next(this.selection);
+    this.selection.apply();
+    this.selectionChangeEvent.next(selection);
   }
 
-  rerender() {
+  recordSnapshotFromEditingBefore() {
+    this.input.cleanValue();
+    this.selectionSnapshot = this.selection.clone();
+    this.fragmentSnapshot = this.selection.commonAncestorFragment.clone();
+  }
+
+  private rerender() {
+    this.invokeViewUpdateBeforeHooks();
     this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
+    this.invokeViewUpdatedHooks();
+    this.viewChanged();
     this.updateFrameHeight();
   }
 
-  private cursorMove(event: Event) {
+  private invokeCursorMoveHooks(direction: CursorMoveDirection) {
     const hooks = this.hooks.filter(hook => typeof hook.onCursorMove === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onCursorMove(event, this, () => {
+      hook.onCursorMove(direction, this, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -190,25 +208,49 @@ export class Viewer {
     this.selection.apply();
   }
 
-  private delete(event: Event) {
+  private invokeDeleteHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onDelete === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onDelete(event, this, this.root.parser, () => {
+      hook.onDelete(this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
         break;
       }
     }
-    this.cursor.updateStateBySelection(this.selection);
+    this.rerender();
+    this.input.updateStateBySelection(this.selection);
   }
 
-  private input(event: Event) {
+  private invokeInputHooks() {
+    if (!this.selection.collapsed) {
+      this.invokeDeleteHooks();
+      this.recordSnapshotFromEditingBefore();
+    }
     const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onInput(event, this, this.root.parser, () => {
+      hook.onInput({
+        beforeSelection: this.selectionSnapshot,
+        beforeFragment: this.fragmentSnapshot,
+        value: this.input.input.value,
+        cursorOffset: this.input.input.selectionStart
+      }, this, this.root.parser, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
+    this.rerender();
+  }
+
+  private invokeViewUpdateBeforeHooks() {
+    const hooks = this.hooks.filter(hook => typeof hook.onViewUpdateBefore === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onViewUpdateBefore(this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -217,11 +259,24 @@ export class Viewer {
     }
   }
 
-  private focus(event: Event) {
+  private invokeViewUpdatedHooks() {
+    const hooks = this.hooks.filter(hook => typeof hook.onViewUpdated === 'function');
+    for (const hook of hooks) {
+      let isLoop = false;
+      hook.onViewUpdated(this, () => {
+        isLoop = true;
+      });
+      if (!isLoop) {
+        break;
+      }
+    }
+  }
+
+  private invokeFocusHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onFocus === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onFocus(event, this, () => {
+      hook.onFocus(this, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -230,11 +285,11 @@ export class Viewer {
     }
   }
 
-  private selectStart(event: Event) {
+  private invokeSelectStartHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onSelectStart === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onSelectStart(event, this.nativeSelection, () => {
+      hook.onSelectStart(this.nativeSelection, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -244,7 +299,7 @@ export class Viewer {
     this.viewChanged();
   }
 
-  private selectionChange(event: Event) {
+  private invokeSelectionChangeHooks() {
     const tbSelection = new TBSelection(this.contentDocument);
     const ranges: Range[] = [];
     if (this.nativeSelection.rangeCount) {
@@ -259,7 +314,7 @@ export class Viewer {
       for (const hook of hooks) {
         let isLoop = false;
         result = [];
-        const r = hook.onSelectionChange(event, range, this.contentDocument, () => {
+        const r = hook.onSelectionChange(range, this.contentDocument, () => {
           isLoop = true;
         });
         if (Array.isArray(r)) {
@@ -277,29 +332,35 @@ export class Viewer {
     });
 
     this.selection = tbSelection;
-    this.cursor.updateStateBySelection(this.selection);
+    this.input.updateStateBySelection(this.selection);
     this.selectionChangeEvent.next(tbSelection);
   }
 
-  private enter(ev: Event) {
+  private invokeEnterHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onEnter === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onEnter(ev, this, this.root.parser, () => {
+      hook.onEnter({
+        beforeSelection: this.selectionSnapshot,
+        beforeFragment: this.fragmentSnapshot,
+        value: this.input.input.value,
+        cursorOffset: this.input.input.selectionStart
+      }, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
         break;
       }
     }
+    this.rerender();
     this.viewChanged();
   }
 
-  private paste(event: Event) {
+  private invokePasteHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onPaste(event, this, this.root.parser, () => {
+      hook.onPaste(this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {

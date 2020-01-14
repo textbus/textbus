@@ -2,11 +2,27 @@ import { Commander } from '../commands/commander';
 import { Viewer } from './viewer';
 import { Editor } from '../editor';
 import { Parser } from '../parser/parser';
+import { TBSelection } from './selection';
+import { Fragment } from '../parser/fragment';
 
 export interface EditContext {
   document: Document;
   window: Window;
   editor: Editor;
+}
+
+export enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
+}
+
+export interface EditingSnapshot {
+  beforeSelection: TBSelection;
+  beforeFragment: Fragment;
+  value: string;
+  cursorOffset: number;
 }
 
 export interface Hook {
@@ -17,20 +33,19 @@ export interface Hook {
    */
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
-  onSelectStart?(event: Event, selection: Selection, next: () => void): void;
+  onSelectStart?(selection: Selection, next: () => void): void;
 
-  onFocus?(event: Event, viewer: Viewer, next: () => void): void;
+  onFocus?(viewer: Viewer, next: () => void): void;
 
-  onCursorMove?(event: Event, viewer: Viewer, next: () => void): void;
+  onCursorMove?(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void;
 
   /**
    * 当编辑器选区变化时调用
-   * @param event
    * @param range 原始的选区
    * @param document 编辑器的 Document 对象
    * @param next
    */
-  onSelectionChange?(event: Event, range: Range, document: Document, next: () => void): Range | Range[];
+  onSelectionChange?(range: Range, document: Document, next: () => void): Range | Range[];
 
   /**
    * 当编辑器视图发生变化后调用
@@ -39,39 +54,41 @@ export interface Hook {
 
   /**
    * 当用户输入文本时调用
-   * @param event
+   * @param snapshot
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onInput?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
+  onInput?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void;
+
+  onViewUpdateBefore?(viewer: Viewer, parser: Parser, next: () => void): void;
+
+  onViewUpdated?(viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户输入回车时调用
-   * @param event
+   * @param snapshot
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onEnter?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
+  onEnter?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户删除内容时调用
-   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onDelete?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
+  onDelete?(viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户粘贴内容时调用
-   * @param event
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(event: Event, viewer: Viewer, parser: Parser, next: () => void): void;
+  onPaste?(viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户应用某个命令时调用
