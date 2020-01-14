@@ -33,7 +33,7 @@ export class CodeHook implements Hook {
         }
       });
       const lexer = compile({
-        keyword: 'var|const|let|function|class'.split('|'),
+        keyword: /\b(?:var|const|let|function|class)\b/,
         WS: /[ \t]+/,
         identifier: /[a-zA-Z$_]\w*/,
         equal: '=',

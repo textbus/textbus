@@ -1,5 +1,5 @@
 import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
-import { auditTime, filter, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, filter, sampleTime, tap } from 'rxjs/operators';
 
 import { EventDelegate, HandlerConfig, HandlerType } from './toolbar/help';
 import { Viewer } from './viewer/viewer';
@@ -104,8 +104,11 @@ export class Editor implements EventDelegate {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
-      this.paths.update(this.viewer.nativeSelection.focusNode);
       this.updateHandlerState(selection);
+    });
+
+    this.viewer.onSelectionChange.pipe(distinctUntilChanged()).subscribe(() => {
+      this.paths.update(this.viewer.nativeSelection.focusNode);
     });
 
     this.listenUserWriteEvent();
