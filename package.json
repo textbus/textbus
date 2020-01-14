@@ -24,7 +24,7 @@
     "gulp": "^4.0.2",
     "handlebars": "^4.4.3",
     "handlebars-loader": "^1.7.1",
-    "highlight.js": "^9.15.9",
+    "highlight.js": "^9.17.1",
     "html-webpack-plugin": "^3.2.0",
     "loader-utils": "^1.2.3",
     "mini-css-extract-plugin": "^0.8.0",
@@ -53,6 +53,7 @@
     "@tanbo/css-themes": "^0.0.1",
     "moo": "^0.5.1",
     "pug-lexer": "^4.1.0",
-    "rxjs": "^6.5.2"
+    "rxjs": "^6.5.2",
+    "sparser": "^1.4.12"
   }
 }

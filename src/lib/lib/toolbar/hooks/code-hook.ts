@@ -1,12 +1,107 @@
-import { compile } from 'moo';
-
 import { Hook } from '../../viewer/help';
 import { Viewer } from '../../viewer/viewer';
 import { Parser } from '../../parser/parser';
-import { AbstractData, AbstractDataParams } from '../utils/abstract-data';
+import { AbstractData } from '../utils/abstract-data';
 import { Handler } from '../handlers/help';
 import { BlockFormat, FormatRange } from '../../parser/format';
 import { Single } from '../../parser/single';
+import { Fragment } from '../../parser/fragment';
+
+const hljs = require('highlight.js');
+const theme = [
+  {
+    classes: ['hljs'],
+    styles: {
+      color: '#333',
+      backgroundColor: '#f8f8f8'
+    }
+  }, {
+    classes: ['hljs-comment', 'hljs-quote'],
+    styles: {
+      color: '#998',
+      fontStyle: 'italic'
+    }
+  }, {
+    classes: ['hljs-keyword', 'hljs-selector-tag', 'hljs-subst'],
+    styles: {
+      color: '#333',
+      fontWeight: 'bold'
+    }
+  }, {
+    classes: ['hljs-number', 'hljs-literal', 'hljs-variable', 'hljs-template-variable', 'hljs-tag', 'hljs-attr'],
+    styles: {
+      color: '#008080'
+    }
+  }, {
+    classes: ['hljs-string', 'hljs-doctag'],
+    styles: {
+      color: '#d14'
+    }
+  }, {
+    classes: ['hljs-title', 'hljs-section', 'hljs-selector-id'],
+    styles: {
+      color: '#900',
+      fontWeight: 'bold'
+    }
+  }, {
+    classes: ['hljs-subst'],
+    styles: {
+      fontWeight: 'normal'
+    }
+  }, {
+    classes: ['hljs-type', 'hljs-class', 'hljs-title'], styles: {
+      color: '#458',
+      fontWeight: 'bold'
+    }
+  }, {
+    classes: ['hljs-tag', 'hljs-name', 'hljs-attribute'],
+    styles: {
+      color: '#000080',
+      fontWeight: 'normal'
+    }
+  }, {
+    classes: ['hljs-regexp', 'hljs-link'],
+    styles: {
+      color: '#009926'
+    }
+  }, {
+    classes: ['hljs-symbol', 'hljs-bullet'],
+    styles: {
+      color: '#990073'
+    }
+  }, {
+    classes: ['hljs-built_in', 'hljs-builtin-name'],
+    styles: {
+      color: '#0086b3'
+    }
+  }, {
+    classes: ['hljs-meta'],
+    styles: {
+      color: '#999',
+      fontWeight: 'bold'
+    }
+  }, {
+    classes: ['hljs-deletion'],
+    styles: {
+      backgroundColor: '#fdd'
+    }
+  }, {
+    classes: ['hljs-addition'],
+    styles: {
+      backgroundColor: '#dfd'
+    }
+  }, {
+    classes: ['hljs-emphasis'],
+    styles: {
+      fontStyle: 'italic'
+    }
+  }, {
+    classes: ['hljs-strong'],
+    styles: {
+      fontWeight: 'bold'
+    }
+  }
+];
 
 export class CodeHook implements Hook {
   onViewUpdateBefore(viewer: Viewer, parser: Parser, next: () => void): void {
@@ -32,47 +127,51 @@ export class CodeHook implements Hook {
           commonAncestorFragment.apply(item, true);
         }
       });
-      const lexer = compile({
-        keyword: /\b(?:var|const|let|function|class)\b/,
-        WS: /[ \t]+/,
-        identifier: /[a-zA-Z$_]\w*/,
-        equal: '=',
-        comment: /\/\/.*?$/,
-        number: /0|[1-9][0-9]*/,
-        string: /"(?:\\["\\]|[^\n"\\])*"/,
-        lparen: '(',
-        rparen: ')',
-        NL: {match: /\n/, lineBreaks: true},
-        // myError: error
-      });
-      lexer.reset(code.replace(/(?!\n)\s/g, ' '));
-      for (const item of lexer) {
-        let params: AbstractDataParams;
-        switch (item.type) {
-          case 'keyword':
-            params = {
-              tag: 'strong',
-              style: {
-                name: 'color',
-                value: '#1559a5'
-              }
-            };
-            break;
-          case 'string':
-            params = {
-              style: {
-                name: 'color',
-                value: '#f96'
-              }
-            };
-            break;
-        }
-        if (params) {
-          const formatStates = parser.getFormatStateByData(new AbstractData(params));
-          commonAncestorFragment.mergeMatchStates(formatStates, item.offset, item.offset + item.text.length, false);
+      const lang = (elementRef.nativeElement.getAttribute('lang') || 'bash').toLowerCase();
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          const html = hljs.highlight(lang, code).value;
+          const div = document.createElement('div');
+          div.innerHTML = html;
+          this.mergeStyles(0, div, commonAncestorFragment, parser);
+        } catch (e) {
+          console.log(e);
         }
       }
     }
     next();
+  }
+
+  private mergeStyles(index: number, node: HTMLElement, context: Fragment, parser: Parser) {
+    const start = index;
+    Array.from(node.childNodes).forEach(item => {
+      if (item.nodeType === 1) {
+        index = this.mergeStyles(index, item as HTMLElement, context, parser);
+      } else if (item.nodeType === 3) {
+        index += (item as Text).textContent.length;
+      }
+    });
+
+    if (start === 0) {
+      return 0;
+    }
+
+    node.classList.forEach(value => {
+      for (const item of theme) {
+        if (item.classes.includes(value)) {
+          const styles = item.styles;
+          Object.keys(styles).forEach(key => {
+            const formatStates = parser.getFormatStateByData(new AbstractData({
+              style: {
+                name: key,
+                value: styles[key]
+              }
+            }));
+            context.mergeMatchStates(formatStates, start, index, false);
+          })
+        }
+      }
+    });
+    return index;
   }
 }
