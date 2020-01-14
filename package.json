@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/tbus",
-  "version": "0.0.1-alpha.35",
+  "version": "0.0.1-alpha.36",
   "description": "",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -14,7 +14,6 @@
   "author": "tanbo",
   "license": "ISC",
   "devDependencies": {
-    "@types/moo": "^0.5.1",
     "@types/node": "^12.7.1",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^9.6.1",
@@ -24,7 +23,6 @@
     "gulp": "^4.0.2",
     "handlebars": "^4.4.3",
     "handlebars-loader": "^1.7.1",
-    "highlight.js": "^9.17.1",
     "html-webpack-plugin": "^3.2.0",
     "loader-utils": "^1.2.3",
     "mini-css-extract-plugin": "^0.8.0",
@@ -51,9 +49,7 @@
     "@tanbo/color": "^0.0.2",
     "@tanbo/color-picker": "^0.0.13",
     "@tanbo/css-themes": "^0.0.1",
-    "moo": "^0.5.1",
-    "pug-lexer": "^4.1.0",
     "rxjs": "^6.5.2",
-    "sparser": "^1.4.12"
+    "highlight.js": "^9.17.1"
   }
 }
