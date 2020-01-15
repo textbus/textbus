@@ -107,7 +107,7 @@ export class CodeHook implements Hook {
   onViewUpdateBefore(viewer: Viewer, parser: Parser, next: () => void): void {
     const commonAncestorFragment = viewer.selection.commonAncestorFragment;
 
-    if (!commonAncestorFragment.token) {
+    if (!commonAncestorFragment || !commonAncestorFragment.token) {
       next();
       return;
     }
