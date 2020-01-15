@@ -210,7 +210,7 @@
   }
 }
 
-@each $t in 12, 13, 14, 16, 18, 20, 24, 36, 48 {
+@each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
   .tanbo-editor-font-size-#{$t} {
     line-height: 1.2;
     font-size: #{$t}px;

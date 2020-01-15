@@ -19,7 +19,7 @@ export const fontSizeHandler: SelectConfig = {
   },
   match: {
     styles: {
-      fontSize: ['12px', '13px', '14px', '16px', '18px', '20px', '24px', '36px', '48px']
+      fontSize: ['12px', '13px', '14px','15px', '16px', '18px', '20px', '24px', '36px', '48px']
     },
     noInTags: ['pre']
   },
@@ -40,6 +40,11 @@ export const fontSizeHandler: SelectConfig = {
       classes: ['tanbo-editor-font-size-14'],
       value: '14px',
       default: true
+    },
+    {
+      label: '15px',
+      classes: ['tanbo-editor-font-size-15'],
+      value: '15px',
     },
     {
       label: '16px',
