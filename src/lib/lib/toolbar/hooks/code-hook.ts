@@ -135,7 +135,6 @@ export class CodeHook implements Hook {
         }
         return '';
       }).join('') || 'bash').toLowerCase();
-
       if (lang && hljs.getLanguage(lang)) {
         try {
           const html = hljs.highlight(lang, code).value;

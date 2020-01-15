@@ -43,9 +43,15 @@ export const codeHandler: SelectConfig = {
   }, {
     value: 'Swift'
   }, {
-    value: 'C'
+    value: 'JSON'
   }, {
-    value: 'C++'
+    value: 'Ruby'
+  }, {
+    value: 'Less'
+  }, {
+    value: 'SCSS'
+  }, {
+    value: 'Stylus'
   }, {
     value: 'bash',
     label: '无',
