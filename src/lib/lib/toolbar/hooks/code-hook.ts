@@ -6,8 +6,8 @@ import { Handler } from '../handlers/help';
 import { BlockFormat, FormatRange } from '../../parser/format';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
+import { getLanguage, highlight } from 'highlight.js';
 
-const hljs = require('highlight.js');
 const theme = [
   {
     classes: ['hljs'],
@@ -135,9 +135,9 @@ export class CodeHook implements Hook {
         }
         return '';
       }).join('') || 'bash').toLowerCase();
-      if (lang && hljs.getLanguage(lang)) {
+      if (lang && getLanguage(lang)) {
         try {
-          const html = hljs.highlight(lang, code).value;
+          const html = highlight(lang, code).value;
           const div = document.createElement('div');
           div.innerHTML = html;
           this.mergeStyles(0, div, commonAncestorFragment, parser);
