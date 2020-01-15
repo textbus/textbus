@@ -42,8 +42,8 @@ export class BlockToken {
 
 
   destroyView() {
-    if (this.elementRef) {
-      this.elementRef.destroy();
+    if (this.wrapElement) {
+      this.wrapElement.destroy();
     }
   }
 }
@@ -64,8 +64,8 @@ export class InlineToken {
   }
 
   destroyView() {
-    if (this.elementRef) {
-      this.elementRef.destroy();
+    if (this.wrapElement) {
+      this.wrapElement.destroy();
     }
   }
 }
