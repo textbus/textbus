@@ -141,10 +141,13 @@ export class Differ {
     }
 
     token.children.forEach((childVNode, index) => {
-      this.diffAndUpdateView(
-        childVNode,
-        (oldToken instanceof BlockToken || oldToken instanceof InlineToken) ? oldToken.children.shift() : null,
-        token.slotElement || host, index);
+      const firstChild = (oldToken instanceof BlockToken || oldToken instanceof InlineToken) ?
+        oldToken.children.shift() : null;
+      if (token.slotElement) {
+        this.diffAndUpdateView(childVNode, firstChild, token.slotElement, index);
+      } else {
+        this.diffAndUpdateView(childVNode, firstChild, host, position);
+      }
     });
     if ((oldToken instanceof BlockToken || oldToken instanceof InlineToken)) {
       oldToken.children.forEach(i => i.destroyView());
