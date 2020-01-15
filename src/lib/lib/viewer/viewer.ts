@@ -13,6 +13,7 @@ import { Differ } from '../renderer/differ';
 import { DOMElement } from '../renderer/dom-renderer';
 import { findFirstPosition, findLastChild, isMac } from './tools';
 import { Fragment } from '../parser/fragment';
+import { Contents } from '../parser/contents';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -124,7 +125,18 @@ export class Viewer {
         }
       });
       this.input.events.onPaste.subscribe(() => {
-        this.invokePasteHooks();
+        const div = document.createElement('div');
+        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+        div.contentEditable = 'true';
+        document.body.appendChild(div);
+        div.focus();
+        setTimeout(() => {
+          const fragment = this.editor.parser.parse(div, new Fragment(null));
+          const contents = new Contents();
+          contents.insertElements(fragment.sliceContents(0), 0);
+          document.body.removeChild(div);
+          this.invokePasteHooks(contents);
+        });
       });
     };
 
@@ -356,18 +368,18 @@ export class Viewer {
     this.viewChanged();
   }
 
-  private invokePasteHooks() {
+  private invokePasteHooks(contents: Contents) {
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onPaste(this, this.root.parser, () => {
+      hook.onPaste(contents, this, this.root.parser, () => {
         isLoop = true;
       });
       if (!isLoop) {
         break;
       }
     }
-
+    this.rerender();
     this.viewChanged();
   }
 

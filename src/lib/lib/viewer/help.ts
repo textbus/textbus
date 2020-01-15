@@ -4,6 +4,7 @@ import { Editor } from '../editor';
 import { Parser } from '../parser/parser';
 import { TBSelection } from './selection';
 import { Fragment } from '../parser/fragment';
+import { Contents } from '../parser/contents';
 
 export interface EditContext {
   document: Document;
@@ -84,11 +85,12 @@ export interface Hook {
 
   /**
    * 当用户粘贴内容时调用
+   * @param contents
    * @param viewer 视图渲染器
    * @param parser
    * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(viewer: Viewer, parser: Parser, next: () => void): void;
+  onPaste?(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void;
 
   /**
    * 当用户应用某个命令时调用

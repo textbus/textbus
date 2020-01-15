@@ -100,64 +100,53 @@ export class DefaultHook implements Hook {
     });
   }
 
-  onPaste(viewer: Viewer, parser: Parser, next: () => void): void {
-    const div = document.createElement('div');
-    div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-    div.contentEditable = 'true';
-    document.body.appendChild(div);
-    div.focus();
-    setTimeout(() => {
-      const fragment = parser.parse(div, new Fragment(null));
-      const contents = new Contents();
-      contents.insertElements(fragment.sliceContents(0), 0);
-      document.body.removeChild(div);
-      const selection = viewer.selection;
-      if (!viewer.selection.collapsed) {
-        this.onDelete(viewer, parser, () => {
-        });
-      }
-      const firstRange = selection.firstRange;
-      const newContents = contents.slice(0);
-      const last = newContents[newContents.length - 1] as Fragment;
+  onPaste(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void {
+    const selection = viewer.selection;
+    if (!viewer.selection.collapsed) {
+      this.onDelete(viewer, parser, () => {
+      });
+    }
+    const firstRange = selection.firstRange;
+    const newContents = contents.slice(0);
+    const last = newContents[newContents.length - 1] as Fragment;
 
-      const commonAncestorFragment = selection.commonAncestorFragment;
-      const firstChild = commonAncestorFragment.getContentAtIndex(0);
-      const isEmpty = commonAncestorFragment.contentLength === 0 ||
-        commonAncestorFragment.contentLength === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
+    const commonAncestorFragment = selection.commonAncestorFragment;
+    const firstChild = commonAncestorFragment.getContentAtIndex(0);
+    const isEmpty = commonAncestorFragment.contentLength === 0 ||
+      commonAncestorFragment.contentLength === 1 && firstChild instanceof Single && firstChild.tagName === 'br';
 
-      let index = commonAncestorFragment.getIndexInParent();
-      const parent = commonAncestorFragment.parent;
-      if (isEmpty) {
-        parent.delete(index, index + 1);
-      } else {
-        let startIndex = firstRange.startIndex;
-        this.newLine(viewer, parser);
-        firstRange.startFragment = firstRange.endFragment = commonAncestorFragment;
-        firstRange.startIndex = firstRange.endIndex = startIndex;
-        const firstContent = newContents[0];
-        if (firstContent instanceof Fragment) {
-          if (!(firstContent.getContentAtIndex(0) instanceof Fragment)) {
-            newContents.shift();
-            commonAncestorFragment.insertFragmentContents(firstContent, startIndex);
-            if (!newContents.length) {
-              firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
-            }
+    let index = commonAncestorFragment.getIndexInParent();
+    const parent = commonAncestorFragment.parent;
+    if (isEmpty) {
+      parent.delete(index, index + 1);
+    } else {
+      let startIndex = firstRange.startIndex;
+      this.newLine(viewer, parser);
+      firstRange.startFragment = firstRange.endFragment = commonAncestorFragment;
+      firstRange.startIndex = firstRange.endIndex = startIndex;
+      const firstContent = newContents[0];
+      if (firstContent instanceof Fragment) {
+        if (!(firstContent.getContentAtIndex(0) instanceof Fragment)) {
+          newContents.shift();
+          commonAncestorFragment.insertFragmentContents(firstContent, startIndex);
+          if (!newContents.length) {
+            firstRange.startIndex = firstRange.endIndex = startIndex + firstContent.contentLength;
           }
         }
       }
-      if (newContents.length) {
-        newContents.forEach(item => {
-          parent.insert(item, isEmpty ? index : index + 1);
-          index++;
-        });
-        const p = findLastChild(last, last.contentLength - 1);
-        firstRange.startFragment = firstRange.endFragment = p.fragment;
-        firstRange.startIndex = firstRange.endIndex = p.index;
-      }
-      this.sideEffects.push(() => {
-        selection.apply();
-      })
-    });
+    }
+    if (newContents.length) {
+      newContents.forEach(item => {
+        parent.insert(item, isEmpty ? index : index + 1);
+        index++;
+      });
+      const p = findLastChild(last, last.contentLength - 1);
+      firstRange.startFragment = firstRange.endFragment = p.fragment;
+      firstRange.startIndex = firstRange.endIndex = p.index;
+    }
+    this.sideEffects.push(() => {
+      selection.apply();
+    })
   }
 
   onEnter(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void {
