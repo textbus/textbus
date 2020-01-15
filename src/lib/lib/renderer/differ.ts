@@ -67,7 +67,7 @@ export class Differ {
           }));
         });
         token.elementRef.nativeElement[TBUS_TOKEN] = token;
-        host.append(token.elementRef);
+        host.insert(token.elementRef, position);
       }
       if (oldToken instanceof MediaToken) {
         token.context.viewSynced();
@@ -164,7 +164,7 @@ export class Differ {
       } else {
         currentNode.nativeElement[TBUS_TOKEN] = token;
         token.elementRef = currentNode;
-        host.append(currentNode);
+        host.insert(currentNode, position);
         if (oldVNode) {
           oldVNode.destroyView();
         }
