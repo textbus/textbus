@@ -3,7 +3,7 @@ import { Viewer } from '../../viewer/viewer';
 import { Parser } from '../../parser/parser';
 import { AbstractData } from '../utils/abstract-data';
 import { Handler } from '../handlers/help';
-import { BlockFormat, FormatRange } from '../../parser/format';
+import { BlockFormat, FormatRange, InlineFormat } from '../../parser/format';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
 import { getLanguage, highlight } from 'highlight.js';
@@ -140,7 +140,9 @@ export class CodeHook implements Hook {
           const html = highlight(lang, code).value;
           const div = document.createElement('div');
           div.innerHTML = html;
-          this.mergeStyles(0, div, commonAncestorFragment, parser);
+          this.getFormats(0, div, commonAncestorFragment, parser).formats.forEach(f => {
+            commonAncestorFragment.apply(f, false);
+          });
         } catch (e) {
           // console.log(e);
         }
@@ -149,32 +151,46 @@ export class CodeHook implements Hook {
     next();
   }
 
-  private mergeStyles(index: number, node: HTMLElement, context: Fragment, parser: Parser) {
+  private getFormats(index: number, node: HTMLElement, context: Fragment, parser: Parser) {
     const start = index;
+    const childFormats: InlineFormat[] = [];
     Array.from(node.childNodes).forEach(item => {
       if (item.nodeType === 1) {
-        index = this.mergeStyles(index, item as HTMLElement, context, parser);
+        const result = this.getFormats(index, item as HTMLElement, context, parser);
+        index = result.index;
+        childFormats.push(...result.formats);
       } else if (item.nodeType === 3) {
         index += (item as Text).textContent.length;
       }
     });
 
+    const formats: InlineFormat[] = [];
     node.classList.forEach(value => {
       for (const item of theme) {
         if (item.classes.includes(value)) {
           const styles = item.styles;
           Object.keys(styles).forEach(key => {
-            const formatStates = parser.getFormatStateByData(new AbstractData({
+            formats.push(...parser.getFormatStateByData(new AbstractData({
               style: {
                 name: key,
                 value: styles[key]
               }
-            }));
-            context.mergeMatchStates(formatStates, start, index, false);
+            })).map(delta => {
+              return new InlineFormat({
+                ...delta,
+                context,
+                startIndex: start,
+                endIndex: index
+              })
+            }))
           })
         }
       }
     });
-    return index;
+    formats.push(...childFormats);
+    return {
+      index,
+      formats
+    };
   }
 }
