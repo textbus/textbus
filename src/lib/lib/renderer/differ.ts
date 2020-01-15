@@ -132,7 +132,11 @@ export class Differ {
       token.slotElement = (oldToken as InlineToken).slotElement;
       token.wrapElement && (token.wrapElement.nativeElement[TBUS_TOKEN] = token);
       token.slotElement && (token.slotElement.nativeElement[TBUS_TOKEN] = token);
-      host.insert(token.wrapElement, position);
+      if (token.wrapElement) {
+        // 只有当有容器时，才插入，
+        // 当继承样式时，如 h1 ~ h6 下的加粗，没有容器
+        host.insert(token.wrapElement, position);
+      }
       token.formats.forEach(format => {
         token.context.mergeFormat(format, true);
       });

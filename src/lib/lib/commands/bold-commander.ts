@@ -26,17 +26,43 @@ export class BoldCommander implements Commander {
         } else {
           state = overlap ? FormatState.Invalid : FormatState.Valid
         }
-        if (state === FormatState.Valid) {
-          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
-            tag: 'strong'
-          })), item.startIndex, item.endIndex, false);
-        } else if (state === FormatState.Exclude) {
-          item.context.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
-            style: {
-              name: 'fontWeight',
-              value: 'normal'
-            }
-          })), item.startIndex, item.endIndex, false);
+        switch (state) {
+          case FormatState.Valid:
+            item.context.apply(new InlineFormat({
+              state: FormatState.Valid,
+              startIndex: item.startIndex,
+              endIndex: item.endIndex,
+              handler: handler,
+              context: item.context,
+              abstractData: {
+                tag: 'strong'
+              }
+            }), false);
+            break;
+          case FormatState.Exclude:
+            item.context.apply(new InlineFormat({
+              state: FormatState.Invalid,
+              startIndex: item.startIndex,
+              endIndex: item.endIndex,
+              handler: handler,
+              context: item.context,
+              abstractData: {
+                tag: item.context.token.elementRef.name
+              }
+            }), false);
+            break;
+          case FormatState.Inherit:
+            item.context.apply(new InlineFormat({
+              state: FormatState.Inherit,
+              startIndex: item.startIndex,
+              endIndex: item.endIndex,
+              handler: handler,
+              context: item.context,
+              abstractData: {
+                tag: item.context.token.elementRef.name
+              }
+            }), false);
+            break;
         }
       });
     })
