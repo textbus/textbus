@@ -21,8 +21,8 @@ export class Differ {
     this?.oldToken?.children.forEach(i => i.destroyView());
     this.oldToken = newToken;
     host.nativeElement[TBUS_TOKEN] = newToken;
-    newToken.wrapElement = host.nativeElement;
-    newToken.slotElement = host.nativeElement;
+    newToken.wrapElement = host;
+    newToken.slotElement = host;
   }
 
   /**
@@ -222,7 +222,7 @@ export class Differ {
                                    token: BlockToken | InlineToken): { wrap: ElementRef, slot: ElementRef } {
     const wrap = this.renderer.createElement(vElement);
     wrap.nativeElement[TBUS_TOKEN] = token;
-    const newFormatStates = this.parser.getFormatStateByNode(wrap.nativeElement);
+    const newFormatStates = this.parser.getFormatStateByNode(wrap.nativeElement as HTMLElement);
     this.mergeFormat(token, newFormatStates);
 
     let slot = wrap;
