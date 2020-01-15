@@ -31,7 +31,7 @@ export class ListCommander implements Commander<any> {
         let liFragment: Fragment;
         while (node) {
           if (/li/i.test(node.name) && reg.test(node.parent.name)) {
-            liFragment = (node[TBUS_TOKEN] as Token).context;
+            liFragment = (node.nativeElement[TBUS_TOKEN] as Token).context;
             break;
           }
           node = node.parent;
