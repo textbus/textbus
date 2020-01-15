@@ -1,7 +1,7 @@
 import { VElement } from './element';
 
 export interface ElementRef {
-  readonly nativeElement: unknown;
+  readonly nativeElement: any;
   readonly name: string;
   readonly parent: ElementRef;
 
@@ -13,7 +13,7 @@ export interface ElementRef {
 }
 
 export interface TextRef {
-  readonly nativeElement: unknown;
+  readonly nativeElement: any;
   readonly parent: ElementRef;
   textContent: string;
 
