@@ -60,6 +60,10 @@ export class Cursor {
     fromEvent(context, 'scroll').subscribe(() => {
       this.updateCursorPosition();
     });
+
+    this.events.onBlur.subscribe(() => {
+      this.hide();
+    })
   }
 
   keyMap(keyMap: KeyMap) {
