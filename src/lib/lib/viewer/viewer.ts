@@ -16,7 +16,7 @@ import {
   findLastChild, getNextLinePosition,
   getNextPosition,
   getPreviousLinePosition,
-  getPreviousPosition,
+  getPreviousPosition, getRangePosition,
   isMac
 } from './tools';
 import { Fragment } from '../parser/fragment';
@@ -47,6 +47,7 @@ export class Viewer {
   private fragmentSnapshot: Fragment;
 
   private oldCursorPosition: { left: number, top: number } = null;
+  private cleanOldCursorTimer: any;
 
   constructor(private editor: Editor,
               private renderer: Differ) {
@@ -412,6 +413,7 @@ export class Viewer {
   private moveCursor(direction: CursorMoveDirection) {
     this.selection.ranges.forEach(range => {
       let p: TBRangePosition;
+      let range2: TBRange;
       switch (direction) {
         case CursorMoveDirection.Left:
           p = getPreviousPosition(range);
@@ -420,35 +422,57 @@ export class Viewer {
           p = getNextPosition(range);
           break;
         case CursorMoveDirection.Up:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().apply();
+
           if (this.oldCursorPosition) {
-            p = getPreviousLinePosition(range, this.oldCursorPosition.left, this.oldCursorPosition.top);
+            p = getPreviousLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
           } else {
-            const range2 = range.clone().apply();
-            const rect = range2.nativeRange.getBoundingClientRect();
+            const rect = getRangePosition(range2.nativeRange);
             this.oldCursorPosition = rect;
             p = getPreviousLinePosition(range, rect.left, rect.top);
           }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
           break;
         case CursorMoveDirection.Down:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().apply();
+
           if (this.oldCursorPosition) {
-            p = getNextLinePosition(range, this.oldCursorPosition.left, this.oldCursorPosition.top);
+            p = getNextLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
           } else {
-            const range2 = range.clone().apply();
-            const rect = range2.nativeRange.getBoundingClientRect();
+            const rect = getRangePosition(range2.nativeRange);
             this.oldCursorPosition = rect;
             p = getNextLinePosition(range, rect.left, rect.top);
           }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
           break;
       }
       range.startFragment = range.endFragment = p.fragment;
       range.startIndex = range.endIndex = p.index;
     });
-
     this.selection.apply();
     this.recordSnapshotFromEditingBefore();
   }
 
   private updateFrameHeight() {
-    this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
+    const childBody = this.contentDocument.body;
+    const lastChild = childBody.lastChild;
+    let height = 0;
+    if (lastChild) {
+      if (lastChild.nodeType === 1) {
+        height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
+      } else {
+        const div = this.contentDocument.createElement('div');
+        childBody.appendChild(div);
+        height = div.getBoundingClientRect().bottom;
+        childBody.removeChild(div);
+      }
+    }
+    this.frame.style.height = height + 'px';
   }
 }

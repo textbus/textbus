@@ -107,6 +107,17 @@ export function getNextPosition(range: TBRange): TBRangePosition {
   }
 }
 
+export function getRangePosition(range: Range) {
+  let rect = range.getBoundingClientRect();
+  const {startContainer, startOffset} = range;
+  if (startContainer.nodeType === 1 &&
+    startContainer.childNodes[startOffset] &&
+    /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
+    rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+  }
+  return rect;
+}
+
 export function getPreviousLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
   const range2 = range.clone();
   let isToPrevLine = false;
@@ -122,13 +133,7 @@ export function getPreviousLinePosition(range: TBRange, left: number, top: numbe
     range2.startIndex = range2.endIndex = position.index;
     range2.startFragment = range2.endFragment = position.fragment;
     range2.apply();
-    let rect2 = range2.nativeRange.getBoundingClientRect();
-    const {startContainer, startOffset} = range2.nativeRange;
-    if (startContainer.nodeType === 1 &&
-      startContainer.childNodes[startOffset] &&
-      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
-      rect2 = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
-    }
+    let rect2 = getRangePosition(range2.nativeRange);
     if (!isToPrevLine) {
       if (rect2.left > minLeft) {
         isToPrevLine = true;
@@ -174,13 +179,7 @@ export function getNextLinePosition(range: TBRange, left: number, top: number): 
     range2.startIndex = range2.endIndex = position.index;
     range2.startFragment = range2.endFragment = position.fragment;
     range2.apply();
-    let rect2 = range2.nativeRange.getBoundingClientRect();
-    const {startContainer, startOffset} = range2.nativeRange;
-    if (startContainer.nodeType === 1 &&
-      startContainer.childNodes[startOffset] &&
-      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
-      rect2 = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
-    }
+    let rect2 = getRangePosition(range2.nativeRange);
     if (!isToNextLine) {
       if (rect2.left < maxRight) {
         isToNextLine = true;

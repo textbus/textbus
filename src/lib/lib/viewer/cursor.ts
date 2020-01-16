@@ -2,7 +2,7 @@ import { fromEvent } from 'rxjs';
 
 import { TBSelection } from './selection';
 import { Events, KeyMap } from './events';
-import { isWindows } from './tools';
+import { getRangePosition, isWindows } from './tools';
 
 interface CursorStyle {
   left: number;
@@ -100,12 +100,7 @@ export class Cursor {
     const range = document.createRange();
     range.setStart(startContainer, startOffset);
     range.collapse();
-    let rect = range.getBoundingClientRect();
-    if (startContainer.nodeType === 1 &&
-      startContainer.childNodes[startOffset] &&
-      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
-      rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
-    }
+    let rect = getRangePosition(range);
     const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
     const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
     let style: CursorStyle = {
