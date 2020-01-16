@@ -20,6 +20,8 @@ export class Events {
   onFocus: Observable<Event>;
   onBlur: Observable<Event>;
   onPaste: Observable<Event>;
+  onCopy: Observable<Event>;
+  onCut: Observable<Event>;
 
   private keyMaps: KeyMap[] = [];
 
@@ -36,6 +38,8 @@ export class Events {
     this.onFocus = fromEvent(this.input, 'focus');
     this.onBlur = fromEvent(this.input, 'blur');
     this.onPaste = fromEvent(this.input, 'paste');
+    this.onCopy = fromEvent(this.input, 'copy');
+    this.onCut = fromEvent(this.input, 'cut');
 
     let isWriting = false;
     fromEvent(this.input, 'compositionstart').subscribe(() => {

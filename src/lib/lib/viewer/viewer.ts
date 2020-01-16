@@ -60,84 +60,7 @@ export class Viewer {
           this.invokeSelectStartHooks();
         });
 
-      let selectionChangedTimer: number;
-
-      fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
-        clearTimeout(selectionChangedTimer);
-        this.invokeSelectionChangeHooks();
-      });
-
-      this.input.events.onFocus.subscribe(() => {
-        this.invokeFocusHooks();
-      });
-
-      this.input.events.onInput.subscribe(() => {
-        this.invokeInputHooks();
-        this.input.updateStateBySelection(this.selection);
-      });
-
-      this.input.keyMap({
-        config: {
-          key: 'Backspace'
-        },
-
-        action: () => {
-          this.invokeDeleteHooks();
-          selectionChangedTimer = setTimeout(() => {
-            // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
-            this.selectionChangeEvent.next(this.selection);
-          });
-        }
-      });
-
-      this.input.keyMap({
-        config: {
-          key: 'Enter'
-        },
-        action: () => {
-          this.invokeEnterHooks();
-        }
-      });
-
-      this.input.keyMap({
-        config: {
-          key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
-        },
-        action: (ev: KeyboardEvent) => {
-          const map: { [key: string]: CursorMoveDirection } = {
-            ArrowLeft: CursorMoveDirection.Left,
-            ArrowRight: CursorMoveDirection.Right,
-            ArrowUp: CursorMoveDirection.Up,
-            ArrowDown: CursorMoveDirection.Down
-          };
-          this.invokeCursorMoveHooks(map[ev.key]);
-        }
-      });
-
-      this.input.keyMap({
-        config: {
-          key: 'a',
-          metaKey: isMac,
-          ctrlKey: !isMac
-        },
-        action: () => {
-          this.selectAll();
-        }
-      });
-      this.input.events.onPaste.subscribe(() => {
-        const div = document.createElement('div');
-        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-        div.contentEditable = 'true';
-        document.body.appendChild(div);
-        div.focus();
-        setTimeout(() => {
-          const fragment = this.editor.parser.parse(div, new Fragment(null));
-          const contents = new Contents();
-          contents.insertElements(fragment.sliceContents(0), 0);
-          document.body.removeChild(div);
-          this.invokePasteHooks(contents);
-        });
-      });
+      this.listenEvents();
     };
 
     this.frame.setAttribute('scrolling', 'no');
@@ -196,6 +119,99 @@ export class Viewer {
     this.input.cleanValue();
     this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selection.commonAncestorFragment.clone();
+  }
+
+  private listenEvents() {
+    let selectionChangedTimer: number;
+
+    fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+      clearTimeout(selectionChangedTimer);
+      this.invokeSelectionChangeHooks();
+    });
+
+    this.input.events.onFocus.subscribe(() => {
+      this.invokeFocusHooks();
+    });
+
+    this.input.events.onInput.subscribe(() => {
+      this.invokeInputHooks();
+      this.input.updateStateBySelection(this.selection);
+    });
+
+    this.input.keyMap({
+      config: {
+        key: 'Backspace'
+      },
+
+      action: () => {
+        this.invokeDeleteHooks();
+        selectionChangedTimer = setTimeout(() => {
+          // 当全部删除后，再次删除，不会触发 selection 变化，会导致 toolbar 状态高亮异常，这里手动触发一次
+          this.selectionChangeEvent.next(this.selection);
+        });
+      }
+    });
+
+    this.input.keyMap({
+      config: {
+        key: 'Enter'
+      },
+      action: () => {
+        this.invokeEnterHooks();
+      }
+    });
+
+    this.input.keyMap({
+      config: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+      },
+      action: (ev: KeyboardEvent) => {
+        const map: { [key: string]: CursorMoveDirection } = {
+          ArrowLeft: CursorMoveDirection.Left,
+          ArrowRight: CursorMoveDirection.Right,
+          ArrowUp: CursorMoveDirection.Up,
+          ArrowDown: CursorMoveDirection.Down
+        };
+        this.invokeCursorMoveHooks(map[ev.key]);
+      }
+    });
+
+    this.input.keyMap({
+      config: {
+        key: 'a',
+        metaKey: isMac,
+        ctrlKey: !isMac
+      },
+      action: () => {
+        this.selectAll();
+      }
+    });
+    this.input.events.onPaste.subscribe(() => {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+      div.contentEditable = 'true';
+      document.body.appendChild(div);
+      div.focus();
+      setTimeout(() => {
+        const fragment = this.editor.parser.parse(div, new Fragment(null));
+        const contents = new Contents();
+        contents.insertElements(fragment.sliceContents(0), 0);
+        document.body.removeChild(div);
+        this.invokePasteHooks(contents);
+      });
+    });
+
+    this.input.events.onCopy.subscribe(ev => {
+      this.recordSnapshotFromEditingBefore();
+      this.contentDocument.execCommand('copy');
+      ev.preventDefault();
+    });
+
+    this.input.events.onCut.subscribe(ev => {
+      this.contentDocument.execCommand('copy');
+      this.invokeDeleteHooks();
+      ev.preventDefault();
+    });
   }
 
   private rerender() {
