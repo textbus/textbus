@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/tbus",
-  "version": "0.0.1-alpha.47",
+  "version": "0.0.1-alpha.48",
   "description": "",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
