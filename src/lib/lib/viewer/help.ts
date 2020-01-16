@@ -49,14 +49,6 @@ export interface Hook {
   onFocus?(viewer: Viewer, next: () => void): void;
 
   /**
-   * 当用户触发了方向键时调用
-   * @param direction
-   * @param viewer
-   * @param next
-   */
-  onTriggerDirectionKey?(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void;
-
-  /**
    * 当编辑器选区变化时调用
    * @param range 原始的选区
    * @param document 编辑器的 Document 对象

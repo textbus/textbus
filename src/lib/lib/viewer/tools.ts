@@ -107,6 +107,88 @@ export function getNextPosition(range: TBRange): TBRangePosition {
   }
 }
 
+export function getPreviousLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
+  const range2 = range.clone();
+  let isToPrevLine = false;
+  let loopCount = 0;
+  let minLeft = left;
+  let minTop = top;
+  while (true) {
+    loopCount++;
+    const position = getPreviousPosition(range2);
+    range2.startIndex = range2.endIndex = position.index;
+    range2.startFragment = range2.endFragment = position.fragment;
+    range2.apply();
+    const rect2 = range2.nativeRange.getBoundingClientRect();
+    if (!isToPrevLine) {
+      if (rect2.left > minLeft) {
+        isToPrevLine = true;
+      } else if (rect2.left === minLeft && rect2.top === minTop) {
+        return position;
+      }
+      minLeft = rect2.left;
+      minTop = rect2.top;
+    }
+    if (isToPrevLine && rect2.left < left) {
+      return position;
+    }
+    if (loopCount > 10000) {
+      break;
+    }
+  }
+  return {
+    index: 0,
+    fragment: range.startFragment
+  };
+}
+
+export function getNextLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
+  const range2 = range.clone();
+  let isToNextLine = false;
+  let loopCount = 0;
+  let maxRight = left;
+  let minTop = top;
+  let oldPosition: TBRangePosition;
+  let oldLeft = 0;
+  while (true) {
+    loopCount++;
+    const position = getNextPosition(range2);
+    range2.startIndex = range2.endIndex = position.index;
+    range2.startFragment = range2.endFragment = position.fragment;
+    range2.apply();
+    const rect2 = range2.nativeRange.getBoundingClientRect();
+    if (!isToNextLine) {
+      if (rect2.left < maxRight) {
+        isToNextLine = true;
+      } else if (rect2.left === maxRight && rect2.top === minTop) {
+        return position;
+      }
+      maxRight = rect2.left;
+      minTop = rect2.top;
+      oldPosition = position;
+    }
+    if (isToNextLine) {
+      if (rect2.left > left) {
+        return oldPosition;
+      }
+      if (oldPosition) {
+        if (rect2.left < oldLeft) {
+          return oldPosition;
+        }
+      }
+      oldPosition = position;
+      oldLeft = rect2.left;
+    }
+    if (loopCount > 10000) {
+      break;
+    }
+  }
+  return {
+    index: range.endFragment.contentLength,
+    fragment: range.endFragment
+  };
+}
+
 export function findFirstPosition(fragment: Fragment): TBRangePosition {
   const first = fragment.getContentAtIndex(0);
   if (first instanceof Fragment) {
@@ -153,4 +235,3 @@ export function findLastChild(fragment: Fragment, index: number): TBRangePositio
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
-

@@ -6,12 +6,19 @@ import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
 import { Cursor } from './cursor';
-import { TBRange } from './range';
+import { TBRange, TBRangePosition } from './range';
 import { CursorMoveDirection, Hook } from './help';
 import { Editor } from '../editor';
 import { Differ } from '../renderer/differ';
 import { DOMElement } from '../renderer/dom-renderer';
-import { findFirstPosition, findLastChild, isMac } from './tools';
+import {
+  findFirstPosition,
+  findLastChild, getNextLinePosition,
+  getNextPosition,
+  getPreviousLinePosition,
+  getPreviousPosition,
+  isMac
+} from './tools';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 
@@ -38,6 +45,8 @@ export class Viewer {
 
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
+
+  private oldCursorPosition: { left: number, top: number } = null;
 
   constructor(private editor: Editor,
               private renderer: Differ) {
@@ -172,7 +181,7 @@ export class Viewer {
           ArrowUp: CursorMoveDirection.Up,
           ArrowDown: CursorMoveDirection.Down
         };
-        this.invokeCursorMoveHooks(map[ev.key]);
+        this.moveCursor(map[ev.key]);
       }
     });
 
@@ -219,20 +228,6 @@ export class Viewer {
     this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
     this.invokeViewChangeHooks();
     this.updateFrameHeight();
-  }
-
-  private invokeCursorMoveHooks(direction: CursorMoveDirection) {
-    const hooks = this.hooks.filter(hook => typeof hook.onTriggerDirectionKey === 'function');
-    for (const hook of hooks) {
-      let isLoop = false;
-      hook.onTriggerDirectionKey(direction, this, () => {
-        isLoop = true;
-      });
-      if (!isLoop) {
-        break;
-      }
-    }
-    this.selection.apply();
   }
 
   private invokeDeleteHooks() {
@@ -412,6 +407,45 @@ export class Viewer {
     firstRange.endIndex = endPosition.index;
     this.selection.addRange(firstRange);
     this.selection.apply();
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    this.selection.ranges.forEach(range => {
+      let p: TBRangePosition;
+      switch (direction) {
+        case CursorMoveDirection.Left:
+          p = getPreviousPosition(range);
+          break;
+        case CursorMoveDirection.Right:
+          p = getNextPosition(range);
+          break;
+        case CursorMoveDirection.Up:
+          if (this.oldCursorPosition) {
+            p = getPreviousLinePosition(range, this.oldCursorPosition.left, this.oldCursorPosition.top);
+          } else {
+            const range2 = range.clone().apply();
+            const rect = range2.nativeRange.getBoundingClientRect();
+            this.oldCursorPosition = rect;
+            p = getPreviousLinePosition(range, rect.left, rect.top);
+          }
+          break;
+        case CursorMoveDirection.Down:
+          if (this.oldCursorPosition) {
+            p = getNextLinePosition(range, this.oldCursorPosition.left, this.oldCursorPosition.top);
+          } else {
+            const range2 = range.clone().apply();
+            const rect = range2.nativeRange.getBoundingClientRect();
+            this.oldCursorPosition = rect;
+            p = getNextLinePosition(range, rect.left, rect.top);
+          }
+          break;
+      }
+      range.startFragment = range.endFragment = p.fragment;
+      range.startIndex = range.endIndex = p.index;
+    });
+
+    this.selection.apply();
+    this.recordSnapshotFromEditingBefore();
   }
 
   private updateFrameHeight() {

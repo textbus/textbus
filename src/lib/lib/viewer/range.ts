@@ -85,6 +85,7 @@ export class TBRange {
     this.endIndex += offset;
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
+    return this;
   }
 
   collapse(toEnd = false) {
@@ -95,6 +96,7 @@ export class TBRange {
       this.endFragment = this.startFragment;
       this.endIndex = this.startIndex;
     }
+    return this;
   }
 
   getCommonAncestorContentsScope() {

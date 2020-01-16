@@ -27,30 +27,6 @@ export class DefaultHook implements Hook {
     selection.removeAllRanges();
   }
 
-  onTriggerDirectionKey(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void {
-    viewer.selection.ranges.forEach(range => {
-      let p: TBRangePosition;
-      switch (direction) {
-        case CursorMoveDirection.Left:
-          p = getPreviousPosition(range);
-          range.startFragment = p.fragment;
-          range.startIndex = p.index;
-          range.endFragment = p.fragment;
-          range.endIndex = p.index;
-          break;
-        case CursorMoveDirection.Right:
-          p = getNextPosition(range);
-          range.startFragment = p.fragment;
-          range.startIndex = p.index;
-          range.endFragment = p.fragment;
-          range.endIndex = p.index;
-          break
-      }
-    });
-    viewer.selection.apply();
-    viewer.recordSnapshotFromEditingBefore();
-  }
-
   onViewChange(viewer: Viewer, next: () => void): void {
     while (this.sideEffects.length) {
       this.sideEffects.shift()();
