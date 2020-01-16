@@ -115,6 +115,7 @@ export class CodeHook implements Hook {
     if (/pre/i.test(elementRef.name)) {
       const formatRanges = commonAncestorFragment.getFormatRanges();
       commonAncestorFragment.useFormats(new Map<Handler, FormatRange[]>());
+
       const code = commonAncestorFragment.sliceContents(0).map(item => {
         if (typeof item === 'string') {
           return item;
@@ -122,8 +123,10 @@ export class CodeHook implements Hook {
           return '\n';
         }
       }).join('');
+
       formatRanges.forEach(item => {
-        if (item instanceof BlockFormat) {
+        if (item instanceof BlockFormat || item.startIndex === 0 &&
+          item.endIndex === commonAncestorFragment.contentLength) {
           commonAncestorFragment.apply(item, true);
         }
       });
