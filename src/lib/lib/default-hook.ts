@@ -67,7 +67,7 @@ export class DefaultHook implements Hook {
     snapshot.beforeFragment.clone().sliceContents(0).forEach(i => {
       commonAncestorFragment.append(i);
     });
-    // commonAncestorFragment.useFormats(this.editingFragment.getFormatMatrix());
+    // commonAncestorFragment.useFormats(this.editingFragment.getFormatMap());
 
     let index = 0;
     snapshot.value.replace(/\n+|[^\n]+/g, (str) => {

@@ -2,10 +2,10 @@ import { BlockFormat, FormatRange, InlineFormat } from './format';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
 
-export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
+export function getCanApplyFormats(formatMap: Map<Handler, FormatRange[]>) {
   let formats: FormatRange[] = [];
   // 检出所有生效规则
-  formatMatrix.forEach(value => {
+  formatMap.forEach(value => {
     formats = formats.concat(value);
   });
   // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
@@ -32,23 +32,23 @@ export function getCanApplyFormats(formatMatrix: Map<Handler, FormatRange[]>) {
 
 /**
  * 合并当前片段的格式化信息
- * @param matrix
+ * @param formatMap
  * @param format
  * @param important
  */
-export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatRange, important = false) {
+export function mergeFormat(formatMap: Map<Handler, FormatRange[]>, format: FormatRange, important = false) {
 
   if (format instanceof BlockFormat) {
     if (format.state === FormatState.Invalid) {
-      matrix.delete(format.handler);
+      formatMap.delete(format.handler);
     } else {
-      matrix.set(format.handler, [format]);
+      formatMap.set(format.handler, [format]);
     }
     return;
   }
 
   let formatRanges: InlineFormat[] = [];
-  const oldFormats = matrix.get(format.handler)?.filter(i => {
+  const oldFormats = formatMap.get(format.handler)?.filter(i => {
     if (i instanceof InlineFormat) {
       return true;
     }
@@ -114,8 +114,8 @@ export function mergeFormat(matrix: Map<Handler, FormatRange[]>, format: FormatR
   }
   const ff = formatRanges.filter(f => f.state !== FormatState.Invalid);
   if (ff.length) {
-    matrix.set(format.handler, ff);
+    formatMap.set(format.handler, ff);
   } else {
-    matrix.delete(format.handler);
+    formatMap.delete(format.handler);
   }
 }

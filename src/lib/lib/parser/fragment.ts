@@ -16,14 +16,14 @@ export class Fragment extends ViewData {
     return this.contents.length;
   }
 
-  private formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+  private formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
   private contents = new Contents();
 
   constructor(formats?: FormatDelta[]) {
     super();
     if (Array.isArray(formats)) {
       formats.forEach(item => {
-        this.formatMatrix.set(item.handler, [new BlockFormat({
+        this.formatMap.set(item.handler, [new BlockFormat({
           ...item,
           context: this
         })])
@@ -32,19 +32,19 @@ export class Fragment extends ViewData {
   }
 
   getFormatRangesByHandler(handler: Handler) {
-    return this.formatMatrix.get(handler);
+    return this.formatMap.get(handler);
   }
 
   getFormatHandlers() {
-    return Array.from(this.formatMatrix.keys());
+    return Array.from(this.formatMap.keys());
   }
 
   getFormatRanges() {
-    return Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []);
+    return Array.from(this.formatMap.values()).reduce((v, n) => v.concat(n), []);
   }
 
   setFormats(key: Handler, formatRanges: FormatRange[]) {
-    this.formatMatrix.set(key, formatRanges.map(f => {
+    this.formatMap.set(key, formatRanges.map(f => {
       f.context = this;
       return f;
     }));
@@ -69,32 +69,32 @@ export class Fragment extends ViewData {
   }
 
   cleanFormats() {
-    this.formatMatrix.clear();
+    this.formatMap.clear();
     this.markDirty(true);
   }
 
   useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
     this.markDirty();
 
-    this.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+    this.formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(formats.keys()).forEach(key => {
-      this.formatMatrix.set(key, formats.get(key).map(i => {
+      this.formatMap.set(key, formats.get(key).map(i => {
         i.context = this;
         return i.clone();
       }));
     });
   }
 
-  getFormatMatrix() {
-    const formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
-    Array.from(this.formatMatrix.keys()).forEach(key => {
-      formatMatrix.set(key, this.formatMatrix.get(key).map(i => {
+  getFormatMap() {
+    const formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+    Array.from(this.formatMap.keys()).forEach(key => {
+      formatMap.set(key, this.formatMap.get(key).map(i => {
         const c = i.clone();
         c.context = null;
         return c;
       }));
     });
-    return formatMatrix;
+    return formatMap;
   }
 
   /**
@@ -108,9 +108,9 @@ export class Fragment extends ViewData {
         (<{ parent: Fragment }>item.parent) = ff;
       }
     });
-    ff.formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
-    Array.from(this.formatMatrix.keys()).forEach(key => {
-      ff.formatMatrix.set(key, this.formatMatrix.get(key).map(f => {
+    ff.formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+    Array.from(this.formatMap.keys()).forEach(key => {
+      ff.formatMap.set(key, this.formatMap.get(key).map(f => {
         const c = f.clone();
         c.context = ff;
         return c;
@@ -195,7 +195,7 @@ export class Fragment extends ViewData {
     }
     this.contents.insert(content, index);
     const newFormats: InlineFormat[] = [];
-    Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
+    Array.from(this.formatMap.values()).reduce((v, n) => v.concat(n), []).filter(format => {
       return format instanceof InlineFormat || format instanceof SingleFormat;
     }).forEach((format: InlineFormat) => {
       if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
@@ -242,7 +242,7 @@ export class Fragment extends ViewData {
 
     this.contents.append(content);
     if (insertAdjacentInlineFormat) {
-      Array.from(this.formatMatrix.values()).reduce((v, n) => v.concat(n), []).filter(format => {
+      Array.from(this.formatMap.values()).reduce((v, n) => v.concat(n), []).filter(format => {
         return [Priority.Property, Priority.Inline].includes(format.handler.priority);
       }).forEach((format: InlineFormat) => {
         format.endIndex += content.length;
@@ -268,10 +268,10 @@ export class Fragment extends ViewData {
       return content;
     });
     this.contents.insertElements(elements, index);
-    Array.from(this.formatMatrix.keys()).filter(key => {
+    Array.from(this.formatMap.keys()).filter(key => {
       return [Priority.Inline, Priority.Property].includes(key.priority);
     }).forEach(key => {
-      const formatRanges: InlineFormat[] = this.formatMatrix.get(key).filter(f => f instanceof InlineFormat);
+      const formatRanges: InlineFormat[] = this.formatMap.get(key).filter(f => f instanceof InlineFormat);
       const newRanges: InlineFormat[] = [];
       formatRanges.forEach(format => {
         if (format.startIndex < index && format.endIndex > index) {
@@ -289,13 +289,13 @@ export class Fragment extends ViewData {
           format.endIndex += contentsLength;
         }
       });
-      this.formatMatrix.set(key, newRanges);
+      this.formatMap.set(key, newRanges);
     });
 
-    Array.from(fragment.formatMatrix.keys()).filter(key => {
+    Array.from(fragment.formatMap.keys()).filter(key => {
       return [Priority.Inline, Priority.Property].includes(key.priority);
     }).forEach(key => {
-      const formatRanges: InlineFormat[] = fragment.formatMatrix.get(key).filter(f => f instanceof InlineFormat);
+      const formatRanges: InlineFormat[] = fragment.formatMap.get(key).filter(f => f instanceof InlineFormat);
       formatRanges.forEach(format => {
         const c = format.clone();
         c.startIndex += index;
@@ -325,12 +325,12 @@ export class Fragment extends ViewData {
         ff.append(item);
       }
     });
-    const formatMatrix = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+    const formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
 
-    Array.from(this.formatMatrix.keys()).forEach(key => {
+    Array.from(this.formatMap.keys()).forEach(key => {
       const formats: Array<InlineFormat | BlockFormat> = [];
       const newFragmentFormats: Array<InlineFormat | BlockFormat> = [];
-      this.formatMatrix.get(key).forEach(format => {
+      this.formatMap.get(key).forEach(format => {
         if (format instanceof BlockFormat) {
           const c = format.clone();
           c.context = ff;
@@ -369,13 +369,13 @@ export class Fragment extends ViewData {
         }
       });
       if (formats.length) {
-        formatMatrix.set(key, formats);
+        formatMap.set(key, formats);
       }
       if (newFragmentFormats) {
-        ff.formatMatrix.set(key, newFragmentFormats);
+        ff.formatMap.set(key, newFragmentFormats);
       }
     });
-    this.formatMatrix = formatMatrix;
+    this.formatMap = formatMap;
     return ff;
   }
 
@@ -391,7 +391,7 @@ export class Fragment extends ViewData {
     // if (!this.dataChanged) {
     //   return this.vNode;
     // }
-    const formatRanges = getCanApplyFormats(this.formatMatrix) as Array<InlineFormat | BlockFormat>;
+    const formatRanges = getCanApplyFormats(this.formatMap) as Array<InlineFormat | BlockFormat>;
     const contents = this.contents;
     const containerFormatRanges: Array<InlineFormat | BlockFormat> = [];
     const childFormatRanges: Array<InlineFormat> = [];
@@ -417,7 +417,7 @@ export class Fragment extends ViewData {
   mergeFormat(format: FormatRange, important = false) {
     this.markDirty();
     format.context = this;
-    mergeFormat(this.formatMatrix, format, important);
+    mergeFormat(this.formatMap, format, important);
   }
 
   destroy() {
@@ -426,7 +426,7 @@ export class Fragment extends ViewData {
       const index = this.getIndexInParent();
       this.parent.delete(index, index + 1);
     }
-    this.formatMatrix.clear();
+    this.formatMap.clear();
     this.contents = new Contents();
     (<{ parent: Fragment }>this.parent) = null;
   }
