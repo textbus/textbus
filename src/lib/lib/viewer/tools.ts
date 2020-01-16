@@ -113,13 +113,22 @@ export function getPreviousLinePosition(range: TBRange, left: number, top: numbe
   let loopCount = 0;
   let minLeft = left;
   let minTop = top;
+  let position: TBRangePosition;
+  let oldPosition: TBRangePosition;
+  let oldLeft = 0;
   while (true) {
     loopCount++;
-    const position = getPreviousPosition(range2);
+    position = getPreviousPosition(range2);
     range2.startIndex = range2.endIndex = position.index;
     range2.startFragment = range2.endFragment = position.fragment;
     range2.apply();
-    const rect2 = range2.nativeRange.getBoundingClientRect();
+    let rect2 = range2.nativeRange.getBoundingClientRect();
+    const {startContainer, startOffset} = range2.nativeRange;
+    if (startContainer.nodeType === 1 &&
+      startContainer.childNodes[startOffset] &&
+      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
+      rect2 = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+    }
     if (!isToPrevLine) {
       if (rect2.left > minLeft) {
         isToPrevLine = true;
@@ -129,14 +138,23 @@ export function getPreviousLinePosition(range: TBRange, left: number, top: numbe
       minLeft = rect2.left;
       minTop = rect2.top;
     }
-    if (isToPrevLine && rect2.left < left) {
-      return position;
+    if (isToPrevLine) {
+      if (rect2.left < left) {
+        return position;
+      }
+      if (oldPosition) {
+        if (rect2.left > oldLeft) {
+          return oldPosition;
+        }
+      }
+      oldLeft = rect2.left;
+      oldPosition = position;
     }
     if (loopCount > 10000) {
       break;
     }
   }
-  return {
+  return position || {
     index: 0,
     fragment: range.startFragment
   };
@@ -156,7 +174,13 @@ export function getNextLinePosition(range: TBRange, left: number, top: number): 
     range2.startIndex = range2.endIndex = position.index;
     range2.startFragment = range2.endFragment = position.fragment;
     range2.apply();
-    const rect2 = range2.nativeRange.getBoundingClientRect();
+    let rect2 = range2.nativeRange.getBoundingClientRect();
+    const {startContainer, startOffset} = range2.nativeRange;
+    if (startContainer.nodeType === 1 &&
+      startContainer.childNodes[startOffset] &&
+      /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
+      rect2 = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+    }
     if (!isToNextLine) {
       if (rect2.left < maxRight) {
         isToNextLine = true;
@@ -183,7 +207,7 @@ export function getNextLinePosition(range: TBRange, left: number, top: number): 
       break;
     }
   }
-  return {
+  return oldPosition || {
     index: range.endFragment.contentLength,
     fragment: range.endFragment
   };
