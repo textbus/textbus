@@ -27,7 +27,7 @@ export class DefaultHook implements Hook {
     selection.removeAllRanges();
   }
 
-  onCursorMove(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void {
+  onTriggerDirectionKey(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void {
     viewer.selection.ranges.forEach(range => {
       let p: TBRangePosition;
       switch (direction) {
@@ -51,7 +51,7 @@ export class DefaultHook implements Hook {
     viewer.recordSnapshotFromEditingBefore();
   }
 
-  onViewUpdated(viewer: Viewer, next: () => void): void {
+  onViewChange(viewer: Viewer, next: () => void): void {
     while (this.sideEffects.length) {
       this.sideEffects.shift()();
     }

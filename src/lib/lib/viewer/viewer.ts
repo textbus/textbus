@@ -217,16 +217,15 @@ export class Viewer {
   private rerender() {
     this.invokeViewUpdateBeforeHooks();
     this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
-    this.invokeViewUpdatedHooks();
-    this.viewChanged();
+    this.invokeViewChangeHooks();
     this.updateFrameHeight();
   }
 
   private invokeCursorMoveHooks(direction: CursorMoveDirection) {
-    const hooks = this.hooks.filter(hook => typeof hook.onCursorMove === 'function');
+    const hooks = this.hooks.filter(hook => typeof hook.onTriggerDirectionKey === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onCursorMove(direction, this, () => {
+      hook.onTriggerDirectionKey(direction, this, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -287,11 +286,11 @@ export class Viewer {
     }
   }
 
-  private invokeViewUpdatedHooks() {
-    const hooks = this.hooks.filter(hook => typeof hook.onViewUpdated === 'function');
+  private invokeViewChangeHooks() {
+    const hooks = this.hooks.filter(hook => typeof hook.onViewChange === 'function');
     for (const hook of hooks) {
       let isLoop = false;
-      hook.onViewUpdated(this, () => {
+      hook.onViewChange(this, () => {
         isLoop = true;
       });
       if (!isLoop) {
@@ -324,7 +323,6 @@ export class Viewer {
         break;
       }
     }
-    this.viewChanged();
   }
 
   private invokeSelectionChangeHooks() {
@@ -381,7 +379,6 @@ export class Viewer {
       }
     }
     this.rerender();
-    this.viewChanged();
   }
 
   private invokePasteHooks(contents: Contents) {
@@ -396,7 +393,6 @@ export class Viewer {
       }
     }
     this.rerender();
-    this.viewChanged();
   }
 
   private selectAll() {
@@ -420,13 +416,5 @@ export class Viewer {
 
   private updateFrameHeight() {
     this.frame.style.height = this.contentDocument.documentElement.scrollHeight + 'px';
-  }
-
-  private viewChanged() {
-    this.hooks.forEach(hook => {
-      if (typeof hook.onViewChange === 'function') {
-        hook.onViewChange();
-      }
-    });
   }
 }

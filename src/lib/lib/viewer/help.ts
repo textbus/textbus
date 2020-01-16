@@ -34,11 +34,27 @@ export interface Hook {
    */
   setup?(frameContainer: HTMLElement, context: EditContext): void;
 
+  /**
+   * 当用户开始选择时调用
+   * @param selection
+   * @param next
+   */
   onSelectStart?(selection: Selection, next: () => void): void;
 
+  /**
+   * 当编辑框获得焦点时调用
+   * @param viewer
+   * @param next
+   */
   onFocus?(viewer: Viewer, next: () => void): void;
 
-  onCursorMove?(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void;
+  /**
+   * 当用户触发了方向键时调用
+   * @param direction
+   * @param viewer
+   * @param next
+   */
+  onTriggerDirectionKey?(direction: CursorMoveDirection, viewer: Viewer, next: () => void): void;
 
   /**
    * 当编辑器选区变化时调用
@@ -49,11 +65,6 @@ export interface Hook {
   onSelectionChange?(range: Range, document: Document, next: () => void): Range | Range[];
 
   /**
-   * 当编辑器视图发生变化后调用
-   */
-  onViewChange?(): void;
-
-  /**
    * 当用户输入文本时调用
    * @param snapshot
    * @param viewer 视图渲染器
@@ -62,9 +73,18 @@ export interface Hook {
    */
   onInput?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void;
 
+  /**
+   * 当视图重绘前调用
+   * @param viewer
+   * @param parser
+   * @param next
+   */
   onViewUpdateBefore?(viewer: Viewer, parser: Parser, next: () => void): void;
 
-  onViewUpdated?(viewer: Viewer, next: () => void): void;
+  /**
+   * 当编辑器视图发生变化后调用
+   */
+  onViewChange?(viewer: Viewer, next: () => void): void;
 
   /**
    * 当用户输入回车时调用

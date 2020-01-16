@@ -167,7 +167,7 @@ export class TableEditHook implements Hook {
     });
   }
 
-  onViewChange(): void {
+  onViewChange(viewer: Viewer, next: () => void): void {
     if (this.startPosition && this.endPosition) {
       this.cellMatrix = this.serialize(this.tableElement);
       const startCell = this.cellMatrix[this.startPosition.rowIndex].cells[this.startPosition.columnIndex].cellElement;
@@ -176,6 +176,7 @@ export class TableEditHook implements Hook {
       this.endCell = endCell;
       this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
     }
+    next();
   }
 
   onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
