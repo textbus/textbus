@@ -7,7 +7,7 @@ import { SelectHandler } from './handlers/select-handler';
 import { DropdownHandler } from './handlers/dropdown-handler';
 import { ActionSheetHandler } from './handlers/action-sheet-handler';
 import { Editor } from '../editor';
-import { DefaultTagsHandler } from '../default-tags-handler';
+import { DefaultTagsHandler } from './default-tags-handler';
 import { TBSelection } from '../viewer/selection';
 import { KeymapConfig } from '../viewer/events';
 

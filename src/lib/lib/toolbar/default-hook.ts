@@ -1,13 +1,13 @@
-import { EditingSnapshot, Hook } from './viewer/help';
-import { Single } from './parser/single';
-import { Viewer } from './viewer/viewer';
-import { Fragment } from './parser/fragment';
-import { Contents } from './parser/contents';
-import { BlockFormat } from './parser/format';
-import { Priority } from './toolbar/help';
-import { Parser } from './parser/parser';
-import { AbstractData } from './toolbar/utils/abstract-data';
-import { findFirstPosition, findLastChild, findRerenderFragment } from './viewer/tools';
+import { EditingSnapshot, Hook } from '../viewer/help';
+import { Single } from '../parser/single';
+import { Viewer } from '../viewer/viewer';
+import { Fragment } from '../parser/fragment';
+import { Contents } from '../parser/contents';
+import { BlockFormat } from '../parser/format';
+import { Priority } from './help';
+import { Parser } from '../parser/parser';
+import { AbstractData } from './utils/abstract-data';
+import { findFirstPosition, findLastChild, findRerenderFragment } from '../viewer/tools';
 
 export class DefaultHook implements Hook {
   private sideEffects: Array<() => void> = [];

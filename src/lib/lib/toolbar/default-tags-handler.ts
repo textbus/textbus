@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
 
-import { Handler } from './toolbar/handlers/help';
-import { FormatState, Matcher } from './matcher/matcher';
-import { ChildSlotModel, Commander } from './commands/commander';
-import { Priority } from './toolbar/help';
-import { AbstractData, EditableOptions } from './toolbar/utils/abstract-data';
-import { Editor } from './editor';
+import { Handler } from './handlers/help';
+import { FormatState, Matcher } from '../matcher/matcher';
+import { ChildSlotModel, Commander } from '../commands/commander';
+import { Priority } from './help';
+import { AbstractData, EditableOptions } from './utils/abstract-data';
+import { Editor } from '../editor';
 import { DefaultHook } from './default-hook';
-import { VElement } from './renderer/element';
+import { VElement } from '../renderer/element';
 
 export class DefaultTagCommander implements Commander {
   recordHistory = false;
