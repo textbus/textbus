@@ -2,10 +2,9 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EventDelegate } from '../help';
+import { DropdownConfig, EditableOptions, EventDelegate } from '../help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 
 export class DropdownHandler implements Handler {

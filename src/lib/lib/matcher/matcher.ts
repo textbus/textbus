@@ -2,7 +2,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../viewer/range';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';

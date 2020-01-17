@@ -1,6 +1,6 @@
 import { HandlerType, Priority, SelectConfig, SelectOptionConfig } from '../help';
 import { CodeCommander } from '../../commands/code-commander';
-import { AbstractData } from '../utils/abstract-data';
+import { AbstractData } from '../../parser/abstract-data';
 import { CodeHook } from '../hooks/code-hook';
 
 export const codeHandler: SelectConfig = {

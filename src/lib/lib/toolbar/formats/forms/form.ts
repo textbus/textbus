@@ -5,7 +5,7 @@ import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../../help';
 import { DropdownHandlerView } from '../../handlers/utils/dropdown';
-import { AbstractData } from '../../utils/abstract-data';
+import { AbstractData } from '../../../parser/abstract-data';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;

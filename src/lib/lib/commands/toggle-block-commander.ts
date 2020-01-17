@@ -6,7 +6,7 @@ import { Fragment } from '../parser/fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';
 import { RootFragment } from '../parser/root-fragment';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { VElement } from '../renderer/element';
 
 export class ToggleBlockCommander implements Commander {

@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { RootFragment } from '../parser/root-fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';

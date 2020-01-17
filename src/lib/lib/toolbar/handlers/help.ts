@@ -2,10 +2,10 @@ import { Observable } from 'rxjs';
 
 import { Commander } from '../../commands/commander';
 import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
-import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Keymap, KeymapConfig } from '../../viewer/events';
 import { isMac } from '../../viewer/tools';
+import { EditableOptions } from '../help';
 
 export interface Handler {
   elementRef: HTMLElement;

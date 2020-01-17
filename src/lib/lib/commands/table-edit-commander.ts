@@ -1,6 +1,6 @@
 import { Commander } from './commander';
 import { TBSelection } from '../viewer/selection';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { Handler } from '../toolbar/handlers/help';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';

@@ -1,10 +1,9 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ButtonConfig } from '../help';
+import { ButtonConfig, EditableOptions } from '../help';
 import { Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
-import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Keymap } from '../../viewer/events';
 

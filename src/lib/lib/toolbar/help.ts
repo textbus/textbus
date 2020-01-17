@@ -2,7 +2,7 @@ import { Matcher, MatchRule } from '../matcher/matcher';
 import { Commander } from '../commands/commander';
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { AbstractData, EditableOptions } from './utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { Hook } from '../viewer/help';
 import { KeymapConfig } from '../viewer/events';
 
@@ -78,6 +78,12 @@ export interface ActionConfig {
   label?: string;
   classes?: string[];
   keymap?: KeymapConfig;
+}
+
+export interface EditableOptions {
+  tag?: boolean;
+  attrs?: string[];
+  styleName?: string;
 }
 
 export interface ActionSheetConfig {

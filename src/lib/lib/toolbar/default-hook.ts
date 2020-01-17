@@ -6,7 +6,7 @@ import { Contents } from '../parser/contents';
 import { BlockFormat } from '../parser/format';
 import { Priority } from './help';
 import { Parser } from '../parser/parser';
-import { AbstractData } from './utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { findFirstPosition, findLastChild, findRerenderFragment } from '../viewer/tools';
 
 export class DefaultHook implements Hook {

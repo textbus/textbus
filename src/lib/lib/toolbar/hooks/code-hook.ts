@@ -1,7 +1,7 @@
 import { Hook } from '../../viewer/help';
 import { Viewer } from '../../viewer/viewer';
 import { Parser } from '../../parser/parser';
-import { AbstractData } from '../utils/abstract-data';
+import { AbstractData } from '../../parser/abstract-data';
 import { Handler } from '../handlers/help';
 import { BlockFormat, FormatRange, InlineFormat } from '../../parser/format';
 import { Single } from '../../parser/single';

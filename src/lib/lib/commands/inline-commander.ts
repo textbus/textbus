@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { VElement } from '../renderer/element';
 
 export class InlineCommander implements Commander {

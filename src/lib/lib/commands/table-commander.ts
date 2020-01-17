@@ -4,7 +4,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
 import { Fragment } from '../parser/fragment';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';
 import { Parser } from '../parser/parser';

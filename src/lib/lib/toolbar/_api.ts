@@ -11,7 +11,7 @@ export * from './hooks/link-hook';
 export * from './hooks/source-hook';
 export * from './hooks/table-edit-hook';
 
-export * from './utils/abstract-data';
+export * from '../parser/abstract-data';
 
 export * from './help';
 export * from './default-hook';

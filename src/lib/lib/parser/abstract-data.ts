@@ -1,9 +1,3 @@
-export interface EditableOptions {
-  tag?: boolean;
-  attrs?: string[];
-  styleName?: string;
-}
-
 export interface AbstractDataParams {
   tag?: string;
   attrs?: { [key: string]: string | number } | Map<string, string | number>;

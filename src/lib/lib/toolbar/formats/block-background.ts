@@ -3,7 +3,7 @@ import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { AbstractData } from '../utils/abstract-data';
+import { AbstractData } from '../../parser/abstract-data';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
 import { dtd } from '../../dtd';
 

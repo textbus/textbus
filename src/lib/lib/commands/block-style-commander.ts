@@ -3,7 +3,7 @@ import { FormatState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { VElement } from '../renderer/element';
 import { RootFragment } from '../parser/root-fragment';
 import { Fragment } from '../parser/fragment';

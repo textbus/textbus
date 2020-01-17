@@ -3,9 +3,9 @@ import { dtd } from '../dtd';
 import { Single } from './single';
 import { FormatState } from '../matcher/matcher';
 import { BlockFormat, InlineFormat, SingleFormat } from './format';
-import { AbstractData, EditableOptions } from '../toolbar/utils/abstract-data';
+import { AbstractData } from './abstract-data';
 import { Handler } from '../toolbar/handlers/help';
-import { Priority } from '../toolbar/help';
+import { EditableOptions, Priority } from '../toolbar/help';
 
 export interface FormatDelta {
   handler: Handler;

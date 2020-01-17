@@ -2,7 +2,7 @@ import { Fragment } from './fragment';
 import { Single } from './single';
 import { BlockFormat } from './format';
 import { Parser } from './parser';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from './abstract-data';
 
 export class RootFragment extends Fragment {
   constructor(public parser: Parser) {

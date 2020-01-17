@@ -4,7 +4,7 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { AbstractData } from '../utils/abstract-data';
+import { AbstractData } from '../../parser/abstract-data';
 import { dtd } from '../../dtd';
 
 const commander = new StyleCommander('backgroundColor', false);

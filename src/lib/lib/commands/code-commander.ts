@@ -2,7 +2,7 @@ import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
-import { AbstractData } from '../toolbar/utils/abstract-data';
+import { AbstractData } from '../parser/abstract-data';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 import { RootFragment } from '../parser/root-fragment';

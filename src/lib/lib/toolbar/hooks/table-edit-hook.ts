@@ -8,7 +8,7 @@ import { Viewer } from '../../viewer/viewer';
 import { Single } from '../../parser/single';
 import { Fragment } from '../../parser/fragment';
 import { Parser } from '../../parser/parser';
-import { AbstractData } from '../utils/abstract-data';
+import { AbstractData } from '../../parser/abstract-data';
 import { findFirstPosition } from '../../viewer/tools';
 
 interface ElementPosition {

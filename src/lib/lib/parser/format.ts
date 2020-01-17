@@ -1,6 +1,6 @@
 import { Handler } from '../toolbar/handlers/help';
 import { FormatState } from '../matcher/matcher';
-import { AbstractData, AbstractDataParams } from '../toolbar/utils/abstract-data';
+import { AbstractData, AbstractDataParams } from './abstract-data';
 import { Fragment } from './fragment';
 import { Single } from './single';
 

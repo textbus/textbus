@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { EventDelegate } from '../../help';
-import { AbstractData } from '../../utils/abstract-data';
+import { AbstractData } from '../../../parser/abstract-data';
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
