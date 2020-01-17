@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { AbstractData, EditableOptions } from './utils/abstract-data';
 import { Hook } from '../viewer/help';
+import { KeyMapConfig } from '../viewer/events';
 
 export enum Priority {
   Default = 0,
@@ -30,6 +31,7 @@ export interface ButtonConfig {
   tooltip?: string;
   match?: MatchRule | Matcher;
   hook?: Hook;
+  keyMap?: KeyMapConfig;
 }
 
 export interface SelectOptionConfig {
@@ -37,6 +39,7 @@ export interface SelectOptionConfig {
   label?: string;
   classes?: string[];
   default?: boolean;
+  keyMap?: KeyMapConfig;
 }
 
 export interface SelectConfig {
@@ -74,6 +77,7 @@ export interface ActionConfig {
   value?: any;
   label?: string;
   classes?: string[];
+  keyMap?: KeyMapConfig;
 }
 
 export interface ActionSheetConfig {

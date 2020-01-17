@@ -5,6 +5,7 @@ import { CommonMatchDelta, Matcher } from '../../matcher/matcher';
 import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
+import { KeyMap } from '../../viewer/events';
 
 export interface Handler {
   elementRef: HTMLElement;
@@ -15,6 +16,6 @@ export interface Handler {
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   context: Editor;
   hook?: Hook;
-
+  keyMap?: KeyMap | KeyMap[];
   updateStatus?(commonMatchDelta: CommonMatchDelta): void;
 }

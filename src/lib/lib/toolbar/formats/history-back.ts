@@ -11,5 +11,9 @@ export const historyBackHandler: ButtonConfig = {
   editable: null,
   hook: historyHook,
   match: new HistoryMatcher('back'),
-  execCommand: new HistoryCommander('back')
+  execCommand: new HistoryCommander('back'),
+  keyMap: {
+    ctrlKey: true,
+    key: 'z'
+  }
 };

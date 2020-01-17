@@ -1,11 +1,11 @@
 import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { isMac } from './tools';
 
 export interface KeyMapConfig {
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
-  metaKey?: boolean;
   key: string | string[];
 }
 
@@ -61,9 +61,9 @@ export class Events {
       });
       for (const item of keyMaps) {
         if (!!item.config.altKey === ev.altKey &&
-          !!item.config.ctrlKey === ev.ctrlKey &&
           !!item.config.shiftKey === ev.shiftKey &&
-          !!item.config.metaKey === ev.metaKey) {
+          !!item.config.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)
+        ) {
           ev.preventDefault();
           return item.action(ev);
         }

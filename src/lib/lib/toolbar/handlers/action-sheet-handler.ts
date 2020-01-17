@@ -10,6 +10,7 @@ import { EditableOptions } from '../utils/abstract-data';
 import { map } from 'rxjs/operators';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
+import { KeyMap } from '../../viewer/events';
 
 export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -20,6 +21,7 @@ export class ActionSheetHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
+  keyMap: KeyMap[] = [];
 
   private matchedEvent = new Subject<ActionConfig>();
   private options: ActionSheetOptionHandler[] = [];
@@ -44,6 +46,17 @@ export class ActionSheetHandler implements Handler {
       const item = new ActionSheetOptionHandler(option);
       menu.appendChild(item.elementRef);
       this.options.push(item);
+      if (option.keyMap) {
+        this.keyMap.push({
+          config: option.keyMap,
+          action: () => {
+            if (!this.dropdown.disabled) {
+              config.execCommand.actionType = option.value;
+              this.eventSource.next();
+            }
+          }
+        })
+      }
     });
 
     this.dropdown = new Dropdown(

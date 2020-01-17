@@ -16,11 +16,12 @@ import {
   findLastChild, getNextLinePosition,
   getNextPosition,
   getPreviousLinePosition,
-  getPreviousPosition, getRangePosition,
-  isMac
+  getPreviousPosition, getRangePosition
 } from './tools';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
+import { auditTime } from 'rxjs/operators';
+import { KeyMap } from './events';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -131,10 +132,14 @@ export class Viewer {
     this.fragmentSnapshot = this.selection.commonAncestorFragment.clone();
   }
 
+  registerKeyMap(keyMap: KeyMap) {
+    this.input.keyMap(keyMap);
+  }
+
   private listenEvents() {
     let selectionChangedTimer: number;
 
-    fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+    fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
       clearTimeout(selectionChangedTimer);
       this.invokeSelectionChangeHooks();
     });
@@ -189,8 +194,7 @@ export class Viewer {
     this.input.keyMap({
       config: {
         key: 'a',
-        metaKey: isMac,
-        ctrlKey: !isMac
+        ctrlKey: true
       },
       action: () => {
         this.selectAll();

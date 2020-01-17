@@ -209,6 +209,14 @@ export class Editor implements EventDelegate {
         h = new ActionSheetHandler(option, this);
         break;
     }
+    if (h.keyMap) {
+      this.run(() => {
+        const keyMaps = Array.isArray(h.keyMap) ? h.keyMap : [h.keyMap];
+        keyMaps.forEach(k => {
+          this.viewer.registerKeyMap(k);
+        });
+      })
+    }
     this.handlers.push(h);
     return h.elementRef;
   }

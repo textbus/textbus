@@ -11,5 +11,10 @@ export const historyForwardHandler: ButtonConfig = {
   editable: null,
   hook: historyHook,
   match: new HistoryMatcher('forward'),
-  execCommand: new HistoryCommander('forward')
+  execCommand: new HistoryCommander('forward'),
+  keyMap: {
+    ctrlKey: true,
+    shiftKey: true,
+    key: 'z'
+  }
 };

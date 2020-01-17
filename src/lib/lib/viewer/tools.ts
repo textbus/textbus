@@ -148,7 +148,7 @@ export function getPreviousLinePosition(range: TBRange, left: number, top: numbe
         return position;
       }
       if (oldPosition) {
-        if (rect2.left > oldLeft) {
+        if (rect2.left >= oldLeft) {
           return oldPosition;
         }
       }

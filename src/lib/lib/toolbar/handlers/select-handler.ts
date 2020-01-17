@@ -8,6 +8,7 @@ import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
+import { KeyMap } from '../../viewer/events';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -18,6 +19,7 @@ export class SelectHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
+  keyMap: KeyMap[] = [];
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
@@ -44,6 +46,19 @@ export class SelectHandler implements Handler {
       menu.appendChild(item.elementRef);
       if (option.default) {
         dropdownInner.innerText = option.label || option.value;
+      }
+
+      if (option.keyMap) {
+        this.keyMap.push({
+          config: option.keyMap,
+          action: () => {
+            if (!this.dropdown.disabled) {
+              this.value = option.value;
+              this.execCommand.updateValue(option.value);
+              this.applyEventSource.next();
+            }
+          }
+        })
       }
 
       item.onCheck.subscribe(v => {

@@ -7,6 +7,7 @@ import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
 import { Editor } from '../../editor';
+import { KeyMap } from '../../viewer/events';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -16,6 +17,7 @@ export class ButtonHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
+  keyMap: KeyMap;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig, public context: Editor) {
@@ -33,6 +35,16 @@ export class ButtonHandler implements Handler {
     inner.innerText = config.label || '';
     inner.classList.add(...(config.classes || []));
     this.elementRef.appendChild(inner);
+    if (config.keyMap) {
+      this.keyMap = {
+        config: config.keyMap,
+        action: () => {
+          if (!this.elementRef.disabled) {
+            this.eventSource.next();
+          }
+        }
+      }
+    }
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next();
     });
