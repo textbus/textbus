@@ -150,7 +150,7 @@ export class Differ {
               startIndex: format.startIndex,
               endIndex: format.endIndex,
               context: format.context
-            }));
+            }), true);
           }
         })
       });
