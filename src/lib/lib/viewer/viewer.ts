@@ -477,6 +477,6 @@ export class Viewer {
         childBody.removeChild(div);
       }
     }
-    this.frame.style.height = height + 'px';
+    this.frame.style.height = height + 30 + 'px';
   }
 }

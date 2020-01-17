@@ -14,7 +14,6 @@ export class Differ {
   }
 
   render(newToken: BlockToken, host: ElementRef) {
-    console.log(newToken.context.sliceContents(0))
     newToken.children.forEach((vNode, index) => {
       const old = this?.oldToken?.children.shift();
       this.diffAndUpdateView(vNode, old, host, index);
@@ -140,8 +139,11 @@ export class Differ {
       }
       token.formats.forEach(format => {
         this.parser.getFormatStateByData(format.abstractData).forEach(f => {
-          if (f instanceof BlockFormat) {
-            token.context.mergeFormat(f, true);
+          if ([Priority.Block, Priority.Default, Priority.BlockStyle].includes(f.handler.priority)) {
+            token.context.mergeFormat(new BlockFormat({
+              ...f,
+              context: format.context
+            }), true);
           } else {
             token.context.mergeFormat(new InlineFormat({
               ...f,
