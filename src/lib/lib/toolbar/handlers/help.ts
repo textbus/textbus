@@ -23,16 +23,24 @@ export interface Handler {
 export function createKeymapHTML(config: KeymapConfig) {
   const arr: string[] = [];
   if (config.ctrlKey) {
-    arr.push(isMac ? 'tanbo-editor-icon-command' : 'tanbo-editor-icon-ctrl');
+    arr.push(isMac ? 'tanbo-editor-icon-command' : 'Ctrl');
   }
   if (config.shiftKey) {
-    arr.push('tanbo-editor-icon-shift');
+    arr.push(isMac ? 'tanbo-editor-icon-shift' : 'Shift');
   }
   if (config.altKey) {
-    arr.push('tanbo-editor-icon-opt');
+    arr.push(isMac ? 'tanbo-editor-icon-opt' : 'Alt');
   }
-  return arr.map(s => {
+  const keys = Array.isArray(config.key) ?
+    config.key.map(i => i.toUpperCase()).join('/') :
+    config.key.toUpperCase();
+
+  if (isMac) {
+    return arr.map(s => {
       return `<span class="${s}"></span>`;
-    }).join('') +
-    (Array.isArray(config.key) ? config.key.map(i => i.toUpperCase()).join('/') : config.key.toUpperCase());
+    }).join('') + keys
+
+  }
+  arr.push(keys);
+  return arr.join('+');
 }

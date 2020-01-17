@@ -15,18 +15,18 @@
 .tanbo-editor-toolbar-keymap-prompt {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
   white-space: nowrap;
   z-index: 2;
   padding: 3px 8px;
   border-radius: 5px;
-  letter-spacing: 2px;
   align-items: center;
-  font-size: 14px;
+  font-size: 12px;
   display: none;
   pointer-events: none;
   background-color: rgba(0, 0, 0, .1);
   font-variant-numeric: tabular-nums;
+  font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
   &-show {
     display: flex;
     align-items: center;
@@ -127,15 +127,15 @@
     min-height: 25px;
 
     &-keymap {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: normal;
       margin-left: 1.2em;
       margin-right: -.5em;
-      opacity: .9;
-      letter-spacing: 1px;
+      opacity: .6;
       display: inline-flex;
       align-items: center;
       font-variant-numeric: tabular-nums;
+      font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
     }
 
     &-label {
