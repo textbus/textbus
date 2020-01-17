@@ -20,5 +20,9 @@ export const boldHandler: ButtonConfig = {
     },
     noInTags: ['pre']
   },
+  keymap: {
+    ctrlKey: true,
+    key: 'b'
+  },
   execCommand: new BoldCommander()
 };

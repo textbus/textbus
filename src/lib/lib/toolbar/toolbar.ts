@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { HandlerConfig, HandlerType } from './help';
-import { Handler } from './handlers/help';
+import { createKeymapHTML, Handler } from './handlers/help';
 import { ButtonHandler } from './handlers/button-handler';
 import { SelectHandler } from './handlers/select-handler';
 import { DropdownHandler } from './handlers/dropdown-handler';
@@ -9,6 +9,7 @@ import { ActionSheetHandler } from './handlers/action-sheet-handler';
 import { Editor } from '../editor';
 import { DefaultTagsHandler } from '../default-tags-handler';
 import { TBSelection } from '../viewer/selection';
+import { KeymapConfig } from '../viewer/events';
 
 export class Toolbar {
   elementRef = document.createElement('div');
@@ -16,10 +17,13 @@ export class Toolbar {
   readonly handlers: Handler[] = [];
 
   private actionEvent = new Subject<Handler>();
+  private keymapPrompt = document.createElement('div');
 
   constructor(private context: Editor, private config: (HandlerConfig | HandlerConfig[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('tanbo-editor-toolbar');
+    this.keymapPrompt.classList.add('tanbo-editor-toolbar-keymap-prompt');
+    this.elementRef.appendChild(this.keymapPrompt);
 
     const defaultHandlers = new DefaultTagsHandler();
     this.handlers.push(defaultHandlers);
@@ -27,6 +31,21 @@ export class Toolbar {
     this.createToolbar(config);
 
     this.context.registerHook(defaultHandlers.hook);
+
+    this.elementRef.addEventListener('mouseover', (ev) => {
+      const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
+      if (keymap) {
+        try {
+          const config: KeymapConfig = JSON.parse(keymap);
+          this.keymapPrompt.innerHTML = createKeymapHTML(config);
+          this.keymapPrompt.classList.add('tanbo-editor-toolbar-keymap-prompt-show');
+          return;
+        } catch (e) {
+
+        }
+      }
+      this.keymapPrompt.classList.remove('tanbo-editor-toolbar-keymap-prompt-show');
+    })
   }
 
   updateHandlerState(selection: TBSelection) {
@@ -34,6 +53,16 @@ export class Toolbar {
       const s = handler.matcher.queryState(selection, handler, this.context);
       handler.updateStatus(s);
     });
+  }
+
+  private findNeedShowKeymapHandler(el: HTMLElement): string {
+    if (el === this.elementRef) {
+      return;
+    }
+    if (el.dataset.keymap) {
+      return el.dataset.keymap;
+    }
+    return this.findNeedShowKeymapHandler(el.parentNode as HTMLElement);
   }
 
   private createToolbar(handlers: (HandlerConfig | HandlerConfig[])[]) {

@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { ButtonConfig } from '../help';
-import { createKeymapHTML, Handler } from './help';
+import { Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
@@ -43,10 +43,7 @@ export class ButtonHandler implements Handler {
           }
         }
       };
-      const keymapLabel = document.createElement('span');
-      keymapLabel.classList.add('tanbo-editor-handler-keymap');
-      keymapLabel.innerHTML = createKeymapHTML(config.keymap);
-      this.elementRef.appendChild(keymapLabel);
+      this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
     }
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next();

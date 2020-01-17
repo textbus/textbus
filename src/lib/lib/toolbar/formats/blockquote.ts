@@ -13,5 +13,9 @@ export const blockquoteHandler: ButtonConfig = {
   editable: {
     tag: true
   },
+  keymap: {
+    ctrlKey: true,
+    key: '\''
+  },
   execCommand: new ToggleBlockCommander('blockquote')
 };

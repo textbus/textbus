@@ -13,5 +13,9 @@ export const underlineHandler: ButtonConfig = {
     tags: ['u'],
     noInTags: ['pre']
   },
+  keymap: {
+    ctrlKey: true,
+    key: 'u'
+  },
   execCommand: new InlineCommander('u')
 };

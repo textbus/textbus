@@ -98,10 +98,13 @@ export class ActionSheetOptionHandler {
     this.onCheck = this.eventSource.asObservable();
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
+    const label = document.createElement('span');
+    label.classList.add('tanbo-editor-toolbar-menu-item-label');
     if (option.classes) {
-      this.elementRef.classList.add(...(option.classes || []));
+      label.classList.add(...(option.classes || []));
     }
-    this.elementRef.innerText = option.label;
+    label.innerText = option.label;
+    this.elementRef.appendChild(label);
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next(option.value);
     });

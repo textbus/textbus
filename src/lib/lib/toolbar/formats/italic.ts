@@ -19,5 +19,9 @@ export const italicHandler: ButtonConfig = {
     },
     noInTags: ['pre']
   },
+  keymap: {
+    ctrlKey: true,
+    key: 'i'
+  },
   execCommand: new InlineCommander('em')
 };

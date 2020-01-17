@@ -12,6 +12,26 @@
   z-index: 2;
 }
 
+.tanbo-editor-toolbar-keymap-prompt {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  white-space: nowrap;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 5px;
+  letter-spacing: 2px;
+  align-items: center;
+  font-size: 14px;
+  display: none;
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, .1);
+  &-show {
+    display: flex;
+    align-items: center;
+  }
+}
+
 .tanbo-editor-toolbar-group {
   margin-right: 8px;
   margin-bottom: 5px;
@@ -42,37 +62,6 @@
     color: $color-primary;
   }
 
-
-  .tanbo-editor-handler-keymap {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    z-index: 2;
-    background-color: $color-dark;
-    color: #fff;
-    padding: 3px 5px;
-    border-radius: 5px;
-    letter-spacing: 2px;
-    align-items: center;
-    font-size: 14px;
-    display: none;
-    pointer-events: none;
-
-    &:before {
-      color: $color-dark;
-      content: "";
-      border-top: 4px dashed;
-      border-right: 4px solid transparent;
-      border-left: 4px solid transparent;
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -4px;
-    }
-  }
-
   &:hover {
     box-shadow: 0 0 1px 0 rgba(0, 0, 0, .4);
   }
@@ -90,6 +79,7 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+
     .tanbo-editor-handler-keymap {
       display: none;
     }

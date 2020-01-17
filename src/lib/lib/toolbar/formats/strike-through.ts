@@ -13,5 +13,9 @@ export const strikeThroughHandler: ButtonConfig = {
     tags: ['strike', 'del', 's'],
     noInTags: ['pre']
   },
+  keymap: {
+    ctrlKey: true,
+    key: 'd'
+  },
   execCommand: new InlineCommander('del')
 };
