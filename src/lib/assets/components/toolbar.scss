@@ -26,6 +26,7 @@
   display: none;
   pointer-events: none;
   background-color: rgba(0, 0, 0, .1);
+  font-variant-numeric: tabular-nums;
   &-show {
     display: flex;
     align-items: center;
@@ -79,10 +80,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-
-    .tanbo-editor-handler-keymap {
-      display: none;
-    }
   }
 }
 
@@ -138,6 +135,7 @@
       letter-spacing: 1px;
       display: inline-flex;
       align-items: center;
+      font-variant-numeric: tabular-nums;
     }
 
     &-label {
@@ -370,9 +368,9 @@
 }
 
 .tanbo-editor-emoji-menu {
-  width: 210px;
+  width: 220px;
   padding: 10px 5px;
-
+  box-sizing: border-box;
   &-item {
     background: none;
     border: none;
