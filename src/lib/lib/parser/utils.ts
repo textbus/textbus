@@ -9,7 +9,7 @@ export function getCanApplyFormats(formatMap: Map<Handler, FormatRange[]>) {
     formats = formats.concat(value);
   });
   // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
-  return formats.sort((next, prev) => {
+  return formats.filter(i => i.state !== FormatState.Inherit).sort((next, prev) => {
     if (prev instanceof BlockFormat) {
       if (next instanceof BlockFormat) {
         return next.handler.priority - prev.handler.priority;

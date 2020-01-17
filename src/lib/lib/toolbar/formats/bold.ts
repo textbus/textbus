@@ -7,7 +7,8 @@ export const boldHandler: ButtonConfig = {
   tooltip: '加粗',
   priority: Priority.Inline,
   editable: {
-    tag: true
+    tag: true,
+    styleName: 'fontWeight'
   },
   match: {
     extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],

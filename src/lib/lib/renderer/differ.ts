@@ -14,6 +14,7 @@ export class Differ {
   }
 
   render(newToken: BlockToken, host: ElementRef) {
+    console.log(newToken.context.sliceContents(0))
     newToken.children.forEach((vNode, index) => {
       const old = this?.oldToken?.children.shift();
       this.diffAndUpdateView(vNode, old, host, index);
@@ -138,7 +139,18 @@ export class Differ {
         host.insert(token.wrapElement, position);
       }
       token.formats.forEach(format => {
-        token.context.mergeFormat(format, true);
+        this.parser.getFormatStateByData(format.abstractData).forEach(f => {
+          if (f instanceof BlockFormat) {
+            token.context.mergeFormat(f, true);
+          } else {
+            token.context.mergeFormat(new InlineFormat({
+              ...f,
+              startIndex: format.startIndex,
+              endIndex: format.endIndex,
+              context: format.context
+            }));
+          }
+        })
       });
 
       (oldToken as InlineToken).wrapElement = (oldToken as InlineToken).slotElement = null;
@@ -150,7 +162,7 @@ export class Differ {
       if (token.slotElement) {
         this.diffAndUpdateView(childVNode, firstChild, token.slotElement, index);
       } else {
-        this.diffAndUpdateView(childVNode, firstChild, host, position);
+        this.diffAndUpdateView(childVNode, firstChild, host, position + index);
       }
     });
     if ((oldToken instanceof BlockToken || oldToken instanceof InlineToken)) {

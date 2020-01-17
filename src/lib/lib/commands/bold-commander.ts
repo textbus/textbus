@@ -19,13 +19,9 @@ export class BoldCommander implements Commander {
           this.clean(item, handler);
           return;
         }
-        let state: FormatState;
+
         const el = BoldCommander.findBoldParent(item.context.token.elementRef.nativeElement as HTMLElement);
-        if (el) {
-          state = overlap ? FormatState.Exclude : FormatState.Inherit;
-        } else {
-          state = overlap ? FormatState.Invalid : FormatState.Valid
-        }
+        const state = el ? FormatState.Inherit : FormatState.Valid;
         switch (state) {
           case FormatState.Valid:
             item.context.apply(new InlineFormat({
@@ -39,18 +35,6 @@ export class BoldCommander implements Commander {
               }
             }), false);
             break;
-          case FormatState.Exclude:
-            item.context.apply(new InlineFormat({
-              state: FormatState.Invalid,
-              startIndex: item.startIndex,
-              endIndex: item.endIndex,
-              handler: handler,
-              context: item.context,
-              abstractData: {
-                tag: item.context.token.elementRef.name
-              }
-            }), false);
-            break;
           case FormatState.Inherit:
             item.context.apply(new InlineFormat({
               state: FormatState.Inherit,
@@ -58,9 +42,7 @@ export class BoldCommander implements Commander {
               endIndex: item.endIndex,
               handler: handler,
               context: item.context,
-              abstractData: {
-                tag: item.context.token.elementRef.name
-              }
+              abstractData: null
             }), false);
             break;
         }
@@ -107,9 +89,13 @@ export class BoldCommander implements Commander {
             handler,
             context: scope.context,
             state,
-            abstractData: {
-              tag: el ? el.tagName.toLowerCase() : 'strong'
-            }
+            abstractData: state === FormatState.Exclude ? {
+              tag: 'span',
+              style: {
+                name: 'fontWeight',
+                value: 'normal'
+              }
+            } : null
           });
           formats.push(childFormat);
         } else {
