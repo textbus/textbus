@@ -36,8 +36,41 @@
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  position: relative;
+
   &-active {
     color: $color-primary;
+  }
+
+
+  .tanbo-editor-handler-keymap {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 2;
+    background-color: $color-dark;
+    color: #fff;
+    padding: 3px 5px;
+    border-radius: 5px;
+    letter-spacing: 2px;
+    align-items: center;
+    font-size: 14px;
+    display: none;
+    pointer-events: none;
+
+    &:before {
+      color: $color-dark;
+      content: "";
+      border-top: 4px dashed;
+      border-right: 4px solid transparent;
+      border-left: 4px solid transparent;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -4px;
+    }
   }
 
   &:hover {
@@ -57,6 +90,9 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    .tanbo-editor-handler-keymap {
+      display: none;
+    }
   }
 }
 
@@ -70,6 +106,7 @@
   text-align: left;
   height: 28px;
   line-height: 26px;
+
   &:before {
     font-size: .6em;
     margin-right: 5px;
@@ -87,7 +124,9 @@
 
   &-item {
     color: inherit;
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 3px 20px;
     background: none;
     border: none;
@@ -98,6 +137,26 @@
     cursor: pointer;
     white-space: nowrap;
     line-height: inherit;
+    min-height: 25px;
+
+    &-keymap {
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 1.2em;
+      margin-right: -.5em;
+      opacity: .9;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    &-label {
+      &:before {
+        margin-right: .5em;
+        //font-size: 1.2em;
+        vertical-align: middle;
+      }
+    }
 
     &:hover {
       color: #fff;
@@ -109,12 +168,6 @@
       cursor: not-allowed;
       background: inherit;
       color: inherit;
-    }
-
-    &:before {
-      margin-right: .5em;
-      //font-size: 1.2em;
-      vertical-align: middle;
     }
   }
 }
@@ -324,4 +377,23 @@
   font-size: 13px;
   overflow: hidden;
   z-index: 2;
+}
+
+.tanbo-editor-emoji-menu {
+  width: 210px;
+  padding: 10px 5px;
+
+  &-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-size: 16px;
+    padding: 4px 5px;
+    width: 30px;
+
+    &:hover {
+      transform: scale(1.4);
+    }
+  }
 }

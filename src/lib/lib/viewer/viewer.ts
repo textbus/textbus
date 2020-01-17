@@ -1,4 +1,5 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 
 import { template } from './template-html';
 import { TBSelection } from './selection';
@@ -20,8 +21,7 @@ import {
 } from './tools';
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
-import { auditTime } from 'rxjs/operators';
-import { KeyMap } from './events';
+import { Keymap } from './events';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -111,7 +111,7 @@ export class Viewer {
   }
 
   apply(handler: Handler) {
-    const state = handler.matcher.queryState(this.selection, handler).state;
+    const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
     if (state === MatchState.Disabled) {
       return;
     }
@@ -132,8 +132,8 @@ export class Viewer {
     this.fragmentSnapshot = this.selection.commonAncestorFragment.clone();
   }
 
-  registerKeyMap(keyMap: KeyMap) {
-    this.input.keyMap(keyMap);
+  registerKeymap(keymap: Keymap) {
+    this.input.keymap(keymap);
   }
 
   private listenEvents() {
@@ -153,7 +153,7 @@ export class Viewer {
       this.input.updateStateBySelection(this.selection);
     });
 
-    this.input.keyMap({
+    this.input.keymap({
       config: {
         key: 'Backspace'
       },
@@ -167,7 +167,7 @@ export class Viewer {
       }
     });
 
-    this.input.keyMap({
+    this.input.keymap({
       config: {
         key: 'Enter'
       },
@@ -176,7 +176,7 @@ export class Viewer {
       }
     });
 
-    this.input.keyMap({
+    this.input.keymap({
       config: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -191,7 +191,7 @@ export class Viewer {
       }
     });
 
-    this.input.keyMap({
+    this.input.keymap({
       config: {
         key: 'a',
         ctrlKey: true

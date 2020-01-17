@@ -12,7 +12,7 @@ export const historyBackHandler: ButtonConfig = {
   hook: historyHook,
   match: new HistoryMatcher('back'),
   execCommand: new HistoryCommander('back'),
-  keyMap: {
+  keymap: {
     ctrlKey: true,
     key: 'z'
   }

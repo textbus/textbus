@@ -14,3 +14,4 @@ export * from './hooks/table-edit-hook';
 export * from './utils/abstract-data';
 
 export * from './help';
+export * from './toolbar';

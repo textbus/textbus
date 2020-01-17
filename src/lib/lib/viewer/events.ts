@@ -2,15 +2,15 @@ import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isMac } from './tools';
 
-export interface KeyMapConfig {
+export interface KeymapConfig {
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
   key: string | string[];
 }
 
-export interface KeyMap {
-  config: KeyMapConfig;
+export interface Keymap {
+  config: KeymapConfig;
 
   action(event: Event): any;
 }
@@ -23,14 +23,14 @@ export class Events {
   onCopy: Observable<Event>;
   onCut: Observable<Event>;
 
-  private keyMaps: KeyMap[] = [];
+  private keymaps: Keymap[] = [];
 
   constructor(private input: HTMLInputElement | HTMLTextAreaElement) {
     this.setup();
   }
 
-  addKeyMap(keyMap: KeyMap) {
-    this.keyMaps.push(keyMap);
+  addKeymap(keymap: Keymap) {
+    this.keymaps.push(keymap);
   }
 
   private setup() {
@@ -53,13 +53,13 @@ export class Events {
       // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
-      const keyMaps = this.keyMaps.filter(key => {
+      const keymaps = this.keymaps.filter(key => {
         if (Array.isArray(key.config.key)) {
           return key.config.key.includes(ev.key);
         }
         return key.config.key === ev.key;
       });
-      for (const item of keyMaps) {
+      for (const item of keymaps) {
         if (!!item.config.altKey === ev.altKey &&
           !!item.config.shiftKey === ev.shiftKey &&
           !!item.config.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)

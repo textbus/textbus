@@ -1,22 +1,20 @@
 import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import { auditTime, distinctUntilChanged, filter, sampleTime, tap } from 'rxjs/operators';
 
-import { EventDelegate, HandlerConfig, HandlerType } from './toolbar/help';
+import { EventDelegate, HandlerConfig } from './toolbar/help';
 import { Viewer } from './viewer/viewer';
-import { ButtonHandler } from './toolbar/handlers/button-handler';
 import { Handler } from './toolbar/handlers/help';
 import { RootFragment } from './parser/root-fragment';
-import { ActionSheetHandler } from './toolbar/handlers/action-sheet-handler';
 import { RangePath, TBSelection } from './viewer/selection';
-import { SelectHandler } from './toolbar/handlers/select-handler';
-import { DropdownHandler } from './toolbar/handlers/dropdown-handler';
 import { Paths } from './paths/paths';
 import { Fragment } from './parser/fragment';
 import { Parser } from './parser/parser';
 import { Differ } from './renderer/differ';
-import { DefaultTagsHandler } from './default-tags-handler';
 import { DomRenderer } from './renderer/dom-renderer';
 import { Renderer } from './renderer/renderer';
+import { Toolbar } from './toolbar/toolbar';
+import { Hook } from './viewer/help';
+import { Keymap } from './viewer/events';
 
 export interface Snapshot {
   doc: Fragment;
@@ -60,10 +58,9 @@ export class Editor implements EventDelegate {
   private readonly viewer: Viewer;
   private readonly renderer: Renderer;
   private readonly paths = new Paths();
-  private readonly toolbar = document.createElement('div');
+  private readonly toolbar: Toolbar;
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
-  private readonly handlers: Handler[] = [];
 
   private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
@@ -80,13 +77,16 @@ export class Editor implements EventDelegate {
       this.container = selector;
     }
     this.historyStackSize = options.historyStackSize || 50;
-    const defaultHandlers = new DefaultTagsHandler();
-    this.handlers.push(defaultHandlers);
-    this.createToolbar(options.handlers);
-    this.run(() => {
-      this.viewer.use(defaultHandlers.hook);
+    this.toolbar = new Toolbar(this, options.handlers);
+    this.toolbar.onAction.pipe(filter(() => this.readyState)).subscribe((handler: Handler) => {
+      this.viewer.apply(handler);
+      if (handler.execCommand.recordHistory) {
+        this.recordSnapshot();
+        this.listenUserWriteEvent();
+      }
+      // this.updateHandlerState(this.selection);
     });
-    this.parser = new Parser(this.handlers);
+    this.parser = new Parser(this.toolbar.handlers);
     this.renderer = options?.settings?.renderer || new DomRenderer();
     this.viewer = new Viewer(this, new Differ(this.parser, this.renderer));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
@@ -104,7 +104,7 @@ export class Editor implements EventDelegate {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
-      this.updateHandlerState(selection);
+      this.toolbar.updateHandlerState(selection);
     });
 
     this.viewer.onSelectionChange.pipe(distinctUntilChanged()).subscribe(() => {
@@ -112,11 +112,9 @@ export class Editor implements EventDelegate {
     });
 
     this.listenUserWriteEvent();
-
-    this.toolbar.classList.add('tanbo-editor-toolbar');
     this.frameContainer.classList.add('tanbo-editor-frame-container');
 
-    this.elementRef.appendChild(this.toolbar);
+    this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     this.frameContainer.appendChild(this.viewer.elementRef);
     this.elementRef.appendChild(this.paths.elementRef);
@@ -132,14 +130,6 @@ export class Editor implements EventDelegate {
       this.viewer.elementRef.style.cssText = 'width: 600px;';
     }
   }
-
-  updateHandlerState(selection: TBSelection) {
-    this.handlers.filter(h => typeof h.updateStatus === 'function').forEach(handler => {
-      const s = handler.matcher.queryState(selection, handler);
-      handler.updateStatus(s);
-    });
-  }
-
 
   dispatchEvent(type: string): Observable<string> {
     if (typeof this.options.uploader === 'function') {
@@ -172,61 +162,6 @@ export class Editor implements EventDelegate {
     return null;
   }
 
-  private createToolbar(handlers: (HandlerConfig | HandlerConfig[])[]) {
-    if (Array.isArray(handlers)) {
-      handlers.forEach(handler => {
-        const group = document.createElement('span');
-        group.classList.add('tanbo-editor-toolbar-group');
-        if (Array.isArray(handler)) {
-          this.createHandlers(handler).forEach(el => group.appendChild(el));
-        } else {
-          group.appendChild(this.createHandler(handler));
-        }
-        this.toolbar.appendChild(group);
-      });
-      this.listenUserAction();
-    }
-  }
-
-  private createHandler(option: HandlerConfig) {
-    if (option.hook) {
-      this.run(() => {
-        this.viewer.use(option.hook);
-      });
-    }
-    let h: Handler;
-    switch (option.type) {
-      case HandlerType.Button:
-        h = new ButtonHandler(option, this);
-        break;
-      case HandlerType.Select:
-        h = new SelectHandler(option, this);
-        break;
-      case HandlerType.Dropdown:
-        h = new DropdownHandler(option, this, this);
-        break;
-      case HandlerType.ActionSheet:
-        h = new ActionSheetHandler(option, this);
-        break;
-    }
-    if (h.keyMap) {
-      this.run(() => {
-        const keyMaps = Array.isArray(h.keyMap) ? h.keyMap : [h.keyMap];
-        keyMaps.forEach(k => {
-          this.viewer.registerKeyMap(k);
-        });
-      })
-    }
-    this.handlers.push(h);
-    return h.elementRef;
-  }
-
-  private createHandlers(handlers: HandlerConfig[]) {
-    return handlers.map(handler => {
-      return this.createHandler(handler);
-    });
-  }
-
   private recordSnapshot() {
     if (this.historySequence.length !== this.historyIndex) {
       this.historySequence.length = this.historyIndex + 1;
@@ -244,21 +179,6 @@ export class Editor implements EventDelegate {
 
   private dispatchContentChangeEvent() {
     this.changeEvent.next(this.viewer.contentDocument.documentElement.outerHTML);
-  }
-
-  private listenUserAction() {
-    this.handlers.forEach(item => {
-      if (item.onApply instanceof Observable) {
-        item.onApply.pipe(filter(() => this.readyState)).subscribe(() => {
-          this.viewer.apply(item);
-          if (item.execCommand.recordHistory) {
-            this.recordSnapshot();
-            this.listenUserWriteEvent();
-          }
-          // this.updateHandlerState(this.selection);
-        });
-      }
-    });
   }
 
   private writeContents(html: string) {
@@ -287,7 +207,19 @@ export class Editor implements EventDelegate {
     });
   }
 
-  private run(fn: () => void) {
+  registerHook(hook: Hook) {
+    this.run(() => {
+      this.viewer.use(hook);
+    });
+  }
+
+  registerKeymap(keymap: Keymap) {
+    this.run(() => {
+      this.viewer.registerKeymap(keymap);
+    })
+  }
+
+  run(fn: () => void) {
     if (!this.readyState) {
       this.tasks.push(fn);
       return;
@@ -303,7 +235,7 @@ export class Editor implements EventDelegate {
       this.dispatchContentChangeEvent();
     })).pipe(sampleTime(5000)).subscribe(() => {
       this.recordSnapshot();
-      this.updateHandlerState(this.viewer.cloneSelection());
+      this.toolbar.updateHandlerState(this.viewer.cloneSelection());
     });
   }
 }

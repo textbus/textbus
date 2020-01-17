@@ -6,6 +6,7 @@ import { AbstractData } from '../toolbar/utils/abstract-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
 import { FormatRange } from '../parser/format';
+import { Editor } from '../editor';
 
 interface MatchData {
   state: FormatState;
@@ -91,7 +92,7 @@ export class Matcher {
     return this.match(node);
   }
 
-  queryState(selection: TBSelection, handler: Handler): CommonMatchDelta {
+  queryState(selection: TBSelection, handler: Handler, editor: Editor): CommonMatchDelta {
     if (!selection.rangeCount) {
       return {
         srcStates: [],

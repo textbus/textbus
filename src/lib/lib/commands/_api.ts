@@ -6,6 +6,7 @@ export * from './block-style-commander';
 export * from './bold-commander';
 export * from './clean-commander';
 export * from './code-commander';
+export * from './emoji-commander';
 export * from './history-commander';
 export * from './inline-commander';
 export * from './link-commander';

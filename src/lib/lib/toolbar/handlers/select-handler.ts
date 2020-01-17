@@ -1,14 +1,13 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { Handler } from './help';
+import { createKeymapHTML, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { SelectConfig, SelectOptionConfig } from '../help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
-import { Editor } from '../../editor';
-import { KeyMap } from '../../viewer/events';
+import { Keymap } from '../../viewer/events';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -19,13 +18,13 @@ export class SelectHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
-  keyMap: KeyMap[] = [];
+  keymap: Keymap[] = [];
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
   private dropdown: Dropdown;
 
-  constructor(private config: SelectConfig, public context: Editor) {
+  constructor(private config: SelectConfig) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
     this.hook = config.hook;
@@ -48,9 +47,9 @@ export class SelectHandler implements Handler {
         dropdownInner.innerText = option.label || option.value;
       }
 
-      if (option.keyMap) {
-        this.keyMap.push({
-          config: option.keyMap,
+      if (option.keymap) {
+        this.keymap.push({
+          config: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {
               this.value = option.value;
@@ -113,10 +112,20 @@ export class SelectOptionHandler {
 
     this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
     this.elementRef.type = 'button';
+
+    const label = document.createElement('span');
+    label.classList.add('tanbo-editor-toolbar-menu-item-label');
     if (option.classes) {
-      this.elementRef.classList.add(...(option.classes || []));
+      label.classList.add(...(option.classes || []));
     }
-    this.elementRef.innerText = option.label || option.value;
+    label.innerText = option.label || option.value;
+    this.elementRef.appendChild(label);
+    if (option.keymap) {
+      const keymapHTML = document.createElement('span');
+      keymapHTML.classList.add('tanbo-editor-toolbar-menu-item-keymap');
+      keymapHTML.innerHTML = createKeymapHTML(option.keymap);
+      this.elementRef.appendChild(keymapHTML);
+    }
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next(option);
     });

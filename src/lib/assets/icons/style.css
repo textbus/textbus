@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tanbo-editor';
   src:
-    url('fonts/tanbo-editor.ttf?apqf5f') format('truetype'),
-    url('fonts/tanbo-editor.woff?apqf5f') format('woff'),
-    url('fonts/tanbo-editor.svg?apqf5f#tanbo-editor') format('svg');
+    url('fonts/tanbo-editor.ttf?d9nyap') format('truetype'),
+    url('fonts/tanbo-editor.woff?d9nyap') format('woff'),
+    url('fonts/tanbo-editor.svg?d9nyap#tanbo-editor') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,56 +24,56 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.tanbo-editor-icon-paint-brush:before {
-  content: "\e90f";
-}
-.tanbo-editor-icon-text-indent:before {
-  content: "\e90e";
+.tanbo-editor-icon-paint-bucket:before {
+  content: "\e900";
 }
 .tanbo-editor-icon-arrow-right:before {
   content: "\e50f";
 }
 .tanbo-editor-icon-background-color:before {
-  content: "\e900";
-}
-.tanbo-editor-icon-color:before {
   content: "\e901";
 }
-.tanbo-editor-icon-clean:before {
+.tanbo-editor-icon-color:before {
   content: "\e902";
 }
-.tanbo-editor-icon-table-edit:before {
+.tanbo-editor-icon-brush:before {
   content: "\e903";
 }
-.tanbo-editor-icon-table-split-columns:before {
+.tanbo-editor-icon-table-edit:before {
   content: "\e904";
 }
-.tanbo-editor-icon-table-delete-row-top:before {
+.tanbo-editor-icon-table-split-columns:before {
   content: "\e905";
 }
-.tanbo-editor-icon-table-delete-row-bottom:before {
+.tanbo-editor-icon-table-delete-row-top:before {
   content: "\e906";
 }
-.tanbo-editor-icon-table-delete-column-right:before {
+.tanbo-editor-icon-table-delete-row-bottom:before {
   content: "\e907";
 }
-.tanbo-editor-icon-table-delete-column-left:before {
+.tanbo-editor-icon-table-delete-column-right:before {
   content: "\e908";
 }
-.tanbo-editor-icon-table-add-row-top:before {
+.tanbo-editor-icon-table-delete-column-left:before {
   content: "\e909";
 }
-.tanbo-editor-icon-table-add-row-bottom:before {
+.tanbo-editor-icon-table-add-row-top:before {
   content: "\e90a";
 }
-.tanbo-editor-icon-table-add-column-right:before {
+.tanbo-editor-icon-table-add-row-bottom:before {
   content: "\e90b";
 }
-.tanbo-editor-icon-table-add-column-left:before {
+.tanbo-editor-icon-table-add-column-right:before {
   content: "\e90c";
 }
-.tanbo-editor-icon-image:before {
+.tanbo-editor-icon-table-add-column-left:before {
   content: "\e90d";
+}
+.tanbo-editor-icon-image:before {
+  content: "\e90e";
+}
+.tanbo-editor-icon-text-indent:before {
+  content: "\e90f";
 }
 .tanbo-editor-icon-music:before {
   content: "\e911";
@@ -161,4 +161,25 @@
 }
 .tanbo-editor-icon-code:before {
   content: "\ea80";
+}
+.tanbo-editor-icon-smile2:before {
+  content: "\e9e2";
+}
+.tanbo-editor-icon-question:before {
+  content: "\ea09";
+}
+.tanbo-editor-icon-command:before {
+  content: "\ea4e";
+}
+.tanbo-editor-icon-shift:before {
+  content: "\ea4f";
+}
+.tanbo-editor-icon-ctrl:before {
+  content: "\ea50";
+}
+.tanbo-editor-icon-opt:before {
+  content: "\ea51";
+}
+.tanbo-editor-icon-clear-formatting:before {
+  content: "\ea6f";
 }

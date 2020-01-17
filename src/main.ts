@@ -5,7 +5,7 @@ import { createEditor } from './lib/create';
 import './lib/assets/index.scss';
 
 const editor = createEditor('#editor', {
-  // theme: 'mac-os-dark',
+  theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';

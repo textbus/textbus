@@ -3,6 +3,7 @@ export { FormHidden } from './forms/form-hidden';
 export { FormOptions } from './forms/form-options';
 export { FormSwitch } from './forms/form-switch';
 export { FormTextField } from './forms/form-text-field';
+
 export { alignHandler } from './align';
 export { blockBackgroundHandler } from './block-background';
 export { blockquoteHandler } from './blockquote';
@@ -10,6 +11,7 @@ export { boldHandler } from './bold';
 export { cleanHandler } from './clean';
 export { codeHandler } from './code';
 export { colorHandler } from './color';
+export { emojiHandler } from './emoji';
 export { fontFamilyHandler } from './font-family';
 export { fontSizeHandler } from './font-size';
 export { hHandler } from './h';

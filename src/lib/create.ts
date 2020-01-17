@@ -9,6 +9,7 @@ import {
   cleanHandler,
   codeHandler,
   colorHandler,
+  emojiHandler,
   fontFamilyHandler,
   fontSizeHandler,
   hHandler,
@@ -65,7 +66,8 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ], [
         colorHandler,
         textBackgroundHandler,
-        blockBackgroundHandler
+        blockBackgroundHandler,
+        emojiHandler,
       ], [
         fontFamilyHandler
       ], [

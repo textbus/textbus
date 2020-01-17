@@ -1,13 +1,12 @@
 import { Observable, Subject } from 'rxjs';
 
 import { ButtonConfig } from '../help';
-import { Handler } from './help';
+import { createKeymapHTML, Handler } from './help';
 import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
 import { Hook } from '../../viewer/help';
-import { Editor } from '../../editor';
-import { KeyMap } from '../../viewer/events';
+import { Keymap } from '../../viewer/events';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
@@ -17,10 +16,10 @@ export class ButtonHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
-  keyMap: KeyMap;
+  keymap: Keymap;
   private eventSource = new Subject<void>();
 
-  constructor(private config: ButtonConfig, public context: Editor) {
+  constructor(private config: ButtonConfig) {
     this.priority = config.priority;
     this.editableOptions = config.editable;
     this.hook = config.hook;
@@ -35,15 +34,19 @@ export class ButtonHandler implements Handler {
     inner.innerText = config.label || '';
     inner.classList.add(...(config.classes || []));
     this.elementRef.appendChild(inner);
-    if (config.keyMap) {
-      this.keyMap = {
-        config: config.keyMap,
+    if (config.keymap) {
+      this.keymap = {
+        config: config.keymap,
         action: () => {
           if (!this.elementRef.disabled) {
             this.eventSource.next();
           }
         }
-      }
+      };
+      const keymapLabel = document.createElement('span');
+      keymapLabel.classList.add('tanbo-editor-handler-keymap');
+      keymapLabel.innerHTML = createKeymapHTML(config.keymap);
+      this.elementRef.appendChild(keymapLabel);
     }
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next();

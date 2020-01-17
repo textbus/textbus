@@ -1,7 +1,7 @@
 import { fromEvent } from 'rxjs';
 
 import { TBSelection } from './selection';
-import { Events, KeyMap } from './events';
+import { Events, Keymap } from './events';
 import { getRangePosition, isWindows } from './tools';
 
 interface CursorStyle {
@@ -66,8 +66,8 @@ export class Cursor {
     })
   }
 
-  keyMap(keyMap: KeyMap) {
-    this.events.addKeyMap(keyMap);
+  keymap(keymap: Keymap) {
+    this.events.addKeymap(keymap);
   }
 
   updateStateBySelection(selection: TBSelection) {

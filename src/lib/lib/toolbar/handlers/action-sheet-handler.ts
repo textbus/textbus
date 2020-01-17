@@ -9,8 +9,7 @@ import { Commander } from '../../commands/commander';
 import { EditableOptions } from '../utils/abstract-data';
 import { map } from 'rxjs/operators';
 import { Hook } from '../../viewer/help';
-import { Editor } from '../../editor';
-import { KeyMap } from '../../viewer/events';
+import { Keymap } from '../../viewer/events';
 
 export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -21,14 +20,14 @@ export class ActionSheetHandler implements Handler {
   priority: number;
   editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   hook: Hook;
-  keyMap: KeyMap[] = [];
+  keymap: Keymap[] = [];
 
   private matchedEvent = new Subject<ActionConfig>();
   private options: ActionSheetOptionHandler[] = [];
   private eventSource = new Subject<any>();
   private dropdown: Dropdown;
 
-  constructor(private config: ActionSheetConfig, public context: Editor) {
+  constructor(private config: ActionSheetConfig) {
     this.priority = config.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
@@ -46,9 +45,9 @@ export class ActionSheetHandler implements Handler {
       const item = new ActionSheetOptionHandler(option);
       menu.appendChild(item.elementRef);
       this.options.push(item);
-      if (option.keyMap) {
-        this.keyMap.push({
-          config: option.keyMap,
+      if (option.keymap) {
+        this.keymap.push({
+          config: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {
               config.execCommand.actionType = option.value;
