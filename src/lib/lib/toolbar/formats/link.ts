@@ -37,7 +37,7 @@ form.onSubmit = function (attrs) {
 
 export const linkHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-link'],
+  classes: ['tbus-icon-link'],
   priority: Priority.Inline,
   tooltip: '链接',
   onHide: hideEvent.asObservable(),

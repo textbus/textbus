@@ -1,19 +1,19 @@
-.tanbo-editor-form {
+.tbus-form {
   padding: 15px;
   min-width: 160px;
   user-select: none;
 }
 
-.tanbo-editor-form-group {
+.tbus-form-group {
   margin-bottom: 10px;
 }
 
-.tanbo-editor-form-label {
+.tbus-form-label {
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-.tanbo-editor-form-control-wrap {
+.tbus-form-control-wrap {
   white-space: nowrap;
   margin-bottom: 5px;
   display: flex;
@@ -28,7 +28,7 @@
   }
 }
 
-.tanbo-editor-form-btn {
+.tbus-form-btn {
   padding: 3px 6px;
   font-size: 13px;
   border-radius: 3px;
@@ -57,7 +57,7 @@
   }
 }
 
-.tanbo-editor-form-control {
+.tbus-form-control {
   outline: none;
   background-color: #fff;
   width: 100%;
@@ -74,11 +74,11 @@
   }
 }
 
-.tanbo-editor-form-btn-wrap {
+.tbus-form-btn-wrap {
   padding-top: 5px;
 }
 
-.tanbo-editor-form-submit {
+.tbus-form-submit {
   padding: 3px 10px;
   font-size: 13px;
   border-radius: 3px;

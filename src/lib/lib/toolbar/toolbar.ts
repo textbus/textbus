@@ -21,8 +21,8 @@ export class Toolbar {
 
   constructor(private context: Editor, private config: (HandlerConfig | HandlerConfig[])[]) {
     this.onAction = this.actionEvent.asObservable();
-    this.elementRef.classList.add('tanbo-editor-toolbar');
-    this.keymapPrompt.classList.add('tanbo-editor-toolbar-keymap-prompt');
+    this.elementRef.classList.add('tbus-toolbar');
+    this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
     this.elementRef.appendChild(this.keymapPrompt);
 
     const defaultHandlers = new DefaultTagsHandler();
@@ -38,13 +38,13 @@ export class Toolbar {
         try {
           const config: KeymapConfig = JSON.parse(keymap);
           this.keymapPrompt.innerHTML = createKeymapHTML(config);
-          this.keymapPrompt.classList.add('tanbo-editor-toolbar-keymap-prompt-show');
+          this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt-show');
           return;
         } catch (e) {
 
         }
       }
-      this.keymapPrompt.classList.remove('tanbo-editor-toolbar-keymap-prompt-show');
+      this.keymapPrompt.classList.remove('tbus-toolbar-keymap-prompt-show');
     })
   }
 
@@ -69,7 +69,7 @@ export class Toolbar {
     if (Array.isArray(handlers)) {
       handlers.forEach(handler => {
         const group = document.createElement('span');
-        group.classList.add('tanbo-editor-toolbar-group');
+        group.classList.add('tbus-toolbar-group');
         if (Array.isArray(handler)) {
           this.createHandlers(handler).forEach(el => group.appendChild(el));
         } else {

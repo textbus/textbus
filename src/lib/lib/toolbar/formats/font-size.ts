@@ -4,7 +4,7 @@ import { StyleCommander } from '../../commands/style-commander';
 export const fontSizeHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字体大小',
-  classes: ['tanbo-editor-icon-font-size'],
+  classes: ['tbus-icon-font-size'],
   execCommand: new StyleCommander('fontSize'),
   priority: Priority.Property,
   highlight(options, abstractData) {
@@ -27,53 +27,53 @@ export const fontSizeHandler: SelectConfig = {
   options: [
     {
       label: '12px',
-      classes: ['tanbo-editor-font-size-12'],
+      classes: ['tbus-font-size-12'],
       value: '12px'
     },
     {
       label: '13px',
-      classes: ['tanbo-editor-font-size-13'],
+      classes: ['tbus-font-size-13'],
       value: '13px'
     },
     {
       label: '14px',
-      classes: ['tanbo-editor-font-size-14'],
+      classes: ['tbus-font-size-14'],
       value: '14px',
       default: true
     },
     {
       label: '15px',
-      classes: ['tanbo-editor-font-size-15'],
+      classes: ['tbus-font-size-15'],
       value: '15px',
     },
     {
       label: '16px',
-      classes: ['tanbo-editor-font-size-16'],
+      classes: ['tbus-font-size-16'],
       value: '16px'
     },
     {
       label: '18px',
-      classes: ['tanbo-editor-font-size-18'],
+      classes: ['tbus-font-size-18'],
       value: '18px'
     },
     {
       label: '20px',
-      classes: ['tanbo-editor-font-size-20'],
+      classes: ['tbus-font-size-20'],
       value: '20px'
     },
     {
       label: '24px',
-      classes: ['tanbo-editor-font-size-24'],
+      classes: ['tbus-font-size-24'],
       value: '24px'
     },
     {
       label: '36px',
-      classes: ['tanbo-editor-font-size-36'],
+      classes: ['tbus-font-size-36'],
       value: '36px'
     },
     {
       label: '48px',
-      classes: ['tanbo-editor-font-size-48'],
+      classes: ['tbus-font-size-48'],
       value: '48px'
     }
   ]

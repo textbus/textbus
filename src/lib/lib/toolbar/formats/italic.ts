@@ -3,7 +3,7 @@ import { ButtonConfig, HandlerType, Priority } from '../help';
 
 export const italicHandler: ButtonConfig = {
   type: HandlerType.Button,
-  classes: ['tanbo-editor-icon-italic'],
+  classes: ['tbus-icon-italic'],
   priority: Priority.Inline,
   tooltip: '斜体',
   editable: {

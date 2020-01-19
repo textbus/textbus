@@ -39,10 +39,10 @@ export class Cursor {
 
   constructor(private context: Document) {
 
-    this.elementRef.classList.add('tanbo-editor-selection');
-    this.cursor.classList.add('tanbo-editor-cursor');
-    this.inputWrap.classList.add('tanbo-editor-input-wrap');
-    this.input.classList.add('tanbo-editor-input');
+    this.elementRef.classList.add('tbus-selection');
+    this.cursor.classList.add('tbus-cursor');
+    this.inputWrap.classList.add('tbus-input-wrap');
+    this.input.classList.add('tbus-input');
 
     this.inputWrap.appendChild(this.input);
 

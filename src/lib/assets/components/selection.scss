@@ -1,11 +1,11 @@
-.tanbo-editor-selection {
+.tbus-selection {
   position: absolute;
   width: 0;
   height: 18px;
   pointer-events: none;
 }
 
-.tanbo-editor-cursor {
+.tbus-cursor {
   width: 2px;
   height: 100%;
   background: #000;
@@ -15,14 +15,14 @@
   box-shadow: 0 0 3px rgba(255, 255, 255, .3);
 }
 
-.tanbo-editor-input-wrap {
+.tbus-input-wrap {
   width: 0;
   height: 0;
   position: absolute;
   overflow: hidden;
 }
 
-.tanbo-editor-input {
+.tbus-input {
   width: 2000px;
   padding: 0;
   border: none;

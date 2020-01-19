@@ -22,7 +22,7 @@ export const hHandler: SelectConfig = {
   },
   options: [{
     label: '标题1',
-    classes: ['tanbo-editor-toolbar-h1'],
+    classes: ['tbus-toolbar-h1'],
     value: 'h1',
     keymap: {
       ctrlKey: true,
@@ -30,7 +30,7 @@ export const hHandler: SelectConfig = {
     }
   }, {
     label: '标题2',
-    classes: ['tanbo-editor-toolbar-h2'],
+    classes: ['tbus-toolbar-h2'],
     value: 'h2',
     keymap: {
       ctrlKey: true,
@@ -38,7 +38,7 @@ export const hHandler: SelectConfig = {
     }
   }, {
     label: '标题3',
-    classes: ['tanbo-editor-toolbar-h3'],
+    classes: ['tbus-toolbar-h3'],
     value: 'h3',
     keymap: {
       ctrlKey: true,
@@ -46,7 +46,7 @@ export const hHandler: SelectConfig = {
     }
   }, {
     label: '标题4',
-    classes: ['tanbo-editor-toolbar-h4'],
+    classes: ['tbus-toolbar-h4'],
     value: 'h4',
     keymap: {
       ctrlKey: true,
@@ -54,7 +54,7 @@ export const hHandler: SelectConfig = {
     }
   }, {
     label: '标题5',
-    classes: ['tanbo-editor-toolbar-h5'],
+    classes: ['tbus-toolbar-h5'],
     value: 'h5',
     keymap: {
       ctrlKey: true,
@@ -62,7 +62,7 @@ export const hHandler: SelectConfig = {
     }
   }, {
     label: '标题6',
-    classes: ['tanbo-editor-toolbar-h6'],
+    classes: ['tbus-toolbar-h6'],
     value: 'h6',
     keymap: {
       ctrlKey: true,

@@ -37,7 +37,7 @@ form.onSubmit = function (attrs) {
 
 export const videoHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-video'],
+  classes: ['tbus-icon-video'],
   priority: Priority.Inline,
   tooltip: '视频',
   onHide: hideEvent.asObservable(),

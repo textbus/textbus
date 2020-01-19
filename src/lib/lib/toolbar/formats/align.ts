@@ -27,7 +27,7 @@ export const alignHandler: SelectConfig = {
   options: [
     {
       label: '左对齐',
-      classes: ['tanbo-editor-icon-paragraph-left'],
+      classes: ['tbus-icon-paragraph-left'],
       value: 'left',
       keymap: {
         ctrlKey: true,
@@ -36,7 +36,7 @@ export const alignHandler: SelectConfig = {
       default: true
     }, {
       label: '右对齐',
-      classes: ['tanbo-editor-icon-paragraph-right'],
+      classes: ['tbus-icon-paragraph-right'],
       value: 'right',
       keymap: {
         ctrlKey: true,
@@ -44,7 +44,7 @@ export const alignHandler: SelectConfig = {
       },
     }, {
       label: '居中对齐',
-      classes: ['tanbo-editor-icon-paragraph-center'],
+      classes: ['tbus-icon-paragraph-center'],
       value: 'center',
       keymap: {
         ctrlKey: true,
@@ -52,7 +52,7 @@ export const alignHandler: SelectConfig = {
       },
     }, {
       label: '分散对齐',
-      classes: ['tanbo-editor-icon-paragraph-justify'],
+      classes: ['tbus-icon-paragraph-justify'],
       value: 'justify',
       keymap: {
         ctrlKey: true,

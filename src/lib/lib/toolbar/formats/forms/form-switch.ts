@@ -7,9 +7,9 @@ export class FormSwitch implements FormItem {
 
   constructor(private config: AttrSwitch) {
     this.name = config.name;
-    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.classList.add('tbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tanbo-editor-form-control-wrap">
+    <div class="tbus-form-control-wrap">
       <label><input type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
     </div>
     `;

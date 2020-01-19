@@ -1,10 +1,10 @@
-.tanbo-editor-container.tanbo-editor-theme-dark {
-  .tanbo-editor-toolbar {
+.tbus-container.tbus-theme-dark {
+  .tbus-toolbar {
     background-color: $color-darker;
     border-color: $color-darker;
   }
 
-  .tanbo-editor-handler {
+  .tbus-handler {
     color: $color-gray;
 
     &-active {
@@ -22,12 +22,12 @@
     }
   }
 
-  .tanbo-editor-dropdown.tanbo-editor-dropdown-open > .tanbo-editor-handler {
+  .tbus-dropdown.tbus-dropdown-open > .tbus-handler {
     background-color: $color-gray;
     color: $color-darker;
   }
 
-  .tanbo-editor-paths {
+  .tbus-paths {
     background-color: lighten($color-darker, 8);
     border-color: lighten($color-darker, 8);
     color: $color-gray-dark;

@@ -1,4 +1,4 @@
-.tanbo-editor-toolbar {
+.tbus-toolbar {
   padding: 8px 15px 3px;
   background-color: $color-light;
   border: 1px solid $color-gray-light;
@@ -12,7 +12,7 @@
   z-index: 2;
 }
 
-.tanbo-editor-toolbar-keymap-prompt {
+.tbus-toolbar-keymap-prompt {
   position: absolute;
   top: 100%;
   right: 0;
@@ -33,7 +33,7 @@
   }
 }
 
-.tanbo-editor-toolbar-group {
+.tbus-toolbar-group {
   margin-right: 8px;
   margin-bottom: 5px;
   display: inline-block;
@@ -44,7 +44,7 @@
   }
 }
 
-.tanbo-editor-handler {
+.tbus-handler {
   font-size: 14px;
   background: none;
   border: none;
@@ -83,7 +83,7 @@
   }
 }
 
-.tanbo-editor-select-button {
+.tbus-select-button {
   width: 90px;
   display: inline-block;
   justify-content: space-between;
@@ -105,7 +105,7 @@
 }
 
 
-.tanbo-editor-toolbar-menu {
+.tbus-toolbar-menu {
   padding-top: 5px;
   padding-bottom: 5px;
 
@@ -160,7 +160,7 @@
   }
 }
 
-.tanbo-editor-toolbar {
+.tbus-toolbar {
   &-h1 {
     font-size: 2em;
     font-weight: bold;
@@ -192,7 +192,7 @@
   }
 }
 
-.tanbo-editor-font {
+.tbus-font {
   &-sans-serif {
     font-family: sans-serif;
   }
@@ -234,7 +234,7 @@
   }
 }
 
-.tanbo-editor-text {
+.tbus-text {
   &-left {
     text-align: left;
   }
@@ -253,14 +253,14 @@
 }
 
 @each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
-  .tanbo-editor-font-size-#{$t} {
+  .tbus-font-size-#{$t} {
     line-height: 1.2;
     font-size: #{$t}px;
   }
 }
 
 @each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
-  .tanbo-editor-line-height-#{str-replace($t + '', '.', '_')} {
+  .tbus-line-height-#{str-replace($t + '', '.', '_')} {
     &:before {
       content: "";
       margin-right: 10px;
@@ -279,7 +279,7 @@
 }
 
 @each $t in 0, 1, 2, 3, 4, 5 {
-  .tanbo-editor-letter-spacing-#{$t} {
+  .tbus-letter-spacing-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -297,7 +297,7 @@
 }
 
 @each $t in 0, 1, 2, 4 {
-  .tanbo-editor-text-indent-#{$t} {
+  .tbus-text-indent-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -317,7 +317,7 @@
   }
 }
 
-.tanbo-editor-dropdown {
+.tbus-dropdown {
   position: relative;
   display: inline-block;
 
@@ -325,18 +325,18 @@
     z-index: 2;
   }
 
-  &.tanbo-editor-dropdown-open {
-    > .tanbo-editor-handler {
+  &.tbus-dropdown-open {
+    > .tbus-handler {
       background-color: #fff;
     }
 
-    .tanbo-editor-dropdown-menu {
+    .tbus-dropdown-menu {
       transform: scaleY(1);
     }
   }
 }
 
-.tanbo-editor-dropdown-caret {
+.tbus-dropdown-caret {
   margin-left: 2px;
 
   &:after {
@@ -351,7 +351,7 @@
   }
 }
 
-.tanbo-editor-dropdown-menu {
+.tbus-dropdown-menu {
   position: absolute;
   left: 0;
   top: 100%;
@@ -367,7 +367,7 @@
   z-index: 2;
 }
 
-.tanbo-editor-emoji-menu {
+.tbus-emoji-menu {
   width: 220px;
   padding: 10px 5px;
   box-sizing: border-box;

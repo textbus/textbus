@@ -112,16 +112,16 @@ export class Editor implements EventDelegate {
     });
 
     this.listenUserWriteEvent();
-    this.frameContainer.classList.add('tanbo-editor-frame-container');
+    this.frameContainer.classList.add('tbus-frame-container');
 
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     this.frameContainer.appendChild(this.viewer.elementRef);
     this.elementRef.appendChild(this.paths.elementRef);
 
-    this.elementRef.classList.add('tanbo-editor-container');
+    this.elementRef.classList.add('tbus-container');
     if (options.theme) {
-      this.elementRef.classList.add('tanbo-editor-theme-' + options.theme);
+      this.elementRef.classList.add('tbus-theme-' + options.theme);
     }
     this.container.appendChild(this.elementRef);
 

@@ -3,7 +3,7 @@ import { BoldCommander } from '../../commands/bold-commander';
 
 export const boldHandler: ButtonConfig = {
   type: HandlerType.Button,
-  classes: ['tanbo-editor-icon-bold'],
+  classes: ['tbus-icon-bold'],
   tooltip: '加粗',
   priority: Priority.Inline,
   editable: {

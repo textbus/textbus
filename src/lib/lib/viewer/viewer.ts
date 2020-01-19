@@ -83,8 +83,8 @@ export class Viewer {
                     })())`;
 
 
-    this.elementRef.classList.add('tanbo-editor-wrap');
-    this.frame.classList.add('tanbo-editor-frame');
+    this.elementRef.classList.add('tbus-wrap');
+    this.frame.classList.add('tbus-frame');
     this.elementRef.appendChild(this.frame);
   }
 

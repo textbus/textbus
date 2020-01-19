@@ -1,4 +1,4 @@
-.tanbo-editor-frame-container {
+.tbus-frame-container {
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
   background-color: $color-lighter;
@@ -6,7 +6,7 @@
   overflow: hidden;
 }
 
-.tanbo-editor-wrap {
+.tbus-wrap {
   position: relative;
   overflow: hidden;
   box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
@@ -14,7 +14,7 @@
   background-color: #fff;
 }
 
-.tanbo-editor-frame {
+.tbus-frame {
   border: none;
   width: 100%;
   display: block;

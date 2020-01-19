@@ -3,7 +3,7 @@ import { ListCommander } from '../../commands/list-commander';
 
 export const olHandler: ButtonConfig = {
   type: HandlerType.Button,
-  classes: ['tanbo-editor-icon-list-numbered'],
+  classes: ['tbus-icon-list-numbered'],
   priority: Priority.Block,
   tooltip: '有序列表',
   editable: {

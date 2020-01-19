@@ -28,7 +28,7 @@ form.onSubmit = function aaa(attrs) {
 
 export const imageHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-image'],
+  classes: ['tbus-icon-image'],
   priority: Priority.Inline,
   tooltip: '图片',
   onHide: hideEvent.asObservable(),

@@ -21,9 +21,9 @@ export class Dropdown {
 
   set highlight(v: boolean) {
     if (v) {
-      this.button.classList.add('tanbo-editor-handler-active');
+      this.button.classList.add('tbus-handler-active');
     } else {
-      this.button.classList.remove('tanbo-editor-handler-active');
+      this.button.classList.remove('tbus-handler-active');
     }
   }
 
@@ -33,25 +33,25 @@ export class Dropdown {
               private menuContents: HTMLElement | DocumentFragment,
               private hideEvent: Observable<any>,
               private tooltip = '') {
-    this.elementRef.classList.add('tanbo-editor-dropdown');
+    this.elementRef.classList.add('tbus-dropdown');
 
-    this.button.classList.add('tanbo-editor-handler');
+    this.button.classList.add('tbus-handler');
     this.button.type = 'button';
     this.button.title = tooltip;
     this.button.appendChild(inner);
     const dropdownArrow = document.createElement('span');
-    dropdownArrow.classList.add('tanbo-editor-dropdown-caret');
+    dropdownArrow.classList.add('tbus-dropdown-caret');
     this.button.appendChild(dropdownArrow);
 
     this.elementRef.appendChild(this.button);
 
     const menu = document.createElement('div');
-    menu.classList.add('tanbo-editor-dropdown-menu');
+    menu.classList.add('tbus-dropdown-menu');
     menu.appendChild(menuContents);
     this.elementRef.appendChild(menu);
 
     const updatePosition = () => {
-      if (this.elementRef.classList.contains('tanbo-editor-dropdown-open')) {
+      if (this.elementRef.classList.contains('tbus-dropdown-open')) {
         const distance = document.body.clientWidth - (this.elementRef.getBoundingClientRect().left + menu.offsetWidth);
         menu.style.left = `${Math.min(0, distance)}px`;
       }
@@ -64,20 +64,20 @@ export class Dropdown {
 
     document.addEventListener('click', () => {
       if (!isSelfClick) {
-        this.elementRef.classList.remove('tanbo-editor-dropdown-open');
+        this.elementRef.classList.remove('tbus-dropdown-open');
       }
       isSelfClick = false;
     });
     this.button.addEventListener('click', () => {
       isSelfClick = true;
-      this.elementRef.classList.toggle('tanbo-editor-dropdown-open');
+      this.elementRef.classList.toggle('tbus-dropdown-open');
       updatePosition();
     });
 
     window.addEventListener('resize', updatePosition);
 
     this.hideEvent.subscribe(() => {
-      this.elementRef.classList.remove('tanbo-editor-dropdown-open');
+      this.elementRef.classList.remove('tbus-dropdown-open');
     });
   }
 }

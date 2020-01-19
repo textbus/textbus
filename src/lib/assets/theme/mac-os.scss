@@ -1,6 +1,6 @@
-.tanbo-editor-container.tanbo-editor-theme-mac-os {
-  .tanbo-editor-toolbar-group {
-    .tanbo-editor-handler {
+.tbus-container.tbus-theme-mac-os {
+  .tbus-toolbar-group {
+    .tbus-handler {
       background: linear-gradient(#fff 3px, #eee 17px, $color-gray-light);
       border: 1px solid darken($color-gray-light, 3);
       border-radius: 0;
@@ -18,7 +18,7 @@
       }
     }
 
-    > .tanbo-editor-handler {
+    > .tbus-handler {
       &-active {
         background: linear-gradient(
                 lighten($color-primary, 20) 1px,
@@ -46,17 +46,17 @@
       }
     }
 
-    .tanbo-editor-dropdown {
+    .tbus-dropdown {
       &:not(:first-child) {
         margin-left: -1px;
       }
 
-      &:last-child .tanbo-editor-handler {
+      &:last-child .tbus-handler {
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
       }
 
-      &:first-child .tanbo-editor-handler {
+      &:first-child .tbus-handler {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }

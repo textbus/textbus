@@ -5,7 +5,7 @@ import { CodeHook } from '../hooks/code-hook';
 
 export const codeHandler: SelectConfig = {
   type: HandlerType.Select,
-  classes: ['tanbo-editor-icon-code'],
+  classes: ['tbus-icon-code'],
   tooltip: '代码',
   priority: Priority.Block,
   mini: true,

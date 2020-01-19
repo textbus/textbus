@@ -37,7 +37,7 @@ export class ActionSheetHandler implements Handler {
     dropdownButton.classList.add(...config.classes || []);
 
     const menu = document.createElement('div');
-    menu.classList.add('tanbo-editor-toolbar-menu');
+    menu.classList.add('tbus-toolbar-menu');
 
     config.actions.forEach(option => {
       const item = new ActionSheetOptionHandler(option);
@@ -94,10 +94,10 @@ export class ActionSheetOptionHandler {
 
   constructor(private option: ActionConfig) {
     this.onCheck = this.eventSource.asObservable();
-    this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
+    this.elementRef.classList.add('tbus-toolbar-menu-item');
     this.elementRef.type = 'button';
     const label = document.createElement('span');
-    label.classList.add('tanbo-editor-toolbar-menu-item-label');
+    label.classList.add('tbus-toolbar-menu-item-label');
     if (option.classes) {
       label.classList.add(...(option.classes || []));
     }

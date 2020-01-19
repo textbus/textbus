@@ -37,7 +37,7 @@ form.onSubmit = function (attrs) {
 
 export const musicHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-music'],
+  classes: ['tbus-icon-music'],
   priority: Priority.Inline,
   tooltip: '音频',
   onHide: hideEvent.asObservable(),

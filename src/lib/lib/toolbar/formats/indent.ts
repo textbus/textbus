@@ -7,7 +7,7 @@ export const indentHandler: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '首行缩进',
   priority: Priority.BlockStyle,
-  classes: ['tanbo-editor-icon-text-indent'],
+  classes: ['tbus-icon-text-indent'],
   execCommand: commander,
   mini: true,
   highlight(options, abstractData) {
@@ -30,20 +30,20 @@ export const indentHandler: SelectConfig = {
     {
       label: '0x',
       value: '0',
-      classes: ['tanbo-editor-text-indent-0'],
+      classes: ['tbus-text-indent-0'],
       default: true
     }, {
       label: '1x',
       value: '1em',
-      classes: ['tanbo-editor-text-indent-1'],
+      classes: ['tbus-text-indent-1'],
       default: true
     }, {
       label: '2x',
-      classes: ['tanbo-editor-text-indent-2'],
+      classes: ['tbus-text-indent-2'],
       value: '2em',
     }, {
       label: '4x',
-      classes: ['tanbo-editor-text-indent-4'],
+      classes: ['tbus-text-indent-4'],
       value: '4em'
     }
   ]

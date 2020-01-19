@@ -36,7 +36,7 @@ form.onSubmit = function (attrs) {
 
 export const tableHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-table'],
+  classes: ['tbus-icon-table'],
   priority: Priority.Block,
   tooltip: '表格',
   onHide: hideEvent.asObservable(),

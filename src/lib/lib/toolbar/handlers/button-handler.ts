@@ -28,7 +28,7 @@ export class ButtonHandler implements Handler {
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = config.tooltip || '';
-    this.elementRef.classList.add('tanbo-editor-handler');
+    this.elementRef.classList.add('tbus-handler');
     const inner = document.createElement('span');
     inner.innerText = config.label || '';
     inner.classList.add(...(config.classes || []));
@@ -53,14 +53,14 @@ export class ButtonHandler implements Handler {
     switch (commonMatchDelta.state) {
       case MatchState.Highlight:
         this.elementRef.disabled = false;
-        this.elementRef.classList.add('tanbo-editor-handler-active');
+        this.elementRef.classList.add('tbus-handler-active');
         break;
       case MatchState.Normal:
         this.elementRef.disabled = false;
-        this.elementRef.classList.remove('tanbo-editor-handler-active');
+        this.elementRef.classList.remove('tbus-handler-active');
         break;
       case MatchState.Disabled:
-        this.elementRef.classList.remove('tanbo-editor-handler-active');
+        this.elementRef.classList.remove('tbus-handler-active');
         this.elementRef.disabled = true;
         break
     }

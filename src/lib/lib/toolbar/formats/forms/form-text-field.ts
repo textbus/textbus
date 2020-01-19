@@ -9,14 +9,14 @@ export class FormTextField implements FormItem {
   constructor(private config: AttrTextField,
               private delegate: (type: string) => Observable<string>) {
     this.name = config.name;
-    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.classList.add('tbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tanbo-editor-form-label">${config.label}</div>
-    <div class="tanbo-editor-form-control-wrap">
-      <input class="tanbo-editor-form-control" placeholder="${config.placeholder || ''}" type="text">&nbsp;
+    <div class="tbus-form-label">${config.label}</div>
+    <div class="tbus-form-control-wrap">
+      <input class="tbus-form-control" placeholder="${config.placeholder || ''}" type="text">&nbsp;
       ${config.canUpload ?
-      `<button type="button" class="tanbo-editor-form-btn" title="${config.uploadBtnText || '上传'}">
-        <span class="tanbo-editor-icon-upload"></span>
+      `<button type="button" class="tbus-form-btn" title="${config.uploadBtnText || '上传'}">
+        <span class="tbus-icon-upload"></span>
        </button>`
       : ''
       }

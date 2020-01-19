@@ -33,11 +33,11 @@ export class SelectHandler implements Handler {
 
     const dropdownInner = document.createElement('span');
     this.textContainer = dropdownInner;
-    dropdownInner.classList.add('tanbo-editor-select-button', ...config.classes || []);
-    config.mini && dropdownInner.classList.add('tanbo-editor-select-button-mini');
+    dropdownInner.classList.add('tbus-select-button', ...config.classes || []);
+    config.mini && dropdownInner.classList.add('tbus-select-button-mini');
 
     const menu = document.createElement('div');
-    menu.classList.add('tanbo-editor-toolbar-menu');
+    menu.classList.add('tbus-toolbar-menu');
 
     config.options.forEach(option => {
       const item = new SelectOptionHandler(option);
@@ -109,11 +109,11 @@ export class SelectOptionHandler {
   constructor(private option: SelectOptionConfig) {
     this.onCheck = this.eventSource.asObservable();
 
-    this.elementRef.classList.add('tanbo-editor-toolbar-menu-item');
+    this.elementRef.classList.add('tbus-toolbar-menu-item');
     this.elementRef.type = 'button';
 
     const label = document.createElement('span');
-    label.classList.add('tanbo-editor-toolbar-menu-item-label');
+    label.classList.add('tbus-toolbar-menu-item-label');
     if (option.classes) {
       label.classList.add(...(option.classes || []));
     }
@@ -121,7 +121,7 @@ export class SelectOptionHandler {
     this.elementRef.appendChild(label);
     if (option.keymap) {
       const keymapHTML = document.createElement('span');
-      keymapHTML.classList.add('tanbo-editor-toolbar-menu-item-keymap');
+      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
       keymapHTML.innerHTML = createKeymapHTML(option.keymap);
       this.elementRef.appendChild(keymapHTML);
     }

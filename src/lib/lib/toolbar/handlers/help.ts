@@ -23,13 +23,13 @@ export interface Handler {
 export function createKeymapHTML(config: KeymapConfig) {
   const arr: string[] = [];
   if (config.ctrlKey) {
-    arr.push(isMac ? 'tanbo-editor-icon-command' : 'Ctrl');
+    arr.push(isMac ? 'tbus-icon-command' : 'Ctrl');
   }
   if (config.shiftKey) {
-    arr.push(isMac ? 'tanbo-editor-icon-shift' : 'Shift');
+    arr.push(isMac ? 'tbus-icon-shift' : 'Shift');
   }
   if (config.altKey) {
-    arr.push(isMac ? 'tanbo-editor-icon-opt' : 'Alt');
+    arr.push(isMac ? 'tbus-icon-opt' : 'Alt');
   }
   const keys = Array.isArray(config.key) ?
     config.key.map(i => i.toUpperCase()).join('/') :

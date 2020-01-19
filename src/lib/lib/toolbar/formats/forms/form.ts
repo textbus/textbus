@@ -14,7 +14,7 @@ export class Form implements DropdownHandlerView {
   private delegator: EventDelegate;
 
   constructor(forms: Array<AttrConfig>) {
-    this.elementRef.classList.add('tanbo-editor-form');
+    this.elementRef.classList.add('tbus-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
@@ -40,8 +40,8 @@ export class Form implements DropdownHandlerView {
     this.elementRef.setAttribute('novalidate', 'novalidate');
 
     const btnWrap = document.createElement('div');
-    btnWrap.classList.add('tanbo-editor-form-btn-wrap');
-    btnWrap.innerHTML = '<button class="tanbo-editor-form-submit" type="submit">确定</button>';
+    btnWrap.classList.add('tbus-form-btn-wrap');
+    btnWrap.innerHTML = '<button class="tbus-form-submit" type="submit">确定</button>';
 
     this.elementRef.appendChild(btnWrap);
 

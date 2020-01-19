@@ -5,7 +5,7 @@ import { historyHook } from '../hooks/history-hook';
 
 export const historyForwardHandler: ButtonConfig = {
   type: HandlerType.Button,
-  classes: ['tanbo-editor-icon-history-forward'],
+  classes: ['tbus-icon-history-forward'],
   tooltip: '重做',
   priority: Priority.Block,
   editable: null,

@@ -36,7 +36,7 @@ class Palette implements DropdownHandlerView {
 }
 export const colorHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-color'],
+  classes: ['tbus-icon-color'],
   tooltip: '文字颜色',
   priority: Priority.Property,
   onHide: hideEvent.asObservable(),

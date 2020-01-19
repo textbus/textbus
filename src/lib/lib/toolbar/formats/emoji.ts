@@ -12,7 +12,7 @@ class Emoji implements DropdownHandlerView {
 
   constructor() {
     this.onCheck = this.checkEvent.asObservable();
-    this.elementRef.classList.add('tanbo-editor-emoji-menu');
+    this.elementRef.classList.add('tbus-emoji-menu');
     const emoji: string[] = [];
     for (let i = 0x1F600; i < 0x1F64F; i++) {
       emoji.push(i.toString(16).toUpperCase());
@@ -21,7 +21,7 @@ class Emoji implements DropdownHandlerView {
     const buttons = emoji.map(s => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.classList.add('tanbo-editor-emoji-menu-item');
+      button.classList.add('tbus-emoji-menu-item');
       button.innerHTML = `&#x${s};`;
       fragment.appendChild(button);
       return button;
@@ -51,7 +51,7 @@ viewer.onCheck.subscribe(t => {
 
 export const emojiHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tanbo-editor-icon-smile2'],
+  classes: ['tbus-icon-smile2'],
   execCommand: commander,
   viewer,
   onHide: viewer.onCheck,

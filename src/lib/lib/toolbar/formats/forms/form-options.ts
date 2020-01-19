@@ -7,10 +7,10 @@ export class FormOptions implements FormItem {
 
   constructor(private config: AttrOptions) {
     this.name = config.name;
-    this.elementRef.classList.add('tanbo-editor-form-group');
+    this.elementRef.classList.add('tbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tanbo-editor-form-label">${config.label}</div>
-    <div class="tanbo-editor-form-control-wrap">${
+    <div class="tbus-form-label">${config.label}</div>
+    <div class="tbus-form-control-wrap">${
       config.values.map(c => {
         return `<label>
                   <input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}">

@@ -35,7 +35,7 @@ export class DefaultTagsHandler implements Handler {
   context: Editor;
   hook = new DefaultHook();
   matcher = new Matcher({
-    tags: 'div,h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,td,th,ul,ol,li,br'.split(',')
+    tags: 'div,h1,h2,h3,h4,h5,h6,p,table,thead,tbody,tfoot,tr,td,th,ul,ol,li,br,pre,code'.split(',')
   });
 
   editableOptions(el: HTMLElement): EditableOptions {

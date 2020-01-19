@@ -25,44 +25,44 @@ export const fontFamilyHandler: SelectConfig = {
   options: [
     {
       label: 'sans-serif',
-      classes: ['tanbo-editor-font-sans-serif'],
+      classes: ['tbus-font-sans-serif'],
       value: '',
       default: true
     }, {
       label: '宋体',
-      classes: ['tanbo-editor-font-SimSun'],
+      classes: ['tbus-font-SimSun'],
       value: 'SimSun'
     }, {
       label: '黑体',
-      classes: ['tanbo-editor-font-SimHei'],
+      classes: ['tbus-font-SimHei'],
       value: 'SimHei'
     }, {
       label: '微软雅黑',
-      classes: ['tanbo-editor-font-Microsoft-YaHei'],
+      classes: ['tbus-font-Microsoft-YaHei'],
       value: 'Microsoft YaHei'
     }, {
       label: '楷体',
-      classes: ['tanbo-editor-font-KaiTi'],
+      classes: ['tbus-font-KaiTi'],
       value: 'KaiTi'
     }, {
       label: '仿宋',
-      classes: ['tanbo-editor-font-FangSong'],
+      classes: ['tbus-font-FangSong'],
       value: 'FangSong',
     }, {
       label: 'Arial',
-      classes: ['tanbo-editor-font-Arial'],
+      classes: ['tbus-font-Arial'],
       value: 'Arial'
     }, {
       label: 'Helvetica',
-      classes: ['tanbo-editor-font-Helvetica'],
+      classes: ['tbus-font-Helvetica'],
       value: 'Helvetica'
     }, {
       label: 'Impact',
-      classes: ['tanbo-editor-font-Impact'],
+      classes: ['tbus-font-Impact'],
       value: 'Impact'
     }, {
       label: 'Times New Roman',
-      classes: ['tanbo-editor-font-Times-New-Roman'],
+      classes: ['tbus-font-Times-New-Roman'],
       value: 'Times New Roman'
     }
   ]
