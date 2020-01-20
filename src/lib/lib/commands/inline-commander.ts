@@ -16,7 +16,7 @@ export class InlineCommander implements Commander {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
-
+          range.commonAncestorFragment.splitFormatRange(handler, range.startIndex);
         } else {
           range.commonAncestorFragment.setFormats(handler, [new InlineFormat({
             startIndex: range.startIndex,

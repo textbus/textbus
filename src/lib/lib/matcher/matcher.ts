@@ -5,7 +5,7 @@ import { TBRange } from '../viewer/range';
 import { AbstractData } from '../parser/abstract-data';
 import { Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
-import { FormatRange } from '../parser/format';
+import { BlockFormat, FormatRange, InlineFormat } from '../parser/format';
 import { Editor } from '../editor';
 
 interface MatchData {
@@ -234,18 +234,16 @@ export class Matcher {
 
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
-        // 如果为块级元素，则需要从第 0 位开始匹配
-        if (format.startIndex === 0 &&
-          format.endIndex === fragment.contentLength &&
-          (format.handler.priority === Priority.Block || format.handler.priority === Priority.BlockStyle)) {
-          if (startIndex >= format.startIndex && startIndex <= format.endIndex) {
-            return {
-              state: format.state,
-              abstractData: format?.abstractData.clone() || null
-            };
-          }
+        if (format instanceof BlockFormat) {
+          return {
+            state: format.state,
+            abstractData: format?.abstractData.clone() || null
+          };
         }
-        if ((startIndex === 0 && startIndex === format.startIndex) || (startIndex > format.startIndex && startIndex <= format.endIndex)) {
+        const matchBegin = startIndex === 0 ? startIndex >= format.startIndex : startIndex > format.startIndex;
+        const matchClose = format.greedy ? endIndex <= format.endIndex : endIndex < format.endIndex;
+        console.log(format, matchClose, matchBegin)
+        if (matchBegin && matchClose) {
           return {
             state: format.state,
             abstractData: format?.abstractData.clone() || null
@@ -439,7 +437,9 @@ export class Matcher {
         const matchBegin = (startIndex === 0 || startIndex === endIndex) ?
           startIndex >= f.startIndex :
           startIndex > f.startIndex;
-        const matchClose = endIndex <= f.endIndex;
+        const matchClose = (f instanceof InlineFormat && !f.greedy) ?
+          endIndex < f.endIndex :
+          endIndex <= f.endIndex;
 
         if (matchBegin && matchClose) {
           states.push(f);
