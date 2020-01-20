@@ -106,7 +106,6 @@ const theme = [
 export class CodeHook implements Hook {
   onViewUpdateBefore(viewer: Viewer, parser: Parser) {
     const commonAncestorFragment = viewer.selection.commonAncestorFragment;
-
     if (!commonAncestorFragment || !commonAncestorFragment.token) {
       return true;
     }
@@ -132,11 +131,11 @@ export class CodeHook implements Hook {
       const lang = (commonAncestorFragment.getFormatRanges().map(format => {
         if (format instanceof BlockFormat) {
           if (format.abstractData.tag === 'pre') {
-            return format.abstractData.attrs.get('lang');
+            return format.abstractData.attrs?.get('lang') || '';
           }
         }
         return '';
-      }).join('') || 'bash').toLowerCase();
+      }).shift() + '' || 'bash').toLowerCase();
       if (lang && getLanguage(lang)) {
         try {
           const html = highlight(lang, code).value;

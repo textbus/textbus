@@ -175,6 +175,31 @@ export class Viewer {
         this.invokeEnterHooks();
       }
     });
+    this.input.keymap({
+      config: {
+        key: 'Tab'
+      },
+      action: (event: Event) => {
+        event.preventDefault();
+
+        const input = this.input.input;
+        const value = input.value;
+        const startIndex = input.selectionStart;
+        const endIndex = input.selectionEnd;
+
+        const beforeText = value.substr(0, startIndex);
+        const endText = value.substr(startIndex);
+
+        input.value = beforeText + '    ' + endText;
+        console.log(input.value);
+        input.selectionStart = startIndex + 4;
+        input.selectionEnd = endIndex + 4;
+
+        this.invokeInputHooks();
+        this.input.updateStateBySelection(this.selection);
+        return false;
+      }
+    });
 
     this.input.keymap({
       config: {
@@ -238,7 +263,7 @@ export class Viewer {
   private invokeDeleteHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onDelete === 'function');
     for (const hook of hooks) {
-      if(!hook.onDelete(this, this.root.parser)) {
+      if (!hook.onDelete(this, this.root.parser)) {
         break;
       }
     }
