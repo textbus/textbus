@@ -18,6 +18,7 @@
   right: 0;
   white-space: nowrap;
   z-index: 2;
+  line-height: 1;
   padding: 3px 8px;
   border-radius: 5px;
   align-items: center;
@@ -27,6 +28,11 @@
   background-color: rgba(0, 0, 0, .1);
   font-variant-numeric: tabular-nums;
   font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+
+  > span {
+    margin-right: 1px;
+  }
+
   &-show {
     display: flex;
     align-items: center;
@@ -128,6 +134,7 @@
 
     &-keymap {
       font-size: 12px;
+      line-height: 1;
       font-weight: normal;
       margin-left: 1.2em;
       margin-right: -.5em;
@@ -136,6 +143,10 @@
       align-items: center;
       font-variant-numeric: tabular-nums;
       font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+
+      > span {
+        margin-right: 1px;
+      }
     }
 
     &-label {
@@ -371,6 +382,7 @@
   width: 220px;
   padding: 10px 5px;
   box-sizing: border-box;
+
   &-item {
     background: none;
     border: none;

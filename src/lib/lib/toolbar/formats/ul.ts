@@ -13,5 +13,10 @@ export const ulHandler: ButtonConfig = {
     tags: ['ul'],
     noInTags: ['pre']
   },
+  keymap: {
+    shiftKey: true,
+    ctrlKey: true,
+    key: 'u'
+  },
   execCommand: new ListCommander('ul')
 };

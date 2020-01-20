@@ -14,7 +14,7 @@ class Emoji implements DropdownHandlerView {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-emoji-menu');
     const emoji: string[] = [];
-    for (let i = 0x1F600; i < 0x1F64F; i++) {
+    for (let i = 0x1F600; i <= 0x1F64F; i++) {
       emoji.push(i.toString(16).toUpperCase());
     }
     const fragment = document.createDocumentFragment();
@@ -51,7 +51,7 @@ viewer.onCheck.subscribe(t => {
 
 export const emojiHandler: DropdownConfig = {
   type: HandlerType.Dropdown,
-  classes: ['tbus-icon-smile2'],
+  classes: ['tbus-icon-emoji'],
   execCommand: commander,
   viewer,
   onHide: viewer.onCheck,

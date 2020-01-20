@@ -13,5 +13,10 @@ export const olHandler: ButtonConfig = {
     tags: ['ol'],
     noInTags: ['pre']
   },
+  keymap: {
+    shiftKey: true,
+    ctrlKey: true,
+    key: 'o'
+  },
   execCommand: new ListCommander('ol')
 };

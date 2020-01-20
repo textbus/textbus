@@ -1,9 +1,9 @@
 @font-face {
-  font-family: 'tanbo-editor';
+  font-family: 'tubs';
   src:
-    url('fonts/tanbo-editor.ttf?d9nyap') format('truetype'),
-    url('fonts/tanbo-editor.woff?d9nyap') format('woff'),
-    url('fonts/tanbo-editor.svg?d9nyap#tanbo-editor') format('svg');
+    url('fonts/tubs.ttf?l7yfr4') format('truetype'),
+    url('fonts/tubs.woff?l7yfr4') format('woff'),
+    url('fonts/tubs.svg?l7yfr4#tubs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,7 +11,7 @@
 
 [class^="tbus-icon-"], [class*=" tbus-icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'tanbo-editor' !important;
+  font-family: 'tubs' !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -105,7 +105,7 @@
 .tbus-icon-line-height:before {
   content: "\ea5f";
 }
-.tbus-icon-text-width:before {
+.tbus-icon-letter-spacing:before {
   content: "\ea60";
 }
 .tbus-icon-font-size:before {
@@ -148,25 +148,13 @@
   content: "\ea79";
 }
 .tbus-icon-paragraph-justify:before {
-  content: "\ea7a";
-}
-.tbus-icon-paragraph-justify11:before {
   content: "\ea7b";
-}
-.tbus-icon-paragraph-justify2:before {
-  content: "\ea7c";
-}
-.tbus-icon-paragraph-justify3:before {
-  content: "\ea7d";
 }
 .tbus-icon-code:before {
   content: "\ea80";
 }
-.tbus-icon-smile2:before {
+.tbus-icon-emoji:before {
   content: "\e9e2";
-}
-.tbus-icon-question:before {
-  content: "\ea09";
 }
 .tbus-icon-command:before {
   content: "\ea4e";

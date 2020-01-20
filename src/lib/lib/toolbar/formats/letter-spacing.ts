@@ -6,7 +6,7 @@ export const letterSpacingHandler: SelectConfig = {
   tooltip: '字间距',
   priority: Priority.Property,
   execCommand: new StyleCommander('letterSpacing'),
-  classes: ['tbus-icon-text-width'],
+  classes: ['tbus-icon-letter-spacing'],
   highlight(options, abstractData) {
     for (const option of options) {
       if (option.value === abstractData.style.value) {
