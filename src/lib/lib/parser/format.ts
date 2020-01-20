@@ -21,6 +21,7 @@ export interface SingleFormatParams {
 export interface InlineFormatParams extends FormatParams {
   startIndex: number;
   endIndex: number;
+  greedy?: boolean;
 }
 
 export class BlockFormat {
@@ -53,13 +54,14 @@ export class InlineFormat {
   context: Fragment;
   state: FormatState;
   abstractData: AbstractData;
-
+  greedy: boolean;
   constructor(params: InlineFormatParams | InlineFormat) {
     this.startIndex = params.startIndex;
     this.endIndex = params.endIndex;
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
+    this.greedy = !!params.greedy;
     this.abstractData = params.abstractData && new AbstractData(params.abstractData);
   }
 

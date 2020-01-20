@@ -343,6 +343,10 @@ export class Viewer {
     let result: Range[] = [];
     ranges.forEach(range => {
       const hooks = this.hooks.filter(hook => typeof hook.onSelectionChange === 'function');
+      if (!hooks.length) {
+        result.push(range);
+        return;
+      }
       for (const hook of hooks) {
         let isLoop = false;
         result = [];
@@ -362,7 +366,6 @@ export class Viewer {
     result.forEach(item => {
       tbSelection.addRange(new TBRange(item));
     });
-
     this.selection = tbSelection;
     this.input.updateStateBySelection(this.selection);
     this.selectionChangeEvent.next(tbSelection);

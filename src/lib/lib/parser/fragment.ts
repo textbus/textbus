@@ -73,6 +73,30 @@ export class Fragment extends ViewData {
     this.markDirty(true);
   }
 
+  splitFormatRange(handler: Handler, index: number) {
+    const formats = this.formatMap.get(handler).filter(f => f instanceof InlineFormat) as InlineFormat[];
+    const newFormats: InlineFormat[] = [];
+    formats.forEach(format => {
+      if (format.startIndex < index && format.endIndex >= index) {
+        const c = format.clone();
+        if (format.endIndex === index) {
+          c.greedy = false;
+          newFormats.push(c);
+          return;
+        }
+        c.endIndex = index;
+        c.greedy = false;
+        newFormats.push(c);
+        const e = format.clone();
+        e.startIndex = index;
+        newFormats.push(e);
+      }
+    });
+    if (newFormats.length) {
+      this.formatMap.set(handler, newFormats);
+    }
+  }
+
   useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
     this.markDirty();
 
@@ -147,7 +171,7 @@ export class Fragment extends ViewData {
       const children = this.contents.slice(format.startIndex, format.endIndex);
       let index = 0;
       const formats: Array<InlineFormat | BlockFormat> = [];
-      let childFormat: InlineFormat;
+      let childFormat: InlineFormat | BlockFormat;
       children.forEach(item => {
         if (item instanceof Fragment) {
           const c = format.clone();
@@ -170,7 +194,7 @@ export class Fragment extends ViewData {
             });
             formats.push(childFormat);
           } else if (format instanceof InlineFormat) {
-            childFormat.endIndex = format.startIndex + index + item.length;
+            (<InlineFormat>childFormat).endIndex = format.startIndex + index + item.length;
           }
         }
         index += item.length;
@@ -195,27 +219,35 @@ export class Fragment extends ViewData {
     }
     this.contents.insert(content, index);
     const newFormats: InlineFormat[] = [];
-    Array.from(this.formatMap.values()).reduce((v, n) => v.concat(n), []).filter(format => {
-      return format instanceof InlineFormat || format instanceof SingleFormat;
-    }).forEach((format: InlineFormat) => {
-      if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
-        newFormats.push(new InlineFormat({
-          startIndex: index + 1,
-          endIndex: format.endIndex + 1,
-          state: format.state,
-          handler: format.handler,
-          context: this,
-          abstractData: format.abstractData.clone()
-        }));
-        format.endIndex = index;
-      } else {
-        if (format.startIndex >= index && format.startIndex > 0) {
-          format.startIndex += content.length;
+    Array.from(this.formatMap.keys()).forEach(key => {
+      const formats = this.formatMap.get(key).filter(format => {
+        return format instanceof InlineFormat || format instanceof SingleFormat;
+      });
+
+      // const collapsedFormat = formats.filter(f => {
+      //   return f.startIndex === f.endIndex && f.startIndex === index;
+      // })[0];
+
+      formats.forEach((format: InlineFormat) => {
+        if (content instanceof Fragment && format.startIndex < index && format.endIndex >= index) {
+          newFormats.push(new InlineFormat({
+            startIndex: index + 1,
+            endIndex: format.endIndex + 1,
+            state: format.state,
+            handler: format.handler,
+            context: this,
+            abstractData: format.abstractData.clone()
+          }));
+          format.endIndex = index;
+        } else {
+          if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
+            format.startIndex += content.length;
+          }
+          if (format.endIndex >= index) {
+            format.endIndex += content.length;
+          }
         }
-        if (format.endIndex >= index) {
-          format.endIndex += content.length;
-        }
-      }
+      })
     });
     newFormats.forEach(f => {
       this.mergeFormat(f, true);
@@ -271,7 +303,7 @@ export class Fragment extends ViewData {
     Array.from(this.formatMap.keys()).filter(key => {
       return [Priority.Inline, Priority.Property].includes(key.priority);
     }).forEach(key => {
-      const formatRanges: InlineFormat[] = this.formatMap.get(key).filter(f => f instanceof InlineFormat);
+      const formatRanges = this.formatMap.get(key).filter(f => f instanceof InlineFormat) as InlineFormat[];
       const newRanges: InlineFormat[] = [];
       formatRanges.forEach(format => {
         if (format.startIndex < index && format.endIndex > index) {
@@ -295,7 +327,7 @@ export class Fragment extends ViewData {
     Array.from(fragment.formatMap.keys()).filter(key => {
       return [Priority.Inline, Priority.Property].includes(key.priority);
     }).forEach(key => {
-      const formatRanges: InlineFormat[] = fragment.formatMap.get(key).filter(f => f instanceof InlineFormat);
+      const formatRanges = fragment.formatMap.get(key).filter(f => f instanceof InlineFormat) as InlineFormat[];
       formatRanges.forEach(format => {
         const c = format.clone();
         c.startIndex += index;

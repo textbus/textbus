@@ -32,7 +32,7 @@ export interface Hook {
    * @param frameContainer 编辑器所在容器
    * @param context 编辑器的全局对象
    */
-  setup?(frameContainer: HTMLElement, context: EditContext): void;
+  setup?(frameContainer: HTMLElement, context: EditContext): any;
 
   /**
    * 当用户开始选择时调用

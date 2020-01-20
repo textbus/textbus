@@ -47,7 +47,7 @@ export function mergeFormat(formatMap: Map<Handler, FormatRange[]>, format: Form
     return;
   }
 
-  let formatRanges: InlineFormat[] = [];
+  let formatRanges: Array<InlineFormat | BlockFormat> = [];
   const oldFormats = formatMap.get(format.handler)?.filter(i => {
     if (i instanceof InlineFormat) {
       return true;

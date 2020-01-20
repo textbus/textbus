@@ -14,6 +14,23 @@ export class InlineCommander implements Commander {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean) {
     selection.ranges.forEach(range => {
+      if (range.collapsed) {
+        if (overlap) {
+
+        } else {
+          range.commonAncestorFragment.setFormats(handler, [new InlineFormat({
+            startIndex: range.startIndex,
+            endIndex: range.startIndex,
+            handler,
+            context: range.commonAncestorFragment,
+            state: FormatState.Valid,
+            abstractData: {
+              tag: this.tagName
+            }
+          })]);
+        }
+        return;
+      }
       range.getSelectedScope().forEach(item => {
         const r = new InlineFormat({
           startIndex: item.startIndex,

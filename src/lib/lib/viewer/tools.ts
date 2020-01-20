@@ -110,10 +110,25 @@ export function getNextPosition(range: TBRange): TBRangePosition {
 export function getRangePosition(range: Range) {
   let rect = range.getBoundingClientRect();
   const {startContainer, startOffset} = range;
-  if (startContainer.nodeType === 1 &&
-    startContainer.childNodes[startOffset] &&
-    /^(br|img)$/i.test(startContainer.childNodes[startOffset].nodeName)) {
-    rect = (startContainer.childNodes[startOffset] as HTMLElement).getBoundingClientRect();
+  const offsetNode = startContainer.childNodes[startOffset];
+  if (startContainer.nodeType === 1) {
+    if (offsetNode && /^(br|img)$/i.test(offsetNode.nodeName)) {
+      rect = (offsetNode as HTMLElement).getBoundingClientRect();
+    } else if (offsetNode && offsetNode.nodeType === 1 && offsetNode.childNodes.length === 0) {
+      const cloneRange = range.cloneRange();
+      const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
+      offsetNode.appendChild(textNode);
+      cloneRange.selectNodeContents(offsetNode);
+      rect = cloneRange.getBoundingClientRect();
+      cloneRange.detach();
+    } else if (!offsetNode) {
+      const span = startContainer.ownerDocument.createElement('span');
+      span.innerText = 'x';
+      span.style.display = 'inline-block';
+      startContainer.appendChild(span);
+      rect = span.getBoundingClientRect();
+      startContainer.removeChild(span);
+    }
   }
   return rect;
 }

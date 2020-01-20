@@ -138,13 +138,6 @@ export class TableEditHook implements Hook {
 
   }
 
-  onViewUpdated(viewer: Viewer, next: () => void): void {
-    while (this.sideEffects.length) {
-      this.sideEffects.shift()();
-    }
-    next();
-  }
-
   onSelectionChange(range: Range, doc: Document): Range | Range[] {
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
@@ -175,6 +168,9 @@ export class TableEditHook implements Hook {
       this.startCell = startCell;
       this.endCell = endCell;
       this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
+    }
+    while (this.sideEffects.length) {
+      this.sideEffects.shift()();
     }
     return true;
   }

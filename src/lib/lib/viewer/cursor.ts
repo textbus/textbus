@@ -101,11 +101,10 @@ export class Cursor {
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = getRangePosition(range);
-    const rect2 = ((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement).getBoundingClientRect();
     const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
     let style: CursorStyle = {
-      left: Math.max(rect.left, rect2.left),
-      top: Math.max(rect.top, rect2.top),
+      left: rect.left,
+      top: rect.top,
       height: rect.height,
       fontSize: computedStyle.fontSize,
       lineHeight: Number.parseInt(computedStyle.fontSize) * Number.parseFloat(computedStyle.lineHeight) + ''

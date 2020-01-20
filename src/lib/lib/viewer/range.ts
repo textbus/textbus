@@ -83,6 +83,7 @@ export class TBRange {
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
+    console.log(start, end)
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
     return this;
@@ -297,9 +298,10 @@ export class TBRange {
           if (item.children.length) {
             return this.findFocusNodeAndOffset(item.children, i);
           }
+          const index = Array.from(item.elementRef.nativeElement.parentNode.childNodes).indexOf(item.elementRef.nativeElement as ChildNode);
           return {
-            node: item.elementRef.nativeElement,
-            offset: i
+            node: item.elementRef.nativeElement.parentNode,
+            offset: toEnd ? index + 1 : index
           }
         } else if (item instanceof MediaToken) {
           const index = Array.from(item.elementRef.nativeElement.parentNode.childNodes).indexOf(item.elementRef.nativeElement as ChildNode);
