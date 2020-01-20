@@ -12,21 +12,24 @@ import { findFirstPosition, findLastChild, findRerenderFragment } from '../viewe
 export class DefaultHook implements Hook {
   private sideEffects: Array<() => void> = [];
 
-  onFocus(viewer: Viewer, next: () => void): void {
+  onFocus(viewer: Viewer) {
     viewer.recordSnapshotFromEditingBefore();
+    return false;
   }
 
-  onSelectStart(selection: Selection, next: () => void): void {
+  onSelectStart(selection: Selection) {
     selection.removeAllRanges();
+    return false;
   }
 
-  onViewChange(viewer: Viewer, next: () => void): void {
+  onViewChange(viewer: Viewer) {
     while (this.sideEffects.length) {
       this.sideEffects.shift()();
     }
+    return false;
   }
 
-  onInput(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void {
+  onInput(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser) {
     const startIndex = snapshot.beforeSelection.firstRange.startIndex;
     const selection = viewer.selection;
     const commonAncestorFragment = selection.commonAncestorFragment;
@@ -67,13 +70,13 @@ export class DefaultHook implements Hook {
     this.sideEffects.push(() => {
       viewer.selection.apply(snapshot.cursorOffset);
     });
+    return false;
   }
 
-  onPaste(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void {
+  onPaste(contents: Contents, viewer: Viewer, parser: Parser) {
     const selection = viewer.selection;
     if (!viewer.selection.collapsed) {
-      this.onDelete(viewer, parser, () => {
-      });
+      this.onDelete(viewer, parser);
     }
     const firstRange = selection.firstRange;
     const newContents = contents.slice(0);
@@ -115,22 +118,23 @@ export class DefaultHook implements Hook {
     }
     this.sideEffects.push(() => {
       selection.apply();
-    })
+    });
+    return false;
   }
 
-  onEnter(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void {
+  onEnter(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser) {
     if (!viewer.selection.collapsed) {
-      this.onDelete(viewer, parser, () => {
-      });
+      this.onDelete(viewer, parser);
     }
     this.newLine(viewer, parser);
     viewer.recordSnapshotFromEditingBefore();
     this.sideEffects.push(() => {
       viewer.selection.apply();
     });
+    return false;
   }
 
-  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
+  onDelete(viewer: Viewer, parser: Parser) {
     const selection = viewer.selection;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
@@ -258,6 +262,7 @@ export class DefaultHook implements Hook {
         })
       }
     });
+    return false;
   }
 
   private newLine(viewer: Viewer, parser: Parser) {

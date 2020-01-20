@@ -238,11 +238,7 @@ export class Viewer {
   private invokeDeleteHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onDelete === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onDelete(this, this.root.parser, () => {
-        isLoop = true;
-      });
-      if (!isLoop) {
+      if(!hook.onDelete(this, this.root.parser)) {
         break;
       }
     }
@@ -257,15 +253,12 @@ export class Viewer {
     }
     const hooks = this.hooks.filter(hook => typeof hook.onInput === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onInput({
+      const isLoop = hook.onInput({
         beforeSelection: this.selectionSnapshot,
         beforeFragment: this.fragmentSnapshot,
         value: this.input.input.value,
         cursorOffset: this.input.input.selectionStart
-      }, this, this.root.parser, () => {
-        isLoop = true;
-      });
+      }, this, this.root.parser);
       if (!isLoop) {
         break;
       }
@@ -276,10 +269,7 @@ export class Viewer {
   private invokeViewUpdateBeforeHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onViewUpdateBefore === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onViewUpdateBefore(this, this.root.parser, () => {
-        isLoop = true;
-      });
+      const isLoop = hook.onViewUpdateBefore(this, this.root.parser);
       if (!isLoop) {
         break;
       }
@@ -289,10 +279,7 @@ export class Viewer {
   private invokeViewChangeHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onViewChange === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onViewChange(this, () => {
-        isLoop = true;
-      });
+      const isLoop = hook.onViewChange(this);
       if (!isLoop) {
         break;
       }
@@ -302,10 +289,7 @@ export class Viewer {
   private invokeFocusHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onFocus === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onFocus(this, () => {
-        isLoop = true;
-      });
+      const isLoop = hook.onFocus(this);
       if (!isLoop) {
         break;
       }
@@ -315,10 +299,7 @@ export class Viewer {
   private invokeSelectStartHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onSelectStart === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onSelectStart(this.nativeSelection, () => {
-        isLoop = true;
-      });
+      const isLoop = hook.onSelectStart(this.nativeSelection);
       if (!isLoop) {
         break;
       }
@@ -365,15 +346,12 @@ export class Viewer {
   private invokeEnterHooks() {
     const hooks = this.hooks.filter(hook => typeof hook.onEnter === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onEnter({
+      const isLoop = hook.onEnter({
         beforeSelection: this.selectionSnapshot,
         beforeFragment: this.fragmentSnapshot,
         value: this.input.input.value,
         cursorOffset: this.input.input.selectionStart
-      }, this, this.root.parser, () => {
-        isLoop = true;
-      });
+      }, this, this.root.parser);
       if (!isLoop) {
         break;
       }
@@ -384,10 +362,7 @@ export class Viewer {
   private invokePasteHooks(contents: Contents) {
     const hooks = this.hooks.filter(hook => typeof hook.onPaste === 'function');
     for (const hook of hooks) {
-      let isLoop = false;
-      hook.onPaste(contents, this, this.root.parser, () => {
-        isLoop = true;
-      });
+      const isLoop = hook.onPaste(contents, this, this.root.parser);
       if (!isLoop) {
         break;
       }

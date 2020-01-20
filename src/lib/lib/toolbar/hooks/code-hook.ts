@@ -104,12 +104,11 @@ const theme = [
 ];
 
 export class CodeHook implements Hook {
-  onViewUpdateBefore(viewer: Viewer, parser: Parser, next: () => void): void {
+  onViewUpdateBefore(viewer: Viewer, parser: Parser) {
     const commonAncestorFragment = viewer.selection.commonAncestorFragment;
 
     if (!commonAncestorFragment || !commonAncestorFragment.token) {
-      next();
-      return;
+      return true;
     }
     const elementRef = commonAncestorFragment.token.elementRef;
     if (/pre/i.test(elementRef.name)) {
@@ -151,7 +150,7 @@ export class CodeHook implements Hook {
         }
       }
     }
-    next();
+    return true;
   }
 
   private getFormats(index: number, node: HTMLElement, context: Fragment, parser: Parser) {

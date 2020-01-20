@@ -37,16 +37,14 @@ export interface Hook {
   /**
    * 当用户开始选择时调用
    * @param selection
-   * @param next
    */
-  onSelectStart?(selection: Selection, next: () => void): void;
+  onSelectStart?(selection: Selection): boolean;
 
   /**
    * 当编辑框获得焦点时调用
    * @param viewer
-   * @param next
    */
-  onFocus?(viewer: Viewer, next: () => void): void;
+  onFocus?(viewer: Viewer): boolean;
 
   /**
    * 当编辑器选区变化时调用
@@ -61,48 +59,43 @@ export interface Hook {
    * @param snapshot
    * @param viewer 视图渲染器
    * @param parser
-   * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onInput?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void;
+  onInput?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser): boolean;
 
   /**
    * 当视图重绘前调用
    * @param viewer
    * @param parser
-   * @param next
    */
-  onViewUpdateBefore?(viewer: Viewer, parser: Parser, next: () => void): void;
+  onViewUpdateBefore?(viewer: Viewer, parser: Parser): boolean;
 
   /**
    * 当编辑器视图发生变化后调用
    */
-  onViewChange?(viewer: Viewer, next: () => void): void;
+  onViewChange?(viewer: Viewer): boolean;
 
   /**
    * 当用户输入回车时调用
    * @param snapshot
    * @param viewer 视图渲染器
    * @param parser
-   * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onEnter?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser, next: () => void): void;
+  onEnter?(snapshot: EditingSnapshot, viewer: Viewer, parser: Parser): boolean;
 
   /**
    * 当用户删除内容时调用
    * @param viewer 视图渲染器
    * @param parser
-   * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onDelete?(viewer: Viewer, parser: Parser, next: () => void): void;
+  onDelete?(viewer: Viewer, parser: Parser): boolean;
 
   /**
    * 当用户粘贴内容时调用
    * @param contents
    * @param viewer 视图渲染器
    * @param parser
-   * @param next 当前勾子逻辑处理完成后同步调用
    */
-  onPaste?(contents: Contents, viewer: Viewer, parser: Parser, next: () => void): void;
+  onPaste?(contents: Contents, viewer: Viewer, parser: Parser): boolean;
 
   /**
    * 当用户应用某个命令时调用

@@ -167,7 +167,7 @@ export class TableEditHook implements Hook {
     });
   }
 
-  onViewChange(viewer: Viewer, next: () => void): void {
+  onViewChange(viewer: Viewer) {
     if (this.startPosition && this.endPosition) {
       this.cellMatrix = this.serialize(this.tableElement);
       const startCell = this.cellMatrix[this.startPosition.rowIndex].cells[this.startPosition.columnIndex].cellElement;
@@ -176,10 +176,10 @@ export class TableEditHook implements Hook {
       this.endCell = endCell;
       this.setSelectedCellsAndUpdateMaskStyle(startCell, endCell);
     }
-    next();
+    return true;
   }
 
-  onDelete(viewer: Viewer, parser: Parser, next: () => void): void {
+  onDelete(viewer: Viewer, parser: Parser) {
     const selection = viewer.selection;
 
     const findCell = (fragment: Fragment): Fragment => {
@@ -229,12 +229,12 @@ export class TableEditHook implements Hook {
                 selection.apply();
               })
             }
-            return;
+            return false;
           }
         }
       }
     }
-    next();
+    return true
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
