@@ -56,69 +56,74 @@ export function mergeFormat(formatMap: Map<Handler, FormatRange[]>, format: Form
     return false;
   }) as InlineFormat[];
 
+
   if (oldFormats) {
-    if (format.startIndex === format.endIndex) {
-      formatRanges.push(...oldFormats);
-      const flag = oldFormats.filter(f => {
-        return f.startIndex <= format.startIndex && f.endIndex >= format.endIndex;
-      }).length > 0;
-      if (!flag) {
-        formatRanges.push(format);
-      }
+    const minFormatRanges: InlineFormat[] = [];
+    const formatMarks: Array<InlineFormat> = [];
+    if (important) {
+      oldFormats.unshift(format);
     } else {
-      const formatMarks: Array<InlineFormat> = [];
-      if (important) {
-        oldFormats.unshift(format);
+      oldFormats.push(format);
+    }
+    let index = oldFormats.length - 1;
+
+    while (index >= 0) {
+      const item = oldFormats[index];
+      if (item.startIndex === item.endIndex) {
+        minFormatRanges.push(item);
       } else {
-        oldFormats.push(format);
-      }
-      let index = oldFormats.length - 1;
-      while (index >= 0) {
-        const item = oldFormats[index];
         if (formatMarks.length < item.endIndex) {
           formatMarks.length = item.endIndex;
         }
         formatMarks.fill(item, item.startIndex, item.endIndex);
-        index--;
       }
-      let newFormatRange: InlineFormat = null;
-      for (let i = 0; i < formatMarks.length; i++) {
-        const mark = formatMarks[i];
+      index--;
+    }
+    let newFormatRange: InlineFormat = null;
+    for (let i = 0; i < formatMarks.length; i++) {
+      const mark = formatMarks[i];
 
-        if (!mark) {
-          newFormatRange = null;
-          continue;
-        }
-        if (!newFormatRange) {
-          newFormatRange = new InlineFormat({
-            startIndex: i,
-            endIndex: i + 1,
-            handler: mark.handler,
-            context: mark.context,
-            state: mark.state,
-            abstractData: mark.abstractData
-          });
-          formatRanges.push(newFormatRange);
-          continue;
-        }
-        if (mark.state === newFormatRange.state && (
-          mark.abstractData &&
-          newFormatRange.abstractData &&
-          mark.abstractData.equal(newFormatRange.abstractData) || !mark.abstractData === true && !newFormatRange.abstractData === true)) {
-          newFormatRange.endIndex = i + 1;
-        } else {
-          newFormatRange = new InlineFormat({
-            startIndex: i,
-            endIndex: i + 1,
-            handler: mark.handler,
-            context: mark.context,
-            state: mark.state,
-            abstractData: mark.abstractData
-          });
-          formatRanges.push(newFormatRange);
-        }
+      if (!mark) {
+        newFormatRange = null;
+        continue;
+      }
+      if (!newFormatRange) {
+        newFormatRange = new InlineFormat({
+          startIndex: i,
+          endIndex: i + 1,
+          handler: mark.handler,
+          context: mark.context,
+          state: mark.state,
+          abstractData: mark.abstractData
+        });
+        formatRanges.push(newFormatRange);
+        continue;
+      }
+      if (mark.state === newFormatRange.state && (
+        mark.abstractData &&
+        newFormatRange.abstractData &&
+        mark.abstractData.equal(newFormatRange.abstractData) || !mark.abstractData === true && !newFormatRange.abstractData === true)) {
+        newFormatRange.endIndex = i + 1;
+      } else {
+        newFormatRange = new InlineFormat({
+          startIndex: i,
+          endIndex: i + 1,
+          handler: mark.handler,
+          context: mark.context,
+          state: mark.state,
+          abstractData: mark.abstractData
+        });
+        formatRanges.push(newFormatRange);
       }
     }
+    minFormatRanges.forEach(item => {
+      const flag = oldFormats.filter(f => {
+        return f.startIndex <= item.startIndex && f.endIndex >= item.endIndex && item !== f;
+      }).length === 0;
+      if (flag) {
+        formatRanges.push(item);
+      }
+    })
   } else {
     formatRanges.push(format);
   }
