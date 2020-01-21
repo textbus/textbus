@@ -52,7 +52,7 @@ export class AbstractData {
   }
 
   /**
-   * 判断 data 是否相等和自己相等
+   * 判断 data 是否和自己相等
    * @param data
    */
   equal(data: AbstractData) {
