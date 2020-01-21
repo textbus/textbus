@@ -191,7 +191,6 @@ export class Viewer {
         const endText = value.substr(startIndex);
 
         input.value = beforeText + '    ' + endText;
-        console.log(input.value);
         input.selectionStart = startIndex + 4;
         input.selectionEnd = endIndex + 4;
 

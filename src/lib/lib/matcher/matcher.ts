@@ -118,7 +118,6 @@ export class Matcher {
           s.endIndex,
           s.context,
           handler);
-        console.log(state)
         if (state.state === FormatState.Invalid) {
           const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
           if (inSingleContainer.state !== FormatState.Invalid) {
