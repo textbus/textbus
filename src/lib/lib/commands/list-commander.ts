@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
@@ -107,8 +107,8 @@ export class ListCommander implements Commander<any> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
-    if (state === FormatState.Valid) {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+    if (state === MatchState.Valid) {
       return new ReplaceModel(new VElement(abstractData.tag));
     }
     return null;

@@ -3,7 +3,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Priority } from '../toolbar/help';
 import { Fragment } from '../parser/fragment';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { InlineFormat } from '../parser/format';
 
 export class CleanCommander implements Commander {
@@ -31,7 +31,7 @@ export class CleanCommander implements Commander {
       return ![Priority.Default, Priority.Block, Priority.BlockStyle].includes(handler.priority);
     }).forEach(handler => {
       fragment.apply(new InlineFormat({
-        state: FormatState.Invalid,
+        state: MatchState.Invalid,
         startIndex,
         endIndex,
         handler: handler,

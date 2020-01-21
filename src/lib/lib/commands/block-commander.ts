@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AbstractData } from '../parser/abstract-data';
@@ -46,7 +46,7 @@ export class BlockCommander implements Commander<string> {
     })
   }
 
-  render(state: FormatState, rawElement?: VElement, data?: AbstractData): ReplaceModel {
+  render(state: MatchState, rawElement?: VElement, data?: AbstractData): ReplaceModel {
     return new ReplaceModel(new VElement(data ? data.tag : this.tagName));
   }
 

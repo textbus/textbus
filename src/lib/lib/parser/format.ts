@@ -1,5 +1,5 @@
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { AbstractData, AbstractDataParams } from './abstract-data';
 import { Fragment } from './fragment';
 import { Single } from './single';
@@ -7,27 +7,31 @@ import { Single } from './single';
 export interface FormatParams {
   handler: Handler;
   context: Fragment;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractDataParams;
 }
 
 export interface SingleFormatParams {
   handler: Handler;
   context: Single;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractDataParams;
 }
 
 export interface InlineFormatParams extends FormatParams {
   startIndex: number;
   endIndex: number;
-  greedy?: boolean;
 }
 
+/**
+ * 记录一个 Block 片段的格式化信息的类。
+ * 如标签： P、Table、Ul...
+ * 如块级样式：text-align: right
+ */
 export class BlockFormat {
   handler: Handler;
   context: Fragment;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractData;
   readonly startIndex = 0;
 
@@ -47,12 +51,17 @@ export class BlockFormat {
   }
 }
 
+/**
+ * 记录一个 Inline 片段的格式化信息的类。
+ * 如标签： strong、em...
+ * 如行内样式：color: red
+ */
 export class InlineFormat {
   startIndex: number;
   endIndex: number;
   handler: Handler;
   context: Fragment;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractData;
 
   constructor(params: InlineFormatParams | InlineFormat) {
@@ -69,10 +78,14 @@ export class InlineFormat {
   }
 }
 
+/**
+ * 记录一个单节点的格式化信息的类。
+ * 如标签： img、video...
+ */
 export class SingleFormat {
   handler: Handler;
   context: Single;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractData;
 
   constructor(params: SingleFormatParams | SingleFormat) {

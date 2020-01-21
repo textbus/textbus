@@ -1,5 +1,5 @@
 import { ChildSlotModel, Commander } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AttrState } from '../toolbar/formats/forms/help';
@@ -48,7 +48,7 @@ export class LinkCommander implements Commander<AttrState[]> {
                 startIndex: item.startIndex + index,
                 endIndex: item.endIndex + index,
                 handler,
-                state: FormatState.Valid,
+                state: MatchState.Valid,
                 context: item.context,
                 abstractData: new AbstractData({
                   attrs
@@ -61,7 +61,7 @@ export class LinkCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
     const el = new VElement(this.tagName);
     if (abstractData && abstractData.attrs) {
       abstractData.attrs.forEach((value, key) => {

@@ -1,7 +1,11 @@
 import { BlockFormat, FormatRange, InlineFormat } from './format';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 
+/**
+ * 获了格式化信息中所有的可应用的数据
+ * @param formatMap
+ */
 export function getCanApplyFormats(formatMap: Map<Handler, FormatRange[]>) {
   let formats: FormatRange[] = [];
   // 检出所有生效规则
@@ -9,7 +13,7 @@ export function getCanApplyFormats(formatMap: Map<Handler, FormatRange[]>) {
     formats = formats.concat(value);
   });
   // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
-  return formats.filter(i => i.state !== FormatState.Inherit).sort((next, prev) => {
+  return formats.filter(i => i.state !== MatchState.Inherit).sort((next, prev) => {
     if (prev instanceof BlockFormat) {
       if (next instanceof BlockFormat) {
         return next.handler.priority - prev.handler.priority;
@@ -39,7 +43,7 @@ export function getCanApplyFormats(formatMap: Map<Handler, FormatRange[]>) {
 export function mergeFormat(formatMap: Map<Handler, FormatRange[]>, format: FormatRange, important = false) {
 
   if (format instanceof BlockFormat) {
-    if (format.state === FormatState.Invalid) {
+    if (format.state === MatchState.Invalid) {
       formatMap.delete(format.handler);
     } else {
       formatMap.set(format.handler, [format]);
@@ -127,7 +131,7 @@ export function mergeFormat(formatMap: Map<Handler, FormatRange[]>, format: Form
   } else {
     formatRanges.push(format);
   }
-  const ff = formatRanges.filter(f => f.state !== FormatState.Invalid);
+  const ff = formatRanges.filter(f => f.state !== MatchState.Invalid);
   if (ff.length) {
     formatMap.set(format.handler, ff);
   } else {

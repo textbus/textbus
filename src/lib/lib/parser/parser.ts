@@ -1,7 +1,7 @@
 import { Fragment } from './fragment';
 import { dtd } from '../dtd';
 import { Single } from './single';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { BlockFormat, InlineFormat, SingleFormat } from './format';
 import { AbstractData } from './abstract-data';
 import { Handler } from '../toolbar/handlers/help';
@@ -9,7 +9,7 @@ import { EditableOptions, Priority } from '../toolbar/help';
 
 export interface FormatDelta {
   handler: Handler;
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractData;
 }
 
@@ -17,6 +17,11 @@ export class Parser {
   constructor(private registries: Handler[] = []) {
   }
 
+  /**
+   * 解析一段 HTML，并把解析后的抽象数据插入到 context 中
+   * @param element
+   * @param context
+   */
   parse(element: HTMLElement, context: Fragment) {
     const flatTree = this.normalize(element);
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
@@ -26,6 +31,10 @@ export class Parser {
     return context;
   }
 
+  /**
+   * 获取抽象数据在富文本中所有 handler 的匹配数据
+   * @param data
+   */
   getFormatStateByData(data: AbstractData): FormatDelta[] {
     return this.registries.map(item => {
       return {
@@ -33,9 +42,12 @@ export class Parser {
         state: item.matcher.matchData(data),
         abstractData: new AbstractData(data)
       }
-    }).filter(item => item.state !== FormatState.Invalid);
+    }).filter(item => item.state !== MatchState.Invalid);
   }
-
+  /**
+   * 获取 HTML 节点在富文本中所有 handler 的匹配数据
+   * @param node
+   */
   getFormatStateByNode(node: HTMLElement): FormatDelta[] {
     return this.registries.map(item => {
       return {
@@ -47,7 +59,7 @@ export class Parser {
             : item.editableOptions
         )
       };
-    }).filter(item => item.state !== FormatState.Invalid);
+    }).filter(item => item.state !== MatchState.Invalid);
   }
 
   private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
@@ -61,7 +73,7 @@ export class Parser {
             : item.editableOptions
         )
       };
-    }).filter(item => item.state !== FormatState.Invalid).forEach(item => {
+    }).filter(item => item.state !== MatchState.Invalid).forEach(item => {
 
       switch (item.handler.priority) {
         case Priority.Default:

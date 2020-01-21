@@ -1,4 +1,4 @@
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AbstractData } from '../parser/abstract-data';
@@ -24,5 +24,5 @@ export interface Commander<T = any> {
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment): void;
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): RenderModel;
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): RenderModel;
 }

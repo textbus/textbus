@@ -1,5 +1,5 @@
 import { ChildSlotModel, Commander } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { AbstractData } from '../parser/abstract-data';
@@ -24,7 +24,7 @@ export class BoldCommander implements Commander {
             endIndex: range.startIndex,
             handler,
             context: range.commonAncestorFragment,
-            state: FormatState.Valid,
+            state: MatchState.Valid,
             abstractData: {
               tag: 'strong'
             }
@@ -47,11 +47,11 @@ export class BoldCommander implements Commander {
         }
 
         const el = BoldCommander.findBoldParent(item.context.token.elementRef.nativeElement as HTMLElement);
-        const state = el ? FormatState.Inherit : FormatState.Valid;
+        const state = el ? MatchState.Inherit : MatchState.Valid;
         switch (state) {
-          case FormatState.Valid:
+          case MatchState.Valid:
             item.context.apply(new InlineFormat({
-              state: FormatState.Valid,
+              state: MatchState.Valid,
               startIndex: item.startIndex,
               endIndex: item.endIndex,
               handler: handler,
@@ -61,9 +61,9 @@ export class BoldCommander implements Commander {
               }
             }), false);
             break;
-          case FormatState.Inherit:
+          case MatchState.Inherit:
             item.context.apply(new InlineFormat({
-              state: FormatState.Inherit,
+              state: MatchState.Inherit,
               startIndex: item.startIndex,
               endIndex: item.endIndex,
               handler: handler,
@@ -77,9 +77,9 @@ export class BoldCommander implements Commander {
     this.recordHistory = flag;
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData) {
     switch (state) {
-      case FormatState.Exclude:
+      case MatchState.Exclude:
         if (rawElement) {
           rawElement.styles.set('fontWeight', 'normal');
           break;
@@ -88,7 +88,7 @@ export class BoldCommander implements Commander {
           node.styles.set('fontWeight', 'normal');
           return new ChildSlotModel(node);
         }
-      case FormatState.Valid:
+      case MatchState.Valid:
         return new ChildSlotModel(new VElement('strong'));
     }
     return null;
@@ -97,7 +97,7 @@ export class BoldCommander implements Commander {
   private clean(scope: SelectedScope, handler: Handler) {
     const children = scope.context.sliceContents(scope.startIndex, scope.endIndex);
     const el = BoldCommander.findBoldParent(scope.context.token.elementRef.nativeElement as HTMLElement);
-    let state: FormatState = el ? FormatState.Exclude : FormatState.Invalid;
+    let state: MatchState = el ? MatchState.Exclude : MatchState.Invalid;
     let index = 0;
     const formats: InlineFormat[] = [];
     let childFormat: InlineFormat;
@@ -116,7 +116,7 @@ export class BoldCommander implements Commander {
             handler,
             context: scope.context,
             state,
-            abstractData: state === FormatState.Exclude ? {
+            abstractData: state === MatchState.Exclude ? {
               tag: 'span',
               style: {
                 name: 'fontWeight',

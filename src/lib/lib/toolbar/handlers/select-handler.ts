@@ -1,9 +1,9 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { createKeymapHTML, Handler } from './help';
+import { SelectionMatchDelta, createKeymapHTML, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { EditableOptions, SelectConfig, SelectOptionConfig } from '../help';
-import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
+import { EditableOptions, HighlightState, SelectConfig, SelectOptionConfig } from '../help';
+import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { Keymap } from '../../viewer/events';
@@ -76,9 +76,9 @@ export class SelectHandler implements Handler {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    if (commonMatchDelta.abstractData) {
-      const option = this.config.highlight(this.config.options, commonMatchDelta.abstractData);
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    if (selectionMatchDelta.abstractData) {
+      const option = this.config.highlight(this.config.options, selectionMatchDelta.abstractData);
       if (option) {
         this.textContainer.innerText = option.label || option.value;
         this.dropdown.disabled = false;
@@ -87,7 +87,7 @@ export class SelectHandler implements Handler {
       }
     }
     this.dropdown.highlight = false;
-    this.dropdown.disabled = commonMatchDelta.state === MatchState.Disabled;
+    this.dropdown.disabled = selectionMatchDelta.state === HighlightState.Disabled;
     let defaultOption: SelectOptionConfig;
     for (const op of this.config.options) {
       if (op.default) {

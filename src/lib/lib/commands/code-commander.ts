@@ -1,7 +1,7 @@
 import { Commander, ReplaceModel } from './commander';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { AbstractData } from '../parser/abstract-data';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
@@ -57,8 +57,8 @@ export class CodeCommander implements Commander<string> {
     }
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
-    if (state === FormatState.Valid) {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+    if (state === MatchState.Valid) {
       const el = new VElement(abstractData.tag);
       const lang = abstractData?.attrs?.get('lang');
       if (lang) {

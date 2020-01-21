@@ -3,7 +3,7 @@ import { Fragment } from './fragment';
 import { Handler } from '../toolbar/handlers/help';
 import { SingleFormat } from './format';
 import { FormatDelta } from './parser';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 
 export class Single extends ViewData {
   private formatMap = new Map<Handler, SingleFormat[]>();
@@ -37,7 +37,7 @@ export class Single extends ViewData {
   }
 
   mergeFormat(format: SingleFormat) {
-    if (format.state === FormatState.Invalid) {
+    if (format.state === MatchState.Invalid) {
       this.formatMap.delete(format.handler);
     } else {
       this.formatMap.set(format.handler, [format]);

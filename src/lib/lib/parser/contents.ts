@@ -29,6 +29,11 @@ export class Contents implements Iterable<string | ViewData> {
     };
   }
 
+  /**
+   * 在指定下标插入新的文本或节点
+   * @param content
+   * @param index
+   */
   insert(content: string | ViewData, index: number) {
     if (index >= this.length) {
       if (typeof content === 'string') {
@@ -77,6 +82,10 @@ export class Contents implements Iterable<string | ViewData> {
     }
   }
 
+  /**
+   * 在内容最后添加文本或节点
+   * @param content
+   */
   append(content: string | ViewData) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
@@ -87,6 +96,11 @@ export class Contents implements Iterable<string | ViewData> {
     }
   }
 
+  /**
+   * 在当前数据中，根据传入的下标范围切出片段并返回一个数组
+   * @param startIndex
+   * @param endIndex
+   */
   slice(startIndex: number, endIndex = this.length) {
     if (startIndex >= endIndex) {
       return [];
@@ -112,6 +126,11 @@ export class Contents implements Iterable<string | ViewData> {
     return result;
   }
 
+  /**
+   * 删除下标指定范围内的内容
+   * @param startIndex
+   * @param endIndex
+   */
   delete(startIndex: number, endIndex: number) {
     if (endIndex <= startIndex) {
       return [];
@@ -123,6 +142,11 @@ export class Contents implements Iterable<string | ViewData> {
     return discardedContents;
   }
 
+  /**
+   * 在指定下标位置插入一组文本或节点
+   * @param contents
+   * @param index
+   */
   insertElements(contents: Array<string | ViewData>, index: number) {
     contents.forEach(item => {
       this.insert(item, index);
@@ -130,10 +154,17 @@ export class Contents implements Iterable<string | ViewData> {
     });
   }
 
+  /**
+   * 获取当前内容内所有的子片段
+   */
   getFragments(): Fragment[] {
     return this.elements.filter(i => i instanceof Fragment) as Fragment[];
   }
 
+  /**
+   * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1
+   * @param element
+   */
   find(element: ViewData): number {
     let index = 0;
     for (const item of this.elements) {
@@ -145,10 +176,17 @@ export class Contents implements Iterable<string | ViewData> {
     return -1;
   }
 
+  /**
+   * 通过下标获取文本或子节点
+   * @param index
+   */
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0];
   }
 
+  /**
+   * 复制当前内容的副本
+   */
   clone(): Contents {
     const newContents = new Contents();
     this.elements.forEach(item => {

@@ -5,7 +5,6 @@ import { template } from './template-html';
 import { TBSelection } from './selection';
 import { RootFragment } from '../parser/root-fragment';
 import { Handler } from '../toolbar/handlers/help';
-import { MatchState } from '../matcher/matcher';
 import { Cursor } from './cursor';
 import { TBRange, TBRangePosition } from './range';
 import { CursorMoveDirection, Hook } from './help';
@@ -22,6 +21,7 @@ import {
 import { Fragment } from '../parser/fragment';
 import { Contents } from '../parser/contents';
 import { Keymap } from './events';
+import { HighlightState } from '../toolbar/help';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -112,10 +112,10 @@ export class Viewer {
 
   apply(handler: Handler) {
     const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
-    if (state === MatchState.Disabled) {
+    if (state === HighlightState.Disabled) {
       return;
     }
-    const overlap = state === MatchState.Highlight;
+    const overlap = state === HighlightState.Highlight;
     if (handler.hook && typeof handler.hook.onApply === 'function') {
       handler.hook.onApply(handler.execCommand);
     }

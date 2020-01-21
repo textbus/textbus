@@ -6,6 +6,15 @@ import { AbstractData } from '../parser/abstract-data';
 import { Hook } from '../viewer/help';
 import { KeymapConfig } from '../viewer/events';
 
+/**
+ * 工具条控件的显示状态
+ */
+export enum HighlightState {
+  Highlight = 'Highlight',
+  Normal = 'Normal',
+  Disabled = 'Disabled'
+}
+
 export enum Priority {
   Default = 0,
   Block = 100,

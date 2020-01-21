@@ -1,8 +1,8 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ButtonConfig, EditableOptions } from '../help';
-import { Handler } from './help';
-import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
+import { ButtonConfig, EditableOptions, HighlightState } from '../help';
+import { SelectionMatchDelta, Handler } from './help';
+import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { Keymap } from '../../viewer/events';
@@ -49,17 +49,17 @@ export class ButtonHandler implements Handler {
     });
   }
 
-  updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    switch (commonMatchDelta.state) {
-      case MatchState.Highlight:
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    switch (selectionMatchDelta.state) {
+      case HighlightState.Highlight:
         this.elementRef.disabled = false;
         this.elementRef.classList.add('tbus-handler-active');
         break;
-      case MatchState.Normal:
+      case HighlightState.Normal:
         this.elementRef.disabled = false;
         this.elementRef.classList.remove('tbus-handler-active');
         break;
-      case MatchState.Disabled:
+      case HighlightState.Disabled:
         this.elementRef.classList.remove('tbus-handler-active');
         this.elementRef.disabled = true;
         break

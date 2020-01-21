@@ -1,5 +1,5 @@
 import { ChildSlotModel, Commander } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { InlineFormat } from '../parser/format';
@@ -26,7 +26,7 @@ export class StyleCommander implements Commander<string | number> {
           endIndex: item.endIndex,
           handler,
           context: item.context,
-          state: FormatState.Valid,
+          state: MatchState.Valid,
           abstractData: {
             style: {name: this.name, value: this.value}
           }
@@ -36,7 +36,7 @@ export class StyleCommander implements Commander<string | number> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
     if (abstractData && abstractData.style) {
       if (rawElement) {
         const isInline = dtd[rawElement.tagName.toLowerCase()].display === 'inline';

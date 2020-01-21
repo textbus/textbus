@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Contents } from '../parser/contents';
@@ -51,7 +51,7 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
     if (rawElement) {
       rawElement.styles.set(abstractData.style.name, abstractData.style.value);
     }

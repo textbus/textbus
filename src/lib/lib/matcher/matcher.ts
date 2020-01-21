@@ -1,57 +1,61 @@
 import { TBSelection } from '../viewer/selection';
-import { Handler } from '../toolbar/handlers/help';
+import { SelectionMatchDelta, Handler, RangeMatchDelta } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
 import { TBRange } from '../viewer/range';
 import { AbstractData } from '../parser/abstract-data';
-import { Priority } from '../toolbar/help';
+import { HighlightState, Priority } from '../toolbar/help';
 import { Single } from '../parser/single';
-import { BlockFormat, FormatRange, InlineFormat } from '../parser/format';
+import { BlockFormat, FormatRange } from '../parser/format';
 import { Editor } from '../editor';
 
+/**
+ * 匹配到的抽象数据及状态
+ */
 interface MatchData {
-  state: FormatState;
+  state: MatchState;
   abstractData: AbstractData;
 }
 
+/**
+ * 一段内容通过 Rule 规则匹配后的结果状态
+ */
 export enum MatchState {
-  Highlight = 'Highlight',
-  Normal = 'Normal',
-  Disabled = 'Disabled'
-}
-
-export enum FormatState {
   Valid = 'Valid',
   Invalid = 'Invalid',
   Exclude = 'Exclude',
   Inherit = 'Inherit'
 }
 
-export interface MatchDelta {
-  state: MatchState;
-  fromRange: TBRange;
-  abstractData: AbstractData;
-}
-
-export interface CommonMatchDelta {
-  state: MatchState;
-  srcStates: MatchDelta[];
-  abstractData: AbstractData;
-}
-
+/**
+ * 匹配规则
+ */
 export interface MatchRule {
+  /** 匹配的标签 */
   tags?: string[] | RegExp;
+  /** 匹配的样式 */
   styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   // classes?: string[];
+  /** 匹配的属性 */
   attrs?: Array<{ key: string; value?: string | string[] }>;
+  /** 可继承样式的标签，如加粗，可继承自 h1~h6 */
   extendTags?: string[] | RegExp;
+  /** 排除的样式 */
   excludeStyles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   // excludeClasses?: string[];
+  /** 排除的属性 */
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
+  /** 不能包含哪些标签 */
   noContainTags?: string[] | RegExp;
+  /** 不能在哪些标签之内 */
   noInTags?: string[] | RegExp;
+  /** 自定义过滤器，以适配以上不能满足的特殊需求 */
   filter?: (node: HTMLElement | AbstractData) => boolean;
 }
 
+/**
+ * Matcher 类用于根据不同规则创建匹配器
+ * 通过调用 Matcher 实例的对应方法，可查询当前节点、抽象数据、选区的匹配结果
+ */
 export class Matcher {
   private inheritValidators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
@@ -84,29 +88,43 @@ export class Matcher {
     }
   }
 
-  matchData(data: AbstractData): FormatState {
+  /**
+   * 查询抽象数据在当前匹配器的状态
+   * @param data
+   */
+  matchData(data: AbstractData): MatchState {
     return this.match(data);
   }
 
-  matchNode(node: HTMLElement): FormatState {
+  /**
+   * 查询 HTML 元素节点在当前匹配器的状态
+   * @param node
+   */
+  matchNode(node: HTMLElement): MatchState {
     return this.match(node);
   }
 
-  queryState(selection: TBSelection, handler: Handler, editor: Editor): CommonMatchDelta {
+  /**
+   * 查询 Handler 在 TBSelection 所有 TBRange 的匹配结果
+   * @param selection 当前选区
+   * @param handler 要查询的 Handler
+   * @param editor 当前编辑器实例
+   */
+  queryState(selection: TBSelection, handler: Handler, editor: Editor): SelectionMatchDelta {
     if (!selection.rangeCount) {
       return {
         srcStates: [],
-        state: MatchState.Normal,
+        state: HighlightState.Normal,
         abstractData: null
       };
     }
-    const srcStates: MatchDelta[] = selection.ranges.map(range => {
+    const srcStates: RangeMatchDelta[] = selection.ranges.map(range => {
 
       const isDisable = this.getDisableStateByRange(range);
 
       if (isDisable) {
         return {
-          state: MatchState.Disabled,
+          state: HighlightState.Disabled,
           fromRange: range,
           abstractData: null
         };
@@ -118,9 +136,9 @@ export class Matcher {
           s.endIndex,
           s.context,
           handler);
-        if (state.state === FormatState.Invalid) {
+        if (state.state === MatchState.Invalid) {
           const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
-          if (inSingleContainer.state !== FormatState.Invalid) {
+          if (inSingleContainer.state !== MatchState.Invalid) {
             states.push(inSingleContainer);
           } else {
             states.push(state);
@@ -129,27 +147,27 @@ export class Matcher {
           states.push(state);
         }
       });
-      let mergedState = Matcher.mergeStates(states) || {state: FormatState.Invalid, abstractData: null};
+      let mergedState = Matcher.mergeStates(states) || {state: MatchState.Invalid, abstractData: null};
       return {
-        state: (mergedState.state === FormatState.Valid || mergedState.state === FormatState.Inherit) ?
-          MatchState.Highlight : MatchState.Normal,
+        state: (mergedState.state === MatchState.Valid || mergedState.state === MatchState.Inherit) ?
+          HighlightState.Highlight : HighlightState.Normal,
         fromRange: range,
         abstractData: mergedState.abstractData
       };
     });
     let isDisable = false;
     for (const i of srcStates) {
-      if (i.state === MatchState.Disabled) {
+      if (i.state === HighlightState.Disabled) {
         isDisable = true;
         break;
       }
     }
 
     return {
-      state: isDisable ? MatchState.Disabled :
-        srcStates.reduce((v, n) => v && n.state === MatchState.Highlight, true) ?
-          MatchState.Highlight :
-          MatchState.Normal,
+      state: isDisable ? HighlightState.Disabled :
+        srcStates.reduce((v, n) => v && n.state === HighlightState.Highlight, true) ?
+          HighlightState.Highlight :
+          HighlightState.Normal,
       srcStates,
       abstractData: srcStates[0].abstractData
     };
@@ -159,18 +177,18 @@ export class Matcher {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
       if (!b) {
-        return FormatState.Invalid;
+        return MatchState.Invalid;
       }
     }
     const exclude = this.excludeValidators.map(fn => fn(p)).includes(true);
     if (exclude) {
-      return FormatState.Exclude;
+      return MatchState.Exclude;
     }
     const inherit = this.inheritValidators.map(fn => fn(p)).includes(true);
     if (inherit) {
-      return FormatState.Inherit;
+      return MatchState.Inherit;
     }
-    return this.validators.map(fn => fn(p)).includes(true) ? FormatState.Valid : FormatState.Invalid;
+    return this.validators.map(fn => fn(p)).includes(true) ? MatchState.Valid : MatchState.Invalid;
   }
 
   private getDisableStateByRange(range: TBRange) {
@@ -223,7 +241,7 @@ export class Matcher {
     if ([Priority.Default, Priority.Block].includes(handler.priority)) {
       if (formatRanges.length) {
         const first = formatRanges[0];
-        if (first.state !== FormatState.Invalid) {
+        if (first.state !== MatchState.Invalid) {
           return {
             state: first.state,
             abstractData: first?.abstractData.clone() || null
@@ -250,7 +268,7 @@ export class Matcher {
         }
       }
       return {
-        state: FormatState.Invalid,
+        state: MatchState.Invalid,
         abstractData: null
       };
     }
@@ -266,9 +284,9 @@ export class Matcher {
       if (typeof child === 'string' || child instanceof Single) {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
-            if (format.state === FormatState.Exclude) {
+            if (format.state === MatchState.Exclude) {
               return {
-                state: FormatState.Exclude,
+                state: MatchState.Exclude,
                 abstractData: format?.abstractData.clone() || null
               };
             } else {
@@ -279,7 +297,7 @@ export class Matcher {
             }
           } else {
             states.push({
-              state: FormatState.Invalid,
+              state: MatchState.Invalid,
               abstractData: null
             })
           }
@@ -295,7 +313,7 @@ export class Matcher {
         }
         if (!formatRanges.length) {
           return {
-            state: FormatState.Invalid,
+            state: MatchState.Invalid,
             abstractData: null
           };
         }
@@ -397,14 +415,14 @@ export class Matcher {
   private static mergeStates(states: MatchData[]): MatchData {
     states = states.filter(i => i);
     for (const item of states) {
-      if (item.state === FormatState.Exclude) {
+      if (item.state === MatchState.Exclude) {
         return {
-          state: FormatState.Exclude,
+          state: MatchState.Exclude,
           abstractData: item.abstractData ? item.abstractData.clone() : null
         };
-      } else if (item.state === FormatState.Invalid) {
+      } else if (item.state === MatchState.Invalid) {
         return {
-          state: FormatState.Invalid,
+          state: MatchState.Invalid,
           abstractData: item.abstractData ? item.abstractData.clone() : null
         };
       }
@@ -447,17 +465,17 @@ export class Matcher {
       }
 
       for (const item of states) {
-        if (item.state === FormatState.Exclude) {
+        if (item.state === MatchState.Exclude) {
           return {
-            state: FormatState.Exclude,
+            state: MatchState.Exclude,
             abstractData: item.abstractData.clone()
           }
         }
       }
       for (const item of states) {
-        if (item.state === FormatState.Valid) {
+        if (item.state === MatchState.Valid) {
           return {
-            state: FormatState.Valid,
+            state: MatchState.Valid,
             abstractData: item.abstractData.clone()
           }
         }
@@ -471,7 +489,7 @@ export class Matcher {
       }
     }
     return {
-      state: FormatState.Invalid,
+      state: MatchState.Invalid,
       abstractData: null
     };
   }

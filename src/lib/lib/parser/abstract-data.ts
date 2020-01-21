@@ -1,9 +1,15 @@
+/**
+ * 抽象数据字面量
+ */
 export interface AbstractDataParams {
   tag?: string;
   attrs?: { [key: string]: string | number } | Map<string, string | number>;
   style?: { name: string, value: string | number };
 }
 
+/**
+ * 抽象数据类，用于记录一个节点或样式的摘要数据
+ */
 export class AbstractData {
   tag: string;
   attrs: Map<string, string | number>;
@@ -24,6 +30,9 @@ export class AbstractData {
     }
   }
 
+  /**
+   * 复制当前抽象数据的副本
+   */
   clone() {
     const attrs = new Map<string, string | number>();
     this.attrs && this.attrs.forEach((value, key) => {
@@ -42,6 +51,10 @@ export class AbstractData {
     });
   }
 
+  /**
+   * 判断 data 是否相等和自己相等
+   * @param data
+   */
   equal(data: AbstractData) {
     if (data === this) {
       return true;

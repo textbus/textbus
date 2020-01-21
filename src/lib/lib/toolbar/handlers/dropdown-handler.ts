@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 
-import { Handler } from './help';
+import { SelectionMatchDelta, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EditableOptions, EventDelegate } from '../help';
-import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
+import { DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
+import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 
@@ -43,18 +43,18 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    this.config.viewer.update(commonMatchDelta.abstractData);
-    switch (commonMatchDelta.state) {
-      case MatchState.Highlight:
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    this.config.viewer.update(selectionMatchDelta.abstractData);
+    switch (selectionMatchDelta.state) {
+      case HighlightState.Highlight:
         this.dropdown.disabled = false;
         this.dropdown.highlight = true;
         break;
-      case MatchState.Normal:
+      case HighlightState.Normal:
         this.dropdown.disabled = false;
         this.dropdown.highlight = false;
         break;
-      case MatchState.Disabled:
+      case HighlightState.Disabled:
         this.dropdown.disabled = true;
         this.dropdown.highlight = false;
         break

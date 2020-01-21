@@ -1,10 +1,10 @@
 import { merge, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ActionSheetConfig, ActionConfig, EditableOptions } from '../help';
+import { ActionSheetConfig, ActionConfig, EditableOptions, HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
-import { Handler } from './help';
-import { CommonMatchDelta, Matcher, MatchState } from '../../matcher/matcher';
+import { SelectionMatchDelta, Handler } from './help';
+import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
 import { Keymap } from '../../viewer/events';
@@ -69,17 +69,17 @@ export class ActionSheetHandler implements Handler {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(commonMatchDelta: CommonMatchDelta): void {
-    switch (commonMatchDelta.state) {
-      case MatchState.Highlight:
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    switch (selectionMatchDelta.state) {
+      case HighlightState.Highlight:
         this.dropdown.disabled = false;
         this.dropdown.highlight = true;
         break;
-      case MatchState.Normal:
+      case HighlightState.Normal:
         this.dropdown.disabled = false;
         this.dropdown.highlight = false;
         break;
-      case MatchState.Disabled:
+      case HighlightState.Disabled:
         this.dropdown.disabled = true;
         this.dropdown.highlight = false;
         break

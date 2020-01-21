@@ -1,5 +1,5 @@
 import { ChildSlotModel, Commander } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -24,7 +24,7 @@ export class InlineCommander implements Commander {
             endIndex: range.startIndex,
             handler,
             context: range.commonAncestorFragment,
-            state: FormatState.Valid,
+            state: MatchState.Valid,
             abstractData: {
               tag: 'strong'
             }
@@ -46,7 +46,7 @@ export class InlineCommander implements Commander {
           endIndex: item.endIndex,
           handler,
           context: item.context,
-          state: overlap ? FormatState.Invalid : FormatState.Valid,
+          state: overlap ? MatchState.Invalid : MatchState.Valid,
           abstractData: {
             tag: this.tagName
           }
@@ -57,7 +57,7 @@ export class InlineCommander implements Commander {
     this.recordHistory = flag;
   }
 
-  render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {
+  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData) {
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }

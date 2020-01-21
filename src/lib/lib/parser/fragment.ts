@@ -12,13 +12,26 @@ export class Fragment extends ViewData {
   readonly token: BlockToken;
   readonly parent: Fragment;
 
+  /**
+   * 当前片段内容的长度
+   */
   get contentLength() {
     return this.contents.length;
   }
 
+  /**
+   * 当前片段的格式化数据
+   */
   private formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
+  /**
+   * 当前片段的内容
+   */
   private contents = new Contents();
 
+  /**
+   * 当前片段的格式化信息
+   * @param formats
+   */
   constructor(formats?: FormatDelta[]) {
     super();
     if (Array.isArray(formats)) {
@@ -31,18 +44,33 @@ export class Fragment extends ViewData {
     }
   }
 
+  /**
+   * 通过 Handler 获取当前片段的的格式化信息
+   * @param handler
+   */
   getFormatRangesByHandler(handler: Handler) {
     return this.formatMap.get(handler);
   }
 
+  /**
+   * 获取当前片段内所有的 Handler
+   */
   getFormatHandlers() {
     return Array.from(this.formatMap.keys());
   }
 
+  /**
+   * 获取当前片段内所有的格式化信息
+   */
   getFormatRanges() {
     return Array.from(this.formatMap.values()).reduce((v, n) => v.concat(n), []);
   }
 
+  /**
+   * 通过 Handler 设置一组格式化数据
+   * @param key
+   * @param formatRanges
+   */
   setFormats(key: Handler, formatRanges: FormatRange[]) {
     this.formatMap.set(key, formatRanges.map(f => {
       f.context = this;
@@ -50,6 +78,13 @@ export class Fragment extends ViewData {
     }));
   }
 
+  /**
+   * 合并一组格式化数据
+   * @param states 格式化数据
+   * @param startIndex inlineFormat 的格式化范围起始下标
+   * @param endIndex inlineFormat 的格式化范围结束下标
+   * @param canSurroundBlockElement 是否可以包含块级节点
+   */
   mergeMatchStates(states: FormatDelta[], startIndex: number, endIndex: number, canSurroundBlockElement: boolean) {
     states.forEach(state => {
       if ([Priority.Default, Priority.Block, Priority.BlockStyle].includes(state.handler.priority)) {
@@ -68,6 +103,9 @@ export class Fragment extends ViewData {
     });
   }
 
+  /**
+   * 清除当前片段的所有格式
+   */
   cleanFormats() {
     this.formatMap.clear();
     this.markDirty(true);
@@ -97,6 +135,10 @@ export class Fragment extends ViewData {
   //   }
   // }
 
+  /**
+   * 给当前片段应用新一格式
+   * @param formats
+   */
   useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
     this.markDirty();
 
@@ -109,6 +151,9 @@ export class Fragment extends ViewData {
     });
   }
 
+  /**
+   * 获取当前片段格式化信息的副本
+   */
   getFormatMap() {
     const formatMap = new Map<Handler, Array<BlockFormat | InlineFormat>>();
     Array.from(this.formatMap.keys()).forEach(key => {
@@ -119,6 +164,17 @@ export class Fragment extends ViewData {
       }));
     });
     return formatMap;
+  }
+
+  /**
+   * 合并一段格式
+   * @param format
+   * @param important
+   */
+  mergeFormat(format: FormatRange, important = false) {
+    this.markDirty();
+    format.context = this;
+    mergeFormat(this.formatMap, format, important);
   }
 
   /**
@@ -143,6 +199,10 @@ export class Fragment extends ViewData {
     return ff;
   }
 
+  /**
+   * 用新的内容覆盖当前片段的内容
+   * @param contents
+   */
   useContents(contents: Contents) {
     this.markDirty();
     this.contents = contents;
@@ -153,6 +213,11 @@ export class Fragment extends ViewData {
     });
   }
 
+  /**
+   * 从当前片段内切分出一段内容
+   * @param startIndex
+   * @param endIndex
+   */
   sliceContents(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
   }
@@ -282,14 +347,27 @@ export class Fragment extends ViewData {
     }
   }
 
+  /**
+   * 通过下标在当前片段获取指定位置的内容
+   * @param index
+   */
   getContentAtIndex(index: number) {
     return this.contents.getContentAtIndex(index);
   }
 
+  /**
+   * 查找一个节点在当前片段内的下标位置，如未找到，则返回 -1
+   * @param el
+   */
   find(el: ViewData) {
     return this.contents.find(el);
   }
 
+  /**
+   * 把一个片段的内容及格式插入到当前片段的指定位置
+   * @param fragment
+   * @param index
+   */
   insertFragmentContents(fragment: Fragment, index: number) {
     this.markDirty();
     const contentsLength = fragment.contents.length;
@@ -411,6 +489,9 @@ export class Fragment extends ViewData {
     return ff;
   }
 
+  /**
+   * 向上清除当前片段所在的空树
+   */
   cleanEmptyFragmentTreeBySelf() {
     const parent = this.parent;
     this.destroy();
@@ -419,6 +500,9 @@ export class Fragment extends ViewData {
     }
   }
 
+  /**
+   * 通过当前节点的格式化信息创建虚拟 DOM 并返回
+   */
   createVDom() {
     // if (!this.dataChanged) {
     //   return this.vNode;
@@ -446,12 +530,9 @@ export class Fragment extends ViewData {
     return root;
   }
 
-  mergeFormat(format: FormatRange, important = false) {
-    this.markDirty();
-    format.context = this;
-    mergeFormat(this.formatMap, format, important);
-  }
-
+  /**
+   * 清除当前片段的所有数据，并在父节点中删除
+   */
   destroy() {
     this.contents.getFragments().forEach(f => f.destroy());
     if (this.parent) {
@@ -463,6 +544,9 @@ export class Fragment extends ViewData {
     (<{ parent: Fragment }>this.parent) = null;
   }
 
+  /**
+   * 获取当前片段在父片段中的下标位置
+   */
   getIndexInParent() {
     if (this.parent) {
       let i = this.parent.contents.find(this);
@@ -535,6 +619,11 @@ export class Fragment extends ViewData {
     }
   }
 
+  /**
+   * 根据指定范围选取内容并创建节点后返回
+   * @param startIndex
+   * @param endIndex
+   */
   private createNodesByRange(startIndex: number, endIndex: number) {
     const vNodes: Token[] = [];
 

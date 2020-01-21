@@ -1,5 +1,5 @@
 import { Commander, ReplaceModel } from './commander';
-import { FormatState } from '../matcher/matcher';
+import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { Fragment } from '../parser/fragment';
@@ -76,8 +76,8 @@ export class ToggleBlockCommander implements Commander {
     }
   }
 
-  render(state: FormatState): ReplaceModel {
-    if (state === FormatState.Valid) {
+  render(state: MatchState): ReplaceModel {
+    if (state === MatchState.Valid) {
       return new ReplaceModel(new VElement(this.tagName));
     }
     return null;
