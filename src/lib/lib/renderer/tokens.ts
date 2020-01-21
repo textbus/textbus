@@ -3,6 +3,10 @@ import { FormatRange, SingleFormat } from '../parser/format';
 import { Single } from '../parser/single';
 import { ElementRef, TextRef } from './renderer';
 
+/**
+ * 文本 Token
+ * 主要用于储存一段文本的内容和位置信息
+ */
 export class TextToken {
   elementRef: TextRef;
 
@@ -22,6 +26,10 @@ export class TextToken {
   }
 }
 
+/**
+ * Block Token
+ * 主要用于储存 Block 元素节点的格式化信息和节点树
+ */
 export class BlockToken {
   get elementRef() {
     return this.slotElement;
@@ -48,6 +56,10 @@ export class BlockToken {
   }
 }
 
+/**
+ * Inline Token
+ * 主要用于储存 Inline 元素节点的格式化信息和节点树
+ */
 export class InlineToken {
   get elementRef() {
     return this.slotElement;
@@ -69,7 +81,10 @@ export class InlineToken {
     }
   }
 }
-
+/**
+ * Media Token
+ * 主要用于储存单元素节点的格式化信息和节点树，如 br、img等
+ */
 export class MediaToken {
   elementRef: ElementRef;
 

@@ -2,6 +2,9 @@ import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isMac } from './tools';
 
+/**
+ * 快捷键配置项
+ */
 export interface KeymapConfig {
   ctrlKey?: boolean;
   shiftKey?: boolean;
@@ -9,12 +12,20 @@ export interface KeymapConfig {
   key: string | string[];
 }
 
+/**
+ * 添加快捷键配置的参数
+ */
 export interface Keymap {
+  /** 快捷键配置 */
   config: KeymapConfig;
 
+  /** 当触发快捷键时执行的回调 */
   action(event: Event): any;
 }
 
+/**
+ * 事件劫持类，用于分配用户鼠标和键盘操作后的逻辑
+ */
 export class Events {
   onInput: Observable<Event>;
   onFocus: Observable<Event>;
@@ -29,6 +40,10 @@ export class Events {
     this.setup();
   }
 
+  /**
+   * 添加快捷键
+   * @param keymap
+   */
   addKeymap(keymap: Keymap) {
     this.keymaps.push(keymap);
   }

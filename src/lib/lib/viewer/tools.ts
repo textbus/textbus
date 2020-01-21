@@ -2,6 +2,10 @@ import { TBRange, TBRangePosition } from './range';
 import { Fragment } from '../parser/fragment';
 import { Single } from '../parser/single';
 
+/**
+ * 获取上一个选区位置
+ * @param range
+ */
 export function getPreviousPosition(range: TBRange) {
   const currentFragment = range.startFragment;
   let offset = range.startIndex;
@@ -52,6 +56,10 @@ export function getPreviousPosition(range: TBRange) {
   }
 }
 
+/**
+ * 获取下一个选区位置
+ * @param range
+ */
 export function getNextPosition(range: TBRange): TBRangePosition {
   const currentFragment = range.endFragment;
   let offset = range.endIndex;
@@ -107,6 +115,10 @@ export function getNextPosition(range: TBRange): TBRangePosition {
   }
 }
 
+/**
+ * 获取 Range 光标显示的位置
+ * @param range
+ */
 export function getRangePosition(range: Range) {
   let rect = range.getBoundingClientRect();
   const {startContainer, startOffset} = range;
@@ -133,6 +145,12 @@ export function getRangePosition(range: Range) {
   return rect;
 }
 
+/**
+ * 获取选区向上移动一行的位置
+ * @param range
+ * @param left
+ * @param top
+ */
 export function getPreviousLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
   const range2 = range.clone();
   let isToPrevLine = false;
@@ -180,6 +198,12 @@ export function getPreviousLinePosition(range: TBRange, left: number, top: numbe
   };
 }
 
+/**
+ * 获取选区向下移动一行的位置
+ * @param range
+ * @param left
+ * @param top
+ */
 export function getNextLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
   const range2 = range.clone();
   let isToNextLine = false;
@@ -227,6 +251,10 @@ export function getNextLinePosition(range: TBRange, left: number, top: number): 
   };
 }
 
+/**
+ * 查找 Fragment 内第一个选区位置
+ * @param fragment
+ */
 export function findFirstPosition(fragment: Fragment): TBRangePosition {
   const first = fragment.getContentAtIndex(0);
   if (first instanceof Fragment) {
@@ -254,7 +282,11 @@ export function findRerenderFragment(start: Fragment): TBRangePosition {
     fragment: start.parent
   };
 }
-
+/**
+ * 查找 Fragment 最后一个后代元素
+ * @param fragment
+ * @param index
+ */
 export function findLastChild(fragment: Fragment, index: number): TBRangePosition {
   const last = fragment.getContentAtIndex(index);
   if (last instanceof Fragment) {

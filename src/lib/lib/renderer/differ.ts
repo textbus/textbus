@@ -7,12 +7,20 @@ import { Priority } from '../toolbar/help';
 import { VElement } from './element';
 import { ElementRef, NodeRef, Renderer, TextRef } from './renderer';
 
+/**
+ * diff 算法类，用于比较新老 Token 树，并在找出差异更新对应 NativeElement
+ */
 export class Differ {
   private oldToken: BlockToken;
 
   constructor(private parser: Parser, private renderer: Renderer) {
   }
 
+  /**
+   * 把 Token 树渲染到指定容器
+   * @param newToken 新的 Token
+   * @param host 渲染容器
+   */
   render(newToken: BlockToken, host: ElementRef) {
     newToken.children.forEach((vNode, index) => {
       const old = this?.oldToken?.children.shift();
@@ -42,6 +50,13 @@ export class Differ {
     }
   }
 
+  /**
+   * 渲染新的 Media 节点，如 br、img
+   * @param token
+   * @param oldToken
+   * @param host
+   * @param position
+   */
   private renderMediaNode(token: MediaToken, oldToken: Token, host: ElementRef, position: number): ElementRef {
     if (!Differ.diff(token, oldToken)) {
       let vElement = new VElement(token.data.tagName);
@@ -84,6 +99,15 @@ export class Differ {
     return token.elementRef;
   }
 
+  /**
+   * 渲染容器节点
+   * 当节点为 Block 节点时，会清空当前 Fragment 的 FormatMap
+   * 并根据渲染后的结果重新生成 FormatMap，以保持和视图同步
+   * @param token
+   * @param oldToken
+   * @param host
+   * @param position
+   */
   private renderContainerNode(token: BlockToken | InlineToken, oldToken: Token, host: ElementRef, position: number) {
     if (token instanceof BlockToken) {
       token.context.cleanFormats();
@@ -173,6 +197,13 @@ export class Differ {
     return token.wrapElement;
   }
 
+  /**
+   * 渲染文本节点
+   * @param token
+   * @param oldVNode
+   * @param host
+   * @param position
+   */
   private renderTextNode(token: TextToken, oldVNode: Token, host: ElementRef, position: number): TextRef {
     if (!Differ.diff(token, oldVNode)) {
       let currentNode = this.renderer.createTextNode(token.text);
@@ -199,6 +230,11 @@ export class Differ {
     return token.elementRef;
   }
 
+  /**
+   * 比较两个节点是否相等，并返回布尔值
+   * @param token
+   * @param oldToken
+   */
   private static diff(token: Token, oldToken: Token): boolean {
     if (token === oldToken) {
       return true;
@@ -239,6 +275,11 @@ export class Differ {
     return true;
   }
 
+  /**
+   * 渲染 InlineFormat 或 BlockFormat 生成的虚拟 VElement 树，并返回最外层节点和最内层节点
+   * @param vElement
+   * @param token
+   */
   private createNativeElementsTree(vElement: VElement,
                                    token: BlockToken | InlineToken): { wrap: ElementRef, slot: ElementRef } {
     const wrap = this.renderer.createElement(vElement);

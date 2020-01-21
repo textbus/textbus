@@ -1,6 +1,10 @@
 import { VElement } from './element';
 import { ElementRef, TextRef, Renderer, NodeRef } from './renderer';
 
+/**
+ * 将文本中的空白字符转成 unicode，用于在 DOM Text 节点中显示
+ * @param s
+ */
 export function replaceEmpty(s: string) {
   return s.replace(/\s\s+/g, str => {
     return ' ' + Array.from({
@@ -9,6 +13,9 @@ export function replaceEmpty(s: string) {
   }).replace(/^\s|\s$/g, '\u00a0');
 }
 
+/**
+ * DOM 元素节点引用的实现类
+ */
 export class DOMElement implements ElementRef {
   get name() {
     return this.nativeElement.nodeName.toLowerCase();
@@ -48,6 +55,9 @@ export class DOMElement implements ElementRef {
   }
 }
 
+/**
+ * DOM 文本节点引用的实现类
+ */
 export class DOMText implements TextRef {
   set textContent(v: string) {
     this.nativeElement.textContent = replaceEmpty(v);
@@ -72,6 +82,9 @@ export class DOMText implements TextRef {
   }
 }
 
+/**
+ * DOM 渲染器的实现类
+ */
 export class DomRenderer implements Renderer {
   createElement(element: VElement): ElementRef {
     const el = document.createElement(element.tagName);

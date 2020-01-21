@@ -23,6 +23,9 @@ import { Contents } from '../parser/contents';
 import { Keymap } from './events';
 import { HighlightState } from '../toolbar/help';
 
+/**
+ * TBus 视图面板
+ */
 export class Viewer {
   elementRef = document.createElement('div');
   onSelectionChange: Observable<TBSelection>;
@@ -88,6 +91,10 @@ export class Viewer {
     this.elementRef.appendChild(this.frame);
   }
 
+  /**
+   * 渲染一个 Fragment 到当前视图中
+   * @param rootFragment
+   */
   render(rootFragment: RootFragment) {
     this.root = rootFragment;
     this.contentDocument.body.innerHTML = '';
@@ -95,6 +102,10 @@ export class Viewer {
     this.updateFrameHeight();
   }
 
+  /**
+   * 给当前视图应用生命周期勾子
+   * @param hook
+   */
   use(hook: Hook) {
     this.hooks.push(hook);
     if (typeof hook.setup === 'function') {
@@ -106,10 +117,17 @@ export class Viewer {
     }
   }
 
+  /**
+   * 克隆当前视图的 Selection
+   */
   cloneSelection() {
     return this.selection.clone();
   }
 
+  /**
+   * 给当前视图 Selection 应用命令
+   * @param handler
+   */
   apply(handler: Handler) {
     const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
     if (state === HighlightState.Disabled) {
@@ -126,12 +144,19 @@ export class Viewer {
     this.selectionChangeEvent.next(selection);
   }
 
+  /**
+   * 记录编辑前的快照
+   */
   recordSnapshotFromEditingBefore() {
     this.input.cleanValue();
     this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selection.commonAncestorFragment.clone();
   }
 
+  /**
+   * 注册快捷键
+   * @param keymap
+   */
   registerKeymap(keymap: Keymap) {
     this.input.keymap(keymap);
   }

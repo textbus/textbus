@@ -66,10 +66,18 @@ export class Cursor {
     })
   }
 
+  /**
+   * 添加快捷键
+   * @param keymap
+   */
   keymap(keymap: Keymap) {
     this.events.addKeymap(keymap);
   }
 
+  /**
+   * 根据 Selection 更新光标显示位置及状态
+   * @param selection
+   */
   updateStateBySelection(selection: TBSelection) {
     this.selection = selection;
     if (!selection.rangeCount) {
@@ -83,6 +91,9 @@ export class Cursor {
     }
   }
 
+  /**
+   * 清除当前输入框内的值
+   */
   cleanValue() {
     this.input.value = '';
   }

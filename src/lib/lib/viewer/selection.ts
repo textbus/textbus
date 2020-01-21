@@ -1,33 +1,56 @@
 import { Fragment } from '../parser/fragment';
 import { TBRange, TBRangePosition } from './range';
 
+/**
+ * 记录 Range 的位置 path
+ */
 export interface RangePath {
   startPaths: number[];
   endPaths: number[];
 }
 
+/**
+ * TBus 定义的抽象 Selection 类
+ */
 export class TBSelection {
-
+  /**
+   * 获取所有 Range
+   */
   get ranges(): TBRange[] {
     return this._ranges;
   };
 
+  /**
+   * 获取所有 Range 的公共 Fragment
+   */
   get commonAncestorFragment() {
     return this.getCommonFragment();
   };
 
+  /**
+   * 获取 Range 的数量
+   */
   get rangeCount() {
     return this.ranges.length;
   }
 
+  /**
+   * 获取 Selection 的第一个 Range
+   */
   get firstRange() {
     return this.ranges[0] || null;
   }
 
+  /**
+   * 获取 Selection 的最后一个 Range
+   */
   get lastRange() {
     return this.ranges[this.ranges.length - 1] || null;
   }
 
+  /**
+   * 当前 Selection 是否折叠
+   */
   get collapsed() {
     return this.ranges.length === 1 && this.firstRange.collapsed;
   }
@@ -37,26 +60,44 @@ export class TBSelection {
   constructor(private context: Document) {
   }
 
+  /**
+   * 清除所有的 Range
+   */
   removeAllRanges() {
     this._ranges = [];
   }
 
+  /**
+   * 添加 Range
+   * @param range
+   */
   addRange(range: TBRange) {
     this._ranges.push(range);
   }
 
+  /**
+   * 复制当前 Selection 的副本
+   */
   clone() {
     const t = new TBSelection(this.context);
     t._ranges = this.ranges.map(r => r.clone());
     return t;
   }
 
+  /**
+   * 将当前选区应用到实际 DOM 中
+   * @param offset 设置偏移量。如光标向后移一位为 1，光标向前移一位为 -1
+   */
   apply(offset = 0) {
     this.ranges.forEach(range => {
       range.apply(offset);
     });
   }
 
+  /**
+   * 折叠当前选区
+   * @param toEnd 是否折叠到结束位置
+   */
   collapse(toEnd = false) {
     const range = toEnd ? this.lastRange : this.firstRange;
     range.collapse(toEnd);
@@ -64,6 +105,9 @@ export class TBSelection {
     this.apply();
   }
 
+  /**
+   * 获取当前 Selection 所有 Range 的 path
+   */
   getRangePaths(): Array<RangePath> {
     const getPaths = (fragment: Fragment): number[] => {
       const paths = [];
@@ -92,6 +136,11 @@ export class TBSelection {
     });
   }
 
+  /**
+   * 将一组路径应用到当前 Selection
+   * @param paths
+   * @param fragment
+   */
   usePaths(paths: RangePath[], fragment: Fragment) {
     const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
       let f = fragment;
