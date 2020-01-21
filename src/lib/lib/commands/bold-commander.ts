@@ -18,7 +18,8 @@ export class BoldCommander implements Commander {
       if (range.collapsed) {
         if (!overlap) {
           flag = true;
-          range.commonAncestorFragment.setFormats(handler, [new InlineFormat({
+          const old = range.commonAncestorFragment.getFormatRangesByHandler(handler);
+          const f = new InlineFormat({
             startIndex: range.startIndex,
             endIndex: range.startIndex,
             handler,
@@ -27,7 +28,12 @@ export class BoldCommander implements Commander {
             abstractData: {
               tag: 'strong'
             }
-          })]);
+          });
+          if (old) {
+            old.push(f);
+          } else {
+            range.commonAncestorFragment.setFormats(handler, [f]);
+          }
           return;
         }
         // range.commonAncestorFragment.splitFormatRange(handler, range.startIndex);
