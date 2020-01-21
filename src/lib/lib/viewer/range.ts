@@ -83,7 +83,6 @@ export class TBRange {
       this.endIndex + offset);
     this.startIndex += offset;
     this.endIndex += offset;
-    console.log(start, end)
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
     return this;

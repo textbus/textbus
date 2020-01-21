@@ -73,29 +73,29 @@ export class Fragment extends ViewData {
     this.markDirty(true);
   }
 
-  splitFormatRange(handler: Handler, index: number) {
-    const formats = this.formatMap.get(handler).filter(f => f instanceof InlineFormat) as InlineFormat[];
-    const newFormats: InlineFormat[] = [];
-    formats.forEach(format => {
-      if (format.startIndex < index && format.endIndex >= index) {
-        const c = format.clone();
-        if (format.endIndex === index) {
-          c.greedy = false;
-          newFormats.push(c);
-          return;
-        }
-        c.endIndex = index;
-        c.greedy = false;
-        newFormats.push(c);
-        const e = format.clone();
-        e.startIndex = index;
-        newFormats.push(e);
-      }
-    });
-    if (newFormats.length) {
-      this.formatMap.set(handler, newFormats);
-    }
-  }
+  // splitFormatRange(handler: Handler, index: number) {
+  //   const formats = this.formatMap.get(handler).filter(f => f instanceof InlineFormat) as InlineFormat[];
+  //   const newFormats: InlineFormat[] = [];
+  //   formats.forEach(format => {
+  //     if (format.startIndex < index && format.endIndex >= index) {
+  //       const c = format.clone();
+  //       if (format.endIndex === index) {
+  //         c.greedy = false;
+  //         newFormats.push(c);
+  //         return;
+  //       }
+  //       c.endIndex = index;
+  //       c.greedy = false;
+  //       newFormats.push(c);
+  //       const e = format.clone();
+  //       e.startIndex = index;
+  //       newFormats.push(e);
+  //     }
+  //   });
+  //   if (newFormats.length) {
+  //     this.formatMap.set(handler, newFormats);
+  //   }
+  // }
 
   useFormats(formats: Map<Handler, Array<BlockFormat | InlineFormat>>) {
     this.markDirty();

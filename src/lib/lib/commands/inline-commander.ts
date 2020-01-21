@@ -13,11 +13,11 @@ export class InlineCommander implements Commander {
   }
 
   command(selection: TBSelection, handler: Handler, overlap: boolean) {
+    let flag = false;
     selection.ranges.forEach(range => {
       if (range.collapsed) {
-        if (overlap) {
-          range.commonAncestorFragment.splitFormatRange(handler, range.startIndex);
-        } else {
+        if (!overlap) {
+          flag = true;
           range.commonAncestorFragment.setFormats(handler, [new InlineFormat({
             startIndex: range.startIndex,
             endIndex: range.startIndex,
@@ -28,9 +28,12 @@ export class InlineCommander implements Commander {
               tag: this.tagName
             }
           })]);
+          return;
         }
+        // range.commonAncestorFragment.splitFormatRange(handler, range.startIndex);
         return;
       }
+      flag = true;
       range.getSelectedScope().forEach(item => {
         const r = new InlineFormat({
           startIndex: item.startIndex,
@@ -44,7 +47,8 @@ export class InlineCommander implements Commander {
         });
         item.context.apply(r, false);
       });
-    })
+    });
+    this.recordHistory = flag;
   }
 
   render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {

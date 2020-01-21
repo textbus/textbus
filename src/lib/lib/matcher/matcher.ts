@@ -118,6 +118,7 @@ export class Matcher {
           s.endIndex,
           s.context,
           handler);
+        console.log(state)
         if (state.state === FormatState.Invalid) {
           const inSingleContainer = Matcher.inSingleContainer(s.context, handler, s.startIndex, s.endIndex);
           if (inSingleContainer.state !== FormatState.Invalid) {
@@ -241,8 +242,7 @@ export class Matcher {
           };
         }
         const matchBegin = startIndex === 0 ? startIndex >= format.startIndex : startIndex > format.startIndex;
-        const matchClose = format.greedy ? endIndex <= format.endIndex : endIndex < format.endIndex;
-        console.log(format, matchClose, matchBegin)
+        const matchClose = endIndex < format.endIndex;
         if (matchBegin && matchClose) {
           return {
             state: format.state,
@@ -434,15 +434,16 @@ export class Matcher {
       const formatRanges = fragment.getFormatRangesByHandler(handler) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
-        const matchBegin = (startIndex === 0 || startIndex === endIndex) ?
-          startIndex >= f.startIndex :
-          startIndex > f.startIndex;
-        const matchClose = (f instanceof InlineFormat && !f.greedy) ?
-          endIndex < f.endIndex :
-          endIndex <= f.endIndex;
-
-        if (matchBegin && matchClose) {
+        if (startIndex === endIndex && f.startIndex === f.endIndex && startIndex === f.startIndex) {
           states.push(f);
+        } else {
+          const matchBegin = startIndex === 0 ?
+            startIndex >= f.startIndex :
+            startIndex > f.startIndex;
+          const matchClose = endIndex <= f.endIndex;
+          if (matchBegin && matchClose) {
+            states.push(f);
+          }
         }
       }
 

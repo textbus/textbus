@@ -54,7 +54,6 @@ export class InlineFormat {
   context: Fragment;
   state: FormatState;
   abstractData: AbstractData;
-  greedy: boolean;
 
   constructor(params: InlineFormatParams | InlineFormat) {
     this.startIndex = params.startIndex;
@@ -62,7 +61,6 @@ export class InlineFormat {
     this.handler = params.handler;
     this.context = params.context;
     this.state = params.state;
-    this.greedy = (params.greedy === undefined || params.greedy === null) ? true : !!params.greedy;
     this.abstractData = params.abstractData && new AbstractData(params.abstractData);
   }
 

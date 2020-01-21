@@ -13,7 +13,27 @@ export class BoldCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, handler: Handler, overlap: boolean, rootFragment: RootFragment) {
+    let flag = false;
     selection.ranges.forEach(range => {
+      if (range.collapsed) {
+        if (!overlap) {
+          flag = true;
+          range.commonAncestorFragment.setFormats(handler, [new InlineFormat({
+            startIndex: range.startIndex,
+            endIndex: range.startIndex,
+            handler,
+            context: range.commonAncestorFragment,
+            state: FormatState.Valid,
+            abstractData: {
+              tag: 'strong'
+            }
+          })]);
+          return;
+        }
+        // range.commonAncestorFragment.splitFormatRange(handler, range.startIndex);
+        return;
+      }
+      flag = true;
       range.getSelectedScope().forEach(item => {
         if (overlap) {
           this.clean(item, handler);
@@ -47,7 +67,8 @@ export class BoldCommander implements Commander {
             break;
         }
       });
-    })
+    });
+    this.recordHistory = flag;
   }
 
   render(state: FormatState, rawElement?: VElement, abstractData?: AbstractData) {

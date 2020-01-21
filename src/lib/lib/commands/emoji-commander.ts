@@ -2,7 +2,7 @@ import { Commander } from './commander';
 import { TBSelection } from '../viewer/selection';
 
 export class EmojiCommander implements Commander<string> {
-  recordHistory = false;
+  recordHistory = true;
   private value: string = '';
 
   updateValue(value: string): void {
