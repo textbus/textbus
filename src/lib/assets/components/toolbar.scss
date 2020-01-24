@@ -39,6 +39,11 @@
   }
 }
 
+.tbus-toolbar-keymap-join {
+  opacity: .8;
+  font-size: .8em;
+}
+
 .tbus-toolbar-group {
   margin-right: 8px;
   margin-bottom: 5px;
@@ -138,7 +143,7 @@
       font-weight: normal;
       margin-left: 1.2em;
       margin-right: -.5em;
-      opacity: .6;
+      opacity: .8;
       display: inline-flex;
       align-items: center;
       font-variant-numeric: tabular-nums;

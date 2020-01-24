@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { ActionSheetConfig, ActionConfig, EditableOptions, HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
-import { SelectionMatchDelta, Handler } from './help';
+import { SelectionMatchDelta, Handler, createKeymapHTML } from './help';
 import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
@@ -101,8 +101,15 @@ export class ActionSheetOptionHandler {
     if (option.classes) {
       label.classList.add(...(option.classes || []));
     }
+
     label.innerText = option.label;
     this.elementRef.appendChild(label);
+    if (option.keymap) {
+      const keymapHTML = document.createElement('span');
+      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
+      keymapHTML.innerHTML = createKeymapHTML(option.keymap);
+      this.elementRef.appendChild(keymapHTML);
+    }
     this.elementRef.addEventListener('click', () => {
       this.eventSource.next(option.value);
     });

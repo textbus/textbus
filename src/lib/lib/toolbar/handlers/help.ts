@@ -62,5 +62,5 @@ export function createKeymapHTML(config: KeymapConfig) {
 
   }
   arr.push(keys);
-  return arr.join('+');
+  return arr.join('<span class="tbus-toolbar-keymap-join">+</span>');
 }
