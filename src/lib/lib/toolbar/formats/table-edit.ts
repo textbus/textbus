@@ -20,7 +20,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table-add-column-left'],
     keymap: {
       ctrlKey: true,
-      altKey: true,
+      shiftKey: true,
       key: 'l'
     }
   }, {
@@ -29,7 +29,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table-add-column-right'],
     keymap: {
       ctrlKey: true,
-      altKey: true,
+      shiftKey: true,
       key: 'r'
     }
   }, {
@@ -38,7 +38,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table-add-row-top'],
     keymap: {
       ctrlKey: true,
-      altKey: true,
+      shiftKey: true,
       key: 'u'
     }
   }, {
@@ -47,7 +47,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table-add-row-bottom'],
     keymap: {
       ctrlKey: true,
-      altKey: true,
+      shiftKey: true,
       key: 'd'
     }
   }, {
@@ -55,7 +55,7 @@ export const tableEditHandler: ActionSheetConfig = {
     value: TableEditActions.DeleteLeftColumn,
     classes: ['tbus-icon-table-delete-column-left'],
     keymap: {
-      shiftKey: true,
+      ctrlKey: true,
       altKey: true,
       key: 'l'
     }
@@ -64,7 +64,7 @@ export const tableEditHandler: ActionSheetConfig = {
     value: TableEditActions.DeleteRightColumn,
     classes: ['tbus-icon-table-delete-column-right'],
     keymap: {
-      shiftKey: true,
+      ctrlKey: true,
       altKey: true,
       key: 'r'
     }
@@ -73,7 +73,7 @@ export const tableEditHandler: ActionSheetConfig = {
     value: TableEditActions.DeleteTopRow,
     classes: ['tbus-icon-table-delete-row-top'],
     keymap: {
-      shiftKey: true,
+      ctrlKey: true,
       altKey: true,
       key: 'u'
     }
@@ -82,7 +82,7 @@ export const tableEditHandler: ActionSheetConfig = {
     value: TableEditActions.DeleteBottomRow,
     classes: ['tbus-icon-table-delete-row-bottom'],
     keymap: {
-      shiftKey: true,
+      ctrlKey: true,
       altKey: true,
       key: 'd'
     }
