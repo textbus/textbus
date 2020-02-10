@@ -15,7 +15,7 @@ const form = new Form([{
   required: true,
   placeholder: '请输入链接地址',
   canUpload: true,
-  uploadType: 'video',
+  uploadType: 'image',
   uploadBtnText: '上传新图片'
 }]);
 
