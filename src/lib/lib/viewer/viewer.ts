@@ -282,6 +282,7 @@ export class Viewer {
     this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
     this.invokeViewChangeHooks();
     this.updateFrameHeight();
+    this.userWriteEvent.next();
   }
 
   private invokeDeleteHooks() {
