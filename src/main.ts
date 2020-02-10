@@ -19,6 +19,6 @@ const editor = createEditor('#editor', {
 //   console.log(result);
 // });
 
-// setTimeout(() => {
-//   editor.updateContentHTML(`<html><body><div>测试</div></body></html>`)
-// }, 3000);
+setTimeout(() => {
+  editor.setContents(`<html><body><div>测试</div></body></html>`)
+}, 3000);

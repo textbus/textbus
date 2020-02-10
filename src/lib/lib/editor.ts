@@ -78,18 +78,18 @@ export class Editor implements EventDelegate {
     }
     this.historyStackSize = options.historyStackSize || 50;
     this.toolbar = new Toolbar(this, options.handlers);
-    this.toolbar.onAction.pipe(filter(() => this.readyState)).subscribe((handler: Handler) => {
+    this.toolbar.onAction.pipe(filter(() => !!this.selection)).subscribe((handler: Handler) => {
       this.viewer.apply(handler);
       if (handler.execCommand.recordHistory) {
         this.recordSnapshot();
         this.listenUserWriteEvent();
       }
-      // this.updateHandlerState(this.selection);
     });
     this.parser = new Parser(this.toolbar.handlers);
     this.renderer = options?.settings?.renderer || new DomRenderer();
     this.viewer = new Viewer(this, new Differ(this.parser, this.renderer));
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
+      this.readyState = true;
       const vDom = new RootFragment(this.parser);
       this.root = vDom;
       vDom.setContents(result[0]);
@@ -99,7 +99,6 @@ export class Editor implements EventDelegate {
     });
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
-      this.readyState = true;
       this.selection = selection;
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
@@ -131,6 +130,17 @@ export class Editor implements EventDelegate {
     }
   }
 
+  setContents(html: string) {
+    this.run(() => {
+      this.writeContents(html).then(result => {
+        const vDom = new RootFragment(this.parser);
+        this.root = vDom;
+        vDom.setContents(result);
+        this.viewer.render(vDom)
+      })
+    })
+  }
+
   dispatchEvent(type: string): Observable<string> {
     if (typeof this.options.uploader === 'function') {
       const result = this.options.uploader(type);
@@ -160,6 +170,26 @@ export class Editor implements EventDelegate {
       return this.historySequence[this.historyIndex];
     }
     return null;
+  }
+
+  registerHook(hook: Hook) {
+    this.run(() => {
+      this.viewer.use(hook);
+    });
+  }
+
+  registerKeymap(keymap: Keymap) {
+    this.run(() => {
+      this.viewer.registerKeymap(keymap);
+    })
+  }
+
+  private run(fn: () => void) {
+    if (!this.readyState) {
+      this.tasks.push(fn);
+      return;
+    }
+    fn();
   }
 
   private recordSnapshot() {
@@ -205,26 +235,6 @@ export class Editor implements EventDelegate {
 
       document.body.appendChild(temporaryIframe);
     });
-  }
-
-  registerHook(hook: Hook) {
-    this.run(() => {
-      this.viewer.use(hook);
-    });
-  }
-
-  registerKeymap(keymap: Keymap) {
-    this.run(() => {
-      this.viewer.registerKeymap(keymap);
-    })
-  }
-
-  run(fn: () => void) {
-    if (!this.readyState) {
-      this.tasks.push(fn);
-      return;
-    }
-    fn();
   }
 
   private listenUserWriteEvent() {

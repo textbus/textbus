@@ -97,7 +97,7 @@ export class Viewer {
    */
   render(rootFragment: RootFragment) {
     this.root = rootFragment;
-    this.contentDocument.body.innerHTML = '';
+    // this.contentDocument.body.innerHTML = '';
     this.renderer.render(rootFragment.createVDom(), new DOMElement(this.contentDocument.body));
     this.updateFrameHeight();
   }
