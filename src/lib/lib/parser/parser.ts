@@ -44,6 +44,7 @@ export class Parser {
       }
     }).filter(item => item.state !== MatchState.Invalid);
   }
+
   /**
    * 获取 HTML 节点在富文本中所有 handler 的匹配数据
    * @param node
@@ -248,10 +249,13 @@ export class Parser {
     }
     let style: { name: string, value: string } = null;
     if (config.styleName) {
-      style = {
-        name: config.styleName,
-        value: node.style[config.styleName]
-      };
+      const v = node.style[config.styleName];
+      if (v) {
+        style = {
+          name: config.styleName,
+          value: v
+        };
+      }
     }
     return new AbstractData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,
