@@ -32,7 +32,8 @@ export class Dropdown {
   constructor(private inner: HTMLElement,
               private menuContents: HTMLElement | DocumentFragment,
               private hideEvent: Observable<any>,
-              private tooltip = '') {
+              private tooltip = '',
+              private limitDisplay: HTMLElement) {
     this.elementRef.classList.add('tbus-dropdown');
 
     this.button.classList.add('tbus-handler');
@@ -52,7 +53,7 @@ export class Dropdown {
 
     const updatePosition = () => {
       if (this.elementRef.classList.contains('tbus-dropdown-open')) {
-        const distance = document.body.clientWidth - (this.elementRef.getBoundingClientRect().left + menu.offsetWidth);
+        const distance = this.limitDisplay.getBoundingClientRect().right - (this.elementRef.getBoundingClientRect().left + menu.offsetWidth);
         menu.style.left = `${Math.min(0, distance)}px`;
       }
     };

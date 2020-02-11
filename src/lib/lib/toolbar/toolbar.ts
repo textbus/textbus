@@ -17,12 +17,16 @@ export class Toolbar {
   readonly handlers: Handler[] = [];
 
   private actionEvent = new Subject<Handler>();
+  private toolsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
   constructor(private context: Editor, private config: (HandlerConfig | HandlerConfig[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
+    this.toolsElement.classList.add('tbus-toolbar-tools');
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
+
+    this.elementRef.appendChild(this.toolsElement);
     this.elementRef.appendChild(this.keymapPrompt);
 
     const defaultHandlers = new DefaultTagsHandler();
@@ -75,7 +79,7 @@ export class Toolbar {
         } else {
           group.appendChild(this.createHandler(handler));
         }
-        this.elementRef.appendChild(group);
+        this.toolsElement.appendChild(group);
       });
       this.listenUserAction();
     }
@@ -97,13 +101,13 @@ export class Toolbar {
         h = new ButtonHandler(option);
         break;
       case HandlerType.Select:
-        h = new SelectHandler(option);
+        h = new SelectHandler(option, this.toolsElement);
         break;
       case HandlerType.Dropdown:
-        h = new DropdownHandler(option, this.context);
+        h = new DropdownHandler(option, this.context, this.toolsElement);
         break;
       case HandlerType.ActionSheet:
-        h = new ActionSheetHandler(option);
+        h = new ActionSheetHandler(option, this.toolsElement);
         break;
     }
     if (h.keymap) {

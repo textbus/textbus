@@ -23,7 +23,8 @@ export class SelectHandler implements Handler {
   private textContainer: HTMLElement;
   private dropdown: Dropdown;
 
-  constructor(private config: SelectConfig) {
+  constructor(private config: SelectConfig,
+              private stickyElement: HTMLElement) {
     this.priority = config.priority;
     this.execCommand = config.execCommand;
     this.hook = config.hook;
@@ -71,7 +72,8 @@ export class SelectHandler implements Handler {
       dropdownInner,
       menu,
       merge(...this.options.map(item => item.onCheck)),
-      config.tooltip
+      config.tooltip,
+      stickyElement
     );
     this.elementRef = this.dropdown.elementRef;
   }

@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { SelectionMatchDelta, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
+import { ActionSheetConfig, DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
 import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
@@ -18,7 +18,9 @@ export class DropdownHandler implements Handler {
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 
-  constructor(private config: DropdownConfig, private delegate: EventDelegate) {
+  constructor(private config: DropdownConfig,
+              private delegate: EventDelegate,
+              private stickyElement: HTMLElement) {
     this.onApply = config.onHide;
     this.priority = config.priority;
     this.editableOptions = config.editable;
@@ -34,7 +36,8 @@ export class DropdownHandler implements Handler {
       this.dropdownButton,
       config.viewer.elementRef,
       config.onHide,
-      config.tooltip
+      config.tooltip,
+      stickyElement
     );
     this.elementRef = this.dropdown.elementRef;
 

@@ -25,7 +25,8 @@ export class ActionSheetHandler implements Handler {
   private eventSource = new Subject<any>();
   private dropdown: Dropdown;
 
-  constructor(private config: ActionSheetConfig) {
+  constructor(private config: ActionSheetConfig,
+              private stickyElement: HTMLElement) {
     this.priority = config.priority;
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
@@ -64,7 +65,8 @@ export class ActionSheetHandler implements Handler {
         this.eventSource.next();
         return v;
       })),
-      config.tooltip
+      config.tooltip,
+      stickyElement
     );
     this.elementRef = this.dropdown.elementRef;
   }

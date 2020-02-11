@@ -1,11 +1,6 @@
 .tbus-container {
   line-height: 1.428;
-
-  > div:first-child {
-    border-radius: 5px 5px 0 0;
-  }
-
-  > div:last-child {
-    border-radius: 0 0 5px 5px;
-  }
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
 }
