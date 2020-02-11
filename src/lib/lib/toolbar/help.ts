@@ -51,6 +51,8 @@ export interface ButtonConfig {
   priority: Priority;
   /** 当前工具编辑项的配置 */
   editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
+  /** 当前控件定制的样式表 */
+  styleSheets?: string[];
   /** 设置按扭显示的文字 */
   label?: string;
   /** 给按扭控件添加一组 css class 类 */
@@ -93,6 +95,8 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
   highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig;
+  /** 当前控件定制的样式表 */
+  styleSheets?: string[];
   /** 锚中节点的匹配项配置 */
   match?: MatchRule | Matcher;
   /** 给 Select 控件添加一组 css class */
@@ -117,6 +121,8 @@ export interface DropdownConfig {
   priority: Priority;
   /** 当前下拉框编辑项的配置 */
   editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
+  /** 当前控件定制的样式表 */
+  styleSheets?: string[];
   /** 给当前控件添加一组 css class */
   classes?: string[];
   /** 当鼠标放在控件上的提示文字 */
@@ -159,6 +165,8 @@ export interface ActionSheetConfig {
   execCommand: Commander & { actionType: any };
   /** 设置渲染优化级 */
   priority: Priority;
+  /** 当前控件定制的样式表 */
+  styleSheets?: string[];
   /** 当鼠标放在控件上的提示文字 */
   match?: MatchRule | Matcher;
   /** 设置控件显示的文字 */

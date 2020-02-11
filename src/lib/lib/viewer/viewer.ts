@@ -54,7 +54,8 @@ export class Viewer {
   private cleanOldCursorTimer: any;
 
   constructor(private editor: Editor,
-              private renderer: Differ) {
+              private renderer: Differ,
+              private styleSheets: string[] = []) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
@@ -67,6 +68,12 @@ export class Viewer {
       this.input = new Cursor(doc);
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.input.elementRef);
+
+      this.styleSheets.forEach(s => {
+        const style = doc.createElement('style');
+        style.innerHTML = s;
+        doc.head.appendChild(style);
+      });
 
       merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
         .subscribe(() => {

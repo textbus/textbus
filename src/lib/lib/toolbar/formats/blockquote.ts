@@ -6,6 +6,13 @@ export const blockquoteHandler: ButtonConfig = {
   classes: ['tbus-icon-quotes-right'],
   tooltip: '引用',
   priority: Priority.Block,
+  styleSheets: [`blockquote {
+  padding: 10px 15px;
+  border-left: 10px solid $color-gray-light;
+  background-color: $color-lighter;
+  margin: 1em 0;
+  border-radius: 4px;
+}`],
   match: {
     tags: ['blockquote'],
     noInTags: ['table', 'pre']

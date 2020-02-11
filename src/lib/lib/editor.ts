@@ -37,8 +37,13 @@ export interface EditorOptions {
 
 }
 
+export interface TBDoc {
+  styleSheets: string[];
+  contents: string;
+}
+
 export class Editor implements EventDelegate {
-  readonly onChange: Observable<string>;
+  readonly onChange: Observable<TBDoc>;
   readonly parser: Parser;
   readonly elementRef = document.createElement('div');
 
@@ -62,7 +67,7 @@ export class Editor implements EventDelegate {
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
-  private changeEvent = new Subject<string>();
+  private changeEvent = new Subject<TBDoc>();
   private tasks: Array<() => void> = [];
   private readyState = false;
   private selection: TBSelection;
@@ -87,7 +92,7 @@ export class Editor implements EventDelegate {
     });
     this.parser = new Parser(this.toolbar.handlers);
     this.renderer = options?.settings?.renderer || new DomRenderer();
-    this.viewer = new Viewer(this, new Differ(this.parser, this.renderer));
+    this.viewer = new Viewer(this, new Differ(this.parser, this.renderer), this.toolbar.styleSheets);
     zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
       const vDom = new RootFragment(this.parser);
@@ -208,7 +213,10 @@ export class Editor implements EventDelegate {
   }
 
   private dispatchContentChangeEvent() {
-    this.changeEvent.next(this.viewer.contentDocument.documentElement.outerHTML);
+    this.changeEvent.next({
+      styleSheets: this.toolbar.styleSheets.map(t => t),
+      contents: this.viewer.contentDocument.body.innerHTML
+    });
   }
 
   private writeContents(html: string) {

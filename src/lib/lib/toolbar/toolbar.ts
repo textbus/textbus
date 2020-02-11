@@ -15,6 +15,7 @@ export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<Handler>;
   readonly handlers: Handler[] = [];
+  readonly styleSheets: string[] = [];
 
   private actionEvent = new Subject<Handler>();
   private toolsElement = document.createElement('div');
@@ -94,6 +95,9 @@ export class Toolbar {
   private createHandler(option: HandlerConfig) {
     if (option.hook) {
       this.context.registerHook(option.hook)
+    }
+    if (Array.isArray(option.styleSheets)) {
+      this.styleSheets.push(...option.styleSheets);
     }
     let h: Handler;
     switch (option.type) {

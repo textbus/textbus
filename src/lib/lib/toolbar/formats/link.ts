@@ -41,6 +41,9 @@ export const linkHandler: DropdownConfig = {
   priority: Priority.Inline,
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
+  styleSheets: [`[style*=color]:not([style*=background-color]) a {
+  color: inherit;
+}`],
   editable: {
     attrs: ['href', 'target']
   },
