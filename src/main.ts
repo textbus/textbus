@@ -6,6 +6,7 @@ import './lib/assets/index.scss';
 
 const editor = createEditor('#editor', {
   theme: 'dark',
+  height: 300,
   uploader(type: string): string | Promise<string> | Observable<string> {
     console.log(type);
     return '/test';

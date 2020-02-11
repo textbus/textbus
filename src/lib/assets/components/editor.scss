@@ -3,20 +3,21 @@
   border-right: 1px solid $color-light;
   background-color: $color-lighter;
   user-select: none;
-  overflow: hidden;
 }
 
 .tbus-wrap {
   position: relative;
-  overflow: hidden;
+  //overflow: hidden;
   box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
   margin: 0 auto;
   background-color: #fff;
+  overflow: auto;
+  height: 400px;
 }
 
 .tbus-frame {
   border: none;
   width: 100%;
   display: block;
-  min-height: 340px;
+  min-height: 100%;
 }

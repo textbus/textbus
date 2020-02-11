@@ -95,6 +95,7 @@ export class Viewer {
 
     this.elementRef.classList.add('tbus-wrap');
     this.frame.classList.add('tbus-frame');
+
     this.elementRef.appendChild(this.frame);
   }
 

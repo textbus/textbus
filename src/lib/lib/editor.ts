@@ -32,6 +32,7 @@ export interface EditorOptions {
   content?: string;
   usePaperModel?: boolean;
   settings?: EditorSettings;
+  height?: number | 'auto';
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
@@ -128,6 +129,14 @@ export class Editor implements EventDelegate {
       this.elementRef.classList.add('tbus-theme-' + options.theme);
     }
     this.container.appendChild(this.elementRef);
+
+    if (options.height === 'auto') {
+      this.viewer.elementRef.style.height = 'auto';
+      this.viewer.elementRef.style.overflow = 'visible';
+    } else if (typeof options.height === 'number') {
+      this.viewer.elementRef.style.height = options.height + 'px';
+      this.viewer.elementRef.style.overflow = 'auto';
+    }
 
     if (options.usePaperModel) {
       this.frameContainer.style.padding = '20px 0';
