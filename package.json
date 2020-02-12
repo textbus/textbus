@@ -7,13 +7,15 @@
   "typings": "./bundles/public-api.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test-c": "jest --coverage",
     "build:lib": "rimraf bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-template-style.config.js",
     "publish:lib": "npm run build:lib && npm publish --access=public"
   },
   "author": "tanbo",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^25.1.2",
     "@types/node": "^12.7.1",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^9.6.1",
@@ -24,6 +26,7 @@
     "handlebars": "^4.4.3",
     "handlebars-loader": "^1.7.1",
     "html-webpack-plugin": "^3.2.0",
+    "jest": "^25.1.0",
     "loader-utils": "^1.2.3",
     "mini-css-extract-plugin": "^0.8.0",
     "node-sass": "^4.12.0",
@@ -34,6 +37,7 @@
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "to-string-loader": "^1.1.5",
+    "ts-jest": "^25.2.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.3",
     "url-loader": "^2.2.0",
