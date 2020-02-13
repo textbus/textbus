@@ -198,4 +198,11 @@ export class Contents implements Iterable<string | ViewData> {
     });
     return newContents;
   }
+
+  /**
+   * 清除内容
+   */
+  clear() {
+    this.elements = [];
+  }
 }
