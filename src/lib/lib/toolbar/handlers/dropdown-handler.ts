@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { SelectionMatchDelta, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { ActionSheetConfig, DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
+import { DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
 import { Matcher } from '../../matcher/matcher';
 import { Commander } from '../../commands/commander';
 import { Hook } from '../../viewer/help';
