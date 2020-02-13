@@ -56,7 +56,7 @@ export class Fragment extends ViewData {
    * 获取当前片段内所有的 Handler
    */
   getFormatHandlers() {
-    return Array.from(this.formatMap.getFormatHandlers());
+    return this.formatMap.getFormatHandlers();
   }
 
   /**
