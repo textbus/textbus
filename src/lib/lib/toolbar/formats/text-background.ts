@@ -5,7 +5,7 @@ import { DropdownConfig, HandlerType, Priority } from '../help';
 import { StyleCommander } from '../../commands/style-commander';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { AbstractData } from '../../parser/abstract-data';
-import { dtd } from '../../dtd';
+import { dtd } from '../../parser/dtd';
 
 const commander = new StyleCommander('backgroundColor', false);
 

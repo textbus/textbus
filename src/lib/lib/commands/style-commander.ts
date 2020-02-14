@@ -4,7 +4,7 @@ import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { InlineFormat } from '../parser/format';
 import { AbstractData } from '../parser/abstract-data';
-import { dtd } from '../dtd';
+import { dtd } from '../parser/dtd';
 import { VElement } from '../renderer/element';
 
 export class StyleCommander implements Commander<string | number> {

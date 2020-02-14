@@ -5,7 +5,7 @@ import { DropdownConfig, HandlerType, Priority } from '../help';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { AbstractData } from '../../parser/abstract-data';
 import { BlockStyleCommander } from '../../commands/block-style-commander';
-import { dtd } from '../../dtd';
+import { dtd } from '../../parser/dtd';
 
 const commander = new BlockStyleCommander('backgroundColor');
 

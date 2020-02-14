@@ -7,7 +7,7 @@ import { AbstractData } from '../parser/abstract-data';
 import { RootFragment } from '../parser/root-fragment';
 import { TBUS_TOKEN } from '../parser/help';
 import { Token } from '../renderer/tokens';
-import { dtd } from '../dtd';
+import { dtd } from '../parser/dtd';
 import { VElement } from '../renderer/element';
 
 export class ListCommander implements Commander<any> {
