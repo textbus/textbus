@@ -21,6 +21,7 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       shiftKey: true,
+      altKey: true,
       key: 'l'
     }
   }, {
@@ -30,6 +31,7 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       shiftKey: true,
+      altKey: true,
       key: 'r'
     }
   }, {
@@ -39,7 +41,8 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       shiftKey: true,
-      key: 'u'
+      altKey: true,
+      key: 't'
     }
   }, {
     label: '在下边添加行',
@@ -48,7 +51,8 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       shiftKey: true,
-      key: 'd'
+      altKey: true,
+      key: 'b'
     }
   }, {
     label: '删除左边列',
@@ -75,7 +79,7 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       altKey: true,
-      key: 'u'
+      key: 't'
     }
   }, {
     label: '删除下边行',
@@ -84,7 +88,7 @@ export const tableEditHandler: ActionSheetConfig = {
     keymap: {
       ctrlKey: true,
       altKey: true,
-      key: 'd'
+      key: 'b'
     }
   }, {
     label: '合并单元格',
@@ -92,6 +96,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table-split-columns'],
     keymap: {
       ctrlKey: true,
+      shiftKey: true,
       altKey: true,
       key: 'm'
     }
@@ -101,6 +106,7 @@ export const tableEditHandler: ActionSheetConfig = {
     classes: ['tbus-icon-table'],
     keymap: {
       ctrlKey: true,
+      shiftKey: true,
       altKey: true,
       key: 's'
     }

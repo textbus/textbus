@@ -68,12 +68,13 @@ export class Events {
       // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
-      const keymaps = this.keymaps.filter(key => {
-        if (Array.isArray(key.config.key)) {
-          return key.config.key.includes(ev.key);
+      const keymaps = this.keymaps.filter(keyMap => {
+        if (Array.isArray(keyMap.config.key)) {
+          return new RegExp(`^(${keyMap.config.key.join('|')})$`, 'i').test(ev.key);
         }
-        return key.config.key === ev.key;
+        return new RegExp(`^${ev.key}$`, 'i').test(keyMap.config.key);
       });
+
       for (const item of keymaps) {
         if (!!item.config.altKey === ev.altKey &&
           !!item.config.shiftKey === ev.shiftKey &&

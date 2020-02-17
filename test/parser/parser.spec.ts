@@ -1,6 +1,6 @@
-import { Parser } from '@tanbo/tbus/parser/parser';
+import { HtmlNormalizer } from '@tanbo/tbus/parser/html-normalizer';
 
-const parser = new Parser();
+const parser = new HtmlNormalizer();
 
 function createDOMByString(str: string) {
   const div = document.createElement('div');
@@ -23,5 +23,21 @@ describe('Parser 类', () => {
       <li><p>p</p></li>
       <span>b</span>
     `)).toEqual('<p><span>a</span></p><ul><li><p>p</p></li></ul><p><span>b</span></p>');
+    expect(createDOMByString(`
+    <ul>
+      <span>aaa</span>
+      <li><span>bbb</span></li>
+    </ul>
+    `)).toEqual('<ul><li><p><span>aaa</span></p></li><li><p><span>bbb</span></p></li></ul>');
+    expect(createDOMByString(`
+    <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+    `)).toEqual('<table><tbody><tr><td><br></td><td><br></td></tr></tbody></table>');
   })
 });

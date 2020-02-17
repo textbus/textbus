@@ -4,14 +4,6 @@ import { TBSelection } from './selection';
 import { Events, Keymap } from './events';
 import { getRangePosition, isWindows } from './tools';
 
-interface CursorStyle {
-  left: number;
-  top: number;
-  height: number;
-  fontSize: string;
-  lineHeight: string;
-}
-
 export class Cursor {
   events: Events;
   input = document.createElement('textarea');
@@ -112,24 +104,19 @@ export class Cursor {
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = getRangePosition(range);
-    const computedStyle = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
-    let style: CursorStyle = {
-      left: rect.left,
-      top: rect.top,
-      height: rect.height,
-      fontSize: computedStyle.fontSize,
-      lineHeight: Number.parseInt(computedStyle.fontSize) * Number.parseFloat(computedStyle.lineHeight) + ''
-    };
-    if (!style.height) {
-      style.height = Number.parseInt(style.fontSize) * Number.parseFloat(style.lineHeight);
-    }
+    const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
+
     if (isWindows) {
-      this.inputWrap.style.top = style.fontSize;
+      this.inputWrap.style.top = fontSize;
     }
-    this.elementRef.style.left = style.left + 'px';
-    this.elementRef.style.top = style.top + 'px';
-    this.elementRef.style.height = style.height + 'px';
-    this.input.style.lineHeight = style.lineHeight;
+
+    const boxHeight = Number.parseInt(fontSize) * Number.parseFloat(lineHeight);
+
+    this.elementRef.style.left = rect.left + 'px';
+    this.elementRef.style.top = rect.top + 'px';
+    this.elementRef.style.height = (rect.height || boxHeight) + 'px';
+    this.cursor.style.backgroundColor = color;
+    this.input.style.lineHeight = boxHeight + '';
   }
 
   private show() {

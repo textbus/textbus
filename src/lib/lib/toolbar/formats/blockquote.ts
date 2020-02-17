@@ -8,8 +8,8 @@ export const blockquoteHandler: ButtonConfig = {
   priority: Priority.Block,
   styleSheets: [`blockquote {
   padding: 10px 15px;
-  border-left: 10px solid $color-gray-light;
-  background-color: $color-lighter;
+  border-left: 10px solid #dddee1;
+  background-color: #f8f8f9;
   margin: 1em 0;
   border-radius: 4px;
 }`],
