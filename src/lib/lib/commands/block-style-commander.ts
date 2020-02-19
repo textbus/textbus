@@ -1,4 +1,4 @@
-import { Commander, ReplaceModel } from './commander';
+import { Commander, RenderModel, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -51,7 +51,7 @@ export class BlockStyleCommander implements Commander<string> {
     });
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     if (rawElement) {
       rawElement.styles.set(abstractData.style.name, abstractData.style.value);
     }

@@ -1,4 +1,4 @@
-import { Commander, ReplaceModel } from './commander';
+import { Commander, RenderModel, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -46,8 +46,8 @@ export class BlockCommander implements Commander<string> {
     })
   }
 
-  render(state: MatchState, rawElement?: VElement, data?: AbstractData): ReplaceModel {
-    return new ReplaceModel(new VElement(data ? data.tag : this.tagName));
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
+    return new ReplaceModel(new VElement(abstractData ? abstractData.tag : this.tagName));
   }
 
   private deleteEmptyFragment(fragment: Fragment, scope: Fragment) {

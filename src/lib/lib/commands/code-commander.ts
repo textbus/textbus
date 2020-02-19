@@ -1,4 +1,4 @@
-import { Commander, ReplaceModel } from './commander';
+import { Commander, RenderModel, ReplaceModel } from './commander';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
 import { MatchState } from '../matcher/matcher';
@@ -57,7 +57,7 @@ export class CodeCommander implements Commander<string> {
     }
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     if (state === MatchState.Valid) {
       const el = new VElement(abstractData.tag);
       const lang = abstractData?.attrs?.get('lang');

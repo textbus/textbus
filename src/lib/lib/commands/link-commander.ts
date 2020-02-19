@@ -1,4 +1,4 @@
-import { ChildSlotModel, Commander } from './commander';
+import { ChildSlotModel, Commander, RenderModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -61,7 +61,7 @@ export class LinkCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     const el = new VElement(this.tagName);
     if (abstractData && abstractData.attrs) {
       abstractData.attrs.forEach((value, key) => {

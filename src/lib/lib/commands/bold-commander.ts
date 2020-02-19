@@ -1,4 +1,4 @@
-import { ChildSlotModel, Commander } from './commander';
+import { ChildSlotModel, Commander, RenderModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -77,7 +77,7 @@ export class BoldCommander implements Commander {
     this.recordHistory = flag;
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData) {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     switch (state) {
       case MatchState.Exclude:
         if (rawElement) {

@@ -1,4 +1,4 @@
-import { Commander, ReplaceModel } from './commander';
+import { Commander, RenderModel, ReplaceModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -75,7 +75,7 @@ export class AttrCommander implements Commander<AttrState[]> {
     });
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ReplaceModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     const el = new VElement(this.tagName);
     if (abstractData && abstractData.attrs) {
       abstractData.attrs.forEach((value, key) => {

@@ -1,4 +1,4 @@
-import { ChildSlotModel, Commander } from './commander';
+import { ChildSlotModel, Commander, RenderModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { TBSelection } from '../viewer/selection';
 import { Handler } from '../toolbar/handlers/help';
@@ -36,7 +36,7 @@ export class StyleCommander implements Commander<string | number> {
     });
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData): ChildSlotModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     if (abstractData && abstractData.style) {
       if (rawElement) {
         const isInline = dtd[rawElement.tagName.toLowerCase()].display === 'inline';

@@ -1,4 +1,4 @@
-import { ChildSlotModel, Commander } from './commander';
+import { ChildSlotModel, Commander, RenderModel } from './commander';
 import { MatchState } from '../matcher/matcher';
 import { InlineFormat } from '../parser/format';
 import { TBSelection } from '../viewer/selection';
@@ -57,7 +57,7 @@ export class InlineCommander implements Commander {
     this.recordHistory = flag;
   }
 
-  render(state: MatchState, rawElement?: VElement, abstractData?: AbstractData) {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }
