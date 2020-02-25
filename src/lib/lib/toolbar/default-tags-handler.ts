@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './handlers/help';
 import { MatchState, Matcher } from '../matcher/matcher';
-import { ChildSlotModel, Commander } from '../commands/commander';
+import { ChildSlotModel, Commander, RenderModel } from '../commands/commander';
 import { EditableOptions, Priority } from './help';
 import { AbstractData } from '../parser/abstract-data';
 import { Editor } from '../editor';
@@ -15,7 +15,7 @@ export class DefaultTagCommander implements Commander {
   command(): void {
   }
 
-  render(state: MatchState, element?: VElement, abstractData?: AbstractData): ChildSlotModel {
+  render(state: MatchState, abstractData: AbstractData, rawElement?: VElement): RenderModel {
     const el = new VElement(abstractData.tag);
     if (abstractData && abstractData.attrs) {
       abstractData.attrs.forEach((value, key) => {

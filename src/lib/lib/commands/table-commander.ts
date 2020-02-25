@@ -26,7 +26,7 @@ export class TableCommander implements Commander<AttrState[]> {
     const firstRange = selection.firstRange;
     const fragment = firstRange.startFragment;
     const context = fragment.parent;
-    const table = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+    const table = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'table'
     })));
     if (this.header) {
@@ -58,20 +58,20 @@ export class TableCommander implements Commander<AttrState[]> {
   }
 
   private createBody(parser: Parser) {
-    const tbody = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const tbody = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'tbody'
     })));
 
     for (let i = 0; i < this.rows; i++) {
-      const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
+      const tr = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
         tag: 'tr'
       })));
       tbody.append(tr);
       for (let j = 0; j < this.cols; j++) {
-        const td = new Fragment(parser.getFormatStateByData(new AbstractData({
+        const td = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'td'
         })));
-        td.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+        td.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'br'
         }))));
         tr.append(td);
@@ -82,18 +82,18 @@ export class TableCommander implements Commander<AttrState[]> {
   }
 
   private createHeader(parser: Parser) {
-    const thead = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const thead = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'thead'
     })));
-    const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const tr = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'tr'
     })));
     thead.append(tr);
     for (let i = 0; i < this.cols; i++) {
-      const th = new Fragment(parser.getFormatStateByData(new AbstractData({
+      const th = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
         tag: 'th'
       })));
-      th.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+      th.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
         tag: 'br'
       }))));
       tr.append(th);

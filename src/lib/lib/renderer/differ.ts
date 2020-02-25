@@ -62,7 +62,7 @@ export class Differ {
       let vElement = new VElement(token.data.tagName);
       token.formats.reduce((node, next) => {
         if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, node, next.abstractData);
+          const renderModel = next.handler.execCommand.render(next.state, next.abstractData, node);
           if (renderModel instanceof ReplaceModel) {
             vElement = renderModel.replaceElement;
             return renderModel.replaceElement;
@@ -75,7 +75,7 @@ export class Differ {
       }, vElement);
       token.elementRef = this.renderer.createElement(vElement);
       if (token.elementRef) {
-        this.parser.getFormatStateByNode(token.elementRef.nativeElement as HTMLElement).forEach(f => {
+        this.parser.createFormatDeltasByHTMLElement(token.elementRef.nativeElement as HTMLElement).forEach(f => {
           token.data.mergeFormat(new SingleFormat({
             context: token.data,
             ...f
@@ -117,7 +117,7 @@ export class Differ {
       let slotElement: VElement;
       token.formats.reduce((vEle, next) => {
         if (next.handler) {
-          const renderModel = next.handler.execCommand.render(next.state, vEle, next.abstractData);
+          const renderModel = next.handler.execCommand.render(next.state, next.abstractData, vEle);
           if (renderModel instanceof ReplaceModel) {
             wrapElement = slotElement = renderModel.replaceElement;
             return renderModel.replaceElement;
@@ -162,7 +162,7 @@ export class Differ {
         host.insert(token.wrapElement, position);
       }
       token.formats.forEach(format => {
-        this.parser.getFormatStateByData(format.abstractData).forEach(f => {
+        this.parser.createFormatDeltasByAbstractData(format.abstractData).forEach(f => {
           if ([Priority.Block, Priority.Default, Priority.BlockStyle].includes(f.handler.priority)) {
             token.context.mergeFormat(new BlockFormat({
               ...f,
@@ -284,7 +284,7 @@ export class Differ {
                                    token: BlockToken | InlineToken): { wrap: ElementRef, slot: ElementRef } {
     const wrap = this.renderer.createElement(vElement);
     wrap.nativeElement[TBUS_TOKEN] = token;
-    const newFormatStates = this.parser.getFormatStateByNode(wrap.nativeElement as HTMLElement);
+    const newFormatStates = this.parser.createFormatDeltasByHTMLElement(wrap.nativeElement as HTMLElement);
     this.mergeFormat(token, newFormatStates);
 
     let slot = wrap;

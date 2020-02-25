@@ -15,6 +15,7 @@ import { Renderer } from './renderer/renderer';
 import { Toolbar } from './toolbar/toolbar';
 import { Hook } from './viewer/help';
 import { Keymap } from './viewer/events';
+import { Loading } from './utils/loading';
 
 export interface Snapshot {
   doc: Fragment;
@@ -63,6 +64,7 @@ export class Editor implements EventDelegate {
   private root: RootFragment;
   private readonly viewer: Viewer;
   private readonly renderer: Renderer;
+  private readonly loading = new Loading();
   private readonly paths = new Paths();
   private readonly toolbar: Toolbar;
   private readonly frameContainer = document.createElement('div');
@@ -121,6 +123,7 @@ export class Editor implements EventDelegate {
 
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
+    this.frameContainer.appendChild(this.loading.elementRef);
     this.frameContainer.appendChild(this.viewer.elementRef);
     this.elementRef.appendChild(this.paths.elementRef);
 

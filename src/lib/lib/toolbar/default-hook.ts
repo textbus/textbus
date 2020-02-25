@@ -45,7 +45,7 @@ export class DefaultHook implements Hook {
     snapshot.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new Single('br', parser.getFormatStateByData(new AbstractData({
+          const s = new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'br'
           })));
           commonAncestorFragment.insert(s, index + startIndex);
@@ -63,7 +63,7 @@ export class DefaultHook implements Hook {
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + snapshot.cursorOffset === commonAncestorFragment.contentLength &&
       last instanceof Single && last.tagName === 'br') {
-      commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+      commonAncestorFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
         tag: 'br'
       }))));
     }
@@ -141,7 +141,7 @@ export class DefaultHook implements Hook {
         if (range.startIndex > 0) {
           range.commonAncestorFragment.delete(range.startIndex - 1, range.startIndex);
           if (!range.commonAncestorFragment.contentLength) {
-            range.commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+            range.commonAncestorFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
               tag: 'br'
             }))));
           }
@@ -158,7 +158,7 @@ export class DefaultHook implements Hook {
           if (range.startFragment.contentLength) {
             if (!rerenderFragment.fragment.parent && rerenderFragment.index === 0) {
               const startFragment = new Fragment();
-              parser.getFormatStateByData(new AbstractData({
+              parser.createFormatDeltasByAbstractData(new AbstractData({
                 tag: 'p'
               })).forEach(item => {
                 startFragment.mergeFormat(new BlockFormat({
@@ -188,7 +188,7 @@ export class DefaultHook implements Hook {
                 range.startIndex = 0;
               } else {
                 const startFragment = new Fragment();
-                parser.getFormatStateByData(new AbstractData({
+                parser.createFormatDeltasByAbstractData(new AbstractData({
                   tag: 'p'
                 })).forEach(item => {
                   startFragment.mergeFormat(new BlockFormat({
@@ -197,7 +197,7 @@ export class DefaultHook implements Hook {
                   }))
                 });
 
-                startFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+                startFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
                   tag: 'br'
                 }))));
                 rerenderFragment.fragment.insert(startFragment, 0);
@@ -251,7 +251,7 @@ export class DefaultHook implements Hook {
         range.endFragment = range.startFragment;
         range.endIndex = range.startIndex;
         if (range.startFragment.contentLength === 0) {
-          range.startFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+          range.startFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'br'
           }))));
         }
@@ -271,11 +271,11 @@ export class DefaultHook implements Hook {
       const commonAncestorFragment = range.commonAncestorFragment;
       if (/th|td|pre/i.test(commonAncestorFragment.token.elementRef.name)) {
         if (range.endIndex === commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+          commonAncestorFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'br'
           }))));
         }
-        commonAncestorFragment.insert(new Single('br', parser.getFormatStateByData(new AbstractData({
+        commonAncestorFragment.insert(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'br'
         }))), range.endIndex);
         range.startIndex = range.endIndex = range.endIndex + 1;
@@ -283,12 +283,12 @@ export class DefaultHook implements Hook {
         const afterFragment = commonAncestorFragment.delete(range.startIndex,
           commonAncestorFragment.contentLength);
         if (!commonAncestorFragment.contentLength) {
-          commonAncestorFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+          commonAncestorFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'br'
           }))));
         }
         const index = commonAncestorFragment.getIndexInParent();
-        parser.getFormatStateByData(new AbstractData({
+        parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'p'
         })).forEach(item => {
           afterFragment.mergeFormat(new BlockFormat({
@@ -297,7 +297,7 @@ export class DefaultHook implements Hook {
           }))
         });
         if (!afterFragment.contentLength) {
-          afterFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+          afterFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'br'
           }))));
         }

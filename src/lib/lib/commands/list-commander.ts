@@ -64,7 +64,7 @@ export class ListCommander implements Commander<any> {
       let insertPosition = range.getCommonAncestorFragmentScope().startIndex;
       let container = range.commonAncestorFragment;
 
-      const listGroup = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+      const listGroup = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
         tag: this.tagName
       })));
 
@@ -79,14 +79,14 @@ export class ListCommander implements Commander<any> {
           if (/li/i.test(nativeElement.name)) {
             listGroup.append(item.context);
           } else {
-            const li = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+            const li = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
               tag: 'li'
             })));
             li.append(item.context);
             listGroup.append(li);
           }
         } else {
-          const li = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+          const li = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'li'
           })));
           li.append(item.context.delete(item.startIndex, item.endIndex));
@@ -96,7 +96,7 @@ export class ListCommander implements Commander<any> {
       });
       const limitChildren = dtd[container.token.elementRef.name.toLowerCase()]?.limitChildren;
       if (limitChildren) {
-        const childFragment = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+        const childFragment = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: limitChildren[0]
         })));
         childFragment.append(listGroup);

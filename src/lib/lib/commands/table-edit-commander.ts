@@ -123,7 +123,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         if (cell.columnOffset === 0) {
           fragment.parent.insert(TableEditCommander.createCell('td', parser), fragment.getIndexInParent());
         } else if (cell.rowOffset === 0) {
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               colspan: cell.cellElement.colSpan + 1,
@@ -154,7 +154,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
       if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
         if (cell.rowOffset === 0) {
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               colspan: cell.cellElement.colSpan + 1,
@@ -180,7 +180,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[TBUS_TOKEN] as Token).context;
-    const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const tr = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'tr'
     })));
     if (index === 0) {
@@ -193,7 +193,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         if (cell.rowOffset > 0) {
           if (cell.columnOffset === 0) {
             const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-            parser.getFormatStateByData(new AbstractData({
+            parser.createFormatDeltasByAbstractData(new AbstractData({
               tag: 'td',
               attrs: {
                 rowspan: cell.cellElement.rowSpan + 1,
@@ -226,7 +226,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
 
     const row = cellMatrix[index];
     const fragment = (row.rowElement[TBUS_TOKEN] as Token).context;
-    const tr = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const tr = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'tr'
     })));
 
@@ -234,7 +234,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       if (cell.rowOffset < cell.cellElement.rowSpan - 1) {
         if (cell.columnOffset === 0) {
           const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               colspan: cell.cellElement.colSpan + 1,
@@ -269,7 +269,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
     const selectedCells = Array.from(new Set(cells));
     const newNode = selectedCells.shift();
     const fragment = (newNode[TBUS_TOKEN] as Token).context;
-    parser.getFormatStateByData(new AbstractData({
+    parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'td',
       attrs: {
         rowspan: maxRow - minRow + 1,
@@ -310,7 +310,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
         const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
         if (cell.rowOffset !== 0 || cell.columnOffset !== 0) {
           const rowFragment = (cell.rowElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td'
           })).forEach(item => {
             fragment.mergeFormat(new BlockFormat({
@@ -369,7 +369,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
           }
         } else {
           const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               rowspan: cell.cellElement.rowSpan - 1,
@@ -406,7 +406,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       if (cell.columnOffset === 0) {
         if (cell.rowOffset > 0) {
           const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               rowspan: cell.cellElement.rowSpan - 1,
@@ -454,7 +454,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
           const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               colspan: cell.cellElement.colSpan - 1,
@@ -498,7 +498,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
       if (cell.rowOffset === 0) {
         if (cell.columnOffset > 0) {
           const cellFragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-          parser.getFormatStateByData(new AbstractData({
+          parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'td',
             attrs: {
               colspan: cell.cellElement.colSpan - 1,
@@ -533,11 +533,11 @@ export class TableEditCommander implements Commander<TableEditParams> {
     if (colspan) {
       attrs.set('colspan', colspan + '');
     }
-    const cell = new Fragment(parser.getFormatStateByData(new AbstractData({
+    const cell = new Fragment(parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: tagName,
       attrs
     })));
-    cell.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+    cell.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
       tag: 'br'
     }))));
     return cell;

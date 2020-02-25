@@ -22,7 +22,7 @@ describe('Contents 类', () => {
     const single = new Single('br');
     instance.append(single);
     expect(instance.length).toEqual(str.length + single.length);
-  });
+});
   test('确保 insert 内容正常', () => {
     const instance = new Contents();
     const str = '1234';

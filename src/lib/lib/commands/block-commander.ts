@@ -21,11 +21,11 @@ export class BlockCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       if (range.commonAncestorFragment === range.startFragment && range.commonAncestorFragment === range.endFragment) {
         range.commonAncestorFragment.mergeMatchStates(
-          rootFragment.parser.getFormatStateByData(new AbstractData({
+          rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: this.tagName
           })), 0, range.commonAncestorFragment.contentLength, false);
       } else {
-        const matchStates = rootFragment.parser.getFormatStateByData(new AbstractData({
+        const matchStates = rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: this.tagName
         }));
         const parent = range.commonAncestorFragment.parent;

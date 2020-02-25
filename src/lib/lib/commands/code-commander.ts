@@ -21,13 +21,13 @@ export class CodeCommander implements Commander<string> {
       selection.ranges.forEach(range => {
         const fragment = range.startFragment;
         const context = fragment.parent;
-        const pre = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+        const pre = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'pre',
           attrs: {
             lang: this.lang
           }
         })));
-        pre.append(new Single('br', rootFragment.parser.getFormatStateByData(new AbstractData({
+        pre.append(new Single('br', rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: 'br'
         }))));
         context.insert(pre, selection.firstRange.startFragment.getIndexInParent() + 1);
@@ -41,7 +41,7 @@ export class CodeCommander implements Commander<string> {
 
     } else {
       selection.ranges.forEach(range => {
-        const states = rootFragment.parser.getFormatStateByData(new AbstractData({
+        const states = rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
             tag: 'pre',
             attrs: {
               lang: this.lang

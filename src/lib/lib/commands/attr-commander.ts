@@ -49,7 +49,7 @@ export class AttrCommander implements Commander<AttrState[]> {
           });
           const newNode = new Single(
             this.tagName,
-            rootFragment.parser.getFormatStateByData(new AbstractData({
+            rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
               tag: this.tagName,
               attrs
             }))

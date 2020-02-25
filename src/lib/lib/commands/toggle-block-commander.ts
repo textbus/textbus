@@ -55,7 +55,7 @@ export class ToggleBlockCommander implements Commander {
     } else {
       selection.ranges.forEach(range => {
         const commonAncestorFragment = range.commonAncestorFragment;
-        const temporaryFragment = new Fragment(rootFragment.parser.getFormatStateByData(new AbstractData({
+        const temporaryFragment = new Fragment(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
           tag: this.tagName
         })));
         if (range.startFragment === commonAncestorFragment && range.endFragment === commonAncestorFragment) {

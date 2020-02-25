@@ -42,7 +42,7 @@ export class BlockStyleCommander implements Commander<string> {
       }
       return v;
     }, [] as Fragment[]).forEach(f => {
-      f.mergeMatchStates(rootFragment.parser.getFormatStateByData(new AbstractData({
+      f.mergeMatchStates(rootFragment.parser.createFormatDeltasByAbstractData(new AbstractData({
         style: {
           name: this.name,
           value: this.value

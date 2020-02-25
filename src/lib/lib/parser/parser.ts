@@ -30,7 +30,7 @@ export class Parser {
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.transform(node, context);
     }, 0);
-    this.mergeFormatsByNode(context, element, 0, len);
+    this.mergeFormatsByHTMLElement(context, element, 0, len);
     return context;
   }
 
@@ -38,7 +38,7 @@ export class Parser {
    * 获取抽象数据在富文本中所有 handler 的匹配数据
    * @param data
    */
-  getFormatStateByData(data: AbstractData): FormatDelta[] {
+  createFormatDeltasByAbstractData(data: AbstractData): FormatDelta[] {
     return this.registries.map(item => {
       return {
         handler: item,
@@ -50,23 +50,23 @@ export class Parser {
 
   /**
    * 获取 HTML 节点在富文本中所有 handler 的匹配数据
-   * @param node
+   * @param element
    */
-  getFormatStateByNode(node: HTMLElement): FormatDelta[] {
+  createFormatDeltasByHTMLElement(element: HTMLElement): FormatDelta[] {
     return this.registries.map(item => {
       return {
         handler: item,
-        state: item.matcher.matchNode(node),
-        abstractData: this.getAbstractData(node,
+        state: item.matcher.matchNode(element),
+        abstractData: this.getAbstractData(element,
           typeof item.editableOptions === 'function'
-            ? item.editableOptions(node)
+            ? item.editableOptions(element)
             : item.editableOptions
         )
       };
     }).filter(item => item.state !== MatchState.Invalid);
   }
 
-  private mergeFormatsByNode(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
+  private mergeFormatsByHTMLElement(context: Fragment | Single, by: HTMLElement, startIndex: number, len: number) {
     this.registries.map(item => {
       return {
         handler: item,
@@ -136,13 +136,13 @@ export class Parser {
         if (dtd[tagName].type === 'single') {
           const newSingle = new Single(tagName);
           context.append(newSingle);
-          this.mergeFormatsByNode(newSingle, from as HTMLElement, start, start + 1);
+          this.mergeFormatsByHTMLElement(newSingle, from as HTMLElement, start, start + 1);
           return 1;
         } else {
           const len = Array.from(from.childNodes).reduce((len, node) => {
             return len + this.transform(node, context);
           }, 0);
-          this.mergeFormatsByNode(context, from as HTMLElement, start, len);
+          this.mergeFormatsByHTMLElement(context, from as HTMLElement, start, len);
           return len;
         }
       } else {
@@ -158,7 +158,7 @@ export class Parser {
         nodes.forEach(node => {
           this.transform(node, newBlock);
         });
-        this.mergeFormatsByNode(newBlock, from as HTMLElement, 0, newBlock.contentLength);
+        this.mergeFormatsByHTMLElement(newBlock, from as HTMLElement, 0, newBlock.contentLength);
         context.append(newBlock);
         return 1;
       }

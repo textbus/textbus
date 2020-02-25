@@ -171,7 +171,7 @@ export class CodeHook implements Hook {
         if (item.classes.includes(value)) {
           const styles = item.styles;
           Object.keys(styles).forEach(key => {
-            formats.push(...parser.getFormatStateByData(new AbstractData({
+            formats.push(...parser.createFormatDeltasByAbstractData(new AbstractData({
               style: {
                 name: key,
                 value: styles[key]

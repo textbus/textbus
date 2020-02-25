@@ -216,7 +216,7 @@ export class TableEditHook implements Hook {
                 const newPosition = findFirstPosition(cellFragment);
                 range.startFragment = range.endFragment = newPosition.fragment;
               } else {
-                cellFragment.append(new Single('br', parser.getFormatStateByData(new AbstractData({
+                cellFragment.append(new Single('br', parser.createFormatDeltasByAbstractData(new AbstractData({
                   tag: 'br'
                 }))));
                 range.startFragment = range.endFragment = cellFragment;
