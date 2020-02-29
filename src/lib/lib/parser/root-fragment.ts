@@ -9,8 +9,8 @@ export class RootFragment extends Fragment {
     super(null);
   }
 
-  setContents(el: HTMLElement) {
-    this.parser.parse(el, this);
+  setContents(contents: string) {
+    this.parser.parse(contents, this);
   }
 
   createVDom() {

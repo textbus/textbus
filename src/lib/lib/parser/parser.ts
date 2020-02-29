@@ -22,15 +22,15 @@ export class Parser {
 
   /**
    * 解析一段 HTML，并把解析后的抽象数据插入到 context 中
-   * @param element
+   * @param contents
    * @param context
    */
-  parse(element: HTMLElement, context: Fragment) {
-    const flatTree = this.htmlNormalizer.normalize(element);
+  parse(contents: string, context: Fragment) {
+    const flatTree = this.htmlNormalizer.normalize(contents);
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.transform(node, context);
     }, 0);
-    this.mergeFormatsByHTMLElement(context, element, 0, len);
+    // this.mergeFormatsByHTMLElement(context, flatTree, 0, len);
     return context;
   }
 
