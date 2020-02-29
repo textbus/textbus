@@ -25,12 +25,12 @@ export class Parser {
    * @param contents
    * @param context
    */
-  parse(contents: string, context: Fragment) {
+  parse(contents: HTMLElement, context: Fragment) {
     const flatTree = this.htmlNormalizer.normalize(contents);
     const len = Array.from(flatTree.childNodes).reduce((len, node) => {
       return len + this.transform(node, context);
     }, 0);
-    // this.mergeFormatsByHTMLElement(context, flatTree, 0, len);
+    this.mergeFormatsByHTMLElement(context, contents, 0, len);
     return context;
   }
 

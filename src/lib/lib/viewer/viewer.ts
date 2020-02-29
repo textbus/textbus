@@ -264,7 +264,7 @@ export class Viewer {
       document.body.appendChild(div);
       div.focus();
       setTimeout(() => {
-        const fragment = this.editor.parser.parse(div.innerHTML, new Fragment(null));
+        const fragment = this.editor.parser.parse(div, new Fragment(null));
         const contents = new Contents();
         contents.insertElements(fragment.sliceContents(0), 0);
         document.body.removeChild(div);

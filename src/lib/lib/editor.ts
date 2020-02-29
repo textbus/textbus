@@ -96,18 +96,15 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(this.toolbar.handlers);
     this.renderer = options?.settings?.renderer || new DomRenderer();
     this.viewer = new Viewer(this, new Differ(this.parser, this.renderer), this.toolbar.styleSheets);
-    this.viewer.onReady.subscribe(() => {
+    zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
       const vDom = new RootFragment(this.parser);
       this.root = vDom;
-      vDom.setContents(options.content || '<p><br></p>');
+      vDom.setContents(result[0]);
       this.viewer.render(vDom);
       this.recordSnapshot();
       this.tasks.forEach(fn => fn());
     });
-    // zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
-    //
-    // });
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
       this.selection = selection;
@@ -151,10 +148,14 @@ export class Editor implements EventDelegate {
   }
 
   setContents(html: string) {
-    const vDom = new RootFragment(this.parser);
-    this.root = vDom;
-    vDom.setContents(html);
-    this.viewer.render(vDom)
+    this.run(() => {
+      this.writeContents(html).then(result => {
+        const vDom = new RootFragment(this.parser);
+        this.root = vDom;
+        vDom.setContents(result);
+        this.viewer.render(vDom)
+      })
+    })
   }
 
   dispatchEvent(type: string): Observable<string> {

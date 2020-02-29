@@ -1,6 +1,5 @@
 .tbus-loading {
   height: 3px;
-  background-color: rgba(255, 255, 255, .6);
   position: absolute;
   width: 100%;
   top: 0;
@@ -8,15 +7,18 @@
   z-index: 1;
   pointer-events: none;
 
-  &:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 20%;
-    height: 100%;
-    background-color: $color-primary;
-    animation: tbus-loading infinite 1s linear;
+  &-active{
+    background-color: rgba(0, 0, 0, .3);
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20%;
+      height: 100%;
+      background-color: $color-primary;
+      animation: tbus-loading infinite 1s linear;
+    }
   }
 }
 

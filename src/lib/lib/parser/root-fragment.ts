@@ -9,7 +9,7 @@ export class RootFragment extends Fragment {
     super(null);
   }
 
-  setContents(contents: string) {
+  setContents(contents: HTMLElement) {
     this.parser.parse(contents, this);
   }
 

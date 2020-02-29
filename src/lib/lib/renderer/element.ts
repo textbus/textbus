@@ -11,11 +11,3 @@ export class VElement {
     return newChild;
   }
 }
-
-export interface VElement {
-  readonly attrs: Map<string, string | number>;
-  readonly styles: Map<string, string | number>;
-  readonly childNodes: Array<VElement>;
-
-  appendChild(newChild: VElement): VElement;
-}

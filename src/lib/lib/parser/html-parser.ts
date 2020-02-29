@@ -223,9 +223,7 @@ export class HtmlParser {
       endIndex: this.index,
       nodeType: 1,
       tag: tagName,
-      attrs: properties || [],
-      childNodes: [],
-      parentNode: null
+      attrs: properties || []
     } as AbstractContainerElementNode;
     if (ch == '/') {
       this.index += 2;
@@ -234,12 +232,12 @@ export class HtmlParser {
       tag.close = true;
 
     } else if (ch == '>') {
-      if (dtd[tag.tag].type === 'single') {
+      if (tagName.charAt(0) == '/') {
+          tag.close = true;
+        tag.tag = tagName.substring(1, tagName.length);
+      } else if (dtd[tag.tag].type === 'single') {
         tag.close = true;
         tag.begin = true;
-      } else if (tagName.charAt(0) == '/') {
-        tag.close = true;
-        tag.tag = tagName.substring(1, tagName.length);
       } else {
         tag.begin = true;
       }
