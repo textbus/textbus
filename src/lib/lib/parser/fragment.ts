@@ -593,7 +593,7 @@ export class Fragment extends ViewData {
           const f = formatRanges[index];
           if (f && f.startIndex < firstRange.endIndex) {
             if (f.endIndex <= firstRange.endIndex) {
-              childFormatRanges.push(formatRanges.shift());
+              childFormatRanges.push(formatRanges.splice(index, 1)[0]);
             } else {
               const cloneRange = f.clone();
               cloneRange.endIndex = firstRange.endIndex;
@@ -605,6 +605,17 @@ export class Fragment extends ViewData {
             break;
           }
         }
+        formatRanges.sort((next, prev) => {
+          const a = next.startIndex - prev.startIndex;
+          if (a === 0) {
+            let b = next.endIndex - prev.endIndex;
+            if (b === 0) {
+              return next.handler.priority - prev.handler.priority;
+            }
+          }
+          return a;
+        });
+
         if (childFormatRanges.length) {
           this.vDomBuilder(childFormatRanges, container, firstRange.startIndex, firstRange.endIndex);
         } else {
