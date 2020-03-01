@@ -290,7 +290,6 @@ export class Viewer {
     this.renderer.render(this.root.createVDom(), new DOMElement(this.contentDocument.body));
     this.invokeViewChangeHooks();
     this.updateFrameHeight();
-    this.userWriteEvent.next();
   }
 
   private invokeDeleteHooks() {
@@ -301,6 +300,7 @@ export class Viewer {
       }
     }
     this.rerender();
+    this.userWriteEvent.next();
     this.input.updateStateBySelection(this.selection);
   }
 
@@ -322,6 +322,7 @@ export class Viewer {
       }
     }
     this.rerender();
+    this.userWriteEvent.next();
   }
 
   private invokeViewUpdateBeforeHooks() {
@@ -418,6 +419,7 @@ export class Viewer {
       }
     }
     this.rerender();
+    this.userWriteEvent.next();
   }
 
   private invokePasteHooks(contents: Contents) {
