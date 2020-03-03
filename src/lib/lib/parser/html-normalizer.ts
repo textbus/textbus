@@ -34,8 +34,18 @@ export class HtmlNormalizer {
           if (limitChildren.includes(tagName)) {
             const cloneContainer = node.cloneNode();
             fragment.appendChild(cloneContainer);
-            if ((node as HTMLElement).tagName.toLowerCase() === 'td' && node.childNodes.length === 0) {
-              cloneContainer.appendChild(document.createElement('br'));
+            if ((node as HTMLElement).tagName.toLowerCase() === 'td') {
+              if (node.childNodes.length === 0) {
+                cloneContainer.appendChild(document.createElement('br'));
+              } else {
+                Array.from(node.childNodes).forEach(n => {
+                  const c = n.cloneNode();
+                  cloneContainer.appendChild(c);
+                  if (n.nodeType === 1) {
+                    Array.from(this.normalize(n as HTMLElement).childNodes).forEach(cc => c.appendChild(cc));
+                  }
+                });
+              }
             } else {
               Array.from(this.normalize(node as HTMLElement).childNodes).forEach(c => cloneContainer.appendChild(c));
             }
