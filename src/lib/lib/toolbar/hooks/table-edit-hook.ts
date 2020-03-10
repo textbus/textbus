@@ -314,11 +314,13 @@ export class TableEditHook implements Hook {
   private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableSelectionRange {
     const cellMatrix = this.cellMatrix;
     const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
-    const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1)
-      .map(row => row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1)));
+    const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => {
+      return row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1);
+    }));
     const y1 = -Math.max(...cellMatrix[minRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
-    const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1)
-      .map(cell => cell.cellElement.rowSpan - (cell.rowOffset + 1)));
+    const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1).map(cell => {
+      return cell.cellElement.rowSpan - (cell.rowOffset + 1);
+    }));
 
     if (x1 || y1 || x2 || y2) {
       return this.findSelectedRange(minRow + y1, minColumn + x1, maxRow + y2, maxColumn + x2);
