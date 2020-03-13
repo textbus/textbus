@@ -1,6 +1,7 @@
 .DS_Store
 node_modules/
 src/
+test/
 .gitignore
 .npmignore
 disable-output-webpack-plugin.js
@@ -13,6 +14,7 @@ webpack.config.js
 webpack-sass.config.js
 webpack-template-style.config.js
 npm-debug.log
+jest.config.js
 .idea
 *.swp
 *.swo
