@@ -84,6 +84,7 @@ export class Dropdown {
     window.addEventListener('resize', updatePosition);
 
     this.hideEvent.subscribe(() => {
+      this.freeze = false;
       this.elementRef.classList.remove('tbus-dropdown-open');
     });
   }
