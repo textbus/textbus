@@ -19,12 +19,15 @@
   display: flex;
 
   label {
-    margin-right: 10px;
+    margin-right: 1em;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
   }
 
   input {
     vertical-align: middle;
-    margin: 0;
+    margin-right: .5em;
   }
 }
 
