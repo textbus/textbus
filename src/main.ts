@@ -7,8 +7,17 @@ import './lib/assets/index.scss';
 const editor = createEditor('#editor', {
   theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
-    console.log(type);
-    return '/test';
+    const fileInput = document.createElement('input');
+    fileInput.setAttribute('type', 'file');
+    fileInput.setAttribute('accept', 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon');
+    fileInput.style.cssText = 'position: absolute; left: -9999px; top: -9999px; opacity: 0';
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve('/test')
+      }, 3000)
+    })
   },
   content: ``
 });

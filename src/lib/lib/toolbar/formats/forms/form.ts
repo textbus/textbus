@@ -1,3 +1,5 @@
+import { Observable, Subject } from 'rxjs';
+
 import { FormItem, AttrType, AttrState, AttrConfig } from './help';
 import { FormTextField } from './form-text-field';
 import { FormOptions } from './form-options';
@@ -6,20 +8,27 @@ import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../../help';
 import { DropdownHandlerView } from '../../handlers/utils/dropdown';
 import { AbstractData } from '../../../parser/abstract-data';
+import { tap } from 'rxjs/operators';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
+  freezeState: Observable<boolean>;
   readonly elementRef = document.createElement('form');
   private items: FormItem[] = [];
   private delegator: EventDelegate;
+  private freezeStateSource = new Subject<boolean>();
 
   constructor(forms: Array<AttrConfig>) {
+    this.freezeState = this.freezeStateSource.asObservable();
     this.elementRef.classList.add('tbus-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
           this.items.push(new FormTextField(attr, (type: string) => {
-            return this.delegator.dispatchEvent(type);
+            this.freezeStateSource.next(true);
+            return this.delegator.dispatchEvent(type).pipe(tap(() => {
+              this.freezeStateSource.next(false);
+            }));
           }));
           break;
         case AttrType.Options:

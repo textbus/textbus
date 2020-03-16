@@ -400,9 +400,9 @@
     font-size: 16px;
     padding: 4px 5px;
     width: 30px;
-
     &:hover {
-      transform: scale(1.4);
+      background-color: $color-light;
+      border-radius: 3px;
     }
   }
 }

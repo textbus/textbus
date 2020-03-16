@@ -1,9 +1,11 @@
 import { Observable } from 'rxjs';
+
 import { EventDelegate } from '../../help';
 import { AbstractData } from '../../../parser/abstract-data';
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
+  freezeState?: Observable<boolean>;
 
   update(value?: AbstractData): void;
 
@@ -14,6 +16,7 @@ export interface DropdownHandlerView {
 
 export class Dropdown {
   readonly elementRef = document.createElement('span');
+  freeze = false;
 
   set disabled(v: boolean) {
     this.button.disabled = v;
@@ -64,6 +67,9 @@ export class Dropdown {
     });
 
     document.addEventListener('click', () => {
+      if (this.freeze) {
+        return;
+      }
       if (!isSelfClick) {
         this.elementRef.classList.remove('tbus-dropdown-open');
       }

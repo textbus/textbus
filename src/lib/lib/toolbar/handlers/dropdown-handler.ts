@@ -39,10 +39,16 @@ export class DropdownHandler implements Handler {
       config.tooltip,
       stickyElement
     );
+
     this.elementRef = this.dropdown.elementRef;
 
     if (typeof config.viewer.setEventDelegator === 'function') {
       config.viewer.setEventDelegator(delegate);
+    }
+    if (config.viewer.freezeState instanceof Observable) {
+      config.viewer.freezeState.subscribe(b => {
+        this.dropdown.freeze = b;
+      });
     }
   }
 

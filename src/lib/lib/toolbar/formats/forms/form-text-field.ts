@@ -1,10 +1,12 @@
 import { AttrState, AttrTextField, FormItem } from './help';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 export class FormTextField implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
+  private sub: Subscription;
+  private readonly btn: HTMLButtonElement;
 
   constructor(private config: AttrTextField,
               private delegate: (type: string) => Observable<string>) {
@@ -23,15 +25,28 @@ export class FormTextField implements FormItem {
     </div>`;
     this.input = this.elementRef.querySelector('input');
     if (config.canUpload) {
-      this.elementRef.querySelector('button').addEventListener('click', () => {
-        delegate(this.config.uploadType).subscribe(url => {
-          this.update(url);
+      this.btn = this.elementRef.querySelector('button');
+      this.btn.addEventListener('click', () => {
+        this.btn.classList.add('tbus-form-btn-loading');
+        this.input.disabled = true;
+        this.btn.children[0].className = 'tbus-icon-loading';
+        if (this.sub) {
+          this.sub.unsubscribe();
+        }
+        this.sub = delegate(this.config.uploadType).subscribe({
+          next: url => {
+            this.update(url);
+          },
+          complete: () => {
+            this.reset();
+          }
         });
       });
     }
   }
 
   update(value?: any): void {
+    this.reset();
     if (value === undefined) {
       this.input.value = '';
     } else {
@@ -44,6 +59,17 @@ export class FormTextField implements FormItem {
       name: this.config.name,
       required: this.config.required,
       value: this.input.value
+    }
+  }
+
+  private reset() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+    this.input.disabled = false;
+    if (this.btn) {
+      this.btn.classList.remove('tbus-form-btn-loading');
+      this.btn.children[0].className = 'tbus-icon-upload';
     }
   }
 }

@@ -55,6 +55,25 @@
     background-color: darken($color-lighter, 15);
     border-color: darken($color-gray, 7);
   }
+
+  &-loading {
+    @keyframes tbus-form-btn-loading {
+      0% {
+        transform: rotateZ(0deg);
+      }
+      50% {
+        transform: rotateZ(-180deg);
+      }
+      100% {
+        transform: rotateZ(-360deg);
+      }
+    }
+
+    > span {
+      display: inline-block;
+      animation: .8s tbus-form-btn-loading linear infinite;
+    }
+  }
 }
 
 .tbus-form-control {
@@ -71,6 +90,11 @@
     border-color: $color-primary;
     box-shadow: 0 0 0 2px rgba(red($color-primary), green($color-primary), blue($color-primary), .5);
     z-index: 1;
+  }
+  &:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    background-color:$color-light;
   }
 }
 
