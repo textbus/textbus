@@ -128,12 +128,16 @@ export class Parser {
       return textContent.length;
     } else if (from.nodeType === 1) {
       const tagName = (from as HTMLElement).tagName.toLowerCase();
-      if (dtd[tagName].display === 'none') {
+      const config = dtd[tagName];
+      if (!config) {
         return 0;
       }
-      if (/inline/.test(dtd[tagName].display)) {
+      if (config.display === 'none') {
+        return 0;
+      }
+      if (/inline/.test(config.display)) {
         const start = context.contentLength;
-        if (dtd[tagName].type === 'single') {
+        if (config.type === 'single') {
           const newSingle = new Single(tagName);
           context.append(newSingle);
           this.mergeFormatsByHTMLElement(newSingle, from as HTMLElement, start, start + 1);
@@ -148,9 +152,9 @@ export class Parser {
       } else {
         const newBlock = new Fragment();
         let nodes: Node[];
-        if (dtd[tagName].limitChildren) {
+        if (config.limitChildren) {
           nodes = Array.from((from as HTMLElement).children).filter(el => {
-            return dtd[tagName].limitChildren.includes(el.tagName.toLowerCase());
+            return config.limitChildren.includes(el.tagName.toLowerCase());
           });
         } else {
           nodes = Array.from(from.childNodes);

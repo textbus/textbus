@@ -1,12 +1,12 @@
 {
   "name": "@tanbo/tbus",
-  "version": "0.0.1-alpha.69",
+  "version": "0.0.1-alpha.70",
   "description": "A rich text editor",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
   "typings": "./bundles/public-api.d.ts",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --host 192.168.0.113",
     "test": "jest",
     "test-c": "jest --coverage",
     "build:lib": "rimraf bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-template-style.config.js",
