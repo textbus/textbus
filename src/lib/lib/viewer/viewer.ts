@@ -420,6 +420,7 @@ export class Viewer {
     }
     this.rerender();
     this.userWriteEvent.next();
+    this.input.focus(); // 让光标在可视区域内，不完美
   }
 
   private invokePasteHooks(contents: Contents) {
@@ -431,6 +432,7 @@ export class Viewer {
       }
     }
     this.rerender();
+    this.userWriteEvent.next();
   }
 
   private selectAll() {

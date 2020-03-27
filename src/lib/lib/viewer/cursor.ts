@@ -92,6 +92,8 @@ export class Cursor {
 
   focus() {
     this.input.value = '';
+    this.input.blur();
+    this.input.focus();
   }
 
   private updateCursorPosition() {

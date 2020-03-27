@@ -26,8 +26,8 @@ const editor = createEditor('#editor', {
 //
 const box = document.getElementById('box');
 editor.onChange.subscribe(result => {
-  // console.log(result.styleSheets.join(''));
-  box.innerText = result.contents;
+  console.log(result);
+  box.innerText = result;
 });
 
 // setTimeout(() => {

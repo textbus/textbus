@@ -39,13 +39,8 @@ export interface EditorOptions {
 
 }
 
-export interface TBDoc {
-  styleSheets: string[];
-  contents: string;
-}
-
 export class Editor implements EventDelegate {
-  readonly onChange: Observable<TBDoc>;
+  readonly onChange: Observable<string>;
   readonly parser: Parser;
   readonly elementRef = document.createElement('div');
 
@@ -55,6 +50,10 @@ export class Editor implements EventDelegate {
 
   get canForward() {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
+  }
+
+  get styleSheet() {
+    return this.toolbar.styleSheets.map(t => t).join('');
   }
 
   private historySequence: Array<Snapshot> = [];
@@ -70,7 +69,7 @@ export class Editor implements EventDelegate {
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
-  private changeEvent = new Subject<TBDoc>();
+  private changeEvent = new Subject<string>();
   private tasks: Array<() => void> = [];
   private readyState = false;
   private selection: TBSelection;
@@ -225,10 +224,7 @@ export class Editor implements EventDelegate {
   }
 
   private dispatchContentChangeEvent() {
-    this.changeEvent.next({
-      styleSheets: this.toolbar.styleSheets.map(t => t),
-      contents: this.viewer.contentDocument.body.innerHTML
-    });
+    this.changeEvent.next(this.viewer.contentDocument.body.innerHTML);
   }
 
   private writeContents(html: string) {
