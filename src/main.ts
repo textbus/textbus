@@ -6,6 +6,7 @@ import './lib/assets/index.scss';
 
 const editor = createEditor('#editor', {
   theme: 'dark',
+  usePaperModel: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');

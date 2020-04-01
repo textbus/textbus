@@ -76,6 +76,8 @@ export class Editor implements EventDelegate {
 
   private sub: Subscription;
 
+  private defaultHTML = '<p><br></p>';
+
   constructor(private selector: string | HTMLElement, private options: EditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable();
     if (typeof selector === 'string') {
@@ -95,7 +97,7 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(this.toolbar.handlers);
     this.renderer = options?.settings?.renderer || new DomRenderer();
     this.viewer = new Viewer(this, new Differ(this.parser, this.renderer), this.toolbar.styleSheets);
-    zip(this.writeContents(options.content || '<p><br></p>'), this.viewer.onReady).subscribe(result => {
+    zip(this.writeContents(options.content || this.defaultHTML), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
       const vDom = new RootFragment(this.parser);
       this.root = vDom;
@@ -148,7 +150,7 @@ export class Editor implements EventDelegate {
 
   setContents(html: string) {
     this.run(() => {
-      this.writeContents(html).then(result => {
+      this.writeContents(html || this.defaultHTML).then(result => {
         const vDom = new RootFragment(this.parser);
         this.root = vDom;
         vDom.setContents(result);
