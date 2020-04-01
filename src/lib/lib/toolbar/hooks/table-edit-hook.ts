@@ -82,7 +82,16 @@ export class TableEditHook implements Hook {
         insertStyle = false;
       }
 
-      const startPaths = Array.from(startEvent.composedPath()) as Array<Node>;
+      let startPaths: Node[] = [];
+      if(startEvent.composedPath){
+        startPaths = startEvent.composedPath() as Node[];
+      } else {
+        let n = startEvent.target as Node;
+        while (n) {
+          startPaths.push(n);
+          n = n.parentNode;
+        }
+      }
       this.startCell = this.endCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
       this.tableElement = findElementByTagName(startPaths, 'table') as HTMLTableElement;
       if (!this.startCell || !this.tableElement) {

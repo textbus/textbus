@@ -246,7 +246,6 @@ export class Editor implements EventDelegate {
         'opacity:0';
       temporaryIframe.src = `javascript:void((function () {
                       document.open();
-                      document.domain = '${document.domain}';
                       document.write('${html.replace(/[']/g, '\\\'')}');
                       document.close();
                     })())`;

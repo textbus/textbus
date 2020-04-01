@@ -1,3 +1,4 @@
+import 'core-js';
 import { Observable } from 'rxjs';
 
 import { createEditor } from './lib/create';

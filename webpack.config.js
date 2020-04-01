@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
+const ip = require('ip');
 
 module.exports = {
   mode: 'development',
@@ -15,7 +16,7 @@ module.exports = {
     extensions: ['.ts', '.js']
   },
   devServer: {
-    host: 'localhost',
+    host: ip.address(),
     contentBase: path.join(__dirname, 'dist'),
     compress: true,
     port: 9000,

@@ -87,7 +87,6 @@ export class Viewer {
     this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
                       document.open();
-                      document.domain = '${document.domain}';
                       document.write('${template}');
                       document.close();
                     })())`;
