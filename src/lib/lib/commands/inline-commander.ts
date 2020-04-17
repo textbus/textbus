@@ -26,7 +26,7 @@ export class InlineCommander implements Commander {
             context: range.commonAncestorFragment,
             state: MatchState.Valid,
             abstractData: {
-              tag: 'strong'
+              tag: this.tagName
             }
           });
           if (old) {
