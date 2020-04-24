@@ -13,13 +13,9 @@ export class Editor {
     this.parser = new Parser(options.plugins);
   }
 
-  init() {
-
-  }
-
   setContents(html: string) {
     this.writeContents(html).then(el => {
-      const d = this.parser.parse(el);
+      const d = this.parser.parse((el as any).children[0]);
       console.log(d)
     });
   }

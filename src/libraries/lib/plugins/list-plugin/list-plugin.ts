@@ -15,10 +15,12 @@ export class ListAbstractData implements AbstractData {
       this.slots.push(slot);
       if (child.nodeType === 1 && child.nodeName === 'li') {
         child.childNodes.forEach(c => {
-          templateMap.push({
-            read: c,
-            toSlot: slot
-          });
+          if (c.nodeType === 1) {
+            templateMap.push({
+              read: c as HTMLElement,
+              toSlot: slot
+            });
+          }
         })
       } else if (child.nodeType === 3) {
         templateMap.push({

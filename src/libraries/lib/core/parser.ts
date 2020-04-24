@@ -6,12 +6,21 @@ export class Parser {
   }
 
   parse(el: HTMLElement) {
-    const root = new Slot();
+    return this.makeAbstractData(el, new Slot());
+  }
+
+  private makeAbstractData(el: HTMLElement, slot: Slot) {
+
     this.plugins.forEach(plugin => {
       if (plugin.matcher.match(el)) {
-        plugin.abstractData.from(el, root);
+        plugin.abstractData.from(el, slot).forEach(item => {
+          const {toSlot, read} = item;
+          if (read.nodeType === 1) {
+            this.makeAbstractData(read as HTMLElement, toSlot);
+          }
+        });
       }
     });
-    return root;
+    return slot;
   }
 }
