@@ -1,7 +1,7 @@
 import { Matcher } from './matcher';
-import { AbstractData } from './abstract-data';
+import { Template } from './template';
 
 export interface Plugin {
   matcher: Matcher;
-  abstractData: AbstractData;
+  viewTemplate: Template;
 }

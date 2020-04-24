@@ -1,8 +1,8 @@
 import { Plugin } from '../../core/help';
 import { Matcher } from '../../core/matcher';
-import { AbstractData, Slot, TemplateMap } from '../../core/abstract-data';
+import { Template, Slot, TemplateMap } from '../../core/template';
 
-export class ListAbstractData implements AbstractData {
+export class ListTemplate implements Template {
   private tagName: string;
   slots: Slot[] = [];
 
@@ -37,5 +37,5 @@ export class ListPlugin implements Plugin {
   matcher = new Matcher({
     tags: ['ul', 'ol']
   });
-  abstractData = new ListAbstractData();
+  viewTemplate = new ListTemplate();
 }

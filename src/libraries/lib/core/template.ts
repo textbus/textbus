@@ -1,5 +1,5 @@
 export class Slot {
-  data: AbstractData;
+  data: Template;
 }
 
 export interface TemplateMap {
@@ -7,7 +7,7 @@ export interface TemplateMap {
   toSlot: Slot;
 }
 
-export interface AbstractData {
+export interface Template {
   slots: Slot[];
   from(template: HTMLElement, toSlot: Slot): TemplateMap[];
 }
