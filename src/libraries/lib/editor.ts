@@ -1,5 +1,4 @@
 import { Plugin } from './core/help';
-import { Core } from './core/core';
 import { Parser } from './core/parser';
 
 export interface EditorOptions {
@@ -7,7 +6,6 @@ export interface EditorOptions {
 }
 
 export class Editor {
-  private core = new Core();
   private parser: Parser;
   constructor(private options: EditorOptions) {
     this.parser = new Parser(options.plugins);

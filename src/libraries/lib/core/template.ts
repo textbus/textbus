@@ -1,15 +1,11 @@
-import { Contents } from './contents';
-
-export class Slot {
-  contents = new Contents();
-}
+import { EditableFragment } from './editable-fragment';
 
 export interface ChildSlotsMap {
   from: Node;
-  inSlot: Slot;
+  inSlot: EditableFragment;
 }
 
 export interface Template {
-  slots: Slot[];
+  slots: EditableFragment[];
   from(template: HTMLElement): ChildSlotsMap[];
 }

@@ -1,5 +1,5 @@
 import { Plugin } from './help';
-import { Slot } from './template';
+import { EditableFragment } from './editable-fragment';
 import { MatchState } from '../../../lib/lib/matcher/matcher';
 
 export class Parser {
@@ -7,17 +7,17 @@ export class Parser {
   }
 
   parse(el: HTMLElement) {
-    return this.makeAbstractData(el, new Slot());
+    return this.readTemplate(el, new EditableFragment());
   }
 
-  private makeAbstractData(el: Node, slot: Slot) {
+  private readTemplate(el: Node, slot: EditableFragment) {
     if (el.nodeType === 1) {
       this.plugins.forEach(plugin => {
         if (plugin.matcher.match(el as HTMLElement) === MatchState.Valid) {
           const template = plugin.getViewTemplate();
           slot.contents.append(template);
           template.from(el as HTMLElement).forEach(item => {
-            this.makeAbstractData(item.from, item.inSlot);
+            this.readTemplate(item.from, item.inSlot);
           });
         }
       });

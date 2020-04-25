@@ -1,16 +1,14 @@
-import { Plugin } from '../../core/help';
-import { Matcher } from '../../core/matcher';
-import { Template, Slot, ChildSlotsMap } from '../../core/template';
+import { Plugin, Template, EditableFragment, ChildSlotsMap, Matcher } from '../../core/_api';
 
 export class ListTemplate implements Template {
   private tagName: string;
-  slots: Slot[] = [];
+  slots: EditableFragment[] = [];
 
   from(template: HTMLElement): ChildSlotsMap[] {
     this.tagName = template.tagName;
     const childSlotsMaps: ChildSlotsMap[] = [];
     Array.from(template.childNodes).forEach(child => {
-      const slot = new Slot();
+      const slot = new EditableFragment();
       this.slots.push(slot);
       if (child.nodeType === 1 && /^li$/i.test(child.nodeName)) {
         childSlotsMaps.push({
