@@ -6,12 +6,14 @@ import { Editor, EditorOptions } from './libraries/public-api';
 
 import './lib/assets/index.scss';
 import { ListPlugin } from './libraries/lib/plugins/list-plugin/list-plugin';
+import { BlockPlugin } from './libraries/lib/plugins/list-plugin/block-plugin';
 
 
 
 const editor = new Editor({
   plugins: [
-    new ListPlugin()
+    new ListPlugin(),
+    new BlockPlugin()
   ]
 });
 
