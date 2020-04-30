@@ -1,14 +1,17 @@
 import { Plugin } from './core/help';
 import { Parser } from './core/parser';
+import { Template } from './core/template';
+import { Formatter } from './core/formatter';
 
 export interface EditorOptions {
-  plugins: Plugin[];
+  templates: Template[];
+  formats: Formatter[];
 }
 
 export class Editor {
   private parser: Parser;
   constructor(private options: EditorOptions) {
-    this.parser = new Parser(options.plugins);
+    this.parser = new Parser(options);
   }
 
   setContents(html: string) {

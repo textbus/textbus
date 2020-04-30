@@ -1,11 +1,17 @@
-import { Plugin, Template, EditableFragment, ChildSlotsMap, Matcher } from '../../core/_api';
+import { ChildSlotsMap, Template } from '../core/template';
+import { EditableFragment } from '../core/editable-fragment';
 
 export class ListTemplate implements Template {
-  private tagName: string;
   slots: EditableFragment[] = [];
 
+  constructor(private tagName: string) {
+  }
+
+  is(template: HTMLElement): boolean {
+    return template.nodeName.toLowerCase() === this.tagName;
+  }
+
   from(template: HTMLElement): ChildSlotsMap[] {
-    this.tagName = template.tagName;
     const childSlotsMaps: ChildSlotsMap[] = [];
     Array.from(template.childNodes).forEach(child => {
       const slot = new EditableFragment();
@@ -25,15 +31,5 @@ export class ListTemplate implements Template {
       }
     });
     return childSlotsMaps;
-  }
-}
-
-export class ListPlugin implements Plugin {
-  matcher = new Matcher({
-    tags: ['ul', 'ol']
-  });
-
-  getViewTemplate(): Template {
-    return new ListTemplate();
   }
 }

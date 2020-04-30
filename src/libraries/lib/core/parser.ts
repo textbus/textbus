@@ -1,29 +1,41 @@
-import { Plugin } from './help';
 import { EditableFragment } from './editable-fragment';
-import { MatchState } from '../../../lib/lib/matcher/matcher';
+import { EditorOptions } from '../editor';
+import { FormatRange } from './formatter';
 
 export class Parser {
-  constructor(private plugins: Plugin[]) {
+  constructor(private options: EditorOptions) {
   }
 
   parse(el: HTMLElement) {
-    return this.readTemplate(el, new EditableFragment());
+    const rootSlot = new EditableFragment();
+    this.readTemplate(el, rootSlot);
+    return rootSlot;
   }
 
   private readTemplate(el: Node, slot: EditableFragment) {
     if (el.nodeType === 1) {
-      this.plugins.forEach(plugin => {
-        if (plugin.matcher.match(el as HTMLElement) === MatchState.Valid) {
-          const template = plugin.getViewTemplate();
-          slot.contents.append(template);
-          template.from(el as HTMLElement).forEach(item => {
-            this.readTemplate(item.from, item.inSlot);
+      const templates = this.options.templates;
+      for (const t of templates) {
+        if (t.is(el as HTMLElement)) {
+          slot.append(t);
+          t.from(el as HTMLElement).forEach(item => {
+            this.readFormats(item.from as HTMLElement, item.inSlot);
+            item.from.childNodes.forEach(c => this.readTemplate(c, item.inSlot));
           });
+          return;
         }
-      });
+      }
+      this.readFormats(el as HTMLElement, slot);
     } else if (el.nodeType === 3) {
-      slot.contents.append(el.textContent);
+      slot.append(el.textContent);
     }
-    return slot;
+  }
+
+  private readFormats(el: HTMLElement, slot: EditableFragment) {
+    this.options.formats.map(formatter => {
+      if (formatter.is(el)) {
+        slot.mergeFormat(new FormatRange(formatter.extractData(el as HTMLElement), formatter));
+      }
+    });
   }
 }

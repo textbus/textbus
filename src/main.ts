@@ -5,15 +5,20 @@ import 'core-js';
 import { Editor, EditorOptions } from './libraries/public-api';
 
 import './lib/assets/index.scss';
-import { ListPlugin } from './libraries/lib/plugins/list-plugin/list-plugin';
-import { BlockPlugin } from './libraries/lib/plugins/list-plugin/block-plugin';
+import { ListTemplate } from './libraries/lib/templates/list';
+import { BlockTemplate } from './libraries/lib/templates/block';
+import { Bold } from './libraries/lib/formatter/bold';
 
 
 
 const editor = new Editor({
-  plugins: [
-    new ListPlugin(),
-    new BlockPlugin()
+  templates: [
+    new ListTemplate('ul'),
+    new ListTemplate('ol'),
+    new BlockTemplate('div')
+  ],
+  formats: [
+    new Bold()
   ]
 });
 
@@ -21,6 +26,7 @@ editor.setContents(`
 <ul>
 <li>aaa</li>
 <li>bbb</li>
+<strong>ccc</strong>
 </ul>
 `);
 
