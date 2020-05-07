@@ -1,7 +1,7 @@
 import { Matcher } from './matcher';
-import { Template } from './template';
+import { TemplateTranslator } from './template';
 
 export interface Plugin {
   matcher: Matcher;
-  getViewTemplate(): Template;
+  getViewTemplate(): TemplateTranslator;
 }

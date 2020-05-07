@@ -4,13 +4,17 @@ import { FormatRange } from './formatter';
 
 export class EditableFragment {
   private contents = new Contents();
-  private f: any [] = [];
+  private formatMap: any [] = [];
+
+  get contentLength() {
+    return this.contents.length;
+  }
 
   append(element: string | Template) {
     this.contents.append(element);
   }
 
   mergeFormat(formatter: FormatRange) {
-    this.f.push(formatter);
+    this.formatMap.push(formatter);
   }
 }

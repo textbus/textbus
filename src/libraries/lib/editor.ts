@@ -1,10 +1,10 @@
 import { Plugin } from './core/help';
 import { Parser } from './core/parser';
-import { Template } from './core/template';
+import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';
 
 export interface EditorOptions {
-  templates: Template[];
+  templates: TemplateTranslator[];
   formats: Formatter[];
 }
 

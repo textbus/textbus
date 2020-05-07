@@ -1,7 +1,8 @@
-import { ChildSlotsMap, Template } from '../core/template';
+import { TemplateTranslator, ViewData } from '../core/template';
 import { EditableFragment } from '../core/editable-fragment';
+import { AbstractData } from '../core/abstract-data';
 
-export class BlockTemplate implements Template {
+export class BlockTemplate implements TemplateTranslator {
   slots: EditableFragment[] = [];
 
   constructor(private tagName: string) {
@@ -11,13 +12,19 @@ export class BlockTemplate implements Template {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(template: HTMLElement): ChildSlotsMap[] {
+  from(template: HTMLElement): ViewData {
     this.tagName = template.tagName;
     const slot = new EditableFragment();
     this.slots.push(slot);
-    return [{
-      from: template,
-      inSlot: slot
-    }];
+    return {
+      childrenSlots: [{
+        from: template,
+        toSlot: slot
+      }]
+    };
+  }
+
+
+  render(abstractData: AbstractData): any {
   }
 }

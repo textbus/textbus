@@ -1,5 +1,6 @@
 import { EditableFragment } from './editable-fragment';
 import { EditorOptions } from '../editor';
+import { Template } from './template';
 import { FormatRange } from './formatter';
 
 export class Parser {
@@ -17,24 +18,40 @@ export class Parser {
       const templates = this.options.templates;
       for (const t of templates) {
         if (t.is(el as HTMLElement)) {
-          slot.append(t);
-          t.from(el as HTMLElement).forEach(item => {
-            this.readFormats(item.from as HTMLElement, item.inSlot);
-            item.from.childNodes.forEach(c => this.readTemplate(c, item.inSlot));
-          });
-          return;
+          const viewData = t.from(el as HTMLElement);
+          slot.append(new Template(viewData.abstractData, t));
+          viewData.childrenSlots.forEach(item => {
+            this.readTemplate(item.from, item.toSlot);
+          })
+          return 1;
         }
       }
-      this.readFormats(el as HTMLElement, slot);
+      const maps = this.readFormats(el as HTMLElement);
+      const startIndex = slot.contentLength;
+      let endIndex = startIndex;
+      Array.from(el.childNodes).forEach(child => {
+        endIndex += this.readTemplate(child, slot);
+      })
+      maps.forEach(item => {
+        slot.mergeFormat({
+          startIndex,
+          endIndex,
+          renderer: item.formatter,
+          abstractData: item.abstractData
+        })
+      })
+      return endIndex;
     } else if (el.nodeType === 3) {
       slot.append(el.textContent);
+      return el.textContent.length;
     }
   }
 
-  private readFormats(el: HTMLElement, slot: EditableFragment) {
-    this.options.formats.map(formatter => {
-      if (formatter.is(el)) {
-        slot.mergeFormat(new FormatRange(formatter.extractData(el as HTMLElement), formatter));
+  private readFormats(el: HTMLElement) {
+    return this.options.formats.filter(formatter => formatter.is(el)).map(formatter => {
+      return {
+        formatter,
+        abstractData: formatter.read(el as HTMLElement)
       }
     });
   }
