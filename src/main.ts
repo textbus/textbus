@@ -23,7 +23,7 @@ const editor = new Editor('#editor', {
 
 editor.setContents(`
 <ul>
-<strong>0<em>12</em></strong><em><strong>34</strong></em><strong><em>5</em>6</strong>
+<strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong>
 </ul>
 test
 `);
