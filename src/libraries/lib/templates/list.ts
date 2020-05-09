@@ -1,9 +1,8 @@
-import { SlotMap, TemplateTranslator, ViewData } from '../core/template';
+import { SlotMap, Template, TemplateTranslator, ViewData } from '../core/template';
 import { EditableFragment } from '../core/editable-fragment';
-import { AbstractData } from '../core/abstract-data';
+import { VElement } from '../core/element';
 
-export class ListTemplate implements TemplateTranslator {
-  slots: EditableFragment[] = [];
+export class ListTemplateTranslator implements TemplateTranslator {
 
   constructor(private tagName: string) {
   }
@@ -12,13 +11,14 @@ export class ListTemplate implements TemplateTranslator {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(template: HTMLElement): ViewData {
+  from(el: HTMLElement): ViewData {
+    const template = new ListTemplate(this.tagName);
     const childrenSlots: SlotMap[] = [];
 
-    const childNodes = Array.from(template.childNodes);
+    const childNodes = Array.from(el.childNodes);
     while (childNodes.length) {
       const slot = new EditableFragment();
-      this.slots.push(slot);
+      template.childSlots.push(slot);
       let first = childNodes.shift();
       let newLi: HTMLElement;
       while (first) {
@@ -44,10 +44,24 @@ export class ListTemplate implements TemplateTranslator {
       }
     }
     return {
+      template,
       childrenSlots
     };
   }
+}
 
-  render(abstractData: AbstractData): any {
+export class ListTemplate extends Template {
+  constructor(private tagName: string) {
+    super();
+  }
+
+  render() {
+    const list = new VElement(this.tagName);
+    this.childSlots.forEach(slot => {
+      const li = new VElement('li');
+      list.appendChild(li);
+      this.viewMap.set(slot, li);
+    })
+    return list;
   }
 }

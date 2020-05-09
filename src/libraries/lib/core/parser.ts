@@ -1,14 +1,13 @@
 import { EditableFragment } from './editable-fragment';
 import { EditorOptions } from '../editor';
-import { Template } from './template';
-import { FormatRange } from './formatter';
+import { RootEditableFragment } from './root-editable-fragment';
 
 export class Parser {
   constructor(private options: EditorOptions) {
   }
 
   parse(el: HTMLElement) {
-    const rootSlot = new EditableFragment();
+    const rootSlot = new RootEditableFragment();
     this.readTemplate(el, rootSlot);
     return rootSlot;
   }
@@ -19,31 +18,27 @@ export class Parser {
       for (const t of templates) {
         if (t.is(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
-          slot.append(new Template(viewData.abstractData, t));
+          slot.append(viewData.template);
           viewData.childrenSlots.forEach(item => {
             this.readTemplate(item.from, item.toSlot);
           })
-          return 1;
         }
       }
       const maps = this.readFormats(el as HTMLElement);
       const startIndex = slot.contentLength;
-      let endIndex = startIndex;
       Array.from(el.childNodes).forEach(child => {
-        endIndex += this.readTemplate(child, slot);
+        this.readTemplate(child, slot);
       })
       maps.forEach(item => {
         slot.mergeFormat({
           startIndex,
-          endIndex,
+          endIndex: slot.contentLength,
           renderer: item.formatter,
           abstractData: item.abstractData
         })
       })
-      return endIndex;
     } else if (el.nodeType === 3) {
       slot.append(el.textContent);
-      return el.textContent.length;
     }
   }
 

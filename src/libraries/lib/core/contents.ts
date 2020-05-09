@@ -15,4 +15,29 @@ export class Contents {
       this.elements.push(content);
     }
   }
+
+  slice(startIndex: number, endIndex = this.length) {
+    if (startIndex >= endIndex) {
+      return [];
+    }
+    let index = 0;
+    const result: Array<string | Template> = [];
+    for (const el of this.elements) {
+      const fragmentStartIndex = index;
+      const fragmentEndIndex = index + el.length;
+      index += el.length;
+
+      if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
+        if (typeof el === 'string') {
+          const min = Math.max(0, startIndex - fragmentStartIndex);
+          const max = Math.min(fragmentEndIndex, endIndex) - fragmentStartIndex;
+          result.push(el.slice(min, max));
+        } else {
+          result.push(el);
+        }
+      }
+
+    }
+    return result;
+  }
 }

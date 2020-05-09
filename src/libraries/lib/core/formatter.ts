@@ -1,5 +1,5 @@
 import { AbstractData } from './abstract-data';
-import { Renderer } from './renderer';
+import { VElement } from './element';
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -10,10 +10,12 @@ export interface EditableOptions {
   styleName?: string;
 }
 
-export interface Formatter extends Renderer {
+export interface Formatter {
   is(node: HTMLElement): boolean;
 
   read(node: HTMLElement): AbstractData;
+
+  render(abstractData: AbstractData): VElement;
 }
 
 export function extractData(node: HTMLElement, config: EditableOptions): AbstractData {
@@ -47,5 +49,5 @@ export interface FormatRange {
   startIndex: number;
   endIndex: number;
   abstractData: AbstractData;
-  renderer: Renderer;
+  renderer: Formatter;
 }

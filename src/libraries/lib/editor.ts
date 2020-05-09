@@ -2,22 +2,50 @@ import { Plugin } from './core/help';
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';
+import { Viewer } from './viewer/viewer';
+import { DomRenderer } from './viewer/dom-renderer';
 
 export interface EditorOptions {
+  theme?: string;
   templates: TemplateTranslator[];
   formats: Formatter[];
 }
 
 export class Editor {
+  readonly elementRef = document.createElement('div');
+  private readonly frameContainer = document.createElement('div');
+  private readonly container: HTMLElement;
+
   private parser: Parser;
-  constructor(private options: EditorOptions) {
+  private viewer = new Viewer(new DomRenderer());
+
+  constructor(private selector: string | HTMLElement, private options: EditorOptions) {
+    if (typeof selector === 'string') {
+      this.container = document.querySelector(selector);
+    } else {
+      this.container = selector;
+    }
     this.parser = new Parser(options);
+
+    this.frameContainer.classList.add('tbus-frame-container');
+
+    // this.elementRef.appendChild(this.toolbar.elementRef);
+    this.elementRef.appendChild(this.frameContainer);
+    // this.frameContainer.appendChild(this.loading.elementRef);
+    this.frameContainer.appendChild(this.viewer.elementRef);
+    // this.elementRef.appendChild(this.paths.elementRef);
+
+    this.elementRef.classList.add('tbus-container');
+    if (options.theme) {
+      this.elementRef.classList.add('tbus-theme-' + options.theme);
+    }
+    this.container.appendChild(this.elementRef);
   }
 
   setContents(html: string) {
     this.writeContents(html).then(el => {
-      const d = this.parser.parse(el);
-      console.log(d)
+      const rootFragment = this.parser.parse(el);
+      this.viewer.render(rootFragment);
     });
   }
 

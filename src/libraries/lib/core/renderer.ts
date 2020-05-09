@@ -1,5 +1,5 @@
-import { AbstractData } from './abstract-data';
+import { VElement } from './element';
 
 export interface Renderer {
-  render(abstractData: AbstractData): HTMLElement;
+  render(vDom: VElement, host: HTMLElement): void;
 }

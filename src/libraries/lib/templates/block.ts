@@ -1,10 +1,8 @@
-import { TemplateTranslator, ViewData } from '../core/template';
+import { Template, TemplateTranslator, ViewData } from '../core/template';
 import { EditableFragment } from '../core/editable-fragment';
-import { AbstractData } from '../core/abstract-data';
+import { VElement } from '../core/element';
 
-export class BlockTemplate implements TemplateTranslator {
-  slots: EditableFragment[] = [];
-
+export class BlockTemplateTranslator implements TemplateTranslator {
   constructor(private tagName: string) {
   }
 
@@ -12,19 +10,28 @@ export class BlockTemplate implements TemplateTranslator {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(template: HTMLElement): ViewData {
-    this.tagName = template.tagName;
+  from(el: HTMLElement): ViewData {
+    const template = new BlockTemplate(this.tagName);
     const slot = new EditableFragment();
-    this.slots.push(slot);
+    template.childSlots.push(slot);
     return {
+      template,
       childrenSlots: [{
-        from: template,
+        from: el,
         toSlot: slot
       }]
     };
   }
+}
 
+export class BlockTemplate extends Template {
+  constructor(private tagName: string) {
+    super();
+  }
 
-  render(abstractData: AbstractData): any {
+  render() {
+    const block = new VElement(this.tagName);
+    this.viewMap.set(this.childSlots[0], block);
+    return block;
   }
 }

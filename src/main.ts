@@ -5,17 +5,16 @@ import 'core-js';
 import { Editor, EditorOptions } from './libraries/public-api';
 
 import './lib/assets/index.scss';
-import { ListTemplate } from './libraries/lib/templates/list';
-import { BlockTemplate } from './libraries/lib/templates/block';
+import { ListTemplate, ListTemplateTranslator } from './libraries/lib/templates/list';
+import { BlockTemplate, BlockTemplateTranslator } from './libraries/lib/templates/block';
 import { Bold } from './libraries/lib/formatter/bold';
 
 
-
-const editor = new Editor({
+const editor = new Editor('#editor', {
   templates: [
-    new ListTemplate('ul'),
-    new ListTemplate('ol'),
-    new BlockTemplate('div')
+    new ListTemplateTranslator('ul'),
+    new ListTemplateTranslator('ol'),
+    new BlockTemplateTranslator('div')
   ],
   formats: [
     new Bold()
@@ -24,9 +23,7 @@ const editor = new Editor({
 
 editor.setContents(`
 <ul>
-<li>aaa</li>
-<li>bbb</li>
-<strong>ccc</strong>3232
+<strong>0<em>12</em></strong><em><strong>34</strong></em><strong><em>5</em>6</strong>
 </ul>
 test
 `);
