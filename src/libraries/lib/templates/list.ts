@@ -14,23 +14,35 @@ export class ListTemplate implements TemplateTranslator {
 
   from(template: HTMLElement): ViewData {
     const childrenSlots: SlotMap[] = [];
-    Array.from(template.childNodes).forEach(child => {
+
+    const childNodes = Array.from(template.childNodes);
+    while (childNodes.length) {
       const slot = new EditableFragment();
       this.slots.push(slot);
-      if (child.nodeType === 1 && /^li$/i.test(child.nodeName)) {
-        childrenSlots.push({
-          from: child as HTMLElement,
-          toSlot: slot
-        })
-      } else {
-        const li = document.createElement('li');
-        li.appendChild(child);
-        childrenSlots.push({
-          from: li,
-          toSlot: slot
-        })
+      let first = childNodes.shift();
+      let newLi: HTMLElement;
+      while (first) {
+        if (/^li$/i.test(first.nodeName)) {
+          childrenSlots.push({
+            from: first as HTMLElement,
+            toSlot: slot
+          })
+          break;
+        }
+        if (!newLi) {
+          newLi = document.createElement('li');
+        }
+        newLi.appendChild(first);
+        first = childNodes.shift();
       }
-    });
+      if (newLi) {
+        childrenSlots.push({
+          from: newLi,
+          toSlot: slot
+        })
+        newLi = null;
+      }
+    }
     return {
       childrenSlots
     };

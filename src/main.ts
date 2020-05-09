@@ -26,8 +26,9 @@ editor.setContents(`
 <ul>
 <li>aaa</li>
 <li>bbb</li>
-<strong>ccc</strong>
+<strong>ccc</strong>3232
 </ul>
+test
 `);
 
 // const editor = createEditor('#editor', {

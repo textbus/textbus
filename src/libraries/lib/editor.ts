@@ -16,7 +16,7 @@ export class Editor {
 
   setContents(html: string) {
     this.writeContents(html).then(el => {
-      const d = this.parser.parse((el as any).children[0]);
+      const d = this.parser.parse(el);
       console.log(d)
     });
   }
