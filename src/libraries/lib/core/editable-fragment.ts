@@ -22,31 +22,34 @@ export class EditableFragment {
 
   createVDom() {
     const formats = this.formatMap.getCanApplyFormats();
-    const vDom = new VElement('root');
-    this.vDomBuilder(formats, vDom, 0, this.contents.length);
-    return vDom;
+    return this.vDomBuilder(formats, 0, this.contents.length);
   }
 
-  private vDomBuilder(formats: FormatRange[], parent: VElement, startIndex: number, endIndex: number) {
+  private vDomBuilder(formats: FormatRange[], startIndex: number, endIndex: number) {
+    const children: Array<string|VElement> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
+      console.log(firstRange)
       if (firstRange) {
 
       } else {
         const contents = this.contents.slice(startIndex, endIndex);
         contents.forEach(item => {
           if (typeof item === 'string') {
-            parent.appendChild(item);
+            children.push(item);
           } else if (item instanceof Template) {
-            parent.appendChild(item.render());
+            children.push(item.render());
             item.childSlots.forEach(slot => {
-              // slot.
-              // slot.createVDom()
+              const parent = item.getChildViewBySlot(slot);
+              slot.createVDom().forEach(child => {
+                parent.appendChild(child);
+              })
             });
           }
         });
         break;
       }
     }
+    return children;
   }
 }

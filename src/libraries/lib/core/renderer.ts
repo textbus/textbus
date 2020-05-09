@@ -1,5 +1,5 @@
 import { VElement } from './element';
 
 export interface Renderer {
-  render(vDom: VElement, host: HTMLElement): void;
+  render(vDom: Array<VElement | string>, host: HTMLElement): void;
 }
