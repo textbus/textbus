@@ -1,6 +1,7 @@
 import { extractData, Formatter } from '../core/formatter';
 import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
+import { ChildSlotModel } from '../core/renderer';
 
 export class Bold implements Formatter {
   is(node: HTMLElement): boolean {
@@ -13,7 +14,7 @@ export class Bold implements Formatter {
     });
   }
 
-  render(abstractData: AbstractData): VElement {
-    return new VElement('strong');
+  render(abstractData: AbstractData) {
+    return new ChildSlotModel(new VElement('strong'));
   }
 }

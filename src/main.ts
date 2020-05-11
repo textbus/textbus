@@ -8,6 +8,7 @@ import './lib/assets/index.scss';
 import { ListTemplate, ListTemplateTranslator } from './libraries/lib/templates/list';
 import { BlockTemplate, BlockTemplateTranslator } from './libraries/lib/templates/block';
 import { Bold } from './libraries/lib/formatter/bold';
+import { Color } from './libraries/lib/formatter/color';
 
 
 const editor = new Editor('#editor', {
@@ -17,12 +18,14 @@ const editor = new Editor('#editor', {
     new BlockTemplateTranslator('div')
   ],
   formats: [
-    new Bold()
+    new Bold(),
+    new Color()
   ]
 });
 
 editor.setContents(`
 <ul>
+<li style="color: red"><strong>fdsa</strong></li>
 <strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong>
 </ul>
 test

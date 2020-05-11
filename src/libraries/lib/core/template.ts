@@ -1,9 +1,9 @@
-import { EditableFragment } from './editable-fragment';
+import { Fragment } from './fragment';
 import { VElement } from './element';
 
 export interface SlotMap {
   from: HTMLElement;
-  toSlot: EditableFragment;
+  toSlot: Fragment;
 }
 
 export interface ViewData {
@@ -19,12 +19,12 @@ export interface TemplateTranslator {
 
 export abstract class Template {
   readonly length = 1;
-  readonly childSlots: EditableFragment[] = [];
-  readonly viewMap = new Map<EditableFragment, VElement>();
+  readonly childSlots: Fragment[] = [];
+  readonly viewMap = new Map<Fragment, VElement>();
 
   abstract render(): VElement;
 
-  getChildViewBySlot(slot: EditableFragment) {
+  getChildViewBySlot(slot: Fragment) {
     return this.viewMap.get(slot);
   }
 }

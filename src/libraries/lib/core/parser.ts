@@ -1,18 +1,18 @@
-import { EditableFragment } from './editable-fragment';
+import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
-import { RootEditableFragment } from './root-editable-fragment';
+import { RootFragment } from './root-fragment';
 
 export class Parser {
   constructor(private options: EditorOptions) {
   }
 
   parse(el: HTMLElement) {
-    const rootSlot = new RootEditableFragment();
+    const rootSlot = new RootFragment();
     this.readTemplate(el, rootSlot);
     return rootSlot;
   }
 
-  private readTemplate(el: Node, slot: EditableFragment) {
+  private readTemplate(el: Node, slot: Fragment) {
     if (el.nodeType === 1) {
       const templates = this.options.templates;
       for (const t of templates) {

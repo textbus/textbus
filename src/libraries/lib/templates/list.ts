@@ -1,6 +1,7 @@
 import { SlotMap, Template, TemplateTranslator, ViewData } from '../core/template';
-import { EditableFragment } from '../core/editable-fragment';
+import { Fragment } from '../core/fragment';
 import { VElement } from '../core/element';
+import { EventType } from '../core/events';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 
@@ -17,7 +18,7 @@ export class ListTemplateTranslator implements TemplateTranslator {
 
     const childNodes = Array.from(el.childNodes);
     while (childNodes.length) {
-      const slot = new EditableFragment();
+      const slot = new Fragment();
       template.childSlots.push(slot);
       let first = childNodes.shift();
       let newLi: HTMLElement;
@@ -57,8 +58,14 @@ export class ListTemplate extends Template {
 
   render() {
     const list = new VElement(this.tagName);
-    this.childSlots.forEach(slot => {
+    this.childSlots.forEach((slot, index) => {
       const li = new VElement('li');
+      li.events.subscribe(event => {
+        if (event.type === EventType.onEnter) {
+          this.childSlots.splice(index, 0, new Fragment());
+        }
+        list.events.emit(event);
+      });
       list.appendChild(li);
       this.viewMap.set(slot, li);
     })

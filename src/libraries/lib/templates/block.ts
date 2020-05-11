@@ -1,5 +1,5 @@
 import { Template, TemplateTranslator, ViewData } from '../core/template';
-import { EditableFragment } from '../core/editable-fragment';
+import { Fragment } from '../core/fragment';
 import { VElement } from '../core/element';
 
 export class BlockTemplateTranslator implements TemplateTranslator {
@@ -12,7 +12,7 @@ export class BlockTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLElement): ViewData {
     const template = new BlockTemplate(this.tagName);
-    const slot = new EditableFragment();
+    const slot = new Fragment();
     template.childSlots.push(slot);
     return {
       template,

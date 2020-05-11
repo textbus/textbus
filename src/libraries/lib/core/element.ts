@@ -1,4 +1,7 @@
+import { EventEmitter } from './events';
+
 export class VElement {
+  readonly events = new EventEmitter();
   readonly childNodes: Array<VElement | string> = [];
   readonly attrs = new Map<string, string | number>();
   readonly styles = new Map<string, string | number>();

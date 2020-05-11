@@ -1,5 +1,6 @@
 import { AbstractData } from './abstract-data';
 import { VElement } from './element';
+import { ChildSlotModel, ReplaceModel } from './renderer';
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -15,7 +16,7 @@ export interface Formatter {
 
   read(node: HTMLElement): AbstractData;
 
-  render(abstractData: AbstractData): VElement;
+  render(abstractData: AbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
 }
 
 export function extractData(node: HTMLElement, config: EditableOptions): AbstractData {

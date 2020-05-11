@@ -3,7 +3,7 @@ import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
-import { DomRenderer } from './viewer/dom-renderer';
+import { Renderer } from './core/renderer';
 
 export interface EditorOptions {
   theme?: string;
@@ -17,7 +17,7 @@ export class Editor {
   private readonly container: HTMLElement;
 
   private parser: Parser;
-  private viewer = new Viewer(new DomRenderer());
+  private viewer = new Viewer(new Renderer());
 
   constructor(private selector: string | HTMLElement, private options: EditorOptions) {
     if (typeof selector === 'string') {

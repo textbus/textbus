@@ -1,6 +1,6 @@
 import { Renderer } from '../core/renderer';
 import { template } from './template-html';
-import { EditableFragment } from '../core/editable-fragment';
+import { RootFragment } from '../core/root-fragment';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -47,10 +47,9 @@ export class Viewer {
     this.elementRef.appendChild(this.frame);
   }
 
-  render(rootFragment: EditableFragment) {
+  render(rootFragment: RootFragment) {
     setTimeout(() => {
-
-      this.renderer.render(rootFragment.createVDom(), this.contentDocument.body);
+      this.renderer.render(rootFragment, this.contentDocument.body);
     })
   }
 }
