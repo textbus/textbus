@@ -22,6 +22,7 @@ export class Parser {
           viewData.childrenSlots.forEach(item => {
             this.readTemplate(item.from, item.toSlot);
           })
+          return;
         }
       }
       const maps = this.readFormats(el as HTMLElement);
