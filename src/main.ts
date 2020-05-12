@@ -15,7 +15,8 @@ const editor = new Editor('#editor', {
   templates: [
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
-    new BlockTemplateTranslator('div')
+    new BlockTemplateTranslator('div'),
+    new BlockTemplateTranslator('p')
   ],
   formats: [
     new Bold(),

@@ -25,7 +25,7 @@ export class BlockTemplateTranslator implements TemplateTranslator {
 }
 
 export class BlockTemplate extends Template {
-  constructor(private tagName: string) {
+  constructor(public readonly tagName: string) {
     super();
   }
 

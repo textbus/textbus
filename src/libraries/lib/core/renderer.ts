@@ -1,4 +1,4 @@
-import { VElement } from './element';
+import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
@@ -15,14 +15,55 @@ export class ReplaceModel {
  * 把当前的渲染结果作为插槽返回，并且把后续的渲染结果插入在当前节点内
  */
 export class ChildSlotModel {
-  constructor(public slotElement: VElement) {
+  constructor(public childElement: VElement) {
   }
 }
 
+export interface ElementPosition {
+  startIndex: number;
+  endIndex: number;
+  fragment: Fragment;
+}
+
 export class Renderer {
+  private nativeElementCaches = new Map<Node, VElement | VTextNode>();
+  private fragmentCaches = new Map<VTextNode | VElement, ElementPosition>();
+  private oldVDom: VElement;
+
   render(fragment: Fragment, host: HTMLElement) {
     const vDom = this.createVDom(fragment, new VElement('root'));
-    console.log(vDom);
+    this.diffAndUpdate(this.oldVDom, vDom, host);
+    this.oldVDom = vDom;
+    setTimeout(() => {
+      console.log(this.oldVDom)
+      console.log(this.nativeElementCaches)
+      console.log(this.fragmentCaches)
+    })
+  }
+
+  private diffAndUpdate(oldVDom: VElement, newVDom: VElement, host: HTMLElement) {
+    if (oldVDom) {
+
+    } else {
+      const el = document.createElement(newVDom.tagName);
+      newVDom.attrs.forEach((value, key) => {
+        el.setAttribute(key, value + '');
+      });
+      newVDom.styles.forEach((value, key) => {
+        el.style[key] = value;
+      });
+      host.appendChild(el);
+      this.nativeElementCaches.set(el, newVDom);
+      newVDom.childNodes.forEach(child => {
+        if (child instanceof VTextNode) {
+          const textNode = document.createTextNode(child.textContent);
+          this.nativeElementCaches.set(textNode, child);
+          el.appendChild(textNode);
+        } else {
+          this.diffAndUpdate(null, child, el);
+        }
+      });
+    }
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
@@ -43,7 +84,7 @@ export class Renderer {
   }
 
   private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number) {
-    const children: Array<string | VElement> = [];
+    const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
       if (firstRange) {
@@ -60,6 +101,18 @@ export class Renderer {
           }
         }
         const {host, slot} = this.rending(childFormats);
+        let el = host;
+        while (el) {
+          this.fragmentCaches.set(el, {
+            fragment,
+            startIndex,
+            endIndex
+          });
+          if (el === slot) {
+            break;
+          }
+          el = el.childNodes[0] as VElement;
+        }
 
         const progenyFormats: FormatRange[] = [];
         let index = 0;
@@ -107,11 +160,17 @@ export class Renderer {
   }
 
   private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
-    const children: Array<VElement | string> = [];
+    const children: Array<VElement | VTextNode> = [];
     const contents = fragment.slice(startIndex, endIndex);
     contents.forEach(item => {
       if (typeof item === 'string') {
-        children.push(item);
+        const textNode = new VTextNode(item);
+        this.fragmentCaches.set(textNode, {
+          fragment,
+          startIndex,
+          endIndex
+        });
+        children.push(textNode);
       } else if (item instanceof Template) {
         children.push(item.render());
         item.childSlots.forEach(slot => {
@@ -132,11 +191,11 @@ export class Renderer {
         return host;
       } else if (renderModel instanceof ChildSlotModel) {
         if (vEle) {
-          vEle.appendChild(renderModel.slotElement);
+          vEle.appendChild(renderModel.childElement);
         } else {
-          host = renderModel.slotElement;
+          host = renderModel.childElement;
         }
-        slot = renderModel.slotElement;
+        slot = renderModel.childElement;
         return slot;
       }
       return vEle;

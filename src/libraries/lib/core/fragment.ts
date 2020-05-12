@@ -2,7 +2,6 @@ import { Contents } from './contents';
 import { Template } from './template';
 import { FormatRange } from './formatter';
 import { FormatMap } from './format-map';
-import { VElement } from './element';
 
 export class Fragment {
   private contents = new Contents();
@@ -24,7 +23,7 @@ export class Fragment {
     return this.formatMap.getCanApplyFormats();
   }
 
-  slice(startIndex: number, endIndex: number) {
+  slice(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
   }
 

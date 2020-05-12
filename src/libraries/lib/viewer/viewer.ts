@@ -1,6 +1,8 @@
 import { Renderer } from '../core/renderer';
 import { template } from './template-html';
 import { RootFragment } from '../core/root-fragment';
+import { BlockTemplate } from '../templates/block';
+import { Fragment } from '../core/fragment';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -49,6 +51,14 @@ export class Viewer {
 
   render(rootFragment: RootFragment) {
     setTimeout(() => {
+      const last = rootFragment.slice(rootFragment.contentLength - 1);
+      if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
+        const p = new BlockTemplate('p');
+        const fragment = new Fragment();
+        fragment.append('br');
+        p.childSlots.push(fragment);
+        rootFragment.append(p);
+      }
       this.renderer.render(rootFragment, this.contentDocument.body);
     })
   }
