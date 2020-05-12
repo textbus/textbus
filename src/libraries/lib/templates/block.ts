@@ -6,7 +6,7 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   constructor(private tagName: string) {
   }
 
-  is(template: HTMLElement): boolean {
+  match(template: HTMLElement): boolean {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 

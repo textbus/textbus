@@ -4,7 +4,7 @@ import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
 export class Bold implements Formatter {
-  is(node: HTMLElement): boolean {
+  match(node: HTMLElement): boolean {
     return node.nodeName.toLowerCase() === 'strong';
   }
 

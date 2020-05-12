@@ -16,7 +16,7 @@ export class Parser {
     if (el.nodeType === 1) {
       const templates = this.options.templates;
       for (const t of templates) {
-        if (t.is(el as HTMLElement)) {
+        if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.template);
           viewData.childrenSlots.forEach(item => {
@@ -44,7 +44,7 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement) {
-    return this.options.formats.filter(formatter => formatter.is(el)).map(formatter => {
+    return this.options.formats.filter(formatter => formatter.match(el)).map(formatter => {
       return {
         formatter,
         abstractData: formatter.read(el as HTMLElement)

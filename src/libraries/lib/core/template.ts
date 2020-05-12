@@ -12,7 +12,7 @@ export interface ViewData {
 }
 
 export interface TemplateTranslator {
-  is(template: HTMLElement): boolean;
+  match(template: HTMLElement): boolean;
 
   from(template: HTMLElement): ViewData;
 }
