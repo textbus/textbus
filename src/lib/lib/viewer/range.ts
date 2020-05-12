@@ -1,6 +1,4 @@
 import { Fragment } from '../parser/fragment';
-import { TBUS_TOKEN } from '../parser/help';
-import { BlockToken, InlineToken, MediaToken, Token, TextToken } from '../renderer/tokens';
 
 /**
  * 标识 Fragment 中的一个位置

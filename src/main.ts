@@ -2,13 +2,13 @@ import 'core-js';
 // import { Observable } from 'rxjs';
 
 // import { createEditor } from './lib/create';
-import { Editor, EditorOptions } from './libraries/public-api';
+import { Editor, EditorOptions } from './lib/public-api';
 
 import './lib/assets/index.scss';
-import { ListTemplate, ListTemplateTranslator } from './libraries/lib/templates/list';
-import { BlockTemplate, BlockTemplateTranslator } from './libraries/lib/templates/block';
-import { Bold } from './libraries/lib/formatter/bold';
-import { Color } from './libraries/lib/formatter/color';
+import { ListTemplateTranslator } from './lib/lib/templates/list';
+import { BlockTemplateTranslator } from './lib/lib/templates/block';
+import { Bold } from './lib/lib/formatter/bold';
+import { Color } from './lib/lib/formatter/color';
 
 
 const editor = new Editor('#editor', {
