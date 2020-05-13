@@ -37,7 +37,7 @@ export class Editor {
     this.toolbar.onAction
       // .pipe(filter(() => !!this.selection))
       .subscribe(config => {
-        this.viewer.apply(config, config.matcher);
+        this.viewer.apply(config);
         if (config.execCommand.recordHistory) {
           // this.recordSnapshot();
           // this.listenUserWriteEvent();

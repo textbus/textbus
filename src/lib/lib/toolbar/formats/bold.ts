@@ -1,6 +1,6 @@
 import { ButtonConfig, HandlerType } from '../help';
 import { BoldCommander } from '../../commands/bold-commander';
-import { Matcher } from '../../matcher/matcher';
+import { FormatMatcher } from '../../matcher/matcher';
 import { boldFormatter } from '../../formatter/bold';
 
 export const bold: ButtonConfig = {
@@ -11,6 +11,6 @@ export const bold: ButtonConfig = {
     ctrlKey: true,
     key: 'b'
   },
-  matcher: new Matcher() as any,
+  matcher: new FormatMatcher(boldFormatter),
   execCommand: new BoldCommander()
 }

@@ -2,10 +2,17 @@ import { Template } from '../core/template';
 import { Formatter } from '../core/formatter';
 import { TBSelection } from '../viewer/selection';
 
-export type MatchRule = Formatter | { new(): Template };
-
-export class Matcher {
-  queryState(selection: TBSelection, rule: MatchRule) {
-    console.log(rule, selection);
+export class FormatMatcher {
+  constructor(private rule: Formatter) {
   }
+
+  queryState(selection: TBSelection) {
+    return false;
+  };
 }
+
+export interface TemplateMatcher {
+  queryState(selection: TBSelection, template: Template): boolean;
+}
+
+export type MatchRule = FormatMatcher | TemplateMatcher;

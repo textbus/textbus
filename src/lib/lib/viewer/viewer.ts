@@ -8,13 +8,12 @@ import { fromEvent, merge } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { HandlerConfig } from '../toolbar/help';
 import { TBSelection } from './selection';
-import { Matcher, MatchRule } from '../matcher/matcher';
+import { FormatMatcher } from '../matcher/matcher';
 
 export class Viewer {
   elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
-  private matcher = new Matcher();
   private frame = document.createElement('iframe');
   private input: Cursor;
   private nativeSelection: Selection;
@@ -79,10 +78,12 @@ export class Viewer {
     })
   }
 
-  apply(config: HandlerConfig, rule: MatchRule) {
+  apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    const state = this.matcher.queryState(selection, rule);
-    console.log(state);
+    if (config.matcher instanceof FormatMatcher) {
+      const state = config.matcher.queryState(selection);
+      console.log(state);
+    }
     // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
     // if (state === HighlightState.Disabled) {
     //   return;
