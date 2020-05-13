@@ -1,6 +1,5 @@
 import { fromEvent } from 'rxjs';
 
-import { TBSelection } from './selection';
 import { Events, Keymap } from './events';
 import { getRangePosition, isWindows } from './tools';
 
@@ -27,7 +26,7 @@ export class Cursor {
   private _display = true;
   private flashing = true;
 
-  private selection: TBSelection;
+  private selection: Selection;
 
   constructor(private context: Document) {
 
@@ -70,13 +69,13 @@ export class Cursor {
    * 根据 Selection 更新光标显示位置及状态
    * @param selection
    */
-  updateStateBySelection(selection: TBSelection) {
+  updateStateBySelection(selection: Selection) {
     this.selection = selection;
     if (!selection.rangeCount) {
       return;
     }
     this.updateCursorPosition();
-    if (selection.collapsed) {
+    if (selection.isCollapsed) {
       this.show();
     } else {
       this.hide();
@@ -97,11 +96,11 @@ export class Cursor {
   }
 
   private updateCursorPosition() {
-    if (!this.selection || !this.selection.firstRange) {
+    if (!this.selection || !this.selection.rangeCount) {
       return;
     }
-    const startContainer = this.selection.firstRange.nativeRange.startContainer;
-    const startOffset = this.selection.firstRange.nativeRange.startOffset;
+    const startContainer = this.selection.focusNode;
+    const startOffset = this.selection.focusOffset;
     const range = document.createRange();
     range.setStart(startContainer, startOffset);
     range.collapse();

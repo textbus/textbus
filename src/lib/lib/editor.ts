@@ -1,4 +1,3 @@
-import { Plugin } from './core/help';
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';

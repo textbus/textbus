@@ -3,22 +3,28 @@ import { template } from './template-html';
 import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block';
 import { Fragment } from '../core/fragment';
+import { Cursor } from './cursor';
+import { fromEvent, merge } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 
 export class Viewer {
   elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
   private frame = document.createElement('iframe');
+  private input: Cursor;
+  private nativeSelection: Selection;
 
   constructor(private renderer: Renderer) {
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
+
       // this.selection = new TBSelection(doc);
-      // this.input = new Cursor(doc);
+      this.input = new Cursor(doc);
       // this.readyEvent.next(doc);
-      // this.elementRef.appendChild(this.input.elementRef);
+      this.elementRef.appendChild(this.input.elementRef);
       //
       // this.styleSheets.forEach(s => {
       //   const style = doc.createElement('style');
@@ -26,13 +32,13 @@ export class Viewer {
       //   doc.head.appendChild(style);
       // });
 
-      // merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
-      //   .subscribe(() => {
-      //     this.nativeSelection = this.contentDocument.getSelection();
-      //     this.invokeSelectStartHooks();
-      //   });
+      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
+        .subscribe(() => {
+          this.nativeSelection = this.contentDocument.getSelection();
+          // this.invokeSelectStartHooks();
+        });
       //
-      // this.listenEvents();
+      this.listenEvents();
     };
 
     this.frame.setAttribute('scrolling', 'no');
@@ -47,6 +53,12 @@ export class Viewer {
     this.frame.classList.add('tbus-frame');
 
     this.elementRef.appendChild(this.frame);
+  }
+
+  listenEvents() {
+    fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
+      this.input.updateStateBySelection(this.nativeSelection);
+    })
   }
 
   render(rootFragment: RootFragment) {
