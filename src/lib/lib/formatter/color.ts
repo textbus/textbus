@@ -3,7 +3,7 @@ import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-export class Color implements Formatter {
+class ColorFormatter implements Formatter {
   match(node: HTMLElement): boolean {
     return !!node.style.color;
   }
@@ -24,3 +24,5 @@ export class Color implements Formatter {
     }
   }
 }
+
+export const colorFormatter = new ColorFormatter();

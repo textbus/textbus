@@ -12,7 +12,7 @@ export interface EditableOptions {
 }
 
 export interface Formatter {
-  match(node: HTMLElement): boolean;
+  match(node: HTMLElement | AbstractData): boolean;
 
   read(node: HTMLElement): AbstractData;
 

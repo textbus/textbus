@@ -3,11 +3,15 @@ import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
+import { Toolbar } from './toolbar/toolbar';
+import { HandlerConfig } from './toolbar/help';
+import { filter } from 'rxjs/operators';
 
 export interface EditorOptions {
   theme?: string;
-  templates: TemplateTranslator[];
-  formats: Formatter[];
+  templates?: TemplateTranslator[];
+  formats?: Formatter[];
+  toolbar?: (HandlerConfig | HandlerConfig[])[];
 }
 
 export class Editor {
@@ -16,6 +20,7 @@ export class Editor {
   private readonly container: HTMLElement;
 
   private parser: Parser;
+  private readonly toolbar: Toolbar;
   private viewer = new Viewer(new Renderer());
 
   constructor(private selector: string | HTMLElement, private options: EditorOptions) {
@@ -27,8 +32,27 @@ export class Editor {
     this.parser = new Parser(options);
 
     this.frameContainer.classList.add('tbus-frame-container');
+    this.toolbar = new Toolbar(this, options.toolbar);
 
-    // this.elementRef.appendChild(this.toolbar.elementRef);
+    this.toolbar.onAction
+      // .pipe(filter(() => !!this.selection))
+      .subscribe(config => {
+        this.viewer.apply(config, config.matcher);
+        if (config.execCommand.recordHistory) {
+          // this.recordSnapshot();
+          // this.listenUserWriteEvent();
+        }
+      });
+
+    // this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
+    //   this.selection = selection;
+    //   const event = document.createEvent('Event');
+    //   event.initEvent('click', true, true);
+    //   this.elementRef.dispatchEvent(event);
+    //   this.toolbar.updateHandlerState(selection);
+    // });
+
+    this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     // this.frameContainer.appendChild(this.loading.elementRef);
     this.frameContainer.appendChild(this.viewer.elementRef);

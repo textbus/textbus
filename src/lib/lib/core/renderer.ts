@@ -31,14 +31,16 @@ export class Renderer {
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
-    const vDom = this.createVDom(fragment, new VElement('root'));
+    const root = new VElement('root');
+    this.nativeElementCaches.set(host, root);
+    const vDom = this.createVDom(fragment, root);
     this.diffAndUpdate(this.oldVDom, vDom, host);
     this.oldVDom = vDom;
-    setTimeout(() => {
-      console.log(this.oldVDom)
-      console.log(this.nativeElementCaches)
-      console.log(this.fragmentCaches)
-    })
+  }
+
+  getPositionByNode(node: Node) {
+    const vDom = this.nativeElementCaches.get(node);
+    return this.fragmentCaches.get(vDom);
   }
 
   private diffAndUpdate(oldVDom: VElement, newVDom: VElement, host: HTMLElement) {
@@ -67,6 +69,11 @@ export class Renderer {
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
+    this.fragmentCaches.set(host, {
+      startIndex: 0,
+      endIndex: fragment.contentLength,
+      fragment
+    });
     const containerFormats: FormatRange[] = [];
     const childFormats: FormatRange[] = [];
     fragment.getCanApplyFormats().forEach(f => {
@@ -162,17 +169,26 @@ export class Renderer {
   private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     const contents = fragment.slice(startIndex, endIndex);
+    let i = startIndex;
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
         this.fragmentCaches.set(textNode, {
           fragment,
-          startIndex,
-          endIndex
+          startIndex: i,
+          endIndex: i + item.length
         });
+        i += item.length;
         children.push(textNode);
       } else if (item instanceof Template) {
-        children.push(item.render());
+        const vDom = item.render();
+        this.fragmentCaches.set(vDom, {
+          fragment,
+          startIndex: i,
+          endIndex: i + 1
+        });
+        i++;
+        children.push(vDom);
         item.childSlots.forEach(slot => {
           const parent = item.getChildViewBySlot(slot);
           this.createVDom(slot, parent);

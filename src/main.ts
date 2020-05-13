@@ -7,8 +7,9 @@ import { Editor, EditorOptions } from './lib/public-api';
 import './lib/assets/index.scss';
 import { ListTemplateTranslator } from './lib/lib/templates/list';
 import { BlockTemplateTranslator } from './lib/lib/templates/block';
-import { Bold } from './lib/lib/formatter/bold';
-import { Color } from './lib/lib/formatter/color';
+import { boldFormatter } from './lib/lib/formatter/bold';
+import { colorFormatter } from './lib/lib/formatter/color';
+import { bold } from './lib/lib/toolbar/formats/bold';
 
 
 const editor = new Editor('#editor', {
@@ -19,9 +20,10 @@ const editor = new Editor('#editor', {
     new BlockTemplateTranslator('p')
   ],
   formats: [
-    new Bold(),
-    new Color()
-  ]
+    boldFormatter,
+    colorFormatter
+  ],
+  toolbar: [[bold]]
 });
 
 editor.setContents(`

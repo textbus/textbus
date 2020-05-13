@@ -6,11 +6,15 @@ import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
 import { fromEvent, merge } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
+import { HandlerConfig } from '../toolbar/help';
+import { TBSelection } from './selection';
+import { Matcher, MatchRule } from '../matcher/matcher';
 
 export class Viewer {
   elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
+  private matcher = new Matcher();
   private frame = document.createElement('iframe');
   private input: Cursor;
   private nativeSelection: Selection;
@@ -73,5 +77,24 @@ export class Viewer {
       }
       this.renderer.render(rootFragment, this.contentDocument.body);
     })
+  }
+
+  apply(config: HandlerConfig, rule: MatchRule) {
+    const selection = new TBSelection(this.nativeSelection, this.renderer);
+    const state = this.matcher.queryState(selection, rule);
+    console.log(state);
+    // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
+    // if (state === HighlightState.Disabled) {
+    //   return;
+    // }
+    // const overlap = state === HighlightState.Highlight;
+    // if (handler.hook && typeof handler.hook.onApply === 'function') {
+    //   handler.hook.onApply(handler.execCommand);
+    // }
+    // let selection = this.selection;
+    // handler.execCommand.command(selection, handler, overlap, this.root);
+    // this.rerender();
+    // this.selection.apply();
+    // this.selectionChangeEvent.next(selection);
   }
 }
