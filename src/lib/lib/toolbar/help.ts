@@ -3,7 +3,7 @@ import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { KeymapConfig } from '../viewer/events';
 import { AbstractData } from '../core/abstract-data';
 import { Commander } from '../commands/commander';
-import { MatchRule } from '../matcher/matcher';
+import { Matcher } from '../matcher/matcher';
 
 /**
  * 工具条控件的显示状态
@@ -32,7 +32,7 @@ export interface ButtonConfig {
   /** 按扭控件点击后调用的命令 */
   execCommand: Commander;
   /** 锚中节点的的匹配项配置 */
-  matcher?: MatchRule;
+  matcher?: Matcher;
   /** 设置按扭显示的文字 */
   label?: string;
   /** 给按扭控件添加一组 css class 类 */
@@ -68,7 +68,7 @@ export interface SelectConfig {
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
   highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig;
   /** 锚中节点的的匹配项配置 */
-  matcher?: MatchRule;
+  matcher?: Matcher;
   /** 给 Select 控件添加一组 css class */
   classes?: string[];
   /** 设置当前 Select 是否根据内容扩展宽度 */
@@ -84,7 +84,7 @@ export interface DropdownConfig {
   /** 订阅下拉控件操作完成时的观察者 */
   onHide: Observable<any>;
   /** 锚中节点的的匹配项配置 */
-  matcher?: MatchRule;
+  matcher?: Matcher;
   /** 订阅下拉控件操作完成时调用的命令 */
   execCommand: Commander;
   /** 给当前控件添加一组 css class */
@@ -124,7 +124,7 @@ export interface ActionSheetConfig {
   /** 当某一项被点击时调用的命令 */
   execCommand: Commander & { actionType: any };
   /** 锚中节点的的匹配项配置 */
-  matcher?: MatchRule;
+  matcher?: Matcher;
   /** 设置控件显示的文字 */
   label?: string;
   /** 给当前控件添加一组 css class */

@@ -11,8 +11,8 @@ export class FormatMatcher {
   };
 }
 
-export interface TemplateMatcher {
-  queryState(selection: TBSelection, template: Template): boolean;
+export abstract class TemplateMatcher {
+  abstract queryState(selection: TBSelection, template: Template): boolean;
 }
 
-export type MatchRule = FormatMatcher | TemplateMatcher;
+export type Matcher = FormatMatcher | TemplateMatcher;

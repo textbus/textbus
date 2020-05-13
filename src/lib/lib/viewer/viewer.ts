@@ -82,7 +82,7 @@ export class Viewer {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
     if (config.matcher instanceof FormatMatcher) {
       const state = config.matcher.queryState(selection);
-      console.log(state);
+      console.log(this, state);
     }
     // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
     // if (state === HighlightState.Disabled) {
