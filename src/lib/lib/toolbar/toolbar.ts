@@ -51,8 +51,8 @@ export class Toolbar {
 
   updateHandlerState(selection: TBSelection, renderer: Renderer) {
     this.handlers.filter(h => typeof h.instance.updateStatus === 'function').forEach(handler => {
-      if (handler.config.matcher instanceof Formatter) {
-        const s = handler.config.matcher.queryState(selection, renderer);
+      if (handler.config.match instanceof Formatter) {
+        const s = handler.config.match.queryState(selection, renderer);
         handler.instance.updateStatus(s);
       }
     });

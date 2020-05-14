@@ -86,8 +86,8 @@ export class Viewer {
 
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    if (config.matcher instanceof Formatter) {
-      const state = config.matcher.queryState(selection, this.renderer);
+    if (config.match instanceof Formatter) {
+      const state = config.match.queryState(selection, this.renderer);
       console.log(state);
     }
     // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;

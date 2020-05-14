@@ -10,6 +10,6 @@ export const bold: ButtonConfig = {
     ctrlKey: true,
     key: 'b'
   },
-  matcher: boldFormatter,
+  match: boldFormatter,
   execCommand: new BoldCommander()
 }
