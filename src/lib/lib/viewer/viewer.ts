@@ -6,7 +6,7 @@ import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
-import { HandlerConfig } from '../toolbar/help';
+import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Formatter } from '../core/formatter';
 
@@ -87,21 +87,16 @@ export class Viewer {
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
     if (config.match instanceof Formatter) {
-      const state = config.match.queryState(selection, this.renderer);
-      console.log(state);
+      const state = config.match.queryState(selection, this.renderer).state;
+      if (state === HighlightState.Disabled) {
+        return;
+      }
+      const overlap = state === HighlightState.Highlight;
+      config.execCommand.command(selection, config.match, overlap);
+      // this.rerender();
+      // this.selection.apply();
+      this.selectionChangeEvent.next(selection);
     }
-    // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
-    // if (state === HighlightState.Disabled) {
-    //   return;
-    // }
-    // const overlap = state === HighlightState.Highlight;
-    // if (handler.hook && typeof handler.hook.onApply === 'function') {
-    //   handler.hook.onApply(handler.execCommand);
-    // }
-    // let selection = this.selection;
-    // handler.execCommand.command(selection, handler, overlap, this.root);
-    // this.rerender();
-    // this.selection.apply();
-    // this.selectionChangeEvent.next(selection);
+
   }
 }

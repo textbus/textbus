@@ -9,7 +9,7 @@ import { ListTemplateTranslator } from './lib/lib/templates/list';
 import { BlockTemplateTranslator } from './lib/lib/templates/block';
 import { boldFormatter } from './lib/lib/formatter/bold';
 import { colorFormatter } from './lib/lib/formatter/color';
-import { bold } from './lib/lib/toolbar/formats/bold';
+import { bold } from './lib/lib/toolbar/tools/bold';
 
 
 const editor = new Editor('#editor', {
