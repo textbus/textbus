@@ -1,6 +1,7 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
 import { RootFragment } from './root-fragment';
+import { MatchState } from './formatter';
 
 export class Parser {
   constructor(private options: EditorOptions) {
@@ -44,7 +45,7 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement) {
-    return this.options.formats.filter(formatter => formatter.match(el)).map(formatter => {
+    return this.options.formats.filter(formatter => formatter.match(el) !== MatchState.Invalid).map(formatter => {
       return {
         formatter,
         abstractData: formatter.read(el as HTMLElement)

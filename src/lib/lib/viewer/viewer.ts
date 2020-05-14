@@ -8,7 +8,7 @@ import { fromEvent, merge } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { HandlerConfig } from '../toolbar/help';
 import { TBSelection } from './selection';
-import { FormatMatcher } from '../matcher/matcher';
+import { Formatter } from '../core/formatter';
 
 export class Viewer {
   elementRef = document.createElement('div');
@@ -80,7 +80,7 @@ export class Viewer {
 
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    if (config.matcher instanceof FormatMatcher) {
+    if (config.matcher instanceof Formatter) {
       const state = config.matcher.queryState(selection);
       console.log(this, state);
     }

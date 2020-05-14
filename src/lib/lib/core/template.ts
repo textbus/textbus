@@ -17,10 +17,13 @@ export interface TemplateTranslator {
   from(template: HTMLElement): ViewData;
 }
 
-export abstract class Template {
+export abstract  class Template {
   readonly length = 1;
   readonly childSlots: Fragment[] = [];
   readonly viewMap = new Map<Fragment, VElement>();
+
+  protected constructor() {
+  }
 
   abstract render(): VElement;
 
