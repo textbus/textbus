@@ -40,4 +40,19 @@ export class Contents {
     }
     return result;
   }
+
+  /**
+   * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1
+   * @param element
+   */
+  find(element: Template): number {
+    let index = 0;
+    for (const item of this.elements) {
+      if (item === element) {
+        return index;
+      }
+      index += item.length;
+    }
+    return -1;
+  }
 }

@@ -8,11 +8,14 @@ import { DropdownHandler } from './handlers/dropdown-handler';
 import { ActionSheetHandler } from './handlers/action-sheet-handler';
 import { Editor } from '../editor';
 import { KeymapConfig } from '../viewer/events';
+import { TBSelection } from '../viewer/selection';
+import { Formatter } from '../core/formatter';
+import { Renderer } from '../core/renderer';
 
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<HandlerConfig>;
-  readonly handlers: Array<{config: HandlerConfig, instance: Handler}> = [];
+  readonly handlers: Array<{ config: HandlerConfig, instance: Handler }> = [];
   readonly styleSheets: string[] = [];
 
   private actionEvent = new Subject<HandlerConfig>();
@@ -46,12 +49,14 @@ export class Toolbar {
     })
   }
 
-  // updateHandlerState(selection: TBSelection) {
-  //   this.handlers.filter(h => typeof h.updateStatus === 'function').forEach(handler => {
-  //     const s = handler.matcher.queryState(selection, handler, this.context);
-  //     handler.updateStatus(s);
-  //   });
-  // }
+  updateHandlerState(selection: TBSelection, renderer: Renderer) {
+    this.handlers.filter(h => typeof h.instance.updateStatus === 'function').forEach(handler => {
+      if (handler.config.matcher instanceof Formatter) {
+        const s = handler.config.matcher.queryState(selection, renderer);
+        handler.instance.updateStatus(s);
+      }
+    });
+  }
 
   private findNeedShowKeymapHandler(el: HTMLElement): string {
     if (el === this.elementRef) {

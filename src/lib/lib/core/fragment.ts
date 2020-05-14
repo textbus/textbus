@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { Template } from './template';
-import { FormatRange } from './formatter';
+import { FormatRange, Formatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export class Fragment {
@@ -23,8 +23,27 @@ export class Fragment {
     return this.formatMap.getCanApplyFormats();
   }
 
-  slice(startIndex: number, endIndex?: number) {
+  sliceContents(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
+  }
+
+  /**
+   * 获取当前片段内所有的格式化信息
+   */
+  getFormatRanges() {
+    return this.formatMap.getFormatRanges();
+  }
+
+  find(template: Template) {
+    return this.contents.find(template);
+  }
+
+  /**
+   * 通过 Handler 获取当前片段的的格式化信息
+   * @param formatter
+   */
+  getFormatRangesByFormatter(formatter: Formatter) {
+    return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
   // clone(options: { contents?: boolean, formats?: boolean } = {}) {

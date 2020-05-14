@@ -36,7 +36,8 @@ export class Parser {
           startIndex,
           endIndex: slot.contentLength,
           renderer: item.formatter,
-          abstractData: item.abstractData
+          abstractData: item.abstractData,
+          state: item.state
         })
       })
     } else if (el.nodeType === 3) {
@@ -45,10 +46,15 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement) {
-    return this.options.formats.filter(formatter => formatter.match(el) !== MatchState.Invalid).map(formatter => {
+    return this.options.formats.map(f => {
       return {
-        formatter,
-        abstractData: formatter.read(el as HTMLElement)
+        formatter: f,
+        state: f.match(el)
+      }
+    }).filter(p => p.state !== MatchState.Invalid).map(p => {
+      return {
+        ...p,
+        abstractData: p.formatter.read(el as HTMLElement)
       }
     });
   }

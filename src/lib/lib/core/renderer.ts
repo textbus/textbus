@@ -26,21 +26,33 @@ export interface ElementPosition {
 }
 
 export class Renderer {
-  private nativeElementCaches = new Map<Node, VElement | VTextNode>();
-  private fragmentCaches = new Map<VTextNode | VElement, ElementPosition>();
+  private nativeElementAndVDomMapping = new Map<Node, VElement | VTextNode>();
+  private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
+  private fragmentHierarchyMapping: Map<Fragment, Template>;
+  private templateHierarchyMapping: Map<Template, Fragment>;
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
+    this.fragmentHierarchyMapping = new Map<Fragment, Template>();
+    this.templateHierarchyMapping = new Map<Template, Fragment>();
     const root = new VElement('root');
-    this.nativeElementCaches.set(host, root);
+    this.nativeElementAndVDomMapping.set(host, root);
     const vDom = this.createVDom(fragment, root);
     this.diffAndUpdate(this.oldVDom, vDom, host);
     this.oldVDom = vDom;
   }
 
   getPositionByNode(node: Node) {
-    const vDom = this.nativeElementCaches.get(node);
-    return this.fragmentCaches.get(vDom);
+    const vDom = this.nativeElementAndVDomMapping.get(node);
+    return this.vDomPositionMapping.get(vDom);
+  }
+
+  getParentTemplateByFragment(fragment: Fragment) {
+    return this.fragmentHierarchyMapping.get(fragment);
+  }
+
+  getParentFragmentByTemplate(template: Template) {
+    return this.templateHierarchyMapping.get(template);
   }
 
   private diffAndUpdate(oldVDom: VElement, newVDom: VElement, host: HTMLElement) {
@@ -55,11 +67,11 @@ export class Renderer {
         el.style[key] = value;
       });
       host.appendChild(el);
-      this.nativeElementCaches.set(el, newVDom);
+      this.nativeElementAndVDomMapping.set(el, newVDom);
       newVDom.childNodes.forEach(child => {
         if (child instanceof VTextNode) {
           const textNode = document.createTextNode(child.textContent);
-          this.nativeElementCaches.set(textNode, child);
+          this.nativeElementAndVDomMapping.set(textNode, child);
           el.appendChild(textNode);
         } else {
           this.diffAndUpdate(null, child, el);
@@ -69,7 +81,7 @@ export class Renderer {
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
-    this.fragmentCaches.set(host, {
+    this.vDomPositionMapping.set(host, {
       startIndex: 0,
       endIndex: fragment.contentLength,
       fragment
@@ -110,7 +122,7 @@ export class Renderer {
         const {host, slot} = this.rending(childFormats);
         let el = host;
         while (el) {
-          this.fragmentCaches.set(el, {
+          this.vDomPositionMapping.set(el, {
             fragment,
             startIndex,
             endIndex
@@ -168,12 +180,12 @@ export class Renderer {
 
   private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
-    const contents = fragment.slice(startIndex, endIndex);
+    const contents = fragment.sliceContents(startIndex, endIndex);
     let i = startIndex;
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        this.fragmentCaches.set(textNode, {
+        this.vDomPositionMapping.set(textNode, {
           fragment,
           startIndex: i,
           endIndex: i + item.length
@@ -181,8 +193,9 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else if (item instanceof Template) {
+        this.templateHierarchyMapping.set(item, fragment);
         const vDom = item.render();
-        this.fragmentCaches.set(vDom, {
+        this.vDomPositionMapping.set(vDom, {
           fragment,
           startIndex: i,
           endIndex: i + 1
@@ -190,6 +203,7 @@ export class Renderer {
         i++;
         children.push(vDom);
         item.childSlots.forEach(slot => {
+          this.fragmentHierarchyMapping.set(slot, item);
           const parent = item.getChildViewBySlot(slot);
           this.createVDom(slot, parent);
         });
@@ -201,7 +215,7 @@ export class Renderer {
   private rending(formats: FormatRange[], host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.reduce((vEle, next) => {
-      const renderModel = next.renderer.render(next.abstractData, vEle);
+      const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
       if (renderModel instanceof ReplaceModel) {
         host = slot = renderModel.replaceElement;
         return host;

@@ -5,7 +5,7 @@ import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
 import { HandlerConfig } from './toolbar/help';
-import { filter } from 'rxjs/operators';
+import { auditTime, filter } from 'rxjs/operators';
 
 export interface EditorOptions {
   theme?: string;
@@ -21,7 +21,8 @@ export class Editor {
 
   private parser: Parser;
   private readonly toolbar: Toolbar;
-  private viewer = new Viewer(new Renderer());
+  private renderer = new Renderer();
+  private viewer = new Viewer(this.renderer);
 
   constructor(private selector: string | HTMLElement, private options: EditorOptions) {
     if (typeof selector === 'string') {
@@ -44,13 +45,12 @@ export class Editor {
         }
       });
 
-    // this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
-    //   this.selection = selection;
-    //   const event = document.createEvent('Event');
-    //   event.initEvent('click', true, true);
-    //   this.elementRef.dispatchEvent(event);
-    //   this.toolbar.updateHandlerState(selection);
-    // });
+    this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.elementRef.dispatchEvent(event);
+      this.toolbar.updateHandlerState(selection, this.renderer);
+    });
 
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);

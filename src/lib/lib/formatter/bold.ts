@@ -1,4 +1,4 @@
-import { Formatter, MatchRule } from '../core/formatter';
+import { Formatter, MatchRule, MatchState } from '../core/formatter';
 import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
@@ -15,7 +15,7 @@ class BoldFormatter extends Formatter {
     });
   }
 
-  render(abstractData: AbstractData, existingElement?: VElement) {
+  render(state: MatchState, abstractData: AbstractData, existingElement?: VElement) {
     if (existingElement && /(h[1-6])|th/i.test(existingElement.tagName)) {
       return;
     }

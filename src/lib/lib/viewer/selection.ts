@@ -2,6 +2,10 @@ import { TBRange } from '../viewer/range';
 import { Renderer } from '../core/renderer';
 
 export class TBSelection {
+  get rangeCount() {
+    return this.ranges.length;
+  }
+
   get ranges() {
     const ranges: TBRange[] = [];
     for (let i = 0; i < this.nativeSelection.rangeCount; i++) {

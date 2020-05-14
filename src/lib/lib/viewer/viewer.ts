@@ -4,13 +4,15 @@ import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block';
 import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
-import { fromEvent, merge } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { HandlerConfig } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Formatter } from '../core/formatter';
 
 export class Viewer {
+  onSelectionChange: Observable<TBSelection>;
+
   elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
@@ -18,7 +20,10 @@ export class Viewer {
   private input: Cursor;
   private nativeSelection: Selection;
 
+  private selectionChangeEvent = new Subject<TBSelection>();
+
   constructor(private renderer: Renderer) {
+    this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
@@ -61,12 +66,13 @@ export class Viewer {
   listenEvents() {
     fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
+      this.selectionChangeEvent.next(new TBSelection(this.nativeSelection, this.renderer));
     })
   }
 
   render(rootFragment: RootFragment) {
     setTimeout(() => {
-      const last = rootFragment.slice(rootFragment.contentLength - 1);
+      const last = rootFragment.sliceContents(rootFragment.contentLength - 1);
       if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
         const p = new BlockTemplate('p');
         const fragment = new Fragment();
@@ -81,8 +87,8 @@ export class Viewer {
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
     if (config.matcher instanceof Formatter) {
-      const state = config.matcher.queryState(selection);
-      console.log(this, state);
+      const state = config.matcher.queryState(selection, this.renderer);
+      console.log(state);
     }
     // const state = handler.matcher.queryState(this.selection, handler, this.editor).state;
     // if (state === HighlightState.Disabled) {

@@ -7,7 +7,7 @@ import { Fragment } from '../core/fragment';
 export interface SelectedScope {
   startIndex: number;
   endIndex: number;
-  context: Fragment;
+  fragment: Fragment;
 }
 
 export class TBRange {
@@ -39,6 +39,33 @@ export class TBRange {
   }
 
   /**
+   * 获取当前选区在公共 Fragment 中的范围
+   */
+  getCommonAncestorFragmentScope() {
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    let startIndex = this.startIndex;
+    let endIndex = this.endIndex;
+
+    while (startFragment !== this.commonAncestorFragment) {
+      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      startIndex = startFragment.find(parentTemplate);
+    }
+
+    while (endFragment !== this.commonAncestorFragment) {
+      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      endIndex = endFragment.find(parentTemplate);
+    }
+
+    return {
+      startIndex,
+      endIndex
+    }
+  }
+
+  /**
    * 获取当前选区选中的所有片段
    * 如（[]表示选区位置)：
    * <Fragment>
@@ -61,48 +88,50 @@ export class TBRange {
    *   endIndex: 3
    * }]
    */
-  // getSelectedScope(): SelectedScope[] {
-  //   const start: SelectedScope[] = [];
-  //   const end: SelectedScope[] = [];
-  //   let startFragment = this.startFragment;
-  //   let endFragment = this.endFragment;
-  //   let startIndex = this.startIndex;
-  //   let endIndex = this.endIndex;
-  //
-  //   if (startFragment === this.commonAncestorFragment &&
-  //     endFragment === this.commonAncestorFragment &&
-  //     startIndex === endIndex) {
-  //     return [{
-  //       startIndex, endIndex, context: startFragment
-  //     }];
-  //   }
-  //
-  //   while (startFragment !== this.commonAncestorFragment) {
-  //     start.push({
-  //       startIndex,
-  //       endIndex: startFragment.contentLength,
-  //       context: startFragment
-  //     });
-  //     startIndex = startFragment.getIndexInParent() + 1;
-  //     startFragment = startFragment.parent;
-  //   }
-  //   while (endFragment !== this.commonAncestorFragment) {
-  //     end.push({
-  //       startIndex: 0,
-  //       endIndex,
-  //       context: endFragment
-  //     });
-  //     endIndex = endFragment.getIndexInParent();
-  //     endFragment = endFragment.parent;
-  //   }
-  //   return [...start, {
-  //     startIndex,
-  //     endIndex,
-  //     context: this.commonAncestorFragment
-  //   }, ...end].filter(item => {
-  //     return item.startIndex < item.endIndex
-  //   });
-  // }
+  getSelectedScope(): SelectedScope[] {
+    const start: SelectedScope[] = [];
+    const end: SelectedScope[] = [];
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    let startIndex = this.startIndex;
+    let endIndex = this.endIndex;
+
+    if (startFragment === this.commonAncestorFragment &&
+      endFragment === this.commonAncestorFragment &&
+      startIndex === endIndex) {
+      return [{
+        startIndex, endIndex, fragment: startFragment
+      }];
+    }
+
+    while (startFragment !== this.commonAncestorFragment) {
+      start.push({
+        startIndex,
+        endIndex: startFragment.contentLength,
+        fragment: startFragment
+      });
+      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      startIndex = startFragment.find(parentTemplate) + 1;
+    }
+    while (endFragment !== this.commonAncestorFragment) {
+      end.push({
+        startIndex: 0,
+        endIndex,
+        fragment: endFragment
+      });
+      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      endIndex = endFragment.find(parentTemplate);
+    }
+    return [...start, {
+      startIndex,
+      endIndex,
+      fragment: this.commonAncestorFragment
+    }, ...end].filter(item => {
+      return item.startIndex < item.endIndex
+    });
+  }
 
   private getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
