@@ -1,11 +1,16 @@
-import { Formatter, MatchRule, MatchState } from '../core/formatter';
+import { Formatter, MatchState } from '../core/formatter';
 import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
 class ColorFormatter extends Formatter {
-  constructor(matchRule: MatchRule) {
-    super(matchRule);
+  constructor() {
+    super({
+      styles: {
+        color: /.+/
+      },
+      noInTags: ['pre']
+    });
   }
   read(node: HTMLElement): AbstractData {
     return this.extractData(node, {
@@ -24,9 +29,4 @@ class ColorFormatter extends Formatter {
   }
 }
 
-export const colorFormatter = new ColorFormatter({
-  styles: {
-    color: /.+/
-  },
-  noInTags: ['pre']
-});
+export const colorFormatter = new ColorFormatter();

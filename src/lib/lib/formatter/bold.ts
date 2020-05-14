@@ -1,11 +1,21 @@
-import { Formatter, MatchRule, MatchState } from '../core/formatter';
+import { Formatter, MatchState } from '../core/formatter';
 import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
 class BoldFormatter extends Formatter {
-  constructor(matchRule: MatchRule) {
-    super(matchRule);
+  constructor() {
+    super({
+      extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],
+      tags: ['strong', 'b'],
+      styles: {
+        fontWeight: ['bold', '500', '600', '700', '800', '900']
+      },
+      excludeStyles: {
+        fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
+      },
+      noInTags: ['pre']
+    });
   }
 
   read(node: HTMLElement): AbstractData {
@@ -23,14 +33,4 @@ class BoldFormatter extends Formatter {
   }
 }
 
-export const boldFormatter = new BoldFormatter({
-  extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],
-  tags: ['strong', 'b'],
-  styles: {
-    fontWeight: ['bold', '500', '600', '700', '800', '900']
-  },
-  excludeStyles: {
-    fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
-  },
-  noInTags: ['pre']
-});
+export const boldFormatter = new BoldFormatter();
