@@ -13,4 +13,4 @@ export const bold: ButtonConfig<Formatter> = {
   },
   match: boldFormatter,
   execCommand: new BoldCommander()
-}
+};

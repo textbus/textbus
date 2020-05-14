@@ -11,6 +11,7 @@ import { boldFormatter } from './lib/lib/formatter/bold';
 import { colorFormatter } from './lib/lib/formatter/color';
 import { bold } from './lib/lib/toolbar/tools/bold';
 import { color } from './lib/lib/toolbar/tools/color';
+import { h } from './lib/lib/toolbar/tools/h';
 
 
 const editor = new Editor('#editor', {
@@ -24,7 +25,10 @@ const editor = new Editor('#editor', {
     boldFormatter,
     colorFormatter
   ],
-  toolbar: [[bold, color]]
+  toolbar: [
+    [h],
+    [bold, color]
+  ]
 });
 
 editor.setContents(`

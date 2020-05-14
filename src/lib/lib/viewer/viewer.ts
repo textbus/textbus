@@ -9,6 +9,8 @@ import { auditTime } from 'rxjs/operators';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Formatter } from '../core/formatter';
+import { TemplateMatcher } from '../matcher/matcher';
+import { FormatCommander, TemplateCommander } from '../commands/commander';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
@@ -92,11 +94,14 @@ export class Viewer {
         return;
       }
       const overlap = state === HighlightState.Highlight;
-      config.execCommand.command(selection, config.match, overlap);
+      (<FormatCommander>config.execCommand).command(selection, config.match, overlap);
       console.log(this.renderer)
       // this.rerender();
       // this.selection.apply();
       this.selectionChangeEvent.next(selection);
+    } else if (config.match instanceof TemplateMatcher) {
+      const isMatch = config.match.queryState(selection, this.renderer);
+      (<TemplateCommander>config.execCommand).command(selection, isMatch)
     }
 
   }

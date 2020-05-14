@@ -45,4 +45,4 @@ export const color: DropdownConfig<Formatter> = {
   onHide: hideEvent.asObservable(),
   match: colorFormatter,
   execCommand: commander
-}
+};

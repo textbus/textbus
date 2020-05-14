@@ -1,10 +1,10 @@
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { KeymapConfig } from '../viewer/events';
-import { AbstractData } from '../core/abstract-data';
-import { Commander } from '../commands/commander';
+import { FormatCommander, TemplateCommander } from '../commands/commander';
 import { Formatter } from '../core/formatter';
 import { Template } from '../core/template';
+import { TemplateMatcher } from '../matcher/matcher';
 
 /**
  * 工具条控件的显示状态
@@ -28,12 +28,14 @@ export enum HandlerType {
 /**
  * 按扭型工具的配置接口
  */
-export interface ButtonConfig<T = Formatter | {new(...args: any): Template}, K = any> {
+export interface ButtonConfig<T = Formatter | Template,
+  U = T extends Formatter ? T : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander : TemplateCommander> {
   type: HandlerType.Button;
   /** 按扭控件点击后调用的命令 */
-  execCommand: Commander<T, K>;
+  execCommand: K;
   /** 锚中节点的的匹配项配置 */
-  match?: T;
+  match?: U;
   /** 设置按扭显示的文字 */
   label?: string;
   /** 给按扭控件添加一组 css class 类 */
@@ -60,18 +62,20 @@ export interface SelectOptionConfig {
   keymap?: KeymapConfig;
 }
 
-export interface SelectConfig<T = Formatter | {new(...args: any): Template}, K = any> {
+export interface SelectConfig<T = Formatter | Template,
+  U = T extends Formatter ? T : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander : TemplateCommander> {
   type: HandlerType.Select;
   /** 当前 Select 某项点击后，应用的命令 */
-  execCommand: Commander<T, K>;
+  execCommand: K;
   /** Select 的可选项配置 */
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight(options: SelectOptionConfig[], data: AbstractData): SelectOptionConfig;
+  highlight(options: SelectOptionConfig[], data: any): SelectOptionConfig;
 
   /** 锚中节点的的匹配项配置 */
-  match?: T;
+  match?: U;
   /** 给 Select 控件添加一组 css class */
   classes?: string[];
   /** 设置当前 Select 是否根据内容扩展宽度 */
@@ -80,16 +84,18 @@ export interface SelectConfig<T = Formatter | {new(...args: any): Template}, K =
   tooltip?: string;
 }
 
-export interface DropdownConfig<T = Formatter | {new(...args: any): Template}, K = any> {
+export interface DropdownConfig<T = Formatter | Template,
+  U = T extends Formatter ? T : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander : TemplateCommander>  {
   type: HandlerType.Dropdown;
   /** 下拉控件展开后显示的内容 */
   viewer: DropdownHandlerView;
   /** 订阅下拉控件操作完成时的观察者 */
   onHide: Observable<any>;
   /** 锚中节点的的匹配项配置 */
-  match?: T;
+  match?: U;
   /** 订阅下拉控件操作完成时调用的命令 */
-  execCommand: Commander<T, K>;
+  execCommand: K;
   /** 给当前控件添加一组 css class */
   classes?: string[];
   /** 当鼠标放在控件上的提示文字 */
@@ -118,16 +124,18 @@ export interface EditableOptions {
   styleName?: string;
 }
 
-export interface ActionSheetConfig<T = Formatter | {new(...args: any): Template}, K = any> {
+export interface ActionSheetConfig<T = Formatter | Template,
+  U = T extends Formatter ? T : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander : TemplateCommander>  {
   type: HandlerType.ActionSheet;
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
   /** 当前下拉框编辑项的配置 */
   editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   /** 当某一项被点击时调用的命令 */
-  execCommand: Commander<T, K> & { actionType: any };
+  execCommand: K & { actionType: any };
   /** 锚中节点的的匹配项配置 */
-  match?: T;
+  match?: U;
   /** 设置控件显示的文字 */
   label?: string;
   /** 给当前控件添加一组 css class */
