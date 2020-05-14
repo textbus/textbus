@@ -46,6 +46,33 @@ export class Fragment {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
+  apply(formatRange: FormatRange) {
+    const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
+    let index = 0;
+    const formats: FormatRange[] = [];
+    contents.forEach(item => {
+      if (item instanceof Template) {
+        item.childSlots.forEach(fragment => {
+          const newFormatRange = Object.assign({}, formatRange);
+          newFormatRange.startIndex = 0;
+          newFormatRange.endIndex = fragment.contentLength;
+          fragment.apply(newFormatRange);
+        })
+      } else {
+        formats.push({
+          startIndex: formatRange.startIndex + index,
+          endIndex: formatRange.endIndex + index,
+          state: formatRange.state,
+          abstractData: formatRange.abstractData,
+          renderer: formatRange.renderer
+        })
+      }
+      index += item.length;
+    });
+
+    formats.forEach(f => this.formatMap.merge(f));
+  }
+
   // clone(options: { contents?: boolean, formats?: boolean } = {}) {
   //   const fragment = new Fragment();
   //

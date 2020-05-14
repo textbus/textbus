@@ -4,17 +4,19 @@ import { Formatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
-import { HandlerConfig } from './toolbar/help';
+import { EventDelegate, HandlerConfig } from './toolbar/help';
 import { auditTime, filter } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
 
 export interface EditorOptions {
   theme?: string;
   templates?: TemplateTranslator[];
   formats?: Formatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
+  uploader?(type: string): (string | Promise<string> | Observable<string>);
 }
 
-export class Editor {
+export class Editor implements EventDelegate {
   readonly elementRef = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
@@ -70,6 +72,20 @@ export class Editor {
       const rootFragment = this.parser.parse(el);
       this.viewer.render(rootFragment);
     });
+  }
+
+  dispatchEvent(type: string): Observable<string> {
+    if (typeof this.options.uploader === 'function') {
+      const result = this.options.uploader(type);
+      if (result instanceof Observable) {
+        return result;
+      } else if (result instanceof Promise) {
+        return from(result);
+      } else if (typeof result === 'string') {
+        return of(result);
+      }
+    }
+    return of('');
   }
 
   private writeContents(html: string) {

@@ -100,7 +100,7 @@ export class Toolbar {
         h = new SelectHandler(option, this.toolsElement);
         break;
       case HandlerType.Dropdown:
-        // h = new DropdownHandler(option, this.context, this.toolsElement);
+        h = new DropdownHandler(option, this.context, this.toolsElement);
         break;
       case HandlerType.ActionSheet:
         h = new ActionSheetHandler(option, this.toolsElement);

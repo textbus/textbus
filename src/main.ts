@@ -10,6 +10,7 @@ import { BlockTemplateTranslator } from './lib/lib/templates/block';
 import { boldFormatter } from './lib/lib/formatter/bold';
 import { colorFormatter } from './lib/lib/formatter/color';
 import { bold } from './lib/lib/toolbar/tools/bold';
+import { color } from './lib/lib/toolbar/tools/color';
 
 
 const editor = new Editor('#editor', {
@@ -23,7 +24,7 @@ const editor = new Editor('#editor', {
     boldFormatter,
     colorFormatter
   ],
-  toolbar: [[bold]]
+  toolbar: [[bold, color]]
 });
 
 editor.setContents(`

@@ -93,6 +93,7 @@ export class Viewer {
       }
       const overlap = state === HighlightState.Highlight;
       config.execCommand.command(selection, config.match, overlap);
+      console.log(this.renderer)
       // this.rerender();
       // this.selection.apply();
       this.selectionChangeEvent.next(selection);
