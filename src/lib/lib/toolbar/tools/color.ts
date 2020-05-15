@@ -8,6 +8,7 @@ import { colorFormatter } from '../../formatter/color';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { StyleCommander } from '../../commands/style-commander';
 import { AbstractData } from '../../core/abstract-data';
+import { FormatMatcher } from '../../matcher/format-matcher';
 
 const hideEvent = new Subject<void>();
 const commander = new StyleCommander('color');
@@ -43,6 +44,6 @@ export const color: DropdownConfig<Formatter> = {
   tooltip: '文字颜色',
   viewer: new Palette(),
   onHide: hideEvent.asObservable(),
-  match: colorFormatter,
+  match: new FormatMatcher<Formatter>(colorFormatter),
   execCommand: commander
 };

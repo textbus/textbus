@@ -8,8 +8,7 @@ class ColorFormatter extends Formatter {
     super({
       styles: {
         color: /.+/
-      },
-      noInTags: ['pre']
+      }
     });
   }
   read(node: HTMLElement): AbstractData {

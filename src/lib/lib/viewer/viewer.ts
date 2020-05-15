@@ -4,13 +4,14 @@ import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block';
 import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
-import { fromEvent, merge, Observable, Subject } from 'rxjs';
+import { config, fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
-import { Formatter } from '../core/formatter';
 import { TemplateMatcher } from '../matcher/matcher';
 import { FormatCommander, TemplateCommander } from '../commands/commander';
+import { FormatMatcher } from '../matcher/format-matcher';
+import { Template } from '../core/template';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
@@ -88,13 +89,14 @@ export class Viewer {
 
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    if (config.match instanceof Formatter) {
+    if (config.match instanceof FormatMatcher) {
       const state = config.match.queryState(selection, this.renderer).state;
       if (state === HighlightState.Disabled) {
         return;
       }
       const overlap = state === HighlightState.Highlight;
-      (<FormatCommander>config.execCommand).command(selection, config.match, overlap);
+      // config.execCommand.command
+      // (config.execCommand as FormatCommander<Template>).command(selection, config.match, overlap);
       console.log(this.renderer)
       // this.rerender();
       // this.selection.apply();

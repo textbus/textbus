@@ -3,7 +3,7 @@ import { TBSelection } from '../viewer/selection';
 import { Formatter, MatchState } from '../core/formatter';
 import { AbstractData } from '../core/abstract-data';
 
-export class StyleCommander implements FormatCommander<string> {
+export class StyleCommander implements FormatCommander<Formatter, string> {
   recordHistory = true;
 
   private value = '';

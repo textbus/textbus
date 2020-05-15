@@ -5,6 +5,7 @@ import { FormatCommander, TemplateCommander } from '../commands/commander';
 import { Formatter } from '../core/formatter';
 import { Template } from '../core/template';
 import { TemplateMatcher } from '../matcher/matcher';
+import { FormatMatcher } from '@tanbo/tbus/matcher/format-matcher';
 
 /**
  * 工具条控件的显示状态
@@ -29,8 +30,8 @@ export enum HandlerType {
  * 按扭型工具的配置接口
  */
 export interface ButtonConfig<T = Formatter | Template,
-  U = T extends Formatter ? T : TemplateMatcher<Template>,
-  K = T extends Formatter ? FormatCommander : TemplateCommander> {
+  U = T extends Formatter ? FormatMatcher<Formatter> : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander<T> : TemplateCommander> {
   type: HandlerType.Button;
   /** 按扭控件点击后调用的命令 */
   execCommand: K;
@@ -63,8 +64,8 @@ export interface SelectOptionConfig {
 }
 
 export interface SelectConfig<T = Formatter | Template,
-  U = T extends Formatter ? T : TemplateMatcher<Template>,
-  K = T extends Formatter ? FormatCommander : TemplateCommander> {
+  U = T extends Formatter ? FormatMatcher<Formatter> : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander<T> : TemplateCommander> {
   type: HandlerType.Select;
   /** 当前 Select 某项点击后，应用的命令 */
   execCommand: K;
@@ -85,8 +86,8 @@ export interface SelectConfig<T = Formatter | Template,
 }
 
 export interface DropdownConfig<T = Formatter | Template,
-  U = T extends Formatter ? T : TemplateMatcher<Template>,
-  K = T extends Formatter ? FormatCommander : TemplateCommander>  {
+  U = T extends Formatter ? FormatMatcher<Formatter> : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander<T> : TemplateCommander>  {
   type: HandlerType.Dropdown;
   /** 下拉控件展开后显示的内容 */
   viewer: DropdownHandlerView;
@@ -125,8 +126,8 @@ export interface EditableOptions {
 }
 
 export interface ActionSheetConfig<T = Formatter | Template,
-  U = T extends Formatter ? T : TemplateMatcher<Template>,
-  K = T extends Formatter ? FormatCommander : TemplateCommander>  {
+  U = T extends Formatter ? FormatMatcher<Formatter> : TemplateMatcher<Template>,
+  K = T extends Formatter ? FormatCommander<T> : TemplateCommander>  {
   type: HandlerType.ActionSheet;
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
