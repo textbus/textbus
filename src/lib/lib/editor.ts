@@ -1,3 +1,6 @@
+import { auditTime, filter } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
 import { Formatter } from './core/formatter';
@@ -5,8 +8,7 @@ import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
 import { EventDelegate, HandlerConfig } from './toolbar/help';
-import { auditTime, filter } from 'rxjs/operators';
-import { from, Observable, of } from 'rxjs';
+import { TBSelection } from './viewer/selection';
 
 export interface EditorOptions {
   theme?: string;
@@ -26,6 +28,8 @@ export class Editor implements EventDelegate {
   private renderer = new Renderer();
   private viewer = new Viewer(this.renderer);
 
+  private selection: TBSelection;
+
   constructor(private selector: string | HTMLElement, private options: EditorOptions) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
@@ -38,7 +42,7 @@ export class Editor implements EventDelegate {
     this.toolbar = new Toolbar(this, options.toolbar);
 
     this.toolbar.onAction
-      // .pipe(filter(() => !!this.selection))
+      .pipe(filter(() => !!this.selection))
       .subscribe(config => {
         this.viewer.apply(config);
         if (config.execCommand.recordHistory) {
@@ -48,6 +52,7 @@ export class Editor implements EventDelegate {
       });
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
+      this.selection = selection;
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
