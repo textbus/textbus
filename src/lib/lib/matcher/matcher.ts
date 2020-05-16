@@ -1,10 +1,10 @@
 import { TBSelection } from '../viewer/selection';
-import { Template } from '../core/template';
 import { Renderer } from '../core/renderer';
-import { AbstractData } from '@tanbo/tbus/core/abstract-data';
-import { HighlightState } from '@tanbo/tbus/toolbar/help';
-import { TBRange } from '@tanbo/tbus/viewer/range';
-import { MatchState } from '@tanbo/tbus/core/formatter';
+import { AbstractData } from '../core/abstract-data';
+import { HighlightState } from '../toolbar/help';
+import { TBRange } from '../viewer/range';
+import { MatchState } from '../core/formatter';
+import { Editor } from '../editor';
 
 /**
  * 匹配到的抽象数据及状态
@@ -28,14 +28,12 @@ export interface RangeMatchDelta {
  */
 export interface SelectionMatchDelta {
   state: HighlightState;
-  srcStates: RangeMatchDelta[];
-  abstractData: AbstractData;
+  srcStates?: RangeMatchDelta[];
+  abstractData?: AbstractData;
 }
 
 export type Constructor<T> = { new(...args: any): T };
 
-export abstract class TemplateMatcher<T extends Template> {
-  abstract get templateConstructor(): Constructor<T>;
-
-  abstract queryState(selection: TBSelection, renderer: Renderer): boolean;
+export interface Matcher {
+  queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchDelta;
 }

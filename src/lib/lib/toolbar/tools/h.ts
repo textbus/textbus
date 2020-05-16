@@ -1,10 +1,9 @@
 import { HandlerType, SelectConfig } from '../help';
 import { BlockCommander } from '../../commands/block-commander';
 import { BlockTemplate } from '../../templates/block';
-import { Template } from '../../core/template';
 import { BlockMatcher } from '../../matcher/block-matcher';
 
-export const h: SelectConfig<Template> = {
+export const h: SelectConfig = {
   type: HandlerType.Select,
   options: [{
     label: '标题1',

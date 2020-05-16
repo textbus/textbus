@@ -4,14 +4,11 @@ import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block';
 import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
-import { config, fromEvent, merge, Observable, Subject } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
-import { TemplateMatcher } from '../matcher/matcher';
-import { FormatCommander, TemplateCommander } from '../commands/commander';
-import { FormatMatcher } from '../matcher/format-matcher';
-import { Template } from '../core/template';
+import { Editor } from '../editor';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
@@ -25,7 +22,8 @@ export class Viewer {
 
   private selectionChangeEvent = new Subject<TBSelection>();
 
-  constructor(private renderer: Renderer) {
+  constructor(private renderer: Renderer,
+              private context: Editor) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
@@ -89,22 +87,15 @@ export class Viewer {
 
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    if (config.match instanceof FormatMatcher) {
-      const state = config.match.queryState(selection, this.renderer).state;
-      if (state === HighlightState.Disabled) {
-        return;
-      }
-      const overlap = state === HighlightState.Highlight;
-      // config.execCommand.command
-      // (config.execCommand as FormatCommander<Template>).command(selection, config.match, overlap);
-      console.log(this.renderer)
-      // this.rerender();
-      // this.selection.apply();
-      this.selectionChangeEvent.next(selection);
-    } else if (config.match instanceof TemplateMatcher) {
-      const isMatch = config.match.queryState(selection, this.renderer);
-      (<TemplateCommander>config.execCommand).command(selection, isMatch)
+    const state = config.match.queryState(selection, this.renderer, this.context).state;
+    if (state === HighlightState.Disabled) {
+      return;
     }
+    const overlap = state === HighlightState.Highlight;
 
+    config.execCommand.command(selection, overlap);
+    // this.rerender();
+    // this.selection.apply();
+    this.selectionChangeEvent.next(selection);
   }
 }

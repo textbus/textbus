@@ -1,7 +1,7 @@
-import { TemplateCommander } from './commander';
+import { Commander } from './commander';
 import { TBSelection } from '../viewer/selection';
 
-export class BlockCommander implements TemplateCommander<string> {
+export class BlockCommander implements Commander<string> {
   recordHistory = true;
 
   constructor(private tagName: string) {

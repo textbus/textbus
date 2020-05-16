@@ -26,7 +26,7 @@ export class Editor implements EventDelegate {
   private parser: Parser;
   private readonly toolbar: Toolbar;
   private renderer = new Renderer();
-  private viewer = new Viewer(this.renderer);
+  private viewer = new Viewer(this.renderer, this);
 
   private selection: TBSelection;
 

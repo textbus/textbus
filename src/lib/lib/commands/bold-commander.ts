@@ -1,11 +1,13 @@
-import { FormatCommander } from './commander';
+import { Commander } from './commander';
 import { TBSelection } from '../viewer/selection';
 import { Formatter } from '../core/formatter';
 
-export class BoldCommander implements FormatCommander<Formatter> {
+export class BoldCommander implements Commander<Formatter> {
   recordHistory = true;
 
-  command(selection: TBSelection, handler: Formatter, overlap: boolean) {
+  constructor(private formatter: Formatter) {
+  }
 
+  command(selection: TBSelection, overlap: boolean): void {
   }
 }

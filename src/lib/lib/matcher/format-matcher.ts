@@ -5,7 +5,7 @@ import { Fragment } from '../core/fragment';
 import { TBRange } from '../viewer/range';
 import { Template } from '../core/template';
 import { FormatRange, Formatter, MatchState } from '../core/formatter';
-import { MatchData, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { MatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 
 export interface FormatMatcherParams {
   /** 不能包含哪些标签 */
@@ -14,8 +14,8 @@ export interface FormatMatcherParams {
   noInTags?: string[] | RegExp;
 }
 
-export class FormatMatcher<T extends Formatter> {
-  constructor(private formatter: T, private rule: FormatMatcherParams = {}) {
+export class FormatMatcher implements Matcher {
+  constructor(private formatter: Formatter, private rule: FormatMatcherParams = {}) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
