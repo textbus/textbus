@@ -26,18 +26,18 @@ export interface ElementPosition {
 }
 
 class NativeElementMappingTable {
-  private native_vDom_mapping = new Map<Node, VElement | VTextNode>();
-  private vDom_native_mapping = new Map<VElement | VTextNode, Node>();
+  private nativeVDomMapping = new Map<Node, VElement | VTextNode>();
+  private vDomNativeMapping = new Map<VElement | VTextNode, Node>();
 
   set(key: Node, value: VElement | VTextNode): void;
   set(key: VElement | VTextNode, value: Node): void;
   set(key: any, value: any) {
     if (key instanceof VElement || key instanceof VTextNode) {
-      this.vDom_native_mapping.set(key, value);
-      this.native_vDom_mapping.set(value, key);
+      this.vDomNativeMapping.set(key, value);
+      this.nativeVDomMapping.set(value, key);
     } else {
-      this.vDom_native_mapping.set(value, key);
-      this.native_vDom_mapping.set(key, value);
+      this.vDomNativeMapping.set(value, key);
+      this.nativeVDomMapping.set(key, value);
     }
   }
 
@@ -45,20 +45,20 @@ class NativeElementMappingTable {
   get(key: VElement | VTextNode): Node;
   get(key: any) {
     if (key instanceof VTextNode || key instanceof VElement) {
-      return this.vDom_native_mapping.get(key);
+      return this.vDomNativeMapping.get(key);
     }
-    return this.native_vDom_mapping.get(key);
+    return this.nativeVDomMapping.get(key);
   }
 
   delete(key: Node | VElement | VTextNode) {
     if (key instanceof VTextNode || key instanceof VElement) {
-      const v = this.vDom_native_mapping.get(key);
-      this.vDom_native_mapping.delete(key);
-      this.native_vDom_mapping.delete(v);
+      const v = this.vDomNativeMapping.get(key);
+      this.vDomNativeMapping.delete(key);
+      this.nativeVDomMapping.delete(v);
     } else {
-      const v = this.native_vDom_mapping.get(key);
-      this.native_vDom_mapping.delete(key);
-      this.vDom_native_mapping.delete(v);
+      const v = this.nativeVDomMapping.get(key);
+      this.nativeVDomMapping.delete(key);
+      this.vDomNativeMapping.delete(v);
     }
   }
 }
