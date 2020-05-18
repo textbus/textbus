@@ -2,6 +2,7 @@ import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
+import { h } from '@tanbo/tbus/toolbar/tools/h';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -32,6 +33,12 @@ class NativeElementMappingTable {
   set(key: Node, value: VElement | VTextNode): void;
   set(key: VElement | VTextNode, value: Node): void;
   set(key: any, value: any) {
+    if (this.get(key)) {
+      this.delete(key);
+    }
+    if (this.get(value)) {
+      this.delete(value);
+    }
     if (key instanceof VElement || key instanceof VTextNode) {
       this.vDomNativeMapping.set(key, value);
       this.nativeVDomMapping.set(value, key);
@@ -76,7 +83,11 @@ export class Renderer {
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
     const vDom = this.createVDom(fragment, root);
-    this.diffAndUpdate(vDom, host, this.oldVDom);
+    if (this.oldVDom) {
+      this.rendering(vDom, host, this.oldVDom);
+    } else {
+      this.renderingNewTree(host, vDom);
+    }
     this.oldVDom = vDom;
   }
 
@@ -93,13 +104,110 @@ export class Renderer {
     return this.templateHierarchyMapping.get(template);
   }
 
-  private diffAndUpdate(newVDom: VElement | VTextNode, host: HTMLElement, oldVDom?: VElement | VTextNode,) {
+  // private diffChildNodes(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
+  //
+  // }
+
+  private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
+    let min = 0;
+    let max = vDom.childNodes.length - 1;
+    let minToMax = true;
+    while (min <= max) {
+      if (minToMax) {
+        const current = vDom.childNodes[min];
+        if (this.equal(current, oldVDom.childNodes[0])) {
+          const oldFirst = oldVDom.childNodes.shift();
+          min++;
+          const el = this.NVMappingTable.get(oldFirst);
+          this.NVMappingTable.set(el, current);
+          this.diffAndUpdate(el as HTMLElement, current as VElement, oldFirst as VElement);
+        } else {
+          minToMax = false;
+        }
+      } else {
+        const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
+        const current = vDom.childNodes[max];
+
+        if (this.equal(current, oldLast)) {
+          const last = oldVDom.childNodes.pop();
+          max--;
+          const el = this.NVMappingTable.get(last);
+          this.NVMappingTable.set(el, current);
+          this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
+        } else {
+          if (current instanceof VElement) {
+            const el = this.createElement(current);
+            host.appendChild(el);
+            this.NVMappingTable.set(el, current);
+            if (oldLast instanceof VElement) {
+              this.diffAndUpdate(el, current, oldVDom.childNodes.pop() as VElement)
+            }
+          } else {
+            const el = this.createTextNode(current);
+            this.NVMappingTable.set(el, current);
+            host.appendChild(el);
+          }
+        }
+        if (oldLast) {
+          this.NVMappingTable.delete(oldLast);
+        }
+      }
+    }
+  }
+
+  private createElement(vDom: VElement) {
+    const el = document.createElement(vDom.tagName);
+    vDom.attrs.forEach((value, key) => {
+      el.setAttribute(key, value + '');
+    });
+    vDom.styles.forEach((value, key) => {
+      el.style[key] = value;
+    });
+    return el;
+  }
+
+  private createTextNode(vDom: VTextNode) {
+    return document.createTextNode(vDom.textContent);
+  }
+
+  private equal(left: VElement | VTextNode, right: VElement | VTextNode) {
+    if (left instanceof VElement) {
+      if (right instanceof VElement) {
+        return left.equal(right);
+      }
+      return false;
+    }
+    return right instanceof VTextNode && left.textContent === right.textContent;
+  }
+
+  private renderingNewTree(host: HTMLElement, vDom: VElement) {
+    vDom.childNodes.forEach(child => {
+      if (child instanceof VTextNode) {
+        const el = document.createTextNode(child.textContent);
+        host.appendChild(el);
+        this.NVMappingTable.set(el, child);
+        return;
+      }
+      const el = document.createElement(child.tagName);
+      vDom.attrs.forEach((value, key) => {
+        el.setAttribute(key, value + '');
+      });
+      vDom.styles.forEach((value, key) => {
+        el.style[key] = value;
+      });
+      host.appendChild(el);
+      this.NVMappingTable.set(el, child);
+      this.renderingNewTree(el, child);
+    })
+  }
+
+  private rendering(newVDom: VElement | VTextNode, host: HTMLElement, oldVDom?: VElement | VTextNode,) {
     if (newVDom instanceof VElement) {
       if (oldVDom instanceof VElement && newVDom.equal(oldVDom)) {
         const nativeElementNode = this.NVMappingTable.get(oldVDom);
         newVDom.childNodes.forEach(child => {
           const oldFirst = oldVDom.childNodes.shift();
-          this.diffAndUpdate(child, nativeElementNode as HTMLElement, oldFirst);
+          this.rendering(child, nativeElementNode as HTMLElement, oldFirst);
         });
         this.NVMappingTable.set(newVDom, nativeElementNode);
       } else {
@@ -118,7 +226,7 @@ export class Renderer {
         this.NVMappingTable.set(el, newVDom);
         const oldChildNodes = oldVDom instanceof VElement ? oldVDom.childNodes : [];
         newVDom.childNodes.forEach(child => {
-          this.diffAndUpdate(child, el, oldChildNodes.shift());
+          this.rendering(child, el, oldChildNodes.shift());
         });
         while (oldChildNodes.length) {
           this.vDomPositionMapping.delete(oldChildNodes.shift());
@@ -163,7 +271,7 @@ export class Renderer {
         childFormats.push(f);
       }
     });
-    const r = this.rending(containerFormats, host);
+    const r = this.createVDomByFormats(containerFormats, host);
     this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
       r.slot.appendChild(item);
     });
@@ -187,7 +295,7 @@ export class Renderer {
             break;
           }
         }
-        const {host, slot} = this.rending(childFormats);
+        const {host, slot} = this.createVDomByFormats(childFormats);
         let el = host;
         while (el) {
           this.vDomPositionMapping.set(el, {
@@ -280,7 +388,7 @@ export class Renderer {
     return children;
   }
 
-  private rending(formats: FormatRange[], host?: VElement): { host: VElement, slot: VElement } {
+  private createVDomByFormats(formats: FormatRange[], host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.reduce((vEle, next) => {
       const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
