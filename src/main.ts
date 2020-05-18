@@ -14,6 +14,7 @@ import { color } from './lib/lib/toolbar/tools/color';
 import { h } from './lib/lib/toolbar/tools/h';
 import { historyBack } from './lib/lib/toolbar/tools/history-back';
 import { historyForward } from './lib/lib/toolbar/tools/history-forward';
+import { SingleTemplateTranslator } from './lib/lib/templates/single';
 
 
 const editor = new Editor('#editor', {
@@ -21,7 +22,8 @@ const editor = new Editor('#editor', {
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
     new BlockTemplateTranslator('div'),
-    new BlockTemplateTranslator('p')
+    new BlockTemplateTranslator('p'),
+    new SingleTemplateTranslator('br')
   ],
   formats: [
     boldFormatter,

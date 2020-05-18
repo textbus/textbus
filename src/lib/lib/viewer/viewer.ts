@@ -9,9 +9,11 @@ import { auditTime } from 'rxjs/operators';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Editor } from '../editor';
+import { SingleTemplate } from '../templates/single';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
+  onReady: Observable<Document>;
 
   elementRef = document.createElement('div');
   contentWindow: Window;
@@ -19,20 +21,21 @@ export class Viewer {
   private frame = document.createElement('iframe');
   private input: Cursor;
   private nativeSelection: Selection;
+  private rootFragment: RootFragment;
 
+  private readyEvent = new Subject<Document>();
   private selectionChangeEvent = new Subject<TBSelection>();
 
   constructor(private renderer: Renderer,
               private context: Editor) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
+    this.onReady = this.readyEvent.asObservable();
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
       this.contentWindow = this.frame.contentWindow;
-
-      // this.selection = new TBSelection(doc);
       this.input = new Cursor(doc);
-      // this.readyEvent.next(doc);
+      this.readyEvent.next(doc);
       this.elementRef.appendChild(this.input.elementRef);
       //
       // this.styleSheets.forEach(s => {
@@ -72,17 +75,16 @@ export class Viewer {
   }
 
   render(rootFragment: RootFragment) {
-    setTimeout(() => {
-      const last = rootFragment.sliceContents(rootFragment.contentLength - 1);
-      if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
-        const p = new BlockTemplate('p');
-        const fragment = new Fragment();
-        fragment.append('br');
-        p.childSlots.push(fragment);
-        rootFragment.append(p);
-      }
-      this.renderer.render(rootFragment, this.contentDocument.body);
-    })
+    this.rootFragment = rootFragment;
+    const last = rootFragment.sliceContents(rootFragment.contentLength - 1)[0];
+    if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
+      const p = new BlockTemplate('p');
+      const fragment = new Fragment();
+      fragment.append(new SingleTemplate('br'));
+      p.childSlots.push(fragment);
+      rootFragment.append(p);
+    }
+    this.renderer.render(rootFragment, this.contentDocument.body);
   }
 
   apply(config: HandlerConfig) {
@@ -94,7 +96,7 @@ export class Viewer {
     const overlap = state === HighlightState.Highlight;
 
     config.execCommand.command(selection, overlap);
-    // this.rerender();
+    this.render(this.rootFragment);
     // this.selection.apply();
     this.selectionChangeEvent.next(selection);
   }

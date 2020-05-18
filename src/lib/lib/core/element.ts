@@ -18,4 +18,30 @@ export class VElement {
     this.childNodes.push(newChild);
     return newChild;
   }
+
+  equal(vElement: VElement) {
+    if (vElement === this) {
+      return true;
+    }
+    if (!vElement) {
+      return false;
+    }
+    const left = vElement;
+    const right = this;
+    return left.tagName == right.tagName &&
+      VElement.equalMap(left.attrs, right.attrs) &&
+      VElement.equalMap(left.styles, right.styles);
+  }
+
+  private static equalMap(left: Map<string, string | number>, right: Map<string, string | number>) {
+    if (left === right || !left === true && !right === true) {
+      return true;
+    }
+    if (!left !== !right || left.size !== right.size) {
+      return false;
+    }
+    return Array.from(left.keys()).reduce((v, key) => {
+      return v && left.get(key) === right.get(key);
+    }, true);
+  }
 }

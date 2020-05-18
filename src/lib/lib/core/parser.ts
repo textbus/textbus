@@ -21,32 +21,23 @@ export class Parser {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.template);
           viewData.childrenSlots.forEach(item => {
-            this.readTemplate(item.from, item.toSlot);
+            if (item.from === el) {
+              this.readFormats(item.from, item.toSlot);
+            } else {
+              this.readTemplate(item.from, item.toSlot);
+            }
           })
           return;
         }
       }
-      const maps = this.readFormats(el as HTMLElement);
-      const startIndex = slot.contentLength;
-      Array.from(el.childNodes).forEach(child => {
-        this.readTemplate(child, slot);
-      })
-      maps.forEach(item => {
-        slot.mergeFormat({
-          startIndex,
-          endIndex: slot.contentLength,
-          renderer: item.formatter,
-          abstractData: item.abstractData,
-          state: item.state
-        })
-      })
+      this.readFormats(el as HTMLElement, slot);
     } else if (el.nodeType === 3) {
       slot.append(el.textContent);
     }
   }
 
-  private readFormats(el: HTMLElement) {
-    return this.options.formats.map(f => {
+  private readFormats(el: HTMLElement, slot: Fragment) {
+    const maps = this.options.formats.map(f => {
       return {
         formatter: f,
         state: f.match(el)
@@ -57,5 +48,18 @@ export class Parser {
         abstractData: p.formatter.read(el as HTMLElement)
       }
     });
+    const startIndex = slot.contentLength;
+    Array.from(el.childNodes).forEach(child => {
+      this.readTemplate(child, slot);
+    })
+    maps.forEach(item => {
+      slot.mergeFormat({
+        startIndex,
+        endIndex: slot.contentLength,
+        renderer: item.formatter,
+        abstractData: item.abstractData,
+        state: item.state
+      })
+    })
   }
 }

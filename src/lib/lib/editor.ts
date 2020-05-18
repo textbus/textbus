@@ -1,5 +1,5 @@
 import { auditTime, filter } from 'rxjs/operators';
-import { from, Observable, of } from 'rxjs';
+import { from, Observable, of, zip } from 'rxjs';
 
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
@@ -15,7 +15,10 @@ export interface EditorOptions {
   templates?: TemplateTranslator[];
   formats?: Formatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
+
   uploader?(type: string): (string | Promise<string> | Observable<string>);
+
+  contents?: string;
 }
 
 export class Editor implements EventDelegate {
@@ -28,7 +31,12 @@ export class Editor implements EventDelegate {
   private renderer = new Renderer();
   private viewer = new Viewer(this.renderer, this);
 
+  private readyState = false;
+  private tasks: Array<() => void> = [];
+
   private selection: TBSelection;
+
+  private defaultHTML = '<p><br></p>';
 
   constructor(private selector: string | HTMLElement, private options: EditorOptions) {
     if (typeof selector === 'string') {
@@ -70,13 +78,23 @@ export class Editor implements EventDelegate {
       this.elementRef.classList.add('tbus-theme-' + options.theme);
     }
     this.container.appendChild(this.elementRef);
+
+    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
+      this.readyState = true;
+      const rootFragment = this.parser.parse(result[0]);
+      this.viewer.render(rootFragment);
+      // this.recordSnapshot();
+      this.tasks.forEach(fn => fn());
+    });
   }
 
   setContents(html: string) {
-    this.writeContents(html).then(el => {
-      const rootFragment = this.parser.parse(el);
-      this.viewer.render(rootFragment);
-    });
+    this.run(() => {
+      this.writeContents(html).then(el => {
+        const rootFragment = this.parser.parse(el);
+        this.viewer.render(rootFragment);
+      });
+    })
   }
 
   dispatchEvent(type: string): Observable<string> {
@@ -91,6 +109,14 @@ export class Editor implements EventDelegate {
       }
     }
     return of('');
+  }
+
+  private run(fn: () => void) {
+    if (!this.readyState) {
+      this.tasks.push(fn);
+      return;
+    }
+    fn();
   }
 
   private writeContents(html: string) {

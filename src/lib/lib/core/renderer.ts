@@ -25,8 +25,46 @@ export interface ElementPosition {
   fragment: Fragment;
 }
 
+class NativeElementMappingTable {
+  private native_vDom_mapping = new Map<Node, VElement | VTextNode>();
+  private vDom_native_mapping = new Map<VElement | VTextNode, Node>();
+
+  set(key: Node, value: VElement | VTextNode): void;
+  set(key: VElement | VTextNode, value: Node): void;
+  set(key: any, value: any) {
+    if (key instanceof VElement || key instanceof VTextNode) {
+      this.vDom_native_mapping.set(key, value);
+      this.native_vDom_mapping.set(value, key);
+    } else {
+      this.vDom_native_mapping.set(value, key);
+      this.native_vDom_mapping.set(key, value);
+    }
+  }
+
+  get(key: Node): VElement | VTextNode;
+  get(key: VElement | VTextNode): Node;
+  get(key: any) {
+    if (key instanceof VTextNode || key instanceof VElement) {
+      return this.vDom_native_mapping.get(key);
+    }
+    return this.native_vDom_mapping.get(key);
+  }
+
+  delete(key: Node | VElement | VTextNode) {
+    if (key instanceof VTextNode || key instanceof VElement) {
+      const v = this.vDom_native_mapping.get(key);
+      this.vDom_native_mapping.delete(key);
+      this.native_vDom_mapping.delete(v);
+    } else {
+      const v = this.native_vDom_mapping.get(key);
+      this.native_vDom_mapping.delete(key);
+      this.vDom_native_mapping.delete(v);
+    }
+  }
+}
+
 export class Renderer {
-  private nativeElementAndVDomMapping = new Map<Node, VElement | VTextNode>();
+  private NVMappingTable = new NativeElementMappingTable();
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
   private fragmentHierarchyMapping: Map<Fragment, Template>;
   private templateHierarchyMapping: Map<Template, Fragment>;
@@ -36,14 +74,14 @@ export class Renderer {
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
     const root = new VElement('root');
-    this.nativeElementAndVDomMapping.set(host, root);
+    this.NVMappingTable.set(host, root);
     const vDom = this.createVDom(fragment, root);
-    this.diffAndUpdate(this.oldVDom, vDom, host);
+    this.diffAndUpdate(vDom, host, this.oldVDom);
     this.oldVDom = vDom;
   }
 
   getPositionByNode(node: Node) {
-    const vDom = this.nativeElementAndVDomMapping.get(node);
+    const vDom = this.NVMappingTable.get(node);
     return this.vDomPositionMapping.get(vDom);
   }
 
@@ -55,28 +93,58 @@ export class Renderer {
     return this.templateHierarchyMapping.get(template);
   }
 
-  private diffAndUpdate(oldVDom: VElement, newVDom: VElement, host: HTMLElement) {
-    if (oldVDom) {
-
-    } else {
-      const el = document.createElement(newVDom.tagName);
-      newVDom.attrs.forEach((value, key) => {
-        el.setAttribute(key, value + '');
-      });
-      newVDom.styles.forEach((value, key) => {
-        el.style[key] = value;
-      });
-      host.appendChild(el);
-      this.nativeElementAndVDomMapping.set(el, newVDom);
-      newVDom.childNodes.forEach(child => {
-        if (child instanceof VTextNode) {
-          const textNode = document.createTextNode(child.textContent);
-          this.nativeElementAndVDomMapping.set(textNode, child);
-          el.appendChild(textNode);
-        } else {
-          this.diffAndUpdate(null, child, el);
+  private diffAndUpdate(newVDom: VElement | VTextNode, host: HTMLElement, oldVDom?: VElement | VTextNode,) {
+    if (newVDom instanceof VElement) {
+      if (oldVDom instanceof VElement && newVDom.equal(oldVDom)) {
+        const nativeElementNode = this.NVMappingTable.get(oldVDom);
+        newVDom.childNodes.forEach(child => {
+          const oldFirst = oldVDom.childNodes.shift();
+          this.diffAndUpdate(child, nativeElementNode as HTMLElement, oldFirst);
+        });
+        this.NVMappingTable.set(newVDom, nativeElementNode);
+      } else {
+        const el = document.createElement(newVDom.tagName);
+        newVDom.attrs.forEach((value, key) => {
+          el.setAttribute(key, value + '');
+        });
+        newVDom.styles.forEach((value, key) => {
+          el.style[key] = value;
+        });
+        host.appendChild(el);
+        if (oldVDom) {
+          const oldNativeElement = this.NVMappingTable.get(oldVDom);
+          oldNativeElement.parentNode.removeChild(oldNativeElement);
         }
-      });
+        this.NVMappingTable.set(el, newVDom);
+        const oldChildNodes = oldVDom instanceof VElement ? oldVDom.childNodes : [];
+        newVDom.childNodes.forEach(child => {
+          this.diffAndUpdate(child, el, oldChildNodes.shift());
+        });
+        while (oldChildNodes.length) {
+          this.vDomPositionMapping.delete(oldChildNodes.shift());
+        }
+      }
+    } else {
+      const nativeNode = this.NVMappingTable.get(oldVDom);
+      if (oldVDom instanceof VTextNode) {
+        if (oldVDom.textContent !== newVDom.textContent) {
+          nativeNode.textContent = newVDom.textContent;
+        }
+        this.NVMappingTable.set(nativeNode, newVDom);
+      } else {
+        const newNativeTextNode = document.createTextNode(newVDom.textContent);
+        this.NVMappingTable.set(newNativeTextNode, newVDom);
+        host.appendChild(newNativeTextNode);
+        const fn = (vEle: VElement | VTextNode) => {
+          this.NVMappingTable.delete(this.NVMappingTable.get(vEle));
+          if (vEle instanceof VElement) {
+            vEle.childNodes.forEach(child => {
+              fn(child);
+            })
+          }
+        };
+        fn(nativeNode);
+      }
     }
   }
 
