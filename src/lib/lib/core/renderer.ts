@@ -117,7 +117,7 @@ export class Renderer {
           const el = this.NVMappingTable.get(oldFirst);
           childNodes[min] = el;
           min++;
-          this.NVMappingTable.set(el, current);
+          this.NVMappingTable.set(current, el);
           if (current instanceof VElement) {
             this.diffAndUpdate(el as HTMLElement, current, oldFirst as VElement);
           }
