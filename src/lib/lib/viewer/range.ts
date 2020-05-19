@@ -111,6 +111,19 @@ export class TBRange {
         fragment: startFragment
       });
       const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      const childSlots = parentTemplate.childSlots;
+      const end = childSlots.indexOf(this.endFragment);
+
+      start.push(...childSlots.slice(
+        childSlots.indexOf(startFragment) + 1,
+        end === -1 ? childSlots.length : end
+      ).map(fragment => {
+        return {
+          startIndex: 0,
+          endIndex: fragment.contentLength,
+          fragment
+        }
+      }));
       startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       startIndex = startFragment.find(parentTemplate) + 1;
     }
@@ -121,6 +134,18 @@ export class TBRange {
         fragment: endFragment
       });
       const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      const childSlots = parentTemplate.childSlots;
+      const start = childSlots.indexOf(this.startFragment);
+      end.push(...childSlots.slice(
+        start === -1 ? 0 : start + 1,
+        parentTemplate.childSlots.indexOf(endFragment)
+      ).map(fragment => {
+        return {
+          startIndex: 0,
+          endIndex: fragment.contentLength,
+          fragment
+        }
+      }));
       endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       endIndex = endFragment.find(parentTemplate);
     }
