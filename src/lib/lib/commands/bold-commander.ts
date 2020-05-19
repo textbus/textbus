@@ -12,7 +12,6 @@ export class BoldCommander implements Commander<Formatter> {
   command(selection: TBSelection, overlap: boolean): void {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        console.log(item)
         item.fragment.apply({
           state: overlap ? MatchState.Invalid : MatchState.Valid,
           startIndex: item.startIndex,
