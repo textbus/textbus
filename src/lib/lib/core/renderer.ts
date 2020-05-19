@@ -2,7 +2,6 @@ import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
-import { h } from '@tanbo/tbus/toolbar/tools/h';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -84,7 +83,7 @@ export class Renderer {
     this.NVMappingTable.set(host, root);
     const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
-      this.rendering(vDom, host, this.oldVDom);
+      this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
       this.renderingNewTree(host, vDom);
     }
@@ -104,23 +103,24 @@ export class Renderer {
     return this.templateHierarchyMapping.get(template);
   }
 
-  // private diffChildNodes(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
-  //
-  // }
-
   private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
     let min = 0;
     let max = vDom.childNodes.length - 1;
     let minToMax = true;
+
+    const childNodes: Node[] = [];
     while (min <= max) {
       if (minToMax) {
         const current = vDom.childNodes[min];
         if (this.equal(current, oldVDom.childNodes[0])) {
           const oldFirst = oldVDom.childNodes.shift();
-          min++;
           const el = this.NVMappingTable.get(oldFirst);
+          childNodes[min] = el;
+          min++;
           this.NVMappingTable.set(el, current);
-          this.diffAndUpdate(el as HTMLElement, current as VElement, oldFirst as VElement);
+          if (current instanceof VElement) {
+            this.diffAndUpdate(el as HTMLElement, current, oldFirst as VElement);
+          }
         } else {
           minToMax = false;
         }
@@ -130,29 +130,52 @@ export class Renderer {
 
         if (this.equal(current, oldLast)) {
           const last = oldVDom.childNodes.pop();
-          max--;
           const el = this.NVMappingTable.get(last);
+          childNodes[max] = el;
           this.NVMappingTable.set(el, current);
           this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
         } else {
           if (current instanceof VElement) {
             const el = this.createElement(current);
-            host.appendChild(el);
+            childNodes[max] = el;
             this.NVMappingTable.set(el, current);
             if (oldLast instanceof VElement) {
               this.diffAndUpdate(el, current, oldVDom.childNodes.pop() as VElement)
+            } else {
+              this.renderingNewTree(el, current)
             }
           } else {
             const el = this.createTextNode(current);
+            childNodes[max] = el;
             this.NVMappingTable.set(el, current);
             host.appendChild(el);
           }
+          if (oldLast) {
+            const el = this.NVMappingTable.get(oldLast);
+            el.parentNode.removeChild(el);
+            this.NVMappingTable.delete(oldLast);
+            oldVDom.childNodes.pop();
+          }
         }
-        if (oldLast) {
-          this.NVMappingTable.delete(oldLast);
-        }
+        max--;
       }
     }
+    oldVDom.childNodes.forEach(v => {
+      const node = this.NVMappingTable.get(v);
+      node.parentNode.removeChild(node);
+      this.NVMappingTable.delete(v);
+    })
+    childNodes.forEach((child, index) => {
+      const nativeChildNodes = host.childNodes;
+      const oldChild = nativeChildNodes[index];
+      if (oldChild) {
+        if (oldChild !== child) {
+          host.insertBefore(child, oldChild);
+        }
+      } else {
+        host.appendChild(child);
+      }
+    })
   }
 
   private createElement(vDom: VElement) {
@@ -188,72 +211,11 @@ export class Renderer {
         this.NVMappingTable.set(el, child);
         return;
       }
-      const el = document.createElement(child.tagName);
-      vDom.attrs.forEach((value, key) => {
-        el.setAttribute(key, value + '');
-      });
-      vDom.styles.forEach((value, key) => {
-        el.style[key] = value;
-      });
+      const el = this.createElement(child);
       host.appendChild(el);
       this.NVMappingTable.set(el, child);
       this.renderingNewTree(el, child);
     })
-  }
-
-  private rendering(newVDom: VElement | VTextNode, host: HTMLElement, oldVDom?: VElement | VTextNode,) {
-    if (newVDom instanceof VElement) {
-      if (oldVDom instanceof VElement && newVDom.equal(oldVDom)) {
-        const nativeElementNode = this.NVMappingTable.get(oldVDom);
-        newVDom.childNodes.forEach(child => {
-          const oldFirst = oldVDom.childNodes.shift();
-          this.rendering(child, nativeElementNode as HTMLElement, oldFirst);
-        });
-        this.NVMappingTable.set(newVDom, nativeElementNode);
-      } else {
-        const el = document.createElement(newVDom.tagName);
-        newVDom.attrs.forEach((value, key) => {
-          el.setAttribute(key, value + '');
-        });
-        newVDom.styles.forEach((value, key) => {
-          el.style[key] = value;
-        });
-        host.appendChild(el);
-        if (oldVDom) {
-          const oldNativeElement = this.NVMappingTable.get(oldVDom);
-          oldNativeElement.parentNode.removeChild(oldNativeElement);
-        }
-        this.NVMappingTable.set(el, newVDom);
-        const oldChildNodes = oldVDom instanceof VElement ? oldVDom.childNodes : [];
-        newVDom.childNodes.forEach(child => {
-          this.rendering(child, el, oldChildNodes.shift());
-        });
-        while (oldChildNodes.length) {
-          this.vDomPositionMapping.delete(oldChildNodes.shift());
-        }
-      }
-    } else {
-      const nativeNode = this.NVMappingTable.get(oldVDom);
-      if (oldVDom instanceof VTextNode) {
-        if (oldVDom.textContent !== newVDom.textContent) {
-          nativeNode.textContent = newVDom.textContent;
-        }
-        this.NVMappingTable.set(nativeNode, newVDom);
-      } else {
-        const newNativeTextNode = document.createTextNode(newVDom.textContent);
-        this.NVMappingTable.set(newNativeTextNode, newVDom);
-        host.appendChild(newNativeTextNode);
-        const fn = (vEle: VElement | VTextNode) => {
-          this.NVMappingTable.delete(this.NVMappingTable.get(vEle));
-          if (vEle instanceof VElement) {
-            vEle.childNodes.forEach(child => {
-              fn(child);
-            })
-          }
-        };
-        fn(nativeNode);
-      }
-    }
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
