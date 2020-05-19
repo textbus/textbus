@@ -112,7 +112,7 @@ export class Renderer {
     while (min <= max) {
       if (minToMax) {
         const current = vDom.childNodes[min];
-        if (this.equal(current, oldVDom.childNodes[0])) {
+        if (Renderer.equal(current, oldVDom.childNodes[0])) {
           const oldFirst = oldVDom.childNodes.shift();
           const el = this.NVMappingTable.get(oldFirst);
           childNodes[min] = el;
@@ -128,7 +128,7 @@ export class Renderer {
         const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
         const current = vDom.childNodes[max];
 
-        if (this.equal(current, oldLast)) {
+        if (Renderer.equal(current, oldLast)) {
           const last = oldVDom.childNodes.pop();
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
@@ -145,7 +145,7 @@ export class Renderer {
               this.renderingNewTree(el, current)
             }
           } else {
-            const el = this.createTextNode(current);
+            const el = Renderer.createTextNode(current);
             childNodes[max] = el;
             this.NVMappingTable.set(el, current);
             host.appendChild(el);
@@ -164,7 +164,7 @@ export class Renderer {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);
       this.NVMappingTable.delete(v);
-    })
+    });
     childNodes.forEach((child, index) => {
       const nativeChildNodes = host.childNodes;
       const oldChild = nativeChildNodes[index];
@@ -187,20 +187,6 @@ export class Renderer {
       el.style[key] = value;
     });
     return el;
-  }
-
-  private createTextNode(vDom: VTextNode) {
-    return document.createTextNode(vDom.textContent);
-  }
-
-  private equal(left: VElement | VTextNode, right: VElement | VTextNode) {
-    if (left instanceof VElement) {
-      if (right instanceof VElement) {
-        return left.equal(right);
-      }
-      return false;
-    }
-    return right instanceof VTextNode && left.textContent === right.textContent;
   }
 
   private renderingNewTree(host: HTMLElement, vDom: VElement) {
@@ -372,5 +358,19 @@ export class Renderer {
       host,
       slot
     }
+  }
+
+  private static createTextNode(vDom: VTextNode) {
+    return document.createTextNode(vDom.textContent);
+  }
+
+  private static equal(left: VElement | VTextNode, right: VElement | VTextNode) {
+    if (left instanceof VElement) {
+      if (right instanceof VElement) {
+        return left.equal(right);
+      }
+      return false;
+    }
+    return right instanceof VTextNode && left.textContent === right.textContent;
   }
 }
