@@ -52,7 +52,7 @@ export class ListTemplateTranslator implements TemplateTranslator {
 }
 
 export class ListTemplate extends Template {
-  constructor(private tagName: string) {
+  constructor(public tagName: string) {
     super();
   }
 

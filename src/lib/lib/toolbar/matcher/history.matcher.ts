@@ -1,8 +1,8 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../viewer/selection';
-import { Renderer } from '../core/renderer';
-import { Editor } from '../editor';
-import { HighlightState } from '../toolbar/help';
+import { TBSelection } from '../../viewer/selection';
+import { Renderer } from '../../core/renderer';
+import { Editor } from '../../editor';
+import { HighlightState } from '../help';
 
 export class HistoryMatcher implements Matcher {
   constructor(private type: 'forward' | 'back') {

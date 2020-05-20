@@ -3,7 +3,7 @@ import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-class BoldFormatter extends Formatter {
+export class BoldFormatter extends Formatter {
   constructor() {
     super({
       extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],

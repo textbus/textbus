@@ -2,7 +2,13 @@ import 'core-js';
 // import { Observable } from 'rxjs';
 
 // import { createEditor } from './lib/create';
-import { Editor, EditorOptions, italicTool, strikeThroughTool, underlineTool } from './lib/public-api';
+import {
+  CodeTemplateTranslator, codeTool,
+  Editor, fontSizeTool, italicFormatter,
+  italicTool, olTool, strikeThroughFormatter,
+  strikeThroughTool, ulTool, underlineFormatter,
+  underlineTool
+} from './lib/public-api';
 
 import './lib/assets/index.scss';
 
@@ -26,16 +32,23 @@ const editor = new Editor('#editor', {
     new ListTemplateTranslator('ol'),
     new BlockTemplateTranslator('div'),
     new BlockTemplateTranslator('p'),
-    new SingleTemplateTranslator('br')
+    new SingleTemplateTranslator('br'),
+    new CodeTemplateTranslator()
   ],
   formats: [
     boldFormatter,
-    colorFormatter
+    colorFormatter,
+    italicFormatter,
+    strikeThroughFormatter,
+    underlineFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
+    [codeTool],
+    [olTool, ulTool],
+    [fontSizeTool],
     [colorTool]
   ]
 });

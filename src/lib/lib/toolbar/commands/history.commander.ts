@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../viewer/selection';
+import { TBSelection } from '../../viewer/selection';
 
 export class HistoryCommander implements Commander {
   recordHistory = false;

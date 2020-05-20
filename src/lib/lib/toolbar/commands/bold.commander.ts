@@ -1,7 +1,7 @@
 import { Commander } from './commander';
-import { TBSelection } from '../viewer/selection';
-import { Formatter, MatchState } from '../core/formatter';
-import { AbstractData } from '../core/abstract-data';
+import { TBSelection } from '../../viewer/selection';
+import { Formatter, MatchState } from '../../core/formatter';
+import { AbstractData } from '../../core/abstract-data';
 
 export class BoldCommander implements Commander<Formatter> {
   recordHistory = true;

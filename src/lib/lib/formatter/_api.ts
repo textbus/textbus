@@ -1,2 +1,3 @@
 export * from './bold.formatter';
-export * from './color.formatter';
+export * from './inline.formatter';
+export * from './style.formatter';

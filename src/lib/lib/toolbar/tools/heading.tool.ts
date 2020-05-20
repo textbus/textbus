@@ -1,7 +1,7 @@
 import { HandlerType, SelectConfig } from '../help';
-import { BlockCommander } from '../../commands/block.commander';
+import { BlockCommander } from '../commands/block.commander';
 import { BlockTemplate } from '../../templates/block.template';
-import { BlockMatcher } from '../../matcher/block.matcher';
+import { BlockMatcher } from '../matcher/block.matcher';
 
 export const headingTool: SelectConfig = {
   type: HandlerType.Select,

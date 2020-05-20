@@ -1,4 +1,4 @@
-import { TBSelection } from '../viewer/selection';
+import { TBSelection } from '../../viewer/selection';
 
 /**
  * 操作编辑器的命令工具

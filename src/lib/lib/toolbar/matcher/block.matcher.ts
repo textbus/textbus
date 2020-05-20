@@ -1,8 +1,8 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../viewer/selection';
-import { BlockTemplate } from '../templates/block.template';
-import { Constructor, Renderer } from '../core/renderer';
-import { HighlightState } from '../toolbar/help';
+import { TBSelection } from '../../viewer/selection';
+import { BlockTemplate } from '../../templates/block.template';
+import { Constructor, Renderer } from '../../core/renderer';
+import { HighlightState } from '../help';
 
 export class BlockMatcher implements Matcher {
   constructor(public templateConstructor: Constructor<BlockTemplate>) {

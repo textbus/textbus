@@ -3,7 +3,7 @@ import { AbstractData } from '../core/abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-class InlineFormatter extends Formatter {
+export class InlineFormatter extends Formatter {
   constructor(private tagName: string, rule: MatchRule) {
     super(rule);
   }

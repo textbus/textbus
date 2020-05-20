@@ -1,10 +1,10 @@
-import { TBSelection } from '../viewer/selection';
-import { Renderer } from '../core/renderer';
-import { HighlightState } from '../toolbar/help';
-import { Fragment } from '../core/fragment';
-import { TBRange } from '../viewer/range';
-import { Template } from '../core/template';
-import { FormatRange, Formatter, MatchState } from '../core/formatter';
+import { TBSelection } from '../../viewer/selection';
+import { Renderer } from '../../core/renderer';
+import { HighlightState } from '../help';
+import { Fragment } from '../../core/fragment';
+import { TBRange } from '../../viewer/range';
+import { Template } from '../../core/template';
+import { FormatRange, Formatter, MatchState } from '../../core/formatter';
 import { MatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 
 export interface FormatMatcherParams {

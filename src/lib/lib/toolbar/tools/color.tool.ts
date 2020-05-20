@@ -3,11 +3,11 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Subject } from 'rxjs';
 
 import { DropdownConfig, HandlerType } from '../help';
-import { colorFormatter } from '../../formatter/color.formatter';
+import { colorFormatter } from '../../formatter/style.formatter';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { StyleCommander } from '../../commands/style.commander';
+import { StyleCommander } from '../commands/style.commander';
 import { AbstractData } from '../../core/abstract-data';
-import { FormatMatcher } from '../../matcher/format.matcher';
+import { FormatMatcher } from '../matcher/format.matcher';
 
 const hideEvent = new Subject<void>();
 const commander = new StyleCommander('color', colorFormatter);

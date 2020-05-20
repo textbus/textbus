@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { KeymapConfig } from '../viewer/events';
-import { Commander } from '../commands/commander';
-import { Matcher } from '../matcher/matcher';
+import { Commander } from './commands/commander';
+import { Matcher } from './matcher/matcher';
 
 /**
  * 工具条控件的显示状态

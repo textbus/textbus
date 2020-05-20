@@ -1,7 +1,7 @@
 import { ButtonConfig, HandlerType } from '../help';
 import { strikeThroughFormatter } from '../../formatter/inline.formatter';
-import { FormatMatcher } from '../../matcher/format.matcher';
-import { InlineCommander } from '../../commands/inline.commander';
+import { FormatMatcher } from '../matcher/format.matcher';
+import { InlineCommander } from '../commands/inline.commander';
 
 export const strikeThroughTool: ButtonConfig = {
   type: HandlerType.Button,

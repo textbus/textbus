@@ -1,10 +1,10 @@
-import { TBSelection } from '../viewer/selection';
-import { Renderer } from '../core/renderer';
-import { AbstractData } from '../core/abstract-data';
-import { HighlightState } from '../toolbar/help';
-import { TBRange } from '../viewer/range';
-import { MatchState } from '../core/formatter';
-import { Editor } from '../editor';
+import { TBSelection } from '../../viewer/selection';
+import { Renderer } from '../../core/renderer';
+import { AbstractData } from '../../core/abstract-data';
+import { HighlightState } from '../help';
+import { TBRange } from '../../viewer/range';
+import { MatchState } from '../../core/formatter';
+import { Editor } from '../../editor';
 
 /**
  * 匹配到的抽象数据及状态
