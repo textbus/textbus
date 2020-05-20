@@ -6,7 +6,7 @@ import {
   blockBackgroundTool,
   CodeTemplateTranslator,
   codeTool,
-  Editor, emojiTool,
+  Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
   fontSizeFormatter,
   fontSizeTool,
   italicFormatter,
@@ -66,7 +66,8 @@ const editor = new Editor('#editor', {
     textIndentFormatter,
     colorFormatter,
     subscriptFormatter,
-    superscriptFormatter
+    superscriptFormatter,
+    fontFamilyFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -76,7 +77,8 @@ const editor = new Editor('#editor', {
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [subscriptTool, superscriptTool],
-    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool]
+    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    [fontFamilyTool]
   ]
 });
 

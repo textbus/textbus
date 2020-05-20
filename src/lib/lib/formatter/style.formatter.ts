@@ -59,3 +59,8 @@ export const textIndentFormatter = new StyleFormatter('textIndent', {
     textIndent: /.+/
   }
 });
+export const fontFamilyFormatter = new StyleFormatter('fontFamily', {
+  styles: {
+    fontFamily: /.+/
+  }
+});

@@ -2,6 +2,7 @@ export { blockBackgroundTool } from './block-background.tool';
 export { boldTool } from './bold.tool';
 export { colorTool } from './color.tool';
 export { emojiTool } from './emoji.tool';
+export { fontFamilyTool } from './font-family.tool';
 export { codeTool } from './code.tool';
 export { fontSizeTool } from './font-size.tool';
 export { headingTool } from './heading.tool';
