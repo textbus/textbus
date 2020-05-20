@@ -1,9 +1,9 @@
 import { ButtonConfig, HandlerType } from '../help';
-import { BoldCommander } from '../../commands/bold-commander';
-import { boldFormatter } from '../../formatter/bold';
-import { FormatMatcher } from '../../matcher/format-matcher';
+import { BoldCommander } from '../../commands/bold.commander';
+import { boldFormatter } from '../../formatter/bold.formatter';
+import { FormatMatcher } from '../../matcher/format.matcher';
 
-export const bold: ButtonConfig = {
+export const boldTool: ButtonConfig = {
   type: HandlerType.Button,
   classes: ['tbus-icon-bold'],
   tooltip: '加粗',

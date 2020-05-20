@@ -107,21 +107,10 @@ export interface ActionConfig {
   keymap?: KeymapConfig;
 }
 
-export interface EditableOptions {
-  /** 设置是否要编辑标签 */
-  tag?: boolean;
-  /** 设置要编辑的 HTML 属性 */
-  attrs?: string[];
-  /** 设置要编辑的 Style */
-  styleName?: string;
-}
-
 export interface ActionSheetConfig  {
   type: HandlerType.ActionSheet;
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
-  /** 当前下拉框编辑项的配置 */
-  editable: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   /** 当某一项被点击时调用的命令 */
   execCommand: Commander & { actionType: any };
   /** 锚中节点的的匹配项配置 */

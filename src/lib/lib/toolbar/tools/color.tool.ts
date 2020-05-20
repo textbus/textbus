@@ -3,11 +3,11 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Subject } from 'rxjs';
 
 import { DropdownConfig, HandlerType } from '../help';
-import { colorFormatter } from '../../formatter/color';
+import { colorFormatter } from '../../formatter/color.formatter';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { StyleCommander } from '../../commands/style-commander';
+import { StyleCommander } from '../../commands/style.commander';
 import { AbstractData } from '../../core/abstract-data';
-import { FormatMatcher } from '../../matcher/format-matcher';
+import { FormatMatcher } from '../../matcher/format.matcher';
 
 const hideEvent = new Subject<void>();
 const commander = new StyleCommander('color', colorFormatter);
@@ -37,7 +37,7 @@ class Palette implements DropdownHandlerView {
   }
 }
 
-export const color: DropdownConfig = {
+export const colorTool: DropdownConfig = {
   type: HandlerType.Dropdown,
   classes: ['tbus-icon-color'],
   tooltip: '文字颜色',

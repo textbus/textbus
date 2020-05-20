@@ -2,13 +2,11 @@ import { Observable } from 'rxjs';
 
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EditableOptions, EventDelegate, HighlightState } from '../help';
+import { DropdownConfig, EventDelegate, HighlightState } from '../help';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
   onApply: Observable<any>;
-  priority: number;
-  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   private dropdownButton = document.createElement('span');
   private dropdown: Dropdown;
 

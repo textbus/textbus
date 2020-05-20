@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ButtonConfig, EditableOptions, HighlightState } from '../help';
+import { ButtonConfig, HighlightState } from '../help';
 import {  Handler } from './help';
 import { Keymap } from '../../viewer/events';
 

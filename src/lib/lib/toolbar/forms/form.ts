@@ -5,10 +5,10 @@ import { FormTextField } from './form-text-field';
 import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
-import { EventDelegate } from '../../help';
-import { DropdownHandlerView } from '../../handlers/utils/dropdown';
+import { EventDelegate } from '../help';
+import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { tap } from 'rxjs/operators';
-import { AbstractData } from '../../../core/abstract-data';
+import { AbstractData } from '../../core/abstract-data';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;

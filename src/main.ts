@@ -5,16 +5,19 @@ import 'core-js';
 import { Editor, EditorOptions } from './lib/public-api';
 
 import './lib/assets/index.scss';
-import { ListTemplateTranslator } from './lib/lib/templates/list';
-import { BlockTemplateTranslator } from './lib/lib/templates/block';
-import { boldFormatter } from './lib/lib/formatter/bold';
-import { colorFormatter } from './lib/lib/formatter/color';
-import { bold } from './lib/lib/toolbar/tools/bold';
-import { color } from './lib/lib/toolbar/tools/color';
-import { h } from './lib/lib/toolbar/tools/h';
-import { historyBack } from './lib/lib/toolbar/tools/history-back';
-import { historyForward } from './lib/lib/toolbar/tools/history-forward';
-import { SingleTemplateTranslator } from './lib/lib/templates/single';
+
+import {
+  ListTemplateTranslator,
+  BlockTemplateTranslator,
+  SingleTemplateTranslator,
+  boldFormatter,
+  colorFormatter,
+  historyBackTool,
+  historyForwardTool,
+  hTool,
+  boldTool,
+  colorTool
+} from './lib/public-api';
 
 
 const editor = new Editor('#editor', {
@@ -30,9 +33,9 @@ const editor = new Editor('#editor', {
     colorFormatter
   ],
   toolbar: [
-    [historyBack, historyForward],
-    [h],
-    [bold, color]
+    [historyBackTool, historyForwardTool],
+    [hTool],
+    [boldTool, colorTool]
   ]
 });
 

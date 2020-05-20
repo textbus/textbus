@@ -2,15 +2,13 @@ import { merge, Observable, Subject } from 'rxjs';
 
 import { createKeymapHTML, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
-import { EditableOptions, HighlightState, SelectConfig, SelectOptionConfig } from '../help';
+import { HighlightState, SelectConfig, SelectOptionConfig } from '../help';
 import { Keymap } from '../../viewer/events';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
   onApply: Observable<any>;
-  priority: number;
-  editableOptions: ((element: HTMLElement) => EditableOptions) | EditableOptions;
   keymap: Keymap[] = [];
   private applyEventSource = new Subject<any>();
   private value = '';
@@ -42,7 +40,7 @@ export class SelectHandler implements Handler {
           action: () => {
             if (!this.dropdown.disabled) {
               this.value = option.value;
-              // this.execCommand.updateValue(option.value);
+              config.execCommand.updateValue(option.value);
               this.applyEventSource.next();
             }
           }
@@ -51,7 +49,7 @@ export class SelectHandler implements Handler {
 
       item.onCheck.subscribe(v => {
         this.value = v.value;
-        // this.execCommand.updateValue(v.value);
+        config.execCommand.updateValue(v.value);
         this.applyEventSource.next();
       });
       this.options.push(item);

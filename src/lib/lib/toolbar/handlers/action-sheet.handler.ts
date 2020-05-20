@@ -1,7 +1,7 @@
 import { merge, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ActionSheetConfig, ActionConfig, EditableOptions, HighlightState } from '../help';
+import { ActionSheetConfig, ActionConfig, HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
 import { Handler, createKeymapHTML } from './help';
 import { Keymap } from '../../viewer/events';

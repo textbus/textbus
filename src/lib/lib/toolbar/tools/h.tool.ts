@@ -1,9 +1,9 @@
 import { HandlerType, SelectConfig } from '../help';
-import { BlockCommander } from '../../commands/block-commander';
-import { BlockTemplate } from '../../templates/block';
-import { BlockMatcher } from '../../matcher/block-matcher';
+import { BlockCommander } from '../../commands/block.commander';
+import { BlockTemplate } from '../../templates/block.template';
+import { BlockMatcher } from '../../matcher/block.matcher';
 
-export const h: SelectConfig = {
+export const hTool: SelectConfig = {
   type: HandlerType.Select,
   options: [{
     label: '标题1',

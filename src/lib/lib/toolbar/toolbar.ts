@@ -2,10 +2,10 @@ import { Observable, Subject } from 'rxjs';
 
 import { HandlerConfig, HandlerType } from './help';
 import { createKeymapHTML, Handler } from './handlers/help';
-import { ButtonHandler } from './handlers/button-handler';
-import { SelectHandler } from './handlers/select-handler';
-import { DropdownHandler } from './handlers/dropdown-handler';
-import { ActionSheetHandler } from './handlers/action-sheet-handler';
+import { ButtonHandler } from './handlers/button.handler';
+import { SelectHandler } from './handlers/select.handler';
+import { DropdownHandler } from './handlers/dropdown.handler';
+import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
 import { KeymapConfig } from '../viewer/events';
 import { TBSelection } from '../viewer/selection';
