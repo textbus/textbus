@@ -1,6 +1,11 @@
 import { TBRange } from '../viewer/range';
 import { Renderer } from '../core/renderer';
 
+export interface RangePath {
+  startPaths: number[];
+  endPaths: number[];
+}
+
 export class TBSelection {
   get rangeCount() {
     return this.ranges.length;

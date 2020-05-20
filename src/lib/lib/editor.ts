@@ -8,7 +8,13 @@ import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
 import { EventDelegate, HandlerConfig } from './toolbar/help';
-import { TBSelection } from './viewer/selection';
+import { RangePath, TBSelection } from './viewer/selection';
+import { Fragment } from './core/fragment';
+
+export interface Snapshot {
+  contents: Fragment;
+  paths: RangePath[];
+}
 
 export interface EditorOptions {
   theme?: string;
@@ -22,7 +28,16 @@ export interface EditorOptions {
 }
 
 export class Editor implements EventDelegate {
+  get canBack() {
+    return this.historySequence.length > 0 && this.historyIndex > 0;
+  }
+
+  get canForward() {
+    return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
+  }
+
   readonly elementRef = document.createElement('div');
+
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
@@ -33,6 +48,10 @@ export class Editor implements EventDelegate {
 
   private readyState = false;
   private tasks: Array<() => void> = [];
+
+  private historySequence: Array<Snapshot> = [];
+  private historyIndex = 0;
+  private readonly historyStackSize: number;
 
   private selection: TBSelection;
 
@@ -110,6 +129,38 @@ export class Editor implements EventDelegate {
     }
     return of('');
   }
+
+  getPreviousSnapshot() {
+    if (this.canBack) {
+      this.historyIndex--;
+      this.historyIndex = Math.max(0, this.historyIndex);
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  getNextSnapshot() {
+    if (this.canForward) {
+      this.historyIndex++;
+      return this.historySequence[this.historyIndex];
+    }
+    return null;
+  }
+
+  // private recordSnapshot() {
+  //   if (this.historySequence.length !== this.historyIndex) {
+  //     this.historySequence.length = this.historyIndex + 1;
+  //   }
+  //   this.historySequence.push({
+  //     contents: this.root.clone(),
+  //     paths: this.viewer.selection.getRangePaths()
+  //   });
+  //   if (this.historySequence.length > this.historyStackSize) {
+  //     this.historySequence.shift();
+  //   }
+  //   this.historyIndex = this.historySequence.length - 1;
+  //   this.dispatchContentChangeEvent();
+  // }
 
   private run(fn: () => void) {
     if (!this.readyState) {

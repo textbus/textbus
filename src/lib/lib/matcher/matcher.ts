@@ -32,8 +32,6 @@ export interface SelectionMatchDelta {
   abstractData?: AbstractData;
 }
 
-export type Constructor<T> = { new(...args: any): T };
-
 export interface Matcher {
   queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchDelta;
 }

@@ -25,6 +25,8 @@ export interface ElementPosition {
   fragment: Fragment;
 }
 
+export type Constructor<T> = { new(...args: any): T };
+
 class NativeElementMappingTable {
   private nativeVDomMapping = new Map<Node, VElement | VTextNode>();
   private vDomNativeMapping = new Map<VElement | VTextNode, Node>();
@@ -101,6 +103,18 @@ export class Renderer {
 
   getParentFragmentByTemplate(template: Template) {
     return this.templateHierarchyMapping.get(template);
+  }
+
+  getContext(by: Fragment, context: Constructor<Template>): Template {
+    const templateInstance = this.fragmentHierarchyMapping.get(by);
+    if (templateInstance instanceof context) {
+      return templateInstance;
+    }
+    const parentFragment = this.templateHierarchyMapping.get(templateInstance);
+    if (!parentFragment) {
+      return null;
+    }
+    return this.getContext(parentFragment, context);
   }
 
   private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
