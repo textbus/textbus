@@ -3,10 +3,23 @@ import 'core-js';
 
 // import { createEditor } from './lib/create';
 import {
-  CodeTemplateTranslator, codeTool,
-  Editor, fontSizeTool, italicFormatter,
-  italicTool, letterSpacingTool, lineHeightTool, olTool, strikeThroughFormatter,
-  strikeThroughTool, textIndentTool, ulTool, underlineFormatter,
+  CodeTemplateTranslator,
+  codeTool,
+  Editor,
+  fontSizeFormatter,
+  fontSizeTool,
+  italicFormatter,
+  italicTool,
+  letterSpacingFormatter,
+  letterSpacingTool,
+  lineHeightFormatter,
+  lineHeightTool,
+  olTool,
+  strikeThroughFormatter,
+  strikeThroughTool, subscriptFormatter, subscriptTool, superscriptFormatter, superscriptTool, textIndentFormatter,
+  textIndentTool,
+  ulTool,
+  underlineFormatter,
   underlineTool
 } from './lib/public-api';
 
@@ -37,10 +50,16 @@ const editor = new Editor('#editor', {
   ],
   formats: [
     boldFormatter,
-    colorFormatter,
     italicFormatter,
     strikeThroughFormatter,
-    underlineFormatter
+    underlineFormatter,
+    fontSizeFormatter,
+    lineHeightFormatter,
+    letterSpacingFormatter,
+    textIndentFormatter,
+    colorFormatter,
+    subscriptFormatter,
+    superscriptFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -49,6 +68,7 @@ const editor = new Editor('#editor', {
     [codeTool],
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+    [subscriptTool, superscriptTool],
     [colorTool]
   ]
 });

@@ -40,3 +40,9 @@ export const underlineFormatter = new InlineFormatter('u', {
     textDecoration: ['underline']
   }
 });
+export const subscriptFormatter = new InlineFormatter('sub', {
+  tags: ['sub']
+});
+export const superscriptFormatter = new InlineFormatter('sup', {
+  tags: ['sup']
+});

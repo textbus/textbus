@@ -10,6 +10,8 @@ export { letterSpacingTool } from './letter-spacing.tool';
 export { lineHeightTool } from './line-height.tool';
 export { olTool } from './ol.tool';
 export { strikeThroughTool } from './strike-through.tool';
+export { subscriptTool } from './subscript.tool';
+export { superscriptTool } from './superscript.tool';
 export { textIndentTool } from './text-indent.tool';
 export { ulTool } from './ul.tool';
 export { underlineTool } from './underline.tool';
