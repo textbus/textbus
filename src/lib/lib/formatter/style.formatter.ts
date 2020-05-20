@@ -36,3 +36,20 @@ export const fontSizeFormatter = new StyleFormatter('fontSize', {
     fontSize: /.+/
   }
 });
+
+export const lineHeightFormatter = new StyleFormatter('lineHeight', {
+  styles: {
+    lineHeight: /.+/
+  }
+});
+
+export const letterSpacingFormatter = new StyleFormatter('letterSpacing', {
+  styles: {
+    letterSpacing: /.+/
+  }
+});
+export const textIndentFormatter = new StyleFormatter('textIndent', {
+  styles: {
+    textIndent: /.+/
+  }
+});

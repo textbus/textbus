@@ -5,8 +5,8 @@ import 'core-js';
 import {
   CodeTemplateTranslator, codeTool,
   Editor, fontSizeTool, italicFormatter,
-  italicTool, olTool, strikeThroughFormatter,
-  strikeThroughTool, ulTool, underlineFormatter,
+  italicTool, letterSpacingTool, lineHeightTool, olTool, strikeThroughFormatter,
+  strikeThroughTool, textIndentTool, ulTool, underlineFormatter,
   underlineTool
 } from './lib/public-api';
 
@@ -48,7 +48,7 @@ const editor = new Editor('#editor', {
     [boldTool, italicTool, strikeThroughTool, underlineTool],
     [codeTool],
     [olTool, ulTool],
-    [fontSizeTool],
+    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [colorTool]
   ]
 });
