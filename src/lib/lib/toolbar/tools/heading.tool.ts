@@ -3,7 +3,7 @@ import { BlockCommander } from '../../commands/block.commander';
 import { BlockTemplate } from '../../templates/block.template';
 import { BlockMatcher } from '../../matcher/block.matcher';
 
-export const hTool: SelectConfig = {
+export const headingTool: SelectConfig = {
   type: HandlerType.Select,
   options: [{
     label: '标题1',

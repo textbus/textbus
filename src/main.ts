@@ -2,7 +2,7 @@ import 'core-js';
 // import { Observable } from 'rxjs';
 
 // import { createEditor } from './lib/create';
-import { Editor, EditorOptions } from './lib/public-api';
+import { Editor, EditorOptions, italicTool, strikeThroughTool, underlineTool } from './lib/public-api';
 
 import './lib/assets/index.scss';
 
@@ -14,7 +14,7 @@ import {
   colorFormatter,
   historyBackTool,
   historyForwardTool,
-  hTool,
+  headingTool,
   boldTool,
   colorTool
 } from './lib/public-api';
@@ -34,8 +34,9 @@ const editor = new Editor('#editor', {
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
-    [hTool],
-    [boldTool, colorTool]
+    [headingTool],
+    [boldTool, italicTool, strikeThroughTool, underlineTool],
+    [colorTool]
   ]
 });
 
