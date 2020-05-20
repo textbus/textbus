@@ -11,6 +11,7 @@ export { historyForwardTool } from './history-forward.tool';
 export { italicTool } from './italic.tool';
 export { letterSpacingTool } from './letter-spacing.tool';
 export { lineHeightTool } from './line-height.tool';
+export { linkTool } from './link.tool';
 export { olTool } from './ol.tool';
 export { strikeThroughTool } from './strike-through.tool';
 export { subscriptTool } from './subscript.tool';

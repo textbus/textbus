@@ -14,7 +14,7 @@ import {
   letterSpacingFormatter,
   letterSpacingTool,
   lineHeightFormatter,
-  lineHeightTool,
+  lineHeightTool, linkTool,
   olTool,
   strikeThroughFormatter,
   strikeThroughTool,
@@ -78,7 +78,8 @@ const editor = new Editor('#editor', {
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [subscriptTool, superscriptTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-    [fontFamilyTool]
+    [fontFamilyTool],
+    [linkTool]
   ]
 });
 
