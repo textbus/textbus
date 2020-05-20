@@ -5,6 +5,8 @@ import { StyleCommander } from '../commands/style.commander';
 
 export const fontSizeTool: SelectConfig = {
   type: HandlerType.Select,
+  tooltip: '字体大小',
+  classes: ['tbus-icon-font-size'],
   mini: true,
   options: [{
     label: '12px',
