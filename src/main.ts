@@ -3,9 +3,10 @@ import 'core-js';
 
 // import { createEditor } from './lib/create';
 import {
+  blockBackgroundTool,
   CodeTemplateTranslator,
   codeTool,
-  Editor,
+  Editor, emojiTool,
   fontSizeFormatter,
   fontSizeTool,
   italicFormatter,
@@ -16,7 +17,13 @@ import {
   lineHeightTool,
   olTool,
   strikeThroughFormatter,
-  strikeThroughTool, subscriptFormatter, subscriptTool, superscriptFormatter, superscriptTool, textIndentFormatter,
+  strikeThroughTool,
+  subscriptFormatter,
+  subscriptTool,
+  superscriptFormatter,
+  superscriptTool,
+  textBackgroundTool,
+  textIndentFormatter,
   textIndentTool,
   ulTool,
   underlineFormatter,
@@ -69,7 +76,7 @@ const editor = new Editor('#editor', {
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [subscriptTool, superscriptTool],
-    [colorTool]
+    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool]
   ]
 });
 

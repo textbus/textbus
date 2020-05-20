@@ -1,5 +1,7 @@
+export { blockBackgroundTool } from './block-background.tool';
 export { boldTool } from './bold.tool';
 export { colorTool } from './color.tool';
+export { emojiTool } from './emoji.tool';
 export { codeTool } from './code.tool';
 export { fontSizeTool } from './font-size.tool';
 export { headingTool } from './heading.tool';
@@ -12,6 +14,7 @@ export { olTool } from './ol.tool';
 export { strikeThroughTool } from './strike-through.tool';
 export { subscriptTool } from './subscript.tool';
 export { superscriptTool } from './superscript.tool';
+export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';
 export { ulTool } from './ul.tool';
 export { underlineTool } from './underline.tool';

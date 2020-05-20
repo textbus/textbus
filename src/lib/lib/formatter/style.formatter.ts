@@ -31,6 +31,12 @@ export const colorFormatter = new StyleFormatter('color', {
   }
 });
 
+export const backgroundColor = new StyleFormatter('backgroundColor', {
+  styles: {
+    backgroundColor: /.+/
+  }
+});
+
 export const fontSizeFormatter = new StyleFormatter('fontSize', {
   styles: {
     fontSize: /.+/
