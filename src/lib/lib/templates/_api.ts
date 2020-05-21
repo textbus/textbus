@@ -4,4 +4,5 @@ export * from './code.template';
 export * from './image.template';
 export * from './list.template';
 export * from './single.template';
+export * from './table.template';
 export * from './video.template';

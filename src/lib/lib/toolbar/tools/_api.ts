@@ -1,6 +1,7 @@
 export { audioTool } from './audio.tool';
 export { blockBackgroundTool } from './block-background.tool';
 export { boldTool } from './bold.tool';
+export { cleanTool } from './clean.tool';
 export { colorTool } from './color.tool';
 export { emojiTool } from './emoji.tool';
 export { fontFamilyTool } from './font-family.tool';
@@ -18,6 +19,8 @@ export { olTool } from './ol.tool';
 export { strikeThroughTool } from './strike-through.tool';
 export { subscriptTool } from './subscript.tool';
 export { superscriptTool } from './superscript.tool';
+export { tableTool } from './table.tool';
+export { tableEditTool } from './table-edit.tool';
 export { textAlignTool } from './text-aligh.tool';
 export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';

@@ -4,7 +4,7 @@ import 'core-js';
 // import { createEditor } from './lib/create';
 import {
   AudioTemplateTranslator, audioTool,
-  blockBackgroundTool,
+  blockBackgroundTool, cleanTool,
   CodeTemplateTranslator,
   codeTool,
   Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
@@ -22,7 +22,7 @@ import {
   subscriptFormatter,
   subscriptTool,
   superscriptFormatter,
-  superscriptTool, textAlignTool,
+  superscriptTool, tableEditTool, TableTemplateTranslator, tableTool, textAlignTool,
   textBackgroundTool,
   textIndentFormatter,
   textIndentTool,
@@ -57,7 +57,8 @@ const editor = new Editor('#editor', {
     new CodeTemplateTranslator(),
     new AudioTemplateTranslator(),
     new VideoTemplateTranslator(),
-    new ImageTemplateTranslator()
+    new ImageTemplateTranslator(),
+    new TableTemplateTranslator()
   ],
   formats: [
     boldFormatter,
@@ -84,7 +85,9 @@ const editor = new Editor('#editor', {
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],
-    [textAlignTool]
+    [textAlignTool],
+    [tableTool, tableEditTool],
+    [cleanTool]
   ]
 });
 
