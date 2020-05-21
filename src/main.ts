@@ -48,7 +48,7 @@ import {
 
 
 const editor = new Editor('#editor', {
-  templates: [
+  templateTranslators: [
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
     new BlockTemplateTranslator('div'),
@@ -60,7 +60,7 @@ const editor = new Editor('#editor', {
     new ImageTemplateTranslator(),
     new TableTemplateTranslator()
   ],
-  formats: [
+  formatters: [
     boldFormatter,
     italicFormatter,
     strikeThroughFormatter,

@@ -15,7 +15,7 @@ export class Parser {
 
   private readTemplate(el: Node, slot: Fragment) {
     if (el.nodeType === 1) {
-      const templates = this.options.templates;
+      const templates = this.options.templateTranslators;
       for (const t of templates) {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
@@ -37,7 +37,7 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement, slot: Fragment) {
-    const maps = this.options.formats.map(f => {
+    const maps = this.options.formatters.map(f => {
       return {
         formatter: f,
         state: f.match(el)

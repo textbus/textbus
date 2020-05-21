@@ -18,8 +18,8 @@ export interface Snapshot {
 
 export interface EditorOptions {
   theme?: string;
-  templates?: TemplateTranslator[];
-  formats?: Formatter[];
+  templateTranslators?: TemplateTranslator[];
+  formatters?: Formatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
