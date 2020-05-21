@@ -1,11 +1,12 @@
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
+
 import { Renderer } from '../core/renderer';
 import { template } from './template-html';
 import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
-import { fromEvent, merge, Observable, Subject } from 'rxjs';
-import { auditTime } from 'rxjs/operators';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Editor } from '../editor';
@@ -97,7 +98,7 @@ export class Viewer {
 
     config.execCommand.command(selection, overlap);
     this.render(this.rootFragment);
-    // this.selection.apply();
+    selection.restore();
     this.selectionChangeEvent.next(selection);
   }
 }

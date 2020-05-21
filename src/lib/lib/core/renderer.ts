@@ -76,13 +76,16 @@ export class Renderer {
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
   private fragmentHierarchyMapping: Map<Fragment, Template>;
   private templateHierarchyMapping: Map<Template, Fragment>;
+  private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
+    this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
+    this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
@@ -97,12 +100,24 @@ export class Renderer {
     return this.vDomPositionMapping.get(vDom);
   }
 
+  getPositionByVDom(vDom: VElement | VTextNode) {
+    return this.vDomPositionMapping.get(vDom);
+  }
+
+  getNativeNodeByVDom(vDom: VElement | VTextNode) {
+    return this.NVMappingTable.get(vDom);
+  }
+
   getParentTemplateByFragment(fragment: Fragment) {
     return this.fragmentHierarchyMapping.get(fragment);
   }
 
   getParentFragmentByTemplate(template: Template) {
     return this.templateHierarchyMapping.get(template);
+  }
+
+  getVElementByFragment(fragment: Fragment) {
+    return this.fragmentAndVDomMapping.get(fragment);
   }
 
   getContext(by: Fragment, context: Constructor<Template>): Template {
@@ -219,6 +234,7 @@ export class Renderer {
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
+    this.fragmentAndVDomMapping.set(fragment, host);
     this.vDomPositionMapping.set(host, {
       startIndex: 0,
       endIndex: fragment.contentLength,
@@ -233,7 +249,7 @@ export class Renderer {
         childFormats.push(f);
       }
     });
-    const r = this.createVDomByFormats(containerFormats, host);
+    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
     this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
       r.slot.appendChild(item);
     });
@@ -257,19 +273,8 @@ export class Renderer {
             break;
           }
         }
-        const {host, slot} = this.createVDomByFormats(childFormats);
-        let el = host;
-        while (el) {
-          this.vDomPositionMapping.set(el, {
-            fragment,
-            startIndex,
-            endIndex
-          });
-          if (el === slot) {
-            break;
-          }
-          el = el.childNodes[0] as VElement;
-        }
+        const {host, slot} = this.createVDomByFormats(childFormats, fragment, startIndex, endIndex);
+
 
         const progenyFormats: FormatRange[] = [];
         let index = 0;
@@ -350,7 +355,12 @@ export class Renderer {
     return children;
   }
 
-  private createVDomByFormats(formats: FormatRange[], host?: VElement): { host: VElement, slot: VElement } {
+  private createVDomByFormats(
+    formats: FormatRange[],
+    fragment: Fragment,
+    startIndex: number,
+    endIndex: number,
+    host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.reduce((vEle, next) => {
       const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
@@ -368,6 +378,18 @@ export class Renderer {
       }
       return vEle;
     }, host);
+    let el = host;
+    while (el) {
+      this.vDomPositionMapping.set(el, {
+        fragment,
+        startIndex,
+        endIndex
+      });
+      if (el === slot) {
+        break;
+      }
+      el = el.childNodes[0] as VElement;
+    }
     return {
       host,
       slot

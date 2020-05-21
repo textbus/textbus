@@ -1,5 +1,6 @@
 import { Renderer } from '../core/renderer';
 import { Fragment } from '../core/fragment';
+import { VElement } from '../core/element';
 
 /**
  * 标识一个选中 Fragment 的范围
@@ -36,6 +37,13 @@ export class TBRange {
       this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
       this.commonAncestorFragment = renderer.getPositionByNode(nativeRange.commonAncestorContainer).fragment;
     }
+  }
+
+  restore() {
+    const start = this.findFocusNodeAndOffset(this.startFragment, this.startIndex);
+    const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
+    this.nativeRange.setStart(start.node, start.offset);
+    this.nativeRange.setEnd(end.node, end.offset);
   }
 
   /**
@@ -166,5 +174,29 @@ export class TBRange {
       return this.renderer.getPositionByNode(node.childNodes[offset]).startIndex;
     }
     return offset;
+  }
+
+  private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
+    let vElement = this.renderer.getVElementByFragment(fragment);
+
+    while (vElement) {
+      for (const child of vElement.childNodes) {
+        const position = this.renderer.getPositionByVDom(child);
+        if (position.fragment !== fragment) {
+          break;
+        }
+        if (position.startIndex <= offset && position.endIndex >= offset) {
+          if (child instanceof VElement) {
+            vElement = child;
+          } else {
+            return {
+              node: this.renderer.getNativeNodeByVDom(child),
+              offset: offset - position.startIndex
+            }
+          }
+        }
+      }
+    }
+    throw new Error('DOM 与虚拟节点不同步！');
   }
 }

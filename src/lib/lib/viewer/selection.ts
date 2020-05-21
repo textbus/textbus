@@ -8,17 +8,24 @@ export interface RangePath {
 
 export class TBSelection {
   get rangeCount() {
-    return this.ranges.length;
+    return this._ranges.length;
   }
 
   get ranges() {
-    const ranges: TBRange[] = [];
-    for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
-      ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
-    }
-    return ranges;
+    return this._ranges;
   }
 
+  private _ranges: TBRange[] = [];
+
   constructor(private nativeSelection: Selection, private renderer: Renderer) {
+    for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
+      this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
+    }
+  }
+
+  restore() {
+    this._ranges.forEach(range => {
+      range.restore();
+    });
   }
 }
