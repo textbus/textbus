@@ -18,6 +18,7 @@ export { olTool } from './ol.tool';
 export { strikeThroughTool } from './strike-through.tool';
 export { subscriptTool } from './subscript.tool';
 export { superscriptTool } from './superscript.tool';
+export { textAlignTool } from './text-aligh.tool';
 export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';
 export { ulTool } from './ul.tool';

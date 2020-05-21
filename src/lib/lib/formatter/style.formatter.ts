@@ -64,3 +64,8 @@ export const fontFamilyFormatter = new StyleFormatter('fontFamily', {
     fontFamily: /.+/
   }
 });
+export const textAlignFormatter = new StyleFormatter('textAlign', {
+  styles: {
+    textAlign: /.+/
+  }
+});

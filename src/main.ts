@@ -22,7 +22,7 @@ import {
   subscriptFormatter,
   subscriptTool,
   superscriptFormatter,
-  superscriptTool,
+  superscriptTool, textAlignTool,
   textBackgroundTool,
   textIndentFormatter,
   textIndentTool,
@@ -83,7 +83,8 @@ const editor = new Editor('#editor', {
     [subscriptTool, superscriptTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
-    [linkTool, imageTool, audioTool, videoTool]
+    [linkTool, imageTool, audioTool, videoTool],
+    [textAlignTool]
   ]
 });
 
