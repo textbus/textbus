@@ -75,19 +75,20 @@ const editor = new Editor('#editor', {
     fontFamilyFormatter
   ],
   toolbar: [
-    [historyBackTool, historyForwardTool],
-    [headingTool],
-    [boldTool, italicTool, strikeThroughTool, underlineTool],
-    [codeTool],
-    [olTool, ulTool],
-    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-    [subscriptTool, superscriptTool],
-    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-    [fontFamilyTool],
-    [linkTool, imageTool, audioTool, videoTool],
-    [textAlignTool],
-    [tableTool, tableEditTool],
-    [cleanTool]
+    // [historyBackTool, historyForwardTool],
+    // [headingTool],
+    italicTool
+    // [boldTool, italicTool, strikeThroughTool, underlineTool],
+    // [codeTool],
+    // [olTool, ulTool],
+    // [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+    // [subscriptTool, superscriptTool],
+    // [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    // [fontFamilyTool],
+    // [linkTool, imageTool, audioTool, videoTool],
+    // [textAlignTool],
+    // [tableTool, tableEditTool],
+    // [cleanTool]
   ]
 });
 

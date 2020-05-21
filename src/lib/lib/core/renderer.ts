@@ -244,9 +244,9 @@ export class Renderer {
     const childFormats: FormatRange[] = [];
     fragment.getCanApplyFormats().forEach(f => {
       if (f.startIndex === 0 && f.endIndex === fragment.contentLength) {
-        containerFormats.push(f);
+        containerFormats.push(Object.assign({}, f));
       } else {
-        childFormats.push(f);
+        childFormats.push(Object.assign({}, f));
       }
     });
     const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
