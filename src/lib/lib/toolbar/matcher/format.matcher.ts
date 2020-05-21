@@ -80,7 +80,6 @@ export class FormatMatcher implements Matcher {
 
   private getStatesByRange(fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): MatchData {
     let formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
-    console.log(formatRanges)
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         const matchBegin = startIndex === 0 ? startIndex >= format.startIndex : startIndex > format.startIndex;

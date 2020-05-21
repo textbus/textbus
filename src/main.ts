@@ -75,29 +75,24 @@ const editor = new Editor('#editor', {
     fontFamilyFormatter
   ],
   toolbar: [
-    // [historyBackTool, historyForwardTool],
-    // [headingTool],
-    italicTool
-    // [boldTool, italicTool, strikeThroughTool, underlineTool],
-    // [codeTool],
-    // [olTool, ulTool],
-    // [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-    // [subscriptTool, superscriptTool],
-    // [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-    // [fontFamilyTool],
-    // [linkTool, imageTool, audioTool, videoTool],
-    // [textAlignTool],
-    // [tableTool, tableEditTool],
-    // [cleanTool]
+    [historyBackTool, historyForwardTool],
+    [headingTool],
+    [boldTool, italicTool, strikeThroughTool, underlineTool],
+    [codeTool],
+    [olTool, ulTool],
+    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+    [subscriptTool, superscriptTool],
+    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    [fontFamilyTool],
+    [linkTool, imageTool, audioTool, videoTool],
+    [textAlignTool],
+    [tableTool, tableEditTool],
+    [cleanTool]
   ]
 });
 
 editor.setContents(`
-<ul>
-<li style="color: red"><strong>fdsa</strong></li>
 <strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong>
-</ul>
-test
 `);
 
 // const editor = createEditor('#editor', {

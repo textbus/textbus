@@ -6,7 +6,6 @@ import { StyleCommander } from '../commands/style.commander';
 export const fontFamilyTool: SelectConfig = {
   type: HandlerType.Select,
   tooltip: '字体',
-  mini: true,
   options: [{
     label: 'sans-serif',
     classes: ['tbus-font-sans-serif'],
