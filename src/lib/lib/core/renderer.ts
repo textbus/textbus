@@ -93,6 +93,7 @@ export class Renderer {
       this.renderingNewTree(host, vDom);
     }
     this.oldVDom = vDom;
+    console.log(this)
   }
 
   getPositionByNode(node: Node) {
@@ -182,7 +183,7 @@ export class Renderer {
           if (oldLast) {
             const el = this.NVMappingTable.get(oldLast);
             el.parentNode.removeChild(el);
-            this.NVMappingTable.delete(oldLast);
+            this.cleanVDom(oldLast);
             oldVDom.childNodes.pop();
           }
         }
@@ -192,7 +193,7 @@ export class Renderer {
     oldVDom.childNodes.forEach(v => {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);
-      this.NVMappingTable.delete(v);
+      this.cleanVDom(v);
     });
     childNodes.forEach((child, index) => {
       const nativeChildNodes = host.childNodes;
@@ -205,6 +206,15 @@ export class Renderer {
         host.appendChild(child);
       }
     })
+  }
+
+  private cleanVDom(vDom: VElement | VTextNode) {
+    this.NVMappingTable.delete(vDom);
+    if (vDom instanceof VElement) {
+      vDom.childNodes.forEach(child => {
+        this.cleanVDom(child);
+      })
+    }
   }
 
   private createElement(vDom: VElement) {

@@ -27,7 +27,7 @@ export class FormatMap {
 
       const a = next.startIndex - prev.startIndex;
       if (a === 0) {
-        return next.endIndex - prev.endIndex;
+        return prev.endIndex - next.endIndex;
       }
       return a;
     });
