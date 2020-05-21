@@ -3,12 +3,13 @@ import 'core-js';
 
 // import { createEditor } from './lib/create';
 import {
+  AudioTemplateTranslator, audioTool,
   blockBackgroundTool,
   CodeTemplateTranslator,
   codeTool,
   Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
   fontSizeFormatter,
-  fontSizeTool,
+  fontSizeTool, ImageTemplateTranslator, imageTool,
   italicFormatter,
   italicTool,
   letterSpacingFormatter,
@@ -27,7 +28,7 @@ import {
   textIndentTool,
   ulTool,
   underlineFormatter,
-  underlineTool
+  underlineTool, VideoTemplateTranslator, videoTool
 } from './lib/public-api';
 
 import './lib/assets/index.scss';
@@ -53,7 +54,10 @@ const editor = new Editor('#editor', {
     new BlockTemplateTranslator('div'),
     new BlockTemplateTranslator('p'),
     new SingleTemplateTranslator('br'),
-    new CodeTemplateTranslator()
+    new CodeTemplateTranslator(),
+    new AudioTemplateTranslator(),
+    new VideoTemplateTranslator(),
+    new ImageTemplateTranslator()
   ],
   formats: [
     boldFormatter,
@@ -79,7 +83,7 @@ const editor = new Editor('#editor', {
     [subscriptTool, superscriptTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
-    [linkTool]
+    [linkTool, imageTool, audioTool, videoTool]
   ]
 });
 

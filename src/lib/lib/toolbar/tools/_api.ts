@@ -1,3 +1,4 @@
+export { audioTool } from './audio.tool';
 export { blockBackgroundTool } from './block-background.tool';
 export { boldTool } from './bold.tool';
 export { colorTool } from './color.tool';
@@ -8,6 +9,7 @@ export { fontSizeTool } from './font-size.tool';
 export { headingTool } from './heading.tool';
 export { historyBackTool } from './history-back.tool';
 export { historyForwardTool } from './history-forward.tool';
+export { imageTool } from './image.tool';
 export { italicTool } from './italic.tool';
 export { letterSpacingTool } from './letter-spacing.tool';
 export { lineHeightTool } from './line-height.tool';
@@ -20,3 +22,4 @@ export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';
 export { ulTool } from './ul.tool';
 export { underlineTool } from './underline.tool';
+export { videoTool } from './video.tool';
