@@ -170,9 +170,9 @@ export class Renderer {
             childNodes[max] = el;
             this.NVMappingTable.set(el, current);
             if (oldLast instanceof VElement) {
-              this.diffAndUpdate(el, current, oldVDom.childNodes.pop() as VElement)
+              this.diffAndUpdate(el, current, oldLast);
             } else {
-              this.renderingNewTree(el, current)
+              this.renderingNewTree(el, current);
             }
           } else {
             const el = Renderer.createTextNode(current);
