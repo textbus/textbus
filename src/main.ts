@@ -61,6 +61,7 @@ const editor = new Editor('#editor', {
     new TableTemplateTranslator()
   ],
   formatters: [
+    fontFamilyFormatter,
     boldFormatter,
     italicFormatter,
     strikeThroughFormatter,
@@ -72,7 +73,6 @@ const editor = new Editor('#editor', {
     colorFormatter,
     subscriptFormatter,
     superscriptFormatter,
-    fontFamilyFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -92,10 +92,7 @@ const editor = new Editor('#editor', {
 });
 
 editor.setContents(`
-<ul>
-<li><strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong></li>
-<li><strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong></li>
-</ul>
+<p><strong style="font-family: FangSong">test</strong>54</p>
 `);
 
 // const editor = createEditor('#editor', {

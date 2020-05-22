@@ -5,7 +5,7 @@ import { ChildSlotModel } from '../core/renderer';
 
 export class InlineFormatter extends Formatter {
   constructor(private tagName: string, rule: MatchRule) {
-    super(rule);
+    super(rule, 0);
   }
 
   read(node: HTMLElement): FormatAbstractData {

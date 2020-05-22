@@ -7,7 +7,7 @@ export class LinkFormatter extends Formatter {
   constructor() {
     super({
       tags: ['a']
-    });
+    }, 0);
   }
 
   read(node: HTMLElement): FormatAbstractData {

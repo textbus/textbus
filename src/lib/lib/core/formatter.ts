@@ -56,7 +56,7 @@ export abstract class Formatter {
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
 
-  protected constructor(protected rule: MatchRule) {
+  protected constructor(protected rule: MatchRule, public priority: number) {
 
     if (rule.extendTags) {
       this.inheritValidators.push(this.makeTagsMatcher(rule.extendTags));

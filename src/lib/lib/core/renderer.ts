@@ -375,22 +375,23 @@ export class Renderer {
     endIndex: number,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
-    formats.reduce((vEle, next) => {
-      const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
-      if (renderModel instanceof ReplaceModel) {
-        host = slot = renderModel.replaceElement;
-        return host;
-      } else if (renderModel instanceof ChildSlotModel) {
-        if (vEle) {
-          vEle.appendChild(renderModel.childElement);
-        } else {
-          host = renderModel.childElement;
+    formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
+      .reduce((vEle, next) => {
+        const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
+        if (renderModel instanceof ReplaceModel) {
+          host = slot = renderModel.replaceElement;
+          return host;
+        } else if (renderModel instanceof ChildSlotModel) {
+          if (vEle) {
+            vEle.appendChild(renderModel.childElement);
+          } else {
+            host = renderModel.childElement;
+          }
+          slot = renderModel.childElement;
+          return slot;
         }
-        slot = renderModel.childElement;
-        return slot;
-      }
-      return vEle;
-    }, host);
+        return vEle;
+      }, host);
     let el = host;
     while (el) {
       this.vDomPositionMapping.set(el, {

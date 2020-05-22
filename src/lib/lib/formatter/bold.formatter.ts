@@ -14,7 +14,7 @@ export class BoldFormatter extends Formatter {
       excludeStyles: {
         fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
       }
-    });
+    }, 0);
   }
 
   read(node: HTMLElement): FormatAbstractData {

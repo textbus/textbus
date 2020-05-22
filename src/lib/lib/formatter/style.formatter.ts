@@ -5,7 +5,7 @@ import { ChildSlotModel } from '../core/renderer';
 
 export class StyleFormatter extends Formatter {
   constructor(public styleName: string, rule: MatchRule) {
-    super(rule);
+    super(rule, 10);
   }
 
   read(node: HTMLElement): FormatAbstractData {
