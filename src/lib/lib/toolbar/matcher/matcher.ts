@@ -20,7 +20,7 @@ export interface MatchData {
 export interface RangeMatchDelta {
   state: HighlightState;
   fromRange: TBRange;
-  abstractData: AbstractData;
+  abstractData?: AbstractData;
 }
 
 /**

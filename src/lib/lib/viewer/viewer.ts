@@ -96,7 +96,7 @@ export class Viewer {
     }
     const overlap = state === HighlightState.Highlight;
 
-    config.execCommand.command(selection, overlap);
+    config.execCommand.command(selection, overlap, this.renderer);
     this.render(this.rootFragment);
     selection.restore();
     this.selectionChangeEvent.next(selection);

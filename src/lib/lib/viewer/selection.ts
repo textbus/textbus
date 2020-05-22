@@ -1,5 +1,6 @@
 import { TBRange } from '../viewer/range';
 import { Renderer } from '../core/renderer';
+import { Fragment } from '@tanbo/tbus/core/fragment';
 
 export interface RangePath {
   startPaths: number[];
@@ -15,6 +16,10 @@ export class TBSelection {
     return this._ranges;
   }
 
+  get commonAncestorFragment() {
+    return this.getCommonFragment();
+  }
+
   private _ranges: TBRange[] = [];
 
   constructor(private nativeSelection: Selection, private renderer: Renderer) {
@@ -27,5 +32,37 @@ export class TBSelection {
     this._ranges.forEach(range => {
       range.restore();
     });
+  }
+
+  private getCommonFragment(): Fragment {
+    const ranges = this.ranges || [];
+    if (ranges.length === 1) {
+      return ranges[0].commonAncestorFragment;
+    }
+
+    const depth: Fragment[][] = [];
+
+    ranges.map(range => range.commonAncestorFragment).forEach(fragment => {
+      const tree = [];
+      while (fragment) {
+        tree.push(fragment);
+        fragment = this.renderer.getParentFragmentByTemplate(this.renderer.getParentTemplateByFragment(fragment));
+      }
+      depth.push(tree);
+    });
+
+    let fragment: Fragment = null;
+
+    while (true) {
+      const firstFragments = depth.map(arr => arr.pop()).filter(i => i);
+      if (firstFragments.length === depth.length) {
+        if (new Set(firstFragments).size === 1) {
+          fragment = firstFragments[0];
+        } else {
+          break;
+        }
+      }
+    }
+    return fragment;
   }
 }

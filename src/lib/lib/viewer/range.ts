@@ -1,6 +1,7 @@
 import { Renderer } from '../core/renderer';
 import { Fragment } from '../core/fragment';
 import { VElement } from '../core/element';
+import { Template } from '../core/template';
 
 /**
  * 标识一个选中 Fragment 的范围
@@ -166,6 +167,123 @@ export class TBRange {
     });
   }
 
+  /**
+   * 获取选区内所有连续的 Inline
+   * 如（[]表示选区位置)：
+   * <Fragment>
+   *   <Inline>00[00</Inline>
+   *   <ChildFragmentA>11111</ChildFragmentA>
+   *   <ChildFragmentB>222]22</ChildFragmentB>
+   * </Fragment>
+   * 则返回：
+   * [{
+   *   fragment: Fragment,
+   *   startIndex: 0,
+   *   endIndex: 4,
+   * }, {
+   *   fragment: ChildFragmentA,
+   *   startIndex: 0,
+   *   endIndex: 5
+   * }, {
+   *   fragment: ChildFragmentB,
+   *   startIndex: 0,
+   *   endIndex: 5
+   * }]
+   */
+
+  getBlockFragmentsBySelectedScope(): SelectedScope[] {
+    const start: SelectedScope[] = [];
+    const end: SelectedScope[] = [];
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    let startIndex = TBRange.findBlockStartIndex(this.startFragment, this.startIndex);
+    let endIndex = TBRange.findBlockEndIndex(this.endFragment, this.endIndex);
+
+    while (startFragment !== this.commonAncestorFragment) {
+      start.push({
+        startIndex,
+        endIndex: startFragment.contentLength,
+        fragment: startFragment
+      });
+
+      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      const childSlots = parentTemplate.childSlots;
+      const end = childSlots.indexOf(this.endFragment);
+
+      start.push(...childSlots.slice(
+        childSlots.indexOf(startFragment) + 1,
+        end === -1 ? childSlots.length : end
+      ).map(fragment => {
+        return {
+          startIndex: 0,
+          endIndex: fragment.contentLength,
+          fragment
+        }
+      }));
+      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      startIndex = startFragment.find(parentTemplate) + 1;
+    }
+    while (endFragment !== this.commonAncestorFragment) {
+      end.push({
+        startIndex: 0,
+        endIndex,
+        fragment: endFragment
+      });
+      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      const childSlots = parentTemplate.childSlots;
+      const start = childSlots.indexOf(this.startFragment);
+      end.push(...childSlots.slice(
+        start === -1 ? 0 : start + 1,
+        parentTemplate.childSlots.indexOf(endFragment)
+      ).map(fragment => {
+        return {
+          startIndex: 0,
+          endIndex: fragment.contentLength,
+          fragment
+        }
+      }));
+      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      endIndex = endFragment.find(parentTemplate);
+    }
+    return [...start, {
+      startIndex,
+      endIndex,
+      fragment: this.commonAncestorFragment
+    }, ...end].filter(item => {
+      return item.startIndex < item.endIndex
+    }).reduce((previousValue, currentValue) => {
+      return previousValue.concat(this.contentsToBlockRange(
+        currentValue.fragment,
+        currentValue.startIndex,
+        currentValue.endIndex));
+    }, []);
+  }
+
+  private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
+    const ranges: SelectedScope[] = [];
+    let scope: SelectedScope;
+    let index = 0;
+    fragment.sliceContents(startIndex, endIndex).forEach(content => {
+      if (content instanceof Fragment) {
+        scope = null;
+        ranges.push(...this.contentsToBlockRange(content, 0, content.contentLength));
+      } else {
+        if (!scope) {
+          scope = {
+            startIndex: index,
+            endIndex: index + content.length,
+            fragment
+          };
+          ranges.push(scope);
+        } else {
+          scope.endIndex = index + content.length
+        }
+      }
+      index += content.length;
+    });
+    return ranges;
+  }
+
   private getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
       if (node.childNodes.length === offset) {
@@ -198,5 +316,27 @@ export class TBRange {
       }
     }
     throw new Error('DOM 与虚拟节点不同步！');
+  }
+
+  private static findBlockStartIndex(fragment: Fragment, index: number) {
+    let startIndex: number = 0;
+    for (let i = 0; i < index; i++) {
+
+      const item = fragment.getContentAtIndex(i);
+      if (item instanceof Template) {
+        startIndex = i + 1;
+      }
+    }
+    return startIndex;
+  }
+
+  private static findBlockEndIndex(fragment: Fragment, index: number) {
+    for (; index < fragment.contentLength; index++) {
+      const item = fragment.getContentAtIndex(index);
+      if (item instanceof Template) {
+        break;
+      }
+    }
+    return index;
   }
 }

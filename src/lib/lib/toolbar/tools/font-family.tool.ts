@@ -49,9 +49,12 @@ export const fontFamilyTool: SelectConfig = {
     value: 'Times New Roman'
   }],
   match: new FormatMatcher(fontFamilyFormatter),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, abstractData) {
+    for (const option of options) {
+      if (option.value === abstractData.style.value) {
+        return option;
+      }
+    }
   },
   execCommand: new StyleCommander('fontFamily', fontFamilyFormatter)
 };

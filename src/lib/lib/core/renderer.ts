@@ -73,19 +73,22 @@ class NativeElementMappingTable {
 
 export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
+
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-  private fragmentHierarchyMapping: Map<Fragment, Template>;
-  private templateHierarchyMapping: Map<Template, Fragment>;
+  private fragmentHierarchyMapping = new Map<Fragment, Template>();
+  private templateHierarchyMapping = new Map<Template, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
+
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
+    this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
-    this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
+    this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
+
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
-    this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
@@ -120,7 +123,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  getContext(by: Fragment, context: Constructor<Template>): Template {
+  getContext<T extends Template>(by: Fragment, context: Constructor<T>): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
     if (templateInstance instanceof context) {
       return templateInstance;

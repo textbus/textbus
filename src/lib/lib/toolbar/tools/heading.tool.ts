@@ -5,6 +5,12 @@ import { BlockMatcher } from '../matcher/block.matcher';
 
 export const headingTool: SelectConfig = {
   type: HandlerType.Select,
+  match: new BlockMatcher(BlockTemplate),
+  highlight(options, p) {
+    console.log(p);
+    return options[0]
+  },
+  execCommand: new BlockCommander('p'),
   options: [{
     label: '标题1',
     classes: ['tbus-toolbar-h1'],
@@ -61,11 +67,5 @@ export const headingTool: SelectConfig = {
       ctrlKey: true,
       key: '0'
     }
-  }],
-  match: new BlockMatcher(BlockTemplate),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
-  },
-  execCommand: new BlockCommander('p')
+  }]
 };

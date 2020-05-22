@@ -1,4 +1,5 @@
 import { TBSelection } from '../../viewer/selection';
+import { Renderer } from '../../core/renderer';
 
 /**
  * 操作编辑器的命令工具
@@ -20,6 +21,7 @@ export interface Commander<T = any> {
    * 格式化文档的方法
    * @param selection 当前用户操作的选区
    * @param overlap 根据当前选区和工具类的 `Matcher` 匹配出的结果得到的状态，`true` 为完全重叠，`false` 为不完全重叠或不重叠
+   * @param renderer 渲染器
    */
-  command(selection: TBSelection, overlap: boolean): void;
+  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void;
 }

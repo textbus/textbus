@@ -92,7 +92,10 @@ const editor = new Editor('#editor', {
 });
 
 editor.setContents(`
-<strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong>
+<ul>
+<li><strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong></li>
+<li><strong>0<em>12</em></strong><em>34</em><strong><em>5</em>6</strong></li>
+</ul>
 `);
 
 // const editor = createEditor('#editor', {

@@ -27,6 +27,87 @@ export class Fragment {
     return this.contents.slice(startIndex, endIndex);
   }
 
+  insert(contents: Template | string, index: number) {
+    this.contents.insert(contents, index);
+    const newFormatRanges: FormatRange[] = [];
+    this.formatMap.getFormatRanges().forEach(format => {
+      if (contents instanceof Template && format.startIndex < index && format.endIndex >= index) {
+        newFormatRanges.push({
+          startIndex: index + 1,
+          endIndex: format.endIndex + 1,
+          state: format.state,
+          abstractData: format.abstractData.clone(),
+          renderer: format.renderer
+        });
+        format.endIndex = index;
+      } else {
+        if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
+          format.startIndex += contents.length;
+        }
+        if (format.endIndex >= index) {
+          format.endIndex += contents.length;
+        }
+      }
+    })
+    newFormatRanges.forEach(f => {
+      this.mergeFormat(f);
+    });
+  }
+
+  /**
+   * 通过下标获取文本或子节点
+   * @param index
+   */
+  getContentAtIndex(index: number) {
+    return this.contents.getContentAtIndex(index);
+  }
+
+  delete(startIndex: number, length = this.contents.length - startIndex) {
+    const endIndex = startIndex + length;
+    const formatMap = new FormatMap();
+
+    const formatRanges: FormatRange[] = [];
+    const newFragmentFormats: FormatRange[] = [];
+    this.formatMap.getFormatRanges().forEach(format => {
+      const cloneFormat = Object.assign({}, format);
+      cloneFormat.startIndex = 0;
+      if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
+        cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
+        cloneFormat.endIndex = Math.min(format.endIndex - startIndex, endIndex - startIndex);
+        newFragmentFormats.push(cloneFormat);
+      }
+      if (format.endIndex <= startIndex) {
+        // 在选区之前
+        formatRanges.push(format);
+      } else if (format.startIndex > endIndex) {
+        // 在选区这后
+        format.startIndex -= length;
+        format.endIndex -= length;
+        formatRanges.push(format);
+      } else {
+        if (format.startIndex < startIndex) {
+          format.endIndex = Math.max(startIndex, format.endIndex - length);
+          formatRanges.push(format);
+        } else if (format.endIndex > endIndex) {
+          format.startIndex = startIndex;
+          format.endIndex = startIndex + format.endIndex - endIndex;
+          formatRanges.push(format);
+        } else if (format.startIndex === 0 && startIndex === 0) {
+          format.startIndex = format.endIndex = 0;
+          formatRanges.push(format);
+        }
+      }
+    })
+    formatRanges.forEach(f => {
+      formatMap.merge(f);
+    });
+    this.formatMap = formatMap;
+    return {
+      formatRanges: newFragmentFormats,
+      contents: this.contents.delete(startIndex, endIndex)
+    };
+  }
+
   /**
    * 获取当前片段内所有的格式化信息
    */
