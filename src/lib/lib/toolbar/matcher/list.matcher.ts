@@ -10,7 +10,15 @@ export class ListMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     const states = selection.ranges.map<RangeMatchDelta<ListTemplate>>(range => {
-      console.log(range.commonAncestorFragment)
+      if (range.commonAncestorTemplate instanceof ListTemplate &&
+        range.commonAncestorTemplate.tagName === this.tagName) {
+        return {
+          srcData: range.commonAncestorTemplate,
+          fromRange: range,
+          state: HighlightState.Highlight
+        }
+      }
+
       const context = renderer.getContext(range.commonAncestorFragment, ListTemplate);
       return {
         state: context && context.tagName === this.tagName ? HighlightState.Highlight : HighlightState.Normal,

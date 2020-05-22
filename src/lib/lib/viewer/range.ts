@@ -18,7 +18,8 @@ export class TBRange {
 
   startFragment: Fragment;
   endFragment: Fragment;
-  commonAncestorFragment: Fragment;
+  readonly commonAncestorFragment: Fragment;
+  readonly commonAncestorTemplate: Template;
 
   constructor(private nativeRange: Range,
               private renderer: Renderer) {
@@ -36,7 +37,15 @@ export class TBRange {
 
       this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
       this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
-      this.commonAncestorFragment = renderer.getPositionByNode(nativeRange.commonAncestorContainer).fragment;
+      const position = renderer.getPositionByNode(nativeRange.commonAncestorContainer);
+      this.commonAncestorFragment = position.fragment;
+      if (position.endIndex - position.startIndex === 1) {
+        this.commonAncestorTemplate = position.fragment.sliceContents(
+          position.startIndex,
+          position.endIndex)[0] as Template;
+      } else {
+        this.commonAncestorTemplate = this.renderer.getParentTemplateByFragment(position.fragment);
+      }
     }
   }
 
