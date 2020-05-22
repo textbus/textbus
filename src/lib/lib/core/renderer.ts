@@ -93,7 +93,6 @@ export class Renderer {
       this.renderingNewTree(host, vDom);
     }
     this.oldVDom = vDom;
-    console.log(this)
   }
 
   getPositionByNode(node: Node) {
