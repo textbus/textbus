@@ -1,5 +1,5 @@
-import { Formatter, MatchState } from '../core/formatter';
-import { AbstractData } from '../core/abstract-data';
+import { Formatter, FormatEffect } from '../core/formatter';
+import { FormatAbstractData } from '../core/format-abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
@@ -17,14 +17,14 @@ export class BoldFormatter extends Formatter {
     });
   }
 
-  read(node: HTMLElement): AbstractData {
+  read(node: HTMLElement): FormatAbstractData {
     return this.extractData(node, {
       tag: true,
       styleName: 'fontWeight'
     });
   }
 
-  render(state: MatchState, abstractData: AbstractData, existingElement?: VElement) {
+  render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (existingElement && /(h[1-6])|th/i.test(existingElement.tagName)) {
       return;
     }

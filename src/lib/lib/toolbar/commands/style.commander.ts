@@ -1,7 +1,7 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../viewer/selection';
-import { Formatter, MatchState } from '../../core/formatter';
-import { AbstractData } from '../../core/abstract-data';
+import { Formatter, FormatEffect } from '../../core/formatter';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export class StyleCommander implements Commander<string> {
   recordHistory = true;
@@ -19,11 +19,11 @@ export class StyleCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({
-          state: MatchState.Valid,
+          state: FormatEffect.Valid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           renderer: this.formatter,
-          abstractData: new AbstractData({
+          abstractData: new FormatAbstractData({
             style: {
               name: this.name,
               value: this.value

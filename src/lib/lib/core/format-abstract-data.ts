@@ -10,7 +10,7 @@ export interface AbstractDataParams {
 /**
  * 抽象数据类，用于记录一个节点或样式的摘要数据
  */
-export class AbstractData {
+export class FormatAbstractData {
   tag: string;
   attrs: Map<string, string | number>;
   style: { name: string, value: string | number };
@@ -38,7 +38,7 @@ export class AbstractData {
     this.attrs && this.attrs.forEach((value, key) => {
       attrs.set(key, value);
     });
-    return new AbstractData({
+    return new FormatAbstractData({
       tag: this.tag,
       attrs: attrs.size ? (() => {
         const obj: { [key: string]: string | number } = {};
@@ -55,7 +55,7 @@ export class AbstractData {
    * 判断 data 是否和自己相等
    * @param data
    */
-  equal(data: AbstractData) {
+  equal(data: FormatAbstractData) {
     if (data === this) {
       return true;
     }
@@ -65,8 +65,8 @@ export class AbstractData {
     const left = data;
     const right = this;
     return left.tag == right.tag &&
-      AbstractData.equalAttrs(left.attrs, right.attrs) &&
-      AbstractData.equalStyle(left.style, right.style);
+      FormatAbstractData.equalAttrs(left.attrs, right.attrs) &&
+      FormatAbstractData.equalStyle(left.style, right.style);
   }
 
   private static equalAttrs(left: Map<string, string | number>, right: Map<string, string | number>) {

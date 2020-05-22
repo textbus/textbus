@@ -1,7 +1,7 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
 import { RootFragment } from './root-fragment';
-import { MatchState } from './formatter';
+import { FormatEffect } from './formatter';
 
 export class Parser {
   constructor(private options: EditorOptions) {
@@ -42,7 +42,7 @@ export class Parser {
         formatter: f,
         state: f.match(el)
       }
-    }).filter(p => p.state !== MatchState.Invalid).map(p => {
+    }).filter(p => p.state !== FormatEffect.Invalid).map(p => {
       return {
         ...p,
         abstractData: p.formatter.read(el as HTMLElement)

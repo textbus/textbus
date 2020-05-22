@@ -4,8 +4,9 @@ import { HighlightState } from '../help';
 import { Fragment } from '../../core/fragment';
 import { TBRange } from '../../viewer/range';
 import { Template } from '../../core/template';
-import { FormatRange, Formatter, MatchState } from '../../core/formatter';
-import { MatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { FormatRange, Formatter, FormatEffect } from '../../core/formatter';
+import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export interface FormatMatcherParams {
   /** 不能包含哪些标签 */
@@ -23,10 +24,10 @@ export class FormatMatcher implements Matcher {
       return {
         srcStates: [],
         state: HighlightState.Normal,
-        abstractData: null
+        matchData: null
       };
     }
-    const srcStates: RangeMatchDelta[] = selection.ranges.map(range => {
+    const srcStates: RangeMatchDelta<FormatAbstractData>[] = selection.ranges.map(range => {
 
       const isDisable = this.getDisableStateByRange(range, renderer);
 
@@ -34,16 +35,16 @@ export class FormatMatcher implements Matcher {
         return {
           state: HighlightState.Disabled,
           fromRange: range,
-          abstractData: null
+          srcData: null
         };
       }
 
-      const states: MatchData[] = [];
+      const states: FormatMatchData[] = [];
       range.getSelectedScope().forEach(s => {
         const state = this.getStatesByRange(s.fragment, this.formatter, s.startIndex, s.endIndex);
-        if (state.state === MatchState.Invalid) {
-          const inSingleContainer = this.inSingleContainer(renderer, s.fragment, this.formatter, s.startIndex, s.endIndex);
-          if (inSingleContainer.state !== MatchState.Invalid) {
+        if (state.effect === FormatEffect.Invalid) {
+          const inSingleContainer = FormatMatcher.inSingleContainer(renderer, s.fragment, this.formatter, s.startIndex, s.endIndex);
+          if (inSingleContainer.effect !== FormatEffect.Invalid) {
             states.push(inSingleContainer);
           } else {
             states.push(state);
@@ -52,12 +53,12 @@ export class FormatMatcher implements Matcher {
           states.push(state);
         }
       });
-      let mergedState = FormatMatcher.mergeStates(states) || {state: MatchState.Invalid, abstractData: null};
+      let mergedState = FormatMatcher.mergeStates(states) || {effect: FormatEffect.Invalid, srcData: null};
       return {
-        state: (mergedState.state === MatchState.Valid || mergedState.state === MatchState.Inherit) ?
+        state: (mergedState.effect === FormatEffect.Valid || mergedState.effect === FormatEffect.Inherit) ?
           HighlightState.Highlight : HighlightState.Normal,
         fromRange: range,
-        abstractData: mergedState.abstractData
+        srcData: mergedState.srcData
       };
     });
     let isDisable = false;
@@ -74,11 +75,11 @@ export class FormatMatcher implements Matcher {
           HighlightState.Highlight :
           HighlightState.Normal,
       srcStates,
-      abstractData: srcStates[0].abstractData
+      matchData: srcStates[0].srcData
     };
   }
 
-  private getStatesByRange(fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): MatchData {
+  private getStatesByRange(fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): FormatMatchData {
     let formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
@@ -86,19 +87,19 @@ export class FormatMatcher implements Matcher {
         const matchClose = endIndex < format.endIndex;
         if (matchBegin && matchClose) {
           return {
-            state: format.state,
-            abstractData: format?.abstractData.clone() || null
+            effect: format.state,
+            srcData: format?.abstractData.clone() || null
           };
         }
       }
       return {
-        state: MatchState.Invalid,
-        abstractData: null
+        effect: FormatEffect.Invalid,
+        srcData: null
       };
     }
 
     const childContents = fragment.sliceContents(startIndex, endIndex);
-    const states: Array<MatchData> = [];
+    const states: Array<FormatMatchData> = [];
     let index = startIndex;
     formatRanges = formatRanges.filter(item => {
       return !(item.endIndex <= startIndex || item.startIndex >= endIndex);
@@ -108,28 +109,28 @@ export class FormatMatcher implements Matcher {
       if (typeof child === 'string') {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
-            if (format.state === MatchState.Exclude) {
+            if (format.state === FormatEffect.Exclude) {
               return {
-                state: MatchState.Exclude,
-                abstractData: format?.abstractData.clone() || null
+                effect: FormatEffect.Exclude,
+                srcData: format?.abstractData.clone() || null
               };
             } else {
               states.push({
-                state: format.state,
-                abstractData: format?.abstractData.clone() || null
+                effect: format.state,
+                srcData: format?.abstractData.clone() || null
               });
             }
           } else {
             states.push({
-              state: MatchState.Invalid,
-              abstractData: null
+              effect: FormatEffect.Invalid,
+              srcData: null
             })
           }
         }
         if (!formatRanges.length) {
           return {
-            state: MatchState.Invalid,
-            abstractData: null
+            effect: FormatEffect.Invalid,
+            srcData: null
           };
         }
       } else if (child instanceof Fragment) {
@@ -151,7 +152,7 @@ export class FormatMatcher implements Matcher {
     if (!fragment) {
       return false;
     }
-    return this.isDisable(fragment, this.rule.noInTags) || this.isInTag(
+    return FormatMatcher.isDisable(fragment, this.rule.noInTags) || this.isInTag(
       renderer.getParentFragmentByTemplate(renderer.getParentTemplateByFragment(fragment)),
       renderer
     );
@@ -165,7 +166,7 @@ export class FormatMatcher implements Matcher {
       elements.push(...t.childSlots);
     });
     for (let el of elements) {
-      if (this.isDisable(el, this.rule.noContainTags) ||
+      if (FormatMatcher.isDisable(el, this.rule.noContainTags) ||
         this.isContainTag(el, renderer, {startIndex: 0, endIndex: el.contentLength})) {
         return true;
       }
@@ -173,7 +174,7 @@ export class FormatMatcher implements Matcher {
     return false;
   }
 
-  private isDisable(fragment: Fragment, tags: string[] | RegExp) {
+  private static isDisable(fragment: Fragment, tags: string[] | RegExp) {
     const formats = fragment.getFormatRanges();
 
     for (const f of formats) {
@@ -193,8 +194,7 @@ export class FormatMatcher implements Matcher {
   }
 
 
-
-  private inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): MatchData {
+  private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): FormatMatchData {
 
     while (true) {
       const formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
@@ -214,18 +214,18 @@ export class FormatMatcher implements Matcher {
       }
 
       for (const item of states) {
-        if (item.state === MatchState.Exclude) {
+        if (item.state === FormatEffect.Exclude) {
           return {
-            state: MatchState.Exclude,
-            abstractData: item.abstractData.clone()
+            effect: FormatEffect.Exclude,
+            srcData: item.abstractData.clone()
           }
         }
       }
       for (const item of states) {
-        if (item.state === MatchState.Valid) {
+        if (item.state === FormatEffect.Valid) {
           return {
-            state: MatchState.Valid,
-            abstractData: item.abstractData.clone()
+            effect: FormatEffect.Valid,
+            srcData: item.abstractData.clone()
           }
         }
       }
@@ -241,23 +241,23 @@ export class FormatMatcher implements Matcher {
       }
     }
     return {
-      state: MatchState.Invalid,
-      abstractData: null
+      effect: FormatEffect.Invalid,
+      srcData: null
     };
   }
 
-  private static mergeStates(states: MatchData[]): MatchData {
+  private static mergeStates(states: FormatMatchData[]): FormatMatchData {
     states = states.filter(i => i);
     for (const item of states) {
-      if (item.state === MatchState.Exclude) {
+      if (item.effect === FormatEffect.Exclude) {
         return {
-          state: MatchState.Exclude,
-          abstractData: item.abstractData ? item.abstractData.clone() : null
+          effect: FormatEffect.Exclude,
+          srcData: item.srcData ? item.srcData.clone() : null
         };
-      } else if (item.state === MatchState.Invalid) {
+      } else if (item.effect === FormatEffect.Invalid) {
         return {
-          state: MatchState.Invalid,
-          abstractData: item.abstractData ? item.abstractData.clone() : null
+          effect: FormatEffect.Invalid,
+          srcData: item.srcData ? item.srcData.clone() : null
         };
       }
     }
@@ -265,7 +265,7 @@ export class FormatMatcher implements Matcher {
     const last = states[states.length - 1];
     let equal = true;
     for (let i = 1; i < states.length; i++) {
-      const b = states[0].abstractData.equal(states[i].abstractData);
+      const b = states[0].srcData.equal(states[i].srcData);
       if (!b) {
         equal = false;
         break;
@@ -273,8 +273,8 @@ export class FormatMatcher implements Matcher {
     }
 
     return states.length ? {
-      state: last.state,
-      abstractData: states.length && equal ? last.abstractData.clone() : null
+      effect: last.effect,
+      srcData: states.length && equal ? last.srcData.clone() : null
     } : null;
   }
 }

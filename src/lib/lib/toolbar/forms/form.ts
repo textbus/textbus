@@ -8,7 +8,7 @@ import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { tap } from 'rxjs/operators';
-import { AbstractData } from '../../core/abstract-data';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;
@@ -80,7 +80,7 @@ export class Form implements DropdownHandlerView {
     this.delegator = delegate;
   }
 
-  update(d: AbstractData): void {
+  update(d: FormatAbstractData): void {
     this.items.forEach(item => {
       item.update((d && d.attrs) ? d.attrs.get(item.name) : '');
     });

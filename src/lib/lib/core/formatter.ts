@@ -1,4 +1,4 @@
-import { AbstractData } from './abstract-data';
+import { FormatAbstractData } from './format-abstract-data';
 import { VElement } from './element';
 import { ChildSlotModel, ReplaceModel } from './renderer';
 
@@ -14,7 +14,7 @@ export interface EditableOptions {
 /**
  * 一段内容通过 Rule 规则匹配后的结果状态
  */
-export enum MatchState {
+export enum FormatEffect {
   Valid = 'Valid',
   Invalid = 'Invalid',
   Exclude = 'Exclude',
@@ -24,9 +24,9 @@ export enum MatchState {
 export interface FormatRange {
   startIndex: number;
   endIndex: number;
-  abstractData: AbstractData;
+  abstractData: FormatAbstractData;
   renderer: Formatter;
-  state: MatchState;
+  state: FormatEffect;
 }
 
 /**
@@ -48,13 +48,13 @@ export interface MatchRule {
   /** 排除的属性 */
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   /** 自定义过滤器，以适配以上不能满足的特殊需求 */
-  filter?: (node: HTMLElement | AbstractData) => boolean;
+  filter?: (node: HTMLElement | FormatAbstractData) => boolean;
 }
 
 export abstract class Formatter {
-  private inheritValidators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
-  private validators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement | AbstractData) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
+  private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
 
   protected constructor(protected rule: MatchRule) {
 
@@ -84,31 +84,31 @@ export abstract class Formatter {
     }
   }
 
-  abstract read(node: HTMLElement): AbstractData;
+  abstract read(node: HTMLElement): FormatAbstractData;
 
-  abstract render(state: MatchState, abstractData: AbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
+  abstract render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
 
-  match(p: HTMLElement | AbstractData) {
+  match(p: HTMLElement | FormatAbstractData) {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
       if (!b) {
-        return MatchState.Invalid;
+        return FormatEffect.Invalid;
       }
     }
     const exclude = this.excludeValidators.map(fn => fn(p)).includes(true);
     if (exclude) {
-      return MatchState.Exclude;
+      return FormatEffect.Exclude;
     }
     const inherit = this.inheritValidators.map(fn => fn(p)).includes(true);
     if (inherit) {
-      return MatchState.Inherit;
+      return FormatEffect.Inherit;
     }
-    return this.validators.map(fn => fn(p)).includes(true) ? MatchState.Valid : MatchState.Invalid;
+    return this.validators.map(fn => fn(p)).includes(true) ? FormatEffect.Valid : FormatEffect.Invalid;
   }
 
-  protected extractData(node: HTMLElement, config: EditableOptions): AbstractData {
+  protected extractData(node: HTMLElement, config: EditableOptions): FormatAbstractData {
     if (!config) {
-      return new AbstractData();
+      return new FormatAbstractData();
     }
     const attrs = new Map<string, string>();
     if (config.attrs) {
@@ -126,7 +126,7 @@ export abstract class Formatter {
         };
       }
     }
-    return new AbstractData({
+    return new FormatAbstractData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,
       attrs: attrs.size ? attrs : null,
       style
@@ -134,24 +134,24 @@ export abstract class Formatter {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement | AbstractData) => {
-      const tagName = node instanceof AbstractData ? node.tag : node.nodeName.toLowerCase();
+    return (node: HTMLElement | FormatAbstractData) => {
+      const tagName = node instanceof FormatAbstractData ? node.tag : node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement | AbstractData) => {
+    return (node: HTMLElement | FormatAbstractData) => {
       return attrs.map(attr => {
         if (attr.value) {
-          if (node instanceof AbstractData) {
+          if (node instanceof FormatAbstractData) {
             return node?.attrs.get(attr.key) === attr.value;
           }
           if (node instanceof HTMLElement) {
             return node.getAttribute(attr.key) === attr.value;
           }
         } else {
-          if (node instanceof AbstractData) {
+          if (node instanceof FormatAbstractData) {
             return node?.attrs.has(attr.key);
           }
           if (node instanceof HTMLElement) {
@@ -164,7 +164,7 @@ export abstract class Formatter {
   }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement | AbstractData) => {
+    return (node: HTMLElement | FormatAbstractData) => {
       const elementStyles = node.style;
       if (!elementStyles) {
         return false;
@@ -173,7 +173,7 @@ export abstract class Formatter {
         const optionValue = (Array.isArray(styles[key]) ?
           styles[key] :
           [styles[key]]) as Array<string | number | RegExp>;
-        let styleValue = node instanceof AbstractData ?
+        let styleValue = node instanceof FormatAbstractData ?
           (node.style.name === key ? node.style.value + '' : '') :
           elementStyles[key];
         if (key === 'fontFamily' && typeof styleValue === 'string') {

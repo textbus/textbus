@@ -1,4 +1,4 @@
-import { Matcher, SelectionMatchDelta } from './matcher';
+import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 import { TBSelection } from '../../viewer/selection';
 import { Renderer } from '../../core/renderer';
 import { ListTemplate } from '../../templates/list.template';
@@ -9,14 +9,31 @@ export class ListMatcher implements Matcher {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
-    const context = renderer.getContext(selection.commonAncestorFragment, ListTemplate);
-    if (context && context.tagName === this.tagName) {
+    const states = selection.ranges.map<RangeMatchDelta<ListTemplate>>(range => {
+      console.log(range.commonAncestorFragment)
+      const context = renderer.getContext(range.commonAncestorFragment, ListTemplate);
       return {
-        state: HighlightState.Highlight,
+        state: context && context.tagName === this.tagName ? HighlightState.Highlight : HighlightState.Normal,
+        srcData: context,
+        fromRange: range
+      }
+    });
+    let isHighlight = true;
+    for (const item of states) {
+      if (item.state === HighlightState.Normal) {
+        isHighlight = false;
+        break;
       }
     }
+    console.log({
+      state: isHighlight ? HighlightState.Highlight : HighlightState.Normal,
+      srcStates: states,
+      matchData: states[0]?.srcData,
+    })
     return {
-      state: HighlightState.Normal
+      state: isHighlight ? HighlightState.Highlight : HighlightState.Normal,
+      srcStates: states,
+      matchData: states[0]?.srcData,
     }
   }
 }

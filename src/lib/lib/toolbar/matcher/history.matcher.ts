@@ -14,13 +14,13 @@ export class HistoryMatcher implements Matcher {
         return {
           state: editor.canBack ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
-          abstractData: null
+          matchData: null
         };
       case 'forward':
         return {
           state: editor.canForward ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
-          abstractData: null
+          matchData: null
         };
     }  }
 }

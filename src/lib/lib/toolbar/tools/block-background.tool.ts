@@ -6,7 +6,7 @@ import { DropdownConfig, HandlerType } from '../help';
 import { backgroundColor } from '../../formatter/style.formatter';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { StyleCommander } from '../commands/style.commander';
-import { AbstractData } from '../../core/abstract-data';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 import { FormatMatcher } from '../matcher/format.matcher';
 
 const hideEvent = new Subject<void>();
@@ -25,7 +25,7 @@ class Palette implements DropdownHandlerView {
     };
   }
 
-  update(d?: AbstractData): void {
+  update(d?: FormatAbstractData): void {
     const color = d ? (d.style.value + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;

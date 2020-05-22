@@ -7,13 +7,14 @@ import { HighlightState } from '../help';
 export class BlockMatcher implements Matcher {
   constructor(public templateConstructor: Constructor<BlockTemplate>) {
   }
-
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     const contextTemplates = selection.ranges.map(range => {
       return renderer.getContext(range.commonAncestorFragment, this.templateConstructor);
     });
     return {
-      state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight
+      state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,
+      srcStates: [],
+      matchData: null
     }
   }
 }

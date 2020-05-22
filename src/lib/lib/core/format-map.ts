@@ -1,4 +1,4 @@
-import { FormatRange, Formatter, MatchState } from './formatter';
+import { FormatRange, Formatter, FormatEffect } from './formatter';
 
 export class FormatMap {
   private map = new Map<Formatter, FormatRange[]>();
@@ -82,7 +82,7 @@ export class FormatMap {
         formatRanges.push(newFormatRange);
       }
     }
-    const ff = formatRanges.filter(f => f.state !== MatchState.Invalid);
+    const ff = formatRanges.filter(f => f.state !== FormatEffect.Invalid);
     if (ff.length) {
       this.map.set(formatter.renderer, ff);
     } else {

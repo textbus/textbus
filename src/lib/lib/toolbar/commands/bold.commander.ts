@@ -1,7 +1,7 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../viewer/selection';
-import { Formatter, MatchState } from '../../core/formatter';
-import { AbstractData } from '../../core/abstract-data';
+import { Formatter, FormatEffect } from '../../core/formatter';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export class BoldCommander implements Commander<Formatter> {
   recordHistory = true;
@@ -13,11 +13,11 @@ export class BoldCommander implements Commander<Formatter> {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({
-          state: overlap ? MatchState.Invalid : MatchState.Valid,
+          state: overlap ? FormatEffect.Invalid : FormatEffect.Valid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           renderer: this.formatter,
-          abstractData: new AbstractData({
+          abstractData: new FormatAbstractData({
             tag: 'strong'
           })
         });
