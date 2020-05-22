@@ -33,11 +33,6 @@ export class ListMatcher implements Matcher {
         break;
       }
     }
-    console.log({
-      state: isHighlight ? HighlightState.Highlight : HighlightState.Normal,
-      srcStates: states,
-      matchData: states[0]?.srcData,
-    })
     return {
       state: isHighlight ? HighlightState.Highlight : HighlightState.Normal,
       srcStates: states,
