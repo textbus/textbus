@@ -4,6 +4,7 @@ import { createKeymapHTML, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { HighlightState, SelectConfig, SelectOptionConfig } from '../help';
 import { Keymap } from '../../viewer/events';
+import { SelectionMatchDelta } from '../matcher/matcher';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
@@ -65,9 +66,9 @@ export class SelectHandler implements Handler {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(selectionMatchDelta: any): void {
-    if (selectionMatchDelta.abstractData) {
-      const option = this.config.highlight(this.config.options, selectionMatchDelta.abstractData);
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    if (selectionMatchDelta.matchData) {
+      const option = this.config.highlight(this.config.options, selectionMatchDelta.matchData);
       if (option) {
         this.textContainer.innerText = option.label || option.value;
         this.dropdown.disabled = false;

@@ -1,7 +1,7 @@
 import { HandlerType, SelectConfig } from '../help';
-import { BlockTemplate } from '../../templates/block.template';
-import { BlockMatcher } from '../matcher/block.matcher';
 import { CodeCommander } from '../commands/code.commander';
+import { CodeTemplate } from '../../templates/code.template';
+import { CodeMatcher } from '../matcher/code.matcher';
 
 export const codeTool: SelectConfig = {
   type: HandlerType.Select,
@@ -39,10 +39,15 @@ export const codeTool: SelectConfig = {
     label: '无',
     default: true
   }],
-  match: new BlockMatcher(BlockTemplate),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  match: new CodeMatcher(),
+  highlight(options, t) {
+    if (t instanceof CodeTemplate) {
+      for (const item of options) {
+        if (item.value === t.lang) {
+          return item;
+        }
+      }
+    }
   },
   execCommand: new CodeCommander()
 };

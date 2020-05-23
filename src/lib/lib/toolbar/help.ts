@@ -4,6 +4,7 @@ import { KeymapConfig } from '../viewer/events';
 import { Commander } from './commands/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
+import { Template } from '@tanbo/tbus/core/template';
 
 /**
  * 工具条控件的显示状态
@@ -67,7 +68,7 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight(options: SelectOptionConfig[], data: FormatAbstractData): SelectOptionConfig;
+  highlight(options: SelectOptionConfig[], data: FormatAbstractData | Template): SelectOptionConfig;
 
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;

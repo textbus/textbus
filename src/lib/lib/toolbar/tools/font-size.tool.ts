@@ -2,6 +2,7 @@ import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { fontSizeFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const fontSizeTool: SelectConfig = {
   type: HandlerType.Select,
@@ -51,9 +52,14 @@ export const fontSizeTool: SelectConfig = {
     value: '48px'
   }],
   match: new FormatMatcher(fontSizeFormatter),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, data) {
+    if (data instanceof FormatAbstractData) {
+      for (const option of options) {
+        if (option.value === data.style.value) {
+          return option;
+        }
+      }
+    }
   },
   execCommand: new StyleCommander('fontSize', fontSizeFormatter)
 };

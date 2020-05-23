@@ -6,9 +6,14 @@ import { BlockMatcher } from '../matcher/block.matcher';
 export const headingTool: SelectConfig = {
   type: HandlerType.Select,
   match: new BlockMatcher(BlockTemplate),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, t) {
+    if (t instanceof BlockTemplate) {
+      for (const item of options) {
+        if (item.value === t.tagName) {
+          return item;
+        }
+      }
+    }
   },
   execCommand: new BlockCommander('p'),
   options: [{

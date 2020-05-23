@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { DropdownConfig, EventDelegate, HighlightState } from '../help';
+import { SelectionMatchDelta } from '../matcher/matcher';
 
 export class DropdownHandler implements Handler {
   elementRef: HTMLElement;
@@ -38,8 +39,8 @@ export class DropdownHandler implements Handler {
     }
   }
 
-  updateStatus(selectionMatchDelta: any): void {
-    this.config.viewer.update(selectionMatchDelta.abstractData);
+  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
+    this.config.viewer.update(selectionMatchDelta.matchData);
     switch (selectionMatchDelta.state) {
       case HighlightState.Highlight:
         this.dropdown.disabled = false;

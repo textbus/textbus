@@ -2,6 +2,7 @@ import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { fontFamilyFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const fontFamilyTool: SelectConfig = {
   type: HandlerType.Select,
@@ -49,10 +50,12 @@ export const fontFamilyTool: SelectConfig = {
     value: 'Times New Roman'
   }],
   match: new FormatMatcher(fontFamilyFormatter),
-  highlight(options, abstractData) {
-    for (const option of options) {
-      if (option.value === abstractData.style.value) {
-        return option;
+  highlight(options, data) {
+    if (data instanceof FormatAbstractData) {
+      for (const option of options) {
+        if (option.value === data.style.value) {
+          return option;
+        }
       }
     }
   },

@@ -1,19 +1,17 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { TBSelection } from '../../viewer/selection';
-import { BlockTemplate } from '../../templates/block.template';
-import { Constructor, Renderer } from '../../core/renderer';
+import { Renderer } from '../../core/renderer';
 import { HighlightState } from '../help';
+import { CodeTemplate } from '../../templates/code.template';
 
-export class BlockMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<BlockTemplate>) {
-  }
+export class CodeMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     const contextTemplates = selection.ranges.map(range => {
-      if (range.commonAncestorTemplate instanceof this.templateConstructor) {
+      if (range.commonAncestorTemplate instanceof CodeTemplate) {
         return range.commonAncestorTemplate;
       }
-      return renderer.getContext(range.commonAncestorFragment, this.templateConstructor);
+      return renderer.getContext(range.commonAncestorFragment, CodeTemplate);
     });
     return {
       state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,
