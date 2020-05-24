@@ -1,6 +1,22 @@
 import { Subject } from 'rxjs';
+import { Fragment } from '@tanbo/tbus/core/fragment';
 
-export class Event {
+
+export enum EventType {
+  onEnter
+}
+
+export interface EventParams {
+  type: EventType;
+  srcEvent: Event;
+  startFragment: Fragment;
+  endFragment: Fragment;
+  startIndex: number;
+  endIndex: number;
+
+}
+
+export class TBEvent {
   get stopped() {
     return this._stopped;
   }
@@ -15,12 +31,8 @@ export class Event {
   }
 }
 
-export enum EventType {
-  onEnter
-}
-
-export class EventEmitter extends Subject<Event> {
-  emit(value: Event) {
+export class EventEmitter extends Subject<TBEvent> {
+  emit(value: TBEvent) {
     super.next(value);
   }
 }

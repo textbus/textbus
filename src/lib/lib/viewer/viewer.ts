@@ -12,7 +12,7 @@ import { TBSelection } from './selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
 import { VElement } from '../core/element';
-import { Event, EventType } from '../core/events';
+import { EventType } from '../core/events';
 import { Keymap } from './events';
 
 export class Viewer {

@@ -2,7 +2,7 @@ import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
-import { Event, EventType } from './events';
+import { TBEvent, EventType } from './events';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -146,7 +146,7 @@ export class Renderer {
   dispatchEvent(by: VElement, type: EventType) {
     let stopped = false;
     do {
-      const event = new Event(type);
+      const event = new TBEvent(type);
       by.events.emit(event);
       stopped = event.stopped;
       if (!stopped) {
