@@ -11,6 +11,9 @@ import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from './selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
+import { VElement } from '../core/element';
+import { Event, EventType } from '../core/events';
+import { Keymap } from './events';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
@@ -72,6 +75,25 @@ export class Viewer {
     fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
       this.selectionChangeEvent.next(new TBSelection(this.nativeSelection, this.renderer));
+    })
+    this.dispatchEvent({
+      key: 'Enter'
+    }, EventType.onEnter);
+  }
+
+  dispatchEvent(keymap: Keymap, eventType: EventType) {
+    this.input.events.addKeymap({
+      keymap,
+      action: () => {
+        const focusNode = this.nativeSelection.focusNode;
+        let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
+        const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
+        if (!vElement) {
+          return;
+        }
+        this.renderer.dispatchEvent(vElement, eventType);
+        this.render(this.rootFragment);
+      }
     })
   }
 

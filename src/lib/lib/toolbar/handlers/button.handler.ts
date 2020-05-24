@@ -2,12 +2,12 @@ import { Observable, Subject } from 'rxjs';
 
 import { ButtonConfig, HighlightState } from '../help';
 import {  Handler } from './help';
-import { Keymap } from '../../viewer/events';
+import { KeymapAction } from '../../viewer/events';
 
 export class ButtonHandler implements Handler {
   readonly elementRef = document.createElement('button');
   onApply: Observable<void>;
-  keymap: Keymap;
+  keymap: KeymapAction;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
@@ -21,7 +21,7 @@ export class ButtonHandler implements Handler {
     this.elementRef.appendChild(inner);
     if (config.keymap) {
       this.keymap = {
-        config: config.keymap,
+        keymap: config.keymap,
         action: () => {
           if (!this.elementRef.disabled) {
             this.eventSource.next();

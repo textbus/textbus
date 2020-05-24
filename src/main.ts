@@ -93,6 +93,9 @@ const editor = new Editor('#editor', {
 
 editor.setContents(`
 <p><strong style="font-family: FangSong">test</strong>54</p>
+<ul>
+<li>fdsafdsafdsa</li>
+</ul>
 `);
 
 // const editor = createEditor('#editor', {

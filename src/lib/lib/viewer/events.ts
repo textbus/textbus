@@ -5,7 +5,7 @@ import { isMac } from './tools';
 /**
  * 快捷键配置项
  */
-export interface KeymapConfig {
+export interface Keymap {
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
@@ -15,9 +15,9 @@ export interface KeymapConfig {
 /**
  * 添加快捷键配置的参数
  */
-export interface Keymap {
+export interface KeymapAction {
   /** 快捷键配置 */
-  config: KeymapConfig;
+  keymap: Keymap;
 
   /** 当触发快捷键时执行的回调 */
   action(event: Event): any;
@@ -34,7 +34,7 @@ export class Events {
   onCopy: Observable<Event>;
   onCut: Observable<Event>;
 
-  private keymaps: Keymap[] = [];
+  private keymaps: KeymapAction[] = [];
 
   constructor(private input: HTMLInputElement | HTMLTextAreaElement) {
     this.setup();
@@ -44,7 +44,7 @@ export class Events {
    * 添加快捷键
    * @param keymap
    */
-  addKeymap(keymap: Keymap) {
+  addKeymap(keymap: KeymapAction) {
     this.keymaps.push(keymap);
   }
 
@@ -69,16 +69,16 @@ export class Events {
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
       const keymaps = this.keymaps.filter(keyMap => {
-        if (Array.isArray(keyMap.config.key)) {
-          return new RegExp(`^(${keyMap.config.key.join('|')})$`, 'i').test(ev.key);
+        if (Array.isArray(keyMap.keymap.key)) {
+          return new RegExp(`^(${keyMap.keymap.key.join('|')})$`, 'i').test(ev.key);
         }
-        return new RegExp(`^${ev.key}$`, 'i').test(keyMap.config.key);
+        return new RegExp(`^${ev.key}$`, 'i').test(keyMap.keymap.key);
       });
 
       for (const item of keymaps) {
-        if (!!item.config.altKey === ev.altKey &&
-          !!item.config.shiftKey === ev.shiftKey &&
-          !!item.config.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)
+        if (!!item.keymap.altKey === ev.altKey &&
+          !!item.keymap.shiftKey === ev.shiftKey &&
+          !!item.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)
         ) {
           ev.preventDefault();
           return item.action(ev);

@@ -1,7 +1,17 @@
 import { Subject } from 'rxjs';
 
 export class Event {
+  get stopped() {
+    return this._stopped;
+  }
+
+  private _stopped = false;
+
   constructor(public readonly type: EventType) {
+  }
+
+  stopPropagation() {
+    this._stopped = true;
   }
 }
 
@@ -10,12 +20,6 @@ export enum EventType {
 }
 
 export class EventEmitter extends Subject<Event> {
-  trigger(type: EventType) {
-    setTimeout(() => {
-      this.emit(new Event(type));
-    })
-  }
-
   emit(value: Event) {
     super.next(value);
   }

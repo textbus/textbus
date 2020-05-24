@@ -1,17 +1,17 @@
 import { Observable } from 'rxjs';
 
-import { Keymap, KeymapConfig } from '../../viewer/events';
+import { KeymapAction, Keymap } from '../../viewer/events';
 import { isMac } from '../../viewer/tools';
 
 export interface Handler {
   elementRef: HTMLElement;
   onApply: Observable<any>;
-  keymap?: Keymap | Keymap[];
+  keymap?: KeymapAction | KeymapAction[];
 
   updateStatus?(selectionMatchDelta: any): void;
 }
 
-export function createKeymapHTML(config: KeymapConfig) {
+export function createKeymapHTML(config: Keymap) {
   const arr: string[] = [];
   if (config.ctrlKey) {
     arr.push(isMac ? 'tbus-icon-command' : 'Ctrl');

@@ -1,6 +1,6 @@
 import { fromEvent } from 'rxjs';
 
-import { Events, Keymap } from './events';
+import { Events, KeymapAction } from './events';
 import { getRangePosition, isWindows } from './tools';
 
 export class Cursor {
@@ -61,7 +61,7 @@ export class Cursor {
    * 添加快捷键
    * @param keymap
    */
-  keymap(keymap: Keymap) {
+  keymap(keymap: KeymapAction) {
     this.events.addKeymap(keymap);
   }
 

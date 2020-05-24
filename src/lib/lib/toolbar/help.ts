@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { KeymapConfig } from '../viewer/events';
+import { Keymap } from '../viewer/events';
 import { Commander } from './commands/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
@@ -41,7 +41,7 @@ export interface ButtonConfig {
   /** 当鼠标放在控件上的提示文字 */
   tooltip?: string;
   /** 当前按扭控件的快捷键配置 */
-  keymap?: KeymapConfig;
+  keymap?: Keymap;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface SelectOptionConfig {
   /** 当所有选项都未锚中时，显示的默认项 */
   default?: boolean;
   /** 当前选项应用的快捷键 */
-  keymap?: KeymapConfig;
+  keymap?: Keymap;
 }
 
 export interface SelectConfig {
@@ -106,7 +106,7 @@ export interface ActionConfig {
   /** 给当前 action 添加一组 css class */
   classes?: string[];
   /** 给当前 action 添加一组 css class */
-  keymap?: KeymapConfig;
+  keymap?: Keymap;
 }
 
 export interface ActionSheetConfig  {

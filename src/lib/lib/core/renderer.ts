@@ -2,6 +2,7 @@ import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
+import { Event, EventType } from './events';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -78,6 +79,7 @@ export class Renderer {
   private fragmentHierarchyMapping = new Map<Fragment, Template>();
   private templateHierarchyMapping = new Map<Template, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
+  private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
   private oldVDom: VElement;
 
@@ -86,6 +88,7 @@ export class Renderer {
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
     this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
+    this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
@@ -96,6 +99,7 @@ export class Renderer {
       this.renderingNewTree(host, vDom);
     }
     this.oldVDom = vDom;
+    this.setupVDomHierarchy(vDom);
   }
 
   getPositionByNode(node: Node) {
@@ -109,6 +113,10 @@ export class Renderer {
 
   getNativeNodeByVDom(vDom: VElement | VTextNode) {
     return this.NVMappingTable.get(vDom);
+  }
+
+  getVDomByNativeNode(node: Node) {
+    return this.NVMappingTable.get(node);
   }
 
   getParentTemplateByFragment(fragment: Fragment) {
@@ -133,6 +141,31 @@ export class Renderer {
       return null;
     }
     return this.getContext(parentFragment, context);
+  }
+
+  dispatchEvent(by: VElement, type: EventType) {
+    let stopped = false;
+    do {
+      const event = new Event(type);
+      by.events.emit(event);
+      stopped = event.stopped;
+      if (!stopped) {
+        by = this.getParentVDom(by);
+      }
+    } while (!stopped);
+  }
+
+  private getParentVDom(child: VElement | VTextNode) {
+    return this.vDomHierarchyMapping.get(child);
+  }
+
+  private setupVDomHierarchy(vDom: VElement) {
+    vDom.childNodes.forEach(child => {
+      this.vDomHierarchyMapping.set(child, vDom);
+      if (child instanceof VElement) {
+        this.setupVDomHierarchy(child);
+      }
+    })
   }
 
   private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {

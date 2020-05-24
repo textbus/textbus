@@ -7,7 +7,7 @@ import { SelectHandler } from './handlers/select.handler';
 import { DropdownHandler } from './handlers/dropdown.handler';
 import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
-import { KeymapConfig } from '../viewer/events';
+import { Keymap } from '../viewer/events';
 import { TBSelection } from '../viewer/selection';
 import { Formatter } from '../core/formatter';
 import { Renderer } from '../core/renderer';
@@ -37,7 +37,7 @@ export class Toolbar {
       const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
       if (keymap) {
         try {
-          const config: KeymapConfig = JSON.parse(keymap);
+          const config: Keymap = JSON.parse(keymap);
           this.keymapPrompt.innerHTML = createKeymapHTML(config);
           this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt-show');
           return;

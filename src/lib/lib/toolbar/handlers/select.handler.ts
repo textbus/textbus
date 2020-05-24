@@ -3,14 +3,14 @@ import { merge, Observable, Subject } from 'rxjs';
 import { createKeymapHTML, Handler } from './help';
 import { Dropdown } from './utils/dropdown';
 import { HighlightState, SelectConfig, SelectOptionConfig } from '../help';
-import { Keymap } from '../../viewer/events';
+import { KeymapAction } from '../../viewer/events';
 import { SelectionMatchDelta } from '../matcher/matcher';
 
 export class SelectHandler implements Handler {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
   onApply: Observable<any>;
-  keymap: Keymap[] = [];
+  keymap: KeymapAction[] = [];
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
@@ -37,7 +37,7 @@ export class SelectHandler implements Handler {
 
       if (option.keymap) {
         this.keymap.push({
-          config: option.keymap,
+          keymap: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {
               this.value = option.value;

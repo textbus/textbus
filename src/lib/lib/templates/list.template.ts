@@ -62,9 +62,9 @@ export class ListTemplate extends Template {
       const li = new VElement('li');
       li.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
-          this.childSlots.splice(index, 0, new Fragment());
+          this.childSlots.splice(index + 1, 0, new Fragment());
+          event.stopPropagation();
         }
-        list.events.emit(event);
       });
       list.appendChild(li);
       this.viewMap.set(slot, li);
