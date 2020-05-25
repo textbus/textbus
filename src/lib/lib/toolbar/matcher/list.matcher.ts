@@ -1,5 +1,5 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { Renderer } from '../../core/renderer';
 import { ListTemplate } from '../../templates/list.template';
 import { HighlightState } from '../help';

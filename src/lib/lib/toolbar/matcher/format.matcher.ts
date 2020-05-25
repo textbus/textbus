@@ -1,8 +1,8 @@
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { Renderer } from '../../core/renderer';
 import { HighlightState } from '../help';
 import { Fragment } from '../../core/fragment';
-import { TBRange } from '../../viewer/range';
+import { TBRange } from '../../core/range';
 import { Template } from '../../core/template';
 import { FormatRange, Formatter, FormatEffect } from '../../core/formatter';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';

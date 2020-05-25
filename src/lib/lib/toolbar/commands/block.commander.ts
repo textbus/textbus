@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { Renderer } from '../../core/renderer';
 import { BlockTemplate } from '../../templates/block.template';
 

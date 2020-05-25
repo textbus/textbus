@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;

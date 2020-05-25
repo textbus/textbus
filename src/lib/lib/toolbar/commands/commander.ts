@@ -1,4 +1,4 @@
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { Renderer } from '../../core/renderer';
 
 /**

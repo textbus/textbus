@@ -1,6 +1,6 @@
-import { TBRange } from '../viewer/range';
-import { Renderer } from '../core/renderer';
-import { Fragment } from '@tanbo/tbus/core/fragment';
+import { TBRange } from './range';
+import { Renderer } from './renderer';
+import { Fragment } from './fragment';
 
 export interface RangePath {
   startPaths: number[];

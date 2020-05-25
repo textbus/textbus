@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 
 export class EmojiCommander implements Commander<string> {
   recordHistory = true;

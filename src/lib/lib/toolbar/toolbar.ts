@@ -8,7 +8,7 @@ import { DropdownHandler } from './handlers/dropdown.handler';
 import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
 import { Keymap } from '../viewer/events';
-import { TBSelection } from '../viewer/selection';
+import { TBSelection } from '../core/selection';
 import { Formatter } from '../core/formatter';
 import { Renderer } from '../core/renderer';
 

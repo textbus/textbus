@@ -1,7 +1,7 @@
-import { Renderer } from '../core/renderer';
-import { Fragment } from '../core/fragment';
-import { VElement } from '../core/element';
-import { Template } from '../core/template';
+import { Renderer } from './renderer';
+import { Fragment } from './fragment';
+import { VElement } from './element';
+import { Template } from './template';
 
 /**
  * 标识一个选中 Fragment 的范围

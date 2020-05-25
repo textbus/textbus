@@ -8,7 +8,7 @@ import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
 import { Cursor } from './cursor';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
-import { TBSelection } from './selection';
+import { TBSelection } from '../core/selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
 import { VElement } from '../core/element';
@@ -91,7 +91,7 @@ export class Viewer {
         if (!vElement) {
           return;
         }
-        this.renderer.dispatchEvent(vElement, eventType);
+        this.renderer.dispatchEvent(vElement, eventType, new TBSelection(this.nativeSelection, this.renderer));
         this.render(this.rootFragment);
       }
     })

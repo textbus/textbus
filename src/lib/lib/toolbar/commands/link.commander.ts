@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { LinkFormatter } from '../../formatter/link.formatter';
 
 export class LinkCommander implements Commander {

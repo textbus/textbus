@@ -8,7 +8,7 @@ import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
 import { EventDelegate, HandlerConfig } from './toolbar/help';
-import { RangePath, TBSelection } from './viewer/selection';
+import { RangePath, TBSelection } from './core/selection';
 import { Fragment } from './core/fragment';
 
 export interface Snapshot {

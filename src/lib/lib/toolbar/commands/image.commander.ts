@@ -1,5 +1,5 @@
 import { Commander } from './commander';
-import { TBSelection } from '../../viewer/selection';
+import { TBSelection } from '../../core/selection';
 import { AttrState } from '../forms/help';
 
 export class ImageCommander implements Commander<AttrState[]> {

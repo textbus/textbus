@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Fragment } from '@tanbo/tbus/core/fragment';
+import { TBSelection } from './selection';
 
 
 export enum EventType {
@@ -8,12 +8,7 @@ export enum EventType {
 
 export interface EventParams {
   type: EventType;
-  srcEvent: Event;
-  startFragment: Fragment;
-  endFragment: Fragment;
-  startIndex: number;
-  endIndex: number;
-
+  selection: TBSelection
 }
 
 export class TBEvent {
@@ -21,9 +16,14 @@ export class TBEvent {
     return this._stopped;
   }
 
+  readonly type: EventType;
+  readonly selection: TBSelection;
+
   private _stopped = false;
 
-  constructor(public readonly type: EventType) {
+  constructor(config: EventParams) {
+    this.type = config.type;
+    this.selection = config.selection;
   }
 
   stopPropagation() {

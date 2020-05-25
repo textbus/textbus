@@ -6,6 +6,8 @@ export * from './format-map';
 export * from './formatter';
 export * from './fragment';
 export * from './parser';
+export * from './range';
 export * from './renderer';
 export * from './root-fragment';
+export * from './selection';
 export * from './template';

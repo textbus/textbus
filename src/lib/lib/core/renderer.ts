@@ -3,6 +3,7 @@ import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
 import { Template } from './template';
 import { TBEvent, EventType } from './events';
+import { TBSelection } from './selection';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -143,10 +144,13 @@ export class Renderer {
     return this.getContext(parentFragment, context);
   }
 
-  dispatchEvent(by: VElement, type: EventType) {
+  dispatchEvent(by: VElement, type: EventType, selection: TBSelection) {
     let stopped = false;
     do {
-      const event = new TBEvent(type);
+      const event = new TBEvent({
+        type,
+        selection
+      });
       by.events.emit(event);
       stopped = event.stopped;
       if (!stopped) {
