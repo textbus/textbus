@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { ActionSheetConfig, ActionConfig, HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
 import { Handler, createKeymapHTML } from './help';
-import { KeymapAction } from '../../viewer/events';
+import { KeymapAction } from '../../viewer/cursor';
 
 export class ActionSheetHandler implements Handler {
   readonly elementRef: HTMLElement;

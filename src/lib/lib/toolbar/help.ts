@@ -1,10 +1,10 @@
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { Keymap } from '../viewer/events';
 import { Commander } from './commands/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
-import { Template } from '@tanbo/tbus/core/template';
+import { Template } from '../core/template';
+import { Keymap } from '../viewer/cursor';
 
 /**
  * 工具条控件的显示状态

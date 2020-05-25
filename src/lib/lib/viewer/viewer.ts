@@ -6,14 +6,13 @@ import { template } from './template-html';
 import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
-import { Cursor } from './cursor';
+import { Cursor, Keymap } from './cursor';
 import { HandlerConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from '../core/selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
 import { VElement } from '../core/element';
 import { EventType } from '../core/events';
-import { Keymap } from './events';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;

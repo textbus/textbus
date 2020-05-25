@@ -7,9 +7,8 @@ import { SelectHandler } from './handlers/select.handler';
 import { DropdownHandler } from './handlers/dropdown.handler';
 import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
-import { Keymap } from '../viewer/events';
+import { Keymap } from '../viewer/cursor';
 import { TBSelection } from '../core/selection';
-import { Formatter } from '../core/formatter';
 import { Renderer } from '../core/renderer';
 
 export class Toolbar {
