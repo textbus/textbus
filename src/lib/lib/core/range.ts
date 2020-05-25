@@ -317,6 +317,12 @@ export class TBRange {
     let vElement = this.renderer.getVElementByFragment(fragment);
 
     while (vElement) {
+      if (vElement.childNodes.length === 0) {
+        return {
+          node: this.renderer.getNativeNodeByVDom(vElement),
+          offset: 0
+        };
+      }
       for (const child of vElement.childNodes) {
         const position = this.renderer.getPositionByVDom(child);
         if (position.fragment !== fragment) {
