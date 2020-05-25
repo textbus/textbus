@@ -18,6 +18,16 @@ export class TBRange {
 
   startFragment: Fragment;
   endFragment: Fragment;
+
+  /**
+   * 当前选区是否折叠
+   */
+  get collapsed() {
+    return this.startFragment === this.commonAncestorFragment &&
+      this.endFragment === this.commonAncestorFragment &&
+      this.startIndex === this.endIndex;
+  }
+
   readonly commonAncestorFragment: Fragment;
   readonly commonAncestorTemplate: Template;
 

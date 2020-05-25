@@ -62,8 +62,8 @@ export class Fragment {
     return this.contents.getContentAtIndex(index);
   }
 
-  delete(startIndex: number, length = this.contents.length - startIndex) {
-    const endIndex = startIndex + length;
+  delete(startIndex: number, count = this.contents.length - startIndex) {
+    const endIndex = startIndex + count;
     const formatMap = new FormatMap();
 
     const formatRanges: FormatRange[] = [];

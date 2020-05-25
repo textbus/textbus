@@ -5,6 +5,7 @@ export * from './events';
 export * from './format-map';
 export * from './formatter';
 export * from './fragment';
+export * from './lifecycle';
 export * from './parser';
 export * from './range';
 export * from './renderer';

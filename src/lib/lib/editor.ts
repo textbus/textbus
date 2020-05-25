@@ -10,6 +10,7 @@ import { Toolbar } from './toolbar/toolbar';
 import { EventDelegate, HandlerConfig } from './toolbar/help';
 import { RangePath, TBSelection } from './core/selection';
 import { Fragment } from './core/fragment';
+import { Lifecycle } from './core/lifecycle';
 
 export interface Snapshot {
   contents: Fragment;
@@ -21,6 +22,7 @@ export interface EditorOptions {
   templateTranslators?: TemplateTranslator[];
   formatters?: Formatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
+  hooks?: Lifecycle[];
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
@@ -57,7 +59,7 @@ export class Editor implements EventDelegate {
 
   private defaultHTML = '<p><br></p>';
 
-  constructor(private selector: string | HTMLElement, private options: EditorOptions) {
+  constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {

@@ -20,6 +20,27 @@ export class TBSelection {
     return this.getCommonFragment();
   }
 
+  /**
+   * 获取 Selection 的第一个 Range
+   */
+  get firstRange() {
+    return this.ranges[0] || null;
+  }
+
+  /**
+   * 获取 Selection 的最后一个 Range
+   */
+  get lastRange() {
+    return this.ranges[this.ranges.length - 1] || null;
+  }
+
+  /**
+   * 当前 Selection 是否折叠
+   */
+  get collapsed() {
+    return this.ranges.length === 1 && this.firstRange.collapsed;
+  }
+
   private _ranges: TBRange[] = [];
 
   constructor(private nativeSelection: Selection, private renderer: Renderer) {

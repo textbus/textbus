@@ -156,7 +156,7 @@ export class Renderer {
       if (!stopped) {
         by = this.getParentVDom(by);
       }
-    } while (!stopped);
+    } while (!stopped && by);
   }
 
   private getParentVDom(child: VElement | VTextNode) {

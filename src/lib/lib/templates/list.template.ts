@@ -62,7 +62,18 @@ export class ListTemplate extends Template {
       const li = new VElement('li');
       li.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
-          this.childSlots.splice(index + 1, 0, new Fragment());
+          const firstRange = event.selection.firstRange;
+          const {contents, formatRanges} = slot.delete(firstRange.endIndex);
+          const next = new Fragment();
+          contents.forEach(item => {
+            next.append(item);
+          });
+          formatRanges.forEach(item => {
+            next.mergeFormat(item);
+          });
+          this.childSlots.splice(index + 1, 0, next);
+          firstRange.startFragment = firstRange.endFragment = next;
+          firstRange.startIndex = firstRange.endIndex = 0;
           event.stopPropagation();
         }
       });

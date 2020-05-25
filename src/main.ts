@@ -6,7 +6,7 @@ import {
   AudioTemplateTranslator, audioTool,
   blockBackgroundTool, cleanTool,
   CodeTemplateTranslator,
-  codeTool,
+  codeTool, DefaultHook,
   Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
   fontSizeFormatter,
   fontSizeTool, ImageTemplateTranslator, imageTool,
@@ -48,6 +48,9 @@ import {
 
 
 const editor = new Editor('#editor', {
+  hooks: [
+    new DefaultHook()
+  ],
   templateTranslators: [
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
@@ -93,8 +96,10 @@ const editor = new Editor('#editor', {
 
 editor.setContents(`
 <p><strong style="font-family: FangSong">test</strong>54</p>
+<p><strong style="font-family: FangSong">test</strong>54</p>
+<p><strong style="font-family: FangSong">test</strong>54</p>
 <ul>
-<li>fdsafdsafdsa</li>
+<li>123456</li>
 </ul>
 `);
 

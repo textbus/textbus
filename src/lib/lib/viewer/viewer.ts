@@ -90,8 +90,20 @@ export class Viewer {
         if (!vElement) {
           return;
         }
-        this.renderer.dispatchEvent(vElement, eventType, new TBSelection(this.nativeSelection, this.renderer));
+        const selection = new TBSelection(this.nativeSelection, this.renderer);
+        let isNext = true;
+        (this.context.options.hooks || []).forEach(lifecycle => {
+          if (typeof lifecycle.onEnter === 'function') {
+            if (lifecycle.onEnter(this.renderer, selection) === false) {
+              isNext = false;
+            }
+          }
+        })
+        if (isNext) {
+          this.renderer.dispatchEvent(vElement, eventType, selection);
+        }
         this.render(this.rootFragment);
+        selection.restore();
       }
     })
   }
