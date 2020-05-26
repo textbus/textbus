@@ -89,7 +89,7 @@ export class Events {
   }
 }
 
-export class Cursor {
+export class Input {
   events: Events;
   input = document.createElement('textarea');
 

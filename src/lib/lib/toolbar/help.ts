@@ -4,7 +4,7 @@ import { Commander } from './commands/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { Template } from '../core/template';
-import { Keymap } from '../viewer/cursor';
+import { Keymap } from '../viewer/input';
 
 /**
  * 工具条控件的显示状态

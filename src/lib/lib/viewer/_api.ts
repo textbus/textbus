@@ -1,1 +1,1 @@
-export * from './cursor';
+export * from './input';

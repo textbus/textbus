@@ -48,6 +48,7 @@ import {
 
 
 const editor = new Editor('#editor', {
+  theme: 'dark',
   hooks: [
     new DefaultHook()
   ],
@@ -101,6 +102,7 @@ editor.setContents(`
 <ul>
 <li>123456</li>
 </ul>
+<pre lang="Typescript" style="font-size: 15px;"><strong style="color: rgb(51, 51, 51);">import</strong>&nbsp;{ createEditor }&nbsp;<strong style="color: rgb(51, 51, 51);">from</strong>&nbsp;<span style="color: rgb(221, 17, 68);">'@tanbo/tbus'</span>;<br><br><strong style="color: rgb(51, 51, 51);">const</strong>&nbsp;editor = createEditor(<span style="color: rgb(0, 134, 179);">document</span>.getElementById(<span style="color: rgb(221, 17, 68);">'editor'</span>));<br>editor.onChange.subscribe(result =&gt; {<br>&nbsp;&nbsp;<span style="color: rgb(0, 134, 179);">console</span>.log(result);<br>})<br></pre>
 `);
 
 // const editor = createEditor('#editor', {

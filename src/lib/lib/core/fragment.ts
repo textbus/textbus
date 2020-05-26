@@ -54,6 +54,15 @@ export class Fragment {
     });
   }
 
+  clone() {
+    const ff = new Fragment();
+    ff.contents = this.contents.clone();
+    this.formatMap.getFormatRanges().forEach(formatRange => {
+      ff.mergeFormat(Object.assign({}, formatRange));
+    })
+    return ff;
+  }
+
   /**
    * 通过下标获取文本或子节点
    * @param index

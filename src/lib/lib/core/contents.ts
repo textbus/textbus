@@ -132,4 +132,13 @@ export class Contents {
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0];
   }
+
+  /**
+   * 复制当前内容的副本
+   */
+  clone(): Contents {
+    const newContents = new Contents();
+    this.elements.forEach(item => newContents.append(item));
+    return newContents;
+  }
 }

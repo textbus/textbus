@@ -7,7 +7,7 @@ import { SelectHandler } from './handlers/select.handler';
 import { DropdownHandler } from './handlers/dropdown.handler';
 import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
-import { Keymap } from '../viewer/cursor';
+import { Keymap } from '../viewer/input';
 import { TBSelection } from '../core/selection';
 import { Renderer } from '../core/renderer';
 

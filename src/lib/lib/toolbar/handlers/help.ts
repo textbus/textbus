@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KeymapAction, Keymap } from '../../viewer/cursor';
+import { KeymapAction, Keymap } from '../../viewer/input';
 import { isMac } from '../../viewer/tools';
 
 export interface Handler {
