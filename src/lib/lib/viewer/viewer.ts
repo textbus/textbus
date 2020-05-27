@@ -92,7 +92,6 @@ export class Viewer {
         }
       })
       if (isNext) {
-        // this.recordSnapshotFromEditingBefore();
         this.write(selection);
       }
       this.render(this.rootFragment);
@@ -124,6 +123,9 @@ export class Viewer {
         })
         if (isNext) {
           this.renderer.dispatchEvent(vElement, eventType, selection);
+        }
+        if ([EventType.onEnter].includes(eventType)) {
+          this.recordSnapshotFromEditingBefore();
         }
         this.render(this.rootFragment);
         selection.restore();

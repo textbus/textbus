@@ -202,7 +202,9 @@ export class Renderer {
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
           this.NVMappingTable.set(el, current);
-          this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
+          if (current instanceof VElement) {
+            this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
+          }
         } else {
           if (current instanceof VElement) {
             const el = this.createElement(current);
@@ -323,7 +325,12 @@ export class Renderer {
             break;
           }
         }
-        const {host, slot} = this.createVDomByFormats(childFormats, fragment, startIndex, endIndex);
+        const {host, slot} = this.createVDomByFormats(
+          childFormats,
+          fragment,
+          firstRange.startIndex,
+          firstRange.endIndex
+        );
 
 
         const progenyFormats: FormatRange[] = [];

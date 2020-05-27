@@ -315,30 +315,35 @@ export class TBRange {
 
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
     let vElement = this.renderer.getVElementByFragment(fragment);
-
-    while (vElement) {
-      if (vElement.childNodes.length === 0) {
+    parentLoop: while (vElement) {
+      const len = vElement.childNodes.length;
+      if (len === 0) {
         return {
           node: this.renderer.getNativeNodeByVDom(vElement),
           offset: 0
         };
       }
-      for (const child of vElement.childNodes) {
+      for (let i = 0; i < len; i++) {
+        const child = vElement.childNodes[i];
         const position = this.renderer.getPositionByVDom(child);
         if (position.fragment !== fragment) {
-          break;
+          throw new Error('当前节点的 fragment 和指定的 fragment 不匹配')
         }
         if (position.startIndex <= offset && position.endIndex >= offset) {
+          if (i < len - 1 && position.endIndex === offset) {
+            continue;
+          }
           if (child instanceof VElement) {
             vElement = child;
-          } else {
-            return {
-              node: this.renderer.getNativeNodeByVDom(child),
-              offset: offset - position.startIndex
-            }
+            continue parentLoop;
+          }
+          return {
+            node: this.renderer.getNativeNodeByVDom(child),
+            offset: offset - position.startIndex
           }
         }
       }
+      throw new Error('未找到对应节点');
     }
     throw new Error('DOM 与虚拟节点不同步！');
   }
