@@ -78,7 +78,7 @@ export class Renderer {
 
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
   private fragmentHierarchyMapping = new Map<Fragment, Template>();
-  private templateHierarchyMapping = new Map<Template, Fragment>();
+  private templateHierarchyMapping = new Map<Template | MediaTemplate, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
@@ -392,7 +392,7 @@ export class Renderer {
         });
         i += item.length;
         children.push(textNode);
-      } else if (item instanceof Template) {
+      } else {
         this.templateHierarchyMapping.set(item, fragment);
         const vDom = item.render();
         this.vDomPositionMapping.set(vDom, {
@@ -402,11 +402,13 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        item.childSlots.forEach(slot => {
-          this.fragmentHierarchyMapping.set(slot, item);
-          const parent = item.getChildViewBySlot(slot);
-          this.createVDom(slot, parent);
-        });
+        if (item instanceof Template) {
+          item.childSlots.forEach(slot => {
+            this.fragmentHierarchyMapping.set(slot, item);
+            const parent = item.getChildViewBySlot(slot);
+            this.createVDom(slot, parent);
+          });
+        }
       }
     });
     return children;
