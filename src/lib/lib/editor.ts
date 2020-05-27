@@ -1,49 +1,35 @@
-import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
-import { auditTime, distinctUntilChanged, filter, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, filter } from 'rxjs/operators';
+import { from, Observable, of, zip } from 'rxjs';
 
-import { EventDelegate, HandlerConfig } from './toolbar/help';
+import { Parser } from './core/parser';
+import { TemplateTranslator } from './core/template';
+import { Formatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
-import { Handler } from './toolbar/handlers/help';
-import { RootFragment } from './parser/root-fragment';
-import { RangePath, TBSelection } from './viewer/selection';
-import { Paths } from './paths/paths';
-import { Fragment } from './parser/fragment';
-import { Parser } from './parser/parser';
-import { Differ } from './renderer/differ';
-import { DomRenderer } from './renderer/dom-renderer';
-import { Renderer } from './renderer/renderer';
+import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
-import { Hook } from './viewer/help';
-import { Keymap } from './viewer/events';
-import { Loading } from './utils/loading';
+import { EventDelegate, HandlerConfig } from './toolbar/help';
+import { RangePath, TBSelection } from './core/selection';
+import { Fragment } from './core/fragment';
+import { Lifecycle } from './core/lifecycle';
 
 export interface Snapshot {
-  doc: Fragment;
+  contents: Fragment;
   paths: RangePath[];
-}
-
-export interface EditorSettings {
-  renderer?: Renderer;
 }
 
 export interface EditorOptions {
   theme?: string;
-  historyStackSize?: number;
-  handlers?: (HandlerConfig | HandlerConfig[])[];
-  content?: string;
-  usePaperModel?: boolean;
-  settings?: EditorSettings;
-  height?: number | 'auto';
+  templateTranslators?: TemplateTranslator[];
+  formatters?: Formatter[];
+  toolbar?: (HandlerConfig | HandlerConfig[])[];
+  hooks?: Lifecycle[];
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
+  contents?: string;
 }
 
 export class Editor implements EventDelegate {
-  readonly onChange: Observable<string>;
-  readonly parser: Parser;
-  readonly elementRef = document.createElement('div');
-
   get canBack() {
     return this.historySequence.length > 0 && this.historyIndex > 0;
   }
@@ -52,81 +38,61 @@ export class Editor implements EventDelegate {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
-  get styleSheet() {
-    return this.toolbar.styleSheets.map(t => t).join('');
-  }
+  readonly elementRef = document.createElement('div');
+
+  private readonly frameContainer = document.createElement('div');
+  private readonly container: HTMLElement;
+
+  private parser: Parser;
+  private readonly toolbar: Toolbar;
+  private renderer = new Renderer();
+  private viewer = new Viewer(this.renderer, this);
+
+  private readyState = false;
+  private tasks: Array<() => void> = [];
 
   private historySequence: Array<Snapshot> = [];
   private historyIndex = 0;
   private readonly historyStackSize: number;
 
-  private root: RootFragment;
-  private readonly viewer: Viewer;
-  private readonly renderer: Renderer;
-  private readonly loading = new Loading();
-  private readonly paths = new Paths();
-  private readonly toolbar: Toolbar;
-  private readonly frameContainer = document.createElement('div');
-  private readonly container: HTMLElement;
-
-  private changeEvent = new Subject<string>();
-  private tasks: Array<() => void> = [];
-  private readyState = false;
   private selection: TBSelection;
-
-  private sub: Subscription;
 
   private defaultHTML = '<p><br></p>';
 
-  constructor(private selector: string | HTMLElement, private options: EditorOptions = {}) {
-    this.onChange = this.changeEvent.asObservable();
+  constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
       this.container = selector;
     }
-    this.historyStackSize = options.historyStackSize || 50;
-    this.toolbar = new Toolbar(this, options.handlers);
-    this.toolbar.onAction.pipe(filter(() => !!this.selection)).subscribe((handler: Handler) => {
-      this.viewer.apply(handler);
-      if (handler.execCommand.recordHistory) {
-        this.recordSnapshot();
-        this.listenUserWriteEvent();
-      }
-    });
-    this.parser = new Parser(this.toolbar.handlers);
-    this.renderer = options?.settings?.renderer || new DomRenderer();
-    this.viewer = new Viewer(this, new Differ(this.parser, this.renderer), this.toolbar.styleSheets);
-    zip(this.writeContents(options.content || this.defaultHTML), this.viewer.onReady).subscribe(result => {
-      this.readyState = true;
-      const vDom = new RootFragment(this.parser);
-      this.root = vDom;
-      vDom.setContents(result[0]);
-      this.viewer.render(vDom);
-      this.recordSnapshot();
-      this.tasks.forEach(fn => fn());
-    });
+    this.parser = new Parser(options);
+
+    this.frameContainer.classList.add('tbus-frame-container');
+    this.toolbar = new Toolbar(this, options.toolbar);
+
+    this.toolbar.onAction
+      .pipe(filter(() => !!this.selection))
+      .subscribe(config => {
+        this.viewer.apply(config);
+        if (config.execCommand.recordHistory) {
+          // this.recordSnapshot();
+          // this.listenUserWriteEvent();
+        }
+      });
 
     this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
       this.selection = selection;
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
-      this.toolbar.updateHandlerState(selection);
+      this.toolbar.updateHandlerState(selection, this.renderer);
     });
-
-    this.viewer.onSelectionChange.pipe(distinctUntilChanged()).subscribe(() => {
-      this.paths.update(this.viewer.nativeSelection.focusNode);
-    });
-
-    this.listenUserWriteEvent();
-    this.frameContainer.classList.add('tbus-frame-container');
 
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
-    this.frameContainer.appendChild(this.loading.elementRef);
+    // this.frameContainer.appendChild(this.loading.elementRef);
     this.frameContainer.appendChild(this.viewer.elementRef);
-    this.elementRef.appendChild(this.paths.elementRef);
+    // this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
@@ -134,28 +100,21 @@ export class Editor implements EventDelegate {
     }
     this.container.appendChild(this.elementRef);
 
-    if (options.height === 'auto') {
-      this.viewer.elementRef.style.height = 'auto';
-      this.viewer.elementRef.style.overflow = 'visible';
-    } else if (typeof options.height === 'number') {
-      this.viewer.elementRef.style.height = options.height + 'px';
-      this.viewer.elementRef.style.overflow = 'auto';
-    }
-
-    if (options.usePaperModel) {
-      this.frameContainer.style.padding = '20px 0';
-      this.viewer.elementRef.style.cssText = 'width: 600px;';
-    }
+    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
+      this.readyState = true;
+      const rootFragment = this.parser.parse(result[0]);
+      this.viewer.render(rootFragment);
+      // this.recordSnapshot();
+      this.tasks.forEach(fn => fn());
+    });
   }
 
   setContents(html: string) {
     this.run(() => {
-      this.writeContents(html || this.defaultHTML).then(result => {
-        const vDom = new RootFragment(this.parser);
-        this.root = vDom;
-        vDom.setContents(result);
-        this.viewer.render(vDom)
-      })
+      this.writeContents(html).then(el => {
+        const rootFragment = this.parser.parse(el);
+        this.viewer.render(rootFragment);
+      });
     })
   }
 
@@ -190,17 +149,20 @@ export class Editor implements EventDelegate {
     return null;
   }
 
-  registerHook(hook: Hook) {
-    this.run(() => {
-      this.viewer.use(hook);
-    });
-  }
-
-  registerKeymap(keymap: Keymap) {
-    this.run(() => {
-      this.viewer.registerKeymap(keymap);
-    })
-  }
+  // private recordSnapshot() {
+  //   if (this.historySequence.length !== this.historyIndex) {
+  //     this.historySequence.length = this.historyIndex + 1;
+  //   }
+  //   this.historySequence.push({
+  //     contents: this.root.clone(),
+  //     paths: this.viewer.selection.getRangePaths()
+  //   });
+  //   if (this.historySequence.length > this.historyStackSize) {
+  //     this.historySequence.shift();
+  //   }
+  //   this.historyIndex = this.historySequence.length - 1;
+  //   this.dispatchContentChangeEvent();
+  // }
 
   private run(fn: () => void) {
     if (!this.readyState) {
@@ -208,25 +170,6 @@ export class Editor implements EventDelegate {
       return;
     }
     fn();
-  }
-
-  private recordSnapshot() {
-    if (this.historySequence.length !== this.historyIndex) {
-      this.historySequence.length = this.historyIndex + 1;
-    }
-    this.historySequence.push({
-      doc: this.root.clone(),
-      paths: this.viewer.selection.getRangePaths()
-    });
-    if (this.historySequence.length > this.historyStackSize) {
-      this.historySequence.shift();
-    }
-    this.historyIndex = this.historySequence.length - 1;
-    this.dispatchContentChangeEvent();
-  }
-
-  private dispatchContentChangeEvent() {
-    this.changeEvent.next(this.viewer.contentDocument.body.innerHTML);
   }
 
   private writeContents(html: string) {
@@ -251,18 +194,6 @@ export class Editor implements EventDelegate {
                     })())`;
 
       document.body.appendChild(temporaryIframe);
-    });
-  }
-
-  private listenUserWriteEvent() {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
-    this.sub = this.viewer.onUserWrite.pipe(tap(() => {
-      this.dispatchContentChangeEvent();
-    })).pipe(sampleTime(5000)).subscribe(() => {
-      this.recordSnapshot();
-      this.toolbar.updateHandlerState(this.viewer.cloneSelection());
     });
   }
 }

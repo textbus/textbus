@@ -2,22 +2,22 @@ import { Observable, Subject } from 'rxjs';
 
 import { HandlerConfig, HandlerType } from './help';
 import { createKeymapHTML, Handler } from './handlers/help';
-import { ButtonHandler } from './handlers/button-handler';
-import { SelectHandler } from './handlers/select-handler';
-import { DropdownHandler } from './handlers/dropdown-handler';
-import { ActionSheetHandler } from './handlers/action-sheet-handler';
+import { ButtonHandler } from './handlers/button.handler';
+import { SelectHandler } from './handlers/select.handler';
+import { DropdownHandler } from './handlers/dropdown.handler';
+import { ActionSheetHandler } from './handlers/action-sheet.handler';
 import { Editor } from '../editor';
-import { DefaultTagsHandler } from './default-tags-handler';
-import { TBSelection } from '../viewer/selection';
-import { KeymapConfig } from '../viewer/events';
+import { Keymap } from '../viewer/input';
+import { TBSelection } from '../core/selection';
+import { Renderer } from '../core/renderer';
 
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable<Handler>;
-  readonly handlers: Handler[] = [];
+  onAction: Observable<HandlerConfig>;
+  readonly handlers: Array<{ config: HandlerConfig, instance: Handler }> = [];
   readonly styleSheets: string[] = [];
 
-  private actionEvent = new Subject<Handler>();
+  private actionEvent = new Subject<HandlerConfig>();
   private toolsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
@@ -30,18 +30,13 @@ export class Toolbar {
     this.elementRef.appendChild(this.toolsElement);
     this.elementRef.appendChild(this.keymapPrompt);
 
-    const defaultHandlers = new DefaultTagsHandler();
-    this.handlers.push(defaultHandlers);
-
     this.createToolbar(config);
-
-    this.context.registerHook(defaultHandlers.hook);
 
     this.elementRef.addEventListener('mouseover', (ev) => {
       const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
       if (keymap) {
         try {
-          const config: KeymapConfig = JSON.parse(keymap);
+          const config: Keymap = JSON.parse(keymap);
           this.keymapPrompt.innerHTML = createKeymapHTML(config);
           this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt-show');
           return;
@@ -53,10 +48,12 @@ export class Toolbar {
     })
   }
 
-  updateHandlerState(selection: TBSelection) {
-    this.handlers.filter(h => typeof h.updateStatus === 'function').forEach(handler => {
-      const s = handler.matcher.queryState(selection, handler, this.context);
-      handler.updateStatus(s);
+  updateHandlerState(selection: TBSelection, renderer: Renderer) {
+    this.handlers.filter(h => typeof h.instance.updateStatus === 'function').forEach(handler => {
+      const s = handler.config.match?.queryState(selection, renderer, this.context);
+      if (s) {
+        handler.instance.updateStatus(s);
+      }
     });
   }
 
@@ -93,12 +90,6 @@ export class Toolbar {
   }
 
   private createHandler(option: HandlerConfig) {
-    if (option.hook) {
-      this.context.registerHook(option.hook)
-    }
-    if (Array.isArray(option.styleSheets)) {
-      this.styleSheets.push(...option.styleSheets);
-    }
     let h: Handler;
     switch (option.type) {
       case HandlerType.Button:
@@ -117,18 +108,21 @@ export class Toolbar {
     if (h.keymap) {
       const keymaps = Array.isArray(h.keymap) ? h.keymap : [h.keymap];
       keymaps.forEach(k => {
-        this.context.registerKeymap(k);
+        // this.context.registerKeymap(k);
       });
     }
-    this.handlers.push(h);
+    this.handlers.push({
+      config: option,
+      instance: h
+    });
     return h.elementRef;
   }
 
   private listenUserAction() {
     this.handlers.forEach(item => {
-      if (item.onApply instanceof Observable) {
-        item.onApply.subscribe(() => {
-          this.actionEvent.next(item);
+      if (item.instance.onApply instanceof Observable) {
+        item.instance.onApply.subscribe(() => {
+          this.actionEvent.next(item.config);
         })
       }
     });
