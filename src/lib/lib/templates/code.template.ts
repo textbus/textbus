@@ -39,6 +39,7 @@ export class CodeTemplate extends Template {
     code.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
+        console.log(firstRange.startIndex)
         this.childSlots[0].insert(new SingleTemplate('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
       }

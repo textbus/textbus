@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { Template } from './template';
+import { MediaTemplate, Template } from './template';
 import { FormatRange, Formatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -11,7 +11,7 @@ export class Fragment {
     return this.contents.length;
   }
 
-  append(element: string | Template) {
+  append(element: string | Template | MediaTemplate) {
     this.contents.append(element);
   }
 
@@ -27,11 +27,12 @@ export class Fragment {
     return this.contents.slice(startIndex, endIndex);
   }
 
-  insert(contents: Template | string, index: number) {
+  insert(contents: Template | MediaTemplate | string, index: number) {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
-      if (contents instanceof Template && format.startIndex < index && format.endIndex >= index) {
+      if (contents instanceof Template &&
+        format.startIndex < index && format.endIndex >= index) {
         newFormatRanges.push({
           startIndex: index + 1,
           endIndex: format.endIndex + 1,
@@ -124,7 +125,7 @@ export class Fragment {
     return this.formatMap.getFormatRanges();
   }
 
-  find(template: Template) {
+  find(template: Template | MediaTemplate) {
     return this.contents.find(template);
   }
 

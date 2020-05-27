@@ -5,7 +5,7 @@ import { HighlightState } from '../help';
 import { TBRange } from '../../core/range';
 import { FormatEffect } from '../../core/formatter';
 import { Editor } from '../../editor';
-import { Template } from '../../core/template';
+import { MediaTemplate, Template } from '../../core/template';
 
 /**
  * 匹配到的抽象数据及状态
@@ -27,7 +27,7 @@ export interface RangeMatchDelta<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchDelta<T = FormatAbstractData | Template> {
+export interface SelectionMatchDelta<T = FormatAbstractData | Template | MediaTemplate> {
   state: HighlightState;
   srcStates: RangeMatchDelta<T>[];
   matchData: T;

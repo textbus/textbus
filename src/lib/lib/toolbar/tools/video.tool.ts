@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { DropdownConfig, HandlerType } from '../help';
-import { BlockMatcher } from '../matcher/block.matcher';
 import { VideoTemplate } from '../../templates/video.template';
 import { VideoCommander } from '../commands/video.commander';
+import { MediaMatcher } from '../matcher/media.matcher';
 
 const commander = new VideoCommander()
 
@@ -42,6 +42,6 @@ export const videoTool: DropdownConfig = {
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  match: new BlockMatcher(VideoTemplate),
+  match: new MediaMatcher(VideoTemplate),
   execCommand: commander
 };

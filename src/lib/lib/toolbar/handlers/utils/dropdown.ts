@@ -2,13 +2,13 @@ import { Observable } from 'rxjs';
 
 import { EventDelegate } from '../../help';
 import { FormatAbstractData } from '../../../core/format-abstract-data';
-import { Template } from '../../../core/template';
+import { MediaTemplate, Template } from '../../../core/template';
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
   freezeState?: Observable<boolean>;
 
-  update(value?: FormatAbstractData| Template): void;
+  update(value?: FormatAbstractData| Template |MediaTemplate): void;
 
   reset?(): void;
 

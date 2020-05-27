@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { DropdownConfig, HandlerType } from '../help';
-import { BlockMatcher } from '../matcher/block.matcher';
+import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageTemplate } from '../../templates/image.template';
 import { ImageCommander } from '../commands/image.commander';
 
@@ -32,6 +32,6 @@ export const imageTool: DropdownConfig = {
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  match: new BlockMatcher(ImageTemplate),
+  match: new MediaMatcher(ImageTemplate),
   execCommand: commander
 };

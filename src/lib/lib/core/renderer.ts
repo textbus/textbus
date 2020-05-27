@@ -1,7 +1,7 @@
 import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
-import { Template } from './template';
+import { MediaTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
 
@@ -132,7 +132,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  getContext<T extends Template>(by: Fragment, context: Constructor<T>): T {
+  getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
     if (templateInstance instanceof context) {
       return templateInstance;
