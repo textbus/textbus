@@ -188,6 +188,7 @@ export class Input {
     const startContainer = this.selection.focusNode;
     const startOffset = this.selection.focusOffset;
     const range = document.createRange();
+    console.log(startContainer, startOffset)
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = getRangePosition(range);

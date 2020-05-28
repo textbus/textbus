@@ -1,7 +1,7 @@
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement } from './element';
-import { Template } from './template';
+import { MediaTemplate, Template } from './template';
 
 /**
  * 标识一个选中 Fragment 的范围
@@ -372,6 +372,14 @@ export class TBRange {
             continue;
           }
           if (child instanceof VElement) {
+            if (child.childNodes.length === 0) {
+              const node = this.renderer.getNativeNodeByVDom(child);
+              const parentNode = node.parentNode;
+              return {
+                node: parentNode,
+                offset: Array.from(parentNode.childNodes).indexOf(node as any)
+              }
+            }
             vElement = child;
             continue parentLoop;
           }
