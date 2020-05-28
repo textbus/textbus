@@ -52,7 +52,6 @@ export class Viewer {
       merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
         .subscribe(() => {
           this.nativeSelection = this.contentDocument.getSelection();
-          // this.invokeSelectStartHooks();
         });
       //
       this.listenEvents();
@@ -134,9 +133,7 @@ export class Viewer {
         this.render(this.rootFragment);
         selection.restore();
         this.input.updateStateBySelection(this.nativeSelection);
-        if ([EventType.onEnter].includes(eventType)) {
-          this.recordSnapshotFromEditingBefore();
-        }
+        this.recordSnapshotFromEditingBefore();
       }
     })
   }
