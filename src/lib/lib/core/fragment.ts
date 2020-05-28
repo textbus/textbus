@@ -165,8 +165,10 @@ export class Fragment {
     const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
     let index = 0;
     const formats: FormatRange[] = [];
+    let newFormat: FormatRange;
     contents.forEach(item => {
       if (item instanceof Template) {
+        newFormat = null;
         item.childSlots.forEach(fragment => {
           const newFormatRange = Object.assign({}, formatRange);
           newFormatRange.startIndex = 0;
@@ -174,17 +176,21 @@ export class Fragment {
           fragment.apply(newFormatRange);
         })
       } else {
-        formats.push({
-          startIndex: formatRange.startIndex + index,
-          endIndex: formatRange.endIndex + index,
-          state: formatRange.state,
-          abstractData: formatRange.abstractData,
-          renderer: formatRange.renderer
-        })
+        if (!newFormat) {
+          newFormat = {
+            startIndex: formatRange.startIndex + index,
+            endIndex: formatRange.startIndex + index + item.length,
+            state: formatRange.state,
+            abstractData: formatRange.abstractData,
+            renderer: formatRange.renderer
+          };
+          formats.push(newFormat)
+        } else {
+          newFormat.endIndex = formatRange.startIndex + index + item.length;
+        }
       }
       index += item.length;
     });
-
     formats.forEach(f => this.formatMap.merge(f));
   }
 
