@@ -43,12 +43,12 @@ export class Viewer {
       this.input = new Input(doc);
       this.readyEvent.next(doc);
       this.elementRef.appendChild(this.input.elementRef);
-      //
-      // this.styleSheets.forEach(s => {
-      //   const style = doc.createElement('style');
-      //   style.innerHTML = s;
-      //   doc.head.appendChild(style);
-      // });
+
+      (this.context.options.styleSheets || []).forEach(s => {
+        const style = doc.createElement('style');
+        style.innerHTML = s;
+        doc.head.appendChild(style);
+      });
 
       merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
         .subscribe(() => {

@@ -6,7 +6,7 @@ import {
   AudioTemplateTranslator, audioTool,
   blockBackgroundTool, cleanTool,
   CodeTemplateTranslator,
-  codeTool, DefaultHook,
+  codeTool, DefaultHook, defaultStyleSheets,
   Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
   fontSizeFormatter,
   fontSizeTool, ImageTemplateTranslator, imageTool,
@@ -49,6 +49,7 @@ import {
 
 const editor = new Editor('#editor', {
   theme: 'dark',
+  styleSheets: defaultStyleSheets,
   hooks: [
     new DefaultHook()
   ],

@@ -23,6 +23,7 @@ export interface EditorOptions {
   formatters?: Formatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
   hooks?: Lifecycle[];
+  styleSheets?: string[];
 
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 
