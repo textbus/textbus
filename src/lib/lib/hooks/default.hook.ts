@@ -1,15 +1,13 @@
 import { Lifecycle } from '../core/lifecycle';
 import { Renderer } from '../core/renderer';
 import { TBSelection } from '../core/selection';
-import { Fragment } from '@tanbo/tbus/core/fragment';
-import { TBRange } from '@tanbo/tbus/core/range';
+import { BlockFormatter } from '../core/formatter';
 
 export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {
-    selection.ranges.forEach(range => {
-      const flag = range.startFragment === range.endFragment;
-      this.deleteRange(range, flag);
-    })
+    if (!selection.collapsed) {
+      this.deleteSelectedRange(selection);
+    }
     return true;
   }
 
@@ -17,7 +15,9 @@ export class DefaultHook implements Lifecycle {
     if (!selection.collapsed) {
       const b = selection.ranges.map(range => {
         const flag = range.startFragment === range.endFragment;
-        this.deleteRange(range, flag);
+        range.deleteSelectedScope();
+        range.startFragment = range.endFragment;
+        range.startIndex = range.endIndex = flag ? range.startIndex : 0;
         return flag;
       }).includes(false);
       if (b) {
@@ -27,19 +27,31 @@ export class DefaultHook implements Lifecycle {
     return true;
   }
 
-  // onDelete(renderer: Renderer, selection: TBSelection): boolean {
-  //
-  // }
+  onDelete(renderer: Renderer, selection: TBSelection): boolean {
+    if (!selection.collapsed) {
+      this.deleteSelectedRange(selection);
+      return false;
+    }
+    return true;
+  }
 
-  private deleteRange(range: TBRange, startFragmentEqualEndFragment: boolean) {
-    range.getSelectedScope().forEach(scope => {
-      if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        range.deleteEmptyTree(scope.fragment);
-      } else {
-        scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+  private deleteSelectedRange(selection: TBSelection) {
+    selection.ranges.forEach(range => {
+      range.deleteSelectedScope();
+      if (range.startFragment !== range.endFragment) {
+        const ff = range.endFragment.delete(0);
+        const startIndex = range.startFragment.contentLength;
+        ff.contents.forEach(c => range.startFragment.append(c));
+        ff.formatRanges
+          .filter(f => !(f.renderer instanceof BlockFormatter))
+          .map(f => {
+            f.startIndex += startIndex;
+            f.endIndex += startIndex;
+            return f;
+          })
+          .forEach(f => range.startFragment.mergeFormat(f));
       }
+      range.collapse();
     })
-    range.startFragment = range.endFragment;
-    range.startIndex = range.endIndex = startFragmentEqualEndFragment ? range.startIndex : 0;
   }
 }

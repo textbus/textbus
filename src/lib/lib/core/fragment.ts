@@ -2,6 +2,7 @@ import { Contents } from './contents';
 import { MediaTemplate, Template } from './template';
 import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
+import { BlockStyleFormatter } from '../formatter/block-style.formatter';
 
 export class Fragment {
   private contents = new Contents();
@@ -91,10 +92,15 @@ export class Fragment {
 
     const formatRanges: FormatRange[] = [];
     const newFragmentFormats: FormatRange[] = [];
-    this.formatMap.getFormatRanges().forEach(format => {
-      const cloneFormat = Object.assign({}, format);
-      cloneFormat.startIndex = 0;
+    this.formatMap.getFormatRanges().filter(f => {
+      if (f.renderer instanceof BlockStyleFormatter) {
+        newFragmentFormats.push(Object.assign({}, f));
+        return false;
+      }
+      return true;
+    }).forEach(format => {
       if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
+        const cloneFormat = Object.assign({}, format);
         cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
         cloneFormat.endIndex = Math.min(format.endIndex - startIndex, endIndex - startIndex);
         newFragmentFormats.push(cloneFormat);
@@ -104,12 +110,12 @@ export class Fragment {
         formatRanges.push(format);
       } else if (format.startIndex > endIndex) {
         // 在选区这后
-        format.startIndex -= length;
-        format.endIndex -= length;
+        format.startIndex -= count;
+        format.endIndex -= count;
         formatRanges.push(format);
       } else {
         if (format.startIndex < startIndex) {
-          format.endIndex = Math.max(startIndex, format.endIndex - length);
+          format.endIndex = Math.max(startIndex, format.endIndex - count);
           formatRanges.push(format);
         } else if (format.endIndex > endIndex) {
           format.startIndex = startIndex;

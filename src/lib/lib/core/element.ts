@@ -62,24 +62,31 @@ export class RootVElement extends VElement implements Lifecycle {
 
   onDelete(renderer: Renderer, selection: TBSelection): boolean {
     selection.ranges.forEach(range => {
-      if (range.collapsed) {
-        if (range.commonAncestorFragment.contentLength === 0) {
-          range.deleteEmptyTree(range.commonAncestorFragment);
-        } else {
-          range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-          range.startIndex = range.endIndex = range.startIndex - 1;
-        }
-        return;
+      // 这里只用考虑闭合的选区，未闭合的选区的 default.hook 完成删除动作
+      if (range.commonAncestorFragment.contentLength === 0) {
+        range.deleteEmptyTree(range.commonAncestorFragment);
+      } else {
+        range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+        range.startIndex = range.endIndex = range.startIndex - 1;
       }
-      range.deleteSelectedScope();
-      if (range.startFragment !== range.endFragment) {
-        const ff = range.endFragment.delete(0);
-        ff.contents.forEach(c => range.startFragment.append(c));
-        ff.formatRanges
-          .filter(f => !(f.renderer instanceof BlockFormatter))
-          .forEach(f => range.startFragment.mergeFormat(f));
-      }
-      range.collapse();
+      // if (range.collapsed) {
+      //   if (range.commonAncestorFragment.contentLength === 0) {
+      //     range.deleteEmptyTree(range.commonAncestorFragment);
+      //   } else {
+      //     range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+      //     range.startIndex = range.endIndex = range.startIndex - 1;
+      //   }
+      //   return;
+      // }
+      // range.deleteSelectedScope();
+      // if (range.startFragment !== range.endFragment) {
+      //   const ff = range.endFragment.delete(0);
+      //   ff.contents.forEach(c => range.startFragment.append(c));
+      //   ff.formatRanges
+      //     .filter(f => !(f.renderer instanceof BlockFormatter))
+      //     .forEach(f => range.startFragment.mergeFormat(f));
+      // }
+      // range.collapse();
     });
     return false;
   }

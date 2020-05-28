@@ -118,8 +118,12 @@ export class Viewer {
         const selection = new TBSelection(this.nativeSelection, this.renderer);
         let isNext = true;
         (this.context.options.hooks || []).forEach(lifecycle => {
-          if (typeof lifecycle.onEnter === 'function') {
+          if (eventType === EventType.onEnter && typeof lifecycle.onEnter === 'function') {
             if (lifecycle.onEnter(this.renderer, selection) === false) {
+              isNext = false;
+            }
+          } else if (eventType === EventType.onDelete && typeof lifecycle.onDelete === 'function') {
+            if (lifecycle.onDelete(this.renderer, selection) === false) {
               isNext = false;
             }
           }
