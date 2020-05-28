@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { MediaTemplate, Template } from './template';
-import { BlockFormatter, FormatRange, InlineFormatter } from './formatter';
+import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export class Fragment {
@@ -15,8 +15,21 @@ export class Fragment {
     this.contents.append(element);
   }
 
-  mergeFormat(formatter: FormatRange) {
-    this.formatMap.merge(formatter);
+  mergeFormat(format: FormatDelta) {
+    if (format.renderer instanceof InlineFormatter) {
+      this.formatMap.merge(format as FormatRange);
+    } else {
+      let self = this;
+      this.formatMap.merge({
+        get startIndex() {
+          return 0;
+        },
+        get endIndex() {
+          return self.contentLength;
+        },
+        ...format
+      })
+    }
   }
 
   getCanApplyFormats() {
@@ -133,11 +146,16 @@ export class Fragment {
    * 通过 Handler 获取当前片段的的格式化信息
    * @param formatter
    */
-  getFormatRangesByFormatter(formatter: InlineFormatter|BlockFormatter) {
+  getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
-  apply(formatRange: FormatRange) {
+  apply(f: FormatDelta) {
+    if (f.renderer instanceof BlockFormatter) {
+      this.mergeFormat(f);
+      return;
+    }
+    const formatRange = f as FormatRange;
     const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
     let index = 0;
     const formats: FormatRange[] = [];

@@ -21,14 +21,17 @@ export enum FormatEffect {
   Inherit = 'Inherit'
 }
 
-// export type FormatRange<T extends InlineFormatter | BlockFormatter, U = {
-//   abstractData: FormatAbstractData;
-//   renderer: T;
-//   state: FormatEffect;
-// }> = T extends InlineFormatter ? {
-//   startIndex: number;
-//   endIndex: number;
-// } & U : U;
+export type FormatDelta = {
+  abstractData: FormatAbstractData;
+  renderer: InlineFormatter;
+  state: FormatEffect;
+  startIndex: number;
+  endIndex: number;
+} | {
+  abstractData: FormatAbstractData;
+  renderer: BlockFormatter;
+  state: FormatEffect;
+};
 
 export interface FormatRange {
   startIndex: number;

@@ -36,7 +36,7 @@ export class FormatMap {
   }
 
   merge(formatter: FormatRange) {
-    if (formatter instanceof BlockFormatter) {
+    if (formatter.renderer instanceof BlockFormatter) {
       if (formatter.state === FormatEffect.Invalid) {
         this.map.delete(formatter.renderer);
       } else {

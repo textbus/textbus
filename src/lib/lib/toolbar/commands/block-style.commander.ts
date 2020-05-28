@@ -1,6 +1,6 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../core/selection';
-import { FormatEffect } from '../../core/formatter';
+import { BlockFormatter, FormatEffect } from '../../core/formatter';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
@@ -19,16 +19,16 @@ export class BlockStyleCommander implements Commander<string> {
   command(selection: TBSelection, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        // item.fragment.apply({
-        //   state: FormatEffect.Valid,
-        //   renderer: this.formatter,
-        //   abstractData: new FormatAbstractData({
-        //     style: {
-        //       name: this.name,
-        //       value: this.value
-        //     }
-        //   })
-        // });
+        item.fragment.apply({
+          state: FormatEffect.Valid,
+          renderer: this.formatter,
+          abstractData: new FormatAbstractData({
+            style: {
+              name: this.name,
+              value: this.value
+            }
+          })
+        });
       });
     });
   }

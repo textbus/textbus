@@ -1,51 +1,74 @@
 import 'core-js';
-// import { Observable } from 'rxjs';
-
 // import { createEditor } from './lib/create';
 import {
-  AudioTemplateTranslator, audioTool,
-  blockBackgroundTool, cleanTool,
+  AudioTemplateTranslator,
+  audioTool,
+  blockBackgroundTool, BlockFormatter, BlockStyleFormatter,
+  BlockTemplateTranslator,
+  boldFormatter,
+  boldTool,
+  cleanTool,
   CodeTemplateTranslator,
-  codeTool, DefaultHook, defaultStyleSheets,
-  Editor, emojiTool, fontFamilyFormatter, fontFamilyTool,
+  codeTool,
+  colorFormatter,
+  colorTool,
+  DefaultHook,
+  defaultStyleSheets,
+  Editor,
+  emojiTool,
+  fontFamilyFormatter,
+  fontFamilyTool,
   fontSizeFormatter,
-  fontSizeTool, ImageTemplateTranslator, imageTool,
+  fontSizeTool,
+  FormatAbstractData,
+  FormatDelta,
+  FormatEffect,
+  headingTool,
+  historyBackTool,
+  historyForwardTool,
+  ImageTemplateTranslator,
+  imageTool,
+  InlineFormatter,
   italicFormatter,
   italicTool,
   letterSpacingFormatter,
   letterSpacingTool,
   lineHeightFormatter,
-  lineHeightTool, linkTool,
+  lineHeightTool,
+  linkTool,
+  ListTemplateTranslator,
   olTool,
+  SingleTemplateTranslator,
   strikeThroughFormatter,
-  strikeThroughTool,
+  strikeThroughTool, StyleFormatter,
   subscriptFormatter,
   subscriptTool,
   superscriptFormatter,
-  superscriptTool, tableEditTool, TableTemplateTranslator, tableTool, textAlignTool,
+  superscriptTool,
+  tableEditTool,
+  TableTemplateTranslator,
+  tableTool,
+  textAlignTool,
   textBackgroundTool,
   textIndentFormatter,
   textIndentTool,
   ulTool,
   underlineFormatter,
-  underlineTool, VideoTemplateTranslator, videoTool
+  underlineTool,
+  VideoTemplateTranslator,
+  videoTool
 } from './lib/public-api';
 
 import './lib/assets/index.scss';
+// import { Observable } from 'rxjs';
 
-import {
-  ListTemplateTranslator,
-  BlockTemplateTranslator,
-  SingleTemplateTranslator,
-  boldFormatter,
-  colorFormatter,
-  historyBackTool,
-  historyForwardTool,
-  headingTool,
-  boldTool,
-  colorTool
-} from './lib/public-api';
-
+const a: FormatDelta = {
+  abstractData: new FormatAbstractData(),
+  state: FormatEffect.Invalid,
+  renderer: new BlockStyleFormatter('a', {}),
+  // startIndex: 0,
+  // endIndex: 9
+}
 
 const editor = new Editor('#editor', {
   theme: 'dark',
