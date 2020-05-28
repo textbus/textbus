@@ -278,6 +278,44 @@ export class TBRange {
     }, []);
   }
 
+  deleteSelectedScope() {
+    this.getSelectedScope().forEach(scope => {
+      if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        this.deleteEmptyTree(scope.fragment);
+      } else {
+        scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+      }
+    })
+  }
+
+  deleteEmptyTree(fragment: Fragment) {
+    const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+    parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
+    if (parentTemplate.childSlots.length === 0) {
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const index = parentFragment.find(parentTemplate);
+      parentFragment.delete(index, 1);
+      if (parentFragment.contentLength === 0) {
+        this.deleteEmptyTree(parentFragment);
+      }
+    }
+  }
+
+  /**
+   * 折叠当前选区
+   * @param toEnd 是否折叠到结束位置
+   */
+  collapse(toEnd = false) {
+    if (toEnd) {
+      this.startIndex = this.endIndex;
+      this.startFragment = this.endFragment;
+    } else {
+      this.endFragment = this.startFragment;
+      this.endIndex = this.startIndex;
+    }
+    return this;
+  }
+
   private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const ranges: SelectedScope[] = [];
     let scope: SelectedScope;

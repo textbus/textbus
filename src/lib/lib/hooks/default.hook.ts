@@ -8,7 +8,7 @@ export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {
     selection.ranges.forEach(range => {
       const flag = range.startFragment === range.endFragment;
-      this.deleteRange(range, renderer, flag);
+      this.deleteRange(range, flag);
     })
     return true;
   }
@@ -17,7 +17,7 @@ export class DefaultHook implements Lifecycle {
     if (!selection.collapsed) {
       const b = selection.ranges.map(range => {
         const flag = range.startFragment === range.endFragment;
-        this.deleteRange(range, renderer, flag);
+        this.deleteRange(range, flag);
         return flag;
       }).includes(false);
       if (b) {
@@ -27,28 +27,19 @@ export class DefaultHook implements Lifecycle {
     return true;
   }
 
-  private deleteRange(range: TBRange, renderer: Renderer, startFragmentEqualEndFragment: boolean) {
+  // onDelete(renderer: Renderer, selection: TBSelection): boolean {
+  //
+  // }
+
+  private deleteRange(range: TBRange, startFragmentEqualEndFragment: boolean) {
     range.getSelectedScope().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        this.deleteEmptyTree(scope.fragment, renderer);
+        range.deleteEmptyTree(scope.fragment);
       } else {
         scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
       }
     })
     range.startFragment = range.endFragment;
     range.startIndex = range.endIndex = startFragmentEqualEndFragment ? range.startIndex : 0;
-  }
-
-  private deleteEmptyTree(fragment: Fragment, renderer: Renderer) {
-    const parentTemplate = renderer.getParentTemplateByFragment(fragment);
-    parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
-    if (parentTemplate.childSlots.length === 0) {
-      const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
-      const index = parentFragment.find(parentTemplate);
-      parentFragment.delete(index, 1);
-      if (parentFragment.contentLength === 0) {
-        this.deleteEmptyTree(parentFragment, renderer);
-      }
-    }
   }
 }

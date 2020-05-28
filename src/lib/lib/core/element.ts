@@ -1,4 +1,8 @@
-import { EventEmitter } from './events';
+import { EventEmitter, EventType } from './events';
+import { Lifecycle } from './lifecycle';
+import { Renderer } from './renderer';
+import { TBSelection } from './selection';
+import { BlockFormatter } from './formatter';
 
 export class VTextNode {
   constructor(public readonly textContent: string = '') {
@@ -43,5 +47,40 @@ export class VElement {
     return Array.from(left.keys()).reduce((v, key) => {
       return v && left.get(key) === right.get(key);
     }, true);
+  }
+}
+
+export class RootVElement extends VElement implements Lifecycle {
+  constructor() {
+    super('root');
+    this.events.subscribe(event => {
+      if (event.type === EventType.onDelete) {
+        this.onDelete(event.renderer, event.selection);
+      }
+    })
+  }
+
+  onDelete(renderer: Renderer, selection: TBSelection): boolean {
+    selection.ranges.forEach(range => {
+      if (range.collapsed) {
+        if (range.commonAncestorFragment.contentLength === 0) {
+          range.deleteEmptyTree(range.commonAncestorFragment);
+        } else {
+          range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+          range.startIndex = range.endIndex = range.startIndex - 1;
+        }
+        return;
+      }
+      range.deleteSelectedScope();
+      if (range.startFragment !== range.endFragment) {
+        const ff = range.endFragment.delete(0);
+        ff.contents.forEach(c => range.startFragment.append(c));
+        ff.formatRanges
+          .filter(f => !(f.renderer instanceof BlockFormatter))
+          .forEach(f => range.startFragment.mergeFormat(f));
+      }
+      range.collapse();
+    });
+    return false;
   }
 }

@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { MediaTemplate, Template } from './template';
-import { FormatRange, Formatter } from './formatter';
+import { BlockFormatter, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export class Fragment {
@@ -133,7 +133,7 @@ export class Fragment {
    * 通过 Handler 获取当前片段的的格式化信息
    * @param formatter
    */
-  getFormatRangesByFormatter(formatter: Formatter) {
+  getFormatRangesByFormatter(formatter: InlineFormatter|BlockFormatter) {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
@@ -163,6 +163,7 @@ export class Fragment {
 
     formats.forEach(f => this.formatMap.merge(f));
   }
+
 
   // clone(options: { contents?: boolean, formats?: boolean } = {}) {
   //   const fragment = new Fragment();

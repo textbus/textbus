@@ -3,7 +3,6 @@ import { auditTime } from 'rxjs/operators';
 
 import { Renderer } from '../core/renderer';
 import { template } from './template-html';
-import { RootFragment } from '../core/root-fragment';
 import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
 import { Input, Keymap } from './input';
@@ -24,7 +23,7 @@ export class Viewer {
   private frame = document.createElement('iframe');
   private input: Input;
   private nativeSelection: Selection;
-  private rootFragment: RootFragment;
+  private rootFragment: Fragment;
 
   private readyEvent = new Subject<Document>();
   private selectionChangeEvent = new Subject<TBSelection>();
@@ -101,6 +100,9 @@ export class Viewer {
     this.dispatchEvent({
       key: 'Enter'
     }, EventType.onEnter);
+    this.dispatchEvent({
+      key: 'Backspace'
+    }, EventType.onDelete);
   }
 
   dispatchEvent(keymap: Keymap, eventType: EventType) {
@@ -135,7 +137,7 @@ export class Viewer {
     })
   }
 
-  render(rootFragment: RootFragment) {
+  render(rootFragment: Fragment) {
     this.rootFragment = rootFragment;
     const last = rootFragment.sliceContents(rootFragment.contentLength - 1)[0];
     if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {

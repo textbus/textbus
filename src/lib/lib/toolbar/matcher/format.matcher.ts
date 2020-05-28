@@ -4,7 +4,7 @@ import { HighlightState } from '../help';
 import { Fragment } from '../../core/fragment';
 import { TBRange } from '../../core/range';
 import { Template } from '../../core/template';
-import { FormatRange, Formatter, FormatEffect } from '../../core/formatter';
+import { FormatRange, InlineFormatter, FormatEffect, BlockFormatter } from '../../core/formatter';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
@@ -16,7 +16,7 @@ export interface FormatMatcherParams {
 }
 
 export class FormatMatcher implements Matcher {
-  constructor(private formatter: Formatter, private rule: FormatMatcherParams = {}) {
+  constructor(private formatter: InlineFormatter | BlockFormatter, private rule: FormatMatcherParams = {}) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -79,7 +79,7 @@ export class FormatMatcher implements Matcher {
     };
   }
 
-  private getStatesByRange(fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): FormatMatchData {
+  private getStatesByRange(fragment: Fragment, formatter: InlineFormatter | BlockFormatter, startIndex: number, endIndex: number): FormatMatchData {
     let formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
@@ -194,7 +194,7 @@ export class FormatMatcher implements Matcher {
   }
 
 
-  private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: Formatter, startIndex: number, endIndex: number): FormatMatchData {
+  private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
 
     while (true) {
       const formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];

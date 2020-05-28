@@ -1,6 +1,6 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../core/selection';
-import { Formatter, FormatEffect } from '../../core/formatter';
+import { InlineFormatter, FormatEffect } from '../../core/formatter';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export class StyleCommander implements Commander<string> {
@@ -8,7 +8,7 @@ export class StyleCommander implements Commander<string> {
 
   private value = '';
 
-  constructor(private name: string, private formatter: Formatter) {
+  constructor(private name: string, private formatter: InlineFormatter) {
   }
 
   updateValue(value: string) {

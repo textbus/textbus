@@ -1,7 +1,7 @@
 import { HandlerType, SelectConfig } from '../help';
-import { BlockCommander } from '../commands/block.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { textAlignFormatter } from '../../formatter/style.formatter';
+import { textAlignFormatter } from '../../formatter/block-style.formatter';
+import { BlockStyleCommander } from '../commands/block-style.commander';
 
 export const textAlignTool: SelectConfig = {
   type: HandlerType.Select,
@@ -45,5 +45,5 @@ export const textAlignTool: SelectConfig = {
     console.log(p);
     return options[0]
   },
-  execCommand: new BlockCommander('textAlign')
+  execCommand: new BlockStyleCommander('textAlign', textAlignFormatter)
 };

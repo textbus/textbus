@@ -1,12 +1,12 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../core/selection';
-import { Formatter, FormatEffect } from '../../core/formatter';
+import { InlineFormatter, FormatEffect } from '../../core/formatter';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
-export class BoldCommander implements Commander<Formatter> {
+export class BoldCommander implements Commander<InlineFormatter> {
   recordHistory = true;
 
-  constructor(private formatter: Formatter) {
+  constructor(private formatter: InlineFormatter) {
   }
 
   command(selection: TBSelection, overlap: boolean): void {

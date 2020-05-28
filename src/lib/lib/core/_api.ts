@@ -9,6 +9,5 @@ export * from './lifecycle';
 export * from './parser';
 export * from './range';
 export * from './renderer';
-export * from './root-fragment';
 export * from './selection';
 export * from './template';

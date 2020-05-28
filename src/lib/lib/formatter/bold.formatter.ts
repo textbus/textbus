@@ -1,9 +1,9 @@
-import { Formatter, FormatEffect } from '../core/formatter';
+import { InlineFormatter, FormatEffect } from '../core/formatter';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-export class BoldFormatter extends Formatter {
+export class BoldFormatter extends InlineFormatter {
   constructor() {
     super({
       extendTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'th'],

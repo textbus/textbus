@@ -3,7 +3,7 @@ import { from, Observable, of, zip } from 'rxjs';
 
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
-import { Formatter } from './core/formatter';
+import { InlineFormatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
@@ -20,7 +20,7 @@ export interface Snapshot {
 export interface EditorOptions {
   theme?: string;
   templateTranslators?: TemplateTranslator[];
-  formatters?: Formatter[];
+  formatters?: InlineFormatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
   hooks?: Lifecycle[];
   styleSheets?: string[];

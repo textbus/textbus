@@ -1,7 +1,7 @@
 import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { textIndentFormatter } from '../../formatter/style.formatter';
-import { StyleCommander } from '../commands/style.commander';
+import { textIndentFormatter } from '../../formatter/block-style.formatter';
+import { BlockStyleCommander } from '../commands/block-style.commander';
 
 export const textIndentTool: SelectConfig = {
   type: HandlerType.Select,
@@ -32,5 +32,5 @@ export const textIndentTool: SelectConfig = {
     console.log(p);
     return options[0]
   },
-  execCommand: new StyleCommander('textIndent', textIndentFormatter)
+  execCommand: new BlockStyleCommander('textIndent', textIndentFormatter)
 };

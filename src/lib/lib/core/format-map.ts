@@ -1,12 +1,13 @@
-import { FormatRange, Formatter, FormatEffect } from './formatter';
+import { BlockFormatter, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 
 export class FormatMap {
-  private map = new Map<Formatter, FormatRange[]>();
+  private map = new Map<InlineFormatter | BlockFormatter, Array<FormatRange>>();
+
   /**
    * 通过 Handler 获取当前片段的的格式化信息
    * @param formatter
    */
-  getFormatRangesByFormatter(formatter: Formatter) {
+  getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
     return this.map.get(formatter);
   }
 
@@ -16,6 +17,7 @@ export class FormatMap {
   getFormatRanges() {
     return Array.from(this.map.values()).reduce((v, n) => v.concat(n), []);
   }
+
   getCanApplyFormats() {
     let formats: FormatRange[] = [];
     // 检出所有生效规则
@@ -34,7 +36,15 @@ export class FormatMap {
   }
 
   merge(formatter: FormatRange) {
-    const oldFormats = this.map.get(formatter.renderer);
+    if (formatter instanceof BlockFormatter) {
+      if (formatter.state === FormatEffect.Invalid) {
+        this.map.delete(formatter.renderer);
+      } else {
+        this.map.set(formatter.renderer, [formatter]);
+      }
+      return;
+    }
+    const oldFormats = this.map.get(formatter.renderer) as FormatRange[];
     if (!Array.isArray(oldFormats)) {
       this.map.set(formatter.renderer, [formatter]);
       return;

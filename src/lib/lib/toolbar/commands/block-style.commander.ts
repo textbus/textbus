@@ -1,18 +1,35 @@
 import { Commander } from './commander';
 import { TBSelection } from '../../core/selection';
+import { FormatEffect } from '../../core/formatter';
+import { FormatAbstractData } from '../../core/format-abstract-data';
+import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
 
-  constructor(private name: string) {
+  private value = '';
+
+  constructor(private name: string, private formatter: BlockStyleFormatter) {
   }
 
-  updateValue(value: string): void {
-    this.name = value;
+  updateValue(value: string) {
+    this.value = value;
   }
 
-  command(selection: TBSelection, overlap: boolean): void {
-    console.log(selection)
+  command(selection: TBSelection, overlap: boolean) {
+    selection.ranges.forEach(range => {
+      range.getSelectedScope().forEach(item => {
+        // item.fragment.apply({
+        //   state: FormatEffect.Valid,
+        //   renderer: this.formatter,
+        //   abstractData: new FormatAbstractData({
+        //     style: {
+        //       name: this.name,
+        //       value: this.value
+        //     }
+        //   })
+        // });
+      });
+    });
   }
-
 }

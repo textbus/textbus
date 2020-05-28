@@ -21,11 +21,20 @@ export enum FormatEffect {
   Inherit = 'Inherit'
 }
 
+// export type FormatRange<T extends InlineFormatter | BlockFormatter, U = {
+//   abstractData: FormatAbstractData;
+//   renderer: T;
+//   state: FormatEffect;
+// }> = T extends InlineFormatter ? {
+//   startIndex: number;
+//   endIndex: number;
+// } & U : U;
+
 export interface FormatRange {
   startIndex: number;
   endIndex: number;
   abstractData: FormatAbstractData;
-  renderer: Formatter;
+  renderer: InlineFormatter | BlockFormatter;
   state: FormatEffect;
 }
 
@@ -51,7 +60,7 @@ export interface MatchRule {
   filter?: (node: HTMLElement | FormatAbstractData) => boolean;
 }
 
-export abstract class Formatter {
+abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
@@ -190,5 +199,14 @@ export abstract class Formatter {
         return false;
       }).includes(false);
     }
+  }
+}
+
+export abstract class InlineFormatter extends Formatter {
+}
+
+export abstract class BlockFormatter extends InlineFormatter {
+  protected constructor(protected rule: MatchRule = {}) {
+    super(rule, 0);
   }
 }

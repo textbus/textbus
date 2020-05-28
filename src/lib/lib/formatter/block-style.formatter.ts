@@ -1,11 +1,11 @@
-import { InlineFormatter, MatchRule, FormatEffect } from '../core/formatter';
+import { MatchRule, FormatEffect, BlockFormatter } from '../core/formatter';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-export class StyleFormatter extends InlineFormatter {
+export class BlockStyleFormatter extends BlockFormatter {
   constructor(public styleName: string, rule: MatchRule) {
-    super(rule, 10);
+    super(rule);
   }
 
   read(node: HTMLElement): FormatAbstractData {
@@ -18,38 +18,25 @@ export class StyleFormatter extends InlineFormatter {
     if (existingElement) {
       existingElement.styles.set(this.styleName, abstractData.style.value);
     } else {
-      const el = new VElement('span');
+      const el = new VElement('div');
       el.styles.set(this.styleName, abstractData.style.value);
       return new ChildSlotModel(el);
     }
   }
 }
 
-export const colorFormatter = new StyleFormatter('color', {
+export const lineHeightFormatter = new BlockStyleFormatter('lineHeight', {
   styles: {
-    color: /.+/
+    lineHeight: /.+/
   }
 });
-
-export const backgroundColor = new StyleFormatter('backgroundColor', {
+export const textIndentFormatter = new BlockStyleFormatter('textIndent', {
   styles: {
-    backgroundColor: /.+/
+    textIndent: /.+/
   }
 });
-
-export const fontSizeFormatter = new StyleFormatter('fontSize', {
+export const textAlignFormatter = new BlockStyleFormatter('textAlign', {
   styles: {
-    fontSize: /.+/
-  }
-});
-
-export const letterSpacingFormatter = new StyleFormatter('letterSpacing', {
-  styles: {
-    letterSpacing: /.+/
-  }
-});
-export const fontFamilyFormatter = new StyleFormatter('fontFamily', {
-  styles: {
-    fontFamily: /.+/
+    textAlign: /.+/
   }
 });

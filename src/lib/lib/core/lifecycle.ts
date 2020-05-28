@@ -8,6 +8,8 @@ export interface Lifecycle {
 
   onEnter?(renderer: Renderer, selection: TBSelection): boolean;
 
+  onDelete?(renderer: Renderer, selection: TBSelection): boolean;
+
   onSelectionChange?(): void;
 
   onRender?(): void;

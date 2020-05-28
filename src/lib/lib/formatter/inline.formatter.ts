@@ -1,9 +1,9 @@
-import { Formatter, MatchRule, FormatEffect } from '../core/formatter';
+import { InlineFormatter, MatchRule, FormatEffect } from '../core/formatter';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-export class InlineFormatter extends Formatter {
+export class InlineTagFormatter extends InlineFormatter {
   constructor(private tagName: string, rule: MatchRule) {
     super(rule, 0);
   }
@@ -19,7 +19,7 @@ export class InlineFormatter extends Formatter {
   }
 }
 
-export const italicFormatter = new InlineFormatter('em', {
+export const italicFormatter = new InlineTagFormatter('em', {
   tags: ['em', 'i'],
   styles: {
     fontStyle: ['italic']
@@ -28,21 +28,21 @@ export const italicFormatter = new InlineFormatter('em', {
     fontStyle: /(?!italic).+/
   }
 });
-export const strikeThroughFormatter = new InlineFormatter('del', {
+export const strikeThroughFormatter = new InlineTagFormatter('del', {
   tags: ['strike', 'del', 's'],
   styles: {
     textDecoration: ['line-through']
   }
 });
-export const underlineFormatter = new InlineFormatter('u', {
+export const underlineFormatter = new InlineTagFormatter('u', {
   tags: ['u'],
   styles: {
     textDecoration: ['underline']
   }
 });
-export const subscriptFormatter = new InlineFormatter('sub', {
+export const subscriptFormatter = new InlineTagFormatter('sub', {
   tags: ['sub']
 });
-export const superscriptFormatter = new InlineFormatter('sup', {
+export const superscriptFormatter = new InlineTagFormatter('sup', {
   tags: ['sup']
 });

@@ -1,6 +1,6 @@
-import { VElement, VTextNode } from './element';
+import { RootVElement, VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
-import { FormatRange } from './formatter';
+import { BlockFormatter, FormatRange } from './formatter';
 import { MediaTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
@@ -91,7 +91,7 @@ export class Renderer {
     this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
-    const root = new VElement('root');
+    const root = new RootVElement();
     this.NVMappingTable.set(host, root);
     const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
@@ -149,7 +149,8 @@ export class Renderer {
     do {
       const event = new TBEvent({
         type,
-        selection
+        selection,
+        renderer: this
       });
       by.events.emit(event);
       stopped = event.stopped;
@@ -295,7 +296,7 @@ export class Renderer {
     const childFormats: FormatRange[] = [];
     fragment.getCanApplyFormats().forEach(f => {
       const ff = Object.assign({}, f);
-      if (f.startIndex === 0 && f.endIndex === fragment.contentLength) {
+      if(ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
         containerFormats.push(ff);
       } else {
         childFormats.push(ff);
@@ -415,7 +416,7 @@ export class Renderer {
   }
 
   private createVDomByFormats(
-    formats: FormatRange[],
+    formats: Array<FormatRange>,
     fragment: Fragment,
     startIndex: number,
     endIndex: number,

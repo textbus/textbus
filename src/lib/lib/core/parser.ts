@@ -1,6 +1,5 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
-import { RootFragment } from './root-fragment';
 import { FormatEffect } from './formatter';
 
 export class Parser {
@@ -8,7 +7,7 @@ export class Parser {
   }
 
   parse(el: HTMLElement) {
-    const rootSlot = new RootFragment();
+    const rootSlot = new Fragment();
     this.readTemplate(el, rootSlot);
     return rootSlot;
   }

@@ -1,9 +1,9 @@
-import { Formatter, MatchRule, FormatEffect } from '../core/formatter';
+import { InlineFormatter, MatchRule, FormatEffect } from '../core/formatter';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { VElement } from '../core/element';
 import { ChildSlotModel } from '../core/renderer';
 
-export class LinkFormatter extends Formatter {
+export class LinkFormatter extends InlineFormatter {
   constructor() {
     super({
       tags: ['a']
