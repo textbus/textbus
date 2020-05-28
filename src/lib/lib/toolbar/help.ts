@@ -3,7 +3,7 @@ import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { Commander } from './commands/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
-import { Template } from '../core/template';
+import { MediaTemplate, Template } from '../core/template';
 import { Keymap } from '../viewer/input';
 
 /**
@@ -68,7 +68,7 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight(options: SelectOptionConfig[], data: FormatAbstractData | Template): SelectOptionConfig;
+  highlight(options: SelectOptionConfig[], data: FormatAbstractData | Template | MediaTemplate): SelectOptionConfig;
 
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;

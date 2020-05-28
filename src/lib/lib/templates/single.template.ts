@@ -1,4 +1,4 @@
-import { Template, TemplateTranslator, ViewData } from '../core/template';
+import { MediaTemplate, TemplateTranslator, ViewData } from '../core/template';
 import { VElement } from '../core/element';
 
 export class SingleTemplateTranslator implements TemplateTranslator {
@@ -18,9 +18,9 @@ export class SingleTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class SingleTemplate extends Template {
-  constructor(public readonly tagName: string) {
-    super();
+export class SingleTemplate extends MediaTemplate {
+  constructor(tagName: string) {
+    super(tagName);
   }
 
   render() {

@@ -1,6 +1,8 @@
 import { Template, TemplateTranslator, ViewData } from '../core/template';
 import { Fragment } from '../core/fragment';
 import { VElement } from '../core/element';
+import { EventType } from '../core/events';
+import { SingleTemplate } from './single.template';
 
 export class CodeTemplateTranslator implements TemplateTranslator {
   private tagName = 'pre';
@@ -34,6 +36,14 @@ export class CodeTemplate extends Template {
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     const code = new VElement('code');
+    code.events.subscribe(event => {
+      if (event.type === EventType.onEnter) {
+        const firstRange = event.selection.firstRange;
+        console.log(firstRange.startIndex)
+        this.childSlots[0].insert(new SingleTemplate('br'), firstRange.startIndex);
+        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+      }
+    })
     block.appendChild(code);
     this.viewMap.set(this.childSlots[0], code);
     return block;

@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { DropdownConfig, HandlerType } from '../help';
-import { BlockMatcher } from '../matcher/block.matcher';
 import { AudioTemplate } from '../../templates/audio.template';
 import { AudioCommander } from '../commands/audio.commander';
+import { MediaMatcher } from '../matcher/media.matcher';
 
 const commander = new AudioCommander();
 
@@ -42,6 +42,6 @@ export const audioTool: DropdownConfig = {
   tooltip: '音频',
   onHide: hideEvent.asObservable(),
   viewer: form,
-  match: new BlockMatcher(AudioTemplate),
+  match: new MediaMatcher(AudioTemplate),
   execCommand: commander
 };

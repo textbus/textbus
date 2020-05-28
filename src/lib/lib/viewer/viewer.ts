@@ -92,11 +92,11 @@ export class Viewer {
         }
       })
       if (isNext) {
-        // this.recordSnapshotFromEditingBefore();
         this.write(selection);
       }
       this.render(this.rootFragment);
       selection.restore();
+      this.input.updateStateBySelection(this.nativeSelection);
     })
     this.dispatchEvent({
       key: 'Enter'
@@ -127,6 +127,10 @@ export class Viewer {
         }
         this.render(this.rootFragment);
         selection.restore();
+        this.input.updateStateBySelection(this.nativeSelection);
+        if ([EventType.onEnter].includes(eventType)) {
+          this.recordSnapshotFromEditingBefore();
+        }
       }
     })
   }

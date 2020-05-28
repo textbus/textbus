@@ -7,7 +7,7 @@ export interface SlotMap {
 }
 
 export interface ViewData {
-  template: Template;
+  template: Template | MediaTemplate;
   childrenSlots: SlotMap[];
 }
 
@@ -30,4 +30,13 @@ export abstract class Template {
   getChildViewBySlot(slot: Fragment) {
     return this.viewMap.get(slot);
   }
+}
+
+export abstract class MediaTemplate {
+  readonly length = 1;
+
+  protected constructor(public tagName: string) {
+  }
+
+  abstract render(): VElement;
 }

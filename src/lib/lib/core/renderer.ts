@@ -1,7 +1,7 @@
 import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { FormatRange } from './formatter';
-import { Template } from './template';
+import { MediaTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
 
@@ -78,7 +78,7 @@ export class Renderer {
 
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
   private fragmentHierarchyMapping = new Map<Fragment, Template>();
-  private templateHierarchyMapping = new Map<Template, Fragment>();
+  private templateHierarchyMapping = new Map<Template | MediaTemplate, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
@@ -132,7 +132,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  getContext<T extends Template>(by: Fragment, context: Constructor<T>): T {
+  getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
     if (templateInstance instanceof context) {
       return templateInstance;
@@ -202,7 +202,9 @@ export class Renderer {
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
           this.NVMappingTable.set(el, current);
-          this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
+          if (current instanceof VElement) {
+            this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
+          }
         } else {
           if (current instanceof VElement) {
             const el = this.createElement(current);
@@ -323,7 +325,12 @@ export class Renderer {
             break;
           }
         }
-        const {host, slot} = this.createVDomByFormats(childFormats, fragment, startIndex, endIndex);
+        const {host, slot} = this.createVDomByFormats(
+          childFormats,
+          fragment,
+          firstRange.startIndex,
+          firstRange.endIndex
+        );
 
 
         const progenyFormats: FormatRange[] = [];
@@ -385,7 +392,7 @@ export class Renderer {
         });
         i += item.length;
         children.push(textNode);
-      } else if (item instanceof Template) {
+      } else {
         this.templateHierarchyMapping.set(item, fragment);
         const vDom = item.render();
         this.vDomPositionMapping.set(vDom, {
@@ -395,11 +402,13 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        item.childSlots.forEach(slot => {
-          this.fragmentHierarchyMapping.set(slot, item);
-          const parent = item.getChildViewBySlot(slot);
-          this.createVDom(slot, parent);
-        });
+        if (item instanceof Template) {
+          item.childSlots.forEach(slot => {
+            this.fragmentHierarchyMapping.set(slot, item);
+            const parent = item.getChildViewBySlot(slot);
+            this.createVDom(slot, parent);
+          });
+        }
       }
     });
     return children;
