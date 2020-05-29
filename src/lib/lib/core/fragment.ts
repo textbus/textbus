@@ -82,6 +82,11 @@ export class Fragment {
     return ff;
   }
 
+  clean() {
+    this.contents = new Contents();
+    this.formatMap = new FormatMap();
+  }
+
   /**
    * 通过下标获取文本或子节点
    * @param index
@@ -197,21 +202,4 @@ export class Fragment {
     });
     formats.forEach(f => this.formatMap.merge(f));
   }
-
-
-  // clone(options: { contents?: boolean, formats?: boolean } = {}) {
-  //   const fragment = new Fragment();
-  //
-  //   if (options.contents) {
-  //     this.contents.slice(0).forEach(item => {
-  //       if (typeof item === 'string') {
-  //         fragment.append(item);
-  //       } else {
-  //         fragment.append(item);
-  //       }
-  //     })
-  //   }
-  //
-  //   return fragment;
-  // }
 }

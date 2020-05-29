@@ -23,6 +23,10 @@ export class SingleTemplate extends MediaTemplate {
     super(tagName);
   }
 
+  clone() {
+    return new SingleTemplate(this.tagName);
+  }
+
   render() {
     return new VElement(this.tagName);
   }

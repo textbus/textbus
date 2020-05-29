@@ -17,15 +17,16 @@ export class HistoryCommander implements Commander<Editor> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
-    console.log(this.editor)
     const snapshot = this.action === 'back' ?
       this.editor.getPreviousSnapshot() :
       this.editor.getNextSnapshot();
     if (snapshot) {
-      // rootFragment.cleanFormats();
-      // rootFragment.useContents(new Contents());
-      // rootFragment.insertFragmentContents(snapshot.doc.clone(), 0);
-      // selection.usePaths(snapshot.paths, rootFragment);
+      rootFragment.clean();
+      snapshot.contents.sliceContents(0).forEach(item => {
+        rootFragment.append(item);
+      });
+      snapshot.contents.getFormatRanges().forEach(f => rootFragment.mergeFormat(f));
+      selection.usePaths(snapshot.paths, rootFragment);
     }
   }
 }

@@ -1,10 +1,19 @@
 import { TBRange } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
+import { Template } from './template';
 
 export interface RangePath {
   startPaths: number[];
   endPaths: number[];
+}
+
+/**
+ * 标识 Fragment 中的一个位置
+ */
+export interface TBRangePosition {
+  fragment: Fragment;
+  index: number;
 }
 
 export class TBSelection {
@@ -42,8 +51,10 @@ export class TBSelection {
   }
 
   private _ranges: TBRange[] = [];
+  private nativeSelection: Selection;
 
-  constructor(private nativeSelection: Selection, private renderer: Renderer) {
+  constructor(private context: Document, private renderer: Renderer,) {
+    this.nativeSelection = context.getSelection();
     for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
       this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
     }
@@ -55,36 +66,16 @@ export class TBSelection {
     });
   }
 
-  private getCommonFragment(): Fragment {
-    const ranges = this.ranges || [];
-    if (ranges.length === 1) {
-      return ranges[0].commonAncestorFragment;
-    }
+  /**
+   * 清除所有的 Range
+   */
+  removeAllRanges() {
+    this._ranges = [];
+    this.nativeSelection.removeAllRanges();
+  }
 
-    const depth: Fragment[][] = [];
-
-    ranges.map(range => range.commonAncestorFragment).forEach(fragment => {
-      const tree = [];
-      while (fragment) {
-        tree.push(fragment);
-        fragment = this.renderer.getParentFragmentByTemplate(this.renderer.getParentTemplateByFragment(fragment));
-      }
-      depth.push(tree);
-    });
-
-    let fragment: Fragment = null;
-
-    while (true) {
-      const firstFragments = depth.map(arr => arr.pop()).filter(i => i);
-      if (firstFragments.length === depth.length) {
-        if (new Set(firstFragments).size === 1) {
-          fragment = firstFragments[0];
-        } else {
-          break;
-        }
-      }
-    }
-    return fragment;
+  addRange(range: TBRange) {
+    this._ranges.push(range);
   }
 
   /**
@@ -122,5 +113,79 @@ export class TBSelection {
         }
       }
     });
+  }
+
+  /**
+   * 将一组路径应用到当前 Selection
+   * @param paths
+   * @param fragment
+   */
+  usePaths(paths: RangePath[], fragment: Fragment) {
+    const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
+      const paths = position.map(i => i).reverse();
+      while (true) {
+        const index = paths.pop();
+        console.log(fragment, index, fragment.getContentAtIndex(index))
+        fragment = (fragment.getContentAtIndex(index) as Template).childSlots[paths.pop()];
+        if (paths.length === 1) {
+          return {
+            fragment,
+            index: paths.pop()
+          }
+        }
+      }
+    };
+    this.removeAllRanges();
+    paths.filter(r => r.startPaths.length).forEach(rangePosition => {
+      const start = findPosition(rangePosition.startPaths, fragment);
+      const nativeRange = this.context.createRange();
+      const range = new TBRange(nativeRange, this.renderer);
+
+      range.startIndex = start.index;
+      range.startFragment = start.fragment;
+
+      if (rangePosition.endPaths === rangePosition.startPaths) {
+        range.endIndex = start.index;
+        range.endFragment = start.fragment;
+      } else {
+        const end = findPosition(rangePosition.endPaths, fragment);
+        range.endIndex = end.index;
+        range.endFragment = end.fragment;
+      }
+      this.nativeSelection.addRange(nativeRange);
+      this.addRange(range);
+    });
+  }
+
+  private getCommonFragment(): Fragment {
+    const ranges = this.ranges || [];
+    if (ranges.length === 1) {
+      return ranges[0].commonAncestorFragment;
+    }
+
+    const depth: Fragment[][] = [];
+
+    ranges.map(range => range.commonAncestorFragment).forEach(fragment => {
+      const tree = [];
+      while (fragment) {
+        tree.push(fragment);
+        fragment = this.renderer.getParentFragmentByTemplate(this.renderer.getParentTemplateByFragment(fragment));
+      }
+      depth.push(tree);
+    });
+
+    let fragment: Fragment = null;
+
+    while (true) {
+      const firstFragments = depth.map(arr => arr.pop()).filter(i => i);
+      if (firstFragments.length === depth.length) {
+        if (new Set(firstFragments).size === 1) {
+          fragment = firstFragments[0];
+        } else {
+          break;
+        }
+      }
+    }
+    return fragment;
   }
 }

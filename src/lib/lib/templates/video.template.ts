@@ -21,6 +21,10 @@ export class VideoTemplate extends MediaTemplate {
     super(tagName);
   }
 
+  clone() {
+    return new VideoTemplate(this.tagName);
+  }
+
   render() {
     return new VElement(this.tagName);
   }

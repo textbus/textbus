@@ -21,6 +21,10 @@ export class TableTemplate extends Template {
     super();
   }
 
+  clone() {
+    return new TableTemplate(this.tagName);
+  }
+
   render() {
     return new VElement(this.tagName);
   }

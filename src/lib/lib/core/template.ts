@@ -1,5 +1,6 @@
 import { Fragment } from './fragment';
 import { VElement } from './element';
+import { Constructor } from '@tanbo/tbus/core/renderer';
 
 export interface SlotMap {
   from: HTMLElement;
@@ -26,6 +27,7 @@ export abstract class Template {
   }
 
   abstract render(): VElement;
+  abstract clone(): any;
 
   getChildViewBySlot(slot: Fragment) {
     return this.viewMap.get(slot);
@@ -39,4 +41,5 @@ export abstract class MediaTemplate {
   }
 
   abstract render(): VElement;
+  abstract clone(): any;
 }

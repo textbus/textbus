@@ -24,4 +24,8 @@ export class ImageTemplate extends MediaTemplate {
   render() {
     return new VElement(this.tagName);
   }
+
+  clone() {
+    return new ImageTemplate(this.tagName);
+  }
 }

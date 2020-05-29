@@ -32,6 +32,10 @@ export class CodeTemplate extends Template {
     super();
   }
 
+  clone() {
+    return new CodeTemplate(this.lang);
+  }
+
   render() {
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);

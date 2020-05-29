@@ -77,17 +77,17 @@ export class Viewer {
     merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
       .subscribe(() => {
         this.nativeSelection = this.contentDocument.getSelection();
-        this.canEditableEvent.next(new TBSelection(this.nativeSelection, this.renderer));
+        this.canEditableEvent.next(new TBSelection(this.contentDocument, this.renderer));
       });
     fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
-      this.selectionChangeEvent.next(new TBSelection(this.nativeSelection, this.renderer));
+      this.selectionChangeEvent.next(new TBSelection(this.contentDocument, this.renderer));
     })
     this.input.events.onFocus.subscribe(() => {
       this.recordSnapshotFromEditingBefore();
     })
     this.input.events.onInput.subscribe(() => {
-      const selection = new TBSelection(this.nativeSelection, this.renderer);
+      const selection = new TBSelection(this.contentDocument, this.renderer);
       let isNext = true;
       (this.context.options.hooks || []).forEach(lifecycle => {
         if (typeof lifecycle.onInput === 'function') {
@@ -121,7 +121,7 @@ export class Viewer {
         if (!vElement) {
           return;
         }
-        const selection = new TBSelection(this.nativeSelection, this.renderer);
+        const selection = new TBSelection(this.contentDocument, this.renderer);
         let isNext = true;
         (this.context.options.hooks || []).forEach(lifecycle => {
           if (eventType === EventType.onEnter && typeof lifecycle.onEnter === 'function') {
@@ -160,7 +160,7 @@ export class Viewer {
   }
 
   apply(config: HandlerConfig) {
-    const selection = new TBSelection(this.nativeSelection, this.renderer);
+    const selection = new TBSelection(this.contentDocument, this.renderer);
     const state = config.match ?
       config.match.queryState(selection, this.renderer, this.context).state :
       HighlightState.Normal;
@@ -188,7 +188,7 @@ export class Viewer {
    */
   recordSnapshotFromEditingBefore() {
     this.input.cleanValue();
-    this.selectionSnapshot = new TBSelection(this.nativeSelection, this.renderer);
+    this.selectionSnapshot = new TBSelection(this.contentDocument, this.renderer);
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment.clone();
   }
 

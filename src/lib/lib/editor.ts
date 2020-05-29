@@ -182,6 +182,7 @@ export class Editor implements EventDelegate {
     }
     this.historyIndex = this.historySequence.length - 1;
     this.dispatchContentChangeEvent();
+    console.log(this.historySequence);
   }
 
   private run(fn: () => void) {

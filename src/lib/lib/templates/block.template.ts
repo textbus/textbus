@@ -31,6 +31,10 @@ export class BlockTemplate extends Template {
     super();
   }
 
+  clone() {
+    return new BlockTemplate(this.tagName);
+  }
+
   render() {
     const block = new VElement(this.tagName);
     this.viewMap.set(this.childSlots[0], block);

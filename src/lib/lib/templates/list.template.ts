@@ -56,6 +56,14 @@ export class ListTemplate extends Template {
     super();
   }
 
+  clone() {
+    const list = new ListTemplate(this.tagName);
+    this.childSlots.forEach(f => {
+      list.childSlots.push(f.clone());
+    });
+    return list;
+  }
+
   render() {
     const list = new VElement(this.tagName);
     this.childSlots.forEach((slot, index) => {

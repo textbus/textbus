@@ -139,7 +139,13 @@ export class Contents {
    */
   clone(): Contents {
     const newContents = new Contents();
-    this.elements.forEach(item => newContents.append(item));
+    this.elements.forEach(item => {
+      if (typeof item === 'string') {
+        newContents.append(item)
+      } else {
+        newContents.append(item.clone());
+      }
+    });
     return newContents;
   }
 }
