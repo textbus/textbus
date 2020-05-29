@@ -16,6 +16,8 @@ import { EventType } from '../core/events';
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
   onReady: Observable<Document>;
+  onCanEditable: Observable<TBSelection>;
+  onUserWrite: Observable<void>;
 
   elementRef = document.createElement('div');
   contentWindow: Window;
@@ -27,6 +29,8 @@ export class Viewer {
 
   private readyEvent = new Subject<Document>();
   private selectionChangeEvent = new Subject<TBSelection>();
+  private canEditableEvent = new Subject<TBSelection>();
+  private userWriteEvent = new Subject<void>();
 
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
@@ -35,6 +39,9 @@ export class Viewer {
               private context: Editor) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
+    this.onCanEditable = this.canEditableEvent.asObservable();
+    this.onUserWrite = this.userWriteEvent.asObservable();
+
     this.frame.onload = () => {
       const doc = this.frame.contentDocument;
       this.contentDocument = doc;
@@ -49,11 +56,6 @@ export class Viewer {
         doc.head.appendChild(style);
       });
 
-      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
-        .subscribe(() => {
-          this.nativeSelection = this.contentDocument.getSelection();
-        });
-      //
       this.listenEvents();
     };
 
@@ -72,6 +74,11 @@ export class Viewer {
   }
 
   listenEvents() {
+    merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
+      .subscribe(() => {
+        this.nativeSelection = this.contentDocument.getSelection();
+        this.canEditableEvent.next(new TBSelection(this.nativeSelection, this.renderer));
+      });
     fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
       this.selectionChangeEvent.next(new TBSelection(this.nativeSelection, this.renderer));
@@ -134,6 +141,7 @@ export class Viewer {
         selection.restore();
         this.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
+        this.userWriteEvent.next();
       }
     })
   }
@@ -213,5 +221,6 @@ export class Viewer {
       last instanceof SingleTemplate && last.tagName === 'br') {
       commonAncestorFragment.append(new SingleTemplate('br'));
     }
+    this.userWriteEvent.next();
   }
 }

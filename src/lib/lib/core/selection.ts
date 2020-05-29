@@ -86,4 +86,41 @@ export class TBSelection {
     }
     return fragment;
   }
+
+  /**
+   * 获取当前 Selection 所有 Range 的 path
+   */
+  getRangePaths(): Array<RangePath> {
+    const getPaths = (fragment: Fragment): number[] => {
+      const paths = [];
+      while (fragment) {
+        const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+        if (parentTemplate) {
+          paths.push(parentTemplate.childSlots.indexOf(fragment));
+          fragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+          paths.push(fragment.find(parentTemplate));
+        } else {
+          break;
+        }
+      }
+      return paths.reverse();
+    };
+    return this.ranges.map<RangePath>(range => {
+      const paths = getPaths(range.startFragment);
+      paths.push(range.startIndex);
+      if (range.collapsed) {
+        return {
+          startPaths: paths,
+          endPaths: paths
+        }
+      } else {
+        const endPaths = getPaths(range.endFragment);
+        endPaths.push(range.endIndex);
+        return {
+          startPaths: paths,
+          endPaths
+        }
+      }
+    });
+  }
 }

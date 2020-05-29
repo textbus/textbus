@@ -1,5 +1,5 @@
-import { auditTime, filter } from 'rxjs/operators';
-import { from, Observable, of, zip } from 'rxjs';
+import { auditTime, filter, sampleTime, switchMap, tap } from 'rxjs/operators';
+import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import { Parser } from './core/parser';
 import { TemplateTranslator } from './core/template';
@@ -19,6 +19,7 @@ export interface Snapshot {
 
 export interface EditorOptions {
   theme?: string;
+  historyStackSize?: number;
   templateTranslators?: TemplateTranslator[];
   formatters?: InlineFormatter[];
   toolbar?: (HandlerConfig | HandlerConfig[])[];
@@ -31,6 +32,8 @@ export interface EditorOptions {
 }
 
 export class Editor implements EventDelegate {
+  readonly onChange: Observable<void>;
+
   get canBack() {
     return this.historySequence.length > 0 && this.historyIndex > 0;
   }
@@ -59,6 +62,9 @@ export class Editor implements EventDelegate {
   private selection: TBSelection;
 
   private defaultHTML = '<p><br></p>';
+  private rootFragment: Fragment;
+  private sub: Subscription;
+  private changeEvent = new Subject<void>();
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
@@ -66,6 +72,9 @@ export class Editor implements EventDelegate {
     } else {
       this.container = selector;
     }
+    this.historyStackSize = options.historyStackSize || 50;
+    this.onChange = this.changeEvent.asObservable();
+
     this.parser = new Parser(options);
 
     this.frameContainer.classList.add('tbus-frame-container');
@@ -76,13 +85,23 @@ export class Editor implements EventDelegate {
       .subscribe(config => {
         this.viewer.apply(config);
         if (config.execCommand.recordHistory) {
-          // this.recordSnapshot();
-          // this.listenUserWriteEvent();
+          this.recordSnapshot();
+          this.listenUserWriteEvent();
         }
       });
-
-    this.viewer.onSelectionChange.pipe(auditTime(100)).subscribe(selection => {
+    const unsub = zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).pipe(switchMap(result => {
+      this.readyState = true;
+      const rootFragment = this.parser.parse(result[0]);
+      this.rootFragment = rootFragment;
+      this.viewer.render(rootFragment);
+      this.tasks.forEach(fn => fn());
+      return this.viewer.onCanEditable;
+    })).subscribe(selection => {
       this.selection = selection;
+      this.recordSnapshot();
+      unsub.unsubscribe();
+    });
+    this.viewer.onSelectionChange.pipe(tap(s => this.selection = s), auditTime(100)).subscribe(selection => {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
@@ -91,9 +110,7 @@ export class Editor implements EventDelegate {
 
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
-    // this.frameContainer.appendChild(this.loading.elementRef);
     this.frameContainer.appendChild(this.viewer.elementRef);
-    // this.elementRef.appendChild(this.paths.elementRef);
 
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
@@ -101,13 +118,8 @@ export class Editor implements EventDelegate {
     }
     this.container.appendChild(this.elementRef);
 
-    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
-      this.readyState = true;
-      const rootFragment = this.parser.parse(result[0]);
-      this.viewer.render(rootFragment);
-      // this.recordSnapshot();
-      this.tasks.forEach(fn => fn());
-    });
+    this.listenUserWriteEvent();
+
   }
 
   setContents(html: string) {
@@ -150,20 +162,27 @@ export class Editor implements EventDelegate {
     return null;
   }
 
-  // private recordSnapshot() {
-  //   if (this.historySequence.length !== this.historyIndex) {
-  //     this.historySequence.length = this.historyIndex + 1;
-  //   }
-  //   this.historySequence.push({
-  //     contents: this.root.clone(),
-  //     paths: this.viewer.selection.getRangePaths()
-  //   });
-  //   if (this.historySequence.length > this.historyStackSize) {
-  //     this.historySequence.shift();
-  //   }
-  //   this.historyIndex = this.historySequence.length - 1;
-  //   this.dispatchContentChangeEvent();
-  // }
+  getContents() {
+    return {
+      styleSheets: this.options.styleSheets,
+      contents: this.viewer.contentDocument.body.innerHTML
+    };
+  }
+
+  private recordSnapshot() {
+    if (this.historySequence.length !== this.historyIndex) {
+      this.historySequence.length = this.historyIndex + 1;
+    }
+    this.historySequence.push({
+      contents: this.rootFragment.clone(),
+      paths: this.selection.getRangePaths()
+    });
+    if (this.historySequence.length > this.historyStackSize) {
+      this.historySequence.shift();
+    }
+    this.historyIndex = this.historySequence.length - 1;
+    this.dispatchContentChangeEvent();
+  }
 
   private run(fn: () => void) {
     if (!this.readyState) {
@@ -195,6 +214,22 @@ export class Editor implements EventDelegate {
                     })())`;
 
       document.body.appendChild(temporaryIframe);
+    });
+  }
+
+  private dispatchContentChangeEvent() {
+    this.changeEvent.next();
+  }
+
+  private listenUserWriteEvent() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+    this.sub = this.viewer.onUserWrite.pipe(tap(() => {
+      this.dispatchContentChangeEvent();
+    })).pipe(sampleTime(5000)).subscribe(() => {
+      this.recordSnapshot();
+      this.toolbar.updateHandlerState(this.selection, this.renderer);
     });
   }
 }
