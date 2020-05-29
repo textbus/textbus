@@ -22,7 +22,11 @@ export class TableTemplate extends Template {
   }
 
   clone() {
-    return new TableTemplate(this.tagName);
+    const template = new TableTemplate(this.tagName);
+    this.childSlots.forEach(f => {
+      template.childSlots.push(f.clone());
+    });
+    return template;
   }
 
   render() {

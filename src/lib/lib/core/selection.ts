@@ -125,7 +125,6 @@ export class TBSelection {
       const paths = position.map(i => i).reverse();
       while (true) {
         const index = paths.pop();
-        console.log(fragment, index, fragment.getContentAtIndex(index))
         fragment = (fragment.getContentAtIndex(index) as Template).childSlots[paths.pop()];
         if (paths.length === 1) {
           return {

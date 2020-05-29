@@ -33,7 +33,11 @@ export class CodeTemplate extends Template {
   }
 
   clone() {
-    return new CodeTemplate(this.lang);
+    const template = new CodeTemplate(this.lang);
+    this.childSlots.forEach(f => {
+      template.childSlots.push(f.clone());
+    });
+    return template;
   }
 
   render() {

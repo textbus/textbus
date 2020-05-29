@@ -126,6 +126,7 @@ export class Editor implements EventDelegate {
     this.run(() => {
       this.writeContents(html).then(el => {
         const rootFragment = this.parser.parse(el);
+        this.rootFragment = rootFragment;
         this.viewer.render(rootFragment);
       });
     })
@@ -182,7 +183,6 @@ export class Editor implements EventDelegate {
     }
     this.historyIndex = this.historySequence.length - 1;
     this.dispatchContentChangeEvent();
-    console.log(this.historySequence);
   }
 
   private run(fn: () => void) {

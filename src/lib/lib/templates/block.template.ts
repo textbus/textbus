@@ -32,7 +32,11 @@ export class BlockTemplate extends Template {
   }
 
   clone() {
-    return new BlockTemplate(this.tagName);
+    const template = new BlockTemplate(this.tagName);
+    this.childSlots.forEach(f => {
+      template.childSlots.push(f.clone());
+    });
+    return template;
   }
 
   render() {

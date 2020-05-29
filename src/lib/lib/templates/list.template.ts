@@ -57,11 +57,11 @@ export class ListTemplate extends Template {
   }
 
   clone() {
-    const list = new ListTemplate(this.tagName);
+    const template = new ListTemplate(this.tagName);
     this.childSlots.forEach(f => {
-      list.childSlots.push(f.clone());
+      template.childSlots.push(f.clone());
     });
-    return list;
+    return template;
   }
 
   render() {

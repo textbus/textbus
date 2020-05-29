@@ -2,6 +2,7 @@ import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const textAlignTool: SelectConfig = {
   type: HandlerType.Select,
@@ -41,9 +42,14 @@ export const textAlignTool: SelectConfig = {
     },
   }],
   match: new FormatMatcher(textAlignFormatter),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, data) {
+    if (data instanceof FormatAbstractData) {
+      for (const option of options) {
+        if (option.value === data.style.value) {
+          return option;
+        }
+      }
+    }
   },
   execCommand: new BlockStyleCommander('textAlign', textAlignFormatter)
 };
