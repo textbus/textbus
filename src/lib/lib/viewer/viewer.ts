@@ -153,7 +153,9 @@ export class Viewer {
 
   apply(config: HandlerConfig) {
     const selection = new TBSelection(this.nativeSelection, this.renderer);
-    const state = config.match.queryState(selection, this.renderer, this.context).state;
+    const state = config.match ?
+      config.match.queryState(selection, this.renderer, this.context).state :
+      HighlightState.Normal;
     if (state === HighlightState.Disabled) {
       return;
     }

@@ -1,5 +1,6 @@
 import { ButtonConfig, HandlerType } from '../help';
 import { CleanCommander } from '../commands/clean.commander';
+import { LinkFormatter } from '../../formatter/link.formatter';
 
 export const cleanTool: ButtonConfig = {
   type: HandlerType.Button,
@@ -11,5 +12,5 @@ export const cleanTool: ButtonConfig = {
     altKey: true,
     key: 'c'
   },
-  execCommand: new CleanCommander()
+  execCommand: new CleanCommander([LinkFormatter])
 };

@@ -63,7 +63,7 @@ export interface MatchRule {
   filter?: (node: HTMLElement | FormatAbstractData) => boolean;
 }
 
-abstract class Formatter {
+export abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
@@ -208,7 +208,7 @@ abstract class Formatter {
 export abstract class InlineFormatter extends Formatter {
 }
 
-export abstract class BlockFormatter extends InlineFormatter {
+export abstract class BlockFormatter extends Formatter {
   protected constructor(protected rule: MatchRule = {}) {
     super(rule, 0);
   }
