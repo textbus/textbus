@@ -22,10 +22,11 @@ export class HistoryCommander implements Commander<Editor> {
       this.editor.getNextSnapshot();
     if (snapshot) {
       rootFragment.clean();
-      snapshot.contents.sliceContents(0).forEach(item => {
+      const t = snapshot.contents.clone();
+      t.sliceContents(0).forEach(item => {
         rootFragment.append(item);
       });
-      snapshot.contents.getFormatRanges().forEach(f => rootFragment.mergeFormat(f));
+      t.getFormatRanges().forEach(f => rootFragment.mergeFormat(f));
       selection.usePaths(snapshot.paths, rootFragment);
     }
   }
