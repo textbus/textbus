@@ -1,10 +1,10 @@
-import { ActionSheetConfig, HandlerType } from '../help';
+import { ActionSheetConfig, ToolType } from '../help';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { TableEditActions, TableEditCommander } from '../commands/table-edit.commander';
 import { TableTemplate } from '../../templates/table.template';
 
 export const tableEditTool: ActionSheetConfig = {
-  type: HandlerType.ActionSheet,
+  type: ToolType.ActionSheet,
   classes: ['tbus-icon-table-edit'],
   tooltip: '编辑表格',
   match: new BlockMatcher(TableTemplate),

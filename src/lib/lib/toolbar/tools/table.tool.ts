@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { TableTemplate } from '../../templates/table.template';
 import { TableCommander } from '../commands/table.commander';
@@ -36,7 +36,7 @@ form.onSubmit = function (attrs) {
 };
 
 export const tableTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-table'],
   tooltip: '表格',
   onHide: hideEvent.asObservable(),

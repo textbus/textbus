@@ -1,11 +1,11 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const letterSpacingTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   tooltip: '字间距',
   classes: ['tbus-icon-letter-spacing'],
   mini: true,

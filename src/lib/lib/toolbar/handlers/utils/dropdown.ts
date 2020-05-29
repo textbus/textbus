@@ -8,7 +8,7 @@ export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;
   freezeState?: Observable<boolean>;
 
-  update(value?: FormatAbstractData| Template |MediaTemplate): void;
+  update(value?: FormatAbstractData | Template | MediaTemplate): void;
 
   reset?(): void;
 
@@ -88,5 +88,13 @@ export class Dropdown {
       this.freeze = false;
       this.elementRef.classList.remove('tbus-dropdown-open');
     });
+  }
+
+  show() {
+
+  }
+
+  hide() {
+
   }
 }

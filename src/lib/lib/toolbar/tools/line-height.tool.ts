@@ -1,11 +1,11 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { lineHeightFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const lineHeightTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   tooltip: '行高',
   classes: ['tbus-icon-line-height'],
   mini: true,

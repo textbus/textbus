@@ -1,9 +1,9 @@
-import { ButtonConfig, HandlerType } from '../help';
+import { ButtonConfig, ToolType } from '../help';
 import { ListMatcher } from '../matcher/list.matcher';
 import { ListCommander } from '../commands/list.commander';
 
 export const ulTool: ButtonConfig = {
-  type: HandlerType.Button,
+  type: ToolType.Button,
   classes: ['tbus-icon-list'],
   tooltip: '无序列表',
   keymap: {

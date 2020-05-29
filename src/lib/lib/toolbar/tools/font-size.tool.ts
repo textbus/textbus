@@ -1,11 +1,11 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { fontSizeFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const fontSizeTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   tooltip: '字体大小',
   classes: ['tbus-icon-font-size'],
   mini: true,

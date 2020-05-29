@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs';
 
-import { Handler } from './help';
+import { Tool } from './help';
 import { Dropdown } from './utils/dropdown';
 import { DropdownConfig, EventDelegate, HighlightState } from '../help';
 import { SelectionMatchDelta } from '../matcher/matcher';
 
-export class DropdownHandler implements Handler {
+export class DropdownHandler implements Tool {
   elementRef: HTMLElement;
   onApply: Observable<any>;
   private dropdownButton = document.createElement('span');
@@ -55,5 +55,9 @@ export class DropdownHandler implements Handler {
         this.dropdown.highlight = false;
         break
     }
+  }
+
+  expand(is: boolean) {
+    is ? this.dropdown.show() : this.dropdown.hide();
   }
 }

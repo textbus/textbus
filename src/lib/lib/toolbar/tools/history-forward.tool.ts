@@ -1,9 +1,9 @@
-import { ButtonConfig, HandlerType } from '../../toolbar/help';
+import { ButtonConfig, ToolType } from '../../toolbar/help';
 import { HistoryMatcher } from '../matcher/history.matcher';
 import { HistoryCommander } from '../commands/history.commander';
 
 export const historyForwardTool: ButtonConfig = {
-  type: HandlerType.Button,
+  type: ToolType.Button,
   classes: ['tbus-icon-history-forward'],
   tooltip: '重做',
   match: new HistoryMatcher('forward'),

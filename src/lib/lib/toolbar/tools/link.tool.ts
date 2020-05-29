@@ -1,11 +1,12 @@
 import { Subject } from 'rxjs';
 
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { LinkCommander } from '../commands/link.commander';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
+import { FormatEffect } from '../../core/formatter';
 
 const commander = new LinkCommander(linkFormatter);
 
@@ -37,11 +38,31 @@ form.onSubmit = function (attrs) {
 };
 
 export const linkTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-link'],
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
   viewer: form,
+  contextMenu: [{
+    label: '编辑',
+    action(renderer, selection, tool) {
+      tool.expand(true);
+    }
+  }, {
+    label: '删除',
+    action(renderer, selection) {
+      selection.firstRange.getSelectedScope().forEach(scope => {
+        scope.fragment.getFormatRangesByFormatter(linkFormatter).forEach(format => {
+          if (format.startIndex <= scope.startIndex && format.endIndex >= scope.endIndex) {
+            scope.fragment.mergeFormat({
+              ...format,
+              state: FormatEffect.Invalid
+            });
+          }
+        });
+      })
+    }
+  }],
   match: new FormatMatcher(linkFormatter),
   execCommand: commander
 };

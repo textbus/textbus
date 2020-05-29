@@ -1,10 +1,10 @@
-import { ButtonConfig, HandlerType } from '../help';
+import { ButtonConfig, ToolType } from '../help';
 import { BoldCommander } from '../commands/bold.commander';
 import { boldFormatter } from '../../formatter/bold.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 
 export const boldTool: ButtonConfig = {
-  type: HandlerType.Button,
+  type: ToolType.Button,
   classes: ['tbus-icon-bold'],
   tooltip: '加粗',
   keymap: {

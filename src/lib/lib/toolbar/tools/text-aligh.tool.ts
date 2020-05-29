@@ -1,11 +1,11 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const textAlignTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   tooltip: '对齐方式',
   options: [{
     label: '左对齐',

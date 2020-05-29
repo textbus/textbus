@@ -7,10 +7,12 @@ import { InlineFormatter } from './core/formatter';
 import { Viewer } from './viewer/viewer';
 import { Renderer } from './core/renderer';
 import { Toolbar } from './toolbar/toolbar';
-import { EventDelegate, HandlerConfig } from './toolbar/help';
+import { EventDelegate, ToolConfig } from './toolbar/help';
 import { RangePath, TBSelection } from './core/selection';
 import { Fragment } from './core/fragment';
 import { Lifecycle } from './core/lifecycle';
+import { ContextMenu } from './toolbar/context-menu';
+import { KeymapAction } from '@tanbo/tbus/viewer/input';
 
 export interface Snapshot {
   contents: Fragment;
@@ -22,7 +24,7 @@ export interface EditorOptions {
   historyStackSize?: number;
   templateTranslators?: TemplateTranslator[];
   formatters?: InlineFormatter[];
-  toolbar?: (HandlerConfig | HandlerConfig[])[];
+  toolbar?: (ToolConfig | ToolConfig[])[];
   hooks?: Lifecycle[];
   styleSheets?: string[];
 
@@ -51,6 +53,7 @@ export class Editor implements EventDelegate {
   private readonly toolbar: Toolbar;
   private renderer = new Renderer();
   private viewer = new Viewer(this.renderer, this);
+  private contextMenu = new ContextMenu();
 
   private readyState = false;
   private tasks: Array<() => void> = [];
@@ -66,6 +69,7 @@ export class Editor implements EventDelegate {
   private sub: Subscription;
   private changeEvent = new Subject<void>();
 
+
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
@@ -78,7 +82,8 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(options);
 
     this.frameContainer.classList.add('tbus-frame-container');
-    this.toolbar = new Toolbar(this, options.toolbar);
+
+    this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
 
     this.toolbar.onAction
       .pipe(filter(() => !!this.selection))
@@ -174,6 +179,12 @@ export class Editor implements EventDelegate {
       styleSheets: this.options.styleSheets,
       contents
     };
+  }
+
+  registerKeymap(action: KeymapAction) {
+    this.run(() => {
+      this.viewer.registerKeymap(action);
+    });
   }
 
   private recordSnapshot() {

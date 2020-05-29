@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { DropdownHandlerView } from '../handlers/utils/dropdown';
 import { EmojiCommander } from '../commands/emoji.commander';
 
@@ -50,7 +50,7 @@ viewer.onCheck.subscribe(t => {
 });
 
 export const emojiTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-emoji'],
   execCommand: commander,
   viewer,

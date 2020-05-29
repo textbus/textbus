@@ -3,14 +3,14 @@ import { map } from 'rxjs/operators';
 
 import { ActionSheetConfig, ActionConfig, HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
-import { Handler, createKeymapHTML } from './help';
+import { Tool, createKeymapHTML } from './help';
 import { KeymapAction } from '../../viewer/input';
 
-export class ActionSheetHandler implements Handler {
+export class ActionSheetHandler implements Tool {
   readonly elementRef: HTMLElement;
   onMatched: Observable<ActionConfig>;
   onApply: Observable<any>;
-  keymap: KeymapAction[] = [];
+  keymapAction: KeymapAction[] = [];
 
   private matchedEvent = new Subject<ActionConfig>();
   private options: ActionSheetOptionHandler[] = [];
@@ -33,7 +33,7 @@ export class ActionSheetHandler implements Handler {
       menu.appendChild(item.elementRef);
       this.options.push(item);
       if (option.keymap) {
-        this.keymap.push({
+        this.keymapAction.push({
           keymap: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {

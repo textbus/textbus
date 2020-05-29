@@ -1,10 +1,10 @@
-import { ButtonConfig, HandlerType } from '../help';
+import { ButtonConfig, ToolType } from '../help';
 import { italicFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
 
 export const italicTool: ButtonConfig = {
-  type: HandlerType.Button,
+  type: ToolType.Button,
   classes: ['tbus-icon-italic'],
   tooltip: '斜体',
   keymap: {

@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { backgroundColor } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
@@ -10,7 +10,7 @@ const hideEvent = new Subject<void>();
 const commander = new StyleCommander('backgroundColor', backgroundColor);
 
 export const blockBackgroundTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-paint-bucket'],
   tooltip: '元素背景颜色',
   viewer: new Palette(commander, hideEvent),

@@ -1,11 +1,11 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textIndentFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const textIndentTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   tooltip: '首行缩进',
   classes: ['tbus-icon-text-indent'],
   mini: true,

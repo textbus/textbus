@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
-import { HandlerConfig, HandlerType } from './help';
-import { createKeymapHTML, Handler } from './handlers/help';
+import { ToolConfig, ToolType } from './help';
+import { createKeymapHTML, Tool } from './handlers/help';
 import { ButtonHandler } from './handlers/button.handler';
 import { SelectHandler } from './handlers/select.handler';
 import { DropdownHandler } from './handlers/dropdown.handler';
@@ -10,18 +10,19 @@ import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { TBSelection } from '../core/selection';
 import { Renderer } from '../core/renderer';
+import { SelectionMatchDelta } from '@tanbo/tbus/toolbar/matcher/matcher';
+import { ContextMenu } from './context-menu';
 
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable<HandlerConfig>;
-  readonly handlers: Array<{ config: HandlerConfig, instance: Handler }> = [];
-  readonly styleSheets: string[] = [];
+  onAction: Observable<ToolConfig>;
+  readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
-  private actionEvent = new Subject<HandlerConfig>();
+  private actionEvent = new Subject<ToolConfig>();
   private toolsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
-  constructor(private context: Editor, private config: (HandlerConfig | HandlerConfig[])[]) {
+  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolConfig | ToolConfig[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
@@ -49,12 +50,18 @@ export class Toolbar {
   }
 
   updateHandlerState(selection: TBSelection, renderer: Renderer) {
-    this.handlers.filter(h => typeof h.instance.updateStatus === 'function').forEach(handler => {
-      const s = handler.config.match?.queryState(selection, renderer, this.context);
-      if (s) {
-        handler.instance.updateStatus(s);
+    this.tools.forEach(tool => {
+      let s: SelectionMatchDelta;
+      if (typeof tool.instance.updateStatus === 'function') {
+        s = tool.config.match?.queryState(selection, renderer, this.context);
+        if (s) {
+          tool.instance.updateStatus(s);
+        }
       }
-    });
+      if (Array.isArray(tool.config.contextMenu)) {
+        this.contextMenu.setMenus(tool.config.contextMenu);
+      }
+    })
   }
 
   private findNeedShowKeymapHandler(el: HTMLElement): string {
@@ -67,7 +74,7 @@ export class Toolbar {
     return this.findNeedShowKeymapHandler(el.parentNode as HTMLElement);
   }
 
-  private createToolbar(handlers: (HandlerConfig | HandlerConfig[])[]) {
+  private createToolbar(handlers: (ToolConfig | ToolConfig[])[]) {
     if (Array.isArray(handlers)) {
       handlers.forEach(handler => {
         const group = document.createElement('span');
@@ -83,35 +90,35 @@ export class Toolbar {
     }
   }
 
-  private createHandlers(handlers: HandlerConfig[]) {
+  private createHandlers(handlers: ToolConfig[]) {
     return handlers.map(handler => {
       return this.createHandler(handler);
     });
   }
 
-  private createHandler(option: HandlerConfig) {
-    let h: Handler;
+  private createHandler(option: ToolConfig) {
+    let h: Tool;
     switch (option.type) {
-      case HandlerType.Button:
+      case ToolType.Button:
         h = new ButtonHandler(option);
         break;
-      case HandlerType.Select:
+      case ToolType.Select:
         h = new SelectHandler(option, this.toolsElement);
         break;
-      case HandlerType.Dropdown:
+      case ToolType.Dropdown:
         h = new DropdownHandler(option, this.context, this.toolsElement);
         break;
-      case HandlerType.ActionSheet:
+      case ToolType.ActionSheet:
         h = new ActionSheetHandler(option, this.toolsElement);
         break;
     }
-    if (h.keymap) {
-      const keymaps = Array.isArray(h.keymap) ? h.keymap : [h.keymap];
+    if (h.keymapAction) {
+      const keymaps = Array.isArray(h.keymapAction) ? h.keymapAction : [h.keymapAction];
       keymaps.forEach(k => {
-        // this.context.registerKeymap(k);
+        this.context.registerKeymap(k);
       });
     }
-    this.handlers.push({
+    this.tools.push({
       config: option,
       instance: h
     });
@@ -119,7 +126,7 @@ export class Toolbar {
   }
 
   private listenUserAction() {
-    this.handlers.forEach(item => {
+    this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
         item.instance.onApply.subscribe(() => {
           this.actionEvent.next(item.config);

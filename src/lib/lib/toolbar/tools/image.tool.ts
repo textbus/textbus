@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageTemplate } from '../../templates/image.template';
 import { ImageCommander } from '../commands/image.commander';
@@ -27,7 +27,7 @@ form.onSubmit = function (attrs) {
 };
 
 export const imageTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-image'],
   tooltip: '图片',
   onHide: hideEvent.asObservable(),

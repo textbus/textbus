@@ -1,10 +1,10 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { CodeCommander } from '../commands/code.commander';
 import { CodeTemplate } from '../../templates/code.template';
 import { CodeMatcher } from '../matcher/code.matcher';
 
 export const codeTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   classes: ['tbus-icon-code'],
   tooltip: '代码',
   mini: true,

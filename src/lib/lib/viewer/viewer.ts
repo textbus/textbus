@@ -5,8 +5,8 @@ import { Renderer } from '../core/renderer';
 import { template } from './template-html';
 import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
-import { Input, Keymap } from './input';
-import { HandlerConfig, HighlightState } from '../toolbar/help';
+import { Input, Keymap, KeymapAction } from './input';
+import { ToolConfig, HighlightState } from '../toolbar/help';
 import { TBSelection } from '../core/selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
@@ -152,6 +152,10 @@ export class Viewer {
     })
   }
 
+  registerKeymap(action: KeymapAction) {
+    this.input.keymap(action);
+  }
+
   render(rootFragment: Fragment) {
     this.rootFragment = rootFragment;
     const last = rootFragment.sliceContents(rootFragment.contentLength - 1)[0];
@@ -165,7 +169,7 @@ export class Viewer {
     this.renderer.render(rootFragment, this.contentDocument.body);
   }
 
-  apply(config: HandlerConfig) {
+  apply(config: ToolConfig) {
     const selection = new TBSelection(this.contentDocument, this.renderer);
     const state = config.match ?
       config.match.queryState(selection, this.renderer, this.context).state :

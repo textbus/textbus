@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { VideoTemplate } from '../../templates/video.template';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
@@ -37,7 +37,7 @@ form.onSubmit = function (attrs) {
 };
 
 export const videoTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-video'],
   tooltip: '视频',
   onHide: hideEvent.asObservable(),

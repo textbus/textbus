@@ -1,10 +1,10 @@
-import { HandlerType, SelectConfig } from '../help';
+import { ToolType, SelectConfig } from '../help';
 import { BlockCommander } from '../commands/block.commander';
 import { BlockTemplate } from '../../templates/block.template';
 import { BlockMatcher } from '../matcher/block.matcher';
 
 export const headingTool: SelectConfig = {
-  type: HandlerType.Select,
+  type: ToolType.Select,
   match: new BlockMatcher(BlockTemplate),
   highlight(options, t) {
     if (t instanceof BlockTemplate) {

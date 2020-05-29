@@ -1,16 +1,16 @@
 import { merge, Observable, Subject } from 'rxjs';
 
-import { createKeymapHTML, Handler } from './help';
+import { createKeymapHTML, Tool } from './help';
 import { Dropdown } from './utils/dropdown';
 import { HighlightState, SelectConfig, SelectOptionConfig } from '../help';
 import { KeymapAction } from '../../viewer/input';
 import { SelectionMatchDelta } from '../matcher/matcher';
 
-export class SelectHandler implements Handler {
+export class SelectHandler implements Tool {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
   onApply: Observable<any>;
-  keymap: KeymapAction[] = [];
+  keymapAction: KeymapAction[] = [];
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
@@ -36,7 +36,7 @@ export class SelectHandler implements Handler {
       }
 
       if (option.keymap) {
-        this.keymap.push({
+        this.keymapAction.push({
           keymap: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {

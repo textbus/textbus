@@ -3,10 +3,10 @@ import { Observable } from 'rxjs';
 import { KeymapAction, Keymap } from '../../viewer/input';
 import { isMac } from '../../viewer/tools';
 
-export interface Handler {
+export interface Tool {
   elementRef: HTMLElement;
   onApply: Observable<any>;
-  keymap?: KeymapAction | KeymapAction[];
+  keymapAction?: KeymapAction | KeymapAction[];
 
   updateStatus?(selectionMatchDelta: any): void;
 }

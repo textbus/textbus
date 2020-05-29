@@ -1,9 +1,9 @@
-import { ButtonConfig, HandlerType } from '../help';
+import { ButtonConfig, ToolType } from '../help';
 import { CleanCommander } from '../commands/clean.commander';
 import { LinkFormatter } from '../../formatter/link.formatter';
 
 export const cleanTool: ButtonConfig = {
-  type: HandlerType.Button,
+  type: ToolType.Button,
   classes: ['tbus-icon-clear-formatting'],
   tooltip: '清除格式',
   keymap: {

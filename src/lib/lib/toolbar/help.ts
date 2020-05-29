@@ -5,6 +5,12 @@ import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { MediaTemplate, Template } from '../core/template';
 import { Keymap } from '../viewer/input';
+import { Renderer } from '../core/renderer';
+import { TBSelection } from '../core/selection';
+import { ButtonHandler } from './handlers/button.handler';
+import { SelectHandler } from './handlers/select.handler';
+import { DropdownHandler } from './handlers/dropdown.handler';
+import { ActionSheetHandler } from './handlers/action-sheet.handler';
 
 /**
  * 工具条控件的显示状态
@@ -18,20 +24,29 @@ export enum HighlightState {
 /**
  * 工具条工具类型
  */
-export enum HandlerType {
+export enum ToolType {
   Button,
   Select,
   Dropdown,
   ActionSheet
 }
 
+export interface ContextMenuConfig<T> {
+  classes?: string[];
+  label?: string;
+  displayNeedMatch?: boolean;
+  action?: (renderer: Renderer, selection: TBSelection, tool: T) => void;
+}
+
 /**
  * 按扭型工具的配置接口
  */
 export interface ButtonConfig {
-  type: HandlerType.Button;
+  type: ToolType.Button;
   /** 按扭控件点击后调用的命令 */
   execCommand: Commander;
+  /** 设置上下文菜单 */
+  contextMenu?: ContextMenuConfig<ButtonHandler>[];
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
   /** 设置按扭显示的文字 */
@@ -61,7 +76,7 @@ export interface SelectOptionConfig {
 }
 
 export interface SelectConfig {
-  type: HandlerType.Select;
+  type: ToolType.Select;
   /** 当前 Select 某项点击后，应用的命令 */
   execCommand: Commander;
   /** Select 的可选项配置 */
@@ -69,6 +84,9 @@ export interface SelectConfig {
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
   highlight(options: SelectOptionConfig[], data: FormatAbstractData | Template | MediaTemplate): SelectOptionConfig;
+
+  /** 设置上下文菜单 */
+  contextMenu?: ContextMenuConfig<SelectHandler>[];
 
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
@@ -80,8 +98,8 @@ export interface SelectConfig {
   tooltip?: string;
 }
 
-export interface DropdownConfig  {
-  type: HandlerType.Dropdown;
+export interface DropdownConfig {
+  type: ToolType.Dropdown;
   /** 下拉控件展开后显示的内容 */
   viewer: DropdownHandlerView;
   /** 订阅下拉控件操作完成时的观察者 */
@@ -89,7 +107,9 @@ export interface DropdownConfig  {
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
   /** 订阅下拉控件操作完成时调用的命令 */
-  execCommand: Commander ;
+  execCommand: Commander;
+  /** 设置上下文菜单 */
+  contextMenu?: ContextMenuConfig<DropdownHandler>[];
   /** 给当前控件添加一组 css class */
   classes?: string[];
   /** 当鼠标放在控件上的提示文字 */
@@ -109,12 +129,14 @@ export interface ActionConfig {
   keymap?: Keymap;
 }
 
-export interface ActionSheetConfig  {
-  type: HandlerType.ActionSheet;
+export interface ActionSheetConfig {
+  type: ToolType.ActionSheet;
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
   /** 当某一项被点击时调用的命令 */
   execCommand: Commander & { actionType: any };
+  /** 设置上下文菜单 */
+  contextMenu?: ContextMenuConfig<ActionSheetHandler>[];
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
   /** 设置控件显示的文字 */
@@ -125,7 +147,7 @@ export interface ActionSheetConfig  {
   tooltip?: string;
 }
 
-export type HandlerConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;
+export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;
 
 export interface EventDelegate {
   dispatchEvent(type: string): Observable<string>

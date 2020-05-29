@@ -2,7 +2,7 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, HandlerType } from '../help';
+import { DropdownConfig, ToolType } from '../help';
 import { AudioTemplate } from '../../templates/audio.template';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
@@ -37,7 +37,7 @@ form.onSubmit = function (attrs) {
 };
 
 export const audioTool: DropdownConfig = {
-  type: HandlerType.Dropdown,
+  type: ToolType.Dropdown,
   classes: ['tbus-icon-music'],
   tooltip: '音频',
   onHide: hideEvent.asObservable(),

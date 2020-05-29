@@ -4,5 +4,6 @@ export * from './handlers/_api';
 export * from './matcher/_api';
 export * from './tools/_api';
 
+export * from './context-menu';
 export * from './help';
 export * from './toolbar';
