@@ -162,7 +162,7 @@ export class Fragment {
    * @param formatter
    */
   getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
-    return this.formatMap.getFormatRangesByFormatter(formatter) || [];
+    return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
   apply(f: FormatDelta) {

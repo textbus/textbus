@@ -8,7 +8,7 @@ export class FormatMap {
    * @param formatter
    */
   getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
-    return this.map.get(formatter);
+    return this.map.get(formatter) || [];
   }
 
   /**
