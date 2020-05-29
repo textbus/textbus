@@ -7,6 +7,7 @@ import { AttrType } from '../forms/help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
 import { FormatEffect } from '../../core/formatter';
+import { DropdownHandler } from '../handlers/dropdown.handler';
 
 const commander = new LinkCommander(linkFormatter);
 
@@ -45,11 +46,13 @@ export const linkTool: DropdownConfig = {
   viewer: form,
   contextMenu: [{
     label: '编辑',
+    displayNeedMatch: true,
     action(renderer, selection, tool) {
-      tool.expand(true);
+      (<DropdownHandler>tool).expand(true);
     }
   }, {
     label: '删除',
+    displayNeedMatch: true,
     action(renderer, selection) {
       selection.firstRange.getSelectedScope().forEach(scope => {
         scope.fragment.getFormatRangesByFormatter(linkFormatter).forEach(format => {

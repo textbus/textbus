@@ -91,10 +91,10 @@ export class Dropdown {
   }
 
   show() {
-
+    this.elementRef.classList.add('tbus-dropdown-open');
   }
 
   hide() {
-
+    this.elementRef.classList.remove('tbus-dropdown-open');
   }
 }

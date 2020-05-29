@@ -7,10 +7,7 @@ import { MediaTemplate, Template } from '../core/template';
 import { Keymap } from '../viewer/input';
 import { Renderer } from '../core/renderer';
 import { TBSelection } from '../core/selection';
-import { ButtonHandler } from './handlers/button.handler';
-import { SelectHandler } from './handlers/select.handler';
-import { DropdownHandler } from './handlers/dropdown.handler';
-import { ActionSheetHandler } from './handlers/action-sheet.handler';
+import { Tool } from './handlers/help';
 
 /**
  * 工具条控件的显示状态
@@ -31,11 +28,11 @@ export enum ToolType {
   ActionSheet
 }
 
-export interface ContextMenuConfig<T> {
+export interface ContextMenuConfig {
   classes?: string[];
   label?: string;
   displayNeedMatch?: boolean;
-  action?: (renderer: Renderer, selection: TBSelection, tool: T) => void;
+  action?: (renderer: Renderer, selection: TBSelection, tool: Tool) => void;
 }
 
 /**
@@ -46,7 +43,7 @@ export interface ButtonConfig {
   /** 按扭控件点击后调用的命令 */
   execCommand: Commander;
   /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig<ButtonHandler>[];
+  contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
   /** 设置按扭显示的文字 */
@@ -86,7 +83,7 @@ export interface SelectConfig {
   highlight(options: SelectOptionConfig[], data: FormatAbstractData | Template | MediaTemplate): SelectOptionConfig;
 
   /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig<SelectHandler>[];
+  contextMenu?: ContextMenuConfig[];
 
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
@@ -109,7 +106,7 @@ export interface DropdownConfig {
   /** 订阅下拉控件操作完成时调用的命令 */
   execCommand: Commander;
   /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig<DropdownHandler>[];
+  contextMenu?: Array<ContextMenuConfig>;
   /** 给当前控件添加一组 css class */
   classes?: string[];
   /** 当鼠标放在控件上的提示文字 */
@@ -136,7 +133,7 @@ export interface ActionSheetConfig {
   /** 当某一项被点击时调用的命令 */
   execCommand: Commander & { actionType: any };
   /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig<ActionSheetHandler>[];
+  contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
   match?: Matcher;
   /** 设置控件显示的文字 */

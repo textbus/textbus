@@ -53,7 +53,7 @@ export class Editor implements EventDelegate {
   private readonly toolbar: Toolbar;
   private renderer = new Renderer();
   private viewer = new Viewer(this.renderer, this);
-  private contextMenu = new ContextMenu();
+  private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
   private tasks: Array<() => void> = [];

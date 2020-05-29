@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { ToolConfig, ToolType } from './help';
+import { HighlightState, ToolConfig, ToolType } from './help';
 import { createKeymapHTML, Tool } from './handlers/help';
 import { ButtonHandler } from './handlers/button.handler';
 import { SelectHandler } from './handlers/select.handler';
@@ -59,7 +59,13 @@ export class Toolbar {
         }
       }
       if (Array.isArray(tool.config.contextMenu)) {
-        this.contextMenu.setMenus(tool.config.contextMenu);
+        const menus = tool.config.contextMenu.filter(m => {
+          if (typeof m.displayNeedMatch === 'boolean') {
+            return m.displayNeedMatch === (s.state === HighlightState.Highlight);
+          }
+          return true;
+        });
+        this.contextMenu.setMenus(menus, selection, tool.instance);
       }
     })
   }
