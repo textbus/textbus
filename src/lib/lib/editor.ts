@@ -150,7 +150,7 @@ export class Editor implements EventDelegate {
     if (this.canBack) {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
-      return this.historySequence[this.historyIndex];
+      return Editor.cloneHistoryData(this.historySequence[this.historyIndex]);
     }
     return null;
   }
@@ -158,7 +158,7 @@ export class Editor implements EventDelegate {
   getNextSnapshot() {
     if (this.canForward) {
       this.historyIndex++;
-      return this.historySequence[this.historyIndex];
+      return Editor.cloneHistoryData(this.historySequence[this.historyIndex]);
     }
     return null;
   }
@@ -232,5 +232,12 @@ export class Editor implements EventDelegate {
       this.recordSnapshot();
       this.toolbar.updateHandlerState(this.selection, this.renderer);
     });
+  }
+
+  private static cloneHistoryData(snapshot: Snapshot): Snapshot {
+    return {
+      contents: snapshot.contents.clone(),
+      paths: snapshot.paths.map(i => i)
+    }
   }
 }
