@@ -19,8 +19,10 @@ export class LinkFormatter extends InlineFormatter {
 
   render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     const el = new VElement('a');
-    el.attrs.set('target', abstractData.attrs.get('target'));
-    el.attrs.set('href', abstractData.attrs.get('href'));
+    const target = abstractData.attrs.get('target');
+    const href = abstractData.attrs.get('href');
+    target && el.attrs.set('target', target);
+    href && el.attrs.set('data-href', href);
     return new ChildSlotModel(el);
   }
 }

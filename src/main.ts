@@ -33,7 +33,7 @@ import {
   letterSpacingFormatter,
   letterSpacingTool,
   lineHeightFormatter,
-  lineHeightTool,
+  lineHeightTool, linkFormatter, LinkHook,
   linkTool,
   ListTemplateTranslator,
   olTool,
@@ -74,7 +74,8 @@ const editor = new Editor('#editor', {
   styleSheets: defaultStyleSheets,
   hooks: [
     new DefaultHook(),
-    new HistoryHook()
+    new HistoryHook(),
+    new LinkHook()
   ],
   templateTranslators: [
     new ListTemplateTranslator('ul'),
@@ -95,6 +96,7 @@ const editor = new Editor('#editor', {
     strikeThroughFormatter,
     underlineFormatter,
     fontSizeFormatter,
+    linkFormatter,
     lineHeightFormatter,
     letterSpacingFormatter,
     textIndentFormatter,
@@ -120,11 +122,15 @@ const editor = new Editor('#editor', {
 });
 
 editor.setContents(`
-  <p style="background: red">
+  <p>
     19世纪非欧几何理论诞生，广义相对论说明了这种空间的真实存在。然而对于人们来说，想像诡异的非欧空间是困难的。我们从微分流形的角度
-    <strong style="line-height: 3em; ">BlockStyleCommander</strong>出发，对给定度规、Christoffel记号的参数空间，提出局部渲染和全局渲染两个方法：利用OpenGL进行局部渲染，通过调整为求解测地线方程的Ray Marching算法进行全局渲染。展示非欧空间下的图形，拓展人类的空间想象力。
+    <a href="/test">BlockStyleCommander</a>出发，对给定度规、Christoffel记号的参数空间，提出局部渲染和全局渲染两个方法：利用OpenGL进行局部渲染，通过调整为求解测地线方程的Ray Marching算法进行全局渲染。展示非欧空间下的图形，拓展人类的空间想象力。
   </p>
 `);
+
+editor.onChange.subscribe(() => {
+  console.log(editor.getContents().contents);
+})
 
 // const editor = createEditor('#editor', {
 //   theme: 'dark',

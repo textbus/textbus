@@ -4,6 +4,8 @@ import { Commander } from './commander';
 import { Editor } from '../editor';
 
 export interface Lifecycle {
+  setup?(document: Document): void;
+
   onInit?(): void;
 
   onInput?(renderer: Renderer, selection: TBSelection): boolean;
@@ -17,4 +19,6 @@ export interface Lifecycle {
   onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
 
   onRender?(): void;
+
+  onOutput?(contents: string): string;
 }

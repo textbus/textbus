@@ -164,9 +164,15 @@ export class Editor implements EventDelegate {
   }
 
   getContents() {
+    const contents = (this.options.hooks || []).reduce((previousValue, currentValue) => {
+      if (typeof currentValue.onOutput === 'function') {
+        return currentValue.onOutput(previousValue);
+      }
+      return previousValue;
+    }, this.viewer.contentDocument.body.innerHTML);
     return {
       styleSheets: this.options.styleSheets,
-      contents: this.viewer.contentDocument.body.innerHTML
+      contents
     };
   }
 

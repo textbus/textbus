@@ -56,6 +56,12 @@ export class Viewer {
         doc.head.appendChild(style);
       });
 
+      (context.options.hooks || []).forEach(hooks => {
+        if (typeof hooks.setup === 'function') {
+          hooks.setup(doc);
+        }
+      })
+
       this.listenEvents();
     };
 
