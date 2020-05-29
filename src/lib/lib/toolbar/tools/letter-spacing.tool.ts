@@ -2,6 +2,7 @@ import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const letterSpacingTool: SelectConfig = {
   type: HandlerType.Select,
@@ -35,9 +36,14 @@ export const letterSpacingTool: SelectConfig = {
     value: '5px',
   }],
   match: new FormatMatcher(letterSpacingFormatter),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, data) {
+    if (data instanceof FormatAbstractData) {
+      for (const option of options) {
+        if (option.value === data.style.value) {
+          return option;
+        }
+      }
+    }
   },
   execCommand: new StyleCommander('letterSpacing', letterSpacingFormatter)
 };

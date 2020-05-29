@@ -1,7 +1,8 @@
 import { HandlerType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { lineHeightFormatter } from '../../formatter/block-style.formatter';
-import { BlockStyleCommander } from '../commands/block-style.commander';
+import { lineHeightFormatter } from '../../formatter/style.formatter';
+import { StyleCommander } from '../commands/style.commander';
+import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const lineHeightTool: SelectConfig = {
   type: HandlerType.Select,
@@ -43,9 +44,14 @@ export const lineHeightTool: SelectConfig = {
     value: '4em'
   }],
   match: new FormatMatcher(lineHeightFormatter),
-  highlight(options, p) {
-    console.log(p);
-    return options[0]
+  highlight(options, data) {
+    if (data instanceof FormatAbstractData) {
+      for (const option of options) {
+        if (option.value === data.style.value) {
+          return option;
+        }
+      }
+    }
   },
-  execCommand: new BlockStyleCommander('lineHeight', lineHeightFormatter)
+  execCommand: new StyleCommander('lineHeight', lineHeightFormatter)
 };

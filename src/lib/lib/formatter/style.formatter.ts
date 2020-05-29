@@ -53,3 +53,8 @@ export const fontFamilyFormatter = new StyleFormatter('fontFamily', {
     fontFamily: /.+/
   }
 });
+export const lineHeightFormatter = new StyleFormatter('lineHeight', {
+  styles: {
+    lineHeight: /.+/
+  }
+});

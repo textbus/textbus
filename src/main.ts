@@ -121,6 +121,13 @@ const editor = new Editor('#editor', {
 
 editor.setContents(`
 <pre lang="Typescript" style="font-size: 15px;"><strong style="color: rgb(51, 51, 51);">import</strong>&nbsp;{ createEditor }&nbsp;<strong style="color: rgb(51, 51, 51);">from</strong>&nbsp;<span style="color: rgb(221, 17, 68);">'@tanbo/tbus'</span>;<br><br><strong style="color: rgb(51, 51, 51);">const</strong>&nbsp;editor = createEditor(<span style="color: rgb(0, 134, 179);">document</span>.getElementById(<span style="color: rgb(221, 17, 68);">'editor'</span>));<br>editor.onChange.subscribe(result =&gt; {<br>&nbsp;&nbsp;<span style="color: rgb(0, 134, 179);">console</span>.log(result);<br>})<br></pre>
+  <p style="background: red">
+    <strong style="line-height: 6em">BlockStyleCommander</strong>fdsafdsafdas
+  </p>
+  <p style="background: red">
+    19世纪非欧几何理论诞生，广义相对论说明了这种空间的真实存在。然而对于人们来说，想像诡异的非欧空间是困难的。我们从微分流形的角度
+    <strong style="line-height: 3em; ">BlockStyleCommander</strong>出发，对给定度规、Christoffel记号的参数空间，提出局部渲染和全局渲染两个方法：利用OpenGL进行局部渲染，通过调整为求解测地线方程的Ray Marching算法进行全局渲染。展示非欧空间下的图形，拓展人类的空间想象力。
+  </p>
 `);
 
 // const editor = createEditor('#editor', {

@@ -24,12 +24,6 @@ export class BlockStyleFormatter extends BlockFormatter {
     }
   }
 }
-
-export const lineHeightFormatter = new BlockStyleFormatter('lineHeight', {
-  styles: {
-    lineHeight: /.+/
-  }
-});
 export const textIndentFormatter = new BlockStyleFormatter('textIndent', {
   styles: {
     textIndent: /.+/

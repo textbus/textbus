@@ -73,7 +73,11 @@ export class Fragment {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
     this.formatMap.getFormatRanges().forEach(formatRange => {
-      ff.mergeFormat(Object.assign({}, formatRange));
+      ff.mergeFormat(formatRange.renderer instanceof InlineFormatter ? Object.assign({}, formatRange) : {
+        state: formatRange.state,
+        abstractData: formatRange.abstractData,
+        renderer: formatRange.renderer
+      });
     })
     return ff;
   }
