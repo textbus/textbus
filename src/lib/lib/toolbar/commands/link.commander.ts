@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander } from '../../core/commander';
 import { TBSelection } from '../../core/selection';
 import { LinkFormatter } from '../../formatter/link.formatter';
 

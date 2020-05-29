@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 
 import { DropdownHandlerView } from '../../handlers/utils/dropdown';
 import { FormatAbstractData } from '../../../core/format-abstract-data';
-import { Commander } from '../../commands/commander';
+import { Commander } from '../../../core/commander';
 
 export class Palette implements DropdownHandlerView {
   elementRef = document.createElement('div');

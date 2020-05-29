@@ -160,11 +160,19 @@ export class Viewer {
       return;
     }
     const overlap = state === HighlightState.Highlight;
-
-    config.execCommand.command(selection, overlap, this.renderer);
-    this.render(this.rootFragment);
-    selection.restore();
-    this.selectionChangeEvent.next(selection);
+    let isNext = true;
+    (this.context.options.hooks || []).forEach(lifecycle => {
+      if (typeof lifecycle.onApplyCommand === 'function' &&
+        lifecycle.onApplyCommand(config.execCommand, selection, this.context) === false) {
+        isNext = false;
+      }
+    })
+    if (isNext) {
+      config.execCommand.command(selection, overlap, this.renderer, this.rootFragment);
+      this.render(this.rootFragment);
+      selection.restore();
+      this.selectionChangeEvent.next(selection);
+    }
   }
 
   /**

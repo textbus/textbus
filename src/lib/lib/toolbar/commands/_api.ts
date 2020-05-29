@@ -14,4 +14,4 @@ export * from './table.commander';
 export * from './table-edit.commander';
 export * from './video.commander';
 
-export * from './commander';
+export * from '../../core/commander';

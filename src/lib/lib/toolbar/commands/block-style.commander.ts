@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander } from '../../core/commander';
 import { TBSelection } from '../../core/selection';
 import { BlockFormatter, FormatEffect } from '../../core/formatter';
 import { FormatAbstractData } from '../../core/format-abstract-data';

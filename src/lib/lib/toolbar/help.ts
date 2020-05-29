@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { Commander } from './commands/commander';
+import { Commander } from '../core/commander';
 import { Matcher } from './matcher/matcher';
 import { FormatAbstractData } from '../core/format-abstract-data';
 import { MediaTemplate, Template } from '../core/template';

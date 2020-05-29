@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander } from '../../core/commander';
 import { TBSelection } from '../../core/selection';
 
 export class CodeCommander implements Commander<string> {

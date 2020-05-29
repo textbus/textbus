@@ -1,5 +1,7 @@
 import { Renderer } from './renderer';
 import { TBSelection } from './selection';
+import { Commander } from './commander';
+import { Editor } from '../editor';
 
 export interface Lifecycle {
   onInit?(): void;
@@ -11,6 +13,8 @@ export interface Lifecycle {
   onDelete?(renderer: Renderer, selection: TBSelection): boolean;
 
   onSelectionChange?(): void;
+
+  onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
 
   onRender?(): void;
 }

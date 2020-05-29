@@ -1,4 +1,4 @@
-import { Commander } from './commander';
+import { Commander } from '../../core/commander';
 import { TBSelection } from '../../core/selection';
 import { Renderer } from '../../core/renderer';
 import { BlockTemplate } from '../../templates/block.template';

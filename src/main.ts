@@ -3,7 +3,7 @@ import 'core-js';
 import {
   AudioTemplateTranslator,
   audioTool,
-  blockBackgroundTool, BlockFormatter, BlockStyleFormatter,
+  blockBackgroundTool, BlockStyleFormatter,
   BlockTemplateTranslator,
   boldFormatter,
   boldTool,
@@ -25,10 +25,9 @@ import {
   FormatEffect,
   headingTool,
   historyBackTool,
-  historyForwardTool,
+  historyForwardTool, HistoryHook,
   ImageTemplateTranslator,
   imageTool,
-  InlineFormatter,
   italicFormatter,
   italicTool,
   letterSpacingFormatter,
@@ -40,7 +39,7 @@ import {
   olTool,
   SingleTemplateTranslator,
   strikeThroughFormatter,
-  strikeThroughTool, StyleFormatter,
+  strikeThroughTool,
   subscriptFormatter,
   subscriptTool,
   superscriptFormatter,
@@ -74,7 +73,8 @@ const editor = new Editor('#editor', {
   theme: 'dark',
   styleSheets: defaultStyleSheets,
   hooks: [
-    new DefaultHook()
+    new DefaultHook(),
+    new HistoryHook()
   ],
   templateTranslators: [
     new ListTemplateTranslator('ul'),
