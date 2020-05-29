@@ -15,3 +15,7 @@ body {
 ::selection {
   background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
 }
+
+a {
+  cursor: text;
+}
