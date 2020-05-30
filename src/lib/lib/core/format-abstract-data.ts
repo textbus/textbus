@@ -3,7 +3,7 @@
  */
 export interface AbstractDataParams {
   tag?: string;
-  attrs?: { [key: string]: string | number } | Map<string, string | number>;
+  attrs?: { [key: string]: string | number | boolean } | Map<string, string | number | boolean>;
   style?: { name: string, value: string | number };
 }
 
@@ -12,7 +12,7 @@ export interface AbstractDataParams {
  */
 export class FormatAbstractData {
   tag: string;
-  attrs: Map<string, string | number>;
+  attrs: Map<string, string | number | boolean>;
   style: { name: string, value: string | number };
 
   constructor(params: AbstractDataParams = {}) {
@@ -34,14 +34,14 @@ export class FormatAbstractData {
    * 复制当前抽象数据的副本
    */
   clone() {
-    const attrs = new Map<string, string | number>();
+    const attrs = new Map<string, string | number | boolean>();
     this.attrs && this.attrs.forEach((value, key) => {
       attrs.set(key, value);
     });
     return new FormatAbstractData({
       tag: this.tag,
       attrs: attrs.size ? (() => {
-        const obj: { [key: string]: string | number } = {};
+        const obj: { [key: string]: string | number | boolean } = {};
         Array.from(attrs.keys()).map(key => {
           obj[key] = attrs.get(key);
         });
@@ -69,7 +69,7 @@ export class FormatAbstractData {
       FormatAbstractData.equalStyle(left.style, right.style);
   }
 
-  private static equalAttrs(left: Map<string, string | number>, right: Map<string, string | number>) {
+  private static equalAttrs(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
     if (left === right || !left === true && !right === true) {
       return true;
     }

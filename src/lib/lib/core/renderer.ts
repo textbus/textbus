@@ -83,7 +83,10 @@ export class Renderer {
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
 
-  render(fragment: Fragment, host: HTMLElement, isProduction = false) {
+  private productionRenderingModal = false;
+
+  render(fragment: Fragment, host: HTMLElement) {
+    this.productionRenderingModal = false;
     this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
@@ -92,7 +95,7 @@ export class Renderer {
 
     const root = new RootVElement();
     this.NVMappingTable.set(host, root);
-    const vDom = this.createVDom(fragment, root, isProduction);
+    const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
@@ -100,6 +103,17 @@ export class Renderer {
     }
     this.oldVDom = vDom;
     this.setupVDomHierarchy(vDom);
+  }
+
+  renderToString(fragment: Fragment): string {
+    console.log(this)
+
+    this.productionRenderingModal = true;
+    const root = new VElement('root');
+    const vDom = this.createVDom(fragment, root);
+    return vDom.childNodes.map(child => {
+      return this.vDomToHTMLString(child);
+    }).join('');
   }
 
   getPositionByNode(node: Node) {
@@ -272,7 +286,7 @@ export class Renderer {
   private renderingNewTree(host: HTMLElement, vDom: VElement) {
     vDom.childNodes.forEach(child => {
       if (child instanceof VTextNode) {
-        const el = document.createTextNode(child.textContent);
+        const el = Renderer.createTextNode(child);
         host.appendChild(el);
         this.NVMappingTable.set(el, child);
         return;
@@ -284,13 +298,15 @@ export class Renderer {
     })
   }
 
-  private createVDom(fragment: Fragment, host: VElement, isProduction: boolean) {
-    this.fragmentAndVDomMapping.set(fragment, host);
-    this.vDomPositionMapping.set(host, {
-      startIndex: 0,
-      endIndex: fragment.contentLength,
-      fragment
-    });
+  private createVDom(fragment: Fragment, host: VElement) {
+    if (!this.productionRenderingModal) {
+      this.fragmentAndVDomMapping.set(fragment, host);
+      this.vDomPositionMapping.set(host, {
+        startIndex: 0,
+        endIndex: fragment.contentLength,
+        fragment
+      });
+    }
     const containerFormats: FormatRange[] = [];
     const childFormats: FormatRange[] = [];
     fragment.getCanApplyFormats().forEach(f => {
@@ -301,20 +317,20 @@ export class Renderer {
         childFormats.push(ff);
       }
     });
-    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, isProduction, host);
-    this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength, isProduction).forEach(item => {
+    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
+    this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
       r.slot.appendChild(item);
     });
     return r.host;
   }
 
-  private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number, isProduction: boolean) {
+  private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
-          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.startIndex, isProduction));
+          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.startIndex));
         }
         const childFormats: FormatRange[] = [firstRange];
         while (true) {
@@ -329,8 +345,7 @@ export class Renderer {
           childFormats,
           fragment,
           firstRange.startIndex,
-          firstRange.endIndex,
-          isProduction
+          firstRange.endIndex
         );
 
 
@@ -361,32 +376,32 @@ export class Renderer {
         });
 
         if (progenyFormats.length) {
-          this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex, isProduction).forEach(item => {
+          this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex).forEach(item => {
             slot.appendChild(item);
           });
         } else {
-          this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex, isProduction).forEach(item => {
+          this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex).forEach(item => {
             slot.appendChild(item);
           })
         }
         children.push(host);
         startIndex = firstRange.endIndex;
       } else {
-        children.push(...this.createNodesByRange(fragment, startIndex, endIndex, isProduction));
+        children.push(...this.createNodesByRange(fragment, startIndex, endIndex));
         break;
       }
     }
     return children;
   }
 
-  private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number, isProduction: boolean) {
+  private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     const contents = fragment.sliceContents(startIndex, endIndex);
     let i = startIndex;
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        this.vDomPositionMapping.set(textNode, {
+        !this.productionRenderingModal && this.vDomPositionMapping.set(textNode, {
           fragment,
           startIndex: i,
           endIndex: i + item.length
@@ -394,9 +409,9 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else {
-        this.templateHierarchyMapping.set(item, fragment);
-        const vDom = item.render(isProduction);
-        this.vDomPositionMapping.set(vDom, {
+        !this.productionRenderingModal && this.templateHierarchyMapping.set(item, fragment);
+        const vDom = item.render(this.productionRenderingModal);
+        !this.productionRenderingModal && this.vDomPositionMapping.set(vDom, {
           fragment,
           startIndex: i,
           endIndex: i + 1
@@ -405,9 +420,9 @@ export class Renderer {
         children.push(vDom);
         if (item instanceof Template) {
           item.childSlots.forEach(slot => {
-            this.fragmentHierarchyMapping.set(slot, item);
+            !this.productionRenderingModal && this.fragmentHierarchyMapping.set(slot, item);
             const parent = item.getChildViewBySlot(slot);
-            this.createVDom(slot, parent, isProduction);
+            this.createVDom(slot, parent);
           });
         }
       }
@@ -420,12 +435,11 @@ export class Renderer {
     fragment: Fragment,
     startIndex: number,
     endIndex: number,
-    isProduction: boolean,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
       .reduce((vEle, next) => {
-        const renderModel = next.renderer.render(isProduction, next.state, next.abstractData, vEle);
+        const renderModel = next.renderer.render(this.productionRenderingModal, next.state, next.abstractData, vEle);
         if (renderModel instanceof ReplaceModel) {
           host = slot = renderModel.replaceElement;
           return host;
@@ -442,7 +456,7 @@ export class Renderer {
       }, host);
     let el = host;
     while (el) {
-      this.vDomPositionMapping.set(el, {
+      !this.productionRenderingModal && this.vDomPositionMapping.set(el, {
         fragment,
         startIndex,
         endIndex
@@ -458,8 +472,32 @@ export class Renderer {
     }
   }
 
+  private vDomToHTMLString(vDom: VElement | VTextNode): string {
+    if (vDom instanceof VTextNode) {
+      return Renderer.replaceEmpty(vDom.textContent, '&nbsp;');
+    }
+    const styles = Array.from(vDom.styles.keys()).map(key => {
+      return `${key}:${vDom.styles.get(key)}`;
+    }).join(';');
+    const attrs = Array.from(vDom.attrs.keys()).map(key => {
+      const value = vDom.attrs.get(key);
+      return value === true ? `${key}` : ` ${key}=${value}`;
+    });
+    attrs.push(styles);
+    let attrStr = attrs.join(' ');
+    attrStr = attrStr ? ' ' + attrStr : '';
+    const childHTML = vDom.childNodes.map(child => {
+      return this.vDomToHTMLString(child);
+    }).join('');
+    return [
+      `<${vDom.tagName}${attrStr}>`,
+      childHTML,
+      `</${vDom.tagName}>`
+    ].join('');
+  }
+
   private static createTextNode(vDom: VTextNode) {
-    return document.createTextNode(vDom.textContent);
+    return document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
   }
 
   private static equal(left: VElement | VTextNode, right: VElement | VTextNode) {
@@ -470,5 +508,18 @@ export class Renderer {
       return false;
     }
     return right instanceof VTextNode && left.textContent === right.textContent;
+  }
+
+  /**
+   * 将文本中的空白字符转成 unicode，用于在 DOM Text 节点中显示
+   * @param s
+   * @param target
+   */
+  private static replaceEmpty(s: string, target: string) {
+    return s.replace(/\s\s+/g, str => {
+      return ' ' + Array.from({
+        length: str.length - 1
+      }).fill(target).join('');
+    }).replace(/^\s|\s$/g, target);
   }
 }

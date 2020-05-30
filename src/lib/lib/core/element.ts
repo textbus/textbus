@@ -2,7 +2,6 @@ import { EventEmitter, EventType } from './events';
 import { Lifecycle } from './lifecycle';
 import { Renderer } from './renderer';
 import { TBSelection } from './selection';
-import { BlockFormatter } from './formatter';
 
 export class VTextNode {
   constructor(public readonly textContent: string = '') {
@@ -12,7 +11,7 @@ export class VTextNode {
 export class VElement {
   readonly events = new EventEmitter();
   readonly childNodes: Array<VElement | VTextNode> = [];
-  readonly attrs = new Map<string, string | number>();
+  readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
 
   constructor(public tagName: string) {
@@ -37,7 +36,7 @@ export class VElement {
       VElement.equalMap(left.styles, right.styles);
   }
 
-  private static equalMap(left: Map<string, string | number>, right: Map<string, string | number>) {
+  private static equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
     if (left === right || !left === true && !right === true) {
       return true;
     }

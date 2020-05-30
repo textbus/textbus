@@ -174,7 +174,7 @@ export class Editor implements EventDelegate {
         return currentValue.onOutput(previousValue);
       }
       return previousValue;
-    }, this.viewer.contentDocument.body.innerHTML);
+    }, this.renderer.renderToString(this.rootFragment));
     return {
       styleSheets: this.options.styleSheets,
       contents

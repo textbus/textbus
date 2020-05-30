@@ -33,7 +33,7 @@ import {
   letterSpacingFormatter,
   letterSpacingTool,
   lineHeightFormatter,
-  lineHeightTool, linkFormatter, LinkHook,
+  lineHeightTool, linkFormatter,
   linkTool,
   ListTemplateTranslator,
   olTool,
@@ -74,8 +74,7 @@ const editor = new Editor('#editor', {
   styleSheets: defaultStyleSheets,
   hooks: [
     new DefaultHook(),
-    new HistoryHook(),
-    new LinkHook()
+    new HistoryHook()
   ],
   templateTranslators: [
     new ListTemplateTranslator('ul'),
