@@ -106,8 +106,6 @@ export class Renderer {
   }
 
   renderToString(fragment: Fragment): string {
-    console.log(this)
-
     this.productionRenderingModal = true;
     const root = new VElement('root');
     const vDom = this.createVDom(fragment, root);
@@ -481,9 +479,11 @@ export class Renderer {
     }).join(';');
     const attrs = Array.from(vDom.attrs.keys()).map(key => {
       const value = vDom.attrs.get(key);
-      return value === true ? `${key}` : ` ${key}=${value}`;
+      return value === true ? `${key}` : `${key}="${value}"`;
     });
-    attrs.push(styles);
+    if (styles) {
+      attrs.push(styles);
+    }
     let attrStr = attrs.join(' ');
     attrStr = attrStr ? ' ' + attrStr : '';
     const childHTML = vDom.childNodes.map(child => {
