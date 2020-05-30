@@ -45,8 +45,11 @@ export class Fragment {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
-      if (contents instanceof Template &&
-        format.startIndex < index && format.endIndex >= index) {
+      if(format instanceof BlockFormatter) {
+        newFormatRanges.push(format);
+        return;
+      }
+      if (format.startIndex < index && format.endIndex >= index) {
         newFormatRanges.push({
           startIndex: index + 1,
           endIndex: format.endIndex + 1,

@@ -205,10 +205,11 @@ export class Viewer {
   write(selection: TBSelection) {
     const startIndex = this.selectionSnapshot.firstRange.startIndex;
     const commonAncestorFragment = selection.commonAncestorFragment;
+    const fragmentSnapshot = this.fragmentSnapshot.clone();
 
     commonAncestorFragment.delete(0);
-    this.fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    this.fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.mergeFormat(f));
+    fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
+    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.mergeFormat(f));
 
     let index = 0;
     this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
