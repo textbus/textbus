@@ -1,120 +1,86 @@
-// import { TBRange, TBRangePosition } from './range';
-// import { Fragment } from '../parser/fragment';
-// import { Single } from '../parser/single';
+import { TBRange } from '../core/range';
+import { Fragment } from '../core/fragment';
+import { Renderer } from '../core/renderer';
+import { MediaTemplate, Template } from '../core/template';
+import { TBRangePosition } from '../core/selection';
+import { of } from 'rxjs';
 
+export enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
+}
 /**
  * 获取上一个选区位置
  * @param range
+ * @param renderer
  */
-// export function getPreviousPosition(range: TBRange) {
-//   const currentFragment = range.startFragment;
-//   let offset = range.startIndex;
-//
-//   if (offset > 0) {
-//     return {
-//       fragment: currentFragment,
-//       index: offset - 1
-//     }
-//   }
-//
-//   let fragment = currentFragment;
-//   while (fragment.parent) {
-//     const index = fragment.getIndexInParent();
-//     if (index === 0) {
-//       fragment = fragment.parent;
-//     } else {
-//       let prev = fragment.parent.getContentAtIndex(index - 1);
-//       if (prev instanceof Fragment) {
-//         while (prev) {
-//           const last = (prev as Fragment).getContentAtIndex((prev as Fragment).contentLength - 1);
-//           if (last instanceof Fragment) {
-//             prev = last;
-//           } else {
-//             let len = (prev as Fragment).contentLength;
-//             const c = (prev as Fragment).getContentAtIndex(len - 1);
-//             if (c instanceof Single && c.tagName === 'br') {
-//               len--;
-//             }
-//             return {
-//               fragment: prev as Fragment,
-//               index: len
-//             }
-//           }
-//         }
-//
-//       } else {
-//         return {
-//           fragment: fragment.parent,
-//           index: index - 1
-//         }
-//       }
-//     }
-//   }
-//   return {
-//     fragment: currentFragment,
-//     index: 0
-//   }
-// }
-//
-// /**
-//  * 获取下一个选区位置
-//  * @param range
-//  */
-// export function getNextPosition(range: TBRange): TBRangePosition {
-//   const currentFragment = range.endFragment;
-//   let offset = range.endIndex;
-//   if (offset === currentFragment.contentLength - 1) {
-//     const c = currentFragment.getContentAtIndex(offset);
-//     if (c instanceof Single && c.tagName === 'br') {
-//       offset++;
-//     }
-//   }
-//
-//   if (offset < currentFragment.contentLength) {
-//     return {
-//       fragment: currentFragment,
-//       index: offset + 1
-//     }
-//   }
-//   let fragment = currentFragment;
-//   while (fragment.parent) {
-//     const index = fragment.getIndexInParent();
-//     if (index === fragment.parent.contentLength - 1) {
-//       fragment = fragment.parent;
-//     } else {
-//       let next = fragment.parent.getContentAtIndex(index + 1);
-//       if (next instanceof Fragment) {
-//         while (next) {
-//           const first = (next as Fragment).getContentAtIndex(0);
-//           if (first instanceof Fragment) {
-//             next = first;
-//           } else {
-//             return {
-//               fragment: next as Fragment,
-//               index: 0
-//             }
-//           }
-//         }
-//
-//       } else {
-//         return {
-//           fragment: fragment.parent,
-//           index: index + 1
-//         }
-//       }
-//     }
-//   }
-//   let index = currentFragment.contentLength;
-//   const c = currentFragment.getContentAtIndex(index - 1);
-//   if (c instanceof Single && c.tagName === 'br') {
-//     index--;
-//   }
-//   return {
-//     fragment: currentFragment,
-//     index
-//   }
-// }
-//
+export function getPreviousPosition(range: TBRange, renderer: Renderer): TBRangePosition {
+  let fragment = range.startFragment;
+
+  if (range.startIndex > 0) {
+    const prev = fragment.getContentAtIndex(range.startIndex - 1);
+    if (prev instanceof Template) {
+      return findLastChild(prev.childSlots[prev.childSlots.length - 1]);
+    }
+    return {
+      fragment,
+      index: range.startIndex - 1
+    }
+  }
+
+  while (true) {
+    const parentTemplate = renderer.getParentTemplateByFragment(fragment);
+    if (!parentTemplate) {
+      return {
+        fragment,
+        index: 0
+      };
+    }
+    const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+    if (fragmentIndex > 0) {
+      return findLastChild(parentTemplate[fragmentIndex - 1]);
+    }
+    fragment = renderer.getParentFragmentByTemplate(parentTemplate);
+  }
+}
+
+/**
+ * 获取下一个选区位置
+ * @param range
+ * @param renderer
+ */
+export function getNextPosition(range: TBRange, renderer: Renderer): TBRangePosition {
+  let fragment = range.endFragment;
+  let offset = range.endIndex;
+  if (offset === fragment.contentLength - 1) {
+    const current = fragment.getContentAtIndex(offset);
+    if (current instanceof MediaTemplate && current.tagName === 'br') {
+      offset++;
+    }
+  }
+  if (offset < fragment.contentLength) {
+    const next = fragment.getContentAtIndex(offset + 1);
+    if (next instanceof Template) {
+      return findFirstPosition(next.childSlots[0]);
+    }
+    return {
+      fragment,
+      index: offset + 1
+    }
+  }
+
+  while (true) {
+    const parentTemplate = renderer.getParentTemplateByFragment(fragment);
+    const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+    if (fragmentIndex < parentTemplate.childSlots.length - 1) {
+      return findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
+    }
+    fragment = renderer.getParentFragmentByTemplate(parentTemplate);
+  }
+}
+
 /**
  * 获取 Range 光标显示的位置
  * @param range
@@ -145,12 +111,12 @@ export function getRangePosition(range: Range) {
   return rect;
 }
 
-// /**
-//  * 获取选区向上移动一行的位置
-//  * @param range
-//  * @param left
-//  * @param top
-//  */
+/**
+ * 获取选区向上移动一行的位置
+ * @param range
+ * @param left
+ * @param top
+ */
 // export function getPreviousLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
 //   const range2 = range.clone();
 //   let isToPrevLine = false;
@@ -197,13 +163,13 @@ export function getRangePosition(range: Range) {
 //     fragment: range.startFragment
 //   };
 // }
-//
-// /**
-//  * 获取选区向下移动一行的位置
-//  * @param range
-//  * @param left
-//  * @param top
-//  */
+
+/**
+ * 获取选区向下移动一行的位置
+ * @param range
+ * @param left
+ * @param top
+ */
 // export function getNextLinePosition(range: TBRange, left: number, top: number): TBRangePosition {
 //   const range2 = range.clone();
 //   let isToNextLine = false;
@@ -250,22 +216,22 @@ export function getRangePosition(range: Range) {
 //     fragment: range.endFragment
 //   };
 // }
-//
-// /**
-//  * 查找 Fragment 内第一个选区位置
-//  * @param fragment
-//  */
-// export function findFirstPosition(fragment: Fragment): TBRangePosition {
-//   const first = fragment.getContentAtIndex(0);
-//   if (first instanceof Fragment) {
-//     return findFirstPosition(first);
-//   }
-//   return {
-//     index: 0,
-//     fragment
-//   };
-// }
-//
+
+/**
+ * 查找 Fragment 内第一个选区位置
+ * @param fragment
+ */
+export function findFirstPosition(fragment: Fragment): TBRangePosition {
+  const first = fragment.getContentAtIndex(0);
+  if (first instanceof Fragment) {
+    return findFirstPosition(first);
+  }
+  return {
+    index: 0,
+    fragment
+  };
+}
+
 // export function findRerenderFragment(start: Fragment): TBRangePosition {
 //   if (!start.parent) {
 //     return {
@@ -282,26 +248,27 @@ export function getRangePosition(range: Range) {
 //     fragment: start.parent
 //   };
 // }
-// /**
-//  * 查找 Fragment 最后一个后代元素
-//  * @param fragment
-//  * @param index
-//  */
-// export function findLastChild(fragment: Fragment, index: number): TBRangePosition {
-//   const last = fragment.getContentAtIndex(index);
-//   if (last instanceof Fragment) {
-//     return findLastChild(last, last.contentLength - 1);
-//   } else if (last instanceof Single && last.tagName === 'br') {
-//     return {
-//       index: fragment.contentLength - 1,
-//       fragment
-//     };
-//   }
-//   return {
-//     index: fragment.contentLength,
-//     fragment
-//   }
-// }
+
+/**
+ * 查找 Fragment 最后一个后代元素
+ * @param fragment
+ */
+export function findLastChild(fragment: Fragment): TBRangePosition {
+  const last = fragment.getContentAtIndex(fragment.contentLength - 1);
+  if (last instanceof Template) {
+    const lastFragment = last.childSlots[last.childSlots.length - 1];
+    return findLastChild(lastFragment);
+  } else if (last instanceof MediaTemplate && last.tagName === 'br') {
+    return {
+      index: fragment.contentLength - 1,
+      fragment
+    };
+  }
+  return {
+    index: fragment.contentLength,
+    fragment
+  }
+}
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);

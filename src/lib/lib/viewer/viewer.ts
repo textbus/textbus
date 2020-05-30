@@ -7,11 +7,13 @@ import { BlockTemplate } from '../templates/block.template';
 import { Fragment } from '../core/fragment';
 import { Input, Keymap, KeymapAction } from './input';
 import { ToolConfig, HighlightState } from '../toolbar/help';
-import { TBSelection } from '../core/selection';
+import { TBRangePosition, TBSelection } from '../core/selection';
 import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
 import { VElement } from '../core/element';
 import { EventType } from '../core/events';
+import { CursorMoveDirection, getNextPosition, getPreviousPosition } from './tools';
+import { TBRange } from '../core/range';
 
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
@@ -123,6 +125,20 @@ export class Viewer {
     this.dispatchEvent({
       key: 'Backspace'
     }, EventType.onDelete);
+    this.input.keymap({
+      keymap: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+      },
+      action: (ev: KeyboardEvent) => {
+        const map: { [key: string]: CursorMoveDirection } = {
+          ArrowLeft: CursorMoveDirection.Left,
+          ArrowRight: CursorMoveDirection.Right,
+          ArrowUp: CursorMoveDirection.Up,
+          ArrowDown: CursorMoveDirection.Down
+        };
+        this.moveCursor(map[ev.key]);
+      }
+    });
   }
 
   dispatchEvent(keymap: Keymap, eventType: EventType) {
@@ -243,5 +259,55 @@ export class Viewer {
       commonAncestorFragment.append(new SingleTemplate('br'));
     }
     this.userWriteEvent.next();
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    const selection = new TBSelection(this.contentDocument, this.renderer);
+    selection.ranges.forEach(range => {
+      let p: TBRangePosition;
+      let range2: TBRange;
+      switch (direction) {
+        case CursorMoveDirection.Left:
+          p = getPreviousPosition(range, this.renderer);
+          break;
+        case CursorMoveDirection.Right:
+          p = getNextPosition(range, this.renderer);
+          break;
+        // case CursorMoveDirection.Up:
+        //   clearTimeout(this.cleanOldCursorTimer);
+        //   range2 = range.clone().apply();
+        //
+        //   if (this.oldCursorPosition) {
+        //     p = getPreviousLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
+        //   } else {
+        //     const rect = getRangePosition(range2.nativeRange);
+        //     this.oldCursorPosition = rect;
+        //     p = getPreviousLinePosition(range, rect.left, rect.top);
+        //   }
+        //   this.cleanOldCursorTimer = setTimeout(() => {
+        //     this.oldCursorPosition = null;
+        //   }, 3000);
+        //   break;
+        // case CursorMoveDirection.Down:
+        //   clearTimeout(this.cleanOldCursorTimer);
+        //   range2 = range.clone().apply();
+        //
+        //   if (this.oldCursorPosition) {
+        //     p = getNextLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
+        //   } else {
+        //     const rect = getRangePosition(range2.nativeRange);
+        //     this.oldCursorPosition = rect;
+        //     p = getNextLinePosition(range, rect.left, rect.top);
+        //   }
+        //   this.cleanOldCursorTimer = setTimeout(() => {
+        //     this.oldCursorPosition = null;
+        //   }, 3000);
+        //   break;
+      }
+      range.startFragment = range.endFragment = p.fragment;
+      range.startIndex = range.endIndex = p.index;
+    });
+    selection.restore();
+    this.recordSnapshotFromEditingBefore(selection);
   }
 }

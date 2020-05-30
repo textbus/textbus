@@ -156,8 +156,8 @@ export class Fragment {
     return this.formatMap.getFormatRanges();
   }
 
-  find(template: Template | MediaTemplate) {
-    return this.contents.find(template);
+  indexOf(template: Template | MediaTemplate) {
+    return this.contents.indexOf(template);
   }
 
   /**

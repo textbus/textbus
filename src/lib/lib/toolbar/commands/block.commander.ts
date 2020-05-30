@@ -23,11 +23,11 @@ export class BlockCommander implements Commander<string> {
         if (index === 0) {
           const blockTemplate = new BlockTemplate(this.tagName);
           blockTemplate.childSlots.push(template.childSlots.shift());
-          parentFragment.insert(blockTemplate, parentFragment.find(template));
+          parentFragment.insert(blockTemplate, parentFragment.indexOf(template));
         }
 
         if (template.childSlots.length === 0) {
-          parentFragment.delete(parentFragment.find(template), 1);
+          parentFragment.delete(parentFragment.indexOf(template), 1);
         }
       })
     })

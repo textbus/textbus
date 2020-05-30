@@ -84,13 +84,13 @@ export class TBRange {
     while (startFragment !== this.commonAncestorFragment) {
       const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
       startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      startIndex = startFragment.find(parentTemplate);
+      startIndex = startFragment.indexOf(parentTemplate);
     }
 
     while (endFragment !== this.commonAncestorFragment) {
       const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
       endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      endIndex = endFragment.find(parentTemplate);
+      endIndex = endFragment.indexOf(parentTemplate);
     }
 
     return {
@@ -159,7 +159,7 @@ export class TBRange {
         }
       }));
       startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      startIndex = startFragment.find(parentTemplate) + 1;
+      startIndex = startFragment.indexOf(parentTemplate) + 1;
     }
     while (endFragment !== this.commonAncestorFragment) {
       end.push({
@@ -181,7 +181,7 @@ export class TBRange {
         }
       }));
       endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      endIndex = endFragment.find(parentTemplate);
+      endIndex = endFragment.indexOf(parentTemplate);
     }
     return [...start, {
       startIndex,
@@ -246,7 +246,7 @@ export class TBRange {
         }
       }));
       startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      startIndex = startFragment.find(parentTemplate) + 1;
+      startIndex = startFragment.indexOf(parentTemplate) + 1;
     }
     while (endFragment !== this.commonAncestorFragment) {
       end.push({
@@ -268,7 +268,7 @@ export class TBRange {
         }
       }));
       endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      endIndex = endFragment.find(parentTemplate);
+      endIndex = endFragment.indexOf(parentTemplate);
     }
     return [...start, {
       startIndex,
@@ -299,7 +299,7 @@ export class TBRange {
     parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
     if (parentTemplate.childSlots.length === 0) {
       const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      const index = parentFragment.find(parentTemplate);
+      const index = parentFragment.indexOf(parentTemplate);
       parentFragment.delete(index, 1);
       if (parentFragment.contentLength === 0) {
         this.deleteEmptyTree(parentFragment);

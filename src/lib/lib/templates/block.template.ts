@@ -60,7 +60,7 @@ export class BlockTemplate extends Template {
           fragment.append(new SingleTemplate('br'));
         }
         c.formatRanges.forEach(ff => fragment.mergeFormat(ff));
-        parent.insert(template, parent.find(this) + 1);
+        parent.insert(template, parent.indexOf(this) + 1);
         firstRange.startFragment = firstRange.endFragment = fragment
         firstRange.startIndex = firstRange.endIndex = 0;
       }

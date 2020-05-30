@@ -89,7 +89,7 @@ export class TBSelection {
         if (parentTemplate) {
           paths.push(parentTemplate.childSlots.indexOf(fragment));
           fragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-          paths.push(fragment.find(parentTemplate));
+          paths.push(fragment.indexOf(parentTemplate));
         } else {
           break;
         }
