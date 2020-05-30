@@ -81,10 +81,9 @@ export class Renderer {
   private templateHierarchyMapping = new Map<Template | MediaTemplate, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
-
   private oldVDom: VElement;
 
-  render(fragment: Fragment, host: HTMLElement) {
+  render(fragment: Fragment, host: HTMLElement, isProduction = false) {
     this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new Map<Fragment, Template>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
@@ -93,7 +92,7 @@ export class Renderer {
 
     const root = new RootVElement();
     this.NVMappingTable.set(host, root);
-    const vDom = this.createVDom(fragment, root);
+    const vDom = this.createVDom(fragment, root, isProduction);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
@@ -285,7 +284,7 @@ export class Renderer {
     })
   }
 
-  private createVDom(fragment: Fragment, host: VElement) {
+  private createVDom(fragment: Fragment, host: VElement, isProduction: boolean) {
     this.fragmentAndVDomMapping.set(fragment, host);
     this.vDomPositionMapping.set(host, {
       startIndex: 0,
@@ -296,26 +295,26 @@ export class Renderer {
     const childFormats: FormatRange[] = [];
     fragment.getCanApplyFormats().forEach(f => {
       const ff = Object.assign({}, f);
-      if(ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
+      if (ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
         containerFormats.push(ff);
       } else {
         childFormats.push(ff);
       }
     });
-    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
-    this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
+    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, isProduction, host);
+    this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength, isProduction).forEach(item => {
       r.slot.appendChild(item);
     });
     return r.host;
   }
 
-  private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number) {
+  private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number, isProduction: boolean) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
       if (firstRange) {
         if (startIndex < firstRange.startIndex) {
-          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.startIndex));
+          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.startIndex, isProduction));
         }
         const childFormats: FormatRange[] = [firstRange];
         while (true) {
@@ -330,7 +329,8 @@ export class Renderer {
           childFormats,
           fragment,
           firstRange.startIndex,
-          firstRange.endIndex
+          firstRange.endIndex,
+          isProduction
         );
 
 
@@ -361,25 +361,25 @@ export class Renderer {
         });
 
         if (progenyFormats.length) {
-          this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex).forEach(item => {
+          this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex, isProduction).forEach(item => {
             slot.appendChild(item);
           });
         } else {
-          this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex).forEach(item => {
+          this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex, isProduction).forEach(item => {
             slot.appendChild(item);
           })
         }
         children.push(host);
         startIndex = firstRange.endIndex;
       } else {
-        children.push(...this.createNodesByRange(fragment, startIndex, endIndex));
+        children.push(...this.createNodesByRange(fragment, startIndex, endIndex, isProduction));
         break;
       }
     }
     return children;
   }
 
-  private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
+  private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number, isProduction: boolean) {
     const children: Array<VElement | VTextNode> = [];
     const contents = fragment.sliceContents(startIndex, endIndex);
     let i = startIndex;
@@ -395,7 +395,7 @@ export class Renderer {
         children.push(textNode);
       } else {
         this.templateHierarchyMapping.set(item, fragment);
-        const vDom = item.render();
+        const vDom = item.render(isProduction);
         this.vDomPositionMapping.set(vDom, {
           fragment,
           startIndex: i,
@@ -407,7 +407,7 @@ export class Renderer {
           item.childSlots.forEach(slot => {
             this.fragmentHierarchyMapping.set(slot, item);
             const parent = item.getChildViewBySlot(slot);
-            this.createVDom(slot, parent);
+            this.createVDom(slot, parent, isProduction);
           });
         }
       }
@@ -420,11 +420,12 @@ export class Renderer {
     fragment: Fragment,
     startIndex: number,
     endIndex: number,
+    isProduction: boolean,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
       .reduce((vEle, next) => {
-        const renderModel = next.renderer.render(next.state, next.abstractData, vEle);
+        const renderModel = next.renderer.render(isProduction, next.state, next.abstractData, vEle);
         if (renderModel instanceof ReplaceModel) {
           host = slot = renderModel.replaceElement;
           return host;

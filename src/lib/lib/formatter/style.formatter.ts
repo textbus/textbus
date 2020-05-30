@@ -14,7 +14,7 @@ export class StyleFormatter extends InlineFormatter {
     });
   }
 
-  render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (existingElement) {
       existingElement.styles.set(this.styleName, abstractData.style.value);
     } else {

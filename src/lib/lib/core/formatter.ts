@@ -98,7 +98,7 @@ export abstract class Formatter {
 
   abstract read(node: HTMLElement): FormatAbstractData;
 
-  abstract render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
+  abstract render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
 
   match(p: HTMLElement | FormatAbstractData) {
     if (this.rule.filter) {

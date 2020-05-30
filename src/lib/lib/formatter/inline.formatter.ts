@@ -14,7 +14,7 @@ export class InlineTagFormatter extends InlineFormatter {
     });
   }
 
-  render(state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }
