@@ -156,6 +156,15 @@ export class TBSelection {
     });
   }
 
+  /**
+   * 复制当前 Selection 的副本
+   */
+  clone() {
+    const t = new TBSelection(this.context, this.renderer);
+    t._ranges = this.ranges.map(r => r.clone());
+    return t;
+  }
+
   private getCommonFragment(): Fragment {
     const ranges = this.ranges || [];
     if (ranges.length === 1) {

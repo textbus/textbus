@@ -90,19 +90,27 @@ export class Viewer {
       this.selectionChangeEvent.next(new TBSelection(this.contentDocument, this.renderer));
     })
     this.input.events.onFocus.subscribe(() => {
-      this.recordSnapshotFromEditingBefore();
+      this.recordSnapshotFromEditingBefore(new TBSelection(this.contentDocument, this.renderer));
     })
     this.input.events.onInput.subscribe(() => {
       const selection = new TBSelection(this.contentDocument, this.renderer);
+      const collapsed = selection.collapsed;
       let isNext = true;
       (this.context.options.hooks || []).forEach(lifecycle => {
         if (typeof lifecycle.onInput === 'function') {
           if (lifecycle.onInput(this.renderer, selection) === false) {
             isNext = false;
+          } else {
+            if (!selection.collapsed) {
+              throw new Error('输入前选区必须闭合！');
+            }
           }
         }
       })
       if (isNext) {
+        if (!collapsed) {
+          this.recordSnapshotFromEditingBefore(selection, true);
+        }
         this.write(selection);
       }
       this.render(this.rootFragment);
@@ -146,7 +154,7 @@ export class Viewer {
         this.render(this.rootFragment);
         selection.restore();
         this.input.updateStateBySelection(this.nativeSelection);
-        this.recordSnapshotFromEditingBefore();
+        this.recordSnapshotFromEditingBefore(selection);
         this.userWriteEvent.next();
       }
     })
@@ -196,9 +204,11 @@ export class Viewer {
   /**
    * 记录编辑前的快照
    */
-  recordSnapshotFromEditingBefore() {
-    this.input.cleanValue();
-    this.selectionSnapshot = new TBSelection(this.contentDocument, this.renderer);
+  recordSnapshotFromEditingBefore(selection: TBSelection, keepInputStatus = false) {
+    if (!keepInputStatus) {
+      this.input.cleanValue();
+    }
+    this.selectionSnapshot = selection.clone();
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment.clone();
   }
 

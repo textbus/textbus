@@ -59,6 +59,12 @@ export class TBRange {
     }
   }
 
+  clone() {
+    const r = new TBRange(this.nativeRange.cloneRange(), this.renderer);
+    Object.assign(r, this);
+    return r;
+  }
+
   restore() {
     const start = this.findFocusNodeAndOffset(this.startFragment, this.startIndex);
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
