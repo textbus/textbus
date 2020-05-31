@@ -1,10 +1,9 @@
-import { ButtonConfig, ToolType } from '../help';
 import { strikeThroughFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const strikeThroughTool: ButtonConfig = {
-  type: ToolType.Button,
+export const strikeThroughTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-strikethrough'],
   tooltip: '删除线',
   keymap: {
@@ -13,4 +12,4 @@ export const strikeThroughTool: ButtonConfig = {
   },
   match: new FormatMatcher(strikeThroughFormatter),
   execCommand: new InlineCommander('del', strikeThroughFormatter)
-};
+});

@@ -1,12 +1,11 @@
-import { ButtonConfig, ToolType } from '../help';
 import { superscriptFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const superscriptTool: ButtonConfig = {
-  type: ToolType.Button,
+export const superscriptTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-superscript'],
   tooltip: '上标',
   match: new FormatMatcher(superscriptFormatter),
   execCommand: new InlineCommander('sup', superscriptFormatter)
-};
+});

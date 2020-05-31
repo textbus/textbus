@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const letterSpacingTool: SelectConfig = {
-  type: ToolType.Select,
+export const letterSpacingTool = Toolkit.makeSelectTool({
   tooltip: '字间距',
   classes: ['tbus-icon-letter-spacing'],
   mini: true,
@@ -46,4 +45,4 @@ export const letterSpacingTool: SelectConfig = {
     }
   },
   execCommand: new StyleCommander('letterSpacing', letterSpacingFormatter)
-};
+});

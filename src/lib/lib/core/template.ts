@@ -26,7 +26,7 @@ export abstract class Template {
   }
 
   abstract render(isProduction: boolean): VElement;
-  abstract clone(): Template;
+  abstract clone(): Template & any;
 
   getChildViewBySlot(slot: Fragment) {
     return this.viewMap.get(slot);
@@ -40,5 +40,5 @@ export abstract class MediaTemplate {
   }
 
   abstract render(isProduction: boolean): VElement;
-  abstract clone(): any;
+  abstract clone(): MediaTemplate & any;
 }

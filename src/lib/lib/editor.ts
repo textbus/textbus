@@ -12,7 +12,7 @@ import {
   Fragment
 } from './core/_api';
 import { Viewer, KeymapAction } from './viewer/_api';
-import { Toolbar, EventDelegate, ToolConfig, ContextMenu } from './toolbar/_api';
+import { Toolbar, EventDelegate, ContextMenu, ToolFactory } from './toolbar/_api';
 
 export interface Snapshot {
   contents: Fragment;
@@ -24,7 +24,7 @@ export interface EditorOptions {
   historyStackSize?: number;
   templateTranslators?: TemplateTranslator[];
   formatters?: InlineFormatter[];
-  toolbar?: (ToolConfig | ToolConfig[])[];
+  toolbar?: (ToolFactory | ToolFactory[])[];
   hooks?: Lifecycle[];
   styleSheets?: string[];
 

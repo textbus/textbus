@@ -1,10 +1,9 @@
-import { ToolType, SelectConfig } from '../help';
 import { CodeCommander } from '../commands/code.commander';
 import { CodeTemplate } from '../../templates/code.template';
 import { CodeMatcher } from '../matcher/code.matcher';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const codeTool: SelectConfig = {
-  type: ToolType.Select,
+export const codeTool = Toolkit.makeSelectTool({
   classes: ['tbus-icon-code'],
   tooltip: '代码',
   mini: true,
@@ -50,4 +49,4 @@ export const codeTool: SelectConfig = {
     }
   },
   execCommand: new CodeCommander()
-};
+});

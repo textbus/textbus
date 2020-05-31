@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { fontSizeFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const fontSizeTool: SelectConfig = {
-  type: ToolType.Select,
+export const fontSizeTool = Toolkit.makeSelectTool({
   tooltip: '字体大小',
   classes: ['tbus-icon-font-size'],
   mini: true,
@@ -62,4 +61,4 @@ export const fontSizeTool: SelectConfig = {
     }
   },
   execCommand: new StyleCommander('fontSize', fontSizeFormatter)
-};
+});

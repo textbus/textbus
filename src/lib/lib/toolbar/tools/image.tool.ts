@@ -2,10 +2,10 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, ToolType } from '../help';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageTemplate } from '../../templates/image.template';
 import { ImageCommander } from '../commands/image.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
 const commander = new ImageCommander()
 
@@ -26,12 +26,11 @@ form.onSubmit = function (attrs) {
   hideEvent.next();
 };
 
-export const imageTool: DropdownConfig = {
-  type: ToolType.Dropdown,
+export const imageTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-image'],
   tooltip: '图片',
   onHide: hideEvent.asObservable(),
   viewer: form,
   match: new MediaMatcher(ImageTemplate),
   execCommand: commander
-};
+});

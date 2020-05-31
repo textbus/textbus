@@ -7,7 +7,7 @@ import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
-import { DropdownHandlerView } from '../handlers/_api';
+import { DropdownHandlerView } from '../toolkit/_api';
 import { FormatAbstractData } from '../../core/_api';
 
 export class Form implements DropdownHandlerView {

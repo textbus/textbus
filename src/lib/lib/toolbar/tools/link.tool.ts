@@ -1,13 +1,14 @@
 import { Subject } from 'rxjs';
 
-import { DropdownConfig, ToolType } from '../help';
 import { LinkCommander } from '../commands/link.commander';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
 import { FormatEffect } from '../../core/formatter';
-import { DropdownHandler } from '../handlers/dropdown.handler';
+import { DropdownHandler } from '../toolkit/dropdown.handler';
+import { Toolkit } from '../toolkit/toolkit';
+
 
 const commander = new LinkCommander(linkFormatter);
 
@@ -38,8 +39,7 @@ form.onSubmit = function (attrs) {
   hideEvent.next();
 };
 
-export const linkTool: DropdownConfig = {
-  type: ToolType.Dropdown,
+export const linkTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-link'],
   tooltip: '链接',
   onHide: hideEvent.asObservable(),
@@ -68,4 +68,4 @@ export const linkTool: DropdownConfig = {
   }],
   match: new FormatMatcher(linkFormatter),
   execCommand: commander
-};
+});

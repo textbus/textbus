@@ -2,7 +2,7 @@ import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Subject } from 'rxjs';
 
-import { DropdownHandlerView } from '../../handlers/utils/dropdown';
+import { DropdownHandlerView } from '../../toolkit/utils/dropdown';
 import { FormatAbstractData } from '../../../core/format-abstract-data';
 import { Commander } from '../../../core/commander';
 

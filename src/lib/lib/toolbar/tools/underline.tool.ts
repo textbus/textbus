@@ -1,10 +1,9 @@
-import { ButtonConfig, ToolType } from '../help';
 import { underlineFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const underlineTool: ButtonConfig = {
-  type: ToolType.Button,
+export const underlineTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-underline'],
   tooltip: '下划线',
   keymap: {
@@ -13,4 +12,4 @@ export const underlineTool: ButtonConfig = {
   },
   match: new FormatMatcher(underlineFormatter),
   execCommand: new InlineCommander('u', underlineFormatter)
-};
+});

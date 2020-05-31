@@ -1,9 +1,8 @@
-import { ButtonConfig, ToolType } from '../../toolbar/help';
 import { HistoryMatcher } from '../matcher/history.matcher';
 import { HistoryCommander } from '../commands/history.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const historyBackTool: ButtonConfig = {
-  type: ToolType.Button,
+export const historyBackTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-history-back'],
   tooltip: '撤消',
   match: new HistoryMatcher('back'),
@@ -12,4 +11,4 @@ export const historyBackTool: ButtonConfig = {
     ctrlKey: true,
     key: 'z'
   }
-};
+});

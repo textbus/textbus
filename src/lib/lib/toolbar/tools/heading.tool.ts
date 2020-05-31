@@ -1,10 +1,9 @@
-import { ToolType, SelectConfig } from '../help';
 import { BlockCommander } from '../commands/block.commander';
 import { BlockTemplate } from '../../templates/block.template';
 import { BlockMatcher } from '../matcher/block.matcher';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const headingTool: SelectConfig = {
-  type: ToolType.Select,
+export const headingTool = Toolkit.makeSelectTool({
   match: new BlockMatcher(BlockTemplate),
   highlight(options, t) {
     if (t instanceof BlockTemplate) {
@@ -73,4 +72,4 @@ export const headingTool: SelectConfig = {
       key: '0'
     }
   }]
-};
+});

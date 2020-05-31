@@ -1,9 +1,8 @@
-import { ButtonConfig, ToolType } from '../help';
 import { CleanCommander } from '../commands/clean.commander';
 import { LinkFormatter } from '../../formatter/link.formatter';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const cleanTool: ButtonConfig = {
-  type: ToolType.Button,
+export const cleanTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-clear-formatting'],
   tooltip: '清除格式',
   keymap: {
@@ -13,4 +12,4 @@ export const cleanTool: ButtonConfig = {
     key: 'c'
   },
   execCommand: new CleanCommander([LinkFormatter])
-};
+});

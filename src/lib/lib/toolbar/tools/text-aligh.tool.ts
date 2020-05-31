@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const textAlignTool: SelectConfig = {
-  type: ToolType.Select,
+export const textAlignTool = Toolkit.makeSelectTool({
   tooltip: '对齐方式',
   options: [{
     label: '左对齐',
@@ -52,4 +51,4 @@ export const textAlignTool: SelectConfig = {
     }
   },
   execCommand: new BlockStyleCommander('textAlign', textAlignFormatter)
-};
+});

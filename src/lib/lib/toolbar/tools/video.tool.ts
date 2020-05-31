@@ -2,10 +2,10 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, ToolType } from '../help';
 import { VideoTemplate } from '../../templates/video.template';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
+import { Toolkit } from '../toolkit/toolkit';
 
 const commander = new VideoCommander()
 
@@ -36,12 +36,11 @@ form.onSubmit = function (attrs) {
   hideEvent.next();
 };
 
-export const videoTool: DropdownConfig = {
-  type: ToolType.Dropdown,
+export const videoTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-video'],
   tooltip: '视频',
   onHide: hideEvent.asObservable(),
   viewer: form,
   match: new MediaMatcher(VideoTemplate),
   execCommand: commander
-};
+});

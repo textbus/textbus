@@ -1,5 +1,4 @@
-import { ContextMenuConfig } from './help';
-import { Tool } from './handlers/help';
+import { ContextMenuConfig, Tool } from './toolkit/help';
 import { Renderer, TBSelection } from '../core/_api';
 
 export class ContextMenu {

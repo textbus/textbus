@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { lineHeightFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const lineHeightTool: SelectConfig = {
-  type: ToolType.Select,
+export const lineHeightTool = Toolkit.makeSelectTool({
   tooltip: '行高',
   classes: ['tbus-icon-line-height'],
   mini: true,
@@ -54,4 +53,4 @@ export const lineHeightTool: SelectConfig = {
     }
   },
   execCommand: new StyleCommander('lineHeight', lineHeightFormatter)
-};
+});

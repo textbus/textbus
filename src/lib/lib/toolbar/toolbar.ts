@@ -1,14 +1,10 @@
 import { Observable, Subject } from 'rxjs';
 
-import { HighlightState, ToolConfig, ToolType } from './help';
+import { HighlightState } from './help';
 import {
   createKeymapHTML,
-  Tool,
-  ButtonHandler,
-  SelectHandler,
-  DropdownHandler,
-  ActionSheetHandler
-} from './handlers/_api';
+  Tool, ToolConfig, ToolFactory, ToolType
+} from './toolkit/_api';
 import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { TBSelection, Renderer } from '../core/_api';
@@ -24,7 +20,7 @@ export class Toolbar {
   private toolsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
-  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolConfig | ToolConfig[])[]) {
+  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
@@ -82,7 +78,7 @@ export class Toolbar {
     return this.findNeedShowKeymapHandler(el.parentNode as HTMLElement);
   }
 
-  private createToolbar(handlers: (ToolConfig | ToolConfig[])[]) {
+  private createToolbar(handlers: (ToolFactory | ToolFactory[])[]) {
     if (Array.isArray(handlers)) {
       handlers.forEach(handler => {
         const group = document.createElement('span');
@@ -98,26 +94,26 @@ export class Toolbar {
     }
   }
 
-  private createHandlers(handlers: ToolConfig[]) {
+  private createHandlers(handlers: ToolFactory[]) {
     return handlers.map(handler => {
       return this.createHandler(handler);
     });
   }
 
-  private createHandler(option: ToolConfig) {
+  private createHandler(option: ToolFactory) {
     let h: Tool;
     switch (option.type) {
       case ToolType.Button:
-        h = new ButtonHandler(option);
+        h = option.factory();
         break;
       case ToolType.Select:
-        h = new SelectHandler(option, this.toolsElement);
+        h = option.factory(this.toolsElement);
         break;
       case ToolType.Dropdown:
-        h = new DropdownHandler(option, this.context, this.toolsElement);
+        h = option.factory(this.context, this.toolsElement);
         break;
       case ToolType.ActionSheet:
-        h = new ActionSheetHandler(option, this.toolsElement);
+        h = option.factory(this.toolsElement);
         break;
     }
     if (h.keymapAction) {
@@ -127,7 +123,7 @@ export class Toolbar {
       });
     }
     this.tools.push({
-      config: option,
+      config: option.config,
       instance: h
     });
     return h.elementRef;

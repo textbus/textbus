@@ -1,10 +1,9 @@
-import { ButtonConfig, ToolType } from '../help';
 import { BoldCommander } from '../commands/bold.commander';
 import { boldFormatter } from '../../formatter/bold.formatter';
 import { BoldMatcher } from '../matcher/bold.matcher';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const boldTool: ButtonConfig = {
-  type: ToolType.Button,
+export const boldTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-bold'],
   tooltip: '加粗',
   keymap: {
@@ -13,4 +12,4 @@ export const boldTool: ButtonConfig = {
   },
   match: new BoldMatcher(),
   execCommand: new BoldCommander(boldFormatter)
-};
+});

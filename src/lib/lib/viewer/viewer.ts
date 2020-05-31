@@ -5,7 +5,7 @@ import { Renderer, Fragment, TBRangePosition, TBSelection, VElement, EventType }
 import { template } from './template-html';
 import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
-import { ToolConfig, HighlightState } from '../toolbar/help';
+import { HighlightState, ToolConfig } from '../toolbar/_api';
 import { Editor } from '../editor';
 import {
   CursorMoveDirection, getNextLinePosition,

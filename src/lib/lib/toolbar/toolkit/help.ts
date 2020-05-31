@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { KeymapAction, Keymap, isMac } from '../../viewer/_api';
+import { Renderer, TBSelection } from '../../core/_api';
 
 export interface Tool {
   elementRef: HTMLElement;
@@ -8,6 +9,13 @@ export interface Tool {
   keymapAction?: KeymapAction | KeymapAction[];
 
   updateStatus?(selectionMatchDelta: any): void;
+}
+
+export interface ContextMenuConfig {
+  classes?: string[];
+  label?: string;
+  displayNeedMatch?: boolean;
+  action?: (renderer: Renderer, selection: TBSelection, tool: Tool) => void;
 }
 
 export function createKeymapHTML(config: Keymap) {

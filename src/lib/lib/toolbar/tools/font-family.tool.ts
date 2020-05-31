@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { fontFamilyFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const fontFamilyTool: SelectConfig = {
-  type: ToolType.Select,
+export const fontFamilyTool = Toolkit.makeSelectTool({
   tooltip: '字体',
   options: [{
     label: 'sans-serif',
@@ -60,4 +59,4 @@ export const fontFamilyTool: SelectConfig = {
     }
   },
   execCommand: new StyleCommander('fontFamily', fontFamilyFormatter)
-};
+});

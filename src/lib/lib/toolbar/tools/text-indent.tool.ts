@@ -1,11 +1,10 @@
-import { ToolType, SelectConfig } from '../help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textIndentFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const textIndentTool: SelectConfig = {
-  type: ToolType.Select,
+export const textIndentTool = Toolkit.makeSelectTool({
   tooltip: '首行缩进',
   classes: ['tbus-icon-text-indent'],
   mini: true,
@@ -39,4 +38,4 @@ export const textIndentTool: SelectConfig = {
     }
   },
   execCommand: new BlockStyleCommander('textIndent', textIndentFormatter)
-};
+});

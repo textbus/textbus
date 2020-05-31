@@ -2,10 +2,10 @@ import { Subject } from 'rxjs';
 
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { DropdownConfig, ToolType } from '../help';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { TableTemplate } from '../../templates/table.template';
 import { TableCommander } from '../commands/table.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
 const commander = new TableCommander()
 
@@ -35,12 +35,11 @@ form.onSubmit = function (attrs) {
   hideEvent.next();
 };
 
-export const tableTool: DropdownConfig = {
-  type: ToolType.Dropdown,
+export const tableTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-table'],
   tooltip: '表格',
   onHide: hideEvent.asObservable(),
   viewer: form,
   match: new BlockMatcher(TableTemplate),
   execCommand: commander
-};
+});

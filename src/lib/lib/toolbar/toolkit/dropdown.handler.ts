@@ -1,9 +1,29 @@
 import { Observable } from 'rxjs';
 
-import { Tool } from './help';
-import { Dropdown } from './utils/dropdown';
-import { DropdownConfig, EventDelegate, HighlightState } from '../help';
-import { SelectionMatchDelta } from '../matcher/_api';
+import { ContextMenuConfig, Tool } from './help';
+import { Dropdown, DropdownHandlerView } from './utils/dropdown';
+import { EventDelegate, HighlightState } from '../help';
+import { Matcher, SelectionMatchDelta } from '../matcher/_api';
+import { Commander } from '../../core/_api';
+
+export interface DropdownConfig {
+  /** 下拉控件展开后显示的内容 */
+  viewer: DropdownHandlerView;
+  /** 订阅下拉控件操作完成时的观察者 */
+  onHide: Observable<any>;
+  /** 锚中节点的的匹配项配置 */
+  match?: Matcher;
+  /** 订阅下拉控件操作完成时调用的命令 */
+  execCommand: Commander;
+  /** 设置上下文菜单 */
+  contextMenu?: Array<ContextMenuConfig>;
+  /** 给当前控件添加一组 css class */
+  classes?: string[];
+  /** 当鼠标放在控件上的提示文字 */
+  tooltip?: string;
+  /** 设置控件显示的文字 */
+  label?: string;
+}
 
 export class DropdownHandler implements Tool {
   elementRef: HTMLElement;

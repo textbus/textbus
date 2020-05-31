@@ -1,11 +1,40 @@
 import { merge, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ActionSheetConfig, ActionConfig, HighlightState } from '../help';
+import {  HighlightState } from '../help';
 import { Dropdown } from './utils/dropdown';
-import { Tool, createKeymapHTML } from './help';
-import { KeymapAction } from '../../viewer/input';
+import { Tool, createKeymapHTML, ContextMenuConfig } from './help';
+import { Keymap, KeymapAction } from '../../viewer/input';
+import { Commander } from '../../core/_api';
+import { Matcher } from '../matcher/_api';
 
+export interface ActionConfig {
+  /** 设置当前 action 的 value */
+  value?: any;
+  /** 设置当前 action 显示的文字 */
+  label?: string;
+  /** 给当前 action 添加一组 css class */
+  classes?: string[];
+  /** 给当前 action 添加一组 css class */
+  keymap?: Keymap;
+}
+
+export interface ActionSheetConfig {
+  /** 当前控件可操作的选项 */
+  actions: ActionConfig[];
+  /** 当某一项被点击时调用的命令 */
+  execCommand: Commander & { actionType: any };
+  /** 设置上下文菜单 */
+  contextMenu?: ContextMenuConfig[];
+  /** 锚中节点的的匹配项配置 */
+  match?: Matcher;
+  /** 设置控件显示的文字 */
+  label?: string;
+  /** 给当前控件添加一组 css class */
+  classes?: string[];
+  /** 当鼠标放在控件上的提示文字 */
+  tooltip?: string;
+}
 export class ActionSheetHandler implements Tool {
   readonly elementRef: HTMLElement;
   onMatched: Observable<ActionConfig>;

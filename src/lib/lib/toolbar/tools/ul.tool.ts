@@ -1,9 +1,8 @@
-import { ButtonConfig, ToolType } from '../help';
 import { ListMatcher } from '../matcher/list.matcher';
 import { ListCommander } from '../commands/list.commander';
+import { Toolkit } from '../toolkit/toolkit';
 
-export const ulTool: ButtonConfig = {
-  type: ToolType.Button,
+export const ulTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-list'],
   tooltip: '无序列表',
   keymap: {
@@ -13,4 +12,4 @@ export const ulTool: ButtonConfig = {
   },
   match: new ListMatcher('ul'),
   execCommand: new ListCommander('ul')
-};
+});
