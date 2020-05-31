@@ -16,8 +16,8 @@ export class VideoTemplateTranslator implements TemplateTranslator {
 }
 
 export class VideoTemplate extends MediaTemplate {
-  constructor(private src: string, private autoplay: boolean, private controls: boolean) {
-    super('audio');
+  constructor(public src: string, public autoplay: boolean, public controls: boolean) {
+    super('video');
 
   }
 

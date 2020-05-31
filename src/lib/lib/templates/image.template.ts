@@ -16,7 +16,7 @@ export class ImageTemplateTranslator implements TemplateTranslator {
 }
 
 export class ImageTemplate extends MediaTemplate {
-  constructor(private src: string) {
+  constructor(public src: string) {
     super('img');
   }
 
