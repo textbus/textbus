@@ -2,15 +2,15 @@ import { Template, TemplateTranslator, ViewData, Fragment, VElement, EventType }
 import { SingleTemplate } from './single.template';
 
 export class BlockTemplateTranslator implements TemplateTranslator {
-  constructor(private tagName: string) {
+  constructor(private tagNames: string[]) {
   }
 
   match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+    return this.tagNames.includes(template.nodeName.toLowerCase());
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new BlockTemplate(this.tagName);
+    const template = new BlockTemplate(el.tagName.toLocaleLowerCase());
     const slot = new Fragment();
     template.childSlots.push(slot);
     return {

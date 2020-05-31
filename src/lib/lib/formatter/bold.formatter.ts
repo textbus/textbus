@@ -1,4 +1,4 @@
-import { InlineFormatter, FormatEffect, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
+import { ChildSlotModel, FormatAbstractData, FormatEffect, InlineFormatter, VElement } from '../core/_api';
 
 export class BoldFormatter extends InlineFormatter {
   constructor() {
@@ -22,6 +22,11 @@ export class BoldFormatter extends InlineFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+    if (state === FormatEffect.Exclude) {
+      const el = new VElement('span');
+      el.styles.set('fontWeight', 'normal');
+      return new ChildSlotModel(el);
+    }
     if (existingElement && /(h[1-6])|th/i.test(existingElement.tagName)) {
       return;
     }
