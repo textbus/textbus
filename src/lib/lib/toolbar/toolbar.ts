@@ -1,16 +1,18 @@
 import { Observable, Subject } from 'rxjs';
 
 import { HighlightState, ToolConfig, ToolType } from './help';
-import { createKeymapHTML, Tool } from './handlers/help';
-import { ButtonHandler } from './handlers/button.handler';
-import { SelectHandler } from './handlers/select.handler';
-import { DropdownHandler } from './handlers/dropdown.handler';
-import { ActionSheetHandler } from './handlers/action-sheet.handler';
+import {
+  createKeymapHTML,
+  Tool,
+  ButtonHandler,
+  SelectHandler,
+  DropdownHandler,
+  ActionSheetHandler
+} from './handlers/_api';
 import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
-import { TBSelection } from '../core/selection';
-import { Renderer } from '../core/renderer';
-import { SelectionMatchDelta } from '@tanbo/tbus/toolbar/matcher/matcher';
+import { TBSelection, Renderer } from '../core/_api';
+import { SelectionMatchDelta } from './matcher/matcher';
 import { ContextMenu } from './context-menu';
 
 export class Toolbar {

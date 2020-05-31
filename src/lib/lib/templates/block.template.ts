@@ -1,7 +1,4 @@
-import { Template, TemplateTranslator, ViewData } from '../core/template';
-import { Fragment } from '../core/fragment';
-import { VElement } from '../core/element';
-import { EventType } from '../core/events';
+import { Template, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
 import { SingleTemplate } from './single.template';
 
 export class BlockTemplateTranslator implements TemplateTranslator {

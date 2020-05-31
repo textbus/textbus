@@ -1,8 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { EventDelegate } from '../../help';
-import { FormatAbstractData } from '../../../core/format-abstract-data';
-import { MediaTemplate, Template } from '../../../core/template';
+import { FormatAbstractData, MediaTemplate, Template } from '../../../core/_api';
 
 export interface DropdownHandlerView {
   elementRef: HTMLElement | DocumentFragment;

@@ -1,12 +1,17 @@
-import { TBSelection } from '../../core/selection';
-import { Renderer } from '../../core/renderer';
+import {
+  TBSelection,
+  Renderer,
+  Fragment,
+  TBRange,
+  Template,
+  FormatAbstractData,
+  FormatRange,
+  InlineFormatter,
+  FormatEffect,
+  BlockFormatter
+} from '../../core/_api';
 import { HighlightState } from '../help';
-import { Fragment } from '../../core/fragment';
-import { TBRange } from '../../core/range';
-import { Template } from '../../core/template';
-import { FormatRange, InlineFormatter, FormatEffect, BlockFormatter } from '../../core/formatter';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export interface FormatMatcherParams {
   /** 不能包含哪些标签 */

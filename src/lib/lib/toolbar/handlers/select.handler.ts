@@ -3,8 +3,8 @@ import { merge, Observable, Subject } from 'rxjs';
 import { createKeymapHTML, Tool } from './help';
 import { Dropdown } from './utils/dropdown';
 import { HighlightState, SelectConfig, SelectOptionConfig } from '../help';
-import { KeymapAction } from '../../viewer/input';
-import { SelectionMatchDelta } from '../matcher/matcher';
+import { KeymapAction } from '../../viewer/_api';
+import { SelectionMatchDelta } from '../matcher/_api';
 
 export class SelectHandler implements Tool {
   readonly elementRef: HTMLElement;

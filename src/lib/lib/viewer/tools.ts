@@ -1,9 +1,4 @@
-import { TBRange } from '../core/range';
-import { Fragment } from '../core/fragment';
-import { Renderer } from '../core/renderer';
-import { MediaTemplate, Template } from '../core/template';
-import { TBRangePosition } from '../core/selection';
-import { of } from 'rxjs';
+import { TBRange, Fragment, Renderer, MediaTemplate, Template, TBRangePosition } from '../core/_api';
 
 export enum CursorMoveDirection {
   Left,

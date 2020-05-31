@@ -1,8 +1,6 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../../core/selection';
-import { Constructor, Renderer } from '../../core/renderer';
+import { TBSelection, Constructor, Renderer, MediaTemplate } from '../../core/_api';
 import { HighlightState } from '../help';
-import { MediaTemplate } from '../../core/template';
 
 export class MediaMatcher implements Matcher {
   constructor(public templateConstructor: Constructor<MediaTemplate>) {

@@ -1,10 +1,6 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
+import { Commander, TBSelection, Template, FormatEffect, FormatAbstractData } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
 import { AttrState } from '../forms/help';
-import { Template } from '../../core/template';
-import { FormatEffect } from '../../core/formatter';
-import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;

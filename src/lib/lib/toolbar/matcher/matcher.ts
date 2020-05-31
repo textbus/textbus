@@ -1,11 +1,14 @@
-import { TBSelection } from '../../core/selection';
-import { Renderer } from '../../core/renderer';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import {
+  TBSelection,
+  Renderer,
+  FormatAbstractData,
+  TBRange,
+  FormatEffect,
+  MediaTemplate,
+  Template
+} from '../../core/_api';
 import { HighlightState } from '../help';
-import { TBRange } from '../../core/range';
-import { FormatEffect } from '../../core/formatter';
 import { Editor } from '../../editor';
-import { MediaTemplate, Template } from '../../core/template';
 
 /**
  * 匹配到的抽象数据及状态

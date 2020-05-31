@@ -1,17 +1,12 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
-import { Renderer } from '../core/renderer';
+import { Renderer, Fragment, TBRangePosition, TBSelection, VElement, EventType } from '../core/_api';
 import { template } from './template-html';
-import { BlockTemplate } from '../templates/block.template';
-import { Fragment } from '../core/fragment';
+import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
 import { ToolConfig, HighlightState } from '../toolbar/help';
-import { TBRangePosition, TBSelection } from '../core/selection';
 import { Editor } from '../editor';
-import { SingleTemplate } from '../templates/single.template';
-import { VElement } from '../core/element';
-import { EventType } from '../core/events';
 import {
   CursorMoveDirection, getNextLinePosition,
   getNextPosition,

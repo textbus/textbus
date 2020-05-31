@@ -1,7 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
-import { InlineFormatter, FormatEffect } from '../../core/formatter';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Commander, TBSelection, InlineFormatter, FormatEffect, FormatAbstractData } from '../../core/_api';
 
 export class BoldCommander implements Commander<InlineFormatter> {
   recordHistory = true;

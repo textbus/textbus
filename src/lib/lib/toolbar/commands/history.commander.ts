@@ -1,8 +1,5 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
+import { Commander, TBSelection, Renderer, Fragment } from '../../core/_api';
 import { Editor } from '../../editor';
-import { Renderer } from '../../core/renderer';
-import { Fragment } from '../../core/fragment';
 
 export class HistoryCommander implements Commander<Editor> {
   recordHistory = false;

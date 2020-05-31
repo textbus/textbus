@@ -1,8 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
-import { FormatEffect, Formatter } from '../../core/formatter';
-import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Constructor } from '../../core/renderer';
+import { Commander, TBSelection, FormatEffect, Formatter, FormatAbstractData, Constructor } from '../../core/_api';
 
 export class CleanCommander implements Commander {
   recordHistory = true;

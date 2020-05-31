@@ -1,7 +1,4 @@
-import { InlineFormatter, FormatEffect } from '../core/formatter';
-import { FormatAbstractData } from '../core/format-abstract-data';
-import { VElement } from '../core/element';
-import { ChildSlotModel } from '../core/renderer';
+import { InlineFormatter, FormatEffect, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
 
 export class BoldFormatter extends InlineFormatter {
   constructor() {

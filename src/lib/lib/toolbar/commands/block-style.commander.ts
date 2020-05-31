@@ -1,7 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
-import { BlockFormatter, FormatEffect } from '../../core/formatter';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { Commander, TBSelection, FormatEffect, FormatAbstractData } from '../../core/_api';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
 export class BlockStyleCommander implements Commander<string> {

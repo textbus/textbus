@@ -1,6 +1,4 @@
-import { MediaTemplate, TemplateTranslator, ViewData } from '../core/template';
-import { VElement } from '../core/element';
-import { Constructor } from '@tanbo/tbus/core/renderer';
+import { MediaTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class AudioTemplateTranslator implements TemplateTranslator {
   private tagName = 'audio';

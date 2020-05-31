@@ -1,5 +1,6 @@
-import { AttrState, AttrTextField, FormItem } from './help';
 import { Observable, Subscription } from 'rxjs';
+
+import { AttrState, AttrTextField, FormItem } from './help';
 
 export class FormTextField implements FormItem {
   elementRef = document.createElement('div');

@@ -1,8 +1,6 @@
-import { Lifecycle } from '../core/lifecycle';
-import { TBSelection } from '../core/selection';
+import { Lifecycle, TBSelection, Commander } from '../core/_api';
+import { HistoryCommander } from '../toolbar/_api';
 import { Editor } from '../editor';
-import { Commander } from '../core/commander';
-import { HistoryCommander } from '../toolbar/commands/history.commander';
 
 export class HistoryHook implements Lifecycle {
   onApplyCommand(commander: Commander, selection: TBSelection, editor: Editor): boolean {

@@ -1,5 +1,4 @@
-import { Template, TemplateTranslator, ViewData } from '../core/template';
-import { VElement } from '../core/element';
+import { Template, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class TableTemplateTranslator implements TemplateTranslator {
   private tagName = 'table';

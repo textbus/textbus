@@ -1,5 +1,4 @@
-import { MediaTemplate, TemplateTranslator, ViewData } from '../core/template';
-import { VElement } from '../core/element';
+import { MediaTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class VideoTemplateTranslator implements TemplateTranslator {
   private tagName = 'video';

@@ -1,7 +1,4 @@
-import { SlotMap, Template, TemplateTranslator, ViewData } from '../core/template';
-import { Fragment } from '../core/fragment';
-import { VElement } from '../core/element';
-import { EventType } from '../core/events';
+import { SlotMap, Template, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 

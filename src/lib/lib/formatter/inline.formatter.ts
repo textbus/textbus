@@ -1,7 +1,4 @@
-import { InlineFormatter, MatchRule, FormatEffect } from '../core/formatter';
-import { FormatAbstractData } from '../core/format-abstract-data';
-import { VElement } from '../core/element';
-import { ChildSlotModel } from '../core/renderer';
+import { InlineFormatter, MatchRule, FormatEffect, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
 
 export class InlineTagFormatter extends InlineFormatter {
   constructor(private tagName: string, rule: MatchRule) {

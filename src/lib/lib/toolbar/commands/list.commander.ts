@@ -1,6 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
-import { Renderer } from '../../core/renderer';
+import { Commander, TBSelection, Renderer } from '../../core/_api';
 
 export class ListCommander implements Commander {
   recordHistory = true;

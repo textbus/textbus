@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { ButtonConfig, HighlightState } from '../help';
 import {  Tool } from './help';
-import { KeymapAction } from '../../viewer/input';
+import { KeymapAction } from '../../viewer/_api';
 
 export class ButtonHandler implements Tool {
   readonly elementRef = document.createElement('button');

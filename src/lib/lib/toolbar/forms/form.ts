@@ -1,4 +1,5 @@
 import { Observable, Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { FormItem, AttrType, AttrState, AttrConfig } from './help';
 import { FormTextField } from './form-text-field';
@@ -6,9 +7,8 @@ import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
-import { DropdownHandlerView } from '../handlers/utils/dropdown';
-import { tap } from 'rxjs/operators';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { DropdownHandlerView } from '../handlers/_api';
+import { FormatAbstractData } from '../../core/_api';
 
 export class Form implements DropdownHandlerView {
   onSubmit: (attrs: AttrState[]) => void;

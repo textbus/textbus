@@ -1,12 +1,9 @@
 import { Observable } from 'rxjs';
-import { DropdownHandlerView } from './handlers/utils/dropdown';
-import { Commander } from '../core/commander';
+
+import { Commander, FormatAbstractData, MediaTemplate, Template, Renderer, TBSelection } from '../core/_api';
 import { Matcher } from './matcher/matcher';
-import { FormatAbstractData } from '../core/format-abstract-data';
-import { MediaTemplate, Template } from '../core/template';
+import { DropdownHandlerView } from './handlers/utils/dropdown';
 import { Keymap } from '../viewer/input';
-import { Renderer } from '../core/renderer';
-import { TBSelection } from '../core/selection';
 import { Tool } from './handlers/help';
 
 /**

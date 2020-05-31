@@ -1,6 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
-import { Renderer } from '../../core/renderer';
+import { Commander, TBSelection, Renderer } from '../../core/_api';
 import { BlockTemplate } from '../../templates/block.template';
 
 export class BlockCommander implements Commander<string> {

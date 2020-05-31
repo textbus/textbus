@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Tool } from './help';
 import { Dropdown } from './utils/dropdown';
 import { DropdownConfig, EventDelegate, HighlightState } from '../help';
-import { SelectionMatchDelta } from '../matcher/matcher';
+import { SelectionMatchDelta } from '../matcher/_api';
 
 export class DropdownHandler implements Tool {
   elementRef: HTMLElement;

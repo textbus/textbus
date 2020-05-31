@@ -1,7 +1,4 @@
-import { MatchRule, FormatEffect, BlockFormatter } from '../core/formatter';
-import { FormatAbstractData } from '../core/format-abstract-data';
-import { VElement } from '../core/element';
-import { ChildSlotModel } from '../core/renderer';
+import { MatchRule, FormatEffect, BlockFormatter, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
 
 export class BlockStyleFormatter extends BlockFormatter {
   constructor(public styleName: string, rule: MatchRule) {

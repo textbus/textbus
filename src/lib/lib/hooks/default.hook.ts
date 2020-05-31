@@ -1,7 +1,4 @@
-import { Lifecycle } from '../core/lifecycle';
-import { Renderer } from '../core/renderer';
-import { TBSelection } from '../core/selection';
-import { BlockFormatter } from '../core/formatter';
+import { Lifecycle, Renderer, TBSelection, BlockFormatter } from '../core/_api';
 
 export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {

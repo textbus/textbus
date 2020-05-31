@@ -1,7 +1,6 @@
 import { ContextMenuConfig } from './help';
 import { Tool } from './handlers/help';
-import { Renderer } from '../core/renderer';
-import { TBSelection } from '../core/selection';
+import { Renderer, TBSelection } from '../core/_api';
 
 export class ContextMenu {
   constructor(private renderer: Renderer) {

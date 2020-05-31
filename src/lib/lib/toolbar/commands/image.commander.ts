@@ -1,5 +1,4 @@
-import { Commander } from '../../core/commander';
-import { TBSelection } from '../../core/selection';
+import { Commander, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
 
 export class ImageCommander implements Commander<AttrState[]> {

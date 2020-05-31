@@ -1,7 +1,6 @@
+import { TBSelection, Constructor, Renderer } from '../../core/_api';
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../../core/selection';
 import { BlockTemplate } from '../../templates/block.template';
-import { Constructor, Renderer } from '../../core/renderer';
 import { HighlightState } from '../help';
 
 export class BlockMatcher implements Matcher {

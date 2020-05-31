@@ -1,18 +1,18 @@
 import { auditTime, filter, sampleTime, switchMap, tap } from 'rxjs/operators';
 import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
-import { Parser } from './core/parser';
-import { TemplateTranslator } from './core/template';
-import { InlineFormatter } from './core/formatter';
-import { Viewer } from './viewer/viewer';
-import { Renderer } from './core/renderer';
-import { Toolbar } from './toolbar/toolbar';
-import { EventDelegate, ToolConfig } from './toolbar/help';
-import { RangePath, TBSelection } from './core/selection';
-import { Fragment } from './core/fragment';
-import { Lifecycle } from './core/lifecycle';
-import { ContextMenu } from './toolbar/context-menu';
-import { KeymapAction } from '@tanbo/tbus/viewer/input';
+import {
+  Parser,
+  TemplateTranslator,
+  InlineFormatter,
+  Renderer,
+  RangePath,
+  TBSelection,
+  Lifecycle,
+  Fragment
+} from './core/_api';
+import { Viewer, KeymapAction } from './viewer/_api';
+import { Toolbar, EventDelegate, ToolConfig, ContextMenu } from './toolbar/_api';
 
 export interface Snapshot {
   contents: Fragment;

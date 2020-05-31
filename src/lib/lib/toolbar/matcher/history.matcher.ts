@@ -1,6 +1,5 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection } from '../../core/selection';
-import { Renderer } from '../../core/renderer';
+import { TBSelection, Renderer } from '../../core/_api';
 import { Editor } from '../../editor';
 import { HighlightState } from '../help';
 
@@ -22,5 +21,6 @@ export class HistoryMatcher implements Matcher {
           srcStates: [],
           matchData: null
         };
-    }  }
+    }
+  }
 }
