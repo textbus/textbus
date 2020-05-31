@@ -375,14 +375,14 @@ export class Renderer {
 
         if (progenyFormats.length) {
           this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex).forEach(item => {
-            slot.appendChild(item);
+            slot ? slot.appendChild(item) : children.push(item);
           });
         } else {
           this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex).forEach(item => {
-            slot.appendChild(item);
+            slot ? slot.appendChild(item) : children.push(item);
           })
         }
-        children.push(host);
+        host && children.push(host);
         startIndex = firstRange.endIndex;
       } else {
         children.push(...this.createNodesByRange(fragment, startIndex, endIndex));
@@ -475,14 +475,15 @@ export class Renderer {
       return Renderer.replaceEmpty(vDom.textContent, '&nbsp;');
     }
     const styles = Array.from(vDom.styles.keys()).map(key => {
-      return `${key}:${vDom.styles.get(key)}`;
+      const k = key.replace(/[A-Z]/g, str => '-' + str.toLocaleLowerCase());
+      return `${k}:${vDom.styles.get(key)}`;
     }).join(';');
     const attrs = Array.from(vDom.attrs.keys()).map(key => {
       const value = vDom.attrs.get(key);
       return value === true ? `${key}` : `${key}="${value}"`;
     });
     if (styles) {
-      attrs.push(styles);
+      attrs.push(`style="${styles}"`);
     }
     let attrStr = attrs.join(' ');
     attrStr = attrStr ? ' ' + attrStr : '';

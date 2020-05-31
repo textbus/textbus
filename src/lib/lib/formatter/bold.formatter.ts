@@ -22,13 +22,13 @@ export class BoldFormatter extends InlineFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+    if (state === FormatEffect.Inherit) {
+      return;
+    }
     if (state === FormatEffect.Exclude) {
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
       return new ChildSlotModel(el);
-    }
-    if (existingElement && /(h[1-6])|th/i.test(existingElement.tagName)) {
-      return;
     }
     return new ChildSlotModel(new VElement('strong'));
   }

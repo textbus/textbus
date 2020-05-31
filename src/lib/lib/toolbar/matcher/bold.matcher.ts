@@ -21,7 +21,10 @@ export class BoldMatcher extends FormatMatcher {
     const contextMatchResult = this.contextMatcher.queryState(selection, renderer);
     if (contextMatchResult.state === HighlightState.Highlight &&
       /h[1-6]/i.test((contextMatchResult.matchData as BlockTemplate)?.tagName)) {
-      return contextMatchResult;
+      return {
+        ...contextMatchResult,
+        state: result.state === HighlightState.Normal ? HighlightState.Normal : HighlightState.Highlight
+      };
     }
     return result;
   }
