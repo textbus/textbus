@@ -7,24 +7,29 @@ export class AudioTemplateTranslator implements TemplateTranslator {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLElement): ViewData {
+  from(el: HTMLAudioElement): ViewData {
     return {
-      template: new AudioTemplate(this.tagName),
+      template: new AudioTemplate(el.src, el.autoplay, el.controls),
       childrenSlots: []
     };
   }
 }
 
 export class AudioTemplate extends MediaTemplate {
-  constructor(tagName: string) {
-    super(tagName);
+
+  constructor(private src: string, private autoplay: boolean, private controls: boolean) {
+    super('audio');
   }
 
   render() {
-    return new VElement(this.tagName);
+    const el = new VElement(this.tagName);
+    el.attrs.set('src', this.src);
+    el.attrs.set('autoplay', this.autoplay);
+    el.attrs.set('controls', this.controls);
+    return el;
   }
 
   clone() {
-    return new AudioTemplate(this.tagName);
+    return new AudioTemplate(this.src, this.autoplay, this.controls);
   }
 }
