@@ -9,9 +9,9 @@ export class EmojiCommander implements Commander<string> {
   }
 
   command(selection: TBSelection): void {
-    // selection.ranges.forEach(range => {
-    //   range.startFragment.insert(this.value, range.startIndex);
-    //   range.startIndex = range.endIndex = range.startIndex + this.value.length;
-    // });
+    selection.ranges.forEach(range => {
+      range.startFragment.insert(this.value, range.startIndex);
+      range.startIndex = range.endIndex = range.startIndex + this.value.length;
+    });
   }
 }
