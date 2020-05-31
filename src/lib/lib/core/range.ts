@@ -31,7 +31,7 @@ export class TBRange {
   readonly commonAncestorFragment: Fragment;
   readonly commonAncestorTemplate: Template;
 
-  constructor(private nativeRange: Range,
+  constructor(public nativeRange: Range,
               private renderer: Renderer) {
     if ([1, 3].includes(nativeRange.commonAncestorContainer.nodeType)) {
       if (nativeRange.startContainer.nodeType === 3) {
@@ -70,6 +70,7 @@ export class TBRange {
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
+    return this;
   }
 
   /**
@@ -291,7 +292,8 @@ export class TBRange {
       } else {
         scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
       }
-    })
+    });
+    return this;
   }
 
   deleteEmptyTree(fragment: Fragment) {
@@ -305,6 +307,7 @@ export class TBRange {
         this.deleteEmptyTree(parentFragment);
       }
     }
+    return this;
   }
 
   /**

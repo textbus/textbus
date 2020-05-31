@@ -12,7 +12,13 @@ import { Editor } from '../editor';
 import { SingleTemplate } from '../templates/single.template';
 import { VElement } from '../core/element';
 import { EventType } from '../core/events';
-import { CursorMoveDirection, getNextPosition, getPreviousPosition } from './tools';
+import {
+  CursorMoveDirection, getNextLinePosition,
+  getNextPosition,
+  getPreviousLinePosition,
+  getPreviousPosition,
+  getRangePosition
+} from './tools';
 import { TBRange } from '../core/range';
 
 export class Viewer {
@@ -36,6 +42,9 @@ export class Viewer {
 
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
+
+  private oldCursorPosition: { left: number, top: number } = null;
+  private cleanOldCursorTimer: any;
 
   constructor(private renderer: Renderer,
               private context: Editor) {
@@ -273,36 +282,36 @@ export class Viewer {
         case CursorMoveDirection.Right:
           p = getNextPosition(range, this.renderer);
           break;
-        // case CursorMoveDirection.Up:
-        //   clearTimeout(this.cleanOldCursorTimer);
-        //   range2 = range.clone().apply();
-        //
-        //   if (this.oldCursorPosition) {
-        //     p = getPreviousLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
-        //   } else {
-        //     const rect = getRangePosition(range2.nativeRange);
-        //     this.oldCursorPosition = rect;
-        //     p = getPreviousLinePosition(range, rect.left, rect.top);
-        //   }
-        //   this.cleanOldCursorTimer = setTimeout(() => {
-        //     this.oldCursorPosition = null;
-        //   }, 3000);
-        //   break;
-        // case CursorMoveDirection.Down:
-        //   clearTimeout(this.cleanOldCursorTimer);
-        //   range2 = range.clone().apply();
-        //
-        //   if (this.oldCursorPosition) {
-        //     p = getNextLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top);
-        //   } else {
-        //     const rect = getRangePosition(range2.nativeRange);
-        //     this.oldCursorPosition = rect;
-        //     p = getNextLinePosition(range, rect.left, rect.top);
-        //   }
-        //   this.cleanOldCursorTimer = setTimeout(() => {
-        //     this.oldCursorPosition = null;
-        //   }, 3000);
-        //   break;
+        case CursorMoveDirection.Up:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = getPreviousLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top, this.renderer);
+          } else {
+            const rect = getRangePosition(range2.nativeRange);
+            this.oldCursorPosition = rect;
+            p = getPreviousLinePosition(range, rect.left, rect.top, this.renderer);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
+        case CursorMoveDirection.Down:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = getNextLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top, this.renderer);
+          } else {
+            const rect = getRangePosition(range2.nativeRange);
+            this.oldCursorPosition = rect;
+            p = getNextLinePosition(range, rect.left, rect.top, this.renderer);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
       }
       range.startFragment = range.endFragment = p.fragment;
       range.startIndex = range.endIndex = p.index;
