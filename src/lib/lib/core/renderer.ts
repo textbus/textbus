@@ -500,6 +500,9 @@ export class Renderer {
     }
     let attrStr = attrs.join(' ');
     attrStr = attrStr ? ' ' + attrStr : '';
+    if (/^(br|img|hr)$/.test(vDom.tagName)) {
+      return `<${vDom.tagName}${attrStr}>`;
+    }
     const childHTML = vDom.childNodes.map(child => {
       return this.vDomToHTMLString(child);
     }).join('');
