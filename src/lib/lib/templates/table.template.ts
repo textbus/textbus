@@ -9,19 +9,19 @@ export class TableTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLElement): ViewData {
     return {
-      template: new TableTemplate(this.tagName),
+      template: new TableTemplate(),
       childrenSlots: []
     };
   }
 }
 
 export class TableTemplate extends Template {
-  constructor(public readonly tagName: string) {
-    super();
+  constructor() {
+    super('table');
   }
 
   clone() {
-    const template = new TableTemplate(this.tagName);
+    const template = new TableTemplate();
     this.childSlots.forEach(f => {
       template.childSlots.push(f.clone());
     });

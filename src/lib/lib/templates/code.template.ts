@@ -26,7 +26,7 @@ export class CodeTemplateTranslator implements TemplateTranslator {
 
 export class CodeTemplate extends Template {
   constructor(public lang: string) {
-    super();
+    super('pre');
   }
 
   clone() {

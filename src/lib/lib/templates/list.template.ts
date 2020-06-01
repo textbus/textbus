@@ -49,8 +49,8 @@ export class ListTemplateTranslator implements TemplateTranslator {
 }
 
 export class ListTemplate extends Template {
-  constructor(public tagName: string) {
-    super();
+  constructor(tagName: string) {
+    super(tagName);
   }
 
   clone() {

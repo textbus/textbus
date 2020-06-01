@@ -1,5 +1,6 @@
-import { Commander, TBSelection, Renderer } from '../../core/_api';
+import { Commander, FormatAbstractData, FormatEffect, Renderer, TBSelection } from '../../core/_api';
 import { BlockTemplate } from '../../templates/block.template';
+import { boldFormatter } from '../../formatter/bold.formatter';
 
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
@@ -20,7 +21,26 @@ export class BlockCommander implements Commander<string> {
 
         if (index === 0) {
           const blockTemplate = new BlockTemplate(this.tagName);
-          blockTemplate.childSlots.push(template.childSlots.shift());
+          const fragment = template.childSlots.shift();
+          if (/h[1-6]/.test(this.tagName)) {
+            fragment.mergeFormat({
+              state: FormatEffect.Inherit,
+              startIndex: 0,
+              endIndex: fragment.contentLength,
+              abstractData: new FormatAbstractData({
+                tag: 'strong'
+              }),
+              renderer: boldFormatter
+            })
+          }
+          if (!/h[1-6]/.test(template.tagName) && this.tagName === 'p') {
+            fragment.getFormatRangesByFormatter(boldFormatter).forEach(format => {
+              if (format.state === FormatEffect.Inherit) {
+                format.state = FormatEffect.Valid;
+              }
+            })
+          }
+          blockTemplate.childSlots.push(fragment);
           parentFragment.insert(blockTemplate, parentFragment.indexOf(template));
         }
 

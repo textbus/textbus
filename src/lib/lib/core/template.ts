@@ -22,7 +22,7 @@ export abstract class Template {
   readonly childSlots: Fragment[] = [];
   protected viewMap = new Map<Fragment, VElement>();
 
-  protected constructor() {
+  protected constructor(public tagName: string) {
   }
 
   abstract render(isProduction: boolean): VElement;
