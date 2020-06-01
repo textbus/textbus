@@ -28,7 +28,9 @@ export class Fragment {
         get endIndex() {
           return self.contentLength;
         },
-        ...format
+        renderer: format.renderer,
+        abstractData: format.abstractData,
+        state: format.state
       })
     }
   }
@@ -45,7 +47,7 @@ export class Fragment {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
-      if(format instanceof BlockFormatter) {
+      if (format instanceof BlockFormatter) {
         newFormatRanges.push(format);
         return;
       }

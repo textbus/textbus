@@ -6,8 +6,7 @@ const editor = createEditor('#editor', {
   theme: 'dark',
 });
 
-editor.setContents(`
- <h1>te&nbsp;&nbsp;&nbsp;st</h1>&nbsp;&nbsp;<p>19世纪非欧几何理论诞生，广义相对论说明了这种空间的真实存在。然而对于人们来说，想像诡异的非欧空间是困难的。我们从微分流形的角度<a href="/test">BlockStyleCommander</a>出发，对给定度规、Christoffel记号的参数空间，提出局部渲染和全局渲染两个方法：利用OpenGL进行局部渲染，通过调整为求解测地线方程的Ray Marching算法进行全局渲染。展示非欧空间下的图形，拓展人类的空间想象力。</p>
+editor.setContents(`<h1 style="text-align: center; color: rgb(16, 125, 184);">TBus&nbsp;<span style="letter-spacing: 5px;">富文本编辑器</span></h1><h4 style="text-align: center; color: rgb(73, 80, 96);">—— 基于 Typescript，轻量，易扩展 ——</h4><p style="font-size: 15px; color: rgb(73, 80, 96);">和传统富文本编辑器不同，TBus 未使用 DOM 的 contentEditable 属性，并且采用分层设计，抽象了出了&nbsp;<strong>Fragment</strong>（片段） 数据模型、<strong>TBSelection</strong>（选区），使开发及扩展&nbsp;<strong>Commander</strong>（命令）无需关心浏览器的行为及差异，只需要关注当前的&nbsp;<strong>Contents</strong>（内容）和&nbsp;<strong>FormatRange</strong>（格式），这种高层次的抽象，使普通开发者也可以很容易的扩展出自己的功能。甚至，在富文本中实现代码高亮这样的功能，也变得很容易。</p><pre lang="Typescript" style="font-size: 15px;"><strong style="color: rgb(51, 51, 51);">import</strong>&nbsp;{ createEditor }&nbsp;<strong style="color: rgb(51, 51, 51);">from</strong>&nbsp;<span style="color: rgb(221, 17, 68);">'@tanbo/tbus'</span>;<br><br><strong style="color: rgb(51, 51, 51);">const</strong>&nbsp;editor = createEditor(<span style="color: rgb(0, 134, 179);">document</span>.getElementById(<span style="color: rgb(221, 17, 68);">'editor'</span>));<br>editor.onChange.subscribe(result =&gt; {<br>&nbsp;&nbsp;<span style="color: rgb(0, 134, 179);">console</span>.log(result);<br>})<br></pre>
 `);
 
 editor.onChange.subscribe(() => {
