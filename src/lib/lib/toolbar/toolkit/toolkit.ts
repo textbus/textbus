@@ -11,18 +11,40 @@ export enum ToolType {
   ActionSheet
 }
 
-
-export type ToolHandler = ButtonHandler | SelectHandler | DropdownHandler | ActionSheetHandler;
 export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;
 
-export interface ToolFactory<T = ToolHandler> {
-  type: ToolType;
-  config: ToolConfig,
-  factory(...args: any[]): T;
+export interface ButtonToolFactory {
+  type: ToolType.Button;
+  config: ButtonConfig;
+
+  factory(): ButtonHandler;
 }
 
+export interface SelectToolFactory {
+  type: ToolType.Select;
+  config: SelectConfig;
+
+  factory(stickyElement: HTMLElement): SelectHandler;
+}
+
+export interface DropdownToolFactory {
+  type: ToolType.Dropdown;
+  config: DropdownConfig;
+
+  factory(delegate: EventDelegate, stickyElement: HTMLElement): DropdownHandler;
+}
+
+export interface ActionSheetToolFactory {
+  type: ToolType.ActionSheet,
+  config: ActionSheetConfig,
+
+  factory(stickElement: HTMLElement): ActionSheetHandler
+}
+
+export type ToolFactory = ButtonToolFactory | SelectToolFactory | DropdownToolFactory | ActionSheetToolFactory;
+
 export class Toolkit {
-  static makeButtonTool(config: ButtonConfig): ToolFactory<ButtonHandler> {
+  static makeButtonTool(config: ButtonConfig): ButtonToolFactory {
     return {
       type: ToolType.Button,
       config,
@@ -32,7 +54,7 @@ export class Toolkit {
     }
   }
 
-  static makeSelectTool(config: SelectConfig): ToolFactory<SelectHandler> {
+  static makeSelectTool(config: SelectConfig): SelectToolFactory {
     return {
       type: ToolType.Select,
       config,
@@ -42,7 +64,7 @@ export class Toolkit {
     }
   }
 
-  static makeDropdownTool(config: DropdownConfig): ToolFactory<DropdownHandler> {
+  static makeDropdownTool(config: DropdownConfig): DropdownToolFactory {
     return {
       type: ToolType.Dropdown,
       config,
@@ -52,7 +74,7 @@ export class Toolkit {
     }
   }
 
-  static makeActionSheetTool(config: ActionSheetConfig): ToolFactory<ActionSheetHandler> {
+  static makeActionSheetTool(config: ActionSheetConfig): ActionSheetToolFactory {
     return {
       type: ToolType.ActionSheet,
       config,
