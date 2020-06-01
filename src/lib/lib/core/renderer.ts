@@ -477,7 +477,7 @@ export class Renderer {
           '<': '&lt;',
           '>': '&gt;',
           '&': '&amp;'
-        }[str] || '';
+        }[str];
       }), '&nbsp;');
     }
     const styles = Array.from(vDom.styles.keys()).map(key => {

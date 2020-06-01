@@ -31,7 +31,14 @@ export class Parser {
       }
       this.readFormats(el as HTMLElement, slot);
     } else if (el.nodeType === 3) {
-      slot.append(el.textContent);
+      slot.append(el.textContent.replace(/&lt;|&gt;|&amp;|&nbsp;/g, str => {
+        return {
+          '&lt;': '<',
+          '&gt;': '>',
+          '&amp;': '&',
+          '&nbsp;': ' '
+        }[str];
+      }));
     }
   }
 
