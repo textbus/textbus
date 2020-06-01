@@ -273,6 +273,13 @@ export class Renderer {
   private createElement(vDom: VElement) {
     const el = document.createElement(vDom.tagName);
     vDom.attrs.forEach((value, key) => {
+      if (value === false) {
+        return;
+      }
+      if (value === true) {
+        el[key] = true;
+        return;
+      }
       el.setAttribute(key, value + '');
     });
     vDom.styles.forEach((value, key) => {
@@ -484,7 +491,7 @@ export class Renderer {
       const k = key.replace(/[A-Z]/g, str => '-' + str.toLocaleLowerCase());
       return `${k}:${vDom.styles.get(key)}`;
     }).join(';');
-    const attrs = Array.from(vDom.attrs.keys()).map(key => {
+    const attrs = Array.from(vDom.attrs.keys()).filter(key => vDom.attrs.get(key) !== false).map(key => {
       const value = vDom.attrs.get(key);
       return value === true ? `${key}` : `${key}="${value}"`;
     });
