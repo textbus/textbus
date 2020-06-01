@@ -472,7 +472,13 @@ export class Renderer {
 
   private vDomToHTMLString(vDom: VElement | VTextNode): string {
     if (vDom instanceof VTextNode) {
-      return Renderer.replaceEmpty(vDom.textContent, '&nbsp;');
+      return Renderer.replaceEmpty(vDom.textContent.replace(/[><&]/g, str => {
+        return {
+          '<': '&lt;',
+          '>': '&gt;',
+          '&': '&amp;'
+        }[str] || '';
+      }), '&nbsp;');
     }
     const styles = Array.from(vDom.styles.keys()).map(key => {
       const k = key.replace(/[A-Z]/g, str => '-' + str.toLocaleLowerCase());
