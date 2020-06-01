@@ -1,7 +1,7 @@
 module.exports = function test(source, sourceMap) {
   this.cacheable && this.cacheable();
   const newSource = `
-  var result = '${source}';
+  var result = '${source.replace(/\n/g, '')}';
   export default result;
   `;
 
