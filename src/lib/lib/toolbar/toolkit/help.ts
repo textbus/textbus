@@ -1,11 +1,12 @@
 import { Observable } from 'rxjs';
 
 import { KeymapAction, Keymap, isMac } from '../../viewer/_api';
-import { Renderer, TBSelection } from '../../core/_api';
+import { Commander, Renderer, TBSelection } from '../../core/_api';
 
 export interface Tool {
   elementRef: HTMLElement;
   onApply: Observable<any>;
+  commander: Commander;
   keymapAction?: KeymapAction | KeymapAction[];
 
   updateStatus?(selectionMatchDelta: any): void;

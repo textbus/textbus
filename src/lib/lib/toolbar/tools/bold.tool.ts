@@ -11,5 +11,7 @@ export const boldTool = Toolkit.makeButtonTool({
     key: 'b'
   },
   match: new BoldMatcher(),
-  execCommand: new BoldCommander(boldFormatter)
+  execCommand() {
+    return new BoldCommander(boldFormatter);
+  }
 });

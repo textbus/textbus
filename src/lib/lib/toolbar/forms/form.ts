@@ -7,18 +7,20 @@ import { FormOptions } from './form-options';
 import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
-import { DropdownHandlerView } from '../toolkit/_api';
+import { DropdownViewer } from '../toolkit/_api';
 import { FormatAbstractData } from '../../core/_api';
 
-export class Form implements DropdownHandlerView {
-  onSubmit: (attrs: AttrState[]) => void;
+export class Form implements DropdownViewer {
+  onComplete: Observable<AttrState[]>;
   freezeState: Observable<boolean>;
   readonly elementRef = document.createElement('form');
   private items: FormItem[] = [];
   private delegator: EventDelegate;
   private freezeStateSource = new Subject<boolean>();
+  private completeEvent = new Subject<AttrState[]>();
 
   constructor(forms: Array<AttrConfig>) {
+    this.onComplete = this.completeEvent.asObservable();
     this.freezeState = this.freezeStateSource.asObservable();
     this.elementRef.classList.add('tbus-form');
     forms.forEach(attr => {
@@ -55,11 +57,9 @@ export class Form implements DropdownHandlerView {
     this.elementRef.appendChild(btnWrap);
 
     this.elementRef.addEventListener('submit', (ev: Event) => {
-      if (typeof this.onSubmit === 'function') {
-        this.onSubmit(this.items.map(item => {
-          return item.getAttr();
-        }));
-      }
+      this.completeEvent.next(this.items.map(item => {
+        return item.getAttr();
+      }));
       ev.preventDefault();
     });
   }

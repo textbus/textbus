@@ -12,7 +12,7 @@ import { ContextMenuConfig } from './help';
  */
 export interface ButtonConfig {
   /** 按扭控件点击后调用的命令 */
-  execCommand: Commander;
+  execCommand(): Commander;
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
@@ -31,9 +31,11 @@ export class ButtonHandler implements Tool {
   readonly elementRef = document.createElement('button');
   onApply: Observable<void>;
   keymapAction: KeymapAction;
+  commander: Commander;
   private eventSource = new Subject<void>();
 
   constructor(private config: ButtonConfig) {
+    this.commander = config.execCommand();
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = config.tooltip || '';

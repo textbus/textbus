@@ -11,5 +11,7 @@ export const olTool = Toolkit.makeButtonTool({
     key: 'o'
   },
   match: new ListMatcher('ol'),
-  execCommand: new ListCommander('ol')
+  execCommand() {
+    return new ListCommander('ol');
+  }
 });

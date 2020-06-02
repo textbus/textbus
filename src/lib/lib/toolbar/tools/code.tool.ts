@@ -48,5 +48,7 @@ export const codeTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand: new CodeCommander()
+  execCommand() {
+    return new CodeCommander();
+  }
 });

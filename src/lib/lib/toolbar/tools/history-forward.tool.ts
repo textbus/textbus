@@ -6,7 +6,9 @@ export const historyForwardTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-history-forward'],
   tooltip: '重做',
   match: new HistoryMatcher('forward'),
-  execCommand: new HistoryCommander('forward'),
+  execCommand() {
+    return new HistoryCommander('forward');
+  },
   keymap: {
     ctrlKey: true,
     shiftKey: true,

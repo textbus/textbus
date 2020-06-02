@@ -44,5 +44,7 @@ export const letterSpacingTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand: new StyleCommander('letterSpacing', letterSpacingFormatter)
+  execCommand() {
+    return new StyleCommander('letterSpacing', letterSpacingFormatter);
+  }
 });

@@ -1,7 +1,7 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
-import { Renderer, Fragment, TBRangePosition, TBSelection, VElement, EventType } from '../core/_api';
+import { Renderer, Fragment, TBRangePosition, TBSelection, VElement, EventType, Commander } from '../core/_api';
 import { template } from './template-html';
 import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
@@ -197,7 +197,7 @@ export class Viewer {
     this.renderer.render(rootFragment, this.contentDocument.body);
   }
 
-  apply(config: ToolConfig) {
+  apply(config: ToolConfig, commander: Commander) {
     const selection = new TBSelection(this.contentDocument, this.renderer);
     const state = config.match ?
       config.match.queryState(selection, this.renderer, this.context).state :
@@ -209,12 +209,12 @@ export class Viewer {
     let isNext = true;
     (this.context.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onApplyCommand === 'function' &&
-        lifecycle.onApplyCommand(config.execCommand, selection, this.context) === false) {
+        lifecycle.onApplyCommand(commander, selection, this.context) === false) {
         isNext = false;
       }
     })
     if (isNext) {
-      config.execCommand.command(selection, overlap, this.renderer, this.rootFragment);
+      commander.command(selection, overlap, this.renderer, this.rootFragment);
       this.render(this.rootFragment);
       selection.restore();
       this.selectionChangeEvent.next(selection);

@@ -1,17 +1,17 @@
 import { Observable, Subject } from 'rxjs';
 
-import { DropdownHandlerView } from '../toolkit/utils/dropdown';
+import { DropdownViewer } from '../toolkit/utils/dropdown';
 import { EmojiCommander } from '../commands/emoji.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
-class Emoji implements DropdownHandlerView {
+class Emoji implements DropdownViewer {
   elementRef = document.createElement('div');
-  onCheck: Observable<string>;
+  onComplete: Observable<string>;
 
   private checkEvent = new Subject<string>();
 
   constructor() {
-    this.onCheck = this.checkEvent.asObservable();
+    this.onComplete = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-emoji-menu');
     const emoji: string[] = [];
     for (let i = 0x1F600; i <= 0x1F64F; i++) {
@@ -42,16 +42,13 @@ class Emoji implements DropdownHandlerView {
   }
 }
 
-const viewer = new Emoji();
-const commander = new EmojiCommander();
-
-viewer.onCheck.subscribe(t => {
-  commander.updateValue(t);
-});
-
 export const emojiTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-emoji'],
-  execCommand: commander,
-  viewer,
-  onHide: viewer.onCheck,
+  tooltip: '表情',
+  execCommand() {
+    return new EmojiCommander()
+  },
+  menuFactory() {
+    return new Emoji();
+  },
 });

@@ -13,10 +13,10 @@ import { ContextMenu } from './context-menu';
 
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable<ToolConfig>;
+  onAction: Observable<{ config: ToolConfig, instance: Tool }>;
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
-  private actionEvent = new Subject<ToolConfig>();
+  private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
   private toolsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
@@ -133,7 +133,7 @@ export class Toolbar {
     this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
         item.instance.onApply.subscribe(() => {
-          this.actionEvent.next(item.config);
+          this.actionEvent.next(item);
         })
       }
     });

@@ -1,9 +1,17 @@
-import { Commander, TBSelection, FormatEffect, Formatter, FormatAbstractData, Constructor } from '../../core/_api';
+import {
+  Commander,
+  TBSelection,
+  FormatEffect,
+  FormatAbstractData,
+  Constructor,
+  BlockFormatter,
+  InlineFormatter
+} from '../../core/_api';
 
 export class CleanCommander implements Commander {
   recordHistory = true;
 
-  constructor(private excludeFormatters: Constructor<Formatter>[] = []) {
+  constructor(private excludeFormatters: Constructor<BlockFormatter | InlineFormatter>[] = []) {
   }
 
   command(selection: TBSelection, overlap: boolean): void {

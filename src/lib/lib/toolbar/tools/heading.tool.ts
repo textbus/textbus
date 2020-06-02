@@ -14,7 +14,9 @@ export const headingTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand: new BlockCommander('p'),
+  execCommand() {
+    return new BlockCommander('p');
+  },
   options: [{
     label: '标题1',
     classes: ['tbus-toolbar-h1'],

@@ -11,5 +11,7 @@ export const cleanTool = Toolkit.makeButtonTool({
     altKey: true,
     key: 'c'
   },
-  execCommand: new CleanCommander([LinkFormatter])
+  execCommand() {
+    return new CleanCommander([LinkFormatter]);
+  }
 });

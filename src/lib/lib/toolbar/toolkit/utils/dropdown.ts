@@ -3,11 +3,12 @@ import { Observable } from 'rxjs';
 import { EventDelegate } from '../../help';
 import { FormatAbstractData, MediaTemplate, Template } from '../../../core/_api';
 
-export interface DropdownHandlerView {
+export interface DropdownViewer {
   elementRef: HTMLElement | DocumentFragment;
+  onComplete: Observable<any>;
   freezeState?: Observable<boolean>;
 
-  update(value?: FormatAbstractData | Template | MediaTemplate): void;
+  update?(value?: FormatAbstractData | Template | MediaTemplate): void;
 
   reset?(): void;
 
@@ -33,8 +34,7 @@ export class Dropdown {
   private button = document.createElement('button');
 
   constructor(private inner: HTMLElement,
-              private menuContents: HTMLElement | DocumentFragment,
-              private hideEvent: Observable<any>,
+              private menuViewer: DropdownViewer,
               private tooltip = '',
               private limitDisplay: HTMLElement) {
     this.elementRef.classList.add('tbus-dropdown');
@@ -51,7 +51,7 @@ export class Dropdown {
 
     const menu = document.createElement('div');
     menu.classList.add('tbus-dropdown-menu');
-    menu.appendChild(menuContents);
+    menu.appendChild(menuViewer.elementRef);
     this.elementRef.appendChild(menu);
 
     const updatePosition = () => {
@@ -83,7 +83,7 @@ export class Dropdown {
 
     window.addEventListener('resize', updatePosition);
 
-    this.hideEvent.subscribe(() => {
+    menuViewer.onComplete.subscribe(() => {
       this.freeze = false;
       this.elementRef.classList.remove('tbus-dropdown-open');
     });

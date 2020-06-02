@@ -88,8 +88,8 @@ export class Editor implements EventDelegate {
     this.toolbar.onAction
       .pipe(filter(() => !!this.selection))
       .subscribe(config => {
-        this.viewer.apply(config);
-        if (config.execCommand.recordHistory) {
+        this.viewer.apply(config.config, config.instance.commander);
+        if (config.instance.commander.recordHistory) {
           this.recordSnapshot();
           this.listenUserWriteEvent();
         }

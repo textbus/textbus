@@ -1,21 +1,22 @@
 import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
-import { DropdownHandlerView } from '../../toolkit/utils/dropdown';
-import { FormatAbstractData } from '../../../core/format-abstract-data';
-import { Commander } from '../../../core/commander';
+import { DropdownViewer } from '../../toolkit/utils/dropdown';
+import { FormatAbstractData } from '../../../core/_api';
 
-export class Palette implements DropdownHandlerView {
+export class Palette implements DropdownViewer {
   elementRef = document.createElement('div');
+  onComplete: Observable<string>;
 
   private picker: Picker;
+  private completeEvent = new Subject<string>();
 
-  constructor(commander: Commander, hideEvent: Subject<any>) {
+  constructor() {
+    this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef);
-    this.picker.onSelected = function (ev) {
-      commander.updateValue(ev.hex);
-      hideEvent.next();
+    this.picker.onSelected = (ev) => {
+      this.completeEvent.next(ev.hex);
     };
   }
 

@@ -1,7 +1,7 @@
-import { merge, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { createKeymapHTML, Tool, ContextMenuConfig } from './help';
-import { Dropdown } from './utils/dropdown';
+import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../viewer/_api';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
@@ -25,7 +25,8 @@ export interface SelectOptionConfig {
 
 export interface SelectConfig {
   /** 当前 Select 某项点击后，应用的命令 */
-  execCommand: Commander;
+  execCommand(): Commander;
+
   /** Select 的可选项配置 */
   options: SelectOptionConfig[];
 
@@ -45,60 +46,105 @@ export interface SelectConfig {
   tooltip?: string;
 }
 
+class SelectOptionHandler {
+  readonly elementRef = document.createElement('button');
+  onCheck: Observable<SelectOptionConfig>;
+  private eventSource = new Subject<SelectOptionConfig>();
+
+  constructor(private option: SelectOptionConfig) {
+    this.onCheck = this.eventSource.asObservable();
+
+    this.elementRef.classList.add('tbus-toolbar-menu-item');
+    this.elementRef.type = 'button';
+
+    const label = document.createElement('span');
+    label.classList.add('tbus-toolbar-menu-item-label');
+    if (option.classes) {
+      label.classList.add(...(option.classes || []));
+    }
+    label.innerText = option.label || option.value;
+    this.elementRef.appendChild(label);
+    if (option.keymap) {
+      const keymapHTML = document.createElement('span');
+      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
+      keymapHTML.innerHTML = createKeymapHTML(option.keymap);
+      this.elementRef.appendChild(keymapHTML);
+    }
+    this.elementRef.addEventListener('click', () => {
+      this.eventSource.next(option);
+    });
+  }
+}
+
+class SelectViewer implements DropdownViewer {
+  elementRef = document.createElement('div');
+  onComplete: Observable<SelectOptionConfig>;
+  private completeEvent = new Subject<SelectOptionConfig>();
+
+  constructor(private options: SelectOptionConfig[] = [], private inner: HTMLElement) {
+    this.onComplete = this.completeEvent.asObservable();
+    this.elementRef.classList.add('tbus-toolbar-menu');
+
+    options.forEach(option => {
+      const item = new SelectOptionHandler(option);
+      this.elementRef.appendChild(item.elementRef);
+      if (option.default) {
+        inner.innerText = option.label || option.value;
+      }
+      item.onCheck.subscribe(v => {
+        this.completeEvent.next(v);
+      });
+    });
+  }
+}
+
 export class SelectHandler implements Tool {
   readonly elementRef: HTMLElement;
   options: SelectOptionHandler[] = [];
   onApply: Observable<any>;
   keymapAction: KeymapAction[] = [];
+  commander: Commander;
   private applyEventSource = new Subject<any>();
   private value = '';
   private textContainer: HTMLElement;
   private dropdown: Dropdown;
+  private viewer: SelectViewer;
 
   constructor(private config: SelectConfig,
               private stickyElement: HTMLElement) {
+    this.commander = config.execCommand();
     this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');
+    this.viewer = new SelectViewer(this.config.options, dropdownInner);
     this.textContainer = dropdownInner;
     dropdownInner.classList.add('tbus-select-button', ...config.classes || []);
     config.mini && dropdownInner.classList.add('tbus-select-button-mini');
 
-    const menu = document.createElement('div');
-    menu.classList.add('tbus-toolbar-menu');
-
-    config.options.forEach(option => {
-      const item = new SelectOptionHandler(option);
-      menu.appendChild(item.elementRef);
-      if (option.default) {
-        dropdownInner.innerText = option.label || option.value;
-      }
-
+    this.config.options.forEach(option => {
       if (option.keymap) {
         this.keymapAction.push({
           keymap: option.keymap,
           action: () => {
             if (!this.dropdown.disabled) {
               this.value = option.value;
-              config.execCommand.updateValue(option.value);
+              this.commander.updateValue(option.value);
               this.applyEventSource.next();
             }
           }
         })
       }
+    })
 
-      item.onCheck.subscribe(v => {
-        this.value = v.value;
-        config.execCommand.updateValue(v.value);
-        this.applyEventSource.next();
-      });
-      this.options.push(item);
-    });
+    this.viewer.onComplete.subscribe(option => {
+      this.value = option.value;
+      this.commander.updateValue(option.value);
+      this.applyEventSource.next();
+    })
 
     this.dropdown = new Dropdown(
       dropdownInner,
-      menu,
-      merge(...this.options.map(item => item.onCheck)),
+      this.viewer,
       config.tooltip,
       stickyElement
     );
@@ -127,35 +173,5 @@ export class SelectHandler implements Tool {
     if (defaultOption) {
       this.textContainer.innerText = defaultOption.label || defaultOption.value;
     }
-  }
-}
-
-export class SelectOptionHandler {
-  readonly elementRef = document.createElement('button');
-  onCheck: Observable<SelectOptionConfig>;
-  private eventSource = new Subject<SelectOptionConfig>();
-
-  constructor(private option: SelectOptionConfig) {
-    this.onCheck = this.eventSource.asObservable();
-
-    this.elementRef.classList.add('tbus-toolbar-menu-item');
-    this.elementRef.type = 'button';
-
-    const label = document.createElement('span');
-    label.classList.add('tbus-toolbar-menu-item-label');
-    if (option.classes) {
-      label.classList.add(...(option.classes || []));
-    }
-    label.innerText = option.label || option.value;
-    this.elementRef.appendChild(label);
-    if (option.keymap) {
-      const keymapHTML = document.createElement('span');
-      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
-      keymapHTML.innerHTML = createKeymapHTML(option.keymap);
-      this.elementRef.appendChild(keymapHTML);
-    }
-    this.elementRef.addEventListener('click', () => {
-      this.eventSource.next(option);
-    });
   }
 }

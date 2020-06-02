@@ -7,7 +7,9 @@ export const tableEditTool = Toolkit.makeActionSheetTool({
   classes: ['tbus-icon-table-edit'],
   tooltip: '编辑表格',
   match: new BlockMatcher(TableTemplate),
-  execCommand: new TableEditCommander(),
+  execCommand() {
+    return new TableEditCommander();
+  },
   actions: [{
     label: '在左边添加列',
     value: TableEditActions.AddColumnToLeft,

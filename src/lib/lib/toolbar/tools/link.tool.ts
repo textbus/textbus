@@ -1,5 +1,3 @@
-import { Subject } from 'rxjs';
-
 import { LinkCommander } from '../commands/link.commander';
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
@@ -9,41 +7,31 @@ import { FormatEffect } from '../../core/formatter';
 import { DropdownHandler } from '../toolkit/dropdown.handler';
 import { Toolkit } from '../toolkit/toolkit';
 
-
-const commander = new LinkCommander(linkFormatter);
-
-const form = new Form([{
-  type: AttrType.TextField,
-  label: '跳转链接地址',
-  name: 'href',
-  required: true,
-  placeholder: '请输入链接地址'
-}, {
-  type: AttrType.Options,
-  label: '跳转方式',
-  name: 'target',
-  required: true,
-  values: [{
-    label: '当前窗口',
-    value: '_self',
-    default: true
-  }, {
-    label: '新窗口',
-    value: '_blank'
-  }]
-}]);
-const hideEvent = new Subject<void>();
-
-form.onSubmit = function (attrs) {
-  commander.updateValue(attrs);
-  hideEvent.next();
-};
-
 export const linkTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-link'],
   tooltip: '链接',
-  onHide: hideEvent.asObservable(),
-  viewer: form,
+  menuFactory() {
+    return new Form([{
+      type: AttrType.TextField,
+      label: '跳转链接地址',
+      name: 'href',
+      required: true,
+      placeholder: '请输入链接地址'
+    }, {
+      type: AttrType.Options,
+      label: '跳转方式',
+      name: 'target',
+      required: true,
+      values: [{
+        label: '当前窗口',
+        value: '_self',
+        default: true
+      }, {
+        label: '新窗口',
+        value: '_blank'
+      }]
+    }]);
+  },
   contextMenu: [{
     label: '编辑',
     displayNeedMatch: true,
@@ -67,5 +55,7 @@ export const linkTool = Toolkit.makeDropdownTool({
     }
   }],
   match: new FormatMatcher(linkFormatter),
-  execCommand: commander
+  execCommand() {
+    return new LinkCommander(linkFormatter)
+  }
 });

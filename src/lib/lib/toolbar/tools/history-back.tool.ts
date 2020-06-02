@@ -6,7 +6,9 @@ export const historyBackTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-history-back'],
   tooltip: '撤消',
   match: new HistoryMatcher('back'),
-  execCommand: new HistoryCommander('back'),
+  execCommand() {
+    return new HistoryCommander('back');
+  },
   keymap: {
     ctrlKey: true,
     key: 'z'

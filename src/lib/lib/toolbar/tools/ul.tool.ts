@@ -11,5 +11,7 @@ export const ulTool = Toolkit.makeButtonTool({
     key: 'u'
   },
   match: new ListMatcher('ul'),
-  execCommand: new ListCommander('ul')
+  execCommand() {
+    return new ListCommander('ul');
+  }
 });

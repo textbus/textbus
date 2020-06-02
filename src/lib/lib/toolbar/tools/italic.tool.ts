@@ -11,5 +11,7 @@ export const italicTool = Toolkit.makeButtonTool({
     key: 'i'
   },
   match: new FormatMatcher(italicFormatter),
-  execCommand: new InlineCommander('em', italicFormatter)
+  execCommand() {
+    return new InlineCommander('em', italicFormatter);
+  }
 });

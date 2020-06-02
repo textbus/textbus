@@ -32,13 +32,19 @@ export class BlockCommander implements Commander<string> {
               }),
               renderer: boldFormatter
             })
-          }
-          if (!/h[1-6]/.test(template.tagName) && this.tagName === 'p') {
-            fragment.getFormatRangesByFormatter(boldFormatter).forEach(format => {
-              if (format.state === FormatEffect.Inherit) {
-                format.state = FormatEffect.Valid;
-              }
-            })
+          } else if (this.tagName === 'p') {
+            const flag = /h[1-6]/.test(template.tagName);
+            if (flag) {
+              fragment.mergeFormat({
+                state: FormatEffect.Invalid,
+                startIndex: 0,
+                endIndex: fragment.contentLength,
+                abstractData: new FormatAbstractData({
+                  tag: 'strong'
+                }),
+                renderer: boldFormatter
+              })
+            }
           }
           blockTemplate.childSlots.push(fragment);
           parentFragment.insert(blockTemplate, parentFragment.indexOf(template));
