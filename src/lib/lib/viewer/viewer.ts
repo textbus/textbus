@@ -1,7 +1,7 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
-import { Renderer, Fragment, TBRangePosition, TBSelection, VElement, EventType, Commander } from '../core/_api';
+import { Commander, EventType, Fragment, Renderer, TBRangePosition, TBSelection, VElement } from '../core/_api';
 import { template } from './template-html';
 import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
@@ -83,6 +83,7 @@ export class Viewer {
     merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
       .subscribe(() => {
         this.nativeSelection = this.contentDocument.getSelection();
+        this.nativeSelection.removeAllRanges();
         this.canEditableEvent.next(new TBSelection(this.contentDocument, this.renderer));
       });
     fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
@@ -164,6 +165,17 @@ export class Viewer {
         })
         if (isNext) {
           this.renderer.dispatchEvent(vElement, eventType, selection);
+        }
+        if (eventType === EventType.onDelete) {
+          if (this.rootFragment.contentLength === 0) {
+            const p = new BlockTemplate('p');
+            const fragment = new Fragment();
+            fragment.append(new SingleTemplate('br'));
+            p.childSlots.push(fragment);
+            this.rootFragment.append(p);
+            selection.firstRange.setStart(fragment, 0);
+            selection.firstRange.collapse();
+          }
         }
         this.render(this.rootFragment);
         selection.restore();

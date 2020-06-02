@@ -1,6 +1,7 @@
 import { Subject } from 'rxjs';
 import { TBSelection } from './selection';
 import { Renderer } from './renderer';
+import { Fragment } from './fragment';
 
 
 export enum EventType {
@@ -22,6 +23,7 @@ export class TBEvent {
   readonly type: EventType;
   readonly selection: TBSelection;
   readonly renderer: Renderer;
+  readonly rootFragment: Fragment;
 
   private _stopped = false;
 

@@ -1,10 +1,10 @@
-import { Lifecycle, Renderer, TBSelection, BlockFormatter } from '../core/_api';
+import { Lifecycle, Renderer, TBSelection } from '../core/_api';
 
 export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {
-    if (!selection.collapsed) {
-      this.deleteSelectedRange(selection);
-    }
+    selection.ranges.forEach(range => {
+      range.connect();
+    })
     return true;
   }
 
@@ -26,29 +26,11 @@ export class DefaultHook implements Lifecycle {
 
   onDelete(renderer: Renderer, selection: TBSelection): boolean {
     if (!selection.collapsed) {
-      this.deleteSelectedRange(selection);
+      selection.ranges.forEach(range => {
+        range.connect();
+      })
       return false;
     }
     return true;
-  }
-
-  private deleteSelectedRange(selection: TBSelection) {
-    selection.ranges.forEach(range => {
-      range.deleteSelectedScope();
-      if (range.startFragment !== range.endFragment) {
-        const ff = range.endFragment.delete(0);
-        const startIndex = range.startFragment.contentLength;
-        ff.contents.forEach(c => range.startFragment.append(c));
-        ff.formatRanges
-          .filter(f => !(f.renderer instanceof BlockFormatter))
-          .map(f => {
-            f.startIndex += startIndex;
-            f.endIndex += startIndex;
-            return f;
-          })
-          .forEach(f => range.startFragment.mergeFormat(f));
-      }
-      range.collapse();
-    })
   }
 }

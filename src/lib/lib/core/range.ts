@@ -2,6 +2,7 @@ import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement } from './element';
 import { MediaTemplate, Template } from './template';
+import { BlockFormatter } from './formatter';
 
 /**
  * 标识 Fragment 中的一个位置
@@ -79,6 +80,16 @@ export class TBRange {
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
     return this;
+  }
+
+  setStart(fragment: Fragment, offset: number) {
+    this.startFragment = fragment;
+    this.startIndex = offset;
+  }
+
+  setEnd(fragment: Fragment, offset: number) {
+    this.endFragment = fragment;
+    this.endIndex = offset;
   }
 
   /**
@@ -304,15 +315,17 @@ export class TBRange {
     return this;
   }
 
-  deleteEmptyTree(fragment: Fragment) {
+  deleteEmptyTree(fragment: Fragment): TBRange {
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
-    parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
-    if (parentTemplate.childSlots.length === 0) {
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      const index = parentFragment.indexOf(parentTemplate);
-      parentFragment.delete(index, 1);
-      if (parentFragment.contentLength === 0) {
-        this.deleteEmptyTree(parentFragment);
+    if (parentTemplate) {
+      parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
+      if (parentTemplate.childSlots.length === 0) {
+        const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+        const index = parentFragment.indexOf(parentTemplate);
+        parentFragment.delete(index, 1);
+        if (parentFragment.contentLength === 0) {
+          return this.deleteEmptyTree(parentFragment);
+        }
       }
     }
     return this;
@@ -573,6 +586,27 @@ export class TBRange {
 
   getRangePosition() {
     return TBRange.getRangePosition(this.nativeRange);
+  }
+
+  connect() {
+    if (this.collapsed) {
+      return;
+    }
+    this.deleteSelectedScope();
+    if (this.startFragment !== this.endFragment) {
+      const ff = this.endFragment.delete(0);
+      const startIndex = this.startFragment.contentLength;
+      ff.contents.forEach(c => this.startFragment.append(c));
+      ff.formatRanges
+        .filter(f => !(f.renderer instanceof BlockFormatter))
+        .map(f => {
+          f.startIndex += startIndex;
+          f.endIndex += startIndex;
+          return f;
+        })
+        .forEach(f => this.startFragment.mergeFormat(f));
+    }
+    this.collapse();
   }
 
   static getRangePosition(range: Range) {
