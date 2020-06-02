@@ -1,4 +1,4 @@
-import { TBRange } from './range';
+import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { Template } from './template';
@@ -6,14 +6,6 @@ import { Template } from './template';
 export interface RangePath {
   startPaths: number[];
   endPaths: number[];
-}
-
-/**
- * 标识 Fragment 中的一个位置
- */
-export interface TBRangePosition {
-  fragment: Fragment;
-  index: number;
 }
 
 export class TBSelection {

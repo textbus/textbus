@@ -7,13 +7,7 @@ import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
 import { HighlightState, ToolConfig } from '../toolbar/_api';
 import { Editor } from '../editor';
-import {
-  CursorMoveDirection, getNextLinePosition,
-  getNextPosition,
-  getPreviousLinePosition,
-  getPreviousPosition,
-  getRangePosition
-} from './tools';
+import { CursorMoveDirection } from './tools';
 import { TBRange } from '../core/range';
 
 export class Viewer {
@@ -274,21 +268,21 @@ export class Viewer {
       let range2: TBRange;
       switch (direction) {
         case CursorMoveDirection.Left:
-          p = getPreviousPosition(range, this.renderer);
+          p = range.getPreviousPosition();
           break;
         case CursorMoveDirection.Right:
-          p = getNextPosition(range, this.renderer);
+          p = range.getNextPosition();
           break;
         case CursorMoveDirection.Up:
           clearTimeout(this.cleanOldCursorTimer);
           range2 = range.clone().restore();
 
           if (this.oldCursorPosition) {
-            p = getPreviousLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top, this.renderer);
+            p = range2.getPreviousLinePosition(this.oldCursorPosition.left, this.oldCursorPosition.top);
           } else {
-            const rect = getRangePosition(range2.nativeRange);
+            const rect = range2.getRangePosition();
             this.oldCursorPosition = rect;
-            p = getPreviousLinePosition(range, rect.left, rect.top, this.renderer);
+            p = range.getPreviousLinePosition(rect.left, rect.top);
           }
           this.cleanOldCursorTimer = setTimeout(() => {
             this.oldCursorPosition = null;
@@ -299,11 +293,11 @@ export class Viewer {
           range2 = range.clone().restore();
 
           if (this.oldCursorPosition) {
-            p = getNextLinePosition(range2, this.oldCursorPosition.left, this.oldCursorPosition.top, this.renderer);
+            p = range2.getNextLinePosition(this.oldCursorPosition.left, this.oldCursorPosition.top);
           } else {
-            const rect = getRangePosition(range2.nativeRange);
+            const rect = range2.getRangePosition();
             this.oldCursorPosition = rect;
-            p = getNextLinePosition(range, rect.left, rect.top, this.renderer);
+            p = range.getNextLinePosition(rect.left, rect.top);
           }
           this.cleanOldCursorTimer = setTimeout(() => {
             this.oldCursorPosition = null;

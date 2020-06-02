@@ -4,6 +4,14 @@ import { VElement } from './element';
 import { MediaTemplate, Template } from './template';
 
 /**
+ * 标识 Fragment 中的一个位置
+ */
+export interface TBRangePosition {
+  fragment: Fragment;
+  index: number;
+}
+
+/**
  * 标识一个选中 Fragment 的范围
  */
 export interface SelectedScope {
@@ -31,7 +39,7 @@ export class TBRange {
   readonly commonAncestorFragment: Fragment;
   readonly commonAncestorTemplate: Template;
 
-  constructor(public nativeRange: Range,
+  constructor(private nativeRange: Range,
               private renderer: Renderer) {
     if ([1, 3].includes(nativeRange.commonAncestorContainer.nodeType)) {
       if (nativeRange.startContainer.nodeType === 3) {
@@ -324,6 +332,275 @@ export class TBRange {
     }
     return this;
   }
+
+  /**
+   * 获取上一个选区位置
+   */
+  getPreviousPosition(): TBRangePosition {
+    let fragment = this.startFragment;
+
+    if (this.startIndex > 0) {
+      const prev = fragment.getContentAtIndex(this.startIndex - 1);
+      if (prev instanceof Template) {
+        return this.findLastChild(prev.childSlots[prev.childSlots.length - 1]);
+      }
+      return {
+        fragment,
+        index: this.startIndex - 1
+      }
+    }
+
+    // 循环向前找第一个子 fragment，但有可能当前这个就是第一个，这时循环
+    // 向上会找不到，那么就使用当前的 fragment
+    const cacheFragment = fragment;
+
+    while (true) {
+      const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+      if (!parentTemplate) {
+        return {
+          fragment: cacheFragment,
+          index: 0
+        };
+      }
+      const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+      if (fragmentIndex > 0) {
+        return this.findLastChild(parentTemplate[fragmentIndex - 1]);
+      }
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const templateIndex = parentFragment.indexOf(parentTemplate);
+      if (templateIndex > 0) {
+        const prevContent = parentFragment.getContentAtIndex(templateIndex - 1);
+        if (prevContent instanceof Template) {
+          return this.findLastChild(prevContent.childSlots[prevContent.childSlots.length - 1]);
+        }
+        return {
+          fragment: parentFragment,
+          index: templateIndex - 1
+        }
+      } else {
+        fragment = parentFragment;
+      }
+    }
+  }
+
+  /**
+   * 获取下一个选区位置
+   */
+  getNextPosition(): TBRangePosition {
+    let fragment = this.endFragment;
+    let offset = this.endIndex;
+    if (offset === fragment.contentLength - 1) {
+      const current = fragment.getContentAtIndex(offset);
+      if (current instanceof MediaTemplate && current.tagName === 'br') {
+        offset++;
+      }
+    }
+    if (offset < fragment.contentLength) {
+      const next = fragment.getContentAtIndex(offset + 1);
+      if (next instanceof Template) {
+        return this.findFirstPosition(next.childSlots[0]);
+      }
+      return {
+        fragment,
+        index: offset + 1
+      }
+    }
+
+    // 循环向后找最后一个子 fragment，但有可能当前这个就是最后一个，这时循环
+    // 向上会找不到，那么就使用当前的 fragment
+    const cacheFragment = fragment;
+
+    while (true) {
+      const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+      if (!parentTemplate) {
+        return {
+          fragment: cacheFragment,
+          index: cacheFragment.contentLength
+        }
+      }
+      const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+      if (fragmentIndex < parentTemplate.childSlots.length - 1) {
+        return this.findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
+      }
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const templateIndex = parentFragment.indexOf(parentTemplate);
+      if (templateIndex < parentFragment.contentLength - 1) {
+        const nextContent = parentFragment.getContentAtIndex(templateIndex + 1);
+        if (nextContent instanceof Template) {
+          return this.findFirstPosition(nextContent.childSlots[0]);
+        }
+        return {
+          fragment: parentFragment,
+          index: templateIndex + 1
+        }
+      } else {
+        fragment = parentFragment;
+      }
+    }
+  }
+
+  /**
+   * 获取选区向上移动一行的位置
+   * @param left
+   * @param top
+   */
+  getPreviousLinePosition(left: number, top: number): TBRangePosition {
+    const range2 = this.clone();
+    let isToPrevLine = false;
+    let loopCount = 0;
+    let minLeft = left;
+    let minTop = top;
+    let position: TBRangePosition;
+    let oldPosition: TBRangePosition;
+    let oldLeft = 0;
+    while (true) {
+      loopCount++;
+      position = range2.getPreviousPosition();
+      range2.startIndex = range2.endIndex = position.index;
+      range2.startFragment = range2.endFragment = position.fragment;
+      range2.restore();
+      let rect2 = range2.getRangePosition();
+      if (!isToPrevLine) {
+        if (rect2.left > minLeft) {
+          isToPrevLine = true;
+        } else if (rect2.left === minLeft && rect2.top === minTop) {
+          return position;
+        }
+        minLeft = rect2.left;
+        minTop = rect2.top;
+      }
+      if (isToPrevLine) {
+        if (rect2.left < left) {
+          return position;
+        }
+        if (oldPosition) {
+          if (rect2.left >= oldLeft) {
+            return oldPosition;
+          }
+        }
+        oldLeft = rect2.left;
+        oldPosition = position;
+      }
+      if (loopCount > 10000) {
+        break;
+      }
+    }
+    return position || {
+      index: 0,
+      fragment: this.startFragment
+    };
+  }
+
+  /**
+   * 获取选区向下移动一行的位置
+   * @param left
+   * @param top
+   */
+  getNextLinePosition(left: number, top: number): TBRangePosition {
+    const range2 = this.clone();
+    let isToNextLine = false;
+    let loopCount = 0;
+    let maxRight = left;
+    let minTop = top;
+    let oldPosition: TBRangePosition;
+    let oldLeft = 0;
+    while (true) {
+      loopCount++;
+      const position = range2.getNextPosition();
+      range2.startIndex = range2.endIndex = position.index;
+      range2.startFragment = range2.endFragment = position.fragment;
+      range2.restore();
+      let rect2 = range2.getRangePosition();
+      if (!isToNextLine) {
+        if (rect2.left < maxRight) {
+          isToNextLine = true;
+        } else if (rect2.left === maxRight && rect2.top === minTop) {
+          return position;
+        }
+        maxRight = rect2.left;
+        minTop = rect2.top;
+        oldPosition = position;
+      }
+      if (isToNextLine) {
+        if (rect2.left > left) {
+          return oldPosition;
+        }
+        if (oldPosition) {
+          if (rect2.left < oldLeft) {
+            return oldPosition;
+          }
+        }
+        oldPosition = position;
+        oldLeft = rect2.left;
+      }
+      if (loopCount > 10000) {
+        break;
+      }
+    }
+    return oldPosition || {
+      index: this.endFragment.contentLength,
+      fragment: this.endFragment
+    };
+  }
+
+  findFirstPosition(fragment: Fragment): TBRangePosition {
+    const first = fragment.getContentAtIndex(0);
+    if (first instanceof Fragment) {
+      return this.findFirstPosition(first);
+    }
+    return {
+      index: 0,
+      fragment
+    };
+  }
+
+  findLastChild(fragment: Fragment): TBRangePosition {
+    const last = fragment.getContentAtIndex(fragment.contentLength - 1);
+    if (last instanceof Template) {
+      const lastFragment = last.childSlots[last.childSlots.length - 1];
+      return this.findLastChild(lastFragment);
+    } else if (last instanceof MediaTemplate && last.tagName === 'br') {
+      return {
+        index: fragment.contentLength - 1,
+        fragment
+      };
+    }
+    return {
+      index: fragment.contentLength,
+      fragment
+    }
+  }
+
+  getRangePosition() {
+    return TBRange.getRangePosition(this.nativeRange);
+  }
+
+  static getRangePosition(range: Range) {
+    let rect = range.getBoundingClientRect();
+    const {startContainer, startOffset} = range;
+    const offsetNode = startContainer.childNodes[startOffset];
+    if (startContainer.nodeType === 1) {
+      if (offsetNode && /^(br|img)$/i.test(offsetNode.nodeName)) {
+        rect = (offsetNode as HTMLElement).getBoundingClientRect();
+      } else if (offsetNode && offsetNode.nodeType === 1 && offsetNode.childNodes.length === 0) {
+        const cloneRange = range.cloneRange();
+        const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
+        offsetNode.appendChild(textNode);
+        cloneRange.selectNodeContents(offsetNode);
+        rect = cloneRange.getBoundingClientRect();
+        cloneRange.detach();
+      } else if (!offsetNode) {
+        const span = startContainer.ownerDocument.createElement('span');
+        span.innerText = 'x';
+        span.style.display = 'inline-block';
+        startContainer.appendChild(span);
+        rect = span.getBoundingClientRect();
+        startContainer.removeChild(span);
+      }
+    }
+    return rect;
+  }
+
 
   private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const ranges: SelectedScope[] = [];

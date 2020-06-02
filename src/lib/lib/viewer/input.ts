@@ -1,7 +1,8 @@
 import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { getRangePosition, isWindows, isMac } from './tools';
+import { isWindows, isMac } from './tools';
+import { TBRange } from '../core/range';
 
 /**
  * 快捷键配置项
@@ -190,7 +191,7 @@ export class Input {
     const range = document.createRange();
     range.setStart(startContainer, startOffset);
     range.collapse();
-    let rect = getRangePosition(range);
+    let rect = TBRange.getRangePosition(range);
     const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
 
     if (isWindows) {
