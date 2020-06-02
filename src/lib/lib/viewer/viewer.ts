@@ -289,11 +289,11 @@ export class Viewer {
     const lastPosition = firstRange.findLastChild(this.rootFragment);
     selection.removeAllRanges();
 
+    console.log(lastPosition)
     firstRange.setStart(firstPosition.fragment, firstPosition.index);
     firstRange.setEnd(lastPosition.fragment, lastPosition.index);
 
     selection.addRange(firstRange);
-    console.log(firstRange);
     selection.restore();
   }
 

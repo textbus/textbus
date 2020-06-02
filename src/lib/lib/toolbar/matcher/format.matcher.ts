@@ -138,10 +138,10 @@ export class FormatMatcher implements Matcher {
             srcData: null
           };
         }
-      } else if (child instanceof Fragment) {
-        if (child.contentLength) {
-          states.push(this.getStatesByRange(child, this.formatter, 0, child.contentLength));
-        }
+      } else if (child instanceof Template) {
+        child.childSlots.forEach(childFragment => {
+          states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
+        })
       }
       index += child.length;
     }

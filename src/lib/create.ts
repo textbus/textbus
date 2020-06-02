@@ -96,19 +96,20 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       underlineFormatter
     ],
     toolbar: [
-      [historyBackTool, historyForwardTool],
-      [headingTool],
-      [boldTool, italicTool, strikeThroughTool, underlineTool],
-      [codeTool],
-      [olTool, ulTool],
-      [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-      [subscriptTool, superscriptTool],
-      [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-      [fontFamilyTool],
-      [linkTool, imageTool, audioTool, videoTool],
-      [textAlignTool],
-      [tableTool, tableEditTool],
-      [cleanTool]
+      boldTool
+      // [historyBackTool, historyForwardTool],
+      // [headingTool],
+      // [boldTool, italicTool, strikeThroughTool, underlineTool],
+      // [codeTool],
+      // [olTool, ulTool],
+      // [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+      // [subscriptTool, superscriptTool],
+      // [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+      // [fontFamilyTool],
+      // [linkTool, imageTool, audioTool, videoTool],
+      // [textAlignTool],
+      // [tableTool, tableEditTool],
+      // [cleanTool]
     ]
   };
   return new Editor(selector, Object.assign(defaultOptions, options));
