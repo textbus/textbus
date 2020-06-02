@@ -42,7 +42,20 @@ export function getPreviousPosition(range: TBRange, renderer: Renderer): TBRange
     if (fragmentIndex > 0) {
       return findLastChild(parentTemplate[fragmentIndex - 1]);
     }
-    fragment = renderer.getParentFragmentByTemplate(parentTemplate);
+    const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+    const templateIndex = parentFragment.indexOf(parentTemplate);
+    if (templateIndex > 0) {
+      const prevContent = parentFragment.getContentAtIndex(templateIndex - 1);
+      if (prevContent instanceof Template) {
+        return findLastChild(prevContent.childSlots[prevContent.childSlots.length - 1]);
+      }
+      return {
+        fragment: parentFragment,
+        index: templateIndex - 1
+      }
+    } else {
+      fragment = parentFragment;
+    }
   }
 }
 
@@ -87,7 +100,20 @@ export function getNextPosition(range: TBRange, renderer: Renderer): TBRangePosi
     if (fragmentIndex < parentTemplate.childSlots.length - 1) {
       return findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
     }
-    fragment = renderer.getParentFragmentByTemplate(parentTemplate);
+    const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+    const templateIndex = parentFragment.indexOf(parentTemplate);
+    if (templateIndex < parentFragment.contentLength - 1) {
+      const nextContent = parentFragment.getContentAtIndex(templateIndex + 1);
+      if (nextContent instanceof Template) {
+        return findFirstPosition(nextContent.childSlots[0]);
+      }
+      return {
+        fragment: parentFragment,
+        index: templateIndex + 1
+      }
+    } else {
+      fragment = parentFragment;
+    }
   }
 }
 
