@@ -25,8 +25,47 @@ export class TBRange {
   startIndex: number;
   endIndex: number;
 
-  startFragment: Fragment;
-  endFragment: Fragment;
+  /**
+   * 选区开始的 Fragment
+   */
+  get startFragment() {
+    return this._startFragment;
+  }
+
+  set startFragment(v: Fragment) {
+    this._startFragment = v;
+    this._commonAncestorFragment = null;
+  }
+
+  /**
+   * 选区结束的 Fragment
+   */
+  get endFragment() {
+    return this._endFragment;
+  }
+
+  set endFragment(v: Fragment) {
+    this._endFragment = v;
+    this._commonAncestorFragment = null;
+  }
+
+  /**
+   * 当前选区最近的公共 Fragment
+   */
+  get commonAncestorFragment() {
+    if (!this._commonAncestorFragment) {
+      this._commonAncestorFragment = this.getCommonAncestorFragment();
+    }
+    return this._commonAncestorFragment;
+  }
+
+  get commonAncestorTemplate() {
+    if (!this._commonAncestorTemplate) {
+      this._commonAncestorTemplate = this.getCommonAncestorTemplate();
+    }
+    return this._commonAncestorTemplate;
+  }
+
 
   /**
    * 当前选区是否折叠
@@ -37,8 +76,10 @@ export class TBRange {
       this.startIndex === this.endIndex;
   }
 
-  readonly commonAncestorFragment: Fragment;
-  readonly commonAncestorTemplate: Template;
+  private _startFragment: Fragment;
+  private _endFragment: Fragment;
+  private _commonAncestorFragment: Fragment;
+  private _commonAncestorTemplate: Template;
 
   constructor(private nativeRange: Range,
               private renderer: Renderer) {
@@ -56,15 +97,6 @@ export class TBRange {
 
       this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
       this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
-      const position = renderer.getPositionByNode(nativeRange.commonAncestorContainer);
-      this.commonAncestorFragment = position.fragment;
-      if (position.endIndex - position.startIndex === 1) {
-        this.commonAncestorTemplate = position.fragment.sliceContents(
-          position.startIndex,
-          position.endIndex)[0] as Template;
-      } else {
-        this.commonAncestorTemplate = this.renderer.getParentTemplateByFragment(position.fragment);
-      }
     }
   }
 
@@ -635,6 +667,54 @@ export class TBRange {
     return rect;
   }
 
+  private getCommonAncestorFragment() {
+    let startFragment = this.startFragment;
+    let endFragment = this.endFragment;
+    if (startFragment === endFragment) {
+      return startFragment;
+    }
+
+    const startPaths: Fragment[] = [];
+    const endPaths: Fragment[] = [];
+
+    while (startFragment) {
+      startPaths.push(startFragment);
+      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      if (!parentTemplate) {
+        break;
+      }
+      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+    }
+
+    while (endFragment) {
+      endPaths.push(endFragment);
+      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      if (!parentTemplate) {
+        break;
+      }
+      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+    }
+    let f: Fragment = null;
+    while (startPaths.length && endPaths.length) {
+      let s = startPaths.pop();
+      let e = endPaths.pop();
+      if (s === e) {
+        f = s;
+      } else {
+        break
+      }
+    }
+    return f;
+  }
+
+  private getCommonAncestorTemplate() {
+    const startTemplate = this.renderer.getParentTemplateByFragment(this.startFragment);
+    const endTemplate = this.renderer.getParentTemplateByFragment(this.endFragment);
+    if (startTemplate === endTemplate) {
+      return startTemplate;
+    }
+    return this.renderer.getParentTemplateByFragment(this.commonAncestorFragment);
+  }
 
   private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
     const ranges: SelectedScope[] = [];
