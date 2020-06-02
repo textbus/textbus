@@ -195,6 +195,8 @@ export class Viewer {
       rootFragment.append(p);
     }
     this.renderer.render(rootFragment, this.contentDocument.body);
+
+    this.updateFrameHeight();
   }
 
   apply(config: ToolConfig, commander: Commander) {
@@ -313,5 +315,22 @@ export class Viewer {
     });
     selection.restore();
     this.recordSnapshotFromEditingBefore(selection);
+  }
+
+  private updateFrameHeight() {
+    const childBody = this.contentDocument.body;
+    const lastChild = childBody.lastChild;
+    let height = 0;
+    if (lastChild) {
+      if (lastChild.nodeType === 1) {
+        height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
+      } else {
+        const div = this.contentDocument.createElement('div');
+        childBody.appendChild(div);
+        height = div.getBoundingClientRect().bottom;
+        childBody.removeChild(div);
+      }
+    }
+    this.frame.style.height = height + 30 + 'px';
   }
 }
