@@ -590,8 +590,9 @@ export class TBRange {
 
   findFirstPosition(fragment: Fragment): TBRangePosition {
     const first = fragment.getContentAtIndex(0);
-    if (first instanceof Fragment) {
-      return this.findFirstPosition(first);
+    if (first instanceof Template) {
+      const firstFragment = first.childSlots[0];
+      return this.findFirstPosition(firstFragment);
     }
     return {
       index: 0,

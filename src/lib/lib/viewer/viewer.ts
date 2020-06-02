@@ -138,6 +138,15 @@ export class Viewer {
         this.moveCursor(map[ev.key]);
       }
     });
+    this.input.keymap({
+      keymap: {
+        key: 'a',
+        ctrlKey: true
+      },
+      action: () => {
+        this.selectAll();
+      }
+    });
   }
 
   dispatchEvent(keymap: Keymap, eventType: EventType) {
@@ -271,6 +280,21 @@ export class Viewer {
       commonAncestorFragment.append(new SingleTemplate('br'));
     }
     this.userWriteEvent.next();
+  }
+
+  private selectAll() {
+    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const firstRange = selection.firstRange;
+    const firstPosition = firstRange.findFirstPosition(this.rootFragment);
+    const lastPosition = firstRange.findLastChild(this.rootFragment);
+    selection.removeAllRanges();
+
+    firstRange.setStart(firstPosition.fragment, firstPosition.index);
+    firstRange.setEnd(lastPosition.fragment, lastPosition.index);
+
+    selection.addRange(firstRange);
+    console.log(firstRange);
+    selection.restore();
   }
 
   private moveCursor(direction: CursorMoveDirection) {

@@ -63,7 +63,7 @@ export class TBSelection {
    */
   removeAllRanges() {
     this._ranges = [];
-    this.nativeSelection.removeAllRanges();
+    // this.nativeSelection.removeAllRanges();
   }
 
   addRange(range: TBRange) {
