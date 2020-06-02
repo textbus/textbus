@@ -43,7 +43,7 @@ export class BlockTemplate extends Template {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragmentByTemplate(this);
 
-        const template = new BlockTemplate(this.tagName);
+        const template = new BlockTemplate('p');
         const fragment = new Fragment();
         template.childSlots.push(fragment);
         const firstRange = event.selection.firstRange;
