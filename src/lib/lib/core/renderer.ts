@@ -1,4 +1,4 @@
-import { RootVElement, VElement, VTextNode } from './element';
+import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatRange } from './formatter';
 import { MediaTemplate, Template } from './template';
@@ -93,7 +93,7 @@ export class Renderer {
     this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
 
-    const root = new RootVElement();
+    const root = new VElement('root');
     this.NVMappingTable.set(host, root);
     const vDom = this.createVDom(fragment, root);
     if (this.oldVDom) {
@@ -103,6 +103,7 @@ export class Renderer {
     }
     this.oldVDom = vDom;
     this.setupVDomHierarchy(vDom);
+    return vDom;
   }
 
   renderToString(fragment: Fragment): string {

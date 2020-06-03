@@ -4,7 +4,7 @@ import {
   Commander,
   Contents,
   EventType,
-  Fragment,
+  Fragment, MediaTemplate,
   Parser,
   Renderer,
   TBRangePosition,
@@ -246,7 +246,47 @@ export class Viewer {
       p.childSlots.push(fragment);
       rootFragment.append(p);
     }
-    this.renderer.render(rootFragment, this.contentDocument.body);
+    this.renderer.render(rootFragment, this.contentDocument.body).events.subscribe(event => {
+      if (event.type === EventType.onDelete) {
+        this.selection.ranges.forEach(range => {
+          if (!range.collapsed) {
+            range.connect();
+            return;
+          }
+          if (range.startIndex > 0) {
+            range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+            range.startIndex = range.endIndex = range.startIndex - 1;
+            if (range.commonAncestorFragment.contentLength === 0) {
+              range.commonAncestorFragment.append(new SingleTemplate('br'));
+            }
+          } else {
+            const firstContent = range.startFragment.getContentAtIndex(0);
+            if (firstContent instanceof MediaTemplate && firstContent.tagName === 'br') {
+              range.startFragment.delete(0, 1);
+              if (range.startFragment.contentLength === 0) {
+                let position = range.getPreviousPosition();
+                if (position.fragment === range.startFragment && position.index === range.startIndex) {
+                  position = range.getNextPosition();
+                }
+                range.deleteEmptyTree(range.startFragment);
+                range.setStart(position.fragment, position.index);
+                range.collapse();
+              }
+            } else {
+              const prevPosition = range.getPreviousPosition();
+              if (prevPosition.fragment !== range.startFragment) {
+                range.setStart(prevPosition.fragment, prevPosition.index);
+                const last = prevPosition.fragment.getContentAtIndex(prevPosition.index - 1);
+                if (last instanceof MediaTemplate && last.tagName === 'br') {
+                  range.startIndex--;
+                }
+                range.connect();
+              }
+            }
+          }
+        });
+      }
+    });
 
     this.updateFrameHeight();
   }
