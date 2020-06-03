@@ -62,6 +62,7 @@ export class Editor implements EventDelegate {
   private historyIndex = 0;
   private readonly historyStackSize: number;
 
+  private canEditable = false;
   private selection: TBSelection;
 
   private defaultHTML = '<p><br></p>';
@@ -86,7 +87,7 @@ export class Editor implements EventDelegate {
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
 
     this.toolbar.onAction
-      .pipe(filter(() => !!this.selection))
+      .pipe(filter(() => this.canEditable))
       .subscribe(config => {
         this.viewer.apply(config.config, config.instance.commander);
         if (config.instance.commander.recordHistory) {
@@ -101,8 +102,8 @@ export class Editor implements EventDelegate {
       this.viewer.render(rootFragment);
       this.tasks.forEach(fn => fn());
       return this.viewer.onCanEditable;
-    })).subscribe(selection => {
-      this.selection = selection;
+    })).subscribe(() => {
+      this.canEditable = true;
       this.recordSnapshot();
       unsub.unsubscribe();
     });
@@ -193,7 +194,7 @@ export class Editor implements EventDelegate {
     }
     this.historySequence.push({
       contents: this.rootFragment.clone(),
-      paths: this.selection.getRangePaths()
+      paths: this.selection ? this.selection.getRangePaths() : []
     });
     if (this.historySequence.length > this.historyStackSize) {
       this.historySequence.shift();

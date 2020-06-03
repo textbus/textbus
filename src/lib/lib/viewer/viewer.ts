@@ -1,5 +1,5 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
-import { auditTime } from 'rxjs/operators';
+import { auditTime, tap } from 'rxjs/operators';
 
 import { Commander, EventType, Fragment, Renderer, TBRangePosition, TBSelection, VElement } from '../core/_api';
 import { template } from './template-html';
@@ -13,7 +13,7 @@ import { TBRange } from '../core/range';
 export class Viewer {
   onSelectionChange: Observable<TBSelection>;
   onReady: Observable<Document>;
-  onCanEditable: Observable<TBSelection>;
+  onCanEditable: Observable<void>;
   onUserWrite: Observable<void>;
 
   elementRef = document.createElement('div');
@@ -26,8 +26,10 @@ export class Viewer {
 
   private readyEvent = new Subject<Document>();
   private selectionChangeEvent = new Subject<TBSelection>();
-  private canEditableEvent = new Subject<TBSelection>();
+  private canEditableEvent = new Subject<void>();
   private userWriteEvent = new Subject<void>();
+
+  private selection: TBSelection;
 
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
@@ -84,17 +86,19 @@ export class Viewer {
       .subscribe(() => {
         this.nativeSelection = this.contentDocument.getSelection();
         this.nativeSelection.removeAllRanges();
-        this.canEditableEvent.next(new TBSelection(this.contentDocument, this.renderer));
+        this.canEditableEvent.next();
       });
-    fromEvent(this.contentDocument, 'selectionchange').pipe(auditTime(10)).subscribe(() => {
+    fromEvent(this.contentDocument, 'selectionchange').pipe(tap(() => {
+      this.selection = new TBSelection(this.contentDocument, this.renderer);
+    }), auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
-      this.selectionChangeEvent.next(new TBSelection(this.contentDocument, this.renderer));
+      this.selectionChangeEvent.next(this.selection);
     })
     this.input.events.onFocus.subscribe(() => {
-      this.recordSnapshotFromEditingBefore(new TBSelection(this.contentDocument, this.renderer));
+      this.recordSnapshotFromEditingBefore();
     })
     this.input.events.onInput.subscribe(() => {
-      const selection = new TBSelection(this.contentDocument, this.renderer);
+      const selection = this.selection;
       const collapsed = selection.collapsed;
       let isNext = true;
       (this.context.options.hooks || []).forEach(lifecycle => {
@@ -110,7 +114,7 @@ export class Viewer {
       })
       if (isNext) {
         if (!collapsed) {
-          this.recordSnapshotFromEditingBefore(selection, true);
+          this.recordSnapshotFromEditingBefore(true);
         }
         this.write(selection);
       }
@@ -159,7 +163,7 @@ export class Viewer {
         if (!vElement) {
           return;
         }
-        const selection = new TBSelection(this.contentDocument, this.renderer);
+        const selection = this.selection;
         let isNext = true;
         (this.context.options.hooks || []).forEach(lifecycle => {
           if (eventType === EventType.onEnter && typeof lifecycle.onEnter === 'function') {
@@ -189,7 +193,7 @@ export class Viewer {
         this.render(this.rootFragment);
         selection.restore();
         this.input.updateStateBySelection(this.nativeSelection);
-        this.recordSnapshotFromEditingBefore(selection);
+        this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
     })
@@ -215,7 +219,7 @@ export class Viewer {
   }
 
   apply(config: ToolConfig, commander: Commander) {
-    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const selection = this.selection;
     const state = config.match ?
       config.match.queryState(selection, this.renderer, this.context).state :
       HighlightState.Normal;
@@ -241,11 +245,11 @@ export class Viewer {
   /**
    * 记录编辑前的快照
    */
-  recordSnapshotFromEditingBefore(selection: TBSelection, keepInputStatus = false) {
+  recordSnapshotFromEditingBefore(keepInputStatus = false) {
     if (!keepInputStatus) {
       this.input.cleanValue();
     }
-    this.selectionSnapshot = selection.clone();
+    this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment.clone();
   }
 
@@ -283,13 +287,12 @@ export class Viewer {
   }
 
   private selectAll() {
-    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const selection = this.selection;
     const firstRange = selection.firstRange;
     const firstPosition = firstRange.findFirstPosition(this.rootFragment);
     const lastPosition = firstRange.findLastChild(this.rootFragment);
     selection.removeAllRanges();
 
-    console.log(lastPosition)
     firstRange.setStart(firstPosition.fragment, firstPosition.index);
     firstRange.setEnd(lastPosition.fragment, lastPosition.index);
 
@@ -298,7 +301,7 @@ export class Viewer {
   }
 
   private moveCursor(direction: CursorMoveDirection) {
-    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const selection = this.selection;
     selection.ranges.forEach(range => {
       let p: TBRangePosition;
       let range2: TBRange;
@@ -344,7 +347,7 @@ export class Viewer {
       range.startIndex = range.endIndex = p.index;
     });
     selection.restore();
-    this.recordSnapshotFromEditingBefore(selection);
+    this.recordSnapshotFromEditingBefore();
   }
 
   private updateFrameHeight() {
