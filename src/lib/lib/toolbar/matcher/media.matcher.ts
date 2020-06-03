@@ -1,22 +1,45 @@
-import { Matcher, SelectionMatchDelta } from './matcher';
-import { TBSelection, Constructor, Renderer, MediaTemplate } from '../../core/_api';
+import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { Constructor, MediaTemplate, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 
 export class MediaMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<MediaTemplate>) {
+  constructor(public templateConstructor: Constructor<MediaTemplate>, public tagName: string) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
-    const contextTemplates = selection.ranges.map(range => {
+    const states: RangeMatchDelta<MediaTemplate>[] = selection.ranges.map(range => {
+      let template: MediaTemplate;
       if (range.commonAncestorTemplate instanceof this.templateConstructor) {
-        return range.commonAncestorTemplate;
+        template = range.commonAncestorTemplate;
+      } else {
+        template = renderer.getContext(range.commonAncestorFragment, this.templateConstructor)
       }
-      return renderer.getContext(range.commonAncestorFragment, this.templateConstructor);
+      if (template && template.tagName === this.tagName) {
+        return {
+          srcData: template,
+          fromRange: range,
+          state: HighlightState.Highlight
+        };
+      }
+      return {
+        state: HighlightState.Normal,
+        fromRange: range,
+        srcData: null
+      };
     });
+    for (const s of states) {
+      if (s.state !== HighlightState.Highlight) {
+        return {
+          state: HighlightState.Normal,
+          srcStates: states,
+          matchData: states[0]?.srcData
+        }
+      }
+    }
     return {
-      state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,
-      srcStates: [],
-      matchData: contextTemplates[0]
+      state: HighlightState.Normal,
+      srcStates: states,
+      matchData: null
     }
   }
 }

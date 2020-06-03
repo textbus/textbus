@@ -5,6 +5,7 @@ import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { EventDelegate, HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
+import { map } from 'rxjs/operators';
 
 export interface DropdownConfig {
   /** 下拉控件展开后显示的内容 */
@@ -40,7 +41,9 @@ export class DropdownHandler implements Tool {
     this.commander = config.execCommand();
     const viewer = config.menuFactory();
     this.viewer = viewer;
-    this.onApply = viewer.onComplete;
+    this.onApply = viewer.onComplete.pipe(map(result => {
+      this.commander?.updateValue(result);
+    }));
     this.dropdownButton.innerText = config.label || '';
 
     this.dropdownButton.classList.add(...(config.classes || []));

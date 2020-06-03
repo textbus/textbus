@@ -30,7 +30,7 @@ export const videoTool = Toolkit.makeDropdownTool({
       value: 'controls'
     }]);
   },
-  match: new MediaMatcher(VideoTemplate),
+  match: new MediaMatcher(VideoTemplate, 'video'),
   execCommand() {
     return new VideoCommander();
   }
