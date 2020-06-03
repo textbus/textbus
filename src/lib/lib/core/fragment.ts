@@ -53,13 +53,12 @@ export class Fragment {
       }
       if (format.startIndex < index && format.endIndex >= index) {
         newFormatRanges.push({
-          startIndex: index + 1,
-          endIndex: format.endIndex + 1,
+          startIndex: format.startIndex,
+          endIndex: format.endIndex + contents.length,
           state: format.state,
           abstractData: format.abstractData.clone(),
           renderer: format.renderer
         });
-        format.endIndex = index;
       } else {
         if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
           format.startIndex += contents.length;
