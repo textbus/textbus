@@ -628,6 +628,7 @@ export class TBRange {
     this.deleteSelectedScope();
     if (this.startFragment !== this.endFragment) {
       const ff = this.endFragment.delete(0);
+      this.deleteEmptyTree(this.endFragment);
       const startIndex = this.startFragment.contentLength;
       ff.contents.forEach(c => this.startFragment.append(c));
       ff.formatRanges
