@@ -47,7 +47,7 @@ export class Fragment {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
-      if (format instanceof BlockFormatter) {
+      if (format.renderer instanceof BlockFormatter) {
         newFormatRanges.push(format);
         return;
       }

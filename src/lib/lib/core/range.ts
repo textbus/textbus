@@ -605,11 +605,11 @@ export class TBRange {
     if (last instanceof Template) {
       const lastFragment = last.childSlots[last.childSlots.length - 1];
       return this.findLastChild(lastFragment);
-    } else if (last instanceof MediaTemplate && last.tagName === 'br') {
-      return {
-        index: fragment.contentLength - 1,
-        fragment
-      };
+      // } else if (last instanceof MediaTemplate && last.tagName === 'br') {
+      //   return {
+      //     index: fragment.contentLength - 1,
+      //     fragment
+      //   };
     }
     return {
       index: fragment.contentLength,
@@ -776,9 +776,10 @@ export class TBRange {
             if (child.childNodes.length === 0) {
               const node = this.renderer.getNativeNodeByVDom(child);
               const parentNode = node.parentNode;
+              const index = Array.from(parentNode.childNodes).indexOf(node as any);
               return {
                 node: parentNode,
-                offset: Array.from(parentNode.childNodes).indexOf(node as any)
+                offset: position.endIndex === offset ? index + 1 : index
               }
             }
             vElement = child;

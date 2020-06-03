@@ -111,7 +111,11 @@ export class FormatMatcher implements Matcher {
     });
 
     for (const child of childContents) {
-      if (typeof child === 'string') {
+      if (child instanceof Template) {
+        child.childSlots.forEach(childFragment => {
+          states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
+        })
+      } else {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
             if (format.state === FormatEffect.Exclude) {
@@ -138,10 +142,6 @@ export class FormatMatcher implements Matcher {
             srcData: null
           };
         }
-      } else if (child instanceof Template) {
-        child.childSlots.forEach(childFragment => {
-          states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
-        })
       }
       index += child.length;
     }

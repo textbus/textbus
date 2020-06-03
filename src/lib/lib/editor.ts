@@ -107,7 +107,9 @@ export class Editor implements EventDelegate {
       this.recordSnapshot();
       unsub.unsubscribe();
     });
-    this.viewer.onSelectionChange.pipe(tap(s => this.selection = s), auditTime(100)).subscribe(selection => {
+    this.viewer.onSelectionChange.pipe(tap(s => {
+      this.selection = s;
+    }), auditTime(100)).subscribe(selection => {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);

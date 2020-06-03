@@ -1,5 +1,4 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
-import { auditTime, tap } from 'rxjs/operators';
 
 import { Commander, EventType, Fragment, Renderer, TBRangePosition, TBSelection, VElement } from '../core/_api';
 import { template } from './template-html';
@@ -88,9 +87,8 @@ export class Viewer {
         this.nativeSelection.removeAllRanges();
         this.canEditableEvent.next();
       });
-    fromEvent(this.contentDocument, 'selectionchange').pipe(tap(() => {
+    fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
       this.selection = new TBSelection(this.contentDocument, this.renderer);
-    }), auditTime(10)).subscribe(() => {
       this.input.updateStateBySelection(this.nativeSelection);
       this.selectionChangeEvent.next(this.selection);
     })
