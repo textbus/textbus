@@ -133,7 +133,7 @@ export class Fragment {
           endIndex: format.endIndex - count
         };
 
-        if (cloneFormat.startIndex <= format.endIndex) {
+        if (cloneFormat.startIndex < cloneFormat.endIndex) {
           selfFormats.push(cloneFormat);
         }
         if (endIndex - format.startIndex > 0) {
@@ -149,7 +149,7 @@ export class Fragment {
           startIndex: Math.max(startIndex, format.startIndex - count),
           endIndex: format.endIndex - count
         };
-        if (cloneFormat.startIndex <= format.endIndex) {
+        if (cloneFormat.startIndex < cloneFormat.endIndex) {
           selfFormats.push(cloneFormat);
         }
         const s = Math.max(format.startIndex - count, startIndex);
