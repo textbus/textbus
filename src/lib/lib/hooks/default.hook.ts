@@ -1,10 +1,17 @@
-import { Lifecycle, Renderer, TBSelection } from '../core/_api';
+import { Contents, Lifecycle, Renderer, TBSelection } from '../core/_api';
 
 export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {
     selection.ranges.forEach(range => {
       range.connect();
     })
+    return true;
+  }
+
+  onPaste(contents: Contents, renderer: Renderer, selection: TBSelection): boolean {
+    selection.ranges.forEach(range => {
+      range.connect();
+    });
     return true;
   }
 

@@ -1,6 +1,16 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 
-import { Commander, EventType, Fragment, Renderer, TBRangePosition, TBSelection, VElement } from '../core/_api';
+import {
+  Commander,
+  Contents,
+  EventType,
+  Fragment,
+  Parser,
+  Renderer,
+  TBRangePosition,
+  TBSelection,
+  VElement
+} from '../core/_api';
 import { template } from './template-html';
 import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
@@ -37,7 +47,8 @@ export class Viewer {
   private cleanOldCursorTimer: any;
 
   constructor(private renderer: Renderer,
-              private context: Editor) {
+              private context: Editor,
+              private parser: Parser) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable();
     this.onReady = this.readyEvent.asObservable();
     this.onCanEditable = this.canEditableEvent.asObservable();
@@ -120,6 +131,30 @@ export class Viewer {
       selection.restore();
       this.input.updateStateBySelection(this.nativeSelection);
     })
+    this.input.events.onPaste.subscribe(() => {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+      div.contentEditable = 'true';
+      document.body.appendChild(div);
+      div.focus();
+      setTimeout(() => {
+        const fragment = this.parser.parse(div);
+        const contents = new Contents();
+        fragment.sliceContents(0).forEach(i => contents.append(i));
+        document.body.removeChild(div);
+        let isNext = true;
+        (this.context.options.hooks || []).forEach(lifecycle => {
+          if (typeof lifecycle.onPaste === 'function') {
+            if (lifecycle.onPaste(contents, this.renderer, this.selection) === false) {
+              isNext = false;
+            }
+          }
+        })
+        if (isNext) {
+          this.paste(contents);
+        }
+      });
+    });
     this.dispatchEvent({
       key: 'Enter'
     }, EventType.onEnter);
@@ -282,6 +317,20 @@ export class Viewer {
       commonAncestorFragment.append(new SingleTemplate('br'));
     }
     this.userWriteEvent.next();
+  }
+
+  paste(contents: Contents) {
+    const firstRange = this.selection.firstRange;
+    const fragment = firstRange.startFragment;
+    let i = 0
+    contents.slice(0).forEach(item => {
+      fragment.insert(item, firstRange.startIndex + i);
+      i += item.length;
+    });
+    // firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + contents.length;
+    this.render(this.rootFragment);
+    this.updateFrameHeight();
+    // this.selection.restore();
   }
 
   private selectAll() {

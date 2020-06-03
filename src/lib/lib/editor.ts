@@ -50,9 +50,9 @@ export class Editor implements EventDelegate {
   private readonly container: HTMLElement;
 
   private parser: Parser;
-  private readonly toolbar: Toolbar;
+  private viewer: Viewer;
+  private toolbar: Toolbar;
   private renderer = new Renderer();
-  private viewer = new Viewer(this.renderer, this);
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
@@ -85,7 +85,7 @@ export class Editor implements EventDelegate {
     this.frameContainer.classList.add('tbus-frame-container');
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
-
+    this.viewer = new Viewer(this.renderer, this, this.parser);
     this.toolbar.onAction
       .pipe(filter(() => this.canEditable))
       .subscribe(config => {
