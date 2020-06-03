@@ -337,7 +337,7 @@ export class TBRange {
   }
 
   deleteSelectedScope() {
-    this.getSelectedScope().forEach(scope => {
+    this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
         this.deleteEmptyTree(scope.fragment);
       } else {
