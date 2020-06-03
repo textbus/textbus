@@ -9,10 +9,10 @@ import {
   RangePath,
   TBSelection,
   Lifecycle,
-  Fragment
+  Fragment, Commander
 } from './core/_api';
 import { Viewer, KeymapAction } from './viewer/_api';
-import { Toolbar, EventDelegate, ContextMenu, ToolFactory } from './toolbar/_api';
+import { Toolbar, EventDelegate, ContextMenu, ToolFactory, ToolConfig, HighlightState } from './toolbar/_api';
 
 export interface Snapshot {
   contents: Fragment;
@@ -89,7 +89,7 @@ export class Editor implements EventDelegate {
     this.toolbar.onAction
       .pipe(filter(() => this.canEditable))
       .subscribe(config => {
-        this.viewer.apply(config.config, config.instance.commander);
+        this.apply(config.config, config.instance.commander);
         if (config.instance.commander.recordHistory) {
           this.recordSnapshot();
           this.listenUserWriteEvent();
@@ -188,6 +188,30 @@ export class Editor implements EventDelegate {
     this.run(() => {
       this.viewer.registerKeymap(action);
     });
+  }
+
+  private apply(config: ToolConfig, commander: Commander) {
+    const selection = this.selection;
+    const state = config.match ?
+      config.match.queryState(selection, this.renderer, this).state :
+      HighlightState.Normal;
+    if (state === HighlightState.Disabled) {
+      return;
+    }
+    const overlap = state === HighlightState.Highlight;
+    let isNext = true;
+    (this.options.hooks || []).forEach(lifecycle => {
+      if (typeof lifecycle.onApplyCommand === 'function' &&
+        lifecycle.onApplyCommand(commander, selection, this) === false) {
+        isNext = false;
+      }
+    })
+    if (isNext) {
+      commander.command(selection, overlap, this.renderer, this.rootFragment);
+      this.viewer.render(this.rootFragment);
+      selection.restore();
+      this.toolbar.updateHandlerState(selection, this.renderer);
+    }
   }
 
   private recordSnapshot() {

@@ -1,7 +1,6 @@
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 
 import {
-  Commander,
   Contents,
   EventType,
   Fragment, MediaTemplate,
@@ -14,7 +13,6 @@ import {
 import { template } from './template-html';
 import { BlockTemplate, SingleTemplate } from '../templates/_api';
 import { Input, Keymap, KeymapAction } from './input';
-import { HighlightState, ToolConfig } from '../toolbar/_api';
 import { Editor } from '../editor';
 import { CursorMoveDirection } from './tools';
 import { TBRange } from '../core/range';
@@ -289,30 +287,6 @@ export class Viewer {
     });
 
     this.updateFrameHeight();
-  }
-
-  apply(config: ToolConfig, commander: Commander) {
-    const selection = this.selection;
-    const state = config.match ?
-      config.match.queryState(selection, this.renderer, this.context).state :
-      HighlightState.Normal;
-    if (state === HighlightState.Disabled) {
-      return;
-    }
-    const overlap = state === HighlightState.Highlight;
-    let isNext = true;
-    (this.context.options.hooks || []).forEach(lifecycle => {
-      if (typeof lifecycle.onApplyCommand === 'function' &&
-        lifecycle.onApplyCommand(commander, selection, this.context) === false) {
-        isNext = false;
-      }
-    })
-    if (isNext) {
-      commander.command(selection, overlap, this.renderer, this.rootFragment);
-      this.render(this.rootFragment);
-      selection.restore();
-      this.selectionChangeEvent.next(selection);
-    }
   }
 
   /**
