@@ -2,7 +2,6 @@ import { Contents } from './contents';
 import { MediaTemplate, Template } from './template';
 import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
-import { BlockStyleFormatter } from '../formatter/block-style.formatter';
 
 export class Fragment {
   private contents = new Contents();
@@ -103,49 +102,73 @@ export class Fragment {
     const endIndex = startIndex + count;
     const formatMap = new FormatMap();
 
-    const formatRanges: FormatRange[] = [];
-    const newFragmentFormats: FormatRange[] = [];
+    const selfFormats: FormatRange[] = [];
+    const discardedFormats: FormatRange[] = [];
     this.formatMap.getFormatRanges().filter(f => {
-      if (f.renderer instanceof BlockStyleFormatter) {
-        newFragmentFormats.push(Object.assign({}, f));
+      if (f.renderer instanceof BlockFormatter) {
+        selfFormats.push(Object.assign({}, f));
+        discardedFormats.push(Object.assign({}, f));
         return false;
       }
       return true;
     }).forEach(format => {
-      if (format.startIndex <= endIndex && format.endIndex >= startIndex) {
-        const cloneFormat = Object.assign({}, format);
-        cloneFormat.startIndex = Math.max(format.startIndex - startIndex, 0);
-        cloneFormat.endIndex = Math.min(format.endIndex - startIndex, endIndex - startIndex);
-        newFragmentFormats.push(cloneFormat);
-      }
+      // 在之前
       if (format.endIndex <= startIndex) {
-        // 在选区之前
-        formatRanges.push(format);
-      } else if (format.startIndex > endIndex) {
-        // 在选区这后
-        format.startIndex -= count;
-        format.endIndex -= count;
-        formatRanges.push(format);
+        selfFormats.push(Object.assign({}, format));
+        return;
+      }
+      // 在之后
+      if (format.startIndex >= endIndex) {
+        selfFormats.push({
+          ...format,
+          startIndex: format.startIndex - count,
+          endIndex: format.endIndex - count
+        });
+        return;
+      }
+
+      if (format.startIndex <= startIndex) {
+        const cloneFormat = {
+          ...format,
+          endIndex: format.endIndex - count
+        };
+
+        if (cloneFormat.startIndex <= format.endIndex) {
+          selfFormats.push(cloneFormat);
+        }
+        if (endIndex - format.startIndex > 0) {
+          discardedFormats.push({
+            ...format,
+            startIndex: 0,
+            endIndex: endIndex - format.startIndex
+          });
+        }
       } else {
-        if (format.startIndex < startIndex) {
-          format.endIndex = Math.max(startIndex, format.endIndex - count);
-          formatRanges.push(format);
-        } else if (format.endIndex > endIndex) {
-          format.startIndex = startIndex;
-          format.endIndex = startIndex + format.endIndex - endIndex;
-          formatRanges.push(format);
-        } else if (format.startIndex === 0 && startIndex === 0) {
-          format.startIndex = format.endIndex = 0;
-          formatRanges.push(format);
+        const cloneFormat = {
+          ...format,
+          startIndex: Math.max(startIndex, format.startIndex - count),
+          endIndex: format.endIndex - count
+        };
+        if (cloneFormat.startIndex <= format.endIndex) {
+          selfFormats.push(cloneFormat);
+        }
+        const s = Math.max(format.startIndex - count, startIndex);
+        const e = format.endIndex - count;
+        if (e > s) {
+          discardedFormats.push({
+            ...format,
+            startIndex: 0,
+            endIndex: e - s
+          })
         }
       }
     })
-    formatRanges.forEach(f => {
+    selfFormats.forEach(f => {
       formatMap.merge(f);
     });
     this.formatMap = formatMap;
     return {
-      formatRanges: newFragmentFormats,
+      formatRanges: discardedFormats,
       contents: this.contents.delete(startIndex, endIndex)
     };
   }
