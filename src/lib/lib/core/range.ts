@@ -625,8 +625,17 @@ export class TBRange {
     if (this.collapsed) {
       return;
     }
+    let toEnd = false;
+    if (this.startIndex === 0) {
+      const {fragment, index} = this.findFirstPosition(this.startFragment);
+      toEnd = fragment === this.startFragment && index === this.startIndex;
+    }
+
     this.deleteSelectedScope();
-    if (this.startFragment !== this.endFragment) {
+    if (toEnd) {
+      this.endIndex = 0;
+      this.collapse(true);
+    } else if (this.startFragment !== this.endFragment) {
       const ff = this.endFragment.delete(0);
       this.deleteEmptyTree(this.endFragment);
       const startIndex = this.startFragment.contentLength;
@@ -639,8 +648,8 @@ export class TBRange {
           return f;
         })
         .forEach(f => this.startFragment.mergeFormat(f));
+      this.collapse();
     }
-    this.collapse();
   }
 
   static getRangePosition(range: Range) {
