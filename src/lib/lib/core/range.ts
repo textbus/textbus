@@ -15,7 +15,7 @@ export interface TBRangePosition {
 /**
  * 标识一个选中 Fragment 的范围
  */
-export interface SelectedScope {
+export interface TBRangeScope {
   startIndex: number;
   endIndex: number;
   fragment: Fragment;
@@ -174,9 +174,9 @@ export class TBRange {
    *   endIndex: 3
    * }]
    */
-  getSelectedScope(): SelectedScope[] {
-    const start: SelectedScope[] = [];
-    const end: SelectedScope[] = [];
+  getSelectedScope(): TBRangeScope[] {
+    const start: TBRangeScope[] = [];
+    const end: TBRangeScope[] = [];
     let startFragment = this.startFragment;
     let endFragment = this.endFragment;
     let startIndex = this.startIndex;
@@ -268,13 +268,13 @@ export class TBRange {
    * }]
    */
 
-  getBlockFragmentsBySelectedScope(): SelectedScope[] {
-    const start: SelectedScope[] = [];
-    const end: SelectedScope[] = [];
+  getExpandedScope(): TBRangeScope[] {
+    const start: TBRangeScope[] = [];
+    const end: TBRangeScope[] = [];
     let startFragment = this.startFragment;
     let endFragment = this.endFragment;
-    let startIndex = TBRange.findBlockStartIndex(this.startFragment, this.startIndex);
-    let endIndex = TBRange.findBlockEndIndex(this.endFragment, this.endIndex);
+    let startIndex = TBRange.findExpandedStartIndex(this.startFragment, this.startIndex);
+    let endIndex = TBRange.findExpandedEndIndex(this.endFragment, this.endIndex);
 
     while (startFragment !== this.commonAncestorFragment) {
       start.push({
@@ -336,6 +336,46 @@ export class TBRange {
     }, []);
   }
 
+  getSuccessiveContents() {
+    function fn(fragment: Fragment, startIndex: number, endIndex: number) {
+      const scopes: TBRangeScope[] = [];
+      if (startIndex >= endIndex) {
+        return scopes;
+      }
+      let newScope: TBRangeScope;
+
+      let i = 0;
+      const contents = fragment.sliceContents(startIndex, endIndex);
+      contents.forEach(c => {
+        if (c instanceof Template) {
+          newScope = null;
+          c.childSlots.forEach(childFragment => {
+            scopes.push(...fn(childFragment, 0, childFragment.contentLength));
+          })
+        } else {
+          if (!newScope) {
+            newScope = {
+              startIndex: startIndex + i,
+              endIndex: startIndex + i + c.length,
+              fragment
+            };
+            scopes.push(newScope);
+          } else {
+            newScope.endIndex = startIndex + i + c.length;
+          }
+        }
+        i += c.length;
+      });
+      return scopes;
+    }
+
+    const result: TBRangeScope[] = [];
+    this.getExpandedScope().forEach(scope => {
+      result.push(...fn(scope.fragment, scope.startIndex, scope.endIndex));
+    });
+    return result;
+  }
+
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
@@ -347,7 +387,7 @@ export class TBRange {
     return this;
   }
 
-  deleteEmptyTree(fragment: Fragment): TBRange {
+  deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): TBRange {
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
     if (parentTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
@@ -355,8 +395,8 @@ export class TBRange {
         const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
         const index = parentFragment.indexOf(parentTemplate);
         parentFragment.delete(index, 1);
-        if (parentFragment.contentLength === 0) {
-          return this.deleteEmptyTree(parentFragment);
+        if (parentFragment.contentLength === 0 && parentFragment !== endFragment) {
+          return this.deleteEmptyTree(parentFragment, endFragment);
         }
       }
     }
@@ -730,8 +770,8 @@ export class TBRange {
   }
 
   private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
-    const ranges: SelectedScope[] = [];
-    let scope: SelectedScope;
+    const ranges: TBRangeScope[] = [];
+    let scope: TBRangeScope;
     let index = 0;
     fragment.sliceContents(startIndex, endIndex).forEach(content => {
       if (content instanceof Fragment) {
@@ -808,19 +848,17 @@ export class TBRange {
     throw new Error('DOM 与虚拟节点不同步！');
   }
 
-  private static findBlockStartIndex(fragment: Fragment, index: number) {
-    let startIndex: number = 0;
-    for (let i = 0; i < index; i++) {
-
-      const item = fragment.getContentAtIndex(i);
+  private static findExpandedStartIndex(fragment: Fragment, index: number) {
+    for (; index > 0; index--) {
+      const item = fragment.getContentAtIndex(index);
       if (item instanceof Template) {
-        startIndex = i + 1;
+        break;
       }
     }
-    return startIndex;
+    return index;
   }
 
-  private static findBlockEndIndex(fragment: Fragment, index: number) {
+  private static findExpandedEndIndex(fragment: Fragment, index: number) {
     for (; index < fragment.contentLength; index++) {
       const item = fragment.getContentAtIndex(index);
       if (item instanceof Template) {
