@@ -635,7 +635,9 @@ export class TBRange {
     if (toEnd) {
       this.endIndex = 0;
       this.collapse(true);
-    } else if (this.startFragment !== this.endFragment) {
+      return;
+    }
+    if (this.startFragment !== this.endFragment) {
       const ff = this.endFragment.delete(0);
       this.deleteEmptyTree(this.endFragment);
       const startIndex = this.startFragment.contentLength;
@@ -648,8 +650,8 @@ export class TBRange {
           return f;
         })
         .forEach(f => this.startFragment.mergeFormat(f));
-      this.collapse();
     }
+    this.collapse();
   }
 
   static getRangePosition(range: Range) {
