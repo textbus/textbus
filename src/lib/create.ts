@@ -70,7 +70,7 @@ export const defaultOptions: EditorOptions = {
   templateTranslators: [
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
-    new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6'.split(',')),
+    new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote'.split(',')),
     new SingleTemplateTranslator('br'),
     new CodeTemplateTranslator(),
     new AudioTemplateTranslator(),
@@ -96,20 +96,20 @@ export const defaultOptions: EditorOptions = {
     underlineFormatter
   ],
   toolbar: [
-    [historyBackTool, historyForwardTool],
-    [headingTool],
-    [boldTool, italicTool, strikeThroughTool, underlineTool],
+    // [historyBackTool, historyForwardTool],
+    // [headingTool],
+    // [boldTool, italicTool, strikeThroughTool, underlineTool],
     [blockquoteTool],
-    [codeTool],
-    [olTool, ulTool],
-    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-    [subscriptTool, superscriptTool],
-    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-    [fontFamilyTool],
-    [linkTool, imageTool, audioTool, videoTool],
-    [textAlignTool],
-    [tableTool, tableEditTool],
-    [cleanTool]
+    // [codeTool],
+    // [olTool, ulTool],
+    // [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+    // [subscriptTool, superscriptTool],
+    // [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    // [fontFamilyTool],
+    // [linkTool, imageTool, audioTool, videoTool],
+    // [textAlignTool],
+    // [tableTool, tableEditTool],
+    // [cleanTool]
   ]
 };
 

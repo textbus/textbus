@@ -146,14 +146,20 @@ export class Renderer {
 
   getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
-    if (templateInstance instanceof context && typeof filter === 'function' && filter(templateInstance)) {
-      return templateInstance;
+    if (templateInstance instanceof context) {
+      if (typeof filter === 'function') {
+        if (filter(templateInstance)) {
+          return templateInstance;
+        }
+      } else {
+        return templateInstance;
+      }
     }
     const parentFragment = this.templateHierarchyMapping.get(templateInstance);
     if (!parentFragment) {
       return null;
     }
-    return this.getContext(parentFragment, context);
+    return this.getContext(parentFragment, context, filter);
   }
 
   dispatchEvent(by: VElement, type: EventType, selection: TBSelection) {

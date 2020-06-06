@@ -11,7 +11,11 @@ export class BlockMatcher implements Matcher {
     const contextTemplates = selection.ranges.map(range => {
       if (range.commonAncestorTemplate instanceof this.templateConstructor) {
         if (this.tagName) {
-          return range.commonAncestorTemplate.tagName === this.tagName ? range.commonAncestorTemplate : null;
+          return range.commonAncestorTemplate.tagName === this.tagName ?
+            range.commonAncestorTemplate :
+            renderer.getContext(range.commonAncestorFragment, this.templateConstructor, instance => {
+              return instance.tagName === this.tagName;
+            });
         }
         return range.commonAncestorTemplate;
       }

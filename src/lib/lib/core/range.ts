@@ -24,48 +24,19 @@ export interface TBRangeScope {
 export class TBRange {
   startIndex: number;
   endIndex: number;
-
-  /**
-   * 选区开始的 Fragment
-   */
-  get startFragment() {
-    return this._startFragment;
-  }
-
-  set startFragment(v: Fragment) {
-    this._startFragment = v;
-    this._commonAncestorFragment = null;
-  }
-
-  /**
-   * 选区结束的 Fragment
-   */
-  get endFragment() {
-    return this._endFragment;
-  }
-
-  set endFragment(v: Fragment) {
-    this._endFragment = v;
-    this._commonAncestorFragment = null;
-  }
+  startFragment: Fragment;
+  endFragment: Fragment;
 
   /**
    * 当前选区最近的公共 Fragment
    */
   get commonAncestorFragment() {
-    if (!this._commonAncestorFragment) {
-      this._commonAncestorFragment = this.getCommonAncestorFragment();
-    }
-    return this._commonAncestorFragment;
+    return this.getCommonAncestorFragment();
   }
 
   get commonAncestorTemplate() {
-    if (!this._commonAncestorTemplate) {
-      this._commonAncestorTemplate = this.getCommonAncestorTemplate();
-    }
-    return this._commonAncestorTemplate;
+    return this.getCommonAncestorTemplate();
   }
-
 
   /**
    * 当前选区是否折叠
@@ -75,11 +46,6 @@ export class TBRange {
       this.endFragment === this.commonAncestorFragment &&
       this.startIndex === this.endIndex;
   }
-
-  private _startFragment: Fragment;
-  private _endFragment: Fragment;
-  private _commonAncestorFragment: Fragment;
-  private _commonAncestorTemplate: Template;
 
   constructor(private nativeRange: Range,
               private renderer: Renderer) {
