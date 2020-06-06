@@ -12,6 +12,7 @@ export * from './list.commander';
 export * from './style.commander';
 export * from './table.commander';
 export * from './table-edit.commander';
+export * from './toggle-block.commander';
 export * from './video.commander';
 
 export * from '../../core/commander';

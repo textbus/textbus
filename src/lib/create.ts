@@ -19,6 +19,7 @@ import {
 import {
   audioTool,
   blockBackgroundTool,
+  blockquoteTool,
   boldTool,
   cleanTool,
   codeTool,
@@ -98,6 +99,7 @@ export const defaultOptions: EditorOptions = {
     [historyBackTool, historyForwardTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
+    [blockquoteTool],
     [codeTool],
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],

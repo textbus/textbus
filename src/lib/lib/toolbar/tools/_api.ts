@@ -1,5 +1,6 @@
 export { audioTool } from './audio.tool';
 export { blockBackgroundTool } from './block-background.tool';
+export { blockquoteTool } from './blockquote.tool';
 export { boldTool } from './bold.tool';
 export { cleanTool } from './clean.tool';
 export { colorTool } from './color.tool';
