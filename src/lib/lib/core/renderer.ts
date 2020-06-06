@@ -144,9 +144,9 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>): T {
+  getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
-    if (templateInstance instanceof context) {
+    if (templateInstance instanceof context && typeof filter === 'function' && filter(templateInstance)) {
       return templateInstance;
     }
     const parentFragment = this.templateHierarchyMapping.get(templateInstance);

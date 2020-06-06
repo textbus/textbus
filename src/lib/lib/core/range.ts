@@ -388,6 +388,9 @@ export class TBRange {
   }
 
   deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): TBRange {
+    if (fragment === endFragment) {
+      return this;
+    }
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
     if (parentTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
@@ -395,7 +398,7 @@ export class TBRange {
         const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
         const index = parentFragment.indexOf(parentTemplate);
         parentFragment.delete(index, 1);
-        if (parentFragment.contentLength === 0 && parentFragment !== endFragment) {
+        if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
       }
