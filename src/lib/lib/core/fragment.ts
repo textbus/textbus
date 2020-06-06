@@ -113,11 +113,8 @@ export class Fragment {
       return true;
     }).forEach(format => {
       // 在之前
-      if (format.endIndex <= startIndex) {
-        selfFormats.push(Object.assign({}, format));
-        return;
-      }
-      // 在之后
+      // formatRange  ________-------________
+      // deleteRange     [  ]
       if (format.startIndex >= endIndex) {
         selfFormats.push({
           ...format,
@@ -126,41 +123,76 @@ export class Fragment {
         });
         return;
       }
+      // 在之后
+      // formatRange  ________-------________
+      // deleteRange                  [  ]
+      if (format.startIndex >= endIndex) {
+        selfFormats.push(Object.assign({}, format));
+        return;
+      }
 
-      if (format.startIndex <= startIndex) {
-        const cloneFormat = {
+      // 前交
+      // formatRange  ________-------________
+      // deleteRange        [   ]
+
+      if (format.startIndex > startIndex &&
+        format.startIndex < endIndex &&
+        format.endIndex >= endIndex) {
+        selfFormats.push({
+          ...format,
+          startIndex,
+          endIndex: format.endIndex - startIndex
+        });
+        discardedFormats.push({
+          ...format,
+          startIndex: format.startIndex - startIndex,
+          endIndex: count
+        })
+        return;
+      }
+
+      // 重叠
+      // formatRange  ________-------________
+      // deleteRange           [   ]
+
+      if (format.startIndex <= startIndex && format.endIndex >= endIndex) {
+        selfFormats.push({
           ...format,
           endIndex: format.endIndex - count
-        };
-
-        if (cloneFormat.startIndex < cloneFormat.endIndex) {
-          selfFormats.push(cloneFormat);
-        }
-        if (endIndex - format.startIndex > 0) {
-          discardedFormats.push({
-            ...format,
-            startIndex: 0,
-            endIndex: endIndex - format.startIndex
-          });
-        }
-      } else {
-        const cloneFormat = {
+        });
+        discardedFormats.push({
           ...format,
-          startIndex: Math.max(startIndex, format.startIndex - count),
-          endIndex: format.endIndex - count
-        };
-        if (cloneFormat.startIndex < cloneFormat.endIndex) {
-          selfFormats.push(cloneFormat);
-        }
-        const s = Math.max(format.startIndex - count, startIndex);
-        const e = format.endIndex - count;
-        if (e > s) {
-          discardedFormats.push({
-            ...format,
-            startIndex: 0,
-            endIndex: e - s
-          })
-        }
+          startIndex: 0,
+          endIndex: count
+        });
+        return;
+      }
+
+      // 后交
+      // formatRange  ________-------________
+      // deleteRange               [   ]
+      if (format.startIndex <= startIndex && format.endIndex > startIndex && format.endIndex < endIndex) {
+        selfFormats.push({
+          ...format,
+          endIndex: startIndex
+        });
+        discardedFormats.push({
+          ...format,
+          startIndex: 0,
+          endIndex: format.endIndex - startIndex
+        })
+        return;
+      }
+
+      // 包含
+      // formatRange  ________-------________
+      // deleteRange        [         ]
+      if (format.startIndex > startIndex && format.endIndex < endIndex) {
+        discardedFormats.push({
+          ...format,
+          startIndex: format.startIndex - startIndex,
+          endIndex: format.endIndex - startIndex
+        })
       }
     })
     selfFormats.forEach(f => {
