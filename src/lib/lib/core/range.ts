@@ -3,6 +3,7 @@ import { Fragment } from './fragment';
 import { VElement } from './element';
 import { MediaTemplate, Template } from './template';
 import { BlockFormatter } from './formatter';
+import { start } from 'repl';
 
 /**
  * 标识 Fragment 中的一个位置
@@ -749,13 +750,13 @@ export class TBRange {
       } else {
         if (!scope) {
           scope = {
-            startIndex: index,
-            endIndex: index + content.length,
+            startIndex: index + startIndex,
+            endIndex: index + startIndex + content.length,
             fragment
           };
           ranges.push(scope);
         } else {
-          scope.endIndex = index + content.length
+          scope.endIndex = startIndex + index + content.length
         }
       }
       index += content.length;

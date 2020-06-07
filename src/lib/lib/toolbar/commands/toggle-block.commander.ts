@@ -54,27 +54,15 @@ export class ToggleBlockCommander implements Commander<string> {
               range.deleteEmptyTree(p);
             }
           } else {
-            const t = new BlockTemplate('p');
-            const childFragment = new Fragment();
-            t.childSlots.push(childFragment);
-            const contents = scope.fragment.delete(scope.startIndex, scope.endIndex);
-            contents.contents.forEach(c => childFragment.append(c));
-            contents.formatRanges.forEach(f => childFragment.mergeFormat(f));
-            fragment.insert(t, 0);
-
-            if (scope.fragment === range.startFragment &&
-              scope.startIndex <= range.startIndex &&
-              scope.endIndex >= range.startIndex) {
-              range.setStart(childFragment, range.startIndex - scope.startIndex);
-            }
-            if (scope.fragment === range.endFragment &&
-              scope.startIndex <= range.endIndex &&
-              scope.endIndex >= range.endIndex) {
-              range.setEnd(childFragment, range.endIndex - scope.startIndex);
-            }
-            range.deleteEmptyTree(scope.fragment)
+            const contents = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+            const len = fragment.contentLength;
+            contents.contents.forEach(c => fragment.insert(c, 0));
+            contents.formatRanges.forEach(f => fragment.mergeFormat({
+              ...f,
+              startIndex: f.startIndex + len,
+              endIndex: f.endIndex + len
+            }));
           }
-
         });
         parentFragment.insert(block, position);
       }
