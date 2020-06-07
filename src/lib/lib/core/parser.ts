@@ -1,6 +1,7 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
-import { FormatEffect } from './formatter';
+import { BlockFormatter, FormatEffect, InlineFormatter } from './formatter';
+import { FormatAbstractData } from './format-abstract-data';
 
 export class Parser {
   constructor(private options: EditorOptions) {
@@ -10,6 +11,20 @@ export class Parser {
     const rootSlot = new Fragment();
     this.readTemplate(el, rootSlot);
     return rootSlot;
+  }
+
+  getFormattersByAbstractData(data: FormatAbstractData): Array<{ formatter: InlineFormatter | BlockFormatter, effect: FormatEffect }> {
+    const result: Array<{ formatter: InlineFormatter | BlockFormatter, effect: FormatEffect }> = [];
+    this.options.formatters.map(formatter => {
+      const effect = formatter.match(data);
+      if (effect !== FormatEffect.Invalid) {
+        result.push({
+          formatter,
+          effect,
+        });
+      }
+    })
+    return result;
   }
 
   private readTemplate(el: Node, slot: Fragment) {

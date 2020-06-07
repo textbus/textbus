@@ -45,7 +45,7 @@ export class TBSelection {
   private _ranges: TBRange[] = [];
   private nativeSelection: Selection;
 
-  constructor(private context: Document, private renderer: Renderer,) {
+  constructor(private context: Document, private renderer: Renderer) {
     this.nativeSelection = context.getSelection();
     for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
       this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));

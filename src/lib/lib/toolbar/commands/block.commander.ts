@@ -47,7 +47,7 @@ export class BlockCommander implements Commander<string> {
             }
           }
           blockTemplate.childSlots.push(fragment);
-          parentFragment.insert(blockTemplate, parentFragment.indexOf(template));
+          parentFragment.insertBefore(blockTemplate, template);
         }
 
         if (template.childSlots.length === 0) {
