@@ -42,6 +42,22 @@ export class Fragment {
     return this.contents.slice(startIndex, endIndex);
   }
 
+  insertBefore(contents: Template | MediaTemplate | string, ref: Template | MediaTemplate) {
+    const index = this.indexOf(ref);
+    if (index === -1) {
+      throw new Error('引用的节点不属于当前 Fragment 的子级！');
+    }
+    this.insert(contents, index);
+  }
+
+  insertAfter(contents: Template | MediaTemplate | string, ref: Template | MediaTemplate) {
+    const index = this.indexOf(ref);
+    if (index === -1) {
+      throw new Error('引用的节点不属于当前 Fragment 的子级！');
+    }
+    this.insert(contents, index + 1);
+  }
+
   insert(contents: Template | MediaTemplate | string, index: number) {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
