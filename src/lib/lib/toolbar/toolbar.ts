@@ -6,7 +6,7 @@ import {
   Tool, ToolConfig, ToolFactory, ToolType
 } from './toolkit/_api';
 import { Editor } from '../editor';
-import { Keymap } from '../viewer/input';
+import { Keymap } from '../input/input';
 import { TBSelection, Renderer } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
 import { ContextMenu } from './context-menu';

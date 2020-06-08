@@ -3,7 +3,7 @@ import { merge, Observable, Subject } from 'rxjs';
 import { HighlightState } from '../help';
 import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { Tool, createKeymapHTML, ContextMenuConfig } from './help';
-import { Keymap, KeymapAction } from '../../viewer/input';
+import { Keymap, KeymapAction } from '../../input/input';
 import { Commander } from '../../core/_api';
 import { Matcher } from '../matcher/_api';
 

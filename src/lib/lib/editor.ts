@@ -1,5 +1,5 @@
 import { auditTime, filter, sampleTime, switchMap, tap } from 'rxjs/operators';
-import { from, Observable, of, Subject, Subscription, zip } from 'rxjs';
+import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
   Commander,
@@ -16,9 +16,10 @@ import {
   TemplateTranslator,
   VElement
 } from './core/_api';
-import { CursorMoveDirection, KeymapAction, Viewer } from './viewer/_api';
+import { Viewer } from './viewer/_api';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockTemplate, SingleTemplate } from './templates/_api';
+import { Input, KeymapAction } from './input/input';
 
 export interface Snapshot {
   contents: Fragment;
@@ -48,6 +49,13 @@ export interface EditorOptions {
   contents?: string;
 }
 
+export enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
+}
+
 export class Editor implements EventDelegate {
   readonly onChange: Observable<void>;
 
@@ -67,6 +75,7 @@ export class Editor implements EventDelegate {
   private parser: Parser;
   private viewer: Viewer;
   private toolbar: Toolbar;
+  private input: Input;
   private renderer = new Renderer();
   private contextMenu = new ContextMenu(this.renderer);
 
@@ -120,6 +129,15 @@ export class Editor implements EventDelegate {
           this.listenUserWriteEvent();
         }
       });
+
+    this.viewer.onSelectionChange.pipe(tap(() => {
+      this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
+    }), auditTime(100)).subscribe(() => {
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.elementRef.dispatchEvent(event);
+      this.toolbar.updateHandlerState(this.selection, this.renderer);
+    });
     const unsub = zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).pipe(switchMap(result => {
       this.readyState = true;
       this.rootFragment = this.parser.parse(result[0]);
@@ -131,14 +149,6 @@ export class Editor implements EventDelegate {
       this.canEditable = true;
       this.recordSnapshot();
       unsub.unsubscribe();
-    });
-    this.viewer.onSelectionChange.pipe(tap(() => {
-      this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
-    }), auditTime(100)).subscribe(() => {
-      const event = document.createEvent('Event');
-      event.initEvent('click', true, true);
-      this.elementRef.dispatchEvent(event);
-      this.toolbar.updateHandlerState(this.selection, this.renderer);
     });
 
     this.elementRef.appendChild(this.toolbar.elementRef);
@@ -248,6 +258,16 @@ export class Editor implements EventDelegate {
   }
 
   private setup() {
+    merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
+      .subscribe(() => {
+        this.nativeSelection = this.contentDocument.getSelection();
+        this.nativeSelection.removeAllRanges();
+        this.canEditableEvent.next();
+      });
+    fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
+      this.selectionChangeEvent.next(this.nativeSelection);
+      this.input.updateStateBySelection(this.nativeSelection);
+    })
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
         hooks.setup(this.viewer.contentDocument);
