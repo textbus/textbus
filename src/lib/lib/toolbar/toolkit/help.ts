@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KeymapAction, Keymap, isMac } from '../../viewer/_api';
+import { KeymapAction, Keymap, isMac } from '../../input/input';
 import { Commander, Renderer, TBSelection } from '../../core/_api';
 
 export interface Tool {

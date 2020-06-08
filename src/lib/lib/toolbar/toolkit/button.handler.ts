@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { HighlightState } from '../help';
 import { Tool } from './help';
-import { Keymap, KeymapAction } from '../../viewer/_api';
+import { Keymap, KeymapAction } from '../../input/input';
 import { Commander } from '../../core/commander';
 import { Matcher } from '../matcher/matcher';
 import { ContextMenuConfig } from './help';

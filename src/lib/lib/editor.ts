@@ -1,4 +1,4 @@
-import { auditTime, filter, sampleTime, switchMap, tap } from 'rxjs/operators';
+import { auditTime, sampleTime, switchMap, tap } from 'rxjs/operators';
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
@@ -86,7 +86,7 @@ export class Editor implements EventDelegate {
   private historyIndex = 0;
   private readonly historyStackSize: number;
 
-  private canEditable = false;
+  private nativeSelection: Selection;
   private selection: TBSelection;
 
   private defaultHTML = '<p><br></p>';
@@ -120,35 +120,42 @@ export class Editor implements EventDelegate {
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
-    this.toolbar.onAction
-      .pipe(filter(() => this.canEditable))
-      .subscribe(config => {
+
+
+    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).pipe(switchMap(result => {
+      this.readyState = true;
+      this.rootFragment = this.parser.parse(result[0]);
+      this.render();
+      this.tasks.forEach(fn => fn());
+
+      this.input = new Input(this.viewer.contentDocument);
+
+      this.viewer.elementRef.append(this.input.elementRef);
+
+      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
+        .subscribe(() => {
+          this.nativeSelection = this.viewer.contentDocument.getSelection();
+          this.nativeSelection.removeAllRanges();
+        });
+      this.setup();
+      return fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
+        this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
+        this.input.updateStateBySelection(this.nativeSelection);
+      }), auditTime(100), tap(() => {
+        const event = document.createEvent('Event');
+        event.initEvent('click', true, true);
+        this.elementRef.dispatchEvent(event);
+        this.toolbar.updateHandlerState(this.selection, this.renderer);
+      }));
+    })).subscribe(() => {
+      this.toolbar.onAction.subscribe(config => {
         this.apply(config.config, config.instance.commander);
         if (config.instance.commander.recordHistory) {
           this.recordSnapshot();
           this.listenUserWriteEvent();
         }
       });
-
-    this.viewer.onSelectionChange.pipe(tap(() => {
-      this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
-    }), auditTime(100)).subscribe(() => {
-      const event = document.createEvent('Event');
-      event.initEvent('click', true, true);
-      this.elementRef.dispatchEvent(event);
-      this.toolbar.updateHandlerState(this.selection, this.renderer);
-    });
-    const unsub = zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).pipe(switchMap(result => {
-      this.readyState = true;
-      this.rootFragment = this.parser.parse(result[0]);
-      this.render();
-      this.tasks.forEach(fn => fn());
-      this.setup();
-      return this.viewer.onCanEditable;
-    })).subscribe(() => {
-      this.canEditable = true;
       this.recordSnapshot();
-      unsub.unsubscribe();
     });
 
     this.elementRef.appendChild(this.toolbar.elementRef);
@@ -220,7 +227,7 @@ export class Editor implements EventDelegate {
 
   registerKeymap(action: KeymapAction) {
     this.run(() => {
-      this.viewer.input.keymap(action);
+      this.input.keymap(action);
     });
   }
 
@@ -234,7 +241,7 @@ export class Editor implements EventDelegate {
     fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.mergeFormat(f));
 
     let index = 0;
-    this.viewer.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
+    this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
           const s = new SingleTemplate('br');
@@ -248,9 +255,9 @@ export class Editor implements EventDelegate {
       return str;
     });
 
-    selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + this.viewer.input.input.selectionStart;
+    selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + this.input.input.selectionStart;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + this.viewer.input.input.selectionStart === commonAncestorFragment.contentLength &&
+    if (startIndex + this.input.input.selectionStart === commonAncestorFragment.contentLength &&
       last instanceof SingleTemplate && last.tagName === 'br') {
       commonAncestorFragment.append(new SingleTemplate('br'));
     }
@@ -258,25 +265,15 @@ export class Editor implements EventDelegate {
   }
 
   private setup() {
-    merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.contentDocument, type)))
-      .subscribe(() => {
-        this.nativeSelection = this.contentDocument.getSelection();
-        this.nativeSelection.removeAllRanges();
-        this.canEditableEvent.next();
-      });
-    fromEvent(this.contentDocument, 'selectionchange').subscribe(() => {
-      this.selectionChangeEvent.next(this.nativeSelection);
-      this.input.updateStateBySelection(this.nativeSelection);
-    })
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
         hooks.setup(this.viewer.contentDocument);
       }
     })
-    this.viewer.input.events.onFocus.subscribe(() => {
+    this.input.events.onFocus.subscribe(() => {
       this.recordSnapshotFromEditingBefore();
     })
-    this.viewer.input.events.onInput.subscribe(() => {
+    this.input.events.onInput.subscribe(() => {
       const selection = this.selection;
       const collapsed = selection.collapsed;
       let isNext = true;
@@ -299,9 +296,9 @@ export class Editor implements EventDelegate {
       }
       this.render();
       selection.restore();
-      this.viewer.input.updateStateBySelection(this.viewer.nativeSelection);
+      this.input.updateStateBySelection(this.nativeSelection);
     })
-    this.viewer.input.events.onPaste.subscribe(() => {
+    this.input.events.onPaste.subscribe(() => {
       const div = document.createElement('div');
       div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
       div.contentEditable = 'true';
@@ -326,12 +323,12 @@ export class Editor implements EventDelegate {
       });
     });
 
-    this.viewer.input.events.addKeymap({
+    this.input.events.addKeymap({
       keymap: {
         key: 'Enter'
       },
       action: () => {
-        const focusNode = this.viewer.nativeSelection.focusNode;
+        const focusNode = this.nativeSelection.focusNode;
         let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
         const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
         if (!vElement) {
@@ -351,17 +348,17 @@ export class Editor implements EventDelegate {
         }
         this.render();
         selection.restore();
-        this.viewer.input.updateStateBySelection(this.viewer.nativeSelection);
+        this.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
     })
-    this.viewer.input.events.addKeymap({
+    this.input.events.addKeymap({
       keymap: {
         key: 'Backspace'
       },
       action: () => {
-        const focusNode = this.viewer.nativeSelection.focusNode;
+        const focusNode = this.nativeSelection.focusNode;
         let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
         const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
         if (!vElement) {
@@ -390,12 +387,12 @@ export class Editor implements EventDelegate {
         }
         this.render();
         selection.restore();
-        this.viewer.input.updateStateBySelection(this.viewer.nativeSelection);
+        this.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
     })
-    this.viewer.input.keymap({
+    this.input.keymap({
       keymap: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -409,7 +406,7 @@ export class Editor implements EventDelegate {
         this.moveCursor(map[ev.key]);
       }
     });
-    this.viewer.input.keymap({
+    this.input.keymap({
       keymap: {
         key: 'a',
         ctrlKey: true
@@ -453,7 +450,7 @@ export class Editor implements EventDelegate {
    */
   private recordSnapshotFromEditingBefore(keepInputStatus = false) {
     if (!keepInputStatus) {
-      this.viewer.input.cleanValue();
+      this.input.cleanValue();
     }
     this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment.clone();

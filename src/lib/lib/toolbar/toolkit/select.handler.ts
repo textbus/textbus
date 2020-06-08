@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { createKeymapHTML, Tool, ContextMenuConfig } from './help';
 import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { HighlightState } from '../help';
-import { Keymap, KeymapAction } from '../../viewer/_api';
+import { Keymap, KeymapAction } from '../../input/input';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander, FormatAbstractData, MediaTemplate, Template } from '../../core/_api';
 

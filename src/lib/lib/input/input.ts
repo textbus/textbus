@@ -26,6 +26,7 @@ export interface KeymapAction {
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
+
 /**
  * 事件劫持类，用于分配用户鼠标和键盘操作后的逻辑
  */
@@ -159,6 +160,9 @@ export class Input {
    */
   updateStateBySelection(selection: Selection) {
     this.selection = selection;
+    if (!selection) {
+      debugger
+    }
     if (!selection.rangeCount) {
       return;
     }

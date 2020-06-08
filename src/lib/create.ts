@@ -48,7 +48,7 @@ import {
   underlineTool,
   videoTool
 } from './lib/toolbar/tools/_api';
-import { CodeHook, DefaultHook, HistoryHook } from './lib/hooks/_api';
+import { DefaultHook, HistoryHook } from './lib/hooks/_api';
 import {
   AudioTemplateTranslator,
   BlockTemplateTranslator,
@@ -64,7 +64,6 @@ import { defaultStyleSheets } from './lib/viewer/default-styles';
 export const defaultOptions: EditorOptions = {
   styleSheets: defaultStyleSheets,
   hooks: [
-    new CodeHook(),
     new DefaultHook(),
     new HistoryHook()
   ],
