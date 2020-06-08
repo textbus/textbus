@@ -96,20 +96,20 @@ export const defaultOptions: EditorOptions = {
     underlineFormatter
   ],
   toolbar: [
-    // [historyBackTool, historyForwardTool],
-    // [headingTool],
-    // [boldTool, italicTool, strikeThroughTool, underlineTool],
-    // [blockquoteTool],
+    [historyBackTool, historyForwardTool],
+    [headingTool],
+    [boldTool, italicTool, strikeThroughTool, underlineTool],
+    [blockquoteTool],
     [codeTool],
-    // [olTool, ulTool],
-    // [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-    // [subscriptTool, superscriptTool],
-    // [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
-    // [fontFamilyTool],
-    // [linkTool, imageTool, audioTool, videoTool],
-    // [textAlignTool],
-    // [tableTool, tableEditTool],
-    // [cleanTool]
+    [olTool, ulTool],
+    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
+    [subscriptTool, superscriptTool],
+    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    [fontFamilyTool],
+    [linkTool, imageTool, audioTool, videoTool],
+    [textAlignTool],
+    [tableTool, tableEditTool],
+    [cleanTool]
   ]
 };
 

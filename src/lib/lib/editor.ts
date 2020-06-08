@@ -126,7 +126,6 @@ export class Editor implements EventDelegate {
       this.readyState = true;
       this.rootFragment = this.parser.parse(result[0]);
       this.render();
-      this.tasks.forEach(fn => fn());
 
       this.input = new Input(this.viewer.contentDocument);
 
@@ -138,6 +137,8 @@ export class Editor implements EventDelegate {
           this.nativeSelection.removeAllRanges();
         });
       this.setup();
+
+      this.tasks.forEach(fn => fn());
       return fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
         this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
         this.input.updateStateBySelection(this.nativeSelection);
