@@ -1,4 +1,4 @@
-import { auditTime, sampleTime, switchMap, tap } from 'rxjs/operators';
+import { auditTime, sampleTime, tap } from 'rxjs/operators';
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
@@ -122,41 +122,14 @@ export class Editor implements EventDelegate {
     this.viewer = new Viewer(options.styleSheets);
 
 
-    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).pipe(switchMap(result => {
+    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
       this.rootFragment = this.parser.parse(result[0]);
       this.render();
-
       this.input = new Input(this.viewer.contentDocument);
-
       this.viewer.elementRef.append(this.input.elementRef);
 
-      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
-        .subscribe(() => {
-          this.nativeSelection = this.viewer.contentDocument.getSelection();
-          this.nativeSelection.removeAllRanges();
-        });
       this.setup();
-
-      this.tasks.forEach(fn => fn());
-      return fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
-        this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
-        this.input.updateStateBySelection(this.nativeSelection);
-      }), auditTime(100), tap(() => {
-        const event = document.createEvent('Event');
-        event.initEvent('click', true, true);
-        this.elementRef.dispatchEvent(event);
-        this.toolbar.updateHandlerState(this.selection, this.renderer);
-      }));
-    })).subscribe(() => {
-      this.toolbar.onAction.subscribe(config => {
-        this.apply(config.config, config.instance.commander);
-        if (config.instance.commander.recordHistory) {
-          this.recordSnapshot();
-          this.listenUserWriteEvent();
-        }
-      });
-      this.recordSnapshot();
     });
 
     this.elementRef.appendChild(this.toolbar.elementRef);
@@ -266,11 +239,35 @@ export class Editor implements EventDelegate {
   }
 
   private setup() {
+    merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
+      .subscribe(() => {
+        this.nativeSelection = this.viewer.contentDocument.getSelection();
+        this.nativeSelection.removeAllRanges();
+      });
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
         hooks.setup(this.viewer.contentDocument);
       }
     })
+    fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
+      this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
+      this.input.updateStateBySelection(this.nativeSelection);
+    }), auditTime(100)).subscribe(() => {
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.elementRef.dispatchEvent(event);
+      this.toolbar.updateHandlerState(this.selection, this.renderer);
+    })
+
+    this.toolbar.onAction.subscribe(config => {
+      if (this.selection) {
+        this.apply(config.config, config.instance.commander);
+        if (config.instance.commander.recordHistory) {
+          this.recordSnapshot();
+          this.listenUserWriteEvent();
+        }
+      }
+    });
     this.input.events.onFocus.subscribe(() => {
       this.recordSnapshotFromEditingBefore();
     })
@@ -416,6 +413,9 @@ export class Editor implements EventDelegate {
         this.selectAll();
       }
     });
+
+    this.tasks.forEach(fn => fn());
+    this.recordSnapshot();
   }
 
   private selectAll() {
