@@ -32,6 +32,8 @@ export class CodeCommander implements Commander<string> {
         f.append(new SingleTemplate('br'));
         t.childSlots.push(f);
         parentFragment.insertAfter(t, context);
+        range.setStart(f, 0);
+        range.collapse();
       })
     }
   }
