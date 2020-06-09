@@ -243,64 +243,85 @@ export class TBRange {
     let startIndex = TBRange.findExpandedStartIndex(this.startFragment, this.startIndex);
     let endIndex = TBRange.findExpandedEndIndex(this.endFragment, this.endIndex);
 
-    while (startFragment !== this.commonAncestorFragment) {
+    let startParentTemplate: Template = null;
+    let endParentTemplate: Template = null;
+
+    let startFragmentPosition: number = null;
+    let endFragmentPosition: number = null;
+
+    while (startFragment !== this.commonAncestorFragment &&
+    startParentTemplate !== this.commonAncestorTemplate) {
       start.push({
         startIndex,
         endIndex: startFragment.contentLength,
         fragment: startFragment
       });
 
-      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      const childSlots = parentTemplate.childSlots;
+      startParentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      const childSlots = startParentTemplate.childSlots;
       const end = childSlots.indexOf(this.endFragment);
 
-      start.push(...childSlots.slice(
-        childSlots.indexOf(startFragment) + 1,
-        end === -1 ? childSlots.length : end
-      ).map(fragment => {
-        return {
-          startIndex: 0,
-          endIndex: fragment.contentLength,
-          fragment
-        }
-      }));
-      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      startIndex = startFragment.indexOf(parentTemplate) + 1;
+      startFragmentPosition = childSlots.indexOf(startFragment);
+      if (end === -1) {
+        start.push(...childSlots.slice(startFragmentPosition + 1, childSlots.length).map(fragment => {
+          return {
+            startIndex: 0,
+            endIndex: fragment.contentLength,
+            fragment
+          }
+        }));
+      }
+
+      startFragment = this.renderer.getParentFragmentByTemplate(startParentTemplate);
+      startIndex = startFragment.indexOf(startParentTemplate) + 1;
     }
-    while (endFragment !== this.commonAncestorFragment) {
+    while (endFragment !== this.commonAncestorFragment &&
+    endParentTemplate !== this.commonAncestorTemplate) {
       end.push({
         startIndex: 0,
         endIndex,
         fragment: endFragment
       });
-      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      const childSlots = parentTemplate.childSlots;
+      endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      const childSlots = endParentTemplate.childSlots;
       const start = childSlots.indexOf(this.startFragment);
-      end.push(...childSlots.slice(
-        start === -1 ? 0 : start + 1,
-        parentTemplate.childSlots.indexOf(endFragment)
-      ).map(fragment => {
+
+      endFragmentPosition = childSlots.indexOf(endFragment);
+      if (start === -1) {
+        end.push(...childSlots.slice(0, endFragmentPosition).map(fragment => {
+          return {
+            startIndex: 0,
+            endIndex: fragment.contentLength,
+            fragment
+          }
+        }));
+      }
+
+
+      endFragment = this.renderer.getParentFragmentByTemplate(endParentTemplate);
+      endIndex = endFragment.indexOf(endParentTemplate);
+    }
+    let result: TBRangeScope[] = [...start];
+    if (startParentTemplate === endParentTemplate) {
+      const slots = startParentTemplate.childSlots.slice(startFragmentPosition + 1, endFragmentPosition);
+      result.push(...slots.map(f => {
         return {
           startIndex: 0,
-          endIndex: fragment.contentLength,
-          fragment
-        }
+          endIndex: f.contentLength,
+          fragment: f
+        };
       }));
-      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      endIndex = endFragment.indexOf(parentTemplate);
+    } else {
+      result.push({
+        startIndex,
+        endIndex,
+        fragment: this.commonAncestorFragment
+      })
     }
-    return [...start, {
-      startIndex,
-      endIndex,
-      fragment: this.commonAncestorFragment
-    }, ...end].filter(item => {
+    result.push(...end);
+    return result.filter(item => {
       return item.startIndex < item.endIndex
-    }).reduce((previousValue, currentValue) => {
-      return previousValue.concat(this.contentsToBlockRange(
-        currentValue.fragment,
-        currentValue.startIndex,
-        currentValue.endIndex));
-    }, []);
+    });
   }
 
   getSuccessiveContents() {
@@ -739,30 +760,30 @@ export class TBRange {
     return this.renderer.getParentTemplateByFragment(this.commonAncestorFragment);
   }
 
-  private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number) {
-    const ranges: TBRangeScope[] = [];
-    let scope: TBRangeScope;
-    let index = 0;
-    fragment.sliceContents(startIndex, endIndex).forEach(content => {
-      if (content instanceof Fragment) {
-        scope = null;
-        ranges.push(...this.contentsToBlockRange(content, 0, content.contentLength));
-      } else {
-        if (!scope) {
-          scope = {
-            startIndex: index + startIndex,
-            endIndex: index + startIndex + content.length,
-            fragment
-          };
-          ranges.push(scope);
-        } else {
-          scope.endIndex = startIndex + index + content.length
-        }
-      }
-      index += content.length;
-    });
-    return ranges;
-  }
+  // private contentsToBlockRange(fragment: Fragment, startIndex: number, endIndex: number): TBRangeScope[] {
+  //   const ranges: TBRangeScope[] = [];
+  //   let scope: TBRangeScope;
+  //   let index = 0;
+  //   fragment.sliceContents(startIndex, endIndex).forEach(content => {
+  //     if (content instanceof Fragment) {
+  //       scope = null;
+  //       ranges.push(...this.contentsToBlockRange(content, 0, content.contentLength));
+  //     } else {
+  //       if (!scope) {
+  //         scope = {
+  //           startIndex: index + startIndex,
+  //           endIndex: index + startIndex + content.length,
+  //           fragment
+  //         };
+  //         ranges.push(scope);
+  //       } else {
+  //         scope.endIndex = startIndex + index + content.length
+  //       }
+  //     }
+  //     index += content.length;
+  //   });
+  //   return ranges;
+  // }
 
   private getOffset(node: Node, offset: number) {
     if (node.nodeType === 1) {
