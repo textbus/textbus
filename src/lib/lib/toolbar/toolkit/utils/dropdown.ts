@@ -31,6 +31,21 @@ export class Dropdown {
     }
   }
 
+  set expand(b: boolean) {
+    this._expand = b;
+    if (b) {
+      this.elementRef.classList.add('tbus-dropdown-open');
+    } else {
+      this.elementRef.classList.remove('tbus-dropdown-open');
+    }
+  }
+
+  get expand() {
+    return this._expand;
+  }
+
+  private _expand = false;
+
   private button = document.createElement('button');
 
   constructor(private inner: HTMLElement,
@@ -71,13 +86,13 @@ export class Dropdown {
         return;
       }
       if (!isSelfClick) {
-        this.elementRef.classList.remove('tbus-dropdown-open');
+        this.expand = false;
       }
       isSelfClick = false;
     });
     this.button.addEventListener('click', () => {
       isSelfClick = true;
-      this.elementRef.classList.toggle('tbus-dropdown-open');
+      this.expand = !this.expand;
       updatePosition();
     });
 
@@ -85,15 +100,7 @@ export class Dropdown {
 
     menuViewer.onComplete.subscribe(() => {
       this.freeze = false;
-      this.elementRef.classList.remove('tbus-dropdown-open');
+      this.expand = false;
     });
-  }
-
-  show() {
-    this.elementRef.classList.add('tbus-dropdown-open');
-  }
-
-  hide() {
-    this.elementRef.classList.remove('tbus-dropdown-open');
   }
 }

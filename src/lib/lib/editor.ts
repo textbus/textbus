@@ -1,4 +1,4 @@
-import { auditTime, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/operators';
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
@@ -16,10 +16,11 @@ import {
   TemplateTranslator,
   VElement
 } from './core/_api';
-import { Viewer } from './viewer/_api';
+import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockTemplate, SingleTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
+import { Paths } from './paths/paths';
 
 export interface Snapshot {
   contents: Fragment;
@@ -77,6 +78,7 @@ export class Editor implements EventDelegate {
   private toolbar: Toolbar;
   private input: Input;
   private renderer = new Renderer();
+  private paths = new Paths();
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
@@ -135,7 +137,7 @@ export class Editor implements EventDelegate {
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     this.frameContainer.appendChild(this.viewer.elementRef);
-
+    this.elementRef.append(this.paths.elementRef);
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
       this.elementRef.classList.add('tbus-theme-' + options.theme);
@@ -252,11 +254,15 @@ export class Editor implements EventDelegate {
     fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
       this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
       this.input.updateStateBySelection(this.nativeSelection);
-    }), auditTime(100)).subscribe(() => {
+    }), auditTime(100), tap(() => {
       const event = document.createEvent('Event');
       event.initEvent('click', true, true);
       this.elementRef.dispatchEvent(event);
       this.toolbar.updateHandlerState(this.selection, this.renderer);
+    }), map(() => {
+      return this.nativeSelection.focusNode;
+    }), distinctUntilChanged()).subscribe(node => {
+      this.paths.update(node);
     })
 
     this.toolbar.onAction.subscribe(config => {

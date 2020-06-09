@@ -86,6 +86,6 @@ export class DropdownHandler implements Tool {
   }
 
   expand(is: boolean) {
-    is ? this.dropdown.show() : this.dropdown.hide();
+    this.dropdown.expand = is;
   }
 }
