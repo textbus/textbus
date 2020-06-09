@@ -19,8 +19,7 @@ export const fontSizeTool = Toolkit.makeSelectTool({
   }, {
     label: '14px',
     classes: ['tbus-font-size-14'],
-    value: '14px',
-    default: true
+    value: '14px'
   }, {
     label: '15px',
     classes: ['tbus-font-size-15'],
@@ -28,7 +27,8 @@ export const fontSizeTool = Toolkit.makeSelectTool({
   }, {
     label: '16px',
     classes: ['tbus-font-size-16'],
-    value: '16px'
+    value: '16px',
+    default: true
   }, {
     label: '18px',
     classes: ['tbus-font-size-18'],

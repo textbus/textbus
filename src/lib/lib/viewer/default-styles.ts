@@ -1,6 +1,5 @@
 export const defaultStyleSheets = [`
   body {
-    font-size: 14px;
     padding: 8px;
     margin: 0;
     }
