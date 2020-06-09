@@ -44,26 +44,26 @@ export class ToggleBlockCommander implements Commander<string> {
         const block = new BlockTemplate(this.tagName);
         const fragment = new Fragment();
         block.childSlots.push(fragment);
-        range.getExpandedScope().reverse().forEach(scope => {
-          if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
+        if (index !== -1) {
+          range.commonAncestorFragment.delete(index, 1);
+          fragment.append(range.commonAncestorTemplate);
+        } else {
+          const appendedTemplates: Template[] = [];
+          range.getExpandedScope().reverse().forEach(scope => {
             const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+            if (appendedTemplates.includes(parentTemplate)) {
+              return;
+            }
+            appendedTemplates.push(parentTemplate);
             const p = renderer.getParentFragmentByTemplate(parentTemplate);
             p.delete(p.indexOf(parentTemplate), 1);
             fragment.insert(parentTemplate, 0);
             if (p.contentLength === 0) {
               range.deleteEmptyTree(p);
             }
-          } else {
-            const contents = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
-            const len = fragment.contentLength;
-            contents.contents.forEach(c => fragment.insert(c, 0));
-            contents.formatRanges.forEach(f => fragment.mergeFormat({
-              ...f,
-              startIndex: f.startIndex + len,
-              endIndex: f.endIndex + len
-            }));
-          }
-        });
+          });
+        }
         parentFragment.insert(block, position);
       }
     })
