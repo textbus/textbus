@@ -324,7 +324,7 @@ export class TBRange {
       }
       const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
       if (fragmentIndex > 0) {
-        return this.findLastChild(parentTemplate[fragmentIndex - 1]);
+        return this.findLastChild(parentTemplate.childSlots[fragmentIndex - 1]);
       }
       const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       const templateIndex = parentFragment.indexOf(parentTemplate);

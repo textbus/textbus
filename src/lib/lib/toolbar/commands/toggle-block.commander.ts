@@ -57,10 +57,25 @@ export class ToggleBlockCommander implements Commander<string> {
             }
             appendedTemplates.push(parentTemplate);
             const p = renderer.getParentFragmentByTemplate(parentTemplate);
-            p.delete(p.indexOf(parentTemplate), 1);
-            fragment.insert(parentTemplate, 0);
-            if (p.contentLength === 0) {
-              range.deleteEmptyTree(p);
+            if (p) {
+              p.delete(p.indexOf(parentTemplate), 1);
+              fragment.insert(parentTemplate, 0);
+              if (p.contentLength === 0) {
+                range.deleteEmptyTree(p);
+              }
+            } else {
+              if (scope.fragment === parentFragment) {
+                const length = fragment.contentLength;
+                const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+                c.contents.reverse().forEach(cc => fragment.insert(cc, 0));
+                c.formatRanges.forEach(f => fragment.apply({
+                  ...f,
+                  startIndex: f.startIndex + length,
+                  endIndex: f.endIndex + length,
+                }))
+              } else {
+                block.childSlots.push(scope.fragment)
+              }
             }
           });
         }
