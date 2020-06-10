@@ -17,7 +17,7 @@ describe('删除内容', () => {
   test('删除前面', () =>{
     const fragment = new Fragment();
     fragment.append('0123456789');
-    fragment.mergeFormat(f);
+    fragment.apply(f);
     const deletedContents = fragment.delete(1, 2);
     expect(fragment.getFormatRanges()[0]).toEqual({
       ...f,
@@ -29,7 +29,7 @@ describe('删除内容', () => {
   test('删除前面加中间', () => {
     const fragment = new Fragment();
     fragment.append('0123456789');
-    fragment.mergeFormat(f);
+    fragment.apply(f);
     const deletedContents = fragment.delete(1, 4);
     expect(fragment.getFormatRanges()[0]).toEqual({
       ...f,

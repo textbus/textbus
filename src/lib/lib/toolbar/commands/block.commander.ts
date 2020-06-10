@@ -46,7 +46,7 @@ export class BlockCommander implements Commander<string> {
           blockTemplate.slot = new Fragment();
           const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
           c.contents.forEach(cc => blockTemplate.slot.append(cc));
-          c.formatRanges.forEach(ff => blockTemplate.slot.mergeFormat(ff));
+          c.formatRanges.forEach(ff => blockTemplate.slot.apply(ff));
           scope.fragment.insert(blockTemplate, scope.startIndex);
           this.effect(blockTemplate.slot, '');
         }
@@ -56,7 +56,7 @@ export class BlockCommander implements Commander<string> {
 
   private effect(fragment: Fragment, oldTagName: string) {
     if (/h[1-6]/.test(this.tagName)) {
-      fragment.mergeFormat({
+      fragment.apply({
         state: FormatEffect.Inherit,
         startIndex: 0,
         endIndex: fragment.contentLength,
@@ -68,7 +68,7 @@ export class BlockCommander implements Commander<string> {
     } else if (this.tagName === 'p') {
       const flag = /h[1-6]/.test(oldTagName);
       if (flag) {
-        fragment.mergeFormat({
+        fragment.apply({
           state: FormatEffect.Invalid,
           startIndex: 0,
           endIndex: fragment.contentLength,

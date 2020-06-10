@@ -216,7 +216,7 @@ export class CodeTemplate extends SingleChildTemplate {
       }),
       state: FormatEffect.Valid
     });
-    blockFormats.forEach(f => fragment.mergeFormat(f));
+    blockFormats.forEach(f => fragment.apply(f));
     if (this.lang && getLanguage(this.lang)) {
       try {
         const html = highlight(this.lang, sourceCode).value.replace(/\n/g, '<br>');

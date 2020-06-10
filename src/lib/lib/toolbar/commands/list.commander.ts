@@ -48,7 +48,7 @@ export class ListCommander implements Commander {
           const fragment = new Fragment();
           const contents = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
           contents.contents.forEach(c => fragment.append(c));
-          contents.formatRanges.forEach(f => fragment.mergeFormat(f));
+          contents.formatRanges.forEach(f => fragment.apply(f));
           list.childSlots.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
             range.deleteEmptyTree(scope.fragment, range.commonAncestorFragment);

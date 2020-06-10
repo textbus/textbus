@@ -22,7 +22,7 @@ export class HistoryCommander implements Commander<Editor> {
       snapshot.contents.sliceContents(0).forEach(item => {
         rootFragment.append(item);
       });
-      snapshot.contents.getFormatRanges().forEach(f => rootFragment.mergeFormat(f));
+      snapshot.contents.getFormatRanges().forEach(f => rootFragment.apply(f));
       selection.usePaths(snapshot.paths, rootFragment);
     }
   }

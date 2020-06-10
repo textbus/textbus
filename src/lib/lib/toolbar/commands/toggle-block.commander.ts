@@ -22,7 +22,7 @@ export class ToggleBlockCommander implements Commander<string> {
         const contents = fragment.delete(0);
         contents.contents.reverse().forEach(i => parentFragment.insert(i, position));
         contents.formatRanges.forEach(f => {
-          parentFragment.mergeFormat({
+          parentFragment.apply({
             ...f,
             startIndex: f.startIndex + position,
             endIndex: f.endIndex + position

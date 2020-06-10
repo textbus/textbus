@@ -596,7 +596,7 @@ export class TBRange {
           f.endIndex += startIndex;
           return f;
         })
-        .forEach(f => this.startFragment.mergeFormat(f));
+        .forEach(f => this.startFragment.apply(f));
     }
     this.collapse();
   }

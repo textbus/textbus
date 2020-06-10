@@ -62,7 +62,7 @@ export class BlockTemplate extends SingleChildTemplate {
         } else {
           fragment.append(new SingleTagTemplate('br'));
         }
-        c.formatRanges.forEach(ff => fragment.mergeFormat(ff));
+        c.formatRanges.forEach(ff => fragment.apply(ff));
         parent.insert(template, parent.indexOf(this) + 1);
         firstRange.startFragment = firstRange.endFragment = fragment
         firstRange.startIndex = firstRange.endIndex = 0;

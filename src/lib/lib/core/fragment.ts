@@ -15,25 +15,6 @@ export class Fragment {
     this.contents.append(element);
   }
 
-  mergeFormat(format: FormatDelta) {
-    if (format.renderer instanceof InlineFormatter) {
-      this.formatMap.merge(format as FormatRange);
-    } else {
-      let self = this;
-      this.formatMap.merge({
-        get startIndex() {
-          return 0;
-        },
-        get endIndex() {
-          return self.contentLength;
-        },
-        renderer: format.renderer,
-        abstractData: format.abstractData,
-        state: format.state
-      })
-    }
-  }
-
   getCanApplyFormats() {
     return this.formatMap.getCanApplyFormats();
   }
@@ -282,5 +263,24 @@ export class Fragment {
       index += item.length;
     });
     formats.forEach(f => this.formatMap.merge(f));
+  }
+
+  private mergeFormat(format: FormatDelta) {
+    if (format.renderer instanceof InlineFormatter) {
+      this.formatMap.merge(format as FormatRange);
+    } else {
+      let self = this;
+      this.formatMap.merge({
+        get startIndex() {
+          return 0;
+        },
+        get endIndex() {
+          return self.contentLength;
+        },
+        renderer: format.renderer,
+        abstractData: format.abstractData,
+        state: format.state
+      })
+    }
   }
 }

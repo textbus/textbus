@@ -43,7 +43,7 @@ const f = {
 
 const fragment = new Fragment();
 fragment.append('0123456789');
-fragment.mergeFormat(f);
+fragment.apply(f);
 // const deletedContents = fragment.delete(1, 2);
 const deletedContents = fragment.delete(2, 4);
 // const deletedContents = fragment.delete(1, 2);

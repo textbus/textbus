@@ -23,7 +23,7 @@ export class CleanCommander implements Commander {
             this.excludeFormatters.map(constructor => f.renderer instanceof constructor).includes(true)) {
             return;
           }
-          scope.fragment.mergeFormat({
+          scope.fragment.apply({
             startIndex: scope.startIndex,
             endIndex: scope.endIndex,
             state: FormatEffect.Invalid,

@@ -74,7 +74,7 @@ export class Parser {
       this.readTemplate(child, slot);
     })
     maps.forEach(item => {
-      slot.mergeFormat({
+      slot.apply({
         startIndex,
         endIndex: slot.contentLength,
         renderer: item.formatter,

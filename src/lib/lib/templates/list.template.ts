@@ -78,7 +78,7 @@ export class ListTemplate extends BackboneTemplate {
             next.append(item);
           });
           formatRanges.forEach(item => {
-            next.mergeFormat(item);
+            next.apply(item);
           });
 
           if (next.contentLength === 0) {
