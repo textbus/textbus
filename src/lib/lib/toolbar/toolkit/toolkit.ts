@@ -45,43 +45,47 @@ export type ToolFactory = ButtonToolFactory | SelectToolFactory | DropdownToolFa
 
 export class Toolkit {
   static makeButtonTool(config: ButtonConfig): ButtonToolFactory {
-    return {
+    const op: ButtonToolFactory = {
       type: ToolType.Button,
       config,
-      factory: function () {
-        return new ButtonHandler(config);
+      factory() {
+        return new ButtonHandler(op.config);
       }
-    }
+    };
+    return op;
   }
 
   static makeSelectTool(config: SelectConfig): SelectToolFactory {
-    return {
+    const op: SelectToolFactory = {
       type: ToolType.Select,
       config,
-      factory: function (stickyElement: HTMLElement) {
-        return new SelectHandler(config, stickyElement)
+      factory(stickyElement: HTMLElement) {
+        return new SelectHandler(op.config, stickyElement)
       }
-    }
+    };
+    return op;
   }
 
   static makeDropdownTool(config: DropdownConfig): DropdownToolFactory {
-    return {
+    const op: DropdownToolFactory = {
       type: ToolType.Dropdown,
       config,
-      factory: function (delegate: EventDelegate, stickyElement: HTMLElement) {
-        return new DropdownHandler(config, delegate, stickyElement)
+      factory(delegate: EventDelegate, stickyElement: HTMLElement) {
+        return new DropdownHandler(op.config, delegate, stickyElement)
       }
-    }
+    };
+    return op;
   }
 
   static makeActionSheetTool(config: ActionSheetConfig): ActionSheetToolFactory {
-    return {
+    const op: ActionSheetToolFactory = {
       type: ToolType.ActionSheet,
       config,
-      factory: function (stickElement: HTMLElement) {
-        return new ActionSheetHandler(config, stickElement)
+      factory(stickElement: HTMLElement) {
+        return new ActionSheetHandler(op.config, stickElement)
       }
-    }
+    };
+    return op;
   }
 }
 

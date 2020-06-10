@@ -7,7 +7,7 @@ export interface SlotMap {
 }
 
 export interface ViewData {
-  template: BackboneTemplate | EndTemplate;
+  template: Template;
   childrenSlots: SlotMap[];
 }
 
