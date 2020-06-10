@@ -253,6 +253,7 @@ export class TBRange {
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        scope.fragment.delete(0);
         this.deleteEmptyTree(scope.fragment);
       } else {
         scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
@@ -583,7 +584,7 @@ export class TBRange {
       this.collapse(true);
       return;
     }
-    if (this.startFragment !== this.endFragment) {
+    if (this.startFragment !== this.endFragment && this.endFragment.contentLength > 0) {
       const ff = this.endFragment.delete(0);
       this.deleteEmptyTree(this.endFragment);
       const startIndex = this.startFragment.contentLength;
