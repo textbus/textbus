@@ -31,55 +31,58 @@ export class ToggleBlockCommander implements Commander<string> {
       } else {
         let position: number;
         let parentFragment: Fragment;
+        const block = new BlockTemplate(this.tagName);
+        const fragment = new Fragment();
+        block.slot = fragment;
         if (range.startFragment === range.endFragment) {
           const parentTemplate = renderer.getParentTemplateByFragment(range.startFragment)
           parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
           position = parentFragment.indexOf(parentTemplate);
+          fragment.append(parentTemplate);
+          parentFragment.delete(position, 1);
+          parentFragment.insert(block, position);
         } else {
           position = range.getCommonAncestorFragmentScope().startIndex;
           parentFragment = range.commonAncestorFragment;
-        }
 
-        const block = new BlockTemplate(this.tagName);
-        const fragment = new Fragment();
-        block.slot = fragment;
-        const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
-        if (index !== -1) {
-          range.commonAncestorFragment.delete(index, 1);
-          fragment.append(range.commonAncestorTemplate);
-        } else {
-          const appendedTemplates: Array<BackboneTemplate | SingleChildTemplate> = [];
-          range.getExpandedScope().reverse().forEach(scope => {
-            const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
-            if (appendedTemplates.includes(parentTemplate)) {
-              return;
-            }
-            appendedTemplates.push(parentTemplate);
-            const p = renderer.getParentFragmentByTemplate(parentTemplate);
-            if (p) {
-              p.delete(p.indexOf(parentTemplate), 1);
-              fragment.insert(parentTemplate, 0);
-              if (p.contentLength === 0) {
-                range.deleteEmptyTree(p);
+          const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
+          if (index !== -1) {
+            range.commonAncestorFragment.delete(index, 1);
+            fragment.append(range.commonAncestorTemplate);
+          } else {
+            const appendedTemplates: Array<BackboneTemplate | SingleChildTemplate> = [];
+            range.getExpandedScope().reverse().forEach(scope => {
+              const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+              if (appendedTemplates.includes(parentTemplate)) {
+                return;
               }
-            } else {
-              if (scope.fragment === parentFragment) {
-                const length = fragment.contentLength;
-                const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
-                c.contents.reverse().forEach(cc => fragment.insert(cc, 0));
-                c.formatRanges.forEach(f => fragment.apply({
-                  ...f,
-                  startIndex: f.startIndex + length,
-                  endIndex: f.endIndex + length,
-                }))
+              appendedTemplates.push(parentTemplate);
+              const p = renderer.getParentFragmentByTemplate(parentTemplate);
+              if (p) {
+                p.delete(p.indexOf(parentTemplate), 1);
+                fragment.insert(parentTemplate, 0);
+                if (p.contentLength === 0) {
+                  range.deleteEmptyTree(p);
+                }
               } else {
-                const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
-                block.slot.insert(parentTemplate, 0);
+                if (scope.fragment === parentFragment) {
+                  const length = fragment.contentLength;
+                  const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+                  c.contents.reverse().forEach(cc => fragment.insert(cc, 0));
+                  c.formatRanges.forEach(f => fragment.apply({
+                    ...f,
+                    startIndex: f.startIndex + length,
+                    endIndex: f.endIndex + length,
+                  }))
+                } else {
+                  const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+                  block.slot.insert(parentTemplate, 0);
+                }
               }
-            }
-          });
+            });
+          }
+          parentFragment.insert(block, position);
         }
-        parentFragment.insert(block, position);
       }
     })
   }
