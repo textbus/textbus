@@ -512,6 +512,7 @@ export class Editor implements EventDelegate {
             range.connect();
             return;
           }
+
           if (range.startIndex > 0) {
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
             range.startIndex = range.endIndex = range.startIndex - 1;
@@ -528,6 +529,10 @@ export class Editor implements EventDelegate {
                   position = range.getNextPosition();
                 }
                 range.deleteEmptyTree(range.startFragment);
+                const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
+                if (last instanceof SingleTemplate && last.tagName === 'br') {
+                  position.index--;
+                }
                 range.setStart(position.fragment, position.index);
                 range.collapse();
               }
