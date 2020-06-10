@@ -11,40 +11,32 @@ export class ListCommander implements Commander {
     selection.ranges.forEach(range => {
       const commonScope = range.getCommonAncestorFragmentScope();
       if (overlap) {
-        const startContext = renderer.getContext(
-          range.startFragment,
-          ListTemplate,
-          instance => instance.tagName === this.tagName);
-        const contextFragment = renderer.getParentFragmentByTemplate(startContext);
-        const position = contextFragment.indexOf(startContext);
-        const templates: Template[] = [];
-        range.getSuccessiveContents().reverse().forEach(scope => {
-          if (scope.fragment.contentLength === 1 && scope.fragment.getContentAtIndex(0) instanceof Template) {
-            templates.push(scope.fragment.getContentAtIndex(0) as Template);
-          } else {
-            const t = new BlockTemplate('p');
-            const fragment = new Fragment();
-            t.childSlots.push(fragment);
-            const contents = scope.fragment.delete(scope.startIndex, scope.endIndex);
-            contents.contents.forEach(c => fragment.append(c));
-            contents.formatRanges.forEach(f => fragment.mergeFormat(f));
-            templates.push(t);
-
-            if (scope.fragment === range.startFragment &&
-              scope.startIndex <= range.startIndex &&
-              scope.endIndex >= range.startIndex) {
-              range.setStart(fragment, range.startIndex - scope.startIndex);
-            }
-            if (scope.fragment === range.endFragment &&
-              scope.startIndex <= range.endIndex &&
-              scope.endIndex >= range.endIndex) {
-              range.setEnd(fragment, range.endIndex - scope.startIndex);
-            }
+        range.getSlotRange(ListTemplate, instance => instance.tagName === this.tagName).forEach(item => {
+          const slots = item.template.split(item.startIndex, item.endIndex);
+          const parentFragment = renderer.getParentFragmentByTemplate(item.template);
+          if (slots.before.length) {
+            const beforeList = new ListTemplate(this.tagName);
+            beforeList.childSlots.push(...slots.before);
+            parentFragment.insertBefore(beforeList, item.template);
           }
-          range.deleteEmptyTree(scope.fragment)
+          if (slots.center.length) {
+            slots.center.forEach(fragment => {
+              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof Template) {
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as Template, item.template)
+              } else {
+                const t = new BlockTemplate('p');
+                t.childSlots.push(fragment);
+                parentFragment.insertBefore(t, item.template);
+              }
+            })
+          }
+          if (slots.after.length) {
+            const afterList = new ListTemplate(this.tagName);
+            afterList.childSlots.push(...slots.after);
+            parentFragment.insertBefore(afterList, item.template);
+          }
+          parentFragment.delete(parentFragment.indexOf(item.template), 1);
         })
-        const p = contextFragment.indexOf(startContext) === position ? position + 1 : position;
-        templates.forEach(t => contextFragment.insert(t, p));
       } else {
         const list = new ListTemplate(this.tagName);
         range.getSuccessiveContents().reverse().forEach(scope => {

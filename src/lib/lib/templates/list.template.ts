@@ -87,4 +87,12 @@ export class ListTemplate extends Template {
     })
     return list;
   }
+
+  split(startIndex: number, endIndex: number) {
+    return {
+      before: this.childSlots.slice(0, startIndex),
+      center: this.childSlots.slice(startIndex, endIndex),
+      after: this.childSlots.slice(endIndex)
+    }
+  }
 }
