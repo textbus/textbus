@@ -209,7 +209,7 @@ export abstract class InlineFormatter extends Formatter {
 }
 
 export abstract class BlockFormatter extends Formatter {
-  protected constructor(protected rule: MatchRule = {}) {
-    super(rule, 0);
+  protected constructor(protected rule: MatchRule = {}, priority = 0) {
+    super(rule, priority);
   }
 }

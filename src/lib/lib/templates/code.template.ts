@@ -1,11 +1,17 @@
 import {
-  BackboneTemplate,
-  TemplateTranslator,
-  ViewData,
-  Fragment,
-  VElement,
+  BlockFormatter,
+  ChildSlotModel,
   EventType,
-  FormatDelta, FormatAbstractData, InlineFormatter, FormatEffect, ReplaceModel, ChildSlotModel, SingleChildTemplate
+  FormatAbstractData,
+  FormatDelta,
+  FormatEffect,
+  Fragment,
+  InlineFormatter,
+  ReplaceModel,
+  SingleChildTemplate,
+  TemplateTranslator,
+  VElement,
+  ViewData
 } from '../core/_api';
 import { SingleTemplate } from './single.template';
 import { getLanguage, highlight } from 'highlight.js';
@@ -105,7 +111,21 @@ const theme = [
   }
 ];
 
-class CodeFormatter extends InlineFormatter {
+class CodeFormatter extends BlockFormatter {
+  constructor() {
+    super({}, 1);
+  }
+
+  read(node: HTMLElement): FormatAbstractData {
+    return undefined;
+  }
+
+  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+    return new ChildSlotModel(new VElement('code'));
+  }
+}
+
+class CodeStyleFormatter extends InlineFormatter {
   constructor() {
     super({}, 10);
   }
@@ -123,6 +143,7 @@ class CodeFormatter extends InlineFormatter {
   }
 }
 
+const codeStyleFormatter = new CodeStyleFormatter();
 const codeFormatter = new CodeFormatter();
 
 export class CodeTemplateTranslator implements TemplateTranslator {
@@ -161,18 +182,17 @@ export class CodeTemplate extends SingleChildTemplate {
 
   render() {
     this.format();
+
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
-    const code = new VElement('code');
-    code.events.subscribe(event => {
+    block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new SingleTemplate('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
       }
     })
-    block.appendChild(code);
-    this.vDom = code;
+    this.vDom = block;
     return block;
   }
 
@@ -187,7 +207,16 @@ export class CodeTemplate extends SingleChildTemplate {
         return '\n';
       }
     }).join('');
+    const blockFormats = fragment.getFormatRanges().filter(f => f.renderer instanceof BlockFormatter);
     fragment.clean();
+    fragment.apply({
+      renderer: codeFormatter,
+      abstractData: new FormatAbstractData({
+        tag: 'code'
+      }),
+      state: FormatEffect.Valid
+    });
+    blockFormats.forEach(f => fragment.mergeFormat(f));
     if (this.lang && getLanguage(this.lang)) {
       try {
         const html = highlight(this.lang, sourceCode).value.replace(/\n/g, '<br>');
@@ -236,7 +265,7 @@ export class CodeTemplate extends SingleChildTemplate {
             formats.push({
               startIndex: start,
               endIndex: index,
-              renderer: codeFormatter,
+              renderer: codeStyleFormatter,
               state: FormatEffect.Valid,
               abstractData
             })
