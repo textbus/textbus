@@ -55,7 +55,7 @@ import {
   CodeTemplateTranslator,
   ImageTemplateTranslator,
   ListTemplateTranslator,
-  SingleTemplateTranslator,
+  SingleTagTemplateTranslator,
   TableTemplateTranslator,
   VideoTemplateTranslator
 } from './lib/templates/_api';
@@ -71,7 +71,7 @@ export const defaultOptions: EditorOptions = {
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
     new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote'.split(',')),
-    new SingleTemplateTranslator('br'),
+    new SingleTagTemplateTranslator('br'),
     new CodeTemplateTranslator(),
     new AudioTemplateTranslator(),
     new VideoTemplateTranslator(),

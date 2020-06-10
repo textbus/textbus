@@ -5,7 +5,7 @@ import {
   Renderer,
   TBSelection
 } from '../../core/_api';
-import { CodeTemplate, SingleTemplate } from '../../templates/_api';
+import { CodeTemplate, SingleTagTemplate } from '../../templates/_api';
 
 
 
@@ -29,7 +29,7 @@ export class CodeCommander implements Commander<string> {
         const parentFragment = renderer.getParentFragmentByTemplate(context);
         const t = new CodeTemplate(this.lang);
         const f = new Fragment();
-        f.append(new SingleTemplate('br'));
+        f.append(new SingleTagTemplate('br'));
         t.slot = f;
         parentFragment.insertAfter(t, context);
         range.setStart(f, 0);

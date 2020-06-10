@@ -8,7 +8,6 @@ import {
   Fragment,
   InlineFormatter,
   Lifecycle,
-  EndTemplate,
   Parser,
   RangePath,
   Renderer, TBRange, TBRangePosition,
@@ -18,7 +17,7 @@ import {
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
-import { BlockTemplate, SingleTemplate } from './templates/_api';
+import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { Paths } from './paths/paths';
 
@@ -220,7 +219,7 @@ export class Editor implements EventDelegate {
     this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new SingleTemplate('br');
+          const s = new SingleTagTemplate('br');
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
@@ -234,8 +233,8 @@ export class Editor implements EventDelegate {
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + this.input.input.selectionStart;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + this.input.input.selectionStart === commonAncestorFragment.contentLength &&
-      last instanceof SingleTemplate && last.tagName === 'br') {
-      commonAncestorFragment.append(new SingleTemplate('br'));
+      last instanceof SingleTagTemplate && last.tagName === 'br') {
+      commonAncestorFragment.append(new SingleTagTemplate('br'));
     }
     this.userWriteEvent.next();
   }
@@ -383,7 +382,7 @@ export class Editor implements EventDelegate {
         if (this.rootFragment.contentLength === 0) {
           const p = new BlockTemplate('p');
           const fragment = new Fragment();
-          fragment.append(new SingleTemplate('br'));
+          fragment.append(new SingleTagTemplate('br'));
           p.slot = fragment;
           this.rootFragment.append(p);
           selection.firstRange.setStart(fragment, 0);
@@ -501,7 +500,7 @@ export class Editor implements EventDelegate {
     if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
       const p = new BlockTemplate('p');
       const fragment = new Fragment();
-      fragment.append(new SingleTemplate('br'));
+      fragment.append(new SingleTagTemplate('br'));
       p.slot = fragment;
       rootFragment.append(p);
     }
@@ -517,11 +516,11 @@ export class Editor implements EventDelegate {
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
             range.startIndex = range.endIndex = range.startIndex - 1;
             if (range.commonAncestorFragment.contentLength === 0) {
-              range.commonAncestorFragment.append(new SingleTemplate('br'));
+              range.commonAncestorFragment.append(new SingleTagTemplate('br'));
             }
           } else {
             const firstContent = range.startFragment.getContentAtIndex(0);
-            if (firstContent instanceof EndTemplate && firstContent.tagName === 'br') {
+            if (firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
               range.startFragment.delete(0, 1);
               if (range.startFragment.contentLength === 0) {
                 let position = range.getPreviousPosition();
@@ -530,7 +529,7 @@ export class Editor implements EventDelegate {
                 }
                 range.deleteEmptyTree(range.startFragment);
                 const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
-                if (last instanceof SingleTemplate && last.tagName === 'br') {
+                if (last instanceof SingleTagTemplate && last.tagName === 'br') {
                   position.index--;
                 }
                 range.setStart(position.fragment, position.index);
@@ -541,7 +540,7 @@ export class Editor implements EventDelegate {
               if (prevPosition.fragment !== range.startFragment) {
                 range.setStart(prevPosition.fragment, prevPosition.index);
                 const last = prevPosition.fragment.getContentAtIndex(prevPosition.index - 1);
-                if (last instanceof EndTemplate && last.tagName === 'br') {
+                if (last instanceof SingleTagTemplate && last.tagName === 'br') {
                   range.startIndex--;
                 }
                 range.connect();

@@ -1,5 +1,5 @@
 import { SlotMap, BackboneTemplate, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
-import { SingleTemplate } from './single.template';
+import { SingleTagTemplate } from './single-tag.template';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 
@@ -72,7 +72,7 @@ export class ListTemplate extends BackboneTemplate {
           const {contents, formatRanges} = slot.delete(firstRange.endIndex);
           const next = new Fragment();
           if (slot.contentLength === 0) {
-            slot.append(new SingleTemplate('br'));
+            slot.append(new SingleTagTemplate('br'));
           }
           contents.forEach(item => {
             next.append(item);
@@ -82,7 +82,7 @@ export class ListTemplate extends BackboneTemplate {
           });
 
           if (next.contentLength === 0) {
-            next.append(new SingleTemplate('br'))
+            next.append(new SingleTagTemplate('br'))
           }
           this.childSlots.splice(index + 1, 0, next);
           firstRange.startFragment = firstRange.endFragment = next;

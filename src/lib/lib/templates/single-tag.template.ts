@@ -1,6 +1,6 @@
 import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
-export class SingleTemplateTranslator implements TemplateTranslator {
+export class SingleTagTemplateTranslator implements TemplateTranslator {
   constructor(private tagName: string) {
   }
 
@@ -9,7 +9,7 @@ export class SingleTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new SingleTemplate(this.tagName);
+    const template = new SingleTagTemplate(this.tagName);
     return {
       template,
       childrenSlots: []
@@ -17,13 +17,13 @@ export class SingleTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class SingleTemplate extends EndTemplate {
+export class SingleTagTemplate extends EndTemplate {
   constructor(tagName: string) {
     super(tagName);
   }
 
   clone() {
-    return new SingleTemplate(this.tagName);
+    return new SingleTagTemplate(this.tagName);
   }
 
   render() {

@@ -13,7 +13,7 @@ import {
   VElement,
   ViewData
 } from '../core/_api';
-import { SingleTemplate } from './single.template';
+import { SingleTagTemplate } from './single-tag.template';
 import { getLanguage, highlight } from 'highlight.js';
 
 const theme = [
@@ -188,7 +188,7 @@ export class CodeTemplate extends SingleChildTemplate {
     block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
-        this.slot.insert(new SingleTemplate('br'), firstRange.startIndex);
+        this.slot.insert(new SingleTagTemplate('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
       }
     })
@@ -203,7 +203,7 @@ export class CodeTemplate extends SingleChildTemplate {
       if (typeof item === 'string') {
         return item;
 
-      } else if (item instanceof SingleTemplate && item.tagName === 'br') {
+      } else if (item instanceof SingleTagTemplate && item.tagName === 'br') {
         return '\n';
       }
     }).join('');
@@ -238,7 +238,7 @@ export class CodeTemplate extends SingleChildTemplate {
       if (item.nodeType === 1) {
         if (item.nodeName.toLowerCase() === 'br') {
           index++;
-          context.append(new SingleTemplate('br'));
+          context.append(new SingleTagTemplate('br'));
           return;
         }
         const result = this.getFormats(index, item as HTMLElement, context);

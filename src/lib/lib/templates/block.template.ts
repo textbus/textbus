@@ -7,7 +7,7 @@ import {
   EventType,
   SingleChildTemplate
 } from '../core/_api';
-import { SingleTemplate } from './single.template';
+import { SingleTagTemplate } from './single-tag.template';
 
 export class BlockTemplateTranslator implements TemplateTranslator {
   constructor(private tagNames: string[]) {
@@ -55,12 +55,12 @@ export class BlockTemplate extends SingleChildTemplate {
         const firstRange = event.selection.firstRange;
         const c = firstRange.startFragment.delete(firstRange.startIndex);
         if (firstRange.startFragment.contentLength === 0) {
-          firstRange.startFragment.append(new SingleTemplate('br'));
+          firstRange.startFragment.append(new SingleTagTemplate('br'));
         }
         if (c.contents.length) {
           c.contents.forEach(cc => fragment.append(cc));
         } else {
-          fragment.append(new SingleTemplate('br'));
+          fragment.append(new SingleTagTemplate('br'));
         }
         c.formatRanges.forEach(ff => fragment.mergeFormat(ff));
         parent.insert(template, parent.indexOf(this) + 1);
