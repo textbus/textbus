@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment, Template } from '../../core/_api';
+import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, SingleChildTemplate } from '../../core/_api';
 import { ListTemplate, BlockTemplate } from '../../templates/_api';
 
 export class ListCommander implements Commander {
@@ -21,11 +21,11 @@ export class ListCommander implements Commander {
           }
           if (slots.center.length) {
             slots.center.forEach(fragment => {
-              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof Template) {
-                parentFragment.insertBefore(fragment.getContentAtIndex(0) as Template, item.template)
+              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BackboneTemplate) {
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneTemplate, item.template)
               } else {
                 const t = new BlockTemplate('p');
-                t.childSlots.push(fragment);
+                t.slot = fragment;
                 parentFragment.insertBefore(t, item.template);
               }
             })
@@ -63,11 +63,16 @@ export class ListCommander implements Commander {
           range.commonAncestorFragment.insert(list, commonScope.startIndex);
         } else {
           const parentTemplate = renderer.getParentTemplateByFragment(range.commonAncestorFragment);
-          if (parentTemplate.childSlots.length > 1) {
+          if (parentTemplate instanceof SingleChildTemplate) {
+            const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+            const position = parentFragment.indexOf(parentTemplate);
+            parentFragment.delete(position, 1);
+            parentFragment.insert(list, position);
+          } else {
             const index = parentTemplate.childSlots.indexOf(range.commonAncestorFragment);
-            const before = parentTemplate.clone();
+            const before = parentTemplate.clone() as BackboneTemplate;
             before.childSlots.splice(index);
-            const after = parentTemplate.clone();
+            const after = parentTemplate.clone() as BackboneTemplate;
             after.childSlots.splice(0, index + 1);
 
             const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
@@ -80,11 +85,6 @@ export class ListCommander implements Commander {
             if (before.childSlots.length) {
               parentFragment.insert(before, position);
             }
-          } else {
-            const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
-            const position = parentFragment.indexOf(parentTemplate);
-            parentFragment.delete(position, 1);
-            parentFragment.insert(list, position);
           }
         }
       }

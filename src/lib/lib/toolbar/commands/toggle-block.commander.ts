@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment, Template } from '../../core/_api';
+import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, SingleChildTemplate } from '../../core/_api';
 import { BlockTemplate } from '../../templates/block.template';
 
 export class ToggleBlockCommander implements Commander<string> {
@@ -18,17 +18,16 @@ export class ToggleBlockCommander implements Commander<string> {
         const parentFragment = renderer.getParentFragmentByTemplate(context);
         const position = parentFragment.indexOf(context);
         parentFragment.delete(position, 1);
-        context.childSlots.reverse().forEach(fragment => {
-          const contents = fragment.delete(0);
-          contents.contents.reverse().forEach(i => parentFragment.insert(i, position));
-          contents.formatRanges.forEach(f => {
-            parentFragment.mergeFormat({
-              ...f,
-              startIndex: f.startIndex + position,
-              endIndex: f.endIndex + position
-            })
+        const fragment = context.slot;
+        const contents = fragment.delete(0);
+        contents.contents.reverse().forEach(i => parentFragment.insert(i, position));
+        contents.formatRanges.forEach(f => {
+          parentFragment.mergeFormat({
+            ...f,
+            startIndex: f.startIndex + position,
+            endIndex: f.endIndex + position
           })
-        });
+        })
       } else {
         let position: number;
         let parentFragment: Fragment;
@@ -43,13 +42,13 @@ export class ToggleBlockCommander implements Commander<string> {
 
         const block = new BlockTemplate(this.tagName);
         const fragment = new Fragment();
-        block.childSlots.push(fragment);
+        block.slot = fragment;
         const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
         if (index !== -1) {
           range.commonAncestorFragment.delete(index, 1);
           fragment.append(range.commonAncestorTemplate);
         } else {
-          const appendedTemplates: Template[] = [];
+          const appendedTemplates: Array<BackboneTemplate | SingleChildTemplate> = [];
           range.getExpandedScope().reverse().forEach(scope => {
             const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
             if (appendedTemplates.includes(parentTemplate)) {
@@ -74,7 +73,8 @@ export class ToggleBlockCommander implements Commander<string> {
                   endIndex: f.endIndex + length,
                 }))
               } else {
-                block.childSlots.push(scope.fragment)
+                const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+                block.slot.insert(parentTemplate, 0);
               }
             }
           });

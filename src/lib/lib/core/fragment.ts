@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { MediaTemplate, Template } from './template';
+import { BackboneTemplate, SingleChildTemplate, Template } from './template';
 import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -11,7 +11,7 @@ export class Fragment {
     return this.contents.length;
   }
 
-  append(element: string | Template | MediaTemplate) {
+  append(element: string | Template) {
     this.contents.append(element);
   }
 
@@ -42,7 +42,7 @@ export class Fragment {
     return this.contents.slice(startIndex, endIndex);
   }
 
-  insertBefore(contents: Template | MediaTemplate | string, ref: Template | MediaTemplate) {
+  insertBefore(contents: Template | string, ref: Template) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -50,7 +50,7 @@ export class Fragment {
     this.insert(contents, index);
   }
 
-  insertAfter(contents: Template | MediaTemplate | string, ref: Template | MediaTemplate) {
+  insertAfter(contents: Template | string, ref: Template) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -58,7 +58,7 @@ export class Fragment {
     this.insert(contents, index + 1);
   }
 
-  insert(contents: Template | MediaTemplate | string, index: number) {
+  insert(contents: Template | string, index: number) {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
@@ -228,7 +228,7 @@ export class Fragment {
     return this.formatMap.getFormatRanges();
   }
 
-  indexOf(template: Template | MediaTemplate) {
+  indexOf(template: Template) {
     return this.contents.indexOf(template);
   }
 
@@ -251,7 +251,7 @@ export class Fragment {
     const formats: FormatRange[] = [];
     let newFormat: FormatRange;
     contents.forEach(item => {
-      if (item instanceof Template) {
+      if (item instanceof BackboneTemplate) {
         newFormat = null;
         item.childSlots.forEach(fragment => {
           const newFormatRange = Object.assign({}, formatRange);
@@ -259,6 +259,12 @@ export class Fragment {
           newFormatRange.endIndex = fragment.contentLength;
           fragment.apply(newFormatRange);
         })
+      } else if (item instanceof SingleChildTemplate) {
+        newFormat = null;
+        const newFormatRange = Object.assign({}, formatRange);
+        newFormatRange.startIndex = 0;
+        newFormatRange.endIndex = item.slot.contentLength;
+        item.slot.apply(newFormatRange);
       } else {
         if (!newFormat) {
           newFormat = {

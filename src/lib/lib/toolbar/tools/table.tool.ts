@@ -29,7 +29,7 @@ export const tableTool = Toolkit.makeDropdownTool({
       name: 'header'
     }]);
   },
-  match: new BlockMatcher(TableTemplate),
+  // match: new BlockMatcher(TableTemplate),
   execCommand() {
     return new TableCommander();
   }

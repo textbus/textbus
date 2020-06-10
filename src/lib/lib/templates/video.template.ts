@@ -1,4 +1,4 @@
-import { MediaTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class VideoTemplateTranslator implements TemplateTranslator {
   private tagName = 'video';
@@ -15,7 +15,7 @@ export class VideoTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class VideoTemplate extends MediaTemplate {
+export class VideoTemplate extends EndTemplate {
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('video');
 

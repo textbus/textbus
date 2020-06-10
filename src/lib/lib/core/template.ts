@@ -7,7 +7,7 @@ export interface SlotMap {
 }
 
 export interface ViewData {
-  template: Template | MediaTemplate;
+  template: BackboneTemplate | EndTemplate;
   childrenSlots: SlotMap[];
 }
 
@@ -19,26 +19,28 @@ export interface TemplateTranslator {
 
 export abstract class Template {
   readonly length = 1;
-  readonly childSlots: Fragment[] = [];
-  protected viewMap = new Map<Fragment, VElement>();
 
   protected constructor(public tagName: string) {
   }
 
   abstract render(isProduction: boolean): VElement;
-  abstract clone(): Template & any;
+
+  abstract clone(): Template;
+}
+
+export abstract class SingleChildTemplate extends Template {
+  slot: Fragment;
+  vDom: VElement;
+}
+
+export abstract class BackboneTemplate extends Template {
+  readonly childSlots: Fragment[] = [];
+  protected viewMap = new Map<Fragment, VElement>();
 
   getChildViewBySlot(slot: Fragment) {
     return this.viewMap.get(slot);
   }
 }
 
-export abstract class MediaTemplate {
-  readonly length = 1;
-
-  protected constructor(public tagName: string) {
-  }
-
-  abstract render(isProduction: boolean): VElement;
-  abstract clone(): MediaTemplate & any;
+export abstract class EndTemplate extends Template {
 }

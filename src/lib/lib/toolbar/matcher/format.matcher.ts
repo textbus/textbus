@@ -3,7 +3,7 @@ import {
   Renderer,
   Fragment,
   TBRange,
-  Template,
+  BackboneTemplate,
   FormatAbstractData,
   FormatRange,
   InlineFormatter,
@@ -111,7 +111,7 @@ export class FormatMatcher implements Matcher {
     });
 
     for (const child of childContents) {
-      if (child instanceof Template) {
+      if (child instanceof BackboneTemplate) {
         child.childSlots.forEach(childFragment => {
           states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
         })
@@ -164,8 +164,8 @@ export class FormatMatcher implements Matcher {
   }
 
   private isContainTag(fragment: Fragment, renderer: Renderer, position: { startIndex: number, endIndex: number }): boolean {
-    const templates: Template[] = fragment.sliceContents(position.startIndex, position.endIndex)
-      .filter(item => item instanceof Template) as Template[];
+    const templates: BackboneTemplate[] = fragment.sliceContents(position.startIndex, position.endIndex)
+      .filter(item => item instanceof BackboneTemplate) as BackboneTemplate[];
     const elements: Fragment[] = [];
     templates.forEach(t => {
       elements.push(...t.childSlots);

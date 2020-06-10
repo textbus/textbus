@@ -1,7 +1,7 @@
 import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatRange } from './formatter';
-import { MediaTemplate, Template } from './template';
+import { SingleChildTemplate, BackboneTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
 
@@ -77,8 +77,8 @@ export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
 
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-  private fragmentHierarchyMapping = new Map<Fragment, Template>();
-  private templateHierarchyMapping = new Map<Template | MediaTemplate, Fragment>();
+  private fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | SingleChildTemplate>();
+  private templateHierarchyMapping = new Map<Template, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
@@ -88,7 +88,7 @@ export class Renderer {
   render(fragment: Fragment, host: HTMLElement) {
     this.productionRenderingModal = false;
     this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-    this.fragmentHierarchyMapping = new Map<Fragment, Template>();
+    this.fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | SingleChildTemplate>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
     this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
@@ -144,7 +144,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  getContext<T extends Template | MediaTemplate>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
+  getContext<T extends Template>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
     const templateInstance = this.fragmentHierarchyMapping.get(by);
     if (templateInstance instanceof context) {
       if (typeof filter === 'function') {
@@ -430,7 +430,10 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        if (item instanceof Template) {
+        if (item instanceof SingleChildTemplate) {
+          this.createVDom(item.slot, vDom);
+          !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
+        } else if (item instanceof BackboneTemplate) {
           item.childSlots.forEach(slot => {
             !this.productionRenderingModal && this.fragmentHierarchyMapping.set(slot, item);
             const parent = item.getChildViewBySlot(slot);

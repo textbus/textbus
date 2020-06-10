@@ -30,7 +30,7 @@ export class CodeCommander implements Commander<string> {
         const t = new CodeTemplate(this.lang);
         const f = new Fragment();
         f.append(new SingleTemplate('br'));
-        t.childSlots.push(f);
+        t.slot = f;
         parentFragment.insertAfter(t, context);
         range.setStart(f, 0);
         range.collapse();

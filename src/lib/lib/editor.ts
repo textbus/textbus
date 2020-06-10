@@ -8,7 +8,7 @@ import {
   Fragment,
   InlineFormatter,
   Lifecycle,
-  MediaTemplate,
+  EndTemplate,
   Parser,
   RangePath,
   Renderer, TBRange, TBRangePosition,
@@ -384,7 +384,7 @@ export class Editor implements EventDelegate {
           const p = new BlockTemplate('p');
           const fragment = new Fragment();
           fragment.append(new SingleTemplate('br'));
-          p.childSlots.push(fragment);
+          p.slot = fragment;
           this.rootFragment.append(p);
           selection.firstRange.setStart(fragment, 0);
           selection.firstRange.collapse();
@@ -441,6 +441,14 @@ export class Editor implements EventDelegate {
   private paste(contents: Contents) {
     const firstRange = this.selection.firstRange;
     const fragment = firstRange.startFragment;
+
+    // const firstChild = fragment.getContentAtIndex(0);
+    //
+    // if(fragment.contentLength === 0 || firstChild instanceof SingleTemplate && firstChild.tagName === 'br'){
+    //
+    // }
+    //
+
     let i = 0
     contents.slice(0).forEach(item => {
       fragment.insert(item, firstRange.startIndex + i);
@@ -494,7 +502,7 @@ export class Editor implements EventDelegate {
       const p = new BlockTemplate('p');
       const fragment = new Fragment();
       fragment.append(new SingleTemplate('br'));
-      p.childSlots.push(fragment);
+      p.slot = fragment;
       rootFragment.append(p);
     }
     this.renderer.render(rootFragment, this.viewer.contentDocument.body).events.subscribe(event => {
@@ -512,7 +520,7 @@ export class Editor implements EventDelegate {
             }
           } else {
             const firstContent = range.startFragment.getContentAtIndex(0);
-            if (firstContent instanceof MediaTemplate && firstContent.tagName === 'br') {
+            if (firstContent instanceof EndTemplate && firstContent.tagName === 'br') {
               range.startFragment.delete(0, 1);
               if (range.startFragment.contentLength === 0) {
                 let position = range.getPreviousPosition();
@@ -528,7 +536,7 @@ export class Editor implements EventDelegate {
               if (prevPosition.fragment !== range.startFragment) {
                 range.setStart(prevPosition.fragment, prevPosition.index);
                 const last = prevPosition.fragment.getContentAtIndex(prevPosition.index - 1);
-                if (last instanceof MediaTemplate && last.tagName === 'br') {
+                if (last instanceof EndTemplate && last.tagName === 'br') {
                   range.startIndex--;
                 }
                 range.connect();

@@ -1,4 +1,12 @@
-import { Template, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
+import {
+  BackboneTemplate,
+  TemplateTranslator,
+  ViewData,
+  Fragment,
+  VElement,
+  EventType,
+  SingleChildTemplate
+} from '../core/_api';
 import { SingleTemplate } from './single.template';
 
 export class BlockTemplateTranslator implements TemplateTranslator {
@@ -12,7 +20,7 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   from(el: HTMLElement): ViewData {
     const template = new BlockTemplate(el.tagName.toLocaleLowerCase());
     const slot = new Fragment();
-    template.childSlots.push(slot);
+    template.slot = slot;
     return {
       template,
       childrenSlots: [{
@@ -23,29 +31,27 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class BlockTemplate extends Template {
+export class BlockTemplate extends SingleChildTemplate {
   constructor(tagName: string) {
     super(tagName);
   }
 
   clone() {
     const template = new BlockTemplate(this.tagName);
-    this.childSlots.forEach(f => {
-      template.childSlots.push(f.clone());
-    });
+    template.slot = this.slot.clone();
     return template;
   }
 
   render() {
     const block = new VElement(this.tagName);
-    this.viewMap.set(this.childSlots[0], block);
+    this.vDom = block;
     block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragmentByTemplate(this);
 
         const template = new BlockTemplate('p');
         const fragment = new Fragment();
-        template.childSlots.push(fragment);
+        template.slot = fragment;
         const firstRange = event.selection.firstRange;
         const c = firstRange.startFragment.delete(firstRange.startIndex);
         if (firstRange.startFragment.contentLength === 0) {

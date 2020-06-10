@@ -1,11 +1,11 @@
 import {
-  Template,
+  BackboneTemplate,
   TemplateTranslator,
   ViewData,
   Fragment,
   VElement,
   EventType,
-  FormatDelta, FormatAbstractData, InlineFormatter, FormatEffect, ReplaceModel, ChildSlotModel
+  FormatDelta, FormatAbstractData, InlineFormatter, FormatEffect, ReplaceModel, ChildSlotModel, SingleChildTemplate
 } from '../core/_api';
 import { SingleTemplate } from './single.template';
 import { getLanguage, highlight } from 'highlight.js';
@@ -135,7 +135,7 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   from(el: HTMLElement): ViewData {
     const template = new CodeTemplate(el.getAttribute('lang'));
     const slot = new Fragment();
-    template.childSlots.push(slot);
+    template.slot = slot;
     return {
       template,
       childrenSlots: [{
@@ -148,16 +148,14 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class CodeTemplate extends Template {
+export class CodeTemplate extends SingleChildTemplate {
   constructor(public lang: string) {
     super('pre');
   }
 
   clone() {
     const template = new CodeTemplate(this.lang);
-    this.childSlots.forEach(f => {
-      template.childSlots.push(f.clone());
-    });
+    template.slot = this.slot.clone();
     return template;
   }
 
@@ -169,17 +167,17 @@ export class CodeTemplate extends Template {
     code.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
-        this.childSlots[0].insert(new SingleTemplate('br'), firstRange.startIndex);
+        this.slot.insert(new SingleTemplate('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
       }
     })
     block.appendChild(code);
-    this.viewMap.set(this.childSlots[0], code);
+    this.vDom = code;
     return block;
   }
 
   private format() {
-    const fragment = this.childSlots[0];
+    const fragment = this.slot;
 
     const sourceCode = fragment.sliceContents(0).map(item => {
       if (typeof item === 'string') {

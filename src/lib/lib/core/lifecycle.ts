@@ -3,8 +3,6 @@ import { TBSelection } from './selection';
 import { Commander } from './commander';
 import { Editor } from '../editor';
 import { Contents } from './contents';
-import { MediaTemplate, Template } from './template';
-import { Parser } from './parser';
 
 export interface Lifecycle {
   setup?(document: Document): void;
@@ -22,8 +20,6 @@ export interface Lifecycle {
   onSelectionChange?(): void;
 
   onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
-
-  onRender?(template: Template | MediaTemplate, renderer: Renderer, parser: Parser): void;
 
   onOutput?(contents: string): string;
 }

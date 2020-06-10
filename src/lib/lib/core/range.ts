@@ -1,9 +1,8 @@
 import { Constructor, Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement } from './element';
-import { MediaTemplate, Template } from './template';
+import { BackboneTemplate, EndTemplate, SingleChildTemplate } from './template';
 import { BlockFormatter } from './formatter';
-import { start } from 'repl';
 
 /**
  * 标识 Fragment 中的一个位置
@@ -118,7 +117,7 @@ export class TBRange {
     }
   }
 
-  getSlotRange<T extends Template>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ template: T; startIndex: number; endIndex: number }> {
+  getSlotRange<T extends BackboneTemplate>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ template: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ template: T, index: number }> = [];
     this.getSelectedScope().map(scope => {
       const context = this.renderer.getContext(scope.fragment, of, filter);
@@ -219,7 +218,10 @@ export class TBRange {
       let i = 0;
       const contents = fragment.sliceContents(startIndex, endIndex);
       contents.forEach(c => {
-        if (c instanceof Template) {
+        if (c instanceof SingleChildTemplate) {
+          newScope = null;
+          scopes.push(...fn(c.slot, 0, c.slot.contentLength));
+        } else if (c instanceof BackboneTemplate) {
           newScope = null;
           c.childSlots.forEach(childFragment => {
             scopes.push(...fn(childFragment, 0, childFragment.contentLength));
@@ -264,7 +266,10 @@ export class TBRange {
       return this;
     }
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
-    if (parentTemplate) {
+    if (parentTemplate instanceof SingleChildTemplate) {
+      return this.deleteEmptyTree(this.renderer.getParentFragmentByTemplate(parentTemplate), endFragment);
+    }
+    if (parentTemplate instanceof BackboneTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
       if (parentTemplate.childSlots.length === 0) {
         const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
@@ -301,7 +306,10 @@ export class TBRange {
 
     if (this.startIndex > 0) {
       const prev = fragment.getContentAtIndex(this.startIndex - 1);
-      if (prev instanceof Template) {
+      if (prev instanceof SingleChildTemplate) {
+        return this.findLastChild(prev.slot);
+      }
+      if (prev instanceof BackboneTemplate) {
         return this.findLastChild(prev.childSlots[prev.childSlots.length - 1]);
       }
       return {
@@ -322,15 +330,20 @@ export class TBRange {
           index: 0
         };
       }
-      const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
-      if (fragmentIndex > 0) {
-        return this.findLastChild(parentTemplate.childSlots[fragmentIndex - 1]);
+      if (parentTemplate instanceof BackboneTemplate) {
+        const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+        if (fragmentIndex > 0) {
+          return this.findLastChild(parentTemplate.childSlots[fragmentIndex - 1]);
+        }
       }
       const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex > 0) {
         const prevContent = parentFragment.getContentAtIndex(templateIndex - 1);
-        if (prevContent instanceof Template) {
+        if (prevContent instanceof SingleChildTemplate) {
+          return this.findLastChild(prevContent.slot);
+        }
+        if (prevContent instanceof BackboneTemplate) {
           return this.findLastChild(prevContent.childSlots[prevContent.childSlots.length - 1]);
         }
         return {
@@ -351,13 +364,16 @@ export class TBRange {
     let offset = this.endIndex;
     if (offset === fragment.contentLength - 1) {
       const current = fragment.getContentAtIndex(offset);
-      if (current instanceof MediaTemplate && current.tagName === 'br') {
+      if (current instanceof EndTemplate && current.tagName === 'br') {
         offset++;
       }
     }
     if (offset < fragment.contentLength) {
       const next = fragment.getContentAtIndex(offset + 1);
-      if (next instanceof Template) {
+      if (next instanceof SingleChildTemplate) {
+        return this.findFirstPosition(next.slot);
+      }
+      if (next instanceof BackboneTemplate) {
         return this.findFirstPosition(next.childSlots[0]);
       }
       return {
@@ -378,15 +394,20 @@ export class TBRange {
           index: cacheFragment.contentLength
         }
       }
-      const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
-      if (fragmentIndex < parentTemplate.childSlots.length - 1) {
-        return this.findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
+      if (parentTemplate instanceof BackboneTemplate) {
+        const fragmentIndex = parentTemplate.childSlots.indexOf(fragment);
+        if (fragmentIndex < parentTemplate.childSlots.length - 1) {
+          return this.findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
+        }
       }
       const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex < parentFragment.contentLength - 1) {
         const nextContent = parentFragment.getContentAtIndex(templateIndex + 1);
-        if (nextContent instanceof Template) {
+        if (nextContent instanceof SingleChildTemplate) {
+          return this.findFirstPosition(nextContent.slot);
+        }
+        if (nextContent instanceof BackboneTemplate) {
           return this.findFirstPosition(nextContent.childSlots[0]);
         }
         return {
@@ -505,7 +526,10 @@ export class TBRange {
 
   findFirstPosition(fragment: Fragment): TBRangePosition {
     const first = fragment.getContentAtIndex(0);
-    if (first instanceof Template) {
+    if (first instanceof SingleChildTemplate) {
+      return this.findFirstPosition(first.slot);
+    }
+    if (first instanceof BackboneTemplate) {
       const firstFragment = first.childSlots[0];
       return this.findFirstPosition(firstFragment);
     }
@@ -517,7 +541,10 @@ export class TBRange {
 
   findLastChild(fragment: Fragment): TBRangePosition {
     const last = fragment.getContentAtIndex(fragment.contentLength - 1);
-    if (last instanceof Template) {
+    if (last instanceof SingleChildTemplate) {
+      return this.findLastChild(last.slot);
+    }
+    if (last instanceof BackboneTemplate) {
       const lastFragment = last.childSlots[last.childSlots.length - 1];
       return this.findLastChild(lastFragment);
       // } else if (last instanceof MediaTemplate && last.tagName === 'br') {
@@ -601,8 +628,8 @@ export class TBRange {
                     endIndex: number): TBRangeScope[] {
     const start: TBRangeScope[] = [];
     const end: TBRangeScope[] = [];
-    let startParentTemplate: Template = null;
-    let endParentTemplate: Template = null;
+    let startParentTemplate: BackboneTemplate | SingleChildTemplate = null;
+    let endParentTemplate: BackboneTemplate | SingleChildTemplate = null;
 
     let startFragmentPosition: number = null;
     let endFragmentPosition: number = null;
@@ -616,19 +643,22 @@ export class TBRange {
       });
 
       startParentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      const childSlots = startParentTemplate.childSlots;
-      const end = childSlots.indexOf(this.endFragment);
+      if (startParentTemplate instanceof BackboneTemplate) {
+        const childSlots = startParentTemplate.childSlots;
+        const end = childSlots.indexOf(this.endFragment);
 
-      startFragmentPosition = childSlots.indexOf(startFragment);
-      if (end === -1) {
-        start.push(...childSlots.slice(startFragmentPosition + 1, childSlots.length).map(fragment => {
-          return {
-            startIndex: 0,
-            endIndex: fragment.contentLength,
-            fragment
-          }
-        }));
+        startFragmentPosition = childSlots.indexOf(startFragment);
+        if (end === -1) {
+          start.push(...childSlots.slice(startFragmentPosition + 1, childSlots.length).map(fragment => {
+            return {
+              startIndex: 0,
+              endIndex: fragment.contentLength,
+              fragment
+            }
+          }));
+        }
       }
+
 
       startFragment = this.renderer.getParentFragmentByTemplate(startParentTemplate);
       startIndex = startFragment.indexOf(startParentTemplate) + 1;
@@ -641,18 +671,20 @@ export class TBRange {
         fragment: endFragment
       });
       endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      const childSlots = endParentTemplate.childSlots;
-      const start = childSlots.indexOf(this.startFragment);
+      if (endParentTemplate instanceof BackboneTemplate) {
+        const childSlots = endParentTemplate.childSlots;
+        const start = childSlots.indexOf(this.startFragment);
 
-      endFragmentPosition = childSlots.indexOf(endFragment);
-      if (start === -1) {
-        end.push(...childSlots.slice(0, endFragmentPosition).map(fragment => {
-          return {
-            startIndex: 0,
-            endIndex: fragment.contentLength,
-            fragment
-          }
-        }));
+        endFragmentPosition = childSlots.indexOf(endFragment);
+        if (start === -1) {
+          end.push(...childSlots.slice(0, endFragmentPosition).map(fragment => {
+            return {
+              startIndex: 0,
+              endIndex: fragment.contentLength,
+              fragment
+            }
+          }));
+        }
       }
 
 
@@ -660,7 +692,7 @@ export class TBRange {
       endIndex = endFragment.indexOf(endParentTemplate);
     }
     let result: TBRangeScope[] = [...start];
-    if (startParentTemplate === endParentTemplate && startParentTemplate !== null) {
+    if (startParentTemplate === endParentTemplate && startParentTemplate instanceof BackboneTemplate) {
       const slots = startParentTemplate.childSlots.slice(startFragmentPosition + 1, endFragmentPosition);
       result.push(...slots.map(f => {
         return {
@@ -788,7 +820,7 @@ export class TBRange {
   private static findExpandedStartIndex(fragment: Fragment, index: number) {
     for (; index > 0; index--) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof Template) {
+      if (item instanceof BackboneTemplate || item instanceof SingleChildTemplate) {
         break;
       }
     }
@@ -798,7 +830,7 @@ export class TBRange {
   private static findExpandedEndIndex(fragment: Fragment, index: number) {
     for (; index < fragment.contentLength; index++) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof Template) {
+      if (item instanceof BackboneTemplate || item instanceof SingleChildTemplate) {
         break;
       }
     }

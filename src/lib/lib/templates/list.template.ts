@@ -1,4 +1,4 @@
-import { SlotMap, Template, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
+import { SlotMap, BackboneTemplate, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 
@@ -48,7 +48,7 @@ export class ListTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class ListTemplate extends Template {
+export class ListTemplate extends BackboneTemplate {
   constructor(tagName: string) {
     super(tagName);
   }

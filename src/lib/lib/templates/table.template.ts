@@ -1,4 +1,4 @@
-import { Template, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { BackboneTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class TableTemplateTranslator implements TemplateTranslator {
   private tagName = 'table';
@@ -15,7 +15,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class TableTemplate extends Template {
+export class TableTemplate extends BackboneTemplate {
   constructor() {
     super('table');
   }
