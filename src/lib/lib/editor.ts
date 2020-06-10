@@ -526,12 +526,13 @@ export class Editor implements EventDelegate {
                 let position = range.getPreviousPosition();
                 if (position.fragment === range.startFragment && position.index === range.startIndex) {
                   position = range.getNextPosition();
+                } else {
+                  const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
+                  if (last instanceof SingleTagTemplate && last.tagName === 'br') {
+                    position.index--;
+                  }
                 }
                 range.deleteEmptyTree(range.startFragment);
-                const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
-                if (last instanceof SingleTagTemplate && last.tagName === 'br') {
-                  position.index--;
-                }
                 range.setStart(position.fragment, position.index);
                 range.collapse();
               }
