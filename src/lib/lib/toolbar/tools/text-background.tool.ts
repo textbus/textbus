@@ -10,7 +10,7 @@ export const textBackgroundTool = Toolkit.makeDropdownTool({
   menuFactory() {
     return new Palette()
   },
-  match: new FormatMatcher(backgroundColor),
+  matcher: new FormatMatcher(backgroundColor),
   execCommand() {
     return new StyleCommander('backgroundColor', backgroundColor)
   }

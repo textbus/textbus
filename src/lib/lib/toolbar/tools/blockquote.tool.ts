@@ -10,7 +10,7 @@ export const blockquoteTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: '\''
   },
-  match: new BlockMatcher(BlockTemplate, 'blockquote'),
+  matcher: new BlockMatcher(BlockTemplate, 'blockquote'),
   execCommand() {
     return new ToggleBlockCommander('blockquote');
   }

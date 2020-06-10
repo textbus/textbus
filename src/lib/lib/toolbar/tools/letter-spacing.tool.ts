@@ -34,7 +34,7 @@ export const letterSpacingTool = Toolkit.makeSelectTool({
     classes: ['tbus-letter-spacing-5'],
     value: '5px',
   }],
-  match: new FormatMatcher(letterSpacingFormatter),
+  matcher: new FormatMatcher(letterSpacingFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

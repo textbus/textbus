@@ -10,7 +10,7 @@ export const boldTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'b'
   },
-  match: new BoldMatcher(),
+  matcher: new BoldMatcher(),
   execCommand() {
     return new BoldCommander(boldFormatter);
   }

@@ -50,7 +50,7 @@ export const fontSizeTool = Toolkit.makeSelectTool({
     classes: ['tbus-font-size-48'],
     value: '48px'
   }],
-  match: new FormatMatcher(fontSizeFormatter),
+  matcher: new FormatMatcher(fontSizeFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

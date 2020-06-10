@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 export const historyForwardTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-history-forward'],
   tooltip: '重做',
-  match: new HistoryMatcher('forward'),
+  matcher: new HistoryMatcher('forward'),
   execCommand() {
     return new HistoryCommander('forward');
   },

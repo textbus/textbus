@@ -10,7 +10,7 @@ export const ulTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'u'
   },
-  match: new ListMatcher('ul'),
+  matcher: new ListMatcher('ul'),
   execCommand() {
     return new ListCommander('ul');
   }

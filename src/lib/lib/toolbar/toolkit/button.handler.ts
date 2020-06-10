@@ -16,7 +16,7 @@ export interface ButtonConfig {
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
-  match?: Matcher;
+  matcher?: Matcher;
   /** 设置按扭显示的文字 */
   label?: string;
   /** 给按扭控件添加一组 css class 类 */

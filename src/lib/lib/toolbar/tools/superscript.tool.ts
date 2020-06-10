@@ -6,7 +6,7 @@ import { Toolkit } from '../toolkit/toolkit';
 export const superscriptTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-superscript'],
   tooltip: '上标',
-  match: new FormatMatcher(superscriptFormatter),
+  matcher: new FormatMatcher(superscriptFormatter),
   execCommand() {
     return new InlineCommander('sup', superscriptFormatter);
   }

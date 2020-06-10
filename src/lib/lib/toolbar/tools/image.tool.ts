@@ -20,7 +20,7 @@ export const imageTool = Toolkit.makeDropdownTool({
       uploadBtnText: '上传新图片'
     }])
   },
-  match: new MediaMatcher(ImageTemplate, 'img'),
+  matcher: new MediaMatcher(ImageTemplate, 'img'),
   execCommand() {
     return new ImageCommander();
   }

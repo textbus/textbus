@@ -10,7 +10,7 @@ export const olTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'o'
   },
-  match: new ListMatcher('ol'),
+  matcher: new ListMatcher('ol'),
   execCommand() {
     return new ListCommander('ol');
   }

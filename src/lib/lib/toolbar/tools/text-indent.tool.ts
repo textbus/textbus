@@ -27,7 +27,7 @@ export const textIndentTool = Toolkit.makeSelectTool({
     classes: ['tbus-text-indent-4'],
     value: '4em'
   }],
-  match: new FormatMatcher(textIndentFormatter),
+  matcher: new FormatMatcher(textIndentFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

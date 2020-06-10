@@ -40,7 +40,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
       key: 'j'
     },
   }],
-  match: new FormatMatcher(textAlignFormatter),
+  matcher: new FormatMatcher(textAlignFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

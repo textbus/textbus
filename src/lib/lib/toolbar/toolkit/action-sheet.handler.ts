@@ -28,7 +28,7 @@ export interface ActionSheetConfig {
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
-  match?: Matcher;
+  matcher?: Matcher;
   /** 设置控件显示的文字 */
   label?: string;
   /** 给当前控件添加一组 css class */

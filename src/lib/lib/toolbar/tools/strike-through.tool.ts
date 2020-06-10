@@ -10,7 +10,7 @@ export const strikeThroughTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'd'
   },
-  match: new FormatMatcher(strikeThroughFormatter),
+  matcher: new FormatMatcher(strikeThroughFormatter),
   execCommand() {
     return new InlineCommander('del', strikeThroughFormatter);
   }

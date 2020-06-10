@@ -42,7 +42,7 @@ export const lineHeightTool = Toolkit.makeSelectTool({
     classes: ['tbus-line-height-4'],
     value: '4em'
   }],
-  match: new FormatMatcher(lineHeightFormatter),
+  matcher: new FormatMatcher(lineHeightFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

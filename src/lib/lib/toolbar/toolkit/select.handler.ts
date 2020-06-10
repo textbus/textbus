@@ -37,7 +37,7 @@ export interface SelectConfig {
   contextMenu?: ContextMenuConfig[];
 
   /** 锚中节点的的匹配项配置 */
-  match?: Matcher;
+  matcher?: Matcher;
   /** 给 Select 控件添加一组 css class */
   classes?: string[];
   /** 设置当前 Select 是否根据内容扩展宽度 */

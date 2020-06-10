@@ -51,7 +51,7 @@ export class Toolbar {
     this.tools.forEach(tool => {
       let s: SelectionMatchDelta;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = tool.config.match?.queryState(selection, renderer, this.context);
+        s = tool.config.matcher?.queryState(selection, renderer, this.context);
         if (s) {
           tool.instance.updateStatus(s);
         }

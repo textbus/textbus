@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 export const historyBackTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-history-back'],
   tooltip: '撤消',
-  match: new HistoryMatcher('back'),
+  matcher: new HistoryMatcher('back'),
   execCommand() {
     return new HistoryCommander('back');
   },

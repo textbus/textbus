@@ -48,7 +48,7 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
     classes: ['tbus-font-Times-New-Roman'],
     value: 'Times New Roman'
   }],
-  match: new FormatMatcher(fontFamilyFormatter),
+  matcher: new FormatMatcher(fontFamilyFormatter),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

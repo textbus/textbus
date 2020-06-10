@@ -38,7 +38,7 @@ export const codeTool = Toolkit.makeSelectTool({
     label: '无',
     default: true
   }],
-  match: new CodeMatcher(),
+  matcher: new CodeMatcher(),
   highlight(options, t) {
     if (t instanceof CodeTemplate) {
       for (const item of options) {

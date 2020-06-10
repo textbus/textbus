@@ -30,7 +30,7 @@ export const audioTool = Toolkit.makeDropdownTool({
       value: 'controls'
     }]);
   },
-  match: new MediaMatcher(AudioTemplate, 'audio'),
+  matcher: new MediaMatcher(AudioTemplate, 'audio'),
   execCommand() {
     return new AudioCommander();
   }

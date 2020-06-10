@@ -10,7 +10,7 @@ export const italicTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'i'
   },
-  match: new FormatMatcher(italicFormatter),
+  matcher: new FormatMatcher(italicFormatter),
   execCommand() {
     return new InlineCommander('em', italicFormatter);
   }

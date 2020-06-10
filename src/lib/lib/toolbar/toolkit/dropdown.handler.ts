@@ -12,7 +12,7 @@ export interface DropdownConfig {
   menuFactory(): DropdownViewer;
 
   /** 锚中节点的的匹配项配置 */
-  match?: Matcher;
+  matcher?: Matcher;
 
   /** 订阅下拉控件操作完成时调用的命令 */
   execCommand(): Commander;
