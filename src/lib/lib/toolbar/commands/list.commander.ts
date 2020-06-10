@@ -85,6 +85,7 @@ export class ListCommander implements Commander {
             if (before.childSlots.length) {
               parentFragment.insert(before, position);
             }
+            parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
           }
         }
       }

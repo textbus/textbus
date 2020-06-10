@@ -267,7 +267,11 @@ export class TBRange {
     }
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
     if (parentTemplate instanceof SingleChildTemplate) {
-      return this.deleteEmptyTree(this.renderer.getParentFragmentByTemplate(parentTemplate), endFragment);
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+      if (parentFragment.contentLength === 0) {
+        return this.deleteEmptyTree(parentFragment, endFragment);
+      }
     }
     if (parentTemplate instanceof BackboneTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
