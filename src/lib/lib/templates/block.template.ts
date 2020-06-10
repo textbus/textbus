@@ -66,6 +66,7 @@ export class BlockTemplate extends SingleChildTemplate {
         parent.insert(template, parent.indexOf(this) + 1);
         firstRange.startFragment = firstRange.endFragment = fragment
         firstRange.startIndex = firstRange.endIndex = 0;
+        event.stopPropagation();
       }
     })
     return block;
