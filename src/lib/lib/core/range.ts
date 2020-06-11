@@ -643,7 +643,7 @@ export class TBRange {
 
     while (startFragment !== this.commonAncestorFragment) {
       if (commonAncestorTemplate && startParentTemplate === this.commonAncestorTemplate) {
-        return
+        return;
       }
       start.push({
         startIndex,
@@ -671,13 +671,8 @@ export class TBRange {
     }
     while (endFragment !== this.commonAncestorFragment) {
       if (commonAncestorTemplate && endParentTemplate === this.commonAncestorTemplate) {
-        return
+        return;
       }
-      end.push({
-        startIndex: 0,
-        endIndex,
-        fragment: endFragment
-      });
       endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
       if (endParentTemplate instanceof BackboneTemplate ) {
         const childSlots = endParentTemplate.childSlots;
@@ -694,6 +689,11 @@ export class TBRange {
           }));
         }
       }
+      end.push({
+        startIndex: 0,
+        endIndex,
+        fragment: endFragment
+      });
       endFragment = this.renderer.getParentFragmentByTemplate(endParentTemplate);
       endIndex = endFragment.indexOf(endParentTemplate);
     }
