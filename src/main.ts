@@ -30,6 +30,8 @@ editor.setContents(`
 <li>bbbb</li>
 <li>ccccc</li>
 </ul>
+<p>323</p>
+<p>432432</p>
 `);
 
 

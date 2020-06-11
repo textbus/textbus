@@ -1,7 +1,7 @@
 import { Constructor, Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement } from './element';
-import { BackboneTemplate, EndTemplate, SingleChildTemplate } from './template';
+import { BackboneTemplate, EndTemplate, SingleChildTemplate, Template } from './template';
 import { BlockFormatter } from './formatter';
 
 /**
@@ -639,8 +639,12 @@ export class TBRange {
     let startFragmentPosition: number = null;
     let endFragmentPosition: number = null;
 
-    while (startFragment !== this.commonAncestorFragment &&
-    startParentTemplate !== this.commonAncestorTemplate) {
+    const commonAncestorTemplate = this.commonAncestorTemplate;
+
+    while (startFragment !== this.commonAncestorFragment) {
+      if(commonAncestorTemplate && startParentTemplate === this.commonAncestorTemplate) {
+        return
+      }
       start.push({
         startIndex,
         endIndex: startFragment.contentLength,
@@ -648,7 +652,7 @@ export class TBRange {
       });
 
       startParentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      if (startParentTemplate instanceof BackboneTemplate) {
+      if (startParentTemplate instanceof BackboneTemplate && startParentTemplate !== this.commonAncestorTemplate) {
         const childSlots = startParentTemplate.childSlots;
         const end = childSlots.indexOf(this.endFragment);
 
@@ -663,20 +667,20 @@ export class TBRange {
           }));
         }
       }
-
-
       startFragment = this.renderer.getParentFragmentByTemplate(startParentTemplate);
       startIndex = startFragment.indexOf(startParentTemplate) + 1;
     }
-    while (endFragment !== this.commonAncestorFragment &&
-    endParentTemplate !== this.commonAncestorTemplate) {
+    while (endFragment !== this.commonAncestorFragment) {
+      if(commonAncestorTemplate && endParentTemplate === this.commonAncestorTemplate) {
+        return
+      }
       end.push({
         startIndex: 0,
         endIndex,
         fragment: endFragment
       });
       endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      if (endParentTemplate instanceof BackboneTemplate) {
+      if (endParentTemplate instanceof BackboneTemplate && endParentTemplate !== this.commonAncestorTemplate) {
         const childSlots = endParentTemplate.childSlots;
         const start = childSlots.indexOf(this.startFragment);
 
@@ -691,8 +695,6 @@ export class TBRange {
           }));
         }
       }
-
-
       endFragment = this.renderer.getParentFragmentByTemplate(endParentTemplate);
       endIndex = endFragment.indexOf(endParentTemplate);
     }
@@ -714,8 +716,9 @@ export class TBRange {
       })
     }
     result.push(...end);
+
     return result.filter(item => {
-      return item.startIndex <= item.endIndex
+      return item.startIndex < item.endIndex
     });
   }
 
@@ -760,12 +763,42 @@ export class TBRange {
   }
 
   private getCommonAncestorTemplate() {
-    const startTemplate = this.renderer.getParentTemplateByFragment(this.startFragment);
-    const endTemplate = this.renderer.getParentTemplateByFragment(this.endFragment);
+    let startTemplate = this.renderer.getParentTemplateByFragment(this.startFragment);
+    let endTemplate = this.renderer.getParentTemplateByFragment(this.endFragment);
     if (startTemplate === endTemplate) {
       return startTemplate;
     }
-    return this.renderer.getParentTemplateByFragment(this.commonAncestorFragment);
+    const startPaths: Template[] = [];
+    const endPaths: Template[] = [];
+
+    while (startTemplate) {
+      startPaths.push(startTemplate);
+      const parentFragment = this.renderer.getParentFragmentByTemplate(startTemplate);
+      if (!parentFragment) {
+        break;
+      }
+      startTemplate = this.renderer.getParentTemplateByFragment(parentFragment);
+    }
+
+    while (endTemplate) {
+      endPaths.push(endTemplate);
+      const parentFragment = this.renderer.getParentFragmentByTemplate(endTemplate);
+      if (!parentFragment) {
+        break;
+      }
+      endTemplate = this.renderer.getParentTemplateByFragment(parentFragment);
+    }
+    let f: Template = null;
+    while (startPaths.length && endPaths.length) {
+      let s = startPaths.pop();
+      let e = endPaths.pop();
+      if (s === e) {
+        f = s;
+      } else {
+        break
+      }
+    }
+    return f;
   }
 
   private getOffset(node: Node, offset: number) {
