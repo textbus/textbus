@@ -642,7 +642,7 @@ export class TBRange {
     const commonAncestorTemplate = this.commonAncestorTemplate;
 
     while (startFragment !== this.commonAncestorFragment) {
-      if(commonAncestorTemplate && startParentTemplate === this.commonAncestorTemplate) {
+      if (commonAncestorTemplate && startParentTemplate === this.commonAncestorTemplate) {
         return
       }
       start.push({
@@ -652,12 +652,11 @@ export class TBRange {
       });
 
       startParentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      if (startParentTemplate instanceof BackboneTemplate && startParentTemplate !== this.commonAncestorTemplate) {
+      if (startParentTemplate instanceof BackboneTemplate) {
         const childSlots = startParentTemplate.childSlots;
         const end = childSlots.indexOf(this.endFragment);
-
         startFragmentPosition = childSlots.indexOf(startFragment);
-        if (end === -1) {
+        if (startParentTemplate !== this.commonAncestorTemplate && end === -1) {
           start.push(...childSlots.slice(startFragmentPosition + 1, childSlots.length).map(fragment => {
             return {
               startIndex: 0,
@@ -671,7 +670,7 @@ export class TBRange {
       startIndex = startFragment.indexOf(startParentTemplate) + 1;
     }
     while (endFragment !== this.commonAncestorFragment) {
-      if(commonAncestorTemplate && endParentTemplate === this.commonAncestorTemplate) {
+      if (commonAncestorTemplate && endParentTemplate === this.commonAncestorTemplate) {
         return
       }
       end.push({
@@ -680,12 +679,12 @@ export class TBRange {
         fragment: endFragment
       });
       endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      if (endParentTemplate instanceof BackboneTemplate && endParentTemplate !== this.commonAncestorTemplate) {
+      if (endParentTemplate instanceof BackboneTemplate ) {
         const childSlots = endParentTemplate.childSlots;
         const start = childSlots.indexOf(this.startFragment);
 
         endFragmentPosition = childSlots.indexOf(endFragment);
-        if (start === -1) {
+        if (endParentTemplate !== this.commonAncestorTemplate && start === -1) {
           end.push(...childSlots.slice(0, endFragmentPosition).map(fragment => {
             return {
               startIndex: 0,
