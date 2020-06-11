@@ -725,7 +725,7 @@ export class TBRange {
     result.push(...end);
 
     return result.filter(item => {
-      return item.startIndex < item.endIndex
+      return item.startIndex <= item.endIndex
     });
   }
 
