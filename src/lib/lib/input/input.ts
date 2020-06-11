@@ -72,20 +72,17 @@ export class Events {
       // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
-      const keymaps = this.keymaps.filter(keyMap => {
-        if (Array.isArray(keyMap.keymap.key)) {
-          return new RegExp(`^(${keyMap.keymap.key.join('|')})$`, 'i').test(ev.key);
-        }
-        return new RegExp(`^${ev.key}$`, 'i').test(keyMap.keymap.key);
-      });
-
-      for (const item of keymaps) {
-        if (!!item.keymap.altKey === ev.altKey &&
-          !!item.keymap.shiftKey === ev.shiftKey &&
-          !!item.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)
-        ) {
+      const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key}]$`, 'i');
+      for (const config of this.keymaps) {
+        const test = Array.isArray(config.keymap.key) ?
+          config.keymap.key.map(k => reg.test(k)).includes(true) :
+          reg.test(config.keymap.key);
+        if (test &&
+          !!config.keymap.altKey === ev.altKey &&
+          !!config.keymap.shiftKey === ev.shiftKey &&
+          !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
           ev.preventDefault();
-          return item.action(ev);
+          return config.action(ev);
         }
       }
     });
