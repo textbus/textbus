@@ -511,7 +511,6 @@ export class Editor implements EventDelegate {
             range.connect();
             return;
           }
-
           if (range.startIndex > 0) {
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
             range.startIndex = range.endIndex = range.startIndex - 1;
@@ -537,9 +536,13 @@ export class Editor implements EventDelegate {
                 range.collapse();
               }
             } else {
-              const prevPosition = range.getPreviousPosition();
+              let prevPosition = range.getPreviousPosition();
               if (prevPosition.fragment !== range.startFragment) {
                 range.setStart(prevPosition.fragment, prevPosition.index);
+                while (prevPosition.fragment.contentLength === 0) {
+                  prevPosition = range.getPreviousPosition();
+                  range.setStart(prevPosition.fragment, prevPosition.index);
+                }
                 const last = prevPosition.fragment.getContentAtIndex(prevPosition.index - 1);
                 if (last instanceof SingleTagTemplate && last.tagName === 'br') {
                   range.startIndex--;
