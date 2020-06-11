@@ -98,22 +98,30 @@ export class TBRange {
     let endFragment = this.endFragment;
     let startIndex = this.startIndex;
     let endIndex = this.endIndex;
+    const commonAncestorFragment = this.commonAncestorFragment;
 
-    while (startFragment !== this.commonAncestorFragment) {
-      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      startIndex = startFragment.indexOf(parentTemplate);
+    let startChildTemplate: BackboneTemplate | SingleChildTemplate = null;
+    let endChildTemplate: BackboneTemplate | SingleChildTemplate = null;
+
+    while (startFragment !== commonAncestorFragment) {
+      startChildTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      startFragment = this.renderer.getParentFragmentByTemplate(startChildTemplate);
+      startIndex = startFragment.indexOf(startChildTemplate);
     }
 
-    while (endFragment !== this.commonAncestorFragment) {
-      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      endIndex = endFragment.indexOf(parentTemplate);
+    while (endFragment !== commonAncestorFragment) {
+      endChildTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      endFragment = this.renderer.getParentFragmentByTemplate(endChildTemplate);
+      endIndex = endFragment.indexOf(endChildTemplate);
     }
 
     return {
       startIndex,
-      endIndex
+      startFragment,
+      startChildTemplate,
+      endIndex,
+      endFragment,
+      endChildTemplate
     }
   }
 
@@ -674,7 +682,7 @@ export class TBRange {
         return;
       }
       endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      if (endParentTemplate instanceof BackboneTemplate ) {
+      if (endParentTemplate instanceof BackboneTemplate) {
         const childSlots = endParentTemplate.childSlots;
         const start = childSlots.indexOf(this.startFragment);
 

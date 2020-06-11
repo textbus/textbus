@@ -8,7 +8,7 @@ import {
   FormatRange,
   InlineFormatter,
   FormatEffect,
-  BlockFormatter
+  BlockFormatter, SingleChildTemplate
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
@@ -164,11 +164,13 @@ export class FormatMatcher implements Matcher {
   }
 
   private isContainTag(fragment: Fragment, renderer: Renderer, position: { startIndex: number, endIndex: number }): boolean {
-    const templates: BackboneTemplate[] = fragment.sliceContents(position.startIndex, position.endIndex)
-      .filter(item => item instanceof BackboneTemplate) as BackboneTemplate[];
+    const templates = fragment.sliceContents(position.startIndex, position.endIndex)
+      .filter(item => {
+        return item instanceof BackboneTemplate || item instanceof SingleChildTemplate;
+      }) as Array<BackboneTemplate|SingleChildTemplate>;
     const elements: Fragment[] = [];
     templates.forEach(t => {
-      elements.push(...t.childSlots);
+      t instanceof BackboneTemplate ? elements.push(...t.childSlots) : elements.push(t.slot);
     });
     for (let el of elements) {
       if (FormatMatcher.isDisable(el, this.rule.noContainTags) ||

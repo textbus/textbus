@@ -9,7 +9,6 @@ export class ListCommander implements Commander {
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     selection.ranges.forEach(range => {
-      const commonScope = range.getCommonAncestorFragmentScope();
       if (overlap) {
         range.getSlotRange(ListTemplate, instance => instance.tagName === this.tagName).forEach(item => {
           const slots = item.template.split(item.startIndex, item.endIndex);
@@ -38,11 +37,13 @@ export class ListCommander implements Commander {
           parentFragment.delete(parentFragment.indexOf(item.template), 1);
         })
       } else {
+        const commonScope = range.getCommonAncestorFragmentScope();
+        const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListTemplate(this.tagName);
         range.getSuccessiveContents().reverse().forEach(scope => {
           if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
             list.childSlots.unshift(scope.fragment);
-            range.deleteEmptyTree(scope.fragment, range.commonAncestorFragment);
+            range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
             return;
           }
           const fragment = new Fragment();
@@ -51,7 +52,7 @@ export class ListCommander implements Commander {
           contents.formatRanges.forEach(f => fragment.apply(f));
           list.childSlots.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
-            range.deleteEmptyTree(scope.fragment, range.commonAncestorFragment);
+            range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
           }
           if (scope.fragment === range.startFragment) {
             range.setStart(fragment, range.startIndex - scope.startIndex);
@@ -59,17 +60,21 @@ export class ListCommander implements Commander {
             range.setEnd(fragment, range.endIndex - scope.endIndex);
           }
         });
-        if (range.startFragment !== range.commonAncestorFragment) {
-          range.commonAncestorFragment.insert(list, commonScope.startIndex);
+        if (range.startFragment !== commonAncestorFragment) {
+          if (commonScope.startChildTemplate && commonScope.startChildTemplate instanceof BackboneTemplate && commonAncestorFragment.indexOf(commonScope.startChildTemplate) !== -1) {
+            commonAncestorFragment.insertAfter(list, commonScope.startChildTemplate);
+          } else {
+            commonAncestorFragment.insert(list, commonScope.startIndex);
+          }
         } else {
-          const parentTemplate = renderer.getParentTemplateByFragment(range.commonAncestorFragment);
+          const parentTemplate = renderer.getParentTemplateByFragment(commonAncestorFragment);
           if (parentTemplate instanceof SingleChildTemplate) {
             const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
             const position = parentFragment.indexOf(parentTemplate);
             parentFragment.delete(position, 1);
             parentFragment.insert(list, position);
           } else {
-            const index = parentTemplate.childSlots.indexOf(range.commonAncestorFragment);
+            const index = parentTemplate.childSlots.indexOf(commonAncestorFragment);
             const before = parentTemplate.clone() as BackboneTemplate;
             before.childSlots.splice(index);
             const after = parentTemplate.clone() as BackboneTemplate;
