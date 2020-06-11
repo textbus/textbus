@@ -2,6 +2,7 @@ import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/oper
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
+  BackboneTemplate,
   Commander,
   Contents,
   EventType,
@@ -10,7 +11,7 @@ import {
   Lifecycle,
   Parser,
   RangePath,
-  Renderer, TBRange, TBRangePosition,
+  Renderer, SingleChildTemplate, TBRange, TBRangePosition,
   TBSelection,
   TemplateTranslator,
   VElement
@@ -512,10 +513,18 @@ export class Editor implements EventDelegate {
             return;
           }
           if (range.startIndex > 0) {
+            let prevPosition = range.getPreviousPosition();
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-            range.startIndex = range.endIndex = range.startIndex - 1;
             if (range.commonAncestorFragment.contentLength === 0) {
               range.commonAncestorFragment.append(new SingleTagTemplate('br'));
+              range.startIndex = range.endIndex = 0;
+            } else {
+              while (prevPosition.fragment.contentLength === 0) {
+                range.setStart(prevPosition.fragment, prevPosition.index);
+                range.deleteEmptyTree(prevPosition.fragment);
+                prevPosition = range.getPreviousPosition();
+              }
+              range.setStart(prevPosition.fragment, prevPosition.index);
             }
           } else {
             const firstContent = range.startFragment.getContentAtIndex(0);
@@ -525,15 +534,19 @@ export class Editor implements EventDelegate {
                 let position = range.getPreviousPosition();
                 if (position.fragment === range.startFragment && position.index === range.startIndex) {
                   position = range.getNextPosition();
+                  range.deleteEmptyTree(range.startFragment);
                 } else {
+                  while (position.fragment.contentLength === 0) {
+                    position = range.getPreviousPosition();
+                    range.setStart(position.fragment, position.index);
+                  }
                   const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
                   if (last instanceof SingleTagTemplate && last.tagName === 'br') {
                     position.index--;
                   }
                 }
-                range.deleteEmptyTree(range.startFragment);
                 range.setStart(position.fragment, position.index);
-                range.collapse();
+                range.connect();
               }
             } else {
               let prevPosition = range.getPreviousPosition();
