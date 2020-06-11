@@ -45,8 +45,9 @@ export class FormatMatcher implements Matcher {
       }
 
       const states: FormatMatchData[] = [];
-      range.getSelectedScope().forEach(s => {
+      range.getSelectedScope().filter(s => s.endIndex > s.startIndex).forEach(s => {
         const state = this.getStatesByRange(s.fragment, this.formatter, s.startIndex, s.endIndex);
+
         if (state.effect === FormatEffect.Invalid) {
           const inSingleContainer = FormatMatcher.inSingleContainer(renderer, s.fragment, this.formatter, s.startIndex, s.endIndex);
           if (inSingleContainer.effect !== FormatEffect.Invalid) {
@@ -167,7 +168,7 @@ export class FormatMatcher implements Matcher {
     const templates = fragment.sliceContents(position.startIndex, position.endIndex)
       .filter(item => {
         return item instanceof BackboneTemplate || item instanceof SingleChildTemplate;
-      }) as Array<BackboneTemplate|SingleChildTemplate>;
+      }) as Array<BackboneTemplate | SingleChildTemplate>;
     const elements: Fragment[] = [];
     templates.forEach(t => {
       t instanceof BackboneTemplate ? elements.push(...t.childSlots) : elements.push(t.slot);
