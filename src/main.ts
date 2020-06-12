@@ -20,4 +20,4 @@ const editor = createEditor('#editor', {
   }
 });
 
-editor.setContents(`<div><nav><header>未完成</header><footer>按最近创建</footer></nav><em>新</em></div>`);
+editor.setContents(`<div><nav><header><br></header></nav></div><div><div><div><div><div><div><div><div><div><div><div><div><p></p></div></div></div></div></div></div></div></div></div></div></div></div><p><br></p>`);

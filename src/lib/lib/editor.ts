@@ -2,6 +2,7 @@ import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/oper
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
+  BackboneTemplate,
   Commander,
   Contents,
   EventType,
@@ -10,7 +11,7 @@ import {
   Lifecycle,
   Parser,
   RangePath,
-  Renderer, TBRange, TBRangePosition,
+  Renderer, SingleChildTemplate, TBRange, TBRangePosition,
   TBSelection,
   TemplateTranslator,
   VElement
@@ -20,6 +21,7 @@ import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFa
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { Paths } from './paths/paths';
+import { MediaTemplate } from '../../../bundles/lib/core/template';
 
 export interface Snapshot {
   contents: Fragment;
@@ -511,16 +513,22 @@ export class Editor implements EventDelegate {
             range.connect();
             return;
           }
+          let prevPosition = range.getPreviousPosition();
           if (range.startIndex > 0) {
-            let prevPosition = range.getPreviousPosition();
-            range.commonAncestorFragment.delete(range.startIndex - 1, 1);
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
-            if (range.commonAncestorFragment.contentLength === 0) {
-              range.commonAncestorFragment.append(new SingleTagTemplate('br'));
+
+            const commonAncestorFragment = range.commonAncestorFragment;
+            const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
+            if (typeof c === 'string' || c instanceof MediaTemplate) {
+              commonAncestorFragment.delete(range.startIndex - 1, 1);
+              range.startIndex = range.endIndex = range.startIndex - 1;
+            } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
+              commonAncestorFragment.delete(range.startIndex - 1, 1);
+              range.startIndex = range.endIndex = range.startIndex - 1;
+              if (commonAncestorFragment.contentLength === 0) {
+                commonAncestorFragment.append(new SingleTagTemplate('br'));
+              }
             } else {
               while (prevPosition.fragment.contentLength === 0) {
-                range.setStart(prevPosition.fragment, prevPosition.index);
                 range.deleteEmptyTree(prevPosition.fragment);
                 prevPosition = range.getPreviousPosition();
               }
@@ -528,41 +536,34 @@ export class Editor implements EventDelegate {
               range.connect();
             }
           } else {
+            while (prevPosition.fragment.contentLength === 0) {
+              range.deleteEmptyTree(prevPosition.fragment);
+              let position = range.getPreviousPosition();
+              if (prevPosition.fragment === position.fragment && prevPosition.index === position.index) {
+                position = range.getNextPosition();
+                break;
+              }
+              prevPosition = position;
+            }
+
             const firstContent = range.startFragment.getContentAtIndex(0);
             if (firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
               range.startFragment.delete(0, 1);
               if (range.startFragment.contentLength === 0) {
-                let position = range.getPreviousPosition();
                 range.deleteEmptyTree(range.startFragment);
-                if (position.fragment === range.startFragment && position.index === range.startIndex) {
-                  position = range.getNextPosition();
-                } else {
-                  while (position.fragment.contentLength === 0) {
-                    position = range.getPreviousPosition();
-                    range.setStart(position.fragment, position.index);
-                  }
-                  const last = position.fragment.getContentAtIndex(position.fragment.contentLength - 1);
-                  if (last instanceof SingleTagTemplate && last.tagName === 'br') {
-                    position.index--;
-                  }
-                }
-                range.setStart(position.fragment, position.index);
-                range.connect();
               }
-            } else {
-              let prevPosition = range.getPreviousPosition();
-              if (prevPosition.fragment !== range.startFragment) {
-                range.setStart(prevPosition.fragment, prevPosition.index);
-                while (prevPosition.fragment.contentLength === 0) {
-                  prevPosition = range.getPreviousPosition();
-                  range.setStart(prevPosition.fragment, prevPosition.index);
-                }
-                const last = prevPosition.fragment.getContentAtIndex(prevPosition.index - 1);
-                if (last instanceof SingleTagTemplate && last.tagName === 'br') {
-                  range.startIndex--;
-                }
-                range.connect();
+            }
+            range.setStart(prevPosition.fragment, prevPosition.index);
+            range.collapse();
+            while (prevPosition.fragment.contentLength === 0) {
+              const position = range.getNextPosition();
+              if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
+                break;
               }
+              range.deleteEmptyTree(prevPosition.fragment);
+              range.setStart(position.fragment, position.index);
+              range.collapse();
+              prevPosition = position;
             }
           }
         });

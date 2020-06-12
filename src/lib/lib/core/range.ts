@@ -287,8 +287,7 @@ export class TBRange {
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
       }
-    }
-    if (parentTemplate instanceof BackboneTemplate) {
+    } else if (parentTemplate instanceof BackboneTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
       if (parentTemplate.childSlots.length === 0) {
         const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
@@ -592,18 +591,20 @@ export class TBRange {
       toEnd = fragment === this.startFragment && index === this.startIndex;
     }
 
+    const flag = this.startFragment === this.endFragment;
+    const last = !flag ? this.endFragment.delete(this.endIndex) : null;
+
     this.deleteSelectedScope();
     if (toEnd) {
       this.endIndex = 0;
       this.collapse(true);
       return;
     }
-    if (this.startFragment !== this.endFragment && this.endFragment.contentLength > 0) {
-      const ff = this.endFragment.delete(0);
+    if (last) {
       this.deleteEmptyTree(this.endFragment);
       const startIndex = this.startFragment.contentLength;
-      ff.contents.forEach(c => this.startFragment.append(c));
-      ff.formatRanges
+      last.contents.forEach(c => this.startFragment.append(c));
+      last.formatRanges
         .filter(f => !(f.renderer instanceof BlockFormatter))
         .map(f => {
           f.startIndex += startIndex;
