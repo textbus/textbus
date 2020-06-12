@@ -2,7 +2,6 @@ import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/oper
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
-  BackboneTemplate,
   Commander,
   Contents,
   EventType,
@@ -11,7 +10,7 @@ import {
   Lifecycle,
   Parser,
   RangePath,
-  Renderer, SingleChildTemplate, TBRange, TBRangePosition,
+  Renderer, TBRange, TBRangePosition,
   TBSelection,
   TemplateTranslator,
   VElement
