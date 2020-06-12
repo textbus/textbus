@@ -313,11 +313,6 @@ export class Renderer {
   private createVDom(fragment: Fragment, host: VElement) {
     if (!this.productionRenderingModal) {
       this.fragmentAndVDomMapping.set(fragment, host);
-      this.vDomPositionMapping.set(host, {
-        startIndex: 0,
-        endIndex: fragment.contentLength,
-        fragment
-      });
     }
     const containerFormats: FormatRange[] = [];
     const childFormats: FormatRange[] = [];
@@ -452,6 +447,7 @@ export class Renderer {
     endIndex: number,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
+    const parent = host;
     formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
       .reduce((vEle, next) => {
         const renderModel = next.renderer.render(this.productionRenderingModal, next.state, next.abstractData, vEle);
@@ -469,16 +465,13 @@ export class Renderer {
         }
         return vEle;
       }, host);
-    let el = host;
+    let el: VElement = host === parent ? host.childNodes[0] as VElement : host;
     while (el) {
       !this.productionRenderingModal && this.vDomPositionMapping.set(el, {
         fragment,
         startIndex,
         endIndex
       });
-      if (el === slot) {
-        break;
-      }
       el = el.childNodes[0] as VElement;
     }
     return {

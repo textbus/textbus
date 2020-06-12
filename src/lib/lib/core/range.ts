@@ -831,9 +831,6 @@ export class TBRange {
       for (let i = 0; i < len; i++) {
         const child = vElement.childNodes[i];
         const position = this.renderer.getPositionByVDom(child);
-        // if (position.fragment !== fragment) {
-        //   throw new Error('当前节点的 fragment 和指定的 fragment 不匹配')
-        // }
         if (position.startIndex <= offset && position.endIndex >= offset) {
           if (i < len - 1 && position.endIndex === offset) {
             continue;

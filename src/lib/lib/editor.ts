@@ -525,6 +525,7 @@ export class Editor implements EventDelegate {
                 prevPosition = range.getPreviousPosition();
               }
               range.setStart(prevPosition.fragment, prevPosition.index);
+              range.connect();
             }
           } else {
             const firstContent = range.startFragment.getContentAtIndex(0);
