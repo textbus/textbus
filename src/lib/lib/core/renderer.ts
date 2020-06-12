@@ -447,7 +447,6 @@ export class Renderer {
     endIndex: number,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
-    const parent = host;
     formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
       .reduce((vEle, next) => {
         const renderModel = next.renderer.render(this.productionRenderingModal, next.state, next.abstractData, vEle);
@@ -465,7 +464,7 @@ export class Renderer {
         }
         return vEle;
       }, host);
-    let el: VElement = host === parent ? host.childNodes[0] as VElement : host;
+    let el = host;
     while (el) {
       !this.productionRenderingModal && this.vDomPositionMapping.set(el, {
         fragment,

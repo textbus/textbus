@@ -515,9 +515,9 @@ export class Editor implements EventDelegate {
           if (range.startIndex > 0) {
             let prevPosition = range.getPreviousPosition();
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
+            range.setStart(prevPosition.fragment, prevPosition.index);
             if (range.commonAncestorFragment.contentLength === 0) {
               range.commonAncestorFragment.append(new SingleTagTemplate('br'));
-              range.startIndex = range.endIndex = 0;
             } else {
               while (prevPosition.fragment.contentLength === 0) {
                 range.setStart(prevPosition.fragment, prevPosition.index);

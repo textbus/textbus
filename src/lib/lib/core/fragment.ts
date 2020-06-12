@@ -153,10 +153,12 @@ export class Fragment {
       // deleteRange           [   ]
 
       if (format.startIndex <= startIndex && format.endIndex >= endIndex) {
-        selfFormats.push({
-          ...format,
-          endIndex: format.endIndex - count
-        });
+        if (format.endIndex - count > format.startIndex) {
+          selfFormats.push({
+            ...format,
+            endIndex: format.endIndex - count
+          });
+        }
         discardedFormats.push({
           ...format,
           startIndex: 0,

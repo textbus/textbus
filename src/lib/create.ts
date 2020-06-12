@@ -70,7 +70,7 @@ export const defaultOptions: EditorOptions = {
   templateTranslators: [
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
-    new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote'.split(',')),
+    new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
     new SingleTagTemplateTranslator('br'),
     new CodeTemplateTranslator(),
     new AudioTemplateTranslator(),

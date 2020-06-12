@@ -834,31 +834,41 @@ export class TBRange {
           offset: 0
         };
       }
+      let index = 0;
       for (let i = 0; i < len; i++) {
         const child = vElement.childNodes[i];
         const position = this.renderer.getPositionByVDom(child);
-        if (position.startIndex <= offset && position.endIndex >= offset) {
-          if (i < len - 1 && position.endIndex === offset) {
-            continue;
-          }
-          if (child instanceof VElement) {
-            if (child.childNodes.length === 0) {
-              const node = this.renderer.getNativeNodeByVDom(child);
-              const parentNode = node.parentNode;
-              const index = Array.from(parentNode.childNodes).indexOf(node as any);
-              return {
-                node: parentNode,
-                offset: position.endIndex === offset ? index + 1 : index
-              }
+        if (position.fragment === fragment) {
+          index = position.endIndex;
+          if (position.startIndex <= offset && position.endIndex >= offset) {
+            if (i < len - 1 && position.endIndex === offset) {
+              continue;
             }
-            vElement = child;
-            continue parentLoop;
+            if (child instanceof VElement) {
+              if (child.childNodes.length === 0) {
+                const node = this.renderer.getNativeNodeByVDom(child);
+                const parentNode = node.parentNode;
+                const index = Array.from(parentNode.childNodes).indexOf(node as any);
+                return {
+                  node: parentNode,
+                  offset: position.endIndex === offset ? index + 1 : index
+                }
+              }
+              vElement = child;
+              continue parentLoop;
+            }
+            return {
+              node: this.renderer.getNativeNodeByVDom(child),
+              offset: offset - position.startIndex
+            }
           }
-          return {
-            node: this.renderer.getNativeNodeByVDom(child),
-            offset: offset - position.startIndex
+        } else {
+          if (index + 1 === offset) {
+            return this.findFocusNodeAndOffset(position.fragment, position.fragment.contentLength);
           }
+          index++;
         }
+
       }
       throw new Error('未找到对应节点');
     }
