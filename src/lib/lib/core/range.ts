@@ -268,7 +268,9 @@ export class TBRange {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
         scope.fragment.delete(0);
-        this.deleteEmptyTree(scope.fragment);
+        if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
+          this.deleteEmptyTree(scope.fragment);
+        }
       } else {
         scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
       }
@@ -585,34 +587,35 @@ export class TBRange {
     if (this.collapsed) {
       return;
     }
-    let toEnd = false;
-    if (this.startIndex === 0) {
-      const {fragment, index} = this.findFirstPosition(this.startFragment);
-      toEnd = fragment === this.startFragment && index === this.startIndex;
+    if (this.startFragment === this.endFragment) {
+      this.deleteSelectedScope();
+    } else {
+      let isDeleteFragment = false;
+      if (this.startIndex === 0) {
+        const {fragment, index} = this.findFirstPosition(this.startFragment);
+        isDeleteFragment = fragment === this.startFragment && index === this.startIndex;
+      }
+
+      this.deleteSelectedScope();
+      if (isDeleteFragment) {
+        this.deleteEmptyTree(this.startFragment);
+        this.setStart(this.endFragment, 0);
+      } else {
+        const last = this.endFragment.delete(0);
+        this.deleteEmptyTree(this.endFragment);
+        const startIndex = this.startFragment.contentLength;
+        last.contents.forEach(c => this.startFragment.append(c));
+        last.formatRanges
+          .filter(f => !(f.renderer instanceof BlockFormatter))
+          .map(f => {
+            f.startIndex += startIndex;
+            f.endIndex += startIndex;
+            return f;
+          })
+          .forEach(f => this.startFragment.apply(f));
+      }
     }
 
-    const flag = this.startFragment === this.endFragment;
-    const last = !flag ? this.endFragment.delete(this.endIndex) : null;
-
-    this.deleteSelectedScope();
-    if (toEnd) {
-      this.endIndex = 0;
-      this.collapse(true);
-      return;
-    }
-    if (last) {
-      this.deleteEmptyTree(this.endFragment);
-      const startIndex = this.startFragment.contentLength;
-      last.contents.forEach(c => this.startFragment.append(c));
-      last.formatRanges
-        .filter(f => !(f.renderer instanceof BlockFormatter))
-        .map(f => {
-          f.startIndex += startIndex;
-          f.endIndex += startIndex;
-          return f;
-        })
-        .forEach(f => this.startFragment.apply(f));
-    }
     this.collapse();
   }
 
