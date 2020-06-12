@@ -516,6 +516,7 @@ export class Editor implements EventDelegate {
             let prevPosition = range.getPreviousPosition();
             range.commonAncestorFragment.delete(range.startIndex - 1, 1);
             range.setStart(prevPosition.fragment, prevPosition.index);
+            range.collapse();
             if (range.commonAncestorFragment.contentLength === 0) {
               range.commonAncestorFragment.append(new SingleTagTemplate('br'));
             } else {
@@ -533,9 +534,9 @@ export class Editor implements EventDelegate {
               range.startFragment.delete(0, 1);
               if (range.startFragment.contentLength === 0) {
                 let position = range.getPreviousPosition();
+                range.deleteEmptyTree(range.startFragment);
                 if (position.fragment === range.startFragment && position.index === range.startIndex) {
                   position = range.getNextPosition();
-                  range.deleteEmptyTree(range.startFragment);
                 } else {
                   while (position.fragment.contentLength === 0) {
                     position = range.getPreviousPosition();
