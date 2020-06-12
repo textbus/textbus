@@ -180,6 +180,13 @@ export class TBRange {
    * }]
    */
   getSelectedScope(): TBRangeScope[] {
+    if (this.collapsed) {
+      return [{
+        fragment: this.commonAncestorFragment,
+        startIndex: this.startIndex,
+        endIndex: this.endIndex
+      }];
+    }
     return this.getScopes(this.startFragment, this.endFragment, this.startIndex, this.endIndex);
   }
 
@@ -208,7 +215,6 @@ export class TBRange {
    */
 
   getExpandedScope(): TBRangeScope[] {
-
     return this.getScopes(this.startFragment,
       this.endFragment,
       TBRange.findExpandedStartIndex(this.startFragment, this.startIndex),
@@ -725,7 +731,7 @@ export class TBRange {
     result.push(...end);
 
     return result.filter(item => {
-      return item.startIndex <= item.endIndex
+      return item.startIndex < item.endIndex
     });
   }
 
