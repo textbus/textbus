@@ -3,7 +3,7 @@ import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } fr
 
 import {
   Commander,
-  Contents,
+  Contents, EndTemplate,
   EventType,
   Fragment,
   InlineFormatter,
@@ -20,7 +20,6 @@ import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFa
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { Paths } from './paths/paths';
-import { MediaTemplate } from '../../../bundles/lib/core/template';
 
 export interface Snapshot {
   contents: Fragment;
@@ -510,7 +509,7 @@ export class Editor implements EventDelegate {
 
             const commonAncestorFragment = range.commonAncestorFragment;
             const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
-            if (typeof c === 'string' || c instanceof MediaTemplate) {
+            if (typeof c === 'string' || c instanceof EndTemplate) {
               commonAncestorFragment.delete(range.startIndex - 1, 1);
               range.startIndex = range.endIndex = range.startIndex - 1;
             } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
