@@ -497,14 +497,7 @@ export class Editor implements EventDelegate {
 
   private render() {
     const rootFragment = this.rootFragment;
-    const last = rootFragment.sliceContents(rootFragment.contentLength - 1)[0];
-    if (!(last instanceof BlockTemplate) || last.tagName !== 'p') {
-      const p = new BlockTemplate('p');
-      const fragment = new Fragment();
-      fragment.append(new SingleTagTemplate('br'));
-      p.slot = fragment;
-      rootFragment.append(p);
-    }
+    Editor.guardLastIsParagraph(rootFragment);
     this.renderer.render(rootFragment, this.viewer.contentDocument.body).events.subscribe(event => {
       if (event.type === EventType.onDelete) {
         this.selection.ranges.forEach(range => {
@@ -691,5 +684,22 @@ export class Editor implements EventDelegate {
       contents: snapshot.contents.clone(),
       paths: snapshot.paths.map(i => i)
     }
+  }
+
+  private static guardLastIsParagraph(fragment: Fragment) {
+    const last = fragment.sliceContents(fragment.contentLength - 1)[0];
+    if (last instanceof BlockTemplate) {
+      if (last.tagName === 'p') {
+        if (last.slot.contentLength === 0) {
+          last.slot.append(new SingleTagTemplate('br'));
+        }
+        return;
+      }
+    }
+    const p = new BlockTemplate('p');
+    const ff = new Fragment();
+    ff.append(new SingleTagTemplate('br'));
+    p.slot = ff;
+    fragment.append(p);
   }
 }
