@@ -543,10 +543,18 @@ export class Editor implements EventDelegate {
               range.startFragment.delete(0, 1);
               if (range.startFragment.contentLength === 0) {
                 range.deleteEmptyTree(range.startFragment);
+                const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
+                if (prevContent instanceof SingleTagTemplate && prevContent.tagName === 'br') {
+                  prevPosition.index--;
+                }
+
+                range.setStart(prevPosition.fragment, prevPosition.index);
+                range.collapse();
               }
+            } else {
+              range.setStart(prevPosition.fragment, prevPosition.index);
+              range.connect();
             }
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
             while (prevPosition.fragment.contentLength === 0) {
               const position = range.getNextPosition();
               if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
