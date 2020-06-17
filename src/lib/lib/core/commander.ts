@@ -25,7 +25,6 @@ export interface Commander<T = any> {
    * @param overlap 根据当前选区和工具类的 `Matcher` 匹配出的结果得到的状态，`true` 为完全重叠，`false` 为不完全重叠或不重叠
    * @param renderer 渲染器
    * @param rootFragment 根编辑片段
-   * @param parser 解析器
    */
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment, parser: Parser): void;
+  command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment): void;
 }

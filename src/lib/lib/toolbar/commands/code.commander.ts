@@ -1,7 +1,6 @@
 import {
   Commander,
   Fragment,
-  Parser,
   Renderer,
   TBSelection
 } from '../../core/_api';
@@ -17,7 +16,7 @@ export class CodeCommander implements Commander<string> {
     this.lang = value;
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment, parser: Parser): void {
+  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     if (overlap) {
       selection.ranges.forEach(range => {
         const context = renderer.getContext(range.startFragment, CodeTemplate);

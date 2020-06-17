@@ -487,7 +487,7 @@ export class Editor implements EventDelegate {
       }
     })
     if (isNext) {
-      commander.command(selection, overlap, this.renderer, this.rootFragment, this.parser);
+      commander.command(selection, overlap, this.renderer, this.rootFragment);
       this.render();
       selection.restore();
       this.toolbar.updateHandlerState(selection, this.renderer);

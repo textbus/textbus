@@ -64,6 +64,7 @@ export class ListTemplate extends BackboneTemplate {
 
   render() {
     const list = new VElement(this.tagName);
+    this.viewMap.clear();
     this.childSlots.forEach((slot, index) => {
       const li = new VElement('li');
       li.events.subscribe(event => {
