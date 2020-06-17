@@ -732,7 +732,7 @@ export class TBRange {
         fragment: this.commonAncestorFragment
       })
     }
-    result.push(...end);
+    result.push(...end.reverse());
 
     return result.filter(item => {
       return item.startIndex < item.endIndex

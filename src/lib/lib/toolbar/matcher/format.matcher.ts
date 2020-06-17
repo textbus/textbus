@@ -1,14 +1,15 @@
 import {
-  TBSelection,
-  Renderer,
-  Fragment,
-  TBRange,
   BackboneTemplate,
+  BlockFormatter,
   FormatAbstractData,
-  FormatRange,
-  InlineFormatter,
   FormatEffect,
-  BlockFormatter, SingleChildTemplate
+  FormatRange,
+  Fragment,
+  InlineFormatter,
+  Renderer,
+  SingleChildTemplate,
+  TBRange,
+  TBSelection
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
@@ -45,7 +46,7 @@ export class FormatMatcher implements Matcher {
       }
 
       const states: FormatMatchData[] = [];
-      range.getSelectedScope().filter(s => s.endIndex > s.startIndex).forEach(s => {
+      range.getSelectedScope().forEach(s => {
         const state = this.getStatesByRange(s.fragment, this.formatter, s.startIndex, s.endIndex);
 
         if (state.effect === FormatEffect.Invalid) {
@@ -86,6 +87,7 @@ export class FormatMatcher implements Matcher {
   }
 
   private getStatesByRange(fragment: Fragment, formatter: InlineFormatter | BlockFormatter, startIndex: number, endIndex: number): FormatMatchData {
+
     let formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
@@ -99,7 +101,7 @@ export class FormatMatcher implements Matcher {
         }
       }
       return {
-        effect: FormatEffect.Invalid,
+        effect: fragment.contentLength === 0 ? FormatEffect.Ignore : FormatEffect.Invalid,
         srcData: null
       };
     }
@@ -112,7 +114,9 @@ export class FormatMatcher implements Matcher {
     });
 
     for (const child of childContents) {
-      if (child instanceof BackboneTemplate) {
+      if (child instanceof SingleChildTemplate) {
+        states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.contentLength));
+      } else if (child instanceof BackboneTemplate) {
         child.childSlots.forEach(childFragment => {
           states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
         })
@@ -255,7 +259,7 @@ export class FormatMatcher implements Matcher {
   }
 
   private static mergeStates(states: FormatMatchData[]): FormatMatchData {
-    states = states.filter(i => i);
+    states = states.filter(i => i.effect !== FormatEffect.Ignore);
     for (const item of states) {
       if (item.effect === FormatEffect.Exclude) {
         return {
@@ -283,6 +287,9 @@ export class FormatMatcher implements Matcher {
     return states.length ? {
       effect: last.effect,
       srcData: states.length && equal ? last.srcData.clone() : null
-    } : null;
+    } : {
+      effect: FormatEffect.Ignore,
+      srcData: null
+    };
   }
 }

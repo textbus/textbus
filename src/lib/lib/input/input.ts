@@ -157,9 +157,6 @@ export class Input {
    */
   updateStateBySelection(selection: Selection) {
     this.selection = selection;
-    if (!selection) {
-      debugger
-    }
     if (!selection.rangeCount) {
       return;
     }

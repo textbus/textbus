@@ -18,7 +18,8 @@ export enum FormatEffect {
   Valid = 'Valid',
   Invalid = 'Invalid',
   Exclude = 'Exclude',
-  Inherit = 'Inherit'
+  Inherit = 'Inherit',
+  Ignore = 'Ignore'
 }
 
 export type FormatDelta = {
