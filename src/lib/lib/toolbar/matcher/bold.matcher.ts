@@ -7,7 +7,7 @@ import { BlockMatcher } from './block.matcher';
 import { BlockTemplate } from '../../templates/block.template';
 
 export class BoldMatcher extends FormatMatcher {
-  private contextMatcher = new BlockMatcher(BlockTemplate)
+  private contextMatcher = new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6'.split(','))
 
   constructor() {
     super(boldFormatter);

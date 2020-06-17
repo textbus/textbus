@@ -4,7 +4,7 @@ import { BlockMatcher } from '../matcher/block.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const headingTool = Toolkit.makeSelectTool({
-  matcher: new BlockMatcher(BlockTemplate),
+  matcher: new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6,p'.split(',')),
   highlight(options, t) {
     if (t instanceof BlockTemplate) {
       for (const item of options) {
