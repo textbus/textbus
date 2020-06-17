@@ -17,7 +17,7 @@ export class FormatAbstractData {
 
   constructor(params: AbstractDataParams = {}) {
     this.tag = params.tag;
-    this.style = params.style;
+    this.style = params.style || {} as any;
     if (params.attrs) {
       if (params.attrs instanceof Map) {
         this.attrs = params.attrs;
