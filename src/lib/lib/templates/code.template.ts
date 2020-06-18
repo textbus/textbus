@@ -14,7 +14,7 @@ import {
   ViewData
 } from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
-import { getLanguage, highlight } from 'highlight.js';
+import { highlight } from 'highlight.js';
 
 const theme = [
   {
@@ -191,7 +191,6 @@ export class CodeTemplate extends SingleChildTemplate {
 
   render() {
     this.format();
-
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     block.events.subscribe(event => {
@@ -226,17 +225,16 @@ export class CodeTemplate extends SingleChildTemplate {
       state: FormatEffect.Valid
     });
     blockFormats.forEach(f => fragment.apply(f));
-    if (this.lang && getLanguage(this.lang)) {
-      try {
-        const html = highlight(this.lang, sourceCode).value.replace(/\n/g, '<br>');
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        this.getFormats(0, div, fragment).formats.forEach(f => {
-          fragment.apply(f);
-        });
-      } catch (e) {
-        // console.log(e);
-      }
+    const lang = this.lang || 'bash';
+    try {
+      const html = highlight(lang, sourceCode).value.replace(/\n/g, '<br>');
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      this.getFormats(0, div, fragment).formats.forEach(f => {
+        fragment.apply(f);
+      });
+    } catch (e) {
+      // console.log(e);
     }
   }
 
