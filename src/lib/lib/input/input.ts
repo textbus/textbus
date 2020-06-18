@@ -166,6 +166,7 @@ export class Input {
     } else {
       this.hide();
     }
+    this.input.focus()
   }
 
   /**
