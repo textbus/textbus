@@ -156,15 +156,24 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   from(el: HTMLElement): ViewData {
     const template = new CodeTemplate(el.getAttribute('lang'));
     const slot = new Fragment();
+    const fn = function (node: HTMLElement, fragment: Fragment) {
+      node.childNodes.forEach(node => {
+        if (node.nodeType === 3) {
+          fragment.append(node.textContent);
+        } else if (node.nodeType === 1) {
+          if (/br/i.test(node.nodeName)) {
+            fragment.append(new SingleTagTemplate('br'));
+          } else {
+            fn(node as HTMLElement, fragment);
+          }
+        }
+      })
+    };
+    fn(el, slot);
     template.slot = slot;
     return {
       template,
-      childrenSlots: [{
-        from: (el.children.length === 1 && el.children[0].tagName.toLowerCase()) === 'code' ?
-          el.children[0] as HTMLElement :
-          el,
-        toSlot: slot
-      }]
+      childrenSlots: []
     };
   }
 }
