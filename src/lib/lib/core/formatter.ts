@@ -63,6 +63,13 @@ export interface MatchRule {
   filter?: (node: HTMLElement | FormatAbstractData) => boolean;
 }
 
+export enum FormatterPriority {
+  BlockStyle = 0,
+  InlineTag = 100,
+  InlineStyle = 200,
+  Attribute = 300
+}
+
 abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
@@ -209,7 +216,7 @@ export abstract class InlineFormatter extends Formatter {
 }
 
 export abstract class BlockFormatter extends Formatter {
-  protected constructor(protected rule: MatchRule = {}, priority = 0) {
+  protected constructor(protected rule: MatchRule = {}, priority: number) {
     super(rule, priority);
   }
 }

@@ -26,7 +26,10 @@ export class FormatMap {
     });
     // 排序所有生效规则并克隆副本，防止修改原始数据，影响第二次变更检测
     return formats.sort((next, prev) => {
-
+      const n = prev.renderer.priority - next.renderer.priority;
+      if (n !== 0) {
+        return n;
+      }
       const a = next.startIndex - prev.startIndex;
       if (a === 0) {
         return prev.endIndex - next.endIndex;

@@ -1,8 +1,9 @@
 import { backgroundColor } from '../../formatter/style.formatter';
-import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
 import { Toolkit } from '../toolkit/toolkit';
+import { BlockStyleCommander } from '../commands/block-style.commander';
+import { blockBackgroundColorFormatter } from '../../formatter/block-style.formatter';
 
 export const blockBackgroundTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-paint-bucket'],
@@ -10,8 +11,8 @@ export const blockBackgroundTool = Toolkit.makeDropdownTool({
   menuFactory() {
     return new Palette();
   },
-  matcher: new FormatMatcher(backgroundColor),
+  matcher: new FormatMatcher(blockBackgroundColorFormatter),
   execCommand() {
-    return new StyleCommander('backgroundColor', backgroundColor)
+    return new BlockStyleCommander('backgroundColor', blockBackgroundColorFormatter)
   }
 });

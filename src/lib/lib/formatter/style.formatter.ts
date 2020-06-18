@@ -1,8 +1,16 @@
-import { InlineFormatter, MatchRule, FormatEffect, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
+import {
+  InlineFormatter,
+  MatchRule,
+  FormatEffect,
+  FormatAbstractData,
+  VElement,
+  ChildSlotModel,
+  FormatterPriority
+} from '../core/_api';
 
 export class StyleFormatter extends InlineFormatter {
   constructor(public styleName: string, rule: MatchRule) {
-    super(rule, 10);
+    super(rule, FormatterPriority.InlineStyle);
   }
 
   read(node: HTMLElement): FormatAbstractData {

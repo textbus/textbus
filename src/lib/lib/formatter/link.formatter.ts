@@ -1,10 +1,17 @@
-import { InlineFormatter, FormatEffect, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
+import {
+  InlineFormatter,
+  FormatEffect,
+  FormatAbstractData,
+  VElement,
+  ChildSlotModel,
+  FormatterPriority
+} from '../core/_api';
 
 export class LinkFormatter extends InlineFormatter {
   constructor() {
     super({
       tags: ['a']
-    }, 0);
+    }, FormatterPriority.InlineTag);
   }
 
   read(node: HTMLElement): FormatAbstractData {

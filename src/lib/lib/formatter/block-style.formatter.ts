@@ -1,8 +1,16 @@
-import { MatchRule, FormatEffect, BlockFormatter, FormatAbstractData, VElement, ChildSlotModel } from '../core/_api';
+import {
+  MatchRule,
+  FormatEffect,
+  BlockFormatter,
+  FormatAbstractData,
+  VElement,
+  ChildSlotModel,
+  FormatterPriority
+} from '../core/_api';
 
 export class BlockStyleFormatter extends BlockFormatter {
   constructor(public styleName: string, rule: MatchRule) {
-    super(rule);
+    super(rule, FormatterPriority.BlockStyle);
   }
 
   read(node: HTMLElement): FormatAbstractData {
@@ -30,5 +38,10 @@ export const textIndentFormatter = new BlockStyleFormatter('textIndent', {
 export const textAlignFormatter = new BlockStyleFormatter('textAlign', {
   styles: {
     textAlign: /.+/
+  }
+});
+export const blockBackgroundColorFormatter = new BlockStyleFormatter('backgroundColor', {
+  styles: {
+    backgroundColor: /.+/
   }
 });

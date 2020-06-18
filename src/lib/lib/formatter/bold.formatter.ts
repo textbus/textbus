@@ -1,4 +1,11 @@
-import { ChildSlotModel, FormatAbstractData, FormatEffect, InlineFormatter, VElement } from '../core/_api';
+import {
+  ChildSlotModel,
+  FormatAbstractData,
+  FormatEffect,
+  FormatterPriority,
+  InlineFormatter,
+  VElement
+} from '../core/_api';
 
 export class BoldFormatter extends InlineFormatter {
   constructor() {
@@ -11,7 +18,7 @@ export class BoldFormatter extends InlineFormatter {
       excludeStyles: {
         fontWeight: ['normal', 'lighter', '100', '200', '300', '400']
       }
-    }, 0);
+    }, FormatterPriority.InlineTag);
   }
 
   read(node: HTMLElement): FormatAbstractData {
