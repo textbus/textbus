@@ -46,7 +46,9 @@ export class FormatMap {
     }
     const oldFormats = this.map.get(formatter.renderer) as FormatRange[];
     if (!Array.isArray(oldFormats)) {
-      this.map.set(formatter.renderer, [formatter]);
+      if (formatter.state !== FormatEffect.Invalid) {
+        this.map.set(formatter.renderer, [formatter]);
+      }
       return;
     }
     const newFormatMarks: FormatRange[] = [];
