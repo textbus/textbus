@@ -101,7 +101,7 @@ export class FormatMatcher implements Matcher {
         }
       }
       return {
-        effect: fragment.contentLength === 0 ? FormatEffect.Ignore : FormatEffect.Invalid,
+        effect: fragment.contentLength === 0 ? null : FormatEffect.Invalid,
         srcData: null
       };
     }
@@ -259,7 +259,7 @@ export class FormatMatcher implements Matcher {
   }
 
   private static mergeStates(states: FormatMatchData[]): FormatMatchData {
-    states = states.filter(i => i.effect !== FormatEffect.Ignore);
+    states = states.filter(i => i.effect !== null);
     for (const item of states) {
       if (item.effect === FormatEffect.Exclude) {
         return {
@@ -288,7 +288,7 @@ export class FormatMatcher implements Matcher {
       effect: last.effect,
       srcData: states.length && equal ? last.srcData.clone() : null
     } : {
-      effect: FormatEffect.Ignore,
+      effect: null,
       srcData: null
     };
   }
