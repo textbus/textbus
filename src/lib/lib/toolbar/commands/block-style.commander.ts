@@ -1,4 +1,4 @@
-import { Commander, TBSelection, FormatEffect, FormatAbstractData } from '../../core/_api';
+import { Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
 export class BlockStyleCommander implements Commander<string> {
@@ -17,7 +17,7 @@ export class BlockStyleCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({
-          state: FormatEffect.Valid,
+          state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
           renderer: this.formatter,
           abstractData: new FormatAbstractData({
             style: {
