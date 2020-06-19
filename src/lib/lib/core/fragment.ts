@@ -123,7 +123,7 @@ export class Fragment {
       // 在之后
       // formatRange  ________-------________
       // deleteRange                  [  ]
-      if (format.startIndex >= endIndex) {
+      if (format.endIndex <= startIndex) {
         selfFormats.push(Object.assign({}, format));
         return;
       }
