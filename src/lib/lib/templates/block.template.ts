@@ -1,5 +1,4 @@
 import {
-  BackboneTemplate,
   TemplateTranslator,
   ViewData,
   Fragment,
@@ -44,7 +43,6 @@ export class BlockTemplate extends SingleChildTemplate {
 
   render() {
     const block = new VElement(this.tagName);
-    this.vDom = block;
     block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragmentByTemplate(this);

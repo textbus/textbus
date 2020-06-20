@@ -200,7 +200,6 @@ export class CodeTemplate extends SingleChildTemplate {
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
       }
     })
-    this.vDom = block;
     return block;
   }
 

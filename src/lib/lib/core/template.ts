@@ -30,7 +30,6 @@ export abstract class Template {
 
 export abstract class SingleChildTemplate extends Template {
   slot: Fragment;
-  vDom: VElement;
 }
 
 export abstract class BackboneTemplate extends Template {
