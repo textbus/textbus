@@ -1,6 +1,6 @@
 import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
-import { BlockFormatter, FormatRange } from './formatter';
+import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
 import { BranchTemplate, BackboneTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
@@ -316,7 +316,7 @@ export class Renderer {
     }
     const containerFormats: FormatRange[] = [];
     const childFormats: FormatRange[] = [];
-    fragment.getCanApplyFormats().forEach(f => {
+    Renderer.calculatePriority(fragment.getCanApplyFormats()).forEach(f => {
       const ff = Object.assign({}, f);
       if (ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
         containerFormats.push(ff);
@@ -374,13 +374,8 @@ export class Renderer {
             break;
           }
         }
-        formats.sort((next, prev) => {
-          const a = next.startIndex - prev.startIndex;
-          if (a === 0) {
-            return next.endIndex - prev.endIndex;
-          }
-          return a;
-        });
+
+        formats = Renderer.calculatePriority(formats);
 
         if (progenyFormats.length) {
           this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex).forEach(item => {
@@ -540,5 +535,21 @@ export class Renderer {
         length: str.length - 1
       }).fill(target).join('');
     }).replace(/^\s|\s$/g, target);
+  }
+
+  private static calculatePriority(formats: FormatRange[]) {
+    return formats.filter(i => {
+      return i.state !== FormatEffect.Inherit;
+    }).sort((next, prev) => {
+      const n = next.renderer.priority - prev.renderer.priority;
+      if (n !== 0) {
+        return n;
+      }
+      const a = next.startIndex - prev.startIndex;
+      if (a === 0) {
+        return prev.endIndex - next.endIndex;
+      }
+      return a;
+    });
   }
 }
