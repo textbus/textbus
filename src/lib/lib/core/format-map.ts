@@ -28,7 +28,7 @@ export class FormatMap {
     return formats.filter(i => {
       return i.state !== FormatEffect.Inherit;
     }).sort((next, prev) => {
-      const n = prev.renderer.priority - next.renderer.priority;
+      const n = next.renderer.priority - prev.renderer.priority;
       if (n !== 0) {
         return n;
       }
