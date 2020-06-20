@@ -1,14 +1,14 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { Constructor, EndTemplate, Renderer, TBSelection } from '../../core/_api';
+import { Constructor, LeafTemplate, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 
 export class MediaMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<EndTemplate>, public tagName: string) {
+  constructor(public templateConstructor: Constructor<LeafTemplate>, public tagName: string) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
-    const states: RangeMatchDelta<EndTemplate>[] = selection.ranges.map(range => {
-      let template: EndTemplate;
+    const states: RangeMatchDelta<LeafTemplate>[] = selection.ranges.map(range => {
+      let template: LeafTemplate;
       if (range.commonAncestorTemplate instanceof this.templateConstructor) {
         template = range.commonAncestorTemplate;
       } else {

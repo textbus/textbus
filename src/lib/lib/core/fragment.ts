@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { BackboneTemplate, SingleChildTemplate, Template } from './template';
+import { BackboneTemplate, BranchTemplate, Template } from './template';
 import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -242,7 +242,7 @@ export class Fragment {
           newFormatRange.endIndex = fragment.contentLength;
           fragment.apply(newFormatRange);
         })
-      } else if (item instanceof SingleChildTemplate) {
+      } else if (item instanceof BranchTemplate) {
         newFormat = null;
         const newFormatRange = Object.assign({}, formatRange);
         newFormatRange.startIndex = 0;

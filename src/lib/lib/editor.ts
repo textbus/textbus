@@ -3,7 +3,7 @@ import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } fr
 
 import {
   Commander,
-  Contents, EndTemplate,
+  Contents, LeafTemplate,
   EventType,
   Fragment,
   InlineFormatter,
@@ -509,7 +509,7 @@ export class Editor implements EventDelegate {
 
             const commonAncestorFragment = range.commonAncestorFragment;
             const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
-            if (typeof c === 'string' || c instanceof EndTemplate) {
+            if (typeof c === 'string' || c instanceof LeafTemplate) {
               commonAncestorFragment.delete(range.startIndex - 1, 1);
               range.startIndex = range.endIndex = range.startIndex - 1;
             } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {

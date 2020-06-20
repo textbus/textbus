@@ -1,4 +1,4 @@
-import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class ImageTemplateTranslator implements TemplateTranslator {
   private tagName = 'img';
@@ -15,7 +15,7 @@ export class ImageTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class ImageTemplate extends EndTemplate {
+export class ImageTemplate extends LeafTemplate {
   constructor(public src: string) {
     super('img');
   }

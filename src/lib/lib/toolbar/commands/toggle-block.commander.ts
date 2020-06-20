@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, SingleChildTemplate } from '../../core/_api';
+import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, BranchTemplate } from '../../core/_api';
 import { BlockTemplate } from '../../templates/block.template';
 
 export class ToggleBlockCommander implements Commander<string> {
@@ -50,7 +50,7 @@ export class ToggleBlockCommander implements Commander<string> {
             range.commonAncestorFragment.delete(index, 1);
             fragment.append(range.commonAncestorTemplate);
           } else {
-            const appendedTemplates: Array<BackboneTemplate | SingleChildTemplate> = [];
+            const appendedTemplates: Array<BackboneTemplate | BranchTemplate> = [];
             range.getExpandedScope().reverse().forEach(scope => {
               const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
               if (appendedTemplates.includes(parentTemplate)) {

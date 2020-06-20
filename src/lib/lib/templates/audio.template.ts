@@ -1,4 +1,4 @@
-import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class AudioTemplateTranslator implements TemplateTranslator {
   private tagName = 'audio';
@@ -15,7 +15,7 @@ export class AudioTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class AudioTemplate extends EndTemplate {
+export class AudioTemplate extends LeafTemplate {
 
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('audio');

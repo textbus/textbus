@@ -28,7 +28,7 @@ export abstract class Template {
   abstract clone(): Template;
 }
 
-export abstract class SingleChildTemplate extends Template {
+export abstract class BranchTemplate extends Template {
   slot: Fragment;
 }
 
@@ -41,5 +41,5 @@ export abstract class BackboneTemplate extends Template {
   }
 }
 
-export abstract class EndTemplate extends Template {
+export abstract class LeafTemplate extends Template {
 }

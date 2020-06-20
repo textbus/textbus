@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, SingleChildTemplate } from '../../core/_api';
+import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, BranchTemplate } from '../../core/_api';
 import { ListTemplate, BlockTemplate } from '../../templates/_api';
 
 export class ListCommander implements Commander {
@@ -68,7 +68,7 @@ export class ListCommander implements Commander {
           }
         } else {
           const parentTemplate = renderer.getParentTemplateByFragment(commonAncestorFragment);
-          if (parentTemplate instanceof SingleChildTemplate) {
+          if (parentTemplate instanceof BranchTemplate) {
             const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
             const position = parentFragment.indexOf(parentTemplate);
             parentFragment.delete(position, 1);

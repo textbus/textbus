@@ -1,14 +1,14 @@
 import { Observable } from 'rxjs';
 
 import { EventDelegate } from '../../help';
-import { FormatAbstractData, EndTemplate, BackboneTemplate } from '../../../core/_api';
+import { FormatAbstractData, LeafTemplate, BackboneTemplate } from '../../../core/_api';
 
 export interface DropdownViewer {
   elementRef: HTMLElement | DocumentFragment;
   onComplete: Observable<any>;
   freezeState?: Observable<boolean>;
 
-  update?(value?: FormatAbstractData | BackboneTemplate | EndTemplate): void;
+  update?(value?: FormatAbstractData | BackboneTemplate | LeafTemplate): void;
 
   reset?(): void;
 

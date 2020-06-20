@@ -1,4 +1,4 @@
-import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class SingleTagTemplateTranslator implements TemplateTranslator {
   constructor(private tagName: string) {
@@ -17,7 +17,7 @@ export class SingleTagTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class SingleTagTemplate extends EndTemplate {
+export class SingleTagTemplate extends LeafTemplate {
   constructor(tagName: string) {
     super(tagName);
   }

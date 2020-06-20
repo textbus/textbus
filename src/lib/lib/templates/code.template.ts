@@ -8,7 +8,7 @@ import {
   Fragment,
   InlineFormatter,
   ReplaceModel,
-  SingleChildTemplate,
+  BranchTemplate,
   TemplateTranslator,
   VElement,
   ViewData
@@ -178,7 +178,7 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class CodeTemplate extends SingleChildTemplate {
+export class CodeTemplate extends BranchTemplate {
   constructor(public lang: string) {
     super('pre');
   }

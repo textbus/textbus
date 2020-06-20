@@ -4,7 +4,7 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  Renderer, SingleChildTemplate,
+  Renderer, BranchTemplate,
   TBSelection
 } from '../../core/_api';
 import { BlockTemplate } from '../../templates/block.template';
@@ -28,7 +28,7 @@ export class BlockCommander implements Commander<string> {
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
           const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
-          if (parentTemplate instanceof SingleChildTemplate) {
+          if (parentTemplate instanceof BranchTemplate) {
             const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
             blockTemplate.slot = scope.fragment;
             parentFragment.insertBefore(blockTemplate, parentTemplate);

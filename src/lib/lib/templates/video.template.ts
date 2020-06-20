@@ -1,4 +1,4 @@
-import { EndTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
 
 export class VideoTemplateTranslator implements TemplateTranslator {
   private tagName = 'video';
@@ -15,7 +15,7 @@ export class VideoTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class VideoTemplate extends EndTemplate {
+export class VideoTemplate extends LeafTemplate {
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('video');
 

@@ -7,7 +7,7 @@ import {
   Fragment,
   InlineFormatter,
   Renderer,
-  SingleChildTemplate,
+  BranchTemplate,
   TBRange,
   TBSelection
 } from '../../core/_api';
@@ -114,7 +114,7 @@ export class FormatMatcher implements Matcher {
     });
 
     for (const child of childContents) {
-      if (child instanceof SingleChildTemplate) {
+      if (child instanceof BranchTemplate) {
         states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.contentLength));
       } else if (child instanceof BackboneTemplate) {
         child.childSlots.forEach(childFragment => {
@@ -171,8 +171,8 @@ export class FormatMatcher implements Matcher {
   private isContainTag(fragment: Fragment, renderer: Renderer, position: { startIndex: number, endIndex: number }): boolean {
     const templates = fragment.sliceContents(position.startIndex, position.endIndex)
       .filter(item => {
-        return item instanceof BackboneTemplate || item instanceof SingleChildTemplate;
-      }) as Array<BackboneTemplate | SingleChildTemplate>;
+        return item instanceof BackboneTemplate || item instanceof BranchTemplate;
+      }) as Array<BackboneTemplate | BranchTemplate>;
     const elements: Fragment[] = [];
     templates.forEach(t => {
       t instanceof BackboneTemplate ? elements.push(...t.childSlots) : elements.push(t.slot);

@@ -1,7 +1,7 @@
 import { Constructor, Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement } from './element';
-import { BackboneTemplate, EndTemplate, SingleChildTemplate, Template } from './template';
+import { BackboneTemplate, LeafTemplate, BranchTemplate, Template } from './template';
 import { BlockFormatter } from './formatter';
 
 /**
@@ -100,8 +100,8 @@ export class TBRange {
     let endIndex = this.endIndex;
     const commonAncestorFragment = this.commonAncestorFragment;
 
-    let startChildTemplate: BackboneTemplate | SingleChildTemplate = null;
-    let endChildTemplate: BackboneTemplate | SingleChildTemplate = null;
+    let startChildTemplate: BackboneTemplate | BranchTemplate = null;
+    let endChildTemplate: BackboneTemplate | BranchTemplate = null;
 
     while (startFragment !== commonAncestorFragment) {
       startChildTemplate = this.renderer.getParentTemplateByFragment(startFragment);
@@ -232,7 +232,7 @@ export class TBRange {
       let i = 0;
       const contents = fragment.sliceContents(startIndex, endIndex);
       contents.forEach(c => {
-        if (c instanceof SingleChildTemplate) {
+        if (c instanceof BranchTemplate) {
           newScope = null;
           scopes.push(...fn(c.slot, 0, c.slot.contentLength));
         } else if (c instanceof BackboneTemplate) {
@@ -283,7 +283,7 @@ export class TBRange {
       return this;
     }
     const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
-    if (parentTemplate instanceof SingleChildTemplate) {
+    if (parentTemplate instanceof BranchTemplate) {
       const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
       if (parentFragment.contentLength === 0) {
@@ -326,7 +326,7 @@ export class TBRange {
 
     if (this.startIndex > 0) {
       const prev = fragment.getContentAtIndex(this.startIndex - 1);
-      if (prev instanceof SingleChildTemplate) {
+      if (prev instanceof BranchTemplate) {
         return this.findLastChild(prev.slot);
       }
       if (prev instanceof BackboneTemplate) {
@@ -360,7 +360,7 @@ export class TBRange {
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex > 0) {
         const prevContent = parentFragment.getContentAtIndex(templateIndex - 1);
-        if (prevContent instanceof SingleChildTemplate) {
+        if (prevContent instanceof BranchTemplate) {
           return this.findLastChild(prevContent.slot);
         }
         if (prevContent instanceof BackboneTemplate) {
@@ -384,13 +384,13 @@ export class TBRange {
     let offset = this.endIndex;
     if (offset === fragment.contentLength - 1) {
       const current = fragment.getContentAtIndex(offset);
-      if (current instanceof EndTemplate && current.tagName === 'br') {
+      if (current instanceof LeafTemplate && current.tagName === 'br') {
         offset++;
       }
     }
     if (offset < fragment.contentLength) {
       const next = fragment.getContentAtIndex(offset + 1);
-      if (next instanceof SingleChildTemplate) {
+      if (next instanceof BranchTemplate) {
         return this.findFirstPosition(next.slot);
       }
       if (next instanceof BackboneTemplate) {
@@ -424,7 +424,7 @@ export class TBRange {
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex < parentFragment.contentLength - 1) {
         const nextContent = parentFragment.getContentAtIndex(templateIndex + 1);
-        if (nextContent instanceof SingleChildTemplate) {
+        if (nextContent instanceof BranchTemplate) {
           return this.findFirstPosition(nextContent.slot);
         }
         if (nextContent instanceof BackboneTemplate) {
@@ -546,7 +546,7 @@ export class TBRange {
 
   findFirstPosition(fragment: Fragment): TBRangePosition {
     const first = fragment.getContentAtIndex(0);
-    if (first instanceof SingleChildTemplate) {
+    if (first instanceof BranchTemplate) {
       return this.findFirstPosition(first.slot);
     }
     if (first instanceof BackboneTemplate) {
@@ -561,7 +561,7 @@ export class TBRange {
 
   findLastChild(fragment: Fragment): TBRangePosition {
     const last = fragment.getContentAtIndex(fragment.contentLength - 1);
-    if (last instanceof SingleChildTemplate) {
+    if (last instanceof BranchTemplate) {
       return this.findLastChild(last.slot);
     }
     if (last instanceof BackboneTemplate) {
@@ -651,8 +651,8 @@ export class TBRange {
                     endIndex: number): TBRangeScope[] {
     const start: TBRangeScope[] = [];
     const end: TBRangeScope[] = [];
-    let startParentTemplate: BackboneTemplate | SingleChildTemplate = null;
-    let endParentTemplate: BackboneTemplate | SingleChildTemplate = null;
+    let startParentTemplate: BackboneTemplate | BranchTemplate = null;
+    let endParentTemplate: BackboneTemplate | BranchTemplate = null;
 
     let startFragmentPosition: number = null;
     let endFragmentPosition: number = null;
@@ -882,7 +882,7 @@ export class TBRange {
   private static findExpandedStartIndex(fragment: Fragment, index: number) {
     for (; index > 0; index--) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof BackboneTemplate || item instanceof SingleChildTemplate) {
+      if (item instanceof BackboneTemplate || item instanceof BranchTemplate) {
         break;
       }
     }
@@ -892,7 +892,7 @@ export class TBRange {
   private static findExpandedEndIndex(fragment: Fragment, index: number) {
     for (; index < fragment.contentLength; index++) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof BackboneTemplate || item instanceof SingleChildTemplate) {
+      if (item instanceof BackboneTemplate || item instanceof BranchTemplate) {
         break;
       }
     }

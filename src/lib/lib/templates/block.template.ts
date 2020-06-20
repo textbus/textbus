@@ -4,7 +4,7 @@ import {
   Fragment,
   VElement,
   EventType,
-  SingleChildTemplate
+  BranchTemplate
 } from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
 
@@ -30,7 +30,7 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class BlockTemplate extends SingleChildTemplate {
+export class BlockTemplate extends BranchTemplate {
   constructor(tagName: string) {
     super(tagName);
   }

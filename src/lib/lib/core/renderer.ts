@@ -1,7 +1,7 @@
 import { VElement, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatRange } from './formatter';
-import { SingleChildTemplate, BackboneTemplate, Template } from './template';
+import { BranchTemplate, BackboneTemplate, Template } from './template';
 import { TBEvent, EventType } from './events';
 import { TBSelection } from './selection';
 
@@ -77,7 +77,7 @@ export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
 
   private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-  private fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | SingleChildTemplate>();
+  private fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | BranchTemplate>();
   private templateHierarchyMapping = new Map<Template, Fragment>();
   private fragmentAndVDomMapping = new Map<Fragment, VElement>();
   private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
@@ -88,7 +88,7 @@ export class Renderer {
   render(fragment: Fragment, host: HTMLElement) {
     this.productionRenderingModal = false;
     this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-    this.fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | SingleChildTemplate>();
+    this.fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | BranchTemplate>();
     this.templateHierarchyMapping = new Map<Template, Fragment>();
     this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
     this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
@@ -425,7 +425,7 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        if (item instanceof SingleChildTemplate) {
+        if (item instanceof BranchTemplate) {
           this.createVDom(item.slot, vDom);
           !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
         } else if (item instanceof BackboneTemplate) {

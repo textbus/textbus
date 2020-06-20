@@ -4,7 +4,7 @@ import {
   FormatAbstractData,
   TBRange,
   FormatEffect,
-  EndTemplate,
+  LeafTemplate,
   BackboneTemplate
 } from '../../core/_api';
 import { HighlightState } from '../help';
@@ -30,7 +30,7 @@ export interface RangeMatchDelta<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchDelta<T = FormatAbstractData | BackboneTemplate | EndTemplate> {
+export interface SelectionMatchDelta<T = FormatAbstractData | BackboneTemplate | LeafTemplate> {
   state: HighlightState;
   srcStates: RangeMatchDelta<T>[];
   matchData: T;

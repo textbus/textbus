@@ -5,7 +5,7 @@ import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../input/input';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
-import { Commander, FormatAbstractData, EndTemplate, BackboneTemplate } from '../../core/_api';
+import { Commander, FormatAbstractData, LeafTemplate, BackboneTemplate } from '../../core/_api';
 
 /**
  * Select 工具选项配置项
@@ -31,7 +31,7 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight(options: SelectOptionConfig[], data: FormatAbstractData | BackboneTemplate | EndTemplate): SelectOptionConfig;
+  highlight(options: SelectOptionConfig[], data: FormatAbstractData | BackboneTemplate | LeafTemplate): SelectOptionConfig;
 
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];

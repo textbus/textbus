@@ -1,7 +1,7 @@
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { BackboneTemplate, SingleChildTemplate } from './template';
+import { BackboneTemplate, BranchTemplate } from './template';
 
 export interface RangePath {
   startPaths: number[];
@@ -119,7 +119,7 @@ export class TBSelection {
         const index = paths.pop();
         const c = fragment.getContentAtIndex(index);
         const last = paths.pop();
-        if (c instanceof SingleChildTemplate && last === 0) {
+        if (c instanceof BranchTemplate && last === 0) {
           fragment = c.slot;
         } else if (c instanceof BackboneTemplate) {
           fragment = c.childSlots[last];
