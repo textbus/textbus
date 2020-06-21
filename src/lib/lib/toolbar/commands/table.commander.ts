@@ -1,6 +1,6 @@
 import { Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
-import { TableTemplate, SingleTagTemplate } from '../../templates/_api';
+import { TableTemplate, SingleTagTemplate, TableCell } from '../../templates/_api';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -20,27 +20,31 @@ export class TableCommander implements Commander<AttrState[]> {
       const index = parentFragment.indexOf(range.commonAncestorTemplate);
       const rows = +attrs.get('rows') || 0;
       const cols = +attrs.get('cols') || 0;
-      const body = this.create(rows, cols);
+      const bodies = this.create(rows, cols);
       if (rows && cols) {
-        range.setStart(body[0][0], 0);
+        range.setStart(bodies[0][0].fragment, 0);
         range.collapse();
       }
       const table = new TableTemplate({
-        body
+        bodies
       });
       parentFragment.insert(table, index);
     })
   }
 
   private create(rows: number, columns: number) {
-    const result: Fragment[][] = [];
+    const result: TableCell[][] = [];
     for (let i = 0; i < rows; i++) {
-      const row: Fragment[] = [];
+      const row: TableCell[] = [];
       result.push(row);
       for (let j = 0; j < columns; j++) {
         const fragment = new Fragment();
         fragment.append(new SingleTagTemplate('br'));
-        row.push(fragment);
+        row.push({
+          rowspan: 1,
+          colspan: 1,
+          fragment
+        });
       }
     }
     return result;

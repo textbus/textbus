@@ -1,9 +1,15 @@
-import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
+import { BackboneTemplate, EventType, Fragment, SlotMap, TemplateTranslator, VElement, ViewData } from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
 
+export interface TableCell {
+  colspan: number;
+  rowspan: number;
+  fragment: Fragment;
+}
+
 export interface TableInitParams {
-  headerSlots?: Fragment[];
-  body: Fragment[][];
+  headers?: TableCell[][];
+  bodies: TableCell[][];
 }
 
 export class TableTemplateTranslator implements TemplateTranslator {
@@ -13,12 +19,57 @@ export class TableTemplateTranslator implements TemplateTranslator {
     return template.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLElement): ViewData {
+  from(el: HTMLTableElement): ViewData {
+    const {tHead, tBodies, tFoot} = el;
+    const slots: SlotMap[] = [];
+    const headers: TableCell[][] = [];
+    const bodies: TableCell[][] = [];
+    if (tHead) {
+      Array.from(tHead.rows).forEach(row => {
+        const arr: TableCell[] = [];
+        headers.push(arr);
+        Array.from(row.cells).forEach(cell => {
+          const fragment = new Fragment();
+          arr.push({
+            rowspan: cell.rowSpan,
+            colspan: cell.colSpan,
+            fragment
+          });
+          slots.push({
+            from: cell,
+            toSlot: fragment
+          });
+        })
+      });
+    }
+
+    if (tBodies) {
+      Array.of(...Array.from(tBodies), tFoot || {rows: []}).reduce((value, next) => {
+        return value.concat(Array.from(next.rows));
+      }, [] as HTMLTableRowElement[]).forEach(row => {
+        const arr: TableCell[] = [];
+        bodies.push(arr);
+        Array.from(row.cells).forEach(cell => {
+          const fragment = new Fragment();
+          arr.push({
+            rowspan: cell.rowSpan,
+            colspan: cell.colSpan,
+            fragment
+          });
+          slots.push({
+            from: cell,
+            toSlot: fragment
+          });
+        })
+      });
+    }
+
     return {
       template: new TableTemplate({
-        body: []
+        headers,
+        bodies
       }),
-      childrenSlots: []
+      childrenSlots: slots
     };
   }
 }
@@ -26,10 +77,10 @@ export class TableTemplateTranslator implements TemplateTranslator {
 export class TableTemplate extends BackboneTemplate {
   constructor(private config: TableInitParams) {
     super('table');
-    const bodyConfig = config.body;
+    const bodyConfig = config.bodies;
     for (const row of bodyConfig) {
       for (const col of row) {
-        this.childSlots.push(col);
+        this.childSlots.push(col.fragment);
       }
     }
   }
@@ -45,7 +96,7 @@ export class TableTemplate extends BackboneTemplate {
   render() {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
-    const bodyConfig = this.config.body;
+    const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
       const body = new VElement('tbody');
       table.appendChild(body);
@@ -54,12 +105,18 @@ export class TableTemplate extends BackboneTemplate {
         body.appendChild(tr);
         for (const col of row) {
           const td = new VElement('td');
-          this.viewMap.set(col, td);
+          if (col.colspan > 1) {
+            td.attrs.set('colSpan', col.colspan);
+          }
+          if (col.rowspan > 1) {
+            td.attrs.set('rowSpan', col.rowspan);
+          }
+          this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
           td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
-              col.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+              col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
               firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
             } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
               event.stopPropagation();
