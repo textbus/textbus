@@ -28,3 +28,7 @@ export interface Commander<T = any> {
    */
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment): void;
 }
+
+export interface ActionCommander<T = any> extends Commander<T> {
+  setActionType(type: any): void;
+}

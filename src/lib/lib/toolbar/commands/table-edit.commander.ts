@@ -1,4 +1,4 @@
-import { Commander, TBSelection } from '../../core/_api';
+import { ActionCommander, TBSelection } from '../../core/_api';
 
 export interface CellPosition {
   rowElement: HTMLTableRowElement;
@@ -42,10 +42,14 @@ export interface TableEditParams {
   endPosition: CellPosition;
 }
 
-export class TableEditCommander implements Commander<TableEditParams> {
+export class TableEditCommander implements ActionCommander<TableEditParams> {
   recordHistory = true;
-  actionType: TableEditActions;
+  private actionType: TableEditActions;
   private params: TableEditParams;
+
+  setActionType(type: TableEditActions) {
+    this.actionType = type;
+  }
 
   updateValue(value: TableEditParams): void {
     this.params = value;
@@ -55,5 +59,4 @@ export class TableEditCommander implements Commander<TableEditParams> {
     console.log(this.params)
     alert('新版正在开发中，可以先使用老版本 @tanbo/tbus@0.0.1-alpha.*');
   }
-
 }
