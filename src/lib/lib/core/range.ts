@@ -49,7 +49,7 @@ export class TBRange {
 
   constructor(private nativeRange: Range,
               private renderer: Renderer) {
-    if ([1, 3].includes(nativeRange.commonAncestorContainer.nodeType)) {
+    if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType)) {
       if (nativeRange.startContainer.nodeType === 3) {
         this.startIndex = renderer.getPositionByNode(nativeRange.startContainer).startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === 1) {

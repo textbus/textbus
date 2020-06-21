@@ -247,11 +247,16 @@ export class Editor implements EventDelegate {
       });
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
-        hooks.setup(this.viewer.contentDocument);
+        hooks.setup(this.viewer.contentDocument, this.viewer.contentWindow, this.frameContainer);
       }
     })
     fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
-      this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
+      this.selection = this.options.hooks.reduce((selection, lifecycle) => {
+        if(typeof lifecycle.onSelectionChange === 'function'){
+          lifecycle.onSelectionChange(this.renderer, selection, this.viewer.contentDocument);
+        }
+        return selection;
+      }, new TBSelection(this.viewer.contentDocument, this.renderer));
       this.input.updateStateBySelection(this.nativeSelection);
     }), auditTime(100), tap(() => {
       const event = document.createEvent('Event');

@@ -5,7 +5,7 @@ import { Editor } from '../editor';
 import { Contents } from './contents';
 
 export interface Lifecycle {
-  setup?(document: Document): void;
+  setup?(contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
 
   onInit?(): void;
 
@@ -17,7 +17,7 @@ export interface Lifecycle {
 
   onDelete?(renderer: Renderer, selection: TBSelection): boolean;
 
-  onSelectionChange?(): void;
+  onSelectionChange?(renderer: Renderer, selection: TBSelection, contextDocument: Document): void;
 
   onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
 

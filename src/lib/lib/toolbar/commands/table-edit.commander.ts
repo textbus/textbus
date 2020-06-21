@@ -52,6 +52,7 @@ export class TableEditCommander implements Commander<TableEditParams> {
   }
 
   command(selection: TBSelection, overlap: boolean) {
+    console.log(this.params)
     alert('新版正在开发中，可以先使用老版本 @tanbo/tbus@0.0.1-alpha.*');
   }
 
