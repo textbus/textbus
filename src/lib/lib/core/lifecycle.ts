@@ -5,7 +5,7 @@ import { Editor } from '../editor';
 import { Contents } from './contents';
 
 export interface Lifecycle {
-  setup?(contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
+  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
 
   onInit?(): void;
 

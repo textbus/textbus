@@ -75,7 +75,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
 }
 
 export class TableTemplate extends BackboneTemplate {
-  constructor(private config: TableInitParams) {
+  constructor(public config: TableInitParams) {
     super('table');
     const bodyConfig = config.bodies;
     for (const row of bodyConfig) {

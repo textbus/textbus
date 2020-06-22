@@ -1,9 +1,10 @@
 import { CubicBezier } from '@tanbo/bezier';
 import { fromEvent, merge } from 'rxjs';
 
-import { Commander, Renderer, TBRange, TBSelection } from '../core/_api';
+import { Commander, Fragment, Renderer, TBRange, TBSelection } from '../core/_api';
 import { Lifecycle } from '../core/lifecycle';
 import { CellPosition, RowPosition, TableEditCommander, TableSelectionRange } from '../toolbar/_api';
+import { TableCell, TableTemplate } from '../templates/table.template';
 
 interface ElementPosition {
   left: number;
@@ -46,7 +47,7 @@ export class TableHook implements Lifecycle {
     this.mask.appendChild(this.firstMask);
   }
 
-  setup(contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
+  setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
 
     const childBody = contextDocument.body;
     let insertMask = false;
@@ -60,7 +61,7 @@ export class TableHook implements Lifecycle {
       'resize'
     ].map(type => fromEvent(contextWindow, type))).subscribe(() => {
       if (this.endCell) {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
       }
     });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
@@ -103,8 +104,9 @@ export class TableHook implements Lifecycle {
         this.firstMask.style.left = '0px';
         this.firstMask.style.top = '0px';
       }
-      this.cellMatrix = this.serialize(this.tableElement);
-      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      this.cellMatrix = this.serialize(renderer.getContext(renderer.getPositionByNode(this.startCell).fragment, TableTemplate));
+
+      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
 
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
         const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
@@ -123,7 +125,7 @@ export class TableHook implements Lifecycle {
               insertStyle = false;
             }
           }
-          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
         }
       });
 
@@ -166,7 +168,9 @@ export class TableHook implements Lifecycle {
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
-                                             cell2: HTMLTableCellElement) {
+                                             cell2: HTMLTableCellElement, renderer: Renderer) {
+    const table = renderer.getContext(renderer.getPositionByNode(cell1).fragment, TableTemplate);
+
 
     const p1 = this.findCellPosition(cell1);
     const p2 = this.findCellPosition(cell2);
@@ -202,24 +206,24 @@ export class TableHook implements Lifecycle {
     });
 
     const selectedCells = this.cellMatrix.slice(startPosition.rowIndex, endPosition.rowIndex + 1).map(row => {
-      return row.cells.slice(startPosition.columnIndex, endPosition.columnIndex + 1);
+      return row.cellsPosition.slice(startPosition.columnIndex, endPosition.columnIndex + 1);
     }).reduce((a, b) => {
       return a.concat(b);
-    }).map(item => item.cellElement);
+    }).map(item => renderer.getNativeNodeByVDom(table.getChildViewBySlot(item.cell.fragment)) as HTMLTableCellElement);
 
     this.selectedCells = Array.from(new Set(selectedCells));
     this.startPosition = startPosition;
     this.endPosition = endPosition;
   }
 
-  private findCellPosition(cell: HTMLTableCellElement) {
+  private findCellPosition(cell: TableCell) {
     const cellMatrix = this.cellMatrix;
     let minRow: number, maxRow: number, minColumn: number, maxColumn: number;
 
     forA:for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
-      const cells = cellMatrix[rowIndex].cells;
+      const cells = cellMatrix[rowIndex].cellsPosition;
       for (let colIndex = 0; colIndex < cells.length; colIndex++) {
-        if (cells[colIndex].cellElement === cell) {
+        if (cells[colIndex].cell === cell) {
           minRow = rowIndex;
           minColumn = colIndex;
           break forA;
@@ -228,9 +232,9 @@ export class TableHook implements Lifecycle {
     }
 
     forB:for (let rowIndex = cellMatrix.length - 1; rowIndex > -1; rowIndex--) {
-      const cells = cellMatrix[rowIndex].cells;
+      const cells = cellMatrix[rowIndex].cellsPosition;
       for (let colIndex = cells.length - 1; colIndex > -1; colIndex--) {
-        if (cells[colIndex].cellElement === cell) {
+        if (cells[colIndex].cell === cell) {
           maxRow = rowIndex;
           maxColumn = colIndex;
           break forB;
@@ -279,13 +283,13 @@ export class TableHook implements Lifecycle {
 
   private findSelectedRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableSelectionRange {
     const cellMatrix = this.cellMatrix;
-    const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cells[minColumn].columnOffset));
+    const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cellsPosition[minColumn].columnOffset));
     const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => {
-      return row.cells[maxColumn].cellElement.colSpan - (row.cells[maxColumn].columnOffset + 1);
+      return row.cellsPosition[maxColumn].cell.colspan - (row.cellsPosition[maxColumn].columnOffset + 1);
     }));
-    const y1 = -Math.max(...cellMatrix[minRow].cells.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
-    const y2 = Math.max(...cellMatrix[maxRow].cells.slice(minColumn, maxColumn + 1).map(cell => {
-      return cell.cellElement.rowSpan - (cell.rowOffset + 1);
+    const y1 = -Math.max(...cellMatrix[minRow].cellsPosition.slice(minColumn, maxColumn + 1).map(cell => cell.rowOffset));
+    const y2 = Math.max(...cellMatrix[maxRow].cellsPosition.slice(minColumn, maxColumn + 1).map(cell => {
+      return cell.cell.rowspan - (cell.rowOffset + 1);
     }));
 
     if (x1 || y1 || x2 || y2) {
@@ -293,84 +297,73 @@ export class TableHook implements Lifecycle {
     }
 
     return {
-      startPosition: cellMatrix[minRow].cells[minColumn],
-      endPosition: cellMatrix[maxRow].cells[maxColumn]
+      startPosition: cellMatrix[minRow].cellsPosition[minColumn],
+      endPosition: cellMatrix[maxRow].cellsPosition[maxColumn]
     }
   }
 
-  private serialize(table: HTMLTableElement): RowPosition[] {
+  private serialize(table: TableTemplate): RowPosition[] {
     const rows: RowPosition[] = [];
 
-    function splitRows(rows: HTMLCollectionOf<HTMLTableRowElement>): RowPosition[] {
-      return Array.from(rows).map(tr => {
-        return {
-          beforeRow: tr.previousElementSibling,
-          afterRow: tr.nextElementSibling,
-          rowElement: tr,
-          cells: Array.from(tr.cells).map(cell => {
-            return {
-              rowElement: tr,
-              beforeCell: cell.previousElementSibling,
-              afterCell: cell.nextElementSibling,
-              cellElement: cell,
-              rowOffset: 0,
-              columnOffset: 0
-            }
-          })
-        }
+    const bodies = table.config.bodies;
+    for (let i = 0; i < bodies.length; i++) {
+      const cells: CellPosition[] = [];
+      bodies[i].forEach((cell, index) => {
+        cells.push({
+          row: cells,
+          beforeCell: bodies[i][index - 1],
+          afterCell: bodies[i][index + 1],
+          cell,
+          rowOffset: 0,
+          columnOffset: 0
+        })
+      })
+      rows.push({
+        beforeRow: bodies[i - 1] || null,
+        afterRow: bodies[i + 1] || null,
+        cellsPosition: cells,
+        cells: bodies[i]
       });
     }
 
-    if (table.tHead) {
-      rows.push(...splitRows(table.tHead.rows));
-    }
-
-    if (table.tBodies) {
-      Array.from(table.tBodies).forEach(tbody => {
-        rows.push(...splitRows(tbody.rows));
-      });
-    }
-    if (table.tFoot) {
-      rows.push(...splitRows(table.tFoot.rows));
-    }
     let stop = false;
     let columnIndex = 0;
     const marks: string[] = [];
     do {
       stop = rows.map((row, rowIndex) => {
-        const cell = row.cells[columnIndex];
-        if (cell) {
+        const cellPosition = row.cellsPosition[columnIndex];
+        if (cellPosition) {
           let mark: string;
-          cell.rowIndex = rowIndex;
-          cell.columnIndex = columnIndex;
+          cellPosition.rowIndex = rowIndex;
+          cellPosition.columnIndex = columnIndex;
 
-          if (cell.columnOffset + 1 < cell.cellElement.colSpan) {
+          if (cellPosition.columnOffset + 1 < cellPosition.cell.colspan) {
             mark = `${rowIndex}*${columnIndex + 1}`;
             if (marks.indexOf(mark) === -1) {
-              row.cells.splice(columnIndex + 1, 0, {
-                beforeCell: cell.beforeCell,
-                afterCell: cell.afterCell,
-                rowElement: row.rowElement,
-                cellElement: cell.cellElement,
-                columnOffset: cell.columnOffset + 1,
-                rowOffset: cell.rowOffset
+              row.cellsPosition.splice(columnIndex + 1, 0, {
+                beforeCell: cellPosition.beforeCell,
+                afterCell: cellPosition.afterCell,
+                cell: cellPosition.cell,
+                row: row.cellsPosition,
+                columnOffset: cellPosition.columnOffset + 1,
+                rowOffset: cellPosition.rowOffset
               });
               marks.push(mark);
             }
           }
-          if (cell.rowOffset + 1 < cell.cellElement.rowSpan) {
+          if (cellPosition.rowOffset + 1 < cellPosition.cell.rowspan) {
             mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
               const nextRow = rows[rowIndex + 1];
-              const newRowBeforeColumn = nextRow.cells[columnIndex - 1];
-              const newRowAfterColumn = nextRow.cells[columnIndex];
-              nextRow.cells.splice(columnIndex, 0, {
-                beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cellElement : null,
-                afterCell: newRowAfterColumn ? newRowAfterColumn.cellElement : null,
-                rowElement: rows[rowIndex + 1].rowElement,
-                cellElement: cell.cellElement,
-                columnOffset: cell.columnOffset,
-                rowOffset: cell.rowOffset + 1
+              const newRowBeforeColumn = nextRow.cellsPosition[columnIndex - 1];
+              const newRowAfterColumn = nextRow.cellsPosition[columnIndex];
+              nextRow.cellsPosition.splice(columnIndex, 0, {
+                beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cell : null,
+                afterCell: newRowAfterColumn ? newRowAfterColumn.cell : null,
+                row: rows[rowIndex + 1].cellsPosition,
+                cell: cellPosition.cell,
+                columnOffset: cellPosition.columnOffset,
+                rowOffset: cellPosition.rowOffset + 1
               });
               marks.push(mark);
             }
