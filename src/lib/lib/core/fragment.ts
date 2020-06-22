@@ -138,7 +138,7 @@ export class Fragment {
         selfFormats.push({
           ...format,
           startIndex,
-          endIndex: format.endIndex - startIndex
+          endIndex: format.endIndex - count
         });
         discardedFormats.push({
           ...format,
