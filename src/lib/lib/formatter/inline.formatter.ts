@@ -20,6 +20,10 @@ export class InlineTagFormatter extends InlineFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+    if (existingElement && existingElement.tagName === 'span') {
+      existingElement.tagName = this.tagName;
+      return;
+    }
     return new ChildSlotModel(new VElement(this.tagName));
   }
 }
