@@ -65,7 +65,7 @@ export class Parser {
         renderer: item.formatter,
         abstractData: item.abstractData,
         state: item.state
-      })
+      }, false)
     })
   }
 }
