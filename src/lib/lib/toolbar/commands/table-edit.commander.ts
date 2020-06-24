@@ -33,6 +33,8 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
+    alert('正在开发中，敬请期待。。。');
+    return;
     const context = renderer.getContext(selection.firstRange.startFragment, TableTemplate);
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
