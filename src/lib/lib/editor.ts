@@ -252,7 +252,7 @@ export class Editor implements EventDelegate {
     })
     fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
       this.selection = this.options.hooks.reduce((selection, lifecycle) => {
-        if(typeof lifecycle.onSelectionChange === 'function'){
+        if (typeof lifecycle.onSelectionChange === 'function') {
           lifecycle.onSelectionChange(this.renderer, selection, this.viewer.contentDocument);
         }
         return selection;
@@ -575,6 +575,12 @@ export class Editor implements EventDelegate {
     });
 
     this.viewer.updateFrameHeight();
+
+    (this.options.hooks || []).forEach(lifecycle => {
+      if (typeof lifecycle.onViewUpdated === 'function') {
+        lifecycle.onViewUpdated();
+      }
+    })
   }
 
   private moveCursor(direction: CursorMoveDirection) {

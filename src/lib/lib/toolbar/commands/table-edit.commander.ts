@@ -173,7 +173,10 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     newNode.cell.colspan = maxColumn - minColumn + 1;
 
     selectedCells.forEach(cell => {
-      cell.row.splice(cell.row.indexOf(cell.cell), 1);
+      const index = cell.row.indexOf(cell.cell);
+      if (index > -1) {
+        cell.row.splice(index, 1);
+      }
     });
 
     const range = selection.firstRange;
@@ -184,6 +187,9 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     range.setStart(startPosition.fragment, startPosition.index);
     range.setEnd(endPosition.fragment, endPosition.index);
     selection.addRange(range);
+    const {startCellPosition, endCellPosition} = context.selectCells(fragment, fragment);
+    Object.assign(this.params.startPosition, startCellPosition);
+    Object.assign(this.params.endPosition, endCellPosition);
   }
 
   private splitCells(selection: TBSelection, context: TableTemplate) {

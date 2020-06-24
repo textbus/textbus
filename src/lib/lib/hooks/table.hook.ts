@@ -38,6 +38,8 @@ export class TableHook implements Lifecycle {
   private endCell: HTMLTableCellElement;
   private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
   private animateId: number;
+  private renderer: Renderer;
+  private tableTemplate: TableTemplate;
 
   constructor() {
     this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
@@ -46,7 +48,7 @@ export class TableHook implements Lifecycle {
   }
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
-
+    this.renderer = renderer;
     const childBody = contextDocument.body;
     let insertMask = false;
     let insertStyle = false;
@@ -59,13 +61,15 @@ export class TableHook implements Lifecycle {
       'resize'
     ].map(type => fromEvent(contextWindow, type))).subscribe(() => {
       if (this.endCell) {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
       }
     });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
       this.selectedCells = [];
       this.startPosition = null;
       this.endPosition = null;
+      this.tableElement = null;
+
       if (insertStyle) {
         contextDocument.getSelection().removeAllRanges();
         contextDocument.head.removeChild(style);
@@ -102,7 +106,7 @@ export class TableHook implements Lifecycle {
         this.firstMask.style.left = '0px';
         this.firstMask.style.top = '0px';
       }
-      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
+      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
 
       const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
         const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
@@ -121,7 +125,7 @@ export class TableHook implements Lifecycle {
               insertStyle = false;
             }
           }
-          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, renderer);
+          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
         }
       });
 
@@ -163,18 +167,28 @@ export class TableHook implements Lifecycle {
     return true;
   }
 
-  private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
-                                             cell2: HTMLTableCellElement,
-                                             renderer: Renderer) {
+  onViewUpdated() {
+    if (this.startPosition && this.endPosition && this.tableTemplate) {
 
-    const cell1Fragment = renderer.getPositionByNode(cell1).fragment;
-    const cell2Fragment = renderer.getPositionByNode(cell2).fragment;
-    const table = renderer.getContext(cell1Fragment, TableTemplate);
+      this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
+      this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
+
+      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+    }
+  }
+
+  private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
+                                             cell2: HTMLTableCellElement) {
+
+    const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
+    const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
+    const table = this.renderer.getContext(cell1Fragment, TableTemplate);
+    this.tableTemplate = table;
 
     const {startCellPosition, endCellPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);
 
-    const startRect = (renderer.getNativeNodeByVDom(renderer.getVElementByFragment(startCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
-    const endRect = (renderer.getNativeNodeByVDom(renderer.getVElementByFragment(endCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
+    const startRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(startCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
+    const endRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(endCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
 
     const firstCellRect = this.startCell.getBoundingClientRect();
 

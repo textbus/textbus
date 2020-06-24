@@ -21,5 +21,7 @@ export interface Lifecycle {
 
   onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
 
+  onViewUpdated?(): void;
+
   onOutput?(contents: string): string;
 }
