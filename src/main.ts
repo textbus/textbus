@@ -18,7 +18,7 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  contents: `<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`
+  contents: document.getElementById('table').outerHTML
 });
 
 // editor.setContents(`<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

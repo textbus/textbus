@@ -7,9 +7,40 @@ export interface TableCell {
   fragment: Fragment;
 }
 
+export interface TableCellPosition {
+  beforeCell: TableCell;
+  afterCell: TableCell;
+  row: TableCell[];
+  cell: TableCell,
+  rowIndex: number;
+  columnIndex: number;
+  offsetColumn: number;
+  offsetRow: number;
+}
+
+export interface TableRowPosition {
+  cells: TableCell[];
+  beforeRow: TableCell[];
+  afterRow: TableCell[];
+  cellsPosition: TableCellPosition[];
+}
+
 export interface TableInitParams {
   headers?: TableCell[][];
   bodies: TableCell[][];
+}
+
+export interface TableCellRect {
+  minRow: number;
+  maxRow: number;
+  minColumn: number;
+  maxColumn: number;
+}
+
+export interface TableRange {
+  startCellPosition: TableCellPosition;
+  endCellPosition: TableCellPosition;
+  selectedCells: Fragment[];
 }
 
 export class TableTemplateTranslator implements TemplateTranslator {
@@ -75,6 +106,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
 }
 
 export class TableTemplate extends BackboneTemplate {
+  private cellMatrix: TableRowPosition[];
   constructor(public config: TableInitParams) {
     super('table');
     const bodyConfig = config.bodies;
@@ -125,7 +157,163 @@ export class TableTemplate extends BackboneTemplate {
         }
       }
     }
-
     return table;
+  }
+
+  selectCells(startCell: Fragment, endCell: Fragment) {
+    this.cellMatrix = this.serialize();
+    const p1 = this.findCellPosition(startCell);
+    const p2 = this.findCellPosition(endCell);
+    const minRow = Math.min(p1.minRow, p2.minRow);
+    const minColumn = Math.min(p1.minColumn, p2.minColumn);
+    const maxRow = Math.max(p1.maxRow, p2.maxRow);
+    const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
+    return this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
+  }
+
+  private selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableRange {
+    const cellMatrix = this.cellMatrix;
+    const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cellsPosition[minColumn].offsetColumn));
+    const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => {
+      return row.cellsPosition[maxColumn].cell.colspan - (row.cellsPosition[maxColumn].offsetColumn + 1);
+    }));
+    const y1 = -Math.max(...cellMatrix[minRow].cellsPosition.slice(minColumn, maxColumn + 1).map(cell => cell.offsetRow));
+    const y2 = Math.max(...cellMatrix[maxRow].cellsPosition.slice(minColumn, maxColumn + 1).map(cell => {
+      return cell.cell.rowspan - (cell.offsetRow + 1);
+    }));
+
+    if (x1 || y1 || x2 || y2) {
+      return this.selectCellsByRange(minRow + y1, minColumn + x1, maxRow + y2, maxColumn + x2);
+    }
+
+    const startCellPosition = cellMatrix[minRow].cellsPosition[minColumn];
+    const endCellPosition = cellMatrix[maxRow].cellsPosition[maxColumn];
+
+    const selectedCells = cellMatrix.slice(startCellPosition.rowIndex, endCellPosition.rowIndex + 1).map(row => {
+      return row.cellsPosition.slice(startCellPosition.columnIndex, endCellPosition.columnIndex + 1);
+    }).reduce((a, b) => {
+      return a.concat(b);
+    }).map(item => item.cell.fragment);
+
+    return {
+      selectedCells: Array.from(new Set(selectedCells)),
+      startCellPosition,
+      endCellPosition
+    }
+  }
+
+  private findCellPosition(cell: Fragment): TableCellRect {
+    const cellMatrix = this.cellMatrix;
+    let minRow: number, maxRow: number, minColumn: number, maxColumn: number;
+
+    forA:for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
+      const cells = cellMatrix[rowIndex].cellsPosition;
+      for (let colIndex = 0; colIndex < cells.length; colIndex++) {
+        if (cells[colIndex].cell.fragment === cell) {
+          minRow = rowIndex;
+          minColumn = colIndex;
+          break forA;
+        }
+      }
+    }
+
+    forB:for (let rowIndex = cellMatrix.length - 1; rowIndex > -1; rowIndex--) {
+      const cells = cellMatrix[rowIndex].cellsPosition;
+      for (let colIndex = cells.length - 1; colIndex > -1; colIndex--) {
+        if (cells[colIndex].cell.fragment === cell) {
+          maxRow = rowIndex;
+          maxColumn = colIndex;
+          break forB;
+        }
+      }
+    }
+
+    return {
+      minRow,
+      maxRow,
+      minColumn,
+      maxColumn
+    }
+  }
+
+  private serialize(): TableRowPosition[] {
+    const rows: TableRowPosition[] = [];
+
+    const bodies = this.config.bodies;
+    for (let i = 0; i < bodies.length; i++) {
+      const cells: TableCellPosition[] = [];
+      bodies[i].forEach((cell, index) => {
+        cells.push({
+          row: bodies[i],
+          beforeCell: bodies[i][index - 1],
+          afterCell: bodies[i][index + 1],
+          offsetColumn: 0,
+          offsetRow: 0,
+          columnIndex: null,
+          rowIndex: null,
+          cell
+        })
+      })
+      rows.push({
+        beforeRow: bodies[i - 1] || null,
+        afterRow: bodies[i + 1] || null,
+        cellsPosition: cells,
+        cells: bodies[i]
+      });
+    }
+
+    let stop = false;
+    let columnIndex = 0;
+    const marks: string[] = [];
+    do {
+      stop = rows.map((row, rowIndex) => {
+        const cellPosition = row.cellsPosition[columnIndex];
+        if (cellPosition) {
+          let mark: string;
+          cellPosition.rowIndex = rowIndex;
+          cellPosition.columnIndex = columnIndex;
+
+          if (cellPosition.offsetColumn + 1 < cellPosition.cell.colspan) {
+            mark = `${rowIndex}*${columnIndex + 1}`;
+            if (marks.indexOf(mark) === -1) {
+              row.cellsPosition.splice(columnIndex + 1, 0, {
+                beforeCell: cellPosition.beforeCell,
+                afterCell: cellPosition.afterCell,
+                cell: cellPosition.cell,
+                row: row.cells,
+                rowIndex,
+                columnIndex,
+                offsetColumn: cellPosition.offsetColumn + 1,
+                offsetRow: cellPosition.offsetRow
+              });
+              marks.push(mark);
+            }
+          }
+          if (cellPosition.offsetRow + 1 < cellPosition.cell.rowspan) {
+            mark = `${rowIndex + 1}*${columnIndex}`;
+            if (marks.indexOf(mark) === -1) {
+              const nextRow = rows[rowIndex + 1];
+              const newRowBeforeColumn = nextRow.cellsPosition[columnIndex - 1];
+              const newRowAfterColumn = nextRow.cellsPosition[columnIndex];
+              nextRow.cellsPosition.splice(columnIndex, 0, {
+                beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cell : null,
+                afterCell: newRowAfterColumn ? newRowAfterColumn.cell : null,
+                row: rows[rowIndex + 1].cells,
+                cell: cellPosition.cell,
+                offsetColumn: cellPosition.offsetColumn,
+                offsetRow: cellPosition.offsetRow + 1,
+                rowIndex,
+                columnIndex,
+              });
+              marks.push(mark);
+            }
+          }
+          return true;
+        }
+        return false;
+      }).indexOf(true) > -1;
+      columnIndex++;
+    } while (stop);
+    return rows;
   }
 }
