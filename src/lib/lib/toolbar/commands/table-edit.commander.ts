@@ -1,5 +1,5 @@
-import { ActionCommander, Renderer, TBSelection } from '../../core/_api';
-import { TableCellPosition, TableTemplate } from '../../templates/table.template';
+import { ActionCommander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { TableCellPosition, TableTemplate, SingleTagTemplate } from '../../templates/_api';
 
 export enum TableEditActions {
   AddColumnToLeft,
@@ -36,7 +36,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     const context = renderer.getContext(selection.firstRange.startFragment, TableTemplate);
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
-        // this.addColumnToLeft(context);
+        this.addColumnToLeft(context);
         break;
       // case TableEditActions.AddColumnToRight:
       //   this.addColumnToRight(rootFragment.parser);
@@ -67,38 +67,37 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
       //   break;
     }
   }
-  // private addColumnToLeft(context: TableTemplate) {
-  //   const cellMatrix = this.params.cellMatrix;
-  //   const index = this.params.startPosition.columnIndex;
-  //   cellMatrix.forEach(row => {
-  //     const cell = row.cellsPosition[index];
-  //     const fragment = (cell.cellElement[TBUS_TOKEN] as Token).context;
-  //     if (index === 0) {
-  //       fragment.parent.insert(TableEditCommander.createCell('td', parser), 0);
-  //     } else {
-  //       if (cell.columnOffset === 0) {
-  //         fragment.parent.insert(TableEditCommander.createCell('td', parser), fragment.getIndexInParent());
-  //       } else if (cell.rowOffset === 0) {
-  //         parser.createFormatDeltasByAbstractData(new AbstractData({
-  //           tag: 'td',
-  //           attrs: {
-  //             colspan: cell.cellElement.colSpan + 1,
-  //             rowspan: cell.cellElement.rowSpan
-  //           }
-  //         })).forEach(item => {
-  //           fragment.mergeFormat(new BlockFormat({
-  //             ...item,
-  //             context: fragment
-  //           }))
-  //         });
-  //       }
-  //     }
-  //   });
-  //   if (this.params.startPosition.cellElement === this.params.endPosition.cellElement) {
-  //     this.params.startPosition.columnIndex++;
-  //   } else {
-  //     this.params.startPosition.columnIndex++;
-  //     this.params.endPosition.columnIndex++;
-  //   }
-  // }
+
+  private addColumnToLeft(context: TableTemplate) {
+    const cellMatrix = context.cellMatrix;
+    const index = this.params.startPosition.columnIndex;
+    cellMatrix.forEach(row => {
+      const cell = row.cellsPosition[index];
+      if (index === 0) {
+        cell.row.unshift(TableEditCommander.createCell());
+      } else {
+        if (cell.offsetColumn === 0) {
+          cell.row.splice(cell.row.indexOf(cell.cell), 0, TableEditCommander.createCell());
+        } else if (cell.offsetRow === 0) {
+          cell.cell.colspan++;
+        }
+      }
+    });
+    if (this.params.startPosition.cell === this.params.endPosition.cell) {
+      this.params.startPosition.columnIndex++;
+    } else {
+      this.params.startPosition.columnIndex++;
+      this.params.endPosition.columnIndex++;
+    }
+  }
+
+  private static createCell() {
+    const fragment = new Fragment();
+    fragment.append(new SingleTagTemplate('br'));
+    return {
+      rowspan: 1,
+      colspan: 1,
+      fragment
+    };
+  }
 }

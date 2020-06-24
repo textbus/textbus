@@ -33,7 +33,7 @@ export abstract class BranchTemplate extends Template {
 }
 
 export abstract class BackboneTemplate extends Template {
-  readonly childSlots: Fragment[] = [];
+  childSlots: Fragment[] = [];
   protected viewMap = new Map<Fragment, VElement>();
 
   getChildViewBySlot(slot: Fragment) {

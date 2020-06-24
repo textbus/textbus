@@ -106,7 +106,14 @@ export class TableTemplateTranslator implements TemplateTranslator {
 }
 
 export class TableTemplate extends BackboneTemplate {
-  private cellMatrix: TableRowPosition[];
+  get cellMatrix() {
+    const n = this.serialize();
+    this._cellMatrix = n;
+    return n;
+  }
+
+  private _cellMatrix: TableRowPosition[];
+
   constructor(public config: TableInitParams) {
     super('table');
     const bodyConfig = config.bodies;
@@ -128,6 +135,7 @@ export class TableTemplate extends BackboneTemplate {
   render() {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
+    this.childSlots = [];
     const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
       const body = new VElement('tbody');
@@ -143,6 +151,7 @@ export class TableTemplate extends BackboneTemplate {
           if (col.rowspan > 1) {
             td.attrs.set('rowSpan', col.rowspan);
           }
+          this.childSlots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
           td.events.subscribe(event => {
@@ -161,7 +170,7 @@ export class TableTemplate extends BackboneTemplate {
   }
 
   selectCells(startCell: Fragment, endCell: Fragment) {
-    this.cellMatrix = this.serialize();
+    this._cellMatrix = this.serialize();
     const p1 = this.findCellPosition(startCell);
     const p2 = this.findCellPosition(endCell);
     const minRow = Math.min(p1.minRow, p2.minRow);
@@ -172,7 +181,7 @@ export class TableTemplate extends BackboneTemplate {
   }
 
   private selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableRange {
-    const cellMatrix = this.cellMatrix;
+    const cellMatrix = this._cellMatrix;
     const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cellsPosition[minColumn].offsetColumn));
     const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => {
       return row.cellsPosition[maxColumn].cell.colspan - (row.cellsPosition[maxColumn].offsetColumn + 1);
@@ -203,7 +212,7 @@ export class TableTemplate extends BackboneTemplate {
   }
 
   private findCellPosition(cell: Fragment): TableCellRect {
-    const cellMatrix = this.cellMatrix;
+    const cellMatrix = this._cellMatrix;
     let minRow: number, maxRow: number, minColumn: number, maxColumn: number;
 
     forA:for (let rowIndex = 0; rowIndex < cellMatrix.length; rowIndex++) {
