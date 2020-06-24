@@ -17,7 +17,8 @@ const editor = createEditor('#editor', {
         resolve('/test')
       }, 3000)
     })
-  }
+  },
+  contents: `<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`
 });
 
-editor.setContents(`<h1>TBus&nbsp;<span style="letter-spacing: 5px;">富文本编辑器</span></h1><table><tbody><tr><td><br></td><td>111<br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td>222<br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td>3333<br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td>444<br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td>555<br></td><td><br></td><td><br></td><td><br></td></tr></tbody></table>`);
+// editor.setContents(`<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

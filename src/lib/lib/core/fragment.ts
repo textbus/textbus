@@ -65,7 +65,7 @@ export class Fragment {
       }
     })
     newFormatRanges.forEach(f => {
-      this.mergeFormat(f);
+      this.mergeFormat(f, true);
     });
   }
 
@@ -77,7 +77,7 @@ export class Fragment {
         state: formatRange.state,
         abstractData: formatRange.abstractData,
         renderer: formatRange.renderer
-      });
+      }, true);
     })
     return ff;
   }
@@ -138,7 +138,7 @@ export class Fragment {
         selfFormats.push({
           ...format,
           startIndex,
-          endIndex: format.endIndex - startIndex
+          endIndex: format.endIndex - count
         });
         discardedFormats.push({
           ...format,
@@ -195,7 +195,7 @@ export class Fragment {
       }
     })
     selfFormats.forEach(f => {
-      formatMap.merge(f);
+      formatMap.merge(f, true);
     });
     this.formatMap = formatMap;
     return {
@@ -223,9 +223,9 @@ export class Fragment {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
-  apply(f: FormatDelta) {
+  apply(f: FormatDelta, important = true) {
     if (f.renderer instanceof BlockFormatter) {
-      this.mergeFormat(f);
+      this.mergeFormat(f, important);
       return;
     }
     const formatRange = f as FormatRange;
@@ -264,12 +264,12 @@ export class Fragment {
       }
       index += item.length;
     });
-    formats.forEach(f => this.formatMap.merge(f));
+    formats.forEach(f => this.formatMap.merge(f, important));
   }
 
-  private mergeFormat(format: FormatDelta) {
+  private mergeFormat(format: FormatDelta, important: boolean) {
     if (format.renderer instanceof InlineFormatter) {
-      this.formatMap.merge(format as FormatRange);
+      this.formatMap.merge(format as FormatRange, important);
     } else {
       let self = this;
       this.formatMap.merge({
@@ -282,7 +282,7 @@ export class Fragment {
         renderer: format.renderer,
         abstractData: format.abstractData,
         state: format.state
-      })
+      }, important)
     }
   }
 }

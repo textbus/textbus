@@ -27,7 +27,7 @@ export class FormatMap {
     return formats;
   }
 
-  merge(formatter: FormatRange) {
+  merge(formatter: FormatRange, important: boolean) {
     if (formatter.renderer instanceof BlockFormatter) {
       if (formatter.state === FormatEffect.Invalid) {
         this.map.delete(formatter.renderer);
@@ -45,7 +45,7 @@ export class FormatMap {
     }
     const newFormatMarks: FormatRange[] = [];
     const formatRanges: FormatRange[] = [];
-    oldFormats.push(formatter);
+    important ? oldFormats.push(formatter) : oldFormats.unshift(formatter);
     while (oldFormats.length) {
       const first = oldFormats.shift();
       if (newFormatMarks.length < first.endIndex) {

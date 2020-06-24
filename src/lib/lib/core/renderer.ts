@@ -541,13 +541,13 @@ export class Renderer {
     return formats.filter(i => {
       return i.state !== FormatEffect.Inherit;
     }).sort((next, prev) => {
-      const n = next.renderer.priority - prev.renderer.priority;
-      if (n !== 0) {
-        return n;
-      }
       const a = next.startIndex - prev.startIndex;
       if (a === 0) {
-        return prev.endIndex - next.endIndex;
+        const b = next.endIndex - prev.endIndex;
+        if (b === 0) {
+          return next.renderer.priority - prev.renderer.priority;
+        }
+        return b;
       }
       return a;
     });
