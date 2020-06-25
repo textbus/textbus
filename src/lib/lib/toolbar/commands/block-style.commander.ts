@@ -1,4 +1,10 @@
-import { Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
+import {
+  BackboneTemplate, BranchTemplate,
+  Commander,
+  FormatAbstractData,
+  FormatEffect, Fragment,
+  TBSelection
+} from '../../core/_api';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
 export class BlockStyleCommander implements Commander<string> {
@@ -16,16 +22,30 @@ export class BlockStyleCommander implements Commander<string> {
   command(selection: TBSelection, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        item.fragment.apply({
-          state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
-          renderer: this.formatter,
-          abstractData: new FormatAbstractData({
-            style: {
-              name: this.name,
-              value: this.value
+        let fragments: Fragment[] = [];
+        if (item.fragment === range.startFragment || item.fragment === range.endFragment) {
+          fragments = [item.fragment];
+        } else {
+          item.fragment.sliceContents(item.startIndex, item.endIndex).forEach(content => {
+            if (content instanceof BackboneTemplate) {
+              fragments = content.childSlots;
+            } else if (content instanceof BranchTemplate) {
+              fragments = [content.slot];
             }
           })
-        });
+        }
+        fragments.forEach(slot => {
+          slot.apply({
+            state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
+            renderer: this.formatter,
+            abstractData: new FormatAbstractData({
+              style: {
+                name: this.name,
+                value: this.value
+              }
+            })
+          });
+        })
       });
     });
   }
