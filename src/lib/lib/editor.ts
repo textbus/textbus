@@ -57,6 +57,7 @@ export enum CursorMoveDirection {
 }
 
 export class Editor implements EventDelegate {
+  readonly onReady: Observable<void>;
   readonly onChange: Observable<void>;
 
   get canBack() {
@@ -93,6 +94,7 @@ export class Editor implements EventDelegate {
   private defaultHTML = '<p><br></p>';
   private rootFragment: Fragment;
   private sub: Subscription;
+  private readyEvent = new Subject<void>();
   private changeEvent = new Subject<void>();
 
   private selectionSnapshot: TBSelection;
@@ -113,6 +115,7 @@ export class Editor implements EventDelegate {
       this.container = selector;
     }
     this.historyStackSize = options.historyStackSize || 50;
+    this.onReady = this.readyEvent.asObservable();
     this.onChange = this.changeEvent.asObservable();
 
     this.parser = new Parser(options);
@@ -131,6 +134,7 @@ export class Editor implements EventDelegate {
       this.viewer.elementRef.append(this.input.elementRef);
 
       this.setup();
+      this.readyEvent.next();
     });
 
     this.elementRef.appendChild(this.toolbar.elementRef);
@@ -197,6 +201,13 @@ export class Editor implements EventDelegate {
     return {
       styleSheets: this.options.styleSheets,
       contents
+    };
+  }
+
+  getJSONLiteral() {
+    return {
+      styleSheets: this.options.styleSheets,
+      contents: this.renderer.renderToJSON(this.rootFragment)
     };
   }
 

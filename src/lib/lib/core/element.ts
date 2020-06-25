@@ -1,5 +1,12 @@
 import { EventEmitter } from './events';
 
+export interface VElementLiteral {
+  tagName: string;
+  styles: { [key: string]: any },
+  attrs: { [key: string]: any },
+  childNodes: Array<VElementLiteral | string>;
+}
+
 export class VTextNode {
   constructor(public readonly textContent: string = '') {
   }
@@ -31,6 +38,28 @@ export class VElement {
     return left.tagName == right.tagName &&
       VElement.equalMap(left.attrs, right.attrs) &&
       VElement.equalMap(left.styles, right.styles);
+  }
+
+  toJSON(): VElementLiteral {
+    return {
+      tagName: this.tagName,
+      styles: VElement.mapToJSON(this.styles),
+      attrs: VElement.mapToJSON(this.attrs),
+      childNodes: this.childNodes.map(c => {
+        if (c instanceof VElement) {
+          return c.toJSON();
+        }
+        return c.textContent;
+      })
+    }
+  }
+
+  private static mapToJSON(map: Map<string, any>) {
+    const obj = {};
+    map.forEach((value, key) => {
+      obj[key] = value
+    });
+    return obj;
   }
 
   private static equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {

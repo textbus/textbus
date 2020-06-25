@@ -1,4 +1,4 @@
-import { VElement, VTextNode } from './element';
+import { VElement, VElementLiteral, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
 import { BranchTemplate, BackboneTemplate, Template } from './template';
@@ -113,6 +113,13 @@ export class Renderer {
     return vDom.childNodes.map(child => {
       return this.vDomToHTMLString(child);
     }).join('');
+  }
+
+  renderToJSON(fragment: Fragment): VElementLiteral {
+    this.productionRenderingModal = true;
+    const root = new VElement('body');
+    const vDom = this.createVDom(fragment, root);
+    return vDom.toJSON();
   }
 
   getPositionByNode(node: Node) {
