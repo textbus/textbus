@@ -41,6 +41,8 @@ export class TableHook implements Lifecycle {
   private renderer: Renderer;
   private tableTemplate: TableTemplate;
 
+  private scrollContainer: HTMLElement;
+
   constructor() {
     this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
     this.firstMask.style.cssText = 'position: absolute; box-shadow: 0 0 0 9999px rgba(18,150,219,.1); contain: style';
@@ -49,6 +51,7 @@ export class TableHook implements Lifecycle {
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
     this.renderer = renderer;
+    this.scrollContainer = frameContainer.children[0] as HTMLElement;
     const childBody = contextDocument.body;
     let insertMask = false;
     let insertStyle = false;
@@ -56,7 +59,7 @@ export class TableHook implements Lifecycle {
     style.id = this.id;
     style.innerText = '::selection { background: transparent; }';
 
-    merge(...[
+    merge(fromEvent(this.scrollContainer, 'scroll'), ...[
       'scroll',
       'resize'
     ].map(type => fromEvent(contextWindow, type))).subscribe(() => {
@@ -201,8 +204,8 @@ export class TableHook implements Lifecycle {
       width: this.mask.offsetWidth,
       height: this.mask.offsetHeight
     }, {
-      left: startRect.left,
-      top: startRect.top,
+      left: startRect.left - this.scrollContainer.scrollLeft,
+      top: startRect.top - this.scrollContainer.scrollTop,
       width: endRect.right - startRect.left,
       height: endRect.bottom - startRect.top
     }, {
