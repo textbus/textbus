@@ -64,7 +64,7 @@ export class TableHook implements Lifecycle {
       'resize'
     ].map(type => fromEvent(contextWindow, type))).subscribe(() => {
       if (this.endCell) {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, false);
       }
     });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
@@ -181,7 +181,7 @@ export class TableHook implements Lifecycle {
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
-                                             cell2: HTMLTableCellElement) {
+                                             cell2: HTMLTableCellElement, animate = true) {
 
     const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
     const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
@@ -197,23 +197,32 @@ export class TableHook implements Lifecycle {
 
     this.firstMask.style.width = firstCellRect.width + 'px';
     this.firstMask.style.height = firstCellRect.height + 'px';
+    if (animate) {
+      this.animate({
+        left: this.mask.offsetLeft,
+        top: this.mask.offsetTop,
+        width: this.mask.offsetWidth,
+        height: this.mask.offsetHeight
+      }, {
+        left: startRect.left - this.scrollContainer.scrollLeft,
+        top: startRect.top - this.scrollContainer.scrollTop,
+        width: endRect.right - startRect.left,
+        height: endRect.bottom - startRect.top
+      }, {
+        left: firstCellRect.left - startRect.left,
+        top: firstCellRect.top - startRect.top,
+        width: firstCellRect.width,
+        height: firstCellRect.height
+      });
+    } else {
+      this.mask.style.left = startRect.left - this.scrollContainer.scrollLeft + 'px';
+      this.mask.style.top = startRect.top - this.scrollContainer.scrollTop + 'px';
+      this.mask.style.width = endRect.right - startRect.left + 'px';
+      this.mask.style.height = endRect.bottom - startRect.top + 'px';
 
-    this.animate({
-      left: this.mask.offsetLeft,
-      top: this.mask.offsetTop,
-      width: this.mask.offsetWidth,
-      height: this.mask.offsetHeight
-    }, {
-      left: startRect.left - this.scrollContainer.scrollLeft,
-      top: startRect.top - this.scrollContainer.scrollTop,
-      width: endRect.right - startRect.left,
-      height: endRect.bottom - startRect.top
-    }, {
-      left: firstCellRect.left - startRect.left,
-      top: firstCellRect.top - startRect.top,
-      width: firstCellRect.width,
-      height: firstCellRect.height
-    });
+      this.firstMask.style.left = firstCellRect.left - startRect.left + 'px';
+      this.firstMask.style.top = firstCellRect.top - startRect.top + 'px';
+    }
 
     this.startPosition = startCellPosition;
     this.endPosition = endCellPosition;
