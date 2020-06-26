@@ -277,7 +277,7 @@ export class FormatMatcher implements Matcher {
     const last = states[states.length - 1];
     let equal = true;
     for (let i = 1; i < states.length; i++) {
-      const b = states[0].srcData.equal(states[i].srcData);
+      const b = states[0].srcData ? states[0].srcData.equal(states[i].srcData) : false;
       if (!b) {
         equal = false;
         break;
@@ -286,7 +286,7 @@ export class FormatMatcher implements Matcher {
 
     return states.length ? {
       effect: last.effect,
-      srcData: states.length && equal ? last.srcData.clone() : null
+      srcData: states.length && equal ? last.srcData ? last.srcData.clone() : null : null
     } : {
       effect: null,
       srcData: null

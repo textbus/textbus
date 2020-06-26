@@ -13,7 +13,7 @@ import {
   Renderer, TBRange, TBRangePosition,
   TBSelection,
   TemplateTranslator,
-  VElement
+  VElement, BackboneTemplate, BranchTemplate, BlockFormatter
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
@@ -457,22 +457,68 @@ export class Editor implements EventDelegate {
     const firstRange = this.selection.firstRange;
     const fragment = firstRange.startFragment;
 
-    // const firstChild = fragment.getContentAtIndex(0);
-    //
-    // if(fragment.contentLength === 0 || firstChild instanceof SingleTemplate && firstChild.tagName === 'br'){
-    //
-    // }
-    //
+    const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
 
-    let i = 0
-    contents.slice(0).forEach(item => {
-      fragment.insert(item, firstRange.startIndex + i);
-      i += item.length;
-    });
-    // firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + contents.length;
+    if (parentTemplate instanceof BackboneTemplate) {
+      let i = 0
+      contents.slice(0).forEach(item => {
+        fragment.insert(item, firstRange.startIndex + i);
+        i += item.length;
+      });
+      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
+    } else {
+      const firstChild = fragment.getContentAtIndex(0);
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const contentsArr = contents.slice(0);
+      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagTemplate && firstChild.tagName === 'br') {
+        contentsArr.forEach(item => parentFragment.insertBefore(item, parentTemplate));
+      } else {
+        const firstContent = contentsArr.shift();
+        if (firstContent instanceof BackboneTemplate) {
+          parentFragment.insertAfter(firstContent, parentTemplate);
+        } else if (firstContent instanceof BranchTemplate) {
+          const length = firstContent.slot.contentLength;
+          const firstContents = firstContent.slot.delete(0);
+          firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
+          firstContents.formatRanges.forEach(f => {
+            if (f.renderer instanceof InlineFormatter) {
+              fragment.apply({
+                ...f,
+                startIndex: f.startIndex + firstRange.startIndex,
+                endIndex: f.endIndex + firstRange.startIndex
+              })
+            }
+          })
+          if (contentsArr.length === 0) {
+            firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + length;
+          } else {
+            const afterContents = fragment.delete(firstRange.startIndex);
+            contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
+            const afterTemplate = parentTemplate.clone() as BranchTemplate;
+            afterTemplate.slot = new Fragment();
+            afterContents.contents.forEach(c => afterTemplate.slot.append(c));
+            afterContents.formatRanges.forEach(f => {
+              afterTemplate.slot.apply({
+                ...f,
+                startIndex: 0,
+                endIndex: f.endIndex - f.startIndex
+              });
+            });
+            if (afterTemplate.slot.contentLength === 0) {
+              afterTemplate.slot.append(new SingleTagTemplate('br'));
+            }
+            firstRange.setStart(afterTemplate.slot, 0);
+            firstRange.collapse();
+          }
+        }
+      }
+    }
+
+
     this.render();
     this.viewer.updateFrameHeight();
-    // this.selection.restore();
+    this.selection.restore();
+    this.invokeViewUpdatedHooks();
   }
 
   /**
@@ -586,7 +632,10 @@ export class Editor implements EventDelegate {
     });
 
     this.viewer.updateFrameHeight();
+    this.invokeViewUpdatedHooks();
+  }
 
+  private invokeViewUpdatedHooks() {
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onViewUpdated === 'function') {
         lifecycle.onViewUpdated();
