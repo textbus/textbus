@@ -198,13 +198,14 @@ export class Input {
       this.inputWrap.style.top = fontSize;
     }
 
-    const boxHeight = Number.parseInt(fontSize) * Number.parseFloat(lineHeight);
+    const boxHeight = isNaN(+lineHeight) ? fontSize : Number.parseInt(fontSize) * Number.parseFloat(lineHeight);
 
     this.elementRef.style.left = rect.left + 'px';
     this.elementRef.style.top = rect.top + 'px';
     this.elementRef.style.height = (rect.height || boxHeight) + 'px';
     this.cursor.style.backgroundColor = color;
-    this.input.style.lineHeight = boxHeight + '';
+    this.input.style.lineHeight = (rect.height || boxHeight) + 'px';
+    this.input.style.fontSize = fontSize;
   }
 
   private show() {
