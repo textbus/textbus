@@ -275,7 +275,10 @@ export class TableTemplate extends BackboneTemplate {
     let columnIndex = 0;
     const marks: string[] = [];
     do {
-      stop = rows.map((row, rowIndex) => {
+      let rowIndex = 0;
+      stop = false;
+      while (rowIndex < rows.length) {
+        const row = rows[rowIndex];
         const cellPosition = row.cellsPosition[columnIndex];
         if (cellPosition) {
           let mark: string;
@@ -302,6 +305,16 @@ export class TableTemplate extends BackboneTemplate {
             mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
               const nextRow = rows[rowIndex + 1];
+              // if(!nextRow) {
+              //   nextRow = {
+              //     cellsPosition: row.cellsPosition.map(i => {
+              //       return {
+              //         ...i,
+              //         offsetRow: i.offsetRow-1
+              //       }
+              //     })
+              //   }
+              // }
               const newRowBeforeColumn = nextRow.cellsPosition[columnIndex - 1];
               const newRowAfterColumn = nextRow.cellsPosition[columnIndex];
               nextRow.cellsPosition.splice(columnIndex, 0, {
@@ -317,10 +330,10 @@ export class TableTemplate extends BackboneTemplate {
               marks.push(mark);
             }
           }
-          return true;
+          stop = true;
         }
-        return false;
-      }).indexOf(true) > -1;
+        rowIndex++;
+      }
       columnIndex++;
     } while (stop);
     return rows;

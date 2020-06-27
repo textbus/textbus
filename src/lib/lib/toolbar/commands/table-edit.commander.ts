@@ -176,6 +176,9 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
       const index = cell.row.indexOf(cell.cell);
       if (index > -1) {
         cell.row.splice(index, 1);
+        if (cell.row.length === 0) {
+          context.config.bodies.splice(context.config.bodies.indexOf(cell.row), 1);
+        }
       }
     });
 
@@ -206,12 +209,13 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
         return p.concat(c);
       }, []).forEach(cell => {
       if (cell.offsetRow !== 0 || cell.offsetColumn !== 0) {
-
+        cell.cell.colspan = 1;
+        cell.cell.rowspan = 1;
         const newCellFragment = TableEditCommander.createCell();
 
         if (cell.afterCell) {
           const index = cell.row.indexOf(cell.cell);
-          cell.row.splice(index, 0, newCellFragment);
+          cell.row.splice(index + 1, 0, newCellFragment);
         } else {
           cell.row.push(newCellFragment);
         }
@@ -285,7 +289,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
         }
       }
     });
-    context.config.bodies.splice(context.config.bodies.indexOf(nextRow.cells) + 1, 1);
+    context.config.bodies.splice(context.config.bodies.indexOf(nextRow.cells), 1);
   }
 
   private deleteLeftColumn(context: TableTemplate) {
