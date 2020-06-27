@@ -33,8 +33,6 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
-    alert('正在开发中，敬请期待。。。');
-    return;
     const context = renderer.getContext(selection.firstRange.startFragment, TableTemplate);
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
@@ -103,7 +101,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
           cell.cell.colspan++;
         }
       } else {
-        cell.row.splice(cell.row.indexOf(cell.cell), 0, TableEditCommander.createCell());
+        cell.row.splice(cell.row.indexOf(cell.cell) + 1, 0, TableEditCommander.createCell());
       }
     });
   }
