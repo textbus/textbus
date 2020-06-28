@@ -151,6 +151,9 @@ export class TableTemplate extends BackboneTemplate {
           if (col.rowspan > 1) {
             td.attrs.set('rowSpan', col.rowspan);
           }
+          if (col.fragment.contentLength === 0) {
+            col.fragment.append(new SingleTagTemplate('br'));
+          }
           this.childSlots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
