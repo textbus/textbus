@@ -304,23 +304,21 @@ export class TableTemplate extends BackboneTemplate {
           if (cellPosition.offsetRow + 1 < cellPosition.cell.rowspan) {
             mark = `${rowIndex + 1}*${columnIndex}`;
             if (marks.indexOf(mark) === -1) {
-              const nextRow = rows[rowIndex + 1];
-              // if(!nextRow) {
-              //   nextRow = {
-              //     cellsPosition: row.cellsPosition.map(i => {
-              //       return {
-              //         ...i,
-              //         offsetRow: i.offsetRow-1
-              //       }
-              //     })
-              //   }
-              // }
+              let nextRow = rows[rowIndex + 1];
+              if (!nextRow) {
+                nextRow = {
+                  ...row,
+                  cells: [],
+                  cellsPosition: []
+                };
+                rows.push(nextRow);
+              }
               const newRowBeforeColumn = nextRow.cellsPosition[columnIndex - 1];
               const newRowAfterColumn = nextRow.cellsPosition[columnIndex];
               nextRow.cellsPosition.splice(columnIndex, 0, {
                 beforeCell: newRowBeforeColumn ? newRowBeforeColumn.cell : null,
                 afterCell: newRowAfterColumn ? newRowAfterColumn.cell : null,
-                row: rows[rowIndex + 1].cells,
+                row: nextRow.cells,
                 cell: cellPosition.cell,
                 offsetColumn: cellPosition.offsetColumn,
                 offsetRow: cellPosition.offsetRow + 1,

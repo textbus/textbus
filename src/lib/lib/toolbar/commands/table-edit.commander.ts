@@ -213,6 +213,10 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
         cell.cell.rowspan = 1;
         const newCellFragment = TableEditCommander.createCell();
 
+        if (!context.config.bodies.includes(cell.row)) {
+          context.config.bodies.splice(cell.rowIndex, 0, cell.row);
+        }
+
         if (cell.afterCell) {
           const index = cell.row.indexOf(cell.cell);
           cell.row.splice(index + 1, 0, newCellFragment);
