@@ -1,6 +1,6 @@
 import { Constructor, Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { VElement } from './element';
+import { VElement, VTextNode } from './element';
 import { BackboneTemplate, LeafTemplate, BranchTemplate, Template } from './template';
 import { BlockFormatter } from './formatter';
 
@@ -846,6 +846,12 @@ export class TBRange {
           index = position.endIndex;
           if (position.startIndex <= offset && position.endIndex >= offset) {
             if (i < len - 1 && position.endIndex === offset) {
+              if (child instanceof VTextNode) {
+                return {
+                  node: this.renderer.getNativeNodeByVDom(child),
+                  offset: child.textContent.length
+                }
+              }
               continue;
             }
             if (child instanceof VElement) {
@@ -867,8 +873,18 @@ export class TBRange {
             }
           }
         } else {
-          if (index + 1 === offset) {
-            return this.findFocusNodeAndOffset(position.fragment, position.fragment.contentLength);
+          if (index === offset) {
+            let nextPosition = this.findFirstPosition(position.fragment);
+            if (nextPosition.fragment.contentLength === 0) {
+              const node = this.renderer.getNativeNodeByVDom(vElement);
+              return {
+                node,
+                offset: Array.from(node.childNodes).indexOf(this.renderer.getNativeNodeByVDom(child) as ChildNode)
+              }
+            }
+            this.setStart(position.fragment, 0);
+            this.collapse();
+            return this.findFocusNodeAndOffset(position.fragment, 0);
           }
           index++;
         }
