@@ -8,7 +8,6 @@ import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
 import { DropdownViewer } from '../toolkit/_api';
-import { FormatAbstractData } from '../../core/_api';
 
 export class Form implements DropdownViewer {
   onComplete: Observable<AttrState[]>;
@@ -80,9 +79,10 @@ export class Form implements DropdownViewer {
     this.delegator = delegate;
   }
 
-  update(d: FormatAbstractData): void {
+  update(d: Map<string, string | number | boolean> | { [key: string]: any }): void {
     this.items.forEach(item => {
-      item.update((d && d.attrs) ? d.attrs.get(item.name) : '');
+      const value = d ? d instanceof Map ? d.get(item.name) : d[item.name] : null;
+      item.update(value || '');
     });
   }
 }

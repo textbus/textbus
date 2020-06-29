@@ -8,18 +8,15 @@ export class MediaMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     const states: RangeMatchDelta<LeafTemplate>[] = selection.ranges.map(range => {
-      let template: LeafTemplate;
-      if (range.commonAncestorTemplate instanceof this.templateConstructor) {
-        template = range.commonAncestorTemplate;
-      } else {
-        template = renderer.getContext(range.commonAncestorFragment, this.templateConstructor)
-      }
-      if (template && template.tagName === this.tagName) {
-        return {
-          srcData: template,
-          fromRange: range,
-          state: HighlightState.Highlight
-        };
+      if (range.startFragment === range.endFragment && range.endIndex - range.startIndex === 1) {
+        const content = range.startFragment.sliceContents(range.startIndex, range.endIndex);
+        if (content[0] instanceof this.templateConstructor && content[0].tagName === this.tagName) {
+          return {
+            srcData: content[0],
+            fromRange: range,
+            state: HighlightState.Highlight
+          };
+        }
       }
       return {
         state: HighlightState.Normal,
@@ -37,9 +34,9 @@ export class MediaMatcher implements Matcher {
       }
     }
     return {
-      state: HighlightState.Normal,
+      state: HighlightState.Highlight,
       srcStates: states,
-      matchData: null
+      matchData: states[0]?.srcData
     }
   }
 }

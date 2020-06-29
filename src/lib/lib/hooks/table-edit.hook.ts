@@ -25,7 +25,7 @@ function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLEl
   return null;
 }
 
-export class TableHook implements Lifecycle {
+export class TableEditHook implements Lifecycle {
   private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');

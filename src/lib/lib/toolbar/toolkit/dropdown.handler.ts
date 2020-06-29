@@ -4,7 +4,7 @@ import { ContextMenuConfig, Tool } from './help';
 import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { EventDelegate, HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
-import { Commander } from '../../core/_api';
+import { Commander, FormatAbstractData } from '../../core/_api';
 import { map } from 'rxjs/operators';
 
 export interface DropdownConfig {
@@ -68,7 +68,8 @@ export class DropdownHandler implements Tool {
   }
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
-    this.viewer.update(selectionMatchDelta.matchData);
+    const matchData = selectionMatchDelta.matchData;
+    this.viewer.update(matchData instanceof FormatAbstractData ? matchData.attrs : matchData);
     switch (selectionMatchDelta.state) {
       case HighlightState.Highlight:
         this.dropdown.disabled = false;
