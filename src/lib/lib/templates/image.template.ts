@@ -16,6 +16,9 @@ export class ImageTemplateTranslator implements TemplateTranslator {
 }
 
 export class ImageTemplate extends LeafTemplate {
+  width: string = null;
+  height: string = null;
+
   constructor(public src: string) {
     super('img');
   }
@@ -23,6 +26,12 @@ export class ImageTemplate extends LeafTemplate {
   render() {
     const el = new VElement(this.tagName);
     el.attrs.set('src', this.src);
+    if (this.width) {
+      el.styles.set('width', this.width);
+    }
+    if (this.height) {
+      el.styles.set('height', this.height);
+    }
     return el;
   }
 
