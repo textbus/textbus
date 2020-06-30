@@ -229,7 +229,7 @@ export class Editor implements EventDelegate {
 
     commonAncestorFragment.delete(0);
     fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f));
+    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, true, false));
 
     let index = 0;
     this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
