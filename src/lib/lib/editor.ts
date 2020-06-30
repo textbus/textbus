@@ -2,18 +2,23 @@ import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/oper
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
+  BackboneTemplate,
+  BranchTemplate,
   Commander,
-  Contents, LeafTemplate,
+  Contents,
   EventType,
   Fragment,
   InlineFormatter,
+  LeafTemplate,
   Lifecycle,
   Parser,
   RangePath,
-  Renderer, TBRange, TBRangePosition,
+  Renderer,
+  TBRange,
+  TBRangePosition,
   TBSelection,
   TemplateTranslator,
-  VElement, BackboneTemplate, BranchTemplate, BlockFormatter
+  VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
@@ -224,7 +229,7 @@ export class Editor implements EventDelegate {
 
     commonAncestorFragment.delete(0);
     fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f));
+    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, true, false));
 
     let index = 0;
     this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
@@ -628,6 +633,15 @@ export class Editor implements EventDelegate {
             }
           }
         });
+      } else if (event.type === EventType.onEnter) {
+        const firstRange = event.selection.firstRange;
+        rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+        const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+        if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
+          return;
+        }
+        rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
       }
     });
 

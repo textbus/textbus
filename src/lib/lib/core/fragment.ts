@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { BackboneTemplate, BranchTemplate, Template } from './template';
-import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
+import { BlockFormatter, FormatDelta, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export class Fragment {
@@ -48,13 +48,39 @@ export class Fragment {
         return;
       }
       if (format.startIndex < index && format.endIndex >= index) {
-        newFormatRanges.push({
-          startIndex: format.startIndex,
-          endIndex: format.endIndex + contents.length,
-          state: format.state,
-          abstractData: format.abstractData.clone(),
-          renderer: format.renderer
-        });
+        if (contents instanceof BranchTemplate || contents instanceof BackboneTemplate) {
+          newFormatRanges.push({
+            startIndex: format.startIndex,
+            endIndex: index,
+            state: format.state,
+            abstractData: format.abstractData.clone(),
+            renderer: format.renderer
+          });
+          newFormatRanges.push({
+            startIndex: index,
+            endIndex: index + 1,
+            state: FormatEffect.Invalid,
+            abstractData: format.abstractData.clone(),
+            renderer: format.renderer
+          });
+          if (format.endIndex > index) {
+            newFormatRanges.push({
+              startIndex: index + 1,
+              endIndex: format.endIndex + 1,
+              state: format.state,
+              abstractData: format.abstractData.clone(),
+              renderer: format.renderer
+            })
+          }
+        } else {
+          newFormatRanges.push({
+            startIndex: format.startIndex,
+            endIndex: format.endIndex + contents.length,
+            state: format.state,
+            abstractData: format.abstractData.clone(),
+            renderer: format.renderer
+          });
+        }
       } else {
         if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
           format.startIndex += contents.length;
@@ -223,7 +249,7 @@ export class Fragment {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
-  apply(f: FormatDelta, important = true) {
+  apply(f: FormatDelta, important = true, coverChild = true) {
     if (f.renderer instanceof BlockFormatter) {
       this.mergeFormat(f, important);
       return;
@@ -236,18 +262,22 @@ export class Fragment {
     contents.forEach(item => {
       if (item instanceof BackboneTemplate) {
         newFormat = null;
-        item.childSlots.forEach(fragment => {
-          const newFormatRange = Object.assign({}, formatRange);
-          newFormatRange.startIndex = 0;
-          newFormatRange.endIndex = fragment.contentLength;
-          fragment.apply(newFormatRange);
-        })
+        if (coverChild) {
+          item.childSlots.forEach(fragment => {
+            const newFormatRange = Object.assign({}, formatRange);
+            newFormatRange.startIndex = 0;
+            newFormatRange.endIndex = fragment.contentLength;
+            fragment.apply(newFormatRange, important);
+          })
+        }
       } else if (item instanceof BranchTemplate) {
         newFormat = null;
-        const newFormatRange = Object.assign({}, formatRange);
-        newFormatRange.startIndex = 0;
-        newFormatRange.endIndex = item.slot.contentLength;
-        item.slot.apply(newFormatRange);
+        if (coverChild) {
+          const newFormatRange = Object.assign({}, formatRange);
+          newFormatRange.startIndex = 0;
+          newFormatRange.endIndex = item.slot.contentLength;
+          item.slot.apply(newFormatRange, important);
+        }
       } else {
         if (!newFormat) {
           newFormat = {

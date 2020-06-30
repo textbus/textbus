@@ -62,8 +62,9 @@ export class BlockTemplate extends BranchTemplate {
         }
         c.formatRanges.forEach(ff => fragment.apply(ff));
         parent.insert(template, parent.indexOf(this) + 1);
-        firstRange.startFragment = firstRange.endFragment = fragment
-        firstRange.startIndex = firstRange.endIndex = 0;
+        const position = firstRange.findFirstPosition(fragment);
+        firstRange.startFragment = firstRange.endFragment = position.fragment;
+        firstRange.startIndex = firstRange.endIndex = position.index;
         event.stopPropagation();
       }
     })

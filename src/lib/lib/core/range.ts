@@ -852,6 +852,13 @@ export class TBRange {
                   offset: child.textContent.length
                 }
               }
+              if (position.endIndex === offset) {
+                const afterContent = fragment.sliceContents(position.endIndex, position.endIndex + 1)[0];
+                if (afterContent instanceof BranchTemplate || afterContent instanceof BackboneTemplate) {
+                  vElement = child;
+                  continue parentLoop;
+                }
+              }
               continue;
             }
             if (child instanceof VElement) {
