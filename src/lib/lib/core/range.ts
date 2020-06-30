@@ -852,6 +852,17 @@ export class TBRange {
                   offset: child.textContent.length
                 }
               }
+              // if (position.endIndex - position.startIndex === 1) {
+              //   const content = position.fragment.sliceContents(position.startIndex, position.endIndex)[0];
+              //   if (content instanceof LeafTemplate && content.tagName === 'br') {
+              //     const node = this.renderer.getNativeNodeByVDom(child);
+              //     const parentNode = node.parentNode;
+              //     return {
+              //       node: parentNode,
+              //       offset: Array.from(parentNode.childNodes).indexOf(node as ChildNode) + 1
+              //     }
+              //   }
+              // }
               continue;
             }
             if (child instanceof VElement) {

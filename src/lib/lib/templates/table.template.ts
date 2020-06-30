@@ -1,4 +1,13 @@
-import { BackboneTemplate, EventType, Fragment, SlotMap, TemplateTranslator, VElement, ViewData } from '../core/_api';
+import {
+  BackboneTemplate,
+  EventType,
+  Fragment,
+  LeafTemplate,
+  SlotMap,
+  TemplateTranslator,
+  VElement,
+  ViewData
+} from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
 
 export interface TableCell {
@@ -162,6 +171,11 @@ export class TableTemplate extends BackboneTemplate {
               const firstRange = event.selection.firstRange;
               col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
               firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+              const afterContent = col.fragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+              if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
+                return;
+              }
+              col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
             } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
               event.stopPropagation();
             }
