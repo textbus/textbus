@@ -23,6 +23,7 @@ export class ImageResizeHook implements Lifecycle {
   private currentTemplate: ImageTemplate;
   private currentImage: HTMLImageElement;
   private frameContainer: HTMLElement;
+  private scrollContainer: HTMLElement;
 
   constructor() {
     this.mask.className = 'tbus-image-resize-hooks-handler';
@@ -89,7 +90,7 @@ export class ImageResizeHook implements Lifecycle {
 
         const rect = this.currentImage.getBoundingClientRect();
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px`;
+        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
       };
 
       const mouseUpFn = () => {
@@ -105,6 +106,11 @@ export class ImageResizeHook implements Lifecycle {
   }
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
+    this.scrollContainer = frameContainer.children[0] as HTMLElement;
+    this.scrollContainer.addEventListener('scroll', () => {
+      this.mask.style.marginLeft = -this.scrollContainer.scrollLeft + 'px';
+      this.mask.style.marginTop = -this.scrollContainer.scrollTop + 'px';
+    })
     contextDocument.addEventListener('click', ev => {
       const srcElement = ev.target as HTMLImageElement;
       if (/^img$/i.test(srcElement.nodeName)) {
@@ -118,7 +124,7 @@ export class ImageResizeHook implements Lifecycle {
         range.selectNode(srcElement);
         selection.addRange(range);
         const rect = srcElement.getBoundingClientRect();
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px`;
+        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
         frameContainer.append(this.mask);
       } else {
