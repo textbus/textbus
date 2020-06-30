@@ -173,6 +173,7 @@ export class TableTemplate extends BackboneTemplate {
               firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
               const afterContent = col.fragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
               if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
+                event.stopPropagation();
                 return;
               }
               col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);

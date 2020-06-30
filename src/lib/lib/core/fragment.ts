@@ -240,14 +240,14 @@ export class Fragment {
           const newFormatRange = Object.assign({}, formatRange);
           newFormatRange.startIndex = 0;
           newFormatRange.endIndex = fragment.contentLength;
-          fragment.apply(newFormatRange);
+          fragment.apply(newFormatRange, important);
         })
       } else if (item instanceof BranchTemplate) {
         newFormat = null;
         const newFormatRange = Object.assign({}, formatRange);
         newFormatRange.startIndex = 0;
         newFormatRange.endIndex = item.slot.contentLength;
-        item.slot.apply(newFormatRange);
+        item.slot.apply(newFormatRange, important);
       } else {
         if (!newFormat) {
           newFormat = {
