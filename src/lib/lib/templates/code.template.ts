@@ -198,6 +198,7 @@ export class CodeTemplate extends BranchTemplate {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new SingleTagTemplate('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+        event.stopPropagation();
       }
     })
     return block;
