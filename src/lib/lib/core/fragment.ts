@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { BackboneTemplate, BranchTemplate, Template } from './template';
-import { BlockFormatter, FormatDelta, FormatRange, InlineFormatter } from './formatter';
+import { BlockFormatter, FormatDelta, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export class Fragment {
@@ -53,6 +53,13 @@ export class Fragment {
             startIndex: format.startIndex,
             endIndex: index,
             state: format.state,
+            abstractData: format.abstractData.clone(),
+            renderer: format.renderer
+          });
+          newFormatRanges.push({
+            startIndex: index,
+            endIndex: index + 1,
+            state: FormatEffect.Invalid,
             abstractData: format.abstractData.clone(),
             renderer: format.renderer
           });
