@@ -57,4 +57,4 @@ code, kbd, pre, samp {
 }`, `a {
       text-decoration: underline;
       color: #449fdb;
-}`]
+}`, `img {vertical-align:bottom}`]
