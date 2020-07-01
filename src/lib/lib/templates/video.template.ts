@@ -16,6 +16,8 @@ export class VideoTemplateTranslator implements TemplateTranslator {
 }
 
 export class VideoTemplate extends LeafTemplate {
+  width: string = null;
+  height: string = null;
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('video');
 
@@ -26,6 +28,12 @@ export class VideoTemplate extends LeafTemplate {
     el.attrs.set('src', this.src);
     el.attrs.set('autoplay', this.autoplay);
     el.attrs.set('controls', this.controls);
+    if (this.width) {
+      el.styles.set('width', this.width);
+    }
+    if (this.height) {
+      el.styles.set('height', this.height);
+    }
     return el;
   }
 

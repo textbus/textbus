@@ -48,7 +48,7 @@ import {
   underlineTool,
   videoTool
 } from './lib/toolbar/tools/_api';
-import { DefaultHook, HistoryHook, ImageResizeHook, TableEditHook } from './lib/hooks/_api';
+import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
   AudioTemplateTranslator,
   BlockTemplateTranslator,
@@ -66,7 +66,7 @@ export const defaultOptions: EditorOptions = {
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
-    new ImageResizeHook(),
+    new ImageVideoResizeHook(),
     new TableEditHook()
   ],
   templateTranslators: [

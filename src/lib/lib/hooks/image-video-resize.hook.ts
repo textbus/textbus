@@ -1,5 +1,5 @@
 import { Lifecycle, Renderer } from '../core/_api';
-import { ImageTemplate } from '../templates/image.template';
+import { ImageTemplate, VideoTemplate } from '../templates/_api';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);
@@ -15,13 +15,13 @@ function matchAngle(x: number, y: number, startAngle: number, endAngle: number) 
   return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0;
 }
 
-export class ImageResizeHook implements Lifecycle {
+export class ImageVideoResizeHook implements Lifecycle {
   private mask = document.createElement('div');
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];
 
-  private currentTemplate: ImageTemplate;
-  private currentImage: HTMLImageElement;
+  private currentTemplate: ImageTemplate | VideoTemplate;
+  private currentElement: HTMLImageElement | HTMLVideoElement;
   private frameContainer: HTMLElement;
   private scrollContainer: HTMLElement;
 
@@ -42,7 +42,7 @@ export class ImageResizeHook implements Lifecycle {
 
       this.frameContainer.style.pointerEvents = 'none';
 
-      const startRect = this.currentImage.getBoundingClientRect();
+      const startRect = this.currentElement.getBoundingClientRect();
       this.currentTemplate.width = startRect.width + 'px';
       this.currentTemplate.height = startRect.height + 'px';
 
@@ -78,17 +78,17 @@ export class ImageResizeHook implements Lifecycle {
 
           endWidth = startWidth + startWidth * proportion;
           endHeight = startHeight + startHeight * proportion;
-          this.currentImage.style.width = endWidth + 'px';
-          this.currentImage.style.height = endHeight + 'px';
+          this.currentElement.style.width = endWidth + 'px';
+          this.currentElement.style.height = endHeight + 'px';
         } else if ([1, 5].includes(index)) {
           endHeight = startHeight + (index === 1 ? -offsetY : offsetY);
-          this.currentImage.style.height = endHeight + 'px';
+          this.currentElement.style.height = endHeight + 'px';
         } else if ([3, 7].includes(index)) {
           endWidth = startWidth + (index === 3 ? offsetX : -offsetX)
-          this.currentImage.style.width = endWidth + 'px';
+          this.currentElement.style.width = endWidth + 'px';
         }
 
-        const rect = this.currentImage.getBoundingClientRect();
+        const rect = this.currentElement.getBoundingClientRect();
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
         this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
       };
@@ -113,11 +113,12 @@ export class ImageResizeHook implements Lifecycle {
     })
     contextDocument.addEventListener('click', ev => {
       const srcElement = ev.target as HTMLImageElement;
-      if (/^img$/i.test(srcElement.nodeName)) {
+      if (/^img$|video/i.test(srcElement.nodeName)) {
         const position = renderer.getPositionByNode(srcElement);
-        this.currentImage = srcElement;
+        this.currentElement = srcElement;
         this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageTemplate;
         this.frameContainer = frameContainer;
+        const scrollTop = this.scrollContainer.scrollTop;
         const selection = contextDocument.getSelection();
         selection.removeAllRanges();
         const range = contextDocument.createRange();
@@ -127,8 +128,11 @@ export class ImageResizeHook implements Lifecycle {
         this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
         frameContainer.append(this.mask);
+        setTimeout(() => {
+          this.scrollContainer.scrollTop = scrollTop;
+        })
       } else {
-        this.currentImage = null;
+        this.currentElement = null;
         this.currentTemplate = null;
         if (this.mask.parentNode) {
           this.mask.parentNode.removeChild(this.mask);
