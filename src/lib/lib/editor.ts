@@ -25,6 +25,7 @@ import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFa
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { Paths } from './paths/paths';
+import { Device } from './device/device';
 
 export interface Snapshot {
   contents: Fragment;
@@ -34,6 +35,8 @@ export interface Snapshot {
 export interface EditorOptions {
   /** 设置主题 */
   theme?: string;
+  /** 设备宽度 */
+  deviceWidth?: string;
   /** 设置最大历史栈 */
   historyStackSize?: number;
   /** 设置模板转换器 */
@@ -73,30 +76,19 @@ export class Editor implements EventDelegate {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
-  set device(width: string) {
-    if (this.viewer) {
-      this.frameContainer.style.padding = width === '100%' ? '' : '20px';
-      this.viewer.setViewWidth(width);
-    }
-    this._device = width;
-  }
-
-  get device() {
-    return this._device;
-  }
-
   readonly elementRef = document.createElement('div');
-  private _device = '100%';
 
   private readonly frameContainer = document.createElement('div');
+  private readonly footer = document.createElement('div');
   private readonly container: HTMLElement;
 
-  readonly viewer: Viewer;
+  private viewer: Viewer;
   private parser: Parser;
   private toolbar: Toolbar;
   private input: Input;
   private renderer = new Renderer();
   private paths = new Paths();
+  private device = new Device();
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
@@ -139,10 +131,19 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(options);
 
     this.frameContainer.classList.add('tbus-frame-container');
+    this.footer.classList.add('tbus-footer');
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
-    this.device = '100%';
+    const deviceWidth = options.deviceWidth || '100%';
+    this.frameContainer.style.padding = deviceWidth === '100%' ? '' : '20px';
+    this.device.update(deviceWidth);
+    this.viewer.setViewWidth(deviceWidth);
+
+    this.device.onChange.subscribe(value => {
+      this.frameContainer.style.padding = value === '100%' ? '' : '20px';
+      this.viewer.setViewWidth(value);
+    });
 
     zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
@@ -158,7 +159,9 @@ export class Editor implements EventDelegate {
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     this.frameContainer.appendChild(this.viewer.elementRef);
-    this.elementRef.append(this.paths.elementRef);
+    this.footer.append(this.paths.elementRef);
+    this.footer.append(this.device.elementRef);
+    this.elementRef.append(this.footer);
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
       this.elementRef.classList.add('tbus-theme-' + options.theme);

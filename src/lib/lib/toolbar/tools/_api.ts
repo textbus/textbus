@@ -4,7 +4,6 @@ export { blockquoteTool } from './blockquote.tool';
 export { boldTool } from './bold.tool';
 export { cleanTool } from './clean.tool';
 export { colorTool } from './color.tool';
-export { deviceTool } from './device.tool';
 export { emojiTool } from './emoji.tool';
 export { fontFamilyTool } from './font-family.tool';
 export { codeTool } from './code.tool';
