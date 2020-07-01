@@ -46,6 +46,7 @@
     border: none;
     outline: none;
     cursor: pointer;
+    color: inherit;
 
     &:hover {
       color: $color-primary;
