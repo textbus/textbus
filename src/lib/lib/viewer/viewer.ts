@@ -8,6 +8,7 @@ export class Viewer {
   elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
+
   private frame = document.createElement('iframe');
 
   private readyEvent = new Subject<Document>();
@@ -39,6 +40,10 @@ export class Viewer {
     this.frame.classList.add('tbus-frame');
 
     this.elementRef.appendChild(this.frame);
+  }
+
+  setViewWidth(width: string) {
+    this.elementRef.style.width = width;
   }
 
   updateFrameHeight() {

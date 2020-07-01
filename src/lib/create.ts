@@ -23,7 +23,7 @@ import {
   boldTool,
   cleanTool,
   codeTool,
-  colorTool,
+  colorTool, deviceTool,
   emojiTool,
   fontFamilyTool,
   fontSizeTool,
@@ -48,7 +48,7 @@ import {
   underlineTool,
   videoTool
 } from './lib/toolbar/tools/_api';
-import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
+import { DefaultHook, DeviceHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
   AudioTemplateTranslator,
   BlockTemplateTranslator,
@@ -65,6 +65,7 @@ export const defaultOptions: EditorOptions = {
   styleSheets: defaultStyleSheets,
   hooks: [
     new DefaultHook(),
+    new DeviceHook(),
     new HistoryHook(),
     new ImageVideoResizeHook(),
     new TableEditHook()
@@ -100,6 +101,7 @@ export const defaultOptions: EditorOptions = {
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
+    [deviceTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
     [blockquoteTool],

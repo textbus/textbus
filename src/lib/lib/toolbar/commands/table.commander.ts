@@ -17,22 +17,22 @@ export class TableCommander implements Commander<AttrState[]> {
     });
     selection.ranges.forEach(range => {
       const parentFragment = renderer.getParentFragmentByTemplate(range.commonAncestorTemplate);
-      const index = parentFragment.indexOf(range.commonAncestorTemplate);
       const rows = +attrs.get('rows') || 0;
       const cols = +attrs.get('cols') || 0;
-      const bodies = this.create(rows, cols);
+      const bodies = TableCommander.create(rows, cols);
+      const table = new TableTemplate({
+        bodies
+      });
+      parentFragment.insertAfter(table, range.commonAncestorTemplate);
+
       if (rows && cols) {
         range.setStart(bodies[0][0].fragment, 0);
         range.collapse();
       }
-      const table = new TableTemplate({
-        bodies
-      });
-      parentFragment.insert(table, index);
     })
   }
 
-  private create(rows: number, columns: number) {
+  private static create(rows: number, columns: number) {
     const result: TableCell[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: TableCell[] = [];

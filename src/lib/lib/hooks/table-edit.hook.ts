@@ -41,8 +41,6 @@ export class TableEditHook implements Lifecycle {
   private renderer: Renderer;
   private tableTemplate: TableTemplate;
 
-  private scrollContainer: HTMLElement;
-
   constructor() {
     this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
     this.firstMask.style.cssText = 'position: absolute; box-shadow: 0 0 0 9999px rgba(18,150,219,.1); contain: style';
@@ -51,7 +49,6 @@ export class TableEditHook implements Lifecycle {
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
     this.renderer = renderer;
-    this.scrollContainer = frameContainer.children[0] as HTMLElement;
     const childBody = contextDocument.body;
     let insertMask = false;
     let insertStyle = false;
@@ -59,14 +56,6 @@ export class TableEditHook implements Lifecycle {
     style.id = this.id;
     style.innerText = '::selection { background: transparent; }';
 
-    merge(fromEvent(this.scrollContainer, 'scroll'), ...[
-      'scroll',
-      'resize'
-    ].map(type => fromEvent(contextWindow, type))).subscribe(() => {
-      if (this.endCell) {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell, false);
-      }
-    });
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
       this.selectedCells = [];
       this.startPosition = null;
@@ -204,8 +193,8 @@ export class TableEditHook implements Lifecycle {
         width: this.mask.offsetWidth,
         height: this.mask.offsetHeight
       }, {
-        left: startRect.left - this.scrollContainer.scrollLeft,
-        top: startRect.top - this.scrollContainer.scrollTop,
+        left: startRect.left,
+        top: startRect.top,
         width: endRect.right - startRect.left,
         height: endRect.bottom - startRect.top
       }, {
@@ -215,8 +204,8 @@ export class TableEditHook implements Lifecycle {
         height: firstCellRect.height
       });
     } else {
-      this.mask.style.left = startRect.left - this.scrollContainer.scrollLeft + 'px';
-      this.mask.style.top = startRect.top - this.scrollContainer.scrollTop + 'px';
+      this.mask.style.left = startRect.left + 'px';
+      this.mask.style.top = startRect.top + 'px';
       this.mask.style.width = endRect.right - startRect.left + 'px';
       this.mask.style.height = endRect.bottom - startRect.top + 'px';
 

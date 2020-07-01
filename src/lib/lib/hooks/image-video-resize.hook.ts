@@ -23,7 +23,6 @@ export class ImageVideoResizeHook implements Lifecycle {
   private currentTemplate: ImageTemplate | VideoTemplate;
   private currentElement: HTMLImageElement | HTMLVideoElement;
   private frameContainer: HTMLElement;
-  private scrollContainer: HTMLElement;
 
   constructor() {
     this.mask.className = 'tbus-image-resize-hooks-handler';
@@ -90,7 +89,7 @@ export class ImageVideoResizeHook implements Lifecycle {
 
         const rect = this.currentElement.getBoundingClientRect();
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
+        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
       };
 
       const mouseUpFn = () => {
@@ -106,11 +105,6 @@ export class ImageVideoResizeHook implements Lifecycle {
   }
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
-    this.scrollContainer = frameContainer.children[0] as HTMLElement;
-    this.scrollContainer.addEventListener('scroll', () => {
-      this.mask.style.marginLeft = -this.scrollContainer.scrollLeft + 'px';
-      this.mask.style.marginTop = -this.scrollContainer.scrollTop + 'px';
-    })
     contextDocument.addEventListener('click', ev => {
       const srcElement = ev.target as HTMLImageElement;
       if (/^img$|video/i.test(srcElement.nodeName)) {
@@ -118,19 +112,15 @@ export class ImageVideoResizeHook implements Lifecycle {
         this.currentElement = srcElement;
         this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageTemplate;
         this.frameContainer = frameContainer;
-        const scrollTop = this.scrollContainer.scrollTop;
         const selection = contextDocument.getSelection();
         selection.removeAllRanges();
         const range = contextDocument.createRange();
         range.selectNode(srcElement);
         selection.addRange(range);
         const rect = srcElement.getBoundingClientRect();
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px; margin-top:${-this.scrollContainer.scrollTop}px; margin-left:${-this.scrollContainer.scrollLeft}px`;
+        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
         this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
         frameContainer.append(this.mask);
-        setTimeout(() => {
-          this.scrollContainer.scrollTop = scrollTop;
-        })
       } else {
         this.currentElement = null;
         this.currentTemplate = null;

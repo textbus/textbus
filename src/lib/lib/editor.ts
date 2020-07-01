@@ -73,13 +73,26 @@ export class Editor implements EventDelegate {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
 
+  set device(width: string) {
+    if (this.viewer) {
+      this.frameContainer.style.padding = width === '100%' ? '' : '20px';
+      this.viewer.setViewWidth(width);
+    }
+    this._device = width;
+  }
+
+  get device() {
+    return this._device;
+  }
+
   readonly elementRef = document.createElement('div');
+  private _device = '100%';
 
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
+  readonly viewer: Viewer;
   private parser: Parser;
-  private viewer: Viewer;
   private toolbar: Toolbar;
   private input: Input;
   private renderer = new Renderer();
@@ -129,7 +142,7 @@ export class Editor implements EventDelegate {
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
-
+    this.device = '100%';
 
     zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
@@ -263,7 +276,7 @@ export class Editor implements EventDelegate {
       });
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
-        hooks.setup(this.renderer, this.viewer.contentDocument, this.viewer.contentWindow, this.frameContainer);
+        hooks.setup(this.renderer, this.viewer.contentDocument, this.viewer.contentWindow, this.viewer.elementRef);
       }
     })
     fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {

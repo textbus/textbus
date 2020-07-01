@@ -1,9 +1,9 @@
 @font-face {
-  font-family: 'tubs';
+  font-family: 'tbus';
   src:
-    url('fonts/tubs.ttf?5jxr3p') format('truetype'),
-    url('fonts/tubs.woff?5jxr3p') format('woff'),
-    url('fonts/tubs.svg?5jxr3p#tubs') format('svg');
+    url('fonts/tbus.ttf?bgamfn') format('truetype'),
+    url('fonts/tbus.woff?bgamfn') format('woff'),
+    url('fonts/tbus.svg?bgamfn#tbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,8 +11,8 @@
 
 [class^="tbus-icon-"], [class*=" tbus-icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'tubs' !important;
-  speak: none;
+  font-family: 'tbus' !important;
+  speak: never;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -24,56 +24,59 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tbus-icon-device:before {
+  content: "\e900";
+}
 .tbus-icon-arrow-right:before {
   content: "\e50f";
 }
 .tbus-icon-paint-bucket:before {
-  content: "\e900";
-}
-.tbus-icon-background-color:before {
   content: "\e901";
 }
-.tbus-icon-color:before {
+.tbus-icon-background-color:before {
   content: "\e902";
 }
-.tbus-icon-brush:before {
+.tbus-icon-color:before {
   content: "\e903";
 }
-.tbus-icon-table-edit:before {
+.tbus-icon-brush:before {
   content: "\e904";
 }
-.tbus-icon-table-split-columns:before {
+.tbus-icon-table-edit:before {
   content: "\e905";
 }
-.tbus-icon-table-delete-row-top:before {
+.tbus-icon-table-split-columns:before {
   content: "\e906";
 }
-.tbus-icon-table-delete-row-bottom:before {
+.tbus-icon-table-delete-row-top:before {
   content: "\e907";
 }
-.tbus-icon-table-delete-column-right:before {
+.tbus-icon-table-delete-row-bottom:before {
   content: "\e908";
 }
-.tbus-icon-table-delete-column-left:before {
+.tbus-icon-table-delete-column-right:before {
   content: "\e909";
 }
-.tbus-icon-table-add-row-top:before {
+.tbus-icon-table-delete-column-left:before {
   content: "\e90a";
 }
-.tbus-icon-table-add-row-bottom:before {
+.tbus-icon-table-add-row-top:before {
   content: "\e90b";
 }
-.tbus-icon-table-add-column-right:before {
+.tbus-icon-table-add-row-bottom:before {
   content: "\e90c";
 }
-.tbus-icon-table-add-column-left:before {
+.tbus-icon-table-add-column-right:before {
   content: "\e90d";
 }
-.tbus-icon-image:before {
+.tbus-icon-table-add-column-left:before {
   content: "\e90e";
 }
-.tbus-icon-text-indent:before {
+.tbus-icon-image:before {
   content: "\e90f";
+}
+.tbus-icon-text-indent:before {
+  content: "\e910";
 }
 .tbus-icon-music:before {
   content: "\e911";
@@ -92,6 +95,9 @@
 }
 .tbus-icon-quotes-right:before {
   content: "\e978";
+}
+.tbus-icon-loading:before {
+  content: "\e97f";
 }
 .tbus-icon-list-numbered:before {
   content: "\e9b9";
@@ -170,7 +176,4 @@
 }
 .tbus-icon-code:before {
   content: "\ea80";
-}
-.tbus-icon-loading:before {
-  content: "\e97f";
 }
