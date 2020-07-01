@@ -63,7 +63,6 @@ import { defaultStyleSheets } from './lib/viewer/default-styles';
 
 export const defaultOptions: EditorOptions = {
   styleSheets: defaultStyleSheets,
-  deviceWidth: '300px',
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
