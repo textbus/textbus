@@ -1,4 +1,4 @@
-import { backgroundColor } from '../../formatter/style.formatter';
+import { backgroundColorFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
@@ -10,8 +10,8 @@ export const textBackgroundTool = Toolkit.makeDropdownTool({
   menuFactory() {
     return new Palette()
   },
-  matcher: new FormatMatcher(backgroundColor),
+  matcher: new FormatMatcher(backgroundColorFormatter),
   execCommand() {
-    return new StyleCommander('backgroundColor', backgroundColor)
+    return new StyleCommander('backgroundColor', backgroundColorFormatter);
   }
 });

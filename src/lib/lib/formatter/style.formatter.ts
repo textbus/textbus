@@ -36,7 +36,7 @@ export const colorFormatter = new StyleFormatter('color', {
   }
 });
 
-export const backgroundColor = new StyleFormatter('backgroundColor', {
+export const backgroundColorFormatter = new StyleFormatter('backgroundColor', {
   styles: {
     backgroundColor: /.+/
   }

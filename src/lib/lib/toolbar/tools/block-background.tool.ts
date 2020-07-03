@@ -1,4 +1,3 @@
-import { backgroundColor } from '../../formatter/style.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
 import { Toolkit } from '../toolkit/toolkit';
@@ -13,6 +12,6 @@ export const blockBackgroundTool = Toolkit.makeDropdownTool({
   },
   matcher: new FormatMatcher(blockBackgroundColorFormatter),
   execCommand() {
-    return new BlockStyleCommander('backgroundColor', blockBackgroundColorFormatter)
+    return new BlockStyleCommander('backgroundColor', blockBackgroundColorFormatter);
   }
 });

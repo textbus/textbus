@@ -3,7 +3,6 @@ import {
   fontFamilyFormatter,
   boldFormatter,
   linkFormatter,
-  backgroundColor,
   colorFormatter,
   fontSizeFormatter,
   italicFormatter,
@@ -14,7 +13,7 @@ import {
   superscriptFormatter,
   textAlignFormatter,
   textIndentFormatter,
-  underlineFormatter, blockBackgroundColorFormatter
+  underlineFormatter, blockBackgroundColorFormatter, codeFormatter, backgroundColorFormatter
 } from './lib/formatter/_api';
 import {
   audioTool,
@@ -84,8 +83,9 @@ export const defaultOptions: EditorOptions = {
     fontFamilyFormatter,
     boldFormatter,
     linkFormatter,
-    backgroundColor,
+    backgroundColorFormatter,
     blockBackgroundColorFormatter,
+    codeFormatter,
     colorFormatter,
     fontSizeFormatter,
     italicFormatter,
