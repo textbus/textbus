@@ -46,7 +46,7 @@ import {
   textIndentTool,
   ulTool,
   underlineTool,
-  videoTool
+  videoTool, codeTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -102,7 +102,7 @@ export const defaultOptions: EditorOptions = {
     [historyBackTool, historyForwardTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
-    [blockquoteTool],
+    [blockquoteTool, codeTool],
     [preTool],
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],

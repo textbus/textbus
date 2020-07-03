@@ -55,3 +55,6 @@ export const subscriptFormatter = new InlineTagFormatter('sub', {
 export const superscriptFormatter = new InlineTagFormatter('sup', {
   tags: ['sup']
 });
+export const codeFormatter = new InlineTagFormatter('code', {
+  tags: ['code']
+});

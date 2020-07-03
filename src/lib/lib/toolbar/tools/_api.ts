@@ -3,6 +3,7 @@ export { blockBackgroundTool } from './block-background.tool';
 export { blockquoteTool } from './blockquote.tool';
 export { boldTool } from './bold.tool';
 export { cleanTool } from './clean.tool';
+export { codeTool } from './code.tool';
 export { colorTool } from './color.tool';
 export { emojiTool } from './emoji.tool';
 export { fontFamilyTool } from './font-family.tool';
