@@ -44,9 +44,13 @@ export class Viewer {
 
   setViewWidth(width: string) {
     this.elementRef.style.width = width;
+    this.updateFrameHeight();
   }
 
   updateFrameHeight() {
+    if (!this.contentDocument) {
+      return;
+    }
     const childBody = this.contentDocument.body;
     const lastChild = childBody.lastChild;
     let height = 0;

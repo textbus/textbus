@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tbus';
   src:
-    url('fonts/tbus.ttf?bgamfn') format('truetype'),
-    url('fonts/tbus.woff?bgamfn') format('woff'),
-    url('fonts/tbus.svg?bgamfn#tbus') format('svg');
+    url('fonts/tbus.ttf?g1wtmi') format('truetype'),
+    url('fonts/tbus.woff?g1wtmi') format('woff'),
+    url('fonts/tbus.svg?g1wtmi#tbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -176,4 +176,10 @@
 }
 .tbus-icon-code:before {
   content: "\ea80";
+}
+.tbus-icon-enlarge:before {
+  content: "\e989";
+}
+.tbus-icon-shrink:before {
+  content: "\e98a";
 }
