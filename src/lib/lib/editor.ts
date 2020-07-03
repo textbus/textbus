@@ -24,8 +24,7 @@ import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
-import { Paths } from './paths/paths';
-import { Device } from './device/device';
+import { StatusBar } from './status-bar/status-bar';
 
 export interface Snapshot {
   contents: Fragment;
@@ -79,7 +78,6 @@ export class Editor implements EventDelegate {
   readonly elementRef = document.createElement('div');
 
   private readonly frameContainer = document.createElement('div');
-  private readonly footer = document.createElement('div');
   private readonly container: HTMLElement;
 
   private viewer: Viewer;
@@ -87,8 +85,7 @@ export class Editor implements EventDelegate {
   private toolbar: Toolbar;
   private input: Input;
   private renderer = new Renderer();
-  private paths = new Paths();
-  private device = new Device();
+  private statusBar = new StatusBar();
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
@@ -131,16 +128,15 @@ export class Editor implements EventDelegate {
     this.parser = new Parser(options);
 
     this.frameContainer.classList.add('tbus-frame-container');
-    this.footer.classList.add('tbus-footer');
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
     const deviceWidth = options.deviceWidth || '100%';
     this.frameContainer.style.padding = deviceWidth === '100%' ? '' : '20px';
-    this.device.update(deviceWidth);
+    this.statusBar.device.update(deviceWidth);
     this.viewer.setViewWidth(deviceWidth);
 
-    this.device.onChange.subscribe(value => {
+    this.statusBar.device.onChange.subscribe(value => {
       this.frameContainer.style.padding = value === '100%' ? '' : '20px';
       this.viewer.setViewWidth(value);
     });
@@ -159,9 +155,7 @@ export class Editor implements EventDelegate {
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.frameContainer);
     this.frameContainer.appendChild(this.viewer.elementRef);
-    this.footer.append(this.paths.elementRef);
-    this.footer.append(this.device.elementRef);
-    this.elementRef.append(this.footer);
+    this.elementRef.append(this.statusBar.elementRef);
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
       this.elementRef.classList.add('tbus-theme-' + options.theme);
@@ -298,7 +292,7 @@ export class Editor implements EventDelegate {
     }), map(() => {
       return this.nativeSelection.focusNode;
     }), distinctUntilChanged()).subscribe(node => {
-      this.paths.update(node);
+      this.statusBar.paths.update(node);
     })
 
     this.toolbar.onAction.subscribe(config => {

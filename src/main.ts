@@ -4,7 +4,7 @@ import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
-  theme: 'mac-os',
+  theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');
