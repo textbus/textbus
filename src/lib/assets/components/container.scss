@@ -3,6 +3,8 @@
   border-radius: 5px;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   > div {
     &:first-child {
@@ -13,6 +15,19 @@
     &:last-child {
       border-bottom-left-radius: inherit;
       border-bottom-right-radius: inherit;
+    }
+  }
+
+  &.tbus-container-full-screen {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0;
+
+    .tbus-frame-container {
+      flex: 1;
     }
   }
 }

@@ -134,12 +134,18 @@ export class Editor implements EventDelegate {
     const deviceWidth = options.deviceWidth || '100%';
     this.frameContainer.style.padding = deviceWidth === '100%' ? '' : '20px';
     this.statusBar.device.update(deviceWidth);
+    this.statusBar.fullScreen.full = false;
     this.viewer.setViewWidth(deviceWidth);
 
     this.statusBar.device.onChange.subscribe(value => {
       this.frameContainer.style.padding = value === '100%' ? '' : '20px';
       this.viewer.setViewWidth(value);
     });
+
+    this.statusBar.fullScreen.onChange.subscribe(b => {
+      b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
+
+    })
 
     zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
