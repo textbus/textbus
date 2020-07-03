@@ -4,11 +4,9 @@ import {
   Renderer,
   TBSelection
 } from '../../core/_api';
-import { CodeTemplate, SingleTagTemplate } from '../../templates/_api';
+import { PreTemplate, SingleTagTemplate } from '../../templates/_api';
 
-
-
-export class CodeCommander implements Commander<string> {
+export class PreCommander implements Commander<string> {
   recordHistory = true;
   private lang = '';
 
@@ -19,14 +17,14 @@ export class CodeCommander implements Commander<string> {
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     if (overlap) {
       selection.ranges.forEach(range => {
-        const context = renderer.getContext(range.startFragment, CodeTemplate);
+        const context = renderer.getContext(range.startFragment, PreTemplate);
         context.lang = this.lang;
       });
     } else {
       selection.ranges.forEach(range => {
         const context = range.commonAncestorTemplate;
         const parentFragment = renderer.getParentFragmentByTemplate(context);
-        const t = new CodeTemplate(this.lang);
+        const t = new PreTemplate(this.lang);
         const f = new Fragment();
         f.append(new SingleTagTemplate('br'));
         t.slot = f;

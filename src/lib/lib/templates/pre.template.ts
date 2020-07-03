@@ -154,7 +154,7 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new CodeTemplate(el.getAttribute('lang'));
+    const template = new PreTemplate(el.getAttribute('lang'));
     const slot = new Fragment();
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
@@ -178,13 +178,13 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class CodeTemplate extends BranchTemplate {
+export class PreTemplate extends BranchTemplate {
   constructor(public lang: string) {
     super('pre');
   }
 
   clone() {
-    const template = new CodeTemplate(this.lang);
+    const template = new PreTemplate(this.lang);
     template.slot = this.slot.clone();
     return template;
   }

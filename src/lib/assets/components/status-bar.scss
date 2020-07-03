@@ -14,6 +14,7 @@
 
 .tbus-paths {
   flex: 1;
+
   &:before {
     content: "路径：";
   }
@@ -97,10 +98,12 @@
     white-space: nowrap;
     line-height: inherit;
     min-height: 25px;
+
     small {
       margin-left: 20px;
       opacity: .8;
     }
+
     &-active {
       background-color: $color-light;
     }
@@ -118,4 +121,9 @@
   border: none;
   outline: none;
   font-size: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-primary;
+  }
 }

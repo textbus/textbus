@@ -1,9 +1,9 @@
-import { CodeCommander } from '../commands/code.commander';
-import { CodeTemplate } from '../../templates/code.template';
+import { PreCommander } from '../commands/pre.commander';
+import { PreTemplate } from '../../templates/pre.template';
 import { CodeMatcher } from '../matcher/code.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const codeTool = Toolkit.makeSelectTool({
+export const preTool = Toolkit.makeSelectTool({
   classes: ['tbus-icon-code'],
   tooltip: '代码',
   mini: true,
@@ -40,7 +40,7 @@ export const codeTool = Toolkit.makeSelectTool({
   }],
   matcher: new CodeMatcher(),
   highlight(options, t) {
-    if (t instanceof CodeTemplate) {
+    if (t instanceof PreTemplate) {
       for (const item of options) {
         if (item.value === t.lang) {
           return item;
@@ -49,6 +49,6 @@ export const codeTool = Toolkit.makeSelectTool({
     }
   },
   execCommand() {
-    return new CodeCommander();
+    return new PreCommander();
   }
 });
