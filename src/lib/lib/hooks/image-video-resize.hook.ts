@@ -87,9 +87,7 @@ export class ImageVideoResizeHook implements Lifecycle {
           this.currentElement.style.width = endWidth + 'px';
         }
 
-        const rect = this.currentElement.getBoundingClientRect();
-        this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
+        this.updateStyle();
       };
 
       const mouseUpFn = () => {
@@ -117,9 +115,7 @@ export class ImageVideoResizeHook implements Lifecycle {
         const range = contextDocument.createRange();
         range.selectNode(srcElement);
         selection.addRange(range);
-        const rect = srcElement.getBoundingClientRect();
-        this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
-        this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
+        this.updateStyle();
         frameContainer.append(this.mask);
       } else {
         this.currentElement = null;
@@ -129,5 +125,17 @@ export class ImageVideoResizeHook implements Lifecycle {
         }
       }
     })
+  }
+
+  onViewUpdated() {
+    if (this.currentElement) {
+      this.updateStyle();
+    }
+  }
+
+  private updateStyle() {
+    const rect = this.currentElement.getBoundingClientRect();
+    this.mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
+    this.text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`;
   }
 }

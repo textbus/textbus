@@ -140,12 +140,14 @@ export class Editor implements EventDelegate {
     this.statusBar.device.onChange.subscribe(value => {
       this.frameContainer.style.padding = value === '100%' ? '' : '20px';
       this.viewer.setViewWidth(value);
+      this.invokeViewUpdatedHooks();
     });
 
     this.statusBar.fullScreen.onChange.subscribe(b => {
       b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
 
-    })
+      this.invokeViewUpdatedHooks();
+    });
 
     zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
       this.readyState = true;
