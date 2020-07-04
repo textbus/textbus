@@ -1,4 +1,4 @@
-import { Commander, TBSelection, BackboneTemplate, FormatEffect, FormatAbstractData } from '../../core/_api';
+import { BackboneTemplate, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
 import { AttrState } from '../forms/help';
 
@@ -22,14 +22,22 @@ export class LinkCommander implements Commander<AttrState[]> {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
-          const formats = range.commonAncestorFragment.getFormatRangesByFormatter(this.formatter);
-          if (formats) {
-            for (const format of formats) {
-              if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-                format.abstractData.attrs = attrs
+          const commonAncestorFragment = range.commonAncestorFragment;
+          const formats = commonAncestorFragment.getFormatRangesByFormatter(this.formatter);
+            if (formats) {
+              for (const format of formats) {
+                if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
+                  if (attrs.get('href')) {
+                    format.abstractData.attrs = attrs
+                  } else {
+                    commonAncestorFragment.apply({
+                      ...format,
+                      state: FormatEffect.Invalid
+                    });
+                  }
+                }
               }
             }
-          }
         }
       }
       range.getSelectedScope().forEach(scope => {
