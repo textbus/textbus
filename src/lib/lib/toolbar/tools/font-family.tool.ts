@@ -58,7 +58,7 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new StyleCommander('fontFamily', fontFamilyFormatter)
   }
 });

@@ -31,7 +31,7 @@ export const videoTool = Toolkit.makeDropdownTool({
     }]);
   },
   matcher: new MediaMatcher(VideoTemplate, 'video'),
-  execCommand() {
+  commanderFactory() {
     return new VideoCommander();
   }
 });

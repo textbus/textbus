@@ -37,7 +37,7 @@ export const textIndentTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new BlockStyleCommander('textIndent', textIndentFormatter);
   }
 });

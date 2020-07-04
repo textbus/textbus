@@ -50,7 +50,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new BlockStyleCommander('textAlign', textAlignFormatter);
   }
 });

@@ -23,7 +23,7 @@ export interface ActionSheetConfig {
   actions: ActionConfig[];
 
   /** 当某一项被点击时调用的命令 */
-  execCommand(): ActionCommander;
+  commanderFactory(): ActionCommander;
 
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
@@ -107,7 +107,7 @@ export class ActionSheetHandler implements Tool {
     const dropdownButton = document.createElement('span');
     dropdownButton.classList.add(...config.classes || []);
 
-    this.commander = config.execCommand();
+    this.commander = config.commanderFactory();
 
     config.actions.forEach(action => {
       if (action.keymap) {

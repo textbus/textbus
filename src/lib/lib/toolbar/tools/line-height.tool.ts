@@ -52,7 +52,7 @@ export const lineHeightTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new StyleCommander('lineHeight', lineHeightFormatter);
   }
 });

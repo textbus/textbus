@@ -11,7 +11,7 @@ export const codeTool = Toolkit.makeButtonTool({
   //   key: ''
   // },
   matcher: new FormatMatcher(codeFormatter),
-  execCommand() {
+  commanderFactory() {
     return new InlineCommander('code', codeFormatter);
   }
 });

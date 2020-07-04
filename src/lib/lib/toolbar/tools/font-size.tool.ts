@@ -60,7 +60,7 @@ export const fontSizeTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new StyleCommander('fontSize', fontSizeFormatter);
   }
 });

@@ -11,7 +11,7 @@ export const blockquoteTool = Toolkit.makeButtonTool({
     key: '\''
   },
   matcher: new BlockMatcher(BlockTemplate, ['blockquote']),
-  execCommand() {
+  commanderFactory() {
     return new ToggleBlockCommander('blockquote');
   }
 });

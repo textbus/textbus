@@ -7,7 +7,7 @@ export const tableEditTool = Toolkit.makeActionSheetTool({
   classes: ['tbus-icon-table-edit'],
   tooltip: '编辑表格',
   // match: new BlockMatcher(TableTemplate),
-  execCommand() {
+  commanderFactory() {
     return new TableEditCommander();
   },
   actions: [{

@@ -11,7 +11,7 @@ export const underlineTool = Toolkit.makeButtonTool({
     key: 'u'
   },
   matcher: new FormatMatcher(underlineFormatter),
-  execCommand() {
+  commanderFactory() {
     return new InlineCommander('u', underlineFormatter);
   }
 });

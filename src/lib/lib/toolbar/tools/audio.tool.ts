@@ -31,7 +31,7 @@ export const audioTool = Toolkit.makeDropdownTool({
     }]);
   },
   matcher: new MediaMatcher(AudioTemplate, 'audio'),
-  execCommand() {
+  commanderFactory() {
     return new AudioCommander();
   }
 });

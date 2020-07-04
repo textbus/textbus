@@ -15,7 +15,7 @@ export interface DropdownConfig {
   matcher?: Matcher;
 
   /** 订阅下拉控件操作完成时调用的命令 */
-  execCommand(): Commander;
+  commanderFactory(): Commander;
 
   /** 设置上下文菜单 */
   contextMenu?: Array<ContextMenuConfig>;
@@ -38,7 +38,7 @@ export class DropdownHandler implements Tool {
   constructor(private config: DropdownConfig,
               private delegate: EventDelegate,
               private stickyElement: HTMLElement) {
-    this.commander = config.execCommand();
+    this.commander = config.commanderFactory();
     const viewer = config.menuFactory();
     this.viewer = viewer;
     this.onApply = viewer.onComplete.pipe(map(result => {

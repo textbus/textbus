@@ -48,7 +48,7 @@ export const preTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new PreCommander();
   }
 });

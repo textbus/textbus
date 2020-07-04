@@ -8,7 +8,7 @@ export const rightToLeftTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-rtl'],
   tooltip: '从右向左',
   matcher: new DirMatcher('rtl'),
-  execCommand(): Commander {
+  commanderFactory(): Commander {
     return new DirCommander(dirFormatter, 'rtl');
   }
 })

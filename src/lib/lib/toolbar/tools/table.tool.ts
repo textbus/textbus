@@ -30,7 +30,7 @@ export const tableTool = Toolkit.makeDropdownTool({
     }]);
   },
   // match: new BlockMatcher(TableTemplate),
-  execCommand() {
+  commanderFactory() {
     return new TableCommander();
   }
 });

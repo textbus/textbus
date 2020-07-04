@@ -14,7 +14,7 @@ export const headingTool = Toolkit.makeSelectTool({
       }
     }
   },
-  execCommand() {
+  commanderFactory() {
     return new BlockCommander('p');
   },
   options: [{

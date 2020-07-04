@@ -45,7 +45,7 @@ class Emoji implements DropdownViewer {
 export const emojiTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-emoji'],
   tooltip: '表情',
-  execCommand() {
+  commanderFactory() {
     return new EmojiCommander()
   },
   menuFactory() {

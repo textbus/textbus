@@ -21,7 +21,7 @@ export const imageTool = Toolkit.makeDropdownTool({
     }])
   },
   matcher: new MediaMatcher(ImageTemplate, 'img'),
-  execCommand() {
+  commanderFactory() {
     return new ImageCommander();
   }
 });

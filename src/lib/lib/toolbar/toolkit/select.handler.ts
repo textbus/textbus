@@ -25,7 +25,7 @@ export interface SelectOptionConfig {
 
 export interface SelectConfig {
   /** 当前 Select 某项点击后，应用的命令 */
-  execCommand(): Commander;
+  commanderFactory(): Commander;
 
   /** Select 的可选项配置 */
   options: SelectOptionConfig[];
@@ -112,7 +112,7 @@ export class SelectHandler implements Tool {
 
   constructor(private config: SelectConfig,
               private stickyElement: HTMLElement) {
-    this.commander = config.execCommand();
+    this.commander = config.commanderFactory();
     this.onApply = this.applyEventSource.asObservable();
 
     const dropdownInner = document.createElement('span');

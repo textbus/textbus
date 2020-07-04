@@ -55,7 +55,7 @@ export const linkTool = Toolkit.makeDropdownTool({
     }
   }],
   matcher: new FormatMatcher(linkFormatter),
-  execCommand() {
+  commanderFactory() {
     return new LinkCommander(linkFormatter)
   }
 });

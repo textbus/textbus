@@ -11,7 +11,7 @@ export const textBackgroundTool = Toolkit.makeDropdownTool({
     return new Palette()
   },
   matcher: new FormatMatcher(backgroundColorFormatter),
-  execCommand() {
+  commanderFactory() {
     return new StyleCommander('backgroundColor', backgroundColorFormatter);
   }
 });

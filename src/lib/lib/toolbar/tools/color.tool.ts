@@ -11,7 +11,7 @@ export const colorTool = Toolkit.makeDropdownTool({
     return new Palette();
   },
   matcher: new FormatMatcher(colorFormatter),
-  execCommand() {
+  commanderFactory() {
     return new StyleCommander('color', colorFormatter);
   }
 });

@@ -7,7 +7,7 @@ export const subscriptTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-subscript'],
   tooltip: '下标',
   matcher: new FormatMatcher(subscriptFormatter),
-  execCommand() {
+  commanderFactory() {
     return new InlineCommander('sub', subscriptFormatter);
   }
 });
