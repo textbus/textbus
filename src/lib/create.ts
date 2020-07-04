@@ -13,7 +13,11 @@ import {
   superscriptFormatter,
   textAlignFormatter,
   textIndentFormatter,
-  underlineFormatter, blockBackgroundColorFormatter, codeFormatter, backgroundColorFormatter
+  underlineFormatter,
+  blockBackgroundColorFormatter,
+  codeFormatter,
+  backgroundColorFormatter,
+  dirFormatter
 } from './lib/formatter/_api';
 import {
   audioTool,
@@ -45,7 +49,7 @@ import {
   textIndentTool,
   ulTool,
   underlineTool,
-  videoTool, codeTool
+  videoTool, codeTool, leftToRightTool, rightToLeftTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -96,7 +100,8 @@ export const defaultOptions: EditorOptions = {
     superscriptFormatter,
     textAlignFormatter,
     textIndentFormatter,
-    underlineFormatter
+    underlineFormatter,
+    dirFormatter,
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -107,6 +112,7 @@ export const defaultOptions: EditorOptions = {
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [subscriptTool, superscriptTool],
+    [leftToRightTool, rightToLeftTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],

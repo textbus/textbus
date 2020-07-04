@@ -3,6 +3,7 @@ export * from './block.commander';
 export * from './block-style.commander';
 export * from './bold.commander';
 export * from './clean.commander';
+export * from './dir.commander';
 export * from './pre.commander';
 export * from './emoji.commander';
 export * from './history.commander';
