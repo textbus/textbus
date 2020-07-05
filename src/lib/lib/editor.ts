@@ -365,6 +365,23 @@ export class Editor implements EventDelegate {
       });
     });
 
+    this.input.events.onCopy.subscribe(() => {
+      this.viewer.contentDocument.execCommand('copy');
+    });
+
+    this.input.events.onCut.subscribe(() => {
+      this.viewer.contentDocument.execCommand('copy');
+      this.selection.ranges.forEach(range => {
+        range.connect();
+      });
+      this.render();
+      this.viewer.updateFrameHeight();
+      this.selection.restore();
+      this.invokeViewUpdatedHooks();
+      this.recordSnapshot();
+      this.recordSnapshotFromEditingBefore();
+    })
+
     this.input.events.addKeymap({
       keymap: {
         key: 'Enter'
