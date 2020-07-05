@@ -1,6 +1,6 @@
 import { Commander, TBSelection, InlineFormatter, FormatEffect, FormatAbstractData } from '../../core/_api';
 
-export class InlineCommander implements Commander<string> {
+export class InlineCommander implements Commander {
   recordHistory = true;
 
   constructor(private tagName: string, private formatter: InlineFormatter) {

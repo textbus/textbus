@@ -49,7 +49,10 @@ import {
   textIndentTool,
   ulTool,
   underlineTool,
-  videoTool, codeTool, leftToRightTool, rightToLeftTool
+  videoTool,
+  codeTool,
+  leftToRightTool,
+  rightToLeftTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
