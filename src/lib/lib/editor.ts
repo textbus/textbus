@@ -692,11 +692,11 @@ export class Editor implements EventDelegate {
           range2 = range.clone().restore();
 
           if (this.oldCursorPosition) {
-            p = range2.getPreviousLinePosition(this.oldCursorPosition.left, this.oldCursorPosition.top);
+            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
           } else {
             const rect = range2.getRangePosition();
             this.oldCursorPosition = rect;
-            p = range.getPreviousLinePosition(rect.left, rect.top);
+            p = range.getPreviousLinePosition(rect.left);
           }
           this.cleanOldCursorTimer = setTimeout(() => {
             this.oldCursorPosition = null;
@@ -707,11 +707,11 @@ export class Editor implements EventDelegate {
           range2 = range.clone().restore();
 
           if (this.oldCursorPosition) {
-            p = range2.getNextLinePosition(this.oldCursorPosition.left, this.oldCursorPosition.top);
+            p = range2.getNextLinePosition(this.oldCursorPosition.left);
           } else {
             const rect = range2.getRangePosition();
             this.oldCursorPosition = rect;
-            p = range.getNextLinePosition(rect.left, rect.top);
+            p = range.getNextLinePosition(rect.left);
           }
           this.cleanOldCursorTimer = setTimeout(() => {
             this.oldCursorPosition = null;

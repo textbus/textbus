@@ -442,15 +442,14 @@ export class TBRange {
 
   /**
    * 获取选区向上移动一行的位置
-   * @param left
-   * @param top
+   * @param startLeft
    */
-  getPreviousLinePosition(left: number, top: number): TBRangePosition {
+  getPreviousLinePosition(startLeft: number): TBRangePosition {
     const range2 = this.clone();
     let isToPrevLine = false;
     let loopCount = 0;
-    let minLeft = left;
-    let minTop = top;
+    let minLeft = startLeft;
+    let minTop = this.getRangePosition().top;
     let position: TBRangePosition;
     let oldPosition: TBRangePosition;
     let oldLeft = 0;
@@ -462,7 +461,7 @@ export class TBRange {
       range2.restore();
       let rect2 = range2.getRangePosition();
       if (!isToPrevLine) {
-        if (rect2.left > minLeft) {
+        if (rect2.left > minLeft || rect2.top < minTop) {
           isToPrevLine = true;
         } else if (rect2.left === minLeft && rect2.top === minTop) {
           return position;
@@ -471,7 +470,7 @@ export class TBRange {
         minTop = rect2.top;
       }
       if (isToPrevLine) {
-        if (rect2.left < left) {
+        if (rect2.left < startLeft) {
           return position;
         }
         if (oldPosition) {
@@ -494,15 +493,14 @@ export class TBRange {
 
   /**
    * 获取选区向下移动一行的位置
-   * @param left
-   * @param top
+   * @param startLeft
    */
-  getNextLinePosition(left: number, top: number): TBRangePosition {
+  getNextLinePosition(startLeft: number): TBRangePosition {
     const range2 = this.clone();
     let isToNextLine = false;
     let loopCount = 0;
-    let maxRight = left;
-    let minTop = top;
+    let maxRight = startLeft;
+    let minTop = this.getRangePosition().top;
     let oldPosition: TBRangePosition;
     let oldLeft = 0;
     while (true) {
@@ -513,7 +511,7 @@ export class TBRange {
       range2.restore();
       let rect2 = range2.getRangePosition();
       if (!isToNextLine) {
-        if (rect2.left < maxRight) {
+        if (rect2.left < maxRight || rect2.top > minTop) {
           isToNextLine = true;
         } else if (rect2.left === maxRight && rect2.top === minTop) {
           return position;
@@ -523,7 +521,7 @@ export class TBRange {
         oldPosition = position;
       }
       if (isToNextLine) {
-        if (rect2.left > left) {
+        if (rect2.left > startLeft) {
           return oldPosition;
         }
         if (oldPosition) {
