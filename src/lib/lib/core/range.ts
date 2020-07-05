@@ -525,7 +525,7 @@ export class TBRange {
           return oldPosition;
         }
         if (oldPosition) {
-          if (rect2.left < oldLeft) {
+          if (rect2.left <= oldLeft) {
             return oldPosition;
           }
         }
