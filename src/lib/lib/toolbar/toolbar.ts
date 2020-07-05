@@ -18,15 +18,25 @@ export class Toolbar {
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
   private toolsElement = document.createElement('div');
+  private templatesElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
 
   constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
+    this.templatesElement.classList.add('tbus-toolbar-templates');
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
 
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerText = '模板库';
+    btn.classList.add('tbus-toolbar-templates-btn');
+
+    this.templatesElement.appendChild(btn);
+
     this.elementRef.appendChild(this.toolsElement);
+    this.elementRef.appendChild(this.templatesElement);
     this.elementRef.appendChild(this.keymapPrompt);
 
     this.createToolbar(config);

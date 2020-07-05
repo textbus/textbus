@@ -1,4 +1,5 @@
 .tbus-toolbar {
+  display: flex;
   padding: 8px 15px 3px;
   background-color: $color-light;
   border: 1px solid $color-gray-light;
@@ -9,6 +10,27 @@
   user-select: none;
   position: relative;
   z-index: 2;
+}
+
+.tbus-toolbar-tools {
+  flex: 1;
+}
+
+.tbus-toolbar-templates {
+  border-left: 1px solid rgba(0, 0, 0, .1);
+  padding-left: 1em;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tbus-toolbar-templates-btn {
+  background: none;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-size: 14px;
+  height: 28px;
 }
 
 .tbus-toolbar-keymap-prompt {
@@ -401,6 +423,7 @@
     padding: 4px 5px;
     width: 30px;
     line-height: 1.2;
+
     &:hover {
       background-color: $color-light;
       border-radius: 3px;

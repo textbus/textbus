@@ -1,11 +1,22 @@
-.tbus-frame-container {
+.tbus-dashboard {
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
+  display: flex;
+}
+
+.tbus-frame-container {
   background-color: $color-lighter;
   user-select: none;
   position: relative;
   overflow: auto;
   height: 400px;
+  flex: 1;
+}
+
+.tbus-template-stage {
+  width: 240px;
+  background-color: #fff;
+  border-left: 1px solid $color-light;
 }
 
 .tbus-wrap {

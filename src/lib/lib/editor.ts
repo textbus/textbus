@@ -25,6 +25,7 @@ import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFa
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { StatusBar } from './status-bar/status-bar';
+import { TemplateExample, TemplateStage } from './template-stage/template-stage';
 
 export interface Snapshot {
   contents: Fragment;
@@ -48,12 +49,13 @@ export interface EditorOptions {
   hooks?: Lifecycle[];
   /** 配置编辑器的默认样式 */
   styleSheets?: string[];
+  /** 设置初始化 TBus 时的默认内容 */
+  contents?: string;
+  /** 设置可选的自定义模板 */
+  templateExamples?: TemplateExample[];
 
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string): (string | Promise<string> | Observable<string>);
-
-  /** 设置初始化 TBus 时的默认内容 */
-  contents?: string;
 }
 
 export enum CursorMoveDirection {
@@ -77,6 +79,7 @@ export class Editor implements EventDelegate {
 
   readonly elementRef = document.createElement('div');
 
+  private readonly dashboard = document.createElement('div');
   private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
@@ -84,6 +87,7 @@ export class Editor implements EventDelegate {
   private parser: Parser;
   private toolbar: Toolbar;
   private input: Input;
+  private templateStage: TemplateStage;
   private renderer = new Renderer();
   private statusBar = new StatusBar();
   private contextMenu = new ContextMenu(this.renderer);
@@ -127,9 +131,11 @@ export class Editor implements EventDelegate {
 
     this.parser = new Parser(options);
 
+    this.dashboard.classList.add('tbus-dashboard');
     this.frameContainer.classList.add('tbus-frame-container');
 
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
+    this.templateStage = new TemplateStage(options.templateExamples);
     this.viewer = new Viewer(options.styleSheets);
     const deviceWidth = options.deviceWidth || '100%';
     this.frameContainer.style.padding = deviceWidth === '100%' ? '' : '20px';
@@ -160,9 +166,11 @@ export class Editor implements EventDelegate {
       this.readyEvent.next();
     });
 
-    this.elementRef.appendChild(this.toolbar.elementRef);
-    this.elementRef.appendChild(this.frameContainer);
+    this.dashboard.appendChild(this.frameContainer);
+    this.dashboard.appendChild(this.templateStage.elementRef);
     this.frameContainer.appendChild(this.viewer.elementRef);
+    this.elementRef.appendChild(this.toolbar.elementRef);
+    this.elementRef.appendChild(this.dashboard);
     this.elementRef.append(this.statusBar.elementRef);
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {

@@ -4,7 +4,7 @@ import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
-  theme: 'dark',
+  // theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');
@@ -18,6 +18,12 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
+  templateExamples: [{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  }],
   contents: document.getElementById('table').innerHTML
 });
 
