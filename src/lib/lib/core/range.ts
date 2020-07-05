@@ -565,14 +565,11 @@ export class TBRange {
     if (last instanceof BackboneTemplate) {
       const lastFragment = last.childSlots[last.childSlots.length - 1];
       return this.findLastChild(lastFragment);
-      // } else if (last instanceof MediaTemplate && last.tagName === 'br') {
-      //   return {
-      //     index: fragment.contentLength - 1,
-      //     fragment
-      //   };
     }
     return {
-      index: fragment.contentLength,
+      index: last instanceof LeafTemplate && last.tagName === 'br' ?
+        fragment.contentLength - 1 :
+        fragment.contentLength,
       fragment
     }
   }
