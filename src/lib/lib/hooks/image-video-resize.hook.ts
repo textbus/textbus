@@ -25,7 +25,7 @@ export class ImageVideoResizeHook implements Lifecycle {
   private frameContainer: HTMLElement;
 
   constructor() {
-    this.mask.className = 'tbus-image-resize-hooks-handler';
+    this.mask.className = 'tbus-image-video-resize-hooks-handler';
     for (let i = 0; i < 8; i++) {
       const button = document.createElement('button');
       button.type = 'button';

@@ -14,15 +14,19 @@ import { ContextMenu } from './context-menu';
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<{ config: ToolConfig, instance: Tool }>;
+  onTemplatesStageChange: Observable<boolean>;
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
+  private templateStageEvent = new Subject<boolean>();
   private toolsElement = document.createElement('div');
   private templatesElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
+  private templateStageExpand = false;
 
   constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
+    this.onTemplatesStageChange = this.templateStageEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
     this.templatesElement.classList.add('tbus-toolbar-templates');
@@ -32,6 +36,14 @@ export class Toolbar {
     btn.type = 'button';
     btn.innerText = '模板库';
     btn.classList.add('tbus-toolbar-templates-btn');
+
+    btn.addEventListener('click', () => {
+      this.templateStageExpand = !this.templateStageExpand;
+      this.templateStageExpand ?
+        btn.classList.add('tbus-toolbar-templates-btn-active') :
+        btn.classList.remove('tbus-toolbar-templates-btn-active');
+      this.templateStageEvent.next(this.templateStageExpand);
+    })
 
     this.templatesElement.appendChild(btn);
 

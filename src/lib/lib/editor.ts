@@ -143,6 +143,10 @@ export class Editor implements EventDelegate {
     this.statusBar.fullScreen.full = false;
     this.viewer.setViewWidth(deviceWidth);
 
+    this.toolbar.onTemplatesStageChange.subscribe(b => {
+      this.templateStage.expand = b;
+    })
+
     this.statusBar.device.onChange.subscribe(value => {
       this.frameContainer.style.padding = value === '100%' ? '' : '20px';
       this.viewer.setViewWidth(value);

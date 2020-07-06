@@ -2,6 +2,7 @@
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
   display: flex;
+  height: 400px;
 }
 
 .tbus-frame-container {
@@ -9,14 +10,54 @@
   user-select: none;
   position: relative;
   overflow: auto;
-  height: 400px;
   flex: 1;
 }
 
 .tbus-template-stage {
-  width: 240px;
+  width: 0;
+  overflow: auto;
   background-color: #fff;
   border-left: 1px solid $color-light;
+  height: 100%;
+
+  &-list {
+    box-sizing: content-box;
+    padding: 0 10px;
+    width: 240px;
+  }
+
+  &-expand {
+    width: auto;
+  }
+}
+
+.tbus-template-example-item {
+  width: 100px;
+  height: 70px;
+  margin: 20px 10px;
+  float: left;
+  background-color: #fff;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+  position: relative;
+  cursor: pointer;
+  transition: transform .15s;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
+.tbus-template-example {
+  position: relative;
+
+  &-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+  }
 }
 
 .tbus-wrap {

@@ -23,6 +23,61 @@ const editor = createEditor('#editor', {
     templateFactory() {
       return null;
     }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
+  },{
+    example: 'test',
+    templateFactory() {
+      return null;
+    }
   }],
   contents: document.getElementById('table').innerHTML
 });

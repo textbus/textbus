@@ -13,11 +13,26 @@ export class TemplateStage {
   onCheck: Observable<Template>;
   elementRef = document.createElement('div');
 
+  set expand(b: boolean) {
+    this._expand = b;
+    b ?
+      this.elementRef.classList.add('tbus-template-stage-expand') :
+      this.elementRef.classList.remove('tbus-template-stage-expand');
+  }
+
+  get expand() {
+    return this._expand;
+  }
+
+  private templateListWrapper = document.createElement('div');
+  private _expand = false;
   private checkEvent = new Subject<Template>();
 
   constructor(examples: TemplateExample[] = []) {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-template-stage');
+    this.templateListWrapper.classList.add('tbus-template-stage-list');
+    this.elementRef.appendChild(this.templateListWrapper);
     examples.forEach(item => {
       this.addTemplate(item);
     });
@@ -40,11 +55,12 @@ export class TemplateStage {
         })
       }
     });
-    this.elementRef.appendChild(view);
+    this.templateListWrapper.appendChild(view);
   }
 
   private static createViewer(content: string | HTMLElement) {
     const wrapper = document.createElement('div');
+    wrapper.classList.add('tbus-template-example-item');
     const example = document.createElement('div');
     example.classList.add('tbus-template-example');
     if (typeof content === 'string') {
