@@ -52,19 +52,18 @@ export class TBRange {
     if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       renderer.getPositionByNode(nativeRange.startContainer) &&
       renderer.getPositionByNode(nativeRange.endContainer)) {
+      this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
+      this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
       if (nativeRange.startContainer.nodeType === 3) {
         this.startIndex = renderer.getPositionByNode(nativeRange.startContainer).startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === 1) {
-        this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset);
+        this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset, this.startFragment);
       }
       if (nativeRange.endContainer.nodeType === 3) {
         this.endIndex = renderer.getPositionByNode(nativeRange.endContainer).startIndex + nativeRange.endOffset;
       } else if (nativeRange.endContainer.nodeType === 1) {
-        this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset);
+        this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset, this.endFragment);
       }
-
-      this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
-      this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
     }
   }
 
@@ -815,15 +814,21 @@ export class TBRange {
     return f;
   }
 
-  private getOffset(node: HTMLElement, offset: number) {
+  private getOffset(node: HTMLElement, offset: number, fragment: Fragment) {
     if (node.childNodes.length === offset) {
       const position = this.renderer.getPositionByNode(node);
+      // if(position.fragment !== fragment){
+      //   return
+      // }
       if (position) {
-        return position.fragment.contentLength;
+        return position.endIndex;
       }
       return null;
     }
     const position = this.renderer.getPositionByNode(node.childNodes[offset]);
+    if (position.fragment !== fragment) {
+      return this.renderer.getPositionByNode(node.childNodes[offset - 1]).endIndex;
+    }
     if (position) {
       return position.startIndex;
     }
