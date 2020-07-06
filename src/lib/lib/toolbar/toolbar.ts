@@ -1,13 +1,10 @@
 import { Observable, Subject } from 'rxjs';
 
 import { HighlightState } from './help';
-import {
-  createKeymapHTML,
-  Tool, ToolConfig, ToolFactory, ToolType
-} from './toolkit/_api';
+import { createKeymapHTML, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
 import { Editor } from '../editor';
 import { Keymap } from '../input/input';
-import { TBSelection, Renderer } from '../core/_api';
+import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
 import { ContextMenu } from './context-menu';
 
@@ -73,7 +70,11 @@ export class Toolbar {
     this.tools.forEach(tool => {
       let s: SelectionMatchDelta;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = tool.config.matcher?.queryState(selection, renderer, this.context);
+        s = selection.rangeCount ? tool.config.matcher?.queryState(selection, renderer, this.context) : {
+          matchData: null,
+          state: HighlightState.Normal,
+          srcStates: []
+        };
         if (s) {
           tool.instance.updateStatus(s);
         }

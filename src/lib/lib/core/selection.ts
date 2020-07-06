@@ -39,7 +39,7 @@ export class TBSelection {
    * 当前 Selection 是否折叠
    */
   get collapsed() {
-    return this.ranges.length === 1 && this.firstRange.collapsed;
+    return this.ranges.length === 1 && this.firstRange.collapsed || this.ranges.length === 0;
   }
 
   private _ranges: TBRange[] = [];

@@ -1,6 +1,7 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 import { Constructor, LeafTemplate, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
+import { range } from 'rxjs';
 
 export class MediaMatcher implements Matcher {
   constructor(public templateConstructor: Constructor<LeafTemplate>, public tagName: string) {

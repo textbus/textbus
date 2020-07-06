@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 
 import { KeymapAction, Keymap, isMac } from '../../input/input';
 import { Commander, Renderer, TBSelection } from '../../core/_api';
+import { SelectionMatchDelta } from '../matcher/matcher';
 
 export interface Tool {
   elementRef: HTMLElement;
@@ -9,7 +10,7 @@ export interface Tool {
   commander: Commander;
   keymapAction?: KeymapAction | KeymapAction[];
 
-  updateStatus?(selectionMatchDelta: any): void;
+  updateStatus?(selectionMatchDelta: SelectionMatchDelta): void;
 }
 
 export interface ContextMenuConfig {

@@ -516,7 +516,7 @@ export class Editor implements EventDelegate {
 
   private apply(config: ToolConfig, commander: Commander) {
     const selection = this.selection;
-    const state = config.matcher ?
+    const state = config.matcher && selection.rangeCount ?
       config.matcher.queryState(selection, this.renderer, this).state :
       HighlightState.Normal;
     if (state === HighlightState.Disabled) {
