@@ -10,6 +10,13 @@ export class DirMatcher extends FormatMatcher {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+    if (selection.rangeCount === 0) {
+      return {
+        srcStates: [],
+        matchData: null,
+        state: HighlightState.Normal
+      }
+    }
     const result = super.queryState(selection, renderer);
     if (result.state === HighlightState.Highlight) {
       const matchData = result.matchData as FormatAbstractData;

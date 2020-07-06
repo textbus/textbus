@@ -70,11 +70,7 @@ export class Toolbar {
     this.tools.forEach(tool => {
       let s: SelectionMatchDelta;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = selection.rangeCount ? tool.config.matcher?.queryState(selection, renderer, this.context) : {
-          matchData: null,
-          state: HighlightState.Normal,
-          srcStates: []
-        };
+        s = tool.config.matcher?.queryState(selection, renderer, this.context);
         if (s) {
           tool.instance.updateStatus(s);
         }

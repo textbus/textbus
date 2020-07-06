@@ -8,6 +8,13 @@ export class BlockMatcher implements Matcher {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+    if (selection.rangeCount === 0) {
+      return {
+        srcStates: [],
+        matchData: null,
+        state: HighlightState.Normal
+      }
+    }
     const contextTemplates = selection.ranges.map(range => {
       if (range.commonAncestorTemplate instanceof this.templateConstructor &&
         this.tagNames.includes(range.commonAncestorTemplate.tagName)) {

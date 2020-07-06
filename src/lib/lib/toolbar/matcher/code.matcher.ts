@@ -6,6 +6,13 @@ import { PreTemplate } from '../../templates/pre.template';
 export class CodeMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+    if (selection.rangeCount === 0) {
+      return {
+        srcStates: [],
+        matchData: null,
+        state: HighlightState.Normal
+      }
+    }
     const contextTemplates = selection.ranges.map(range => {
       if (range.commonAncestorTemplate instanceof PreTemplate) {
         return range.commonAncestorTemplate;

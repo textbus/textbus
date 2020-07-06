@@ -1,5 +1,5 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { TBSelection, Renderer } from '../../core/_api';
+import { Renderer, TBSelection } from '../../core/_api';
 import { ListTemplate } from '../../templates/list.template';
 import { HighlightState } from '../help';
 
@@ -8,6 +8,13 @@ export class ListMatcher implements Matcher {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+    if (selection.rangeCount === 0) {
+      return {
+        srcStates: [],
+        matchData: null,
+        state: HighlightState.Normal
+      }
+    }
     const states = selection.ranges.map<RangeMatchDelta<ListTemplate>>(range => {
       if (range.commonAncestorTemplate instanceof ListTemplate &&
         range.commonAncestorTemplate.tagName === this.tagName) {

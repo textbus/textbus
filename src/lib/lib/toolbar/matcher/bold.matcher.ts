@@ -14,6 +14,13 @@ export class BoldMatcher extends FormatMatcher {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+    if (selection.rangeCount === 0) {
+      return {
+        srcStates: [],
+        matchData: null,
+        state: HighlightState.Normal
+      }
+    }
     const result = super.queryState(selection, renderer);
     if (result.state !== HighlightState.Normal) {
       return result;
