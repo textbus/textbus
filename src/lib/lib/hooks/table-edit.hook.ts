@@ -42,8 +42,8 @@ export class TableEditHook implements Lifecycle {
   private tableTemplate: TableTemplate;
 
   constructor() {
-    this.mask.style.cssText = 'position: absolute; box-shadow: inset 0 0 0 2px #1296db; pointer-events: none; overflow: hidden';
-    this.firstMask.style.cssText = 'position: absolute; box-shadow: 0 0 0 9999px rgba(18,150,219,.1); contain: style';
+    this.mask.classList.add('tbus-table-editor-hook-mask');
+    this.firstMask.classList.add('tbus-table-editor-hook-first-cell');
     this.mask.appendChild(this.firstMask);
   }
 

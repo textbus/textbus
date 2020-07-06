@@ -16,4 +16,5 @@
 @import "./theme/mac-os";
 @import "./theme/mac-os-dark";
 
-@import "extends/image-video-resize-hook";
+@import "./hooks/image-video-resize-hook";
+@import "./hooks/table-edit-hook";
