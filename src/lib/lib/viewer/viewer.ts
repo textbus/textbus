@@ -12,6 +12,7 @@ export class Viewer {
   private frame = document.createElement('iframe');
 
   private readyEvent = new Subject<Document>();
+  private id: number = null;
 
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
@@ -26,6 +27,7 @@ export class Viewer {
         doc.head.appendChild(style);
       });
       this.readyEvent.next(doc);
+      this.listen();
     };
 
     this.frame.setAttribute('scrolling', 'no');
@@ -44,26 +46,30 @@ export class Viewer {
 
   setViewWidth(width: string) {
     this.elementRef.style.width = width;
-    this.updateFrameHeight();
   }
 
-  updateFrameHeight() {
-    if (!this.contentDocument) {
-      return;
-    }
+  destroy() {
+    cancelAnimationFrame(this.id);
+  }
+
+  private listen() {
     const childBody = this.contentDocument.body;
-    const lastChild = childBody.lastChild;
-    let height = 0;
-    if (lastChild) {
-      if (lastChild.nodeType === 1) {
-        height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
-      } else {
-        const div = this.contentDocument.createElement('div');
-        childBody.appendChild(div);
-        height = div.getBoundingClientRect().bottom;
-        childBody.removeChild(div);
+    const fn = () => {
+      const lastChild = childBody.lastChild;
+      let height = 0;
+      if (lastChild) {
+        if (lastChild.nodeType === 1) {
+          height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
+        } else {
+          const div = this.contentDocument.createElement('div');
+          childBody.appendChild(div);
+          height = div.getBoundingClientRect().bottom;
+          childBody.removeChild(div);
+        }
       }
+      this.frame.style.height = height + 30 + 'px';
+      this.id = requestAnimationFrame(fn);
     }
-    this.frame.style.height = height + 30 + 'px';
+    this.id = requestAnimationFrame(fn);
   }
 }

@@ -1,4 +1,4 @@
-import { Lifecycle, Renderer } from '../core/_api';
+import { Lifecycle, Renderer, TBSelection } from '../core/_api';
 import { ImageTemplate, VideoTemplate } from '../templates/_api';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
@@ -107,6 +107,9 @@ export class ImageVideoResizeHook implements Lifecycle {
       const srcElement = ev.target as HTMLImageElement;
       if (/^img$|video/i.test(srcElement.nodeName)) {
         const position = renderer.getPositionByNode(srcElement);
+        if (!position) {
+          return;
+        }
         this.currentElement = srcElement;
         this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageTemplate;
         this.frameContainer = frameContainer;
@@ -130,6 +133,13 @@ export class ImageVideoResizeHook implements Lifecycle {
   onViewUpdated() {
     if (this.currentElement) {
       this.updateStyle();
+    }
+  }
+
+  onSelectionChange(renderer: Renderer, selection: TBSelection) {
+    if (selection.collapsed) {
+      this.currentElement = null;
+      this.mask.parentNode?.removeChild(this.mask);
     }
   }
 

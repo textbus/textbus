@@ -18,13 +18,11 @@ export class BlockTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLElement): ViewData {
     const template = new BlockTemplate(el.tagName.toLocaleLowerCase());
-    const slot = new Fragment();
-    template.slot = slot;
     return {
       template,
       childrenSlots: [{
         from: el,
-        toSlot: slot
+        toSlot: template.slot
       }]
     };
   }

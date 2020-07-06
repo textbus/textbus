@@ -4,7 +4,7 @@ import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
-  // theme: 'dark',
+  theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');
@@ -18,71 +18,14 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  templateExamples: [{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  },{
-    example: 'test',
-    templateFactory() {
-      return null;
-    }
-  }],
   contents: document.getElementById('table').innerHTML
 });
 
 editor.onReady.subscribe(() => {
   console.log(editor.getJSONLiteral())
+})
+
+document.getElementById('btn').addEventListener('click', () => {
+  editor.destroy();
 })
 // editor.setContents(`<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

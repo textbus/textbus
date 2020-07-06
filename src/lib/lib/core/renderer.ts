@@ -169,13 +169,14 @@ export class Renderer {
     return this.getContext(parentFragment, context, filter);
   }
 
-  dispatchEvent(by: VElement, type: EventType, selection: TBSelection) {
+  dispatchEvent(by: VElement, type: EventType, selection: TBSelection, data?: {[key: string]: any}) {
     let stopped = false;
     do {
       const event = new TBEvent({
         type,
         selection,
-        renderer: this
+        renderer: this,
+        data
       });
       by.events.emit(event);
       stopped = event.stopped;

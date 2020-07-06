@@ -41,6 +41,8 @@
   position: relative;
   cursor: pointer;
   transition: transform .15s;
+  border-radius: 3px;
+  overflow: hidden;
 
   &:hover {
     transform: scale(1.2);

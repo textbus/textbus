@@ -155,7 +155,6 @@ export class CodeTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLElement): ViewData {
     const template = new PreTemplate(el.getAttribute('lang'));
-    const slot = new Fragment();
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
         if (node.nodeType === 3) {
@@ -169,8 +168,7 @@ export class CodeTemplateTranslator implements TemplateTranslator {
         }
       })
     };
-    fn(el, slot);
-    template.slot = slot;
+    fn(el, template.slot);
     return {
       template,
       childrenSlots: []

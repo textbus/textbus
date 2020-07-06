@@ -22,6 +22,14 @@
     }
   }
 
+  .tbus-toolbar-templates-btn {
+    color: $color-gray;
+
+    &-active {
+      color: $color-primary;
+    }
+  }
+
   .tbus-dropdown.tbus-dropdown-open > .tbus-handler {
     background-color: $color-gray;
     color: $color-darker;

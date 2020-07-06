@@ -49,16 +49,18 @@ export class TBRange {
 
   constructor(private nativeRange: Range,
               private renderer: Renderer) {
-    if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType)) {
+    if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType) &&
+      renderer.getPositionByNode(nativeRange.startContainer) &&
+      renderer.getPositionByNode(nativeRange.endContainer)) {
       if (nativeRange.startContainer.nodeType === 3) {
         this.startIndex = renderer.getPositionByNode(nativeRange.startContainer).startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === 1) {
-        this.startIndex = this.getOffset(nativeRange.startContainer, nativeRange.startOffset);
+        this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset);
       }
       if (nativeRange.endContainer.nodeType === 3) {
         this.endIndex = renderer.getPositionByNode(nativeRange.endContainer).startIndex + nativeRange.endOffset;
       } else if (nativeRange.endContainer.nodeType === 1) {
-        this.endIndex = this.getOffset(nativeRange.endContainer, nativeRange.endOffset);
+        this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset);
       }
 
       this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
@@ -813,14 +815,19 @@ export class TBRange {
     return f;
   }
 
-  private getOffset(node: Node, offset: number) {
-    if (node.nodeType === 1) {
-      if (node.childNodes.length === offset) {
-        return this.renderer.getPositionByNode(node).fragment.contentLength;
+  private getOffset(node: HTMLElement, offset: number) {
+    if (node.childNodes.length === offset) {
+      const position = this.renderer.getPositionByNode(node);
+      if (position) {
+        return position.fragment.contentLength;
       }
-      return this.renderer.getPositionByNode(node.childNodes[offset]).startIndex;
+      return null;
     }
-    return offset;
+    const position = this.renderer.getPositionByNode(node.childNodes[offset]);
+    if (position) {
+      return position.startIndex;
+    }
+    return null;
   }
 
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {

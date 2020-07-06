@@ -3,16 +3,18 @@ import { TBSelection } from './selection';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 
-
 export enum EventType {
   onEnter,
-  onDelete
+  onDelete,
+  onInput,
+  onPaste
 }
 
 export interface EventParams {
   type: EventType;
   selection: TBSelection;
   renderer: Renderer;
+  data?: {[key: string]: any};
 }
 
 export class TBEvent {
@@ -24,6 +26,7 @@ export class TBEvent {
   readonly selection: TBSelection;
   readonly renderer: Renderer;
   readonly rootFragment: Fragment;
+  readonly data: {[key: string]: any};
 
   private _stopped = false;
 
@@ -31,6 +34,7 @@ export class TBEvent {
     this.type = config.type;
     this.selection = config.selection;
     this.renderer = config.renderer;
+    this.data = config.data;
   }
 
   stopPropagation() {

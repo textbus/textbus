@@ -66,9 +66,14 @@ import {
   VideoTemplateTranslator
 } from './lib/templates/_api';
 import { defaultStyleSheets } from './lib/viewer/default-styles';
+import {
+  imageCardStyleSheet,
+  imageCardTemplateExample,
+  ImageCardTemplateTranslator
+} from './lib/extend-templates/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: defaultStyleSheets,
+  styleSheets: [...defaultStyleSheets, imageCardStyleSheet],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
@@ -76,6 +81,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   templateTranslators: [
+    new ImageCardTemplateTranslator(),
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
     new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
@@ -122,6 +128,9 @@ export const defaultOptions: EditorOptions = {
     [textAlignTool],
     [tableTool, tableEditTool],
     [cleanTool]
+  ],
+  templateExamples: [
+    imageCardTemplateExample
   ]
 };
 

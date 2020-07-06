@@ -9,14 +9,13 @@ import {
   EventType,
   Fragment,
   InlineFormatter,
-  LeafTemplate,
   Lifecycle,
   Parser,
   RangePath,
   Renderer,
   TBRange,
   TBRangePosition,
-  TBSelection,
+  TBSelection, Template,
   TemplateTranslator,
   VElement
 } from './core/_api';
@@ -26,6 +25,7 @@ import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { StatusBar } from './status-bar/status-bar';
 import { TemplateExample, TemplateStage } from './template-stage/template-stage';
+import { EventHandler } from './event-handler';
 
 export interface Snapshot {
   contents: Fragment;
@@ -104,7 +104,7 @@ export class Editor implements EventDelegate {
 
   private defaultHTML = '<p><br></p>';
   private rootFragment: Fragment;
-  private sub: Subscription;
+  private snapshotSubscription: Subscription;
   private readyEvent = new Subject<void>();
   private changeEvent = new Subject<void>();
 
@@ -117,6 +117,9 @@ export class Editor implements EventDelegate {
   private onUserWrite: Observable<void>;
   private userWriteEvent = new Subject<void>();
 
+  private eventHandler = new EventHandler();
+
+  private subs: Subscription[] = [];
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -143,32 +146,36 @@ export class Editor implements EventDelegate {
     this.statusBar.fullScreen.full = false;
     this.viewer.setViewWidth(deviceWidth);
 
-    this.toolbar.onTemplatesStageChange.subscribe(b => {
-      this.templateStage.expand = b;
-    })
+    this.subs.push(
+      this.toolbar.onTemplatesStageChange.subscribe(b => {
+        this.templateStage.expand = b;
+      }),
+      this.templateStage.onCheck.subscribe(template => {
+        if (this.selection) {
+          this.insertTemplate(template);
+        }
+      }),
+      this.statusBar.device.onChange.subscribe(value => {
+        this.frameContainer.style.padding = value === '100%' ? '' : '20px';
+        this.viewer.setViewWidth(value);
+        this.invokeViewUpdatedHooks();
+      }),
+      this.statusBar.fullScreen.onChange.subscribe(b => {
+        b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
 
-    this.statusBar.device.onChange.subscribe(value => {
-      this.frameContainer.style.padding = value === '100%' ? '' : '20px';
-      this.viewer.setViewWidth(value);
-      this.invokeViewUpdatedHooks();
-    });
+        this.invokeViewUpdatedHooks();
+      }),
+      zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
+        this.readyState = true;
+        this.rootFragment = this.parser.parse(result[0]);
+        this.render();
+        this.input = new Input(this.viewer.contentDocument);
+        this.viewer.elementRef.append(this.input.elementRef);
 
-    this.statusBar.fullScreen.onChange.subscribe(b => {
-      b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
-
-      this.invokeViewUpdatedHooks();
-    });
-
-    zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
-      this.readyState = true;
-      this.rootFragment = this.parser.parse(result[0]);
-      this.render();
-      this.input = new Input(this.viewer.contentDocument);
-      this.viewer.elementRef.append(this.input.elementRef);
-
-      this.setup();
-      this.readyEvent.next();
-    });
+        this.setup();
+        this.readyEvent.next();
+      })
+    );
 
     this.dashboard.appendChild(this.frameContainer);
     this.dashboard.appendChild(this.templateStage.elementRef);
@@ -252,173 +259,164 @@ export class Editor implements EventDelegate {
     });
   }
 
-  private write(selection: TBSelection) {
-    const startIndex = this.selectionSnapshot.firstRange.startIndex;
-    const commonAncestorFragment = selection.commonAncestorFragment;
-    const fragmentSnapshot = this.fragmentSnapshot.clone();
+  destroy() {
+    this.container.removeChild(this.elementRef);
+    this.subs.forEach(s => s.unsubscribe());
 
-    commonAncestorFragment.delete(0);
-    fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, true, false));
-
-    let index = 0;
-    this.input.input.value.replace(/\n+|[^\n]+/g, (str) => {
-      if (/\n+/.test(str)) {
-        for (let i = 0; i < str.length; i++) {
-          const s = new SingleTagTemplate('br');
-          commonAncestorFragment.insert(s, index + startIndex);
-          index++;
-        }
-      } else {
-        commonAncestorFragment.insert(str, startIndex + index);
-        index += str.length;
-      }
-      return str;
-    });
-
-    selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + this.input.input.selectionStart;
-    const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + this.input.input.selectionStart === commonAncestorFragment.contentLength &&
-      last instanceof SingleTagTemplate && last.tagName === 'br') {
-      commonAncestorFragment.append(new SingleTagTemplate('br'));
-    }
-    this.userWriteEvent.next();
+    this.readyEvent.complete();
+    this.changeEvent.complete();
+    this.historySequence = [];
   }
 
   private setup() {
-    merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
-      .subscribe(() => {
-        this.nativeSelection = this.viewer.contentDocument.getSelection();
-        this.nativeSelection.removeAllRanges();
-      });
+    this.subs.push(
+      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
+        .subscribe(() => {
+          this.nativeSelection = this.viewer.contentDocument.getSelection();
+          this.nativeSelection.removeAllRanges();
+        }));
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
         hooks.setup(this.renderer, this.viewer.contentDocument, this.viewer.contentWindow, this.viewer.elementRef);
       }
     })
-    fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
-      this.selection = this.options.hooks.reduce((selection, lifecycle) => {
-        if (typeof lifecycle.onSelectionChange === 'function') {
-          lifecycle.onSelectionChange(this.renderer, selection, this.viewer.contentDocument);
-        }
-        return selection;
-      }, new TBSelection(this.viewer.contentDocument, this.renderer));
-      this.input.updateStateBySelection(this.nativeSelection);
-    }), auditTime(100), tap(() => {
-      const event = document.createEvent('Event');
-      event.initEvent('click', true, true);
-      this.elementRef.dispatchEvent(event);
-      this.toolbar.updateHandlerState(this.selection, this.renderer);
-    }), map(() => {
-      return this.nativeSelection.focusNode;
-    }), distinctUntilChanged()).subscribe(node => {
-      this.statusBar.paths.update(node);
-    })
 
-    this.toolbar.onAction.subscribe(config => {
-      if (this.selection) {
-        this.apply(config.config, config.instance.commander);
-        if (config.instance.commander.recordHistory) {
-          this.recordSnapshot();
-          this.listenUserWriteEvent();
-        }
-      }
-    });
-    this.input.events.onFocus.subscribe(() => {
-      this.recordSnapshotFromEditingBefore();
-    })
-    this.input.events.onInput.subscribe(() => {
-      const selection = this.selection;
-      const collapsed = selection.collapsed;
-      let isNext = true;
-      (this.options.hooks || []).forEach(lifecycle => {
-        if (typeof lifecycle.onInput === 'function') {
-          if (lifecycle.onInput(this.renderer, selection) === false) {
-            isNext = false;
-          } else {
-            if (!selection.collapsed) {
-              throw new Error('输入前选区必须闭合！');
-            }
+    this.subs.push(
+      fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
+        this.selection = this.options.hooks.reduce((selection, lifecycle) => {
+          if (typeof lifecycle.onSelectionChange === 'function') {
+            lifecycle.onSelectionChange(this.renderer, selection, this.viewer.contentDocument);
+          }
+          return selection;
+        }, new TBSelection(this.viewer.contentDocument, this.renderer));
+        this.input.updateStateBySelection(this.nativeSelection);
+      }), auditTime(100), tap(() => {
+        const event = document.createEvent('Event');
+        event.initEvent('click', true, true);
+        this.elementRef.dispatchEvent(event);
+        this.toolbar.updateHandlerState(this.selection, this.renderer);
+      }), map(() => {
+        return this.nativeSelection.focusNode;
+      }), distinctUntilChanged()).subscribe(node => {
+        this.statusBar.paths.update(node);
+      }),
+      this.toolbar.onAction.subscribe(config => {
+        if (this.selection) {
+          this.apply(config.config, config.instance.commander);
+          if (config.instance.commander.recordHistory) {
+            this.recordSnapshot();
+            this.listenUserWriteEvent();
           }
         }
-      })
-      if (isNext) {
-        if (!collapsed) {
-          this.recordSnapshotFromEditingBefore(true);
-        }
-        this.write(selection);
-      }
-      this.render();
-      selection.restore();
-      this.input.updateStateBySelection(this.nativeSelection);
-    })
-    this.input.events.onPaste.subscribe(() => {
-      const div = document.createElement('div');
-      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-      div.contentEditable = 'true';
-      document.body.appendChild(div);
-      div.focus();
-      setTimeout(() => {
-        const fragment = this.parser.parse(div);
-        const contents = new Contents();
-        fragment.sliceContents(0).forEach(i => contents.append(i));
-        document.body.removeChild(div);
-        let isNext = true;
-        (this.options.hooks || []).forEach(lifecycle => {
-          if (typeof lifecycle.onPaste === 'function') {
-            if (lifecycle.onPaste(contents, this.renderer, this.selection) === false) {
-              isNext = false;
+      }),
+      this.input.events.onFocus.subscribe(() => {
+        this.recordSnapshotFromEditingBefore();
+      }),
+      this.input.events.onInput.subscribe(() => {
+
+        this.dispatchEventAndCallHooks(EventType.onInput, {
+          selectionSnapshot: this.selectionSnapshot,
+          fragmentSnapshot: this.fragmentSnapshot,
+          input: this.input
+        }, () => {
+          const selection = this.selection;
+          const collapsed = selection.collapsed;
+          let isNext = true;
+          (this.options.hooks || []).forEach(lifecycle => {
+            if (typeof lifecycle.onInput === 'function') {
+              if (lifecycle.onInput(this.renderer, selection) === false) {
+                isNext = false;
+              } else {
+                if (!selection.collapsed) {
+                  throw new Error('输入前选区必须闭合！');
+                }
+              }
+            }
+          })
+          if (isNext) {
+            if (!collapsed) {
+              this.recordSnapshotFromEditingBefore(true);
             }
           }
+          return isNext;
         })
-        if (isNext) {
-          this.paste(contents);
-        }
-      });
-    });
-
-    this.input.events.onCopy.subscribe(() => {
-      this.viewer.contentDocument.execCommand('copy');
-    });
-
-    this.input.events.onCut.subscribe(() => {
-      this.viewer.contentDocument.execCommand('copy');
-      this.selection.ranges.forEach(range => {
-        range.connect();
-      });
-      this.render();
-      this.viewer.updateFrameHeight();
-      this.selection.restore();
-      this.invokeViewUpdatedHooks();
-      this.recordSnapshot();
-      this.recordSnapshotFromEditingBefore();
-    })
-
-    this.input.events.addKeymap({
-      keymap: {
-        key: 'Enter'
-      },
-      action: () => {
         const focusNode = this.nativeSelection.focusNode;
         let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
         const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
         if (!vElement) {
           return;
         }
-        const selection = this.selection;
-        let isNext = true;
-        (this.options.hooks || []).forEach(lifecycle => {
-          if (typeof lifecycle.onEnter === 'function') {
-            if (lifecycle.onEnter(this.renderer, selection) === false) {
-              isNext = false;
-            }
-          }
-        })
-        if (isNext) {
-          this.renderer.dispatchEvent(vElement, EventType.onEnter, selection);
-        }
+        this.userWriteEvent.next();
         this.render();
-        selection.restore();
+        this.selection.restore();
+        this.input.updateStateBySelection(this.nativeSelection);
+      }),
+      this.input.events.onPaste.subscribe(() => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+        div.contentEditable = 'true';
+        document.body.appendChild(div);
+        div.focus();
+        setTimeout(() => {
+          const fragment = this.parser.parse(div);
+          const contents = new Contents();
+          fragment.sliceContents(0).forEach(i => contents.append(i));
+          document.body.removeChild(div);
+
+          this.dispatchEventAndCallHooks(EventType.onPaste, {
+            clipboard: contents
+          }, () => {
+            let isNext = true;
+            (this.options.hooks || []).forEach(lifecycle => {
+              if (typeof lifecycle.onPaste === 'function') {
+                if (lifecycle.onPaste(contents, this.renderer, this.selection) === false) {
+                  isNext = false;
+                }
+              }
+            })
+            return isNext;
+          })
+          this.render();
+          this.selection.restore();
+          this.invokeViewUpdatedHooks();
+        });
+      }),
+      this.input.events.onCopy.subscribe(() => {
+        this.viewer.contentDocument.execCommand('copy');
+      }),
+      this.input.events.onCut.subscribe(() => {
+        this.viewer.contentDocument.execCommand('copy');
+        this.selection.ranges.forEach(range => {
+          range.connect();
+        });
+        this.render();
+        this.selection.restore();
+        this.invokeViewUpdatedHooks();
+        this.recordSnapshot();
+        this.recordSnapshotFromEditingBefore();
+      })
+    );
+
+
+    this.input.events.addKeymap({
+      keymap: {
+        key: 'Enter'
+      },
+      action: () => {
+        this.dispatchEventAndCallHooks(EventType.onEnter, null, () => {
+          let isNext = true;
+          (this.options.hooks || []).forEach(lifecycle => {
+            if (typeof lifecycle.onEnter === 'function') {
+              if (lifecycle.onEnter(this.renderer, this.selection) === false) {
+                isNext = false;
+              }
+            }
+          });
+          return isNext;
+        })
+
+        this.render();
+        this.selection.restore();
         this.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
@@ -505,74 +503,6 @@ export class Editor implements EventDelegate {
     selection.restore();
   }
 
-  private paste(contents: Contents) {
-    const firstRange = this.selection.firstRange;
-    const fragment = firstRange.startFragment;
-
-    const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
-
-    if (parentTemplate instanceof BackboneTemplate) {
-      let i = 0
-      contents.slice(0).forEach(item => {
-        fragment.insert(item, firstRange.startIndex + i);
-        i += item.length;
-      });
-      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
-    } else {
-      const firstChild = fragment.getContentAtIndex(0);
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
-      const contentsArr = contents.slice(0);
-      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagTemplate && firstChild.tagName === 'br') {
-        contentsArr.forEach(item => parentFragment.insertBefore(item, parentTemplate));
-      } else {
-        const firstContent = contentsArr.shift();
-        if (firstContent instanceof BackboneTemplate) {
-          parentFragment.insertAfter(firstContent, parentTemplate);
-        } else if (firstContent instanceof BranchTemplate) {
-          const length = firstContent.slot.contentLength;
-          const firstContents = firstContent.slot.delete(0);
-          firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
-          firstContents.formatRanges.forEach(f => {
-            if (f.renderer instanceof InlineFormatter) {
-              fragment.apply({
-                ...f,
-                startIndex: f.startIndex + firstRange.startIndex,
-                endIndex: f.endIndex + firstRange.startIndex
-              })
-            }
-          })
-          if (contentsArr.length === 0) {
-            firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + length;
-          } else {
-            const afterContents = fragment.delete(firstRange.startIndex);
-            contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
-            const afterTemplate = parentTemplate.clone() as BranchTemplate;
-            afterTemplate.slot = new Fragment();
-            afterContents.contents.forEach(c => afterTemplate.slot.append(c));
-            afterContents.formatRanges.forEach(f => {
-              afterTemplate.slot.apply({
-                ...f,
-                startIndex: 0,
-                endIndex: f.endIndex - f.startIndex
-              });
-            });
-            if (afterTemplate.slot.contentLength === 0) {
-              afterTemplate.slot.append(new SingleTagTemplate('br'));
-            }
-            firstRange.setStart(afterTemplate.slot, 0);
-            firstRange.collapse();
-          }
-        }
-      }
-    }
-
-
-    this.render();
-    this.viewer.updateFrameHeight();
-    this.selection.restore();
-    this.invokeViewUpdatedHooks();
-  }
-
   /**
    * 记录编辑前的快照
    */
@@ -581,7 +511,7 @@ export class Editor implements EventDelegate {
       this.input.cleanValue();
     }
     this.selectionSnapshot = this.selection.clone();
-    this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment.clone();
+    this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
   }
 
   private apply(config: ToolConfig, commander: Commander) {
@@ -611,88 +541,8 @@ export class Editor implements EventDelegate {
   private render() {
     const rootFragment = this.rootFragment;
     Editor.guardLastIsParagraph(rootFragment);
-    this.renderer.render(rootFragment, this.viewer.contentDocument.body).events.subscribe(event => {
-      if (event.type === EventType.onDelete) {
-        this.selection.ranges.forEach(range => {
-          if (!range.collapsed) {
-            range.connect();
-            return;
-          }
-          let prevPosition = range.getPreviousPosition();
-          if (range.startIndex > 0) {
-
-            const commonAncestorFragment = range.commonAncestorFragment;
-            const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
-            if (typeof c === 'string' || c instanceof LeafTemplate) {
-              commonAncestorFragment.delete(range.startIndex - 1, 1);
-              range.startIndex = range.endIndex = range.startIndex - 1;
-            } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
-              commonAncestorFragment.delete(range.startIndex - 1, 1);
-              range.startIndex = range.endIndex = range.startIndex - 1;
-              if (commonAncestorFragment.contentLength === 0) {
-                commonAncestorFragment.append(new SingleTagTemplate('br'));
-              }
-            } else {
-              while (prevPosition.fragment.contentLength === 0) {
-                range.deleteEmptyTree(prevPosition.fragment);
-                prevPosition = range.getPreviousPosition();
-              }
-              range.setStart(prevPosition.fragment, prevPosition.index);
-              range.connect();
-            }
-          } else {
-            while (prevPosition.fragment.contentLength === 0) {
-              range.deleteEmptyTree(prevPosition.fragment);
-              let position = range.getPreviousPosition();
-              if (prevPosition.fragment === position.fragment && prevPosition.index === position.index) {
-                position = range.getNextPosition();
-                break;
-              }
-              prevPosition = position;
-            }
-
-            const firstContent = range.startFragment.getContentAtIndex(0);
-            if (firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
-              range.startFragment.delete(0, 1);
-              if (range.startFragment.contentLength === 0) {
-                range.deleteEmptyTree(range.startFragment);
-                const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
-                if (prevContent instanceof SingleTagTemplate && prevContent.tagName === 'br') {
-                  prevPosition.index--;
-                }
-
-                range.setStart(prevPosition.fragment, prevPosition.index);
-                range.collapse();
-              }
-            } else {
-              range.setStart(prevPosition.fragment, prevPosition.index);
-              range.connect();
-            }
-            while (prevPosition.fragment.contentLength === 0) {
-              const position = range.getNextPosition();
-              if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
-                break;
-              }
-              range.deleteEmptyTree(prevPosition.fragment);
-              range.setStart(position.fragment, position.index);
-              range.collapse();
-              prevPosition = position;
-            }
-          }
-        });
-      } else if (event.type === EventType.onEnter) {
-        const firstRange = event.selection.firstRange;
-        rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
-        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-        const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-        if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
-          return;
-        }
-        rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
-      }
-    });
-
-    this.viewer.updateFrameHeight();
+    const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
+    this.eventHandler.listen(vEle);
     this.invokeViewUpdatedHooks();
   }
 
@@ -702,6 +552,22 @@ export class Editor implements EventDelegate {
         lifecycle.onViewUpdated();
       }
     })
+  }
+
+  private dispatchEventAndCallHooks(eventType: EventType,
+                                    eventData: { [key: string]: any },
+                                    callHooksFn: () => boolean): boolean {
+    const focusNode = this.nativeSelection.focusNode;
+    let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
+    const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
+    if (!vElement) {
+      return;
+    }
+    const isNext = callHooksFn();
+    if (isNext) {
+      this.renderer.dispatchEvent(vElement, eventType, this.selection, eventData);
+    }
+    return isNext;
   }
 
   private moveCursor(direction: CursorMoveDirection) {
@@ -751,6 +617,32 @@ export class Editor implements EventDelegate {
       range.startIndex = range.endIndex = p.index;
     });
     selection.restore();
+    this.recordSnapshotFromEditingBefore();
+  }
+
+  private insertTemplate(template: Template) {
+    const firstRange = this.selection.firstRange;
+    const startFragment = firstRange.startFragment;
+    const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+    if (parentTemplate instanceof BranchTemplate) {
+      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const firstContent = startFragment.getContentAtIndex(0);
+      parentFragment.insertAfter(template, parentTemplate);
+      if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
+        parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+
+      }
+    } else if (parentTemplate instanceof BackboneTemplate) {
+      const ff = new Fragment();
+      ff.append(template);
+      parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);
+    } else {
+      startFragment.insert(template, firstRange.endIndex);
+    }
+    this.selection.removeAllRanges();
+    this.render();
+    this.invokeViewUpdatedHooks();
+    this.recordSnapshot();
     this.recordSnapshotFromEditingBefore();
   }
 
@@ -807,10 +699,10 @@ export class Editor implements EventDelegate {
   }
 
   private listenUserWriteEvent() {
-    if (this.sub) {
-      this.sub.unsubscribe();
+    if (this.snapshotSubscription) {
+      this.snapshotSubscription.unsubscribe();
     }
-    this.sub = this.onUserWrite.pipe(tap(() => {
+    this.snapshotSubscription = this.onUserWrite.pipe(tap(() => {
       this.dispatchContentChangeEvent();
     })).pipe(sampleTime(5000)).subscribe(() => {
       this.recordSnapshot();
