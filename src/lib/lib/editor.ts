@@ -623,9 +623,9 @@ export class Editor implements EventDelegate {
   private insertTemplate(template: Template) {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
-    const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+    const parentTemplate = this.renderer.getParentTemplate(startFragment);
     if (parentTemplate instanceof BranchTemplate) {
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentFragment = this.renderer.getParentFragment(parentTemplate);
       const firstContent = startFragment.getContentAtIndex(0);
       parentFragment.insertAfter(template, parentTemplate);
       if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {

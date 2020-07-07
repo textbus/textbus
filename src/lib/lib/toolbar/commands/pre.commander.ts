@@ -23,7 +23,7 @@ export class PreCommander implements Commander<string> {
     } else {
       selection.ranges.forEach(range => {
         const context = range.commonAncestorTemplate;
-        const parentFragment = renderer.getParentFragmentByTemplate(context);
+        const parentFragment = renderer.getParentFragment(context);
         const t = new PreTemplate(this.lang);
         const f = new Fragment();
         f.append(new SingleTagTemplate('br'));

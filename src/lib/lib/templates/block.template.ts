@@ -43,7 +43,7 @@ export class BlockTemplate extends BranchTemplate {
     const block = new VElement(this.tagName);
     block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
-        const parent = event.renderer.getParentFragmentByTemplate(this);
+        const parent = event.renderer.getParentFragment(this);
 
         const template = new BlockTemplate('p');
         const fragment = new Fragment();

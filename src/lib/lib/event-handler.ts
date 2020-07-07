@@ -68,7 +68,7 @@ export class EventHandler {
     const contents = event.data.clipboard as Contents;
     const fragment = firstRange.startFragment;
 
-    const parentTemplate = event.renderer.getParentTemplateByFragment(fragment);
+    const parentTemplate = event.renderer.getParentTemplate(fragment);
 
     if (parentTemplate instanceof BackboneTemplate) {
       let i = 0
@@ -79,7 +79,7 @@ export class EventHandler {
       firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
     } else {
       const firstChild = fragment.getContentAtIndex(0);
-      const parentFragment = event.renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentFragment = event.renderer.getParentFragment(parentTemplate);
       const contentsArr = contents.slice(0);
       if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagTemplate && firstChild.tagName === 'br') {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentTemplate));

@@ -15,7 +15,7 @@ export class ToggleBlockCommander implements Commander<string> {
           instance => {
             return instance.tagName === this.tagName;
           });
-        const parentFragment = renderer.getParentFragmentByTemplate(context);
+        const parentFragment = renderer.getParentFragment(context);
         const position = parentFragment.indexOf(context);
         parentFragment.delete(position, 1);
         const fragment = context.slot;
@@ -35,8 +35,8 @@ export class ToggleBlockCommander implements Commander<string> {
         const fragment = new Fragment();
         block.slot = fragment;
         if (range.startFragment === range.endFragment) {
-          const parentTemplate = renderer.getParentTemplateByFragment(range.startFragment)
-          parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+          const parentTemplate = renderer.getParentTemplate(range.startFragment)
+          parentFragment = renderer.getParentFragment(parentTemplate);
           position = parentFragment.indexOf(parentTemplate);
           fragment.append(parentTemplate);
           parentFragment.delete(position, 1);
@@ -52,12 +52,12 @@ export class ToggleBlockCommander implements Commander<string> {
           } else {
             const appendedTemplates: Array<BackboneTemplate | BranchTemplate> = [];
             range.getExpandedScope().reverse().forEach(scope => {
-              const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+              const parentTemplate = renderer.getParentTemplate(scope.fragment);
               if (appendedTemplates.includes(parentTemplate)) {
                 return;
               }
               appendedTemplates.push(parentTemplate);
-              const p = renderer.getParentFragmentByTemplate(parentTemplate);
+              const p = renderer.getParentFragment(parentTemplate);
               if (p) {
                 p.delete(p.indexOf(parentTemplate), 1);
                 fragment.insert(parentTemplate, 0);
@@ -75,7 +75,7 @@ export class ToggleBlockCommander implements Commander<string> {
                     endIndex: f.endIndex + length,
                   }))
                 } else {
-                  const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+                  const parentTemplate = renderer.getParentTemplate(scope.fragment);
                   block.slot.insert(parentTemplate, 0);
                 }
               }

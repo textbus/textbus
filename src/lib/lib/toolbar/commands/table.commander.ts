@@ -16,7 +16,7 @@ export class TableCommander implements Commander<AttrState[]> {
       attrs.set(attr.name, attr.value);
     });
     selection.ranges.forEach(range => {
-      const parentFragment = renderer.getParentFragmentByTemplate(range.commonAncestorTemplate);
+      const parentFragment = renderer.getParentFragment(range.commonAncestorTemplate);
       const rows = +attrs.get('rows') || 0;
       const cols = +attrs.get('cols') || 0;
       const bodies = TableCommander.create(rows, cols);

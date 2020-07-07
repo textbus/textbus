@@ -105,14 +105,14 @@ export class TBRange {
     let endChildTemplate: BackboneTemplate | BranchTemplate = null;
 
     while (startFragment !== commonAncestorFragment) {
-      startChildTemplate = this.renderer.getParentTemplateByFragment(startFragment);
-      startFragment = this.renderer.getParentFragmentByTemplate(startChildTemplate);
+      startChildTemplate = this.renderer.getParentTemplate(startFragment);
+      startFragment = this.renderer.getParentFragment(startChildTemplate);
       startIndex = startFragment.indexOf(startChildTemplate);
     }
 
     while (endFragment !== commonAncestorFragment) {
-      endChildTemplate = this.renderer.getParentTemplateByFragment(endFragment);
-      endFragment = this.renderer.getParentFragmentByTemplate(endChildTemplate);
+      endChildTemplate = this.renderer.getParentTemplate(endFragment);
+      endFragment = this.renderer.getParentFragment(endChildTemplate);
       endIndex = endFragment.indexOf(endChildTemplate);
     }
 
@@ -132,7 +132,7 @@ export class TBRange {
       const context = this.renderer.getContext(scope.fragment, of, filter);
       let fragment: Fragment = scope.fragment;
       while (fragment) {
-        const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+        const parentTemplate = this.renderer.getParentTemplate(fragment);
         if (parentTemplate === context) {
           maps.push({
             template: context,
@@ -140,7 +140,7 @@ export class TBRange {
           })
           break;
         }
-        fragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+        fragment = this.renderer.getParentFragment(parentTemplate);
       }
     });
     const templates: T[] = [];
@@ -288,9 +288,9 @@ export class TBRange {
     if (fragment === endFragment) {
       return this;
     }
-    const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+    const parentTemplate = this.renderer.getParentTemplate(fragment);
     if (parentTemplate instanceof BranchTemplate) {
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentFragment = this.renderer.getParentFragment(parentTemplate);
       parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
@@ -298,7 +298,7 @@ export class TBRange {
     } else if (parentTemplate instanceof BackboneTemplate) {
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(fragment), 1);
       if (parentTemplate.childSlots.length === 0) {
-        const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+        const parentFragment = this.renderer.getParentFragment(parentTemplate);
         const index = parentFragment.indexOf(parentTemplate);
         parentFragment.delete(index, 1);
         if (parentFragment.contentLength === 0) {
@@ -349,7 +349,7 @@ export class TBRange {
     const cacheFragment = fragment;
 
     while (true) {
-      const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+      const parentTemplate = this.renderer.getParentTemplate(fragment);
       if (!parentTemplate) {
         return {
           fragment: cacheFragment,
@@ -362,7 +362,7 @@ export class TBRange {
           return this.findLastChild(parentTemplate.childSlots[fragmentIndex - 1]);
         }
       }
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentFragment = this.renderer.getParentFragment(parentTemplate);
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex > 0) {
         const prevContent = parentFragment.getContentAtIndex(templateIndex - 1);
@@ -413,7 +413,7 @@ export class TBRange {
     const cacheFragment = fragment;
 
     while (true) {
-      const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+      const parentTemplate = this.renderer.getParentTemplate(fragment);
       if (!parentTemplate) {
         return {
           fragment: cacheFragment,
@@ -426,7 +426,7 @@ export class TBRange {
           return this.findFirstPosition(parentTemplate.childSlots[fragmentIndex + 1]);
         }
       }
-      const parentFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentFragment = this.renderer.getParentFragment(parentTemplate);
       const templateIndex = parentFragment.indexOf(parentTemplate);
       if (templateIndex < parentFragment.contentLength - 1) {
         const nextContent = parentFragment.getContentAtIndex(templateIndex + 1);
@@ -670,7 +670,7 @@ export class TBRange {
         fragment: startFragment
       });
 
-      startParentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      startParentTemplate = this.renderer.getParentTemplate(startFragment);
       if (startParentTemplate instanceof BackboneTemplate) {
         const childSlots = startParentTemplate.childSlots;
         const end = childSlots.indexOf(this.endFragment);
@@ -685,14 +685,14 @@ export class TBRange {
           }));
         }
       }
-      startFragment = this.renderer.getParentFragmentByTemplate(startParentTemplate);
+      startFragment = this.renderer.getParentFragment(startParentTemplate);
       startIndex = startFragment.indexOf(startParentTemplate) + 1;
     }
     while (endFragment !== this.commonAncestorFragment) {
       if (commonAncestorTemplate && endParentTemplate === this.commonAncestorTemplate) {
         return;
       }
-      endParentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      endParentTemplate = this.renderer.getParentTemplate(endFragment);
       if (endParentTemplate instanceof BackboneTemplate) {
         const childSlots = endParentTemplate.childSlots;
         const start = childSlots.indexOf(this.startFragment);
@@ -713,7 +713,7 @@ export class TBRange {
         endIndex,
         fragment: endFragment
       });
-      endFragment = this.renderer.getParentFragmentByTemplate(endParentTemplate);
+      endFragment = this.renderer.getParentFragment(endParentTemplate);
       endIndex = endFragment.indexOf(endParentTemplate);
     }
     let result: TBRangeScope[] = [...start];
@@ -752,20 +752,20 @@ export class TBRange {
 
     while (startFragment) {
       startPaths.push(startFragment);
-      const parentTemplate = this.renderer.getParentTemplateByFragment(startFragment);
+      const parentTemplate = this.renderer.getParentTemplate(startFragment);
       if (!parentTemplate) {
         break;
       }
-      startFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      startFragment = this.renderer.getParentFragment(parentTemplate);
     }
 
     while (endFragment) {
       endPaths.push(endFragment);
-      const parentTemplate = this.renderer.getParentTemplateByFragment(endFragment);
+      const parentTemplate = this.renderer.getParentTemplate(endFragment);
       if (!parentTemplate) {
         break;
       }
-      endFragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+      endFragment = this.renderer.getParentFragment(parentTemplate);
     }
     let f: Fragment = null;
     while (startPaths.length && endPaths.length) {
@@ -781,8 +781,8 @@ export class TBRange {
   }
 
   private getCommonAncestorTemplate() {
-    let startTemplate = this.renderer.getParentTemplateByFragment(this.startFragment);
-    let endTemplate = this.renderer.getParentTemplateByFragment(this.endFragment);
+    let startTemplate = this.renderer.getParentTemplate(this.startFragment);
+    let endTemplate = this.renderer.getParentTemplate(this.endFragment);
     if (startTemplate === endTemplate) {
       return startTemplate;
     }
@@ -791,20 +791,20 @@ export class TBRange {
 
     while (startTemplate) {
       startPaths.push(startTemplate);
-      const parentFragment = this.renderer.getParentFragmentByTemplate(startTemplate);
+      const parentFragment = this.renderer.getParentFragment(startTemplate);
       if (!parentFragment) {
         break;
       }
-      startTemplate = this.renderer.getParentTemplateByFragment(parentFragment);
+      startTemplate = this.renderer.getParentTemplate(parentFragment);
     }
 
     while (endTemplate) {
       endPaths.push(endTemplate);
-      const parentFragment = this.renderer.getParentFragmentByTemplate(endTemplate);
+      const parentFragment = this.renderer.getParentFragment(endTemplate);
       if (!parentFragment) {
         break;
       }
-      endTemplate = this.renderer.getParentTemplateByFragment(parentFragment);
+      endTemplate = this.renderer.getParentTemplate(parentFragment);
     }
     let f: Template = null;
     while (startPaths.length && endPaths.length) {

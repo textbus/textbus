@@ -77,10 +77,10 @@ export class TBSelection {
     const getPaths = (fragment: Fragment): number[] => {
       const paths = [];
       while (fragment) {
-        const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+        const parentTemplate = this.renderer.getParentTemplate(fragment);
         if (parentTemplate) {
           parentTemplate instanceof BackboneTemplate ? paths.push(parentTemplate.childSlots.indexOf(fragment)) : paths.push(0);
-          fragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
+          fragment = this.renderer.getParentFragment(parentTemplate);
           paths.push(fragment.indexOf(parentTemplate));
         } else {
           break;
@@ -177,7 +177,7 @@ export class TBSelection {
       const tree = [];
       while (fragment) {
         tree.push(fragment);
-        fragment = this.renderer.getParentFragmentByTemplate(this.renderer.getParentTemplateByFragment(fragment));
+        fragment = this.renderer.getParentFragment(this.renderer.getParentTemplate(fragment));
       }
       depth.push(tree);
     });

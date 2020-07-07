@@ -27,9 +27,9 @@ export class BlockCommander implements Commander<string> {
         const blockTemplate = new BlockTemplate(this.tagName);
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-          const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+          const parentTemplate = renderer.getParentTemplate(scope.fragment);
           if (parentTemplate instanceof BranchTemplate) {
-            const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+            const parentFragment = renderer.getParentFragment(parentTemplate);
             blockTemplate.slot = scope.fragment;
             parentFragment.insertBefore(blockTemplate, parentTemplate);
             parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);

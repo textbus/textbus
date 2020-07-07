@@ -163,7 +163,7 @@ export class FormatMatcher implements Matcher {
       return false;
     }
     return FormatMatcher.isDisable(fragment, this.rule.noInTags) || this.isInTag(
-      renderer.getParentFragmentByTemplate(renderer.getParentTemplateByFragment(fragment)),
+      renderer.getParentFragment(renderer.getParentTemplate(fragment)),
       renderer
     );
   }
@@ -242,8 +242,8 @@ export class FormatMatcher implements Matcher {
         }
       }
 
-      const parentTemplate = renderer.getParentTemplateByFragment(fragment);
-      const parentFragment = renderer.getParentFragmentByTemplate(parentTemplate);
+      const parentTemplate = renderer.getParentTemplate(fragment);
+      const parentFragment = renderer.getParentFragment(parentTemplate);
       if (parentFragment) {
         startIndex = parentFragment.sliceContents(0).indexOf(parentTemplate);
         endIndex = startIndex + 1;

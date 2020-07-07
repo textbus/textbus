@@ -139,11 +139,11 @@ export class Renderer {
     return this.NVMappingTable.get(node);
   }
 
-  getParentTemplateByFragment(fragment: Fragment) {
+  getParentTemplate(fragment: Fragment) {
     return this.fragmentHierarchyMapping.get(fragment);
   }
 
-  getParentFragmentByTemplate(template: Template) {
+  getParentFragment(template: Template) {
     return this.templateHierarchyMapping.get(template);
   }
 
