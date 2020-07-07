@@ -171,10 +171,10 @@ export class EventHandler {
           range.startFragment.delete(0, 1);
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
-            const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
-            if (prevContent instanceof SingleTagTemplate && prevContent.tagName === 'br') {
-              prevPosition.index--;
-            }
+            // const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
+            // if (prevContent instanceof SingleTagTemplate && prevContent.tagName === 'br') {
+            //   prevPosition.index--;
+            // }
 
             range.setStart(prevPosition.fragment, prevPosition.index);
             range.collapse();

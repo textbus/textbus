@@ -39,6 +39,7 @@ export class TodoListTemplateTranslator implements TemplateTranslator {
 export class TodoListTemplate extends BackboneTemplate {
   constructor(public listConfigs: TodoListConfig[]) {
     super('tbus-todo-list');
+    this.childSlots = listConfigs.map(i => i.slot);
   }
 
   canSplit(): boolean {
@@ -46,9 +47,13 @@ export class TodoListTemplate extends BackboneTemplate {
   }
 
   render(isProduction: boolean): VElement {
+    const list = new VElement('tbus-todo-list');
+    this.listConfigs = this.listConfigs.filter(i => {
+      return this.childSlots.includes(i.slot);
+    });
+
     this.viewMap.clear();
     this.childSlots = [];
-    const list = new VElement('tbus-todo-list');
     this.listConfigs.forEach((config, index) => {
       const slot = config.slot;
 
