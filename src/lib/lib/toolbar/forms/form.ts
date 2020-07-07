@@ -83,7 +83,7 @@ export class Form implements DropdownViewer {
   update(d: FormatAbstractData | BackboneTemplate | LeafTemplate): void {
     this.items.forEach(item => {
       const value = d ? d instanceof FormatAbstractData ? d.attrs.get(item.name) : d[item.name] : null;
-      item.update(value || '');
+      item.update(value);
     });
   }
 }

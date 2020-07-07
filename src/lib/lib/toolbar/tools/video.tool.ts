@@ -19,15 +19,29 @@ export const videoTool = Toolkit.makeDropdownTool({
       uploadType: 'video',
       uploadBtnText: '上传新视频'
     }, {
+      type: AttrType.Hidden,
+      name: 'controls',
+      value: 'controls'
+    }, {
+      type: AttrType.TextField,
+      label: '视频宽度',
+      name: 'width',
+      required: false,
+      placeholder: '支持任意 CSS 单位',
+      value: '100%'
+    }, {
+      type: AttrType.TextField,
+      label: '视频高度',
+      name: 'height',
+      required: false,
+      placeholder: '支持任意 CSS 单位',
+      value: 'auto'
+    }, {
       type: AttrType.Switch,
       label: '自动播放',
       required: true,
       checked: false,
       name: 'autoplay'
-    }, {
-      type: AttrType.Hidden,
-      name: 'controls',
-      value: 'controls'
     }]);
   },
   matcher: new MediaMatcher(VideoTemplate, 'video'),

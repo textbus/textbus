@@ -16,7 +16,7 @@ export class FormTextField implements FormItem {
     this.elementRef.innerHTML = `
     <div class="tbus-form-label">${config.label}</div>
     <div class="tbus-form-control-wrap">
-      <input class="tbus-form-control" placeholder="${config.placeholder || ''}" type="text">&nbsp;
+      <input class="tbus-form-control" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">&nbsp;
       ${config.canUpload ?
       `<button type="button" class="tbus-form-btn" title="${config.uploadBtnText || '上传'}">
         <span class="tbus-icon-upload"></span>
@@ -48,8 +48,8 @@ export class FormTextField implements FormItem {
 
   update(value?: any): void {
     this.reset();
-    if (value === undefined) {
-      this.input.value = '';
+    if ([undefined, null].includes(value)) {
+      this.input.value = this.config.value || '';
     } else {
       this.input.value = value;
     }

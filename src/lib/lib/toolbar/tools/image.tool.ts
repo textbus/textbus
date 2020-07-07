@@ -18,6 +18,20 @@ export const imageTool = Toolkit.makeDropdownTool({
       canUpload: true,
       uploadType: 'image',
       uploadBtnText: '上传新图片'
+    }, {
+      type: AttrType.TextField,
+      label: '图片宽度',
+      name: 'width',
+      required: false,
+      placeholder: '支持任意 CSS 单位',
+      value: '100%'
+    }, {
+      type: AttrType.TextField,
+      label: '图片高度',
+      name: 'height',
+      required: false,
+      placeholder: '支持任意 CSS 单位',
+      value: 'auto'
     }])
   },
   matcher: new MediaMatcher(ImageTemplate, 'img'),

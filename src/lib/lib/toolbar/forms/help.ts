@@ -11,6 +11,7 @@ export interface AttrTextField {
   label: string;
   name: string;
   placeholder: string;
+  value?: string;
   canUpload?: boolean;
   uploadType?: string;
   uploadBtnText?: string;

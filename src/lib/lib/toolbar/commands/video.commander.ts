@@ -17,14 +17,20 @@ export class VideoCommander implements Commander<AttrState[]> {
       attrs.set(attr.name, attr.value);
     });
 
+    const fn = function (template: VideoTemplate) {
+      template.src = attrs.get('src') as string;
+      template.autoplay = attrs.get('autoplay') as boolean;
+      template.controls = attrs.get('controls') as boolean;
+      template.width = attrs.get('width') as string;
+      template.height = attrs.get('height') as string;
+    }
+
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
           const template = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
           if (template instanceof VideoTemplate) {
-            template.src = attrs.get('src') as string;
-            template.autoplay = attrs.get('autoplay') as boolean;
-            template.controls = attrs.get('controls') as boolean;
+            fn(template);
           }
         } else {
           range.commonAncestorFragment.insert(
@@ -35,9 +41,7 @@ export class VideoCommander implements Commander<AttrState[]> {
         range.getSelectedScope().forEach(scope => {
           scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(template => {
             if (template instanceof VideoTemplate) {
-              template.src = attrs.get('src') as string;
-              template.autoplay = attrs.get('autoplay') as boolean;
-              template.controls = attrs.get('controls') as boolean;
+              fn(template);
             }
           })
         });
