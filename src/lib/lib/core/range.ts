@@ -374,7 +374,7 @@ export class TBRange {
         }
         return {
           fragment: parentFragment,
-          index: templateIndex - 1
+          index: templateIndex
         }
       } else {
         fragment = parentFragment;
@@ -395,7 +395,7 @@ export class TBRange {
       }
     }
     if (offset < fragment.contentLength) {
-      const next = fragment.getContentAtIndex(offset + 1);
+      const next = fragment.getContentAtIndex(offset);
       if (next instanceof BranchTemplate) {
         return this.findFirstPosition(next.slot);
       }
