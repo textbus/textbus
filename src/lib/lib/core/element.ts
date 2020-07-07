@@ -26,6 +26,8 @@ export class VElement {
   readonly styles = new Map<string, string | number>();
   readonly classes: string[] = [];
 
+  private listeners: Array<{ type: string, listener: (event: Event) => any }> = [];
+
   constructor(public tagName: string, options?: VElementOption) {
     if (options) {
       if (options.attrs) {
@@ -56,7 +58,8 @@ export class VElement {
     const right = this;
     return left.tagName == right.tagName &&
       VElement.equalMap(left.attrs, right.attrs) &&
-      VElement.equalMap(left.styles, right.styles);
+      VElement.equalMap(left.styles, right.styles) &&
+      VElement.equalClasses(left.classes, right.classes);
   }
 
   toJSON(): VElementLiteral {
@@ -72,6 +75,19 @@ export class VElement {
         return c.textContent;
       })
     }
+  }
+
+  on(type: string, listener: (event: Event) => any) {
+    this.listeners.push({
+      type,
+      listener
+    });
+  }
+
+  bindEventToNativeElement(el: Node) {
+    this.listeners.forEach(i => {
+      el.addEventListener(i.type, i.listener);
+    });
   }
 
   private static mapToJSON(map: Map<string, any>) {
@@ -92,5 +108,21 @@ export class VElement {
     return Array.from(left.keys()).reduce((v, key) => {
       return v && left.get(key) === right.get(key);
     }, true);
+  }
+
+  private static equalClasses(left: string[], right: string[]) {
+    if (left === right) {
+      return true;
+    }
+    if (left.length !== right.length) {
+      return false;
+    }
+
+    for (const k of left) {
+      if (!right.includes(k)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

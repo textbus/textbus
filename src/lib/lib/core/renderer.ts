@@ -301,6 +301,7 @@ export class Renderer {
       el.style[key] = value;
     });
     vDom.classes.forEach(k => el.classList.add(k));
+    vDom.bindEventToNativeElement(el);
     return el;
   }
 

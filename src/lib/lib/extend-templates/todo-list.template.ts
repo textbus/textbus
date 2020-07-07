@@ -37,6 +37,21 @@ export class TodoListTemplateTranslator implements TemplateTranslator {
 }
 
 export class TodoListTemplate extends BackboneTemplate {
+
+  private stateCollection = [{
+    active: false,
+    disabled: false
+  }, {
+    active: true,
+    disabled: false
+  }, {
+    active: false,
+    disabled: true
+  }, {
+    active: true,
+    disabled: true
+  }]
+
   constructor(public listConfigs: TodoListConfig[]) {
     super('tbus-todo-list');
     this.childSlots = listConfigs.map(i => i.slot);
@@ -67,10 +82,10 @@ export class TodoListTemplate extends BackboneTemplate {
         classes: ['tbus-todo-list-state']
       });
       if (config.active) {
-        state.classes.push('tbus-todo-list-active');
+        state.classes.push('tbus-todo-list-state-active');
       }
       if (config.disabled) {
-        state.classes.push('tbus-todo-list-disabled');
+        state.classes.push('tbus-todo-list-state-disabled');
       }
       btn.appendChild(state);
       item.appendChild(btn);
@@ -84,34 +99,49 @@ export class TodoListTemplate extends BackboneTemplate {
       this.viewMap.set(slot, content);
       this.childSlots.push(slot);
       list.appendChild(item);
-      !isProduction && content.events.subscribe(event => {
-        if (event.type === EventType.onEnter) {
-          const firstRange = event.selection.firstRange;
-          const {contents, formatRanges} = slot.delete(firstRange.endIndex);
-          const next = new Fragment();
-          if (slot.contentLength === 0) {
-            slot.append(new SingleTagTemplate('br'));
-          }
-          contents.forEach(item => {
-            next.append(item);
-          });
-          formatRanges.forEach(item => {
-            next.apply(item);
-          });
+      if (!isProduction) {
+        state.on('click', event => {
+          const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
+          const newState = this.stateCollection[i];
+          config.active = newState.active;
+          config.disabled = newState.disabled;
+          const element = event.target as HTMLElement;
+          config.active ?
+            element.classList.add('tbus-todo-list-state-active') :
+            element.classList.remove('tbus-todo-list-state-active');
+          config.disabled ?
+            element.classList.add('tbus-todo-list-state-disabled') :
+            element.classList.remove('tbus-todo-list-state-disabled');
+        })
+        content.events.subscribe(event => {
+          if (event.type === EventType.onEnter) {
+            const firstRange = event.selection.firstRange;
+            const {contents, formatRanges} = slot.delete(firstRange.endIndex);
+            const next = new Fragment();
+            if (slot.contentLength === 0) {
+              slot.append(new SingleTagTemplate('br'));
+            }
+            contents.forEach(item => {
+              next.append(item);
+            });
+            formatRanges.forEach(item => {
+              next.apply(item);
+            });
 
-          if (next.contentLength === 0) {
-            next.append(new SingleTagTemplate('br'))
+            if (next.contentLength === 0) {
+              next.append(new SingleTagTemplate('br'))
+            }
+            this.listConfigs.splice(index + 1, 0, {
+              ...config,
+              slot: next
+            });
+            this.childSlots.splice(index + 1, 0, next);
+            firstRange.startFragment = firstRange.endFragment = next;
+            firstRange.startIndex = firstRange.endIndex = 0;
+            event.stopPropagation();
           }
-          this.listConfigs.splice(index + 1, 0, {
-            ...config,
-            slot: next
-          });
-          this.childSlots.splice(index + 1, 0, next);
-          firstRange.startFragment = firstRange.endFragment = next;
-          firstRange.startIndex = firstRange.endIndex = 0;
-          event.stopPropagation();
-        }
-      });
+        })
+      }
     })
     return list;
   }
@@ -124,6 +154,16 @@ export class TodoListTemplate extends BackboneTemplate {
       }
     });
     return new TodoListTemplate(configs);
+  }
+
+  private getStateIndex(active: boolean, disabled: boolean) {
+    for (let i = 0; i < 4; i++) {
+      const item = this.stateCollection[i];
+      if (item.active === active && item.disabled === disabled) {
+        return i;
+      }
+    }
+    return -1;
   }
 }
 
@@ -163,6 +203,24 @@ tbus-todo-list {
   background: #fff;
   border-radius: 3px;
   cursor: pointer;
+  position: relative;
+}
+.tbus-todo-list-state:after {
+  content: "";
+  position: absolute;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  left: 3px;
+  top: 1px;
+  width: 4px;
+  height: 6px;
+  transform: rotateZ(45deg);
+}
+.tbus-todo-list-state-active:after {
+  border-color: #1296db;
+}
+.tbus-todo-list-state-disabled {
+  opacity: 0.5;
 }
 .tbus-todo-list-content {
   flex: 1;
