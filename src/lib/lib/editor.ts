@@ -151,7 +151,7 @@ export class Editor implements EventDelegate {
         this.templateStage.expand = b;
       }),
       this.templateStage.onCheck.subscribe(template => {
-        if (this.selection) {
+        if (this.selection && this.selection.rangeCount) {
           this.insertTemplate(template);
         }
       }),
