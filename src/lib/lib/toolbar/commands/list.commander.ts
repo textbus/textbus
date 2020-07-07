@@ -95,8 +95,9 @@ export class ListCommander implements Commander {
           }
           if (scope.fragment === range.startFragment) {
             range.setStart(fragment, range.startIndex - scope.startIndex);
-          } else if (scope.fragment === range.endFragment) {
-            range.setEnd(fragment, range.endIndex - scope.endIndex);
+          }
+          if (scope.fragment === range.endFragment) {
+            range.setEnd(fragment, range.endIndex - scope.startIndex);
           }
         });
         if (range.startFragment !== commonAncestorFragment) {
