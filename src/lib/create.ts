@@ -69,11 +69,14 @@ import { defaultStyleSheets } from './lib/viewer/default-styles';
 import {
   imageCardStyleSheet,
   imageCardTemplateExample,
-  ImageCardTemplateTranslator
+  ImageCardTemplateTranslator,
+  todoListStyleSheet,
+  todoListTemplateExample,
+  TodoListTemplateTranslator
 } from './lib/extend-templates/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: [...defaultStyleSheets, imageCardStyleSheet],
+  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
@@ -81,6 +84,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   templateTranslators: [
+    new TodoListTemplateTranslator(),
     new ImageCardTemplateTranslator(),
     new ListTemplateTranslator('ul'),
     new ListTemplateTranslator('ol'),
@@ -130,7 +134,8 @@ export const defaultOptions: EditorOptions = {
     [cleanTool]
   ],
   templateExamples: [
-    imageCardTemplateExample
+    imageCardTemplateExample,
+    todoListTemplateExample
   ]
 };
 

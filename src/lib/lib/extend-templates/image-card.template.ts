@@ -30,9 +30,12 @@ export class ImageCardTemplateTranslator implements TemplateTranslator {
 }
 
 export class ImageCardTemplate extends BackboneTemplate {
-  canSplit = false;
   constructor(public imageSrc: string) {
     super('tbus-image-card');
+  }
+
+  canSplit(): boolean {
+    return false;
   }
 
   render(isProduction: boolean): VElement {
@@ -61,16 +64,17 @@ export class ImageCardTemplate extends BackboneTemplate {
       descFragment.append(new SingleTagTemplate('br'));
     }
     this.viewMap.set(descFragment, desc);
-
-    imgWrapper.events.subscribe(ev => {
-      ev.stopPropagation();
-    })
-
-    desc.events.subscribe(ev => {
-      if (ev.type === EventType.onDelete && ev.selection.firstRange.startIndex === 0) {
+    if (!isProduction) {
+      imgWrapper.events.subscribe(ev => {
         ev.stopPropagation();
-      }
-    })
+      })
+
+      desc.events.subscribe(ev => {
+        if (ev.type === EventType.onDelete && ev.selection.firstRange.startIndex === 0) {
+          ev.stopPropagation();
+        }
+      })
+    }
 
     return card;
   }
@@ -81,7 +85,6 @@ export class ImageCardTemplate extends BackboneTemplate {
     return t;
   }
 }
-
 
 
 export const imageCardTemplateExample: TemplateExample = {

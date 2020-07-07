@@ -632,7 +632,7 @@ export class Editor implements EventDelegate {
         parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
 
       }
-    } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit) {
+    } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit()) {
       const ff = new Fragment();
       ff.append(template);
       parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);

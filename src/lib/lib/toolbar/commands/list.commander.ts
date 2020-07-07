@@ -59,7 +59,7 @@ export class ListCommander implements Commander {
             }
             const parentTemplate = renderer.getParentTemplate(scope.fragment);
             fragment = renderer.getParentFragment(parentTemplate);
-            if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit === false) {
+            if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit() === false) {
               lastBackboneTemplate = parentTemplate;
             }
           }

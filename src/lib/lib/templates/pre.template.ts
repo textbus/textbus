@@ -187,11 +187,11 @@ export class PreTemplate extends BranchTemplate {
     return template;
   }
 
-  render() {
+  render(isProduction: boolean) {
     this.format();
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
-    block.events.subscribe(event => {
+    !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new SingleTagTemplate('br'), firstRange.startIndex);

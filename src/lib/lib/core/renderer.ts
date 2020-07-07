@@ -300,6 +300,7 @@ export class Renderer {
     vDom.styles.forEach((value, key) => {
       el.style[key] = value;
     });
+    vDom.classes.forEach(k => el.classList.add(k));
     return el;
   }
 
@@ -508,6 +509,9 @@ export class Renderer {
     });
     if (styles) {
       attrs.push(`style="${styles}"`);
+    }
+    if (vDom.classes) {
+      attrs.push(`class="${vDom.classes.join(' ')}"`);
     }
     let attrStr = attrs.join(' ');
     attrStr = attrStr ? ' ' + attrStr : '';

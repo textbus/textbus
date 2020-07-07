@@ -115,7 +115,6 @@ export class TableTemplateTranslator implements TemplateTranslator {
 }
 
 export class TableTemplate extends BackboneTemplate {
-  canSplit = false;
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;
@@ -134,6 +133,10 @@ export class TableTemplate extends BackboneTemplate {
     }
   }
 
+  canSplit(): boolean {
+    return false;
+  }
+
   clone() {
     const template = new TableTemplate(this.config);
     this.childSlots.forEach(f => {
@@ -142,7 +145,7 @@ export class TableTemplate extends BackboneTemplate {
     return template;
   }
 
-  render() {
+  render(isProduction: boolean) {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
     this.childSlots = [];
@@ -167,7 +170,7 @@ export class TableTemplate extends BackboneTemplate {
           this.childSlots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
-          td.events.subscribe(event => {
+          !isProduction && td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
               col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);

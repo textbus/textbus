@@ -50,8 +50,6 @@ export class ListTemplateTranslator implements TemplateTranslator {
 }
 
 export class ListTemplate extends BackboneTemplate {
-  canSplit = true;
-
   constructor(tagName: string) {
     super(tagName);
   }
@@ -64,12 +62,16 @@ export class ListTemplate extends BackboneTemplate {
     return template;
   }
 
-  render() {
+  canSplit(): boolean {
+    return true;
+  }
+
+  render(isProduction: boolean) {
     const list = new VElement(this.tagName);
     this.viewMap.clear();
     this.childSlots.forEach((slot, index) => {
       const li = new VElement('li');
-      li.events.subscribe(event => {
+      !isProduction && li.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
           const firstRange = event.selection.firstRange;
           const {contents, formatRanges} = slot.delete(firstRange.endIndex);

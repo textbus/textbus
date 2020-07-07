@@ -39,9 +39,9 @@ export class BlockTemplate extends BranchTemplate {
     return template;
   }
 
-  render() {
+  render(isProduction: boolean) {
     const block = new VElement(this.tagName);
-    block.events.subscribe(event => {
+    !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragment(this);
 

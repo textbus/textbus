@@ -4,6 +4,7 @@ export interface VElementLiteral {
   tagName: string;
   styles: { [key: string]: any },
   attrs: { [key: string]: any },
+  classes: string[];
   childNodes: Array<VElementLiteral | string>;
 }
 
@@ -12,13 +13,31 @@ export class VTextNode {
   }
 }
 
+export interface VElementOption {
+  attrs?: { [key: string]: boolean | string | number };
+  styles?: { [key: string]: string | number };
+  classes?: string[];
+}
+
 export class VElement {
   readonly events = new EventEmitter();
   readonly childNodes: Array<VElement | VTextNode> = [];
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
+  readonly classes: string[] = [];
 
-  constructor(public tagName: string) {
+  constructor(public tagName: string, options?: VElementOption) {
+    if (options) {
+      if (options.attrs) {
+        Object.keys(options.attrs).forEach(key => this.attrs.set(key, options.attrs[key]));
+      }
+      if (options.styles) {
+        Object.keys(options.styles).forEach(key => this.styles.set(key, options.styles[key]));
+      }
+      if (options.classes) {
+        options.classes.forEach(i => this.classes.push(i));
+      }
+    }
   }
 
   appendChild(newChild: VElement | VTextNode) {
@@ -45,6 +64,7 @@ export class VElement {
       tagName: this.tagName,
       styles: VElement.mapToJSON(this.styles),
       attrs: VElement.mapToJSON(this.attrs),
+      classes: this.classes.map(i => i),
       childNodes: this.childNodes.map(c => {
         if (c instanceof VElement) {
           return c.toJSON();
