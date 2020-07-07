@@ -169,7 +169,7 @@ export class Renderer {
     return this.getContext(parentFragment, context, filter);
   }
 
-  dispatchEvent(by: VElement, type: EventType, selection: TBSelection, data?: {[key: string]: any}) {
+  dispatchEvent(by: VElement, type: EventType, selection: TBSelection, data?: { [key: string]: any }) {
     let stopped = false;
     do {
       const event = new TBEvent({
@@ -432,9 +432,15 @@ export class Renderer {
           this.createVDom(item.slot, vDom);
           !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
         } else if (item instanceof BackboneTemplate) {
+          if (!this.productionRenderingModal) {
+            vDom.styles.set('userSelect', 'none');
+          }
           item.childSlots.forEach(slot => {
-            !this.productionRenderingModal && this.fragmentHierarchyMapping.set(slot, item);
             const parent = item.getChildViewBySlot(slot);
+            if (!this.productionRenderingModal) {
+              parent.styles.set('userSelect', 'text');
+              this.fragmentHierarchyMapping.set(slot, item);
+            }
             this.createVDom(slot, parent);
           });
         }
