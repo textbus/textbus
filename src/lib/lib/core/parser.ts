@@ -1,6 +1,7 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
 import { FormatEffect } from './formatter';
+import { BackboneTemplate, BranchTemplate } from './template';
 
 export class Parser {
   constructor(private options: EditorOptions) {
@@ -20,7 +21,9 @@ export class Parser {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.template);
           viewData.childrenSlots.forEach(item => {
-            if (item.from === el) {
+            if (viewData.template instanceof BranchTemplate ||
+              viewData.template instanceof BackboneTemplate ||
+              item.from === el) {
               this.readFormats(item.from, item.toSlot);
             } else {
               this.readTemplate(item.from, item.toSlot);
