@@ -30,6 +30,7 @@ export class ImageCardTemplateTranslator implements TemplateTranslator {
 }
 
 export class ImageCardTemplate extends BackboneTemplate {
+  canSplit = false;
   constructor(public imageSrc: string) {
     super('tbus-image-card');
   }

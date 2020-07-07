@@ -50,6 +50,8 @@ export class ListTemplateTranslator implements TemplateTranslator {
 }
 
 export class ListTemplate extends BackboneTemplate {
+  canSplit = true;
+
   constructor(tagName: string) {
     super(tagName);
   }

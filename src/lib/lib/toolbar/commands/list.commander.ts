@@ -1,4 +1,12 @@
-import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, BranchTemplate } from '../../core/_api';
+import {
+  Commander,
+  TBSelection,
+  Renderer,
+  Fragment,
+  BackboneTemplate,
+  BranchTemplate,
+  TBRangeScope
+} from '../../core/_api';
 import { ListTemplate, BlockTemplate } from '../../templates/_api';
 
 export class ListCommander implements Commander {
@@ -40,8 +48,39 @@ export class ListCommander implements Commander {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListTemplate(this.tagName);
-        range.getSuccessiveContents().reverse().forEach(scope => {
-          if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        const backboneTemplates: BackboneTemplate[] = [];
+        const scopes: TBRangeScope[] = [];
+        range.getSuccessiveContents().forEach(scope => {
+          let fragment = scope.fragment;
+          let lastBackboneTemplate: BackboneTemplate;
+          while (true) {
+            if (fragment === commonAncestorFragment) {
+              break;
+            }
+            const parentTemplate = renderer.getParentTemplateByFragment(scope.fragment);
+            fragment = renderer.getParentFragmentByTemplate(parentTemplate);
+            if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit === false) {
+              lastBackboneTemplate = parentTemplate;
+            }
+          }
+          if (lastBackboneTemplate) {
+            if (backboneTemplates.includes(lastBackboneTemplate)) {
+              return;
+            }
+            backboneTemplates.push(lastBackboneTemplate);
+            const parentFragment = renderer.getParentFragmentByTemplate(lastBackboneTemplate);
+            const index = parentFragment.indexOf(lastBackboneTemplate);
+            scopes.push({
+              startIndex: index,
+              endIndex: index + 1,
+              fragment: parentFragment
+            })
+          } else {
+            scopes.push(scope);
+          }
+        });
+        scopes.reverse().forEach(scope => {
+          if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength && scope.fragment !== commonAncestorFragment) {
             list.childSlots.unshift(scope.fragment);
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
             return;

@@ -34,6 +34,9 @@ export abstract class BranchTemplate extends Template {
 
 export abstract class BackboneTemplate extends Template {
   childSlots: Fragment[] = [];
+
+  abstract get canSplit(): boolean;
+
   protected viewMap = new Map<Fragment, VElement>();
 
   getChildViewBySlot(slot: Fragment) {

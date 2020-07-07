@@ -115,6 +115,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
 }
 
 export class TableTemplate extends BackboneTemplate {
+  canSplit = false;
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;

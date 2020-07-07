@@ -128,14 +128,19 @@ export class TBRange {
 
   getSlotRange<T extends BackboneTemplate>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ template: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ template: T, index: number }> = [];
-    this.getSelectedScope().map(scope => {
+    this.getSelectedScope().forEach(scope => {
       const context = this.renderer.getContext(scope.fragment, of, filter);
-      const index = context.childSlots.indexOf(scope.fragment)
-      if (index !== -1) {
-        maps.push({
-          template: context,
-          index
-        })
+      let fragment: Fragment = scope.fragment;
+      while (fragment) {
+        const parentTemplate = this.renderer.getParentTemplateByFragment(fragment);
+        if (parentTemplate === context) {
+          maps.push({
+            template: context,
+            index: context.childSlots.indexOf(fragment)
+          })
+          break;
+        }
+        fragment = this.renderer.getParentFragmentByTemplate(parentTemplate);
       }
     });
     const templates: T[] = [];
