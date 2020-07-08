@@ -199,7 +199,7 @@ export class EventHandler {
 
   private onEnter(event: TBEvent) {
     const firstRange = event.selection.firstRange;
-    const rootFragment = event.rootFragment;
+    const rootFragment = firstRange.startFragment;
     rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
     const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
