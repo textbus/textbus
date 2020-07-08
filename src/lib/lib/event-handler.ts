@@ -38,7 +38,10 @@ export class EventHandler {
 
     commonAncestorFragment.delete(0);
     fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, true, false));
+    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, {
+      important: true,
+      coverChild: false
+    }));
 
     let index = 0;
     input.input.value.replace(/\n+|[^\n]+/g, (str) => {

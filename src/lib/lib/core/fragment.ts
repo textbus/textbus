@@ -3,6 +3,11 @@ import { BackboneTemplate, BranchTemplate, Template } from './template';
 import { BlockFormatter, FormatDelta, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
+export interface ApplyFormatOptions {
+  important?: boolean;
+  coverChild?: boolean;
+}
+
 export class Fragment {
   private contents = new Contents();
   private formatMap = new FormatMap();
@@ -249,7 +254,11 @@ export class Fragment {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
-  apply(f: FormatDelta, important = true, coverChild = true) {
+  apply(f: FormatDelta, options: ApplyFormatOptions = {
+    important: true,
+    coverChild: true
+  }) {
+    const {coverChild, important} = options;
     if (f.renderer instanceof BlockFormatter) {
       this.mergeFormat(f, important);
       return;
@@ -267,7 +276,7 @@ export class Fragment {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
-            fragment.apply(newFormatRange, important);
+            fragment.apply(newFormatRange, options);
           })
         }
       } else if (item instanceof BranchTemplate) {
@@ -276,7 +285,7 @@ export class Fragment {
           const newFormatRange = Object.assign({}, formatRange);
           newFormatRange.startIndex = 0;
           newFormatRange.endIndex = item.slot.contentLength;
-          item.slot.apply(newFormatRange, important);
+          item.slot.apply(newFormatRange, options);
         }
       } else {
         if (!newFormat) {

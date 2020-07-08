@@ -20,27 +20,7 @@
   <br>
 </div>
 <div id="table" contenteditable="true">
-  <tbus-todo-list style="user-select: none;">
-    <div class="tbus-todo-list-item"><span class="tbus-todo-list-state"></span>
-      <div class="tbus-todo-list-content">你好<br></div>
-    </div>
-    <div class="tbus-todo-list-item"><span class="tbus-todo-list-state"></span>
-      <div class="tbus-todo-list-content">你好222<br></div>
-    </div>
-  </tbus-todo-list>
-  <table>
-    <tbody>
-    <tr>
-      <td>fdsaf</td>
-      <td>fdsa</td>
-    </tr>
-    <tr>
-      <td>fdsaf</td>
-      <td>fdsa</td>
-    </tr>
-    </tbody>
-  </table>
-  <p>fdsafasd</p>
+  <h1 style="text-align: center; color: rgb(16, 125, 184);">TBus&nbsp;<span style="letter-spacing: 5px;">富文本编辑器</span></h1><h4 style="text-align: center; color: rgb(73, 80, 96);">—— 基于 Typescript，轻量，易扩展 ——</h4><p style="color: rgb(73, 80, 96); font-size: 15px;">和传统富文本编辑器不同，TBus 未使用 DOM 的 contentEditable 属性，并且采用分层设计，抽象了出了&nbsp;<strong>Template</strong>（模板）+&nbsp;<strong>Fragment</strong>（片段） 数据模型、<strong>TBSelection</strong>（选区），使开发及扩展&nbsp;<strong>Commander</strong>（命令）无需关心浏览器的行为及差异，只需要关注当前的&nbsp;<strong>Contents</strong>（内容）和&nbsp;<strong>FormatRange</strong>（格式），这种高层次的抽象，使普通开发者也可以很容易的扩展出自己的功能。甚至，在富文本中实现代码高亮这样的功能，也变得很容易。</p><pre lang="Typescript"><code><span style="font-weight: bold;">import</span>&nbsp;{ createEditor }&nbsp;<span style="font-weight: bold;">from</span>&nbsp;<span style="color: rgb(221, 17, 68);">'@tanbo/tbus'</span>;<br><br><span style="font-weight: bold;">const</span>&nbsp;editor = createEditor(<span style="color: rgb(0, 134, 179);">document</span>.getElementById(<span style="color: rgb(221, 17, 68);">'editor'</span>));<br>editor.onChange.subscribe(() =&gt; {<br>&nbsp;&nbsp;<span style="font-weight: bold;">const</span>&nbsp;{contents, styleSheets} = editor.getContents();<br>&nbsp;&nbsp;<span style="color: rgb(0, 134, 179);">console</span>.log(contents, styleSheets);<br>})<br></code></pre>
 </div>
 <p>
   <button type="button" id="btn">destroy</button>
