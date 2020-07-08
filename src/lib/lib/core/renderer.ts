@@ -511,7 +511,7 @@ export class Renderer {
     if (styles) {
       attrs.push(`style="${styles}"`);
     }
-    if (vDom.classes) {
+    if (vDom.classes && vDom.classes.length) {
       attrs.push(`class="${vDom.classes.join(' ')}"`);
     }
     let attrStr = attrs.join(' ');

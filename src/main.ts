@@ -22,7 +22,7 @@ const editor = createEditor('#editor', {
 });
 
 editor.onReady.subscribe(() => {
-  console.log(editor.getJSONLiteral())
+  console.log(editor.getContents().contents)
 })
 
 document.getElementById('btn').addEventListener('click', () => {
