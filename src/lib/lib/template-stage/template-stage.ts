@@ -4,6 +4,7 @@ import { Template } from '../core/_api';
 
 export interface TemplateExample {
   example: string | HTMLElement;
+  name: string;
   category?: string;
 
   templateFactory(): Template | Promise<Template> | Observable<Template>;
@@ -39,7 +40,7 @@ export class TemplateStage {
   }
 
   private addTemplate(example: TemplateExample) {
-    const view = TemplateStage.createViewer(example.example);
+    const view = TemplateStage.createViewer(example.example, example.name);
     view.addEventListener('click', () => {
       const t = example.templateFactory();
       if (t instanceof Template) {
@@ -58,20 +59,32 @@ export class TemplateStage {
     this.templateListWrapper.appendChild(view);
   }
 
-  private static createViewer(content: string | HTMLElement) {
+  private static createViewer(content: string | HTMLElement, name: string) {
     const wrapper = document.createElement('div');
     wrapper.classList.add('tbus-template-example-item');
     const example = document.createElement('div');
     example.classList.add('tbus-template-example');
+
+    const exampleContent = document.createElement('div');
+    exampleContent.classList.add('tbus-template-example-content');
+
     if (typeof content === 'string') {
-      example.innerHTML = content;
+      exampleContent.innerHTML = content;
     } else if (content instanceof HTMLElement) {
-      example.appendChild(content);
+      exampleContent.appendChild(content);
     }
-    wrapper.appendChild(example);
+
+    example.appendChild(exampleContent);
+
     const mask = document.createElement('div');
     mask.classList.add('tbus-template-example-mask');
-    wrapper.appendChild(mask);
+    example.appendChild(mask);
+
+    wrapper.appendChild(example);
+    const nameWrapper = document.createElement('div');
+    nameWrapper.classList.add('tbus-template-example-name');
+    nameWrapper.innerText = name || '';
+    wrapper.appendChild(nameWrapper);
     return wrapper;
   }
 }

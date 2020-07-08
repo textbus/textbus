@@ -135,7 +135,7 @@ export const defaultOptions: EditorOptions = {
   ],
   templateExamples: [
     imageCardTemplateExample,
-    todoListTemplateExample
+    todoListTemplateExample,
   ]
 };
 

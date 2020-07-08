@@ -22,7 +22,7 @@
 
   &-list {
     box-sizing: content-box;
-    padding: 0 10px;
+    padding: 15px 10px;
     width: 240px;
   }
 
@@ -33,24 +33,29 @@
 
 .tbus-template-example-item {
   width: 100px;
-  height: 70px;
-  margin: 20px 10px;
+  height: 100px;
+  margin: 5px 10px;
   float: left;
-  background-color: #fff;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
   position: relative;
   cursor: pointer;
-  transition: transform .15s;
-  border-radius: 3px;
-  overflow: hidden;
 
-  &:hover {
-    transform: scale(1.2);
+  &:hover .tbus-template-example {
+    transform: scale(1.12);
   }
 }
 
 .tbus-template-example {
   position: relative;
+  height: 70px;
+  background-color: #fff;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: transform .15s;
+  &-content {
+    position: relative;
+    z-index: 0;
+  }
 
   &-mask {
     position: absolute;
@@ -60,6 +65,14 @@
     bottom: 0;
     z-index: 1;
   }
+}
+
+.tbus-template-example-name {
+  background-color: #fff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 30px;
+  margin-top: 1px;
 }
 
 .tbus-wrap {
