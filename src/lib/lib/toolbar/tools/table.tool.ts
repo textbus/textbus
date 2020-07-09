@@ -1,7 +1,5 @@
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { BlockMatcher } from '../matcher/block.matcher';
-import { TableTemplate } from '../../templates/table.template';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
 

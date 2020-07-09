@@ -599,8 +599,10 @@ export class TBRange {
 
       this.deleteSelectedScope();
       if (isDeleteFragment) {
-        this.deleteEmptyTree(this.startFragment);
-        this.setStart(this.endFragment, 0);
+        this.startFragment.from(this.endFragment);
+        const firstPosition = this.findFirstPosition(this.startFragment);
+        this.setStart(firstPosition.fragment, firstPosition.index);
+        this.deleteEmptyTree(this.endFragment);
       } else {
         const last = this.endFragment.cut(0);
         this.deleteEmptyTree(this.endFragment);

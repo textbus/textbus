@@ -1,6 +1,4 @@
-import { BlockMatcher } from '../matcher/block.matcher';
 import { TableEditActions, TableEditCommander } from '../commands/table-edit.commander';
-import { TableTemplate } from '../../templates/table.template';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const tableEditTool = Toolkit.makeActionSheetTool({
