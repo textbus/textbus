@@ -6,3 +6,5 @@ export * from './list.template';
 export * from './single-tag.template';
 export * from './table.template';
 export * from './video.template';
+
+export * from './utils/breaking-line';

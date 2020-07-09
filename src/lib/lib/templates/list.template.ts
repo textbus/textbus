@@ -1,6 +1,15 @@
-import { SlotMap, BackboneTemplate, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
+import {
+  SlotMap,
+  BackboneTemplate,
+  TemplateTranslator,
+  ViewData,
+  Fragment,
+  VElement,
+  EventType
+} from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
 import { BlockTemplate } from './block.template';
+import { breakingLine } from './utils/breaking-line';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 
@@ -92,21 +101,9 @@ export class ListTemplate extends BackboneTemplate {
               return;
             }
           }
-          const {contents, formatRanges} = slot.cut(firstRange.endIndex);
-          const next = new Fragment();
-          if (slot.contentLength === 0) {
-            slot.append(new SingleTagTemplate('br'));
-          }
-          contents.forEach(item => {
-            next.append(item);
-          });
-          formatRanges.forEach(item => {
-            next.apply(item);
-          });
 
-          if (next.contentLength === 0) {
-            next.append(new SingleTagTemplate('br'))
-          }
+          const next = breakingLine(slot, firstRange.startIndex);
+
           this.childSlots.splice(index + 1, 0, next);
           firstRange.startFragment = firstRange.endFragment = next;
           firstRange.startIndex = firstRange.endIndex = 0;

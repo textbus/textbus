@@ -1,12 +1,11 @@
 import {
   TemplateTranslator,
   ViewData,
-  Fragment,
   VElement,
   EventType,
   BranchTemplate
 } from '../core/_api';
-import { SingleTagTemplate } from './single-tag.template';
+import { breakingLine } from './utils/breaking-line';
 
 export class BlockTemplateTranslator implements TemplateTranslator {
   constructor(private tagNames: string[]) {
@@ -46,20 +45,11 @@ export class BlockTemplate extends BranchTemplate {
         const parent = event.renderer.getParentFragment(this);
 
         const template = new BlockTemplate('p');
-        const fragment = template.slot;
         const firstRange = event.selection.firstRange;
-        const c = firstRange.startFragment.cut(firstRange.startIndex);
-        if (firstRange.startFragment.contentLength === 0) {
-          firstRange.startFragment.append(new SingleTagTemplate('br'));
-        }
-        if (c.contents.length) {
-          c.contents.forEach(cc => fragment.append(cc));
-        } else {
-          fragment.append(new SingleTagTemplate('br'));
-        }
-        c.formatRanges.forEach(ff => fragment.apply(ff));
+        const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
+        template.slot.from(next);
         parent.insert(template, parent.indexOf(this) + 1);
-        const position = firstRange.findFirstPosition(fragment);
+        const position = firstRange.findFirstPosition(template.slot);
         firstRange.startFragment = firstRange.endFragment = position.fragment;
         firstRange.startIndex = firstRange.endIndex = position.index;
         event.stopPropagation();

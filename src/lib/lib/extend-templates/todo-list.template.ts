@@ -1,5 +1,12 @@
-import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
-import { SingleTagTemplate, BlockTemplate } from '../templates/_api';
+import {
+  BackboneTemplate,
+  EventType,
+  Fragment,
+  TemplateTranslator,
+  VElement,
+  ViewData
+} from '../core/_api';
+import { SingleTagTemplate, BlockTemplate, breakingLine } from '../templates/_api';
 import { TemplateExample } from '../template-stage/template-stage';
 
 export interface TodoListConfig {
@@ -134,21 +141,8 @@ export class TodoListTemplate extends BackboneTemplate {
               }
             }
 
-            const {contents, formatRanges} = slot.cut(firstRange.endIndex);
-            const next = new Fragment();
-            if (slot.contentLength === 0) {
-              slot.append(new SingleTagTemplate('br'));
-            }
-            contents.forEach(item => {
-              next.append(item);
-            });
-            formatRanges.forEach(item => {
-              next.apply(item);
-            });
+            const next = breakingLine(slot, firstRange.startIndex);
 
-            if (next.contentLength === 0) {
-              next.append(new SingleTagTemplate('br'))
-            }
             this.listConfigs.splice(index + 1, 0, {
               ...config,
               slot: next
