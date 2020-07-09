@@ -70,7 +70,7 @@ export enum FormatterPriority {
   Attribute = 300
 }
 
-abstract class Formatter {
+export abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
