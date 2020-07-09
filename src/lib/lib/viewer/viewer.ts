@@ -67,7 +67,8 @@ export class Viewer {
           childBody.removeChild(div);
         }
       }
-      this.frame.style.height = Math.max(height + 30, this.elementRef.offsetHeight) + 'px';
+      const containerHeight = this.elementRef.parentNode?.['offsetHeight'] || 0;
+      this.frame.style.height = Math.max(height + 30, containerHeight) + 'px';
       this.id = requestAnimationFrame(fn);
     }
     this.id = requestAnimationFrame(fn);
