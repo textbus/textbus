@@ -1,5 +1,4 @@
 import {
-  BackboneTemplate,
   Commander,
   FormatAbstractData,
   FormatEffect,
@@ -30,20 +29,20 @@ export class BlockCommander implements Commander<string> {
           const parentTemplate = renderer.getParentTemplate(scope.fragment);
           if (parentTemplate instanceof BranchTemplate) {
             const parentFragment = renderer.getParentFragment(parentTemplate);
-            blockTemplate.slot = scope.fragment;
+            blockTemplate.slot.from(scope.fragment);
             parentFragment.insertBefore(blockTemplate, parentTemplate);
             parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
             this.effect(blockTemplate.slot, parentTemplate.tagName);
           } else {
             const index = parentTemplate.childSlots.indexOf(scope.fragment);
-            blockTemplate.slot = scope.fragment;
+            blockTemplate.slot.from(scope.fragment);
             this.effect(blockTemplate.slot, parentTemplate.tagName);
             const fragment = new Fragment();
             fragment.append(blockTemplate);
             parentTemplate.childSlots.splice(index, 1, fragment);
           }
         } else {
-          blockTemplate.slot = new Fragment();
+          blockTemplate.slot.from(new Fragment());
           const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
           c.contents.forEach(cc => blockTemplate.slot.append(cc));
           c.formatRanges.forEach(ff => blockTemplate.slot.apply(ff));

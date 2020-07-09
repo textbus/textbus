@@ -32,8 +32,7 @@ export class ToggleBlockCommander implements Commander<string> {
         let position: number;
         let parentFragment: Fragment;
         const block = new BlockTemplate(this.tagName);
-        const fragment = new Fragment();
-        block.slot = fragment;
+        const fragment = block.slot;
         if (range.startFragment === range.endFragment) {
           const parentTemplate = renderer.getParentTemplate(range.startFragment)
           parentFragment = renderer.getParentFragment(parentTemplate);

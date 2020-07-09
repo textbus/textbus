@@ -447,11 +447,9 @@ export class Editor implements EventDelegate {
         }
         if (this.rootFragment.contentLength === 0) {
           const p = new BlockTemplate('p');
-          const fragment = new Fragment();
-          fragment.append(new SingleTagTemplate('br'));
-          p.slot = fragment;
+          p.slot.append(new SingleTagTemplate('br'));
           this.rootFragment.append(p);
-          selection.firstRange.setStart(fragment, 0);
+          selection.firstRange.setStart(p.slot, 0);
           selection.firstRange.collapse();
         }
         this.render();
@@ -728,9 +726,7 @@ export class Editor implements EventDelegate {
       }
     }
     const p = new BlockTemplate('p');
-    const ff = new Fragment();
-    ff.append(new SingleTagTemplate('br'));
-    p.slot = ff;
+    p.slot.append(new SingleTagTemplate('br'));
     fragment.append(p);
   }
 }

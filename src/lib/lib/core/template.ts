@@ -66,7 +66,7 @@ export abstract class Template {
 }
 
 export abstract class BranchTemplate extends Template {
-  slot = new Fragment();
+  readonly slot = new Fragment();
 }
 
 export abstract class BackboneTemplate extends Template {

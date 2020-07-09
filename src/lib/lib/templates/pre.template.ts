@@ -183,7 +183,7 @@ export class PreTemplate extends BranchTemplate {
 
   clone() {
     const template = new PreTemplate(this.lang);
-    template.slot = this.slot.clone();
+    template.slot.from(this.slot.clone());
     return template;
   }
 

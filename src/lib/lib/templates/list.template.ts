@@ -1,5 +1,6 @@
 import { SlotMap, BackboneTemplate, TemplateTranslator, ViewData, Fragment, VElement, EventType } from '../core/_api';
 import { SingleTagTemplate } from './single-tag.template';
+import { BlockTemplate } from './block.template';
 
 export class ListTemplateTranslator implements TemplateTranslator {
 
@@ -73,7 +74,24 @@ export class ListTemplate extends BackboneTemplate {
       const li = new VElement('li');
       !isProduction && li.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
+          event.stopPropagation();
+
           const firstRange = event.selection.firstRange;
+          if (slot === this.childSlots[this.childSlots.length - 1]) {
+            const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
+            if (slot.contentLength === 0 ||
+              slot.contentLength === 1 && lastContent instanceof SingleTagTemplate && lastContent.tagName === 'br') {
+              this.childSlots.pop();
+              const parentFragment = event.renderer.getParentFragment(this);
+              const p = new BlockTemplate('p');
+              p.slot.from(new Fragment());
+              p.slot.append(new SingleTagTemplate('br'));
+              parentFragment.insertAfter(p, this);
+              firstRange.setStart(p.slot, 0);
+              firstRange.collapse();
+              return;
+            }
+          }
           const {contents, formatRanges} = slot.delete(firstRange.endIndex);
           const next = new Fragment();
           if (slot.contentLength === 0) {
@@ -92,7 +110,6 @@ export class ListTemplate extends BackboneTemplate {
           this.childSlots.splice(index + 1, 0, next);
           firstRange.startFragment = firstRange.endFragment = next;
           firstRange.startIndex = firstRange.endIndex = 0;
-          event.stopPropagation();
         }
       });
       list.appendChild(li);

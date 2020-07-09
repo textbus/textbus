@@ -16,6 +16,11 @@ export class Fragment {
     return this.contents.length;
   }
 
+  from(source: Fragment) {
+    this.contents = source.contents;
+    this.formatMap = source.formatMap;
+  }
+
   append(element: string | Template) {
     this.contents.append(element);
   }

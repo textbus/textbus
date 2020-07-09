@@ -32,7 +32,7 @@ export class ListCommander implements Commander {
                 parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneTemplate, item.template)
               } else {
                 const t = new BlockTemplate('p');
-                t.slot = fragment;
+                t.slot.from(fragment);
                 parentFragment.insertBefore(t, item.template);
               }
             })

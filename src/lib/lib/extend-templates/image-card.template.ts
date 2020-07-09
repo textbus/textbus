@@ -1,6 +1,6 @@
 import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
 import { TemplateExample } from '../template-stage/template-stage';
-import { ImageTemplate, SingleTagTemplate } from '../templates/_api';
+import { BlockTemplate, ImageTemplate, SingleTagTemplate } from '../templates/_api';
 
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
 const defaultImageSrc = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
@@ -70,7 +70,16 @@ export class ImageCardTemplate extends BackboneTemplate {
       })
 
       desc.events.subscribe(ev => {
-        if (ev.type === EventType.onDelete && ev.selection.firstRange.startIndex === 0) {
+        const firstRange = ev.selection.firstRange;
+        if (ev.type === EventType.onEnter) {
+          const parentFragment = ev.renderer.getParentFragment(this);
+          const p = new BlockTemplate('p');
+          p.slot.append(new SingleTagTemplate('br'));
+          parentFragment.insertAfter(p, this);
+          firstRange.setStart(p.slot, 0);
+          firstRange.collapse();
+        }
+        if (ev.type === EventType.onDelete && firstRange.startIndex === 0) {
           ev.stopPropagation();
         }
       })

@@ -35,7 +35,7 @@ export class BlockTemplate extends BranchTemplate {
 
   clone() {
     const template = new BlockTemplate(this.tagName);
-    template.slot = this.slot.clone();
+    template.slot.from(this.slot.clone());
     return template;
   }
 
@@ -46,8 +46,7 @@ export class BlockTemplate extends BranchTemplate {
         const parent = event.renderer.getParentFragment(this);
 
         const template = new BlockTemplate('p');
-        const fragment = new Fragment();
-        template.slot = fragment;
+        const fragment = template.slot;
         const firstRange = event.selection.firstRange;
         const c = firstRange.startFragment.delete(firstRange.startIndex);
         if (firstRange.startFragment.contentLength === 0) {

@@ -109,7 +109,7 @@ export class EventHandler {
             const afterContents = fragment.delete(firstRange.startIndex);
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
             const afterTemplate = parentTemplate.clone() as BranchTemplate;
-            afterTemplate.slot = new Fragment();
+            afterTemplate.slot.from(new Fragment());
             afterContents.contents.forEach(c => afterTemplate.slot.append(c));
             afterContents.formatRanges.forEach(f => {
               afterTemplate.slot.apply({

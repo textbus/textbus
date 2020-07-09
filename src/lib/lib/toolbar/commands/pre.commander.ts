@@ -1,6 +1,5 @@
 import {
   Commander,
-  Fragment,
   Renderer,
   TBSelection
 } from '../../core/_api';
@@ -25,11 +24,9 @@ export class PreCommander implements Commander<string> {
         const context = range.commonAncestorTemplate;
         const parentFragment = renderer.getParentFragment(context);
         const t = new PreTemplate(this.lang);
-        const f = new Fragment();
-        f.append(new SingleTagTemplate('br'));
-        t.slot = f;
+        t.slot.append(new SingleTagTemplate('br'));
         parentFragment.insertAfter(t, context);
-        range.setStart(f, 0);
+        range.setStart(t.slot, 0);
         range.collapse();
       })
     }

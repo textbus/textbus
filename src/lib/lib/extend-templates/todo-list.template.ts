@@ -1,5 +1,5 @@
 import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
-import { SingleTagTemplate } from '../templates/single-tag.template';
+import { SingleTagTemplate, BlockTemplate } from '../templates/_api';
 import { TemplateExample } from '../template-stage/template-stage';
 
 export interface TodoListConfig {
@@ -115,7 +115,25 @@ export class TodoListTemplate extends BackboneTemplate {
         })
         content.events.subscribe(event => {
           if (event.type === EventType.onEnter) {
+            event.stopPropagation();
+
             const firstRange = event.selection.firstRange;
+
+            if (slot === this.childSlots[this.childSlots.length - 1]) {
+              const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
+              if (slot.contentLength === 0 ||
+                slot.contentLength === 1 && lastContent instanceof SingleTagTemplate && lastContent.tagName === 'br') {
+                this.childSlots.pop();
+                const parentFragment = event.renderer.getParentFragment(this);
+                const p = new BlockTemplate('p');
+                p.slot.append(new SingleTagTemplate('br'));
+                parentFragment.insertAfter(p, this);
+                firstRange.setStart(p.slot, 0);
+                firstRange.collapse();
+                return;
+              }
+            }
+
             const {contents, formatRanges} = slot.delete(firstRange.endIndex);
             const next = new Fragment();
             if (slot.contentLength === 0) {
@@ -138,7 +156,6 @@ export class TodoListTemplate extends BackboneTemplate {
             this.childSlots.splice(index + 1, 0, next);
             firstRange.startFragment = firstRange.endFragment = next;
             firstRange.startIndex = firstRange.endIndex = 0;
-            event.stopPropagation();
           }
         })
       }
