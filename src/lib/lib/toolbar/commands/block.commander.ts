@@ -31,7 +31,7 @@ export class BlockCommander implements Commander<string> {
             const parentFragment = renderer.getParentFragment(parentTemplate);
             blockTemplate.slot.from(scope.fragment);
             parentFragment.insertBefore(blockTemplate, parentTemplate);
-            parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+            parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
             this.effect(blockTemplate.slot, parentTemplate.tagName);
           } else {
             const index = parentTemplate.childSlots.indexOf(scope.fragment);
@@ -43,7 +43,7 @@ export class BlockCommander implements Commander<string> {
           }
         } else {
           blockTemplate.slot.from(new Fragment());
-          const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+          const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           c.contents.forEach(cc => blockTemplate.slot.append(cc));
           c.formatRanges.forEach(ff => blockTemplate.slot.apply(ff));
           scope.fragment.insert(blockTemplate, scope.startIndex);

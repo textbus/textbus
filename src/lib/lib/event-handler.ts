@@ -36,7 +36,7 @@ export class EventHandler {
     const fragmentSnapshot = event.data.fragmentSnapshot.clone() as Fragment;
     const input = event.data.input as Input;
 
-    commonAncestorFragment.delete(0);
+    commonAncestorFragment.cut(0);
     fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
     fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, {
       important: true,
@@ -92,7 +92,7 @@ export class EventHandler {
           parentFragment.insertAfter(firstContent, parentTemplate);
         } else if (firstContent instanceof BranchTemplate) {
           const length = firstContent.slot.contentLength;
-          const firstContents = firstContent.slot.delete(0);
+          const firstContents = firstContent.slot.cut(0);
           firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
           firstContents.formatRanges.forEach(f => {
             if (f.renderer instanceof InlineFormatter) {
@@ -106,7 +106,7 @@ export class EventHandler {
           if (contentsArr.length === 0) {
             firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + length;
           } else {
-            const afterContents = fragment.delete(firstRange.startIndex);
+            const afterContents = fragment.cut(firstRange.startIndex);
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
             const afterTemplate = parentTemplate.clone() as BranchTemplate;
             afterTemplate.slot.from(new Fragment());
@@ -142,10 +142,10 @@ export class EventHandler {
         const commonAncestorFragment = range.commonAncestorFragment;
         const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
         if (typeof c === 'string' || c instanceof LeafTemplate) {
-          commonAncestorFragment.delete(range.startIndex - 1, 1);
+          commonAncestorFragment.cut(range.startIndex - 1, 1);
           range.startIndex = range.endIndex = range.startIndex - 1;
         } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
-          commonAncestorFragment.delete(range.startIndex - 1, 1);
+          commonAncestorFragment.cut(range.startIndex - 1, 1);
           range.startIndex = range.endIndex = range.startIndex - 1;
           if (commonAncestorFragment.contentLength === 0) {
             commonAncestorFragment.append(new SingleTagTemplate('br'));
@@ -171,7 +171,7 @@ export class EventHandler {
 
         const firstContent = range.startFragment.getContentAtIndex(0);
         if (firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
-          range.startFragment.delete(0, 1);
+          range.startFragment.cut(0, 1);
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
             // const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);

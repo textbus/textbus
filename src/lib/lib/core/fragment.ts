@@ -132,6 +132,10 @@ export class Fragment {
   }
 
   delete(startIndex: number, count = this.contents.length - startIndex) {
+    this.cut(startIndex, count);
+  }
+
+  cut(startIndex: number, count = this.contents.length - startIndex) {
     const endIndex = startIndex + count;
     const formatMap = new FormatMap();
 

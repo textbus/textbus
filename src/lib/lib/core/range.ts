@@ -273,12 +273,12 @@ export class TBRange {
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        scope.fragment.delete(0);
+        scope.fragment.cut(0);
         if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
           this.deleteEmptyTree(scope.fragment);
         }
       } else {
-        scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+        scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
       }
     });
     return this;
@@ -291,7 +291,7 @@ export class TBRange {
     const parentTemplate = this.renderer.getParentTemplate(fragment);
     if (parentTemplate instanceof BranchTemplate) {
       const parentFragment = this.renderer.getParentFragment(parentTemplate);
-      parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+      parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
       }
@@ -300,7 +300,7 @@ export class TBRange {
       if (parentTemplate.childSlots.length === 0) {
         const parentFragment = this.renderer.getParentFragment(parentTemplate);
         const index = parentFragment.indexOf(parentTemplate);
-        parentFragment.delete(index, 1);
+        parentFragment.cut(index, 1);
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
@@ -602,7 +602,7 @@ export class TBRange {
         this.deleteEmptyTree(this.startFragment);
         this.setStart(this.endFragment, 0);
       } else {
-        const last = this.endFragment.delete(0);
+        const last = this.endFragment.cut(0);
         this.deleteEmptyTree(this.endFragment);
         const startIndex = this.startFragment.contentLength;
         last.contents.forEach(c => this.startFragment.append(c));

@@ -17,9 +17,9 @@ export class ToggleBlockCommander implements Commander<string> {
           });
         const parentFragment = renderer.getParentFragment(context);
         const position = parentFragment.indexOf(context);
-        parentFragment.delete(position, 1);
+        parentFragment.cut(position, 1);
         const fragment = context.slot;
-        const contents = fragment.delete(0);
+        const contents = fragment.cut(0);
         contents.contents.reverse().forEach(i => parentFragment.insert(i, position));
         contents.formatRanges.forEach(f => {
           parentFragment.apply({
@@ -38,7 +38,7 @@ export class ToggleBlockCommander implements Commander<string> {
           parentFragment = renderer.getParentFragment(parentTemplate);
           position = parentFragment.indexOf(parentTemplate);
           fragment.append(parentTemplate);
-          parentFragment.delete(position, 1);
+          parentFragment.cut(position, 1);
           parentFragment.insert(block, position);
         } else {
           position = range.getCommonAncestorFragmentScope().startIndex;
@@ -46,7 +46,7 @@ export class ToggleBlockCommander implements Commander<string> {
 
           const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
           if (index !== -1) {
-            range.commonAncestorFragment.delete(index, 1);
+            range.commonAncestorFragment.cut(index, 1);
             fragment.append(range.commonAncestorTemplate);
           } else {
             const appendedTemplates: Array<BackboneTemplate | BranchTemplate> = [];
@@ -58,7 +58,7 @@ export class ToggleBlockCommander implements Commander<string> {
               appendedTemplates.push(parentTemplate);
               const p = renderer.getParentFragment(parentTemplate);
               if (p) {
-                p.delete(p.indexOf(parentTemplate), 1);
+                p.cut(p.indexOf(parentTemplate), 1);
                 fragment.insert(parentTemplate, 0);
                 if (p.contentLength === 0) {
                   range.deleteEmptyTree(p);
@@ -66,7 +66,7 @@ export class ToggleBlockCommander implements Commander<string> {
               } else {
                 if (scope.fragment === parentFragment) {
                   const length = fragment.contentLength;
-                  const c = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+                  const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
                   c.contents.reverse().forEach(cc => fragment.insert(cc, 0));
                   c.formatRanges.forEach(f => fragment.apply({
                     ...f,

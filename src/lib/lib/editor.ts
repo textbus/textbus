@@ -627,7 +627,7 @@ export class Editor implements EventDelegate {
       const firstContent = startFragment.getContentAtIndex(0);
       parentFragment.insertAfter(template, parentTemplate);
       if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
-        parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+        parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
 
       }
     } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit()) {

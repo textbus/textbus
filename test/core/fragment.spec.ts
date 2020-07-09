@@ -18,7 +18,7 @@ describe('删除内容', () => {
     const fragment = new Fragment();
     fragment.append('0123456789');
     fragment.apply(f);
-    const deletedContents = fragment.delete(1, 2);
+    const deletedContents = fragment.cut(1, 2);
     expect(fragment.getFormatRanges()[0]).toEqual({
       ...f,
       startIndex: 1,
@@ -30,7 +30,7 @@ describe('删除内容', () => {
     const fragment = new Fragment();
     fragment.append('0123456789');
     fragment.apply(f);
-    const deletedContents = fragment.delete(1, 4);
+    const deletedContents = fragment.cut(1, 4);
     expect(fragment.getFormatRanges()[0]).toEqual({
       ...f,
       startIndex: 1,
@@ -41,5 +41,5 @@ describe('删除内容', () => {
       startIndex: 1,
       endIndex: 3
     })
-  })
+  });
 })

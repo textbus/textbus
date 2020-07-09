@@ -42,7 +42,7 @@ export class ListCommander implements Commander {
             afterList.childSlots.push(...slots.after);
             parentFragment.insertBefore(afterList, item.template);
           }
-          parentFragment.delete(parentFragment.indexOf(item.template), 1);
+          parentFragment.cut(parentFragment.indexOf(item.template), 1);
         })
       } else {
         const commonScope = range.getCommonAncestorFragmentScope();
@@ -86,7 +86,7 @@ export class ListCommander implements Commander {
             return;
           }
           const fragment = new Fragment();
-          const contents = scope.fragment.delete(scope.startIndex, scope.endIndex - scope.startIndex);
+          const contents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           contents.contents.forEach(c => fragment.append(c));
           contents.formatRanges.forEach(f => fragment.apply(f));
           list.childSlots.unshift(fragment);
@@ -111,7 +111,7 @@ export class ListCommander implements Commander {
           if (parentTemplate instanceof BranchTemplate) {
             const parentFragment = renderer.getParentFragment(parentTemplate);
             const position = parentFragment.indexOf(parentTemplate);
-            parentFragment.delete(position, 1);
+            parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else {
             const index = parentTemplate.childSlots.indexOf(commonAncestorFragment);
@@ -130,7 +130,7 @@ export class ListCommander implements Commander {
             if (before.childSlots.length) {
               parentFragment.insert(before, position);
             }
-            parentFragment.delete(parentFragment.indexOf(parentTemplate), 1);
+            parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
           }
         }
       }

@@ -92,7 +92,7 @@ export class ListTemplate extends BackboneTemplate {
               return;
             }
           }
-          const {contents, formatRanges} = slot.delete(firstRange.endIndex);
+          const {contents, formatRanges} = slot.cut(firstRange.endIndex);
           const next = new Fragment();
           if (slot.contentLength === 0) {
             slot.append(new SingleTagTemplate('br'));

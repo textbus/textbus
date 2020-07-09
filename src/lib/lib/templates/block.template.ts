@@ -48,7 +48,7 @@ export class BlockTemplate extends BranchTemplate {
         const template = new BlockTemplate('p');
         const fragment = template.slot;
         const firstRange = event.selection.firstRange;
-        const c = firstRange.startFragment.delete(firstRange.startIndex);
+        const c = firstRange.startFragment.cut(firstRange.startIndex);
         if (firstRange.startFragment.contentLength === 0) {
           firstRange.startFragment.append(new SingleTagTemplate('br'));
         }
