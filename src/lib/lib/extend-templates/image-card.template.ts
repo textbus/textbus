@@ -78,6 +78,7 @@ export class ImageCardTemplate extends BackboneTemplate {
           parentFragment.insertAfter(p, this);
           firstRange.setStart(p.slot, 0);
           firstRange.collapse();
+          ev.stopPropagation();
         }
         if (ev.type === EventType.onDelete && firstRange.startIndex === 0) {
           ev.stopPropagation();
