@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { template } from './template-html';
+import { iframeHTML } from './iframe-html';
 
 export class Viewer {
   onReady: Observable<Document>;
@@ -33,7 +33,7 @@ export class Viewer {
     this.frame.setAttribute('scrolling', 'no');
     this.frame.src = `javascript:void((function () {
                       document.open();
-                      document.write('${template}');
+                      document.write('${iframeHTML}');
                       document.close();
                     })())`;
 

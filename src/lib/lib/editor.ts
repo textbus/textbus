@@ -21,12 +21,12 @@ import {
   TemplateTranslator,
   VElement
 } from './core/_api';
-import { Viewer } from './viewer/viewer';
+import { Viewer } from './workbench/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
 import { Input, KeymapAction } from './input/input';
 import { StatusBar } from './status-bar/status-bar';
-import { TemplateExample, TemplateStage } from './template-stage/template-stage';
+import { TemplateExample, TemplateStage } from './workbench/template-stage';
 import { EventHandler } from './event-handler';
 
 export interface Snapshot {

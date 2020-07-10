@@ -1,7 +1,7 @@
 // @ts-ignore
-import styles from './template-style.scss';
+import styles from './iframe-style.scss';
 
-export const template = `
+export const iframeHTML = `
 <!DOCTYPE html>
 <html lang="zh">
 <head>

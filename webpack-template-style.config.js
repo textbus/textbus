@@ -5,7 +5,7 @@ const DisableOutputWebpackPlugin = require('./disable-output-webpack-plugin');
 module.exports = {
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/lib/lib/viewer/template-style.scss')
+    index: path.resolve(__dirname, 'src/lib/lib/workbench/iframe-style.scss')
   },
   output: {
     path: path.resolve(__dirname, 'bundles/lib/viewer/')
@@ -34,10 +34,10 @@ module.exports = {
   },
   plugins: [
     new AddAssetsWebpackPlugin({
-      filePath: 'template-style.scss.d.ts',
+      filePath: 'iframe-style.scss.d.ts',
       content: 'declare const result: string;\n' +
         'export default result;\n'
     }),
-    new DisableOutputWebpackPlugin(/template/),
+    new DisableOutputWebpackPlugin(/iframe/),
   ]
 };

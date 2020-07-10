@@ -1,6 +1,6 @@
 import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
 import { BlockTemplate, breakingLine, SingleTagTemplate } from '../templates/_api';
-import { TemplateExample } from '../template-stage/template-stage';
+import { TemplateExample } from '../workbench/template-stage';
 
 export interface TodoListConfig {
   active: boolean;

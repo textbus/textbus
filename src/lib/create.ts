@@ -65,7 +65,7 @@ import {
   TableTemplateTranslator,
   VideoTemplateTranslator
 } from './lib/templates/_api';
-import { defaultStyleSheets } from './lib/viewer/default-styles';
+import { defaultStyleSheets } from './lib/workbench/default-styles';
 import {
   imageCardStyleSheet,
   imageCardTemplateExample,

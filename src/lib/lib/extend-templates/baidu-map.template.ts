@@ -1,5 +1,5 @@
 import { EventType, LeafTemplate, TemplateTranslator, VElement, ViewData } from '../core/_api';
-import { TemplateExample } from '../template-stage/template-stage';
+import { TemplateExample } from '../workbench/template-stage';
 
 declare const BMapGL: any;
 

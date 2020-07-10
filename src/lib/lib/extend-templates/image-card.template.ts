@@ -1,5 +1,5 @@
 import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
-import { TemplateExample } from '../template-stage/template-stage';
+import { TemplateExample } from '../workbench/template-stage';
 import { BlockTemplate, ImageTemplate, SingleTagTemplate } from '../templates/_api';
 
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
