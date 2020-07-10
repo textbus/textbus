@@ -70,6 +70,9 @@ export class ImageCardTemplate extends BackboneTemplate {
       })
 
       desc.events.subscribe(ev => {
+        if (!ev.selection) {
+          return;
+        }
         const firstRange = ev.selection.firstRange;
         if (ev.type === EventType.onEnter) {
           const parentFragment = ev.renderer.getParentFragment(this);

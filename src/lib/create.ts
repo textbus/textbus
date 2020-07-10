@@ -70,13 +70,18 @@ import {
   imageCardStyleSheet,
   imageCardTemplateExample,
   ImageCardTemplateTranslator,
+
   todoListStyleSheet,
   todoListTemplateExample,
-  TodoListTemplateTranslator
+  TodoListTemplateTranslator,
+
+  gaodeMapStyleSheet,
+  gaodeMapTemplateExample,
+  BaiduMapTemplateTranslator
 } from './lib/extend-templates/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet],
+  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet, gaodeMapStyleSheet],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
@@ -84,6 +89,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   templateTranslators: [
+    new BaiduMapTemplateTranslator(),
     new TodoListTemplateTranslator(),
     new ImageCardTemplateTranslator(),
     new ListTemplateTranslator('ul'),
@@ -136,6 +142,7 @@ export const defaultOptions: EditorOptions = {
   templateExamples: [
     imageCardTemplateExample,
     todoListTemplateExample,
+    gaodeMapTemplateExample
   ]
 };
 

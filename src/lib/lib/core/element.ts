@@ -26,8 +26,6 @@ export class VElement {
   readonly styles = new Map<string, string | number>();
   readonly classes: string[] = [];
 
-  private listeners: Array<{ type: string, listener: (event: Event) => any }> = [];
-
   constructor(public tagName: string, options?: VElementOption) {
     if (options) {
       if (options.attrs) {
@@ -75,19 +73,6 @@ export class VElement {
         return c.textContent;
       })
     }
-  }
-
-  on(type: string, listener: (event: Event) => any) {
-    this.listeners.push({
-      type,
-      listener
-    });
-  }
-
-  bindEventToNativeElement(el: Node) {
-    this.listeners.forEach(i => {
-      el.addEventListener(i.type, i.listener);
-    });
   }
 
   private static mapToJSON(map: Map<string, any>) {

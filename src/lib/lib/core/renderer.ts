@@ -1,8 +1,8 @@
 import { VElement, VElementLiteral, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
-import { BranchTemplate, BackboneTemplate, Template } from './template';
-import { TBEvent, EventType } from './events';
+import { BackboneTemplate, BranchTemplate, Template } from './template';
+import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
 
 /**
@@ -30,8 +30,8 @@ export interface ElementPosition {
 export type Constructor<T> = { new(...args: any): T };
 
 class NativeElementMappingTable {
-  private nativeVDomMapping = new Map<Node, VElement | VTextNode>();
-  private vDomNativeMapping = new Map<VElement | VTextNode, Node>();
+  private nativeVDomMapping = new WeakMap<Node, VElement | VTextNode>();
+  private vDomNativeMapping = new WeakMap<VElement | VTextNode, Node>();
 
   set(key: Node, value: VElement | VTextNode): void;
   set(key: VElement | VTextNode, value: Node): void;
@@ -76,22 +76,22 @@ class NativeElementMappingTable {
 export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
 
-  private vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-  private fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | BranchTemplate>();
-  private templateHierarchyMapping = new Map<Template, Fragment>();
-  private fragmentAndVDomMapping = new Map<Fragment, VElement>();
-  private vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
+  private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
+  private fragmentHierarchyMapping = new WeakMap<Fragment, BackboneTemplate | BranchTemplate>();
+  private templateHierarchyMapping = new WeakMap<Template, Fragment>();
+  private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
+  private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
 
   private productionRenderingModal = false;
 
   render(fragment: Fragment, host: HTMLElement) {
     this.productionRenderingModal = false;
-    this.vDomPositionMapping = new Map<VTextNode | VElement, ElementPosition>();
-    this.fragmentHierarchyMapping = new Map<Fragment, BackboneTemplate | BranchTemplate>();
-    this.templateHierarchyMapping = new Map<Template, Fragment>();
-    this.fragmentAndVDomMapping = new Map<Fragment, VElement>();
-    this.vDomHierarchyMapping = new Map<VTextNode | VElement, VElement>();
+    this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
+    this.fragmentHierarchyMapping = new WeakMap<Fragment, BackboneTemplate | BranchTemplate>();
+    this.templateHierarchyMapping = new WeakMap<Template, Fragment>();
+    this.fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
+    this.vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
 
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
@@ -236,16 +236,14 @@ export class Renderer {
           if (current instanceof VElement) {
             const el = this.createElement(current);
             childNodes[max] = el;
-            this.NVMappingTable.set(el, current);
             if (oldLast instanceof VElement) {
               this.diffAndUpdate(el, current, oldLast);
             } else {
               this.renderingNewTree(el, current);
             }
           } else {
-            const el = Renderer.createTextNode(current);
+            const el = this.createTextNode(current);
             childNodes[max] = el;
-            this.NVMappingTable.set(el, current);
             host.appendChild(el);
           }
           if (oldLast) {
@@ -301,21 +299,24 @@ export class Renderer {
       el.style[key] = value;
     });
     vDom.classes.forEach(k => el.classList.add(k));
-    vDom.bindEventToNativeElement(el);
+    this.NVMappingTable.set(el, vDom);
+    vDom.events.emit(new TBEvent({
+      type: EventType.onRendered,
+      renderer: this,
+      selection: null
+    }));
     return el;
   }
 
   private renderingNewTree(host: HTMLElement, vDom: VElement) {
     vDom.childNodes.forEach(child => {
       if (child instanceof VTextNode) {
-        const el = Renderer.createTextNode(child);
+        const el = this.createTextNode(child);
         host.appendChild(el);
-        this.NVMappingTable.set(el, child);
         return;
       }
       const el = this.createElement(child);
       host.appendChild(el);
-      this.NVMappingTable.set(el, child);
       this.renderingNewTree(el, child);
     })
   }
@@ -529,8 +530,10 @@ export class Renderer {
     ].join('');
   }
 
-  private static createTextNode(vDom: VTextNode) {
-    return document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
+  private createTextNode(vDom: VTextNode) {
+    const el =  document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
+    this.NVMappingTable.set(el, vDom);
+    return el;
   }
 
   private static equal(left: VElement | VTextNode, right: VElement | VTextNode) {

@@ -1,12 +1,5 @@
-import {
-  BackboneTemplate,
-  EventType,
-  Fragment,
-  TemplateTranslator,
-  VElement,
-  ViewData
-} from '../core/_api';
-import { SingleTagTemplate, BlockTemplate, breakingLine } from '../templates/_api';
+import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
+import { BlockTemplate, breakingLine, SingleTagTemplate } from '../templates/_api';
 import { TemplateExample } from '../template-stage/template-stage';
 
 export interface TodoListConfig {
@@ -107,21 +100,23 @@ export class TodoListTemplate extends BackboneTemplate {
       this.childSlots.push(slot);
       list.appendChild(item);
       if (!isProduction) {
-        state.on('click', event => {
-          const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
-          const newState = this.stateCollection[i];
-          config.active = newState.active;
-          config.disabled = newState.disabled;
-          const element = event.target as HTMLElement;
-          config.active ?
-            element.classList.add('tbus-todo-list-state-active') :
-            element.classList.remove('tbus-todo-list-state-active');
-          config.disabled ?
-            element.classList.add('tbus-todo-list-state-disabled') :
-            element.classList.remove('tbus-todo-list-state-disabled');
-        })
         content.events.subscribe(event => {
-          if (event.type === EventType.onEnter) {
+          if (event.type === EventType.onRendered) {
+            const nativeElement = event.renderer.getNativeNodeByVDom(state);
+            nativeElement.addEventListener('click', ev => {
+              const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
+              const newState = this.stateCollection[i];
+              config.active = newState.active;
+              config.disabled = newState.disabled;
+              const element = ev.target as HTMLElement;
+              config.active ?
+                element.classList.add('tbus-todo-list-state-active') :
+                element.classList.remove('tbus-todo-list-state-active');
+              config.disabled ?
+                element.classList.add('tbus-todo-list-state-disabled') :
+                element.classList.remove('tbus-todo-list-state-disabled');
+            })
+          } else if (event.type === EventType.onEnter) {
             event.stopPropagation();
 
             const firstRange = event.selection.firstRange;

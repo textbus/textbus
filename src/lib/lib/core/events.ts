@@ -6,7 +6,8 @@ export enum EventType {
   onEnter,
   onDelete,
   onInput,
-  onPaste
+  onPaste,
+  onRendered
 }
 
 export interface EventParams {
