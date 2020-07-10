@@ -9,6 +9,7 @@ import {
   EventType,
   Formatter,
   Fragment,
+  LeafTemplate,
   Lifecycle,
   Parser,
   RangePath,
@@ -623,20 +624,24 @@ export class Editor implements EventDelegate {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
     const parentTemplate = this.renderer.getParentTemplate(startFragment);
-    if (parentTemplate instanceof BranchTemplate) {
-      const parentFragment = this.renderer.getParentFragment(parentTemplate);
-      const firstContent = startFragment.getContentAtIndex(0);
-      parentFragment.insertAfter(template, parentTemplate);
-      if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
-        parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
-
-      }
-    } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit()) {
-      const ff = new Fragment();
-      ff.append(template);
-      parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);
-    } else {
+    if (template instanceof LeafTemplate) {
       startFragment.insert(template, firstRange.endIndex);
+    } else {
+      if (parentTemplate instanceof BranchTemplate) {
+        const parentFragment = this.renderer.getParentFragment(parentTemplate);
+        const firstContent = startFragment.getContentAtIndex(0);
+        parentFragment.insertAfter(template, parentTemplate);
+        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
+          parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
+
+        }
+      } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit()) {
+        const ff = new Fragment();
+        ff.append(template);
+        parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);
+      } else {
+        startFragment.insert(template, firstRange.endIndex);
+      }
     }
     this.selection.removeAllRanges();
     this.render();
