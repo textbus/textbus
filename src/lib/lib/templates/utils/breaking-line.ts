@@ -1,4 +1,4 @@
-import { Fragment, InlineFormatter } from '../../core/_api';
+import { FormatEffect, Fragment, InlineFormatter } from '../../core/_api';
 import { SingleTagTemplate } from '../../templates/single-tag.template';
 
 export function breakingLine(fragment: Fragment, index: number): Fragment {
@@ -18,12 +18,10 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
 
   if (isEnd || isLast) {
     next.append(new SingleTagTemplate('br'));
-    console.log(fragment.getFormatRanges().map(i => {
-      return {
-        ...i
-      }
-    }));
     fragment.getFormatRanges().filter(f => {
+      if (f.state === FormatEffect.Inherit) {
+        return false;
+      }
       if (f.renderer instanceof InlineFormatter) {
         const i = isEnd ? len : len - 1;
         return f.startIndex <= i && f.endIndex >= i;
@@ -41,7 +39,7 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
     const {contents, formatRanges} = fragment.cut(index);
 
     contents.forEach(c => next.append(c));
-    formatRanges.forEach(f => next.apply(f));
+    formatRanges.filter(f => f.state !== FormatEffect.Inherit).forEach(f => next.apply(f));
   }
   return next;
 }

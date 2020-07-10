@@ -25,6 +25,7 @@ export class BaiduMapTemplate extends LeafTemplate {
   render(isProduction: boolean): VElement {
     const el = new VElement(this.tagName);
     if (!isProduction) {
+      el.styles.set('userSelect', 'none');
       el.events.subscribe(event => {
         if (event.type === EventType.onRendered) {
           const setup = function () {
