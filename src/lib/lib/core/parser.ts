@@ -14,7 +14,7 @@ export class Parser {
   }
 
   private readTemplate(el: Node, slot: Fragment) {
-    if (el.nodeType === 1) {
+    if (el.nodeType === Node.ELEMENT_NODE) {
       const templates = this.options.templateTranslators;
       for (const t of templates) {
         if (t.match(el as HTMLElement)) {
@@ -33,7 +33,7 @@ export class Parser {
         }
       }
       this.readFormats(el as HTMLElement, slot);
-    } else if (el.nodeType === 3) {
+    } else if (el.nodeType === Node.TEXT_NODE) {
       slot.append(el.textContent.replace(/&lt;|&gt;|&amp;|&nbsp;/g, str => {
         return {
           '&lt;': '<',
