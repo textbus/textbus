@@ -107,7 +107,7 @@ export const gaodeMapTemplateExample: TemplateExample = {
         const markers = point.lng + ',' + point.lat;
         const zoom = map.getZoom();
 
-        const url = `https://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=250&zoom=${zoom}`
+        const url = `https://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=300&zoom=${zoom}`
         resolve(new BaiduMapTemplate(url));
         workbench.closeDialog();
       })
