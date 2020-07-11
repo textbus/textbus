@@ -69,7 +69,7 @@ export const gaodeMapTemplateExample: TemplateExample = {
         point = new BMapGL.Point(116.404, 39.915);  // 创建点坐标
         map.centerAndZoom(point, 15);
       }
-      const url = 'http://api.map.baidu.com/api?v=1.0&type=webgl&ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&callback=' + callbackName;
+      const url = 'https://api.map.baidu.com/api?v=1.0&type=webgl&ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&callback=' + callbackName;
       const jsApi = document.createElement('script');
       jsApi.src = url;
       document.head.appendChild(jsApi);
@@ -107,7 +107,7 @@ export const gaodeMapTemplateExample: TemplateExample = {
         const markers = point.lng + ',' + point.lat;
         const zoom = map.getZoom();
 
-        const url = `http://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=250&zoom=${zoom}`
+        const url = `https://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=250&zoom=${zoom}`
         resolve(new BaiduMapTemplate(url));
         workbench.closeDialog();
       })
