@@ -76,7 +76,8 @@ import {
   TodoListTemplateTranslator,
 
   baiduMapTemplateExample,
-  BaiduMapTemplateTranslator
+  BaiduMapTemplateTranslator,
+  ImageCardHook
 } from './lib/extend-templates/_api';
 
 export const defaultOptions: EditorOptions = {
@@ -85,7 +86,8 @@ export const defaultOptions: EditorOptions = {
     new DefaultHook(),
     new HistoryHook(),
     new ImageVideoResizeHook(),
-    new TableEditHook()
+    new TableEditHook(),
+    new ImageCardHook()
   ],
   templateTranslators: [
     new BaiduMapTemplateTranslator(),

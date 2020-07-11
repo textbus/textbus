@@ -1,4 +1,4 @@
-import { Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { BranchTemplate, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
 import { TableTemplate, SingleTagTemplate, TableCell } from '../../templates/_api';
 
@@ -16,15 +16,30 @@ export class TableCommander implements Commander<AttrState[]> {
       attrs.set(attr.name, attr.value);
     });
     selection.ranges.forEach(range => {
-      const parentFragment = renderer.getParentFragment(range.commonAncestorTemplate);
       const rows = +attrs.get('rows') || 0;
       const cols = +attrs.get('cols') || 0;
       const bodies = TableCommander.create(rows, cols);
       const table = new TableTemplate({
         bodies
       });
-      parentFragment.insertAfter(table, range.commonAncestorTemplate);
 
+      const parentTemplate = renderer.getParentTemplate(range.startFragment);
+      const parentFragment = renderer.getParentFragment(parentTemplate);
+      const firstContent = range.startFragment.getContentAtIndex(0);
+      if (parentTemplate instanceof BranchTemplate) {
+        if (range.startFragment.contentLength === 0 ||
+          range.startFragment.contentLength === 1 &&
+          firstContent instanceof SingleTagTemplate &&
+          firstContent.tagName === 'br') {
+          const i = parentFragment.indexOf(parentTemplate);
+          parentFragment.insert(table, i);
+          parentFragment.remove(i + 1, 1);
+        } else {
+          parentFragment.insertAfter(table, parentTemplate);
+        }
+      } else {
+        range.startFragment.insert(table, range.startIndex);
+      }
       if (rows && cols) {
         range.setStart(bodies[0][0].fragment, 0);
         range.collapse();

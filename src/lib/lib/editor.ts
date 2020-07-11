@@ -1,4 +1,4 @@
-import { auditTime, distinctUntilChanged, map, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
@@ -256,7 +256,11 @@ export class Editor implements EventDelegate {
         this.toolbar.updateHandlerState(this.selection, this.renderer);
       }), map(() => {
         return this.nativeSelection.focusNode;
-      }), distinctUntilChanged()).subscribe(node => {
+      }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
+        const vEle = this.renderer.getVDomByNativeNode(node.nodeType === 3 ? node.parentNode : node) as VElement;
+        if (vEle) {
+          this.renderer.dispatchEvent(vEle, EventType.onFocus, this.selection);
+        }
         this.statusBar.paths.update(node);
       }),
       this.toolbar.onAction.subscribe(config => {

@@ -34,7 +34,7 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
         endIndex: 1
       })
     })
-    fragment.delete(index);
+    fragment.remove(index);
   } else {
     const {contents, formatRanges} = fragment.cut(index);
 

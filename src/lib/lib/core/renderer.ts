@@ -531,7 +531,7 @@ export class Renderer {
   }
 
   private createTextNode(vDom: VTextNode) {
-    const el =  document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
+    const el = document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
     this.NVMappingTable.set(el, vDom);
     return el;
   }

@@ -131,7 +131,7 @@ export class Fragment {
     return this.contents.getContentAtIndex(index);
   }
 
-  delete(startIndex: number, count = this.contents.length - startIndex) {
+  remove(startIndex: number, count = this.contents.length - startIndex) {
     this.cut(startIndex, count);
   }
 

@@ -3,11 +3,12 @@ import { TBSelection } from './selection';
 import { Renderer } from './renderer';
 
 export enum EventType {
-  onEnter,
-  onDelete,
-  onInput,
-  onPaste,
-  onRendered
+  onFocus = 'focus',
+  onEnter = 'enter',
+  onDelete = 'delete',
+  onInput = 'input',
+  onPaste = 'paste',
+  onRendered = 'rendered'
 }
 
 export interface EventParams {
