@@ -11,13 +11,13 @@ export class HistoryMatcher implements Matcher {
     switch (this.type) {
       case 'back':
         return {
-          state: editor.canBack ? HighlightState.Normal : HighlightState.Disabled,
+          state: editor.history.canBack ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };
       case 'forward':
         return {
-          state: editor.canForward ? HighlightState.Normal : HighlightState.Disabled,
+          state: editor.history.canForward ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };

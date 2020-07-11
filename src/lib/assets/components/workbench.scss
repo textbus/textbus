@@ -1,11 +1,15 @@
-.tbus-dashboard {
+.tbus-workbench {
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
-  display: flex;
   height: 400px;
 }
 
-.tbus-frame-container {
+.tbus-dashboard {
+  display: flex;
+  height: 100%;
+}
+
+.tbus-editable-area {
   background-color: $color-lighter;
   user-select: none;
   position: relative;
@@ -14,7 +18,7 @@
 }
 
 .tbus-template-stage {
-  width: 0;
+  display: none;
   overflow: auto;
   background-color: #fff;
   border-left: 1px solid $color-light;
@@ -27,7 +31,7 @@
   }
 
   &-expand {
-    width: auto;
+    display: block;
   }
 }
 
@@ -75,7 +79,7 @@
   margin-top: 1px;
 }
 
-.tbus-wrap {
+.tbus-tablet {
   min-height: 100%;
   position: relative;
   margin: 0 auto;

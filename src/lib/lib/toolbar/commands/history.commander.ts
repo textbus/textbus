@@ -15,8 +15,8 @@ export class HistoryCommander implements Commander<Editor> {
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
     const snapshot = this.action === 'back' ?
-      this.editor.getPreviousSnapshot() :
-      this.editor.getNextSnapshot();
+      this.editor.history.getPreviousSnapshot() :
+      this.editor.history.getNextSnapshot();
     if (snapshot) {
       rootFragment.clean();
       snapshot.contents.sliceContents(0).forEach(item => {

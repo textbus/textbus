@@ -29,17 +29,14 @@ export class TemplateStage {
   private _expand = false;
   private checkEvent = new Subject<Template>();
 
-  constructor(examples: TemplateExample[] = []) {
+  constructor() {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-template-stage');
     this.templateListWrapper.classList.add('tbus-template-stage-list');
     this.elementRef.appendChild(this.templateListWrapper);
-    examples.forEach(item => {
-      this.addTemplate(item);
-    });
   }
 
-  private addTemplate(example: TemplateExample) {
+  addTemplate(example: TemplateExample) {
     const view = TemplateStage.createViewer(example.example, example.name);
     view.addEventListener('click', () => {
       const t = example.templateFactory();

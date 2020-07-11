@@ -7,7 +7,7 @@ import {
   VElement
 } from './core/_api';
 import { SingleTagTemplate } from './templates/_api';
-import { Input } from './input/input';
+import { Input } from './viewer/input';
 
 export class EventHandler {
   listen(vElement: VElement) {

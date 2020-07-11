@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KeymapAction, Keymap, isMac } from '../../input/input';
+import { KeymapAction, Keymap, isMac } from '../../viewer/input';
 import { Commander, Renderer, TBSelection } from '../../core/_api';
 import { SelectionMatchDelta } from '../matcher/matcher';
 

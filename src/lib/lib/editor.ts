@@ -12,7 +12,6 @@ import {
   LeafTemplate,
   Lifecycle,
   Parser,
-  RangePath,
   Renderer,
   TBRange,
   TBRangePosition,
@@ -21,18 +20,15 @@ import {
   TemplateTranslator,
   VElement
 } from './core/_api';
-import { Viewer } from './workbench/viewer';
+import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockTemplate, SingleTagTemplate } from './templates/_api';
-import { Input, KeymapAction } from './input/input';
+import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
-import { TemplateExample, TemplateStage } from './workbench/template-stage';
+import { TemplateExample } from './workbench/template-stage';
 import { EventHandler } from './event-handler';
-
-export interface Snapshot {
-  contents: Fragment;
-  paths: RangePath[];
-}
+import { Workbench } from './workbench/workbench';
+import { HistoryManager } from './history-manager';
 
 export interface EditorOptions {
   /** 设置主题 */
@@ -70,36 +66,22 @@ export enum CursorMoveDirection {
 export class Editor implements EventDelegate {
   readonly onReady: Observable<void>;
   readonly onChange: Observable<void>;
-
-  get canBack() {
-    return this.historySequence.length > 0 && this.historyIndex > 0;
-  }
-
-  get canForward() {
-    return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
-  }
+  readonly history: HistoryManager;
 
   readonly elementRef = document.createElement('div');
 
-  private readonly dashboard = document.createElement('div');
-  private readonly frameContainer = document.createElement('div');
   private readonly container: HTMLElement;
 
+  private workbench: Workbench;
   private viewer: Viewer;
   private parser: Parser;
   private toolbar: Toolbar;
-  private input: Input;
-  private templateStage: TemplateStage;
   private renderer = new Renderer();
   private statusBar = new StatusBar();
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
   private tasks: Array<() => void> = [];
-
-  private historySequence: Array<Snapshot> = [];
-  private historyIndex = 0;
-  private readonly historyStackSize: number;
 
   private nativeSelection: Selection;
   private selection: TBSelection;
@@ -130,36 +112,30 @@ export class Editor implements EventDelegate {
     } else {
       this.container = selector;
     }
-    this.historyStackSize = options.historyStackSize || 50;
     this.onReady = this.readyEvent.asObservable();
     this.onChange = this.changeEvent.asObservable();
 
+    this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options);
-
-    this.dashboard.classList.add('tbus-dashboard');
-    this.frameContainer.classList.add('tbus-frame-container');
-
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
-    this.templateStage = new TemplateStage(options.templateExamples);
     this.viewer = new Viewer(options.styleSheets);
+    this.workbench = new Workbench(this.viewer);
     const deviceWidth = options.deviceWidth || '100%';
-    this.frameContainer.style.padding = deviceWidth === '100%' ? '' : '20px';
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = false;
-    this.viewer.setViewWidth(deviceWidth);
+    this.workbench.setTabletWidth(deviceWidth);
 
     this.subs.push(
       this.toolbar.onTemplatesStageChange.subscribe(b => {
-        this.templateStage.expand = b;
+        this.workbench.templateStage.expand = b;
       }),
-      this.templateStage.onCheck.subscribe(template => {
+      this.workbench.templateStage.onCheck.subscribe(template => {
         if (this.selection && this.selection.rangeCount) {
           this.insertTemplate(template);
         }
       }),
       this.statusBar.device.onChange.subscribe(value => {
-        this.frameContainer.style.padding = value === '100%' ? '' : '20px';
-        this.viewer.setViewWidth(value);
+        this.workbench.setTabletWidth(value);
         this.invokeViewUpdatedHooks();
       }),
       this.statusBar.fullScreen.onChange.subscribe(b => {
@@ -171,19 +147,13 @@ export class Editor implements EventDelegate {
         this.readyState = true;
         this.rootFragment = this.parser.parse(result[0]);
         this.render();
-        this.input = new Input(this.viewer.contentDocument);
-        this.viewer.elementRef.append(this.input.elementRef);
-
         this.setup();
         this.readyEvent.next();
       })
     );
 
-    this.dashboard.appendChild(this.frameContainer);
-    this.dashboard.appendChild(this.templateStage.elementRef);
-    this.frameContainer.appendChild(this.viewer.elementRef);
     this.elementRef.appendChild(this.toolbar.elementRef);
-    this.elementRef.appendChild(this.dashboard);
+    this.elementRef.appendChild(this.workbench.elementRef);
     this.elementRef.append(this.statusBar.elementRef);
     this.elementRef.classList.add('tbus-container');
     if (options.theme) {
@@ -218,23 +188,6 @@ export class Editor implements EventDelegate {
     return of('');
   }
 
-  getPreviousSnapshot() {
-    if (this.canBack) {
-      this.historyIndex--;
-      this.historyIndex = Math.max(0, this.historyIndex);
-      return Editor.cloneHistoryData(this.historySequence[this.historyIndex]);
-    }
-    return null;
-  }
-
-  getNextSnapshot() {
-    if (this.canForward) {
-      this.historyIndex++;
-      return Editor.cloneHistoryData(this.historySequence[this.historyIndex]);
-    }
-    return null;
-  }
-
   getContents() {
     const contents = (this.options.hooks || []).reduce((previousValue, currentValue) => {
       if (typeof currentValue.onOutput === 'function') {
@@ -257,7 +210,7 @@ export class Editor implements EventDelegate {
 
   registerKeymap(action: KeymapAction) {
     this.run(() => {
-      this.input.keymap(action);
+      this.viewer.input.keymap(action);
     });
   }
 
@@ -267,7 +220,7 @@ export class Editor implements EventDelegate {
 
     this.readyEvent.complete();
     this.changeEvent.complete();
-    this.historySequence = [];
+    this.history.destroy();
   }
 
   private setup() {
@@ -291,7 +244,7 @@ export class Editor implements EventDelegate {
           }
           return selection;
         }, new TBSelection(this.viewer.contentDocument, this.renderer));
-        this.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection);
       }), auditTime(100), tap(() => {
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
@@ -306,20 +259,20 @@ export class Editor implements EventDelegate {
         if (this.selection) {
           this.apply(config.config, config.instance.commander);
           if (config.instance.commander.recordHistory) {
-            this.recordSnapshot();
+            this.history.recordSnapshot(this.rootFragment, this.selection);
             this.listenUserWriteEvent();
           }
         }
       }),
-      this.input.events.onFocus.subscribe(() => {
+      this.viewer.input.events.onFocus.subscribe(() => {
         this.recordSnapshotFromEditingBefore();
       }),
-      this.input.events.onInput.subscribe(() => {
+      this.viewer.input.events.onInput.subscribe(() => {
 
         this.dispatchEventAndCallHooks(EventType.onInput, {
           selectionSnapshot: this.selectionSnapshot,
           fragmentSnapshot: this.fragmentSnapshot,
-          input: this.input
+          input: this.viewer.input
         }, () => {
           const selection = this.selection;
           const collapsed = selection.collapsed;
@@ -351,9 +304,9 @@ export class Editor implements EventDelegate {
         this.userWriteEvent.next();
         this.render();
         this.selection.restore();
-        this.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection);
       }),
-      this.input.events.onPaste.subscribe(() => {
+      this.viewer.input.events.onPaste.subscribe(() => {
         const div = document.createElement('div');
         div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
         div.contentEditable = 'true';
@@ -383,10 +336,10 @@ export class Editor implements EventDelegate {
           this.invokeViewUpdatedHooks();
         });
       }),
-      this.input.events.onCopy.subscribe(() => {
+      this.viewer.input.events.onCopy.subscribe(() => {
         this.viewer.contentDocument.execCommand('copy');
       }),
-      this.input.events.onCut.subscribe(() => {
+      this.viewer.input.events.onCut.subscribe(() => {
         this.viewer.contentDocument.execCommand('copy');
         this.selection.ranges.forEach(range => {
           range.connect();
@@ -394,13 +347,12 @@ export class Editor implements EventDelegate {
         this.render();
         this.selection.restore();
         this.invokeViewUpdatedHooks();
-        this.recordSnapshot();
+        this.history.recordSnapshot(this.rootFragment, this.selection);
         this.recordSnapshotFromEditingBefore();
       })
     );
 
-
-    this.input.events.addKeymap({
+    this.viewer.input.events.addKeymap({
       keymap: {
         key: 'Enter'
       },
@@ -419,12 +371,12 @@ export class Editor implements EventDelegate {
 
         this.render();
         this.selection.restore();
-        this.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
     })
-    this.input.events.addKeymap({
+    this.viewer.input.events.addKeymap({
       keymap: {
         key: 'Backspace'
       },
@@ -456,12 +408,12 @@ export class Editor implements EventDelegate {
         }
         this.render();
         selection.restore();
-        this.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
     })
-    this.input.keymap({
+    this.viewer.input.keymap({
       keymap: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -475,7 +427,7 @@ export class Editor implements EventDelegate {
         this.moveCursor(map[ev.key]);
       }
     });
-    this.input.keymap({
+    this.viewer.input.keymap({
       keymap: {
         key: 'a',
         ctrlKey: true
@@ -486,7 +438,7 @@ export class Editor implements EventDelegate {
     });
 
     this.tasks.forEach(fn => fn());
-    this.recordSnapshot();
+    this.history.recordSnapshot(this.rootFragment, this.selection);
   }
 
   private selectAll() {
@@ -508,7 +460,7 @@ export class Editor implements EventDelegate {
    */
   private recordSnapshotFromEditingBefore(keepInputStatus = false) {
     if (!keepInputStatus) {
-      this.input.cleanValue();
+      this.viewer.input.cleanValue();
     }
     this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
@@ -646,23 +598,8 @@ export class Editor implements EventDelegate {
     this.selection.removeAllRanges();
     this.render();
     this.invokeViewUpdatedHooks();
-    this.recordSnapshot();
+    this.history.recordSnapshot(this.rootFragment, this.selection);
     this.recordSnapshotFromEditingBefore();
-  }
-
-  private recordSnapshot() {
-    if (this.historySequence.length !== this.historyIndex) {
-      this.historySequence.length = this.historyIndex + 1;
-    }
-    this.historySequence.push({
-      contents: this.rootFragment.clone(),
-      paths: this.selection ? this.selection.getRangePaths() : []
-    });
-    if (this.historySequence.length > this.historyStackSize) {
-      this.historySequence.shift();
-    }
-    this.historyIndex = this.historySequence.length - 1;
-    this.dispatchContentChangeEvent();
   }
 
   private run(fn: () => void) {
@@ -709,16 +646,9 @@ export class Editor implements EventDelegate {
     this.snapshotSubscription = this.onUserWrite.pipe(tap(() => {
       this.dispatchContentChangeEvent();
     })).pipe(sampleTime(5000)).subscribe(() => {
-      this.recordSnapshot();
+      this.history.recordSnapshot(this.rootFragment, this.selection);
       this.toolbar.updateHandlerState(this.selection, this.renderer);
     });
-  }
-
-  private static cloneHistoryData(snapshot: Snapshot): Snapshot {
-    return {
-      contents: snapshot.contents.clone(),
-      paths: snapshot.paths.map(i => i)
-    }
   }
 
   private static guardLastIsParagraph(fragment: Fragment) {

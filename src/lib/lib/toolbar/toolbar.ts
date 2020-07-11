@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { HighlightState } from './help';
 import { createKeymapHTML, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
 import { Editor } from '../editor';
-import { Keymap } from '../input/input';
+import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
 import { ContextMenu } from './context-menu';

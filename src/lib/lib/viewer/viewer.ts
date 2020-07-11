@@ -1,15 +1,14 @@
 import { Observable, Subject } from 'rxjs';
 
 import { iframeHTML } from './iframe-html';
+import { Input } from './input';
 
 export class Viewer {
   onReady: Observable<Document>;
-
-  elementRef = document.createElement('div');
   contentWindow: Window;
   contentDocument: Document;
-
-  private frame = document.createElement('iframe');
+  input: Input;
+  elementRef = document.createElement('iframe');
 
   private readyEvent = new Subject<Document>();
   private id: number = null;
@@ -17,35 +16,29 @@ export class Viewer {
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
 
-    this.frame.onload = () => {
-      const doc = this.frame.contentDocument;
+    this.elementRef.onload = () => {
+      const doc = this.elementRef.contentDocument;
       this.contentDocument = doc;
-      this.contentWindow = this.frame.contentWindow;
+      this.contentWindow = this.elementRef.contentWindow;
       (styleSheets).forEach(s => {
         const style = doc.createElement('style');
         style.innerHTML = s;
         doc.head.appendChild(style);
       });
+      this.input = new Input(doc);
       this.readyEvent.next(doc);
       this.listen();
     };
 
-    this.frame.setAttribute('scrolling', 'no');
-    this.frame.src = `javascript:void((function () {
+    this.elementRef.setAttribute('scrolling', 'no');
+    this.elementRef.src = `javascript:void((function () {
                       document.open();
                       document.write('${iframeHTML}');
                       document.close();
                     })())`;
 
 
-    this.elementRef.classList.add('tbus-wrap');
-    this.frame.classList.add('tbus-frame');
-
-    this.elementRef.appendChild(this.frame);
-  }
-
-  setViewWidth(width: string) {
-    this.elementRef.style.width = width;
+    this.elementRef.classList.add('tbus-frame');
   }
 
   destroy() {
@@ -68,7 +61,7 @@ export class Viewer {
         }
       }
       const containerHeight = this.elementRef.parentNode?.['offsetHeight'] || 0;
-      this.frame.style.height = Math.max(height + 30, containerHeight) + 'px';
+      this.elementRef.style.height = Math.max(height + 30, containerHeight) + 'px';
       this.id = requestAnimationFrame(fn);
     }
     this.id = requestAnimationFrame(fn);
