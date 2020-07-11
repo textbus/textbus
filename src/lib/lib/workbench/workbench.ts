@@ -4,13 +4,13 @@ import { Viewer } from '../viewer/viewer';
 export class Workbench {
   elementRef = document.createElement('div');
   readonly templateStage = new TemplateStage(this);
+  readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');
   private dialogBg = document.createElement('div');
   private dialogWrapper = document.createElement('div');
   private dashboard = document.createElement('div');
   private editableArea = document.createElement('div');
-  private tablet = document.createElement('div');
 
   constructor(private viewer: Viewer) {
     this.elementRef.classList.add('tbus-workbench');

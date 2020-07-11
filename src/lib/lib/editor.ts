@@ -236,7 +236,7 @@ export class Editor implements EventDelegate {
         }));
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
-        hooks.setup(this.renderer, this.viewer.contentDocument, this.viewer.contentWindow, this.viewer.elementRef);
+        hooks.setup(this.renderer, this.viewer.contentDocument, this.viewer.contentWindow, this.workbench.tablet);
       }
     })
 

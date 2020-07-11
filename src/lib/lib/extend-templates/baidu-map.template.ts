@@ -1,5 +1,6 @@
-import { EventType, LeafTemplate, TemplateTranslator, VElement, ViewData } from '../core/_api';
+import { BranchTemplate, TemplateTranslator, VElement, ViewData } from '../core/_api';
 import { TemplateExample, Workbench } from '../workbench/_api';
+import { ImageTemplate } from '../templates/image.template';
 
 declare const BMapGL: any;
 
@@ -9,7 +10,11 @@ export class BaiduMapTemplateTranslator implements TemplateTranslator {
   }
 
   from(element: HTMLElement): ViewData {
-    const template = new BaiduMapTemplate(element.getAttribute('data-map-url'));
+    const map = element.children[0] as HTMLImageElement;
+    const template = new BaiduMapTemplate(map?.src || '', {
+      width: map?.style.width || '',
+      height: map?.style.height || ''
+    });
     return {
       template,
       childrenSlots: []
@@ -17,23 +22,33 @@ export class BaiduMapTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class BaiduMapTemplate extends LeafTemplate {
-  constructor(private url: string) {
+export class BaiduMapTemplate extends BranchTemplate {
+  private img: ImageTemplate;
+
+  constructor(private url: string, private options?: {
+    width: string,
+    height: string
+  }) {
     super('baidu-map');
+    this.img = new ImageTemplate(url, options);
   }
 
   render(isProduction: boolean): VElement {
     const el = new VElement(this.tagName);
-    el.attrs.set('data-map-url', this.url);
-    el.styles.set('background', `url(${this.url}) center center / 50% no-repeat`);
+    el.styles.set('textAlign', 'center');
+
+    this.slot.clean();
+    this.slot.append(this.img);
     if (!isProduction) {
-      el.styles.set('userSelect', 'none');
+      el.events.subscribe(ev => {
+        ev.stopPropagation();
+      })
     }
     return el;
   }
 
   clone(): BaiduMapTemplate {
-    return new BaiduMapTemplate(this.url);
+    return new BaiduMapTemplate(this.url, this.options);
   }
 }
 
@@ -118,6 +133,5 @@ export const baiduMapTemplateExample: TemplateExample = {
 export const baiduMapStyleSheet = `
 baidu-map {
   display: block;
-  min-height: 300px;
 }
 `;
