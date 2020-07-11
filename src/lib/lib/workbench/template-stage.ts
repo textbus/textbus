@@ -1,13 +1,14 @@
 import { Observable, Subject } from 'rxjs';
 
 import { Template } from '../core/_api';
+import { Workbench } from './workbench';
 
 export interface TemplateExample {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  templateFactory(): Template | Promise<Template> | Observable<Template>;
+  templateFactory(workbench: Workbench): Template | Promise<Template> | Observable<Template>;
 }
 
 export class TemplateStage {
@@ -29,7 +30,7 @@ export class TemplateStage {
   private _expand = false;
   private checkEvent = new Subject<Template>();
 
-  constructor() {
+  constructor(private workbench: Workbench) {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-template-stage');
     this.templateListWrapper.classList.add('tbus-template-stage-list');
@@ -39,7 +40,7 @@ export class TemplateStage {
   addTemplate(example: TemplateExample) {
     const view = TemplateStage.createViewer(example.example, example.name);
     view.addEventListener('click', () => {
-      const t = example.templateFactory();
+      const t = example.templateFactory(this.workbench);
       if (t instanceof Template) {
         this.checkEvent.next(t);
       } else if (t instanceof Promise) {

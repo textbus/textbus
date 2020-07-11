@@ -3,10 +3,10 @@ import { Viewer } from '../viewer/viewer';
 
 export class Workbench {
   elementRef = document.createElement('div');
-  readonly templateStage = new TemplateStage();
+  readonly templateStage = new TemplateStage(this);
 
   private additionalWorktable = document.createElement('div');
-  private dialog = document.createElement('div');
+  private dialogBg = document.createElement('div');
   private dialogWrapper = document.createElement('div');
   private dashboard = document.createElement('div');
   private editableArea = document.createElement('div');
@@ -16,14 +16,14 @@ export class Workbench {
     this.elementRef.classList.add('tbus-workbench');
 
     this.additionalWorktable.classList.add('tbus-additional-worktable');
-    this.dialog.classList.add('tbus-dialog');
+    this.dialogBg.classList.add('tbus-dialog');
     this.dialogWrapper.classList.add('tbus-dialog-wrapper');
     this.dashboard.classList.add('tbus-dashboard');
     this.editableArea.classList.add('tbus-editable-area');
     this.tablet.classList.add('tbus-tablet');
 
-    this.dialog.appendChild(this.dialogWrapper);
-    this.additionalWorktable.appendChild(this.dialog);
+    this.dialogBg.appendChild(this.dialogWrapper);
+    this.additionalWorktable.appendChild(this.dialogBg);
     this.elementRef.appendChild(this.additionalWorktable);
 
     this.tablet.appendChild(this.viewer.elementRef);
@@ -35,6 +35,16 @@ export class Workbench {
       this.tablet.appendChild(this.viewer.input.elementRef);
       sub.unsubscribe();
     })
+  }
+
+  dialog(element: HTMLElement) {
+    this.dialogWrapper.appendChild(element);
+    this.dialogBg.classList.add('tbus-dialog-active');
+  }
+
+  closeDialog() {
+    this.dialogWrapper.innerHTML = '';
+    this.dialogBg.classList.remove('tbus-dialog-active');
   }
 
   setTabletWidth(width: string) {

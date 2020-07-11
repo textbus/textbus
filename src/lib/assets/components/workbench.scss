@@ -2,11 +2,58 @@
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
   height: 400px;
+  position: relative;
+  overflow: hidden;
 }
+
+.tbus-additional-worktable {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tbus-dialog {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  pointer-events: none;
+  transition: background-color .15s;
+
+  &-wrapper {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+    border-top: 0;
+    left: 50%;
+    top: -100%;
+    transform: translateX(-50%);
+    transition: top .15s .2s;
+    pointer-events: auto;
+  }
+
+  &-active {
+    background-color: rgba(0, 0, 0, .3);
+
+    .tbus-dialog-wrapper {
+      top: 0;
+    }
+  }
+}
+
 
 .tbus-dashboard {
   display: flex;
   height: 100%;
+  position: relative;
+  z-index: 0;
 }
 
 .tbus-editable-area {
@@ -56,6 +103,7 @@
   border-radius: 3px;
   overflow: hidden;
   transition: transform .15s;
+
   &-content {
     position: relative;
     z-index: 0;

@@ -1,0 +1,58 @@
+.tbus-baidu-map-form {
+  width: 500px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+
+  > form {
+    height: 32px;
+    padding: 15px 20px;
+    border-bottom: 1px solid $color-light;
+    text-align: right;
+    background-color: $color-lighter;
+
+    input {
+      width: 300px;
+      padding: 4px 8px;
+      height: 32px;
+      border: 1px solid $color-gray;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    button {
+      width: 60px;
+      height: 32px;
+      background-color: $color-primary;
+      border-radius: 4px;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+  }
+
+  > .tbus-baidu-map-container {
+    flex: 1;
+  }
+
+  > .tbus-map-form-btns {
+    text-align: right;
+    padding: 10px 20px;
+    background-color: $color-lighter;
+    border-top: 1px solid $color-light;
+
+    button {
+      width: 50px;
+      height: 32px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+
+      &:last-child {
+        background-color: $color-primary;
+        color: #fff;
+      }
+    }
+  }
+}
