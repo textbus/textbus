@@ -18,7 +18,7 @@ function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLEl
   }
   const regs = tagName.map(tagName => new RegExp(`^${tagName}$`, 'i'));
   for (const node of nodes) {
-    if (node.nodeType === 1 && regs.map(reg => reg.test((node as HTMLElement).tagName)).indexOf(true) > -1) {
+    if (node.nodeType === Node.ELEMENT_NODE && regs.map(reg => reg.test((node as HTMLElement).tagName)).indexOf(true) > -1) {
       return node as HTMLElement;
     }
   }

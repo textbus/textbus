@@ -14,7 +14,7 @@ export class Paths {
     const fragment = document.createDocumentFragment();
     const elements: HTMLElement[] = [];
     while (node) {
-      if (node.nodeType !== 1) {
+      if (node.nodeType !== Node.ELEMENT_NODE) {
         node = node.parentNode as HTMLElement;
       } else {
         const tagName = (node as HTMLElement).tagName;

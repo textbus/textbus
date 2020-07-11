@@ -192,7 +192,7 @@ export class Input {
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = TBRange.getRangePosition(range);
-    const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === 1 ? startContainer : startContainer.parentNode) as HTMLElement);
+    const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement);
 
     if (isWindows) {
       this.inputWrap.style.top = fontSize;

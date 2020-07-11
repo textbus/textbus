@@ -51,7 +51,7 @@ export class Viewer {
       const lastChild = childBody.lastChild;
       let height = 0;
       if (lastChild) {
-        if (lastChild.nodeType === 1) {
+        if (lastChild.nodeType === Node.ELEMENT_NODE) {
           height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
         } else {
           const div = this.contentDocument.createElement('div');

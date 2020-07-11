@@ -54,14 +54,14 @@ export class TBRange {
       renderer.getPositionByNode(nativeRange.endContainer)) {
       this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
       this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
-      if (nativeRange.startContainer.nodeType === 3) {
+      if (nativeRange.startContainer.nodeType === Node.TEXT_NODE) {
         this.startIndex = renderer.getPositionByNode(nativeRange.startContainer).startIndex + nativeRange.startOffset;
-      } else if (nativeRange.startContainer.nodeType === 1) {
+      } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
         this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset, this.startFragment);
       }
-      if (nativeRange.endContainer.nodeType === 3) {
+      if (nativeRange.endContainer.nodeType === Node.TEXT_NODE) {
         this.endIndex = renderer.getPositionByNode(nativeRange.endContainer).startIndex + nativeRange.endOffset;
-      } else if (nativeRange.endContainer.nodeType === 1) {
+      } else if (nativeRange.endContainer.nodeType === Node.ELEMENT_NODE) {
         this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset, this.endFragment);
       }
     }
@@ -626,10 +626,10 @@ export class TBRange {
     let rect = range.getBoundingClientRect();
     const {startContainer, startOffset} = range;
     const offsetNode = startContainer.childNodes[startOffset];
-    if (startContainer.nodeType === 1) {
+    if (startContainer.nodeType === Node.ELEMENT_NODE) {
       if (offsetNode && /^(br|img)$/i.test(offsetNode.nodeName)) {
         rect = (offsetNode as HTMLElement).getBoundingClientRect();
-      } else if (offsetNode && offsetNode.nodeType === 1 && offsetNode.childNodes.length === 0) {
+      } else if (offsetNode && offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.childNodes.length === 0) {
         const cloneRange = range.cloneRange();
         const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
         offsetNode.appendChild(textNode);
