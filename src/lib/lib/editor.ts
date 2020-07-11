@@ -125,6 +125,10 @@ export class Editor implements EventDelegate {
     this.statusBar.fullScreen.full = false;
     this.workbench.setTabletWidth(deviceWidth);
 
+    if (Array.isArray(options.templateExamples)) {
+      options.templateExamples.forEach(i => this.workbench.templateStage.addTemplate(i));
+    }
+
     this.subs.push(
       this.toolbar.onTemplatesStageChange.subscribe(b => {
         this.workbench.templateStage.expand = b;
