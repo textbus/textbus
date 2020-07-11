@@ -75,13 +75,12 @@ import {
   todoListTemplateExample,
   TodoListTemplateTranslator,
 
-  baiduMapStyleSheet,
   baiduMapTemplateExample,
   BaiduMapTemplateTranslator
 } from './lib/extend-templates/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet, baiduMapStyleSheet],
+  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),

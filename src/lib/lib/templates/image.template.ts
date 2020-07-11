@@ -22,13 +22,13 @@ export class ImageTemplate extends LeafTemplate {
   width: string = null;
   height: string = null;
 
-  constructor(public src: string, option = {
+  constructor(public src: string, options = {
     width: '100%',
     height: 'auto'
   }) {
     super('img');
-    this.width = option.width;
-    this.height = option.height;
+    this.width = options.width;
+    this.height = options.height;
   }
 
   render() {
@@ -43,7 +43,10 @@ export class ImageTemplate extends LeafTemplate {
     return el;
   }
 
-  clone() {
-    return new ImageTemplate(this.src);
+  clone(): ImageTemplate {
+    return new ImageTemplate(this.src, {
+      width: this.width,
+      height: this.height
+    });
   }
 }

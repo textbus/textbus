@@ -1,4 +1,4 @@
-import { BranchTemplate, TemplateTranslator, VElement, ViewData } from '../core/_api';
+import { TemplateTranslator, VElement, ViewData } from '../core/_api';
 import { TemplateExample, Workbench } from '../workbench/_api';
 import { ImageTemplate } from '../templates/image.template';
 
@@ -6,14 +6,14 @@ declare const BMapGL: any;
 
 export class BaiduMapTemplateTranslator implements TemplateTranslator {
   match(element: HTMLElement): boolean {
-    return element.nodeName.toLowerCase() === 'baidu-map';
+    return element.nodeName.toLowerCase() === 'img' &&
+      /^https:\/\/api\.map\.baidu\.com\/staticimage\/v2/.test((element as HTMLImageElement).src);
   }
 
-  from(element: HTMLElement): ViewData {
-    const map = element.children[0] as HTMLImageElement;
-    const template = new BaiduMapTemplate(map?.src || '', {
-      width: map?.style.width || '',
-      height: map?.style.height || ''
+  from(element: HTMLImageElement): ViewData {
+    const template = new BaiduMapTemplate(element.src, {
+      width: element?.style.width || '',
+      height: element?.style.height || ''
     });
     return {
       template,
@@ -22,33 +22,25 @@ export class BaiduMapTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class BaiduMapTemplate extends BranchTemplate {
-  private img: ImageTemplate;
+export class BaiduMapTemplate extends ImageTemplate {
 
-  constructor(private url: string, private options?: {
-    width: string,
-    height: string
-  }) {
-    super('baidu-map');
-    this.img = new ImageTemplate(url, options);
-  }
-
-  render(isProduction: boolean): VElement {
+  render(): VElement {
     const el = new VElement(this.tagName);
-    el.styles.set('textAlign', 'center');
-
-    this.slot.clean();
-    this.slot.append(this.img);
-    if (!isProduction) {
-      el.events.subscribe(ev => {
-        ev.stopPropagation();
-      })
+    el.attrs.set('src', this.src);
+    if (this.width) {
+      el.styles.set('width', this.width);
+    }
+    if (this.height) {
+      el.styles.set('height', this.height);
     }
     return el;
   }
 
   clone(): BaiduMapTemplate {
-    return new BaiduMapTemplate(this.url, this.options);
+    return new BaiduMapTemplate(this.src, {
+      width: this.width,
+      height: this.height
+    });
   }
 }
 
@@ -129,9 +121,3 @@ export const baiduMapTemplateExample: TemplateExample = {
     })
   }
 };
-
-export const baiduMapStyleSheet = `
-baidu-map {
-  display: block;
-}
-`;
