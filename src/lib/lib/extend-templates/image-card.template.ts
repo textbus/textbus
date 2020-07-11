@@ -114,7 +114,7 @@ export class ImageCardHook implements Lifecycle {
   onDelete(renderer: Renderer, selection: TBSelection): boolean {
     const firstRange = selection.firstRange;
     const template = firstRange.commonAncestorTemplate;
-    if (template instanceof ImageCardTemplate) {
+    if (template instanceof ImageCardTemplate && firstRange.startFragment === template.imgFragment) {
       if (template.imgFragment.contentLength === 0) {
         let position = firstRange.getPreviousPosition();
         const parentFragment = renderer.getParentFragment(template);
@@ -143,8 +143,9 @@ export class ImageCardHook implements Lifecycle {
         firstRange.setStart(position.fragment, position.index);
         firstRange.collapse();
       }
+      return false;
     }
-    return false;
+    return true;
   }
 }
 
