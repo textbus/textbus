@@ -1,5 +1,5 @@
-import { Commander, TBSelection, Renderer, Fragment, BackboneTemplate, BranchTemplate } from '../../core/_api';
-import { BlockTemplate } from '../../templates/block.template';
+import { Commander, TBSelection, Renderer, Fragment, BackboneComponent, BranchComponent } from '../../core/_api';
+import { BlockComponent } from '../../components/block.component';
 
 export class ToggleBlockCommander implements Commander<string> {
   recordHistory = true;
@@ -11,7 +11,7 @@ export class ToggleBlockCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       if (overlap) {
         const context = renderer.getContext(range.commonAncestorFragment,
-          BlockTemplate,
+          BlockComponent,
           instance => {
             return instance.tagName === this.tagName;
           });
@@ -31,7 +31,7 @@ export class ToggleBlockCommander implements Commander<string> {
       } else {
         let position: number;
         let parentFragment: Fragment;
-        const block = new BlockTemplate(this.tagName);
+        const block = new BlockComponent(this.tagName);
         const fragment = block.slot;
         if (range.startFragment === range.endFragment) {
           const parentTemplate = renderer.getParentTemplate(range.startFragment)
@@ -49,7 +49,7 @@ export class ToggleBlockCommander implements Commander<string> {
             range.commonAncestorFragment.cut(index, 1);
             fragment.append(range.commonAncestorTemplate);
           } else {
-            const appendedTemplates: Array<BackboneTemplate | BranchTemplate> = [];
+            const appendedTemplates: Array<BackboneComponent | BranchComponent> = [];
             range.getExpandedScope().reverse().forEach(scope => {
               const parentTemplate = renderer.getParentTemplate(scope.fragment);
               if (appendedTemplates.includes(parentTemplate)) {

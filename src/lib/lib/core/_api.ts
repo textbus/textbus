@@ -1,4 +1,5 @@
 export * from './commander';
+export * from './component';
 export * from './contents';
 export * from './element';
 export * from './events';
@@ -11,4 +12,3 @@ export * from './parser';
 export * from './range';
 export * from './renderer';
 export * from './selection';
-export * from './template';

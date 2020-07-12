@@ -1,15 +1,15 @@
 import { FormatMatcher } from './format.matcher';
 import { boldFormatter } from '../../formatter/bold.formatter';
-import { BackboneTemplate, BranchTemplate, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { BackboneComponent, BranchComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
 import { SelectionMatchDelta } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { BlockMatcher } from './block.matcher';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 
 export class BoldMatcher extends FormatMatcher {
-  private contextMatcher = new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6'.split(','))
+  private contextMatcher = new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6'.split(','))
 
-  constructor(excludeTemplates: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
+  constructor(excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
     super(boldFormatter, excludeTemplates);
   }
 
@@ -27,7 +27,7 @@ export class BoldMatcher extends FormatMatcher {
     }
     const contextMatchResult = this.contextMatcher.queryState(selection, renderer);
     if (contextMatchResult.state === HighlightState.Highlight &&
-      /h[1-6]/i.test((contextMatchResult.matchData as BlockTemplate)?.tagName)) {
+      /h[1-6]/i.test((contextMatchResult.matchData as BlockComponent)?.tagName)) {
       return {
         ...contextMatchResult,
         state: result.state === HighlightState.Normal ? HighlightState.Normal : HighlightState.Highlight

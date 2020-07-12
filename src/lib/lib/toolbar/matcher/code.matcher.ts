@@ -1,7 +1,7 @@
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { TBSelection, Renderer } from '../../core/_api';
 import { HighlightState } from '../help';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export class CodeMatcher implements Matcher {
 
@@ -14,10 +14,10 @@ export class CodeMatcher implements Matcher {
       }
     }
     const contextTemplates = selection.ranges.map(range => {
-      if (range.commonAncestorTemplate instanceof PreTemplate) {
+      if (range.commonAncestorTemplate instanceof PreComponent) {
         return range.commonAncestorTemplate;
       }
-      return renderer.getContext(range.commonAncestorFragment, PreTemplate);
+      return renderer.getContext(range.commonAncestorFragment, PreComponent);
     });
     return {
       state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,

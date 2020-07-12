@@ -1,16 +1,16 @@
 import { Commander, TBSelection, Renderer } from '../../core/_api';
-import { TableTemplate, BlockTemplate, SingleTagTemplate } from '../../templates/_api';
+import { TableComponent, BlockComponent, SingleTagComponent } from '../../components/_api';
 
 export class TableAddParagraphCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
     const firstRange = selection.firstRange;
-    const context = renderer.getContext(firstRange.startFragment, TableTemplate);
+    const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
       const parentFragment = renderer.getParentFragment(context);
-      const p = new BlockTemplate('p');
-      p.slot.append(new SingleTagTemplate('br'));
+      const p = new BlockComponent('p');
+      p.slot.append(new SingleTagComponent('br'));
 
       parentFragment.insertAfter(p, context);
 

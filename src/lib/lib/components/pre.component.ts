@@ -8,12 +8,12 @@ import {
   Fragment,
   InlineFormatter,
   ReplaceModel,
-  BranchTemplate,
-  TemplateTranslator,
+  BranchComponent,
+  ComponentReader,
   VElement,
   ViewData
 } from '../core/_api';
-import { SingleTagTemplate } from './single-tag.template';
+import { SingleTagComponent } from './single-tag.component';
 import { highlight } from 'highlight.js';
 
 const theme = [
@@ -146,7 +146,7 @@ class CodeStyleFormatter extends InlineFormatter {
 const codeStyleFormatter = new CodeStyleFormatter();
 const codeFormatter = new CodeFormatter();
 
-export class CodeTemplateTranslator implements TemplateTranslator {
+export class PreComponentReader implements ComponentReader {
   private tagName = 'pre';
 
   match(template: HTMLElement): boolean {
@@ -154,35 +154,35 @@ export class CodeTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new PreTemplate(el.getAttribute('lang'));
+    const component = new PreComponent(el.getAttribute('lang'));
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
         if (node.nodeType === 3) {
           fragment.append(node.textContent);
         } else if (node.nodeType === 1) {
           if (/br/i.test(node.nodeName)) {
-            fragment.append(new SingleTagTemplate('br'));
+            fragment.append(new SingleTagComponent('br'));
           } else {
             fn(node as HTMLElement, fragment);
           }
         }
       })
     };
-    fn(el, template.slot);
+    fn(el, component.slot);
     return {
-      template,
+      component: component,
       childrenSlots: []
     };
   }
 }
 
-export class PreTemplate extends BranchTemplate {
+export class PreComponent extends BranchComponent {
   constructor(public lang: string) {
     super('pre');
   }
 
   clone() {
-    const template = new PreTemplate(this.lang);
+    const template = new PreComponent(this.lang);
     template.slot.from(this.slot.clone());
     return template;
   }
@@ -194,7 +194,7 @@ export class PreTemplate extends BranchTemplate {
     !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
-        this.slot.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+        this.slot.insert(new SingleTagComponent('br'), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
         event.stopPropagation();
       }
@@ -209,7 +209,7 @@ export class PreTemplate extends BranchTemplate {
       if (typeof item === 'string') {
         return item;
 
-      } else if (item instanceof SingleTagTemplate && item.tagName === 'br') {
+      } else if (item instanceof SingleTagComponent && item.tagName === 'br') {
         return '\n';
       }
     }).join('');
@@ -243,7 +243,7 @@ export class PreTemplate extends BranchTemplate {
       if (item.nodeType === 1) {
         if (item.nodeName.toLowerCase() === 'br') {
           index++;
-          context.append(new SingleTagTemplate('br'));
+          context.append(new SingleTagComponent('br'));
           return;
         }
         const result = this.getFormats(index, item as HTMLElement, context);

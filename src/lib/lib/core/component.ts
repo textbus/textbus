@@ -7,11 +7,11 @@ export interface SlotMap {
 }
 
 export interface ViewData {
-  template: Template;
+  component: Component;
   childrenSlots: SlotMap[];
 }
 
-export abstract class TemplateTranslator {
+export abstract class ComponentReader {
   abstract match(element: HTMLElement): boolean;
 
   abstract from(element: HTMLElement): ViewData;
@@ -54,7 +54,7 @@ export abstract class TemplateTranslator {
   // }
 }
 
-export abstract class Template {
+export abstract class Component {
   readonly length = 1;
 
   protected constructor(public tagName: string) {
@@ -62,14 +62,14 @@ export abstract class Template {
 
   abstract render(isProduction: boolean): VElement;
 
-  abstract clone(): Template;
+  abstract clone(): Component;
 }
 
-export abstract class BranchTemplate extends Template {
+export abstract class BranchComponent extends Component {
   readonly slot = new Fragment();
 }
 
-export abstract class BackboneTemplate extends Template {
+export abstract class BackboneComponent extends Component {
   childSlots: Fragment[] = [];
 
   protected viewMap = new Map<Fragment, VElement>();
@@ -81,5 +81,5 @@ export abstract class BackboneTemplate extends Template {
   }
 }
 
-export abstract class LeafTemplate extends Template {
+export abstract class LeafComponent extends Component {
 }

@@ -3,10 +3,10 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  Renderer, BranchTemplate,
+  Renderer, BranchComponent,
   TBSelection
 } from '../../core/_api';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
 
 export class BlockCommander implements Commander<string> {
@@ -23,11 +23,11 @@ export class BlockCommander implements Commander<string> {
     selection.ranges.forEach(range => {
 
       range.getSuccessiveContents().forEach(scope => {
-        const blockTemplate = new BlockTemplate(this.tagName);
+        const blockTemplate = new BlockComponent(this.tagName);
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
           const parentTemplate = renderer.getParentTemplate(scope.fragment);
-          if (parentTemplate instanceof BranchTemplate) {
+          if (parentTemplate instanceof BranchComponent) {
             const parentFragment = renderer.getParentFragment(parentTemplate);
             blockTemplate.slot.from(scope.fragment);
             parentFragment.insertBefore(blockTemplate, parentTemplate);

@@ -2,7 +2,7 @@ import { strikeThroughFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const strikeThroughTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-strikethrough'],
@@ -11,7 +11,7 @@ export const strikeThroughTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'd'
   },
-  matcher: new FormatMatcher(strikeThroughFormatter, [PreTemplate]),
+  matcher: new FormatMatcher(strikeThroughFormatter, [PreComponent]),
   commanderFactory() {
     return new InlineCommander('del', strikeThroughFormatter);
   }

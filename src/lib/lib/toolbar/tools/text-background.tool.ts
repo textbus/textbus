@@ -3,7 +3,7 @@ import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const textBackgroundTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-background-color'],
@@ -11,7 +11,7 @@ export const textBackgroundTool = Toolkit.makeDropdownTool({
   menuFactory() {
     return new Palette()
   },
-  matcher: new FormatMatcher(backgroundColorFormatter, [PreTemplate]),
+  matcher: new FormatMatcher(backgroundColorFormatter, [PreComponent]),
   commanderFactory() {
     return new StyleCommander('backgroundColor', backgroundColorFormatter);
   }

@@ -1,12 +1,12 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { BackboneTemplate, BranchTemplate, Constructor, Renderer, TBSelection } from '../../core/_api';
-import { ListTemplate } from '../../templates/list.template';
+import { BackboneComponent, BranchComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { ListComponent } from '../../components/list.component';
 import { HighlightState } from '../help';
 import { rangeContentInTemplate } from './utils/range-content-in-template';
 
 export class ListMatcher implements Matcher {
   constructor(private tagName: 'ul' | 'ol',
-              private excludeTemplates: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
+              private excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -29,8 +29,8 @@ export class ListMatcher implements Matcher {
       }
     }
 
-    const states = selection.ranges.map<RangeMatchDelta<ListTemplate>>(range => {
-      if (range.commonAncestorTemplate instanceof ListTemplate &&
+    const states = selection.ranges.map<RangeMatchDelta<ListComponent>>(range => {
+      if (range.commonAncestorTemplate instanceof ListComponent &&
         range.commonAncestorTemplate.tagName === this.tagName) {
         return {
           srcData: range.commonAncestorTemplate,
@@ -39,7 +39,7 @@ export class ListMatcher implements Matcher {
         }
       }
 
-      const context = renderer.getContext(range.commonAncestorFragment, ListTemplate);
+      const context = renderer.getContext(range.commonAncestorFragment, ListComponent);
       return {
         state: context && context.tagName === this.tagName ? HighlightState.Highlight : HighlightState.Normal,
         srcData: context,

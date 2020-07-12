@@ -1,7 +1,7 @@
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { BackboneTemplate, BranchTemplate } from './template';
+import { BackboneComponent, BranchComponent } from './component';
 
 export interface RangePath {
   startPaths: number[];
@@ -78,7 +78,7 @@ export class TBSelection {
       while (fragment) {
         const parentTemplate = this.renderer.getParentTemplate(fragment);
         if (parentTemplate) {
-          parentTemplate instanceof BackboneTemplate ? paths.push(parentTemplate.childSlots.indexOf(fragment)) : paths.push(0);
+          parentTemplate instanceof BackboneComponent ? paths.push(parentTemplate.childSlots.indexOf(fragment)) : paths.push(0);
           fragment = this.renderer.getParentFragment(parentTemplate);
           paths.push(fragment.indexOf(parentTemplate));
         } else {
@@ -118,9 +118,9 @@ export class TBSelection {
         const index = paths.pop();
         const c = fragment.getContentAtIndex(index);
         const last = paths.pop();
-        if (c instanceof BranchTemplate && last === 0) {
+        if (c instanceof BranchComponent && last === 0) {
           fragment = c.slot;
-        } else if (c instanceof BackboneTemplate) {
+        } else if (c instanceof BackboneComponent) {
           fragment = c.childSlots[last];
         } else {
           throw new Error('未找到历史位置')

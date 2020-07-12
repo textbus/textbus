@@ -1,6 +1,6 @@
-import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
-export class ImageTemplateTranslator implements TemplateTranslator {
+export class ImageComponentReader implements ComponentReader {
   private tagName = 'img';
 
   match(template: HTMLElement): boolean {
@@ -9,7 +9,7 @@ export class ImageTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLImageElement): ViewData {
     return {
-      template: new ImageTemplate(el.src, {
+      component: new ImageComponent(el.src, {
         width: el.style.width || el.width + '',
         height: el.style.height || el.height +  ''
       }),
@@ -18,7 +18,7 @@ export class ImageTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class ImageTemplate extends LeafTemplate {
+export class ImageComponent extends LeafComponent {
   width: string = null;
   height: string = null;
 
@@ -43,8 +43,8 @@ export class ImageTemplate extends LeafTemplate {
     return el;
   }
 
-  clone(): ImageTemplate {
-    return new ImageTemplate(this.src, {
+  clone(): ImageComponent {
+    return new ImageComponent(this.src, {
       width: this.width,
       height: this.height
     });

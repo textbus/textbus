@@ -2,30 +2,30 @@ import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'r
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
-  BackboneTemplate,
-  BranchTemplate,
+  BackboneComponent,
+  BranchComponent,
   Commander,
   Contents,
   EventType,
   Formatter,
   Fragment,
-  LeafTemplate,
+  LeafComponent,
   Lifecycle,
   Parser,
   Renderer,
   TBRange,
   TBRangePosition,
   TBSelection,
-  Template,
-  TemplateTranslator,
+  Component,
+  ComponentReader,
   VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
-import { BlockTemplate, SingleTagTemplate } from './templates/_api';
+import { BlockComponent, SingleTagComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
-import { TemplateExample } from './workbench/template-stage';
+import { ComponentExample } from './workbench/component-stage';
 import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
@@ -38,7 +38,7 @@ export interface EditorOptions {
   /** 设置最大历史栈 */
   historyStackSize?: number;
   /** 设置模板转换器 */
-  templateTranslators?: TemplateTranslator[];
+  componentReaders?: ComponentReader[];
   /** 设置格式转换器 */
   formatters?: Formatter[];
   /** 工具条配置 */
@@ -50,7 +50,7 @@ export interface EditorOptions {
   /** 设置初始化 TBus 时的默认内容 */
   contents?: string;
   /** 设置可选的自定义模板 */
-  templateExamples?: TemplateExample[];
+  componentExamples?: ComponentExample[];
 
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string): (string | Promise<string> | Observable<string>);
@@ -125,8 +125,8 @@ export class Editor implements EventDelegate {
     this.statusBar.fullScreen.full = false;
     this.workbench.setTabletWidth(deviceWidth);
 
-    if (Array.isArray(options.templateExamples)) {
-      options.templateExamples.forEach(i => this.workbench.templateStage.addTemplate(i));
+    if (Array.isArray(options.componentExamples)) {
+      options.componentExamples.forEach(i => this.workbench.templateStage.addExample(i));
     }
 
     this.subs.push(
@@ -408,8 +408,8 @@ export class Editor implements EventDelegate {
           this.renderer.dispatchEvent(vElement, EventType.onDelete, selection);
         }
         if (this.rootFragment.contentLength === 0) {
-          const p = new BlockTemplate('p');
-          p.slot.append(new SingleTagTemplate('br'));
+          const p = new BlockComponent('p');
+          p.slot.append(new SingleTagComponent('br'));
           this.rootFragment.append(p);
           selection.firstRange.setStart(p.slot, 0);
           selection.firstRange.collapse();
@@ -580,22 +580,22 @@ export class Editor implements EventDelegate {
     this.recordSnapshotFromEditingBefore();
   }
 
-  private insertTemplate(template: Template) {
+  private insertTemplate(template: Component) {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
     const parentTemplate = this.renderer.getParentTemplate(startFragment);
-    if (template instanceof LeafTemplate) {
+    if (template instanceof LeafComponent) {
       startFragment.insert(template, firstRange.endIndex);
     } else {
-      if (parentTemplate instanceof BranchTemplate) {
+      if (parentTemplate instanceof BranchComponent) {
         const parentFragment = this.renderer.getParentFragment(parentTemplate);
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(template, parentTemplate);
-        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
+        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
           parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
 
         }
-      } else if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit()) {
+      } else if (parentTemplate instanceof BackboneComponent && parentTemplate.canSplit()) {
         const ff = new Fragment();
         ff.append(template);
         parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);
@@ -661,16 +661,16 @@ export class Editor implements EventDelegate {
 
   private static guardLastIsParagraph(fragment: Fragment) {
     const last = fragment.sliceContents(fragment.contentLength - 1)[0];
-    if (last instanceof BlockTemplate) {
+    if (last instanceof BlockComponent) {
       if (last.tagName === 'p') {
         if (last.slot.contentLength === 0) {
-          last.slot.append(new SingleTagTemplate('br'));
+          last.slot.append(new SingleTagComponent('br'));
         }
         return;
       }
     }
-    const p = new BlockTemplate('p');
-    p.slot.append(new SingleTagTemplate('br'));
+    const p = new BlockComponent('p');
+    p.slot.append(new SingleTagComponent('br'));
     fragment.append(p);
   }
 }

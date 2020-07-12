@@ -1,14 +1,14 @@
 import {
-  BackboneTemplate,
+  BackboneComponent,
   EventType,
   Fragment,
-  LeafTemplate,
+  LeafComponent,
   SlotMap,
-  TemplateTranslator,
+  ComponentReader,
   VElement,
   ViewData
 } from '../core/_api';
-import { SingleTagTemplate } from './single-tag.template';
+import { SingleTagComponent } from './single-tag.component';
 
 export interface TableCell {
   colspan: number;
@@ -52,7 +52,7 @@ export interface TableRange {
   selectedCells: Fragment[];
 }
 
-export class TableTemplateTranslator implements TemplateTranslator {
+export class TableComponentReader implements ComponentReader {
   private tagName = 'table';
 
   match(template: HTMLElement): boolean {
@@ -105,7 +105,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
     }
 
     return {
-      template: new TableTemplate({
+      component: new TableComponent({
         headers,
         bodies
       }),
@@ -114,7 +114,7 @@ export class TableTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class TableTemplate extends BackboneTemplate {
+export class TableComponent extends BackboneComponent {
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;
@@ -138,7 +138,7 @@ export class TableTemplate extends BackboneTemplate {
   }
 
   clone() {
-    const template = new TableTemplate(this.config);
+    const template = new TableComponent(this.config);
     this.childSlots.forEach(f => {
       template.childSlots.push(f.clone());
     });
@@ -165,7 +165,7 @@ export class TableTemplate extends BackboneTemplate {
             td.attrs.set('rowSpan', col.rowspan);
           }
           if (col.fragment.contentLength === 0) {
-            col.fragment.append(new SingleTagTemplate('br'));
+            col.fragment.append(new SingleTagComponent('br'));
           }
           this.childSlots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
@@ -173,14 +173,14 @@ export class TableTemplate extends BackboneTemplate {
           !isProduction && td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
-              col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+              col.fragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
               firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
               const afterContent = col.fragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-              if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
+              if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
                 event.stopPropagation();
                 return;
               }
-              col.fragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+              col.fragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
             } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
               event.stopPropagation();
             }

@@ -1,5 +1,5 @@
 import { Lifecycle, Renderer, TBSelection } from '../core/_api';
-import { ImageTemplate, VideoTemplate } from '../templates/_api';
+import { ImageComponent, VideoComponent } from '../components/_api';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);
@@ -20,7 +20,7 @@ export class ImageVideoResizeHook implements Lifecycle {
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];
 
-  private currentTemplate: ImageTemplate | VideoTemplate;
+  private currentTemplate: ImageComponent | VideoComponent;
   private currentElement: HTMLImageElement | HTMLVideoElement;
   private frameContainer: HTMLElement;
 
@@ -111,7 +111,7 @@ export class ImageVideoResizeHook implements Lifecycle {
           return;
         }
         this.currentElement = srcElement;
-        this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageTemplate;
+        this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageComponent;
         this.frameContainer = frameContainer;
         const selection = contextDocument.getSelection();
         selection.removeAllRanges();

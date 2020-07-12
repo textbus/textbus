@@ -3,7 +3,7 @@ import { lineHeightFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const lineHeightTool = Toolkit.makeSelectTool({
   tooltip: '行高',
@@ -43,7 +43,7 @@ export const lineHeightTool = Toolkit.makeSelectTool({
     classes: ['tbus-line-height-4'],
     value: '4em'
   }],
-  matcher: new FormatMatcher(lineHeightFormatter, [PreTemplate]),
+  matcher: new FormatMatcher(lineHeightFormatter, [PreComponent]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

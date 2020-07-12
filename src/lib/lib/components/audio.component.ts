@@ -1,6 +1,6 @@
-import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
-export class AudioTemplateTranslator implements TemplateTranslator {
+export class AudioComponentReader implements ComponentReader {
   private tagName = 'audio';
 
   match(template: HTMLElement): boolean {
@@ -9,13 +9,13 @@ export class AudioTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLAudioElement): ViewData {
     return {
-      template: new AudioTemplate(el.src, el.autoplay, el.controls),
+      component: new AudioComponent(el.src, el.autoplay, el.controls),
       childrenSlots: []
     };
   }
 }
 
-export class AudioTemplate extends LeafTemplate {
+export class AudioComponent extends LeafComponent {
 
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('audio');
@@ -30,6 +30,6 @@ export class AudioTemplate extends LeafTemplate {
   }
 
   clone() {
-    return new AudioTemplate(this.src, this.autoplay, this.controls);
+    return new AudioComponent(this.src, this.autoplay, this.controls);
   }
 }

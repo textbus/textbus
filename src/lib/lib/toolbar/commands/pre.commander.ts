@@ -3,7 +3,7 @@ import {
   Renderer,
   TBSelection
 } from '../../core/_api';
-import { PreTemplate, SingleTagTemplate } from '../../templates/_api';
+import { PreComponent, SingleTagComponent } from '../../components/_api';
 
 export class PreCommander implements Commander<string> {
   recordHistory = true;
@@ -16,15 +16,15 @@ export class PreCommander implements Commander<string> {
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     if (overlap) {
       selection.ranges.forEach(range => {
-        const context = renderer.getContext(range.startFragment, PreTemplate);
+        const context = renderer.getContext(range.startFragment, PreComponent);
         context.lang = this.lang;
       });
     } else {
       selection.ranges.forEach(range => {
         const context = range.commonAncestorTemplate;
         const parentFragment = renderer.getParentFragment(context);
-        const t = new PreTemplate(this.lang);
-        t.slot.append(new SingleTagTemplate('br'));
+        const t = new PreComponent(this.lang);
+        t.slot.append(new SingleTagComponent('br'));
         parentFragment.insertAfter(t, context);
         range.setStart(t.slot, 0);
         range.collapse();

@@ -1,7 +1,7 @@
 import { Fragment } from './fragment';
 import { EditorOptions } from '../editor';
 import { FormatEffect } from './formatter';
-import { BackboneTemplate, BranchTemplate } from './template';
+import { BackboneComponent, BranchComponent } from './component';
 
 export class Parser {
   constructor(private options: EditorOptions) {
@@ -15,14 +15,14 @@ export class Parser {
 
   private readTemplate(el: Node, slot: Fragment) {
     if (el.nodeType === 1) {
-      const templates = this.options.templateTranslators;
+      const templates = this.options.componentReaders;
       for (const t of templates) {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
-          slot.append(viewData.template);
+          slot.append(viewData.component);
           viewData.childrenSlots.forEach(item => {
-            if (viewData.template instanceof BranchTemplate ||
-              viewData.template instanceof BackboneTemplate ||
+            if (viewData.component instanceof BranchComponent ||
+              viewData.component instanceof BackboneComponent ||
               item.from === el) {
               this.readFormats(item.from, item.toSlot);
             } else {

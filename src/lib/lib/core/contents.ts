@@ -1,13 +1,13 @@
-import { Template } from './template';
+import { Component } from './component';
 
 export class Contents {
   get length() {
     return this.elements.reduce((p, n) => p + n.length, 0);
   }
 
-  private elements: Array<Template | string> = [];
+  private elements: Array<Component | string> = [];
 
-  append(content: Template | string) {
+  append(content: Component | string) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -22,7 +22,7 @@ export class Contents {
       return [];
     }
     let index = 0;
-    const result: Array<string | Template> = [];
+    const result: Array<string | Component> = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
@@ -46,7 +46,7 @@ export class Contents {
    * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1
    * @param element
    */
-  indexOf(element: Template): number {
+  indexOf(element: Component): number {
     let index = 0;
     for (const item of this.elements) {
       if (item === element) {
@@ -62,7 +62,7 @@ export class Contents {
    * @param content
    * @param index
    */
-  insert(content: string | Template, index: number) {
+  insert(content: string | Component, index: number) {
     if (index >= this.length) {
       if (typeof content === 'string') {
         const last = this.elements[this.elements.length - 1];
@@ -81,7 +81,7 @@ export class Contents {
         if (i > index) {
           break;
         }
-        if ((el instanceof Template) && index === i) {
+        if ((el instanceof Component) && index === i) {
           const prev = this.elements[ii - 1];
           if (typeof prev === 'string' && typeof content === 'string') {
             this.elements[ii - 1] = prev + content;
@@ -96,7 +96,7 @@ export class Contents {
         } else if (typeof el === 'string') {
           if (index >= i && index < i + el.length) {
             const cc = [el.slice(0, index - i), content, el.slice(index - i)].filter(i => i);
-            if (content instanceof Template) {
+            if (content instanceof Component) {
               this.elements.splice(ii, 1, ...cc);
             } else {
               this.elements.splice(ii, 1, cc.join(''));

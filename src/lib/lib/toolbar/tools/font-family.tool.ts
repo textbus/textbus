@@ -3,7 +3,7 @@ import { fontFamilyFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const fontFamilyTool = Toolkit.makeSelectTool({
   tooltip: '字体',
@@ -49,7 +49,7 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
     classes: ['tbus-font-Times-New-Roman'],
     value: 'Times New Roman'
   }],
-  matcher: new FormatMatcher(fontFamilyFormatter, [PreTemplate]),
+  matcher: new FormatMatcher(fontFamilyFormatter, [PreComponent]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

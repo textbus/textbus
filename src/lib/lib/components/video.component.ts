@@ -1,6 +1,6 @@
-import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
-export class VideoTemplateTranslator implements TemplateTranslator {
+export class VideoComponentReader implements ComponentReader {
   private tagName = 'video';
 
   match(template: HTMLElement): boolean {
@@ -9,7 +9,7 @@ export class VideoTemplateTranslator implements TemplateTranslator {
 
   from(el: HTMLVideoElement): ViewData {
     return {
-      template: new VideoTemplate(el.src, el.autoplay, el.controls, {
+      component: new VideoComponent(el.src, el.autoplay, el.controls, {
         width: el.style.width || el.width + '',
         height: el.style.height || el.height + ''
       }),
@@ -18,7 +18,7 @@ export class VideoTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class VideoTemplate extends LeafTemplate {
+export class VideoComponent extends LeafComponent {
   width: string = null;
   height: string = null;
 
@@ -46,6 +46,6 @@ export class VideoTemplate extends LeafTemplate {
   }
 
   clone() {
-    return new VideoTemplate(this.src, this.autoplay, this.controls);
+    return new VideoComponent(this.src, this.autoplay, this.controls);
   }
 }

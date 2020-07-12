@@ -1,8 +1,8 @@
-import { BackboneTemplate, BranchTemplate, Constructor, Renderer, TBRange } from '../../../core/_api';
+import { BackboneComponent, BranchComponent, Constructor, Renderer, TBRange } from '../../../core/_api';
 
 export function rangeContentInTemplate(range: TBRange,
                                        renderer: Renderer,
-                                       templateConstructorList: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
+                                       templateConstructorList: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   let has = true;
   if (templateConstructorList.length === 0) {
     return false;

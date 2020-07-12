@@ -1,9 +1,9 @@
-import { TemplateStage } from './template-stage';
+import { ComponentStage } from './component-stage';
 import { Viewer } from '../viewer/viewer';
 
 export class Workbench {
   elementRef = document.createElement('div');
-  readonly templateStage = new TemplateStage(this);
+  readonly templateStage = new ComponentStage(this);
   readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');

@@ -1,7 +1,7 @@
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { MediaMatcher } from '../matcher/media.matcher';
-import { ImageTemplate, PreTemplate } from '../../templates/_api';
+import { ImageComponent, PreComponent } from '../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
@@ -34,7 +34,7 @@ export const imageTool = Toolkit.makeDropdownTool({
       value: 'auto'
     }])
   },
-  matcher: new MediaMatcher(ImageTemplate, 'img', [PreTemplate]),
+  matcher: new MediaMatcher(ImageComponent, 'img', [PreComponent]),
   commanderFactory() {
     return new ImageCommander();
   }

@@ -1,13 +1,13 @@
 import {
-  TemplateTranslator,
+  ComponentReader,
   ViewData,
   VElement,
   EventType,
-  BranchTemplate
+  BranchComponent
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
-export class BlockTemplateTranslator implements TemplateTranslator {
+export class BlockComponentReader implements ComponentReader {
   constructor(private tagNames: string[]) {
   }
 
@@ -16,9 +16,9 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new BlockTemplate(el.tagName.toLocaleLowerCase());
+    const template = new BlockComponent(el.tagName.toLocaleLowerCase());
     return {
-      template,
+      component: template,
       childrenSlots: [{
         from: el,
         toSlot: template.slot
@@ -27,15 +27,15 @@ export class BlockTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class BlockTemplate extends BranchTemplate {
+export class BlockComponent extends BranchComponent {
   constructor(tagName: string) {
     super(tagName);
   }
 
   clone() {
-    const template = new BlockTemplate(this.tagName);
-    template.slot.from(this.slot.clone());
-    return template;
+    const component = new BlockComponent(this.tagName);
+    component.slot.from(this.slot.clone());
+    return component;
   }
 
   render(isProduction: boolean) {
@@ -44,7 +44,7 @@ export class BlockTemplate extends BranchTemplate {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragment(this);
 
-        const template = new BlockTemplate('p');
+        const template = new BlockComponent('p');
         const firstRange = event.selection.firstRange;
         const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
         template.slot.from(next);

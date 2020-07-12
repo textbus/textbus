@@ -1,6 +1,6 @@
-import { BackboneTemplate, EventType, Fragment, TemplateTranslator, VElement, ViewData } from '../core/_api';
-import { BlockTemplate, breakingLine, SingleTagTemplate } from '../templates/_api';
-import { TemplateExample } from '../workbench/template-stage';
+import { BackboneComponent, EventType, Fragment, ComponentReader, VElement, ViewData } from '../core/_api';
+import { BlockComponent, breakingLine, SingleTagComponent } from '../components/_api';
+import { ComponentExample } from '../workbench/component-stage';
 
 export interface TodoListConfig {
   active: boolean;
@@ -8,7 +8,7 @@ export interface TodoListConfig {
   slot: Fragment;
 }
 
-export class TodoListTemplateTranslator implements TemplateTranslator {
+export class TodoListComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tbus-todo-list';
   }
@@ -23,9 +23,9 @@ export class TodoListTemplateTranslator implements TemplateTranslator {
         slot: new Fragment()
       }
     })
-    const template = new TodoListTemplate(listConfig);
+    const template = new TodoListComponent(listConfig);
     return {
-      template,
+      component: template,
       childrenSlots: listConfig.map(i => {
         return {
           toSlot: i.slot,
@@ -36,7 +36,7 @@ export class TodoListTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class TodoListTemplate extends BackboneTemplate {
+export class TodoListComponent extends BackboneComponent {
 
   private stateCollection = [{
     active: false,
@@ -94,7 +94,7 @@ export class TodoListTemplate extends BackboneTemplate {
       });
       item.appendChild(content);
       if (slot.contentLength === 0) {
-        slot.append(new SingleTagTemplate('br'));
+        slot.append(new SingleTagComponent('br'));
       }
       this.viewMap.set(slot, content);
       this.childSlots.push(slot);
@@ -124,11 +124,11 @@ export class TodoListTemplate extends BackboneTemplate {
             if (slot === this.childSlots[this.childSlots.length - 1]) {
               const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
               if (slot.contentLength === 0 ||
-                slot.contentLength === 1 && lastContent instanceof SingleTagTemplate && lastContent.tagName === 'br') {
+                slot.contentLength === 1 && lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
                 this.childSlots.pop();
                 const parentFragment = event.renderer.getParentFragment(this);
-                const p = new BlockTemplate('p');
-                p.slot.append(new SingleTagTemplate('br'));
+                const p = new BlockComponent('p');
+                p.slot.append(new SingleTagComponent('br'));
                 parentFragment.insertAfter(p, this);
                 firstRange.setStart(p.slot, 0);
                 firstRange.collapse();
@@ -152,14 +152,14 @@ export class TodoListTemplate extends BackboneTemplate {
     return list;
   }
 
-  clone(): TodoListTemplate {
+  clone(): TodoListComponent {
     const configs = this.listConfigs.map(i => {
       return {
         ...i,
         slot: i.slot.clone()
       }
     });
-    return new TodoListTemplate(configs);
+    return new TodoListComponent(configs);
   }
 
   private getStateIndex(active: boolean, disabled: boolean) {
@@ -173,13 +173,13 @@ export class TodoListTemplate extends BackboneTemplate {
   }
 }
 
-export const todoListTemplateExample: TemplateExample = {
+export const todoListComponentExample: ComponentExample = {
   name: '待办事项列表',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#fff" stroke="#1296db" height="8" width="8" rx="2" x="15" y="12"/><text font-family="Helvetica, Arial, sans-serif" font-size="8" x="28" y="19"  stroke-width="0" stroke="#000" fill="#000000">待办事项...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 12)"></use><use xlink:href="#item" transform="translate(0, 24)"></use><use xlink:href="#item" transform="translate(0, 36)"></use></svg>')}">`,
-  templateFactory() {
+  componentFactory() {
     const fragment = new Fragment();
     fragment.append('待办事项...');
-    return new TodoListTemplate([{
+    return new TodoListComponent([{
       active: false,
       disabled: false,
       slot: fragment

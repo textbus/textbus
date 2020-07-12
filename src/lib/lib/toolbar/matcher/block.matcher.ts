@@ -1,13 +1,13 @@
-import { TBSelection, Constructor, Renderer, BackboneTemplate, BranchTemplate } from '../../core/_api';
+import { TBSelection, Constructor, Renderer, BackboneComponent, BranchComponent } from '../../core/_api';
 import { Matcher, SelectionMatchDelta } from './matcher';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 import { HighlightState } from '../help';
 import { rangeContentInTemplate } from './utils/range-content-in-template';
 
 export class BlockMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<BlockTemplate>,
+  constructor(public templateConstructor: Constructor<BlockComponent>,
               private tagNames: string[],
-              private excludeTemplates: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
+              private excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {

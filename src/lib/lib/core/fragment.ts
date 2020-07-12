@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { BackboneTemplate, BranchTemplate, Template } from './template';
+import { BackboneComponent, BranchComponent, Component } from './component';
 import { BlockFormatter, FormatDelta, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -21,7 +21,7 @@ export class Fragment {
     this.formatMap = source.formatMap;
   }
 
-  append(element: string | Template) {
+  append(element: string | Component) {
     this.contents.append(element);
   }
 
@@ -33,7 +33,7 @@ export class Fragment {
     return this.contents.slice(startIndex, endIndex);
   }
 
-  insertBefore(contents: Template | string, ref: Template) {
+  insertBefore(contents: Component | string, ref: Component) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -41,7 +41,7 @@ export class Fragment {
     this.insert(contents, index);
   }
 
-  insertAfter(contents: Template | string, ref: Template) {
+  insertAfter(contents: Component | string, ref: Component) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -49,7 +49,7 @@ export class Fragment {
     this.insert(contents, index + 1);
   }
 
-  insert(contents: Template | string, index: number) {
+  insert(contents: Component | string, index: number) {
     this.contents.insert(contents, index);
     const newFormatRanges: FormatRange[] = [];
     this.formatMap.getFormatRanges().forEach(format => {
@@ -58,7 +58,7 @@ export class Fragment {
         return;
       }
       if (format.startIndex < index && format.endIndex >= index) {
-        if (contents instanceof BranchTemplate || contents instanceof BackboneTemplate) {
+        if (contents instanceof BranchComponent || contents instanceof BackboneComponent) {
           newFormatRanges.push({
             startIndex: format.startIndex,
             endIndex: index,
@@ -251,8 +251,8 @@ export class Fragment {
     return this.formatMap.getFormatRanges();
   }
 
-  indexOf(template: Template) {
-    return this.contents.indexOf(template);
+  indexOf(component: Component) {
+    return this.contents.indexOf(component);
   }
 
   /**
@@ -278,7 +278,7 @@ export class Fragment {
     const formats: FormatRange[] = [];
     let newFormat: FormatRange;
     contents.forEach(item => {
-      if (item instanceof BackboneTemplate) {
+      if (item instanceof BackboneComponent) {
         newFormat = null;
         if (coverChild) {
           item.childSlots.forEach(fragment => {
@@ -288,7 +288,7 @@ export class Fragment {
             fragment.apply(newFormatRange, options);
           })
         }
-      } else if (item instanceof BranchTemplate) {
+      } else if (item instanceof BranchComponent) {
         newFormat = null;
         if (coverChild) {
           const newFormatRange = Object.assign({}, formatRange);

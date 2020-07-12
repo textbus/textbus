@@ -2,7 +2,7 @@ import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 import { TableMatcher } from '../matcher/table.matcher';
 
 export const tableTool = Toolkit.makeDropdownTool({
@@ -29,7 +29,7 @@ export const tableTool = Toolkit.makeDropdownTool({
       name: 'header'
     }]);
   },
-  matcher: new TableMatcher([PreTemplate]),
+  matcher: new TableMatcher([PreComponent]),
   commanderFactory() {
     return new TableCommander();
   }

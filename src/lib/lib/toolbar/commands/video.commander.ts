@@ -1,6 +1,6 @@
 import { Commander, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
-import { VideoTemplate } from '../../templates/video.template';
+import { VideoComponent } from '../../components/video.component';
 
 export class VideoCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -17,7 +17,7 @@ export class VideoCommander implements Commander<AttrState[]> {
       attrs.set(attr.name, attr.value);
     });
 
-    const fn = function (template: VideoTemplate) {
+    const fn = function (template: VideoComponent) {
       template.src = attrs.get('src') as string;
       template.autoplay = attrs.get('autoplay') as boolean;
       template.controls = attrs.get('controls') as boolean;
@@ -29,18 +29,18 @@ export class VideoCommander implements Commander<AttrState[]> {
       if (range.collapsed) {
         if (overlap) {
           const template = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
-          if (template instanceof VideoTemplate) {
+          if (template instanceof VideoComponent) {
             fn(template);
           }
         } else {
           range.commonAncestorFragment.insert(
-            new VideoTemplate(attrs.get('src') as string, !!attrs.get('autoplay'), !!attrs.get('controls')),
+            new VideoComponent(attrs.get('src') as string, !!attrs.get('autoplay'), !!attrs.get('controls')),
             range.startIndex);
         }
       } else {
         range.getSelectedScope().forEach(scope => {
           scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(template => {
-            if (template instanceof VideoTemplate) {
+            if (template instanceof VideoComponent) {
               fn(template);
             }
           })

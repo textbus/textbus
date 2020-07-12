@@ -1,5 +1,5 @@
 import { ActionCommander, Fragment, Renderer, TBSelection } from '../../core/_api';
-import { TableCellPosition, TableTemplate, SingleTagTemplate, TableCell } from '../../templates/_api';
+import { TableCellPosition, TableComponent, SingleTagComponent, TableCell } from '../../components/_api';
 
 export enum TableEditActions {
   AddColumnToLeft,
@@ -33,7 +33,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
-    const context = renderer.getContext(selection.firstRange.startFragment, TableTemplate);
+    const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
         this.addColumnToLeft(context);
@@ -68,7 +68,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     }
   }
 
-  private addColumnToLeft(context: TableTemplate) {
+  private addColumnToLeft(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.startPosition.columnIndex;
     cellMatrix.forEach(row => {
@@ -91,7 +91,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     }
   }
 
-  private addColumnToRight(context: TableTemplate) {
+  private addColumnToRight(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.endPosition.columnIndex;
     cellMatrix.forEach(row => {
@@ -106,7 +106,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     });
   }
 
-  private addRowToTop(context: TableTemplate) {
+  private addRowToTop(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.startPosition.rowIndex;
 
@@ -136,7 +136,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     }
   }
 
-  private addRowToBottom(context: TableTemplate) {
+  private addRowToBottom(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.endPosition.rowIndex;
 
@@ -155,7 +155,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     context.config.bodies.splice(context.config.bodies.indexOf(row.cells) + 1, 0, tr);
   }
 
-  private mergeCells(selection: TBSelection, context: TableTemplate) {
+  private mergeCells(selection: TBSelection, context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
@@ -195,7 +195,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     Object.assign(this.params.endPosition, endCellPosition);
   }
 
-  private splitCells(selection: TBSelection, context: TableTemplate) {
+  private splitCells(selection: TBSelection, context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const minRow = this.params.startPosition.rowIndex;
     const minColumn = this.params.startPosition.columnIndex;
@@ -232,7 +232,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     });
   }
 
-  private deleteTopRow(context: TableTemplate) {
+  private deleteTopRow(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.startPosition.rowIndex;
 
@@ -266,7 +266,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     }
   }
 
-  private deleteBottomRow(context: TableTemplate) {
+  private deleteBottomRow(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.endPosition.rowIndex;
     if (index === cellMatrix.length - 1) {
@@ -296,7 +296,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     context.config.bodies.splice(context.config.bodies.indexOf(nextRow.cells), 1);
   }
 
-  private deleteLeftColumn(context: TableTemplate) {
+  private deleteLeftColumn(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.startPosition.columnIndex;
 
@@ -327,7 +327,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     }
   }
 
-  private deleteRightColumn(context: TableTemplate) {
+  private deleteRightColumn(context: TableComponent) {
     const cellMatrix = context.cellMatrix;
     const index = this.params.endPosition.columnIndex;
     if (index === cellMatrix[0].cellsPosition.length - 1) {
@@ -353,7 +353,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
 
   private static createCell(rowspan = 1, colspan = 1) {
     const fragment = new Fragment();
-    fragment.append(new SingleTagTemplate('br'));
+    fragment.append(new SingleTagComponent('br'));
     return {
       rowspan,
       colspan,

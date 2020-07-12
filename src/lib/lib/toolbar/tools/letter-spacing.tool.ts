@@ -3,7 +3,7 @@ import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const letterSpacingTool = Toolkit.makeSelectTool({
   tooltip: '字间距',
@@ -35,7 +35,7 @@ export const letterSpacingTool = Toolkit.makeSelectTool({
     classes: ['tbus-letter-spacing-5'],
     value: '5px',
   }],
-  matcher: new FormatMatcher(letterSpacingFormatter, [PreTemplate]),
+  matcher: new FormatMatcher(letterSpacingFormatter, [PreComponent]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

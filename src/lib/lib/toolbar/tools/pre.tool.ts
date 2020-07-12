@@ -1,5 +1,5 @@
 import { PreCommander } from '../commands/pre.commander';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 import { CodeMatcher } from '../matcher/code.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
@@ -40,7 +40,7 @@ export const preTool = Toolkit.makeSelectTool({
   }],
   matcher: new CodeMatcher(),
   highlight(options, t) {
-    if (t instanceof PreTemplate) {
+    if (t instanceof PreComponent) {
       for (const item of options) {
         if (item.value === t.lang) {
           return item;

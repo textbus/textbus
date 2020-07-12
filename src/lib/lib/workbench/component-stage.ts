@@ -1,18 +1,18 @@
 import { Observable, Subject } from 'rxjs';
 
-import { Template } from '../core/_api';
+import { Component } from '../core/_api';
 import { Workbench } from './workbench';
 
-export interface TemplateExample {
+export interface ComponentExample {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  templateFactory(workbench: Workbench): Template | Promise<Template> | Observable<Template>;
+  componentFactory(workbench: Workbench): Component | Promise<Component> | Observable<Component>;
 }
 
-export class TemplateStage {
-  onCheck: Observable<Template>;
+export class ComponentStage {
+  onCheck: Observable<Component>;
   elementRef = document.createElement('div');
 
   set expand(b: boolean) {
@@ -26,22 +26,22 @@ export class TemplateStage {
     return this._expand;
   }
 
-  private templateListWrapper = document.createElement('div');
+  private componentListWrapper = document.createElement('div');
   private _expand = false;
-  private checkEvent = new Subject<Template>();
+  private checkEvent = new Subject<Component>();
 
   constructor(private workbench: Workbench) {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('tbus-template-stage');
-    this.templateListWrapper.classList.add('tbus-template-stage-list');
-    this.elementRef.appendChild(this.templateListWrapper);
+    this.componentListWrapper.classList.add('tbus-template-stage-list');
+    this.elementRef.appendChild(this.componentListWrapper);
   }
 
-  addTemplate(example: TemplateExample) {
-    const view = TemplateStage.createViewer(example.example, example.name);
+  addExample(example: ComponentExample) {
+    const view = ComponentStage.createViewer(example.example, example.name);
     view.addEventListener('click', () => {
-      const t = example.templateFactory(this.workbench);
-      if (t instanceof Template) {
+      const t = example.componentFactory(this.workbench);
+      if (t instanceof Component) {
         this.checkEvent.next(t);
       } else if (t instanceof Promise) {
         t.then(instance => {
@@ -54,7 +54,7 @@ export class TemplateStage {
         })
       }
     });
-    this.templateListWrapper.appendChild(view);
+    this.componentListWrapper.appendChild(view);
   }
 
   private static createViewer(content: string | HTMLElement, name: string) {

@@ -1,6 +1,6 @@
-import { LeafTemplate, TemplateTranslator, ViewData, VElement } from '../core/_api';
+import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
-export class SingleTagTemplateTranslator implements TemplateTranslator {
+export class SingleTagComponentReader implements ComponentReader {
   constructor(private tagName: string) {
   }
 
@@ -9,21 +9,21 @@ export class SingleTagTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new SingleTagTemplate(this.tagName);
+    const template = new SingleTagComponent(this.tagName);
     return {
-      template,
+      component: template,
       childrenSlots: []
     };
   }
 }
 
-export class SingleTagTemplate extends LeafTemplate {
+export class SingleTagComponent extends LeafComponent {
   constructor(tagName: string) {
     super(tagName);
   }
 
   clone() {
-    return new SingleTagTemplate(this.tagName);
+    return new SingleTagComponent(this.tagName);
   }
 
   render() {

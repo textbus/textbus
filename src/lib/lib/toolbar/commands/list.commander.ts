@@ -3,11 +3,11 @@ import {
   TBSelection,
   Renderer,
   Fragment,
-  BackboneTemplate,
-  BranchTemplate,
+  BackboneComponent,
+  BranchComponent,
   TBRangeScope
 } from '../../core/_api';
-import { ListTemplate, BlockTemplate } from '../../templates/_api';
+import { ListComponent, BlockComponent } from '../../components/_api';
 
 export class ListCommander implements Commander {
   recordHistory = true;
@@ -18,27 +18,27 @@ export class ListCommander implements Commander {
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     selection.ranges.forEach(range => {
       if (overlap) {
-        range.getSlotRange(ListTemplate, instance => instance.tagName === this.tagName).forEach(item => {
+        range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {
           const slots = item.template.split(item.startIndex, item.endIndex);
           const parentFragment = renderer.getParentFragment(item.template);
           if (slots.before.length) {
-            const beforeList = new ListTemplate(this.tagName);
+            const beforeList = new ListComponent(this.tagName);
             beforeList.childSlots.push(...slots.before);
             parentFragment.insertBefore(beforeList, item.template);
           }
           if (slots.center.length) {
             slots.center.forEach(fragment => {
-              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BackboneTemplate) {
-                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneTemplate, item.template)
+              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BackboneComponent) {
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneComponent, item.template)
               } else {
-                const t = new BlockTemplate('p');
+                const t = new BlockComponent('p');
                 t.slot.from(fragment);
                 parentFragment.insertBefore(t, item.template);
               }
             })
           }
           if (slots.after.length) {
-            const afterList = new ListTemplate(this.tagName);
+            const afterList = new ListComponent(this.tagName);
             afterList.childSlots.push(...slots.after);
             parentFragment.insertBefore(afterList, item.template);
           }
@@ -47,19 +47,19 @@ export class ListCommander implements Commander {
       } else {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
-        const list = new ListTemplate(this.tagName);
-        const backboneTemplates: BackboneTemplate[] = [];
+        const list = new ListComponent(this.tagName);
+        const backboneTemplates: BackboneComponent[] = [];
         const scopes: TBRangeScope[] = [];
         range.getSuccessiveContents().forEach(scope => {
           let fragment = scope.fragment;
-          let lastBackboneTemplate: BackboneTemplate;
+          let lastBackboneTemplate: BackboneComponent;
           while (true) {
             if (fragment === commonAncestorFragment) {
               break;
             }
             const parentTemplate = renderer.getParentTemplate(scope.fragment);
             fragment = renderer.getParentFragment(parentTemplate);
-            if (parentTemplate instanceof BackboneTemplate && parentTemplate.canSplit() === false) {
+            if (parentTemplate instanceof BackboneComponent && parentTemplate.canSplit() === false) {
               lastBackboneTemplate = parentTemplate;
             }
           }
@@ -101,23 +101,23 @@ export class ListCommander implements Commander {
           }
         });
         if (range.startFragment !== commonAncestorFragment) {
-          if (commonScope.startChildTemplate && commonScope.startChildTemplate instanceof BackboneTemplate && commonAncestorFragment.indexOf(commonScope.startChildTemplate) !== -1) {
+          if (commonScope.startChildTemplate && commonScope.startChildTemplate instanceof BackboneComponent && commonAncestorFragment.indexOf(commonScope.startChildTemplate) !== -1) {
             commonAncestorFragment.insertAfter(list, commonScope.startChildTemplate);
           } else {
             commonAncestorFragment.insert(list, commonScope.startIndex);
           }
         } else {
           const parentTemplate = renderer.getParentTemplate(commonAncestorFragment);
-          if (parentTemplate instanceof BranchTemplate) {
+          if (parentTemplate instanceof BranchComponent) {
             const parentFragment = renderer.getParentFragment(parentTemplate);
             const position = parentFragment.indexOf(parentTemplate);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else {
             const index = parentTemplate.childSlots.indexOf(commonAncestorFragment);
-            const before = parentTemplate.clone() as BackboneTemplate;
+            const before = parentTemplate.clone() as BackboneComponent;
             before.childSlots.splice(index);
-            const after = parentTemplate.clone() as BackboneTemplate;
+            const after = parentTemplate.clone() as BackboneComponent;
             after.childSlots.splice(0, index + 1);
 
             const parentFragment = renderer.getParentFragment(parentTemplate);

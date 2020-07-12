@@ -3,7 +3,7 @@ import { fromEvent, merge } from 'rxjs';
 
 import { Commander, Fragment, Renderer, TBRange, TBSelection, Lifecycle } from '../core/_api';
 import { TableEditCommander } from '../toolbar/_api';
-import { TableCellPosition, TableTemplate, SingleTagTemplate } from '../templates/_api';
+import { TableCellPosition, TableComponent, SingleTagComponent } from '../components/_api';
 
 interface ElementPosition {
   left: number;
@@ -41,7 +41,7 @@ export class TableEditHook implements Lifecycle {
   private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
   private animateId: number;
   private renderer: Renderer;
-  private tableTemplate: TableTemplate;
+  private tableTemplate: TableComponent;
 
   constructor() {
     this.mask.classList.add('tbus-table-editor-hook-mask');
@@ -142,7 +142,7 @@ export class TableEditHook implements Lifecycle {
       this.selectedCells.map(cell => {
         const range = new TBRange(context.createRange(), renderer);
         const firstContent = cell.getContentAtIndex(0);
-        if (cell.contentLength === 1 && firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
+        if (cell.contentLength === 1 && firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
           range.setStart(cell, 0);
           range.setEnd(cell, 1);
         } else {
@@ -191,7 +191,7 @@ export class TableEditHook implements Lifecycle {
 
     const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
     const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
-    const table = this.renderer.getContext(cell1Fragment, TableTemplate);
+    const table = this.renderer.getContext(cell1Fragment, TableComponent);
     this.tableTemplate = table;
 
     const {startCellPosition, endCellPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);

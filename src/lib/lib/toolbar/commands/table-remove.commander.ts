@@ -1,12 +1,12 @@
 import { Commander, TBSelection, Renderer, Fragment } from '../../core/_api';
-import { TableTemplate } from '../../templates/_api';
+import { TableComponent } from '../../components/_api';
 
 export class TableRemoveCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
     const firstRange = selection.firstRange;
-    const context = renderer.getContext(firstRange.startFragment, TableTemplate);
+    const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
       let position = firstRange.findFirstPosition(context.childSlots[0]);
       firstRange.setStart(position.fragment, position.index);

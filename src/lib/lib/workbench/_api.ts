@@ -1,2 +1,2 @@
-export * from './template-stage';
+export * from './component-stage';
 export * from './workbench';

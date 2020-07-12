@@ -1,30 +1,30 @@
 import {
-  BackboneTemplate, BranchTemplate,
+  BackboneComponent, BranchComponent,
   EventType,
   Fragment, Lifecycle, Renderer, TBSelection,
-  TemplateTranslator,
+  ComponentReader,
   VElement,
   ViewData
 } from '../core/_api';
-import { TemplateExample } from '../workbench/template-stage';
-import { BlockTemplate, ImageTemplate, SingleTagTemplate } from '../templates/_api';
+import { ComponentExample } from '../workbench/component-stage';
+import { BlockComponent, ImageComponent, SingleTagComponent } from '../components/_api';
 
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
 const defaultImageSrc = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 
-export class ImageCardTemplateTranslator implements TemplateTranslator {
+export class ImageCardComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tbus-image-card';
   }
 
   from(element: HTMLElement): ViewData {
     const imageSrc = (element.children[0].children[0] as HTMLImageElement).src;
-    const template = new ImageCardTemplate(imageSrc);
+    const template = new ImageCardComponent(imageSrc);
     const imageWrapper = new Fragment();
     const desc = new Fragment();
     template.childSlots.push(imageWrapper, desc);
     return {
-      template,
+      component: template,
       childrenSlots: [{
         from: element.children[0] as HTMLElement,
         toSlot: imageWrapper
@@ -36,13 +36,13 @@ export class ImageCardTemplateTranslator implements TemplateTranslator {
   }
 }
 
-export class ImageCardTemplate extends BackboneTemplate {
+export class ImageCardComponent extends BackboneComponent {
   readonly imgFragment = new Fragment();
   readonly descFragment = new Fragment();
 
   constructor(public imageSrc: string) {
     super('tbus-image-card');
-    this.imgFragment.append(new ImageTemplate(imageSrc));
+    this.imgFragment.append(new ImageComponent(imageSrc));
     this.descFragment.append('图片描述');
     this.childSlots.push(this.imgFragment);
     this.childSlots.push(this.descFragment);
@@ -63,7 +63,7 @@ export class ImageCardTemplate extends BackboneTemplate {
     this.viewMap.set(this.imgFragment, imgWrapper);
 
     if (this.descFragment.contentLength === 0) {
-      this.descFragment.append(new SingleTagTemplate('br'));
+      this.descFragment.append(new SingleTagComponent('br'));
     }
     this.viewMap.set(this.descFragment, desc);
     if (!isProduction) {
@@ -78,8 +78,8 @@ export class ImageCardTemplate extends BackboneTemplate {
         const firstRange = ev.selection.firstRange;
         if (ev.type === EventType.onEnter) {
           const parentFragment = ev.renderer.getParentFragment(this);
-          const p = new BlockTemplate('p');
-          p.slot.append(new SingleTagTemplate('br'));
+          const p = new BlockComponent('p');
+          p.slot.append(new SingleTagComponent('br'));
           parentFragment.insertAfter(p, this);
           firstRange.setStart(p.slot, 0);
           firstRange.collapse();
@@ -94,19 +94,19 @@ export class ImageCardTemplate extends BackboneTemplate {
     return card;
   }
 
-  clone(): ImageCardTemplate {
-    const t = new ImageCardTemplate(this.imageSrc);
+  clone(): ImageCardComponent {
+    const t = new ImageCardComponent(this.imageSrc);
     t.childSlots = this.childSlots.map(f => f.clone());
     return t;
   }
 }
 
 
-export const imageCardTemplateExample: TemplateExample = {
+export const imageCardComponentExample: ComponentExample = {
   name: '卡片',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#aaa" height="50" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="16" y="24" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="12" y="63" x="50%" text-anchor="middle" stroke-width="0" stroke="#000" fill="#000000">描述文字</text></g></svg>')}">`,
-  templateFactory() {
-    return new ImageCardTemplate(defaultImageSrc);
+  componentFactory() {
+    return new ImageCardComponent(defaultImageSrc);
   }
 }
 
@@ -114,7 +114,7 @@ export class ImageCardHook implements Lifecycle {
   onDelete(renderer: Renderer, selection: TBSelection): boolean {
     const firstRange = selection.firstRange;
     const template = firstRange.commonAncestorTemplate;
-    if (template instanceof ImageCardTemplate && firstRange.startFragment === template.imgFragment) {
+    if (template instanceof ImageCardComponent && firstRange.startFragment === template.imgFragment) {
       if (template.imgFragment.contentLength === 0) {
         let position = firstRange.getPreviousPosition();
         const parentFragment = renderer.getParentFragment(template);
@@ -127,9 +127,9 @@ export class ImageCardHook implements Lifecycle {
 
         if (position.fragment === firstRange.startFragment) {
           const nextContent = parentFragment.getContentAtIndex(index);
-          if (nextContent instanceof BranchTemplate) {
+          if (nextContent instanceof BranchComponent) {
             position = firstRange.findFirstPosition(nextContent.slot);
-          } else if (nextContent instanceof BackboneTemplate) {
+          } else if (nextContent instanceof BackboneComponent) {
             if (nextContent.childSlots[0]) {
               position = firstRange.findFirstPosition(nextContent.childSlots[0]);
             }

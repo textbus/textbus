@@ -56,29 +56,29 @@ import {
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
-  AudioTemplateTranslator,
-  BlockTemplateTranslator,
-  CodeTemplateTranslator,
-  ImageTemplateTranslator,
-  ListTemplateTranslator,
-  SingleTagTemplateTranslator,
-  TableTemplateTranslator,
-  VideoTemplateTranslator
-} from './lib/templates/_api';
+  AudioComponentReader,
+  BlockComponentReader,
+  PreComponentReader,
+  ImageComponentReader,
+  ListComponentReader,
+  SingleTagComponentReader,
+  TableComponentReader,
+  VideoComponentReader
+} from './lib/components/_api';
 import { defaultStyleSheets } from './lib/viewer/default-styles';
 import {
   imageCardStyleSheet,
-  imageCardTemplateExample,
-  ImageCardTemplateTranslator,
+  imageCardComponentExample,
+  ImageCardComponentReader,
 
   todoListStyleSheet,
-  todoListTemplateExample,
-  TodoListTemplateTranslator,
+  todoListComponentExample,
+  TodoListComponentReader,
 
-  baiduMapTemplateExample,
-  BaiduMapTemplateTranslator,
+  baiduMapcomponentExample,
+  BaiduMapComponentReader,
   ImageCardHook
-} from './lib/extend-templates/_api';
+} from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
   styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet],
@@ -89,19 +89,19 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook(),
     new ImageCardHook()
   ],
-  templateTranslators: [
-    new BaiduMapTemplateTranslator(),
-    new TodoListTemplateTranslator(),
-    new ImageCardTemplateTranslator(),
-    new ListTemplateTranslator('ul'),
-    new ListTemplateTranslator('ol'),
-    new BlockTemplateTranslator('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-    new SingleTagTemplateTranslator('br'),
-    new CodeTemplateTranslator(),
-    new AudioTemplateTranslator(),
-    new VideoTemplateTranslator(),
-    new ImageTemplateTranslator(),
-    new TableTemplateTranslator()
+  componentReaders: [
+    new BaiduMapComponentReader(),
+    new TodoListComponentReader(),
+    new ImageCardComponentReader(),
+    new ListComponentReader('ul'),
+    new ListComponentReader('ol'),
+    new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
+    new SingleTagComponentReader('br'),
+    new PreComponentReader(),
+    new AudioComponentReader(),
+    new VideoComponentReader(),
+    new ImageComponentReader(),
+    new TableComponentReader()
   ],
   formatters: [
     fontFamilyFormatter,
@@ -140,10 +140,10 @@ export const defaultOptions: EditorOptions = {
     [tableTool, tableEditTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ],
-  templateExamples: [
-    imageCardTemplateExample,
-    todoListTemplateExample,
-    baiduMapTemplateExample
+  componentExamples: [
+    imageCardComponentExample,
+    todoListComponentExample,
+    baiduMapcomponentExample
   ]
 };
 

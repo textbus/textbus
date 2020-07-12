@@ -1,12 +1,12 @@
 import {
-  BackboneTemplate,
-  BranchTemplate, Contents,
+  BackboneComponent,
+  BranchComponent, Contents,
   EventType, Fragment, InlineFormatter,
-  LeafTemplate,
+  LeafComponent,
   TBEvent,
   VElement
 } from './core/_api';
-import { SingleTagTemplate } from './templates/_api';
+import { SingleTagComponent } from './components/_api';
 import { Input } from './viewer/input';
 
 export class EventHandler {
@@ -47,7 +47,7 @@ export class EventHandler {
     input.input.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new SingleTagTemplate('br');
+          const s = new SingleTagComponent('br');
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
@@ -61,8 +61,8 @@ export class EventHandler {
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.input.selectionStart;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + input.input.selectionStart === commonAncestorFragment.contentLength &&
-      last instanceof SingleTagTemplate && last.tagName === 'br') {
-      commonAncestorFragment.append(new SingleTagTemplate('br'));
+      last instanceof SingleTagComponent && last.tagName === 'br') {
+      commonAncestorFragment.append(new SingleTagComponent('br'));
     }
   }
 
@@ -73,7 +73,7 @@ export class EventHandler {
 
     const parentTemplate = event.renderer.getParentTemplate(fragment);
 
-    if (parentTemplate instanceof BackboneTemplate) {
+    if (parentTemplate instanceof BackboneComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);
@@ -84,13 +84,13 @@ export class EventHandler {
       const firstChild = fragment.getContentAtIndex(0);
       const parentFragment = event.renderer.getParentFragment(parentTemplate);
       const contentsArr = contents.slice(0);
-      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagTemplate && firstChild.tagName === 'br') {
+      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagComponent && firstChild.tagName === 'br') {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentTemplate));
       } else {
         const firstContent = contentsArr.shift();
-        if (firstContent instanceof BackboneTemplate) {
+        if (firstContent instanceof BackboneComponent) {
           parentFragment.insertAfter(firstContent, parentTemplate);
-        } else if (firstContent instanceof BranchTemplate) {
+        } else if (firstContent instanceof BranchComponent) {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
           firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
@@ -108,7 +108,7 @@ export class EventHandler {
           } else {
             const afterContents = fragment.cut(firstRange.startIndex);
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
-            const afterTemplate = parentTemplate.clone() as BranchTemplate;
+            const afterTemplate = parentTemplate.clone() as BranchComponent;
             afterTemplate.slot.from(new Fragment());
             afterContents.contents.forEach(c => afterTemplate.slot.append(c));
             afterContents.formatRanges.forEach(f => {
@@ -119,7 +119,7 @@ export class EventHandler {
               });
             });
             if (afterTemplate.slot.contentLength === 0) {
-              afterTemplate.slot.append(new SingleTagTemplate('br'));
+              afterTemplate.slot.append(new SingleTagComponent('br'));
             }
             firstRange.setStart(afterTemplate.slot, 0);
             firstRange.collapse();
@@ -141,14 +141,14 @@ export class EventHandler {
 
         const commonAncestorFragment = range.commonAncestorFragment;
         const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
-        if (typeof c === 'string' || c instanceof LeafTemplate) {
+        if (typeof c === 'string' || c instanceof LeafComponent) {
           commonAncestorFragment.cut(range.startIndex - 1, 1);
           range.startIndex = range.endIndex = range.startIndex - 1;
         } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
           commonAncestorFragment.cut(range.startIndex - 1, 1);
           range.startIndex = range.endIndex = range.startIndex - 1;
           if (commonAncestorFragment.contentLength === 0) {
-            commonAncestorFragment.append(new SingleTagTemplate('br'));
+            commonAncestorFragment.append(new SingleTagComponent('br'));
           }
         } else {
           while (prevPosition.fragment.contentLength === 0) {
@@ -170,7 +170,7 @@ export class EventHandler {
         }
 
         const firstContent = range.startFragment.getContentAtIndex(0);
-        if (firstContent instanceof SingleTagTemplate && firstContent.tagName === 'br') {
+        if (firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
           range.startFragment.cut(0, 1);
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
@@ -203,12 +203,12 @@ export class EventHandler {
   private onEnter(event: TBEvent) {
     const firstRange = event.selection.firstRange;
     const rootFragment = firstRange.startFragment;
-    rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+    rootFragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
     const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-    if (typeof afterContent === 'string' || afterContent instanceof LeafTemplate) {
+    if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
       return;
     }
-    rootFragment.insert(new SingleTagTemplate('br'), firstRange.startIndex);
+    rootFragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
   }
 }

@@ -1,7 +1,7 @@
 import { Toolkit } from '../toolkit/toolkit';
 import { ToggleBlockCommander } from '../commands/toggle-block.commander';
 import { BlockMatcher } from '../matcher/block.matcher';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 
 export const blockquoteTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-quotes-right'],
@@ -10,7 +10,7 @@ export const blockquoteTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: '\''
   },
-  matcher: new BlockMatcher(BlockTemplate, ['blockquote']),
+  matcher: new BlockMatcher(BlockComponent, ['blockquote']),
   commanderFactory() {
     return new ToggleBlockCommander('blockquote');
   }

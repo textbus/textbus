@@ -1,17 +1,17 @@
 import {
   SlotMap,
-  BackboneTemplate,
-  TemplateTranslator,
+  BackboneComponent,
+  ComponentReader,
   ViewData,
   Fragment,
   VElement,
   EventType
 } from '../core/_api';
-import { SingleTagTemplate } from './single-tag.template';
-import { BlockTemplate } from './block.template';
+import { SingleTagComponent } from './single-tag.component';
+import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
 
-export class ListTemplateTranslator implements TemplateTranslator {
+export class ListComponentReader implements ComponentReader {
 
   constructor(private tagName: string) {
   }
@@ -21,7 +21,7 @@ export class ListTemplateTranslator implements TemplateTranslator {
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new ListTemplate(this.tagName);
+    const template = new ListComponent(this.tagName);
     const childrenSlots: SlotMap[] = [];
 
     const childNodes = Array.from(el.childNodes);
@@ -53,19 +53,19 @@ export class ListTemplateTranslator implements TemplateTranslator {
       }
     }
     return {
-      template,
+      component: template,
       childrenSlots
     };
   }
 }
 
-export class ListTemplate extends BackboneTemplate {
+export class ListComponent extends BackboneComponent {
   constructor(tagName: string) {
     super(tagName);
   }
 
   clone() {
-    const template = new ListTemplate(this.tagName);
+    const template = new ListComponent(this.tagName);
     this.childSlots.forEach(f => {
       template.childSlots.push(f.clone());
     });
@@ -89,12 +89,12 @@ export class ListTemplate extends BackboneTemplate {
           if (slot === this.childSlots[this.childSlots.length - 1]) {
             const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
             if (slot.contentLength === 0 ||
-              slot.contentLength === 1 && lastContent instanceof SingleTagTemplate && lastContent.tagName === 'br') {
+              slot.contentLength === 1 && lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
               this.childSlots.pop();
               const parentFragment = event.renderer.getParentFragment(this);
-              const p = new BlockTemplate('p');
+              const p = new BlockComponent('p');
               p.slot.from(new Fragment());
-              p.slot.append(new SingleTagTemplate('br'));
+              p.slot.append(new SingleTagComponent('br'));
               parentFragment.insertAfter(p, this);
               firstRange.setStart(p.slot, 0);
               firstRange.collapse();

@@ -1,6 +1,6 @@
-import { BranchTemplate, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
-import { TableTemplate, SingleTagTemplate, TableCell } from '../../templates/_api';
+import { TableComponent, SingleTagComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -19,17 +19,17 @@ export class TableCommander implements Commander<AttrState[]> {
       const rows = +attrs.get('rows') || 0;
       const cols = +attrs.get('cols') || 0;
       const bodies = TableCommander.create(rows, cols);
-      const table = new TableTemplate({
+      const table = new TableComponent({
         bodies
       });
 
       const parentTemplate = renderer.getParentTemplate(range.startFragment);
       const parentFragment = renderer.getParentFragment(parentTemplate);
       const firstContent = range.startFragment.getContentAtIndex(0);
-      if (parentTemplate instanceof BranchTemplate) {
+      if (parentTemplate instanceof BranchComponent) {
         if (range.startFragment.contentLength === 0 ||
           range.startFragment.contentLength === 1 &&
-          firstContent instanceof SingleTagTemplate &&
+          firstContent instanceof SingleTagComponent &&
           firstContent.tagName === 'br') {
           const i = parentFragment.indexOf(parentTemplate);
           parentFragment.insert(table, i);
@@ -54,7 +54,7 @@ export class TableCommander implements Commander<AttrState[]> {
       result.push(row);
       for (let j = 0; j < columns; j++) {
         const fragment = new Fragment();
-        fragment.append(new SingleTagTemplate('br'));
+        fragment.append(new SingleTagComponent('br'));
         row.push({
           rowspan: 1,
           colspan: 1,

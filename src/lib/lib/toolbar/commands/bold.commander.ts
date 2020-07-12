@@ -1,5 +1,5 @@
 import { Commander, TBSelection, InlineFormatter, FormatEffect, FormatAbstractData, Renderer } from '../../core/_api';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 
 export class BoldCommander implements Commander<InlineFormatter> {
   recordHistory = true;
@@ -9,7 +9,7 @@ export class BoldCommander implements Commander<InlineFormatter> {
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
     selection.ranges.forEach(range => {
-      const context = renderer.getContext(range.commonAncestorFragment, BlockTemplate);
+      const context = renderer.getContext(range.commonAncestorFragment, BlockComponent);
       const hasContext = context && /h[1-6]/i.test(context.tagName);
       const state = hasContext ?
         (overlap ? FormatEffect.Exclude : FormatEffect.Inherit) :

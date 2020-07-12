@@ -1,13 +1,13 @@
 import { BlockCommander } from '../commands/block.commander';
-import { BlockTemplate } from '../../templates/block.template';
+import { BlockComponent } from '../../components/block.component';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { Toolkit } from '../toolkit/toolkit';
-import { PreTemplate } from '../../templates/pre.template';
+import { PreComponent } from '../../components/pre.component';
 
 export const headingTool = Toolkit.makeSelectTool({
-  matcher: new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreTemplate]),
+  matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
   highlight(options, t) {
-    if (t instanceof BlockTemplate) {
+    if (t instanceof BlockComponent) {
       for (const item of options) {
         if (item.value === t.tagName) {
           return item;
