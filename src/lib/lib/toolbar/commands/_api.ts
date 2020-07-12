@@ -12,7 +12,9 @@ export * from './inline.commander';
 export * from './list.commander';
 export * from './style.commander';
 export * from './table.commander';
+export * from './table-add-paragraph.commander';
 export * from './table-edit.commander';
+export * from './table-remove.commander';
 export * from './toggle-block.commander';
 export * from './video.commander';
 

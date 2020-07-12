@@ -52,7 +52,7 @@ import {
   videoTool,
   codeTool,
   leftToRightTool,
-  rightToLeftTool
+  rightToLeftTool, tableAddParagraphTool, tableRemoveTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -137,7 +137,7 @@ export const defaultOptions: EditorOptions = {
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],
     [textAlignTool],
-    [tableTool, tableEditTool],
+    [tableTool, tableEditTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ],
   templateExamples: [

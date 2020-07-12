@@ -26,9 +26,11 @@ function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLEl
 }
 
 export class TableEditHook implements Lifecycle {
-  private id = ('id' + Math.random()).replace(/\./, '');
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
+  private insertMask = false;
+  private insertStyle = false;
+  private styleElement: HTMLStyleElement;
   private selectedCells: Fragment[] = [];
   private startPosition: TableCellPosition;
   private endPosition: TableCellPosition;
@@ -50,10 +52,9 @@ export class TableEditHook implements Lifecycle {
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
     this.renderer = renderer;
     const childBody = contextDocument.body;
-    let insertMask = false;
-    let insertStyle = false;
+
     let style = contextDocument.createElement('style');
-    style.id = this.id;
+    this.styleElement = style;
     style.innerText = '::selection { background: transparent; }';
 
     fromEvent(childBody, 'mousedown').subscribe(startEvent => {
@@ -62,10 +63,10 @@ export class TableEditHook implements Lifecycle {
       this.endPosition = null;
       this.tableElement = null;
 
-      if (insertStyle) {
+      if (this.insertStyle) {
         contextDocument.getSelection().removeAllRanges();
         contextDocument.head.removeChild(style);
-        insertStyle = false;
+        this.insertStyle = false;
       }
 
       let startPaths: Node[] = [];
@@ -81,15 +82,15 @@ export class TableEditHook implements Lifecycle {
       this.startCell = this.endCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
       this.tableElement = findElementByTagName(startPaths, 'table') as HTMLTableElement;
       if (!this.startCell || !this.tableElement) {
-        if (insertMask) {
-          insertMask = false;
+        if (this.insertMask) {
+          this.insertMask = false;
           frameContainer.removeChild(this.mask);
         }
         return;
       }
-      if (!insertMask) {
+      if (!this.insertMask) {
         frameContainer.appendChild(this.mask);
-        insertMask = true;
+        this.insertMask = true;
         const initRect = this.startCell.getBoundingClientRect();
         this.mask.style.left = initRect.left + 'px';
         this.mask.style.top = initRect.top + 'px';
@@ -110,11 +111,11 @@ export class TableEditHook implements Lifecycle {
         if (this.endCell) {
           if (this.endCell !== this.startCell) {
             contextDocument.head.appendChild(style);
-            insertStyle = true;
+            this.insertStyle = true;
           } else {
-            if (insertStyle) {
+            if (this.insertStyle) {
               contextDocument.head.removeChild(style);
-              insertStyle = false;
+              this.insertStyle = false;
             }
           }
           this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
@@ -170,8 +171,18 @@ export class TableEditHook implements Lifecycle {
 
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
-
-      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      if (this.startCell && this.endCell) {
+        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      } else {
+        if (this.insertMask) {
+          this.mask.parentNode.removeChild(this.mask);
+          this.insertMask = false;
+        }
+        if (this.insertStyle) {
+          this.styleElement.parentNode.removeChild(this.styleElement);
+          this.insertStyle = false;
+        }
+      }
     }
   }
 
