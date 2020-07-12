@@ -1,10 +1,11 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { Constructor, LeafTemplate, Renderer, TBSelection } from '../../core/_api';
+import { BackboneTemplate, BranchTemplate, Constructor, LeafTemplate, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
-import { range } from 'rxjs';
+import { rangeContentInTemplate } from './utils/range-content-in-template';
 
 export class MediaMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<LeafTemplate>, public tagName: string) {
+  constructor(public templateConstructor: Constructor<LeafTemplate>, public tagName: string,
+              private excludeTemplates: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -15,6 +16,18 @@ export class MediaMatcher implements Matcher {
         state: HighlightState.Normal
       }
     }
+
+    for (const range of selection.ranges) {
+      let isDisable = rangeContentInTemplate(range, renderer, this.excludeTemplates);
+      if (isDisable) {
+        return {
+          state: HighlightState.Disabled,
+          matchData: null,
+          srcStates: []
+        };
+      }
+    }
+
     const states: RangeMatchDelta<LeafTemplate>[] = selection.ranges.map(range => {
       if (range.startFragment === range.endFragment && range.endIndex - range.startIndex === 1) {
         const content = range.startFragment.sliceContents(range.startIndex, range.endIndex);

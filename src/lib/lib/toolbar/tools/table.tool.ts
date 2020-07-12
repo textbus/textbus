@@ -2,6 +2,8 @@ import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
+import { TableMatcher } from '../matcher/table.matcher';
 
 export const tableTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-table'],
@@ -27,7 +29,7 @@ export const tableTool = Toolkit.makeDropdownTool({
       name: 'header'
     }]);
   },
-  // match: new BlockMatcher(TableTemplate),
+  matcher: new TableMatcher([PreTemplate]),
   commanderFactory() {
     return new TableCommander();
   }

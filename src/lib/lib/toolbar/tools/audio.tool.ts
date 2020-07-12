@@ -1,6 +1,6 @@
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { AudioTemplate } from '../../templates/audio.template';
+import { AudioTemplate, PreTemplate } from '../../templates/_api';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
@@ -30,7 +30,7 @@ export const audioTool = Toolkit.makeDropdownTool({
       value: 'controls'
     }]);
   },
-  matcher: new MediaMatcher(AudioTemplate, 'audio'),
+  matcher: new MediaMatcher(AudioTemplate, 'audio', [PreTemplate]),
   commanderFactory() {
     return new AudioCommander();
   }

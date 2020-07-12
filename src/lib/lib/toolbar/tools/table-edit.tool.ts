@@ -1,10 +1,11 @@
 import { TableEditActions, TableEditCommander } from '../commands/table-edit.commander';
 import { Toolkit } from '../toolkit/toolkit';
+import { TableEditMatcher } from '../matcher/table-edit.matcher';
 
 export const tableEditTool = Toolkit.makeActionSheetTool({
   classes: ['tbus-icon-table-edit'],
   tooltip: '编辑表格',
-  // match: new BlockMatcher(TableTemplate),
+  matcher: new TableEditMatcher(),
   commanderFactory() {
     return new TableEditCommander();
   },

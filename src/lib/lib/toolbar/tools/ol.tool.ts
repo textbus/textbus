@@ -1,6 +1,7 @@
 import { ListMatcher } from '../matcher/list.matcher';
 import { ListCommander } from '../commands/list.commander';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const olTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-list-numbered'],
@@ -10,7 +11,7 @@ export const olTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'o'
   },
-  matcher: new ListMatcher('ol'),
+  matcher: new ListMatcher('ol', [PreTemplate]),
   commanderFactory() {
     return new ListCommander('ol');
   }

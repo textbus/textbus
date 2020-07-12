@@ -13,6 +13,7 @@ import {
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { rangeContentInTemplate } from './utils/range-content-in-template';
 
 export class FormatMatcher implements Matcher {
   constructor(private formatter: InlineFormatter | BlockFormatter,
@@ -29,17 +30,7 @@ export class FormatMatcher implements Matcher {
     }
     const srcStates: RangeMatchDelta<FormatAbstractData>[] = selection.ranges.map(range => {
 
-      let isDisable = false;
-
-      forA: for (const t of this.excludeTemplates) {
-        const scopes = range.getSuccessiveContents();
-        for (const scope of scopes) {
-          if (renderer.getContext(scope.fragment, t)) {
-            isDisable = true;
-            break forA;
-          }
-        }
-      }
+      let isDisable = rangeContentInTemplate(range, renderer, this.excludeTemplates);
 
       if (isDisable) {
         return {

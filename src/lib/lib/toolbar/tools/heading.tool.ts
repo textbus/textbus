@@ -2,9 +2,10 @@ import { BlockCommander } from '../commands/block.commander';
 import { BlockTemplate } from '../../templates/block.template';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const headingTool = Toolkit.makeSelectTool({
-  matcher: new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6,p'.split(',')),
+  matcher: new BlockMatcher(BlockTemplate, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreTemplate]),
   highlight(options, t) {
     if (t instanceof BlockTemplate) {
       for (const item of options) {

@@ -1,6 +1,6 @@
 import { Form } from '../forms/form';
 import { AttrType } from '../forms/help';
-import { VideoTemplate } from '../../templates/video.template';
+import { VideoTemplate, PreTemplate } from '../../templates/_api';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
@@ -44,7 +44,7 @@ export const videoTool = Toolkit.makeDropdownTool({
       name: 'autoplay'
     }]);
   },
-  matcher: new MediaMatcher(VideoTemplate, 'video'),
+  matcher: new MediaMatcher(VideoTemplate, 'video', [PreTemplate]),
   commanderFactory() {
     return new VideoCommander();
   }
