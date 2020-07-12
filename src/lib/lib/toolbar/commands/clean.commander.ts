@@ -7,6 +7,7 @@ import {
   BlockFormatter,
   InlineFormatter
 } from '../../core/_api';
+import { SingleTagComponent } from '../../components/single-tag.component';
 
 export class CleanCommander implements Commander {
   recordHistory = true;
@@ -27,11 +28,26 @@ export class CleanCommander implements Commander {
           scope.endIndex >= range.endIndex) {
           scope.endIndex = range.endIndex;
         }
-        scope.fragment.getFormatRanges().forEach(f => {
 
+        let isDeleteBlockFormat = false;
+        if (scope.startIndex === 0) {
+          if (scope.endIndex === scope.fragment.contentLength) {
+            isDeleteBlockFormat = true;
+          } else if (scope.endIndex === scope.fragment.contentLength - 1) {
+            const lastContent = scope.fragment.getContentAtIndex(scope.fragment.contentLength - 1);
+            if (lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
+              isDeleteBlockFormat = true;
+            }
+          }
+        }
+
+        scope.fragment.getFormatRanges().forEach(f => {
           if (f.startIndex > scope.endIndex ||
             f.endIndex < f.startIndex ||
             this.excludeFormatters.map(constructor => f.renderer instanceof constructor).includes(true)) {
+            return;
+          }
+          if (f.renderer instanceof BlockFormatter && !isDeleteBlockFormat) {
             return;
           }
           scope.fragment.apply({
