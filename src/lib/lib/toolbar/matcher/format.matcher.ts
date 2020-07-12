@@ -13,11 +13,11 @@ import {
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { rangeContentInTemplate } from './utils/range-content-in-template';
+import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class FormatMatcher implements Matcher {
   constructor(private formatter: InlineFormatter | BlockFormatter,
-              private excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+              private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -30,7 +30,7 @@ export class FormatMatcher implements Matcher {
     }
     const srcStates: RangeMatchDelta<FormatAbstractData>[] = selection.ranges.map(range => {
 
-      let isDisable = rangeContentInTemplate(range, renderer, this.excludeTemplates);
+      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
 
       if (isDisable) {
         return {
@@ -184,10 +184,10 @@ export class FormatMatcher implements Matcher {
         }
       }
 
-      const parentTemplate = renderer.getParentTemplate(fragment);
-      const parentFragment = renderer.getParentFragment(parentTemplate);
+      const parentComponent = renderer.getParentComponent(fragment);
+      const parentFragment = renderer.getParentFragment(parentComponent);
       if (parentFragment) {
-        startIndex = parentFragment.sliceContents(0).indexOf(parentTemplate);
+        startIndex = parentFragment.sliceContents(0).indexOf(parentComponent);
         endIndex = startIndex + 1;
         fragment = parentFragment;
       } else {

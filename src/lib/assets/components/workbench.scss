@@ -64,7 +64,7 @@
   flex: 1;
 }
 
-.tbus-template-stage {
+.tbus-component-stage {
   display: none;
   overflow: auto;
   background-color: #fff;
@@ -82,7 +82,7 @@
   }
 }
 
-.tbus-template-example-item {
+.tbus-component-example-item {
   width: 100px;
   height: 100px;
   margin: 5px 10px;
@@ -90,12 +90,12 @@
   position: relative;
   cursor: pointer;
 
-  &:hover .tbus-template-example {
+  &:hover .tbus-component-example {
     transform: scale(1.12);
   }
 }
 
-.tbus-template-example {
+.tbus-component-example {
   position: relative;
   height: 70px;
   background-color: #fff;
@@ -119,7 +119,7 @@
   }
 }
 
-.tbus-template-example-name {
+.tbus-component-example-name {
   background-color: #fff;
   text-align: center;
   font-size: 12px;

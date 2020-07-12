@@ -1,14 +1,14 @@
 import { TBSelection, Renderer } from '../../core/_api';
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { HighlightState } from '../../toolbar/help';
-import { rangeContentInTemplate } from './utils/range-content-in-template';
+import { rangeContentInComponent } from './utils/range-content-in-component';
 import { TableComponent } from '../../components/table.component';
 
 export class TableEditMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     for (const range of selection.ranges) {
-      let has = rangeContentInTemplate(range, renderer, [TableComponent]);
+      let has = rangeContentInComponent(range, renderer, [TableComponent]);
       if (!has) {
         return {
           state: HighlightState.Disabled,

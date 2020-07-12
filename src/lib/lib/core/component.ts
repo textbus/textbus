@@ -16,7 +16,7 @@ export abstract class ComponentReader {
 
   abstract from(element: HTMLElement): ViewData;
 
-  // readTemplate(by: HTMLElement, example: VElementLiteral, slotMark: VElementLiteral): HTMLElement[] {
+  // readComponent(by: HTMLElement, example: VElementLiteral, slotMark: VElementLiteral): HTMLElement[] {
   //   return this.findChildSlot(by, example, slotMark, []);
   // }
   //

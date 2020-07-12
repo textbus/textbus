@@ -78,7 +78,7 @@ export class Renderer {
 
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
   private fragmentHierarchyMapping = new WeakMap<Fragment, BackboneComponent | BranchComponent>();
-  private templateHierarchyMapping = new WeakMap<Component, Fragment>();
+  private componentHierarchyMapping = new WeakMap<Component, Fragment>();
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
@@ -89,7 +89,7 @@ export class Renderer {
     this.productionRenderingModal = false;
     this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new WeakMap<Fragment, BackboneComponent | BranchComponent>();
-    this.templateHierarchyMapping = new WeakMap<Component, Fragment>();
+    this.componentHierarchyMapping = new WeakMap<Component, Fragment>();
     this.fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
     this.vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
 
@@ -139,12 +139,12 @@ export class Renderer {
     return this.NVMappingTable.get(node);
   }
 
-  getParentTemplate(fragment: Fragment) {
+  getParentComponent(fragment: Fragment) {
     return this.fragmentHierarchyMapping.get(fragment);
   }
 
-  getParentFragment(template: Component) {
-    return this.templateHierarchyMapping.get(template);
+  getParentFragment(component: Component) {
+    return this.componentHierarchyMapping.get(component);
   }
 
   getVElementByFragment(fragment: Fragment) {
@@ -152,17 +152,17 @@ export class Renderer {
   }
 
   getContext<T extends Component>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
-    const templateInstance = this.fragmentHierarchyMapping.get(by);
-    if (templateInstance instanceof context) {
+    const componentInstance = this.fragmentHierarchyMapping.get(by);
+    if (componentInstance instanceof context) {
       if (typeof filter === 'function') {
-        if (filter(templateInstance)) {
-          return templateInstance;
+        if (filter(componentInstance)) {
+          return componentInstance;
         }
       } else {
-        return templateInstance;
+        return componentInstance;
       }
     }
-    const parentFragment = this.templateHierarchyMapping.get(templateInstance);
+    const parentFragment = this.componentHierarchyMapping.get(componentInstance);
     if (!parentFragment) {
       return null;
     }
@@ -422,7 +422,7 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else {
-        !this.productionRenderingModal && this.templateHierarchyMapping.set(item, fragment);
+        !this.productionRenderingModal && this.componentHierarchyMapping.set(item, fragment);
         const vDom = item.render(this.productionRenderingModal);
         !this.productionRenderingModal && this.vDomPositionMapping.set(vDom, {
           fragment,

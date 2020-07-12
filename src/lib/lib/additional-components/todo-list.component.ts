@@ -23,9 +23,9 @@ export class TodoListComponentReader implements ComponentReader {
         slot: new Fragment()
       }
     })
-    const template = new TodoListComponent(listConfig);
+    const component = new TodoListComponent(listConfig);
     return {
-      component: template,
+      component: component,
       childrenSlots: listConfig.map(i => {
         return {
           toSlot: i.slot,

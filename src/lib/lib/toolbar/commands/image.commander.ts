@@ -17,27 +17,27 @@ export class ImageCommander implements Commander<AttrState[]> {
       attrs.set(attr.name, attr.value);
     });
 
-    const fn = function (template: ImageComponent) {
-      template.src = attrs.get('src') as string;
-      template.width = attrs.get('width') as string;
-      template.height = attrs.get('height') as string;
+    const fn = function (component: ImageComponent) {
+      component.src = attrs.get('src') as string;
+      component.width = attrs.get('width') as string;
+      component.height = attrs.get('height') as string;
     }
 
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
-          const template = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
-          if (template instanceof ImageComponent) {
-            fn(template);
+          const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
+          if (component instanceof ImageComponent) {
+            fn(component);
           }
         } else {
           range.commonAncestorFragment.insert(new ImageComponent(attrs.get('src') as string), range.startIndex);
         }
       } else {
         range.getSelectedScope().forEach(scope => {
-          scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(template => {
-            if (template instanceof ImageComponent) {
-              fn(template);
+          scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(component => {
+            if (component instanceof ImageComponent) {
+              fn(component);
             }
           })
         });

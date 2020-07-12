@@ -19,12 +19,12 @@ export class ImageCardComponentReader implements ComponentReader {
 
   from(element: HTMLElement): ViewData {
     const imageSrc = (element.children[0].children[0] as HTMLImageElement).src;
-    const template = new ImageCardComponent(imageSrc);
+    const component = new ImageCardComponent(imageSrc);
     const imageWrapper = new Fragment();
     const desc = new Fragment();
-    template.childSlots.push(imageWrapper, desc);
+    component.childSlots.push(imageWrapper, desc);
     return {
-      component: template,
+      component: component,
       childrenSlots: [{
         from: element.children[0] as HTMLElement,
         toSlot: imageWrapper
@@ -113,12 +113,12 @@ export const imageCardComponentExample: ComponentExample = {
 export class ImageCardHook implements Lifecycle {
   onDelete(renderer: Renderer, selection: TBSelection): boolean {
     const firstRange = selection.firstRange;
-    const template = firstRange.commonAncestorTemplate;
-    if (template instanceof ImageCardComponent && firstRange.startFragment === template.imgFragment) {
-      if (template.imgFragment.contentLength === 0) {
+    const component = firstRange.commonAncestorComponent;
+    if (component instanceof ImageCardComponent && firstRange.startFragment === component.imgFragment) {
+      if (component.imgFragment.contentLength === 0) {
         let position = firstRange.getPreviousPosition();
-        const parentFragment = renderer.getParentFragment(template);
-        const index = parentFragment.indexOf(template);
+        const parentFragment = renderer.getParentFragment(component);
+        const index = parentFragment.indexOf(component);
         parentFragment.remove(index, 1);
 
         if (parentFragment.contentLength === 0) {

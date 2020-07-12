@@ -23,31 +23,31 @@ export class BlockCommander implements Commander<string> {
     selection.ranges.forEach(range => {
 
       range.getSuccessiveContents().forEach(scope => {
-        const blockTemplate = new BlockComponent(this.tagName);
+        const blockComponent = new BlockComponent(this.tagName);
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-          const parentTemplate = renderer.getParentTemplate(scope.fragment);
-          if (parentTemplate instanceof BranchComponent) {
-            const parentFragment = renderer.getParentFragment(parentTemplate);
-            blockTemplate.slot.from(scope.fragment);
-            parentFragment.insertBefore(blockTemplate, parentTemplate);
-            parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
-            this.effect(blockTemplate.slot, parentTemplate.tagName);
+          const parentComponent = renderer.getParentComponent(scope.fragment);
+          if (parentComponent instanceof BranchComponent) {
+            const parentFragment = renderer.getParentFragment(parentComponent);
+            blockComponent.slot.from(scope.fragment);
+            parentFragment.insertBefore(blockComponent, parentComponent);
+            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+            this.effect(blockComponent.slot, parentComponent.tagName);
           } else {
-            const index = parentTemplate.childSlots.indexOf(scope.fragment);
-            blockTemplate.slot.from(scope.fragment);
-            this.effect(blockTemplate.slot, parentTemplate.tagName);
+            const index = parentComponent.childSlots.indexOf(scope.fragment);
+            blockComponent.slot.from(scope.fragment);
+            this.effect(blockComponent.slot, parentComponent.tagName);
             const fragment = new Fragment();
-            fragment.append(blockTemplate);
-            parentTemplate.childSlots.splice(index, 1, fragment);
+            fragment.append(blockComponent);
+            parentComponent.childSlots.splice(index, 1, fragment);
           }
         } else {
-          blockTemplate.slot.from(new Fragment());
+          blockComponent.slot.from(new Fragment());
           const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
-          c.contents.forEach(cc => blockTemplate.slot.append(cc));
-          c.formatRanges.forEach(ff => blockTemplate.slot.apply(ff));
-          scope.fragment.insert(blockTemplate, scope.startIndex);
-          this.effect(blockTemplate.slot, '');
+          c.contents.forEach(cc => blockComponent.slot.append(cc));
+          c.formatRanges.forEach(ff => blockComponent.slot.apply(ff));
+          scope.fragment.insert(blockComponent, scope.startIndex);
+          this.effect(blockComponent.slot, '');
         }
       })
     })

@@ -2,12 +2,12 @@ import { TBSelection, Constructor, Renderer, BackboneComponent, BranchComponent 
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { BlockComponent } from '../../components/block.component';
 import { HighlightState } from '../help';
-import { rangeContentInTemplate } from './utils/range-content-in-template';
+import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class BlockMatcher implements Matcher {
-  constructor(public templateConstructor: Constructor<BlockComponent>,
+  constructor(public componentConstructor: Constructor<BlockComponent>,
               private tagNames: string[],
-              private excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+              private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -20,7 +20,7 @@ export class BlockMatcher implements Matcher {
     }
 
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInTemplate(range, renderer, this.excludeTemplates);
+      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
 
       if (isDisable) {
         return {
@@ -31,19 +31,19 @@ export class BlockMatcher implements Matcher {
       }
     }
 
-    const contextTemplates = selection.ranges.map(range => {
-      if (range.commonAncestorTemplate instanceof this.templateConstructor &&
-        this.tagNames.includes(range.commonAncestorTemplate.tagName)) {
-        return range.commonAncestorTemplate;
+    const contextComponents = selection.ranges.map(range => {
+      if (range.commonAncestorComponent instanceof this.componentConstructor &&
+        this.tagNames.includes(range.commonAncestorComponent.tagName)) {
+        return range.commonAncestorComponent;
       }
-      return renderer.getContext(range.commonAncestorFragment, this.templateConstructor, instance => {
+      return renderer.getContext(range.commonAncestorFragment, this.componentConstructor, instance => {
         return this.tagNames.includes(instance.tagName);
       });
     });
     return {
-      state: contextTemplates.map(i => !!i).includes(false) && contextTemplates.length ? HighlightState.Normal : HighlightState.Highlight,
+      state: contextComponents.map(i => !!i).includes(false) && contextComponents.length ? HighlightState.Normal : HighlightState.Highlight,
       srcStates: [],
-      matchData: contextTemplates[0]
+      matchData: contextComponents[0]
     }
   }
 }

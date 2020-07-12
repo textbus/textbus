@@ -11,41 +11,41 @@ import { ContextMenu } from './context-menu';
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<{ config: ToolConfig, instance: Tool }>;
-  onTemplatesStageChange: Observable<boolean>;
+  onComponentsStageChange: Observable<boolean>;
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
-  private templateStageEvent = new Subject<boolean>();
+  private componentStageEvent = new Subject<boolean>();
   private toolsElement = document.createElement('div');
-  private templatesElement = document.createElement('div');
+  private componentsElement = document.createElement('div');
   private keymapPrompt = document.createElement('div');
-  private templateStageExpand = false;
+  private componentStageExpand = false;
 
   constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
-    this.onTemplatesStageChange = this.templateStageEvent.asObservable();
+    this.onComponentsStageChange = this.componentStageEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
-    this.templatesElement.classList.add('tbus-toolbar-templates');
+    this.componentsElement.classList.add('tbus-toolbar-components');
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
 
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.innerText = '模板库';
-    btn.classList.add('tbus-toolbar-templates-btn');
+    btn.innerText = '组件库';
+    btn.classList.add('tbus-toolbar-components-btn');
 
     btn.addEventListener('click', () => {
-      this.templateStageExpand = !this.templateStageExpand;
-      this.templateStageExpand ?
-        btn.classList.add('tbus-toolbar-templates-btn-active') :
-        btn.classList.remove('tbus-toolbar-templates-btn-active');
-      this.templateStageEvent.next(this.templateStageExpand);
+      this.componentStageExpand = !this.componentStageExpand;
+      this.componentStageExpand ?
+        btn.classList.add('tbus-toolbar-components-btn-active') :
+        btn.classList.remove('tbus-toolbar-components-btn-active');
+      this.componentStageEvent.next(this.componentStageExpand);
     })
 
-    this.templatesElement.appendChild(btn);
+    this.componentsElement.appendChild(btn);
 
     this.elementRef.appendChild(this.toolsElement);
-    this.elementRef.appendChild(this.templatesElement);
+    this.elementRef.appendChild(this.componentsElement);
     this.elementRef.appendChild(this.keymapPrompt);
 
     this.createToolbar(config);

@@ -1,15 +1,15 @@
 import { TBSelection, Constructor, Renderer, BackboneComponent, BranchComponent } from '../../core/_api';
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { HighlightState } from '../../toolbar/help';
-import { rangeContentInTemplate } from './utils/range-content-in-template';
+import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class TableMatcher implements Matcher {
-  constructor(private excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+  constructor(private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInTemplate(range, renderer, this.excludeTemplates);
+      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
 
       if (isDisable) {
         return {

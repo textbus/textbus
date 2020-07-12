@@ -34,32 +34,32 @@ export class ToggleBlockCommander implements Commander<string> {
         const block = new BlockComponent(this.tagName);
         const fragment = block.slot;
         if (range.startFragment === range.endFragment) {
-          const parentTemplate = renderer.getParentTemplate(range.startFragment)
-          parentFragment = renderer.getParentFragment(parentTemplate);
-          position = parentFragment.indexOf(parentTemplate);
-          fragment.append(parentTemplate);
+          const parentComponent = renderer.getParentComponent(range.startFragment)
+          parentFragment = renderer.getParentFragment(parentComponent);
+          position = parentFragment.indexOf(parentComponent);
+          fragment.append(parentComponent);
           parentFragment.cut(position, 1);
           parentFragment.insert(block, position);
         } else {
           position = range.getCommonAncestorFragmentScope().startIndex;
           parentFragment = range.commonAncestorFragment;
 
-          const index = range.commonAncestorFragment.indexOf(range.commonAncestorTemplate)
+          const index = range.commonAncestorFragment.indexOf(range.commonAncestorComponent)
           if (index !== -1) {
             range.commonAncestorFragment.cut(index, 1);
-            fragment.append(range.commonAncestorTemplate);
+            fragment.append(range.commonAncestorComponent);
           } else {
-            const appendedTemplates: Array<BackboneComponent | BranchComponent> = [];
+            const appendedComponents: Array<BackboneComponent | BranchComponent> = [];
             range.getExpandedScope().reverse().forEach(scope => {
-              const parentTemplate = renderer.getParentTemplate(scope.fragment);
-              if (appendedTemplates.includes(parentTemplate)) {
+              const parentComponent = renderer.getParentComponent(scope.fragment);
+              if (appendedComponents.includes(parentComponent)) {
                 return;
               }
-              appendedTemplates.push(parentTemplate);
-              const p = renderer.getParentFragment(parentTemplate);
+              appendedComponents.push(parentComponent);
+              const p = renderer.getParentFragment(parentComponent);
               if (p) {
-                p.cut(p.indexOf(parentTemplate), 1);
-                fragment.insert(parentTemplate, 0);
+                p.cut(p.indexOf(parentComponent), 1);
+                fragment.insert(parentComponent, 0);
                 if (p.contentLength === 0) {
                   range.deleteEmptyTree(p);
                 }
@@ -74,8 +74,8 @@ export class ToggleBlockCommander implements Commander<string> {
                     endIndex: f.endIndex + length,
                   }))
                 } else {
-                  const parentTemplate = renderer.getParentTemplate(scope.fragment);
-                  block.slot.insert(parentTemplate, 0);
+                  const parentComponent = renderer.getParentComponent(scope.fragment);
+                  block.slot.insert(parentComponent, 0);
                 }
               }
             });

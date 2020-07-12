@@ -11,12 +11,12 @@ export class BaiduMapComponentReader implements ComponentReader {
   }
 
   from(element: HTMLImageElement): ViewData {
-    const template = new BaiduMapComponent(element.src, {
+    const component = new BaiduMapComponent(element.src, {
       width: element?.style.width || '',
       height: element?.style.height || ''
     });
     return {
-      component: template,
+      component: component,
       childrenSlots: []
     }
   }

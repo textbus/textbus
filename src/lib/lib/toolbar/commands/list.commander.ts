@@ -19,57 +19,57 @@ export class ListCommander implements Commander {
     selection.ranges.forEach(range => {
       if (overlap) {
         range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {
-          const slots = item.template.split(item.startIndex, item.endIndex);
-          const parentFragment = renderer.getParentFragment(item.template);
+          const slots = item.component.split(item.startIndex, item.endIndex);
+          const parentFragment = renderer.getParentFragment(item.component);
           if (slots.before.length) {
             const beforeList = new ListComponent(this.tagName);
             beforeList.childSlots.push(...slots.before);
-            parentFragment.insertBefore(beforeList, item.template);
+            parentFragment.insertBefore(beforeList, item.component);
           }
           if (slots.center.length) {
             slots.center.forEach(fragment => {
               if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BackboneComponent) {
-                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneComponent, item.template)
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneComponent, item.component)
               } else {
                 const t = new BlockComponent('p');
                 t.slot.from(fragment);
-                parentFragment.insertBefore(t, item.template);
+                parentFragment.insertBefore(t, item.component);
               }
             })
           }
           if (slots.after.length) {
             const afterList = new ListComponent(this.tagName);
             afterList.childSlots.push(...slots.after);
-            parentFragment.insertBefore(afterList, item.template);
+            parentFragment.insertBefore(afterList, item.component);
           }
-          parentFragment.cut(parentFragment.indexOf(item.template), 1);
+          parentFragment.cut(parentFragment.indexOf(item.component), 1);
         })
       } else {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListComponent(this.tagName);
-        const backboneTemplates: BackboneComponent[] = [];
+        const backboneComponents: BackboneComponent[] = [];
         const scopes: TBRangeScope[] = [];
         range.getSuccessiveContents().forEach(scope => {
           let fragment = scope.fragment;
-          let lastBackboneTemplate: BackboneComponent;
+          let lastBackboneComponent: BackboneComponent;
           while (true) {
             if (fragment === commonAncestorFragment) {
               break;
             }
-            const parentTemplate = renderer.getParentTemplate(scope.fragment);
-            fragment = renderer.getParentFragment(parentTemplate);
-            if (parentTemplate instanceof BackboneComponent && parentTemplate.canSplit() === false) {
-              lastBackboneTemplate = parentTemplate;
+            const parentComponent = renderer.getParentComponent(scope.fragment);
+            fragment = renderer.getParentFragment(parentComponent);
+            if (parentComponent instanceof BackboneComponent && parentComponent.canSplit() === false) {
+              lastBackboneComponent = parentComponent;
             }
           }
-          if (lastBackboneTemplate) {
-            if (backboneTemplates.includes(lastBackboneTemplate)) {
+          if (lastBackboneComponent) {
+            if (backboneComponents.includes(lastBackboneComponent)) {
               return;
             }
-            backboneTemplates.push(lastBackboneTemplate);
-            const parentFragment = renderer.getParentFragment(lastBackboneTemplate);
-            const index = parentFragment.indexOf(lastBackboneTemplate);
+            backboneComponents.push(lastBackboneComponent);
+            const parentFragment = renderer.getParentFragment(lastBackboneComponent);
+            const index = parentFragment.indexOf(lastBackboneComponent);
             scopes.push({
               startIndex: index,
               endIndex: index + 1,
@@ -101,27 +101,27 @@ export class ListCommander implements Commander {
           }
         });
         if (range.startFragment !== commonAncestorFragment) {
-          if (commonScope.startChildTemplate && commonScope.startChildTemplate instanceof BackboneComponent && commonAncestorFragment.indexOf(commonScope.startChildTemplate) !== -1) {
-            commonAncestorFragment.insertAfter(list, commonScope.startChildTemplate);
+          if (commonScope.startChildComponent && commonScope.startChildComponent instanceof BackboneComponent && commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
+            commonAncestorFragment.insertAfter(list, commonScope.startChildComponent);
           } else {
             commonAncestorFragment.insert(list, commonScope.startIndex);
           }
         } else {
-          const parentTemplate = renderer.getParentTemplate(commonAncestorFragment);
-          if (parentTemplate instanceof BranchComponent) {
-            const parentFragment = renderer.getParentFragment(parentTemplate);
-            const position = parentFragment.indexOf(parentTemplate);
+          const parentComponent = renderer.getParentComponent(commonAncestorFragment);
+          if (parentComponent instanceof BranchComponent) {
+            const parentFragment = renderer.getParentFragment(parentComponent);
+            const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else {
-            const index = parentTemplate.childSlots.indexOf(commonAncestorFragment);
-            const before = parentTemplate.clone() as BackboneComponent;
+            const index = parentComponent.childSlots.indexOf(commonAncestorFragment);
+            const before = parentComponent.clone() as BackboneComponent;
             before.childSlots.splice(index);
-            const after = parentTemplate.clone() as BackboneComponent;
+            const after = parentComponent.clone() as BackboneComponent;
             after.childSlots.splice(0, index + 1);
 
-            const parentFragment = renderer.getParentFragment(parentTemplate);
-            const position = parentFragment.indexOf(parentTemplate);
+            const parentFragment = renderer.getParentFragment(parentComponent);
+            const position = parentFragment.indexOf(parentComponent);
 
             if (after.childSlots.length) {
               parentFragment.insert(after, position)
@@ -130,7 +130,7 @@ export class ListCommander implements Commander {
             if (before.childSlots.length) {
               parentFragment.insert(before, position);
             }
-            parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
+            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
           }
         }
       }

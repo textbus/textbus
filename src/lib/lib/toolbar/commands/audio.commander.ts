@@ -20,11 +20,11 @@ export class AudioCommander implements Commander<AttrState[]> {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {
-          const template = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
-          if (template instanceof AudioComponent) {
-            template.src = attrs.get('src') as string;
-            template.autoplay = attrs.get('autoplay') as boolean;
-            template.controls = attrs.get('controls') as boolean;
+          const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
+          if (component instanceof AudioComponent) {
+            component.src = attrs.get('src') as string;
+            component.autoplay = attrs.get('autoplay') as boolean;
+            component.controls = attrs.get('controls') as boolean;
           }
         } else {
           range.commonAncestorFragment.insert(
@@ -33,11 +33,11 @@ export class AudioCommander implements Commander<AttrState[]> {
         }
       } else {
         range.getSelectedScope().forEach(scope => {
-          scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(template => {
-            if (template instanceof AudioComponent) {
-              template.src = attrs.get('src') as string;
-              template.autoplay = attrs.get('autoplay') as boolean;
-              template.controls = attrs.get('controls') as boolean;
+          scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(component => {
+            if (component instanceof AudioComponent) {
+              component.src = attrs.get('src') as string;
+              component.autoplay = attrs.get('autoplay') as boolean;
+              component.controls = attrs.get('controls') as boolean;
             }
           })
         });

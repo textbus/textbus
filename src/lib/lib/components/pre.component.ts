@@ -36,7 +36,7 @@ const theme = [
       fontWeight: 'bold'
     }
   }, {
-    classes: ['hljs-number', 'hljs-literal', 'hljs-variable', 'hljs-template-variable', 'hljs-tag', 'hljs-attr'],
+    classes: ['hljs-number', 'hljs-literal', 'hljs-variable', 'hljs-component-variable', 'hljs-tag', 'hljs-attr'],
     styles: {
       color: '#008080'
     }
@@ -149,8 +149,8 @@ const codeFormatter = new CodeFormatter();
 export class PreComponentReader implements ComponentReader {
   private tagName = 'pre';
 
-  match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === this.tagName;
   }
 
   from(el: HTMLElement): ViewData {
@@ -182,9 +182,9 @@ export class PreComponent extends BranchComponent {
   }
 
   clone() {
-    const template = new PreComponent(this.lang);
-    template.slot.from(this.slot.clone());
-    return template;
+    const component = new PreComponent(this.lang);
+    component.slot.from(this.slot.clone());
+    return component;
   }
 
   render(isProduction: boolean) {

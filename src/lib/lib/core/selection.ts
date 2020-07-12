@@ -76,11 +76,11 @@ export class TBSelection {
     const getPaths = (fragment: Fragment): number[] => {
       const paths = [];
       while (fragment) {
-        const parentTemplate = this.renderer.getParentTemplate(fragment);
-        if (parentTemplate) {
-          parentTemplate instanceof BackboneComponent ? paths.push(parentTemplate.childSlots.indexOf(fragment)) : paths.push(0);
-          fragment = this.renderer.getParentFragment(parentTemplate);
-          paths.push(fragment.indexOf(parentTemplate));
+        const parentComponent = this.renderer.getParentComponent(fragment);
+        if (parentComponent) {
+          parentComponent instanceof BackboneComponent ? paths.push(parentComponent.childSlots.indexOf(fragment)) : paths.push(0);
+          fragment = this.renderer.getParentFragment(parentComponent);
+          paths.push(fragment.indexOf(parentComponent));
         } else {
           break;
         }
@@ -176,7 +176,7 @@ export class TBSelection {
       const tree = [];
       while (fragment) {
         tree.push(fragment);
-        fragment = this.renderer.getParentFragment(this.renderer.getParentTemplate(fragment));
+        fragment = this.renderer.getParentFragment(this.renderer.getParentComponent(fragment));
       }
       depth.push(tree);
     });

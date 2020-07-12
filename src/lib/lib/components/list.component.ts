@@ -16,18 +16,18 @@ export class ListComponentReader implements ComponentReader {
   constructor(private tagName: string) {
   }
 
-  match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === this.tagName;
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new ListComponent(this.tagName);
+    const component = new ListComponent(this.tagName);
     const childrenSlots: SlotMap[] = [];
 
     const childNodes = Array.from(el.childNodes);
     while (childNodes.length) {
       const slot = new Fragment();
-      template.childSlots.push(slot);
+      component.childSlots.push(slot);
       let first = childNodes.shift();
       let newLi: HTMLElement;
       while (first) {
@@ -53,7 +53,7 @@ export class ListComponentReader implements ComponentReader {
       }
     }
     return {
-      component: template,
+      component: component,
       childrenSlots
     };
   }
@@ -65,11 +65,11 @@ export class ListComponent extends BackboneComponent {
   }
 
   clone() {
-    const template = new ListComponent(this.tagName);
+    const component = new ListComponent(this.tagName);
     this.childSlots.forEach(f => {
-      template.childSlots.push(f.clone());
+      component.childSlots.push(f.clone());
     });
-    return template;
+    return component;
   }
 
   canSplit(): boolean {

@@ -1,13 +1,13 @@
 import { BackboneComponent, BranchComponent, Constructor, Renderer, TBRange } from '../../../core/_api';
 
-export function rangeContentInTemplate(range: TBRange,
+export function rangeContentInComponent(range: TBRange,
                                        renderer: Renderer,
-                                       templateConstructorList: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+                                       componentConstructorList: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
   let has = true;
-  if (templateConstructorList.length === 0) {
+  if (componentConstructorList.length === 0) {
     return false;
   }
-  forA: for (const t of templateConstructorList) {
+  forA: for (const t of componentConstructorList) {
     const scopes = range.getSuccessiveContents();
     for (const scope of scopes) {
       if (!renderer.getContext(scope.fragment, t)) {

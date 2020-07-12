@@ -41,7 +41,7 @@ export class TableEditHook implements Lifecycle {
   private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
   private animateId: number;
   private renderer: Renderer;
-  private tableTemplate: TableComponent;
+  private tableComponent: TableComponent;
 
   constructor() {
     this.mask.classList.add('tbus-table-editor-hook-mask');
@@ -167,7 +167,7 @@ export class TableEditHook implements Lifecycle {
   }
 
   onViewUpdated() {
-    if (this.startPosition && this.endPosition && this.tableTemplate) {
+    if (this.startPosition && this.endPosition && this.tableComponent) {
 
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
@@ -192,7 +192,7 @@ export class TableEditHook implements Lifecycle {
     const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
     const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
     const table = this.renderer.getContext(cell1Fragment, TableComponent);
-    this.tableTemplate = table;
+    this.tableComponent = table;
 
     const {startCellPosition, endCellPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);
 

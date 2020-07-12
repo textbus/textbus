@@ -126,16 +126,16 @@ export class Editor implements EventDelegate {
     this.workbench.setTabletWidth(deviceWidth);
 
     if (Array.isArray(options.componentExamples)) {
-      options.componentExamples.forEach(i => this.workbench.templateStage.addExample(i));
+      options.componentExamples.forEach(i => this.workbench.componentStage.addExample(i));
     }
 
     this.subs.push(
-      this.toolbar.onTemplatesStageChange.subscribe(b => {
-        this.workbench.templateStage.expand = b;
+      this.toolbar.onComponentsStageChange.subscribe(b => {
+        this.workbench.componentStage.expand = b;
       }),
-      this.workbench.templateStage.onCheck.subscribe(template => {
+      this.workbench.componentStage.onCheck.subscribe(component => {
         if (this.selection && this.selection.rangeCount) {
-          this.insertTemplate(template);
+          this.insertComponent(component);
         }
       }),
       this.statusBar.device.onChange.subscribe(value => {
@@ -580,27 +580,27 @@ export class Editor implements EventDelegate {
     this.recordSnapshotFromEditingBefore();
   }
 
-  private insertTemplate(template: Component) {
+  private insertComponent(component: Component) {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
-    const parentTemplate = this.renderer.getParentTemplate(startFragment);
-    if (template instanceof LeafComponent) {
-      startFragment.insert(template, firstRange.endIndex);
+    const parentComponent = this.renderer.getParentComponent(startFragment);
+    if (component instanceof LeafComponent) {
+      startFragment.insert(component, firstRange.endIndex);
     } else {
-      if (parentTemplate instanceof BranchComponent) {
-        const parentFragment = this.renderer.getParentFragment(parentTemplate);
+      if (parentComponent instanceof BranchComponent) {
+        const parentFragment = this.renderer.getParentFragment(parentComponent);
         const firstContent = startFragment.getContentAtIndex(0);
-        parentFragment.insertAfter(template, parentTemplate);
+        parentFragment.insertAfter(component, parentComponent);
         if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
-          parentFragment.cut(parentFragment.indexOf(parentTemplate), 1);
+          parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
 
         }
-      } else if (parentTemplate instanceof BackboneComponent && parentTemplate.canSplit()) {
+      } else if (parentComponent instanceof BackboneComponent && parentComponent.canSplit()) {
         const ff = new Fragment();
-        ff.append(template);
-        parentTemplate.childSlots.splice(parentTemplate.childSlots.indexOf(startFragment) + 1, 0, ff);
+        ff.append(component);
+        parentComponent.childSlots.splice(parentComponent.childSlots.indexOf(startFragment) + 1, 0, ff);
       } else {
-        startFragment.insert(template, firstRange.endIndex);
+        startFragment.insert(component, firstRange.endIndex);
       }
     }
     this.selection.removeAllRanges();

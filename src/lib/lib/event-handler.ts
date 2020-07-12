@@ -71,9 +71,9 @@ export class EventHandler {
     const contents = event.data.clipboard as Contents;
     const fragment = firstRange.startFragment;
 
-    const parentTemplate = event.renderer.getParentTemplate(fragment);
+    const parentComponent = event.renderer.getParentComponent(fragment);
 
-    if (parentTemplate instanceof BackboneComponent) {
+    if (parentComponent instanceof BackboneComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);
@@ -82,14 +82,14 @@ export class EventHandler {
       firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
     } else {
       const firstChild = fragment.getContentAtIndex(0);
-      const parentFragment = event.renderer.getParentFragment(parentTemplate);
+      const parentFragment = event.renderer.getParentFragment(parentComponent);
       const contentsArr = contents.slice(0);
       if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagComponent && firstChild.tagName === 'br') {
-        contentsArr.forEach(item => parentFragment.insertBefore(item, parentTemplate));
+        contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
       } else {
         const firstContent = contentsArr.shift();
         if (firstContent instanceof BackboneComponent) {
-          parentFragment.insertAfter(firstContent, parentTemplate);
+          parentFragment.insertAfter(firstContent, parentComponent);
         } else if (firstContent instanceof BranchComponent) {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
@@ -107,21 +107,21 @@ export class EventHandler {
             firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + length;
           } else {
             const afterContents = fragment.cut(firstRange.startIndex);
-            contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentTemplate));
-            const afterTemplate = parentTemplate.clone() as BranchComponent;
-            afterTemplate.slot.from(new Fragment());
-            afterContents.contents.forEach(c => afterTemplate.slot.append(c));
+            contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentComponent));
+            const afterComponent = parentComponent.clone() as BranchComponent;
+            afterComponent.slot.from(new Fragment());
+            afterContents.contents.forEach(c => afterComponent.slot.append(c));
             afterContents.formatRanges.forEach(f => {
-              afterTemplate.slot.apply({
+              afterComponent.slot.apply({
                 ...f,
                 startIndex: 0,
                 endIndex: f.endIndex - f.startIndex
               });
             });
-            if (afterTemplate.slot.contentLength === 0) {
-              afterTemplate.slot.append(new SingleTagComponent('br'));
+            if (afterComponent.slot.contentLength === 0) {
+              afterComponent.slot.append(new SingleTagComponent('br'));
             }
-            firstRange.setStart(afterTemplate.slot, 0);
+            firstRange.setStart(afterComponent.slot, 0);
             firstRange.collapse();
           }
         }
@@ -175,7 +175,7 @@ export class EventHandler {
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
             // const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
-            // if (prevContent instanceof SingleTagTemplate && prevContent.tagName === 'br') {
+            // if (prevContent instanceof SingleTagComponent && prevContent.tagName === 'br') {
             //   prevPosition.index--;
             // }
 

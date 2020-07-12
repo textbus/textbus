@@ -3,7 +3,7 @@ import { Viewer } from '../viewer/viewer';
 
 export class Workbench {
   elementRef = document.createElement('div');
-  readonly templateStage = new ComponentStage(this);
+  readonly componentStage = new ComponentStage(this);
   readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');
@@ -29,7 +29,7 @@ export class Workbench {
     this.tablet.appendChild(this.viewer.elementRef);
     this.editableArea.appendChild(this.tablet);
     this.dashboard.appendChild(this.editableArea);
-    this.dashboard.appendChild(this.templateStage.elementRef);
+    this.dashboard.appendChild(this.componentStage.elementRef);
     this.elementRef.appendChild(this.dashboard);
     const sub = this.viewer.onReady.subscribe(() => {
       this.tablet.appendChild(this.viewer.input.elementRef);

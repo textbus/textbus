@@ -20,7 +20,7 @@ export class ImageVideoResizeHook implements Lifecycle {
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];
 
-  private currentTemplate: ImageComponent | VideoComponent;
+  private currentComponent: ImageComponent | VideoComponent;
   private currentElement: HTMLImageElement | HTMLVideoElement;
   private frameContainer: HTMLElement;
 
@@ -35,15 +35,15 @@ export class ImageVideoResizeHook implements Lifecycle {
     this.mask.append(this.text);
 
     this.mask.addEventListener('mousedown', ev => {
-      if (!this.currentTemplate) {
+      if (!this.currentComponent) {
         return;
       }
 
       this.frameContainer.style.pointerEvents = 'none';
 
       const startRect = this.currentElement.getBoundingClientRect();
-      this.currentTemplate.width = startRect.width + 'px';
-      this.currentTemplate.height = startRect.height + 'px';
+      this.currentComponent.width = startRect.width + 'px';
+      this.currentComponent.height = startRect.height + 'px';
 
       const startX = ev.clientX;
       const startY = ev.clientY;
@@ -91,8 +91,8 @@ export class ImageVideoResizeHook implements Lifecycle {
       };
 
       const mouseUpFn = () => {
-        this.currentTemplate.width = endWidth + 'px';
-        this.currentTemplate.height = endHeight + 'px';
+        this.currentComponent.width = endWidth + 'px';
+        this.currentComponent.height = endHeight + 'px';
         this.frameContainer.style.pointerEvents = '';
         document.removeEventListener('mousemove', mouseMoveFn);
         document.removeEventListener('mouseup', mouseUpFn);
@@ -111,7 +111,7 @@ export class ImageVideoResizeHook implements Lifecycle {
           return;
         }
         this.currentElement = srcElement;
-        this.currentTemplate = position.fragment.getContentAtIndex(position.startIndex) as ImageComponent;
+        this.currentComponent = position.fragment.getContentAtIndex(position.startIndex) as ImageComponent;
         this.frameContainer = frameContainer;
         const selection = contextDocument.getSelection();
         selection.removeAllRanges();
@@ -122,7 +122,7 @@ export class ImageVideoResizeHook implements Lifecycle {
         frameContainer.append(this.mask);
       } else {
         this.currentElement = null;
-        this.currentTemplate = null;
+        this.currentComponent = null;
         if (this.mask.parentNode) {
           this.mask.parentNode.removeChild(this.mask);
         }

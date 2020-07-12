@@ -4,14 +4,14 @@ export class SingleTagComponentReader implements ComponentReader {
   constructor(private tagName: string) {
   }
 
-  match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === this.tagName;
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new SingleTagComponent(this.tagName);
+    const component = new SingleTagComponent(this.tagName);
     return {
-      component: template,
+      component: component,
       childrenSlots: []
     };
   }

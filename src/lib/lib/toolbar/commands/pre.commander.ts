@@ -21,7 +21,7 @@ export class PreCommander implements Commander<string> {
       });
     } else {
       selection.ranges.forEach(range => {
-        const context = range.commonAncestorTemplate;
+        const context = range.commonAncestorComponent;
         const parentFragment = renderer.getParentFragment(context);
         const t = new PreComponent(this.lang);
         t.slot.append(new SingleTagComponent('br'));

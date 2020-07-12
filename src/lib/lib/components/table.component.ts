@@ -55,8 +55,8 @@ export interface TableRange {
 export class TableComponentReader implements ComponentReader {
   private tagName = 'table';
 
-  match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === this.tagName;
   }
 
   from(el: HTMLTableElement): ViewData {
@@ -138,11 +138,11 @@ export class TableComponent extends BackboneComponent {
   }
 
   clone() {
-    const template = new TableComponent(this.config);
+    const component = new TableComponent(this.config);
     this.childSlots.forEach(f => {
-      template.childSlots.push(f.clone());
+      component.childSlots.push(f.clone());
     });
-    return template;
+    return component;
   }
 
   render(isProduction: boolean) {

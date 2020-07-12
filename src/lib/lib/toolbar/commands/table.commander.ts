@@ -23,19 +23,19 @@ export class TableCommander implements Commander<AttrState[]> {
         bodies
       });
 
-      const parentTemplate = renderer.getParentTemplate(range.startFragment);
-      const parentFragment = renderer.getParentFragment(parentTemplate);
+      const parentComponent = renderer.getParentComponent(range.startFragment);
+      const parentFragment = renderer.getParentFragment(parentComponent);
       const firstContent = range.startFragment.getContentAtIndex(0);
-      if (parentTemplate instanceof BranchComponent) {
+      if (parentComponent instanceof BranchComponent) {
         if (range.startFragment.contentLength === 0 ||
           range.startFragment.contentLength === 1 &&
           firstContent instanceof SingleTagComponent &&
           firstContent.tagName === 'br') {
-          const i = parentFragment.indexOf(parentTemplate);
+          const i = parentFragment.indexOf(parentComponent);
           parentFragment.insert(table, i);
           parentFragment.remove(i + 1, 1);
         } else {
-          parentFragment.insertAfter(table, parentTemplate);
+          parentFragment.insertAfter(table, parentComponent);
         }
       } else {
         range.startFragment.insert(table, range.startIndex);

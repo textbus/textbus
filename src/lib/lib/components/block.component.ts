@@ -11,17 +11,17 @@ export class BlockComponentReader implements ComponentReader {
   constructor(private tagNames: string[]) {
   }
 
-  match(template: HTMLElement): boolean {
-    return this.tagNames.includes(template.nodeName.toLowerCase());
+  match(component: HTMLElement): boolean {
+    return this.tagNames.includes(component.nodeName.toLowerCase());
   }
 
   from(el: HTMLElement): ViewData {
-    const template = new BlockComponent(el.tagName.toLocaleLowerCase());
+    const component = new BlockComponent(el.tagName.toLocaleLowerCase());
     return {
-      component: template,
+      component: component,
       childrenSlots: [{
         from: el,
-        toSlot: template.slot
+        toSlot: component.slot
       }]
     };
   }
@@ -44,12 +44,12 @@ export class BlockComponent extends BranchComponent {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragment(this);
 
-        const template = new BlockComponent('p');
+        const component = new BlockComponent('p');
         const firstRange = event.selection.firstRange;
         const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
-        template.slot.from(next);
-        parent.insert(template, parent.indexOf(this) + 1);
-        const position = firstRange.findFirstPosition(template.slot);
+        component.slot.from(next);
+        parent.insert(component, parent.indexOf(this) + 1);
+        const position = firstRange.findFirstPosition(component.slot);
         firstRange.startFragment = firstRange.endFragment = position.fragment;
         firstRange.startIndex = firstRange.endIndex = position.index;
         event.stopPropagation();

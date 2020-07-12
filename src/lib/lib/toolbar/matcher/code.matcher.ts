@@ -13,16 +13,16 @@ export class CodeMatcher implements Matcher {
         state: HighlightState.Normal
       }
     }
-    const contextTemplates = selection.ranges.map(range => {
-      if (range.commonAncestorTemplate instanceof PreComponent) {
-        return range.commonAncestorTemplate;
+    const contextComponents = selection.ranges.map(range => {
+      if (range.commonAncestorComponent instanceof PreComponent) {
+        return range.commonAncestorComponent;
       }
       return renderer.getContext(range.commonAncestorFragment, PreComponent);
     });
     return {
-      state: contextTemplates.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,
+      state: contextComponents.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,
       srcStates: [],
-      matchData: contextTemplates[0]
+      matchData: contextComponents[0]
     }
   }
 }

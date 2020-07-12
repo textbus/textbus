@@ -9,8 +9,8 @@ import { BlockComponent } from '../../components/block.component';
 export class BoldMatcher extends FormatMatcher {
   private contextMatcher = new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6'.split(','))
 
-  constructor(excludeTemplates: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
-    super(boldFormatter, excludeTemplates);
+  constructor(excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+    super(boldFormatter, excludeComponents);
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {

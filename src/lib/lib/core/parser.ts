@@ -9,14 +9,14 @@ export class Parser {
 
   parse(el: HTMLElement) {
     const rootSlot = new Fragment();
-    this.readTemplate(el, rootSlot);
+    this.readComponent(el, rootSlot);
     return rootSlot;
   }
 
-  private readTemplate(el: Node, slot: Fragment) {
+  private readComponent(el: Node, slot: Fragment) {
     if (el.nodeType === 1) {
-      const templates = this.options.componentReaders;
-      for (const t of templates) {
+      const components = this.options.componentReaders;
+      for (const t of components) {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.component);
@@ -26,7 +26,7 @@ export class Parser {
               item.from === el) {
               this.readFormats(item.from, item.toSlot);
             } else {
-              this.readTemplate(item.from, item.toSlot);
+              this.readComponent(item.from, item.toSlot);
             }
           })
           return;
@@ -59,7 +59,7 @@ export class Parser {
     });
     const startIndex = slot.contentLength;
     Array.from(el.childNodes).forEach(child => {
-      this.readTemplate(child, slot);
+      this.readComponent(child, slot);
     })
     maps.forEach(item => {
       slot.apply({

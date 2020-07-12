@@ -3,8 +3,8 @@ import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api
 export class ImageComponentReader implements ComponentReader {
   private tagName = 'img';
 
-  match(template: HTMLElement): boolean {
-    return template.nodeName.toLowerCase() === this.tagName;
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === this.tagName;
   }
 
   from(el: HTMLImageElement): ViewData {
