@@ -3,6 +3,7 @@ import { textIndentFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const textIndentTool = Toolkit.makeSelectTool({
   tooltip: '首行缩进',
@@ -27,7 +28,7 @@ export const textIndentTool = Toolkit.makeSelectTool({
     classes: ['tbus-text-indent-4'],
     value: '4em'
   }],
-  matcher: new FormatMatcher(textIndentFormatter),
+  matcher: new FormatMatcher(textIndentFormatter, [PreTemplate]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

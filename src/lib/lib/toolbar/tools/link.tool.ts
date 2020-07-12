@@ -6,6 +6,7 @@ import { linkFormatter } from '../../formatter/link.formatter';
 import { FormatEffect } from '../../core/formatter';
 import { DropdownHandler } from '../toolkit/dropdown.handler';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const linkTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-link'],
@@ -54,7 +55,7 @@ export const linkTool = Toolkit.makeDropdownTool({
       })
     }
   }],
-  matcher: new FormatMatcher(linkFormatter),
+  matcher: new FormatMatcher(linkFormatter, [PreTemplate]),
   commanderFactory() {
     return new LinkCommander(linkFormatter)
   }

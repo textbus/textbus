@@ -3,6 +3,7 @@ import { fontSizeFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const fontSizeTool = Toolkit.makeSelectTool({
   tooltip: '字体大小',
@@ -50,7 +51,7 @@ export const fontSizeTool = Toolkit.makeSelectTool({
     classes: ['tbus-font-size-48'],
     value: '48px'
   }],
-  matcher: new FormatMatcher(fontSizeFormatter),
+  matcher: new FormatMatcher(fontSizeFormatter, [PreTemplate]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

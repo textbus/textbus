@@ -8,21 +8,15 @@ import {
   InlineFormatter,
   Renderer,
   BranchTemplate,
-  TBRange,
-  TBSelection
+  TBSelection,
+  Constructor
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
 
-export interface FormatMatcherParams {
-  /** 不能包含哪些标签 */
-  noContainTags?: string[] | RegExp;
-  /** 不能在哪些标签之内 */
-  noInTags?: string[] | RegExp;
-}
-
 export class FormatMatcher implements Matcher {
-  constructor(private formatter: InlineFormatter | BlockFormatter, private rule: FormatMatcherParams = {}) {
+  constructor(private formatter: InlineFormatter | BlockFormatter,
+              private excludeTemplates: Array<Constructor<BackboneTemplate | BranchTemplate>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -35,7 +29,17 @@ export class FormatMatcher implements Matcher {
     }
     const srcStates: RangeMatchDelta<FormatAbstractData>[] = selection.ranges.map(range => {
 
-      const isDisable = this.getDisableStateByRange(range, renderer);
+      let isDisable = false;
+
+      forA: for (const t of this.excludeTemplates) {
+        const scopes = range.getSuccessiveContents();
+        for (const scope of scopes) {
+          if (renderer.getContext(scope.fragment, t)) {
+            isDisable = true;
+            break forA;
+          }
+        }
+      }
 
       if (isDisable) {
         return {
@@ -152,59 +156,6 @@ export class FormatMatcher implements Matcher {
     }
     return FormatMatcher.mergeStates(states);
   }
-
-  private getDisableStateByRange(range: TBRange, renderer: Renderer) {
-    return this.isInTag(range.commonAncestorFragment, renderer) ||
-      this.isContainTag(range.commonAncestorFragment, renderer, range.getCommonAncestorFragmentScope());
-  }
-
-  private isInTag(fragment: Fragment, renderer: Renderer): boolean {
-    if (!fragment) {
-      return false;
-    }
-    return FormatMatcher.isDisable(fragment, this.rule.noInTags) || this.isInTag(
-      renderer.getParentFragment(renderer.getParentTemplate(fragment)),
-      renderer
-    );
-  }
-
-  private isContainTag(fragment: Fragment, renderer: Renderer, position: { startIndex: number, endIndex: number }): boolean {
-    const templates = fragment.sliceContents(position.startIndex, position.endIndex)
-      .filter(item => {
-        return item instanceof BackboneTemplate || item instanceof BranchTemplate;
-      }) as Array<BackboneTemplate | BranchTemplate>;
-    const elements: Fragment[] = [];
-    templates.forEach(t => {
-      t instanceof BackboneTemplate ? elements.push(...t.childSlots) : elements.push(t.slot);
-    });
-    for (let el of elements) {
-      if (FormatMatcher.isDisable(el, this.rule.noContainTags) ||
-        this.isContainTag(el, renderer, {startIndex: 0, endIndex: el.contentLength})) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static isDisable(fragment: Fragment, tags: string[] | RegExp) {
-    const formats = fragment.getFormatRanges();
-
-    for (const f of formats) {
-      if (f.abstractData) {
-        if (Array.isArray(tags)) {
-          if (tags.includes(f.abstractData.tag)) {
-            return true;
-          }
-        } else if (tags instanceof RegExp) {
-          if (tags.test(f.abstractData.tag)) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
 
   private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
 

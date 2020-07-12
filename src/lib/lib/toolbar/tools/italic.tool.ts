@@ -2,6 +2,7 @@ import { italicFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
 import { Toolkit } from '../toolkit/toolkit';
+import { PreTemplate } from '../../templates/pre.template';
 
 export const italicTool = Toolkit.makeButtonTool({
   classes: ['tbus-icon-italic'],
@@ -10,7 +11,7 @@ export const italicTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'i'
   },
-  matcher: new FormatMatcher(italicFormatter),
+  matcher: new FormatMatcher(italicFormatter, [PreTemplate]),
   commanderFactory() {
     return new InlineCommander('em', italicFormatter);
   }
