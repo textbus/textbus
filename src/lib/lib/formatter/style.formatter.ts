@@ -36,12 +36,6 @@ export const colorFormatter = new StyleFormatter('color', {
   }
 });
 
-export const backgroundColorFormatter = new StyleFormatter('backgroundColor', {
-  styles: {
-    backgroundColor: /.+/
-  }
-});
-
 export const fontSizeFormatter = new StyleFormatter('fontSize', {
   styles: {
     fontSize: /.+/
@@ -63,3 +57,20 @@ export const lineHeightFormatter = new StyleFormatter('lineHeight', {
     lineHeight: /.+/
   }
 });
+
+export const backgroundColorFormatter = new StyleFormatter('backgroundColor', {
+  styles: {
+    backgroundColor: /.+/
+  }
+});
+
+const match = backgroundColorFormatter.match;
+
+backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) {
+  const inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
+  const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i');
+  if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+    return FormatEffect.Invalid;
+  }
+  return match.call(backgroundColorFormatter, p);
+}

@@ -45,3 +45,14 @@ export const blockBackgroundColorFormatter = new BlockStyleFormatter('background
     backgroundColor: /.+/
   }
 });
+
+const match = blockBackgroundColorFormatter.match;
+
+blockBackgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) {
+  const blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
+  const reg = new RegExp(`^(${blockTags.join('|')})$`, 'i');
+  if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+    return FormatEffect.Invalid;
+  }
+  return match.call(blockBackgroundColorFormatter, p);
+};
