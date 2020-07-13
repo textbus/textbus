@@ -1,6 +1,7 @@
 export * from './commander';
 export * from './component';
 export * from './contents';
+export * from './constructor';
 export * from './element';
 export * from './events';
 export * from './format-abstract-data';

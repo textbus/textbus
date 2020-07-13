@@ -1,4 +1,5 @@
-import { Constructor, Renderer } from './renderer';
+import { Renderer } from './renderer';
+import { Constructor } from './constructor';
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
 import { BackboneComponent, LeafComponent, BranchComponent, Component } from './component';

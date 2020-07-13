@@ -4,6 +4,7 @@ import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
 import { BackboneComponent, BranchComponent, Component } from './component';
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
+import { Constructor } from './constructor';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替
@@ -26,8 +27,6 @@ export interface ElementPosition {
   endIndex: number;
   fragment: Fragment;
 }
-
-export type Constructor<T> = { new(...args: any): T };
 
 class NativeElementMappingTable {
   private nativeVDomMapping = new WeakMap<Node, VElement | VTextNode>();

@@ -4,5 +4,8 @@ export * from './lib/hooks/_api';
 export * from './lib/components/_api';
 export * from './lib/toolbar/_api';
 export * from './lib/viewer/_api';
-export { EditorOptions, Editor } from './lib/editor';
-export { createEditor } from './create';
+
+export * from './lib/editor';
+export * from './lib/event-handler';
+export * from './lib/history-manager';
+export * from './create';
