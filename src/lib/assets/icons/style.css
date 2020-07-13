@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tubs';
   src:
-    url('fonts/tubs.ttf?ydef2h') format('truetype'),
-    url('fonts/tubs.woff?ydef2h') format('woff'),
-    url('fonts/tubs.svg?ydef2h#tubs') format('svg');
+    url('fonts/tubs.ttf?49qqyp') format('truetype'),
+    url('fonts/tubs.woff?49qqyp') format('woff'),
+    url('fonts/tubs.svg?49qqyp#tubs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,11 +24,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.tbus-icon-table-add-paragraph:before {
+.tbus-icon-table-remove:before {
   content: "\e900";
 }
 .tbus-icon-arrow-right:before {
   content: "\e50f";
+}
+.tbus-icon-table-add-paragraph:before {
+  content: "\e901";
 }
 .tbus-icon-device:before {
   content: "\e902";
@@ -107,6 +110,9 @@
 }
 .tbus-icon-shrink:before {
   content: "\e98a";
+}
+.tbus-icon-bin:before {
+  content: "\e9ac";
 }
 .tbus-icon-list-numbered:before {
   content: "\e9b9";
@@ -188,7 +194,4 @@
 }
 .tbus-icon-terminal:before {
   content: "\ea81";
-}
-.tbus-icon-bin:before {
-  content: "\e9ac";
 }
