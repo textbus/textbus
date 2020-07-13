@@ -157,9 +157,9 @@ export class PreComponentReader implements ComponentReader {
     const component = new PreComponent(el.getAttribute('lang'));
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
-        if (node.nodeType === 3) {
+        if (node.nodeType === Node.TEXT_NODE) {
           fragment.append(node.textContent);
-        } else if (node.nodeType === 1) {
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
           if (/br/i.test(node.nodeName)) {
             fragment.append(new SingleTagComponent('br'));
           } else {
@@ -240,7 +240,7 @@ export class PreComponent extends BranchComponent {
     const start = index;
     const childFormats: Array<FormatDelta> = [];
     Array.from(node.childNodes).forEach(item => {
-      if (item.nodeType === 1) {
+      if (item.nodeType === Node.ELEMENT_NODE) {
         if (item.nodeName.toLowerCase() === 'br') {
           index++;
           context.append(new SingleTagComponent('br'));
@@ -249,7 +249,7 @@ export class PreComponent extends BranchComponent {
         const result = this.getFormats(index, item as HTMLElement, context);
         index = result.index;
         childFormats.push(...result.formats);
-      } else if (item.nodeType === 3) {
+      } else if (item.nodeType === Node.TEXT_NODE) {
         context.append(item.textContent);
         index += item.textContent.length;
       }

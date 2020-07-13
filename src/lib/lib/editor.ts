@@ -304,7 +304,7 @@ export class Editor implements EventDelegate {
           return isNext;
         })
         const focusNode = this.nativeSelection.focusNode;
-        let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
+        let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
         const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
         if (!vElement) {
           return;
@@ -390,7 +390,7 @@ export class Editor implements EventDelegate {
       },
       action: () => {
         const focusNode = this.nativeSelection.focusNode;
-        let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
+        let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
         const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
         if (!vElement) {
           return;
@@ -518,7 +518,7 @@ export class Editor implements EventDelegate {
                                     eventData: { [key: string]: any },
                                     callHooksFn: () => boolean): boolean {
     const focusNode = this.nativeSelection.focusNode;
-    let el = focusNode.nodeType === 3 ? focusNode.parentNode : focusNode;
+    let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
     const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
     if (!vElement) {
       return;
