@@ -96,7 +96,7 @@ export const defaultOptions: EditorOptions = {
     new ListComponentReader('ul'),
     new ListComponentReader('ol'),
     new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-    new BrComponentReader('br'),
+    new BrComponentReader(),
     new PreComponentReader(),
     new AudioComponentReader(),
     new VideoComponentReader(),
