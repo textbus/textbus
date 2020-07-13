@@ -53,9 +53,10 @@ import {
   TBus,
   audioTool,
   blockBackgroundTool,
+  blockquoteTool,
   boldTool,
   cleanTool,
-  codeTool,
+  preTool,
   colorTool,
   emojiTool,
   fontFamilyTool,
@@ -79,7 +80,12 @@ import {
   textIndentTool,
   ulTool,
   underlineTool,
-  videoTool
+  videoTool,
+  codeTool,
+  leftToRightTool,
+  rightToLeftTool, 
+  tableAddParagraphTool, 
+  tableRemoveTool
 } from '@tanbo/tbus';
 
 const editor = new TBus(document.getElementById('editor'), {
@@ -87,15 +93,17 @@ const editor = new TBus(document.getElementById('editor'), {
     [historyBackTool, historyForwardTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
-    [codeTool],
+    [blockquoteTool, codeTool],
+    [preTool],
     [olTool, ulTool],
     [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
     [subscriptTool, superscriptTool],
+    [leftToRightTool, rightToLeftTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],
     [textAlignTool],
-    [tableTool, tableEditTool],
+    [tableTool, tableEditTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ]
 });

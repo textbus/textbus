@@ -1,7 +1,6 @@
 import { TBSelection } from './selection';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { Parser } from './parser';
 
 /**
  * 操作编辑器的命令工具

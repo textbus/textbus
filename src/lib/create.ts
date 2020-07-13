@@ -75,7 +75,7 @@ import {
   todoListComponentExample,
   TodoListComponentReader,
 
-  baiduMapcomponentExample,
+  baiduMapComponentExample,
   BaiduMapComponentReader,
   ImageCardHook
 } from './lib/additional-components/_api';
@@ -143,7 +143,7 @@ export const defaultOptions: EditorOptions = {
   componentExamples: [
     imageCardComponentExample,
     todoListComponentExample,
-    baiduMapcomponentExample
+    baiduMapComponentExample
   ]
 };
 
