@@ -22,7 +22,7 @@ import {
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
-import { BlockComponent, SingleTagComponent } from './components/_api';
+import { BlockComponent, BrComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
 import { ComponentExample } from './workbench/component-stage';
@@ -409,7 +409,7 @@ export class Editor implements EventDelegate {
         }
         if (this.rootFragment.contentLength === 0) {
           const p = new BlockComponent('p');
-          p.slot.append(new SingleTagComponent('br'));
+          p.slot.append(new BrComponent());
           this.rootFragment.append(p);
           selection.firstRange.setStart(p.slot, 0);
           selection.firstRange.collapse();
@@ -591,7 +591,7 @@ export class Editor implements EventDelegate {
         const parentFragment = this.renderer.getParentFragment(parentComponent);
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
-        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
+        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
 
         }
@@ -664,13 +664,13 @@ export class Editor implements EventDelegate {
     if (last instanceof BlockComponent) {
       if (last.tagName === 'p') {
         if (last.slot.contentLength === 0) {
-          last.slot.append(new SingleTagComponent('br'));
+          last.slot.append(new BrComponent());
         }
         return;
       }
     }
     const p = new BlockComponent('p');
-    p.slot.append(new SingleTagComponent('br'));
+    p.slot.append(new BrComponent());
     fragment.append(p);
   }
 }

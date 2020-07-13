@@ -61,7 +61,7 @@ import {
   PreComponentReader,
   ImageComponentReader,
   ListComponentReader,
-  SingleTagComponentReader,
+  BrComponentReader,
   TableComponentReader,
   VideoComponentReader
 } from './lib/components/_api';
@@ -96,7 +96,7 @@ export const defaultOptions: EditorOptions = {
     new ListComponentReader('ul'),
     new ListComponentReader('ol'),
     new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-    new SingleTagComponentReader('br'),
+    new BrComponentReader('br'),
     new PreComponentReader(),
     new AudioComponentReader(),
     new VideoComponentReader(),

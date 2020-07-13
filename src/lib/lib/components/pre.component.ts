@@ -13,7 +13,7 @@ import {
   VElement,
   ViewData
 } from '../core/_api';
-import { SingleTagComponent } from './single-tag.component';
+import { BrComponent } from './br.component';
 import { highlight } from 'highlight.js';
 
 const theme = [
@@ -161,7 +161,7 @@ export class PreComponentReader implements ComponentReader {
           fragment.append(node.textContent);
         } else if (node.nodeType === Node.ELEMENT_NODE) {
           if (/br/i.test(node.nodeName)) {
-            fragment.append(new SingleTagComponent('br'));
+            fragment.append(new BrComponent());
           } else {
             fn(node as HTMLElement, fragment);
           }
@@ -194,7 +194,7 @@ export class PreComponent extends BranchComponent {
     !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
-        this.slot.insert(new SingleTagComponent('br'), firstRange.startIndex);
+        this.slot.insert(new BrComponent(), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
         event.stopPropagation();
       }
@@ -209,7 +209,7 @@ export class PreComponent extends BranchComponent {
       if (typeof item === 'string') {
         return item;
 
-      } else if (item instanceof SingleTagComponent && item.tagName === 'br') {
+      } else if (item instanceof BrComponent) {
         return '\n';
       }
     }).join('');
@@ -243,7 +243,7 @@ export class PreComponent extends BranchComponent {
       if (item.nodeType === Node.ELEMENT_NODE) {
         if (item.nodeName.toLowerCase() === 'br') {
           index++;
-          context.append(new SingleTagComponent('br'));
+          context.append(new BrComponent());
           return;
         }
         const result = this.getFormats(index, item as HTMLElement, context);

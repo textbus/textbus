@@ -6,7 +6,7 @@ import {
   TBEvent,
   VElement
 } from './core/_api';
-import { SingleTagComponent } from './components/_api';
+import { BrComponent } from './components/_api';
 import { Input } from './viewer/input';
 
 export class EventHandler {
@@ -47,7 +47,7 @@ export class EventHandler {
     input.input.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
-          const s = new SingleTagComponent('br');
+          const s = new BrComponent();
           commonAncestorFragment.insert(s, index + startIndex);
           index++;
         }
@@ -61,8 +61,8 @@ export class EventHandler {
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.input.selectionStart;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
     if (startIndex + input.input.selectionStart === commonAncestorFragment.contentLength &&
-      last instanceof SingleTagComponent && last.tagName === 'br') {
-      commonAncestorFragment.append(new SingleTagComponent('br'));
+      last instanceof BrComponent) {
+      commonAncestorFragment.append(new BrComponent());
     }
   }
 
@@ -84,7 +84,7 @@ export class EventHandler {
       const firstChild = fragment.getContentAtIndex(0);
       const parentFragment = event.renderer.getParentFragment(parentComponent);
       const contentsArr = contents.slice(0);
-      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof SingleTagComponent && firstChild.tagName === 'br') {
+      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof BrComponent) {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
       } else {
         const firstContent = contentsArr.shift();
@@ -119,7 +119,7 @@ export class EventHandler {
               });
             });
             if (afterComponent.slot.contentLength === 0) {
-              afterComponent.slot.append(new SingleTagComponent('br'));
+              afterComponent.slot.append(new BrComponent());
             }
             firstRange.setStart(afterComponent.slot, 0);
             firstRange.collapse();
@@ -148,7 +148,7 @@ export class EventHandler {
           commonAncestorFragment.cut(range.startIndex - 1, 1);
           range.startIndex = range.endIndex = range.startIndex - 1;
           if (commonAncestorFragment.contentLength === 0) {
-            commonAncestorFragment.append(new SingleTagComponent('br'));
+            commonAncestorFragment.append(new BrComponent());
           }
         } else {
           while (prevPosition.fragment.contentLength === 0) {
@@ -170,12 +170,12 @@ export class EventHandler {
         }
 
         const firstContent = range.startFragment.getContentAtIndex(0);
-        if (firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
+        if (firstContent instanceof BrComponent) {
           range.startFragment.cut(0, 1);
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
             // const prevContent = prevPosition.fragment.getContentAtIndex(prevPosition.fragment.contentLength - 1);
-            // if (prevContent instanceof SingleTagComponent && prevContent.tagName === 'br') {
+            // if (prevContent instanceof SingleTagComponent) {
             //   prevPosition.index--;
             // }
 
@@ -203,12 +203,12 @@ export class EventHandler {
   private onEnter(event: TBEvent) {
     const firstRange = event.selection.firstRange;
     const rootFragment = firstRange.startFragment;
-    rootFragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
+    rootFragment.insert(new BrComponent(), firstRange.startIndex);
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
     const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
     if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
       return;
     }
-    rootFragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
+    rootFragment.insert(new BrComponent(), firstRange.startIndex);
   }
 }

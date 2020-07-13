@@ -8,7 +8,7 @@ import {
   VElement,
   ViewData
 } from '../core/_api';
-import { SingleTagComponent } from './single-tag.component';
+import { BrComponent } from './br.component';
 
 export interface TableCell {
   colspan: number;
@@ -165,7 +165,7 @@ export class TableComponent extends BackboneComponent {
             td.attrs.set('rowSpan', col.rowspan);
           }
           if (col.fragment.contentLength === 0) {
-            col.fragment.append(new SingleTagComponent('br'));
+            col.fragment.append(new BrComponent());
           }
           this.childSlots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
@@ -173,14 +173,14 @@ export class TableComponent extends BackboneComponent {
           !isProduction && td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
-              col.fragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
+              col.fragment.insert(new BrComponent(), firstRange.startIndex);
               firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
               const afterContent = col.fragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
               if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
                 event.stopPropagation();
                 return;
               }
-              col.fragment.insert(new SingleTagComponent('br'), firstRange.startIndex);
+              col.fragment.insert(new BrComponent(), firstRange.startIndex);
             } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
               event.stopPropagation();
             }

@@ -1,6 +1,6 @@
 import { BranchComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
-import { TableComponent, SingleTagComponent, TableCell } from '../../components/_api';
+import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
@@ -29,8 +29,7 @@ export class TableCommander implements Commander<AttrState[]> {
       if (parentComponent instanceof BranchComponent) {
         if (range.startFragment.contentLength === 0 ||
           range.startFragment.contentLength === 1 &&
-          firstContent instanceof SingleTagComponent &&
-          firstContent.tagName === 'br') {
+          firstContent instanceof BrComponent) {
           const i = parentFragment.indexOf(parentComponent);
           parentFragment.insert(table, i);
           parentFragment.remove(i + 1, 1);
@@ -54,7 +53,7 @@ export class TableCommander implements Commander<AttrState[]> {
       result.push(row);
       for (let j = 0; j < columns; j++) {
         const fragment = new Fragment();
-        fragment.append(new SingleTagComponent('br'));
+        fragment.append(new BrComponent());
         row.push({
           rowspan: 1,
           colspan: 1,

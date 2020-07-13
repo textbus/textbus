@@ -1,9 +1,9 @@
 import { FormatEffect, Fragment, InlineFormatter } from '../../core/_api';
-import { SingleTagComponent } from '../single-tag.component';
+import { BrComponent } from '../br.component';
 
 export function breakingLine(fragment: Fragment, index: number): Fragment {
   if (index === 0) {
-    fragment.insert(new SingleTagComponent('br'), 0);
+    fragment.insert(new BrComponent(), 0);
     index = 1;
   }
   const len = fragment.contentLength;
@@ -11,13 +11,12 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
 
   const isEnd = index === len;
   const isLast = index === len - 1 &&
-    lastContent instanceof SingleTagComponent &&
-    lastContent.tagName === 'br';
+    lastContent instanceof BrComponent;
 
   const next = new Fragment();
 
   if (isEnd || isLast) {
-    next.append(new SingleTagComponent('br'));
+    next.append(new BrComponent());
     fragment.getFormatRanges().filter(f => {
       if (f.state === FormatEffect.Inherit) {
         return false;

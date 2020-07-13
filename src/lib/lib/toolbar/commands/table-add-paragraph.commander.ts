@@ -1,5 +1,5 @@
 import { Commander, TBSelection, Renderer } from '../../core/_api';
-import { TableComponent, BlockComponent, SingleTagComponent } from '../../components/_api';
+import { TableComponent, BlockComponent, BrComponent } from '../../components/_api';
 
 export class TableAddParagraphCommander implements Commander {
   recordHistory = true;
@@ -10,7 +10,7 @@ export class TableAddParagraphCommander implements Commander {
     if (context) {
       const parentFragment = renderer.getParentFragment(context);
       const p = new BlockComponent('p');
-      p.slot.append(new SingleTagComponent('br'));
+      p.slot.append(new BrComponent());
 
       parentFragment.insertAfter(p, context);
 

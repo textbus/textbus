@@ -3,7 +3,7 @@ import { fromEvent, merge } from 'rxjs';
 
 import { Commander, Fragment, Renderer, TBRange, TBSelection, Lifecycle } from '../core/_api';
 import { TableEditCommander } from '../toolbar/_api';
-import { TableCellPosition, TableComponent, SingleTagComponent } from '../components/_api';
+import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
 
 interface ElementPosition {
   left: number;
@@ -142,7 +142,7 @@ export class TableEditHook implements Lifecycle {
       this.selectedCells.map(cell => {
         const range = new TBRange(context.createRange(), renderer);
         const firstContent = cell.getContentAtIndex(0);
-        if (cell.contentLength === 1 && firstContent instanceof SingleTagComponent && firstContent.tagName === 'br') {
+        if (cell.contentLength === 1 && firstContent instanceof BrComponent) {
           range.setStart(cell, 0);
           range.setEnd(cell, 1);
         } else {

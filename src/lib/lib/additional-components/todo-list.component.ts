@@ -1,5 +1,5 @@
 import { BackboneComponent, EventType, Fragment, ComponentReader, VElement, ViewData } from '../core/_api';
-import { BlockComponent, breakingLine, SingleTagComponent } from '../components/_api';
+import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
 
 export interface TodoListConfig {
@@ -94,7 +94,7 @@ export class TodoListComponent extends BackboneComponent {
       });
       item.appendChild(content);
       if (slot.contentLength === 0) {
-        slot.append(new SingleTagComponent('br'));
+        slot.append(new BrComponent());
       }
       this.viewMap.set(slot, content);
       this.childSlots.push(slot);
@@ -124,11 +124,11 @@ export class TodoListComponent extends BackboneComponent {
             if (slot === this.childSlots[this.childSlots.length - 1]) {
               const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
               if (slot.contentLength === 0 ||
-                slot.contentLength === 1 && lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
+                slot.contentLength === 1 && lastContent instanceof BrComponent) {
                 this.childSlots.pop();
                 const parentFragment = event.renderer.getParentFragment(this);
                 const p = new BlockComponent('p');
-                p.slot.append(new SingleTagComponent('br'));
+                p.slot.append(new BrComponent());
                 parentFragment.insertAfter(p, this);
                 firstRange.setStart(p.slot, 0);
                 firstRange.collapse();

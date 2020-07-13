@@ -7,7 +7,7 @@ import {
   BlockFormatter,
   InlineFormatter
 } from '../../core/_api';
-import { SingleTagComponent } from '../../components/single-tag.component';
+import { BrComponent } from '../../components/br.component';
 
 export class CleanCommander implements Commander {
   recordHistory = true;
@@ -35,7 +35,7 @@ export class CleanCommander implements Commander {
             isDeleteBlockFormat = true;
           } else if (scope.endIndex === scope.fragment.contentLength - 1) {
             const lastContent = scope.fragment.getContentAtIndex(scope.fragment.contentLength - 1);
-            if (lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
+            if (lastContent instanceof BrComponent) {
               isDeleteBlockFormat = true;
             }
           }

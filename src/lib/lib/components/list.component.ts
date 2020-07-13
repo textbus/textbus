@@ -7,7 +7,7 @@ import {
   VElement,
   EventType
 } from '../core/_api';
-import { SingleTagComponent } from './single-tag.component';
+import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
 
@@ -89,12 +89,12 @@ export class ListComponent extends BackboneComponent {
           if (slot === this.childSlots[this.childSlots.length - 1]) {
             const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
             if (slot.contentLength === 0 ||
-              slot.contentLength === 1 && lastContent instanceof SingleTagComponent && lastContent.tagName === 'br') {
+              slot.contentLength === 1 && lastContent instanceof BrComponent) {
               this.childSlots.pop();
               const parentFragment = event.renderer.getParentFragment(this);
               const p = new BlockComponent('p');
               p.slot.from(new Fragment());
-              p.slot.append(new SingleTagComponent('br'));
+              p.slot.append(new BrComponent());
               parentFragment.insertAfter(p, this);
               firstRange.setStart(p.slot, 0);
               firstRange.collapse();

@@ -3,7 +3,7 @@ import {
   Renderer,
   TBSelection
 } from '../../core/_api';
-import { PreComponent, SingleTagComponent } from '../../components/_api';
+import { PreComponent, BrComponent } from '../../components/_api';
 
 export class PreCommander implements Commander<string> {
   recordHistory = true;
@@ -24,7 +24,7 @@ export class PreCommander implements Commander<string> {
         const context = range.commonAncestorComponent;
         const parentFragment = renderer.getParentFragment(context);
         const t = new PreComponent(this.lang);
-        t.slot.append(new SingleTagComponent('br'));
+        t.slot.append(new BrComponent());
         parentFragment.insertAfter(t, context);
         range.setStart(t.slot, 0);
         range.collapse();

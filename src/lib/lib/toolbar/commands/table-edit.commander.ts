@@ -1,5 +1,5 @@
 import { ActionCommander, Fragment, Renderer, TBSelection } from '../../core/_api';
-import { TableCellPosition, TableComponent, SingleTagComponent, TableCell } from '../../components/_api';
+import { TableCellPosition, TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export enum TableEditActions {
   AddColumnToLeft,
@@ -353,7 +353,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
 
   private static createCell(rowspan = 1, colspan = 1) {
     const fragment = new Fragment();
-    fragment.append(new SingleTagComponent('br'));
+    fragment.append(new BrComponent());
     return {
       rowspan,
       colspan,
