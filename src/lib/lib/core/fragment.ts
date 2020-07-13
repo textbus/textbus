@@ -281,7 +281,7 @@ export class Fragment {
       if (item instanceof BackboneComponent) {
         newFormat = null;
         if (coverChild) {
-          item.childSlots.forEach(fragment => {
+          item.slots.forEach(fragment => {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;

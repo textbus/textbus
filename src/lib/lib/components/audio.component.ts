@@ -10,7 +10,7 @@ export class AudioComponentReader implements ComponentReader {
   from(el: HTMLAudioElement): ViewData {
     return {
       component: new AudioComponent(el.src, el.autoplay, el.controls),
-      childrenSlots: []
+      slotsMap: []
     };
   }
 }

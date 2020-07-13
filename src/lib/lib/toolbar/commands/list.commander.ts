@@ -23,7 +23,7 @@ export class ListCommander implements Commander {
           const parentFragment = renderer.getParentFragment(item.component);
           if (slots.before.length) {
             const beforeList = new ListComponent(this.tagName);
-            beforeList.childSlots.push(...slots.before);
+            beforeList.slots.push(...slots.before);
             parentFragment.insertBefore(beforeList, item.component);
           }
           if (slots.center.length) {
@@ -39,7 +39,7 @@ export class ListCommander implements Commander {
           }
           if (slots.after.length) {
             const afterList = new ListComponent(this.tagName);
-            afterList.childSlots.push(...slots.after);
+            afterList.slots.push(...slots.after);
             parentFragment.insertBefore(afterList, item.component);
           }
           parentFragment.cut(parentFragment.indexOf(item.component), 1);
@@ -81,7 +81,7 @@ export class ListCommander implements Commander {
         });
         scopes.reverse().forEach(scope => {
           if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength && scope.fragment !== commonAncestorFragment) {
-            list.childSlots.unshift(scope.fragment);
+            list.slots.unshift(scope.fragment);
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
             return;
           }
@@ -89,7 +89,7 @@ export class ListCommander implements Commander {
           const contents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           contents.contents.forEach(c => fragment.append(c));
           contents.formatRanges.forEach(f => fragment.apply(f));
-          list.childSlots.unshift(fragment);
+          list.slots.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
           }
@@ -114,20 +114,20 @@ export class ListCommander implements Commander {
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else {
-            const index = parentComponent.childSlots.indexOf(commonAncestorFragment);
+            const index = parentComponent.slots.indexOf(commonAncestorFragment);
             const before = parentComponent.clone() as BackboneComponent;
-            before.childSlots.splice(index);
+            before.slots.splice(index);
             const after = parentComponent.clone() as BackboneComponent;
-            after.childSlots.splice(0, index + 1);
+            after.slots.splice(0, index + 1);
 
             const parentFragment = renderer.getParentFragment(parentComponent);
             const position = parentFragment.indexOf(parentComponent);
 
-            if (after.childSlots.length) {
+            if (after.slots.length) {
               parentFragment.insert(after, position)
             }
             parentFragment.insert(list, position);
-            if (before.childSlots.length) {
+            if (before.slots.length) {
               parentFragment.insert(before, position);
             }
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);

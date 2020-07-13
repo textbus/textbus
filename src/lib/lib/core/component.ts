@@ -8,7 +8,7 @@ export interface SlotMap {
 
 export interface ViewData {
   component: Component;
-  childrenSlots: SlotMap[];
+  slotsMap: SlotMap[];
 }
 
 export abstract class ComponentReader {
@@ -70,7 +70,7 @@ export abstract class BranchComponent extends Component {
 }
 
 export abstract class BackboneComponent extends Component {
-  childSlots: Fragment[] = [];
+  slots: Fragment[] = [];
 
   protected viewMap = new Map<Fragment, VElement>();
 

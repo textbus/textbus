@@ -26,7 +26,7 @@ export class TodoListComponentReader implements ComponentReader {
     const component = new TodoListComponent(listConfig);
     return {
       component: component,
-      childrenSlots: listConfig.map(i => {
+      slotsMap: listConfig.map(i => {
         return {
           toSlot: i.slot,
           from: i.childSlot
@@ -54,7 +54,7 @@ export class TodoListComponent extends BackboneComponent {
 
   constructor(public listConfigs: TodoListConfig[]) {
     super('tbus-todo-list');
-    this.childSlots = listConfigs.map(i => i.slot);
+    this.slots = listConfigs.map(i => i.slot);
   }
 
   canSplit(): boolean {
@@ -64,11 +64,11 @@ export class TodoListComponent extends BackboneComponent {
   render(isProduction: boolean): VElement {
     const list = new VElement('tbus-todo-list');
     this.listConfigs = this.listConfigs.filter(i => {
-      return this.childSlots.includes(i.slot);
+      return this.slots.includes(i.slot);
     });
 
     this.viewMap.clear();
-    this.childSlots = [];
+    this.slots = [];
     this.listConfigs.forEach((config, index) => {
       const slot = config.slot;
 
@@ -97,7 +97,7 @@ export class TodoListComponent extends BackboneComponent {
         slot.append(new BrComponent());
       }
       this.viewMap.set(slot, content);
-      this.childSlots.push(slot);
+      this.slots.push(slot);
       list.appendChild(item);
       if (!isProduction) {
         content.events.subscribe(event => {
@@ -121,11 +121,11 @@ export class TodoListComponent extends BackboneComponent {
 
             const firstRange = event.selection.firstRange;
 
-            if (slot === this.childSlots[this.childSlots.length - 1]) {
+            if (slot === this.slots[this.slots.length - 1]) {
               const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
               if (slot.contentLength === 0 ||
                 slot.contentLength === 1 && lastContent instanceof BrComponent) {
-                this.childSlots.pop();
+                this.slots.pop();
                 const parentFragment = event.renderer.getParentFragment(this);
                 const p = new BlockComponent('p');
                 p.slot.append(new BrComponent());
@@ -142,7 +142,7 @@ export class TodoListComponent extends BackboneComponent {
               ...config,
               slot: next
             });
-            this.childSlots.splice(index + 1, 0, next);
+            this.slots.splice(index + 1, 0, next);
             firstRange.startFragment = firstRange.endFragment = next;
             firstRange.startIndex = firstRange.endIndex = 0;
           }

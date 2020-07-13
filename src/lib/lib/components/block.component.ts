@@ -19,7 +19,7 @@ export class BlockComponentReader implements ComponentReader {
     const component = new BlockComponent(el.tagName.toLocaleLowerCase());
     return {
       component: component,
-      childrenSlots: [{
+      slotsMap: [{
         from: el,
         toSlot: component.slot
       }]

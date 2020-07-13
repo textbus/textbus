@@ -22,10 +22,10 @@ export class ImageCardComponentReader implements ComponentReader {
     const component = new ImageCardComponent(imageSrc);
     const imageWrapper = new Fragment();
     const desc = new Fragment();
-    component.childSlots.push(imageWrapper, desc);
+    component.slots.push(imageWrapper, desc);
     return {
       component: component,
-      childrenSlots: [{
+      slotsMap: [{
         from: element.children[0] as HTMLElement,
         toSlot: imageWrapper
       }, {
@@ -44,8 +44,8 @@ export class ImageCardComponent extends BackboneComponent {
     super('tbus-image-card');
     this.imgFragment.append(new ImageComponent(imageSrc));
     this.descFragment.append('图片描述');
-    this.childSlots.push(this.imgFragment);
-    this.childSlots.push(this.descFragment);
+    this.slots.push(this.imgFragment);
+    this.slots.push(this.descFragment);
   }
 
   canSplit(): boolean {
@@ -54,7 +54,7 @@ export class ImageCardComponent extends BackboneComponent {
 
   render(isProduction: boolean): VElement {
     this.viewMap.clear();
-    this.childSlots = [this.imgFragment, this.descFragment];
+    this.slots = [this.imgFragment, this.descFragment];
     const card = new VElement(this.tagName);
     const imgWrapper = new VElement('div');
     const desc = new VElement('p');
@@ -96,7 +96,7 @@ export class ImageCardComponent extends BackboneComponent {
 
   clone(): ImageCardComponent {
     const t = new ImageCardComponent(this.imageSrc);
-    t.childSlots = this.childSlots.map(f => f.clone());
+    t.slots = this.slots.map(f => f.clone());
     return t;
   }
 }
@@ -130,8 +130,8 @@ export class ImageCardHook implements Lifecycle {
           if (nextContent instanceof BranchComponent) {
             position = firstRange.findFirstPosition(nextContent.slot);
           } else if (nextContent instanceof BackboneComponent) {
-            if (nextContent.childSlots[0]) {
-              position = firstRange.findFirstPosition(nextContent.childSlots[0]);
+            if (nextContent.slots[0]) {
+              position = firstRange.findFirstPosition(nextContent.slots[0]);
             }
           } else {
             position = {

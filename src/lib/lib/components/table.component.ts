@@ -109,7 +109,7 @@ export class TableComponentReader implements ComponentReader {
         headers,
         bodies
       }),
-      childrenSlots: slots
+      slotsMap: slots
     };
   }
 }
@@ -128,7 +128,7 @@ export class TableComponent extends BackboneComponent {
     const bodyConfig = config.bodies;
     for (const row of bodyConfig) {
       for (const col of row) {
-        this.childSlots.push(col.fragment);
+        this.slots.push(col.fragment);
       }
     }
   }
@@ -139,8 +139,8 @@ export class TableComponent extends BackboneComponent {
 
   clone() {
     const component = new TableComponent(this.config);
-    this.childSlots.forEach(f => {
-      component.childSlots.push(f.clone());
+    this.slots.forEach(f => {
+      component.slots.push(f.clone());
     });
     return component;
   }
@@ -148,7 +148,7 @@ export class TableComponent extends BackboneComponent {
   render(isProduction: boolean) {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
-    this.childSlots = [];
+    this.slots = [];
     const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
       const body = new VElement('tbody');
@@ -167,7 +167,7 @@ export class TableComponent extends BackboneComponent {
           if (col.fragment.contentLength === 0) {
             col.fragment.append(new BrComponent());
           }
-          this.childSlots.push(col.fragment);
+          this.slots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
           !isProduction && td.events.subscribe(event => {

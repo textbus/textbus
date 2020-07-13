@@ -9,7 +9,7 @@ export class BrComponentReader implements ComponentReader {
     const component = new BrComponent();
     return {
       component: component,
-      childrenSlots: []
+      slotsMap: []
     };
   }
 }

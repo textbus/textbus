@@ -598,7 +598,7 @@ export class Editor implements EventDelegate {
       } else if (parentComponent instanceof BackboneComponent && parentComponent.canSplit()) {
         const ff = new Fragment();
         ff.append(component);
-        parentComponent.childSlots.splice(parentComponent.childSlots.indexOf(startFragment) + 1, 0, ff);
+        parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);
       } else {
         startFragment.insert(component, firstRange.endIndex);
       }

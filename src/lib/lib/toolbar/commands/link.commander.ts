@@ -44,7 +44,7 @@ export class LinkCommander implements Commander<AttrState[]> {
         let index = 0;
         scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(content => {
           if (content instanceof BackboneComponent) {
-            content.childSlots.forEach(item => {
+            content.slots.forEach(item => {
               item.apply({
                 startIndex: 0,
                 endIndex: item.contentLength,

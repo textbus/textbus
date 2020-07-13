@@ -20,7 +20,7 @@ export class Parser {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.component);
-          viewData.childrenSlots.forEach(item => {
+          viewData.slotsMap.forEach(item => {
             if (viewData.component instanceof BranchComponent ||
               viewData.component instanceof BackboneComponent ||
               item.from === el) {

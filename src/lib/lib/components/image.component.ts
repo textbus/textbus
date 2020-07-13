@@ -13,7 +13,7 @@ export class ImageComponentReader implements ComponentReader {
         width: el.style.width || el.width + '',
         height: el.style.height || el.height +  ''
       }),
-      childrenSlots: []
+      slotsMap: []
     };
   }
 }

@@ -28,7 +28,7 @@ export class BlockStyleCommander implements Commander<string> {
         } else {
           item.fragment.sliceContents(item.startIndex, item.endIndex).forEach(content => {
             if (content instanceof BackboneComponent) {
-              fragments = content.childSlots;
+              fragments = content.slots;
             } else if (content instanceof BranchComponent) {
               fragments = [content.slot];
             }

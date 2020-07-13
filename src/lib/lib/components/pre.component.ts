@@ -171,7 +171,7 @@ export class PreComponentReader implements ComponentReader {
     fn(el, component.slot);
     return {
       component: component,
-      childrenSlots: []
+      slotsMap: []
     };
   }
 }

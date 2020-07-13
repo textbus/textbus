@@ -112,7 +112,7 @@ export class FormatMatcher implements Matcher {
       if (child instanceof BranchComponent) {
         states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.contentLength));
       } else if (child instanceof BackboneComponent) {
-        child.childSlots.forEach(childFragment => {
+        child.slots.forEach(childFragment => {
           states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
         })
       } else {

@@ -438,7 +438,7 @@ export class Renderer {
           if (!this.productionRenderingModal) {
             vDom.styles.set('userSelect', 'none');
           }
-          item.childSlots.forEach(slot => {
+          item.slots.forEach(slot => {
             const parent = item.getChildViewBySlot(slot);
             if (!this.productionRenderingModal) {
               parent.styles.set('userSelect', 'text');

@@ -17,7 +17,7 @@ export class BaiduMapComponentReader implements ComponentReader {
     });
     return {
       component: component,
-      childrenSlots: []
+      slotsMap: []
     }
   }
 }

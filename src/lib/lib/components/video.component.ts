@@ -13,7 +13,7 @@ export class VideoComponentReader implements ComponentReader {
         width: el.style.width || el.width + '',
         height: el.style.height || el.height + ''
       }),
-      childrenSlots: []
+      slotsMap: []
     };
   }
 }

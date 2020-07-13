@@ -78,7 +78,7 @@ export class TBSelection {
       while (fragment) {
         const parentComponent = this.renderer.getParentComponent(fragment);
         if (parentComponent) {
-          parentComponent instanceof BackboneComponent ? paths.push(parentComponent.childSlots.indexOf(fragment)) : paths.push(0);
+          parentComponent instanceof BackboneComponent ? paths.push(parentComponent.slots.indexOf(fragment)) : paths.push(0);
           fragment = this.renderer.getParentFragment(parentComponent);
           paths.push(fragment.indexOf(parentComponent));
         } else {
@@ -121,7 +121,7 @@ export class TBSelection {
         if (c instanceof BranchComponent && last === 0) {
           fragment = c.slot;
         } else if (c instanceof BackboneComponent) {
-          fragment = c.childSlots[last];
+          fragment = c.slots[last];
         } else {
           throw new Error('未找到历史位置')
         }
