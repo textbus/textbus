@@ -4,7 +4,7 @@ export class FormatMap {
   private map = new Map<InlineFormatter | BlockFormatter, Array<FormatRange>>();
 
   /**
-   * 通过 Handler 获取当前片段的的格式化信息
+   * 通过 Handler 获取当前片段的的格式化信息。
    * @param formatter
    */
   getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
@@ -12,12 +12,15 @@ export class FormatMap {
   }
 
   /**
-   * 获取当前片段内所有的格式化信息
+   * 获取当前片段内所有的格式化信息。
    */
   getFormatRanges() {
     return Array.from(this.map.values()).reduce((v, n) => v.concat(n), []);
   }
 
+  /**
+   * 获取可生效的格式数据。
+   */
   getCanApplyFormats() {
     let formats: FormatRange[] = [];
     // 检出所有生效规则
@@ -27,6 +30,11 @@ export class FormatMap {
     return formats;
   }
 
+  /**
+   * 合并格式
+   * @param formatter 当前要合并的格式
+   * @param important 合并的优先级
+   */
   merge(formatter: FormatRange, important: boolean) {
     if (formatter.renderer instanceof BlockFormatter) {
       if (formatter.state === FormatEffect.Invalid) {

@@ -31,7 +31,7 @@ export class FormatAbstractData {
   }
 
   /**
-   * 复制当前抽象数据的副本
+   * 复制当前抽象数据的副本。
    */
   clone() {
     const attrs = new Map<string, string | number | boolean>();
@@ -52,7 +52,7 @@ export class FormatAbstractData {
   }
 
   /**
-   * 判断 data 是否和自己相等
+   * 判断 data 是否和自己相等。
    * @param data
    */
   equal(data: FormatAbstractData) {

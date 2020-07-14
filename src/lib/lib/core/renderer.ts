@@ -7,7 +7,7 @@ import { TBSelection } from './selection';
 import { Constructor } from './constructor';
 
 /**
- * 丢弃前一个 Format 渲染的结果，并用自己代替
+ * 丢弃前一个 Format 渲染的结果，并用自己代替。
  */
 export class ReplaceModel {
   constructor(public replaceElement: VElement) {
@@ -15,7 +15,7 @@ export class ReplaceModel {
 }
 
 /**
- * 把当前的渲染结果作为插槽返回，并且把后续的渲染结果插入在当前节点内
+ * 把当前的渲染结果作为插槽返回，并且把后续的渲染结果插入在当前节点内。
  */
 export class ChildSlotModel {
   constructor(public childElement: VElement) {
@@ -28,6 +28,9 @@ export interface ElementPosition {
   fragment: Fragment;
 }
 
+/**
+ * 储存虚拟 DOM 节点和真实 DOM 节点的映射关系。
+ */
 class NativeElementMappingTable {
   private nativeVDomMapping = new WeakMap<Node, VElement | VTextNode>();
   private vDomNativeMapping = new WeakMap<VElement | VTextNode, Node>();
@@ -72,6 +75,9 @@ class NativeElementMappingTable {
   }
 }
 
+/**
+ * TBus 渲染类，可根据 Fragment 生成真实 DOM 或 HTML 字符串，或者文档的 JSON 字面量。
+ */
 export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
 
@@ -84,6 +90,11 @@ export class Renderer {
 
   private productionRenderingModal = false;
 
+  /**
+   * 把 fragment 渲染到 HTML 元素中。
+   * @param fragment 要渲染的可编辑片段。
+   * @param host 承载渲染结果的 HTML 元素。
+   */
   render(fragment: Fragment, host: HTMLElement) {
     this.productionRenderingModal = false;
     this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
@@ -105,7 +116,11 @@ export class Renderer {
     return vDom;
   }
 
-  renderToString(fragment: Fragment): string {
+  /**
+   * 把 fragment 转换成 HTML 字符串。
+   * @param fragment
+   */
+  renderToHTML(fragment: Fragment): string {
     this.productionRenderingModal = true;
     const root = new VElement('root');
     const vDom = this.createVDom(fragment, root);
@@ -114,6 +129,10 @@ export class Renderer {
     }).join('');
   }
 
+  /**
+   * 把 fragment 转换成虚拟 DOM JSON 字面量。
+   * @param fragment
+   */
   renderToJSON(fragment: Fragment): VElementLiteral {
     this.productionRenderingModal = true;
     const root = new VElement('body');
@@ -121,35 +140,69 @@ export class Renderer {
     return vDom.toJSON();
   }
 
-  getPositionByNode(node: Node) {
+  /**
+   * 获取 DOM 节点在 fragment 中的位置。
+   * @param node
+   */
+  getPositionByNode(node: Node): ElementPosition {
     const vDom = this.NVMappingTable.get(node);
     return this.vDomPositionMapping.get(vDom);
   }
 
-  getPositionByVDom(vDom: VElement | VTextNode) {
+  /**
+   * 获取虚拟 DOM 节点在 fragment 中的位置。
+   * @param vDom
+   */
+  getPositionByVDom(vDom: VElement | VTextNode): ElementPosition {
     return this.vDomPositionMapping.get(vDom);
   }
 
-  getNativeNodeByVDom(vDom: VElement | VTextNode) {
+  /**
+   * 根据虚拟 DOM 节点，查找直实 DOM 节点。
+   * @param vDom
+   */
+  getNativeNodeByVDom(vDom: VElement | VTextNode): Node {
     return this.NVMappingTable.get(vDom);
   }
 
-  getVDomByNativeNode(node: Node) {
+  /**
+   * 根据真实 DOM 节点，查找虚拟 DOM 节点。
+   * @param node
+   */
+  getVDomByNativeNode(node: Node): VElement | VTextNode {
     return this.NVMappingTable.get(node);
   }
 
-  getParentComponent(fragment: Fragment) {
+  /**
+   * 获取 fragment 所属的 Component。
+   * @param fragment
+   */
+  getParentComponent(fragment: Fragment): BranchComponent | BackboneComponent {
     return this.fragmentHierarchyMapping.get(fragment);
   }
 
-  getParentFragment(component: Component) {
+  /**
+   * 获取 component 所在的 fragment。
+   * @param component
+   */
+  getParentFragment(component: Component): Fragment {
     return this.componentHierarchyMapping.get(component);
   }
 
-  getVElementByFragment(fragment: Fragment) {
+  /**
+   * 获取 fragment 对应的虚拟 DOM 节点。
+   * @param fragment
+   */
+  getVElementByFragment(fragment: Fragment): VElement {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
+  /**
+   * 根据 fragment，向上查找最近的某类组件实例。
+   * @param by      开始的 fragment。
+   * @param context 指定组件的构造类。
+   * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
+   */
   getContext<T extends Component>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
     const componentInstance = this.fragmentHierarchyMapping.get(by);
     if (componentInstance instanceof context) {
@@ -168,6 +221,13 @@ export class Renderer {
     return this.getContext(parentFragment, context, filter);
   }
 
+  /**
+   * 发布事件
+   * @param by        最开始发生事件的虚拟 DOM 元素。
+   * @param type      事件类型。
+   * @param selection 当前的选区对象。
+   * @param data      附加的数据。
+   */
   dispatchEvent(by: VElement, type: EventType, selection: TBSelection, data?: { [key: string]: any }) {
     let stopped = false;
     do {

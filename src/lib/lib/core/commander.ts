@@ -28,6 +28,13 @@ export interface Commander<T = any> {
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment): void;
 }
 
+/**
+ * 根据不同操作类型，响应不同操作的命令工具。
+ */
 export interface ActionCommander<T = any> extends Commander<T> {
+  /**
+   * 设置动作类型。
+   * @param type
+   */
   setActionType(type: any): void;
 }

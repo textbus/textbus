@@ -17,5 +17,3 @@ export * from './table-edit.commander';
 export * from './table-remove.commander';
 export * from './toggle-block.commander';
 export * from './video.commander';
-
-export * from '../../core/commander';

@@ -1,12 +1,25 @@
 import { Component } from './component';
 
+/**
+ * 储存 Fragment 内容的类。
+ */
 export class Contents {
+  /**
+   * 当前内容的长度。
+   */
   get length() {
     return this.elements.reduce((p, n) => p + n.length, 0);
   }
 
+  /**
+   * 当前内容。
+   */
   private elements: Array<Component | string> = [];
 
+  /**
+   * 把新内容添加到 elements 末尾。
+   * @param content 新内容
+   */
   append(content: Component | string) {
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
@@ -17,6 +30,11 @@ export class Contents {
     }
   }
 
+  /**
+   * 根据指定位置，切分出内容中的一部分。
+   * @param startIndex
+   * @param endIndex
+   */
   slice(startIndex: number, endIndex = this.length) {
     if (startIndex >= endIndex) {
       return [];
@@ -43,7 +61,7 @@ export class Contents {
   }
 
   /**
-   * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1
+   * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1。
    * @param element
    */
   indexOf(element: Component): number {
@@ -58,7 +76,7 @@ export class Contents {
   }
 
   /**
-   * 在指定下标插入新的文本或节点
+   * 在指定下标插入新的文本或节点。
    * @param content
    * @param index
    */
@@ -111,11 +129,11 @@ export class Contents {
   }
 
   /**
-   * 删除下标指定范围内的内容
+   * 删除下标指定范围内的内容。
    * @param startIndex
    * @param endIndex
    */
-  delete(startIndex: number, endIndex: number) {
+  remove(startIndex: number, endIndex: number) {
     if (endIndex <= startIndex) {
       return [];
     }
@@ -127,7 +145,7 @@ export class Contents {
   }
 
   /**
-   * 通过下标获取文本或子节点
+   * 通过下标获取文本或子节点。
    * @param index
    */
   getContentAtIndex(index: number) {
@@ -135,7 +153,7 @@ export class Contents {
   }
 
   /**
-   * 复制当前内容的副本
+   * 克隆当前内容，并返回一个完全一样的副本。
    */
   clone(): Contents {
     const newContents = new Contents();

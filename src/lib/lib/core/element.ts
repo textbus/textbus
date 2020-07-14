@@ -1,5 +1,8 @@
 import { EventEmitter } from './events';
 
+/**
+ * 虚拟 DOM 节点的字面量表示。
+ */
 export interface VElementLiteral {
   tagName: string;
   styles: { [key: string]: any },
@@ -8,17 +11,26 @@ export interface VElementLiteral {
   childNodes: Array<VElementLiteral | string>;
 }
 
+/**
+ * 虚拟文本节点。
+ */
 export class VTextNode {
   constructor(public readonly textContent: string = '') {
   }
 }
 
+/**
+ * 配置虚拟 DOM 节点的属性选项。
+ */
 export interface VElementOption {
   attrs?: { [key: string]: boolean | string | number };
   styles?: { [key: string]: string | number };
   classes?: string[];
 }
 
+/**
+ * 虚拟 DOM 节点
+ */
 export class VElement {
   readonly events = new EventEmitter();
   readonly childNodes: Array<VElement | VTextNode> = [];
@@ -40,11 +52,19 @@ export class VElement {
     }
   }
 
+  /**
+   * 在最后位置添加一个子节点。
+   * @param newChild
+   */
   appendChild(newChild: VElement | VTextNode) {
     this.childNodes.push(newChild);
     return newChild;
   }
 
+  /**
+   * 判断一个虚拟 DOM 节点是否和自己相等。
+   * @param vElement
+   */
   equal(vElement: VElement) {
     if (vElement === this) {
       return true;
@@ -60,6 +80,9 @@ export class VElement {
       VElement.equalClasses(left.classes, right.classes);
   }
 
+  /**
+   * 把当前虚拟 DOM 节点转换为 JSON 字面量。
+   */
   toJSON(): VElementLiteral {
     return {
       tagName: this.tagName,

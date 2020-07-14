@@ -30,6 +30,9 @@ import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
 
+/**
+ * TBus 初始化时的配置参数
+ */
 export interface EditorOptions {
   /** 设置主题 */
   theme?: string;
@@ -56,6 +59,9 @@ export interface EditorOptions {
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 }
 
+/**
+ * 方向键标识
+ */
 export enum CursorMoveDirection {
   Left,
   Right,
@@ -63,9 +69,15 @@ export enum CursorMoveDirection {
   Down
 }
 
+/**
+ * TBus 主类
+ */
 export class Editor implements EventDelegate {
+  /** 当 TBus 可用时触发 */
   readonly onReady: Observable<void>;
+  /** 当 TBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
+  /** 当 TBus 历史记录管理器 */
   readonly history: HistoryManager;
 
   readonly elementRef = document.createElement('div');
@@ -116,7 +128,7 @@ export class Editor implements EventDelegate {
     this.onChange = this.changeEvent.asObservable();
 
     this.history = new HistoryManager(options.historyStackSize)
-    this.parser = new Parser(options);
+    this.parser = new Parser(options.componentReaders, options.formatters);
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
     this.workbench = new Workbench(this.viewer);
@@ -169,6 +181,10 @@ export class Editor implements EventDelegate {
 
   }
 
+  /**
+   * 设置 TBus 编辑器的内容。
+   * @param html
+   */
   setContents(html: string) {
     this.run(() => {
       this.writeContents(html).then(el => {
@@ -192,19 +208,19 @@ export class Editor implements EventDelegate {
     return of('');
   }
 
+  /**
+   * 获取 TBus 的内容。
+   */
   getContents() {
-    const contents = (this.options.hooks || []).reduce((previousValue, currentValue) => {
-      if (typeof currentValue.onOutput === 'function') {
-        return currentValue.onOutput(previousValue);
-      }
-      return previousValue;
-    }, this.renderer.renderToString(this.rootFragment));
     return {
       styleSheets: this.options.styleSheets,
-      contents
+      contents: this.renderer.renderToHTML(this.rootFragment)
     };
   }
 
+  /**
+   * 获取 TBus 内容的 JSON 字面量。
+   */
   getJSONLiteral() {
     return {
       styleSheets: this.options.styleSheets,
@@ -212,12 +228,19 @@ export class Editor implements EventDelegate {
     };
   }
 
+  /**
+   * 注册快捷键。
+   * @param action
+   */
   registerKeymap(action: KeymapAction) {
     this.run(() => {
       this.viewer.input.keymap(action);
     });
   }
 
+  /**
+   * 销毁 TBus 实例。
+   */
   destroy() {
     this.container.removeChild(this.elementRef);
     this.subs.forEach(s => s.unsubscribe());

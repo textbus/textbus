@@ -1,6 +1,6 @@
 import { Contents } from './contents';
 import { BackboneComponent, BranchComponent, Component } from './component';
-import { BlockFormatter, FormatDelta, FormatEffect, FormatRange, InlineFormatter } from './formatter';
+import { BlockFormatter, FormatParams, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
 export interface ApplyFormatOptions {
@@ -240,7 +240,7 @@ export class Fragment {
     this.formatMap = formatMap;
     return {
       formatRanges: discardedFormats,
-      contents: this.contents.delete(startIndex, endIndex)
+      contents: this.contents.remove(startIndex, endIndex)
     };
   }
 
@@ -263,7 +263,7 @@ export class Fragment {
     return this.formatMap.getFormatRangesByFormatter(formatter);
   }
 
-  apply(f: FormatDelta, options: ApplyFormatOptions = {
+  apply(f: FormatParams, options: ApplyFormatOptions = {
     important: true,
     coverChild: true
   }) {
@@ -315,7 +315,7 @@ export class Fragment {
     formats.forEach(f => this.formatMap.merge(f, important));
   }
 
-  private mergeFormat(format: FormatDelta, important: boolean) {
+  private mergeFormat(format: FormatParams, important: boolean) {
     if (format.renderer instanceof InlineFormatter) {
       this.formatMap.merge(format as FormatRange, important);
     } else {

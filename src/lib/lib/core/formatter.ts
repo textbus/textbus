@@ -12,16 +12,23 @@ export interface EditableOptions {
 }
 
 /**
- * 一段内容通过 Rule 规则匹配后的结果状态
+ * 用于标识格式在 DOM 元素上应用的状态。
  */
 export enum FormatEffect {
+  /** 生效的 */
   Valid = 'Valid',
+  /** 不生效的 */
   Invalid = 'Invalid',
+  /** 排除 */
   Exclude = 'Exclude',
+  /** 继承 */
   Inherit = 'Inherit'
 }
 
-export type FormatDelta = {
+/**
+ * 配置一段格式的参数。
+ */
+export type FormatParams = {
   abstractData: FormatAbstractData;
   renderer: InlineFormatter;
   state: FormatEffect;
@@ -33,6 +40,9 @@ export type FormatDelta = {
   state: FormatEffect;
 };
 
+/**
+ * 标识一段格式的范围。
+ */
 export interface FormatRange {
   startIndex: number;
   endIndex: number;
@@ -63,6 +73,9 @@ export interface MatchRule {
   filter?: (node: HTMLElement | FormatAbstractData) => boolean;
 }
 
+/**
+ * 标识格式渲染优先级。
+ */
 export enum FormatterPriority {
   BlockStyle = 0,
   InlineTag = 100,
@@ -70,6 +83,9 @@ export enum FormatterPriority {
   Attribute = 300
 }
 
+/**
+ * TBus 格式基类，在扩展格式时，不能直接继承 Formatter，请继承 InlineFormatter、BlockFormatter 或其它子类。
+ */
 export abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
   private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
@@ -103,10 +119,34 @@ export abstract class Formatter {
     }
   }
 
+  /**
+   * 读到 DOM 节点，并返回转换后抽象格式数据。
+   * @param node
+   */
   abstract read(node: HTMLElement): FormatAbstractData;
 
+  /**
+   * 当 TBus 渲染样式时，会调用 Formatter 类 render 方法，并根据 render 方法返回的渲染模式，处理虚拟 DOM 结构。
+   *
+   * @param isProduction  是否是输出模式，有些情况下，编辑模式和输出模式渲染的结果是需要不一样的。
+   *                      如在编辑状态下，可能会添加一些临时的属性来做交互，或者兼听一些事件等等，这在输出结果时，是不需要的。
+   * @param state         当前样式的状态，一般来说有两种，生效的（Valid）和不生效的（Invalid），但有些情况下，可能还有其它状态。
+   *                      如：继承（Inherit）、排除（Exclude）。
+   *                      如果当前是状态是 Invalid，是不会调用 render 方法的，只有是其它三种中的一种才会调用。
+   *                      Formatter 在渲染的时候，可以根据不同的状态来渲染出不同的结果。
+   * @param abstractData  渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
+   * @param existingElement 是否已有同级元素。如：当两个样式的范围是一样的，其中一个样式先渲染时，第二个样式渲染时，则会拿到第一个样式渲染后的元素。
+   * @return              ReplaceModel | ChildSlotModel | null
+   *                      ReplaceModel: 替换模式———用新渲染出的元素替换已渲染出的同级元素；
+   *                      ChildSlotModel: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
+   *                      null: 如果已有渲染出的元素，则使用渲染出的元素，否则创建一个虚拟节点
+   */
   abstract render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
 
+  /**
+   * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。
+   * @param p
+   */
   match(p: HTMLElement | FormatAbstractData) {
     if (this.rule.filter) {
       const b = this.rule.filter(p);
@@ -212,11 +252,15 @@ export abstract class Formatter {
   }
 }
 
+/**
+ * 行内样式基类，用于扩展行内样式。
+ */
 export abstract class InlineFormatter extends Formatter {
 }
 
+
 export abstract class BlockFormatter extends Formatter {
-  protected constructor(protected rule: MatchRule = {}, priority: number) {
-    super(rule, priority);
-  }
+  // protected constructor(protected rule: MatchRule = {}, priority: number) {
+  //   super(rule, priority);
+  // }
 }

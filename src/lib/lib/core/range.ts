@@ -6,7 +6,7 @@ import { BackboneComponent, LeafComponent, BranchComponent, Component } from './
 import { BlockFormatter } from './formatter';
 
 /**
- * 标识 Fragment 中的一个位置
+ * 标识 Fragment 中的一个位置。
  */
 export interface TBRangePosition {
   fragment: Fragment;
@@ -14,7 +14,7 @@ export interface TBRangePosition {
 }
 
 /**
- * 标识一个选中 Fragment 的范围
+ * 标识一个选中 Fragment 的范围。
  */
 export interface TBRangeScope {
   startIndex: number;
@@ -22,25 +22,35 @@ export interface TBRangeScope {
   fragment: Fragment;
 }
 
+/**
+ * TBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
+ */
 export class TBRange {
+  /** 选区范围开始位置 */
   startIndex: number;
+  /** 选区范围结束位置 */
   endIndex: number;
+  /** 开始选区范围 */
   startFragment: Fragment;
+  /** 结束选区范围 */
   endFragment: Fragment;
 
   /**
-   * 当前选区最近的公共 Fragment
+   * 当前选区范围最近的公共 Fragment。
    */
   get commonAncestorFragment() {
     return this.getCommonAncestorFragment();
   }
 
+  /**
+   * 当前选区范围最近的公共组件。
+   */
   get commonAncestorComponent() {
     return this.getCommonAncestorComponent();
   }
 
   /**
-   * 当前选区是否折叠
+   * 当前所选范围是否折叠。
    */
   get collapsed() {
     return this.startFragment === this.commonAncestorFragment &&
@@ -68,12 +78,18 @@ export class TBRange {
     }
   }
 
+  /**
+   * 克隆一个完全一样的副本并返回。
+   */
   clone() {
     const r = new TBRange(this.nativeRange.cloneRange(), this.renderer);
     Object.assign(r, this);
     return r;
   }
 
+  /**
+   * 根据当前的 startFragment 和 startIndex，endFragment 和 endIndex，设置在浏览器的的选区范围。
+   */
   restore() {
     const start = this.findFocusNodeAndOffset(this.startFragment, this.startIndex);
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
@@ -82,18 +98,28 @@ export class TBRange {
     return this;
   }
 
+  /**
+   * 设置选区范围开始的位置。
+   * @param fragment 开始的片段
+   * @param offset 开始的偏移位置，从 0 开始计算。
+   */
   setStart(fragment: Fragment, offset: number) {
     this.startFragment = fragment;
     this.startIndex = offset;
   }
 
+  /**
+   * 设置选区范围结束的位置。
+   * @param fragment 结束的片段
+   * @param offset 线束的偏移位置，从 0 开始计算。
+   */
   setEnd(fragment: Fragment, offset: number) {
     this.endFragment = fragment;
     this.endIndex = offset;
   }
 
   /**
-   * 获取当前选区在公共 Fragment 中的范围
+   * 获取当前选区在公共 Fragment 中的范围。
    */
   getCommonAncestorFragmentScope() {
     let startFragment = this.startFragment;
@@ -127,6 +153,11 @@ export class TBRange {
     }
   }
 
+  /**
+   * 获取当前选区范围在 BackboneComponent 插槽的范围。
+   * @param of BackboneComponent 子类的构造 class。
+   * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 BackboneComponent 实例。
+   */
   getSlotRange<T extends BackboneComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ component: T, index: number }> = [];
     this.getSelectedScope().forEach(scope => {
@@ -198,7 +229,7 @@ export class TBRange {
   }
 
   /**
-   * 获取选区内所有连续的 Inline
+   * 获取选区内扩展后的的 Inline
    * 如（[]表示选区位置)：
    * <Fragment>
    *   <Inline>00[00</Inline>
@@ -228,6 +259,29 @@ export class TBRange {
       TBRange.findExpandedEndIndex(this.endFragment, this.endIndex));
   }
 
+  /**
+   * 获取选区内所有连续的 Inline
+   * 如（[]表示选区位置)：
+   * <Fragment>
+   *   <Inline>00[00</Inline>
+   *   <ChildFragmentA>11111</ChildFragmentA>
+   *   <ChildFragmentB>222]22</ChildFragmentB>
+   * </Fragment>
+   * 则返回：
+   * [{
+   *   fragment: Fragment,
+   *   startIndex: 0,
+   *   endIndex: 4,
+   * }, {
+   *   fragment: ChildFragmentA,
+   *   startIndex: 0,
+   *   endIndex: 5
+   * }, {
+   *   fragment: ChildFragmentB,
+   *   startIndex: 0,
+   *   endIndex: 5
+   * }]
+   */
   getSuccessiveContents() {
     function fn(fragment: Fragment, startIndex: number, endIndex: number) {
       const scopes: TBRangeScope[] = [];
@@ -271,6 +325,11 @@ export class TBRange {
     return result;
   }
 
+  /**
+   * 删除选区范围内的内容。
+   * 注意：
+   * 此方法并不会合并选区。如果要删除内容，且要合并选区，请调用 connect 方法。
+   */
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
@@ -285,6 +344,12 @@ export class TBRange {
     return this;
   }
 
+  /**
+   * 根据 Fragment 依次向上查找，如果 Fragment 为空或 Component 为空，则删除。
+   * 直到根 Fragment 或当前 Fragment 等于 endFragment。
+   * @param fragment 开始删除的 fragment。
+   * @param endFragment 可选的结束的 fragment，如不传，则依次向上查找，直到根 fragment。
+   */
   deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): TBRange {
     if (fragment === endFragment) {
       return this;
@@ -326,7 +391,7 @@ export class TBRange {
   }
 
   /**
-   * 获取上一个选区位置
+   * 获取上一个选区位置。
    */
   getPreviousPosition(): TBRangePosition {
     let fragment = this.startFragment;
@@ -384,7 +449,7 @@ export class TBRange {
   }
 
   /**
-   * 获取下一个选区位置
+   * 获取下一个选区位置。
    */
   getNextPosition(): TBRangePosition {
     let fragment = this.endFragment;
@@ -448,8 +513,8 @@ export class TBRange {
   }
 
   /**
-   * 获取选区向上移动一行的位置
-   * @param startLeft
+   * 获取选区向上移动一行的位置。
+   * @param startLeft 参考位置。
    */
   getPreviousLinePosition(startLeft: number): TBRangePosition {
     const range2 = this.clone();
@@ -499,8 +564,8 @@ export class TBRange {
   }
 
   /**
-   * 获取选区向下移动一行的位置
-   * @param startLeft
+   * 获取选区向下移动一行的位置。
+   * @param startLeft 参考位置。
    */
   getNextLinePosition(startLeft: number): TBRangePosition {
     const range2 = this.clone();
@@ -549,6 +614,10 @@ export class TBRange {
     };
   }
 
+  /**
+   * 查找一个 fragment 下的第一个可以放置光标的位置。
+   * @param fragment
+   */
   findFirstPosition(fragment: Fragment): TBRangePosition {
     const first = fragment.getContentAtIndex(0);
     if (first instanceof BranchComponent) {
@@ -564,6 +633,10 @@ export class TBRange {
     };
   }
 
+  /**
+   * 查找一个 fragment 下的最后一个可以放置光标的位置。
+   * @param fragment
+   */
   findLastChild(fragment: Fragment): TBRangePosition {
     const last = fragment.getContentAtIndex(fragment.contentLength - 1);
     if (last instanceof BranchComponent) {
@@ -581,10 +654,16 @@ export class TBRange {
     }
   }
 
+  /**
+   * 获取选区范围在文档中的坐标位置。
+   */
   getRangePosition() {
     return TBRange.getRangePosition(this.nativeRange);
   }
 
+  /**
+   * 删除选区范围内容，并合并选区范围。
+   */
   connect() {
     if (this.collapsed) {
       return;

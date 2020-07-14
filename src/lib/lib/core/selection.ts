@@ -3,40 +3,55 @@ import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { BackboneComponent, BranchComponent } from './component';
 
+/**
+ * 记录选区路径数据。
+ */
 export interface RangePath {
   startPaths: number[];
   endPaths: number[];
 }
 
+/**
+ * TBus 选区对象
+ */
 export class TBSelection {
+  /**
+   * 选区范围个数。
+   */
   get rangeCount() {
     return this._ranges.length;
   }
 
+  /**
+   * 所有选区范围集合。
+   */
   get ranges() {
     return this._ranges;
   }
 
+  /**
+   * 所有选区的所属最近的公共 fragment。
+   */
   get commonAncestorFragment() {
     return this.getCommonFragment();
   }
 
   /**
-   * 获取 Selection 的第一个 Range
+   * 获取 Selection 的第一个 Range。
    */
   get firstRange() {
     return this.ranges[0] || null;
   }
 
   /**
-   * 获取 Selection 的最后一个 Range
+   * 获取 Selection 的最后一个 Range。
    */
   get lastRange() {
     return this.ranges[this.ranges.length - 1] || null;
   }
 
   /**
-   * 当前 Selection 是否折叠
+   * 当前 Selection 是否折叠。
    */
   get collapsed() {
     return this.ranges.length === 1 && this.firstRange.collapsed || this.ranges.length === 0;
@@ -52,6 +67,9 @@ export class TBSelection {
     }
   }
 
+  /**
+   * 通过 TBRange 复位原生选区。
+   */
   restore() {
     this._ranges.forEach(range => {
       range.restore();
@@ -59,12 +77,16 @@ export class TBSelection {
   }
 
   /**
-   * 清除所有的 Range
+   * 清除所有的 Range。
    */
   removeAllRanges() {
     this._ranges = [];
   }
 
+  /**
+   * 添加一个 Range。
+   * @param range
+   */
   addRange(range: TBRange) {
     this._ranges.push(range);
   }
@@ -156,7 +178,7 @@ export class TBSelection {
   }
 
   /**
-   * 复制当前 Selection 的副本
+   * 克隆当前 Selection 的副本，并返回。
    */
   clone() {
     const t = new TBSelection(this.context, this.renderer);

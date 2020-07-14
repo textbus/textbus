@@ -1,10 +1,13 @@
 import { Fragment } from './fragment';
-import { EditorOptions } from '../editor';
-import { FormatEffect } from './formatter';
-import { BackboneComponent, BranchComponent } from './component';
+import { FormatEffect, Formatter } from './formatter';
+import { BackboneComponent, BranchComponent, ComponentReader } from './component';
 
+/**
+ * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
+ */
 export class Parser {
-  constructor(private options: EditorOptions) {
+  constructor(private componentReaders: ComponentReader[] = [],
+              private formatters: Formatter[] = []) {
   }
 
   parse(el: HTMLElement) {
@@ -15,8 +18,7 @@ export class Parser {
 
   private readComponent(el: Node, slot: Fragment) {
     if (el.nodeType === Node.ELEMENT_NODE) {
-      const components = this.options.componentReaders;
-      for (const t of components) {
+      for (const t of this.componentReaders) {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.component);
@@ -46,7 +48,7 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement, slot: Fragment) {
-    const maps = this.options.formatters.map(f => {
+    const maps = this.formatters.map(f => {
       return {
         formatter: f,
         state: f.match(el)

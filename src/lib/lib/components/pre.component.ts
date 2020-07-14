@@ -3,7 +3,7 @@ import {
   ChildSlotModel,
   EventType,
   FormatAbstractData,
-  FormatDelta,
+  FormatParams,
   FormatEffect,
   Fragment,
   InlineFormatter,
@@ -238,7 +238,7 @@ export class PreComponent extends BranchComponent {
 
   private getFormats(index: number, node: HTMLElement, context: Fragment) {
     const start = index;
-    const childFormats: Array<FormatDelta> = [];
+    const childFormats: Array<FormatParams> = [];
     Array.from(node.childNodes).forEach(item => {
       if (item.nodeType === Node.ELEMENT_NODE) {
         if (item.nodeName.toLowerCase() === 'br') {
@@ -255,7 +255,7 @@ export class PreComponent extends BranchComponent {
       }
     });
 
-    const formats: Array<FormatDelta> = [];
+    const formats: Array<FormatParams> = [];
     node.classList.forEach(value => {
       for (const item of theme) {
         if (item.classes.includes(value)) {
