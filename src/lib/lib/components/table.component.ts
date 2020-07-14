@@ -138,11 +138,22 @@ export class TableComponent extends BackboneComponent {
   }
 
   clone() {
-    const component = new TableComponent(this.config);
-    this.slots.forEach(f => {
-      component.slots.push(f.clone());
-    });
-    return component;
+    const clone = function (rows: TableCell[][]) {
+      return rows.map(row => {
+        return row.map(cell => {
+          return {
+            ...cell,
+            fragment: cell.fragment.clone()
+          };
+        })
+      });
+    }
+
+    const config: TableInitParams = {
+      headers: this.config.headers ? clone(this.config.headers) : null,
+      bodies: clone(this.config.bodies)
+    }
+    return new TableComponent(config);
   }
 
   render(isProduction: boolean) {
