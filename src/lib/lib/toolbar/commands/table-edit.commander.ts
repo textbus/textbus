@@ -146,7 +146,7 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     row.cellsPosition.forEach(cell => {
       if (cell.offsetRow < cell.cell.rowspan - 1) {
         if (cell.offsetColumn === 0) {
-          cell.cell.colspan++;
+          cell.cell.rowspan++;
         }
       } else {
         tr.push(TableEditCommander.createCell());
@@ -162,12 +162,13 @@ export class TableEditCommander implements ActionCommander<TableEditParams> {
     const maxRow = this.params.endPosition.rowIndex;
     const maxColumn = this.params.endPosition.columnIndex;
 
-    const cells = cellMatrix.slice(minRow, maxRow + 1)
-      .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1))
+    const selectedCells = cellMatrix.slice(minRow, maxRow + 1)
+      .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1).filter(c => {
+        return c.offsetRow === 0 && c.offsetColumn === 0;
+      }))
       .reduce((p, n) => {
         return p.concat(n);
       });
-    const selectedCells = Array.from(new Set(cells));
     const newNode = selectedCells.shift();
     newNode.cell.rowspan = maxRow - minRow + 1;
     newNode.cell.colspan = maxColumn - minColumn + 1;
