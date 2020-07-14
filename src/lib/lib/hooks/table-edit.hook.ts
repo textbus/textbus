@@ -1,5 +1,4 @@
 import { CubicBezier } from '@tanbo/bezier';
-import { fromEvent, merge } from 'rxjs';
 
 import { Commander, Fragment, Renderer, TBRange, TBSelection, Lifecycle } from '../core/_api';
 import { TableEditCommander } from '../toolbar/_api';
@@ -12,15 +11,16 @@ interface ElementPosition {
   height: number;
 }
 
-function findElementByTagName(nodes: Node[], tagName: string | string[]): HTMLElement {
-  if (!Array.isArray(tagName)) {
-    tagName = [tagName];
+function findParentByTagName(node: Node, tagNames: string[]): HTMLElement {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return findParentByTagName(node.parentNode, tagNames);
   }
-  const regs = tagName.map(tagName => new RegExp(`^${tagName}$`, 'i'));
-  for (const node of nodes) {
-    if (node.nodeType === Node.ELEMENT_NODE && regs.map(reg => reg.test((node as HTMLElement).tagName)).indexOf(true) > -1) {
+  const regs = tagNames.map(tagName => new RegExp(`^${tagName}$`, 'i'));
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    if (regs.map(reg => reg.test(node.nodeName)).indexOf(true) > -1) {
       return node as HTMLElement;
     }
+    return findParentByTagName(node.parentNode, tagNames);
   }
   return null;
 }
@@ -42,6 +42,8 @@ export class TableEditHook implements Lifecycle {
   private animateId: number;
   private renderer: Renderer;
   private tableComponent: TableComponent;
+  private frameContainer: HTMLElement;
+  private contextDocument: Document;
 
   constructor() {
     this.mask.classList.add('tbus-table-editor-hook-mask');
@@ -50,90 +52,53 @@ export class TableEditHook implements Lifecycle {
   }
 
   setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
+    this.contextDocument = contextDocument;
+    this.frameContainer = frameContainer;
     this.renderer = renderer;
-    const childBody = contextDocument.body;
-
     let style = contextDocument.createElement('style');
     this.styleElement = style;
     style.innerText = '::selection { background: transparent; }';
-
-    fromEvent(childBody, 'mousedown').subscribe(startEvent => {
-      this.selectedCells = [];
-      this.startPosition = null;
-      this.endPosition = null;
-      this.tableElement = null;
-
-      if (this.insertStyle) {
-        contextDocument.getSelection().removeAllRanges();
-        contextDocument.head.removeChild(style);
-        this.insertStyle = false;
-      }
-
-      let startPaths: Node[] = [];
-      if (startEvent.composedPath) {
-        startPaths = startEvent.composedPath() as Node[];
-      } else {
-        let n = startEvent.target as Node;
-        while (n) {
-          startPaths.push(n);
-          n = n.parentNode;
-        }
-      }
-      this.startCell = this.endCell = findElementByTagName(startPaths, ['td', 'th']) as HTMLTableCellElement;
-      this.tableElement = findElementByTagName(startPaths, 'table') as HTMLTableElement;
-      if (!this.startCell || !this.tableElement) {
-        if (this.insertMask) {
-          this.insertMask = false;
-          frameContainer.removeChild(this.mask);
-        }
-        return;
-      }
-      if (!this.insertMask) {
-        frameContainer.appendChild(this.mask);
-        this.insertMask = true;
-        const initRect = this.startCell.getBoundingClientRect();
-        this.mask.style.left = initRect.left + 'px';
-        this.mask.style.top = initRect.top + 'px';
-        this.mask.style.width = this.firstMask.style.width = initRect.width + 'px';
-        this.mask.style.height = this.firstMask.style.height = initRect.height + 'px';
-        this.firstMask.style.left = '0px';
-        this.firstMask.style.top = '0px';
-      }
-      this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
-
-      const unBindMouseover = fromEvent(childBody, 'mouseover').subscribe(mouseoverEvent => {
-        const paths = Array.from(mouseoverEvent.composedPath()) as Array<Node>;
-        const currentTable = findElementByTagName(paths, 'table');
-        if (currentTable !== this.tableElement) {
-          return;
-        }
-        this.endCell = findElementByTagName(paths, ['td', 'th']) as HTMLTableCellElement || this.endCell;
-        if (this.endCell) {
-          if (this.endCell !== this.startCell) {
-            contextDocument.head.appendChild(style);
-            this.insertStyle = true;
-          } else {
-            if (this.insertStyle) {
-              contextDocument.head.removeChild(style);
-              this.insertStyle = false;
-            }
-          }
-          this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
-        }
-      });
-
-      const unBindMouseup = merge(...[
-        'mouseleave',
-        'mouseup'
-      ].map(type => fromEvent(childBody, type))).subscribe(() => {
-        unBindMouseover.unsubscribe();
-        unBindMouseup.unsubscribe();
-      });
-    });
-
   }
 
   onSelectionChange(renderer: Renderer, selection: TBSelection, context: Document) {
+    const nativeSelection = context.getSelection();
+    this.selectedCells = [];
+
+    this.startCell = findParentByTagName(nativeSelection.anchorNode, ['th', 'td']) as HTMLTableCellElement;
+    if (!this.startCell) {
+      // 开始位置不在表格内
+      this.removeMask();
+      return;
+    }
+    this.tableElement = findParentByTagName(nativeSelection.anchorNode, ['table']) as HTMLTableElement;
+    this.endCell = findParentByTagName(nativeSelection.focusNode, ['th', 'td']) as HTMLTableCellElement;
+    if (!this.endCell) {
+      this.removeMask();
+      // 结束位置不在表格内
+      return;
+    }
+
+    if (this.tableElement !== findParentByTagName(nativeSelection.focusNode, ['table'])) {
+      // 开始的单元格和结束的单元格不在同一个表格
+      this.removeMask();
+      return;
+    }
+
+    if (this.startCell !== this.endCell) {
+      if (!this.insertStyle) {
+        context.head.appendChild(this.styleElement);
+        this.insertStyle = true;
+      }
+    } else {
+      this.insertStyle = false;
+      this.styleElement.parentNode?.removeChild(this.styleElement);
+    }
+
+    this.addMask(this.startCell, this.endCell);
+
+    this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+
+
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
         return;
@@ -168,21 +133,30 @@ export class TableEditHook implements Lifecycle {
 
   onViewUpdated() {
     if (this.startPosition && this.endPosition && this.tableComponent) {
-
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
       if (this.startCell && this.endCell) {
         this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
-      } else {
-        if (this.insertMask) {
-          this.mask.parentNode.removeChild(this.mask);
-          this.insertMask = false;
-        }
-        if (this.insertStyle) {
-          this.styleElement.parentNode.removeChild(this.styleElement);
-          this.insertStyle = false;
-        }
       }
+    }
+  }
+
+  private removeMask() {
+    this.insertMask = false;
+    this.mask.parentNode?.removeChild(this.mask);
+  }
+
+  private addMask(startCell: HTMLTableCellElement, endCell: HTMLTableCellElement) {
+    const startRect = startCell.getBoundingClientRect();
+    if (startCell === endCell && !this.insertMask) {
+      this.frameContainer.appendChild(this.mask);
+      this.insertMask = true;
+      this.mask.style.left = startRect.left + 'px';
+      this.mask.style.top = startRect.top + 'px';
+      this.mask.style.width = this.firstMask.style.width = startRect.width + 'px';
+      this.mask.style.height = this.firstMask.style.height = startRect.height + 'px';
+      this.firstMask.style.left = '0px';
+      this.firstMask.style.top = '0px';
     }
   }
 
