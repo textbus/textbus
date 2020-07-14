@@ -73,7 +73,6 @@ export class Events {
       return !isWriting || !this.input.value;
     })).subscribe((ev: KeyboardEvent) => {
       const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
-      console.log(reg)
       for (const config of this.keymaps) {
         const test = Array.isArray(config.keymap.key) ?
           config.keymap.key.map(k => reg.test(k)).includes(true) :
