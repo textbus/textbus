@@ -522,9 +522,11 @@ export class TBRange {
     while (true) {
       const parentComponent = this.renderer.getParentComponent(fragment);
       if (!parentComponent) {
+        const len = cacheFragment.contentLength;
+        const last = cacheFragment.getContentAtIndex(len - 1);
         return {
           fragment: cacheFragment,
-          index: cacheFragment.contentLength
+          index: last instanceof LeafComponent && last.tagName === 'br' ? len - 1 : len
         }
       }
       if (parentComponent instanceof BranchComponent) {
