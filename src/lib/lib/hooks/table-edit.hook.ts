@@ -67,12 +67,14 @@ export class TableEditHook implements Lifecycle {
     this.startCell = findParentByTagName(nativeSelection.anchorNode, ['th', 'td']) as HTMLTableCellElement;
     if (!this.startCell) {
       // 开始位置不在表格内
+      this.showNativeSelectionMask();
       this.removeMask();
       return;
     }
     this.tableElement = findParentByTagName(nativeSelection.anchorNode, ['table']) as HTMLTableElement;
     this.endCell = findParentByTagName(nativeSelection.focusNode, ['th', 'td']) as HTMLTableCellElement;
     if (!this.endCell) {
+      this.showNativeSelectionMask();
       this.removeMask();
       // 结束位置不在表格内
       return;
@@ -80,24 +82,18 @@ export class TableEditHook implements Lifecycle {
 
     if (this.tableElement !== findParentByTagName(nativeSelection.focusNode, ['table'])) {
       // 开始的单元格和结束的单元格不在同一个表格
+      this.showNativeSelectionMask();
       this.removeMask();
       return;
     }
 
-    if (this.startCell !== this.endCell) {
-      if (!this.insertStyle) {
-        context.head.appendChild(this.styleElement);
-        this.insertStyle = true;
-      }
+    if (this.startCell === this.endCell) {
+      this.showNativeSelectionMask();
     } else {
-      this.insertStyle = false;
-      this.styleElement.parentNode?.removeChild(this.styleElement);
+      this.hideNativeSelectionMask();
     }
 
-    this.addMask(this.startCell, this.endCell);
-
     this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
-
 
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
@@ -137,8 +133,23 @@ export class TableEditHook implements Lifecycle {
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
       if (this.startCell && this.endCell) {
         this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+      } else {
+        this.removeMask();
+        this.showNativeSelectionMask();
       }
     }
+  }
+
+  private hideNativeSelectionMask() {
+    if (!this.insertStyle) {
+      this.contextDocument.head.appendChild(this.styleElement);
+      this.insertStyle = true;
+    }
+  }
+
+  private showNativeSelectionMask() {
+    this.insertStyle = false;
+    this.styleElement.parentNode?.removeChild(this.styleElement);
   }
 
   private removeMask() {
@@ -146,18 +157,9 @@ export class TableEditHook implements Lifecycle {
     this.mask.parentNode?.removeChild(this.mask);
   }
 
-  private addMask(startCell: HTMLTableCellElement, endCell: HTMLTableCellElement) {
-    const startRect = startCell.getBoundingClientRect();
-    if (startCell === endCell && !this.insertMask) {
-      this.frameContainer.appendChild(this.mask);
-      this.insertMask = true;
-      this.mask.style.left = startRect.left + 'px';
-      this.mask.style.top = startRect.top + 'px';
-      this.mask.style.width = this.firstMask.style.width = startRect.width + 'px';
-      this.mask.style.height = this.firstMask.style.height = startRect.height + 'px';
-      this.firstMask.style.left = '0px';
-      this.firstMask.style.top = '0px';
-    }
+  private addMask() {
+    this.frameContainer.appendChild(this.mask);
+    this.insertMask = true;
   }
 
   private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
@@ -177,7 +179,7 @@ export class TableEditHook implements Lifecycle {
 
     this.firstMask.style.width = firstCellRect.width + 'px';
     this.firstMask.style.height = firstCellRect.height + 'px';
-    if (animate) {
+    if (animate && this.insertMask) {
       this.animate({
         left: this.mask.offsetLeft,
         top: this.mask.offsetTop,
@@ -195,6 +197,7 @@ export class TableEditHook implements Lifecycle {
         height: firstCellRect.height
       });
     } else {
+      this.addMask();
       this.mask.style.left = startRect.left + 'px';
       this.mask.style.top = startRect.top + 'px';
       this.mask.style.width = endRect.right - startRect.left + 'px';
