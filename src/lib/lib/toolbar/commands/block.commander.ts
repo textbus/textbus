@@ -29,6 +29,12 @@ export class BlockCommander implements Commander<string> {
         const parentComponent = renderer.getParentComponent(scope.fragment);
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+          if (scope.fragment === range.startFragment) {
+            range.startFragment = blockComponent.slot;
+          }
+          if (scope.fragment === range.endFragment) {
+            range.endFragment = blockComponent.slot;
+          }
           if (parentComponent instanceof DivisionComponent) {
             const parentFragment = renderer.getParentFragment(parentComponent);
             blockComponent.slot.from(scope.fragment);

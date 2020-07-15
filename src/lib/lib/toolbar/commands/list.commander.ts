@@ -32,6 +32,12 @@ export class ListCommander implements Commander {
                 parentFragment.insertBefore(fragment.getContentAtIndex(0) as BranchComponent, item.component)
               } else {
                 const t = new BlockComponent('p');
+                if (fragment === range.startFragment) {
+                  range.startFragment = t.slot;
+                }
+                if (fragment === range.endFragment) {
+                  range.endFragment = t.slot;
+                }
                 t.slot.from(fragment);
                 parentFragment.insertBefore(t, item.component);
               }

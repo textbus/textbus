@@ -738,20 +738,6 @@ export class TBRange {
 
       this.deleteSelectedScope();
       if (isDeleteFragment) {
-        // const parentTemplate = this.renderer.getParentComponent(this.startFragment);
-        // if (parentTemplate instanceof BackboneComponent &&
-        //   !parentTemplate.canSplit() &&
-        //   parentTemplate.slots.length === 1) {
-        //   const parentFragment = this.renderer.getParentFragment(parentTemplate);
-        //   parentFragment.remove(parentFragment.indexOf(parentTemplate, 1));
-        //   if (parentFragment.contentLength === 0) {
-        //     const t = this.deleteEmptyTree(parentFragment);
-        //     if(t instanceof Fragment) {
-        //       const firstPosition = this.findFirstPosition(t);
-        //       this.setStart(firstPosition.fragment, firstPosition.index);
-        //     } else if (t instanceof )
-        //   }
-        // }
         this.startFragment.from(this.endFragment);
         const firstPosition = this.findFirstPosition(this.startFragment);
         this.setStart(firstPosition.fragment, firstPosition.index);
