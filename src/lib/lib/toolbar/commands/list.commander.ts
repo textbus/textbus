@@ -113,7 +113,7 @@ export class ListCommander implements Commander {
             const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
-          } else {
+          } else if (parentComponent instanceof BranchComponent) {
             const index = parentComponent.slots.indexOf(commonAncestorFragment);
             const before = parentComponent.clone() as BranchComponent;
             before.slots.splice(index);
@@ -131,6 +131,8 @@ export class ListCommander implements Commander {
               parentFragment.insert(before, position);
             }
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+          } else {
+            // TODO 缺少 BackboneComponent 处理逻辑
           }
         }
       }

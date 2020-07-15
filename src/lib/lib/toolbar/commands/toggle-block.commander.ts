@@ -1,4 +1,12 @@
-import { Commander, TBSelection, Renderer, Fragment, BranchComponent, DivisionComponent } from '../../core/_api';
+import {
+  Commander,
+  TBSelection,
+  Renderer,
+  Fragment,
+  BranchComponent,
+  DivisionComponent,
+  BackboneComponent
+} from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 
 export class ToggleBlockCommander implements Commander<string> {
@@ -49,7 +57,7 @@ export class ToggleBlockCommander implements Commander<string> {
             range.commonAncestorFragment.cut(index, 1);
             fragment.append(range.commonAncestorComponent);
           } else {
-            const appendedComponents: Array<BranchComponent | DivisionComponent> = [];
+            const appendedComponents: Array<BranchComponent | DivisionComponent | BackboneComponent> = [];
             range.getExpandedScope().reverse().forEach(scope => {
               const parentComponent = renderer.getParentComponent(scope.fragment);
               if (appendedComponents.includes(parentComponent)) {

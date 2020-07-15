@@ -2,7 +2,7 @@ import { Renderer } from './renderer';
 import { Constructor } from './constructor';
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
-import { BranchComponent, LeafComponent, DivisionComponent, Component } from './component';
+import { BranchComponent, LeafComponent, DivisionComponent, Component, BackboneComponent } from './component';
 import { BlockFormatter } from './formatter';
 
 /**
@@ -128,8 +128,8 @@ export class TBRange {
     let endIndex = this.endIndex;
     const commonAncestorFragment = this.commonAncestorFragment;
 
-    let startChildComponent: BranchComponent | DivisionComponent = null;
-    let endChildComponent: BranchComponent | DivisionComponent = null;
+    let startChildComponent: BranchComponent | DivisionComponent | BackboneComponent = null;
+    let endChildComponent: BranchComponent | DivisionComponent | BackboneComponent = null;
 
     while (startFragment !== commonAncestorFragment) {
       startChildComponent = this.renderer.getParentComponent(startFragment);
@@ -158,7 +158,7 @@ export class TBRange {
    * @param of BackboneComponent 子类的构造 class。
    * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 BackboneComponent 实例。
    */
-  getSlotRange<T extends BranchComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
+  getSlotRange<T extends BranchComponent | BackboneComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ component: T, index: number }> = [];
     this.getSelectedScope().forEach(scope => {
       const context = this.renderer.getContext(scope.fragment, of, filter);
@@ -168,7 +168,9 @@ export class TBRange {
         if (parentComponent === context) {
           maps.push({
             component: context,
-            index: context.slots.indexOf(fragment)
+            index: context instanceof BackboneComponent ?
+              context.indexOf(fragment) :
+              (context as BranchComponent).slots.indexOf(fragment)
           })
           break;
         }
@@ -301,6 +303,11 @@ export class TBRange {
           c.slots.forEach(childFragment => {
             scopes.push(...fn(childFragment, 0, childFragment.contentLength));
           })
+        } else if (c instanceof BackboneComponent) {
+          newScope = null;
+          for (const childFragment of c) {
+            scopes.push(...fn(childFragment, 0, childFragment.contentLength));
+          }
         } else {
           if (!newScope) {
             newScope = {
@@ -351,7 +358,7 @@ export class TBRange {
    * @param endFragment 可选的结束的 fragment，如不传，则依次向上查找，直到根 fragment。
    * @return 删除内容后不为空的 component 或 fragment。
    */
-  deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): BranchComponent | Fragment {
+  deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): BranchComponent | BackboneComponent | Fragment {
     if (fragment === endFragment) {
       return fragment;
     }
@@ -375,6 +382,8 @@ export class TBRange {
         return parentFragment;
       }
       return parentComponent;
+    } else if (parentComponent instanceof BackboneComponent) {
+      // TODO 表格删除未实现
     }
     return fragment;
   }
@@ -408,6 +417,9 @@ export class TBRange {
       if (prev instanceof BranchComponent) {
         return this.findLastChild(prev.slots[prev.slots.length - 1]);
       }
+      if (prev instanceof BackboneComponent) {
+        return this.findLastChild(prev.getSlotAtIndex(prev.slotCount - 1));
+      }
       return {
         fragment,
         index: this.startIndex - 1
@@ -432,6 +444,14 @@ export class TBRange {
           return this.findLastChild(parentComponent.slots[fragmentIndex - 1]);
         }
       }
+
+      if (parentComponent instanceof BackboneComponent) {
+        const fragmentIndex = parentComponent.indexOf(fragment);
+        if (fragmentIndex > 0) {
+          return this.findLastChild(parentComponent.getSlotAtIndex(fragmentIndex - 1));
+        }
+      }
+
       const parentFragment = this.renderer.getParentFragment(parentComponent);
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex > 0) {
@@ -441,6 +461,9 @@ export class TBRange {
         }
         if (prevContent instanceof BranchComponent) {
           return this.findLastChild(prevContent.slots[prevContent.slots.length - 1]);
+        }
+        if (prevContent instanceof BackboneComponent) {
+          return this.findLastChild(prevContent.getSlotAtIndex(prevContent.slotCount - 1));
         }
         return {
           fragment: parentFragment,
@@ -472,6 +495,9 @@ export class TBRange {
       if (next instanceof BranchComponent) {
         return this.findFirstPosition(next.slots[0]);
       }
+      if (next instanceof BackboneComponent) {
+        return this.findFirstPosition(next.getSlotAtIndex(0));
+      }
       return {
         fragment,
         index: offset + 1
@@ -496,6 +522,12 @@ export class TBRange {
           return this.findFirstPosition(parentComponent.slots[fragmentIndex + 1]);
         }
       }
+      if (parentComponent instanceof BackboneComponent) {
+        const fragmentIndex = parentComponent.indexOf(fragment);
+        if (fragmentIndex < parentComponent.slotCount - 1) {
+          return this.findFirstPosition(parentComponent.getSlotAtIndex(fragmentIndex + 1));
+        }
+      }
       const parentFragment = this.renderer.getParentFragment(parentComponent);
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex < parentFragment.contentLength - 1) {
@@ -505,6 +537,9 @@ export class TBRange {
         }
         if (nextContent instanceof BranchComponent) {
           return this.findFirstPosition(nextContent.slots[0]);
+        }
+        if (nextContent instanceof BackboneComponent) {
+          return this.findFirstPosition(nextContent.getSlotAtIndex(0));
         }
         return {
           fragment: parentFragment,
@@ -631,6 +666,11 @@ export class TBRange {
       const firstFragment = first.slots[0];
       return this.findFirstPosition(firstFragment);
     }
+
+    if (first instanceof BackboneComponent) {
+      const firstFragment = first.getSlotAtIndex(0);
+      return this.findFirstPosition(firstFragment);
+    }
     return {
       index: 0,
       fragment
@@ -648,6 +688,10 @@ export class TBRange {
     }
     if (last instanceof BranchComponent) {
       const lastFragment = last.slots[last.slots.length - 1];
+      return this.findLastChild(lastFragment);
+    }
+    if (last instanceof BackboneComponent) {
+      const lastFragment = last.getSlotAtIndex(last.slotCount - 1);
       return this.findLastChild(lastFragment);
     }
     return {
@@ -752,8 +796,8 @@ export class TBRange {
                     endIndex: number): TBRangeScope[] {
     const start: TBRangeScope[] = [];
     const end: TBRangeScope[] = [];
-    let startParentComponent: BranchComponent | DivisionComponent = null;
-    let endParentComponent: BranchComponent | DivisionComponent = null;
+    let startParentComponent: BranchComponent | DivisionComponent | BackboneComponent = null;
+    let endParentComponent: BranchComponent | DivisionComponent | BackboneComponent = null;
 
     let startFragmentPosition: number = null;
     let endFragmentPosition: number = null;
@@ -771,8 +815,10 @@ export class TBRange {
       });
 
       startParentComponent = this.renderer.getParentComponent(startFragment);
-      if (startParentComponent instanceof BranchComponent) {
-        const childSlots = startParentComponent.slots;
+      if (startParentComponent instanceof BranchComponent || startParentComponent instanceof BackboneComponent) {
+        const childSlots = startParentComponent instanceof BranchComponent ?
+          startParentComponent.slots :
+          Array.from(startParentComponent);
         const end = childSlots.indexOf(this.endFragment);
         startFragmentPosition = childSlots.indexOf(startFragment);
         if (startParentComponent !== this.commonAncestorComponent && end === -1) {
@@ -793,8 +839,10 @@ export class TBRange {
         return;
       }
       endParentComponent = this.renderer.getParentComponent(endFragment);
-      if (endParentComponent instanceof BranchComponent) {
-        const childSlots = endParentComponent.slots;
+      if (endParentComponent instanceof BranchComponent || endParentComponent instanceof BackboneComponent) {
+        const childSlots = endParentComponent instanceof BranchComponent ?
+          endParentComponent.slots :
+          Array.from(endParentComponent);
         const start = childSlots.indexOf(this.startFragment);
 
         endFragmentPosition = childSlots.indexOf(endFragment);
@@ -808,6 +856,7 @@ export class TBRange {
           }));
         }
       }
+
       end.push({
         startIndex: 0,
         endIndex,
@@ -817,8 +866,11 @@ export class TBRange {
       endIndex = endFragment.indexOf(endParentComponent);
     }
     let result: TBRangeScope[] = [...start];
-    if (startParentComponent === endParentComponent && startParentComponent instanceof BranchComponent) {
-      const slots = startParentComponent.slots.slice(startFragmentPosition + 1, endFragmentPosition);
+    if (startParentComponent === endParentComponent &&
+      (startParentComponent instanceof BranchComponent || startParentComponent instanceof BackboneComponent)) {
+      const slots = (startParentComponent instanceof BranchComponent ?
+        startParentComponent.slots :
+        Array.from(startParentComponent)).slice(startFragmentPosition + 1, endFragmentPosition);
       result.push(...slots.map(f => {
         return {
           startIndex: 0,
@@ -966,7 +1018,9 @@ export class TBRange {
               }
               if (position.endIndex === offset) {
                 const afterContent = fragment.sliceContents(position.endIndex, position.endIndex + 1)[0];
-                if (afterContent instanceof DivisionComponent || afterContent instanceof BranchComponent) {
+                if (afterContent instanceof DivisionComponent ||
+                  afterContent instanceof BranchComponent ||
+                  afterContent instanceof BackboneComponent) {
                   vElement = child;
                   continue parentLoop;
                 }
@@ -1017,7 +1071,7 @@ export class TBRange {
   private static findExpandedStartIndex(fragment: Fragment, index: number) {
     for (; index > 0; index--) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof BranchComponent || item instanceof DivisionComponent) {
+      if (item instanceof DivisionComponent || item instanceof BranchComponent || item instanceof BackboneComponent) {
         break;
       }
     }
@@ -1027,7 +1081,7 @@ export class TBRange {
   private static findExpandedEndIndex(fragment: Fragment, index: number) {
     for (; index < fragment.contentLength; index++) {
       const item = fragment.getContentAtIndex(index);
-      if (item instanceof BranchComponent || item instanceof DivisionComponent) {
+      if (item instanceof DivisionComponent || item instanceof BranchComponent || item instanceof BackboneComponent) {
         break;
       }
     }

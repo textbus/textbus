@@ -1,8 +1,15 @@
-import { BranchComponent, DivisionComponent, Constructor, Renderer, TBRange } from '../../../core/_api';
+import {
+  BranchComponent,
+  DivisionComponent,
+  Constructor,
+  Renderer,
+  TBRange,
+  BackboneComponent
+} from '../../../core/_api';
 
 export function rangeContentInComponent(range: TBRange,
-                                       renderer: Renderer,
-                                       componentConstructorList: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
+                                        renderer: Renderer,
+                                        componentConstructorList: Array<Constructor<BranchComponent | DivisionComponent | BackboneComponent>> = []) {
   let has = true;
   if (componentConstructorList.length === 0) {
     return false;

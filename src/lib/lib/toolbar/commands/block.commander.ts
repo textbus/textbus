@@ -4,7 +4,7 @@ import {
   FormatEffect,
   Fragment,
   Renderer, DivisionComponent,
-  TBSelection
+  TBSelection, BranchComponent
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
@@ -33,13 +33,15 @@ export class BlockCommander implements Commander<string> {
             parentFragment.insertBefore(blockComponent, parentComponent);
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
             this.effect(blockComponent.slot, parentComponent.tagName);
-          } else {
+          } else if (parentComponent instanceof BranchComponent) {
             const index = parentComponent.slots.indexOf(scope.fragment);
             blockComponent.slot.from(scope.fragment);
             this.effect(blockComponent.slot, parentComponent.tagName);
             const fragment = new Fragment();
             fragment.append(blockComponent);
             parentComponent.slots.splice(index, 1, fragment);
+          } else {
+            // TODO 缺少 BackboneComponent 处理逻辑
           }
         } else {
           blockComponent.slot.from(new Fragment());

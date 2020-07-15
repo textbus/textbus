@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { BranchComponent, DivisionComponent, Component } from './component';
+import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
 import { BlockFormatter, FormatParams, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -58,7 +58,9 @@ export class Fragment {
         return;
       }
       if (format.startIndex < index && format.endIndex >= index) {
-        if (contents instanceof DivisionComponent || contents instanceof BranchComponent) {
+        if (contents instanceof DivisionComponent ||
+          contents instanceof BranchComponent ||
+          contents instanceof BackboneComponent) {
           newFormatRanges.push({
             startIndex: format.startIndex,
             endIndex: index,
@@ -278,7 +280,15 @@ export class Fragment {
     const formats: FormatRange[] = [];
     let newFormat: FormatRange;
     contents.forEach(item => {
-      if (item instanceof BranchComponent) {
+      if (item instanceof DivisionComponent) {
+        newFormat = null;
+        if (coverChild) {
+          const newFormatRange = Object.assign({}, formatRange);
+          newFormatRange.startIndex = 0;
+          newFormatRange.endIndex = item.slot.contentLength;
+          item.slot.apply(newFormatRange, options);
+        }
+      } else if (item instanceof BranchComponent) {
         newFormat = null;
         if (coverChild) {
           item.slots.forEach(fragment => {
@@ -288,13 +298,15 @@ export class Fragment {
             fragment.apply(newFormatRange, options);
           })
         }
-      } else if (item instanceof DivisionComponent) {
+      } else if (item instanceof BackboneComponent) {
         newFormat = null;
         if (coverChild) {
-          const newFormatRange = Object.assign({}, formatRange);
-          newFormatRange.startIndex = 0;
-          newFormatRange.endIndex = item.slot.contentLength;
-          item.slot.apply(newFormatRange, options);
+          for (const fragment of item) {
+            const newFormatRange = Object.assign({}, formatRange);
+            newFormatRange.startIndex = 0;
+            newFormatRange.endIndex = fragment.contentLength;
+            fragment.apply(newFormatRange, options);
+          }
         }
       } else {
         if (!newFormat) {

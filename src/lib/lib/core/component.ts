@@ -32,43 +32,6 @@ export abstract class ComponentReader {
    * @param element 当前要转换的元素。
    */
   abstract from(element: HTMLElement): ViewData;
-
-  // readComponent(by: HTMLElement, example: VElementLiteral, slotMark: VElementLiteral): HTMLElement[] {
-  //   return this.findChildSlot(by, example, slotMark, []);
-  // }
-  //
-  // private findChildSlot(by: HTMLElement,
-  //                       example: VElementLiteral,
-  //                       slotMark: VElementLiteral,
-  //                       childSlot: HTMLElement[]): HTMLElement[] {
-  //   if (example !== slotMark && this.equal(by, example)) {
-  //     for (let index = 0; index < example.childNodes.length; index++) {
-  //       const child = example.childNodes[index];
-  //       const childNode = by.childNodes[index];
-  //       if (!childNode) {
-  //         return false;
-  //       }
-  //       if (typeof child === 'string' && childNode.nodeType === 3) {
-  //         return childNode.textContent === child;
-  //       } else if (typeof child !== 'string' && childNode.nodeType === 1) {
-  //         return this.findChildSlot(childNode as HTMLElement, child, slotMark, childSlot);
-  //       }
-  //     }
-  //   }
-  //   childSlot.push(by);
-  //   return childSlot;
-  // }
-  //
-  // private equal(left: HTMLElement, right: VElementLiteral) {
-  //   const equalTagName = left.nodeName.toLowerCase() === right.tagName;
-  //   const equalAttrs = Object.keys(right.attrs).map(key => {
-  //     return right.attrs[key] === left.getAttribute(key)
-  //   }).reduce((previousValue, currentValue) => previousValue && currentValue, true);
-  //   const equalStyles = Object.keys(right.styles).map(key => {
-  //     return right.styles[key] === left.getAttribute(key)
-  //   }).reduce((previousValue, currentValue) => previousValue && currentValue, true);
-  //   return equalTagName && equalAttrs && equalStyles;
-  // }
 }
 
 /**
@@ -137,6 +100,10 @@ export abstract class BranchComponent extends Component {
  * 如 table，可以有多个 td，但 td 是不能随意删除的，否则会破坏 table 的结构。
  */
 export abstract class BackboneComponent extends Component implements Iterable<Fragment> {
+  get slotCount() {
+    return this.slots.length;
+  }
+
   /**
    * 子插槽的集合
    */
@@ -176,6 +143,14 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
       done: true,
       value: undefined
     };
+  }
+
+  getSlotAtIndex(index: number) {
+    return this.slots[index];
+  }
+
+  indexOf(fragment: Fragment) {
+    return this.slots.indexOf(fragment);
   }
 }
 

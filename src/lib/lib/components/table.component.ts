@@ -1,12 +1,12 @@
 import {
-  BranchComponent,
   EventType,
   Fragment,
   LeafComponent,
   SlotMap,
   ComponentReader,
   VElement,
-  ViewData
+  ViewData,
+  BackboneComponent
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -114,7 +114,7 @@ export class TableComponentReader implements ComponentReader {
   }
 }
 
-export class TableComponent extends BranchComponent {
+export class TableComponent extends BackboneComponent {
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;
@@ -131,10 +131,6 @@ export class TableComponent extends BranchComponent {
         this.slots.push(col.fragment);
       }
     }
-  }
-
-  canSplit(): boolean {
-    return false;
   }
 
   clone() {

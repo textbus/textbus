@@ -8,7 +8,7 @@ export class TableRemoveCommander implements Commander {
     const firstRange = selection.firstRange;
     const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
-      let position = firstRange.findFirstPosition(context.slots[0]);
+      let position = firstRange.findFirstPosition(context.getSlotAtIndex(0));
       firstRange.setStart(position.fragment, position.index);
       firstRange.collapse();
 
