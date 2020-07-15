@@ -106,10 +106,9 @@ export abstract class DivisionComponent extends Component {
 }
 
 /**
- * 有任意个子插槽，且需要保持固定的文档结构的组件。如 ul、table等。也可以用户自定义的组件。
+ * 有任意个子插槽，且子插槽可以任意增删的组件。
+ * 如 ul、ol 等，都保持一个固定的结构，但 li 的个数是不限制的，且是可以更改的。也可以用户自定义的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
- * ul 可以有任意个 li，table 可以有多个 td。ul 和 table 都需要保持固定的结构。
- * ul 的子元素只能是 li，table 的子元素只能是 tbody、row 等。
  */
 export abstract class BranchComponent extends Component {
   /**
@@ -123,10 +122,31 @@ export abstract class BranchComponent extends Component {
   protected viewMap = new Map<Fragment, VElement>();
 
   /**
-   * 当前组件是否可拆分，如 ul，可以把其中一个 li 提取出来，变为 p，
-   * 但 table 则不可以这样做，因为 table 只能作为一个整体操作。
+   * 通过子插槽获取对应的虚拟 DOM 节点。
+   * Renderer 类在渲染组件时，只能获取到当前组件的子插槽，但子插槽的内容要渲染到哪个节点内，
+   * Renderer 是不知道的，这时，需要组件明确返回对应的子节点，以便 Renderer 能继续正常工作。
+   * @param slot 当前组件的某一个子插槽
    */
-  abstract canSplit(): boolean;
+  getChildViewBySlot(slot: Fragment): VElement {
+    return this.viewMap.get(slot);
+  }
+}
+
+/**
+ * 有任意个子插槽，且子插槽不可随意更改的组件。
+ * 如 table，可以有多个 td，但 td 是不能随意删除的，否则会破坏 table 的结构。
+ */
+export abstract class BackboneComponent extends Component implements Iterable<Fragment> {
+  /**
+   * 子插槽的集合
+   */
+  protected slots: Fragment[] = [];
+  /**
+   * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
+   */
+  protected viewMap = new Map<Fragment, VElement>();
+
+  private iteratorIndex = 0;
 
   /**
    * 通过子插槽获取对应的虚拟 DOM 节点。
@@ -136,6 +156,26 @@ export abstract class BranchComponent extends Component {
    */
   getChildViewBySlot(slot: Fragment): VElement {
     return this.viewMap.get(slot);
+  }
+
+  [Symbol.iterator]() {
+    this.iteratorIndex = 0;
+    return this;
+  }
+
+  next() {
+    if (this.iteratorIndex < this.length) {
+      const value = this.slots[this.iteratorIndex];
+      this.iteratorIndex++;
+      return {
+        done: false,
+        value
+      };
+    }
+    return {
+      done: true,
+      value: undefined
+    };
   }
 }
 

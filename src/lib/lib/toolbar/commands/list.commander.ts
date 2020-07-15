@@ -59,7 +59,7 @@ export class ListCommander implements Commander {
             }
             const parentComponent = renderer.getParentComponent(scope.fragment);
             fragment = renderer.getParentFragment(parentComponent);
-            if (parentComponent instanceof BranchComponent && parentComponent.canSplit() === false) {
+            if (parentComponent instanceof BranchComponent) {
               lastBackboneComponent = parentComponent;
             }
           }

@@ -618,7 +618,7 @@ export class Editor implements EventDelegate {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
 
         }
-      } else if (parentComponent instanceof BranchComponent && parentComponent.canSplit()) {
+      } else if (parentComponent instanceof BranchComponent) {
         const ff = new Fragment();
         ff.append(component);
         parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);
