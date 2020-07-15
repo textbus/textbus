@@ -4,10 +4,11 @@ import {
   FormatEffect,
   Fragment,
   Renderer, DivisionComponent,
-  TBSelection, BranchComponent
+  TBSelection, BranchComponent, BackboneComponent
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
+import { BrComponent } from '../../components/br.component';
 
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
@@ -25,8 +26,9 @@ export class BlockCommander implements Commander<string> {
       range.getSuccessiveContents().forEach(scope => {
         const blockComponent = new BlockComponent(this.tagName);
 
+        const parentComponent = renderer.getParentComponent(scope.fragment);
+
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-          const parentComponent = renderer.getParentComponent(scope.fragment);
           if (parentComponent instanceof DivisionComponent) {
             const parentFragment = renderer.getParentFragment(parentComponent);
             blockComponent.slot.from(scope.fragment);
@@ -40,8 +42,14 @@ export class BlockCommander implements Commander<string> {
             const fragment = new Fragment();
             fragment.append(blockComponent);
             parentComponent.slots.splice(index, 1, fragment);
-          } else {
-            // TODO 缺少 BackboneComponent 处理逻辑
+          } else if (parentComponent instanceof BackboneComponent) {
+            const parentFragment = renderer.getParentFragment(parentComponent);
+            blockComponent.slot.from(scope.fragment);
+            scope.fragment.clean();
+            scope.fragment.append(new BrComponent());
+            parentFragment.insertBefore(blockComponent, parentComponent);
+            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+            this.effect(blockComponent.slot, parentComponent.tagName);
           }
         } else {
           blockComponent.slot.from(new Fragment());

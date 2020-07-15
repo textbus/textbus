@@ -123,6 +123,8 @@ export class TableComponent extends BackboneComponent {
 
   private _cellMatrix: TableRowPosition[];
 
+  private deleteMarkFragments: Fragment[] = [];
+
   constructor(public config: TableInitParams) {
     super('table')
     const bodyConfig = config.bodies;
@@ -131,6 +133,11 @@ export class TableComponent extends BackboneComponent {
         this.slots.push(col.fragment);
       }
     }
+  }
+
+  canDelete(deletedSlot: Fragment): boolean {
+    this.deleteMarkFragments.push(deletedSlot);
+    return this.slots.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
   }
 
   clone() {
@@ -156,6 +163,7 @@ export class TableComponent extends BackboneComponent {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
     this.slots = [];
+    this.deleteMarkFragments = [];
     const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
       const body = new VElement('tbody');

@@ -116,6 +116,14 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   private iteratorIndex = 0;
 
   /**
+   * 当用户在文档中作框选删除时，由于 BackboneComponent 是不可编辑的，所以会导致 TBus 无法判断当前组件是否为空组件，
+   * 所以，在 TBus 执行删除程序的过程中，如果遇到了 BackboneComponent，每清空一个 BackboneComponent 所属的 slot，
+   * 就会询问，当前组件是否可以删除。
+   * @param deletedSlot 当前清空的 fragment。
+   */
+  abstract canDelete(deletedSlot: Fragment): boolean;
+
+  /**
    * 通过子插槽获取对应的虚拟 DOM 节点。
    * Renderer 类在渲染组件时，只能获取到当前组件的子插槽，但子插槽的内容要渲染到哪个节点内，
    * Renderer 是不知道的，这时，需要组件明确返回对应的子节点，以便 Renderer 能继续正常工作。

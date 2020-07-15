@@ -383,7 +383,18 @@ export class TBRange {
       }
       return parentComponent;
     } else if (parentComponent instanceof BackboneComponent) {
-      // TODO 表格删除未实现
+      fragment.clean();
+      const b = parentComponent.canDelete(fragment);
+      if (b) {
+        const parentFragment = this.renderer.getParentFragment(parentComponent);
+        const index = parentFragment.indexOf(parentComponent);
+        parentFragment.cut(index, 1);
+        if (parentFragment.contentLength === 0) {
+          return this.deleteEmptyTree(parentFragment, endFragment);
+        }
+        return parentFragment;
+      }
+      return parentComponent;
     }
     return fragment;
   }

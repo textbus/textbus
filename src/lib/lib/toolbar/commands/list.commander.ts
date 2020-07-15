@@ -5,7 +5,7 @@ import {
   Fragment,
   BranchComponent,
   DivisionComponent,
-  TBRangeScope
+  TBRangeScope, BackboneComponent
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
 
@@ -48,26 +48,26 @@ export class ListCommander implements Commander {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListComponent(this.tagName);
-        const backboneComponents: BranchComponent[] = [];
+        const branchComponents: Array<BackboneComponent|BranchComponent> = [];
         const scopes: TBRangeScope[] = [];
         range.getSuccessiveContents().forEach(scope => {
           let fragment = scope.fragment;
-          let lastBackboneComponent: BranchComponent;
+          let lastBackboneComponent: BranchComponent|BackboneComponent;
           while (true) {
             if (fragment === commonAncestorFragment) {
               break;
             }
             const parentComponent = renderer.getParentComponent(scope.fragment);
             fragment = renderer.getParentFragment(parentComponent);
-            if (parentComponent instanceof BranchComponent) {
+            if (parentComponent instanceof BackboneComponent) {
               lastBackboneComponent = parentComponent;
             }
           }
           if (lastBackboneComponent) {
-            if (backboneComponents.includes(lastBackboneComponent)) {
+            if (branchComponents.includes(lastBackboneComponent)) {
               return;
             }
-            backboneComponents.push(lastBackboneComponent);
+            branchComponents.push(lastBackboneComponent);
             const parentFragment = renderer.getParentFragment(lastBackboneComponent);
             const index = parentFragment.indexOf(lastBackboneComponent);
             scopes.push({
@@ -108,7 +108,7 @@ export class ListCommander implements Commander {
           }
         } else {
           const parentComponent = renderer.getParentComponent(commonAncestorFragment);
-          if (parentComponent instanceof DivisionComponent) {
+          if (parentComponent instanceof DivisionComponent || parentComponent instanceof BackboneComponent) {
             const parentFragment = renderer.getParentFragment(parentComponent);
             const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
@@ -131,8 +131,6 @@ export class ListCommander implements Commander {
               parentFragment.insert(before, position);
             }
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
-          } else {
-            // TODO 缺少 BackboneComponent 处理逻辑
           }
         }
       }
