@@ -349,10 +349,11 @@ export class TBRange {
    * 直到根 Fragment 或当前 Fragment 等于 endFragment。
    * @param fragment 开始删除的 fragment。
    * @param endFragment 可选的结束的 fragment，如不传，则依次向上查找，直到根 fragment。
+   * @return 删除内容后不为空的 component 或 fragment。
    */
-  deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): TBRange {
+  deleteEmptyTree(fragment: Fragment, endFragment?: Fragment): BackboneComponent | Fragment {
     if (fragment === endFragment) {
-      return this;
+      return fragment;
     }
     const parentComponent = this.renderer.getParentComponent(fragment);
     if (parentComponent instanceof BranchComponent) {
@@ -361,6 +362,7 @@ export class TBRange {
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
       }
+      return parentFragment;
     } else if (parentComponent instanceof BackboneComponent) {
       parentComponent.slots.splice(parentComponent.slots.indexOf(fragment), 1);
       if (parentComponent.slots.length === 0) {
@@ -370,9 +372,11 @@ export class TBRange {
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
+        return parentFragment;
       }
+      return parentComponent;
     }
-    return this;
+    return fragment;
   }
 
   /**
@@ -679,6 +683,20 @@ export class TBRange {
 
       this.deleteSelectedScope();
       if (isDeleteFragment) {
+        // const parentTemplate = this.renderer.getParentComponent(this.startFragment);
+        // if (parentTemplate instanceof BackboneComponent &&
+        //   !parentTemplate.canSplit() &&
+        //   parentTemplate.slots.length === 1) {
+        //   const parentFragment = this.renderer.getParentFragment(parentTemplate);
+        //   parentFragment.remove(parentFragment.indexOf(parentTemplate, 1));
+        //   if (parentFragment.contentLength === 0) {
+        //     const t = this.deleteEmptyTree(parentFragment);
+        //     if(t instanceof Fragment) {
+        //       const firstPosition = this.findFirstPosition(t);
+        //       this.setStart(firstPosition.fragment, firstPosition.index);
+        //     } else if (t instanceof )
+        //   }
+        // }
         this.startFragment.from(this.endFragment);
         const firstPosition = this.findFirstPosition(this.startFragment);
         this.setStart(firstPosition.fragment, firstPosition.index);
