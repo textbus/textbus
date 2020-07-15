@@ -17,9 +17,9 @@ export class Fragment {
   }
 
   from(source: Fragment) {
-    const c = source.clone();
-    this.contents = c.contents;
-    this.formatMap = c.formatMap;
+    this.contents = source.contents;
+    this.formatMap = source.formatMap;
+    source.clean();
   }
 
   append(element: string | Component) {
