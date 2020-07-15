@@ -1,5 +1,5 @@
 import {
-  BackboneComponent, BranchComponent,
+  BranchComponent, DivisionComponent,
   Commander,
   FormatAbstractData,
   FormatEffect, Fragment,
@@ -27,9 +27,9 @@ export class BlockStyleCommander implements Commander<string> {
           fragments = [item.fragment];
         } else {
           item.fragment.sliceContents(item.startIndex, item.endIndex).forEach(content => {
-            if (content instanceof BackboneComponent) {
+            if (content instanceof BranchComponent) {
               fragments = content.slots;
-            } else if (content instanceof BranchComponent) {
+            } else if (content instanceof DivisionComponent) {
               fragments = [content.slot];
             }
           })

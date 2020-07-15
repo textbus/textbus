@@ -1,10 +1,10 @@
-import { TBSelection, Constructor, Renderer, BackboneComponent, BranchComponent } from '../../core/_api';
+import { TBSelection, Constructor, Renderer, BranchComponent, DivisionComponent } from '../../core/_api';
 import { Matcher, SelectionMatchDelta } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class TableMatcher implements Matcher {
-  constructor(private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+  constructor(private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {

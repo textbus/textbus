@@ -8,7 +8,7 @@ import { FormSwitch } from './form-switch';
 import { FormHidden } from './form-hidden';
 import { EventDelegate } from '../help';
 import { DropdownViewer } from '../toolkit/_api';
-import { FormatAbstractData, BackboneComponent, LeafComponent } from '../../core/_api';
+import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
 
 export class Form implements DropdownViewer {
   onComplete: Observable<AttrState[]>;
@@ -80,7 +80,7 @@ export class Form implements DropdownViewer {
     this.delegator = delegate;
   }
 
-  update(d: FormatAbstractData | BackboneComponent | LeafComponent): void {
+  update(d: FormatAbstractData | BranchComponent | LeafComponent): void {
     this.items.forEach(item => {
       const value = d ? d instanceof FormatAbstractData ? d.attrs.get(item.name) : d[item.name] : null;
       item.update(value);

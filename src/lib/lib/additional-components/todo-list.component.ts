@@ -1,4 +1,4 @@
-import { BackboneComponent, EventType, Fragment, ComponentReader, VElement, ViewData } from '../core/_api';
+import { BranchComponent, EventType, Fragment, ComponentReader, VElement, ViewData } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
 
@@ -36,7 +36,7 @@ export class TodoListComponentReader implements ComponentReader {
   }
 }
 
-export class TodoListComponent extends BackboneComponent {
+export class TodoListComponent extends BranchComponent {
 
   private stateCollection = [{
     active: false,

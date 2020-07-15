@@ -1,6 +1,6 @@
 import { FormatMatcher } from './format.matcher';
 import { boldFormatter } from '../../formatter/bold.formatter';
-import { BackboneComponent, BranchComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
 import { SelectionMatchDelta } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { BlockMatcher } from './block.matcher';
@@ -9,7 +9,7 @@ import { BlockComponent } from '../../components/block.component';
 export class BoldMatcher extends FormatMatcher {
   private contextMatcher = new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6'.split(','))
 
-  constructor(excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+  constructor(excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
     super(boldFormatter, excludeComponents);
   }
 

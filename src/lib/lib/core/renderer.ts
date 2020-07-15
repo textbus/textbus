@@ -1,7 +1,7 @@
 import { VElement, VElementLiteral, VTextNode } from './element';
 import { Fragment } from './fragment';
 import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
-import { BackboneComponent, BranchComponent, Component } from './component';
+import { BranchComponent, DivisionComponent, Component } from './component';
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
 import { Constructor } from './constructor';
@@ -82,7 +82,7 @@ export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
 
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
-  private fragmentHierarchyMapping = new WeakMap<Fragment, BackboneComponent | BranchComponent>();
+  private fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent>();
   private componentHierarchyMapping = new WeakMap<Component, Fragment>();
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
@@ -98,7 +98,7 @@ export class Renderer {
   render(fragment: Fragment, host: HTMLElement) {
     this.productionRenderingModal = false;
     this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
-    this.fragmentHierarchyMapping = new WeakMap<Fragment, BackboneComponent | BranchComponent>();
+    this.fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent>();
     this.componentHierarchyMapping = new WeakMap<Component, Fragment>();
     this.fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
     this.vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
@@ -177,7 +177,7 @@ export class Renderer {
    * 获取 fragment 所属的 Component。
    * @param fragment
    */
-  getParentComponent(fragment: Fragment): BranchComponent | BackboneComponent {
+  getParentComponent(fragment: Fragment): DivisionComponent | BranchComponent {
     return this.fragmentHierarchyMapping.get(fragment);
   }
 
@@ -490,10 +490,10 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        if (item instanceof BranchComponent) {
+        if (item instanceof DivisionComponent) {
           this.createVDom(item.slot, vDom);
           !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
-        } else if (item instanceof BackboneComponent) {
+        } else if (item instanceof BranchComponent) {
           if (!this.productionRenderingModal) {
             vDom.styles.set('userSelect', 'none');
           }

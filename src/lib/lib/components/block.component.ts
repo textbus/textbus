@@ -3,7 +3,7 @@ import {
   ViewData,
   VElement,
   EventType,
-  BranchComponent
+  DivisionComponent
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -27,7 +27,7 @@ export class BlockComponentReader implements ComponentReader {
   }
 }
 
-export class BlockComponent extends BranchComponent {
+export class BlockComponent extends DivisionComponent {
   constructor(tagName: string) {
     super(tagName);
   }

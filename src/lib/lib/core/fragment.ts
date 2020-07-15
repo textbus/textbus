@@ -1,5 +1,5 @@
 import { Contents } from './contents';
-import { BackboneComponent, BranchComponent, Component } from './component';
+import { BranchComponent, DivisionComponent, Component } from './component';
 import { BlockFormatter, FormatParams, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 import { FormatMap } from './format-map';
 
@@ -58,7 +58,7 @@ export class Fragment {
         return;
       }
       if (format.startIndex < index && format.endIndex >= index) {
-        if (contents instanceof BranchComponent || contents instanceof BackboneComponent) {
+        if (contents instanceof DivisionComponent || contents instanceof BranchComponent) {
           newFormatRanges.push({
             startIndex: format.startIndex,
             endIndex: index,
@@ -278,7 +278,7 @@ export class Fragment {
     const formats: FormatRange[] = [];
     let newFormat: FormatRange;
     contents.forEach(item => {
-      if (item instanceof BackboneComponent) {
+      if (item instanceof BranchComponent) {
         newFormat = null;
         if (coverChild) {
           item.slots.forEach(fragment => {
@@ -288,7 +288,7 @@ export class Fragment {
             fragment.apply(newFormatRange, options);
           })
         }
-      } else if (item instanceof BranchComponent) {
+      } else if (item instanceof DivisionComponent) {
         newFormat = null;
         if (coverChild) {
           const newFormatRange = Object.assign({}, formatRange);

@@ -2,8 +2,8 @@ import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'r
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
 
 import {
-  BackboneComponent,
   BranchComponent,
+  DivisionComponent,
   Commander,
   Contents,
   EventType,
@@ -610,7 +610,7 @@ export class Editor implements EventDelegate {
     if (component instanceof LeafComponent) {
       startFragment.insert(component, firstRange.endIndex);
     } else {
-      if (parentComponent instanceof BranchComponent) {
+      if (parentComponent instanceof DivisionComponent) {
         const parentFragment = this.renderer.getParentFragment(parentComponent);
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
@@ -618,7 +618,7 @@ export class Editor implements EventDelegate {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
 
         }
-      } else if (parentComponent instanceof BackboneComponent && parentComponent.canSplit()) {
+      } else if (parentComponent instanceof BranchComponent && parentComponent.canSplit()) {
         const ff = new Fragment();
         ff.append(component);
         parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);

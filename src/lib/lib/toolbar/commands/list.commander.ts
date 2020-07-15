@@ -3,8 +3,8 @@ import {
   TBSelection,
   Renderer,
   Fragment,
-  BackboneComponent,
   BranchComponent,
+  DivisionComponent,
   TBRangeScope
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
@@ -28,8 +28,8 @@ export class ListCommander implements Commander {
           }
           if (slots.center.length) {
             slots.center.forEach(fragment => {
-              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BackboneComponent) {
-                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BackboneComponent, item.component)
+              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BranchComponent) {
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BranchComponent, item.component)
               } else {
                 const t = new BlockComponent('p');
                 t.slot.from(fragment);
@@ -48,18 +48,18 @@ export class ListCommander implements Commander {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListComponent(this.tagName);
-        const backboneComponents: BackboneComponent[] = [];
+        const backboneComponents: BranchComponent[] = [];
         const scopes: TBRangeScope[] = [];
         range.getSuccessiveContents().forEach(scope => {
           let fragment = scope.fragment;
-          let lastBackboneComponent: BackboneComponent;
+          let lastBackboneComponent: BranchComponent;
           while (true) {
             if (fragment === commonAncestorFragment) {
               break;
             }
             const parentComponent = renderer.getParentComponent(scope.fragment);
             fragment = renderer.getParentFragment(parentComponent);
-            if (parentComponent instanceof BackboneComponent && parentComponent.canSplit() === false) {
+            if (parentComponent instanceof BranchComponent && parentComponent.canSplit() === false) {
               lastBackboneComponent = parentComponent;
             }
           }
@@ -101,23 +101,23 @@ export class ListCommander implements Commander {
           }
         });
         if (range.startFragment !== commonAncestorFragment) {
-          if (commonScope.startChildComponent && commonScope.startChildComponent instanceof BackboneComponent && commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
+          if (commonScope.startChildComponent && commonScope.startChildComponent instanceof BranchComponent && commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
             commonAncestorFragment.insertAfter(list, commonScope.startChildComponent);
           } else {
             commonAncestorFragment.insert(list, commonScope.startIndex);
           }
         } else {
           const parentComponent = renderer.getParentComponent(commonAncestorFragment);
-          if (parentComponent instanceof BranchComponent) {
+          if (parentComponent instanceof DivisionComponent) {
             const parentFragment = renderer.getParentFragment(parentComponent);
             const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else {
             const index = parentComponent.slots.indexOf(commonAncestorFragment);
-            const before = parentComponent.clone() as BackboneComponent;
+            const before = parentComponent.clone() as BranchComponent;
             before.slots.splice(index);
-            const after = parentComponent.clone() as BackboneComponent;
+            const after = parentComponent.clone() as BranchComponent;
             after.slots.splice(0, index + 1);
 
             const parentFragment = renderer.getParentFragment(parentComponent);

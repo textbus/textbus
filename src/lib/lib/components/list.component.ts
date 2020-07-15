@@ -1,6 +1,6 @@
 import {
   SlotMap,
-  BackboneComponent,
+  BranchComponent,
   ComponentReader,
   ViewData,
   Fragment,
@@ -59,7 +59,7 @@ export class ListComponentReader implements ComponentReader {
   }
 }
 
-export class ListComponent extends BackboneComponent {
+export class ListComponent extends BranchComponent {
   constructor(tagName: string) {
     super(tagName);
   }

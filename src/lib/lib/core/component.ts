@@ -101,7 +101,7 @@ export abstract class Component {
  * 只有一个子插槽的组件，如 p、div、h1~h6、blockquote 等，也可以是用户自定义的只有一个子插槽的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
-export abstract class BranchComponent extends Component {
+export abstract class DivisionComponent extends Component {
   readonly slot = new Fragment();
 }
 
@@ -111,7 +111,7 @@ export abstract class BranchComponent extends Component {
  * ul 可以有任意个 li，table 可以有多个 td。ul 和 table 都需要保持固定的结构。
  * ul 的子元素只能是 li，table 的子元素只能是 tbody、row 等。
  */
-export abstract class BackboneComponent extends Component {
+export abstract class BranchComponent extends Component {
   /**
    * 子插槽的集合
    */

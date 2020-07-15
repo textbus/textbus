@@ -1,5 +1,5 @@
 import {
-  BackboneComponent,
+  BranchComponent,
   EventType,
   Fragment,
   LeafComponent,
@@ -114,7 +114,7 @@ export class TableComponentReader implements ComponentReader {
   }
 }
 
-export class TableComponent extends BackboneComponent {
+export class TableComponent extends BranchComponent {
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;

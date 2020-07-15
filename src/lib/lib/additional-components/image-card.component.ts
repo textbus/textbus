@@ -1,5 +1,5 @@
 import {
-  BackboneComponent, BranchComponent,
+  BranchComponent, DivisionComponent,
   EventType,
   Fragment, Lifecycle, Renderer, TBSelection,
   ComponentReader,
@@ -36,7 +36,7 @@ export class ImageCardComponentReader implements ComponentReader {
   }
 }
 
-export class ImageCardComponent extends BackboneComponent {
+export class ImageCardComponent extends BranchComponent {
   readonly imgFragment = new Fragment();
   readonly descFragment = new Fragment();
 
@@ -127,9 +127,9 @@ export class ImageCardHook implements Lifecycle {
 
         if (position.fragment === firstRange.startFragment) {
           const nextContent = parentFragment.getContentAtIndex(index);
-          if (nextContent instanceof BranchComponent) {
+          if (nextContent instanceof DivisionComponent) {
             position = firstRange.findFirstPosition(nextContent.slot);
-          } else if (nextContent instanceof BackboneComponent) {
+          } else if (nextContent instanceof BranchComponent) {
             if (nextContent.slots[0]) {
               position = firstRange.findFirstPosition(nextContent.slots[0]);
             }

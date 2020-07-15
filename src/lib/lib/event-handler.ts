@@ -1,6 +1,6 @@
 import {
-  BackboneComponent,
-  BranchComponent, Contents,
+  BranchComponent,
+  DivisionComponent, Contents,
   EventType, Fragment, InlineFormatter,
   LeafComponent,
   TBEvent,
@@ -73,7 +73,7 @@ export class EventHandler {
 
     const parentComponent = event.renderer.getParentComponent(fragment);
 
-    if (parentComponent instanceof BackboneComponent) {
+    if (parentComponent instanceof BranchComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);
@@ -88,9 +88,9 @@ export class EventHandler {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
       } else {
         const firstContent = contentsArr.shift();
-        if (firstContent instanceof BackboneComponent) {
+        if (firstContent instanceof BranchComponent) {
           parentFragment.insertAfter(firstContent, parentComponent);
-        } else if (firstContent instanceof BranchComponent) {
+        } else if (firstContent instanceof DivisionComponent) {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
           firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
@@ -108,7 +108,7 @@ export class EventHandler {
           } else {
             const afterContents = fragment.cut(firstRange.startIndex);
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentComponent));
-            const afterComponent = parentComponent.clone() as BranchComponent;
+            const afterComponent = parentComponent.clone() as DivisionComponent;
             afterComponent.slot.from(new Fragment());
             afterContents.contents.forEach(c => afterComponent.slot.append(c));
             afterContents.formatRanges.forEach(f => {

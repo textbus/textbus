@@ -8,7 +8,7 @@ import {
   Fragment,
   InlineFormatter,
   ReplaceModel,
-  BranchComponent,
+  DivisionComponent,
   ComponentReader,
   VElement,
   ViewData
@@ -176,7 +176,7 @@ export class PreComponentReader implements ComponentReader {
   }
 }
 
-export class PreComponent extends BranchComponent {
+export class PreComponent extends DivisionComponent {
   constructor(public lang: string) {
     super('pre');
   }

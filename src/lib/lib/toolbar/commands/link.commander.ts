@@ -1,4 +1,4 @@
-import { BackboneComponent, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
+import { BranchComponent, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
 import { AttrState } from '../forms/help';
 
@@ -43,7 +43,7 @@ export class LinkCommander implements Commander<AttrState[]> {
       range.getSelectedScope().forEach(scope => {
         let index = 0;
         scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(content => {
-          if (content instanceof BackboneComponent) {
+          if (content instanceof BranchComponent) {
             content.slots.forEach(item => {
               item.apply({
                 startIndex: 0,

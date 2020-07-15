@@ -1,4 +1,4 @@
-import { BranchComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { DivisionComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { AttrState } from '../forms/help';
 import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
@@ -26,7 +26,7 @@ export class TableCommander implements Commander<AttrState[]> {
       const parentComponent = renderer.getParentComponent(range.startFragment);
       const parentFragment = renderer.getParentFragment(parentComponent);
       const firstContent = range.startFragment.getContentAtIndex(0);
-      if (parentComponent instanceof BranchComponent) {
+      if (parentComponent instanceof DivisionComponent) {
         if (range.startFragment.contentLength === 0 ||
           range.startFragment.contentLength === 1 &&
           firstContent instanceof BrComponent) {

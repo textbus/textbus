@@ -1,6 +1,6 @@
 import { Fragment } from './fragment';
 import { FormatEffect, Formatter } from './formatter';
-import { BackboneComponent, BranchComponent, ComponentReader } from './component';
+import { BranchComponent, DivisionComponent, ComponentReader } from './component';
 
 /**
  * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
@@ -23,8 +23,8 @@ export class Parser {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.component);
           viewData.slotsMap.forEach(item => {
-            if (viewData.component instanceof BranchComponent ||
-              viewData.component instanceof BackboneComponent ||
+            if (viewData.component instanceof DivisionComponent ||
+              viewData.component instanceof BranchComponent ||
               item.from === el) {
               this.readFormats(item.from, item.toSlot);
             } else {

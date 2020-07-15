@@ -1,12 +1,12 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { BackboneComponent, BranchComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
 import { ListComponent } from '../../components/list.component';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class ListMatcher implements Matcher {
   constructor(private tagName: 'ul' | 'ol',
-              private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+              private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {

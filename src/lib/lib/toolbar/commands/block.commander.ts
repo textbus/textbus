@@ -3,7 +3,7 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  Renderer, BranchComponent,
+  Renderer, DivisionComponent,
   TBSelection
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
@@ -27,7 +27,7 @@ export class BlockCommander implements Commander<string> {
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
           const parentComponent = renderer.getParentComponent(scope.fragment);
-          if (parentComponent instanceof BranchComponent) {
+          if (parentComponent instanceof DivisionComponent) {
             const parentFragment = renderer.getParentFragment(parentComponent);
             blockComponent.slot.from(scope.fragment);
             parentFragment.insertBefore(blockComponent, parentComponent);

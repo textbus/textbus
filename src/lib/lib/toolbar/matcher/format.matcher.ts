@@ -1,5 +1,5 @@
 import {
-  BackboneComponent,
+  BranchComponent,
   BlockFormatter,
   FormatAbstractData,
   FormatEffect,
@@ -7,7 +7,7 @@ import {
   Fragment,
   InlineFormatter,
   Renderer,
-  BranchComponent,
+  DivisionComponent,
   TBSelection,
   Constructor
 } from '../../core/_api';
@@ -17,7 +17,7 @@ import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class FormatMatcher implements Matcher {
   constructor(private formatter: InlineFormatter | BlockFormatter,
-              private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+              private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
@@ -109,9 +109,9 @@ export class FormatMatcher implements Matcher {
     });
 
     for (const child of childContents) {
-      if (child instanceof BranchComponent) {
+      if (child instanceof DivisionComponent) {
         states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.contentLength));
-      } else if (child instanceof BackboneComponent) {
+      } else if (child instanceof BranchComponent) {
         child.slots.forEach(childFragment => {
           states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
         })

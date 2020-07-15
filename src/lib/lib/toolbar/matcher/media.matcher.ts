@@ -1,11 +1,11 @@
 import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
-import { BackboneComponent, BranchComponent, Constructor, LeafComponent, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, LeafComponent, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class MediaMatcher implements Matcher {
   constructor(public componentConstructor: Constructor<LeafComponent>, public tagName: string,
-              private excludeComponents: Array<Constructor<BackboneComponent | BranchComponent>> = []) {
+              private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
