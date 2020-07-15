@@ -64,6 +64,10 @@ export class TableEditHook implements Lifecycle {
     const nativeSelection = context.getSelection();
     this.selectedCells = [];
 
+    if (nativeSelection.rangeCount === 0) {
+      return;
+    }
+
     this.startCell = findParentByTagName(nativeSelection.anchorNode, ['th', 'td']) as HTMLTableCellElement;
     if (!this.startCell) {
       // 开始位置不在表格内
