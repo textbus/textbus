@@ -131,7 +131,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   }
 
   next() {
-    if (this.iteratorIndex < this.length) {
+    if (this.iteratorIndex < this.slotCount) {
       const value = this.slots[this.iteratorIndex];
       this.iteratorIndex++;
       return {
