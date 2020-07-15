@@ -158,6 +158,7 @@ export class Input {
   updateStateBySelection(selection: Selection) {
     this.selection = selection;
     if (!selection.rangeCount) {
+      this.hide();
       return;
     }
     this.updateCursorPosition();
