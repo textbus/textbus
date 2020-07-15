@@ -44,6 +44,7 @@ export class TableEditHook implements Lifecycle {
   private tableComponent: TableComponent;
   private frameContainer: HTMLElement;
   private contextDocument: Document;
+  private inTable = true;
 
   constructor() {
     this.mask.classList.add('tbus-table-editor-hook-mask');
@@ -62,6 +63,10 @@ export class TableEditHook implements Lifecycle {
 
   onSelectionChange(renderer: Renderer, selection: TBSelection, context: Document) {
     const nativeSelection = context.getSelection();
+    this.inTable = false;
+    this.startCell = null;
+    this.endCell = null;
+    this.tableElement = null;
     this.selectedCells = [];
 
     if (nativeSelection.rangeCount === 0) {
@@ -96,6 +101,7 @@ export class TableEditHook implements Lifecycle {
     } else {
       this.hideNativeSelectionMask();
     }
+    this.inTable = true;
 
     this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
 
@@ -135,7 +141,7 @@ export class TableEditHook implements Lifecycle {
     if (this.startPosition && this.endPosition && this.tableComponent) {
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
-      if (this.startCell && this.endCell) {
+      if (this.startCell && this.endCell && this.inTable) {
         this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
       } else {
         this.removeMask();
