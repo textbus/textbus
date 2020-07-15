@@ -10,6 +10,9 @@
   user-select: none;
   position: relative;
   z-index: 2;
+  button {
+    font-family: inherit;
+  }
 }
 
 .tbus-toolbar-tools {

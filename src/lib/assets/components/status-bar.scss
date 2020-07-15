@@ -10,6 +10,9 @@
   color: $color-default;
   display: flex;
   align-items: center;
+  button {
+    font-family: inherit;
+  }
 }
 
 .tbus-paths {
