@@ -1,7 +1,7 @@
 import { CubicBezier } from '@tanbo/bezier';
 
 import { Commander, Fragment, Renderer, TBRange, TBSelection, Lifecycle } from '../core/_api';
-import { TableEditCommander } from '../toolbar/_api';
+import { TableEditCommander, TdBorderColorCommander } from '../toolbar/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
 
 interface ElementPosition {
@@ -122,8 +122,8 @@ export class TableEditHook implements Lifecycle {
   }
 
   onApplyCommand(commander: Commander): boolean {
-    if (commander instanceof TableEditCommander) {
-      commander.updateValue({
+    if (commander instanceof TableEditCommander || commander instanceof TdBorderColorCommander) {
+      commander.setEditRange({
         startPosition: this.startPosition,
         endPosition: this.endPosition
       });

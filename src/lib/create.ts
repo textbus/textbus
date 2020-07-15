@@ -17,7 +17,7 @@ import {
   blockBackgroundColorFormatter,
   codeFormatter,
   backgroundColorFormatter,
-  dirFormatter
+  dirFormatter, tdBorderColorFormatter
 } from './lib/formatter/_api';
 import {
   audioTool,
@@ -52,7 +52,7 @@ import {
   videoTool,
   codeTool,
   leftToRightTool,
-  rightToLeftTool, tableAddParagraphTool, tableRemoveTool
+  rightToLeftTool, tableAddParagraphTool, tableRemoveTool, tdBorderColorTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -122,6 +122,7 @@ export const defaultOptions: EditorOptions = {
     textIndentFormatter,
     underlineFormatter,
     dirFormatter,
+    tdBorderColorFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -137,7 +138,7 @@ export const defaultOptions: EditorOptions = {
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],
     [textAlignTool],
-    [tableTool, tableEditTool, tableAddParagraphTool, tableRemoveTool],
+    [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ],
   componentExamples: [

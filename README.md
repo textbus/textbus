@@ -85,7 +85,8 @@ import {
   leftToRightTool,
   rightToLeftTool, 
   tableAddParagraphTool, 
-  tableRemoveTool
+  tableRemoveTool,
+  tdBorderColorTool
 } from '@tanbo/tbus';
 
 const editor = new TBus(document.getElementById('editor'), {
@@ -103,7 +104,7 @@ const editor = new TBus(document.getElementById('editor'), {
     [fontFamilyTool],
     [linkTool, imageTool, audioTool, videoTool],
     [textAlignTool],
-    [tableTool, tableEditTool, tableAddParagraphTool, tableRemoveTool],
+    [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ]
 });

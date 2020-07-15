@@ -4,3 +4,4 @@ export * from './dir.formatter';
 export * from './inline.formatter';
 export * from './link.formatter';
 export * from './style.formatter';
+export * from './td-border-color.formatter';

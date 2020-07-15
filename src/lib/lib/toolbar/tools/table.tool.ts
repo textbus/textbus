@@ -21,12 +21,6 @@ export const tableTool = Toolkit.makeDropdownTool({
       name: 'cols',
       label: '表格列数',
       placeholder: '请输入表格列数'
-    }, {
-      type: AttrType.Switch,
-      label: '添加表头',
-      required: true,
-      checked: false,
-      name: 'header'
     }]);
   },
   matcher: new TableMatcher([PreComponent]),

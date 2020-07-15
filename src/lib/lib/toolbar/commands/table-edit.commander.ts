@@ -14,21 +14,21 @@ export enum TableEditActions {
   DeleteRightColumn
 }
 
-export interface TableEditParams {
+export interface TableEditRange {
   startPosition: TableCellPosition;
   endPosition: TableCellPosition;
 }
 
-export class TableEditCommander implements ActionCommander<TableEditParams> {
+export class TableEditCommander implements ActionCommander {
   recordHistory = true;
   private actionType: TableEditActions;
-  private params: TableEditParams;
+  private params: TableEditRange;
 
   setActionType(type: TableEditActions) {
     this.actionType = type;
   }
 
-  updateValue(value: TableEditParams): void {
+  setEditRange(value: TableEditRange): void {
     this.params = value;
   }
 

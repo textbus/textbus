@@ -27,6 +27,7 @@ export { tableTool } from './table.tool';
 export { tableAddParagraphTool } from './table-add-paragraph.tool';
 export { tableEditTool } from './table-edit.tool';
 export { tableRemoveTool } from './table-remove.tool';
+export { tdBorderColorTool } from './td-border-color.tool';
 export { textAlignTool } from './text-aligh.tool';
 export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';

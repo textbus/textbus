@@ -35,7 +35,7 @@ export interface TableRowPosition {
 }
 
 export interface TableInitParams {
-  headers?: TableCell[][];
+  // headers?: TableCell[][];
   bodies: TableCell[][];
 }
 
@@ -103,10 +103,10 @@ export class TableComponentReader implements ComponentReader {
         })
       });
     }
-
+    bodies.unshift(...headers);
     return {
       component: new TableComponent({
-        headers,
+        // headers,
         bodies
       }),
       slotsMap: slots
@@ -124,7 +124,7 @@ export class TableComponent extends BackboneComponent {
   private _cellMatrix: TableRowPosition[];
 
   constructor(public config: TableInitParams) {
-    super('table');
+    super('table')
     const bodyConfig = config.bodies;
     for (const row of bodyConfig) {
       for (const col of row) {
@@ -150,7 +150,7 @@ export class TableComponent extends BackboneComponent {
     }
 
     const config: TableInitParams = {
-      headers: this.config.headers ? clone(this.config.headers) : null,
+      // headers: this.config.headers ? clone(this.config.headers) : null,
       bodies: clone(this.config.bodies)
     }
     return new TableComponent(config);
