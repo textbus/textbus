@@ -140,11 +140,6 @@ export class TBSelection {
    * @param fragment
    */
   usePaths(paths: RangePath[], fragment: Fragment) {
-    if (paths.length === 0) {
-      this.removeAllRanges();
-      this.nativeSelection.removeAllRanges();
-      return;
-    }
     const findPosition = (position: number[], fragment: Fragment): TBRangePosition => {
       const paths = position.map(i => i).reverse();
       while (true) {
