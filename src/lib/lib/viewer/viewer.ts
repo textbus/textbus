@@ -12,6 +12,7 @@ export class Viewer {
 
   private readyEvent = new Subject<Document>();
   private id: number = null;
+  private minHeight = 400;
 
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
@@ -41,6 +42,10 @@ export class Viewer {
     this.elementRef.classList.add('tbus-frame');
   }
 
+  setMinHeight(height: number) {
+    this.minHeight = height;
+  }
+
   destroy() {
     cancelAnimationFrame(this.id);
   }
@@ -60,8 +65,7 @@ export class Viewer {
           childBody.removeChild(div);
         }
       }
-      const containerHeight = this.elementRef.parentNode?.['offsetHeight'] || 0;
-      this.elementRef.style.height = Math.max(height + 30, containerHeight) + 'px';
+      this.elementRef.style.height = Math.max(height + 30, this.minHeight) + 'px';
       this.id = requestAnimationFrame(fn);
     }
     this.id = requestAnimationFrame(fn);

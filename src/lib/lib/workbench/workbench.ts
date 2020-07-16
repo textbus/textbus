@@ -33,6 +33,7 @@ export class Workbench {
     this.elementRef.appendChild(this.dashboard);
     const sub = this.viewer.onReady.subscribe(() => {
       this.tablet.appendChild(this.viewer.input.elementRef);
+      this.viewer.setMinHeight(this.editableArea.offsetHeight);
       sub.unsubscribe();
     })
   }
@@ -48,7 +49,13 @@ export class Workbench {
   }
 
   setTabletWidth(width: string) {
-    this.editableArea.style.padding = width === '100%' ? '' : '20px';
+    if (width === '100%') {
+      this.editableArea.style.padding = '';
+      this.viewer.setMinHeight(this.editableArea.offsetHeight);
+    } else {
+      this.editableArea.style.padding = '20px';
+      this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
+    }
     this.tablet.style.width = width;
   }
 }

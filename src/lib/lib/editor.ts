@@ -132,7 +132,7 @@ export class Editor implements EventDelegate {
     this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
     this.viewer = new Viewer(options.styleSheets);
     this.workbench = new Workbench(this.viewer);
-    const deviceWidth = options.deviceWidth || '100%';
+    let deviceWidth = options.deviceWidth || '100%';
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = false;
     this.workbench.setTabletWidth(deviceWidth);
@@ -151,12 +151,14 @@ export class Editor implements EventDelegate {
         }
       }),
       this.statusBar.device.onChange.subscribe(value => {
+        deviceWidth = value;
         this.workbench.setTabletWidth(value);
         this.invokeViewUpdatedHooks();
       }),
       this.statusBar.fullScreen.onChange.subscribe(b => {
         b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
 
+        this.workbench.setTabletWidth(deviceWidth);
         this.invokeViewUpdatedHooks();
       }),
       zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
