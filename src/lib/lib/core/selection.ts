@@ -165,25 +165,31 @@ export class TBSelection {
     };
     this.removeAllRanges();
     this.nativeSelection.removeAllRanges();
-    paths.filter(r => r.startPaths.length).forEach(rangePosition => {
-      const start = findPosition(rangePosition.startPaths, fragment);
-      const nativeRange = this.context.createRange();
-      const range = new TBRange(nativeRange, this.renderer);
 
-      range.startIndex = start.index;
-      range.startFragment = start.fragment;
+    const len = paths.length;
+    if (len === 0) {
+      return;
+    }
 
-      if (rangePosition.endPaths === rangePosition.startPaths) {
-        range.endIndex = start.index;
-        range.endFragment = start.fragment;
-      } else {
-        const end = findPosition(rangePosition.endPaths, fragment);
-        range.endIndex = end.index;
-        range.endFragment = end.fragment;
-      }
-      this.nativeSelection.addRange(nativeRange);
-      this.addRange(range);
-    });
+    const startPaths = paths[0].startPaths;
+    const endPaths = paths[len - 1].endPaths;
+    const start = findPosition(startPaths, fragment);
+    const nativeRange = this.context.createRange();
+    const range = new TBRange(nativeRange, this.renderer);
+
+    range.startIndex = start.index;
+    range.startFragment = start.fragment;
+
+    if (endPaths === startPaths) {
+      range.endIndex = start.index;
+      range.endFragment = start.fragment;
+    } else {
+      const end = findPosition(endPaths, fragment);
+      range.endIndex = end.index;
+      range.endFragment = end.fragment;
+    }
+    this.nativeSelection.addRange(nativeRange);
+    this.addRange(range);
   }
 
   /**
