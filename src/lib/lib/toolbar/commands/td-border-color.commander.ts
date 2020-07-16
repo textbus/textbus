@@ -61,6 +61,11 @@ export class TdBorderColorCommander implements Commander<string> {
       }
       c.cell.fragment.apply({
         renderer: tdBorderColorFormatter,
+        state: FormatEffect.Invalid,
+        abstractData: new FormatAbstractData()
+      });
+      c.cell.fragment.apply({
+        renderer: tdBorderColorFormatter,
         state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
         abstractData: new FormatAbstractData({
           style: {
