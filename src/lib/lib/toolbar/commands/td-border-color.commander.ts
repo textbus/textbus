@@ -35,7 +35,7 @@ export class TdBorderColorCommander implements Commander<string> {
     selectedCells.forEach(c => {
       if (this.color) {
         if (c.columnIndex === minColumn) {
-          c.beforeCell.fragment.apply({
+          c?.beforeCell.fragment.apply({
             renderer: tdBorderColorFormatter,
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
