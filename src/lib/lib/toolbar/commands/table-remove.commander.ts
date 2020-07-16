@@ -5,6 +5,7 @@ export class TableRemoveCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+    this.recordHistory = true;
     const firstRange = selection.firstRange;
     const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
@@ -25,6 +26,8 @@ export class TableRemoveCommander implements Commander {
       }
       firstRange.setStart(position.fragment, position.index);
       firstRange.collapse();
+    } else {
+      this.recordHistory = false;
     }
   }
 }

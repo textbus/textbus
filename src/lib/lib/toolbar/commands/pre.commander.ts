@@ -14,9 +14,14 @@ export class PreCommander implements Commander<string> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+    let b = true;
     if (overlap) {
       selection.ranges.forEach(range => {
         const context = renderer.getContext(range.startFragment, PreComponent);
+        if (context.lang === this.lang) {
+          b = false;
+          return;
+        }
         context.lang = this.lang;
       });
     } else {
@@ -30,5 +35,6 @@ export class PreCommander implements Commander<string> {
         range.collapse();
       })
     }
+    this.recordHistory = b;
   }
 }

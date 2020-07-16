@@ -19,10 +19,9 @@ export class BlockStyleCommander implements Commander<string> {
     this.value = value;
   }
 
-  command(selection: TBSelection, overlap: boolean) {
+  command(selection: TBSelection) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        console.log(item)
         let fragments: Fragment[] = [];
         if (item.fragment === range.startFragment || item.fragment === range.endFragment) {
           fragments = [item.fragment];

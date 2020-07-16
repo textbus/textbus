@@ -7,6 +7,10 @@ export class InlineCommander implements Commander {
   }
 
   command(selection: TBSelection, overlap: boolean) {
+    this.recordHistory = !selection.collapsed;
+    if (!this.recordHistory) {
+      return;
+    }
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({

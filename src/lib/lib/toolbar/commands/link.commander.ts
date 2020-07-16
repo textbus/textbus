@@ -15,6 +15,10 @@ export class LinkCommander implements Commander<AttrState[]> {
   }
 
   command(selection: TBSelection, overlap: boolean): void {
+    this.recordHistory = !selection.collapsed;
+    if (!this.recordHistory) {
+      return;
+    }
     const attrs = new Map<string, string>();
     this.attrs.forEach(attr => {
       attrs.set(attr.name, attr.value.toString());
@@ -24,20 +28,20 @@ export class LinkCommander implements Commander<AttrState[]> {
         if (overlap) {
           const commonAncestorFragment = range.commonAncestorFragment;
           const formats = commonAncestorFragment.getFormatRangesByFormatter(this.formatter);
-            if (formats) {
-              for (const format of formats) {
-                if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-                  if (attrs.get('href')) {
-                    format.abstractData.attrs = attrs
-                  } else {
-                    commonAncestorFragment.apply({
-                      ...format,
-                      state: FormatEffect.Invalid
-                    });
-                  }
+          if (formats) {
+            for (const format of formats) {
+              if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
+                if (attrs.get('href')) {
+                  format.abstractData.attrs = attrs
+                } else {
+                  commonAncestorFragment.apply({
+                    ...format,
+                    state: FormatEffect.Invalid
+                  });
                 }
               }
             }
+          }
         }
       }
       range.getSelectedScope().forEach(scope => {

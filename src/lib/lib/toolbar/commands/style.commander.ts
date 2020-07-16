@@ -12,7 +12,11 @@ export class StyleCommander implements Commander<string> {
     this.value = value;
   }
 
-  command(selection: TBSelection, overlap: boolean) {
+  command(selection: TBSelection) {
+    this.recordHistory = !selection.collapsed;
+    if (!this.recordHistory) {
+      return;
+    }
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({

@@ -17,7 +17,13 @@ export class TdBorderColorCommander implements Commander<string> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+    this.recordHistory = true;
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
+    if (!context) {
+      this.recordHistory = false;
+      return;
+    }
+
     const cellMatrix = context.cellMatrix;
     const minRow = this.range.startPosition.rowIndex;
     const minColumn = this.range.startPosition.columnIndex;

@@ -8,6 +8,10 @@ export class BoldCommander implements Commander<InlineFormatter> {
   }
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+    this.recordHistory = !selection.collapsed;
+    if (!this.recordHistory) {
+      return;
+    }
     selection.ranges.forEach(range => {
       const context = renderer.getContext(range.commonAncestorFragment, BlockComponent);
       const hasContext = context && /h[1-6]/i.test(context.tagName);

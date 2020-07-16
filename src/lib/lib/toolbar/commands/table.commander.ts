@@ -15,9 +15,17 @@ export class TableCommander implements Commander<AttrState[]> {
     this.attrs.forEach(attr => {
       attrs.set(attr.name, attr.value);
     });
+    const rows = +attrs.get('rows') || 0;
+    const cols = +attrs.get('cols') || 0;
+
+    if (rows === 0 || cols === 0) {
+      this.recordHistory = false;
+      return;
+    }
+    this.recordHistory = true;
+
     selection.ranges.forEach(range => {
-      const rows = +attrs.get('rows') || 0;
-      const cols = +attrs.get('cols') || 0;
+
       const bodies = TableCommander.create(rows, cols);
       const table = new TableComponent({
         bodies

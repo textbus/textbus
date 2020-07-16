@@ -16,17 +16,20 @@ export class CleanCommander implements Commander {
   }
 
   command(selection: TBSelection, overlap: boolean): void {
+    let b = false;
     selection.ranges.forEach(range => {
       range.getSuccessiveContents().forEach(scope => {
         if (scope.fragment === range.startFragment &&
           scope.startIndex <= range.startIndex &&
           scope.endIndex >= range.endIndex) {
           scope.startIndex = range.startIndex;
+          b = true;
         }
         if (scope.fragment === range.endFragment &&
           scope.startIndex <= range.startIndex &&
           scope.endIndex >= range.endIndex) {
           scope.endIndex = range.endIndex;
+          b = true;
         }
 
         let isDeleteBlockFormat = false;
@@ -50,6 +53,7 @@ export class CleanCommander implements Commander {
           if (f.renderer instanceof BlockFormatter && !isDeleteBlockFormat) {
             return;
           }
+          b = true;
           scope.fragment.apply({
             startIndex: scope.startIndex,
             endIndex: scope.endIndex,
@@ -60,5 +64,6 @@ export class CleanCommander implements Commander {
         })
       })
     })
+    this.recordHistory = b;
   }
 }

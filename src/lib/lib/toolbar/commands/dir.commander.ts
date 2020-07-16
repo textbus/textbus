@@ -1,4 +1,4 @@
-import { Commander, TBSelection, FormatEffect, FormatAbstractData } from '../../core/_api';
+import { Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { DirFormatter } from '../../formatter/dir.formatter';
 
 export class DirCommander implements Commander {
@@ -11,7 +11,7 @@ export class DirCommander implements Commander {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply({
-          state: FormatEffect.Valid,
+          state: overlap ? FormatEffect.Invalid : FormatEffect.Valid,
           renderer: this.formatter,
           abstractData: new FormatAbstractData({
             attrs: {

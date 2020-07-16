@@ -5,7 +5,7 @@ import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
-import { Commander, FormatAbstractData, LeafComponent, BranchComponent } from '../../core/_api';
+import { Commander, FormatAbstractData, Component } from '../../core/_api';
 
 /**
  * Select 工具选项配置项
@@ -31,7 +31,7 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight<T = FormatAbstractData | BranchComponent | LeafComponent>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
+  highlight<T = FormatAbstractData | Component>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
 
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
@@ -153,7 +153,7 @@ export class SelectHandler implements Tool {
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
     if (selectionMatchDelta.matchData) {
-      const option = this.config.highlight(this.config.options, selectionMatchDelta.matchData);
+      const option = this.config.highlight?.(this.config.options, selectionMatchDelta.matchData);
       if (option) {
         this.textContainer.innerText = option.label || option.value;
         this.dropdown.disabled = false;

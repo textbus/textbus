@@ -34,6 +34,11 @@ export class TableEditCommander implements ActionCommander {
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
+    this.recordHistory = true;
+    if (!context) {
+      this.recordHistory = false;
+      return;
+    }
     switch (this.actionType) {
       case TableEditActions.AddColumnToLeft:
         this.addColumnToLeft(context);

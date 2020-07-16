@@ -5,6 +5,7 @@ export class TableAddParagraphCommander implements Commander {
   recordHistory = true;
 
   command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
+    this.recordHistory = true;
     const firstRange = selection.firstRange;
     const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
@@ -16,6 +17,8 @@ export class TableAddParagraphCommander implements Commander {
 
       firstRange.setStart(p.slot, 0);
       firstRange.collapse();
+    } else {
+      this.recordHistory = false;
     }
   }
 }
