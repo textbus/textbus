@@ -31,7 +31,7 @@ export interface SelectConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight<T = FormatAbstractData | Component>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
+  highlight?<T = FormatAbstractData | Component>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
 
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
