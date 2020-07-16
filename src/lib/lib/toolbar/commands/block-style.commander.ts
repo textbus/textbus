@@ -22,6 +22,7 @@ export class BlockStyleCommander implements Commander<string> {
   command(selection: TBSelection, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
+        console.log(item)
         let fragments: Fragment[] = [];
         if (item.fragment === range.startFragment || item.fragment === range.endFragment) {
           fragments = [item.fragment];
@@ -30,7 +31,7 @@ export class BlockStyleCommander implements Commander<string> {
             if (content instanceof BranchComponent) {
               fragments = content.slots;
             } else if (content instanceof DivisionComponent) {
-              fragments = [content.slot];
+              fragments.push(content.slot);
             }
           })
         }
