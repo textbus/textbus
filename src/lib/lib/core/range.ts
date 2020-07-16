@@ -758,34 +758,38 @@ export class TBRange {
     if (this.collapsed) {
       return;
     }
-    if (this.startFragment === this.endFragment) {
+    const startFragment = this.startFragment;
+    if (startFragment === this.endFragment) {
       this.deleteSelectedScope();
     } else {
       let isDeleteFragment = false;
       if (this.startIndex === 0) {
-        const {fragment, index} = this.findFirstPosition(this.startFragment);
-        isDeleteFragment = fragment === this.startFragment && index === this.startIndex;
+        const {fragment, index} = this.findFirstPosition(startFragment);
+        isDeleteFragment = fragment === startFragment && index === this.startIndex;
       }
 
       this.deleteSelectedScope();
-      if (isDeleteFragment) {
+      if (isDeleteFragment && startFragment === this.startFragment) {
         this.startFragment.from(this.endFragment);
         const firstPosition = this.findFirstPosition(this.startFragment);
         this.setStart(firstPosition.fragment, firstPosition.index);
         this.deleteEmptyTree(this.endFragment);
       } else {
-        const last = this.endFragment.cut(0);
-        this.deleteEmptyTree(this.endFragment);
-        const startIndex = this.startFragment.contentLength;
-        last.contents.forEach(c => this.startFragment.append(c));
-        last.formatRanges
-          .filter(f => !(f.renderer instanceof BlockFormatter))
-          .map(f => {
-            f.startIndex += startIndex;
-            f.endIndex += startIndex;
-            return f;
-          })
-          .forEach(f => this.startFragment.apply(f));
+        if (this.startFragment !== this.endFragment) {
+          const last = this.endFragment.cut(0);
+          this.deleteEmptyTree(this.endFragment);
+          const startIndex = this.startIndex + 1;
+          last.contents.reverse().forEach(c => this.startFragment.insert(c, startIndex));
+          last.formatRanges
+            .filter(f => !(f.renderer instanceof BlockFormatter))
+            .map(f => {
+              f.startIndex += startIndex;
+              f.endIndex += startIndex;
+              return f;
+            })
+            .forEach(f => this.startFragment.apply(f));
+        }
+
       }
     }
 

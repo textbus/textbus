@@ -137,7 +137,7 @@ export class TableComponent extends BackboneComponent {
 
   canDelete(deletedSlot: Fragment): boolean {
     this.deleteMarkFragments.push(deletedSlot);
-    return this.slots.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
+    return !this.slots.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
   }
 
   clone() {
