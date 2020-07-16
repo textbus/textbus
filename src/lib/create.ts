@@ -76,8 +76,7 @@ import {
   TodoListComponentReader,
 
   baiduMapComponentExample,
-  BaiduMapComponentReader,
-  ImageCardHook
+  BaiduMapComponentReader
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
@@ -86,8 +85,7 @@ export const defaultOptions: EditorOptions = {
     new DefaultHook(),
     new HistoryHook(),
     new ImageVideoResizeHook(),
-    new TableEditHook(),
-    new ImageCardHook()
+    new TableEditHook()
   ],
   componentReaders: [
     new BaiduMapComponentReader(),

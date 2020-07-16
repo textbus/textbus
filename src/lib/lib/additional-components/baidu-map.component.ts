@@ -104,7 +104,7 @@ export const baiduMapComponentExample: ComponentExample = {
 
     const buttons = div.querySelectorAll('.tbus-map-form-btns button');
 
-    return new Promise((resolve, reject) => {
+    return new Promise<BaiduMapComponent>((resolve, reject) => {
       buttons.item(0).addEventListener('click', () => {
         workbench.closeDialog();
         reject();

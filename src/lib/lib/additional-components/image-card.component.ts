@@ -1,10 +1,10 @@
 import {
-  BranchComponent, DivisionComponent,
   EventType,
-  Fragment, Lifecycle, Renderer, TBSelection,
   ComponentReader,
   VElement,
-  ViewData
+  ViewData,
+  BackboneComponent,
+  Fragment
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
@@ -19,10 +19,12 @@ export class ImageCardComponentReader implements ComponentReader {
 
   from(element: HTMLElement): ViewData {
     const imageSrc = (element.children[0].children[0] as HTMLImageElement).src;
-    const component = new ImageCardComponent(imageSrc);
     const imageWrapper = new Fragment();
     const desc = new Fragment();
-    component.slots.push(imageWrapper, desc);
+    const component = new ImageCardComponent(imageSrc, {
+      imgFragment: imageWrapper,
+      descFragment: desc
+    });
     return {
       component: component,
       slotsMap: [{
@@ -36,20 +38,28 @@ export class ImageCardComponentReader implements ComponentReader {
   }
 }
 
-export class ImageCardComponent extends BranchComponent {
-  readonly imgFragment = new Fragment();
-  readonly descFragment = new Fragment();
+export class ImageCardComponent extends BackboneComponent {
+  readonly imgFragment: Fragment;
+  readonly descFragment: Fragment;
 
-  constructor(public imageSrc: string) {
+  constructor(public imageSrc: string, options: { imgFragment: Fragment, descFragment: Fragment }) {
     super('tbus-image-card');
-    this.imgFragment.append(new ImageComponent(imageSrc));
-    this.descFragment.append('图片描述');
+    this.imgFragment = options.imgFragment;
+    this.descFragment = options.descFragment;
+
+    if (this.imgFragment.contentLength === 0) {
+      this.imgFragment.append(new ImageComponent(imageSrc));
+    }
+    if (this.descFragment.contentLength === 0) {
+      this.descFragment.append('图片描述');
+    }
+
     this.slots.push(this.imgFragment);
     this.slots.push(this.descFragment);
   }
 
-  canSplit(): boolean {
-    return false;
+  canDelete(deletedSlot: Fragment): boolean {
+    return deletedSlot === this.imgFragment;
   }
 
   render(isProduction: boolean): VElement {
@@ -95,9 +105,10 @@ export class ImageCardComponent extends BranchComponent {
   }
 
   clone(): ImageCardComponent {
-    const t = new ImageCardComponent(this.imageSrc);
-    t.slots = this.slots.map(f => f.clone());
-    return t;
+    return new ImageCardComponent(this.imageSrc, {
+      imgFragment: this.imgFragment.clone(),
+      descFragment: this.descFragment.clone()
+    });
   }
 }
 
@@ -106,46 +117,10 @@ export const imageCardComponentExample: ComponentExample = {
   name: '卡片',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#aaa" height="50" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="16" y="24" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="12" y="63" x="50%" text-anchor="middle" stroke-width="0" stroke="#000" fill="#000000">描述文字</text></g></svg>')}">`,
   componentFactory() {
-    return new ImageCardComponent(defaultImageSrc);
-  }
-}
-
-export class ImageCardHook implements Lifecycle {
-  onDelete(renderer: Renderer, selection: TBSelection): boolean {
-    const firstRange = selection.firstRange;
-    const component = firstRange.commonAncestorComponent;
-    if (component instanceof ImageCardComponent && firstRange.startFragment === component.imgFragment) {
-      if (component.imgFragment.contentLength === 0) {
-        let position = firstRange.getPreviousPosition();
-        const parentFragment = renderer.getParentFragment(component);
-        const index = parentFragment.indexOf(component);
-        parentFragment.remove(index, 1);
-
-        if (parentFragment.contentLength === 0) {
-          firstRange.deleteEmptyTree(parentFragment);
-        }
-
-        if (position.fragment === firstRange.startFragment) {
-          const nextContent = parentFragment.getContentAtIndex(index);
-          if (nextContent instanceof DivisionComponent) {
-            position = firstRange.findFirstPosition(nextContent.slot);
-          } else if (nextContent instanceof BranchComponent) {
-            if (nextContent.slots[0]) {
-              position = firstRange.findFirstPosition(nextContent.slots[0]);
-            }
-          } else {
-            position = {
-              fragment: parentFragment,
-              index
-            };
-          }
-        }
-        firstRange.setStart(position.fragment, position.index);
-        firstRange.collapse();
-      }
-      return false;
-    }
-    return true;
+    return new ImageCardComponent(defaultImageSrc, {
+      imgFragment: new Fragment(),
+      descFragment: new Fragment()
+    });
   }
 }
 

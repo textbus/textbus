@@ -340,8 +340,37 @@ export class TBRange {
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        scope.fragment.cut(0);
-        if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
+        const parentComponent = this.renderer.getParentComponent(scope.fragment);
+        scope.fragment.remove(0);
+        if (parentComponent instanceof BackboneComponent) {
+          if (parentComponent.canDelete(scope.fragment)) {
+            let position = this.getPreviousPosition();
+            const parentFragment = this.renderer.getParentFragment(parentComponent);
+            const index = parentFragment.indexOf(parentComponent);
+            parentFragment.remove(index, 1);
+
+            if (parentFragment.contentLength === 0) {
+              this.deleteEmptyTree(parentFragment);
+            }
+
+            if (position.fragment === this.startFragment) {
+              const nextContent = parentFragment.getContentAtIndex(index);
+              if (nextContent instanceof DivisionComponent) {
+                position = this.findFirstPosition(nextContent.slot);
+              } else if (nextContent instanceof BranchComponent) {
+                if (nextContent.slots[0]) {
+                  position = this.findFirstPosition(nextContent.slots[0]);
+                }
+              } else {
+                position = {
+                  fragment: parentFragment,
+                  index
+                };
+              }
+            }
+            this.setStart(position.fragment, position.index);
+          }
+        } else if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
           this.deleteEmptyTree(scope.fragment);
         }
       } else {
