@@ -40,7 +40,21 @@ export class FormatMap {
       if (formatter.state === FormatEffect.Invalid) {
         this.map.delete(formatter.renderer);
       } else {
-        this.map.set(formatter.renderer, [formatter]);
+        const oldFormats = this.map.get(formatter.renderer);
+        if (oldFormats) {
+          for (let i = 0; i < oldFormats.length; i++) {
+            const format = oldFormats[i];
+            if (format.abstractData?.equal(formatter.abstractData, false)) {
+              if (!format.abstractData?.equal(formatter.abstractData)) {
+                oldFormats[i] = formatter;
+              }
+              return;
+            }
+          }
+          oldFormats.push(formatter);
+        } else {
+          this.map.set(formatter.renderer, [formatter]);
+        }
       }
       return;
     }

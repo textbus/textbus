@@ -54,8 +54,9 @@ export class FormatAbstractData {
   /**
    * 判断 data 是否和自己相等。
    * @param data
+   * @param diffValue 是否比较值
    */
-  equal(data: FormatAbstractData) {
+  equal(data: FormatAbstractData, diffValue = true) {
     if (data === this) {
       return true;
     }
@@ -65,30 +66,34 @@ export class FormatAbstractData {
     const left = data;
     const right = this;
     return left.tag == right.tag &&
-      FormatAbstractData.equalAttrs(left.attrs, right.attrs) &&
-      FormatAbstractData.equalStyle(left.style, right.style);
+      FormatAbstractData.equalAttrs(left.attrs, right.attrs, diffValue) &&
+      FormatAbstractData.equalStyle(left.style, right.style, diffValue);
   }
 
-  private static equalAttrs(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
+  private static equalAttrs(left: Map<string, string | number | boolean>,
+                            right: Map<string, string | number | boolean>,
+                            diffValue: boolean) {
     if (left === right || !left === true && !right === true) {
       return true;
     }
     if (!left !== !right || left.size !== right.size) {
       return false;
     }
+
     return Array.from(left.keys()).reduce((v, key) => {
-      return v && left.get(key) === right.get(key);
+      return v && (diffValue ? left.get(key) === right.get(key) : left.has(key));
     }, true);
   }
 
   private static equalStyle(left: { name: string, value: string | number },
-                            right: { name: string, value: string | number }) {
+                            right: { name: string, value: string | number },
+                            diffValue: boolean) {
     if (left === right || !left === true && !right === true) {
       return true;
     }
     if (!left !== !right) {
       return false;
     }
-    return left.name === right.name && left.value === right.value;
+    return left.name === right.name && (diffValue ? left.value === right.value : true);
   }
 }

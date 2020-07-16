@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment, FormatEffect, FormatAbstractData } from '../../core/_api';
+import { Commander, FormatAbstractData, FormatEffect, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { TableEditRange } from './table-edit.commander';
 import { TableComponent } from '../../components/table.component';
 import { tdBorderColorFormatter } from '../../formatter/td-border-color.formatter';
@@ -33,6 +33,32 @@ export class TdBorderColorCommander implements Commander<string> {
       });
 
     selectedCells.forEach(c => {
+      if (this.color) {
+        if (c.columnIndex === minColumn) {
+          c.beforeCell.fragment.apply({
+            renderer: tdBorderColorFormatter,
+            state: FormatEffect.Valid,
+            abstractData: new FormatAbstractData({
+              style: {
+                name: 'borderRightColor',
+                value: this.color
+              }
+            })
+          })
+        }
+        if (c.rowIndex === minRow) {
+          cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell.fragment.apply({
+            renderer: tdBorderColorFormatter,
+            state: FormatEffect.Valid,
+            abstractData: new FormatAbstractData({
+              style: {
+                name: 'borderBottomColor',
+                value: this.color
+              }
+            })
+          })
+        }
+      }
       c.cell.fragment.apply({
         renderer: tdBorderColorFormatter,
         state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
