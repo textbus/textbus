@@ -3,7 +3,6 @@ import {
   ChildSlotModel,
   EventType,
   FormatAbstractData,
-  FormatParams,
   FormatEffect,
   Fragment,
   InlineFormatter,
@@ -11,7 +10,7 @@ import {
   DivisionComponent,
   ComponentReader,
   VElement,
-  ViewData
+  ViewData, InlineFormatParams
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { highlight } from 'highlight.js';
@@ -213,23 +212,32 @@ export class PreComponent extends DivisionComponent {
         return '\n';
       }
     }).join('');
-    const blockFormats = fragment.getFormatRanges().filter(f => f.renderer instanceof BlockFormatter);
+    const blockFormats = Array.from(fragment.getFormatKeys())
+      .filter(f => f instanceof BlockFormatter).map(token => {
+        return {
+          token,
+          ranges: fragment.getFormatRanges(token)
+        }
+      });
     fragment.clean();
-    fragment.apply({
-      renderer: codeFormatter,
+    fragment.apply(codeFormatter, {
       abstractData: new FormatAbstractData({
         tag: 'code'
       }),
       state: FormatEffect.Valid
     });
-    blockFormats.forEach(f => fragment.apply(f));
+    blockFormats.forEach(c => {
+      c.ranges.forEach(r => {
+        fragment.apply(c.token, r);
+      })
+    });
     const lang = this.lang || 'bash';
     try {
       const html = highlight(lang, sourceCode).value.replace(/\n/g, '<br>');
       const div = document.createElement('div');
       div.innerHTML = html;
       this.getFormats(0, div, fragment).formats.forEach(f => {
-        fragment.apply(f);
+        fragment.apply(codeStyleFormatter, f);
       });
     } catch (e) {
       // console.log(e);
@@ -238,7 +246,7 @@ export class PreComponent extends DivisionComponent {
 
   private getFormats(index: number, node: HTMLElement, context: Fragment) {
     const start = index;
-    const childFormats: Array<FormatParams> = [];
+    const childFormats: Array<InlineFormatParams> = [];
     Array.from(node.childNodes).forEach(item => {
       if (item.nodeType === Node.ELEMENT_NODE) {
         if (item.nodeName.toLowerCase() === 'br') {
@@ -255,7 +263,7 @@ export class PreComponent extends DivisionComponent {
       }
     });
 
-    const formats: Array<FormatParams> = [];
+    const formats: Array<InlineFormatParams> = [];
     node.classList.forEach(value => {
       for (const item of theme) {
         if (item.classes.includes(value)) {
@@ -270,7 +278,6 @@ export class PreComponent extends DivisionComponent {
             formats.push({
               startIndex: start,
               endIndex: index,
-              renderer: codeStyleFormatter,
               state: FormatEffect.Valid,
               abstractData
             })

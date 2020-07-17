@@ -44,9 +44,9 @@ export const linkTool = Toolkit.makeDropdownTool({
     displayNeedMatch: true,
     action(renderer, selection) {
       selection.firstRange.getSelectedScope().forEach(scope => {
-        scope.fragment.getFormatRangesByFormatter(linkFormatter).forEach(format => {
+        scope.fragment.getFormatRanges(linkFormatter).forEach(format => {
           if (format.startIndex <= scope.startIndex && format.endIndex >= scope.endIndex) {
-            scope.fragment.apply({
+            scope.fragment.apply(linkFormatter, {
               ...format,
               state: FormatEffect.Invalid
             });

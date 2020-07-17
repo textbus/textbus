@@ -61,7 +61,9 @@ export class BlockCommander implements Commander<string> {
           blockComponent.slot.from(new Fragment());
           const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           c.contents.forEach(cc => blockComponent.slot.append(cc));
-          c.formatRanges.forEach(ff => blockComponent.slot.apply(ff));
+          Array.from(c.formatMap.keys()).forEach(token => {
+            (c.formatMap.get(token) || []).forEach(ff => blockComponent.slot.apply(token, ff));
+          });
           scope.fragment.insert(blockComponent, scope.startIndex);
           this.effect(blockComponent.slot, '');
         }
@@ -71,26 +73,24 @@ export class BlockCommander implements Commander<string> {
 
   private effect(fragment: Fragment, oldTagName: string) {
     if (/h[1-6]/.test(this.tagName)) {
-      fragment.apply({
+      fragment.apply(boldFormatter, {
         state: FormatEffect.Inherit,
         startIndex: 0,
         endIndex: fragment.contentLength,
         abstractData: new FormatAbstractData({
           tag: 'strong'
-        }),
-        renderer: boldFormatter
+        })
       })
     } else if (this.tagName === 'p') {
       const flag = /h[1-6]/.test(oldTagName);
       if (flag) {
-        fragment.apply({
+        fragment.apply(boldFormatter, {
           state: FormatEffect.Invalid,
           startIndex: 0,
           endIndex: fragment.contentLength,
           abstractData: new FormatAbstractData({
             tag: 'strong'
-          }),
-          renderer: boldFormatter
+          })
         })
       }
     }

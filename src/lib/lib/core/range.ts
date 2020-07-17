@@ -780,14 +780,16 @@ export class TBRange {
           this.deleteEmptyTree(this.endFragment);
           const startIndex = this.startIndex + 1;
           last.contents.reverse().forEach(c => this.startFragment.insert(c, startIndex));
-          last.formatRanges
-            .filter(f => !(f.renderer instanceof BlockFormatter))
-            .map(f => {
-              f.startIndex += startIndex;
-              f.endIndex += startIndex;
-              return f;
-            })
-            .forEach(f => this.startFragment.apply(f));
+          Array.from(last.formatMap.keys())
+            .filter(token => !(token instanceof BlockFormatter))
+            .map(token => {
+              const formats = last.formatMap.get(token) || [];
+              formats.forEach(f => {
+                f.startIndex += startIndex;
+                f.endIndex += startIndex;
+                this.startFragment.apply(token, f);
+              })
+            });
         }
 
       }

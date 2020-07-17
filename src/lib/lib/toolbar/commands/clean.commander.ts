@@ -44,22 +44,25 @@ export class CleanCommander implements Commander {
           }
         }
 
-        scope.fragment.getFormatRanges().forEach(f => {
-          if (f.startIndex > scope.endIndex ||
-            f.endIndex < f.startIndex ||
-            this.excludeFormatters.map(constructor => f.renderer instanceof constructor).includes(true)) {
+        scope.fragment.getFormatKeys().forEach(token => {
+          if (this.excludeFormatters.map(constructor => token instanceof constructor).includes(true)) {
             return;
           }
-          if (f.renderer instanceof BlockFormatter && !isDeleteBlockFormat) {
-            return;
-          }
-          b = true;
-          scope.fragment.apply({
-            startIndex: scope.startIndex,
-            endIndex: scope.endIndex,
-            state: FormatEffect.Invalid,
-            abstractData: new FormatAbstractData(),
-            renderer: f.renderer
+          scope.fragment.getFormatRanges(token).forEach(f => {
+            if (f.startIndex > scope.endIndex ||
+              f.endIndex < f.startIndex) {
+              return;
+            }
+            if (token instanceof BlockFormatter && !isDeleteBlockFormat) {
+              return;
+            }
+            b = true;
+            scope.fragment.apply(token, {
+              startIndex: scope.startIndex,
+              endIndex: scope.endIndex,
+              state: FormatEffect.Invalid,
+              abstractData: new FormatAbstractData(),
+            });
           });
         })
       })

@@ -19,11 +19,10 @@ export class StyleCommander implements Commander<string> {
     }
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        item.fragment.apply({
+        item.fragment.apply(this.formatter, {
           state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          renderer: this.formatter,
           abstractData: new FormatAbstractData({
             style: {
               name: this.name,

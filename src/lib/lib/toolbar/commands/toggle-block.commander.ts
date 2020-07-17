@@ -29,11 +29,13 @@ export class ToggleBlockCommander implements Commander<string> {
         const fragment = context.slot;
         const contents = fragment.cut(0);
         contents.contents.reverse().forEach(i => parentFragment.insert(i, position));
-        contents.formatRanges.forEach(f => {
-          parentFragment.apply({
-            ...f,
-            startIndex: f.startIndex + position,
-            endIndex: f.endIndex + position
+        Array.from(contents.formatMap.keys()).forEach(token => {
+          contents.formatMap.get(token).forEach(f => {
+            parentFragment.apply(token, {
+              ...f,
+              startIndex: f.startIndex + position,
+              endIndex: f.endIndex + position
+            })
           })
         })
       } else {
@@ -76,11 +78,15 @@ export class ToggleBlockCommander implements Commander<string> {
                   const length = fragment.contentLength;
                   const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
                   c.contents.reverse().forEach(cc => fragment.insert(cc, 0));
-                  c.formatRanges.forEach(f => fragment.apply({
-                    ...f,
-                    startIndex: f.startIndex + length,
-                    endIndex: f.endIndex + length,
-                  }))
+                  Array.from(c.formatMap.keys()).forEach(token => {
+                    c.formatMap.get(token).forEach(f => {
+                      fragment.apply(token, {
+                        ...f,
+                        startIndex: f.startIndex + length,
+                        endIndex: f.endIndex + length,
+                      })
+                    })
+                  })
                 } else {
                   const parentComponent = renderer.getParentComponent(scope.fragment);
                   block.slot.insert(parentComponent, 0);

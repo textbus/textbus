@@ -38,10 +38,12 @@ export class EventHandler {
 
     commonAncestorFragment.cut(0);
     fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatRanges().forEach(f => commonAncestorFragment.apply(f, {
-      important: true,
-      coverChild: false
-    }));
+    fragmentSnapshot.getFormatKeys().forEach(token => {
+      fragmentSnapshot.getFormatRanges(token).forEach(f => commonAncestorFragment.apply(token, f, {
+        important: true,
+        coverChild: false
+      }));
+    })
 
     let index = 0;
     input.input.value.replace(/\n+|[^\n]+/g, (str) => {
@@ -94,12 +96,14 @@ export class EventHandler {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
           firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
-          firstContents.formatRanges.forEach(f => {
-            if (f.renderer instanceof InlineFormatter) {
-              fragment.apply({
-                ...f,
-                startIndex: f.startIndex + firstRange.startIndex,
-                endIndex: f.endIndex + firstRange.startIndex
+          Array.from(firstContents.formatMap.keys()).forEach(token => {
+            if (token instanceof InlineFormatter) {
+              firstContents.formatMap.get(token).forEach(format => {
+                fragment.apply(token, {
+                  ...format,
+                  startIndex: format.startIndex + firstRange.startIndex,
+                  endIndex: format.endIndex + firstRange.startIndex
+                },)
               })
             }
           })
@@ -111,12 +115,14 @@ export class EventHandler {
             const afterComponent = parentComponent.clone() as DivisionComponent;
             afterComponent.slot.from(new Fragment());
             afterContents.contents.forEach(c => afterComponent.slot.append(c));
-            afterContents.formatRanges.forEach(f => {
-              afterComponent.slot.apply({
-                ...f,
-                startIndex: 0,
-                endIndex: f.endIndex - f.startIndex
-              });
+            Array.from(afterContents.formatMap.keys()).forEach(token => {
+              afterContents.formatMap.get(token).forEach(f => {
+                afterComponent.slot.apply(token, {
+                  ...f,
+                  startIndex: 0,
+                  endIndex: f.endIndex - f.startIndex
+                });
+              })
             });
             if (afterComponent.slot.contentLength === 0) {
               afterComponent.slot.append(new BrComponent());

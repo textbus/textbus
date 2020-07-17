@@ -35,9 +35,8 @@ export class BlockStyleCommander implements Commander<string> {
           })
         }
         fragments.forEach(slot => {
-          slot.apply({
+          slot.apply(this.formatter, {
             state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
-            renderer: this.formatter,
             abstractData: new FormatAbstractData({
               style: {
                 name: this.name,

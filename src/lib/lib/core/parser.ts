@@ -65,10 +65,9 @@ export class Parser {
       this.readComponent(child, slot);
     })
     maps.forEach(item => {
-      slot.apply({
+      slot.apply(item.formatter, {
         startIndex,
         endIndex: slot.contentLength,
-        renderer: item.formatter,
         abstractData: item.abstractData,
         state: item.state
       }, {

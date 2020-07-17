@@ -28,17 +28,17 @@ export enum FormatEffect {
 /**
  * 配置一段格式的参数。
  */
-export type FormatParams = {
+export type BlockFormatParams = {
   abstractData: FormatAbstractData;
-  renderer: InlineFormatter;
+  state: FormatEffect;
+};
+
+export type InlineFormatParams = {
+  abstractData: FormatAbstractData;
   state: FormatEffect;
   startIndex: number;
   endIndex: number;
-} | {
-  abstractData: FormatAbstractData;
-  renderer: BlockFormatter;
-  state: FormatEffect;
-};
+}
 
 /**
  * 标识一段格式的范围。
@@ -47,7 +47,6 @@ export interface FormatRange {
   startIndex: number;
   endIndex: number;
   abstractData: FormatAbstractData;
-  renderer: InlineFormatter | BlockFormatter;
   state: FormatEffect;
 }
 

@@ -1,6 +1,11 @@
 import { VElement, VElementLiteral, VTextNode } from './element';
 import { Fragment } from './fragment';
-import { BlockFormatter, FormatEffect, FormatRange } from './formatter';
+import {
+  BlockFormatter,
+  FormatEffect,
+  FormatRange,
+  InlineFormatter
+} from './formatter';
 import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
@@ -27,6 +32,11 @@ export interface ElementPosition {
   endIndex: number;
   fragment: Fragment;
 }
+
+type FormatConfig = {
+  token: InlineFormatter,
+  params: FormatRange
+};
 
 /**
  * 储存虚拟 DOM 节点和真实 DOM 节点的映射关系。
@@ -384,14 +394,22 @@ export class Renderer {
     if (!this.productionRenderingModal) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
-    const containerFormats: FormatRange[] = [];
-    const childFormats: FormatRange[] = [];
-    Renderer.calculatePriority(fragment.getFormatRanges()).forEach(f => {
-      const ff = Object.assign({}, f);
-      if (ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
-        containerFormats.push(ff);
+    const containerFormats: FormatConfig[] = [];
+    const childFormats: FormatConfig[] = [];
+    const formatRangeConfigList: Array<FormatConfig> = [];
+    fragment.getFormatKeys().forEach(token => {
+      fragment.getFormatRanges(token).forEach(f => {
+        formatRangeConfigList.push({
+          token,
+          params: f
+        });
+      })
+    })
+    Renderer.calculatePriority(formatRangeConfigList).forEach(f => {
+      if (f.token instanceof BlockFormatter || f.params.startIndex === 0 && f.params.endIndex === fragment.contentLength) {
+        containerFormats.push(f);
       } else {
-        childFormats.push(ff);
+        childFormats.push(f);
       }
     });
     const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
@@ -401,18 +419,18 @@ export class Renderer {
     return r.host;
   }
 
-  private vDomBuilder(fragment: Fragment, formats: FormatRange[], startIndex: number, endIndex: number) {
+  private vDomBuilder(fragment: Fragment, formats: FormatConfig[], startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
       if (firstRange) {
-        if (startIndex < firstRange.startIndex) {
-          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.startIndex));
+        if (startIndex < firstRange.params.startIndex) {
+          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.params.startIndex));
         }
-        const childFormats: FormatRange[] = [firstRange];
+        const childFormats: FormatConfig[] = [firstRange];
         while (true) {
           const f = formats[0];
-          if (f && f.startIndex === firstRange.startIndex && f.endIndex === firstRange.endIndex) {
+          if (f && f.params.startIndex === firstRange.params.startIndex && f.params.endIndex === firstRange.params.endIndex) {
             childFormats.push(formats.shift());
           } else {
             break;
@@ -421,23 +439,23 @@ export class Renderer {
         const {host, slot} = this.createVDomByFormats(
           childFormats,
           fragment,
-          firstRange.startIndex,
-          firstRange.endIndex
+          firstRange.params.startIndex,
+          firstRange.params.endIndex
         );
 
 
-        const progenyFormats: FormatRange[] = [];
+        const progenyFormats: FormatConfig[] = [];
         let index = 0;
         while (true) {
           const f = formats[index];
-          if (f && f.startIndex < firstRange.endIndex) {
-            if (f.endIndex <= firstRange.endIndex) {
+          if (f && f.params.startIndex < firstRange.params.endIndex) {
+            if (f.params.endIndex <= firstRange.params.endIndex) {
               progenyFormats.push(formats.splice(index, 1)[0]);
             } else {
               const cloneRange = Object.assign({}, f);
-              cloneRange.endIndex = firstRange.endIndex;
+              cloneRange.params.endIndex = firstRange.params.endIndex;
               progenyFormats.push(cloneRange);
-              f.startIndex = firstRange.endIndex;
+              f.params.startIndex = firstRange.params.endIndex;
               index++;
             }
           } else {
@@ -448,16 +466,16 @@ export class Renderer {
         formats = Renderer.calculatePriority(formats);
 
         if (progenyFormats.length) {
-          this.vDomBuilder(fragment, progenyFormats, firstRange.startIndex, firstRange.endIndex).forEach(item => {
+          this.vDomBuilder(fragment, progenyFormats, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
             slot ? slot.appendChild(item) : children.push(item);
           });
         } else {
-          this.createNodesByRange(fragment, firstRange.startIndex, firstRange.endIndex).forEach(item => {
+          this.createNodesByRange(fragment, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
             slot ? slot.appendChild(item) : children.push(item);
           })
         }
         host && children.push(host);
-        startIndex = firstRange.endIndex;
+        startIndex = firstRange.params.endIndex;
       } else {
         children.push(...this.createNodesByRange(fragment, startIndex, endIndex));
         break;
@@ -524,29 +542,28 @@ export class Renderer {
   }
 
   private createVDomByFormats(
-    formats: Array<FormatRange>,
+    formats: Array<FormatConfig>,
     fragment: Fragment,
     startIndex: number,
     endIndex: number,
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
-    formats.sort((a, b) => a.renderer.priority - b.renderer.priority)
-      .reduce((vEle, next) => {
-        const renderModel = next.renderer.render(this.productionRenderingModal, next.state, next.abstractData, vEle);
-        if (renderModel instanceof ReplaceModel) {
-          host = slot = renderModel.replaceElement;
-          return host;
-        } else if (renderModel instanceof ChildSlotModel) {
-          if (vEle) {
-            vEle.appendChild(renderModel.childElement);
-          } else {
-            host = renderModel.childElement;
-          }
-          slot = renderModel.childElement;
-          return slot;
+    formats.reduce((vEle, next) => {
+      const renderModel = next.token.render(this.productionRenderingModal, next.params.state, next.params.abstractData, vEle);
+      if (renderModel instanceof ReplaceModel) {
+        host = slot = renderModel.replaceElement;
+        return host;
+      } else if (renderModel instanceof ChildSlotModel) {
+        if (vEle) {
+          vEle.appendChild(renderModel.childElement);
+        } else {
+          host = renderModel.childElement;
         }
-        return vEle;
-      }, host);
+        slot = renderModel.childElement;
+        return slot;
+      }
+      return vEle;
+    }, host);
     let el = host;
     while (el) {
       !this.productionRenderingModal && this.vDomPositionMapping.set(el, {
@@ -630,15 +647,15 @@ export class Renderer {
     }).replace(/^\s|\s$/g, target);
   }
 
-  private static calculatePriority(formats: FormatRange[]) {
+  private static calculatePriority(formats: FormatConfig[]) {
     return formats.filter(i => {
-      return i.state !== FormatEffect.Inherit;
+      return i.params.state !== FormatEffect.Inherit;
     }).sort((next, prev) => {
-      const a = next.startIndex - prev.startIndex;
+      const a = next.params.startIndex - prev.params.startIndex;
       if (a === 0) {
-        const b = next.endIndex - prev.endIndex;
+        const b = next.params.endIndex - prev.params.endIndex;
         if (b === 0) {
-          return next.renderer.priority - prev.renderer.priority;
+          return next.token.priority - prev.token.priority;
         }
         return b;
       }

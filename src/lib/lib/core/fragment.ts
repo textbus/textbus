@@ -1,6 +1,12 @@
 import { Contents } from './contents';
 import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
-import { BlockFormatter, FormatParams, FormatEffect, FormatRange, InlineFormatter } from './formatter';
+import {
+  BlockFormatter,
+  FormatEffect,
+  InlineFormatter,
+  InlineFormatParams,
+  BlockFormatParams
+} from './formatter';
 import { FormatMap } from './format-map';
 
 export interface ApplyFormatOptions {
@@ -48,72 +54,77 @@ export class Fragment {
 
   insert(contents: Component | string, index: number) {
     this.contents.insert(contents, index);
-    const newFormatRanges: FormatRange[] = [];
-    this.formatMap.getFormatRanges().forEach(format => {
-      if (format.renderer instanceof BlockFormatter) {
-        newFormatRanges.push(format);
-        return;
-      }
-      if (format.startIndex < index && format.endIndex >= index) {
-        if (contents instanceof DivisionComponent ||
-          contents instanceof BranchComponent ||
-          contents instanceof BackboneComponent) {
-          newFormatRanges.push({
-            startIndex: format.startIndex,
-            endIndex: index,
-            state: format.state,
-            abstractData: format.abstractData.clone(),
-            renderer: format.renderer
-          });
-          newFormatRanges.push({
-            startIndex: index,
-            endIndex: index + 1,
-            state: FormatEffect.Invalid,
-            abstractData: format.abstractData.clone(),
-            renderer: format.renderer
-          });
-          if (format.endIndex > index) {
-            newFormatRanges.push({
-              startIndex: index + 1,
-              endIndex: format.endIndex + 1,
-              state: format.state,
+    const formatMap = new FormatMap();
+    Array.from(this.formatMap.keys()).forEach(token => {
+      const formats = this.formatMap.get(token) || [];
+      formats.forEach(format => {
+
+        if (token instanceof BlockFormatter) {
+          formatMap.merge(token, format, true);
+          return;
+        }
+        if (format.startIndex < index && format.endIndex >= index) {
+          if (contents instanceof DivisionComponent ||
+            contents instanceof BranchComponent ||
+            contents instanceof BackboneComponent) {
+            formatMap.merge(token, {
+              ...format,
+              endIndex: index
+            }, true);
+            formatMap.merge(token, {
+              startIndex: index,
+              endIndex: index + 1,
+              state: FormatEffect.Invalid,
               abstractData: format.abstractData.clone(),
-              renderer: format.renderer
-            })
+            }, true);
+            if (format.endIndex > index) {
+              formatMap.merge(token, {
+                ...format,
+                startIndex: index + 1,
+                endIndex: format.endIndex + 1
+              }, true);
+            }
+          } else {
+            formatMap.merge(token, {
+              ...format,
+              endIndex: format.endIndex + contents.length
+            }, true);
           }
         } else {
-          newFormatRanges.push({
-            startIndex: format.startIndex,
-            endIndex: format.endIndex + contents.length,
-            state: format.state,
-            abstractData: format.abstractData.clone(),
-            renderer: format.renderer
-          });
+          if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
+            format.startIndex += contents.length;
+          }
+          if (format.endIndex >= index) {
+            format.endIndex += contents.length;
+          }
+          formatMap.merge(token, format, true);
         }
-      } else {
-        if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
-          format.startIndex += contents.length;
-        }
-        if (format.endIndex >= index) {
-          format.endIndex += contents.length;
-        }
-      }
+      })
     })
-    newFormatRanges.forEach(f => {
-      this.mergeFormat(f, true);
-    });
+    this.formatMap = formatMap;
   }
 
   clone() {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
-    this.formatMap.getFormatRanges().forEach(formatRange => {
-      ff.mergeFormat(formatRange.renderer instanceof InlineFormatter ? Object.assign({}, formatRange) : {
-        state: formatRange.state,
-        abstractData: formatRange.abstractData,
-        renderer: formatRange.renderer
-      }, true);
-    })
+    const self = this;
+    Array.from(this.formatMap.keys()).forEach(token => {
+      ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
+        return token instanceof InlineFormatter ? {
+          ...f,
+          abstractData: f.abstractData?.clone()
+        } : {
+          get startIndex() {
+            return 0;
+          },
+          get endIndex() {
+            return self.contentLength;
+          },
+          state: f.state,
+          abstractData: f.abstractData
+        }
+      })])
+    });
     return ff;
   }
 
@@ -136,109 +147,106 @@ export class Fragment {
 
   cut(startIndex: number, count = this.contents.length - startIndex) {
     const endIndex = startIndex + count;
-    const formatMap = new FormatMap();
+    const selfFormatMap = new FormatMap();
+    const discardedFormatMap = new FormatMap();
 
-    const selfFormats: FormatRange[] = [];
-    const discardedFormats: FormatRange[] = [];
-    this.formatMap.getFormatRanges().filter(f => {
-      if (f.renderer instanceof BlockFormatter) {
-        selfFormats.push(Object.assign({}, f));
-        discardedFormats.push(Object.assign({}, f));
-        return false;
-      }
-      return true;
-    }).forEach(format => {
-      // 在之前
-      // formatRange  ________-------________
-      // deleteRange     [  ]
-      if (format.startIndex >= endIndex) {
-        selfFormats.push({
-          ...format,
-          startIndex: format.startIndex - count,
-          endIndex: format.endIndex - count
-        });
+    Array.from(this.formatMap.keys()).forEach(token => {
+      const formats = this.formatMap.get(token);
+      if (token instanceof BlockFormatter) {
+        selfFormatMap.set(token, [...formats]);
+        discardedFormatMap.set(token, [...formats]);
         return;
       }
-      // 在之后
-      // formatRange  ________-------________
-      // deleteRange                  [  ]
-      if (format.endIndex <= startIndex) {
-        selfFormats.push(Object.assign({}, format));
-        return;
-      }
-
-      // 前交
-      // formatRange  ________-------________
-      // deleteRange        [   ]
-
-      if (format.startIndex > startIndex &&
-        format.startIndex < endIndex &&
-        format.endIndex >= endIndex) {
-        selfFormats.push({
-          ...format,
-          startIndex,
-          endIndex: format.endIndex - count
-        });
-        discardedFormats.push({
-          ...format,
-          startIndex: format.startIndex - startIndex,
-          endIndex: count
-        })
-        return;
-      }
-
-      // 重叠
-      // formatRange  ________-------________
-      // deleteRange           [   ]
-
-      if (format.startIndex <= startIndex && format.endIndex >= endIndex) {
-        if (format.endIndex - count > format.startIndex) {
-          selfFormats.push({
+      formats.forEach(format => {
+        // 在之前
+        // formatRange  ________-------________
+        // deleteRange     [  ]
+        if (format.startIndex >= endIndex) {
+          selfFormatMap.merge(token, {
             ...format,
+            startIndex: format.startIndex - count,
             endIndex: format.endIndex - count
-          });
+          }, true);
+          return;
         }
-        discardedFormats.push({
-          ...format,
-          startIndex: 0,
-          endIndex: count
-        });
-        return;
-      }
+        // 在之后
+        // formatRange  ________-------________
+        // deleteRange                  [  ]
+        if (format.endIndex <= startIndex) {
+          selfFormatMap.merge(token, {...format}, true);
+          return;
+        }
 
-      // 后交
-      // formatRange  ________-------________
-      // deleteRange               [   ]
-      if (format.startIndex <= startIndex && format.endIndex > startIndex && format.endIndex < endIndex) {
-        selfFormats.push({
-          ...format,
-          endIndex: startIndex
-        });
-        discardedFormats.push({
-          ...format,
-          startIndex: 0,
-          endIndex: format.endIndex - startIndex
-        })
-        return;
-      }
+        // 前交
+        // formatRange  ________-------________
+        // deleteRange        [   ]
 
-      // 包含
-      // formatRange  ________-------________
-      // deleteRange        [         ]
-      if (format.startIndex > startIndex && format.endIndex < endIndex) {
-        discardedFormats.push({
-          ...format,
-          startIndex: format.startIndex - startIndex,
-          endIndex: format.endIndex - startIndex
-        })
-      }
+        if (format.startIndex > startIndex &&
+          format.startIndex < endIndex &&
+          format.endIndex >= endIndex) {
+          selfFormatMap.merge(token, {
+            ...format,
+            startIndex,
+            endIndex: format.endIndex - count
+          }, true);
+          discardedFormatMap.merge(token, {
+            ...format,
+            startIndex: format.startIndex - startIndex,
+            endIndex: count
+          }, true);
+          return;
+        }
+
+        // 重叠
+        // formatRange  ________-------________
+        // deleteRange           [   ]
+
+        if (format.startIndex <= startIndex && format.endIndex >= endIndex) {
+          if (format.endIndex - count > format.startIndex) {
+            selfFormatMap.merge(token, {
+              ...format,
+              endIndex: format.endIndex - count
+            }, true);
+          }
+          discardedFormatMap.merge(token, {
+            ...format,
+            startIndex: 0,
+            endIndex: count
+          }, true);
+          return;
+        }
+
+        // 后交
+        // formatRange  ________-------________
+        // deleteRange               [   ]
+        if (format.startIndex <= startIndex && format.endIndex > startIndex && format.endIndex < endIndex) {
+          selfFormatMap.merge(token, {
+            ...format,
+            endIndex: startIndex
+          }, true);
+          discardedFormatMap.merge(token, {
+            ...format,
+            startIndex: 0,
+            endIndex: format.endIndex - startIndex
+          }, true)
+          return;
+        }
+
+        // 包含
+        // formatRange  ________-------________
+        // deleteRange        [         ]
+        if (format.startIndex > startIndex && format.endIndex < endIndex) {
+          discardedFormatMap.merge(token, {
+            ...format,
+            startIndex: format.startIndex - startIndex,
+            endIndex: format.endIndex - startIndex
+          }, true);
+        }
+      })
     })
-    selfFormats.forEach(f => {
-      formatMap.merge(f, true);
-    });
-    this.formatMap = formatMap;
+    this.formatMap = selfFormatMap;
     return {
-      formatRanges: discardedFormats,
+      formatMap: discardedFormatMap,
       contents: this.contents.remove(startIndex, endIndex)
     };
   }
@@ -246,36 +254,45 @@ export class Fragment {
   /**
    * 获取当前片段内所有的格式化信息
    */
-  getFormatRanges() {
-    return this.formatMap.getFormatRanges();
+  getFormatKeys() {
+    return Array.from(this.formatMap.keys());
+  }
+
+  getFormatRanges(token: InlineFormatter | BlockFormatter) {
+    return this.formatMap.get(token) || [];
   }
 
   indexOf(component: Component) {
     return this.contents.indexOf(component);
   }
 
-  /**
-   * 通过 Handler 获取当前片段的的格式化信息
-   * @param formatter
-   */
-  getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
-    return this.formatMap.getFormatRangesByFormatter(formatter);
-  }
-
-  apply(f: FormatParams, options: ApplyFormatOptions = {
-    important: true,
-    coverChild: true
-  }) {
+  apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
+  apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
+  apply(token: InlineFormatter | BlockFormatter,
+        params: InlineFormatParams | BlockFormatParams,
+        options: ApplyFormatOptions = {
+          important: true,
+          coverChild: true
+        }) {
     const {coverChild, important} = options;
-    if (f.renderer instanceof BlockFormatter) {
-      this.mergeFormat(f, important);
+    if (token instanceof BlockFormatter) {
+      let self = this;
+      this.formatMap.merge(token, {
+        ...params,
+        get startIndex() {
+          return 0;
+        },
+        get endIndex() {
+          return self.contentLength;
+        }
+      }, important);
       return;
     }
-    const formatRange = f as FormatRange;
+    const formatRange = params as InlineFormatParams;
     const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
     let index = 0;
-    const formats: FormatRange[] = [];
-    let newFormat: FormatRange;
+    const cacheFormats: Array<{ token: InlineFormatter, params: InlineFormatParams }> = [];
+    let newFormat: InlineFormatParams;
     contents.forEach(item => {
       if (item instanceof DivisionComponent) {
         newFormat = null;
@@ -283,7 +300,7 @@ export class Fragment {
           const newFormatRange = Object.assign({}, formatRange);
           newFormatRange.startIndex = 0;
           newFormatRange.endIndex = item.slot.contentLength;
-          item.slot.apply(newFormatRange, options);
+          item.slot.apply(token, newFormatRange, options);
         }
       } else if (item instanceof BranchComponent) {
         newFormat = null;
@@ -292,7 +309,7 @@ export class Fragment {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
-            fragment.apply(newFormatRange, options);
+            fragment.apply(token, newFormatRange, options);
           })
         }
       } else if (item instanceof BackboneComponent) {
@@ -302,7 +319,7 @@ export class Fragment {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
-            fragment.apply(newFormatRange, options);
+            fragment.apply(token, newFormatRange, options);
           }
         }
       } else {
@@ -311,35 +328,18 @@ export class Fragment {
             startIndex: formatRange.startIndex + index,
             endIndex: formatRange.startIndex + index + item.length,
             state: formatRange.state,
-            abstractData: formatRange.abstractData,
-            renderer: formatRange.renderer
+            abstractData: formatRange.abstractData
           };
-          formats.push(newFormat)
+          cacheFormats.push({
+            token,
+            params: newFormat
+          })
         } else {
           newFormat.endIndex = formatRange.startIndex + index + item.length;
         }
       }
       index += item.length;
     });
-    formats.forEach(f => this.formatMap.merge(f, important));
-  }
-
-  private mergeFormat(format: FormatParams, important: boolean) {
-    if (format.renderer instanceof InlineFormatter) {
-      this.formatMap.merge(format as FormatRange, important);
-    } else {
-      let self = this;
-      this.formatMap.merge({
-        get startIndex() {
-          return 0;
-        },
-        get endIndex() {
-          return self.contentLength;
-        },
-        renderer: format.renderer,
-        abstractData: format.abstractData,
-        state: format.state
-      }, important)
-    }
+    cacheFormats.forEach(f => this.formatMap.merge(f.token, f.params, important));
   }
 }

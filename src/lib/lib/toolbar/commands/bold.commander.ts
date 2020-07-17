@@ -19,11 +19,10 @@ export class BoldCommander implements Commander<InlineFormatter> {
         (overlap ? FormatEffect.Exclude : FormatEffect.Inherit) :
         (overlap ? FormatEffect.Invalid : FormatEffect.Valid)
       range.getSelectedScope().forEach(item => {
-        item.fragment.apply({
+        item.fragment.apply(this.formatter, {
           state,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          renderer: this.formatter,
           abstractData: new FormatAbstractData({
             tag: 'strong'
           })

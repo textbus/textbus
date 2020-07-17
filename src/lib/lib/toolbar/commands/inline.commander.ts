@@ -13,11 +13,10 @@ export class InlineCommander implements Commander {
     }
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        item.fragment.apply({
+        item.fragment.apply(this.formatter, {
           state: overlap ? FormatEffect.Invalid : FormatEffect.Valid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          renderer: this.formatter,
           abstractData: new FormatAbstractData({
             tag: this.tagName
           })

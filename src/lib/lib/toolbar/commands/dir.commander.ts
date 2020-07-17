@@ -10,9 +10,8 @@ export class DirCommander implements Commander {
   command(selection: TBSelection, overlap: boolean) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        item.fragment.apply({
+        item.fragment.apply(this.formatter, {
           state: overlap ? FormatEffect.Invalid : FormatEffect.Valid,
-          renderer: this.formatter,
           abstractData: new FormatAbstractData({
             attrs: {
               dir: this.dir

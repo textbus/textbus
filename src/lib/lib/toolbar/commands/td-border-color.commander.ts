@@ -41,8 +41,7 @@ export class TdBorderColorCommander implements Commander<string> {
     selectedCells.forEach(c => {
       if (this.color) {
         if (c.columnIndex === minColumn) {
-          c.beforeCell?.fragment.apply({
-            renderer: tdBorderColorFormatter,
+          c.beforeCell?.fragment.apply(tdBorderColorFormatter, {
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
               style: {
@@ -53,8 +52,7 @@ export class TdBorderColorCommander implements Commander<string> {
           })
         }
         if (c.rowIndex === minRow) {
-          cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell.fragment.apply({
-            renderer: tdBorderColorFormatter,
+          cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell.fragment.apply(tdBorderColorFormatter, {
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
               style: {
@@ -65,13 +63,11 @@ export class TdBorderColorCommander implements Commander<string> {
           })
         }
       }
-      c.cell.fragment.apply({
-        renderer: tdBorderColorFormatter,
+      c.cell.fragment.apply(tdBorderColorFormatter, {
         state: FormatEffect.Invalid,
         abstractData: new FormatAbstractData()
       });
-      c.cell.fragment.apply({
-        renderer: tdBorderColorFormatter,
+      c.cell.fragment.apply(tdBorderColorFormatter, {
         state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
         abstractData: new FormatAbstractData({
           style: {

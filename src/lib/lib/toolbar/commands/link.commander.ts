@@ -27,21 +27,20 @@ export class LinkCommander implements Commander<AttrState[]> {
       if (range.collapsed) {
         if (overlap) {
           const commonAncestorFragment = range.commonAncestorFragment;
-          const formats = commonAncestorFragment.getFormatRangesByFormatter(this.formatter);
-          if (formats) {
-            for (const format of formats) {
+          commonAncestorFragment.getFormatKeys().forEach(token => {
+            commonAncestorFragment.getFormatRanges(token).forEach(format => {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
                 if (attrs.get('href')) {
                   format.abstractData.attrs = attrs
                 } else {
-                  commonAncestorFragment.apply({
+                  commonAncestorFragment.apply(token, {
                     ...format,
                     state: FormatEffect.Invalid
                   });
                 }
               }
-            }
-          }
+            });
+          })
         }
       }
       range.getSelectedScope().forEach(scope => {
@@ -49,22 +48,20 @@ export class LinkCommander implements Commander<AttrState[]> {
         scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(content => {
           if (content instanceof BranchComponent) {
             content.slots.forEach(item => {
-              item.apply({
+              item.apply(this.formatter, {
                 startIndex: 0,
                 endIndex: item.contentLength,
                 state: FormatEffect.Valid,
-                renderer: this.formatter,
                 abstractData: new FormatAbstractData({
                   attrs
                 })
               })
             })
           } else {
-            scope.fragment.apply({
+            scope.fragment.apply(this.formatter, {
               startIndex: scope.startIndex + index,
               endIndex: scope.startIndex + index + content.length,
               state: FormatEffect.Valid,
-              renderer: this.formatter,
               abstractData: new FormatAbstractData({
                 attrs
               })

@@ -1,34 +1,32 @@
 import { BlockFormatter, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 
 export class FormatMap {
-  private map = new Map<InlineFormatter | BlockFormatter, Array<FormatRange>>();
+  private map = new Map<InlineFormatter | BlockFormatter, FormatRange[]>()
 
-  /**
-   * 通过 Handler 获取当前片段的的格式化信息。
-   * @param formatter
-   */
-  getFormatRangesByFormatter(formatter: InlineFormatter | BlockFormatter) {
-    return this.map.get(formatter) || [];
+  keys() {
+    return this.map.keys();
   }
 
-  /**
-   * 获取当前片段内所有的格式化信息。
-   */
-  getFormatRanges() {
-    return Array.from(this.map.values()).reduce((v, n) => v.concat(n), []);
+  get(formatter: InlineFormatter | BlockFormatter) {
+    return this.map.get(formatter);
+  }
+
+  set(formatter: InlineFormatter | BlockFormatter, formatRanges: FormatRange[]) {
+    this.map.set(formatter, formatRanges);
   }
 
   /**
    * 合并格式
+   * @param token 当前格式类别
    * @param formatter 当前要合并的格式
    * @param important 合并的优先级
    */
-  merge(formatter: FormatRange, important: boolean) {
-    if (formatter.renderer instanceof BlockFormatter) {
+  merge(token: InlineFormatter | BlockFormatter, formatter: FormatRange, important: boolean) {
+    if (token instanceof BlockFormatter) {
       if (formatter.state === FormatEffect.Invalid) {
-        this.map.delete(formatter.renderer);
+        this.map.delete(token);
       } else {
-        const oldFormats = this.map.get(formatter.renderer);
+        const oldFormats = this.map.get(token);
         if (oldFormats) {
           for (let i = 0; i < oldFormats.length; i++) {
             const format = oldFormats[i];
@@ -41,15 +39,15 @@ export class FormatMap {
           }
           oldFormats.push(formatter);
         } else {
-          this.map.set(formatter.renderer, [formatter]);
+          this.map.set(token, [formatter]);
         }
       }
       return;
     }
-    const oldFormats = this.map.get(formatter.renderer) as FormatRange[];
+    const oldFormats = this.map.get(token) as FormatRange[];
     if (!Array.isArray(oldFormats)) {
       if (formatter.state !== FormatEffect.Invalid) {
-        this.map.set(formatter.renderer, [formatter]);
+        this.map.set(token, [formatter]);
       }
       return;
     }
@@ -75,7 +73,6 @@ export class FormatMap {
           startIndex: i,
           endIndex: i + 1,
           abstractData: mark.abstractData,
-          renderer: mark.renderer,
           state: mark.state
         };
         formatRanges.push(newFormatRange);
@@ -90,7 +87,6 @@ export class FormatMap {
           startIndex: i,
           endIndex: i + 1,
           abstractData: mark.abstractData,
-          renderer: mark.renderer,
           state: mark.state
         };
         formatRanges.push(newFormatRange);
@@ -98,9 +94,9 @@ export class FormatMap {
     }
     const ff = formatRanges.filter(f => f.state !== FormatEffect.Invalid);
     if (ff.length) {
-      this.map.set(formatter.renderer, ff);
+      this.map.set(token, ff);
     } else {
-      this.map.delete(formatter.renderer);
+      this.map.delete(token);
     }
   }
 }

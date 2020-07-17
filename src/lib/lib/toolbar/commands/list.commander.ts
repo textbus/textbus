@@ -54,11 +54,11 @@ export class ListCommander implements Commander {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const list = new ListComponent(this.tagName);
-        const branchComponents: Array<BackboneComponent|BranchComponent> = [];
+        const branchComponents: Array<BackboneComponent | BranchComponent> = [];
         const scopes: TBRangeScope[] = [];
         range.getSuccessiveContents().forEach(scope => {
           let fragment = scope.fragment;
-          let lastBackboneComponent: BranchComponent|BackboneComponent;
+          let lastBackboneComponent: BranchComponent | BackboneComponent;
           while (true) {
             if (fragment === commonAncestorFragment) {
               break;
@@ -94,7 +94,9 @@ export class ListCommander implements Commander {
           const fragment = new Fragment();
           const contents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           contents.contents.forEach(c => fragment.append(c));
-          contents.formatRanges.forEach(f => fragment.apply(f));
+          Array.from(contents.formatMap.keys()).forEach(token => {
+            contents.formatMap.get(token).forEach(f => fragment.apply(token, f));
+          })
           list.slots.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);

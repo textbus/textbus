@@ -83,7 +83,7 @@ export class FormatMatcher implements Matcher {
 
   private getStatesByRange(fragment: Fragment, formatter: InlineFormatter | BlockFormatter, startIndex: number, endIndex: number): FormatMatchData {
 
-    let formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
+    let formatRanges = fragment.getFormatRanges(formatter) || [];
     if (startIndex === endIndex) {
       for (const format of formatRanges) {
         const matchBegin = startIndex === 0 ? startIndex >= format.startIndex : startIndex > format.startIndex;
@@ -151,7 +151,7 @@ export class FormatMatcher implements Matcher {
   private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
 
     while (true) {
-      const formatRanges = fragment.getFormatRangesByFormatter(formatter) || [];
+      const formatRanges = fragment.getFormatRanges(formatter) || [];
       const states: FormatRange[] = [];
       for (const f of formatRanges) {
         if (startIndex === endIndex && f.startIndex === f.endIndex && startIndex === f.startIndex) {
