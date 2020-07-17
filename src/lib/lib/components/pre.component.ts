@@ -176,8 +176,14 @@ export class PreComponentReader implements ComponentReader {
 }
 
 export class PreComponent extends DivisionComponent {
+  private vEle: VElement;
+
   constructor(public lang: string) {
     super('pre');
+  }
+
+  getSlotView(): VElement {
+    return this.vEle;
   }
 
   clone() {
@@ -190,6 +196,7 @@ export class PreComponent extends DivisionComponent {
     this.format();
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
+    this.vEle = block;
     !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;

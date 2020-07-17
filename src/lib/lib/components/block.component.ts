@@ -28,8 +28,13 @@ export class BlockComponentReader implements ComponentReader {
 }
 
 export class BlockComponent extends DivisionComponent {
+  private v: VElement;
   constructor(tagName: string) {
     super(tagName);
+  }
+
+  getSlotView(): VElement {
+    return this.v;
   }
 
   clone() {
@@ -40,6 +45,7 @@ export class BlockComponent extends DivisionComponent {
 
   render(isProduction: boolean) {
     const block = new VElement(this.tagName);
+    this.v = block;
     !isProduction && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragment(this);

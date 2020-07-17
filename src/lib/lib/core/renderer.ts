@@ -509,14 +509,14 @@ export class Renderer {
         i++;
         children.push(vDom);
         if (item instanceof DivisionComponent) {
-          this.createVDom(item.slot, vDom);
+          this.createVDom(item.slot, item.getSlotView());
           !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
         } else if (item instanceof BranchComponent) {
           if (!this.productionRenderingModal) {
             vDom.styles.set('userSelect', 'none');
           }
           item.slots.forEach(slot => {
-            const parent = item.getChildViewBySlot(slot);
+            const parent = item.getSlotView(slot);
             if (!this.productionRenderingModal) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);

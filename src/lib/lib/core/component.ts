@@ -66,6 +66,7 @@ export abstract class Component {
  */
 export abstract class DivisionComponent extends Component {
   readonly slot = new Fragment();
+  abstract getSlotView(): VElement;
 }
 
 /**
@@ -90,7 +91,7 @@ export abstract class BranchComponent extends Component {
    * Renderer 是不知道的，这时，需要组件明确返回对应的子节点，以便 Renderer 能继续正常工作。
    * @param slot 当前组件的某一个子插槽
    */
-  getChildViewBySlot(slot: Fragment): VElement {
+  getSlotView(slot: Fragment): VElement {
     return this.viewMap.get(slot);
   }
 }
