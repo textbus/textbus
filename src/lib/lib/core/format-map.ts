@@ -1,7 +1,7 @@
 import { BlockFormatter, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 
 export class FormatMap {
-  private map = new Map<InlineFormatter | BlockFormatter, FormatRange[]>()
+  private map = new Map<InlineFormatter | BlockFormatter, FormatRange[]>();
 
   keys() {
     return this.map.keys();
