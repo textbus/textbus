@@ -24,7 +24,7 @@ describe('删除内容', () => {
       startIndex: 1,
       endIndex: 4,
     })
-    expect(deletedContents.formatMap.keys()).toEqual(0)
+    expect(deletedContents.getFormatKeys()).toEqual(0)
   })
   test('删除前面加中间', () => {
     const fragment = new Fragment();
@@ -36,7 +36,7 @@ describe('删除内容', () => {
       startIndex: 1,
       endIndex: 2,
     })
-    expect(deletedContents.formatMap.get(formatter)[0]).toEqual({
+    expect(deletedContents.getFormatRanges(formatter)[0]).toEqual({
       ...f,
       startIndex: 1,
       endIndex: 3

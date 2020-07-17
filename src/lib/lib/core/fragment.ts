@@ -245,10 +245,10 @@ export class Fragment {
       })
     })
     this.formatMap = selfFormatMap;
-    return {
-      formatMap: discardedFormatMap,
-      contents: this.contents.remove(startIndex, endIndex)
-    };
+    const fragment = new Fragment()
+    this.contents.cut(startIndex, endIndex).forEach(i => fragment.append(i));
+    fragment.formatMap = discardedFormatMap;
+    return fragment;
   }
 
   /**

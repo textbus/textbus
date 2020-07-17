@@ -58,12 +58,9 @@ export class BlockCommander implements Commander<string> {
             this.effect(blockComponent.slot, parentComponent.tagName);
           }
         } else {
-          blockComponent.slot.from(new Fragment());
           const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
-          c.contents.forEach(cc => blockComponent.slot.append(cc));
-          Array.from(c.formatMap.keys()).forEach(token => {
-            (c.formatMap.get(token) || []).forEach(ff => blockComponent.slot.apply(token, ff));
-          });
+          blockComponent.slot.from(c);
+
           scope.fragment.insert(blockComponent, scope.startIndex);
           this.effect(blockComponent.slot, '');
         }

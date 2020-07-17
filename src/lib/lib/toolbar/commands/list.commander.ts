@@ -92,11 +92,8 @@ export class ListCommander implements Commander {
             return;
           }
           const fragment = new Fragment();
-          const contents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
-          contents.contents.forEach(c => fragment.append(c));
-          Array.from(contents.formatMap.keys()).forEach(token => {
-            contents.formatMap.get(token).forEach(f => fragment.apply(token, f));
-          })
+          fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
+
           list.slots.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);

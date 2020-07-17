@@ -779,11 +779,10 @@ export class TBRange {
           const last = this.endFragment.cut(0);
           this.deleteEmptyTree(this.endFragment);
           const startIndex = this.startIndex + 1;
-          last.contents.reverse().forEach(c => this.startFragment.insert(c, startIndex));
-          Array.from(last.formatMap.keys())
-            .filter(token => !(token instanceof BlockFormatter))
+          last.sliceContents(0).reverse().forEach(c => this.startFragment.insert(c, startIndex));
+          last.getFormatKeys().filter(token => !(token instanceof BlockFormatter))
             .map(token => {
-              const formats = last.formatMap.get(token) || [];
+              const formats = last.getFormatRanges(token) || [];
               formats.forEach(f => {
                 f.startIndex += startIndex;
                 f.endIndex += startIndex;

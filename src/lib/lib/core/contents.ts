@@ -133,7 +133,7 @@ export class Contents {
    * @param startIndex
    * @param endIndex
    */
-  remove(startIndex: number, endIndex: number) {
+  cut(startIndex: number, endIndex: number) {
     if (endIndex <= startIndex) {
       return [];
     }

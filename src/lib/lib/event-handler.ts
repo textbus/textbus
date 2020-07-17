@@ -95,10 +95,10 @@ export class EventHandler {
         } else if (firstContent instanceof DivisionComponent) {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
-          firstContents.contents.reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
-          Array.from(firstContents.formatMap.keys()).forEach(token => {
+          firstContents.sliceContents(0).reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
+          Array.from(firstContents.getFormatKeys()).forEach(token => {
             if (token instanceof InlineFormatter) {
-              firstContents.formatMap.get(token).forEach(format => {
+              firstContents.getFormatRanges(token).forEach(format => {
                 fragment.apply(token, {
                   ...format,
                   startIndex: format.startIndex + firstRange.startIndex,
@@ -114,9 +114,9 @@ export class EventHandler {
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentComponent));
             const afterComponent = parentComponent.clone() as DivisionComponent;
             afterComponent.slot.from(new Fragment());
-            afterContents.contents.forEach(c => afterComponent.slot.append(c));
-            Array.from(afterContents.formatMap.keys()).forEach(token => {
-              afterContents.formatMap.get(token).forEach(f => {
+            afterContents.sliceContents(0).forEach(c => afterComponent.slot.append(c));
+            Array.from(afterContents.getFormatKeys()).forEach(token => {
+              afterContents.getFormatRanges(token).forEach(f => {
                 afterComponent.slot.apply(token, {
                   ...f,
                   startIndex: 0,

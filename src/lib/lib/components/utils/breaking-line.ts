@@ -37,11 +37,11 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
     })
     fragment.remove(index);
   } else {
-    const {contents, formatMap} = fragment.cut(index);
+    const f = fragment.cut(index);
 
-    contents.forEach(c => next.append(c));
-    Array.from(formatMap.keys()).forEach(token => {
-      formatMap.get(token).filter(f => f.state !== FormatEffect.Inherit).forEach(f => next.apply(token, f));
+    f.sliceContents(0).forEach(c => next.append(c));
+    f.getFormatKeys().forEach(token => {
+      f.getFormatRanges(token).filter(f => f.state !== FormatEffect.Inherit).forEach(f => next.apply(token, f));
     })
   }
   return next;
