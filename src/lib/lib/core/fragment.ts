@@ -26,10 +26,6 @@ export class Fragment {
     this.contents.append(element);
   }
 
-  getCanApplyFormats() {
-    return this.formatMap.getCanApplyFormats();
-  }
-
   sliceContents(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
   }

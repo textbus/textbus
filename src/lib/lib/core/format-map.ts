@@ -19,18 +19,6 @@ export class FormatMap {
   }
 
   /**
-   * 获取可生效的格式数据。
-   */
-  getCanApplyFormats() {
-    let formats: FormatRange[] = [];
-    // 检出所有生效规则
-    this.map.forEach(value => {
-      formats = formats.concat(value);
-    });
-    return formats;
-  }
-
-  /**
    * 合并格式
    * @param formatter 当前要合并的格式
    * @param important 合并的优先级

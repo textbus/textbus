@@ -386,7 +386,7 @@ export class Renderer {
     }
     const containerFormats: FormatRange[] = [];
     const childFormats: FormatRange[] = [];
-    Renderer.calculatePriority(fragment.getCanApplyFormats()).forEach(f => {
+    Renderer.calculatePriority(fragment.getFormatRanges()).forEach(f => {
       const ff = Object.assign({}, f);
       if (ff.renderer instanceof BlockFormatter || f.startIndex === 0 && f.endIndex === fragment.contentLength) {
         containerFormats.push(ff);
