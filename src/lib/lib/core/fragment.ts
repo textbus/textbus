@@ -9,33 +9,74 @@ import {
 } from './formatter';
 import { FormatMap } from './format-map';
 
+/**
+ * 应用样式的可选参数。
+ */
 export interface ApplyFormatOptions {
+  /** 是否作为最重要的样式，当为 true 时，新样式将会覆盖原有样式，当为 false 的时候，原有样式将会覆盖新样式 */
   important?: boolean;
+  /** 是否将样式应用到子组件（Component）*/
   coverChild?: boolean;
 }
 
+/**
+ * TBus 抽象数据类
+ */
 export class Fragment {
   private contents = new Contents();
   private formatMap = new FormatMap();
 
+  /**
+   * fragment 内容的长度
+   */
   get contentLength() {
     return this.contents.length;
   }
 
+  /**
+   * 用一个新的 fragment 覆盖当前 fragment。
+   * @param source
+   */
   from(source: Fragment) {
     this.contents = source.contents;
     this.formatMap = source.formatMap;
     source.clean();
   }
 
-  append(element: string | Component) {
-    this.contents.append(element);
+  /**
+   * 将新内容添加到 fragment 末尾。
+   * @param content
+   */
+  append(content: string | Component) {
+    const offset = content.length;
+    const length = this.contentLength;
+    this.contents.append(content);
+
+    this.getFormatKeys().forEach(token => {
+      if (token instanceof InlineFormatter) {
+        this.getFormatRanges(token).forEach(range => {
+          if (range.endIndex === length) {
+            range.endIndex += offset;
+          }
+        })
+      }
+    })
   }
 
+  /**
+   * 根据下标切分出一段内容。
+   * @param startIndex
+   * @param endIndex
+   */
   sliceContents(startIndex: number, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
   }
 
+  /**
+   * 插入新内容到指定组件前。
+   * @param contents
+   * @param ref
+   */
   insertBefore(contents: Component | string, ref: Component) {
     const index = this.indexOf(ref);
     if (index === -1) {
@@ -44,6 +85,11 @@ export class Fragment {
     this.insert(contents, index);
   }
 
+  /**
+   * 插入新内容到指定组件后。
+   * @param contents
+   * @param ref
+   */
   insertAfter(contents: Component | string, ref: Component) {
     const index = this.indexOf(ref);
     if (index === -1) {
@@ -52,6 +98,11 @@ export class Fragment {
     this.insert(contents, index + 1);
   }
 
+  /**
+   * 插入新内容到指定位置。
+   * @param contents
+   * @param index
+   */
   insert(contents: Component | string, index: number) {
     this.contents.insert(contents, index);
     const formatMap = new FormatMap();
@@ -104,6 +155,9 @@ export class Fragment {
     this.formatMap = formatMap;
   }
 
+  /**
+   * 克隆当前 fragment 的副本并返回。
+   */
   clone() {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
@@ -128,23 +182,36 @@ export class Fragment {
     return ff;
   }
 
+  /**
+   * 清除当前 fragment 的内容及格式。
+   */
   clean() {
     this.contents = new Contents();
     this.formatMap = new FormatMap();
   }
 
   /**
-   * 通过下标获取文本或子节点
+   * 通过下标获取文本或子节点。
    * @param index
    */
   getContentAtIndex(index: number) {
     return this.contents.getContentAtIndex(index);
   }
 
+  /**
+   * 删除指定范围的内容及格式。
+   * @param startIndex
+   * @param count
+   */
   remove(startIndex: number, count = this.contents.length - startIndex) {
     this.cut(startIndex, count);
   }
 
+  /**
+   * 剪切指定范围的内容及格式，并返回一个新的 fragment。
+   * @param startIndex
+   * @param count
+   */
   cut(startIndex: number, count = this.contents.length - startIndex) {
     const endIndex = startIndex + count;
     const selfFormatMap = new FormatMap();
@@ -252,20 +319,34 @@ export class Fragment {
   }
 
   /**
-   * 获取当前片段内所有的格式化信息
+   * 获取当前片段内所有的 Formatter。
    */
   getFormatKeys() {
     return Array.from(this.formatMap.keys());
   }
 
+  /**
+   * 通过 Formatter 获取所有的 FormatRange。
+   * @param token
+   */
   getFormatRanges(token: InlineFormatter | BlockFormatter) {
     return this.formatMap.get(token) || [];
   }
 
+  /**
+   * 查找一个组件在当前 fragment 的下标位置。
+   * @param component
+   */
   indexOf(component: Component) {
     return this.contents.indexOf(component);
   }
 
+  /**
+   * 给当前 fragment 应用一段新样式。
+   * @param token       样式的 Formatter。
+   * @param params      样式的配置参数。
+   * @param options     应用样式的可选项。
+   */
   apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
   apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
   apply(token: InlineFormatter | BlockFormatter,
