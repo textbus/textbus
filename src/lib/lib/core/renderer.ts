@@ -452,8 +452,13 @@ export class Renderer {
             if (f.params.endIndex <= firstRange.params.endIndex) {
               progenyFormats.push(formats.splice(index, 1)[0]);
             } else {
-              const cloneRange = Object.assign({}, f);
-              cloneRange.params.endIndex = firstRange.params.endIndex;
+              const cloneRange: FormatConfig = {
+                token: f.token,
+                params: {
+                  ...f.params,
+                  endIndex: firstRange.params.endIndex
+                }
+              };
               progenyFormats.push(cloneRange);
               f.params.startIndex = firstRange.params.endIndex;
               index++;
