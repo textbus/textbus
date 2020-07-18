@@ -401,7 +401,9 @@ export class Renderer {
       fragment.getFormatRanges(token).forEach(f => {
         formatRangeConfigList.push({
           token,
-          params: f
+          params: {
+            ...f
+          }
         });
       })
     })
