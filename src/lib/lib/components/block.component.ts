@@ -54,7 +54,7 @@ export class BlockComponent extends DivisionComponent {
         const firstRange = event.selection.firstRange;
         const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
         component.slot.from(next);
-        parent.insert(component, parent.indexOf(this) + 1);
+        parent.insertAfter(component, this);
         const position = firstRange.findFirstPosition(component.slot);
         firstRange.startFragment = firstRange.endFragment = position.fragment;
         firstRange.startIndex = firstRange.endIndex = position.index;
