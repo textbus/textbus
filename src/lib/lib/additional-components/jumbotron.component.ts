@@ -15,12 +15,12 @@ export class JumbotronComponentReader implements ComponentReader {
   }
 
   from(element: HTMLElement): ViewData {
-    const styles = getComputedStyle(element);
+    const style = element.style;
     const component = new JumbotronComponent({
-      backgroundImage: styles.backgroundImage,
-      backgroundSize: styles.backgroundSize,
-      backgroundPosition: styles.backgroundPosition,
-      minHeight: element.style.minHeight
+      backgroundImage: style.backgroundImage,
+      backgroundSize: style.backgroundSize,
+      backgroundPosition: style.backgroundPosition,
+      minHeight: style.minHeight
     });
     return {
       component: component,
@@ -54,10 +54,10 @@ export class JumbotronComponent extends DivisionComponent {
   render(isProduction: boolean): VElement {
     const vEle = new VElement(this.tagName);
     const styles = vEle.styles;
-    styles.set('backgroundImage', `url(${this.options.backgroundImage})`);
+    styles.set('backgroundImage', this.options.backgroundImage);
     styles.set('backgroundSize', this.options.backgroundSize || 'cover');
     styles.set('backgroundPosition', this.options.backgroundPosition || 'center');
-    styles.set('height', this.options.minHeight);
+    styles.set('minHeight', this.options.minHeight);
     this.vEle = vEle;
     return vEle;
   }

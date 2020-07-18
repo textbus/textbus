@@ -3,6 +3,9 @@ import { createEditor } from './lib/create';
 import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 
+const bg = require('./assets/tbus-bg.png');
+console.log(location.origin + '/' + bg);
+
 const editor = createEditor('#editor', {
   theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
@@ -18,7 +21,10 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  contents: document.getElementById('table').innerHTML
+  // contents: document.getElementById('table').innerHTML
+  contents: `
+  <jumbotron style="background-image: url(${location.origin + '/' + bg}); background-size: cover; background-position: center center;"><h1 style="text-align: center; color: rgb(255, 255, 255);">Hello, world!</h1><p style="text-align: center; color: rgb(255, 255, 255);">你好，我是 TBus 富文本编辑器。</p><p style="text-align: center; color: rgb(255, 255, 255);">等你好久了，你还好吗？</p></jumbotron>
+  `
 });
 
 editor.onReady.subscribe(() => {
