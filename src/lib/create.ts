@@ -17,7 +17,8 @@ import {
   blockBackgroundColorFormatter,
   codeFormatter,
   backgroundColorFormatter,
-  dirFormatter, tdBorderColorFormatter
+  dirFormatter,
+  tdBorderColorFormatter
 } from './lib/formatter/_api';
 import {
   audioTool,
@@ -76,11 +77,15 @@ import {
   TodoListComponentReader,
 
   baiduMapComponentExample,
-  BaiduMapComponentReader
+  BaiduMapComponentReader,
+
+  JumbotronComponentReader,
+  jumbotronComponentExample,
+  jumbotronStyleSheet
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet],
+  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet, jumbotronStyleSheet],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
@@ -88,6 +93,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   componentReaders: [
+    new JumbotronComponentReader(),
     new BaiduMapComponentReader(),
     new TodoListComponentReader(),
     new ImageCardComponentReader(),
@@ -142,7 +148,8 @@ export const defaultOptions: EditorOptions = {
   componentExamples: [
     imageCardComponentExample,
     todoListComponentExample,
-    baiduMapComponentExample
+    baiduMapComponentExample,
+    jumbotronComponentExample
   ]
 };
 
