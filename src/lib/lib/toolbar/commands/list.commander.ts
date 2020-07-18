@@ -53,6 +53,7 @@ export class ListCommander implements Commander {
       } else {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
+        const startFragment = range.startFragment;
         const list = new ListComponent(this.tagName);
         const branchComponents: Array<BackboneComponent | BranchComponent> = [];
         const scopes: TBRangeScope[] = [];
@@ -105,7 +106,7 @@ export class ListCommander implements Commander {
             range.setEnd(fragment, range.endIndex - scope.startIndex);
           }
         });
-        if (range.startFragment !== commonAncestorFragment) {
+        if (startFragment !== commonAncestorFragment) {
           if (commonScope.startChildComponent && commonScope.startChildComponent instanceof BranchComponent && commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
             commonAncestorFragment.insertAfter(list, commonScope.startChildComponent);
           } else {
