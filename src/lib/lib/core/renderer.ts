@@ -528,7 +528,7 @@ export class Renderer {
             vDom.styles.set('userSelect', 'none');
           }
           for (const slot of item) {
-            const parent = item.getChildViewBySlot(slot);
+            const parent = item.getSlotView(slot);
             if (!this.productionRenderingModal) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
