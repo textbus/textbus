@@ -21,7 +21,7 @@ export class Parser {
       for (const t of this.componentReaders) {
         if (t.match(el as HTMLElement)) {
           const viewData = t.from(el as HTMLElement);
-          slot.append(viewData.component);
+          slot.append(viewData.component, false);
           viewData.slotsMap.forEach(item => {
             if (viewData.component instanceof DivisionComponent ||
               viewData.component instanceof BranchComponent ||
@@ -44,7 +44,7 @@ export class Parser {
           '&amp;': '&',
           '&nbsp;': ' '
         }[str];
-      }));
+      }), false);
     }
   }
 

@@ -46,21 +46,24 @@ export class Fragment {
   /**
    * 将新内容添加到 fragment 末尾。
    * @param content
+   * @param insertAdjacentInlineFormat
    */
-  append(content: string | Component) {
+  append(content: string | Component, insertAdjacentInlineFormat = false) {
     const offset = content.length;
     const length = this.contentLength;
     this.contents.append(content);
 
-    this.getFormatKeys().forEach(token => {
-      if (token instanceof InlineFormatter) {
-        this.getFormatRanges(token).forEach(range => {
-          if (range.endIndex === length) {
-            range.endIndex += offset;
-          }
-        })
-      }
-    })
+    if (insertAdjacentInlineFormat) {
+      this.getFormatKeys().forEach(token => {
+        if (token instanceof InlineFormatter) {
+          this.getFormatRanges(token).forEach(range => {
+            if (range.endIndex === length) {
+              range.endIndex += offset;
+            }
+          })
+        }
+      })
+    }
   }
 
   /**
