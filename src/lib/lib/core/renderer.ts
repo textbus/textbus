@@ -596,19 +596,22 @@ export class Renderer {
         }[str];
       }), '&nbsp;');
     }
-    const styles = Array.from(vDom.styles.keys()).map(key => {
+    const styles = Array.from(vDom.styles.keys()).filter(key => {
+      const v = vDom.styles.get(key);
+      return !(v === undefined || v === null || v === '');
+    }).map(key => {
       const k = key.replace(/[A-Z]/g, str => '-' + str.toLocaleLowerCase());
-      return `${k}:${vDom.styles.get(key)}`;
+      return `${k}:${vDom.styles.get(key)}`.replace(/"/g, '&quot;');
     }).join(';');
     const attrs = Array.from(vDom.attrs.keys()).filter(key => vDom.attrs.get(key) !== false).map(key => {
       const value = vDom.attrs.get(key);
-      return value === true ? `${key}` : `${key}="${value}"`;
+      return (value === true ? `${key}` : `${key}="${value}"`).replace(/"/g, '&quot;');
     });
     if (styles) {
       attrs.push(`style="${styles}"`);
     }
     if (vDom.classes && vDom.classes.length) {
-      attrs.push(`class="${vDom.classes.join(' ')}"`);
+      attrs.push(`class="${vDom.classes.join(' ').replace(/"/g, '&quot;')}"`);
     }
     let attrStr = attrs.join(' ');
     attrStr = attrStr ? ' ' + attrStr : '';

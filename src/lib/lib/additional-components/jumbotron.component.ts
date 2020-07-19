@@ -103,7 +103,7 @@ export const jumbotronComponentExample: ComponentExample = {
           const component = new JumbotronComponent({
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
-            backgroundImage: inputs[1].value,
+            backgroundImage: `url(${inputs[1].value})`,
             minHeight: inputs[0].value
           });
           const h1 = new BlockComponent('h1');
