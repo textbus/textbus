@@ -17,6 +17,7 @@
   &.tbus-form-tool {
     padding: 15px 20px;
     min-width: 160px;
+    box-sizing: content-box;
     user-select: none;
 
     .tbus-form-group {
