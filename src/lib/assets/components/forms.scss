@@ -15,9 +15,14 @@
   }
 
   &.tbus-form-tool {
-    padding: 15px;
+    padding: 15px 20px;
     min-width: 160px;
     user-select: none;
+
+    .tbus-form-group {
+      padding-left: 0;
+      padding-right: 0;
+    }
 
     .tbus-form-control, .tbus-btn {
       padding: 3px 6px;
@@ -54,6 +59,7 @@
 
   &.tbus-form-workbench {
     min-width: 400px;
+
     .tbus-form-title {
       background-color: $color-lighter;
       border-bottom: 1px solid $color-light;
