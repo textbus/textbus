@@ -1,9 +1,8 @@
-export abstract class FormItem {
+export abstract class FormItem<T = string| number| boolean> {
   abstract name: string;
   readonly elementRef = document.createElement('div');
 
   protected feedbackElement = document.createElement('div');
-  private value: boolean | string | number;
   private labelElement = document.createElement('label');
   private inputWrapper = document.createElement('div');
 
@@ -18,13 +17,9 @@ export abstract class FormItem {
     this.elementRef.append(this.labelElement, this.inputWrapper);
   }
 
-  getValue() {
-    return this.value
-  }
+  abstract getValue(): T;
 
-  setValue(value: string | boolean | number) {
-    this.value = value;
-  };
+  abstract setValue(value: T): void;
 
   abstract validateFn(): boolean;
 

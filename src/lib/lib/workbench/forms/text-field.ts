@@ -9,7 +9,7 @@ export interface TextFieldConfig {
   validateFn?(value: string): string | null;
 }
 
-export class TextField extends FormItem {
+export class TextField extends FormItem<string> {
   name: string;
 
   constructor(private config: TextFieldConfig) {
@@ -32,5 +32,13 @@ export class TextField extends FormItem {
 
   viewProvideFn(): HTMLElement {
     return this.elementRef;
+  }
+
+  getValue(): string {
+    return this.formControl.value;
+  }
+
+  setValue(value: string) {
+    this.formControl.value = value ?? '';
   }
 }

@@ -126,7 +126,7 @@ export const jumbotronComponentExample: ComponentExample = {
 export const jumbotronStyleSheet = `
 jumbotron {
   display: block;
-  height: 200px;
+  min-height: 200px;
   margin-bottom: 1em;
   background-color: #eee;
   padding: 20px;
