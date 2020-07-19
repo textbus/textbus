@@ -38,6 +38,8 @@ export interface EditorOptions {
   theme?: string;
   /** 设备宽度 */
   deviceWidth?: string;
+  /** 默认是否展开组件库 */
+  expandComponentLibrary?: boolean;
   /** 设置最大历史栈 */
   historyStackSize?: number;
   /** 设置组件读取转换器 */
@@ -53,7 +55,7 @@ export interface EditorOptions {
   /** 设置初始化 TBus 时的默认内容 */
   contents?: string;
   /** 设置可选的自定义组件 */
-  componentExamples?: ComponentExample[];
+  componentLibrary?: ComponentExample[];
 
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string): (string | Promise<string> | Observable<string>);
@@ -129,16 +131,20 @@ export class Editor implements EventDelegate {
 
     this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options.componentReaders, options.formatters);
-    this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar);
+    this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar, {
+      showComponentStage: this.options.componentLibrary?.length > 0,
+      openComponentState: this.options.expandComponentLibrary
+    });
     this.viewer = new Viewer(options.styleSheets);
     this.workbench = new Workbench(this.viewer);
     let deviceWidth = options.deviceWidth || '100%';
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = false;
     this.workbench.setTabletWidth(deviceWidth);
+    this.workbench.componentStage.expand = this.options.expandComponentLibrary;
 
-    if (Array.isArray(options.componentExamples)) {
-      options.componentExamples.forEach(i => this.workbench.componentStage.addExample(i));
+    if (Array.isArray(options.componentLibrary)) {
+      options.componentLibrary.forEach(i => this.workbench.componentStage.addExample(i));
     }
 
     this.subs.push(

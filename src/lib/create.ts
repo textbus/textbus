@@ -145,7 +145,7 @@ export const defaultOptions: EditorOptions = {
     [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
   ],
-  componentExamples: [
+  componentLibrary: [
     imageCardComponentExample,
     todoListComponentExample,
     baiduMapComponentExample,

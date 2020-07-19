@@ -21,28 +21,36 @@ export class Toolbar {
   private keymapPrompt = document.createElement('div');
   private componentStageExpand = false;
 
-  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[]) {
+  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[], private options = {
+    showComponentStage: true,
+    openComponentState: false
+  }) {
     this.onAction = this.actionEvent.asObservable();
     this.onComponentsStageChange = this.componentStageEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
     this.toolsElement.classList.add('tbus-toolbar-tools');
     this.componentsElement.classList.add('tbus-toolbar-components');
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
+    this.componentStageExpand = options.openComponentState;
+    if (options.showComponentStage) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerText = '组件库';
+      btn.classList.add('tbus-toolbar-components-btn');
+      btn.addEventListener('click', () => {
+        this.componentStageExpand = !this.componentStageExpand;
+        this.componentStageExpand ?
+          btn.classList.add('tbus-toolbar-components-btn-active') :
+          btn.classList.remove('tbus-toolbar-components-btn-active');
+        this.componentStageEvent.next(this.componentStageExpand);
+      })
 
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.innerText = '组件库';
-    btn.classList.add('tbus-toolbar-components-btn');
+      if (options.openComponentState) {
+        btn.classList.add('tbus-toolbar-components-btn-active');
+      }
+      this.componentsElement.appendChild(btn);
+    }
 
-    btn.addEventListener('click', () => {
-      this.componentStageExpand = !this.componentStageExpand;
-      this.componentStageExpand ?
-        btn.classList.add('tbus-toolbar-components-btn-active') :
-        btn.classList.remove('tbus-toolbar-components-btn-active');
-      this.componentStageEvent.next(this.componentStageExpand);
-    })
-
-    this.componentsElement.appendChild(btn);
 
     this.elementRef.appendChild(this.toolsElement);
     this.elementRef.appendChild(this.componentsElement);

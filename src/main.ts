@@ -7,6 +7,8 @@ const bg = require('./assets/tbus-bg.png');
 console.log(location.origin + '/' + bg);
 
 const editor = createEditor('#editor', {
+  expandComponentLibrary: true,
+  deviceWidth: '768px',
   theme: 'dark',
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
