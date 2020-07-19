@@ -1102,21 +1102,27 @@ export class TBRange {
   }
 
   private static findExpandedStartIndex(fragment: Fragment, index: number) {
-    for (; index > 0; index--) {
-      const item = fragment.getContentAtIndex(index);
+    const contents = fragment.sliceContents(0, index);
+    const len = contents.length;
+    for (let i = len - 1; i >= 0; i--) {
+      const item = contents[i];
       if (item instanceof DivisionComponent || item instanceof BranchComponent || item instanceof BackboneComponent) {
         break;
       }
+      index -= item.length;
     }
     return index;
   }
 
   private static findExpandedEndIndex(fragment: Fragment, index: number) {
-    for (; index < fragment.contentLength; index++) {
-      const item = fragment.getContentAtIndex(index);
+    const contents = fragment.sliceContents(index);
+
+    for (let i = 0; i < contents.length; i++) {
+      const item = contents[i];
       if (item instanceof DivisionComponent || item instanceof BranchComponent || item instanceof BackboneComponent) {
         break;
       }
+      index += item.length;
     }
     return index;
   }
