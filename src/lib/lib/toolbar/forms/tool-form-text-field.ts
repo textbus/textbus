@@ -30,7 +30,7 @@ export class ToolFormTextField implements ToolFormItem {
     if (config.canUpload) {
       this.btn = this.elementRef.querySelector('button');
       this.btn.addEventListener('click', () => {
-        this.btn.classList.add('tbus-form-btn-loading');
+        this.btn.classList.add('tbus-btn-loading');
         this.input.disabled = true;
         this.btn.children[0].className = 'tbus-icon-loading';
         if (this.sub) {
@@ -71,7 +71,7 @@ export class ToolFormTextField implements ToolFormItem {
     }
     this.input.disabled = false;
     if (this.btn) {
-      this.btn.classList.remove('tbus-form-btn-loading');
+      this.btn.classList.remove('tbus-btn-loading');
       this.btn.children[0].className = 'tbus-icon-upload';
     }
   }

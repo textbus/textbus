@@ -323,7 +323,26 @@
     width: 100%;
     display: block;
   }
+  &-loading {
+    @keyframes tbus-form-btn-loading {
+      0% {
+        transform: rotateZ(0deg);
+      }
+      50% {
+        transform: rotateZ(-180deg);
+      }
+      100% {
+        transform: rotateZ(-360deg);
+      }
+    }
+
+    > span {
+      display: inline-block;
+      animation: .8s tbus-form-btn-loading linear infinite;
+    }
+  }
 }
+
 
 @include btn-theme(default, $color-default, $color-lighter);
 @include btn-theme(dark, #fff, $color-dark);
