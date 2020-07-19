@@ -23,7 +23,7 @@
   bottom: 0;
   top: 0;
   pointer-events: none;
-  transition: background-color .15s;
+  transition: background-color .15s cubic-bezier(.36, .66, .04, 1);
 
   &-wrapper {
     position: absolute;
@@ -35,16 +35,17 @@
     left: 50%;
     top: -100%;
     transform: translateX(-50%);
-    transition: top .15s .2s;
+    transition: top .15s cubic-bezier(.36, .66, .04, 1);
     pointer-events: auto;
+
+    &-active {
+      top: 0;
+    }
   }
 
   &-active {
     background-color: rgba(0, 0, 0, .3);
-
-    .tbus-dialog-wrapper {
-      top: 0;
-    }
+    pointer-events: auto;
   }
 }
 

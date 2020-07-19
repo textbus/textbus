@@ -41,11 +41,17 @@ export class Workbench {
   dialog(element: HTMLElement) {
     this.dialogWrapper.appendChild(element);
     this.dialogBg.classList.add('tbus-dialog-active');
+    setTimeout(() => {
+      this.dialogWrapper.classList.add('tbus-dialog-wrapper-active');
+    }, 200)
   }
 
   closeDialog() {
-    this.dialogWrapper.innerHTML = '';
-    this.dialogBg.classList.remove('tbus-dialog-active');
+    this.dialogWrapper.classList.remove('tbus-dialog-wrapper-active');
+    setTimeout(() => {
+      this.dialogBg.classList.remove('tbus-dialog-active');
+      this.dialogWrapper.innerHTML = '';
+    }, 200)
   }
 
   setTabletWidth(width: string) {
