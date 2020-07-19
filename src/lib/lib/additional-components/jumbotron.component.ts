@@ -1,5 +1,5 @@
 import { ComponentReader, DivisionComponent, VElement, ViewData } from '../core/_api';
-import { ComponentExample, Workbench } from '../workbench/_api';
+import { ComponentExample, Form, TextField, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
 
 export interface JumbotronOptions {
@@ -68,62 +68,54 @@ export const jumbotronComponentExample: ComponentExample = {
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#6ad1ec"/><stop offset="100%" stop-color="#fff"/></linearGradient></defs><g><rect fill="url(#bg)" height="100%" width="100%"/></g><path fill="#fff" opacity="0.3" d="M81.25 28.125c0 5.178-4.197 9.375-9.375 9.375s-9.375-4.197-9.375-9.375 4.197-9.375 9.375-9.375 9.375 4.197 9.375 9.375z"></path><path fill="#fff" opacity="0.3"  d="M87.5 81.25h-75v-12.5l21.875-37.5 25 31.25h6.25l21.875-18.75z"></path><text font-family="Helvetica, Arial, sans-serif" font-size="12" x="10" y="25" stroke-width="0.3" stroke="#000" fill="#000000">Hello, world!</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="40" stroke-width="0" stroke="#000" fill="#000000">你好，我是 TBus 富文本编辑器。</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="50" stroke-width="0" stroke="#000" fill="#000000">你现在还好吗？</text></svg>')}">`,
   componentFactory(workbench: Workbench) {
 
-    const jumbotronForm = document.createElement('form');
-    jumbotronForm.classList.add('tbus-jumbotron');
-    jumbotronForm.innerHTML = `
-<h3>巨幕设置</h3>
-<div class="tbus-jumbotron-form-group">
-  <label>巨幕最小高度</label>
-  <div>
-    <input type="text" placeholder="请输入巨幕最小高度" value="200px">
-  </div>
-</div>
-<div class="tbus-jumbotron-form-group">
-  <label>背景图片地址</label>
-  <div>
-    <input type="text" placeholder="请输入背景图片地址">
-  </div>
-</div>
-<div class="tbus-jumbotron-btns">
-  <button type="submit">确认</button>
-  <button type="button">取消</button>
-</div>
-    `;
-    const inputs = jumbotronForm.querySelectorAll('input');
-    const btns = jumbotronForm.querySelectorAll('button');
-
-    inputs[1].onchange = function () {
-      btns[0].disabled = !inputs[1].value;
-    }
+    const form = new Form({
+      title: '巨幕设置',
+      items: [
+        new TextField({
+          label: '巨幕最小高度',
+          name: 'minHeight',
+          defaultValue: '200px',
+          placeholder: '请输入巨幕最小高度'
+        }),
+        new TextField({
+          label: '背景图片地址',
+          name: 'backgroundImage',
+          placeholder: '请输入背景图片地址',
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
+          }
+        })
+      ]
+    });
 
     return new Promise<JumbotronComponent>((resolve, reject) => {
-      workbench.dialog(jumbotronForm);
-      jumbotronForm.onsubmit = function (ev) {
-        if (inputs[1].value) {
-          const component = new JumbotronComponent({
-            backgroundPosition: 'center center',
-            backgroundSize: 'cover',
-            backgroundImage: `url(${inputs[1].value})`,
-            minHeight: inputs[0].value
-          });
-          const h1 = new BlockComponent('h1');
-          h1.slot.append('Hello, world!')
-          const p1 = new BlockComponent('p')
-          p1.slot.append('你好，我是 TBus 富文本编辑器。');
-          const p2 = new BlockComponent('p');
-          p2.slot.append('你现在还好吗？');
+      workbench.dialog(form.elementRef);
+      form.onSubmit = function () {
+        const data = form.getData();
+        const component = new JumbotronComponent({
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          backgroundImage: `url(${data.get('backgroundImage')})`,
+          minHeight: data.get('minHeight') + ''
+        });
+        const h1 = new BlockComponent('h1');
+        h1.slot.append('Hello, world!')
+        const p1 = new BlockComponent('p')
+        p1.slot.append('你好，我是 TBus 富文本编辑器。');
+        const p2 = new BlockComponent('p');
+        p2.slot.append('你现在还好吗？');
 
-          component.slot.append(h1);
-          component.slot.append(p1);
-          component.slot.append(p2);
+        component.slot.append(h1);
+        component.slot.append(p1);
+        component.slot.append(p2);
 
-          resolve(component);
-          workbench.closeDialog();
-        }
-        ev.preventDefault();
-        return false;
+        resolve(component);
+        workbench.closeDialog();
       }
-      btns[1].onclick = function () {
+      form.onClose = function () {
         workbench.closeDialog();
         reject();
       }

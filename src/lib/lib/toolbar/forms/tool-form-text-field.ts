@@ -14,13 +14,15 @@ export class ToolFormTextField implements ToolFormItem {
     this.name = config.name;
     this.elementRef.classList.add('tbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tbus-form-label">${config.label}</div>
-    <div class="tbus-form-control-wrap">
-      <input class="tbus-form-control" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">&nbsp;
-      ${config.canUpload ?
-      `<button type="button" class="tbus-form-btn" title="${config.uploadBtnText || '上传'}">
-        <span class="tbus-icon-upload"></span>
-       </button>`
+    <div class="tbus-control-label">${config.label}</div>
+    <div class="tbus-control-value">
+      <div class="tbus-input-group tbus-input-block">
+        <input class="tbus-form-control tbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
+        `<button type="button" class="tbus-btn tbus-btn-dark" title="${config.uploadBtnText || '上传'}">
+          <span class="tbus-icon-upload"></span>
+         </button>
+      </div>
+      `
       : ''
       }
     </div>`;

@@ -16,3 +16,48 @@
 
   @return $string;
 }
+
+@mixin clearfix {
+  &:before, &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+@mixin input-focus($color) {
+  border-color: $color;
+  @include focus($color);
+  z-index: 1;
+}
+
+@mixin input-style($border-color, $border-focus-color) {
+  border: 1px solid $border-color;
+  &:focus, &.ui-focus {
+    @include input-focus($border-focus-color);
+  }
+  &[readonly] {
+    cursor: pointer;
+  }
+  &[disabled], &.ui-disabled {
+    background-color: $color-light;
+  }
+}
+
+@mixin input-size($v, $h, $radius, $font-size) {
+  padding: $v $h;
+  line-height: $line-height;
+  font-size: $font-size;
+  border-radius: $radius;
+  &.ui-disabled, &[disabled] {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin input-addon-style($border-color, $border-focus-color) {
+  border: 1px solid $border-color;
+  text-align: center;
+  min-width: 34px;
+}

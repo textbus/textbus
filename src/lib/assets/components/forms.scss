@@ -1,135 +1,332 @@
 .tbus-form {
-  padding: 15px;
-  min-width: 160px;
-  user-select: none;
+  overflow: hidden;
+  background-color: $color-lighter;
+  font-size: 14px;
+
+  &.tbus-form-flow {
+    .tbus-form-group {
+      display: block;
+
+      > .tbus-control-label {
+        padding-bottom: 5px;
+        text-align: left;
+      }
+    }
+  }
+
+  &.tbus-form-tool {
+    padding: 15px;
+    min-width: 160px;
+    user-select: none;
+
+    .tbus-form-control, .tbus-btn {
+      padding: 3px 6px;
+      font-size: 13px;
+    }
+
+    .tbus-btn-wrap .tbus-btn {
+      min-width: 46px;
+    }
+
+    .tbus-control-label {
+      font-weight: bold;
+    }
+
+    .tbus-control-static {
+      margin: 0;
+
+      label {
+        margin-right: 1em;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+
+      input {
+        margin-right: .3em;
+      }
+    }
+  }
+
+  &.tbus-form-workbench {
+    min-width: 400px;
+    .tbus-form-title {
+      background-color: $color-dark;
+      color: #fff;
+      padding: 20px;
+      margin-bottom: 15px;
+      margin-top: 0;
+    }
+
+    .tbus-control-label {
+      width: 100px;
+    }
+
+    .tbus-btn-wrap {
+      margin-top: 15px;
+      border-top: 1px solid $color-light;
+      text-align: right;
+      padding-left: 20px;
+      padding-right: 20px;
+      background-color: #fff;
+
+      .tbus-btn {
+        margin-left: 10px;
+      }
+    }
+  }
 }
+
 
 .tbus-form-group {
-  margin-bottom: 10px;
-}
-
-.tbus-form-label {
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.tbus-form-control-wrap {
-  white-space: nowrap;
-  margin-bottom: 5px;
+  padding: 5px 20px;
   display: flex;
+}
 
-  label {
-    margin-right: 1em;
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-  }
+.tbus-control-label {
+  display: block;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-sizing: border-box;
+}
 
-  input {
-    vertical-align: middle;
-    margin-right: .5em;
+.tbus-control-static {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.tbus-control-value, .tbus-control-static {
+  flex: 1;
+  margin: 0;
+
+  > .tbus-form-control {
+    width: 100%;
   }
 }
 
-.tbus-form-btn {
-  padding: 3px 6px;
-  font-size: 13px;
-  border-radius: 3px;
-  color: inherit;
-  background-color: $color-lighter;
-  border: 1px solid $color-gray;
-  cursor: pointer;
-  line-height: 1.428;
-  outline: none;
-
-  &:hover {
-    background-color: darken($color-lighter, 7);
-    border-color: darken($color-gray, 7);
-  }
-
-  &:focus {
-    background-color: darken($color-lighter, 10);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(red($color-gray), green($color-gray), blue($color-gray), .5);
-    border-color: darken($color-gray, 7);
-  }
-
-  &:active {
-    background-color: darken($color-lighter, 15);
-    border-color: darken($color-gray, 7);
-  }
-
-  &-loading {
-    @keyframes tbus-form-btn-loading {
-      0% {
-        transform: rotateZ(0deg);
-      }
-      50% {
-        transform: rotateZ(-180deg);
-      }
-      100% {
-        transform: rotateZ(-360deg);
-      }
-    }
-
-    > span {
-      display: inline-block;
-      animation: .8s tbus-form-btn-loading linear infinite;
-    }
-  }
+.tbus-btn-wrap {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  @include clearfix;
 }
+
 
 .tbus-form-control {
+  position: relative;
   outline: none;
   background-color: #fff;
+  box-sizing: border-box;
+  @include input-style($color-gray, $color-primary);
+  @include input-size(5px, 12px, 4px, 14px);
+}
+
+.tbus-input-block {
+  display: block;
   width: 100%;
+}
+
+
+.tbus-input-addon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: $line-height;
+  padding-left: 8px;
+  padding-right: 8px;
+  min-width: 32px;
+  background-color: #fff;
+  @include input-addon-style($color-gray, $color-gray);
+
+  &:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+}
+
+@mixin input-group-size($control-font-size, $control-x-padding, $control-y-padding, $controller-radius, $btn-radius, $btn-x-padding, $btn-y-padding, $btn-font-size) {
+  font-size: $control-font-size;
+  > .tbus-form-control {
+    @include input-size($control-y-padding, $control-x-padding, 0, $control-font-size);
+  }
+  > .tbus-form-control {
+    &:first-child {
+      border-top-left-radius: $controller-radius;
+      border-bottom-left-radius: $controller-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: $controller-radius;
+      border-bottom-right-radius: $controller-radius;
+    }
+  }
+  > .tbus-btn {
+    padding: $btn-y-padding $btn-x-padding;
+    font-size: $btn-font-size;
+
+    &:first-child {
+      border-top-left-radius: $btn-radius;
+      border-bottom-left-radius: $btn-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: $btn-radius;
+      border-bottom-right-radius: $btn-radius;
+    }
+  }
+}
+
+.tbus-input-group {
+  position: relative;
+  display: inline-flex;
+  font-size: 14px;
+
+  > .tbus-form-control {
+    flex: 1;
+  }
+
+  > .tbus-form-control, > .tbus-input-addon, > .tbus-btn {
+    border-radius: 0;
+  }
+
+  > .tbus-form-control, > .tbus-input-addon {
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+
+  > .tbus-btn {
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+}
+
+@mixin btn-size($name, $v, $h, $font-size, $radius) {
+  .tbus-btn-#{$name} {
+    padding: $v $h;
+    font-size: $font-size;
+    border-radius: $radius;
+  }
+}
+
+@mixin btn-theme($name, $color, $bg-color) {
+  .tbus-btn-#{$name} {
+    color: $color;
+    background-color: $bg-color;
+    @if $name != default {
+      border: 1px solid $bg-color;
+    }
+
+    &:hover {
+      background-color: darken($bg-color, 7);
+      @if $name != default {
+        border-color: darken($bg-color, 7);
+      }
+    }
+
+    &:focus {
+      background-color: darken($bg-color, 10);
+      @include focus(if($name == default, $color, $bg-color));
+      z-index: 1;
+      @if $name != default {
+        border-color: darken($bg-color, 7);
+      }
+    }
+
+    &:active {
+      background-color: darken($bg-color, 15);
+      @if $name != default {
+        border-color: darken($bg-color, 7);
+      }
+    }
+
+    &[disabled], &[readonly] {
+      opacity: .6;
+      cursor: not-allowed;
+
+      &:focus, &:hover, &:active {
+        background-color: $bg-color;
+      }
+    }
+  }
+}
+
+.tbus-btn {
+  display: inline-block;
   border: 1px solid $color-gray;
-  padding: 3px 8px;
-  line-height: 1.428;
-  font-size: 13px;
-  border-radius: 3px;
-
-  &:focus {
-    border-color: $color-primary;
-    box-shadow: 0 0 0 2px rgba(red($color-primary), green($color-primary), blue($color-primary), .5);
-    z-index: 1;
-  }
-  &:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-    background-color:$color-light;
-  }
-}
-
-.tbus-form-btn-wrap {
-  padding-top: 5px;
-}
-
-.tbus-form-submit {
-  padding: 3px 10px;
-  font-size: 13px;
-  border-radius: 3px;
-  color: #fff;
-  background-color: $color-primary;
-  border: 1px solid $color-primary;
+  font-size: 14px;
   cursor: pointer;
-  line-height: 1.428;
+  line-height: $line-height;
+  text-align: center;
+  padding: 5px 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  user-select: none;
   outline: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: inherit;
 
-  &:hover {
-    background-color: darken($color-primary, 7);
-    border-color: darken($color-primary, 7);
+  &[disabled], &[readonly] {
+    opacity: .6;
+    cursor: not-allowed;
   }
 
-  &:focus {
-    background-color: darken($color-primary, 10);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(red($color-primary), green($color-primary), blue($color-primary), .5);
-    border-color: darken($color-primary, 7);
+  &[readonly] {
+    cursor: default;
   }
 
-  &:active {
-    background-color: darken($color-primary, 15);
-    border-color: darken($color-primary, 7);
+  &.tbus-btn-block {
+    width: 100%;
+    display: block;
   }
+}
+
+@include btn-theme(default, $color-default, $color-lighter);
+@include btn-theme(dark, #fff, $color-dark);
+@include btn-theme(gray, #fff, $color-gray-dark);
+@include btn-theme(primary, #fff, $color-primary);
+@include btn-theme(success, #fff, $color-success);
+@include btn-theme(info, #fff, $color-info);
+@include btn-theme(danger, #fff, $color-danger);
+@include btn-theme(warning, #fff, $color-warning);
+
+
+.tbus-control-feedback-invalid {
+  color: $color-danger;
+  margin-top: .5em;
+  font-size: .9em;
 }
