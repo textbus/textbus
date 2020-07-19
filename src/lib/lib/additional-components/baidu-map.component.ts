@@ -50,17 +50,20 @@ export const baiduMapComponentExample: ComponentExample = {
   componentFactory(workbench: Workbench) {
 
     const div = document.createElement('div');
-    div.classList.add('tbus-baidu-map-form');
+    div.classList.add('tbus-form', 'tbus-form-workbench');
+    div.style.minWidth = '500px';
     div.innerHTML = `
-<form>
-  <input type="search" placeholder="请输入地址">
-  <button type="submit">搜索</button>          
+<form class="tbus-form-title">
+  <div class="tbus-input-group tbus-input-block">
+    <input type="search" class="tbus-form-control tbus-input-block" placeholder="请输入地址">
+    <button type="submit" class="tbus-btn tbus-btn-primary">搜索</button>          
+  </div>
 </form>
-<div class="tbus-baidu-map-container">
+<div class="tbus-baidu-map-container" style="height: 200px">
 </div>
-<div class="tbus-map-form-btns">
-<button type="button">取消</button>
-<button type="button">确定</button>
+<div class="tbus-btn-wrap">
+<button type="button" class="tbus-btn tbus-btn-primary">确定</button>
+<button type="button" class="tbus-btn tbus-btn-default">取消</button>
 </div>
     `;
     const mapContainer = div.querySelector('.tbus-baidu-map-container');
@@ -102,14 +105,14 @@ export const baiduMapComponentExample: ComponentExample = {
       return false;
     })
 
-    const buttons = div.querySelectorAll('.tbus-map-form-btns button');
+    const buttons = div.querySelectorAll('.tbus-btn-wrap button');
 
     return new Promise<BaiduMapComponent>((resolve, reject) => {
-      buttons.item(0).addEventListener('click', () => {
+      buttons.item(1).addEventListener('click', () => {
         workbench.closeDialog();
         reject();
       })
-      buttons.item(1).addEventListener('click', () => {
+      buttons.item(0).addEventListener('click', () => {
         const center = map.getCenter().lng + ',' + map.getCenter().lat;
         const markers = point.lng + ',' + point.lat;
         const zoom = map.getZoom();

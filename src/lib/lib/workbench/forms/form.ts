@@ -43,6 +43,7 @@ export class Form {
   onClose: () => any;
   readonly elementRef = document.createElement('form');
   private titleElement = document.createElement('h3');
+  private groupsElement = document.createElement('div');
   private btnWrapper = document.createElement('div');
   private confirmBtn = document.createElement('button');
   private cancelBtn = document.createElement('button');
@@ -67,10 +68,12 @@ export class Form {
     this.options.items.forEach(item => {
       const view = item.viewProvideFn();
       if (view) {
-        this.elementRef.append(view);
+        this.groupsElement.append(view);
       }
     })
 
+    this.groupsElement.classList.add('tbus-form-groups');
+    this.elementRef.append(this.groupsElement);
     this.elementRef.append(this.btnWrapper);
 
     this.elementRef.onsubmit = ev => {

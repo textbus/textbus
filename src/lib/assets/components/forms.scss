@@ -55,11 +55,10 @@
   &.tbus-form-workbench {
     min-width: 400px;
     .tbus-form-title {
-      background-color: $color-dark;
-      color: #fff;
+      background-color: $color-lighter;
+      border-bottom: 1px solid $color-light;
       padding: 20px;
-      margin-bottom: 15px;
-      margin-top: 0;
+      margin: 0;
     }
 
     .tbus-control-label {
@@ -81,6 +80,10 @@
   }
 }
 
+.tbus-form-groups {
+  background-color: $color-lighter;
+  padding: 15px 0;
+}
 
 .tbus-form-group {
   padding: 5px 20px;
