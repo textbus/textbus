@@ -1,4 +1,4 @@
-import { Form } from '../forms/form';
+import { ToolForm } from '../forms/tool-form';
 import { AttrType } from '../forms/help';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
@@ -9,7 +9,7 @@ export const tableTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-table'],
   tooltip: '表格',
   menuFactory() {
-    return new Form([{
+    return new ToolForm([{
       type: AttrType.TextField,
       required: true,
       name: 'rows',

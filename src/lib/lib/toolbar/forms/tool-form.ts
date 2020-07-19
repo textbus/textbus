@@ -1,20 +1,20 @@
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { FormItem, AttrType, AttrState, AttrConfig } from './help';
-import { FormTextField } from './form-text-field';
-import { FormOptions } from './form-options';
-import { FormSwitch } from './form-switch';
-import { FormHidden } from './form-hidden';
+import { ToolFormItem, AttrType, AttrState, AttrConfig } from './help';
+import { ToolFormTextField } from './tool-form-text-field';
+import { ToolFormOptions } from './tool-form-options';
+import { ToolFormSwitch } from './tool-form-switch';
+import { ToolFormHidden } from './tool-form-hidden';
 import { EventDelegate } from '../help';
 import { DropdownViewer } from '../toolkit/_api';
 import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
 
-export class Form implements DropdownViewer {
+export class ToolForm implements DropdownViewer {
   onComplete: Observable<AttrState[]>;
   freezeState: Observable<boolean>;
   readonly elementRef = document.createElement('form');
-  private items: FormItem[] = [];
+  private items: ToolFormItem[] = [];
   private delegator: EventDelegate;
   private freezeStateSource = new Subject<boolean>();
   private completeEvent = new Subject<AttrState[]>();
@@ -26,7 +26,7 @@ export class Form implements DropdownViewer {
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
-          this.items.push(new FormTextField(attr, (type: string) => {
+          this.items.push(new ToolFormTextField(attr, (type: string) => {
             this.freezeStateSource.next(true);
             return this.delegator.dispatchEvent(type).pipe(tap(() => {
               this.freezeStateSource.next(false);
@@ -34,13 +34,13 @@ export class Form implements DropdownViewer {
           }));
           break;
         case AttrType.Options:
-          this.items.push(new FormOptions(attr));
+          this.items.push(new ToolFormOptions(attr));
           break;
         case AttrType.Switch:
-          this.items.push(new FormSwitch(attr));
+          this.items.push(new ToolFormSwitch(attr));
           break;
         case AttrType.Hidden:
-          this.items.push(new FormHidden(attr));
+          this.items.push(new ToolFormHidden(attr));
           break
       }
     });
@@ -66,11 +66,11 @@ export class Form implements DropdownViewer {
 
   reset(): void {
     this.items.forEach(item => {
-      if (item instanceof FormTextField) {
+      if (item instanceof ToolFormTextField) {
         item.update('');
-      } else if (item instanceof FormOptions) {
+      } else if (item instanceof ToolFormOptions) {
         item.update(Number.NaN);
-      } else if (item instanceof FormSwitch) {
+      } else if (item instanceof ToolFormSwitch) {
         item.update();
       }
     });

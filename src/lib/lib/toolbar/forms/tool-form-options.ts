@@ -1,6 +1,6 @@
-import { AttrOptions, AttrState, FormItem } from './help';
+import { AttrOptions, AttrState, ToolFormItem } from './help';
 
-export class FormOptions implements FormItem {
+export class ToolFormOptions implements ToolFormItem {
   elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];

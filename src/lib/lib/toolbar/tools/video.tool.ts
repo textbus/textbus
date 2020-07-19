@@ -1,4 +1,4 @@
-import { Form } from '../forms/form';
+import { ToolForm } from '../forms/tool-form';
 import { AttrType } from '../forms/help';
 import { VideoComponent, PreComponent } from '../../components/_api';
 import { VideoCommander } from '../commands/video.commander';
@@ -9,7 +9,7 @@ export const videoTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-video'],
   tooltip: '视频',
   menuFactory() {
-    return new Form([{
+    return new ToolForm([{
       type: AttrType.TextField,
       label: '视频链接地址',
       name: 'src',

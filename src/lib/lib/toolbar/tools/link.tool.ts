@@ -1,5 +1,5 @@
 import { LinkCommander } from '../commands/link.commander';
-import { Form } from '../forms/form';
+import { ToolForm } from '../forms/tool-form';
 import { AttrType } from '../forms/help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
@@ -12,7 +12,7 @@ export const linkTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-link'],
   tooltip: '链接',
   menuFactory() {
-    return new Form([{
+    return new ToolForm([{
       type: AttrType.TextField,
       label: '跳转链接地址',
       name: 'href',

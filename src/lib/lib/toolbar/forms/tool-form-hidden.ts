@@ -1,6 +1,6 @@
-import { AttrHidden, AttrState, FormItem } from './help';
+import { AttrHidden, AttrState, ToolFormItem } from './help';
 
-export class FormHidden implements FormItem {
+export class ToolFormHidden implements ToolFormItem {
   readonly elementRef = document.createElement('input');
   readonly name: string;
   private readonly value: string | boolean | number;

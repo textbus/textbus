@@ -1,8 +1,8 @@
 import { Observable, Subscription } from 'rxjs';
 
-import { AttrState, AttrTextField, FormItem } from './help';
+import { AttrState, AttrTextField, ToolFormItem } from './help';
 
-export class FormTextField implements FormItem {
+export class ToolFormTextField implements ToolFormItem {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;

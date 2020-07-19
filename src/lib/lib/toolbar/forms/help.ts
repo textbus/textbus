@@ -53,7 +53,7 @@ export interface AttrState {
   value: string | boolean | number;
 }
 
-export interface FormItem {
+export interface ToolFormItem {
   elementRef: HTMLElement;
   name: string;
 

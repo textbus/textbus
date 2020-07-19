@@ -1,6 +1,6 @@
-import { AttrSwitch, AttrState, FormItem } from './help';
+import { AttrSwitch, AttrState, ToolFormItem } from './help';
 
-export class FormSwitch implements FormItem {
+export class ToolFormSwitch implements ToolFormItem {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;

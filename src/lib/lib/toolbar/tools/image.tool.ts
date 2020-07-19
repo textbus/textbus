@@ -1,4 +1,4 @@
-import { Form } from '../forms/form';
+import { ToolForm } from '../forms/tool-form';
 import { AttrType } from '../forms/help';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageComponent, PreComponent } from '../../components/_api';
@@ -9,7 +9,7 @@ export const imageTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-image'],
   tooltip: '图片',
   menuFactory() {
-    return new Form([{
+    return new ToolForm([{
       type: AttrType.TextField,
       label: '图片链接地址',
       name: 'src',
