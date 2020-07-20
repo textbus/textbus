@@ -14,6 +14,17 @@
   },
   "author": "tanbo",
   "license": "GPL",
+  "keywords": [
+    "editor",
+    "text",
+    "rich",
+    "component editor",
+    "web editor",
+    "office",
+    "word",
+    "excel",
+    "note"
+  ],
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^12.7.1",
