@@ -40,9 +40,9 @@ const editor = createEditor('#editor', {
   contents: document.getElementById('table').innerHTML
 });
 
-editor.onReady.subscribe(() => {
-  console.log(editor.getContents().contents)
-})
+// editor.onReady.subscribe(() => {
+//   console.log(editor.getContents().contents)
+// })
 
 document.getElementById('btn').addEventListener('click', () => {
   editor.destroy();

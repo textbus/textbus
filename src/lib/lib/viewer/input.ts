@@ -187,12 +187,22 @@ export class Input {
     if (!this.selection || !this.selection.rangeCount) {
       return;
     }
-    const startContainer = this.selection.focusNode;
-    const startOffset = this.selection.focusOffset;
+    let startContainer = this.selection.focusNode;
+    let startOffset = this.selection.focusOffset;
+
+    if (startContainer.nodeType === Node.ELEMENT_NODE) {
+      const offsetNode = startContainer.childNodes[startOffset];
+      if (offsetNode.nodeType === Node.TEXT_NODE) {
+        startContainer = offsetNode;
+        startOffset = 0;
+      }
+    }
+
     const range = document.createRange();
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = TBRange.getRangePosition(range);
+    console.log(rect)
     const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement);
 
     if (isWindows) {
