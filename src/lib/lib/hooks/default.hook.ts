@@ -5,7 +5,7 @@ export class DefaultHook implements Lifecycle {
     selection.ranges.forEach(range => {
       range.connect();
     })
-    return true;
+    return selection.collapsed && selection.rangeCount === 1;
   }
 
   onPaste(contents: Contents, renderer: Renderer, selection: TBSelection): boolean {
