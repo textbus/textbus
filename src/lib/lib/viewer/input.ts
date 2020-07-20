@@ -195,7 +195,7 @@ export class Input {
     // 这时会引起计算光标位置全部为 0，下面这段代码是修复这个问题
     if (startContainer.nodeType === Node.ELEMENT_NODE) {
       const offsetNode = startContainer.childNodes[startOffset];
-      if (offsetNode.nodeType === Node.TEXT_NODE) {
+      if (offsetNode?.nodeType === Node.TEXT_NODE) {
         startContainer = offsetNode;
         startOffset = 0;
       }
