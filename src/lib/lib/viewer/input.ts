@@ -202,7 +202,6 @@ export class Input {
     range.setStart(startContainer, startOffset);
     range.collapse();
     let rect = TBRange.getRangePosition(range);
-    console.log(rect)
     const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement);
 
     if (isWindows) {
