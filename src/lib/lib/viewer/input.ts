@@ -190,6 +190,9 @@ export class Input {
     let startContainer = this.selection.focusNode;
     let startOffset = this.selection.focusOffset;
 
+    // 当一个只有 br 子节点的容器，同时，后一个容器的开始子元素是文本时。
+    // 用户双击选择 br 所在的容器时，startContainer 会是下一个容器，且 offset 指向下一个容器的首个文本节点
+    // 这时会引起计算光标位置全部为 0，下面这段代码是修复这个问题
     if (startContainer.nodeType === Node.ELEMENT_NODE) {
       const offsetNode = startContainer.childNodes[startOffset];
       if (offsetNode.nodeType === Node.TEXT_NODE) {
