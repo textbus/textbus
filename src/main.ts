@@ -18,7 +18,7 @@ const form = new Form({
   ]
 });
 
-document.body.insertBefore(form.elementRef, document.body.children[0]);
+// document.body.insertBefore(form.elementRef, document.body.children[0]);
 
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
@@ -37,6 +37,7 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
+  contents: document.getElementById('table').innerHTML
 });
 
 editor.onReady.subscribe(() => {
