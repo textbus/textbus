@@ -35,6 +35,10 @@
     color: $color-darker;
   }
 
+  .tbus-workbench {
+    background-color: $color-lighter;
+  }
+
   .tbus-status-bar {
     background-color: lighten($color-darker, 8);
     border-color: lighten($color-darker, 8);
