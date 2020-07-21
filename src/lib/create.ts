@@ -81,11 +81,25 @@ import {
 
   JumbotronComponentReader,
   jumbotronComponentExample,
-  jumbotronStyleSheet
+  jumbotronStyleSheet,
+
+  WordExplainComponentReader,
+  wordExplainComponentExample,
+  wordExplainStyleSheet,
+  wordExplainComponentEditingStyleSheet
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
-  styleSheets: [...defaultStyleSheets, imageCardStyleSheet, todoListStyleSheet, jumbotronStyleSheet],
+  styleSheets: [
+    ...defaultStyleSheets,
+    imageCardStyleSheet,
+    todoListStyleSheet,
+    jumbotronStyleSheet,
+    wordExplainStyleSheet
+  ],
+  editingStyleSheets: [
+    wordExplainComponentEditingStyleSheet
+  ],
   hooks: [
     new DefaultHook(),
     new HistoryHook(),
@@ -93,6 +107,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   componentReaders: [
+    new WordExplainComponentReader(),
     new JumbotronComponentReader(),
     new BaiduMapComponentReader(),
     new TodoListComponentReader(),
@@ -149,7 +164,8 @@ export const defaultOptions: EditorOptions = {
     imageCardComponentExample,
     todoListComponentExample,
     baiduMapComponentExample,
-    jumbotronComponentExample
+    jumbotronComponentExample,
+    wordExplainComponentExample
   ]
 };
 

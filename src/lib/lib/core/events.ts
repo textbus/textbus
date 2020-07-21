@@ -11,7 +11,8 @@ export enum EventType {
   onDelete = 'delete',
   onInput = 'input',
   onPaste = 'paste',
-  onRendered = 'rendered'
+  onRendered = 'rendered',
+  onContentUnexpectedlyChanged = 'contentUnexpectedlyChanged'
 }
 
 /**
@@ -21,7 +22,7 @@ export interface EventParams {
   type: EventType;
   selection: TBSelection;
   renderer: Renderer;
-  data?: {[key: string]: any};
+  data?: { [key: string]: any };
 }
 
 /**
@@ -38,7 +39,7 @@ export class TBEvent {
   readonly type: EventType;
   readonly selection: TBSelection;
   readonly renderer: Renderer;
-  readonly data: {[key: string]: any};
+  readonly data: { [key: string]: any };
 
   private _stopped = false;
 

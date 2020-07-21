@@ -10,16 +10,16 @@ export interface TodoListConfig {
 
 export class TodoListComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
-    return element.nodeName.toLowerCase() === 'tbus-todo-list';
+    return element.nodeName.toLowerCase() === 'tb-todo-list';
   }
 
   from(element: HTMLElement): ViewData {
     const listConfig = Array.from(element.children).map(child => {
-      const stateElement = child.querySelector('span.tbus-todo-list-state');
+      const stateElement = child.querySelector('span.tb-todo-list-state');
       return {
-        active: stateElement.classList.contains('.tbus-todo-list-active'),
-        disabled: stateElement.classList.contains('.tbus-todo-list-disabled'),
-        childSlot: child.querySelector('.tbus-todo-list-content') as HTMLElement,
+        active: stateElement.classList.contains('.tb-todo-list-active'),
+        disabled: stateElement.classList.contains('.tb-todo-list-disabled'),
+        childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
         slot: new Fragment()
       }
     })
@@ -53,7 +53,7 @@ export class TodoListComponent extends BranchComponent {
   }]
 
   constructor(public listConfigs: TodoListConfig[]) {
-    super('tbus-todo-list');
+    super('tb-todo-list');
     this.slots = listConfigs.map(i => i.slot);
   }
 
@@ -62,7 +62,7 @@ export class TodoListComponent extends BranchComponent {
   }
 
   render(isProduction: boolean): VElement {
-    const list = new VElement('tbus-todo-list');
+    const list = new VElement('tb-todo-list');
     this.listConfigs = this.listConfigs.filter(i => {
       return this.slots.includes(i.slot);
     });
@@ -73,24 +73,24 @@ export class TodoListComponent extends BranchComponent {
       const slot = config.slot;
 
       const item = new VElement('div', {
-        classes: ['tbus-todo-list-item']
+        classes: ['tb-todo-list-item']
       });
       const btn = new VElement('div', {
-        classes: ['tbus-todo-list-btn']
+        classes: ['tb-todo-list-btn']
       })
       const state = new VElement('span', {
-        classes: ['tbus-todo-list-state']
+        classes: ['tb-todo-list-state']
       });
       if (config.active) {
-        state.classes.push('tbus-todo-list-state-active');
+        state.classes.push('tb-todo-list-state-active');
       }
       if (config.disabled) {
-        state.classes.push('tbus-todo-list-state-disabled');
+        state.classes.push('tb-todo-list-state-disabled');
       }
       btn.appendChild(state);
       item.appendChild(btn);
       const content = new VElement('div', {
-        classes: ['tbus-todo-list-content']
+        classes: ['tb-todo-list-content']
       });
       item.appendChild(content);
       if (slot.contentLength === 0) {
@@ -110,11 +110,11 @@ export class TodoListComponent extends BranchComponent {
               config.disabled = newState.disabled;
               const element = ev.target as HTMLElement;
               config.active ?
-                element.classList.add('tbus-todo-list-state-active') :
-                element.classList.remove('tbus-todo-list-state-active');
+                element.classList.add('tb-todo-list-state-active') :
+                element.classList.remove('tb-todo-list-state-active');
               config.disabled ?
-                element.classList.add('tbus-todo-list-state-disabled') :
-                element.classList.remove('tbus-todo-list-state-disabled');
+                element.classList.add('tb-todo-list-state-disabled') :
+                element.classList.remove('tb-todo-list-state-disabled');
             })
           } else if (event.type === EventType.onEnter) {
             event.stopPropagation();
@@ -188,20 +188,20 @@ export const todoListComponentExample: ComponentExample = {
 }
 
 export const todoListStyleSheet = `
-tbus-todo-list {
+tb-todo-list {
   display: block;
   margin-top: 1em;
   margin-bottom: 1em;
 }
-.tbus-todo-list-item {
+.tb-todo-list-item {
   padding-top: 0.2em;
   padding-bottom: 0.2em;
   display: flex;
 }
-.tbus-todo-list-btn {
+.tb-todo-list-btn {
   margin-right: 0.6em;
 }
-.tbus-todo-list-state {
+.tb-todo-list-state {
   display: inline-block;
   margin-top: 3px;
   width: 12px;
@@ -212,7 +212,7 @@ tbus-todo-list {
   cursor: pointer;
   position: relative;
 }
-.tbus-todo-list-state:after {
+.tb-todo-list-state:after {
   content: "";
   position: absolute;
   border-right: 2px solid #fff;
@@ -223,13 +223,13 @@ tbus-todo-list {
   height: 6px;
   transform: rotateZ(45deg);
 }
-.tbus-todo-list-state-active:after {
+.tb-todo-list-state-active:after {
   border-color: #1296db;
 }
-.tbus-todo-list-state-disabled {
+.tb-todo-list-state-disabled {
   opacity: 0.5;
 }
-.tbus-todo-list-content {
+.tb-todo-list-content {
   flex: 1;
 }
 `;

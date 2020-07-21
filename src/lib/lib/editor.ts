@@ -3,9 +3,11 @@ import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } fr
 
 import {
   BranchComponent,
-  DivisionComponent,
   Commander,
+  Component,
+  ComponentReader,
   Contents,
+  DivisionComponent,
   EventType,
   Formatter,
   Fragment,
@@ -16,8 +18,6 @@ import {
   TBRange,
   TBRangePosition,
   TBSelection,
-  Component,
-  ComponentReader,
   VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
@@ -50,8 +50,10 @@ export interface EditorOptions {
   toolbar?: (ToolFactory | ToolFactory[])[];
   /** 配置生命周期勾子 */
   hooks?: Lifecycle[];
-  /** 配置编辑器的默认样式 */
+  /** 配置文档的默认样式 */
   styleSheets?: string[];
+  /** 配置文档编辑状态下用到的样式 */
+  editingStyleSheets?: string[];
   /** 设置初始化 TBus 时的默认内容 */
   contents?: string;
   /** 设置可选的自定义组件 */
@@ -118,6 +120,7 @@ export class Editor implements EventDelegate {
   private eventHandler = new EventHandler();
 
   private subs: Subscription[] = [];
+  private contentUnexpectedlyChangedSub: Subscription;
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -135,7 +138,7 @@ export class Editor implements EventDelegate {
       showComponentStage: this.options.componentLibrary?.length > 0,
       openComponentState: this.options.expandComponentLibrary
     });
-    this.viewer = new Viewer(options.styleSheets);
+    this.viewer = new Viewer([...(options.styleSheets || []), ...(options.editingStyleSheets || [])]);
     this.workbench = new Workbench(this.viewer);
     let deviceWidth = options.deviceWidth || '100%';
     this.statusBar.device.update(deviceWidth);
@@ -252,7 +255,9 @@ export class Editor implements EventDelegate {
   destroy() {
     this.container.removeChild(this.elementRef);
     this.subs.forEach(s => s.unsubscribe());
-
+    if (this.contentUnexpectedlyChangedSub) {
+      this.contentUnexpectedlyChangedSub.unsubscribe();
+    }
     this.readyEvent.complete();
     this.changeEvent.complete();
     this.history.destroy();
@@ -534,10 +539,18 @@ export class Editor implements EventDelegate {
   }
 
   private render() {
+    if (this.contentUnexpectedlyChangedSub) {
+      this.contentUnexpectedlyChangedSub.unsubscribe();
+    }
     const rootFragment = this.rootFragment;
     Editor.guardLastIsParagraph(rootFragment);
     const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
     this.eventHandler.listen(vEle);
+    this.contentUnexpectedlyChangedSub = vEle.events.subscribe(ev => {
+      if (ev.type === EventType.onContentUnexpectedlyChanged) {
+        this.render();
+      }
+    })
     this.invokeViewUpdatedHooks();
   }
 

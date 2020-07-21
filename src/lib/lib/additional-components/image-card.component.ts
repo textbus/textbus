@@ -14,7 +14,7 @@ const defaultImageSrc = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent
 
 export class ImageCardComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
-    return element.nodeName.toLowerCase() === 'tbus-image-card';
+    return element.nodeName.toLowerCase() === 'tb-image-card';
   }
 
   from(element: HTMLElement): ViewData {
@@ -43,7 +43,7 @@ export class ImageCardComponent extends BackboneComponent {
   readonly descFragment: Fragment;
 
   constructor(public imageSrc: string, options: { imgFragment: Fragment, descFragment: Fragment }) {
-    super('tbus-image-card');
+    super('tb-image-card');
     this.imgFragment = options.imgFragment;
     this.descFragment = options.descFragment;
 
@@ -125,7 +125,7 @@ export const imageCardComponentExample: ComponentExample = {
 }
 
 export const imageCardStyleSheet = `
-tbus-image-card {
+tb-image-card {
   display: block;
   margin-top: 10px;
   margin-bottom: 20px;
@@ -133,12 +133,12 @@ tbus-image-card {
   border-radius: 3px;
   overflow: hidden;
 }
-tbus-image-card > div > img {
+tb-image-card > div > img {
   width: 100%;
   display: block;
   min-height: 40px;
 }
-tbus-image-card > p {
+tb-image-card > p {
   margin: 0;
   text-align: center;
   font-size: 15px;

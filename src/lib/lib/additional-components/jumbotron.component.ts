@@ -11,7 +11,7 @@ export interface JumbotronOptions {
 
 export class JumbotronComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
-    return element.nodeName.toLowerCase() === 'jumbotron';
+    return element.nodeName.toLowerCase() === 'tb-jumbotron';
   }
 
   from(element: HTMLElement): ViewData {
@@ -36,7 +36,7 @@ export class JumbotronComponent extends DivisionComponent {
   private vEle: VElement;
 
   constructor(private options: JumbotronOptions) {
-    super('jumbotron');
+    super('tb-jumbotron');
   }
 
   getSlotView(): VElement {
@@ -124,7 +124,7 @@ export const jumbotronComponentExample: ComponentExample = {
 }
 
 export const jumbotronStyleSheet = `
-jumbotron {
+tb-jumbotron {
   display: block;
   min-height: 200px;
   margin-bottom: 1em;
