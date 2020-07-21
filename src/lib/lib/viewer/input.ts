@@ -211,13 +211,30 @@ export class Input {
       this.inputWrap.style.top = fontSize;
     }
 
-    const boxHeight = isNaN(+lineHeight) ? fontSize : Number.parseInt(fontSize) * Number.parseFloat(lineHeight);
+    let height: number;
+    if (isNaN(+lineHeight)) {
+      const f = parseFloat(lineHeight);
+      if (isNaN(f)) {
+        height = parseFloat(fontSize);
+      } else {
+        height = f;
+      }
+    } else {
+      height = parseFloat(fontSize) * parseFloat(lineHeight);
+    }
+
+    const boxHeight = Math.max(height, rect.height);
+
+    let top = rect.top;
+    if (rect.height < height) {
+      top -= (height - rect.height) / 2;
+    }
 
     this.elementRef.style.left = rect.left + 'px';
-    this.elementRef.style.top = rect.top + 'px';
-    this.elementRef.style.height = (rect.height || boxHeight) + 'px';
+    this.elementRef.style.top = top + 'px';
+    this.elementRef.style.height = boxHeight + 'px';
     this.cursor.style.backgroundColor = color;
-    this.input.style.lineHeight = (rect.height || boxHeight) + 'px';
+    this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
   }
 

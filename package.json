@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/tbus",
-  "version": "0.0.2-beta.53",
+  "version": "0.0.2-beta.54",
   "description": "A rich text editor",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
