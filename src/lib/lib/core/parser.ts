@@ -23,6 +23,9 @@ export class Parser {
           const viewData = t.from(el as HTMLElement);
           slot.append(viewData.component, false);
           viewData.slotsMap.forEach(item => {
+            if (!item.from) {
+              return;
+            }
             if (viewData.component instanceof DivisionComponent ||
               viewData.component instanceof BranchComponent ||
               viewData.component instanceof BackboneComponent ||

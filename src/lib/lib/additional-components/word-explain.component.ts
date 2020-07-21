@@ -25,9 +25,9 @@ export class WordExplainComponentReader implements ComponentReader {
   }
 
   from(element: Element): ViewData {
-    const title = element.querySelector('.tb-work-explain-title');
-    const subtitle = element.querySelector('.tb-work-explain-subtitle');
-    const detail = element.querySelector('.tb-work-explain-detail');
+    const title = element.querySelector('.tb-word-explain-title');
+    const subtitle = element.querySelector('.tb-word-explain-subtitle');
+    const detail = element.querySelector('.tb-word-explain-detail');
 
     const titleFragment = new Fragment();
     const subtitleFragment = new Fragment();
@@ -55,24 +55,20 @@ export class WordExplainComponentReader implements ComponentReader {
 }
 
 export class WordExplainComponent extends BackboneComponent {
-  private title = new Fragment();
-  private subtitle = new Fragment();
-  private detail = new Fragment();
+  private readonly title: Fragment;
+  private readonly subtitle: Fragment;
+  private readonly detail: Fragment;
 
   private wrapper: VElement;
 
   constructor(private params: WordExplainParams) {
     super('tb-word-explain');
-    this.title.from(params.title);
-    this.subtitle.from(params.subtitle);
-    this.detail.from(params.detail);
+
+    this.title = params.title;
+    this.subtitle = params.subtitle;
+    this.detail = params.detail;
 
     this.slots = [this.title, this.subtitle, this.detail];
-    this.slots.forEach(f => {
-      if (f.contentLength === 0) {
-        f.append(new BrComponent());
-      }
-    })
   }
 
   canDelete(): boolean {
@@ -135,6 +131,10 @@ export class WordExplainComponent extends BackboneComponent {
     }
 
     return wrap;
+  }
+
+  getSlotView(slot: Fragment): VElement {
+    return super.getSlotView(slot);
   }
 }
 
