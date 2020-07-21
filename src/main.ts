@@ -40,11 +40,11 @@ const editor = createEditor('#editor', {
   contents: document.getElementById('table').innerHTML
 });
 
-// editor.onReady.subscribe(() => {
-//   console.log(editor.getContents().contents)
-// })
+editor.onChange.subscribe(() => {
+  console.log(editor.getContents().contents)
+})
 
 document.getElementById('btn').addEventListener('click', () => {
-  editor.destroy();
+  console.log(editor.getContents().contents)
 })
 // editor.setContents(`<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

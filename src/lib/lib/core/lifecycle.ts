@@ -3,6 +3,7 @@ import { TBSelection } from './selection';
 import { Commander } from './commander';
 import { Editor } from '../editor';
 import { Contents } from './contents';
+import { Subject } from 'rxjs';
 
 /**
  * TBus 生命周期方法。
@@ -16,8 +17,9 @@ export interface Lifecycle {
    * @param contextDocument
    * @param contextWindow
    * @param frameContainer
+   * @param contentChangeEventEmitter
    */
-  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
+  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement, contentChangeEventEmitter: Subject<void>): void;
 
   /**
    * 当用户输入时调用。
