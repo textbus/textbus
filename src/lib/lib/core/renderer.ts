@@ -605,7 +605,7 @@ export class Renderer {
     }).join(';');
     const attrs = Array.from(vDom.attrs.keys()).filter(key => vDom.attrs.get(key) !== false).map(key => {
       const value = vDom.attrs.get(key);
-      return (value === true ? `${key}` : `${key}="${value}"`).replace(/"/g, '&quot;');
+      return (value === true ? `${key}` : `${key}="${(value + '').replace(/"/g, '&quot;')}"`);
     });
     if (styles) {
       attrs.push(`style="${styles}"`);

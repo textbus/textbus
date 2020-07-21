@@ -132,10 +132,6 @@ export class WordExplainComponent extends BackboneComponent {
 
     return wrap;
   }
-
-  getSlotView(slot: Fragment): VElement {
-    return super.getSlotView(slot);
-  }
 }
 
 export const wordExplainComponentExample: ComponentExample = {
