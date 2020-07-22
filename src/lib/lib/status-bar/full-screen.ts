@@ -20,6 +20,7 @@ export class FullScreen {
   constructor() {
     this.onChange = this.changeEvent.asObservable();
     this.elementRef.type = 'button';
+    this.elementRef.title = '切换全屏模式';
     this.elementRef.className = 'tbus-full-screen';
     this.elementRef.appendChild(this.icon);
     this.elementRef.addEventListener('click', () => {

@@ -36,6 +36,7 @@ export class Toolbar {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.innerText = '组件库';
+      btn.title = '展开或收起组件库';
       btn.classList.add('tbus-toolbar-components-btn');
       btn.addEventListener('click', () => {
         this.componentStageExpand = !this.componentStageExpand;

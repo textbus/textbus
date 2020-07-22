@@ -38,8 +38,8 @@ export class ComponentStage {
   }
 
   addExample(example: ComponentExample) {
-    const view = ComponentStage.createViewer(example.example, example.name);
-    view.addEventListener('click', () => {
+    const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
+    card.addEventListener('click', () => {
       const t = example.componentFactory(this.workbench);
       if (t instanceof Component) {
         this.checkEvent.next(t);
@@ -54,14 +54,14 @@ export class ComponentStage {
         })
       }
     });
-    this.componentListWrapper.appendChild(view);
+    this.componentListWrapper.appendChild(wrapper);
   }
 
   private static createViewer(content: string | HTMLElement, name: string) {
     const wrapper = document.createElement('div');
     wrapper.classList.add('tbus-component-example-item');
-    const example = document.createElement('div');
-    example.classList.add('tbus-component-example');
+    const card = document.createElement('div');
+    card.classList.add('tbus-component-example');
 
     const exampleContent = document.createElement('div');
     exampleContent.classList.add('tbus-component-example-content');
@@ -72,17 +72,20 @@ export class ComponentStage {
       exampleContent.appendChild(content);
     }
 
-    example.appendChild(exampleContent);
+    card.appendChild(exampleContent);
 
     const mask = document.createElement('div');
     mask.classList.add('tbus-component-example-mask');
-    example.appendChild(mask);
+    card.appendChild(mask);
 
-    wrapper.appendChild(example);
+    wrapper.appendChild(card);
     const nameWrapper = document.createElement('div');
     nameWrapper.classList.add('tbus-component-example-name');
     nameWrapper.innerText = name || '';
     wrapper.appendChild(nameWrapper);
-    return wrapper;
+    return {
+      wrapper,
+      card
+    };
   }
 }

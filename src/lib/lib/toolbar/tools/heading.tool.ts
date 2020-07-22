@@ -5,6 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const headingTool = Toolkit.makeSelectTool({
+  tooltip: '段落与标题',
   matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
   highlight(options, t) {
     if (t instanceof BlockComponent) {

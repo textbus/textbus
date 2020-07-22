@@ -22,6 +22,9 @@ export class Device {
   }, {
     label: 'iPad Pro',
     value: '1024px'
+  }, {
+    label: 'A4',
+    value: '842px'
   }];
   private button = document.createElement('button');
   private label = document.createElement('span');
@@ -33,6 +36,7 @@ export class Device {
   constructor() {
     this.onChange = this.changeEvent.asObservable();
     this.button.type = 'button';
+    this.button.title = '切换设备宽度';
     this.options.forEach(item => {
       const option = document.createElement('button');
       option.type = 'button';
