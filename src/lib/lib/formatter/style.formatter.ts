@@ -8,6 +8,9 @@ import {
   FormatterPriority
 } from '../core/_api';
 
+const inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
+const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i');
+
 export class StyleFormatter extends InlineFormatter {
   constructor(public styleName: string, rule: MatchRule) {
     super(rule, FormatterPriority.InlineStyle);
@@ -20,7 +23,7 @@ export class StyleFormatter extends InlineFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
-    if (existingElement) {
+    if (existingElement && reg.test(existingElement.tagName)) {
       existingElement.styles.set(this.styleName, abstractData.style.value);
     } else {
       const el = new VElement('span');
@@ -67,8 +70,6 @@ export const backgroundColorFormatter = new StyleFormatter('backgroundColor', {
 const match = backgroundColorFormatter.match;
 
 backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) {
-  const inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
-  const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i');
   if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
     return FormatEffect.Invalid;
   }
