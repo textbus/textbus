@@ -17,4 +17,5 @@ export * from './table-edit.commander';
 export * from './table-remove.commander';
 export * from './td-border-color.commander';
 export * from './toggle-block.commander';
+export * from './unlink.commander';
 export * from './video.commander';

@@ -33,4 +33,5 @@ export { textBackgroundTool } from './text-background.tool';
 export { textIndentTool } from './text-indent.tool';
 export { ulTool } from './ul.tool';
 export { underlineTool } from './underline.tool';
+export { unlinkTool } from './unlink.tool';
 export { videoTool } from './video.tool';

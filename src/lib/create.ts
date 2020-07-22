@@ -53,7 +53,7 @@ import {
   videoTool,
   codeTool,
   leftToRightTool,
-  rightToLeftTool, tableAddParagraphTool, tableRemoveTool, tdBorderColorTool
+  rightToLeftTool, tableAddParagraphTool, tableRemoveTool, tdBorderColorTool, unlinkTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -155,7 +155,8 @@ export const defaultOptions: EditorOptions = {
     [leftToRightTool, rightToLeftTool],
     [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
     [fontFamilyTool],
-    [linkTool, imageTool, audioTool, videoTool],
+    [linkTool, unlinkTool],
+    [imageTool, audioTool, videoTool],
     [textAlignTool],
     [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
     [cleanTool]
