@@ -16,7 +16,7 @@ export class UnlinkCommander implements Commander {
           })
         });
       } else {
-        range.getSuccessiveContents().forEach(item => {
+        range.getSelectedScope().forEach(item => {
           item.fragment.apply(linkFormatter, {
             state: FormatEffect.Invalid,
             abstractData: null,
