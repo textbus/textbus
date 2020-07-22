@@ -23,7 +23,7 @@ export class StyleFormatter extends InlineFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
-    if (existingElement && reg.test(existingElement.tagName)) {
+    if (existingElement) {
       existingElement.styles.set(this.styleName, abstractData.style.value);
     } else {
       const el = new VElement('span');
@@ -75,3 +75,14 @@ backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) 
   }
   return match.call(backgroundColorFormatter, p);
 }
+
+backgroundColorFormatter.render = function (isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  if (existingElement && reg.test(existingElement.tagName)) {
+    existingElement.styles.set(this.styleName, abstractData.style.value);
+  } else {
+    const el = new VElement('span');
+    el.styles.set(this.styleName, abstractData.style.value);
+    return new ChildSlotModel(el);
+  }
+};
+
