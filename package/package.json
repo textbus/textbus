@@ -1,0 +1,40 @@
+{
+  "name": "@tanbo/tbus",
+  "version": "0.0.2-beta.60",
+  "description": "A rich text editor",
+  "main": "./bundles/public-api.js",
+  "module": "./bundles/public-api.js",
+  "typings": "./bundles/public-api.d.ts",
+  "license": "GPL",
+  "keywords": [
+    "editor",
+    "text",
+    "rich",
+    "component editor",
+    "web editor",
+    "office",
+    "word",
+    "excel",
+    "note"
+  ],
+  "dependencies": {
+    "@tanbo/bezier": "0.0.1",
+    "@tanbo/color": "^0.0.3",
+    "@tanbo/color-picker": "^0.0.15",
+    "@tanbo/css-themes": "^0.0.1",
+    "@types/highlight.js": "^9.12.3",
+    "highlight.js": "^9.17.1",
+    "rxjs": "^6.0.0"
+  },
+  "author": {
+    "name": "Tan Bo",
+    "email": "tanbohb@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbhuabi/editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tbhuabi/editor.git/issues"
+  }
+}

@@ -1,6 +1,3 @@
-// @ts-ignore
-import styles from './iframe-style.scss';
-
 export const iframeHTML = `
 <!DOCTYPE html>
 <html lang="zh">
@@ -11,7 +8,20 @@ export const iframeHTML = `
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>@tanbo/tbus</title>
   <style>
-    ${styles}
+    html {
+      height: 100%
+    }
+    body {
+      min-height: 100%;
+      box-sizing: border-box;
+      text-size-adjust: none;
+      cursor: text;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection {
+      background-color: rgba(18, 150, 219, .2);
+    }
   </style>
 </head>
 <body></body>
