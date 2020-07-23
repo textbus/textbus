@@ -10,7 +10,7 @@
     "test": "jest",
     "test-c": "jest --coverage",
     "build:lib": "rimraf package/bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-build.config.js",
-    "publish:lib": "npm run build:lib && npm publish --access=public"
+    "publish:lib": "npm run build:lib && cd package && npm publish --access=public"
   },
   "author": "tanbo",
   "license": "GPL",
