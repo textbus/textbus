@@ -137,17 +137,14 @@ class CodeStyleFormatter extends InlineFormatter {
     if (!existingElement) {
       existingElement = new VElement('span');
     }
-    existingElement.styles.set(abstractData.style.name, abstractData.style.value);
+    abstractData.styles.forEach((value, key) => {
+      existingElement.styles.set(key, value);
+    })
     return new ReplaceModel(existingElement);
   }
 }
 
-const codeStyleFormatters = {
-  color: new CodeStyleFormatter(),
-  fontWeight: new CodeStyleFormatter(),
-  fontStyle: new CodeStyleFormatter(),
-  backgroundColor: new CodeStyleFormatter()
-};
+const codeStyleFormatter = new CodeStyleFormatter();
 const codeFormatter = new CodeFormatter();
 
 export class PreComponentReader implements ComponentReader {
@@ -249,7 +246,7 @@ export class PreComponent extends DivisionComponent {
       const div = document.createElement('div');
       div.innerHTML = html;
       this.getFormats(0, div, fragment).formats.forEach(f => {
-        fragment.apply(codeStyleFormatters[f.abstractData.style.name] || new CodeStyleFormatter(), f);
+        fragment.apply(codeStyleFormatter, f);
       });
     } catch (e) {
       // console.log(e);
@@ -280,18 +277,12 @@ export class PreComponent extends DivisionComponent {
       for (const item of theme) {
         if (item.classes.includes(value)) {
           const styles = item.styles;
-          Object.keys(styles).forEach(key => {
-            const abstractData = new FormatAbstractData({
-              style: {
-                name: key,
-                value: styles[key]
-              }
-            });
-            formats.push({
-              startIndex: start,
-              endIndex: index,
-              state: FormatEffect.Valid,
-              abstractData
+          formats.push({
+            startIndex: start,
+            endIndex: index,
+            state: FormatEffect.Valid,
+            abstractData: new FormatAbstractData({
+              styles
             })
           })
         }

@@ -143,7 +143,7 @@ export const wordExplainComponentExample: ComponentExample = {
     title.apply(textAlignFormatter, {
       state: FormatEffect.Valid,
       abstractData: new FormatAbstractData({
-        style: {
+        styles: {
           name: 'textAlign',
           value: 'right'
         }
@@ -155,7 +155,7 @@ export const wordExplainComponentExample: ComponentExample = {
     subtitle.apply(textAlignFormatter, {
       state: FormatEffect.Valid,
       abstractData: new FormatAbstractData({
-        style: {
+        styles: {
           name: 'textAlign',
           value: 'right'
         }

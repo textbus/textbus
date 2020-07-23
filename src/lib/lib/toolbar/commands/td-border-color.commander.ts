@@ -44,7 +44,7 @@ export class TdBorderColorCommander implements Commander<string> {
           c.beforeCell?.fragment.apply(tdBorderColorFormatter, {
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
-              style: {
+              styles: {
                 name: 'borderRightColor',
                 value: this.color
               }
@@ -55,7 +55,7 @@ export class TdBorderColorCommander implements Commander<string> {
           cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell.fragment.apply(tdBorderColorFormatter, {
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
-              style: {
+              styles: {
                 name: 'borderBottomColor',
                 value: this.color
               }
@@ -70,7 +70,7 @@ export class TdBorderColorCommander implements Commander<string> {
       c.cell.fragment.apply(tdBorderColorFormatter, {
         state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
         abstractData: new FormatAbstractData({
-          style: {
+          styles: {
             name: 'borderColor',
             value: this.color
           }

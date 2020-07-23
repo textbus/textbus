@@ -31,7 +31,10 @@ export class LinkCommander implements Commander<AttrState[]> {
             commonAncestorFragment.getFormatRanges(token).forEach(format => {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
                 if (attrs.get('href')) {
-                  format.abstractData.attrs = attrs
+                  format.abstractData.attrs.clear();
+                  attrs.forEach((value, key) => {
+                    format.abstractData.attrs.set(key, value);
+                  })
                 } else {
                   commonAncestorFragment.apply(token, {
                     ...format,

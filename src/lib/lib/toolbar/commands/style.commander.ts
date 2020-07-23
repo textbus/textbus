@@ -24,7 +24,7 @@ export class StyleCommander implements Commander<string> {
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           abstractData: new FormatAbstractData({
-            style: {
+            styles: {
               name: this.name,
               value: this.value
             }

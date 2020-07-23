@@ -12,7 +12,12 @@ export class TdBorderColorFormatter extends BlockFormatter {
   match(p: HTMLElement | FormatAbstractData): FormatEffect {
     if (p instanceof HTMLElement) {
       if (/^(td|th)$/.test(p.nodeName.toLowerCase())) {
-        if (p.style.borderColor) {
+        const style = p.style;
+        if (style.borderColor ||
+          style.borderLeftColor ||
+          style.borderTopColor ||
+          style.borderRightColor ||
+          style.borderBottomColor) {
           return FormatEffect.Valid;
         }
       }
@@ -22,14 +27,26 @@ export class TdBorderColorFormatter extends BlockFormatter {
   }
 
   read(node: HTMLElement): FormatAbstractData {
-    return this.extractData(node, {
-      styleName: 'borderColor'
+    const styles = node.style;
+
+    const obj: { [key: string]: string | number } = {};
+
+    ['borderColor', 'borderLeftColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor'].forEach(key => {
+      if (styles[key]) {
+        obj[key] = styles[key];
+      }
+      return styles[key];
+    })
+    return new FormatAbstractData({
+      styles: obj
     });
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): null {
     if (existingElement) {
-      existingElement.styles.set(abstractData.style.name, abstractData.style.value);
+      abstractData.styles.forEach((value, key) => {
+        existingElement.styles.set(key, value);
+      });
     }
     return null;
   }

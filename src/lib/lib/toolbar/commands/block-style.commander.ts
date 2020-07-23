@@ -53,7 +53,7 @@ export class BlockStyleCommander implements Commander<string> {
           slot.apply(this.formatter, {
             state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
             abstractData: new FormatAbstractData({
-              style: {
+              styles: {
                 name: this.name,
                 value: this.value
               }

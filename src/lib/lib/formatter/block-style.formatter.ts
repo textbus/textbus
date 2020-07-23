@@ -21,10 +21,10 @@ export class BlockStyleFormatter extends BlockFormatter {
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (existingElement) {
-      existingElement.styles.set(this.styleName, abstractData.style.value);
+      existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
     } else {
       const el = new VElement('div');
-      el.styles.set(this.styleName, abstractData.style.value);
+      el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
       return new ChildSlotModel(el);
     }
   }

@@ -3,12 +3,12 @@ import { Observable } from 'rxjs';
 import { EventDelegate } from '../../help';
 import { FormatAbstractData, LeafComponent, BranchComponent } from '../../../core/_api';
 
-export interface DropdownViewer {
+export interface DropdownViewer<T = any> {
   elementRef: HTMLElement | DocumentFragment;
   onComplete: Observable<any>;
   freezeState?: Observable<boolean>;
 
-  update?(value?: FormatAbstractData | BranchComponent | LeafComponent): void;
+  update?(value?: T): void;
 
   reset?(): void;
 

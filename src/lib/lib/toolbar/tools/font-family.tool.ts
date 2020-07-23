@@ -61,7 +61,7 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {
-        if (option.value === data.style.value) {
+        if (option.value === data.styles.get('fontFamily')) {
           return option;
         }
       }

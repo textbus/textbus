@@ -24,10 +24,10 @@ export class StyleFormatter extends InlineFormatter {
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (existingElement) {
-      existingElement.styles.set(this.styleName, abstractData.style.value);
+      existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, abstractData.style.value);
+      el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
       return new ChildSlotModel(el);
     }
   }
@@ -78,11 +78,10 @@ backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) 
 
 backgroundColorFormatter.render = function (isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
   if (existingElement && reg.test(existingElement.tagName)) {
-    existingElement.styles.set(this.styleName, abstractData.style.value);
+    existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
   } else {
     const el = new VElement('span');
-    el.styles.set(this.styleName, abstractData.style.value);
+    el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
     return new ChildSlotModel(el);
   }
 };
-

@@ -187,7 +187,7 @@ export abstract class Formatter {
     return new FormatAbstractData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,
       attrs: attrs.size ? attrs : null,
-      style
+      styles: style
     });
   }
 
@@ -223,17 +223,13 @@ export abstract class Formatter {
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
     return (node: HTMLElement | FormatAbstractData) => {
-      const elementStyles = node.style;
-      if (!elementStyles) {
-        return false;
-      }
       return !Object.keys(styles).map(key => {
         const optionValue = (Array.isArray(styles[key]) ?
           styles[key] :
           [styles[key]]) as Array<string | number | RegExp>;
         let styleValue = node instanceof FormatAbstractData ?
-          (node.style.name === key ? node.style.value + '' : '') :
-          elementStyles[key];
+          (node.styles.has(key) ? node.styles.get(key) : '') :
+          node.style[key];
         if (key === 'fontFamily' && typeof styleValue === 'string') {
           styleValue = styleValue.replace(/['"]/g, '');
         }
