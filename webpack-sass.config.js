@@ -1,6 +1,7 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const DisableOutputWebpackPlugin = require('./disable-output-webpack-plugin');
+const version = require('./package.json').version;
 
 module.exports = {
   mode: 'production',
@@ -36,8 +37,8 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'editor.min.css'
+      filename: 'tbus-' + version + '.css'
     }),
-    new DisableOutputWebpackPlugin(/editor/)
+    new DisableOutputWebpackPlugin(/tbus/)
   ]
 };
