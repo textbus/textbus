@@ -7,7 +7,7 @@ export const tdBorderColorTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-table-border'],
   tooltip: '表格边框颜色',
   menuFactory() {
-    return new Palette();
+    return new Palette('borderColor');
   },
   matcher: new TableEditMatcher(),
   commanderFactory() {

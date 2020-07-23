@@ -9,7 +9,7 @@ export const colorTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-color'],
   tooltip: '文字颜色',
   menuFactory() {
-    return new Palette();
+    return new Palette('color');
   },
   matcher: new FormatMatcher(colorFormatter, [PreComponent]),
   commanderFactory() {

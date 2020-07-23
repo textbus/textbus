@@ -9,7 +9,7 @@ export const textBackgroundTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-background-color'],
   tooltip: '文字背景颜色',
   menuFactory() {
-    return new Palette()
+    return new Palette('backgroundColor')
   },
   matcher: new FormatMatcher(backgroundColorFormatter, [PreComponent]),
   commanderFactory() {

@@ -9,7 +9,7 @@ export const blockBackgroundTool = Toolkit.makeDropdownTool({
   classes: ['tbus-icon-paint-bucket'],
   tooltip: '元素背景颜色',
   menuFactory() {
-    return new Palette();
+    return new Palette('backgroundColor');
   },
   matcher: new FormatMatcher(blockBackgroundColorFormatter, [PreComponent]),
   commanderFactory() {

@@ -3,15 +3,16 @@ import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Observable, Subject } from 'rxjs';
 
 import { DropdownViewer } from '../../toolkit/utils/dropdown';
+import { FormatAbstractData } from '../../../core/_api';
 
-export class Palette implements DropdownViewer<string> {
+export class Palette implements DropdownViewer {
   elementRef = document.createElement('div');
   onComplete: Observable<string>;
 
   private picker: Picker;
   private completeEvent = new Subject<string>();
 
-  constructor() {
+  constructor(private styleName: string) {
     this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef);
     this.picker.onSelected = (ev) => {
@@ -19,8 +20,8 @@ export class Palette implements DropdownViewer<string> {
     };
   }
 
-  update(d?: string): void {
-    const color = d || '#f00';
+  update(d?: FormatAbstractData): void {
+    const color = d ? (d.styles.get(this.styleName) + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;
     } else if (/^rgba?/.test(color)) {
