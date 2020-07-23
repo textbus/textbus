@@ -33,6 +33,14 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
     classes: ['tbus-font-FangSong'],
     value: 'FangSong',
   }, {
+    label: '隶书',
+    classes: ['tbus-font-SimLi'],
+    value: 'SimLi'
+  }, {
+    label: 'Andale Mono',
+    classes: ['tbus-font-andale-mono'],
+    value: 'Andale Mono'
+  }, {
     label: 'Arial',
     classes: ['tbus-font-Arial'],
     value: 'Arial'
