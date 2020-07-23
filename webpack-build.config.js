@@ -1,5 +1,4 @@
 const path = require('path');
-const version = require('./package.json').version;
 
 module.exports = {
   mode: 'production',
@@ -8,7 +7,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, './package/bundles'),
-    filename: 'tbus-' + version + '.js',
+    filename: 'tbus.min.js',
     libraryTarget: 'umd',
     library: 'tbus',
     umdNamedDefine: true
