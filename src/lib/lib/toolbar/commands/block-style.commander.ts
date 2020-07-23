@@ -54,8 +54,7 @@ export class BlockStyleCommander implements Commander<string> {
             state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
             abstractData: new FormatAbstractData({
               styles: {
-                name: this.name,
-                value: this.value
+                [this.name]: this.value
               }
             })
           });

@@ -144,8 +144,7 @@ export const wordExplainComponentExample: ComponentExample = {
       state: FormatEffect.Valid,
       abstractData: new FormatAbstractData({
         styles: {
-          name: 'textAlign',
-          value: 'right'
+          textAlign: 'right'
         }
       })
     })
@@ -156,8 +155,7 @@ export const wordExplainComponentExample: ComponentExample = {
       state: FormatEffect.Valid,
       abstractData: new FormatAbstractData({
         styles: {
-          name: 'textAlign',
-          value: 'right'
+          textAlign: 'right'
         }
       })
     })

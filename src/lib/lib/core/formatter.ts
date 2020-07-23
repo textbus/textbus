@@ -8,7 +8,7 @@ export interface EditableOptions {
   /** 设置要编辑的 HTML 属性 */
   attrs?: string[];
   /** 设置要编辑的 Style */
-  styleName?: string;
+  styleName?: string | string[];
 }
 
 /**
@@ -174,15 +174,15 @@ export abstract class Formatter {
         attrs.set(key, node.getAttribute(key));
       });
     }
-    let style: { name: string, value: string } = null;
+    let style: { [key: string]: string | number } = {};
     if (config.styleName) {
-      const v = node.style[config.styleName];
-      if (v) {
-        style = {
-          name: config.styleName,
-          value: v
-        };
-      }
+      (Array.isArray(config.styleName) ? config.styleName : [config.styleName]).forEach(name => {
+        const v = node.style[name];
+        if (v) {
+          style[name] = v;
+        }
+      })
+
     }
     return new FormatAbstractData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,

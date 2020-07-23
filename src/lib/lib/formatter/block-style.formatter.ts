@@ -9,7 +9,7 @@ import {
 } from '../core/_api';
 
 export class BlockStyleFormatter extends BlockFormatter {
-  constructor(public styleName: string, rule: MatchRule) {
+  constructor(public styleName: string | string[], rule: MatchRule) {
     super(rule, FormatterPriority.BlockStyle);
   }
 
@@ -20,12 +20,13 @@ export class BlockStyleFormatter extends BlockFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
-    if (existingElement) {
-      existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
-    } else {
-      const el = new VElement('div');
-      el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
-      return new ChildSlotModel(el);
+    const b = !!existingElement;
+    existingElement = existingElement || new VElement('div');
+    (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
+      existingElement.styles.set(name, abstractData.styles.get(name));
+    })
+    if (!b) {
+      return new ChildSlotModel(existingElement);
     }
   }
 }

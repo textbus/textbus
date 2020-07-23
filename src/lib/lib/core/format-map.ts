@@ -26,21 +26,22 @@ export class FormatMap {
       if (formatter.state === FormatEffect.Invalid) {
         this.map.delete(token);
       } else {
-        const oldFormats = this.map.get(token);
-        if (oldFormats) {
-          for (let i = 0; i < oldFormats.length; i++) {
-            const format = oldFormats[i];
-            if (format.abstractData?.equal(formatter.abstractData, false)) {
-              if (!format.abstractData?.equal(formatter.abstractData)) {
-                oldFormats[i] = formatter;
-              }
-              return;
-            }
-          }
-          oldFormats.push(formatter);
-        } else {
-          this.map.set(token, [formatter]);
-        }
+        this.map.set(token, [formatter]);
+        // const oldFormats = this.map.get(token);
+        // if (oldFormats) {
+        //   for (let i = 0; i < oldFormats.length; i++) {
+        //     const format = oldFormats[i];
+        //     if (format.abstractData?.equal(formatter.abstractData, false)) {
+        //       if (!format.abstractData?.equal(formatter.abstractData)) {
+        //         oldFormats[i] = formatter;
+        //       }
+        //       return;
+        //     }
+        //   }
+        //   oldFormats.push(formatter);
+        // } else {
+        //   this.map.set(token, [formatter]);
+        // }
       }
       return;
     }

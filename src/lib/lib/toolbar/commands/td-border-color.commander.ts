@@ -41,26 +41,45 @@ export class TdBorderColorCommander implements Commander<string> {
     selectedCells.forEach(c => {
       if (this.color) {
         if (c.columnIndex === minColumn) {
-          c.beforeCell?.fragment.apply(tdBorderColorFormatter, {
-            state: FormatEffect.Valid,
-            abstractData: new FormatAbstractData({
-              styles: {
-                name: 'borderRightColor',
-                value: this.color
-              }
-            })
-          })
+          const prev = c.beforeCell;
+          if (prev) {
+            const f = prev.fragment.getFormatRanges(tdBorderColorFormatter);
+            if (f.length) {
+              f.forEach(ff => {
+                ff.abstractData.styles.set('borderRightColor', this.color);
+              })
+            } else {
+              prev.fragment.apply(tdBorderColorFormatter, {
+                state: FormatEffect.Valid,
+                abstractData: new FormatAbstractData({
+                  styles: {
+                    borderRightColor: this.color
+                  }
+                })
+              })
+            }
+          }
         }
         if (c.rowIndex === minRow) {
-          cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell.fragment.apply(tdBorderColorFormatter, {
-            state: FormatEffect.Valid,
-            abstractData: new FormatAbstractData({
-              styles: {
-                name: 'borderBottomColor',
-                value: this.color
-              }
-            })
-          })
+          const prev = cellMatrix[minRow - 1]?.cellsPosition[c.columnIndex].cell;
+          if (prev) {
+            const f = prev.fragment.getFormatRanges(tdBorderColorFormatter);
+
+            if (f.length) {
+              f.forEach(ff => {
+                ff.abstractData.styles.set('borderBottomColor', this.color);
+              })
+            } else {
+              prev.fragment.apply(tdBorderColorFormatter, {
+                state: FormatEffect.Valid,
+                abstractData: new FormatAbstractData({
+                  styles: {
+                    borderBottomColor: this.color
+                  }
+                })
+              })
+            }
+          }
         }
       }
       c.cell.fragment.apply(tdBorderColorFormatter, {
@@ -71,8 +90,7 @@ export class TdBorderColorCommander implements Commander<string> {
         state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
         abstractData: new FormatAbstractData({
           styles: {
-            name: 'borderColor',
-            value: this.color
+            borderColor: this.color
           }
         })
       })
