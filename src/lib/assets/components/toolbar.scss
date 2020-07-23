@@ -461,6 +461,7 @@
   > div {
     width: 15px;
     height: 15px;
+    box-sizing: content-box;
     border: 1px solid $color-gray;
     background: #fff;
     float: left;
