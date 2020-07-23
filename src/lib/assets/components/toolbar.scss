@@ -436,7 +436,7 @@
     border: none;
     cursor: pointer;
     outline: none;
-    font-size: 16px;
+    font-size: 20px;
     padding: 4px 5px;
     width: 30px;
     line-height: 1.2;
@@ -444,6 +444,34 @@
     &:hover {
       background-color: $color-light;
       border-radius: 3px;
+    }
+  }
+}
+
+.tbus-table-quick-selector {
+  background-color: $color-lighter;
+  overflow: hidden;
+  padding-left: 1px;
+  padding-top: 1px;
+  width: 160px;
+  box-sizing: content-box;
+  cursor: pointer;
+  background-color: #fff;
+
+  > div {
+    width: 15px;
+    height: 15px;
+    border: 1px solid $color-gray;
+    background: #fff;
+    float: left;
+    margin-left: -1px;
+    margin-top: -1px;
+    position: relative;
+
+    &.tbus-table-quick-selector-selected {
+      background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
+      border-color: $color-primary;
+      z-index: 1;
     }
   }
 }
