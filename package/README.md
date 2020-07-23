@@ -50,7 +50,7 @@ editor.onChange.subscribe(() => {
 一般情况下，直接通过 `createEditor` 函数初始化 TBus 即可，要定制工具条，你需要手动实例化 TBus。如果你不清楚 TBus 提供了哪些工具，你只需要到 `/node_modules/@tanbo/tbus/bundles/lib/toolbar/tools` 下查看即可；
 ```typescript
 import {
-  TBus,
+  Editor,
   audioTool,
   blockBackgroundTool,
   blockquoteTool,
@@ -90,7 +90,7 @@ import {
   tdBorderColorTool
 } from '@tanbo/tbus';
 
-const editor = new TBus(document.getElementById('editor'), {
+const editor = new Editor(document.getElementById('editor'), {
   toolbar: [
     [historyBackTool, historyForwardTool],
     [headingTool],
