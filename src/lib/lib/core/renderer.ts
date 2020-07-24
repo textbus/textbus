@@ -663,7 +663,7 @@ export class Renderer {
     }).sort((next, prev) => {
       const a = next.params.startIndex - prev.params.startIndex;
       if (a === 0) {
-        const b = next.params.endIndex - prev.params.endIndex;
+        const b = prev.params.endIndex - next.params.endIndex;
         if (b === 0) {
           return next.token.priority - prev.token.priority;
         }
