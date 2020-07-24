@@ -53,7 +53,11 @@ import {
   videoTool,
   codeTool,
   leftToRightTool,
-  rightToLeftTool, tableAddParagraphTool, tableRemoveTool, tdBorderColorTool, unlinkTool
+  rightToLeftTool,
+  tableAddParagraphTool,
+  tableRemoveTool,
+  tdBorderColorTool,
+  unlinkTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -86,7 +90,12 @@ import {
   WordExplainComponentReader,
   wordExplainComponentExample,
   wordExplainStyleSheet,
-  wordExplainComponentEditingStyleSheet
+  wordExplainComponentEditingStyleSheet,
+
+  timelineComponentStyleSheet,
+  TimelineComponentReader,
+  timelineComponentExample,
+  timelineComponentEditingStyleSheet
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
@@ -95,10 +104,12 @@ export const defaultOptions: EditorOptions = {
     imageCardStyleSheet,
     todoListStyleSheet,
     jumbotronStyleSheet,
-    wordExplainStyleSheet
+    wordExplainStyleSheet,
+    timelineComponentStyleSheet
   ],
   editingStyleSheets: [
-    wordExplainComponentEditingStyleSheet
+    wordExplainComponentEditingStyleSheet,
+    timelineComponentEditingStyleSheet
   ],
   hooks: [
     new DefaultHook(),
@@ -107,6 +118,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   componentReaders: [
+    new TimelineComponentReader(),
     new WordExplainComponentReader(),
     new JumbotronComponentReader(),
     new BaiduMapComponentReader(),
@@ -166,7 +178,8 @@ export const defaultOptions: EditorOptions = {
     todoListComponentExample,
     baiduMapComponentExample,
     jumbotronComponentExample,
-    wordExplainComponentExample
+    wordExplainComponentExample,
+    timelineComponentExample
   ]
 };
 
