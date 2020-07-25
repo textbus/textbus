@@ -95,7 +95,11 @@ import {
   timelineComponentStyleSheet,
   TimelineComponentReader,
   timelineComponentExample,
-  timelineComponentEditingStyleSheet
+  timelineComponentEditingStyleSheet,
+
+  progressComponentExample,
+  ProgressComponentReader,
+  progressComponentStyleSheet
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
@@ -105,7 +109,8 @@ export const defaultOptions: EditorOptions = {
     todoListStyleSheet,
     jumbotronStyleSheet,
     wordExplainStyleSheet,
-    timelineComponentStyleSheet
+    timelineComponentStyleSheet,
+    progressComponentStyleSheet
   ],
   editingStyleSheets: [
     wordExplainComponentEditingStyleSheet,
@@ -118,6 +123,7 @@ export const defaultOptions: EditorOptions = {
     new TableEditHook()
   ],
   componentReaders: [
+    new ProgressComponentReader(),
     new TimelineComponentReader(),
     new WordExplainComponentReader(),
     new JumbotronComponentReader(),
@@ -179,7 +185,8 @@ export const defaultOptions: EditorOptions = {
     baiduMapComponentExample,
     jumbotronComponentExample,
     wordExplainComponentExample,
-    timelineComponentExample
+    timelineComponentExample,
+    progressComponentExample
   ]
 };
 
