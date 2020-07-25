@@ -91,28 +91,33 @@ export class WordExplainComponent extends BackboneComponent {
         f.append(new BrComponent());
       }
     })
-    const titleGroup = new VElement('div');
-    titleGroup.classes.push('tb-word-explain-title-group');
+    const titleGroup = new VElement('div', {
+      classes: ['tb-word-explain-title-group']
+    });
     wrap.appendChild(titleGroup);
 
-    const title = new VElement('h3');
-    title.classes.push('tb-word-explain-title');
+    const title = new VElement('h3', {
+      classes: ['tb-word-explain-title']
+    });
     titleGroup.appendChild(title);
 
-    const subtitle = new VElement('div');
-    subtitle.classes.push('tb-word-explain-subtitle');
+    const subtitle = new VElement('div', {
+      classes: ['tb-word-explain-subtitle']
+    });
     titleGroup.appendChild(subtitle);
 
-    const detail = new VElement('div');
-    detail.classes.push('tb-word-explain-detail');
+    const detail = new VElement('div', {
+      classes: ['tb-word-explain-detail']
+    });
     wrap.appendChild(detail);
 
     this.viewMap.set(this.title, title);
     this.viewMap.set(this.subtitle, subtitle);
     this.viewMap.set(this.detail, detail);
     if (!isProduction) {
-      const close = new VElement('span');
-      close.classes.push('tb-word-explain-close');
+      const close = new VElement('span', {
+        classes: ['tb-word-explain-close']
+      });
       wrap.appendChild(close);
       let selection: TBSelection;
       close.events.subscribe(event => {

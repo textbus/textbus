@@ -52,12 +52,14 @@ export class JumbotronComponent extends DivisionComponent {
   }
 
   render(isProduction: boolean): VElement {
-    const vEle = new VElement(this.tagName);
-    const styles = vEle.styles;
-    styles.set('backgroundImage', this.options.backgroundImage);
-    styles.set('backgroundSize', this.options.backgroundSize || 'cover');
-    styles.set('backgroundPosition', this.options.backgroundPosition || 'center');
-    styles.set('minHeight', this.options.minHeight);
+    const vEle = new VElement(this.tagName, {
+      styles: {
+        backgroundImage: this.options.backgroundImage,
+        backgroundSize: this.options.backgroundSize || 'cover',
+        backgroundPosition: this.options.backgroundPosition || 'center',
+        minHeight: this.options.minHeight
+      }
+    });
     this.vEle = vEle;
     return vEle;
   }
