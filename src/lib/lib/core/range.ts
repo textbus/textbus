@@ -147,7 +147,7 @@ export class TBRange {
       startIndex,
       startFragment,
       startChildComponent,
-      endIndex,
+      endIndex: endIndex + 1,
       endFragment,
       endChildComponent
     }

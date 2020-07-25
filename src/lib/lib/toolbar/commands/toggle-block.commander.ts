@@ -47,7 +47,7 @@ export class ToggleBlockCommander implements Commander<string> {
         } else {
           const commonAncestorFragment = range.commonAncestorFragment;
           const scope = range.getCommonAncestorFragmentScope();
-          fragment.from(commonAncestorFragment.cut(scope.startIndex, scope.endIndex - scope.startIndex + 1));
+          fragment.from(commonAncestorFragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
           commonAncestorFragment.insert(block, scope.startIndex);
         }
       }
