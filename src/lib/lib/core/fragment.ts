@@ -164,7 +164,6 @@ export class Fragment {
   clone() {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
-    const self = this;
     Array.from(this.formatMap.keys()).forEach(token => {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
@@ -175,7 +174,7 @@ export class Fragment {
             return 0;
           },
           get endIndex() {
-            return self.contentLength;
+            return ff.contentLength;
           },
           state: f.state,
           abstractData: f.abstractData
