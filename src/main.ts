@@ -39,9 +39,10 @@ const editor = createEditor('#editor', {
   },
   contents: document.getElementById('table').innerHTML
 });
-
-editor.onReady.subscribe(() => {
-  console.log(editor.getContents().contents)
+let i = 0;
+editor.onChange.subscribe(() => {
+  console.log(i, Date.now());
+  i++;
 })
 
 document.getElementById('btn').addEventListener('click', () => {

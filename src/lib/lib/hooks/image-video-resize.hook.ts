@@ -1,6 +1,5 @@
-import { Lifecycle, Renderer, TBSelection } from '../core/_api';
+import { EventType, Lifecycle, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
-import { Subject } from 'rxjs';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);
@@ -25,7 +24,7 @@ export class ImageVideoResizeHook implements Lifecycle {
   private currentElement: HTMLImageElement | HTMLVideoElement;
   private frameContainer: HTMLElement;
 
-  private eventEmitter: Subject<void>;
+  private renderer: Renderer;
 
   constructor() {
     this.mask.className = 'tbus-image-video-resize-hooks-handler';
@@ -97,8 +96,14 @@ export class ImageVideoResizeHook implements Lifecycle {
         this.currentComponent.width = endWidth + 'px';
         this.currentComponent.height = endHeight + 'px';
         this.frameContainer.style.pointerEvents = '';
-        if (this.eventEmitter) {
-          this.eventEmitter.next();
+        if (this.renderer) {
+          const vEle = this.renderer.getVDomByNativeNode(this.currentElement) as VElement;
+          vEle.styles.set('width', endWidth + 'px');
+          vEle.styles.set('height', endHeight + 'px');
+          this.renderer.dispatchEvent(
+            vEle,
+            EventType.onContentUnexpectedlyChanged,
+            null);
         }
         document.removeEventListener('mousemove', mouseMoveFn);
         document.removeEventListener('mouseup', mouseUpFn);
@@ -108,8 +113,8 @@ export class ImageVideoResizeHook implements Lifecycle {
     })
   }
 
-  setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement, contentChangeEventEmitter: Subject<void>) {
-    this.eventEmitter = contentChangeEventEmitter;
+  setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
+    this.renderer = renderer;
     contextDocument.addEventListener('click', ev => {
       const srcElement = ev.target as HTMLImageElement;
       if (/^img$|video/i.test(srcElement.nodeName)) {

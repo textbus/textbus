@@ -171,9 +171,9 @@ export class Editor implements EventDelegate {
         this.invokeViewUpdatedHooks();
       }),
       zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
-        this.readyState = true;
         this.rootFragment = this.parser.parse(result[0]);
         this.render();
+        this.readyState = true;
         this.setup();
         this.readyEvent.next();
       })
@@ -275,8 +275,7 @@ export class Editor implements EventDelegate {
         hooks.setup(this.renderer,
           this.viewer.contentDocument,
           this.viewer.contentWindow,
-          this.workbench.tablet,
-          this.changeEvent);
+          this.workbench.tablet);
       }
     })
 
@@ -552,6 +551,9 @@ export class Editor implements EventDelegate {
       }
     })
     this.invokeViewUpdatedHooks();
+    if (this.readyState) {
+      this.dispatchContentChangeEvent();
+    }
   }
 
   private invokeViewUpdatedHooks() {
@@ -699,9 +701,7 @@ export class Editor implements EventDelegate {
     if (this.snapshotSubscription) {
       this.snapshotSubscription.unsubscribe();
     }
-    this.snapshotSubscription = this.onUserWrite.pipe(tap(() => {
-      this.dispatchContentChangeEvent();
-    })).pipe(sampleTime(5000)).subscribe(() => {
+    this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
       this.history.recordSnapshot(this.rootFragment, this.selection);
       this.toolbar.updateHandlerState(this.selection, this.renderer);
     });

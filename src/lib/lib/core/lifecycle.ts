@@ -17,9 +17,8 @@ export interface Lifecycle {
    * @param contextDocument
    * @param contextWindow
    * @param frameContainer
-   * @param contentChangeEventEmitter
    */
-  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement, contentChangeEventEmitter: Subject<void>): void;
+  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
 
   /**
    * 当用户输入时调用。
