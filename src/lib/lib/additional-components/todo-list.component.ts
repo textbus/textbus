@@ -17,8 +17,8 @@ export class TodoListComponentReader implements ComponentReader {
     const listConfig = Array.from(element.children).map(child => {
       const stateElement = child.querySelector('span.tb-todo-list-state');
       return {
-        active: stateElement.classList.contains('.tb-todo-list-active'),
-        disabled: stateElement.classList.contains('.tb-todo-list-disabled'),
+        active: stateElement.classList.contains('tb-todo-list-state-active'),
+        disabled: stateElement.classList.contains('tb-todo-list-state-disabled'),
         childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
         slot: new Fragment()
       }
