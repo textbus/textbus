@@ -38,10 +38,8 @@ class FindForm implements AdditionalViewer {
   </div>
 </div>
 `;
-
     const [findInput, replaceInput] = Array.from(this.elementRef.querySelectorAll('input'));
     const [findBtn, nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
-
 
     findBtn.addEventListener('click', () => {
       if (findInput.value) {
@@ -55,6 +53,16 @@ class FindForm implements AdditionalViewer {
       }
     })
 
+  }
+
+  destroy() {
+    this.actionEvent.next({
+      findValue: '',
+      next: false,
+      replaceAll: false,
+      replace: false,
+      replaceValue: ''
+    })
   }
 }
 

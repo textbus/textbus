@@ -1,12 +1,50 @@
 import {
   BackboneComponent,
   BranchComponent,
+  ChildSlotModel,
   Commander,
   DivisionComponent,
+  FormatAbstractData,
+  FormatEffect,
+  FormatterPriority,
   Fragment,
+  InlineFormatter,
   Renderer,
-  TBSelection
+  ReplaceModel,
+  TBSelection,
+  VElement
 } from '../../core/_api';
+
+class FindFormatter extends InlineFormatter {
+  constructor() {
+    super({}, FormatterPriority.InlineStyle);
+  }
+
+  match() {
+    return FormatEffect.Invalid;
+  }
+
+  read(node: HTMLElement): FormatAbstractData {
+    return null;
+  }
+
+  render(isProduction: boolean,
+         state: FormatEffect,
+         abstractData: FormatAbstractData,
+         existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
+    const flag = !!existingElement;
+    if (!existingElement) {
+      existingElement = new VElement('span');
+    }
+
+    existingElement.styles.set('backgroundColor', '#ff0');
+    existingElement.styles.set('color', '#000');
+
+    return flag ? new ChildSlotModel(existingElement) : new ReplaceModel(existingElement);
+  }
+}
+
+export const findFormatter = new FindFormatter();
 
 export interface FindAndReplaceRule {
   findValue: string;
@@ -26,9 +64,29 @@ export class FindCommander implements Commander<FindAndReplaceRule> {
 
   highlight(fragment: Fragment, search: string) {
     let index = 0;
+    fragment.apply(findFormatter, {
+      state: FormatEffect.Invalid,
+      abstractData: null,
+      startIndex: 0,
+      endIndex: fragment.contentLength
+    });
     fragment.sliceContents(0).forEach(item => {
-      if (typeof item === 'string') {
-        const r = item.match(new RegExp(search, 'g'));
+      if (typeof item === 'string' && search) {
+        let position = 0;
+        while (true) {
+          const i = item.indexOf(search, position);
+          if (i > -1) {
+            fragment.apply(findFormatter, {
+              state: FormatEffect.Valid,
+              abstractData: null,
+              startIndex: i,
+              endIndex: i + search.length
+            });
+            position = i + search.length;
+          } else {
+            break;
+          }
+        }
       } else if (item instanceof DivisionComponent) {
         this.highlight(item.slot, search);
       } else if (item instanceof BranchComponent) {

@@ -9,6 +9,8 @@ import { Matcher } from '../matcher/matcher';
 export interface AdditionalViewer<T = any> {
   elementRef: HTMLElement;
   onAction: Observable<T>;
+
+  destroy(): void;
 }
 
 /**
@@ -20,6 +22,7 @@ export interface AdditionalConfig<T = any> {
 
   /** 下拉控件展开后显示的内容 */
   menuFactory(): AdditionalViewer<T>;
+
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */

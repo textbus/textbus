@@ -34,6 +34,8 @@ export class Toolbar {
   private keymapPrompt = document.createElement('div');
   private componentStageExpand = false;
 
+  private currentAdditionalWorktableViewer: AdditionalViewer;
+
   private subs: Subscription[] = [];
 
   constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[], private options = {
@@ -95,6 +97,8 @@ export class Toolbar {
       this.keymapPrompt.classList.remove('tbus-toolbar-keymap-prompt-show');
     })
     this.additionalWorktableCloseBtn.addEventListener('click', () => {
+      this.currentAdditionalWorktableViewer.destroy();
+      this.additionalWorktableContent.innerHTML = '';
       this.additionalWorktable.classList.remove('tbus-toolbar-additional-worktable-show');
     })
   }
@@ -174,6 +178,7 @@ export class Toolbar {
       case ToolType.Additional:
         h = option.factory();
         this.subs.push((<AdditionalHandler>h).onShow.subscribe(viewer => {
+          this.currentAdditionalWorktableViewer = viewer;
           this.additionalWorktableContent.innerHTML = '';
           this.additionalWorktable.classList.add('tbus-toolbar-additional-worktable-show');
           this.additionalWorktableContent.appendChild(viewer.elementRef);
