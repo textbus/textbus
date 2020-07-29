@@ -24,6 +24,7 @@ const editor = createEditor('#editor', {
   expandComponentLibrary: true,
   deviceWidth: '768px',
   theme: 'dark',
+  fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');

@@ -38,6 +38,8 @@ export interface EditorOptions {
   theme?: string;
   /** 设备宽度 */
   deviceWidth?: string;
+  /** 默认是否全屏*/
+  fullScreen?: boolean;
   /** 默认是否展开组件库 */
   expandComponentLibrary?: boolean;
   /** 设置最大历史栈 */
@@ -142,7 +144,10 @@ export class Editor implements EventDelegate {
     this.workbench = new Workbench(this.viewer);
     let deviceWidth = options.deviceWidth || '100%';
     this.statusBar.device.update(deviceWidth);
-    this.statusBar.fullScreen.full = false;
+    this.statusBar.fullScreen.full = this.options.fullScreen;
+
+    this.statusBar.fullScreen.full ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
+
     this.workbench.setTabletWidth(deviceWidth);
     this.workbench.componentStage.expand = this.options.expandComponentLibrary;
 
@@ -425,7 +430,7 @@ export class Editor implements EventDelegate {
     })
     this.viewer.input.events.addKeymap({
       keymap: {
-        key: 'Backspace'
+        key: ['Backspace', 'Delete']
       },
       action: () => {
         const focusNode = this.nativeSelection.focusNode;

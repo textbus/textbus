@@ -4,9 +4,9 @@ import { KeymapAction, Keymap, isMac } from '../../viewer/input';
 import { Commander, Renderer, TBSelection } from '../../core/_api';
 import { SelectionMatchDelta } from '../matcher/matcher';
 
-export interface Tool {
+export interface Tool<T = any> {
   elementRef: HTMLElement;
-  onApply: Observable<any>;
+  onApply: Observable<T>;
   commander: Commander;
   keymapAction?: KeymapAction | KeymapAction[];
 

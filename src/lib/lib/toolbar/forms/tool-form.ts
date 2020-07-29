@@ -52,7 +52,7 @@ export class ToolForm implements DropdownViewer {
 
     const btnWrap = document.createElement('div');
     btnWrap.classList.add('tbus-btn-wrap');
-    btnWrap.innerHTML = '<button class="tbus-btn tbus-btn-primary" type="submit">确定</button>';
+    btnWrap.innerHTML = '<button class="tbus-btn tbus-btn-block tbus-btn-primary" type="submit">确定</button>';
 
     this.elementRef.appendChild(btnWrap);
 

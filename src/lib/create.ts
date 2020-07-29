@@ -57,7 +57,7 @@ import {
   tableAddParagraphTool,
   tableRemoveTool,
   tdBorderColorTool,
-  unlinkTool
+  unlinkTool, findTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -177,6 +177,7 @@ export const defaultOptions: EditorOptions = {
     [imageTool, audioTool, videoTool],
     [textAlignTool],
     [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
+    [findTool],
     [cleanTool]
   ],
   componentLibrary: [

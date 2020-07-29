@@ -14,6 +14,14 @@
     }
   }
 
+  &.tbus-form-inline {
+    .tbus-form-group {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 1em;
+    }
+  }
+
   &.tbus-form-tool {
     padding: 15px 20px;
     min-width: 160px;
@@ -323,6 +331,7 @@
     width: 100%;
     display: block;
   }
+
   &-loading {
     @keyframes tbus-form-btn-loading {
       0% {

@@ -3,15 +3,17 @@ import { SelectConfig, SelectHandler } from './select.handler';
 import { DropdownConfig, DropdownHandler } from './dropdown.handler';
 import { EventDelegate } from '../help';
 import { ActionSheetConfig, ActionSheetHandler } from './action-sheet.handler';
+import { AdditionalConfig, AdditionalHandler } from './additional.handler';
 
 export enum ToolType {
   Button,
   Select,
   Dropdown,
-  ActionSheet
+  ActionSheet,
+  Additional
 }
 
-export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig;
+export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig | AdditionalConfig;
 
 export interface ButtonToolFactory {
   type: ToolType.Button;
@@ -41,7 +43,14 @@ export interface ActionSheetToolFactory {
   factory(stickElement: HTMLElement): ActionSheetHandler
 }
 
-export type ToolFactory = ButtonToolFactory | SelectToolFactory | DropdownToolFactory | ActionSheetToolFactory;
+export interface AdditionalToolFactory {
+  type: ToolType.Additional,
+  config: AdditionalConfig,
+
+  factory(): AdditionalHandler
+}
+
+export type ToolFactory = ButtonToolFactory | SelectToolFactory | DropdownToolFactory | ActionSheetToolFactory | AdditionalToolFactory;
 
 export class Toolkit {
   static makeButtonTool(config: ButtonConfig): ButtonToolFactory {
@@ -83,6 +92,17 @@ export class Toolkit {
       config,
       factory(stickElement: HTMLElement) {
         return new ActionSheetHandler(op.config, stickElement)
+      }
+    };
+    return op;
+  }
+
+  static makeAdditionalTool(config: AdditionalConfig): AdditionalToolFactory {
+    const op: AdditionalToolFactory = {
+      type: ToolType.Additional,
+      config,
+      factory() {
+        return new AdditionalHandler(op.config)
       }
     };
     return op;

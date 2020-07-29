@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'tubs';
   src:
-    url('fonts/tubs.ttf?jyc72t') format('truetype'),
-    url('fonts/tubs.woff?jyc72t') format('woff'),
-    url('fonts/tubs.svg?jyc72t#tubs') format('svg');
+    url('fonts/tubs.ttf?ugfqpc') format('truetype'),
+    url('fonts/tubs.woff?ugfqpc') format('woff'),
+    url('fonts/tubs.svg?ugfqpc#tubs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -200,4 +200,7 @@
 }
 .tbus-icon-terminal:before {
   content: "\ea81";
+}
+.tbus-icon-search:before {
+  content: "\e986";
 }

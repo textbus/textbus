@@ -6,6 +6,7 @@ export { cleanTool } from './clean.tool';
 export { codeTool } from './code.tool';
 export { colorTool } from './color.tool';
 export { emojiTool } from './emoji.tool';
+export { findTool } from './find.tool';
 export { fontFamilyTool } from './font-family.tool';
 export { fontSizeTool } from './font-size.tool';
 export { headingTool } from './heading.tool';

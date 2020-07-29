@@ -1,7 +1,15 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 import { HighlightState } from './help';
-import { createKeymapHTML, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
+import {
+  AdditionalHandler,
+  AdditionalViewer,
+  createKeymapHTML,
+  Tool,
+  ToolConfig,
+  ToolFactory,
+  ToolType
+} from './toolkit/_api';
 import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
@@ -16,10 +24,17 @@ export class Toolbar {
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
   private componentStageEvent = new Subject<boolean>();
+  private toolWrapper = document.createElement('div');
   private toolsElement = document.createElement('div');
   private componentsElement = document.createElement('div');
+  private additionalWorktable = document.createElement('div');
+  private additionalWorktableContent = document.createElement('div');
+  private additionalWorktableClose = document.createElement('div');
+  private additionalWorktableCloseBtn = document.createElement('button');
   private keymapPrompt = document.createElement('div');
   private componentStageExpand = false;
+
+  private subs: Subscription[] = [];
 
   constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[], private options = {
     showComponentStage: true,
@@ -28,8 +43,13 @@ export class Toolbar {
     this.onAction = this.actionEvent.asObservable();
     this.onComponentsStageChange = this.componentStageEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
+    this.toolWrapper.classList.add('tbus-toolbar-wrapper');
     this.toolsElement.classList.add('tbus-toolbar-tools');
     this.componentsElement.classList.add('tbus-toolbar-components');
+    this.additionalWorktable.classList.add('tbus-toolbar-additional-worktable');
+    this.additionalWorktableContent.classList.add('tbus-toolbar-additional-worktable-content');
+    this.additionalWorktableClose.classList.add('tbus-toolbar-additional-worktable-close');
+    this.additionalWorktableCloseBtn.innerHTML = '&times;';
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
     this.componentStageExpand = options.openComponentState;
     if (options.showComponentStage) {
@@ -52,10 +72,10 @@ export class Toolbar {
       this.componentsElement.appendChild(btn);
     }
 
-
-    this.elementRef.appendChild(this.toolsElement);
-    this.elementRef.appendChild(this.componentsElement);
-    this.elementRef.appendChild(this.keymapPrompt);
+    this.toolWrapper.append(this.toolsElement, this.componentsElement);
+    this.additionalWorktableClose.append(this.additionalWorktableCloseBtn);
+    this.additionalWorktable.append(this.additionalWorktableContent, this.additionalWorktableClose);
+    this.elementRef.append(this.toolWrapper, this.additionalWorktable, this.keymapPrompt);
 
     this.createToolbar(config);
 
@@ -72,6 +92,9 @@ export class Toolbar {
         }
       }
       this.keymapPrompt.classList.remove('tbus-toolbar-keymap-prompt-show');
+    })
+    this.additionalWorktableCloseBtn.addEventListener('click', () => {
+      this.additionalWorktable.classList.remove('tbus-toolbar-additional-worktable-show');
     })
   }
 
@@ -94,6 +117,10 @@ export class Toolbar {
         this.contextMenu.setMenus(menus, selection, tool.instance);
       }
     })
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private findNeedShowKeymapHandler(el: HTMLElement): string {
@@ -143,6 +170,16 @@ export class Toolbar {
       case ToolType.ActionSheet:
         h = option.factory(this.toolsElement);
         break;
+      case ToolType.Additional:
+        h = option.factory();
+        this.subs.push((<AdditionalHandler>h).onShow.subscribe(viewer => {
+          this.additionalWorktableContent.innerHTML = '';
+          this.additionalWorktable.classList.add('tbus-toolbar-additional-worktable-show');
+          this.additionalWorktableContent.appendChild(viewer.elementRef);
+        }));
+        break;
+      default:
+        throw new Error('未被支持的工具！');
     }
     if (h.keymapAction) {
       const keymaps = Array.isArray(h.keymapAction) ? h.keymapAction : [h.keymapAction];

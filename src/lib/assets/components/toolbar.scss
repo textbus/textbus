@@ -1,9 +1,6 @@
 .tbus-toolbar {
-  display: flex;
-  padding: 8px 15px 3px;
   background-color: $color-light;
   border: 1px solid $color-gray-light;
-  min-height: 24px;
   font-size: 14px;
   color: $color-default;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -13,6 +10,60 @@
 
   button {
     font-family: inherit;
+  }
+}
+
+.tbus-toolbar-wrapper {
+  display: flex;
+  padding: 8px 15px 3px;
+  min-height: 24px;
+}
+
+.tbus-toolbar-additional-worktable {
+  display: none;
+  align-items: center;
+  padding: 5px 20px;
+  background-color: #fff;
+  border-top: 1px solid $color-gray-light;
+
+  &.tbus-toolbar-additional-worktable-show {
+    display: flex;
+  }
+
+  .tbus-form {
+    color: inherit;
+    padding: 0;
+    background: none;
+  }
+
+  &-content {
+    flex: 1;
+  }
+
+  &-close {
+    line-height: 1;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+
+    button {
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      line-height: 1;
+      color: $color-primary;
+      cursor: pointer;
+      border: none;
+      background: none;
+      outline: none;
+      margin-top: -5px;
+      transition: transform .15s;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
   }
 }
 
