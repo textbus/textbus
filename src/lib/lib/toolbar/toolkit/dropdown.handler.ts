@@ -41,9 +41,7 @@ export class DropdownHandler implements Tool {
     this.commander = config.commanderFactory();
     const viewer = config.menuFactory();
     this.viewer = viewer;
-    this.onApply = viewer.onComplete.pipe(map(result => {
-      this.commander?.updateValue(result);
-    }));
+    this.onApply = viewer.onComplete;
     this.dropdownButton.innerText = config.label || '';
 
     this.dropdownButton.classList.add(...(config.classes || []));

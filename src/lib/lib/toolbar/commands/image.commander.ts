@@ -5,15 +5,10 @@ import { ImageComponent } from '../../components/image.component';
 export class ImageCommander implements Commander<AttrState[]> {
   recordHistory = true;
 
-  private attrs: AttrState[];
 
-  updateValue(value: AttrState[]) {
-    this.attrs = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean): void {
+  command(selection: TBSelection, states: AttrState[], overlap: boolean): void {
     const attrs = new Map<string, string | number | boolean>();
-    this.attrs.forEach(attr => {
+    states.forEach(attr => {
       attrs.set(attr.name, attr.value);
     });
 

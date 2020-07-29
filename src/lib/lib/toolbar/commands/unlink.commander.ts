@@ -1,10 +1,10 @@
 import { Commander, FormatEffect, TBSelection } from '../../core/_api';
 import { linkFormatter } from '../../formatter/link.formatter';
 
-export class UnlinkCommander implements Commander {
+export class UnlinkCommander implements Commander<null> {
   recordHistory = true;
 
-  command(selection: TBSelection, overlap: boolean) {
+  command(selection: TBSelection) {
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         range.startFragment.getFormatRanges(linkFormatter).filter(f => {

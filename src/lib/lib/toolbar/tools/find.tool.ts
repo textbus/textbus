@@ -2,12 +2,12 @@ import { Observable, Subject } from 'rxjs';
 
 import { Toolkit } from '../toolkit/toolkit';
 import { AdditionalViewer } from '../toolkit/_api';
-import { FindCommander } from '../commands/find.commander';
+import { FindAndReplaceRule, FindCommander } from '../commands/find.commander';
 
 class FindForm implements AdditionalViewer {
-  onAction: Observable<any>;
+  onAction: Observable<FindAndReplaceRule>;
   elementRef = document.createElement('form');
-  private actionEvent = new Subject<any>();
+  private actionEvent = new Subject<FindAndReplaceRule>();
 
   constructor() {
     this.onAction = this.actionEvent.asObservable();
@@ -38,6 +38,23 @@ class FindForm implements AdditionalViewer {
   </div>
 </div>
 `;
+
+    const [findInput, replaceInput] = Array.from(this.elementRef.querySelectorAll('input'));
+    const [findBtn, nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
+
+
+    findBtn.addEventListener('click', () => {
+      if (findInput.value) {
+        this.actionEvent.next({
+          findValue: findInput.value,
+          next: false,
+          replaceAll: false,
+          replace: false,
+          replaceValue: ''
+        })
+      }
+    })
+
   }
 }
 

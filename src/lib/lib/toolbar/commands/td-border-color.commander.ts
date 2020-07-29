@@ -5,18 +5,13 @@ import { tdBorderColorFormatter } from '../../formatter/td-border-color.formatte
 
 export class TdBorderColorCommander implements Commander<string> {
   recordHistory = true;
-  private color = '';
   private range: TableEditRange;
-
-  updateValue(value: string) {
-    this.color = value;
-  }
 
   setEditRange(range: TableEditRange) {
     this.range = range;
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+  command(selection: TBSelection, color: string, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
     this.recordHistory = true;
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
     if (!context) {
@@ -39,21 +34,21 @@ export class TdBorderColorCommander implements Commander<string> {
       });
 
     selectedCells.forEach(c => {
-      if (this.color) {
+      if (color) {
         if (c.columnIndex === minColumn) {
           const prev = c.beforeCell;
           if (prev) {
             const f = prev.fragment.getFormatRanges(tdBorderColorFormatter);
             if (f.length) {
               f.forEach(ff => {
-                ff.abstractData.styles.set('borderRightColor', this.color);
+                ff.abstractData.styles.set('borderRightColor', color);
               })
             } else {
               prev.fragment.apply(tdBorderColorFormatter, {
                 state: FormatEffect.Valid,
                 abstractData: new FormatAbstractData({
                   styles: {
-                    borderRightColor: this.color
+                    borderRightColor: color
                   }
                 })
               })
@@ -67,14 +62,14 @@ export class TdBorderColorCommander implements Commander<string> {
 
             if (f.length) {
               f.forEach(ff => {
-                ff.abstractData.styles.set('borderBottomColor', this.color);
+                ff.abstractData.styles.set('borderBottomColor', color);
               })
             } else {
               prev.fragment.apply(tdBorderColorFormatter, {
                 state: FormatEffect.Valid,
                 abstractData: new FormatAbstractData({
                   styles: {
-                    borderBottomColor: this.color
+                    borderBottomColor: color
                   }
                 })
               })
@@ -87,10 +82,10 @@ export class TdBorderColorCommander implements Commander<string> {
         abstractData: new FormatAbstractData()
       });
       c.cell.fragment.apply(tdBorderColorFormatter, {
-        state: this.color ? FormatEffect.Valid : FormatEffect.Invalid,
+        state: color ? FormatEffect.Valid : FormatEffect.Invalid,
         abstractData: new FormatAbstractData({
           styles: {
-            borderColor: this.color
+            borderColor: color
           }
         })
       })

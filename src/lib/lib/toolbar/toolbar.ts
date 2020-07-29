@@ -18,11 +18,11 @@ import { ContextMenu } from './context-menu';
 
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable<{ config: ToolConfig, instance: Tool }>;
+  onAction: Observable<{ config: ToolConfig, instance: Tool, params: any }>;
   onComponentsStageChange: Observable<boolean>;
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
-  private actionEvent = new Subject<{ config: ToolConfig, instance: Tool }>();
+  private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
   private componentStageEvent = new Subject<boolean>();
   private toolWrapper = document.createElement('div');
   private toolsElement = document.createElement('div');
@@ -50,6 +50,7 @@ export class Toolbar {
     this.additionalWorktableContent.classList.add('tbus-toolbar-additional-worktable-content');
     this.additionalWorktableClose.classList.add('tbus-toolbar-additional-worktable-close');
     this.additionalWorktableCloseBtn.innerHTML = '&times;';
+    this.additionalWorktableCloseBtn.type = 'button';
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
     this.componentStageExpand = options.openComponentState;
     if (options.showComponentStage) {
@@ -197,8 +198,11 @@ export class Toolbar {
   private listenUserAction() {
     this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
-        item.instance.onApply.subscribe(() => {
-          this.actionEvent.next(item);
+        item.instance.onApply.subscribe(params => {
+          this.actionEvent.next({
+            ...item,
+            params
+          });
         })
       }
     });

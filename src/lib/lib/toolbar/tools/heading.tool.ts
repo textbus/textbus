@@ -17,7 +17,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   },
   commanderFactory() {
-    return new BlockCommander('p');
+    return new BlockCommander();
   },
   options: [{
     label: '标题1',

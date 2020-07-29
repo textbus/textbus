@@ -5,22 +5,17 @@ import { AttrState } from '../forms/help';
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;
 
-  private attrs: AttrState[];
 
   constructor(private formatter: LinkFormatter) {
   }
 
-  updateValue(value: AttrState[]) {
-    this.attrs = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean): void {
+  command(selection: TBSelection, states: AttrState[], overlap: boolean): void {
     this.recordHistory = !selection.collapsed;
     if (!this.recordHistory) {
       return;
     }
     const attrs = new Map<string, string>();
-    this.attrs.forEach(attr => {
+    states.forEach(attr => {
       attrs.set(attr.name, attr.value.toString());
     });
     selection.ranges.forEach(range => {

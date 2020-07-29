@@ -4,15 +4,10 @@ import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<AttrState[]> {
   recordHistory = true;
-  private attrs: AttrState[] = [];
 
-  updateValue(value: AttrState[]) {
-    this.attrs = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+  command(selection: TBSelection, states: AttrState[],  overlap: boolean, renderer: Renderer): void {
     const attrs = new Map<string, string | number | boolean>();
-    this.attrs.forEach(attr => {
+    states.forEach(attr => {
       attrs.set(attr.name, attr.value);
     });
     const rows = +attrs.get('rows') || 0;

@@ -1,13 +1,13 @@
 import { Commander, TBSelection, InlineFormatter, FormatEffect, FormatAbstractData, Renderer } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 
-export class BoldCommander implements Commander<InlineFormatter> {
+export class BoldCommander implements Commander<null> {
   recordHistory = true;
 
   constructor(private formatter: InlineFormatter) {
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer): void {
     this.recordHistory = !selection.collapsed;
     if (!this.recordHistory) {
       return;

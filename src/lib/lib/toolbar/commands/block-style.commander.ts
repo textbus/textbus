@@ -10,16 +10,10 @@ import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 export class BlockStyleCommander implements Commander<string> {
   recordHistory = true;
 
-  private value = '';
-
   constructor(private name: string, private formatter: BlockStyleFormatter) {
   }
 
-  updateValue(value: string) {
-    this.value = value;
-  }
-
-  command(selection: TBSelection) {
+  command(selection: TBSelection, value: string) {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         let fragments: Fragment[] = [];
@@ -51,10 +45,10 @@ export class BlockStyleCommander implements Commander<string> {
         }
         fragments.forEach(slot => {
           slot.apply(this.formatter, {
-            state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
+            state: value ? FormatEffect.Valid : FormatEffect.Invalid,
             abstractData: new FormatAbstractData({
               styles: {
-                [this.name]: this.value
+                [this.name]: value
               }
             })
           });

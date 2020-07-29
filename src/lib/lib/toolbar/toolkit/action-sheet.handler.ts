@@ -4,7 +4,7 @@ import { HighlightState } from '../help';
 import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { Tool, createKeymapHTML, ContextMenuConfig } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
-import { ActionCommander } from '../../core/_api';
+import { Commander } from '../../core/_api';
 import { Matcher } from '../matcher/_api';
 
 export interface ActionConfig {
@@ -23,7 +23,7 @@ export interface ActionSheetConfig {
   actions: ActionConfig[];
 
   /** 当某一项被点击时调用的命令 */
-  commanderFactory(): ActionCommander;
+  commanderFactory(): Commander;
 
   /** 设置上下文菜单 */
   contextMenu?: ContextMenuConfig[];
@@ -92,7 +92,7 @@ export class ActionSheetHandler implements Tool {
   onMatched: Observable<ActionConfig>;
   onApply: Observable<any>;
   keymapAction: KeymapAction[] = [];
-  commander: ActionCommander;
+  commander: Commander;
 
   private matchedEvent = new Subject<ActionConfig>();
   private eventSource = new Subject<any>();
@@ -115,8 +115,7 @@ export class ActionSheetHandler implements Tool {
           keymap: action.keymap,
           action: () => {
             if (!this.dropdown.disabled) {
-              this.commander.setActionType(action.value);
-              this.eventSource.next();
+              this.eventSource.next(action.value);
             }
           }
         })
@@ -125,8 +124,7 @@ export class ActionSheetHandler implements Tool {
 
     this.viewer.onComplete.subscribe(v => {
       if (!this.dropdown.disabled) {
-        this.commander.setActionType(v);
-        this.eventSource.next();
+        this.eventSource.next(v);
       }
     })
 

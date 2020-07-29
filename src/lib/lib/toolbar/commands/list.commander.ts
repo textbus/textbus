@@ -9,13 +9,13 @@ import {
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
 
-export class ListCommander implements Commander {
+export class ListCommander implements Commander<null> {
   recordHistory = true;
 
   constructor(private tagName: 'ol' | 'ul') {
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer): void {
     selection.ranges.forEach(range => {
       if (overlap) {
         range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {

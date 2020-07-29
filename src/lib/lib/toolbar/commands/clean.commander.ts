@@ -9,13 +9,13 @@ import {
 } from '../../core/_api';
 import { BrComponent } from '../../components/br.component';
 
-export class CleanCommander implements Commander {
+export class CleanCommander implements Commander<null> {
   recordHistory = true;
 
   constructor(private excludeFormatters: Constructor<BlockFormatter | InlineFormatter>[] = []) {
   }
 
-  command(selection: TBSelection, overlap: boolean): void {
+  command(selection: TBSelection, _: null, overlap: boolean): void {
     let b = false;
     selection.ranges.forEach(range => {
       range.getSuccessiveContents().forEach(scope => {

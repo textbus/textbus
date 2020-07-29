@@ -7,28 +7,23 @@ import { PreComponent, BrComponent } from '../../components/_api';
 
 export class PreCommander implements Commander<string> {
   recordHistory = true;
-  private lang = '';
 
-  updateValue(value: string) {
-    this.lang = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+  command(selection: TBSelection, lang: string, overlap: boolean, renderer: Renderer): void {
     let b = true;
     if (overlap) {
       selection.ranges.forEach(range => {
         const context = renderer.getContext(range.startFragment, PreComponent);
-        if (context.lang === this.lang) {
+        if (context.lang === lang) {
           b = false;
           return;
         }
-        context.lang = this.lang;
+        context.lang = lang;
       });
     } else {
       selection.ranges.forEach(range => {
         const context = range.commonAncestorComponent;
         const parentFragment = renderer.getParentFragment(context);
-        const t = new PreComponent(this.lang);
+        const t = new PreComponent(lang);
         t.slot.append(new BrComponent());
         parentFragment.insertAfter(t, context);
         range.setStart(t.slot, 0);

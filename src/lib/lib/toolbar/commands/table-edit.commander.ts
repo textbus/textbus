@@ -1,4 +1,4 @@
-import { ActionCommander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
 import { TableCellPosition, TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export enum TableEditActions {
@@ -19,27 +19,22 @@ export interface TableEditRange {
   endPosition: TableCellPosition;
 }
 
-export class TableEditCommander implements ActionCommander {
+export class TableEditCommander implements Commander<TableEditActions> {
   recordHistory = true;
-  private actionType: TableEditActions;
   private params: TableEditRange;
-
-  setActionType(type: TableEditActions) {
-    this.actionType = type;
-  }
 
   setEditRange(value: TableEditRange): void {
     this.params = value;
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
+  command(selection: TBSelection, actionType: TableEditActions, overlap: boolean, renderer: Renderer) {
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
     this.recordHistory = true;
     if (!context) {
       this.recordHistory = false;
       return;
     }
-    switch (this.actionType) {
+    switch (actionType) {
       case TableEditActions.AddColumnToLeft:
         this.addColumnToLeft(context);
         break;

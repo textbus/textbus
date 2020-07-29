@@ -309,7 +309,7 @@ export class Editor implements EventDelegate {
       }),
       this.toolbar.onAction.subscribe(config => {
         if (this.selection) {
-          this.apply(config.config, config.instance.commander);
+          this.apply(config.config, config.params, config.instance.commander);
           if (config.instance.commander.recordHistory) {
             this.history.recordSnapshot(this.rootFragment, this.selection);
             this.listenUserWriteEvent();
@@ -518,7 +518,7 @@ export class Editor implements EventDelegate {
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
   }
 
-  private apply(config: ToolConfig, commander: Commander) {
+  private apply(config: ToolConfig, params: any, commander: Commander<any>) {
     const selection = this.selection;
     const state = config.matcher ?
       config.matcher.queryState(selection, this.renderer, this).state :
@@ -535,7 +535,7 @@ export class Editor implements EventDelegate {
       }
     })
     if (isNext) {
-      commander.command(selection, overlap, this.renderer, this.rootFragment);
+      commander.command(selection, params, overlap, this.renderer, this.rootFragment);
       this.render();
       selection.restore();
       this.toolbar.updateHandlerState(selection, this.renderer);

@@ -5,15 +5,9 @@ import { AudioComponent } from '../../components/audio.component';
 export class AudioCommander implements Commander<AttrState[]> {
   recordHistory = true;
 
-  private attrs: AttrState[];
-
-  updateValue(value: AttrState[]) {
-    this.attrs = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean): void {
+  command(selection: TBSelection, config: AttrState[], overlap: boolean): void {
     const attrs = new Map<string, string | number | boolean>();
-    this.attrs.forEach(attr => {
+    config.forEach(attr => {
       attrs.set(attr.name, attr.value);
     });
 

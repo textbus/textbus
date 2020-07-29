@@ -3,16 +3,10 @@ import { Commander, FormatAbstractData, FormatEffect, InlineFormatter, TBSelecti
 export class StyleCommander implements Commander<string> {
   recordHistory = true;
 
-  private value = '';
-
   constructor(private name: string, private formatter: InlineFormatter) {
   }
 
-  updateValue(value: string) {
-    this.value = value;
-  }
-
-  command(selection: TBSelection) {
+  command(selection: TBSelection, value: string) {
     this.recordHistory = !selection.collapsed;
     if (!this.recordHistory) {
       return;
@@ -20,12 +14,12 @@ export class StyleCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state: this.value ? FormatEffect.Valid : FormatEffect.Invalid,
+          state: value ? FormatEffect.Valid : FormatEffect.Invalid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           abstractData: new FormatAbstractData({
             styles: {
-              [this.name]: this.value
+              [this.name]: value
             }
           })
         });

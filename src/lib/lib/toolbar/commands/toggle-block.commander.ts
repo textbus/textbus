@@ -5,13 +5,13 @@ import {
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 
-export class ToggleBlockCommander implements Commander<string> {
+export class ToggleBlockCommander implements Commander<null> {
   recordHistory = true;
 
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer) {
+  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer) {
     selection.ranges.forEach(range => {
       if (overlap) {
         const context = renderer.getContext(range.commonAncestorFragment,

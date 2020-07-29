@@ -1,7 +1,7 @@
 import { Commander, TBSelection, Renderer, Fragment } from '../../core/_api';
 import { Editor } from '../../editor';
 
-export class HistoryCommander implements Commander<Editor> {
+export class HistoryCommander implements Commander<null> {
   recordHistory = false;
 
   private editor: Editor;
@@ -9,11 +9,11 @@ export class HistoryCommander implements Commander<Editor> {
   constructor(private action: 'forward' | 'back') {
   }
 
-  updateValue(value: Editor) {
-    this.editor = value;
+  set(v: Editor) {
+    this.editor = v;
   }
 
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
     const snapshot = this.action === 'back' ?
       this.editor.history.getPreviousSnapshot() :
       this.editor.history.getNextSnapshot();

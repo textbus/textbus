@@ -13,18 +13,14 @@ import { BrComponent } from '../../components/br.component';
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
 
-  constructor(private tagName: string) {
-  }
+  private tagName: string;
 
-  updateValue(value: string): void {
-    this.tagName = value;
-  }
-
-  command(selection: TBSelection, overlap: boolean, renderer: Renderer): void {
+  command(selection: TBSelection, tagName: string, overlap: boolean, renderer: Renderer): void {
+    this.tagName = tagName;
     selection.ranges.forEach(range => {
 
       range.getSuccessiveContents().forEach(scope => {
-        const blockComponent = new BlockComponent(this.tagName);
+        const blockComponent = new BlockComponent(tagName);
 
         const parentComponent = renderer.getParentComponent(scope.fragment);
 

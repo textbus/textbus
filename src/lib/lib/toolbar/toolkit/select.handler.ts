@@ -128,8 +128,7 @@ export class SelectHandler implements Tool {
           action: () => {
             if (!this.dropdown.disabled) {
               this.value = option.value;
-              this.commander.updateValue(option.value);
-              this.applyEventSource.next();
+              this.applyEventSource.next(option.value);
             }
           }
         })
@@ -138,8 +137,7 @@ export class SelectHandler implements Tool {
 
     this.viewer.onComplete.subscribe(option => {
       this.value = option.value;
-      this.commander.updateValue(option.value);
-      this.applyEventSource.next();
+      this.applyEventSource.next(option.value);
     })
 
     this.dropdown = new Dropdown(
