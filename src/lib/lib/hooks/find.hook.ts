@@ -10,6 +10,7 @@ import {
 import { Editor } from '../editor';
 import { FindCommander } from '../toolbar/commands/find.commander';
 import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
+import { PreComponent } from '../components/pre.component';
 
 export class FindHook implements Lifecycle {
   private findValue: string;
@@ -46,7 +47,7 @@ export class FindHook implements Lifecycle {
         this.commander = commander;
         this.findValue = params.findValue;
       }
-      const newParams = this.find(rootFragment, this.findValue);
+      const newParams = this.findValue ? this.find(rootFragment, this.findValue) : [];
       this.positions = newParams;
       this.positionIndex = this.positionIndex % this.positions.length || 0;
       updateParamsFn(newParams);
@@ -78,6 +79,9 @@ export class FindHook implements Lifecycle {
     const result: ElementPosition[] = [];
     let index = 0;
     fragment.sliceContents(0).forEach(item => {
+      if (item instanceof PreComponent) {
+        return;
+      }
       if (typeof item === 'string' && search) {
         let position = 0;
         while (true) {

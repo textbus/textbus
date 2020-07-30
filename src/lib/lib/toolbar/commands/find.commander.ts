@@ -30,6 +30,9 @@ class FindFormatter extends InlineFormatter {
          state: FormatEffect,
          abstractData: FormatAbstractData,
          existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
+    if (isProduction) {
+      return null;
+    }
     const flag = !!existingElement;
     if (!existingElement) {
       existingElement = new VElement('span');
@@ -38,7 +41,7 @@ class FindFormatter extends InlineFormatter {
     existingElement.styles.set('backgroundColor', '#ff0');
     existingElement.styles.set('color', '#000');
 
-    return flag ? new ChildSlotModel(existingElement) : new ReplaceModel(existingElement);
+    return flag ? null : new ReplaceModel(existingElement);
   }
 }
 
