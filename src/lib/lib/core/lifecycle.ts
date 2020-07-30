@@ -3,7 +3,7 @@ import { TBSelection } from './selection';
 import { Commander } from './commander';
 import { Editor } from '../editor';
 import { Contents } from './contents';
-import { Subject } from 'rxjs';
+import { Fragment } from './fragment';
 
 /**
  * TBus 生命周期方法。
@@ -62,11 +62,27 @@ export interface Lifecycle {
    * @param commander 当前要应用的 Commander 实例。
    * @param selection
    * @param editor
+   * @param rootFragment
+   * @param params
+   * @param updateParamsFn
    */
-  onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor): boolean;
+  onApplyCommand?(commander: Commander, selection: TBSelection, editor: Editor, rootFragment: Fragment, params: any, updateParamsFn: (newParams: any) => void): boolean;
+
+  /**
+   * 当视图更新前调用
+   * @param renderer
+   * @param selection
+   * @param editor
+   * @param rootFragment
+   */
+  onRenderingBefore?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean;
 
   /**
    * 当视图更新后调用。
+   * @param renderer
+   * @param selection
+   * @param editor
+   * @param rootFragment
    */
-  onViewUpdated?(): void;
+  onViewUpdated?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment): void;
 }

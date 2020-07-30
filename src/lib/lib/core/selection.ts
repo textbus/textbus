@@ -78,17 +78,30 @@ export class TBSelection {
 
   /**
    * 清除所有的 Range。
+   * @param syncNative
    */
-  removeAllRanges() {
+  removeAllRanges(syncNative = false) {
+    if (syncNative) {
+      this.nativeSelection.removeAllRanges();
+    }
     this._ranges = [];
   }
 
   /**
    * 添加一个 Range。
    * @param range
+   * @param syncNative
    */
-  addRange(range: TBRange) {
+  addRange(range: TBRange, syncNative = false) {
+    this.nativeSelection.addRange(range.nativeRange)
     this._ranges.push(range);
+  }
+
+  /**
+   * 创建一个新的区域
+   */
+  createRange() {
+    return new TBRange(this.context.createRange(), this.renderer);
   }
 
   /**

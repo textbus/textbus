@@ -42,7 +42,7 @@ const editor = createEditor('#editor', {
 });
 let i = 0;
 editor.onChange.subscribe(() => {
-  console.log(i, Date.now());
+  // console.log(i, Date.now());
   i++;
 })
 

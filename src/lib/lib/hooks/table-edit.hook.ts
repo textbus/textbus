@@ -127,7 +127,7 @@ export class TableEditHook implements Lifecycle {
     }
   }
 
-  onApplyCommand(commander: Commander<any>): boolean {
+  onApplyCommand(commander: Commander): boolean {
     if (commander instanceof TableEditCommander || commander instanceof TdBorderColorCommander) {
       commander.setEditRange({
         startPosition: this.startPosition,

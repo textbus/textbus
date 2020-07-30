@@ -1,8 +1,17 @@
-import { Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject } from 'rxjs';
 
 import { Toolkit } from '../toolkit/toolkit';
 import { AdditionalViewer } from '../toolkit/_api';
-import { FindAndReplaceRule, FindCommander } from '../commands/find.commander';
+import { FindCommander } from '../commands/find.commander';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+export interface FindAndReplaceRule {
+  findValue: string;
+  next: boolean;
+  replaceValue: string;
+  replace: boolean;
+  replaceAll: boolean;
+}
 
 class FindForm implements AdditionalViewer {
   onAction: Observable<FindAndReplaceRule>;
@@ -19,10 +28,7 @@ class FindForm implements AdditionalViewer {
 <div class="tbus-form-group">
   <label class="tbus-control-label">查找</label>
   <div class="tbus-control-value">
-    <div class="tbus-input-group">
-      <input type="text" class="tbus-form-control" placeholder="请输入查找内容">
-      <button class="tbus-btn tbus-btn-default" type="button">查找</button>
-    </div>
+    <input type="text" class="tbus-form-control" placeholder="请输入查找内容">
   </div>
   <div>
     &nbsp;<button class="tbus-btn tbus-btn-default" type="button">下一个</button>   
@@ -42,20 +48,44 @@ class FindForm implements AdditionalViewer {
 </div>
 `;
     const [findInput, replaceInput] = Array.from(this.elementRef.querySelectorAll('input'));
-    const [findBtn, nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
+    const [nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
 
-    findBtn.addEventListener('click', () => {
-      if (findInput.value) {
-        this.actionEvent.next({
-          findValue: findInput.value,
-          next: false,
-          replaceAll: false,
-          replace: false,
-          replaceValue: ''
-        })
-      }
+    fromEvent(findInput, 'input').pipe(distinctUntilChanged(), debounceTime(200)).subscribe(() => {
+      this.actionEvent.next({
+        findValue: findInput.value,
+        next: false,
+        replaceAll: false,
+        replace: false,
+        replaceValue: ''
+      })
     })
-
+    nextBtn.addEventListener('click', () => {
+      this.actionEvent.next({
+        findValue: findInput.value,
+        next: true,
+        replaceAll: false,
+        replace: false,
+        replaceValue: ''
+      })
+    })
+    replaceBtn.addEventListener('click', () => {
+      this.actionEvent.next({
+        findValue: findInput.value,
+        next: false,
+        replaceAll: false,
+        replace: true,
+        replaceValue: replaceInput.value
+      })
+    })
+    replaceAllBtn.addEventListener('click', () => {
+      this.actionEvent.next({
+        findValue: findInput.value,
+        next: false,
+        replaceAll: true,
+        replace: false,
+        replaceValue: replaceInput.value
+      })
+    })
   }
 
   destroy() {

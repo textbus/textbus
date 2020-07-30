@@ -59,7 +59,7 @@ import {
   tdBorderColorTool,
   unlinkTool, findTool
 } from './lib/toolbar/tools/_api';
-import { DefaultHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
+import { DefaultHook, FindHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
   AudioComponentReader,
   BlockComponentReader,
@@ -120,7 +120,8 @@ export const defaultOptions: EditorOptions = {
     new DefaultHook(),
     new HistoryHook(),
     new ImageVideoResizeHook(),
-    new TableEditHook()
+    new TableEditHook(),
+    new FindHook()
   ],
   componentReaders: [
     new ProgressComponentReader(),

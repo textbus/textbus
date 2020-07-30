@@ -518,7 +518,7 @@ export class Editor implements EventDelegate {
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
   }
 
-  private apply(config: ToolConfig, params: any, commander: Commander<any>) {
+  private apply(config: ToolConfig, params: any, commander: Commander) {
     const selection = this.selection;
     const state = config.matcher ?
       config.matcher.queryState(selection, this.renderer, this).state :
@@ -530,7 +530,9 @@ export class Editor implements EventDelegate {
     let isNext = true;
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onApplyCommand === 'function' &&
-        lifecycle.onApplyCommand(commander, selection, this) === false) {
+        lifecycle.onApplyCommand(commander, selection, this, this.rootFragment, params, newParams => {
+          params = newParams;
+        }) === false) {
         isNext = false;
       }
     })
@@ -543,6 +545,17 @@ export class Editor implements EventDelegate {
   }
 
   private render() {
+    let isNext = true;
+    (this.options.hooks || []).forEach(lifecycle => {
+      if (typeof lifecycle.onRenderingBefore === 'function' &&
+        lifecycle.onRenderingBefore(this.renderer, this.selection, this, this.rootFragment) === false) {
+        isNext = false;
+      }
+    })
+    if (!isNext) {
+      return;
+    }
+
     if (this.contentUnexpectedlyChangedSub) {
       this.contentUnexpectedlyChangedSub.unsubscribe();
     }
@@ -564,7 +577,7 @@ export class Editor implements EventDelegate {
   private invokeViewUpdatedHooks() {
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onViewUpdated === 'function') {
-        lifecycle.onViewUpdated();
+        lifecycle.onViewUpdated(this.renderer, this.selection, this, this.rootFragment);
       }
     })
   }

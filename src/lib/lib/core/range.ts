@@ -58,7 +58,7 @@ export class TBRange {
       this.startIndex === this.endIndex;
   }
 
-  constructor(private nativeRange: Range,
+  constructor(public nativeRange: Range,
               private renderer: Renderer) {
     if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       renderer.getPositionByNode(nativeRange.startContainer) &&
