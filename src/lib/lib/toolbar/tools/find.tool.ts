@@ -6,11 +6,14 @@ import { FindAndReplaceRule, FindCommander } from '../commands/find.commander';
 
 class FindForm implements AdditionalViewer {
   onAction: Observable<FindAndReplaceRule>;
+  onDestroy: Observable<void>;
   elementRef = document.createElement('form');
   private actionEvent = new Subject<FindAndReplaceRule>();
+  private destroyEvent = new Subject<void>();
 
   constructor() {
     this.onAction = this.actionEvent.asObservable();
+    this.onDestroy = this.destroyEvent.asObservable();
     this.elementRef.classList.add('tbus-form', 'tbus-form-inline', 'tbus-form-tool');
     this.elementRef.innerHTML = `
 <div class="tbus-form-group">
@@ -62,7 +65,9 @@ class FindForm implements AdditionalViewer {
       replaceAll: false,
       replace: false,
       replaceValue: ''
-    })
+    });
+    this.destroyEvent.next();
+    this.destroyEvent.complete();
   }
 }
 

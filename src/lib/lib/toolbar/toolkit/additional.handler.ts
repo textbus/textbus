@@ -9,6 +9,7 @@ import { Matcher } from '../matcher/matcher';
 export interface AdditionalViewer<T = any> {
   elementRef: HTMLElement;
   onAction: Observable<T>;
+  onDestroy: Observable<void>;
 
   destroy(): void;
 }
@@ -47,6 +48,11 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   private showEvent = new Subject<AdditionalViewer>();
   private viewer: AdditionalViewer;
 
+  private set active(b: boolean) {
+    b ? this.elementRef.classList.add('tbus-handler-active') :
+      this.elementRef.classList.remove('tbus-handler-active');
+  }
+
   constructor(private config: AdditionalConfig) {
     this.viewer = config.menuFactory();
     this.commander = config.commanderFactory();
@@ -76,7 +82,11 @@ export class AdditionalHandler<T = any> implements Tool<T> {
       };
       this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
     }
+    this.viewer.onDestroy.subscribe(() => {
+      this.active = false;
+    })
     this.elementRef.addEventListener('click', () => {
+      this.active = true;
       this.showEvent.next(this.viewer);
     });
   }
@@ -85,14 +95,11 @@ export class AdditionalHandler<T = any> implements Tool<T> {
     switch (selectionMatchDelta.state) {
       case HighlightState.Highlight:
         this.elementRef.disabled = false;
-        this.elementRef.classList.add('tbus-handler-active');
         break;
       case HighlightState.Normal:
         this.elementRef.disabled = false;
-        this.elementRef.classList.remove('tbus-handler-active');
         break;
       case HighlightState.Disabled:
-        this.elementRef.classList.remove('tbus-handler-active');
         this.elementRef.disabled = true;
         break
     }
