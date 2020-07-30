@@ -96,6 +96,7 @@ class FindForm implements AdditionalViewer {
       replace: false,
       replaceValue: ''
     });
+    this.actionEvent.complete();
     this.destroyEvent.next();
     this.destroyEvent.complete();
   }

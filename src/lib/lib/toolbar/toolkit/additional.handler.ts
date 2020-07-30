@@ -46,7 +46,6 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   commander: Commander;
   private eventSource = new Subject<T>();
   private showEvent = new Subject<AdditionalViewer>();
-  private viewer: AdditionalViewer;
 
   private set active(b: boolean) {
     b ? this.elementRef.classList.add('tbus-handler-active') :
@@ -54,7 +53,6 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   }
 
   constructor(private config: AdditionalConfig) {
-    this.viewer = config.menuFactory();
     this.commander = config.commanderFactory();
 
     this.onShow = this.showEvent.asObservable();
@@ -67,27 +65,20 @@ export class AdditionalHandler<T = any> implements Tool<T> {
     inner.classList.add(...(config.classes || []));
     this.elementRef.appendChild(inner);
 
-    this.viewer.onAction.subscribe(params => {
-      this.eventSource.next(params);
-    })
-
     if (config.keymap) {
       this.keymapAction = {
         keymap: config.keymap,
         action: () => {
           if (!this.elementRef.disabled) {
-            this.showEvent.next(this.viewer);
+            this.show();
           }
         }
       };
       this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
     }
-    this.viewer.onDestroy.subscribe(() => {
-      this.active = false;
-    })
+
     this.elementRef.addEventListener('click', () => {
-      this.active = true;
-      this.showEvent.next(this.viewer);
+      this.show();
     });
   }
 
@@ -103,5 +94,17 @@ export class AdditionalHandler<T = any> implements Tool<T> {
         this.elementRef.disabled = true;
         break
     }
+  }
+
+  private show() {
+    this.active = true;
+    const viewer = this.config.menuFactory();
+    viewer.onAction.subscribe(params => {
+      this.eventSource.next(params);
+    })
+    viewer.onDestroy.subscribe(() => {
+      this.active = false;
+    });
+    this.showEvent.next(viewer);
   }
 }

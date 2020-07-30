@@ -178,6 +178,8 @@ export class Editor implements EventDelegate {
       zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
         this.rootFragment = this.parser.parse(result[0]);
         this.render();
+        this.nativeSelection = this.viewer.contentDocument.getSelection();
+        this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
         this.readyState = true;
         this.setup();
         this.readyEvent.next();
@@ -269,12 +271,12 @@ export class Editor implements EventDelegate {
   }
 
   private setup() {
-    this.subs.push(
-      merge(...['selectstart', 'mousedown'].map(type => fromEvent(this.viewer.contentDocument, type)))
-        .subscribe(() => {
-          this.nativeSelection = this.viewer.contentDocument.getSelection();
-          this.nativeSelection.removeAllRanges();
-        }));
+    this.subs.push(merge(...['selectstart', 'mousedown'].map(type => {
+      return fromEvent(this.viewer.contentDocument, type);
+    })).subscribe(() => {
+      this.nativeSelection.removeAllRanges();
+    }));
+
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
         hooks.setup(this.renderer,
