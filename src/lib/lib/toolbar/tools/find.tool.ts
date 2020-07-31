@@ -50,7 +50,9 @@ class FindForm implements AdditionalViewer {
     const [findInput, replaceInput] = Array.from(this.elementRef.querySelectorAll('input'));
     const [nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
 
+    nextBtn.disabled = replaceBtn.disabled = replaceAllBtn.disabled = true;
     fromEvent(findInput, 'input').pipe(distinctUntilChanged(), debounceTime(200)).subscribe(() => {
+      nextBtn.disabled = replaceBtn.disabled = replaceAllBtn.disabled = !findInput.value;
       this.actionEvent.next({
         findValue: findInput.value,
         next: false,

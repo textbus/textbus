@@ -63,15 +63,21 @@ export class FindHook implements Lifecycle {
     return true;
   }
 
-  onViewUpdated(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment) {
-    if (this.positions.length && !this.isJustFind) {
-      selection.removeAllRanges(true);
-      const r = selection.createRange();
+  onViewUpdated(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement) {
+    if (this.positions.length) {
+      const range = selection.createRange();
       const current = this.positions[this.positionIndex];
-      r.setStart(current.fragment, current.startIndex);
-      r.setEnd(current.fragment, current.endIndex);
-      selection.addRange(r, true);
-      selection.restore();
+      range.setStart(current.fragment, current.startIndex);
+      range.setEnd(current.fragment, current.endIndex);
+      if (this.isJustFind) {
+        range.restore();
+        const position = range.getRangePosition();
+        (frameContainer.parentNode as HTMLElement).scrollTop = position.top;
+      } else {
+        selection.removeAllRanges(true);
+        selection.addRange(range, true);
+        selection.restore();
+      }
     }
   }
 

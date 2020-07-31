@@ -83,6 +83,7 @@ export interface Lifecycle {
    * @param selection
    * @param editor
    * @param rootFragment
+   * @param frameContainer
    */
-  onViewUpdated?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment): void;
+  onViewUpdated?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement): void;
 }

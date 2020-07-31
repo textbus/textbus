@@ -579,7 +579,7 @@ export class Editor implements EventDelegate {
   private invokeViewUpdatedHooks() {
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onViewUpdated === 'function') {
-        lifecycle.onViewUpdated(this.renderer, this.selection, this, this.rootFragment);
+        lifecycle.onViewUpdated(this.renderer, this.selection, this, this.rootFragment, this.workbench.tablet);
       }
     })
   }
