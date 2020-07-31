@@ -9,10 +9,10 @@
   ::-webkit-scrollbar-thumb {
     background-color: $color-gray-dark;
     height: 50px;
-    outline-offset: -2px;
-    outline: 2px solid #fff;
+    outline-offset: 0;
+    outline: 0;
     //-webkit-border-radius: 4px;
-    //border: 2px solid #fff;
+    border: 0;
   }
 
   /*---鼠标点击滚动条显示样式--*/
