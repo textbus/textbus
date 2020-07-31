@@ -1,9 +1,9 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
 import { Toolkit } from '../toolkit/toolkit';
 import { AdditionalViewer } from '../toolkit/_api';
 import { FindCommander } from '../commands/find.commander';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface FindAndReplaceRule {
   findValue: string;
@@ -51,8 +51,9 @@ class FindForm implements AdditionalViewer {
     const [nextBtn, replaceBtn, replaceAllBtn] = Array.from(this.elementRef.querySelectorAll('button'));
 
     nextBtn.disabled = replaceBtn.disabled = replaceAllBtn.disabled = true;
-    fromEvent(findInput, 'input').pipe(distinctUntilChanged(), debounceTime(200)).subscribe(() => {
+    fromEvent(findInput, 'input').pipe(tap(() => {
       nextBtn.disabled = replaceBtn.disabled = replaceAllBtn.disabled = !findInput.value;
+    }), distinctUntilChanged(), debounceTime(200)).subscribe(() => {
       this.actionEvent.next({
         findValue: findInput.value,
         next: false,
