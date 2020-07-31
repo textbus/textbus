@@ -1,13 +1,15 @@
 .tbus-container.tbus-theme-mac-os-dark {
   .tbus-toolbar {
-    background-color: #262829;
-    border-color: #292929;
     box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
-    color: $color-gray-dark;
+  }
+
+  .tbus-toolbar-wrapper {
+    background-color: $color-darker;
+    border-color: $color-darker;
   }
 
   .tbus-toolbar-additional-worktable {
-    border-top-color: #262829;
+    border-bottom: 0;
   }
 
   .tbus-toolbar-group {
@@ -16,6 +18,7 @@
       border: 1px solid darken(#222, 3);
       border-radius: 0;
       color: #9796aa;
+
       &-active {
         color: #ddd;
         position: relative;
@@ -25,11 +28,13 @@
 
     > .tbus-handler {
       color: #9796aa;
+
       &-active {
         color: #ddd;
         position: relative;
         z-index: 1;
       }
+
       &:not(:first-child) {
         margin-left: -1px;
       }

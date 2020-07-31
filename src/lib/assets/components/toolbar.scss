@@ -1,6 +1,5 @@
 .tbus-toolbar {
   background-color: $color-light;
-  border: 1px solid $color-gray-light;
   font-size: 14px;
   color: $color-default;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -14,6 +13,7 @@
 }
 
 .tbus-toolbar-wrapper {
+  border: 1px solid $color-gray-light;
   display: flex;
   padding: 8px 15px 3px;
   min-height: 24px;
@@ -23,8 +23,9 @@
   display: none;
   align-items: center;
   padding: 5px 20px;
-  background-color: #fff;
-  border-top: 1px solid $color-gray-light;
+  border: 1px solid $color-gray-light;
+  border-top: 0;
+  background-color: $color-lighter;
 
   &.tbus-toolbar-additional-worktable-show {
     display: flex;
