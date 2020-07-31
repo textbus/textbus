@@ -294,7 +294,7 @@ export class Editor implements EventDelegate {
           }
           return selection;
         }, new TBSelection(this.viewer.contentDocument, this.renderer));
-        this.viewer.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection, this.workbench.tablet.parentNode as HTMLElement);
       }), auditTime(100), tap(() => {
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
@@ -358,7 +358,7 @@ export class Editor implements EventDelegate {
         this.userWriteEvent.next();
         this.render();
         this.selection.restore();
-        this.viewer.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection, this.workbench.tablet.parentNode as HTMLElement);
       }),
       this.viewer.input.events.onPaste.subscribe(() => {
         const div = document.createElement('div');
@@ -425,7 +425,7 @@ export class Editor implements EventDelegate {
 
         this.render();
         this.selection.restore();
-        this.viewer.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection, this.workbench.tablet.parentNode as HTMLElement);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }
@@ -462,7 +462,7 @@ export class Editor implements EventDelegate {
         }
         this.render();
         selection.restore();
-        this.viewer.input.updateStateBySelection(this.nativeSelection);
+        this.viewer.input.updateStateBySelection(this.nativeSelection, this.workbench.tablet.parentNode as HTMLElement);
         this.recordSnapshotFromEditingBefore();
         this.userWriteEvent.next();
       }

@@ -134,10 +134,6 @@ export class Input {
       this.flashing = true;
     });
 
-    fromEvent(context, 'scroll').subscribe(() => {
-      this.updateCursorPosition();
-    });
-
     this.events.onBlur.subscribe(() => {
       this.hide();
     })
@@ -154,14 +150,15 @@ export class Input {
   /**
    * 根据 Selection 更新光标显示位置及状态
    * @param selection
+   * @param limit 光标显示的范围
    */
-  updateStateBySelection(selection: Selection) {
+  updateStateBySelection(selection: Selection, limit: HTMLElement) {
     this.selection = selection;
     if (!selection.rangeCount) {
       this.hide();
       return;
     }
-    this.updateCursorPosition();
+    this.updateCursorPosition(limit);
     if (selection.isCollapsed) {
       this.show();
     } else {
@@ -183,7 +180,7 @@ export class Input {
     this.input.focus();
   }
 
-  private updateCursorPosition() {
+  private updateCursorPosition(limit: HTMLElement) {
     if (!this.selection || !this.selection.rangeCount) {
       return;
     }
@@ -236,6 +233,20 @@ export class Input {
     this.cursor.style.backgroundColor = color;
     this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
+
+    if (this.selection.isCollapsed && this.selection.rangeCount === 1) {
+      const scrollTop = limit.scrollTop;
+      const offsetHeight = limit.offsetHeight;
+      const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;
+
+      const cursorTop = top + boxHeight + paddingTop + 5;
+      const viewTop = scrollTop + offsetHeight;
+      if (cursorTop > viewTop) {
+        limit.scrollTop = cursorTop - offsetHeight;
+      } else if (top < scrollTop) {
+        limit.scrollTop = top;
+      }
+    }
   }
 
   private show() {
