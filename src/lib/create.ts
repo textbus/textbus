@@ -57,7 +57,8 @@ import {
   tableAddParagraphTool,
   tableRemoveTool,
   tdBorderColorTool,
-  unlinkTool, findTool
+  unlinkTool,
+  findTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, FindHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
