@@ -51,4 +51,5 @@ export const emojiTool = Toolkit.makeDropdownTool({
   menuFactory() {
     return new Emoji();
   },
+  supportSourceCodeModel: true
 });

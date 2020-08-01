@@ -40,7 +40,11 @@ export class Parser {
       }
       this.readFormats(el as HTMLElement, slot);
     } else if (el.nodeType === Node.TEXT_NODE) {
-      slot.append(el.textContent.replace(/&lt;|&gt;|&amp;|&nbsp;/g, str => {
+      const textContent = el.textContent;
+      if (/^\s+$/.test(textContent)) {
+        return;
+      }
+      slot.append(textContent.replace(/&lt;|&gt;|&amp;|&nbsp;/g, str => {
         return {
           '&lt;': '<',
           '&gt;': '>',

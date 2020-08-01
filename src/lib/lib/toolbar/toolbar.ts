@@ -20,8 +20,22 @@ export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<{ config: ToolConfig, instance: Tool, params: any }>;
   onComponentsStageChange: Observable<boolean>;
+
+  set componentsSwitch(b: boolean) {
+    this._componentsSwitch = b;
+    this.componentsElement.style.display = b ? '' : 'none';
+    if (!b) {
+      this.componentStageEvent.next(false);
+    }
+  }
+
+  get componentsSwitch() {
+    return this._componentsSwitch;
+  }
+
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
+  private _componentsSwitch = true;
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
   private componentStageEvent = new Subject<boolean>();
   private toolWrapper = document.createElement('div');
@@ -38,10 +52,13 @@ export class Toolbar {
 
   private subs: Subscription[] = [];
 
-  constructor(private context: Editor, private contextMenu: ContextMenu, private config: (ToolFactory | ToolFactory[])[], private options = {
-    showComponentStage: true,
-    openComponentState: false
-  }) {
+  constructor(private context: Editor,
+              private contextMenu: ContextMenu,
+              private config: (ToolFactory | ToolFactory[])[],
+              private options = {
+                showComponentStage: true,
+                openComponentState: false
+              }) {
     this.onAction = this.actionEvent.asObservable();
     this.onComponentsStageChange = this.componentStageEvent.asObservable();
     this.elementRef.classList.add('tbus-toolbar');
@@ -103,11 +120,15 @@ export class Toolbar {
     })
   }
 
-  updateHandlerState(selection: TBSelection, renderer: Renderer) {
+  updateHandlerState(selection: TBSelection, renderer: Renderer, sourceCodeModal: boolean) {
     this.tools.forEach(tool => {
       let s: SelectionMatchDelta;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = tool.config.matcher?.queryState(selection, renderer, this.context);
+        s = sourceCodeModal && !tool.config.supportSourceCodeModel ? {
+          srcStates: [],
+          matchData: null,
+          state: HighlightState.Disabled
+        } : tool.config.matcher?.queryState(selection, renderer, this.context);
         if (s) {
           tool.instance.updateStatus(s);
         }

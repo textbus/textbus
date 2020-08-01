@@ -13,5 +13,6 @@ export const historyForwardTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     shiftKey: true,
     key: 'z'
-  }
+  },
+  supportSourceCodeModel: true
 });

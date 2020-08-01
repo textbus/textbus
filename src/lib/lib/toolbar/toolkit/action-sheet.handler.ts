@@ -35,6 +35,8 @@ export interface ActionSheetConfig {
   classes?: string[];
   /** 当鼠标放在控件上的提示文字 */
   tooltip?: string;
+  /** 是否支持源代码编辑模式 */
+  supportSourceCodeModel?: boolean;
 }
 
 class ActionSheetOptionHandler {

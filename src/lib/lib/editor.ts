@@ -1,5 +1,6 @@
 import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
 import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
+import pretty from 'pretty';
 
 import {
   BranchComponent,
@@ -22,7 +23,7 @@ import {
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
 import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
-import { BlockComponent, BrComponent } from './components/_api';
+import { BlockComponent, BrComponent, PreComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
 import { ComponentExample } from './workbench/component-stage';
@@ -99,6 +100,7 @@ export class Editor implements EventDelegate {
   private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
+  private openSourceCodeModel = false;
   private tasks: Array<() => void> = [];
 
   private nativeSelection: Selection;
@@ -123,6 +125,8 @@ export class Editor implements EventDelegate {
 
   private subs: Subscription[] = [];
   private contentUnexpectedlyChangedSub: Subscription;
+
+  private sourceCodeComponent = new PreComponent('html');
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -168,6 +172,28 @@ export class Editor implements EventDelegate {
         deviceWidth = value;
         this.workbench.setTabletWidth(value);
         this.invokeViewUpdatedHooks();
+      }),
+      this.statusBar.editingModel.onChange.subscribe(b => {
+        this.openSourceCodeModel = b;
+        if (this.readyState) {
+          this.selection.removeAllRanges();
+          this.toolbar.componentsSwitch = !b;
+          if (b) {
+            const html = this.getContents().html;
+            this.rootFragment.clean();
+            this.sourceCodeComponent.slot.append(pretty(html));
+            this.rootFragment.append(this.sourceCodeComponent);
+            this.render();
+          } else {
+            const html = this.sourceCodeComponent.slot.sliceContents(0).filter(i => {
+              return typeof i === 'string';
+            }).join('');
+            this.writeContents(html).then(dom => {
+              this.rootFragment = this.parser.parse(dom);
+              this.render();
+            })
+          }
+        }
       }),
       this.statusBar.fullScreen.onChange.subscribe(b => {
         b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
@@ -232,7 +258,7 @@ export class Editor implements EventDelegate {
   getContents() {
     return {
       styleSheets: this.options.styleSheets,
-      contents: this.renderer.renderToHTML(this.rootFragment)
+      html: this.renderer.renderToHTML(this.rootFragment)
     };
   }
 
@@ -242,7 +268,7 @@ export class Editor implements EventDelegate {
   getJSONLiteral() {
     return {
       styleSheets: this.options.styleSheets,
-      contents: this.renderer.renderToJSON(this.rootFragment)
+      json: this.renderer.renderToJSON(this.rootFragment)
     };
   }
 
@@ -299,7 +325,7 @@ export class Editor implements EventDelegate {
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
         this.elementRef.dispatchEvent(event);
-        this.toolbar.updateHandlerState(this.selection, this.renderer);
+        this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeModel);
       }), map(() => {
         return this.nativeSelection.focusNode;
       }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
@@ -542,7 +568,7 @@ export class Editor implements EventDelegate {
       commander.command(selection, params, overlap, this.renderer, this.rootFragment);
       this.render();
       selection.restore();
-      this.toolbar.updateHandlerState(selection, this.renderer);
+      this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);
     }
   }
 
@@ -562,7 +588,10 @@ export class Editor implements EventDelegate {
       this.contentUnexpectedlyChangedSub.unsubscribe();
     }
     const rootFragment = this.rootFragment;
-    Editor.guardLastIsParagraph(rootFragment);
+
+    if (!this.openSourceCodeModel) {
+      Editor.guardLastIsParagraph(rootFragment);
+    }
     const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
     this.eventHandler.listen(vEle);
     this.contentUnexpectedlyChangedSub = vEle.events.subscribe(ev => {
@@ -723,7 +752,7 @@ export class Editor implements EventDelegate {
     }
     this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
       this.history.recordSnapshot(this.rootFragment, this.selection);
-      this.toolbar.updateHandlerState(this.selection, this.renderer);
+      this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeModel);
     });
   }
 

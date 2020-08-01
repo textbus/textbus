@@ -12,5 +12,6 @@ export const historyBackTool = Toolkit.makeButtonTool({
   keymap: {
     ctrlKey: true,
     key: 'z'
-  }
+  },
+  supportSourceCodeModel: true
 });
