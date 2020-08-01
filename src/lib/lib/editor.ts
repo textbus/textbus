@@ -181,6 +181,7 @@ export class Editor implements EventDelegate {
           if (b) {
             const html = this.getContents().html;
             this.rootFragment.clean();
+            this.sourceCodeComponent.slot.clean();
             this.sourceCodeComponent.slot.append(pretty(html));
             this.rootFragment.append(this.sourceCodeComponent);
             this.render();
