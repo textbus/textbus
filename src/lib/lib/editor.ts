@@ -349,11 +349,12 @@ export class Editor implements EventDelegate {
       }),
       this.viewer.input.events.onInput.subscribe(() => {
 
-        this.dispatchEventAndCallHooks(EventType.onInput, {
+        const data = {
           selectionSnapshot: this.selectionSnapshot,
           fragmentSnapshot: this.fragmentSnapshot,
           input: this.viewer.input
-        }, () => {
+        };
+        this.dispatchEventAndCallHooks(EventType.onInput, data, () => {
           const selection = this.selection;
           const collapsed = selection.collapsed;
           let isNext = true;
@@ -371,6 +372,8 @@ export class Editor implements EventDelegate {
           if (isNext) {
             if (!collapsed) {
               this.recordSnapshotFromEditingBefore(true);
+              data.fragmentSnapshot = this.fragmentSnapshot;
+              data.selectionSnapshot = this.selectionSnapshot;
             }
           }
           return isNext;
