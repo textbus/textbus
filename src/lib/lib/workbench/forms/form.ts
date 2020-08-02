@@ -1,4 +1,4 @@
-export abstract class FormItem<T = string| number| boolean> {
+export abstract class FormItem<T extends Node, U> {
   abstract name: string;
   readonly elementRef = document.createElement('div');
 
@@ -6,7 +6,7 @@ export abstract class FormItem<T = string| number| boolean> {
   private labelElement = document.createElement('label');
   private inputWrapper = document.createElement('div');
 
-  protected constructor(public formControl: HTMLInputElement, public label: string) {
+  protected constructor(public formControl: T, public label: string) {
     this.elementRef.classList.add('tbus-form-group');
     this.labelElement.classList.add('tbus-control-label');
     this.inputWrapper.classList.add('tbus-control-value');
@@ -17,23 +17,23 @@ export abstract class FormItem<T = string| number| boolean> {
     this.elementRef.append(this.labelElement, this.inputWrapper);
   }
 
-  abstract getValue(): T;
+  abstract getValue(): U;
 
-  abstract setValue(value: T): void;
+  abstract setValue(value: U): void;
 
   abstract validateFn(): boolean;
 
   abstract viewProvideFn(): HTMLElement;
 }
 
-export interface FormOptions {
+export interface FormOptions<T extends Node, U> {
   title: string;
-  items: FormItem[];
+  items: FormItem<T, U>[];
   confirmButtonText?: string;
   cancelButtonText?: string;
 }
 
-export class Form {
+export class Form<T extends Node, U> {
   onSubmit: () => any;
   onClose: () => any;
   readonly elementRef = document.createElement('form');
@@ -43,7 +43,7 @@ export class Form {
   private confirmBtn = document.createElement('button');
   private cancelBtn = document.createElement('button');
 
-  constructor(private options: FormOptions) {
+  constructor(private options: FormOptions<T, U>) {
     this.titleElement.classList.add('tbus-form-title');
     this.titleElement.innerText = options.title;
     this.confirmBtn.innerText = options.confirmButtonText || '确认';
@@ -92,7 +92,7 @@ export class Form {
   }
 
   getData() {
-    const map = new Map<string, string | number | boolean>()
+    const map = new Map<string, U>()
     this.options.items.forEach(item => {
       map.set(item.name, item.getValue());
     })

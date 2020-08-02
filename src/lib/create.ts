@@ -189,7 +189,7 @@ export const defaultOptions: EditorOptions = {
     jumbotronComponentExample,
     wordExplainComponentExample,
     timelineComponentExample,
-    // progressComponentExample
+    progressComponentExample
   ]
 };
 

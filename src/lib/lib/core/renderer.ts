@@ -6,7 +6,7 @@ import {
   FormatRange,
   InlineFormatter
 } from './formatter';
-import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
+import { BranchComponent, DivisionComponent, Component, BackboneComponent, LeafComponent } from './component';
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
 import { Constructor } from './constructor';
@@ -515,9 +515,20 @@ export class Renderer {
         });
         i++;
         children.push(vDom);
-        if (item instanceof DivisionComponent) {
-          this.createVDom(item.slot, item.getSlotView());
-          !this.productionRenderingModal && this.fragmentHierarchyMapping.set(item.slot, item);
+        if (item instanceof LeafComponent) {
+          if (!this.productionRenderingModal && vDom.childNodes.length) {
+            vDom.styles.set('userSelect', 'none');
+          }
+        } else if (item instanceof DivisionComponent) {
+          let view = item.getSlotView();
+          if (!this.productionRenderingModal) {
+            this.fragmentHierarchyMapping.set(item.slot, item);
+            if (view !== vDom) {
+              vDom.styles.set('userSelect', 'none');
+              view.styles.set('userSelect', 'text');
+            }
+          }
+          this.createVDom(item.slot, view);
         } else if (item instanceof BranchComponent) {
           if (!this.productionRenderingModal) {
             vDom.styles.set('userSelect', 'none');

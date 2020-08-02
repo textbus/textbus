@@ -9,7 +9,7 @@ export interface TextFieldConfig {
   validateFn?(value: string): string | null;
 }
 
-export class TextField extends FormItem<string> {
+export class TextField extends FormItem<HTMLInputElement, string> {
   name: string;
 
   constructor(private config: TextFieldConfig) {
