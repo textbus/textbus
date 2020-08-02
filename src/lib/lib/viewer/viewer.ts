@@ -10,13 +10,26 @@ export class Viewer {
   input: Input;
   elementRef = document.createElement('iframe');
 
+  set sourceCodeModel(b: boolean) {
+    this._sourceCodeModel = b;
+    if (this.contentDocument) {
+      if (b) {
+        this.contentDocument.head.append(this.sourceCodeModelStyleSheet)
+      } else {
+        this.sourceCodeModelStyleSheet.parentNode?.removeChild(this.sourceCodeModelStyleSheet);
+      }
+    }
+  }
+
+  private _sourceCodeModel = false;
+  private sourceCodeModelStyleSheet = document.createElement('style');
   private readyEvent = new Subject<Document>();
   private id: number = null;
   private minHeight = 400;
 
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
-
+    this.sourceCodeModelStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
     this.elementRef.onload = () => {
       const doc = this.elementRef.contentDocument;
       this.contentDocument = doc;
@@ -26,6 +39,7 @@ export class Viewer {
         style.innerHTML = s;
         doc.head.appendChild(style);
       });
+      this.sourceCodeModel = this._sourceCodeModel;
       this.input = new Input(doc);
       this.readyEvent.next(doc);
       this.listen();

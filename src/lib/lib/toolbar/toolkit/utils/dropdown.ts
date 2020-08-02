@@ -22,6 +22,10 @@ export class Dropdown {
     this.button.disabled = v;
   }
 
+  get disabled() {
+    return this.button.disabled;
+  }
+
   set highlight(v: boolean) {
     if (v) {
       this.button.classList.add('tbus-handler-active');

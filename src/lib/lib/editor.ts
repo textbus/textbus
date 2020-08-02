@@ -178,6 +178,7 @@ export class Editor implements EventDelegate {
         if (this.readyState) {
           this.selection.removeAllRanges();
           this.toolbar.componentsSwitch = !b;
+          this.viewer.sourceCodeModel = b;
           if (b) {
             const html = this.getContents().html;
             this.rootFragment.clean();
@@ -192,6 +193,7 @@ export class Editor implements EventDelegate {
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();
+              this.recordSnapshotFromEditingBefore();
             })
           }
         }
@@ -217,6 +219,7 @@ export class Editor implements EventDelegate {
     this.elementRef.appendChild(this.workbench.elementRef);
     this.elementRef.append(this.statusBar.elementRef);
     this.elementRef.classList.add('tbus-container');
+
     if (options.theme) {
       this.elementRef.classList.add('tbus-theme-' + options.theme);
     }
@@ -483,14 +486,14 @@ export class Editor implements EventDelegate {
         if (isNext) {
           this.renderer.dispatchEvent(vElement, EventType.onDelete, selection);
         }
-        if (this.rootFragment.contentLength === 0) {
-          const p = new BlockComponent('p');
-          p.slot.append(new BrComponent());
-          this.rootFragment.append(p);
-          selection.firstRange.setStart(p.slot, 0);
-          selection.firstRange.collapse();
-        }
+        const isEmpty = this.rootFragment.contentLength === 0;
+        const firstRange = selection.firstRange;
         this.render();
+        if (isEmpty) {
+          const position = firstRange.findFirstPosition(this.rootFragment);
+          firstRange.setStart(position.fragment, position.index);
+          firstRange.collapse();
+        }
         selection.restore();
         this.viewer.input.updateStateBySelection(this.nativeSelection, this.workbench.tablet.parentNode as HTMLElement);
         this.recordSnapshotFromEditingBefore();
@@ -593,7 +596,9 @@ export class Editor implements EventDelegate {
     }
     const rootFragment = this.rootFragment;
 
-    if (!this.openSourceCodeModel) {
+    if (this.openSourceCodeModel) {
+      Editor.guardContentIsPre(rootFragment, this.sourceCodeComponent);
+    } else {
       Editor.guardLastIsParagraph(rootFragment);
     }
     const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
@@ -773,5 +778,14 @@ export class Editor implements EventDelegate {
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());
     fragment.append(p);
+  }
+
+  private static guardContentIsPre(fragment: Fragment, pre: PreComponent) {
+    if (fragment.contentLength === 0) {
+      fragment.append(pre);
+    }
+    if (pre.slot.contentLength === 0) {
+      pre.slot.append(new BrComponent());
+    }
   }
 }

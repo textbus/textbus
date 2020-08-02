@@ -25,6 +25,8 @@ export class Toolbar {
     this._componentsSwitch = b;
     this.componentsElement.style.display = b ? '' : 'none';
     if (!b) {
+      this.componentStageExpand = false;
+      this.componentsSwitchBtn.classList.remove('tbus-toolbar-components-btn-active');
       this.componentStageEvent.next(false);
     }
   }
@@ -41,6 +43,7 @@ export class Toolbar {
   private toolWrapper = document.createElement('div');
   private toolsElement = document.createElement('div');
   private componentsElement = document.createElement('div');
+  private componentsSwitchBtn = document.createElement('button');
   private additionalWorktable = document.createElement('div');
   private additionalWorktableContent = document.createElement('div');
   private additionalWorktableClose = document.createElement('div');
@@ -73,7 +76,7 @@ export class Toolbar {
     this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
     this.componentStageExpand = options.openComponentState;
     if (options.showComponentStage) {
-      const btn = document.createElement('button');
+      const btn = this.componentsSwitchBtn;
       btn.type = 'button';
       btn.innerText = '组件库';
       btn.title = '展开或收起组件库';
