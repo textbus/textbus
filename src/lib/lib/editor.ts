@@ -180,6 +180,9 @@ export class Editor implements EventDelegate {
           this.toolbar.componentsSwitch = !b;
           this.viewer.sourceCodeModel = b;
           if (b) {
+            if (this.snapshotSubscription) {
+              this.snapshotSubscription.unsubscribe();
+            }
             const html = this.getContents().html;
             this.rootFragment.clean();
             this.sourceCodeComponent.slot.clean();
@@ -193,7 +196,8 @@ export class Editor implements EventDelegate {
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();
-              this.recordSnapshotFromEditingBefore();
+              this.history.recordSnapshot(this.rootFragment, this.selection);
+              this.listenUserWriteEvent();
             })
           }
         }
@@ -575,7 +579,7 @@ export class Editor implements EventDelegate {
       commander.command(selection, params, overlap, this.renderer, this.rootFragment);
       this.render();
       selection.restore();
-      this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);
+      // this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);
     }
   }
 
@@ -761,7 +765,6 @@ export class Editor implements EventDelegate {
     }
     this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
       this.history.recordSnapshot(this.rootFragment, this.selection);
-      this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeModel);
     });
   }
 
