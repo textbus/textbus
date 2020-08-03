@@ -309,7 +309,10 @@ export class Editor implements EventDelegate {
   private setup() {
     this.subs.push(merge(...['selectstart', 'mousedown'].map(type => {
       return fromEvent(this.viewer.contentDocument, type);
-    })).subscribe(() => {
+    })).subscribe((ev: MouseEvent) => {
+      if (ev.button === 2) {
+        return;
+      }
       this.nativeSelection.removeAllRanges();
     }));
 
