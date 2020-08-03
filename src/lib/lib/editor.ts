@@ -214,6 +214,7 @@ export class Editor implements EventDelegate {
         this.readyState = true;
         this.setup();
         this.readyEvent.next();
+        this.workbench.loaded();
       })
     );
 

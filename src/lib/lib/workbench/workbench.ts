@@ -11,6 +11,7 @@ export class Workbench {
   private dialogWrapper = document.createElement('div');
   private dashboard = document.createElement('div');
   private editableArea = document.createElement('div');
+  private loading = document.createElement('div');
 
   constructor(private viewer: Viewer) {
     this.elementRef.classList.add('tbus-workbench');
@@ -31,6 +32,18 @@ export class Workbench {
     this.dashboard.appendChild(this.editableArea);
     this.dashboard.appendChild(this.componentStage.elementRef);
     this.elementRef.appendChild(this.dashboard);
+
+    const loading = this.loading;
+    loading.classList.add('tbus-workbench-loading');
+    loading.innerHTML = `
+    <div>-</div>
+    <div>T</div>
+    <div>B</div>
+    <div>U</div>
+    <div>S</div>
+    <div>-</div>
+    `;
+    this.editableArea.appendChild(loading);
     const sub = this.viewer.onReady.subscribe(() => {
       this.tablet.appendChild(this.viewer.input.elementRef);
       this.viewer.setMinHeight(this.editableArea.offsetHeight);
@@ -63,5 +76,15 @@ export class Workbench {
       this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
     }
     this.tablet.style.width = width;
+  }
+
+  loaded() {
+    setTimeout(() => {
+      this.loading.classList.add('tbus-workbench-loading-done');
+      this.tablet.classList.add('tbus-tablet-ready');
+      setTimeout(() => {
+        this.editableArea.removeChild(this.loading);
+      }, 300);
+    }, 1000)
   }
 }
