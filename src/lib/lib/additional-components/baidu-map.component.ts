@@ -59,9 +59,9 @@ export const baiduMapComponentExample: ComponentExample = {
     <button type="submit" class="tbus-btn tbus-btn-primary">搜索</button>          
   </div>
 </form>
-<div class="tbus-baidu-map-container" style="height: 200px">
+<div class="tbus-baidu-map-container" style="height: 250px">
 </div>
-<div class="tbus-btn-wrap">
+<div class="tbus-btn-wrap" style="margin-top: 0;">
 <button type="button" class="tbus-btn tbus-btn-primary">确定</button>
 <button type="button" class="tbus-btn tbus-btn-default">取消</button>
 </div>
