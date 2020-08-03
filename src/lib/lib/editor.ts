@@ -738,11 +738,25 @@ export class Editor implements EventDelegate {
   private writeContents(html: string) {
     return new Promise<HTMLElement>(resolve => {
       const temporaryIframe = document.createElement('iframe');
-      temporaryIframe.onload = () => {
-        const body = temporaryIframe.contentDocument.body;
-        document.body.removeChild(temporaryIframe);
-        resolve(body);
-      };
+      const loadedId = 'loadedID' + Math.random();
+      const src = `javascript:void((function () {
+                      document.open();
+                      document.domain=\'${document.domain}\';
+                      document.write('<script>document.addEventListener(\\\'DOMContentLoaded\\\', function(){window.parent.postMessage(\\\'${loadedId}\\\', \\\'${location.origin}\\\')})</script>');
+                      document.write('${html.replace(/[']/g, '\\\'')}');
+                      document.close();
+                    })())`;
+
+      const onMessage = (ev: MessageEvent) => {
+        if (ev.data === loadedId) {
+          window.removeEventListener('message', onMessage);
+          const body = temporaryIframe.contentDocument.body;
+          document.body.removeChild(temporaryIframe);
+          resolve(body);
+        }
+      }
+
+      window.addEventListener('message', onMessage);
       temporaryIframe.style.cssText =
         'position: absolute;' +
         'left: -9999px;' +
@@ -750,11 +764,7 @@ export class Editor implements EventDelegate {
         'width:0;' +
         'height:0;' +
         'opacity:0';
-      temporaryIframe.src = `javascript:void((function () {
-                      document.open();
-                      document.write('${html.replace(/[']/g, '\\\'')}');
-                      document.close();
-                    })())`;
+      temporaryIframe.src = src;
 
       document.body.appendChild(temporaryIframe);
     });

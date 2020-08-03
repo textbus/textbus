@@ -26,4 +26,4 @@ export const iframeHTML = `
 </head>
 <body></body>
 </html>
-`;
+`.replace(/\n/g, '').replace(/\s+/g, ' ').replace(/'/g, '\\\'');
