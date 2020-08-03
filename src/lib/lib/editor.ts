@@ -190,9 +190,7 @@ export class Editor implements EventDelegate {
             this.rootFragment.append(this.sourceCodeComponent);
             this.render();
           } else {
-            const html = this.sourceCodeComponent.slot.sliceContents(0).filter(i => {
-              return typeof i === 'string';
-            }).join('');
+            const html = this.getHTMLBySourceCodeModel();
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();
@@ -266,7 +264,7 @@ export class Editor implements EventDelegate {
   getContents() {
     return {
       styleSheets: this.options.styleSheets,
-      html: this.renderer.renderToHTML(this.rootFragment)
+      html: this.openSourceCodeModel ? this.getHTMLBySourceCodeModel() : this.renderer.renderToHTML(this.rootFragment)
     };
   }
 
@@ -274,6 +272,9 @@ export class Editor implements EventDelegate {
    * 获取 TBus 内容的 JSON 字面量。
    */
   getJSONLiteral() {
+    if (this.openSourceCodeModel) {
+      throw new Error('源代码模式下，不支持获取 JSON 字面量！');
+    }
     return {
       styleSheets: this.options.styleSheets,
       json: this.renderer.renderToJSON(this.rootFragment)
@@ -766,6 +767,12 @@ export class Editor implements EventDelegate {
     this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
       this.history.recordSnapshot(this.rootFragment, this.selection);
     });
+  }
+
+  private getHTMLBySourceCodeModel() {
+    return this.sourceCodeComponent.slot.sliceContents(0).filter(i => {
+      return typeof i === 'string';
+    }).join('');
   }
 
   private static guardLastIsParagraph(fragment: Fragment) {
