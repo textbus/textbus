@@ -32,10 +32,13 @@ export class TdBorderColorFormatter extends BlockFormatter {
     const obj: { [key: string]: string | number } = {};
 
     ['borderColor', 'borderLeftColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor'].forEach(key => {
-      if (styles[key]) {
-        obj[key] = styles[key];
+      const value = styles[key];
+      if (value) {
+        if (key !== 'borderColor' && value === obj['borderColor']) {
+          return;
+        }
+        obj[key] = value;
       }
-      return styles[key];
     })
     return new FormatAbstractData({
       styles: obj
@@ -43,6 +46,7 @@ export class TdBorderColorFormatter extends BlockFormatter {
   }
 
   render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): null {
+    console.log(abstractData.styles)
     if (existingElement) {
       abstractData.styles.forEach((value, key) => {
         existingElement.styles.set(key, value);
