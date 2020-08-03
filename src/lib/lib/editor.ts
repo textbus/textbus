@@ -183,7 +183,7 @@ export class Editor implements EventDelegate {
             if (this.snapshotSubscription) {
               this.snapshotSubscription.unsubscribe();
             }
-            const html = this.getContents().html;
+            const html = this.renderer.renderToHTML(this.rootFragment);
             this.rootFragment.clean();
             this.sourceCodeComponent.slot.clean();
             this.sourceCodeComponent.slot.append(pretty(html));

@@ -53,13 +53,12 @@ export const baiduMapComponentExample: ComponentExample = {
     div.classList.add('tbus-form', 'tbus-form-workbench');
     div.style.minWidth = '500px';
     div.innerHTML = `
-<form class="tbus-form-title">
-  <div class="tbus-input-group tbus-input-block">
+<div style="height: 300px; position: relative">
+  <div class="tbus-baidu-map-container" style="height: 100%; position: relative; z-index: 0"></div>
+  <form class="tbus-input-group" style="position: absolute; z-index: 1; left: 50px; top: 20px; width: 400px; box-shadow: 1px 2px 3px rgba(0,0,0,0.2)">
     <input type="search" class="tbus-form-control tbus-input-block" placeholder="请输入地址">
     <button type="submit" class="tbus-btn tbus-btn-primary">搜索</button>          
-  </div>
-</form>
-<div class="tbus-baidu-map-container" style="height: 250px">
+  </form>
 </div>
 <div class="tbus-btn-wrap" style="margin-top: 0;">
 <button type="button" class="tbus-btn tbus-btn-primary">确定</button>
