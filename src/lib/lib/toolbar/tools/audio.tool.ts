@@ -6,7 +6,7 @@ import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const audioTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-music'],
+  classes: ['textbus-icon-music'],
   tooltip: '音频',
   menuFactory() {
     return new ToolForm([{

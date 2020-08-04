@@ -1,4 +1,4 @@
-.tbus-loading {
+.textbus-loading {
   height: 3px;
   position: absolute;
   width: 100%;
@@ -17,12 +17,12 @@
       width: 20%;
       height: 100%;
       background-color: $color-primary;
-      animation: tbus-loading infinite 1s linear;
+      animation: textbus-loading infinite 1s linear;
     }
   }
 }
 
-@keyframes tbus-loading {
+@keyframes textbus-loading {
   0% {
     left: 0
   }

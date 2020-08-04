@@ -32,7 +32,7 @@ import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
 
 /**
- * TBus 初始化时的配置参数
+ * TextBus 初始化时的配置参数
  */
 export interface EditorOptions {
   /** 设置主题 */
@@ -57,7 +57,7 @@ export interface EditorOptions {
   styleSheets?: string[];
   /** 配置文档编辑状态下用到的样式 */
   editingStyleSheets?: string[];
-  /** 设置初始化 TBus 时的默认内容 */
+  /** 设置初始化 TextBus 时的默认内容 */
   contents?: string;
   /** 设置可选的自定义组件 */
   componentLibrary?: ComponentExample[];
@@ -77,14 +77,14 @@ export enum CursorMoveDirection {
 }
 
 /**
- * TBus 主类
+ * TextBus 主类
  */
 export class Editor implements EventDelegate {
-  /** 当 TBus 可用时触发 */
+  /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
-  /** 当 TBus 内容发生变化时触发 */
+  /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
-  /** 当 TBus 历史记录管理器 */
+  /** 当 TextBus 历史记录管理器 */
   readonly history: HistoryManager;
 
   readonly elementRef = document.createElement('div');
@@ -150,7 +150,7 @@ export class Editor implements EventDelegate {
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = this.options.fullScreen;
 
-    this.statusBar.fullScreen.full ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
+    this.statusBar.fullScreen.full ? this.elementRef.classList.add('textbus-container-full-screen') : this.elementRef.classList.remove('textbus-container-full-screen');
 
     this.workbench.setTabletWidth(deviceWidth);
     this.workbench.componentStage.expand = this.options.expandComponentLibrary;
@@ -201,7 +201,7 @@ export class Editor implements EventDelegate {
         }
       }),
       this.statusBar.fullScreen.onChange.subscribe(b => {
-        b ? this.elementRef.classList.add('tbus-container-full-screen') : this.elementRef.classList.remove('tbus-container-full-screen');
+        b ? this.elementRef.classList.add('textbus-container-full-screen') : this.elementRef.classList.remove('textbus-container-full-screen');
 
         this.workbench.setTabletWidth(deviceWidth);
         this.invokeViewUpdatedHooks();
@@ -221,10 +221,10 @@ export class Editor implements EventDelegate {
     this.elementRef.appendChild(this.toolbar.elementRef);
     this.elementRef.appendChild(this.workbench.elementRef);
     this.elementRef.append(this.statusBar.elementRef);
-    this.elementRef.classList.add('tbus-container');
+    this.elementRef.classList.add('textbus-container');
 
     if (options.theme) {
-      this.elementRef.classList.add('tbus-theme-' + options.theme);
+      this.elementRef.classList.add('textbus-theme-' + options.theme);
     }
     this.container.appendChild(this.elementRef);
 
@@ -233,7 +233,7 @@ export class Editor implements EventDelegate {
   }
 
   /**
-   * 设置 TBus 编辑器的内容。
+   * 设置 TextBus 编辑器的内容。
    * @param html
    */
   setContents(html: string) {
@@ -260,7 +260,7 @@ export class Editor implements EventDelegate {
   }
 
   /**
-   * 获取 TBus 的内容。
+   * 获取 TextBus 的内容。
    */
   getContents() {
     return {
@@ -270,7 +270,7 @@ export class Editor implements EventDelegate {
   }
 
   /**
-   * 获取 TBus 内容的 JSON 字面量。
+   * 获取 TextBus 内容的 JSON 字面量。
    */
   getJSONLiteral() {
     if (this.openSourceCodeModel) {
@@ -293,7 +293,7 @@ export class Editor implements EventDelegate {
   }
 
   /**
-   * 销毁 TBus 实例。
+   * 销毁 TextBus 实例。
    */
   destroy() {
     this.container.removeChild(this.elementRef);

@@ -23,27 +23,27 @@ class FindForm implements AdditionalViewer {
   constructor() {
     this.onAction = this.actionEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
-    this.elementRef.classList.add('tbus-form', 'tbus-form-inline', 'tbus-form-tool');
+    this.elementRef.classList.add('textbus-form', 'textbus-form-inline', 'textbus-form-tool');
     this.elementRef.innerHTML = `
-<div class="tbus-form-group">
-  <label class="tbus-control-label">查找</label>
-  <div class="tbus-control-value">
-    <input type="text" class="tbus-form-control" placeholder="请输入查找内容">
+<div class="textbus-form-group">
+  <label class="textbus-control-label">查找</label>
+  <div class="textbus-control-value">
+    <input type="text" class="textbus-form-control" placeholder="请输入查找内容">
   </div>
   <div>
-    &nbsp;<button class="tbus-btn tbus-btn-default" type="button">下一个</button>   
+    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">下一个</button>   
   </div>
 </div>
-<div class="tbus-form-group">
-  <label class="tbus-control-label">替换</label>
-  <div class="tbus-control-value">
-    <div class="tbus-input-group">
-      <input type="text" class="tbus-form-control" placeholder="替换成">
-      <button class="tbus-btn tbus-btn-default" type="button">替换</button>
+<div class="textbus-form-group">
+  <label class="textbus-control-label">替换</label>
+  <div class="textbus-control-value">
+    <div class="textbus-input-group">
+      <input type="text" class="textbus-form-control" placeholder="替换成">
+      <button class="textbus-btn textbus-btn-default" type="button">替换</button>
     </div>
   </div>
   <div>
-    &nbsp;<button class="tbus-btn tbus-btn-default" type="button">全部替换</button>
+    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">全部替换</button>
   </div>
 </div>
 `;
@@ -107,7 +107,7 @@ class FindForm implements AdditionalViewer {
 
 export const findTool = Toolkit.makeAdditionalTool({
   tooltip: '查找与替换',
-  classes: ['tbus-icon-search'],
+  classes: ['textbus-icon-search'],
   keymap: {
     ctrlKey: true,
     key: 'f'

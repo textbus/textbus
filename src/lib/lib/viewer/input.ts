@@ -116,10 +116,10 @@ export class Input {
 
   constructor(private context: Document) {
 
-    this.elementRef.classList.add('tbus-selection');
-    this.cursor.classList.add('tbus-cursor');
-    this.inputWrap.classList.add('tbus-input-wrap');
-    this.input.classList.add('tbus-input');
+    this.elementRef.classList.add('textbus-selection');
+    this.cursor.classList.add('textbus-cursor');
+    this.inputWrap.classList.add('textbus-input-wrap');
+    this.input.classList.add('textbus-input');
 
     this.inputWrap.appendChild(this.input);
 

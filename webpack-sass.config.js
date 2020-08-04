@@ -36,8 +36,8 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'tbus.min.css'
+      filename: 'textbus.min.css'
     }),
-    new DisableOutputWebpackPlugin(/tbus/)
+    new DisableOutputWebpackPlugin(/textbus/)
   ]
 };

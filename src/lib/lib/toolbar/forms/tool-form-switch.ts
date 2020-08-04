@@ -7,9 +7,9 @@ export class ToolFormSwitch implements ToolFormItem {
 
   constructor(private config: AttrSwitch) {
     this.name = config.name;
-    this.elementRef.classList.add('tbus-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tbus-control-static">
+    <div class="textbus-control-static">
       <label><input type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
     </div>
     `;

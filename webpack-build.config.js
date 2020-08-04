@@ -7,9 +7,9 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, './package/bundles'),
-    filename: 'tbus.min.js',
+    filename: 'textbus.min.js',
     libraryTarget: 'umd',
-    library: 'tbus',
+    library: 'textbus',
     umdNamedDefine: true
   },
   resolve: {

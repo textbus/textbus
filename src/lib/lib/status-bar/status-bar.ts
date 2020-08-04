@@ -11,7 +11,7 @@ export class StatusBar {
   editingModel = new EditingModel();
 
   constructor() {
-    this.elementRef.classList.add('tbus-status-bar');
+    this.elementRef.classList.add('textbus-status-bar');
     this.elementRef.append(
       this.paths.elementRef,
       this.device.elementRef,

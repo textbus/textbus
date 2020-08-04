@@ -9,7 +9,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const linkTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-link'],
+  classes: ['textbus-icon-link'],
   tooltip: '链接',
   menuFactory() {
     return new ToolForm([{

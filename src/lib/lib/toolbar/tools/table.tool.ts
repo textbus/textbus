@@ -7,7 +7,7 @@ import { TableMatcher } from '../matcher/table.matcher';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
 export const tableTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-table'],
+  classes: ['textbus-icon-table'],
   tooltip: '表格',
   menuFactory() {
     const form = new ToolForm([{
@@ -25,7 +25,7 @@ export const tableTool = Toolkit.makeDropdownTool({
     }]);
 
     const quickSelector = document.createElement('div');
-    quickSelector.classList.add('tbus-table-quick-selector');
+    quickSelector.classList.add('textbus-table-quick-selector');
     const map = new Map<HTMLElement, { row: number, col: number }>();
     for (let row = 0; row < 10; row++) {
       for (let col = 0; col < 10; col++) {
@@ -50,9 +50,9 @@ export const tableTool = Toolkit.makeDropdownTool({
       if (config) {
         map.forEach((value, key) => {
           if (value.row <= config.row && value.col <= config.col) {
-            key.classList.add('tbus-table-quick-selector-selected');
+            key.classList.add('textbus-table-quick-selector-selected');
           } else {
-            key.classList.remove('tbus-table-quick-selector-selected');
+            key.classList.remove('textbus-table-quick-selector-selected');
           }
         })
         form.update(new FormatAbstractData({
@@ -66,7 +66,7 @@ export const tableTool = Toolkit.makeDropdownTool({
 
     quickSelector.addEventListener('mouseleave', () => {
       if (flag === false) {
-        Array.from(map.keys()).forEach(el => el.classList.remove('tbus-table-quick-selector-selected'));
+        Array.from(map.keys()).forEach(el => el.classList.remove('textbus-table-quick-selector-selected'));
         form.update(new FormatAbstractData({
           attrs: null
         }))

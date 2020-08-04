@@ -6,7 +6,7 @@ export class EditingModel {
 
   set sourceCode(b: boolean) {
     this._sourceCode = b;
-    this.icon.className = b ? 'tbus-icon-quill' : 'tbus-icon-code';
+    this.icon.className = b ? 'textbus-icon-quill' : 'textbus-icon-code';
     this.elementRef.title = b ? '切换为富文本编辑模式' : '切换为源代码编辑模式';
   }
 
@@ -22,8 +22,8 @@ export class EditingModel {
     this.onChange = this.changeEvent.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = '切换为源代码编辑模式';
-    this.elementRef.className = 'tbus-editing-model';
-    this.icon.className = 'tbus-icon-code';
+    this.elementRef.className = 'textbus-editing-model';
+    this.icon.className = 'textbus-icon-code';
     this.elementRef.appendChild(this.icon);
     this.elementRef.addEventListener('click', () => {
       this.sourceCode = !this.sourceCode;

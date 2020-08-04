@@ -6,7 +6,7 @@ import { blockBackgroundColorFormatter } from '../../formatter/block-style.forma
 import { PreComponent } from '../../components/pre.component';
 
 export const blockBackgroundTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-paint-bucket'],
+  classes: ['textbus-icon-paint-bucket'],
   tooltip: '元素背景颜色',
   menuFactory() {
     return new Palette('backgroundColor');

@@ -14,7 +14,7 @@ export class Select extends FormItem<HTMLSelectElement, string> {
   constructor(private config: SelectConfig) {
     super(document.createElement('select'), config.label);
     this.name = config.name;
-    this.formControl.classList.add('tbus-form-control');
+    this.formControl.classList.add('textbus-form-control');
     config.options.forEach(item => {
       const option = document.createElement('option');
       option.label = item.label;

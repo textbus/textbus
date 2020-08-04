@@ -6,7 +6,7 @@ import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const videoTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-video'],
+  classes: ['textbus-icon-video'],
   tooltip: '视频',
   menuFactory() {
     return new ToolForm([{

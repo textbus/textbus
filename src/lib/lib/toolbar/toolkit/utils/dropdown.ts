@@ -28,18 +28,18 @@ export class Dropdown {
 
   set highlight(v: boolean) {
     if (v) {
-      this.button.classList.add('tbus-handler-active');
+      this.button.classList.add('textbus-handler-active');
     } else {
-      this.button.classList.remove('tbus-handler-active');
+      this.button.classList.remove('textbus-handler-active');
     }
   }
 
   set expand(b: boolean) {
     this._expand = b;
     if (b) {
-      this.elementRef.classList.add('tbus-dropdown-open');
+      this.elementRef.classList.add('textbus-dropdown-open');
     } else {
-      this.elementRef.classList.remove('tbus-dropdown-open');
+      this.elementRef.classList.remove('textbus-dropdown-open');
     }
   }
 
@@ -55,25 +55,25 @@ export class Dropdown {
               private menuViewer: DropdownViewer,
               private tooltip = '',
               private limitDisplay: HTMLElement) {
-    this.elementRef.classList.add('tbus-dropdown');
+    this.elementRef.classList.add('textbus-dropdown');
 
-    this.button.classList.add('tbus-handler');
+    this.button.classList.add('textbus-handler');
     this.button.type = 'button';
     this.button.title = tooltip;
     this.button.appendChild(inner);
     const dropdownArrow = document.createElement('span');
-    dropdownArrow.classList.add('tbus-dropdown-caret');
+    dropdownArrow.classList.add('textbus-dropdown-caret');
     this.button.appendChild(dropdownArrow);
 
     this.elementRef.appendChild(this.button);
 
     const menu = document.createElement('div');
-    menu.classList.add('tbus-dropdown-menu');
+    menu.classList.add('textbus-dropdown-menu');
     menu.appendChild(menuViewer.elementRef);
     this.elementRef.appendChild(menu);
 
     const updatePosition = () => {
-      if (this.elementRef.classList.contains('tbus-dropdown-open')) {
+      if (this.elementRef.classList.contains('textbus-dropdown-open')) {
         const distance = this.limitDisplay.getBoundingClientRect().right - (this.elementRef.getBoundingClientRect().left + menu.offsetWidth);
         menu.style.left = `${Math.min(0, distance)}px`;
       }

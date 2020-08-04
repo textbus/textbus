@@ -1,4 +1,4 @@
-.tbus-status-bar {
+.textbus-status-bar {
   border: 1px solid $color-light;
   box-sizing: border-box;
   height: 30px;
@@ -15,7 +15,7 @@
   }
 }
 
-.tbus-paths {
+.textbus-paths {
   flex: 1;
 
   &:before {
@@ -23,7 +23,7 @@
   }
 }
 
-.tbus-paths-link {
+.textbus-paths-link {
   color: inherit;
   font-weight: bold;
   text-decoration: none;
@@ -38,12 +38,12 @@
   }
 }
 
-.tbus-paths-split {
+.textbus-paths-split {
   font-size: .8em;
   color: $color-gray-dark;
 }
 
-.tbus-device {
+.textbus-device {
   position: relative;
 
   &-btn {
@@ -63,7 +63,7 @@
   }
 
   &-expand {
-    .tbus-device-menus {
+    .textbus-device-menus {
       transform: scaleY(1);
     }
   }
@@ -118,7 +118,7 @@
   }
 }
 
-.tbus-full-screen, .tbus-editing-model{
+.textbus-full-screen, .textbus-editing-model{
   background: none;
   color: inherit;
   border: none;

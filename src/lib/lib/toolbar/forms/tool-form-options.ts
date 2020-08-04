@@ -7,10 +7,10 @@ export class ToolFormOptions implements ToolFormItem {
 
   constructor(private config: AttrOptions) {
     this.name = config.name;
-    this.elementRef.classList.add('tbus-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tbus-control-label">${config.label}</div>
-    <div class="tbus-control-static">${
+    <div class="textbus-control-label">${config.label}</div>
+    <div class="textbus-control-static">${
       config.values.map(c => {
         return `<label>
                   <input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}">

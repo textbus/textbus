@@ -8,7 +8,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
   tooltip: '对齐方式',
   options: [{
     label: '左对齐',
-    classes: ['tbus-icon-paragraph-left'],
+    classes: ['textbus-icon-paragraph-left'],
     value: 'left',
     keymap: {
       ctrlKey: true,
@@ -17,7 +17,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
     default: true
   }, {
     label: '右对齐',
-    classes: ['tbus-icon-paragraph-right'],
+    classes: ['textbus-icon-paragraph-right'],
     value: 'right',
     keymap: {
       ctrlKey: true,
@@ -25,7 +25,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
     },
   }, {
     label: '居中对齐',
-    classes: ['tbus-icon-paragraph-center'],
+    classes: ['textbus-icon-paragraph-center'],
     value: 'center',
     keymap: {
       ctrlKey: true,
@@ -33,7 +33,7 @@ export const textAlignTool = Toolkit.makeSelectTool({
     },
   }, {
     label: '分散对齐',
-    classes: ['tbus-icon-paragraph-justify'],
+    classes: ['textbus-icon-paragraph-justify'],
     value: 'justify',
     keymap: {
       ctrlKey: true,

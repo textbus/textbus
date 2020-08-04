@@ -4,7 +4,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const ulTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-list'],
+  classes: ['textbus-icon-list'],
   tooltip: '无序列表',
   keymap: {
     shiftKey: true,

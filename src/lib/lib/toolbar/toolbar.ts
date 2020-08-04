@@ -26,7 +26,7 @@ export class Toolbar {
     this.componentsElement.style.display = b ? '' : 'none';
     if (!b) {
       this.componentStageExpand = false;
-      this.componentsSwitchBtn.classList.remove('tbus-toolbar-components-btn-active');
+      this.componentsSwitchBtn.classList.remove('textbus-toolbar-components-btn-active');
       this.componentStageEvent.next(false);
     }
   }
@@ -64,33 +64,33 @@ export class Toolbar {
               }) {
     this.onAction = this.actionEvent.asObservable();
     this.onComponentsStageChange = this.componentStageEvent.asObservable();
-    this.elementRef.classList.add('tbus-toolbar');
-    this.toolWrapper.classList.add('tbus-toolbar-wrapper');
-    this.toolsElement.classList.add('tbus-toolbar-tools');
-    this.componentsElement.classList.add('tbus-toolbar-components');
-    this.additionalWorktable.classList.add('tbus-toolbar-additional-worktable');
-    this.additionalWorktableContent.classList.add('tbus-toolbar-additional-worktable-content');
-    this.additionalWorktableClose.classList.add('tbus-toolbar-additional-worktable-close');
+    this.elementRef.classList.add('textbus-toolbar');
+    this.toolWrapper.classList.add('textbus-toolbar-wrapper');
+    this.toolsElement.classList.add('textbus-toolbar-tools');
+    this.componentsElement.classList.add('textbus-toolbar-components');
+    this.additionalWorktable.classList.add('textbus-toolbar-additional-worktable');
+    this.additionalWorktableContent.classList.add('textbus-toolbar-additional-worktable-content');
+    this.additionalWorktableClose.classList.add('textbus-toolbar-additional-worktable-close');
     this.additionalWorktableCloseBtn.innerHTML = '&times;';
     this.additionalWorktableCloseBtn.type = 'button';
-    this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt');
+    this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt');
     this.componentStageExpand = options.openComponentState;
     if (options.showComponentStage) {
       const btn = this.componentsSwitchBtn;
       btn.type = 'button';
       btn.innerText = '组件库';
       btn.title = '展开或收起组件库';
-      btn.classList.add('tbus-toolbar-components-btn');
+      btn.classList.add('textbus-toolbar-components-btn');
       btn.addEventListener('click', () => {
         this.componentStageExpand = !this.componentStageExpand;
         this.componentStageExpand ?
-          btn.classList.add('tbus-toolbar-components-btn-active') :
-          btn.classList.remove('tbus-toolbar-components-btn-active');
+          btn.classList.add('textbus-toolbar-components-btn-active') :
+          btn.classList.remove('textbus-toolbar-components-btn-active');
         this.componentStageEvent.next(this.componentStageExpand);
       })
 
       if (options.openComponentState) {
-        btn.classList.add('tbus-toolbar-components-btn-active');
+        btn.classList.add('textbus-toolbar-components-btn-active');
       }
       this.componentsElement.appendChild(btn);
     }
@@ -108,18 +108,18 @@ export class Toolbar {
         try {
           const config: Keymap = JSON.parse(keymap);
           this.keymapPrompt.innerHTML = createKeymapHTML(config);
-          this.keymapPrompt.classList.add('tbus-toolbar-keymap-prompt-show');
+          this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
           return;
         } catch (e) {
 
         }
       }
-      this.keymapPrompt.classList.remove('tbus-toolbar-keymap-prompt-show');
+      this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
     })
     this.additionalWorktableCloseBtn.addEventListener('click', () => {
       this.currentAdditionalWorktableViewer.destroy();
       this.additionalWorktableContent.innerHTML = '';
-      this.additionalWorktable.classList.remove('tbus-toolbar-additional-worktable-show');
+      this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
     })
   }
 
@@ -166,7 +166,7 @@ export class Toolbar {
     if (Array.isArray(handlers)) {
       handlers.forEach(handler => {
         const group = document.createElement('span');
-        group.classList.add('tbus-toolbar-group');
+        group.classList.add('textbus-toolbar-group');
         if (Array.isArray(handler)) {
           this.createHandlers(handler).forEach(el => group.appendChild(el));
         } else {
@@ -204,7 +204,7 @@ export class Toolbar {
         this.subs.push((<AdditionalHandler>h).onShow.subscribe(viewer => {
           this.currentAdditionalWorktableViewer = viewer;
           this.additionalWorktableContent.innerHTML = '';
-          this.additionalWorktable.classList.add('tbus-toolbar-additional-worktable-show');
+          this.additionalWorktable.classList.add('textbus-toolbar-additional-worktable-show');
           this.additionalWorktableContent.appendChild(viewer.elementRef);
         }));
         break;

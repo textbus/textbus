@@ -3,7 +3,7 @@ import { HistoryCommander } from '../commands/history.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const historyBackTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-history-back'],
+  classes: ['textbus-icon-history-back'],
   tooltip: '撤消',
   matcher: new HistoryMatcher('back'),
   commanderFactory() {

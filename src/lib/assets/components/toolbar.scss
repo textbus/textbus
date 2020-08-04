@@ -1,4 +1,4 @@
-.tbus-toolbar {
+.textbus-toolbar {
   background-color: $color-light;
   font-size: 14px;
   color: $color-default;
@@ -12,14 +12,14 @@
   }
 }
 
-.tbus-toolbar-wrapper {
+.textbus-toolbar-wrapper {
   border: 1px solid $color-gray-light;
   display: flex;
   padding: 8px 15px 3px;
   min-height: 24px;
 }
 
-.tbus-toolbar-additional-worktable {
+.textbus-toolbar-additional-worktable {
   display: none;
   align-items: center;
   padding: 5px 20px;
@@ -27,11 +27,11 @@
   border-top: 0;
   background-color: $color-lighter;
 
-  &.tbus-toolbar-additional-worktable-show {
+  &.textbus-toolbar-additional-worktable-show {
     display: flex;
   }
 
-  .tbus-form {
+  .textbus-form {
     color: inherit;
     padding: 0;
     background: none;
@@ -68,11 +68,11 @@
   }
 }
 
-.tbus-toolbar-tools {
+.textbus-toolbar-tools {
   flex: 1;
 }
 
-.tbus-toolbar-components {
+.textbus-toolbar-components {
   border-left: 1px solid rgba(0, 0, 0, .1);
   padding-left: 1em;
   display: flex;
@@ -80,7 +80,7 @@
   margin-bottom: 10px;
 }
 
-.tbus-toolbar-components-btn {
+.textbus-toolbar-components-btn {
   background: none;
   border: none;
   outline: none;
@@ -94,7 +94,7 @@
   }
 }
 
-.tbus-toolbar-keymap-prompt {
+.textbus-toolbar-keymap-prompt {
   position: absolute;
   top: 100%;
   right: 0;
@@ -121,12 +121,12 @@
   }
 }
 
-.tbus-toolbar-keymap-join {
+.textbus-toolbar-keymap-join {
   opacity: .8;
   font-size: .8em;
 }
 
-.tbus-toolbar-group {
+.textbus-toolbar-group {
   margin-right: 8px;
   margin-bottom: 5px;
   display: inline-block;
@@ -137,7 +137,7 @@
   }
 }
 
-.tbus-handler {
+.textbus-handler {
   font-size: 14px;
   background: none;
   border: none;
@@ -176,7 +176,7 @@
   }
 }
 
-.tbus-select-button {
+.textbus-select-button {
   width: 90px;
   display: inline-block;
   justify-content: space-between;
@@ -198,7 +198,7 @@
 }
 
 
-.tbus-toolbar-menu {
+.textbus-toolbar-menu {
   padding-top: 5px;
   padding-bottom: 5px;
 
@@ -258,7 +258,7 @@
   }
 }
 
-.tbus-toolbar {
+.textbus-toolbar {
   &-h1 {
     font-size: 2em;
     font-weight: bold;
@@ -290,7 +290,7 @@
   }
 }
 
-.tbus-font {
+.textbus-font {
   &-sans-serif {
     font-family: sans-serif;
   }
@@ -340,7 +340,7 @@
   }
 }
 
-.tbus-text {
+.textbus-text {
   &-left {
     text-align: left;
   }
@@ -359,14 +359,14 @@
 }
 
 @each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
-  .tbus-font-size-#{$t} {
+  .textbus-font-size-#{$t} {
     line-height: 1.2;
     font-size: #{$t}px;
   }
 }
 
 @each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
-  .tbus-line-height-#{str-replace($t + '', '.', '_')} {
+  .textbus-line-height-#{str-replace($t + '', '.', '_')} {
     &:before {
       content: "";
       margin-right: 10px;
@@ -385,7 +385,7 @@
 }
 
 @each $t in 0, 1, 2, 3, 4, 5 {
-  .tbus-letter-spacing-#{$t} {
+  .textbus-letter-spacing-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -403,7 +403,7 @@
 }
 
 @each $t in 0, 1, 2, 4 {
-  .tbus-text-indent-#{$t} {
+  .textbus-text-indent-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -423,7 +423,7 @@
   }
 }
 
-.tbus-dropdown {
+.textbus-dropdown {
   position: relative;
   display: inline-block;
 
@@ -431,22 +431,22 @@
     z-index: 2;
   }
 
-  &.tbus-dropdown-open {
-    > .tbus-handler {
+  &.textbus-dropdown-open {
+    > .textbus-handler {
       background-color: #fff;
     }
 
-    .tbus-dropdown-menu {
+    .textbus-dropdown-menu {
       transform: scaleY(1);
     }
 
-    .tbus-dropdown-caret:after {
+    .textbus-dropdown-caret:after {
       transform: rotateZ(180deg);
     }
   }
 }
 
-.tbus-dropdown-caret {
+.textbus-dropdown-caret {
   margin-left: 2px;
 
   &:after {
@@ -462,7 +462,7 @@
   }
 }
 
-.tbus-dropdown-menu {
+.textbus-dropdown-menu {
   position: absolute;
   left: 0;
   top: 100%;
@@ -478,7 +478,7 @@
   z-index: 2;
 }
 
-.tbus-emoji-menu {
+.textbus-emoji-menu {
   width: 220px;
   padding: 10px 5px;
   box-sizing: border-box;
@@ -500,7 +500,7 @@
   }
 }
 
-.tbus-table-quick-selector {
+.textbus-table-quick-selector {
   background-color: $color-lighter;
   overflow: hidden;
   padding-left: 1px;
@@ -521,7 +521,7 @@
     margin-top: -1px;
     position: relative;
 
-    &.tbus-table-quick-selector-selected {
+    &.textbus-table-quick-selector-selected {
       background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
       border-color: $color-primary;
       z-index: 1;

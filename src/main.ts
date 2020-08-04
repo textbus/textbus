@@ -49,4 +49,4 @@ editor.onChange.subscribe(() => {
 document.getElementById('btn').addEventListener('click', () => {
   console.log(editor.getContents().html)
 })
-// editor.setContents(`<h1>TBus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);
+// editor.setContents(`<h1>textbus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

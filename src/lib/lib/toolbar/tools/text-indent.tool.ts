@@ -7,25 +7,25 @@ import { PreComponent } from '../../components/pre.component';
 
 export const textIndentTool = Toolkit.makeSelectTool({
   tooltip: '首行缩进',
-  classes: ['tbus-icon-text-indent'],
+  classes: ['textbus-icon-text-indent'],
   mini: true,
   options: [{
     label: '0x',
     value: '0',
-    classes: ['tbus-text-indent-0'],
+    classes: ['textbus-text-indent-0'],
     default: true
   }, {
     label: '1x',
     value: '1em',
-    classes: ['tbus-text-indent-1'],
+    classes: ['textbus-text-indent-1'],
     default: true
   }, {
     label: '2x',
-    classes: ['tbus-text-indent-2'],
+    classes: ['textbus-text-indent-2'],
     value: '2em',
   }, {
     label: '4x',
-    classes: ['tbus-text-indent-4'],
+    classes: ['textbus-text-indent-4'],
     value: '4em'
   }],
   matcher: new FormatMatcher(textIndentFormatter, [PreComponent]),

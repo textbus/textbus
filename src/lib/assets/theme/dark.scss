@@ -1,18 +1,18 @@
-.tbus-container.tbus-theme-dark {
-  .tbus-toolbar {
+.textbus-container.textbus-theme-dark {
+  .textbus-toolbar {
     box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
   }
 
-  .tbus-toolbar-wrapper {
+  .textbus-toolbar-wrapper {
     background-color: $color-darker;
     border-color: $color-darker;
   }
 
-  .tbus-toolbar-additional-worktable {
+  .textbus-toolbar-additional-worktable {
     border-bottom: 0;
   }
 
-  .tbus-handler {
+  .textbus-handler {
     color: $color-gray;
 
     &-active {
@@ -30,7 +30,7 @@
     }
   }
 
-  .tbus-toolbar-components-btn {
+  .textbus-toolbar-components-btn {
     color: $color-gray;
 
     &-active {
@@ -38,16 +38,16 @@
     }
   }
 
-  .tbus-dropdown.tbus-dropdown-open > .tbus-handler {
+  .textbus-dropdown.textbus-dropdown-open > .textbus-handler {
     background-color: $color-gray;
     color: $color-darker;
   }
 
-  .tbus-workbench {
+  .textbus-workbench {
     background-color: $color-lighter;
   }
 
-  .tbus-status-bar {
+  .textbus-status-bar {
     background-color: lighten($color-darker, 8);
     border-color: lighten($color-darker, 8);
     color: $color-gray-dark;

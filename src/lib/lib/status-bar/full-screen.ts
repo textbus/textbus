@@ -6,7 +6,7 @@ export class FullScreen {
 
   set full(b: boolean) {
     this._full = b;
-    this.icon.className = b ? 'tbus-icon-shrink' : 'tbus-icon-enlarge';
+    this.icon.className = b ? 'textbus-icon-shrink' : 'textbus-icon-enlarge';
   }
 
   get full() {
@@ -21,7 +21,7 @@ export class FullScreen {
     this.onChange = this.changeEvent.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = '切换全屏模式';
-    this.elementRef.className = 'tbus-full-screen';
+    this.elementRef.className = 'textbus-full-screen';
     this.elementRef.appendChild(this.icon);
     this.elementRef.addEventListener('click', () => {
       this.full = !this.full;

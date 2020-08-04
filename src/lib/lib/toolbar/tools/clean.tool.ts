@@ -3,7 +3,7 @@ import { LinkFormatter } from '../../formatter/link.formatter';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const cleanTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-clear-formatting'],
+  classes: ['textbus-icon-clear-formatting'],
   tooltip: '清除格式',
   keymap: {
     ctrlKey: true,

@@ -41,7 +41,7 @@ export class ButtonHandler implements Tool {
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = config.tooltip || '';
-    this.elementRef.classList.add('tbus-handler');
+    this.elementRef.classList.add('textbus-handler');
     const inner = document.createElement('span');
     inner.innerText = config.label || '';
     inner.classList.add(...(config.classes || []));
@@ -66,14 +66,14 @@ export class ButtonHandler implements Tool {
     switch (selectionMatchDelta.state) {
       case HighlightState.Highlight:
         this.elementRef.disabled = false;
-        this.elementRef.classList.add('tbus-handler-active');
+        this.elementRef.classList.add('textbus-handler-active');
         break;
       case HighlightState.Normal:
         this.elementRef.disabled = false;
-        this.elementRef.classList.remove('tbus-handler-active');
+        this.elementRef.classList.remove('textbus-handler-active');
         break;
       case HighlightState.Disabled:
-        this.elementRef.classList.remove('tbus-handler-active');
+        this.elementRef.classList.remove('textbus-handler-active');
         this.elementRef.disabled = true;
         break
     }

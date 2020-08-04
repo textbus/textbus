@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const underlineTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-underline'],
+  classes: ['textbus-icon-underline'],
   tooltip: '下划线',
   keymap: {
     ctrlKey: true,

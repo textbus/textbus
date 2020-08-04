@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const codeTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-code'],
+  classes: ['textbus-icon-code'],
   tooltip: '代码',
   // keymap: {
   //   ctrlKey: true,

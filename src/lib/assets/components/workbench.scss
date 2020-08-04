@@ -1,4 +1,4 @@
-.tbus-workbench {
+.textbus-workbench {
   border-left: 1px solid $color-light;
   border-right: 1px solid $color-light;
   background: #fff;
@@ -35,7 +35,7 @@
   }
 }
 
-.tbus-additional-worktable {
+.textbus-additional-worktable {
   position: absolute;
   left: 0;
   top: 0;
@@ -45,7 +45,7 @@
   pointer-events: none;
 }
 
-.tbus-dialog {
+.textbus-dialog {
   position: absolute;
   left: 0;
   right: 0;
@@ -79,21 +79,21 @@
 }
 
 
-.tbus-dashboard {
+.textbus-dashboard {
   display: flex;
   height: 100%;
   position: relative;
   z-index: 0;
 }
 
-.tbus-editable-area {
+.textbus-editable-area {
   user-select: none;
   position: relative;
   overflow: auto;
   flex: 1;
 }
 
-.tbus-workbench-loading {
+.textbus-workbench-loading {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -103,12 +103,12 @@
   transition: opacity .3s;
   pointer-events: none;
 
-  &.tbus-workbench-loading-done {
+  &.textbus-workbench-loading-done {
     opacity: 0;
   }
 }
 
-.tbus-workbench-loading > div {
+.textbus-workbench-loading > div {
   width: 14px;
   height: 14px;
   background-color: #333;
@@ -118,30 +118,34 @@
   justify-content: center;
   font-size: 12px;
   border-radius: 50%;
-  animation: tbus-workbench-loading 1.2s infinite ease-in-out;
+  animation: textbus-workbench-loading 1.2s infinite ease-in-out;
 }
 
-.tbus-workbench-loading > div:nth-child(2) {
+.textbus-workbench-loading > div:nth-child(2) {
   animation-delay: -1.1s;
 }
 
-.tbus-workbench-loading > div:nth-child(3) {
+.textbus-workbench-loading > div:nth-child(3) {
   animation-delay: -1.0s;
 }
 
-.tbus-workbench-loading > div:nth-child(4) {
+.textbus-workbench-loading > div:nth-child(4) {
   animation-delay: -0.9s;
 }
 
-.tbus-workbench-loading > div:nth-child(5) {
+.textbus-workbench-loading > div:nth-child(5) {
   animation-delay: -0.8s;
 }
 
-.tbus-workbench-loading > div:nth-child(6) {
+.textbus-workbench-loading > div:nth-child(6) {
   animation-delay: -0.7s;
 }
 
-@keyframes tbus-workbench-loading {
+.textbus-workbench-loading > div:nth-child(7) {
+  animation-delay: -0.6s;
+}
+
+@keyframes textbus-workbench-loading {
   0%, 40%, 100% {
     transform: scale(0.8);
   }
@@ -151,7 +155,7 @@
 }
 
 
-.tbus-component-stage {
+.textbus-component-stage {
   display: none;
   overflow: auto;
   background-color: #fff;
@@ -169,7 +173,7 @@
   }
 }
 
-.tbus-component-example-item {
+.textbus-component-example-item {
   width: 100px;
   height: 100px;
   margin: 5px 10px;
@@ -178,7 +182,7 @@
   user-select: none;
 }
 
-.tbus-component-example {
+.textbus-component-example {
   position: relative;
   height: 70px;
   background-color: #fff;
@@ -207,14 +211,14 @@
   }
 }
 
-.tbus-component-example-name {
+.textbus-component-example-name {
   text-align: center;
   font-size: 12px;
   line-height: 30px;
   margin-top: 1px;
 }
 
-.tbus-tablet {
+.textbus-tablet {
   min-height: 100%;
   position: relative;
   margin: 0 auto;
@@ -224,13 +228,13 @@
   transform: scale(0.95);
   transition: all 1.2s cubic-bezier(.36, .66, .04, 1);
 
-  &.tbus-tablet-ready {
+  &.textbus-tablet-ready {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.tbus-frame {
+.textbus-frame {
   border: none;
   width: 100%;
   display: block;

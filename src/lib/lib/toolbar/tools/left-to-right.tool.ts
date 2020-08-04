@@ -5,7 +5,7 @@ import { Commander } from '../../core/commander';
 import { DirMatcher } from '../matcher/dir.matcher';
 
 export const leftToRightTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-ltr'],
+  classes: ['textbus-icon-ltr'],
   tooltip: '从左向右',
   matcher: new DirMatcher('ltr'),
   commanderFactory(): Commander {

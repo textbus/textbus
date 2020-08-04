@@ -46,10 +46,10 @@ class ActionSheetOptionHandler {
 
   constructor(private option: ActionConfig) {
     this.onCheck = this.eventSource.asObservable();
-    this.elementRef.classList.add('tbus-toolbar-menu-item');
+    this.elementRef.classList.add('textbus-toolbar-menu-item');
     this.elementRef.type = 'button';
     const label = document.createElement('span');
-    label.classList.add('tbus-toolbar-menu-item-label');
+    label.classList.add('textbus-toolbar-menu-item-label');
     if (option.classes) {
       label.classList.add(...(option.classes || []));
     }
@@ -58,7 +58,7 @@ class ActionSheetOptionHandler {
     this.elementRef.appendChild(label);
     if (option.keymap) {
       const keymapHTML = document.createElement('span');
-      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
+      keymapHTML.classList.add('textbus-toolbar-menu-item-keymap');
       keymapHTML.innerHTML = createKeymapHTML(option.keymap);
       this.elementRef.appendChild(keymapHTML);
     }
@@ -76,7 +76,7 @@ class ActionSheetViewer implements DropdownViewer {
 
   constructor(private actions: ActionConfig[] = []) {
     this.onComplete = this.completeEvent.asObservable();
-    this.elementRef.classList.add('tbus-toolbar-menu');
+    this.elementRef.classList.add('textbus-toolbar-menu');
 
     actions.forEach(option => {
       const item = new ActionSheetOptionHandler(option);

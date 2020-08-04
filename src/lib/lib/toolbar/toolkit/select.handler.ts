@@ -56,11 +56,11 @@ class SelectOptionHandler {
   constructor(private option: SelectOptionConfig) {
     this.onCheck = this.eventSource.asObservable();
 
-    this.elementRef.classList.add('tbus-toolbar-menu-item');
+    this.elementRef.classList.add('textbus-toolbar-menu-item');
     this.elementRef.type = 'button';
 
     const label = document.createElement('span');
-    label.classList.add('tbus-toolbar-menu-item-label');
+    label.classList.add('textbus-toolbar-menu-item-label');
     if (option.classes) {
       label.classList.add(...(option.classes || []));
     }
@@ -68,7 +68,7 @@ class SelectOptionHandler {
     this.elementRef.appendChild(label);
     if (option.keymap) {
       const keymapHTML = document.createElement('span');
-      keymapHTML.classList.add('tbus-toolbar-menu-item-keymap');
+      keymapHTML.classList.add('textbus-toolbar-menu-item-keymap');
       keymapHTML.innerHTML = createKeymapHTML(option.keymap);
       this.elementRef.appendChild(keymapHTML);
     }
@@ -85,7 +85,7 @@ class SelectViewer implements DropdownViewer {
 
   constructor(private options: SelectOptionConfig[] = [], private inner: HTMLElement) {
     this.onComplete = this.completeEvent.asObservable();
-    this.elementRef.classList.add('tbus-toolbar-menu');
+    this.elementRef.classList.add('textbus-toolbar-menu');
 
     options.forEach(option => {
       const item = new SelectOptionHandler(option);
@@ -120,8 +120,8 @@ export class SelectHandler implements Tool {
     const dropdownInner = document.createElement('span');
     this.viewer = new SelectViewer(this.config.options, dropdownInner);
     this.textContainer = dropdownInner;
-    dropdownInner.classList.add('tbus-select-button', ...config.classes || []);
-    config.mini && dropdownInner.classList.add('tbus-select-button-mini');
+    dropdownInner.classList.add('textbus-select-button', ...config.classes || []);
+    config.mini && dropdownInner.classList.add('textbus-select-button-mini');
 
     this.config.options.forEach(option => {
       if (option.keymap) {

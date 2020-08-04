@@ -3,7 +3,7 @@ import { TableEditMatcher } from '../matcher/table-edit.matcher';
 import { TableRemoveCommander } from '../commands/table-remove.commander';
 
 export const tableRemoveTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-table-remove'],
+  classes: ['textbus-icon-table-remove'],
   tooltip: '删除表格',
   matcher: new TableEditMatcher(),
   commanderFactory() {

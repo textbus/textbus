@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
-      "@tanbo/tbus": [
+      "@tanbo/textbus": [
         "src/lib/lib"
       ],
       "@tanbo/tbus/*": [

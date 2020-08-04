@@ -1,52 +1,52 @@
-.tbus-form {
+.textbus-form {
   overflow: hidden;
   background-color: $color-lighter;
   font-size: 14px;
 
-  &.tbus-form-flow {
-    .tbus-form-group {
+  &.textbus-form-flow {
+    .textbus-form-group {
       display: block;
 
-      > .tbus-control-label {
+      > .textbus-control-label {
         padding-bottom: 5px;
         text-align: left;
       }
     }
   }
 
-  &.tbus-form-inline {
-    .tbus-form-group {
+  &.textbus-form-inline {
+    .textbus-form-group {
       display: inline-flex;
       align-items: center;
       margin-right: 1em;
     }
   }
 
-  &.tbus-form-tool {
+  &.textbus-form-tool {
     padding: 15px 20px;
     min-width: 160px;
     box-sizing: content-box;
     user-select: none;
 
-    .tbus-form-group {
+    .textbus-form-group {
       padding-left: 0;
       padding-right: 0;
     }
 
-    .tbus-form-control, .tbus-btn {
+    .textbus-form-control, .textbus-btn {
       padding: 3px 6px;
       font-size: 13px;
     }
 
-    .tbus-btn-wrap .tbus-btn {
+    .textbus-btn-wrap .textbus-btn {
       min-width: 46px;
     }
 
-    .tbus-control-label {
+    .textbus-control-label {
       font-weight: bold;
     }
 
-    .tbus-control-static {
+    .textbus-control-static {
       margin: 0;
 
       label {
@@ -66,21 +66,21 @@
     }
   }
 
-  &.tbus-form-workbench {
+  &.textbus-form-workbench {
     min-width: 400px;
 
-    .tbus-form-title {
+    .textbus-form-title {
       background-color: $color-lighter;
       border-bottom: 1px solid $color-light;
       padding: 20px;
       margin: 0;
     }
 
-    .tbus-control-label {
+    .textbus-control-label {
       width: 100px;
     }
 
-    .tbus-btn-wrap {
+    .textbus-btn-wrap {
       margin-top: 15px;
       border-top: 1px solid $color-light;
       text-align: right;
@@ -88,24 +88,24 @@
       padding-right: 20px;
       background-color: #fff;
 
-      .tbus-btn {
+      .textbus-btn {
         margin-left: 10px;
       }
     }
   }
 }
 
-.tbus-form-groups {
+.textbus-form-groups {
   background-color: $color-lighter;
   padding: 15px 0;
 }
 
-.tbus-form-group {
+.textbus-form-group {
   padding: 5px 20px;
   display: flex;
 }
 
-.tbus-control-label {
+.textbus-control-label {
   display: block;
   text-align: right;
   padding-right: 10px;
@@ -114,28 +114,28 @@
   box-sizing: border-box;
 }
 
-.tbus-control-static {
+.textbus-control-static {
   padding-top: 5px;
   padding-bottom: 5px;
 }
 
-.tbus-control-value, .tbus-control-static {
+.textbus-control-value, .textbus-control-static {
   flex: 1;
   margin: 0;
 
-  > .tbus-form-control {
+  > .textbus-form-control {
     width: 100%;
   }
 }
 
-.tbus-btn-wrap {
+.textbus-btn-wrap {
   padding-top: 10px;
   padding-bottom: 10px;
   @include clearfix;
 }
 
 
-.tbus-form-control {
+.textbus-form-control {
   position: relative;
   outline: none;
   background-color: #fff;
@@ -144,13 +144,13 @@
   @include input-size(5px, 12px, 4px, 14px);
 }
 
-.tbus-input-block {
+.textbus-input-block {
   display: block;
   width: 100%;
 }
 
 
-.tbus-input-addon {
+.textbus-input-addon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -175,10 +175,10 @@
 
 @mixin input-group-size($control-font-size, $control-x-padding, $control-y-padding, $controller-radius, $btn-radius, $btn-x-padding, $btn-y-padding, $btn-font-size) {
   font-size: $control-font-size;
-  > .tbus-form-control {
+  > .textbus-form-control {
     @include input-size($control-y-padding, $control-x-padding, 0, $control-font-size);
   }
-  > .tbus-form-control {
+  > .textbus-form-control {
     &:first-child {
       border-top-left-radius: $controller-radius;
       border-bottom-left-radius: $controller-radius;
@@ -189,7 +189,7 @@
       border-bottom-right-radius: $controller-radius;
     }
   }
-  > .tbus-btn {
+  > .textbus-btn {
     padding: $btn-y-padding $btn-x-padding;
     font-size: $btn-font-size;
 
@@ -205,20 +205,20 @@
   }
 }
 
-.tbus-input-group {
+.textbus-input-group {
   position: relative;
   display: inline-flex;
   font-size: 14px;
 
-  > .tbus-form-control {
+  > .textbus-form-control {
     flex: 1;
   }
 
-  > .tbus-form-control, > .tbus-input-addon, > .tbus-btn {
+  > .textbus-form-control, > .textbus-input-addon, > .textbus-btn {
     border-radius: 0;
   }
 
-  > .tbus-form-control, > .tbus-input-addon {
+  > .textbus-form-control, > .textbus-input-addon {
     &:not(:first-child) {
       margin-left: -1px;
     }
@@ -234,7 +234,7 @@
     }
   }
 
-  > .tbus-btn {
+  > .textbus-btn {
     &:not(:first-child) {
       margin-left: -1px;
     }
@@ -252,7 +252,7 @@
 }
 
 @mixin btn-size($name, $v, $h, $font-size, $radius) {
-  .tbus-btn-#{$name} {
+  .textbus-btn-#{$name} {
     padding: $v $h;
     font-size: $font-size;
     border-radius: $radius;
@@ -260,7 +260,7 @@
 }
 
 @mixin btn-theme($name, $color, $bg-color) {
-  .tbus-btn-#{$name} {
+  .textbus-btn-#{$name} {
     color: $color;
     background-color: $bg-color;
     @if $name != default {
@@ -301,7 +301,7 @@
   }
 }
 
-.tbus-btn {
+.textbus-btn {
   display: inline-block;
   border: 1px solid $color-gray;
   font-size: 14px;
@@ -327,13 +327,13 @@
     cursor: default;
   }
 
-  &.tbus-btn-block {
+  &.textbus-btn-block {
     width: 100%;
     display: block;
   }
 
   &-loading {
-    @keyframes tbus-form-btn-loading {
+    @keyframes textbus-form-btn-loading {
       0% {
         transform: rotateZ(0deg);
       }
@@ -347,7 +347,7 @@
 
     > span {
       display: inline-block;
-      animation: .8s tbus-form-btn-loading linear infinite;
+      animation: .8s textbus-form-btn-loading linear infinite;
     }
   }
 }
@@ -363,7 +363,7 @@
 @include btn-theme(warning, #fff, $color-warning);
 
 
-.tbus-control-feedback-invalid {
+.textbus-control-feedback-invalid {
   color: $color-danger;
   margin-top: .5em;
   font-size: .9em;

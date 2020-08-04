@@ -12,14 +12,14 @@ export class ToolFormTextField implements ToolFormItem {
   constructor(private config: AttrTextField,
               private delegate: (type: string) => Observable<string>) {
     this.name = config.name;
-    this.elementRef.classList.add('tbus-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="tbus-control-label">${config.label}</div>
-    <div class="tbus-control-value">
-      <div class="tbus-input-group tbus-input-block">
-        <input class="tbus-form-control tbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
-        `<button type="button" class="tbus-btn tbus-btn-dark" title="${config.uploadBtnText || '上传'}">
-          <span class="tbus-icon-upload"></span>
+    <div class="textbus-control-label">${config.label}</div>
+    <div class="textbus-control-value">
+      <div class="textbus-input-group textbus-input-block">
+        <input class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
+        `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
+          <span class="textbus-icon-upload"></span>
          </button>
       </div>
       `
@@ -30,9 +30,9 @@ export class ToolFormTextField implements ToolFormItem {
     if (config.canUpload) {
       this.btn = this.elementRef.querySelector('button');
       this.btn.addEventListener('click', () => {
-        this.btn.classList.add('tbus-btn-loading');
+        this.btn.classList.add('textbus-btn-loading');
         this.input.disabled = true;
-        this.btn.children[0].className = 'tbus-icon-loading';
+        this.btn.children[0].className = 'textbus-icon-loading';
         if (this.sub) {
           this.sub.unsubscribe();
         }
@@ -71,8 +71,8 @@ export class ToolFormTextField implements ToolFormItem {
     }
     this.input.disabled = false;
     if (this.btn) {
-      this.btn.classList.remove('tbus-btn-loading');
-      this.btn.children[0].className = 'tbus-icon-upload';
+      this.btn.classList.remove('textbus-btn-loading');
+      this.btn.children[0].className = 'textbus-icon-upload';
     }
   }
 }

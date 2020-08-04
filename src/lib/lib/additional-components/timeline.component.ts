@@ -92,7 +92,7 @@ export class TimelineComponentReader implements ComponentReader {
     const list: TimelineConfig[] = Array.from(element.children).map(child => {
       let type: TimelineType = null;
       for (const k of timelineTypes) {
-        if (child.classList.contains('tbus-timelini-' + k)) {
+        if (child.classList.contains('textbus-timelini-' + k)) {
           type = k as TimelineType;
           break;
         }
@@ -104,7 +104,7 @@ export class TimelineComponentReader implements ComponentReader {
       });
       return {
         type,
-        checked: child.classList.contains('tbus-timeline-checked'),
+        checked: child.classList.contains('textbus-timeline-checked'),
         fragment: slot
       }
     });

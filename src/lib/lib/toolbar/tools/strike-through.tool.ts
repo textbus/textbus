@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const strikeThroughTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-strikethrough'],
+  classes: ['textbus-icon-strikethrough'],
   tooltip: '删除线',
   keymap: {
     ctrlKey: true,

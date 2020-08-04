@@ -1,4 +1,4 @@
-.tbus-container {
+.textbus-container {
   line-height: 1.428;
   border-radius: 5px;
   overflow: hidden;
@@ -18,7 +18,7 @@
     }
   }
 
-  &.tbus-container-full-screen {
+  &.textbus-container-full-screen {
     position: fixed;
     left: 0;
     right: 0;
@@ -27,7 +27,7 @@
     border-radius: 0;
     z-index: 10000;
 
-    .tbus-workbench {
+    .textbus-workbench {
       flex: 1;
     }
   }

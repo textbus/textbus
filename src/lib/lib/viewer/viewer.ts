@@ -48,7 +48,7 @@ export class Viewer {
     this.elementRef.setAttribute('scrolling', 'no');
     this.elementRef.src = `javascript:void((function () {document.open();document.write('${iframeHTML}');document.close();})())`;
 
-    this.elementRef.classList.add('tbus-frame');
+    this.elementRef.classList.add('textbus-frame');
   }
 
   setMinHeight(height: number) {

@@ -15,7 +15,7 @@ export class TextField extends FormItem<HTMLInputElement, string> {
   constructor(private config: TextFieldConfig) {
     super(document.createElement('input'), config.label);
     this.formControl.type = 'text';
-    this.formControl.classList.add('tbus-form-control');
+    this.formControl.classList.add('textbus-form-control');
     this.formControl.placeholder = config.placeholder || '';
     this.name = config.name;
     this.formControl.value = config.defaultValue ?? '';

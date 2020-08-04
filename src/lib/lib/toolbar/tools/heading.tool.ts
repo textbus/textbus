@@ -21,7 +21,7 @@ export const headingTool = Toolkit.makeSelectTool({
   },
   options: [{
     label: '标题1',
-    classes: ['tbus-toolbar-h1'],
+    classes: ['textbus-toolbar-h1'],
     value: 'h1',
     keymap: {
       ctrlKey: true,
@@ -29,7 +29,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   }, {
     label: '标题2',
-    classes: ['tbus-toolbar-h2'],
+    classes: ['textbus-toolbar-h2'],
     value: 'h2',
     keymap: {
       ctrlKey: true,
@@ -37,7 +37,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   }, {
     label: '标题3',
-    classes: ['tbus-toolbar-h3'],
+    classes: ['textbus-toolbar-h3'],
     value: 'h3',
     keymap: {
       ctrlKey: true,
@@ -45,7 +45,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   }, {
     label: '标题4',
-    classes: ['tbus-toolbar-h4'],
+    classes: ['textbus-toolbar-h4'],
     value: 'h4',
     keymap: {
       ctrlKey: true,
@@ -53,7 +53,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   }, {
     label: '标题5',
-    classes: ['tbus-toolbar-h5'],
+    classes: ['textbus-toolbar-h5'],
     value: 'h5',
     keymap: {
       ctrlKey: true,
@@ -61,7 +61,7 @@ export const headingTool = Toolkit.makeSelectTool({
     }
   }, {
     label: '标题6',
-    classes: ['tbus-toolbar-h6'],
+    classes: ['textbus-toolbar-h6'],
     value: 'h6',
     keymap: {
       ctrlKey: true,

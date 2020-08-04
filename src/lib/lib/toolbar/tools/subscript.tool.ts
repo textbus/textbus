@@ -5,7 +5,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const subscriptTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-subscript'],
+  classes: ['textbus-icon-subscript'],
   tooltip: '下标',
   matcher: new FormatMatcher(subscriptFormatter, [PreComponent]),
   commanderFactory() {

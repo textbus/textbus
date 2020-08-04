@@ -12,7 +12,7 @@ export interface RangePath {
 }
 
 /**
- * TBus 选区对象
+ * TextBus 选区对象
  */
 export class TBSelection {
   /**

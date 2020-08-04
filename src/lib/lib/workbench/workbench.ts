@@ -14,14 +14,14 @@ export class Workbench {
   private loading = document.createElement('div');
 
   constructor(private viewer: Viewer) {
-    this.elementRef.classList.add('tbus-workbench');
+    this.elementRef.classList.add('textbus-workbench');
 
-    this.additionalWorktable.classList.add('tbus-additional-worktable');
-    this.dialogBg.classList.add('tbus-dialog');
-    this.dialogWrapper.classList.add('tbus-dialog-wrapper');
-    this.dashboard.classList.add('tbus-dashboard');
-    this.editableArea.classList.add('tbus-editable-area');
-    this.tablet.classList.add('tbus-tablet');
+    this.additionalWorktable.classList.add('textbus-additional-worktable');
+    this.dialogBg.classList.add('textbus-dialog');
+    this.dialogWrapper.classList.add('textbus-dialog-wrapper');
+    this.dashboard.classList.add('textbus-dashboard');
+    this.editableArea.classList.add('textbus-editable-area');
+    this.tablet.classList.add('textbus-tablet');
 
     this.dialogBg.appendChild(this.dialogWrapper);
     this.additionalWorktable.appendChild(this.dialogBg);
@@ -34,14 +34,15 @@ export class Workbench {
     this.elementRef.appendChild(this.dashboard);
 
     const loading = this.loading;
-    loading.classList.add('tbus-workbench-loading');
+    loading.classList.add('textbus-workbench-loading');
     loading.innerHTML = `
-    <div>-</div>
     <div>T</div>
+    <div>e</div>
+    <div>x</div>
+    <div>t</div>
     <div>B</div>
     <div>U</div>
     <div>S</div>
-    <div>-</div>
     `;
     this.editableArea.appendChild(loading);
     const sub = this.viewer.onReady.subscribe(() => {
@@ -53,16 +54,16 @@ export class Workbench {
 
   dialog(element: HTMLElement) {
     this.dialogWrapper.appendChild(element);
-    this.dialogBg.classList.add('tbus-dialog-active');
+    this.dialogBg.classList.add('textbus-dialog-active');
     setTimeout(() => {
-      this.dialogWrapper.classList.add('tbus-dialog-wrapper-active');
+      this.dialogWrapper.classList.add('textbus-dialog-wrapper-active');
     }, 200)
   }
 
   closeDialog() {
-    this.dialogWrapper.classList.remove('tbus-dialog-wrapper-active');
+    this.dialogWrapper.classList.remove('textbus-dialog-wrapper-active');
     setTimeout(() => {
-      this.dialogBg.classList.remove('tbus-dialog-active');
+      this.dialogBg.classList.remove('textbus-dialog-active');
       this.dialogWrapper.innerHTML = '';
     }, 200)
   }
@@ -80,8 +81,8 @@ export class Workbench {
 
   loaded() {
     setTimeout(() => {
-      this.loading.classList.add('tbus-workbench-loading-done');
-      this.tablet.classList.add('tbus-tablet-ready');
+      this.loading.classList.add('textbus-workbench-loading-done');
+      this.tablet.classList.add('textbus-tablet-ready');
       setTimeout(() => {
         this.editableArea.removeChild(this.loading);
       }, 300);

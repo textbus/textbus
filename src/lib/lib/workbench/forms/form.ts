@@ -7,10 +7,10 @@ export abstract class FormItem<T extends Node, U> {
   private inputWrapper = document.createElement('div');
 
   protected constructor(public formControl: T, public label: string) {
-    this.elementRef.classList.add('tbus-form-group');
-    this.labelElement.classList.add('tbus-control-label');
-    this.inputWrapper.classList.add('tbus-control-value');
-    this.feedbackElement.classList.add('tbus-control-feedback-invalid');
+    this.elementRef.classList.add('textbus-form-group');
+    this.labelElement.classList.add('textbus-control-label');
+    this.inputWrapper.classList.add('textbus-control-value');
+    this.feedbackElement.classList.add('textbus-control-feedback-invalid');
 
     this.labelElement.innerText = label;
     this.inputWrapper.append(this.formControl, this.feedbackElement);
@@ -44,20 +44,20 @@ export class Form<T extends Node, U> {
   private cancelBtn = document.createElement('button');
 
   constructor(private options: FormOptions<T, U>) {
-    this.titleElement.classList.add('tbus-form-title');
+    this.titleElement.classList.add('textbus-form-title');
     this.titleElement.innerText = options.title;
     this.confirmBtn.innerText = options.confirmButtonText || '确认';
     this.confirmBtn.type = 'submit';
-    this.confirmBtn.classList.add('tbus-btn', 'tbus-btn-primary');
+    this.confirmBtn.classList.add('textbus-btn', 'textbus-btn-primary');
 
     this.cancelBtn.innerText = options.cancelButtonText || '取消';
     this.cancelBtn.type = 'button';
-    this.cancelBtn.classList.add('tbus-btn', 'tbus-btn-default');
+    this.cancelBtn.classList.add('textbus-btn', 'textbus-btn-default');
 
-    this.btnWrapper.classList.add('tbus-btn-wrap');
+    this.btnWrapper.classList.add('textbus-btn-wrap');
     this.btnWrapper.append(this.confirmBtn, this.cancelBtn);
 
-    this.elementRef.classList.add('tbus-form', 'tbus-form-workbench');
+    this.elementRef.classList.add('textbus-form', 'textbus-form-workbench');
     this.elementRef.append(this.titleElement);
 
     this.options.items.forEach(item => {
@@ -67,7 +67,7 @@ export class Form<T extends Node, U> {
       }
     })
 
-    this.groupsElement.classList.add('tbus-form-groups');
+    this.groupsElement.classList.add('textbus-form-groups');
     this.elementRef.append(this.groupsElement);
     this.elementRef.append(this.btnWrapper);
 

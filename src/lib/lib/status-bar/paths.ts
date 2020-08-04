@@ -7,7 +7,7 @@ export class Paths {
 
   constructor() {
     this.onCheck = this.checkEvent.asObservable();
-    this.elementRef.classList.add('tbus-paths');
+    this.elementRef.classList.add('textbus-paths');
   }
 
   update(node: Node) {
@@ -21,7 +21,7 @@ export class Paths {
         if (tagName && tagName !== 'HTML') {
           const link = document.createElement('button');
           link.type = 'button';
-          link.classList.add('tbus-paths-link');
+          link.classList.add('textbus-paths-link');
           link.innerText = node.nodeName.toLowerCase();
           ((node) => {
             link.onclick = () => {
@@ -41,7 +41,7 @@ export class Paths {
       ele = elements.pop();
       if (ele) {
         const split = document.createElement('span');
-        split.classList.add('tbus-paths-split', 'tbus-icon-arrow-right');
+        split.classList.add('textbus-paths-split', 'textbus-icon-arrow-right');
         fragment.appendChild(split);
       }
     }

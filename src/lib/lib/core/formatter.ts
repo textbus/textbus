@@ -83,7 +83,7 @@ export enum FormatterPriority {
 }
 
 /**
- * TBus 格式基类，在扩展格式时，不能直接继承 Formatter，请继承 InlineFormatter、BlockFormatter 或其它子类。
+ * TextBus 格式基类，在扩展格式时，不能直接继承 Formatter，请继承 InlineFormatter、BlockFormatter 或其它子类。
  */
 export abstract class Formatter {
   private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
@@ -125,7 +125,7 @@ export abstract class Formatter {
   abstract read(node: HTMLElement): FormatAbstractData;
 
   /**
-   * 当 TBus 渲染样式时，会调用 Formatter 类 render 方法，并根据 render 方法返回的渲染模式，处理虚拟 DOM 结构。
+   * 当 TextBus 渲染样式时，会调用 Formatter 类 render 方法，并根据 render 方法返回的渲染模式，处理虚拟 DOM 结构。
    *
    * @param isProduction  是否是输出模式，有些情况下，编辑模式和输出模式渲染的结果是需要不一样的。
    *                      如在编辑状态下，可能会添加一些临时的属性来做交互，或者兼听一些事件等等，这在输出结果时，是不需要的。

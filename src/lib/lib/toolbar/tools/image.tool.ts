@@ -6,7 +6,7 @@ import { ImageCommander } from '../commands/image.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const imageTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-image'],
+  classes: ['textbus-icon-image'],
   tooltip: '图片',
   menuFactory() {
     return new ToolForm([{

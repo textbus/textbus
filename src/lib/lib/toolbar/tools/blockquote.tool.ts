@@ -4,7 +4,7 @@ import { BlockMatcher } from '../matcher/block.matcher';
 import { BlockComponent } from '../../components/block.component';
 
 export const blockquoteTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-quotes-right'],
+  classes: ['textbus-icon-quotes-right'],
   tooltip: '引用',
   keymap: {
     ctrlKey: true,

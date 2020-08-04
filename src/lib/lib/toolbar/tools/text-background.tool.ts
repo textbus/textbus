@@ -6,7 +6,7 @@ import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
 export const textBackgroundTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-background-color'],
+  classes: ['textbus-icon-background-color'],
   tooltip: '文字背景颜色',
   menuFactory() {
     return new Palette('backgroundColor')

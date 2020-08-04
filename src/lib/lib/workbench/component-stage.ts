@@ -18,8 +18,8 @@ export class ComponentStage {
   set expand(b: boolean) {
     this._expand = b;
     b ?
-      this.elementRef.classList.add('tbus-component-stage-expand') :
-      this.elementRef.classList.remove('tbus-component-stage-expand');
+      this.elementRef.classList.add('textbus-component-stage-expand') :
+      this.elementRef.classList.remove('textbus-component-stage-expand');
   }
 
   get expand() {
@@ -32,8 +32,8 @@ export class ComponentStage {
 
   constructor(private workbench: Workbench) {
     this.onCheck = this.checkEvent.asObservable();
-    this.elementRef.classList.add('tbus-component-stage');
-    this.componentListWrapper.classList.add('tbus-component-stage-list');
+    this.elementRef.classList.add('textbus-component-stage');
+    this.componentListWrapper.classList.add('textbus-component-stage-list');
     this.elementRef.appendChild(this.componentListWrapper);
   }
 
@@ -59,12 +59,12 @@ export class ComponentStage {
 
   private static createViewer(content: string | HTMLElement, name: string) {
     const wrapper = document.createElement('div');
-    wrapper.classList.add('tbus-component-example-item');
+    wrapper.classList.add('textbus-component-example-item');
     const card = document.createElement('div');
-    card.classList.add('tbus-component-example');
+    card.classList.add('textbus-component-example');
 
     const exampleContent = document.createElement('div');
-    exampleContent.classList.add('tbus-component-example-content');
+    exampleContent.classList.add('textbus-component-example-content');
 
     if (typeof content === 'string') {
       exampleContent.innerHTML = content;
@@ -75,12 +75,12 @@ export class ComponentStage {
     card.appendChild(exampleContent);
 
     const mask = document.createElement('div');
-    mask.classList.add('tbus-component-example-mask');
+    mask.classList.add('textbus-component-example-mask');
     card.appendChild(mask);
 
     wrapper.appendChild(card);
     const nameWrapper = document.createElement('div');
-    nameWrapper.classList.add('tbus-component-example-name');
+    nameWrapper.classList.add('textbus-component-example-name');
     nameWrapper.innerText = name || '';
     wrapper.appendChild(nameWrapper);
     return {

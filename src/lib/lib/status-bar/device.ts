@@ -40,7 +40,7 @@ export class Device {
     this.options.forEach(item => {
       const option = document.createElement('button');
       option.type = 'button';
-      option.classList.add('tbus-device-option');
+      option.classList.add('textbus-device-option');
       option.innerText = item.label;
       const sm = document.createElement('small');
       sm.innerText = item.value;
@@ -48,10 +48,10 @@ export class Device {
       this.menuItems.push(option);
       this.menus.appendChild(option);
     });
-    this.button.classList.add('tbus-icon-device', 'tbus-device-btn');
+    this.button.classList.add('textbus-icon-device', 'textbus-device-btn');
     this.button.appendChild(this.label);
-    this.elementRef.classList.add('tbus-device');
-    this.menus.classList.add('tbus-device-menus');
+    this.elementRef.classList.add('textbus-device');
+    this.menus.classList.add('textbus-device-menus');
     this.elementRef.appendChild(this.button);
     this.elementRef.appendChild(this.menus);
     this.menus.addEventListener('click', ev => {
@@ -65,13 +65,13 @@ export class Device {
     let isSelfClick = false;
     document.addEventListener('click', () => {
       if (!isSelfClick) {
-        this.elementRef.classList.remove('tbus-device-expand');
+        this.elementRef.classList.remove('textbus-device-expand');
       }
       isSelfClick = false;
     });
     this.button.addEventListener('click', () => {
       isSelfClick = true;
-      this.elementRef.classList.toggle('tbus-device-expand');
+      this.elementRef.classList.toggle('textbus-device-expand');
     });
   }
 
@@ -81,9 +81,9 @@ export class Device {
       if (item.value === value) {
         flag = true;
         this.label.innerText = item.label;
-        this.menuItems[index].classList.add('tbus-device-option-active');
+        this.menuItems[index].classList.add('textbus-device-option-active');
       } else {
-        this.menuItems[index].classList.remove('tbus-device-option-active');
+        this.menuItems[index].classList.remove('textbus-device-option-active');
       }
     })
     if (!flag) {

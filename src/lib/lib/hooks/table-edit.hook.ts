@@ -47,8 +47,8 @@ export class TableEditHook implements Lifecycle {
   private inTable = true;
 
   constructor() {
-    this.mask.classList.add('tbus-table-editor-hook-mask');
-    this.firstMask.classList.add('tbus-table-editor-hook-first-cell');
+    this.mask.classList.add('textbus-table-editor-hook-mask');
+    this.firstMask.classList.add('textbus-table-editor-hook-first-cell');
     this.mask.appendChild(this.firstMask);
   }
 

@@ -12,7 +12,7 @@ class Emoji implements DropdownViewer {
 
   constructor() {
     this.onComplete = this.checkEvent.asObservable();
-    this.elementRef.classList.add('tbus-emoji-menu');
+    this.elementRef.classList.add('textbus-emoji-menu');
     const emoji: string[] = [];
     for (let i = 0x1F600; i <= 0x1F64F; i++) {
       emoji.push(i.toString(16).toUpperCase());
@@ -21,7 +21,7 @@ class Emoji implements DropdownViewer {
     const buttons = emoji.map(s => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.classList.add('tbus-emoji-menu-item');
+      button.classList.add('textbus-emoji-menu-item');
       button.innerHTML = `&#x${s};`;
       fragment.appendChild(button);
       return button;
@@ -43,7 +43,7 @@ class Emoji implements DropdownViewer {
 }
 
 export const emojiTool = Toolkit.makeDropdownTool({
-  classes: ['tbus-icon-emoji'],
+  classes: ['textbus-icon-emoji'],
   tooltip: '表情',
   commanderFactory() {
     return new EmojiCommander()

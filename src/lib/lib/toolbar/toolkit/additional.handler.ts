@@ -50,8 +50,8 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   private showEvent = new Subject<AdditionalViewer>();
 
   private set active(b: boolean) {
-    b ? this.elementRef.classList.add('tbus-handler-active') :
-      this.elementRef.classList.remove('tbus-handler-active');
+    b ? this.elementRef.classList.add('textbus-handler-active') :
+      this.elementRef.classList.remove('textbus-handler-active');
   }
 
   constructor(private config: AdditionalConfig) {
@@ -61,7 +61,7 @@ export class AdditionalHandler<T = any> implements Tool<T> {
     this.onApply = this.eventSource.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = config.tooltip || '';
-    this.elementRef.classList.add('tbus-handler');
+    this.elementRef.classList.add('textbus-handler');
     const inner = document.createElement('span');
     inner.innerText = config.label || '';
     inner.classList.add(...(config.classes || []));

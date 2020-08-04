@@ -4,7 +4,7 @@ import { CodeMatcher } from '../matcher/code.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const preTool = Toolkit.makeSelectTool({
-  classes: ['tbus-icon-terminal'],
+  classes: ['textbus-icon-terminal'],
   tooltip: '代码',
   mini: true,
   options: [{

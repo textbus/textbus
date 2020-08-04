@@ -6,7 +6,7 @@ import { UnlinkMatcher } from '../matcher/unlink.matcher';
 
 export const unlinkTool = Toolkit.makeButtonTool({
   tooltip: '取消链接',
-  classes: ['tbus-icon-unlink'],
+  classes: ['textbus-icon-unlink'],
   matcher: new UnlinkMatcher(linkFormatter, [PreComponent]),
   commanderFactory() {
     return new UnlinkCommander();

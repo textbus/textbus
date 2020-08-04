@@ -86,7 +86,7 @@ class NativeElementMappingTable {
 }
 
 /**
- * TBus 渲染类，可根据 Fragment 生成真实 DOM 或 HTML 字符串，或者文档的 JSON 字面量。
+ * TextBus 渲染类，可根据 Fragment 生成真实 DOM 或 HTML 字符串，或者文档的 JSON 字面量。
  */
 export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();

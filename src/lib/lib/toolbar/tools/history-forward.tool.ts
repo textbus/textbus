@@ -3,7 +3,7 @@ import { HistoryCommander } from '../commands/history.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
 export const historyForwardTool = Toolkit.makeButtonTool({
-  classes: ['tbus-icon-history-forward'],
+  classes: ['textbus-icon-history-forward'],
   tooltip: '重做',
   matcher: new HistoryMatcher('forward'),
   commanderFactory() {
