@@ -18,7 +18,7 @@ export interface ViewData {
 }
 
 /**
- * 当 TBus 需要把一段文本转换为抽象数据时使用，用于把 DOM 树转换为抽象的 Component 和 Fragment 的类。
+ * 当 TextBus 需要把一段文本转换为抽象数据时使用，用于把 DOM 树转换为抽象的 Component 和 Fragment 的类。
  */
 export abstract class ComponentReader {
   /**
@@ -35,11 +35,11 @@ export abstract class ComponentReader {
 }
 
 /**
- * TBus 组件基类，不可直接继承 Component 类，如要扩展功能，请继承 BranchComponent、BackboneComponent 或 LeafComponent 类。
+ * TextBus 组件基类，不可直接继承 Component 类，如要扩展功能，请继承 BranchComponent、BackboneComponent 或 LeafComponent 类。
  */
 export abstract class Component {
   /**
-   * 在 TBus 中，视所有模板为一个单独的个体，且规定长度为 1。
+   * 在 TextBus 中，视所有模板为一个单独的个体，且规定长度为 1。
    */
   readonly length = 1;
 
@@ -117,8 +117,8 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   private iteratorIndex = 0;
 
   /**
-   * 当用户在文档中作框选删除时，由于 BackboneComponent 是不可编辑的，所以会导致 TBus 无法判断当前组件是否为空组件，
-   * 所以，在 TBus 执行删除程序的过程中，如果遇到了 BackboneComponent，每清空一个 BackboneComponent 所属的 slot，
+   * 当用户在文档中作框选删除时，由于 BackboneComponent 是不可编辑的，所以会导致 TextBus 无法判断当前组件是否为空组件，
+   * 所以，在 TextBus 执行删除程序的过程中，如果遇到了 BackboneComponent，每清空一个 BackboneComponent 所属的 slot，
    * 就会询问，当前组件是否可以删除。
    * @param deletedSlot 当前清空的 fragment。
    */

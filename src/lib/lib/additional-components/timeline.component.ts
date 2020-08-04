@@ -168,7 +168,7 @@ export class TimelineComponent extends BranchComponent {
       child.appendChild(icon);
       if (!isProduction) {
         icon.attrs.set('title', '点击切换颜色');
-        // 确保 icon 每次都不一样，让 TBus 可以渲染出新的节点，使下面的交互生效
+        // 确保 icon 每次都不一样，让 TextBus 可以渲染出新的节点，使下面的交互生效
         icon.attrs.set('data-guard-new-node', NaN);
         icon.events.subscribe(ev => {
           if (ev.type === EventType.onRendered) {

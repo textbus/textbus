@@ -20,7 +20,7 @@ export interface ApplyFormatOptions {
 }
 
 /**
- * TBus 抽象数据类
+ * TextBus 抽象数据类
  */
 export class Fragment {
   private contents = new Contents();

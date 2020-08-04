@@ -23,7 +23,7 @@ export interface TBRangeScope {
 }
 
 /**
- * TBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
+ * TextBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
  */
 export class TBRange {
   /** 选区范围开始位置 */

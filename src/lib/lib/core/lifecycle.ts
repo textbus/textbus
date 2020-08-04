@@ -6,13 +6,13 @@ import { Contents } from './contents';
 import { Fragment } from './fragment';
 
 /**
- * TBus 生命周期方法。
- * 在 TBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
+ * TextBus 生命周期方法。
+ * 在 TextBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
  */
 export interface Lifecycle {
 
   /**
-   * 当 TBus 初始化时调用。
+   * 当 TextBus 初始化时调用。
    * @param renderer
    * @param contextDocument
    * @param contextWindow

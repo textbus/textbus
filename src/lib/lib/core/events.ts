@@ -26,7 +26,7 @@ export interface EventParams {
 }
 
 /**
- * TBus 事件对象。
+ * TextBus 事件对象。
  */
 export class TBEvent {
   /**
@@ -59,7 +59,7 @@ export class TBEvent {
 }
 
 /**
- * TBus 事件发射器。
+ * TextBus 事件发射器。
  */
 export class EventEmitter extends Subject<TBEvent> {
   emit(value: TBEvent) {
