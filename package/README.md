@@ -1,8 +1,8 @@
 ## 安装
 
-通过 npm 安装 TBus：
+通过 npm 安装 TextBus：
 ```bash
-npm install @tanbo/tbus
+npm install @tanbo/textbus
 ```
 
 在 html 中准备一个空的元素
@@ -13,9 +13,9 @@ npm install @tanbo/tbus
 
 ```
 
-通过 css 选择器，或直接传入一个 DOM 元素初始化 TBus。
+通过 css 选择器，或直接传入一个 DOM 元素初始化 TextBus。
 ```typescript
-import { createEditor } from '@tanbo/tbus';
+import { createEditor } from '@tanbo/textbus';
 import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
@@ -35,7 +35,7 @@ const editor = createEditor('#editor', {
       return '/test'
     })
   },
-  content: `<p>欢迎你使用&nbsp;<strong>TBus</strong> 富文本编辑器...<br></p>`
+  content: `<p>欢迎你使用&nbsp;<strong>TextBus</strong> 富文本编辑器...<br></p>`
 });
 
 editor.onChange.subscribe(() => {
@@ -43,4 +43,4 @@ editor.onChange.subscribe(() => {
 });
 ```
 ## 官网地址
-[TBus 官网](https://www.tanboui.com/tbus/home)
+[TextBus 官网](https://www.tanboui.com/textbus)
