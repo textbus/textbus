@@ -100,7 +100,12 @@ import {
 
   progressComponentExample,
   ProgressComponentReader,
-  progressComponentStyleSheet
+  progressComponentStyleSheet,
+
+  stepsComponentExample,
+  StepComponentReader,
+  stepsComponentStyleSheet,
+  stepsComponentEditingStyleSheet
 } from './lib/additional-components/_api';
 
 export const defaultOptions: EditorOptions = {
@@ -111,11 +116,13 @@ export const defaultOptions: EditorOptions = {
     jumbotronStyleSheet,
     wordExplainStyleSheet,
     timelineComponentStyleSheet,
-    progressComponentStyleSheet
+    progressComponentStyleSheet,
+    stepsComponentStyleSheet
   ],
   editingStyleSheets: [
     wordExplainComponentEditingStyleSheet,
-    timelineComponentEditingStyleSheet
+    timelineComponentEditingStyleSheet,
+    stepsComponentEditingStyleSheet
   ],
   hooks: [
     new DefaultHook(),
@@ -125,6 +132,7 @@ export const defaultOptions: EditorOptions = {
     new FindHook()
   ],
   componentReaders: [
+    new StepComponentReader(),
     new ProgressComponentReader(),
     new TimelineComponentReader(),
     new WordExplainComponentReader(),
@@ -189,7 +197,8 @@ export const defaultOptions: EditorOptions = {
     jumbotronComponentExample,
     wordExplainComponentExample,
     timelineComponentExample,
-    progressComponentExample
+    progressComponentExample,
+    stepsComponentExample
   ]
 };
 

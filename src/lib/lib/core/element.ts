@@ -26,6 +26,7 @@ export interface VElementOption {
   attrs?: { [key: string]: boolean | string | number };
   styles?: { [key: string]: string | number };
   classes?: string[];
+  childNodes?: Array<VElement | VTextNode>;
 }
 
 /**
@@ -47,7 +48,10 @@ export class VElement {
         Object.keys(options.styles).forEach(key => this.styles.set(key, options.styles[key]));
       }
       if (options.classes) {
-        options.classes.forEach(i => this.classes.push(i));
+        this.classes.push(...options.classes);
+      }
+      if (options.childNodes) {
+        this.childNodes.push(...options.childNodes);
       }
     }
   }
