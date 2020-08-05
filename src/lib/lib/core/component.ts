@@ -78,7 +78,7 @@ export abstract class BranchComponent extends Component {
   /**
    * 子插槽的集合
    */
-  slots: Fragment[] = [];
+  readonly slots: Fragment[] = [];
 
   /**
    * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。

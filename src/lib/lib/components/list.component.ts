@@ -72,10 +72,6 @@ export class ListComponent extends BranchComponent {
     return component;
   }
 
-  canSplit(): boolean {
-    return true;
-  }
-
   render(isProduction: boolean) {
     const list = new VElement(this.tagName);
     this.viewMap.clear();

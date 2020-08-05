@@ -54,11 +54,7 @@ export class TodoListComponent extends BranchComponent {
 
   constructor(public listConfigs: TodoListConfig[]) {
     super('tb-todo-list');
-    this.slots = listConfigs.map(i => i.slot);
-  }
-
-  canSplit(): boolean {
-    return true;
+    this.slots.push(...listConfigs.map(i => i.slot));
   }
 
   render(isProduction: boolean): VElement {
@@ -68,7 +64,7 @@ export class TodoListComponent extends BranchComponent {
     });
 
     this.viewMap.clear();
-    this.slots = [];
+    this.slots.length = 0;
     this.listConfigs.forEach((config, index) => {
       const slot = config.slot;
 
