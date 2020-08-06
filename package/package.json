@@ -34,9 +34,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tbhuabi/editor.git"
+    "url": "git+https://github.com/tbhuabi/textbus.git"
   },
   "bugs": {
-    "url": "https://github.com/tbhuabi/editor.git/issues"
+    "url": "https://github.com/tbhuabi/textbus.git/issues"
   }
 }
