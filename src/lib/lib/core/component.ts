@@ -1,5 +1,6 @@
 import { Fragment } from './fragment';
 import { VElement } from './element';
+import { NativeEventManager } from './native-event-manager';
 
 /**
  * 用于保存读取 DOM 时，Fragment 和 DOM 节点的对应关系。
@@ -48,11 +49,12 @@ export abstract class Component {
 
   /**
    * 用于把当前组件渲染成虚拟 DOM 树
-   * @param isProduction  是否为输出模式。
+   * @param isOutputModel  是否为输出模式。
    *                      当有些情况下，编辑模式和输出模式需要生成不一样的 DOM，且编辑模式可能需要监听一些事件，
-   *                      以方便用户操作，这时可根据 isProduction 参数来作区分。
+   *                      以方便用户操作，这时可根据 isOutputModel 参数来作区分。
+   * @param eventManager  原生事件管理器，用于通过虚拟 DOM 注册或取消原生事件。该对象只在编辑模式下才会传入。
    */
-  abstract render(isProduction: boolean): VElement;
+  abstract render(isOutputModel: boolean, eventManager?: NativeEventManager): VElement;
 
   /**
    * 克隆自己，返回一个完全一样的副本。

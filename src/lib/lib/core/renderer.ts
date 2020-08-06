@@ -10,6 +10,7 @@ import { BranchComponent, DivisionComponent, Component, BackboneComponent, LeafC
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
 import { Constructor } from './constructor';
+import { EventCache, NativeEventManager } from './native-event-manager';
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替。
@@ -98,7 +99,10 @@ export class Renderer {
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
 
-  private productionRenderingModal = false;
+  private outputModal = false;
+
+  private eventCache = new EventCache(this);
+  private nativeEventManager = new NativeEventManager(this.eventCache);
 
   /**
    * 把 fragment 渲染到 HTML 元素中。
@@ -106,7 +110,7 @@ export class Renderer {
    * @param host 承载渲染结果的 HTML 元素。
    */
   render(fragment: Fragment, host: HTMLElement) {
-    this.productionRenderingModal = false;
+    this.outputModal = false;
     this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent | BackboneComponent>();
     this.componentHierarchyMapping = new WeakMap<Component, Fragment>();
@@ -131,7 +135,7 @@ export class Renderer {
    * @param fragment
    */
   renderToHTML(fragment: Fragment): string {
-    this.productionRenderingModal = true;
+    this.outputModal = true;
     const root = new VElement('root');
     const vDom = this.createVDom(fragment, root);
     return vDom.childNodes.map(child => {
@@ -144,7 +148,7 @@ export class Renderer {
    * @param fragment
    */
   renderToJSON(fragment: Fragment): VElementLiteral {
-    this.productionRenderingModal = true;
+    this.outputModal = true;
     const root = new VElement('body');
     const vDom = this.createVDom(fragment, root);
     return vDom.toJSON();
@@ -282,7 +286,10 @@ export class Renderer {
           const el = this.NVMappingTable.get(oldFirst);
           childNodes[min] = el;
           min++;
+          this.eventCache.unbindNativeEvent(oldFirst);
           this.NVMappingTable.set(current, el);
+          this.eventCache.bindNativeEvent(el);
+
           if (current instanceof VElement) {
             this.diffAndUpdate(el as HTMLElement, current, oldFirst as VElement);
           }
@@ -297,7 +304,12 @@ export class Renderer {
           const last = oldVDom.childNodes.pop();
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
+
+          this.eventCache.unbindNativeEvent(last);
           this.NVMappingTable.set(el, current);
+
+          this.eventCache.bindNativeEvent(el);
+
           if (current instanceof VElement) {
             this.diffAndUpdate(el as HTMLElement, current as VElement, last as VElement);
           }
@@ -344,37 +356,13 @@ export class Renderer {
   }
 
   private cleanVDom(vDom: VElement | VTextNode) {
+    this.eventCache.unbindNativeEvent(vDom);
     this.NVMappingTable.delete(vDom);
     if (vDom instanceof VElement) {
       vDom.childNodes.forEach(child => {
         this.cleanVDom(child);
       })
     }
-  }
-
-  private createElement(vDom: VElement) {
-    const el = document.createElement(vDom.tagName);
-    vDom.attrs.forEach((value, key) => {
-      if (value === false) {
-        return;
-      }
-      if (value === true) {
-        el[key] = true;
-        return;
-      }
-      el.setAttribute(key, value + '');
-    });
-    vDom.styles.forEach((value, key) => {
-      el.style[key] = value;
-    });
-    vDom.classes.forEach(k => el.classList.add(k));
-    this.NVMappingTable.set(el, vDom);
-    vDom.events.emit(new TBEvent({
-      type: EventType.onRendered,
-      renderer: this,
-      selection: null
-    }));
-    return el;
   }
 
   private renderingNewTree(host: HTMLElement, vDom: VElement) {
@@ -391,7 +379,7 @@ export class Renderer {
   }
 
   private createVDom(fragment: Fragment, host: VElement) {
-    if (!this.productionRenderingModal) {
+    if (!this.outputModal) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
     const containerFormats: FormatConfig[] = [];
@@ -498,7 +486,7 @@ export class Renderer {
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        !this.productionRenderingModal && this.vDomPositionMapping.set(textNode, {
+        !this.outputModal && this.vDomPositionMapping.set(textNode, {
           fragment,
           startIndex: i,
           endIndex: i + item.length
@@ -506,22 +494,28 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else {
-        !this.productionRenderingModal && this.componentHierarchyMapping.set(item, fragment);
-        const vDom = item.render(this.productionRenderingModal);
-        !this.productionRenderingModal && this.vDomPositionMapping.set(vDom, {
-          fragment,
-          startIndex: i,
-          endIndex: i + 1
-        });
+        let vDom: VElement;
+        if (!this.outputModal) {
+          this.componentHierarchyMapping.set(item, fragment);
+          vDom = item.render(this.outputModal, this.nativeEventManager);
+          this.vDomPositionMapping.set(vDom, {
+            fragment,
+            startIndex: i,
+            endIndex: i + 1
+          })
+        } else {
+          vDom = item.render(this.outputModal);
+        }
+
         i++;
         children.push(vDom);
         if (item instanceof LeafComponent) {
-          if (!this.productionRenderingModal && vDom.childNodes.length) {
+          if (!this.outputModal && vDom.childNodes.length) {
             vDom.styles.set('userSelect', 'none');
           }
         } else if (item instanceof DivisionComponent) {
           let view = item.getSlotView();
-          if (!this.productionRenderingModal) {
+          if (!this.outputModal) {
             this.fragmentHierarchyMapping.set(item.slot, item);
             if (view !== vDom) {
               vDom.styles.set('userSelect', 'none');
@@ -530,24 +524,24 @@ export class Renderer {
           }
           this.createVDom(item.slot, view);
         } else if (item instanceof BranchComponent) {
-          if (!this.productionRenderingModal) {
+          if (!this.outputModal) {
             vDom.styles.set('userSelect', 'none');
           }
           item.slots.forEach(slot => {
             const parent = item.getSlotView(slot);
-            if (!this.productionRenderingModal) {
+            if (!this.outputModal) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
             this.createVDom(slot, parent);
           });
         } else if (item instanceof BackboneComponent) {
-          if (!this.productionRenderingModal) {
+          if (!this.outputModal) {
             vDom.styles.set('userSelect', 'none');
           }
           for (const slot of item) {
             const parent = item.getSlotView(slot);
-            if (!this.productionRenderingModal) {
+            if (!this.outputModal) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
@@ -567,7 +561,7 @@ export class Renderer {
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.reduce((vEle, next) => {
-      const renderModel = next.token.render(this.productionRenderingModal, next.params.state, next.params.abstractData, vEle);
+      const renderModel = next.token.render(this.outputModal, next.params.state, next.params.abstractData, vEle);
       if (renderModel instanceof ReplaceModel) {
         host = slot = renderModel.replaceElement;
         return host;
@@ -584,7 +578,7 @@ export class Renderer {
     }, host);
     let el = host;
     while (el) {
-      !this.productionRenderingModal && this.vDomPositionMapping.set(el, {
+      !this.outputModal && this.vDomPositionMapping.set(el, {
         fragment,
         startIndex,
         endIndex
@@ -639,9 +633,38 @@ export class Renderer {
     ].join('');
   }
 
+  private createElement(vDom: VElement) {
+    const el = document.createElement(vDom.tagName);
+    vDom.attrs.forEach((value, key) => {
+      if (value === false) {
+        return;
+      }
+      if (value === true) {
+        el[key] = true;
+        return;
+      }
+      el.setAttribute(key, value + '');
+    });
+    vDom.styles.forEach((value, key) => {
+      el.style[key] = value;
+    });
+    vDom.classes.forEach(k => el.classList.add(k));
+    this.NVMappingTable.set(el, vDom);
+
+    this.eventCache.bindNativeEvent(el);
+
+    vDom.events.emit(new TBEvent({
+      type: EventType.onRendered,
+      renderer: this,
+      selection: null
+    }));
+    return el;
+  }
+
   private createTextNode(vDom: VTextNode) {
     const el = document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
     this.NVMappingTable.set(el, vDom);
+    this.eventCache.bindNativeEvent(el);
     return el;
   }
 

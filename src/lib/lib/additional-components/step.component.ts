@@ -1,10 +1,10 @@
 import {
   BranchComponent,
   ComponentReader,
-  EventType,
   FormatAbstractData,
   FormatEffect,
   Fragment,
+  NativeEventManager,
   VElement,
   ViewData,
   VTextNode
@@ -84,7 +84,7 @@ export class StepComponent extends BranchComponent {
     });
   }
 
-  render(isProduction: boolean): VElement {
+  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
     const wrap = new VElement('tb-step');
     this.viewMap.clear();
 
@@ -120,36 +120,19 @@ export class StepComponent extends BranchComponent {
       });
       if (!isProduction) {
         const add = new VElement('span', {
-          classes: ['tb-step-item-add'],
-          attrs: {
-            'data-guard-new-node': NaN
-          }
+          classes: ['tb-step-item-add']
         });
-        icon.attrs.set('data-guard-new-node', NaN);
-        add.events.subscribe(ev => {
-          if (ev.type === EventType.onRendered) {
-            const nativeNode = ev.renderer.getNativeNodeByVDom(add);
-            nativeNode.addEventListener('click', () => {
-              this.slots.splice(index, 0, createItem());
-              ev.renderer.dispatchEvent(item, EventType.onContentUnexpectedlyChanged, ev.selection);
-            })
-          }
+        eventManager.listen(add, 'click', () => {
+          this.slots.splice(index, 0, createItem());
         })
-        icon.events.subscribe(ev => {
-          if (ev.type === EventType.onRendered) {
-            const nativeNode = ev.renderer.getNativeNodeByVDom(icon);
-            nativeNode.addEventListener('click', () => {
-              const currentStep = this.config.step;
-              if (index === currentStep) {
-                this.config.step = index + 1;
-              } else if (index + 1 === currentStep) {
-                this.config.step = index - 1;
-              } else {
-                this.config.step = index;
-              }
-
-              ev.renderer.dispatchEvent(item, EventType.onContentUnexpectedlyChanged, ev.selection);
-            })
+        eventManager.listen(icon, 'click', () => {
+          const currentStep = this.config.step;
+          if (index === currentStep) {
+            this.config.step = index + 1;
+          } else if (index + 1 === currentStep) {
+            this.config.step = index - 1;
+          } else {
+            this.config.step = index;
           }
         })
         item.appendChild(add);

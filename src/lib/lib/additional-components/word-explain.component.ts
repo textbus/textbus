@@ -1,11 +1,11 @@
 import {
   BackboneComponent,
   ComponentReader,
-  EventType,
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  TBSelection,
+  NativeEventManager,
+  Renderer,
   VElement,
   ViewData
 } from '../core/_api';
@@ -83,7 +83,7 @@ export class WordExplainComponent extends BackboneComponent {
     });
   }
 
-  render(isProduction: boolean): VElement {
+  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
     this.slots.forEach(f => {
@@ -116,22 +116,19 @@ export class WordExplainComponent extends BackboneComponent {
     this.viewMap.set(this.detail, detail);
     if (!isProduction) {
       const close = new VElement('span', {
-        classes: ['tb-word-explain-close']
+        classes: ['tb-word-explain-close'],
+        attrs: {
+          'data-guard-new-node': NaN // 确保每一次都渲染成最新的，以便 click 事件能拿到 Renderer 对象
+        }
       });
       wrap.appendChild(close);
-      let selection: TBSelection;
+      let renderer: Renderer;
+      eventManager.listen(close, 'click', () => {
+        const parentFragment = renderer.getParentFragment(this);
+        parentFragment.remove(parentFragment.indexOf(this), 1);
+      })
       close.events.subscribe(event => {
-        if (event.selection) {
-          selection = event.selection;
-        }
-        if (event.type === EventType.onRendered) {
-          const closeBtn = event.renderer.getNativeNodeByVDom(close);
-          closeBtn.addEventListener('click', () => {
-            const parentFragment = event.renderer.getParentFragment(this);
-            parentFragment.remove(parentFragment.indexOf(this), 1);
-            event.renderer.dispatchEvent(this.wrapper, EventType.onContentUnexpectedlyChanged, selection);
-          })
-        }
+        renderer = event.renderer;
       })
     }
 

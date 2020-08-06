@@ -1,4 +1,12 @@
-import { BranchComponent, EventType, Fragment, ComponentReader, VElement, ViewData } from '../core/_api';
+import {
+  BranchComponent,
+  EventType,
+  Fragment,
+  ComponentReader,
+  VElement,
+  ViewData,
+  NativeEventManager
+} from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
 
@@ -57,7 +65,7 @@ export class TodoListComponent extends BranchComponent {
     this.slots.push(...listConfigs.map(i => i.slot));
   }
 
-  render(isProduction: boolean): VElement {
+  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
     const list = new VElement('tb-todo-list');
     this.listConfigs = this.listConfigs.filter(i => {
       return this.slots.includes(i.slot);
@@ -96,23 +104,21 @@ export class TodoListComponent extends BranchComponent {
       this.slots.push(slot);
       list.appendChild(item);
       if (!isProduction) {
+        eventManager.listen(content, 'click', ev => {
+          const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
+          const newState = this.stateCollection[i];
+          config.active = newState.active;
+          config.disabled = newState.disabled;
+          const element = ev.target as HTMLElement;
+          config.active ?
+            element.classList.add('tb-todo-list-state-active') :
+            element.classList.remove('tb-todo-list-state-active');
+          config.disabled ?
+            element.classList.add('tb-todo-list-state-disabled') :
+            element.classList.remove('tb-todo-list-state-disabled');
+        })
         content.events.subscribe(event => {
-          if (event.type === EventType.onRendered) {
-            const nativeElement = event.renderer.getNativeNodeByVDom(state);
-            nativeElement.addEventListener('click', ev => {
-              const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
-              const newState = this.stateCollection[i];
-              config.active = newState.active;
-              config.disabled = newState.disabled;
-              const element = ev.target as HTMLElement;
-              config.active ?
-                element.classList.add('tb-todo-list-state-active') :
-                element.classList.remove('tb-todo-list-state-active');
-              config.disabled ?
-                element.classList.add('tb-todo-list-state-disabled') :
-                element.classList.remove('tb-todo-list-state-disabled');
-            })
-          } else if (event.type === EventType.onEnter) {
+          if (event.type === EventType.onEnter) {
             event.stopPropagation();
 
             const firstRange = event.selection.firstRange;

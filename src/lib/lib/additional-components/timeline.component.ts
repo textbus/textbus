@@ -1,10 +1,10 @@
 import {
   BranchComponent,
   ComponentReader,
-  EventType,
   FormatAbstractData,
   FormatEffect,
   Fragment,
+  NativeEventManager,
   SlotMap,
   VElement,
   ViewData
@@ -135,7 +135,7 @@ export class TimelineComponent extends BranchComponent {
     }));
   }
 
-  render(isProduction: boolean): VElement {
+  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
     this.viewMap.clear();
     const list = new VElement('tb-timeline');
     this.vEle = list;
@@ -168,20 +168,13 @@ export class TimelineComponent extends BranchComponent {
       child.appendChild(icon);
       if (!isProduction) {
         icon.attrs.set('title', '点击切换颜色');
-        // 确保 icon 每次都不一样，让 TextBus 可以渲染出新的节点，使下面的交互生效
-        icon.attrs.set('data-guard-new-node', NaN);
-        icon.events.subscribe(ev => {
-          if (ev.type === EventType.onRendered) {
-            const nativeNode = ev.renderer.getNativeNodeByVDom(icon);
-            nativeNode.addEventListener('click', () => {
-              const currentType = item.type;
-              if (!currentType) {
-                item.type = timelineTypes[0] as TimelineType;
-              } else {
-                item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
-              }
-              ev.renderer.dispatchEvent(this.vEle, EventType.onContentUnexpectedlyChanged, ev.selection);
-            })
+
+        eventManager.listen(icon, 'click', () => {
+          const currentType = item.type;
+          if (!currentType) {
+            item.type = timelineTypes[0] as TimelineType;
+          } else {
+            item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
           }
         })
 
@@ -189,22 +182,16 @@ export class TimelineComponent extends BranchComponent {
           classes: ['tb-timeline-add']
         });
         child.appendChild(btn);
-        btn.events.subscribe(ev => {
-          if (ev.type === EventType.onRendered) {
-            const nativeNode = ev.renderer.getNativeNodeByVDom(btn);
-            nativeNode.addEventListener('click', () => {
-              const newSlot = {
-                type: item.type,
-                checked: item.checked,
-                fragment: createTimelineItem().fragment
-              };
-              const index = this.slots.indexOf(item.fragment) + 1;
-              this.list.splice(index, 0, newSlot);
-              this.slots.splice(index, 0, newSlot.fragment);
 
-              ev.renderer.dispatchEvent(this.vEle, EventType.onContentUnexpectedlyChanged, ev.selection);
-            });
-          }
+        eventManager.listen(btn, 'click', () => {
+          const newSlot = {
+            type: item.type,
+            checked: item.checked,
+            fragment: createTimelineItem().fragment
+          };
+          const index = this.slots.indexOf(item.fragment) + 1;
+          this.list.splice(index, 0, newSlot);
+          this.slots.splice(index, 0, newSlot.fragment);
         })
       }
 
