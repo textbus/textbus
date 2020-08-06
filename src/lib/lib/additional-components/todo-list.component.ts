@@ -104,7 +104,7 @@ export class TodoListComponent extends BranchComponent {
       this.slots.push(slot);
       list.appendChild(item);
       if (!isOutputModel) {
-        eventManager.listen(content, 'click', ev => {
+        eventManager.listen(state, 'click', ev => {
           const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
           const newState = this.stateCollection[i];
           config.active = newState.active;
