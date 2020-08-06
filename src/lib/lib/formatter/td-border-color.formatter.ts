@@ -45,7 +45,7 @@ export class TdBorderColorFormatter extends BlockFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): null {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): null {
     if (existingElement) {
       abstractData.styles.forEach((value, key) => {
         existingElement.styles.set(key, value);

@@ -23,7 +23,7 @@ export class DirFormatter extends BlockFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | null {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | null {
     if (state === FormatEffect.Valid) {
       existingElement = existingElement || new VElement('div');
       existingElement.attrs.set('dir', abstractData.attrs.get('dir'));

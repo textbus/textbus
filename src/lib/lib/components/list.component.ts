@@ -72,12 +72,12 @@ export class ListComponent extends BranchComponent {
     return component;
   }
 
-  render(isProduction: boolean) {
+  render(isOutputModel: boolean) {
     const list = new VElement(this.tagName);
     this.viewMap.clear();
     this.slots.forEach((slot, index) => {
       const li = new VElement('li');
-      !isProduction && li.events.subscribe(event => {
+      !isOutputModel && li.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
           event.stopPropagation();
 

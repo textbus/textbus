@@ -22,7 +22,7 @@ export class StyleFormatter extends InlineFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (existingElement) {
       existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
     } else {
@@ -76,7 +76,7 @@ backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) 
   return match.call(backgroundColorFormatter, p);
 }
 
-backgroundColorFormatter.render = function (isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+backgroundColorFormatter.render = function (isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
   if (existingElement && reg.test(existingElement.tagName)) {
     existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
   } else {

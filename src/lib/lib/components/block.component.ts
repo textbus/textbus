@@ -43,10 +43,10 @@ export class BlockComponent extends DivisionComponent {
     return component;
   }
 
-  render(isProduction: boolean) {
+  render(isOutputModel: boolean) {
     const block = new VElement(this.tagName);
     this.v = block;
-    !isProduction && block.events.subscribe(event => {
+    !isOutputModel && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const parent = event.renderer.getParentFragment(this);
 

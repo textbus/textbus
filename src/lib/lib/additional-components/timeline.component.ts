@@ -135,7 +135,7 @@ export class TimelineComponent extends BranchComponent {
     }));
   }
 
-  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputModel: boolean, eventManager: NativeEventManager): VElement {
     this.viewMap.clear();
     const list = new VElement('tb-timeline');
     this.vEle = list;
@@ -166,7 +166,7 @@ export class TimelineComponent extends BranchComponent {
 
       child.appendChild(line);
       child.appendChild(icon);
-      if (!isProduction) {
+      if (!isOutputModel) {
         icon.attrs.set('title', '点击切换颜色');
 
         eventManager.listen(icon, 'click', () => {

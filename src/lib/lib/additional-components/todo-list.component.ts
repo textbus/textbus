@@ -65,7 +65,7 @@ export class TodoListComponent extends BranchComponent {
     this.slots.push(...listConfigs.map(i => i.slot));
   }
 
-  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputModel: boolean, eventManager: NativeEventManager): VElement {
     const list = new VElement('tb-todo-list');
     this.listConfigs = this.listConfigs.filter(i => {
       return this.slots.includes(i.slot);
@@ -103,7 +103,7 @@ export class TodoListComponent extends BranchComponent {
       this.viewMap.set(slot, content);
       this.slots.push(slot);
       list.appendChild(item);
-      if (!isProduction) {
+      if (!isOutputModel) {
         eventManager.listen(content, 'click', ev => {
           const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
           const newState = this.stateCollection[i];

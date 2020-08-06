@@ -119,7 +119,7 @@ class CodeFormatter extends BlockFormatter {
     return undefined;
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
     return new ChildSlotModel(new VElement('code'));
   }
 }
@@ -133,7 +133,7 @@ class CodeStyleFormatter extends InlineFormatter {
     return undefined;
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
     if (!existingElement) {
       existingElement = new VElement('span');
     }
@@ -194,12 +194,12 @@ export class PreComponent extends DivisionComponent {
     return component;
   }
 
-  render(isProduction: boolean) {
+  render(isOutputModel: boolean) {
     this.format();
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     this.vEle = block;
-    !isProduction && block.events.subscribe(event => {
+    !isOutputModel && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new BrComponent(), firstRange.startIndex);

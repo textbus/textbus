@@ -84,7 +84,7 @@ export class StepComponent extends BranchComponent {
     });
   }
 
-  render(isProduction: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputModel: boolean, eventManager: NativeEventManager): VElement {
     const wrap = new VElement('tb-step');
     this.viewMap.clear();
 
@@ -118,7 +118,7 @@ export class StepComponent extends BranchComponent {
           content
         ]
       });
-      if (!isProduction) {
+      if (!isOutputModel) {
         const add = new VElement('span', {
           classes: ['tb-step-item-add']
         });

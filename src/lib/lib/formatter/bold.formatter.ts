@@ -28,7 +28,7 @@ export class BoldFormatter extends InlineFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     if (state === FormatEffect.Inherit) {
       return;
     }

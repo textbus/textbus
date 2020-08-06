@@ -21,12 +21,12 @@ export class LinkFormatter extends InlineFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     const el = new VElement('a');
     const target = abstractData.attrs.get('target');
     const href = abstractData.attrs.get('href');
     target && el.attrs.set('target', target);
-    href && el.attrs.set(isProduction ? 'href' : 'data-href', href);
+    href && el.attrs.set(isOutputModel ? 'href' : 'data-href', href);
     return new ChildSlotModel(el);
   }
 }

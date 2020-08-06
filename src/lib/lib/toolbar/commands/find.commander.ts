@@ -26,11 +26,11 @@ class FindFormatter extends InlineFormatter {
     return null;
   }
 
-  render(isProduction: boolean,
+  render(isOutputModel: boolean,
          state: FormatEffect,
          abstractData: FormatAbstractData,
          existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
-    if (isProduction) {
+    if (isOutputModel) {
       return null;
     }
     const flag = !!existingElement;

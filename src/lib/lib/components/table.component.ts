@@ -159,7 +159,7 @@ export class TableComponent extends BackboneComponent {
     return new TableComponent(config);
   }
 
-  render(isProduction: boolean) {
+  render(isOutputModel: boolean) {
     const table = new VElement(this.tagName);
     this.viewMap.clear();
     this.slots = [];
@@ -185,7 +185,7 @@ export class TableComponent extends BackboneComponent {
           this.slots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
-          !isProduction && td.events.subscribe(event => {
+          !isOutputModel && td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
               col.fragment.insert(new BrComponent(), firstRange.startIndex);

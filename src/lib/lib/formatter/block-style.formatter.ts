@@ -19,7 +19,7 @@ export class BlockStyleFormatter extends BlockFormatter {
     });
   }
 
-  render(isProduction: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
     const b = !!existingElement;
     existingElement = existingElement || new VElement('div');
     (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
