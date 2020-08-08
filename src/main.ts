@@ -4,9 +4,6 @@ import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 import { Form, TextField } from './lib/lib/workbench/forms/_api';
 
-const bg = require('./assets/tbus-bg.png');
-
-const imgUrl = location.origin + '/' + bg;
 
 const form = new Form({
   title: '测试标题',
