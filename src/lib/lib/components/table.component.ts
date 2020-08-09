@@ -108,7 +108,7 @@ export class TableComponentReader implements ComponentReader {
     return {
       component: new TableComponent({
         // headers,
-        useTextBusStyle: el.classList.contains('textbus-table'),
+        useTextBusStyle: el.classList.contains('tb-table'),
         bodies
       }),
       slotsMap: slots
@@ -165,7 +165,7 @@ export class TableComponent extends BackboneComponent {
   render(isOutputModel: boolean) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
-      table.classes.push('textbus-table');
+      table.classes.push('tb-table');
     }
     this.viewMap.clear();
     this.slots = [];

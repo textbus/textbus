@@ -52,7 +52,7 @@ code, kbd, pre, samp {
       width: 100%;
       background-color: #fff;
     }
-    .textbus-table td, th {
+    .tb-table td, th {
       border: 1px solid #aaa;
 }`, `a {
       text-decoration: underline;
