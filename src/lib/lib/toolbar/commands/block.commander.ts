@@ -45,12 +45,8 @@ export class BlockCommander implements Commander<string> {
             fragment.append(blockComponent);
             parentComponent.slots.splice(index, 1, fragment);
           } else if (parentComponent instanceof BackboneComponent) {
-            const parentFragment = renderer.getParentFragment(parentComponent);
             blockComponent.slot.from(scope.fragment);
-            scope.fragment.clean();
-            scope.fragment.append(new BrComponent());
-            parentFragment.insertBefore(blockComponent, parentComponent);
-            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+            scope.fragment.append(blockComponent);
             this.effect(blockComponent.slot, parentComponent.tagName);
           }
         } else {
