@@ -8,7 +8,6 @@ import {
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
-import { BrComponent } from '../../components/br.component';
 
 export class BlockCommander implements Commander<string> {
   recordHistory = true;
