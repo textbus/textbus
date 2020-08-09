@@ -501,18 +501,16 @@
 }
 
 .textbus-table-quick-selector {
-  background-color: $color-lighter;
   overflow: hidden;
   padding-left: 1px;
   padding-top: 1px;
   width: 160px;
   box-sizing: content-box;
   cursor: pointer;
-  background-color: #fff;
 
   > div {
     width: 15px;
-    height: 15px;
+    height: 11px;
     box-sizing: content-box;
     border: 1px solid $color-gray;
     background: #fff;

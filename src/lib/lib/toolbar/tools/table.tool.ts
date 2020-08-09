@@ -22,6 +22,12 @@ export const tableTool = Toolkit.makeDropdownTool({
       name: 'cols',
       label: '表格列数',
       placeholder: '请输入表格列数'
+    }, {
+      type: AttrType.Switch,
+      label: '使用 TextBus 样式',
+      required: false,
+      name: 'useTextBusStyle',
+      checked: true
     }]);
 
     const quickSelector = document.createElement('div');

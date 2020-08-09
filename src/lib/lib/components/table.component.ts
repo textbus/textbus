@@ -36,6 +36,7 @@ export interface TableRowPosition {
 
 export interface TableInitParams {
   // headers?: TableCell[][];
+  useTextBusStyle: boolean;
   bodies: TableCell[][];
 }
 
@@ -107,6 +108,7 @@ export class TableComponentReader implements ComponentReader {
     return {
       component: new TableComponent({
         // headers,
+        useTextBusStyle: el.classList.contains('textbus-table'),
         bodies
       }),
       slotsMap: slots
@@ -154,6 +156,7 @@ export class TableComponent extends BackboneComponent {
 
     const config: TableInitParams = {
       // headers: this.config.headers ? clone(this.config.headers) : null,
+      useTextBusStyle: this.config.useTextBusStyle,
       bodies: clone(this.config.bodies)
     }
     return new TableComponent(config);
@@ -161,6 +164,9 @@ export class TableComponent extends BackboneComponent {
 
   render(isOutputModel: boolean) {
     const table = new VElement(this.tagName);
+    if (this.config.useTextBusStyle) {
+      table.classes.push('textbus-table');
+    }
     this.viewMap.clear();
     this.slots = [];
     this.deleteMarkFragments = [];

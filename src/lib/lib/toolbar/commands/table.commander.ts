@@ -12,6 +12,7 @@ export class TableCommander implements Commander<AttrState[]> {
     });
     const rows = +attrs.get('rows') || 0;
     const cols = +attrs.get('cols') || 0;
+    const useTextBusStyle = !!attrs.get('useTextBusStyle');
 
     if (rows === 0 || cols === 0) {
       this.recordHistory = false;
@@ -23,6 +24,7 @@ export class TableCommander implements Commander<AttrState[]> {
 
       const bodies = TableCommander.create(rows, cols);
       const table = new TableComponent({
+        useTextBusStyle,
         bodies
       });
 
