@@ -65,7 +65,7 @@ export class AdditionalHandler<T = any> implements Tool<T> {
         this.show();
       }
     });
-    this.elementRef = this.button.button;
+    this.elementRef = this.button.elementRef;
 
     if (config.keymap) {
       this.keymapAction = {

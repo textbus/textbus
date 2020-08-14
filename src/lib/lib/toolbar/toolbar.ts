@@ -169,9 +169,9 @@ export class Toolbar {
         const group = document.createElement('span');
         group.classList.add('textbus-toolbar-group');
         if (Array.isArray(handler)) {
-          this.createHandlers(handler).forEach(el => group.appendChild(el));
+          this.createHandlers(handler).forEach((el: Tool) => group.appendChild(el.elementRef));
         } else {
-          group.appendChild(this.createHandler(handler));
+          group.appendChild(this.createHandler(handler).elementRef);
         }
         this.toolsElement.appendChild(group);
       });
@@ -179,13 +179,13 @@ export class Toolbar {
     }
   }
 
-  private createHandlers(handlers: ToolFactory[]) {
+  private createHandlers(handlers: ToolFactory[]): Tool[] {
     return handlers.map(handler => {
       return this.createHandler(handler);
     });
   }
 
-  private createHandler(option: ToolFactory) {
+  private createHandler(option: ToolFactory): Tool {
     let h: Tool;
     switch (option.type) {
       case ToolType.Button:
@@ -209,6 +209,8 @@ export class Toolbar {
           this.additionalWorktableContent.appendChild(viewer.elementRef);
         }));
         break;
+      case ToolType.Group:
+        return option.factory(this.createHandlers(option.config.menu as ToolFactory[]) as any, this.context, this.toolsElement);
       default:
         throw new Error('未被支持的工具！');
     }
@@ -222,7 +224,7 @@ export class Toolbar {
       config: option.config,
       instance: h
     });
-    return h.elementRef;
+    return h;
   }
 
   private listenUserAction() {

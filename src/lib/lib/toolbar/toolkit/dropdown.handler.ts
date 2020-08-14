@@ -65,7 +65,7 @@ export class DropdownHandler implements Tool {
       stickyElement
     });
 
-    this.elementRef = this.dropdown.dropdown;
+    this.elementRef = this.dropdown.elementRef;
 
     if (typeof viewer.setEventDelegator === 'function') {
       viewer.setEventDelegator(delegate);

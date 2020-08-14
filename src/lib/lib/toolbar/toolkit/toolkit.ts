@@ -1,16 +1,18 @@
 import { ButtonConfig, ButtonHandler } from './button.handler';
 import { SelectConfig, SelectHandler } from './select.handler';
 import { DropdownConfig, DropdownHandler } from './dropdown.handler';
-import { EventDelegate } from '../help';
 import { ActionSheetConfig, ActionSheetHandler } from './action-sheet.handler';
 import { AdditionalConfig, AdditionalHandler } from './additional.handler';
+import { GroupConfig, GroupHandler } from './group.handler';
+import { EventDelegate } from '../help';
 
 export enum ToolType {
   Button,
   Select,
   Dropdown,
   ActionSheet,
-  Additional
+  Additional,
+  Group
 }
 
 export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig | AdditionalConfig;
@@ -50,7 +52,22 @@ export interface AdditionalToolFactory {
   factory(): AdditionalHandler
 }
 
-export type ToolFactory = ButtonToolFactory | SelectToolFactory | DropdownToolFactory | ActionSheetToolFactory | AdditionalToolFactory;
+export interface GroupToolFactory {
+  type: ToolType.Group,
+  config: GroupConfig,
+
+  factory(menu: Array<ButtonHandler | SelectHandler | ActionSheetHandler | DropdownHandler>,
+          delegate: EventDelegate,
+          stickyElement: HTMLElement): GroupHandler
+}
+
+export type ToolFactory =
+  ButtonToolFactory
+  | SelectToolFactory
+  | DropdownToolFactory
+  | ActionSheetToolFactory
+  | AdditionalToolFactory
+  | GroupToolFactory;
 
 export class Toolkit {
   static makeButtonTool(config: ButtonConfig): ButtonToolFactory {
@@ -103,6 +120,19 @@ export class Toolkit {
       config,
       factory() {
         return new AdditionalHandler(op.config)
+      }
+    };
+    return op;
+  }
+
+  static makeGroupTool(config: GroupConfig): GroupToolFactory {
+    const op: GroupToolFactory = {
+      type: ToolType.Group,
+      config,
+      factory(menu: Array<ButtonHandler | SelectHandler | ActionSheetHandler | DropdownHandler>,
+              delegate: EventDelegate,
+              stickyElement: HTMLElement) {
+        return new GroupHandler(op.config, menu, delegate, stickyElement);
       }
     };
     return op;

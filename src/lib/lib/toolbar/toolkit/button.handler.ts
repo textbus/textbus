@@ -49,7 +49,7 @@ export class ButtonHandler implements Tool {
         this.eventSource.next();
       }
     })
-    this.elementRef = this.btn.button;
+    this.elementRef = this.btn.elementRef;
     if (config.keymap) {
       this.keymapAction = {
         keymap: config.keymap,

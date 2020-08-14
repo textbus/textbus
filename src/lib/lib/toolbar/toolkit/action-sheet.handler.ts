@@ -83,7 +83,7 @@ export class ActionSheetHandler implements Tool {
         })
       }
     })
-    this.elementRef = this.dropdown.dropdown;
+    this.elementRef = this.dropdown.elementRef;
   }
 
   updateStatus(selectionMatchDelta: any): void {

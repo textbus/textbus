@@ -88,7 +88,7 @@ export class SelectHandler implements Tool {
         })
       }
     })
-    this.elementRef = this.dropdown.dropdown;
+    this.elementRef = this.dropdown.elementRef;
   }
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {

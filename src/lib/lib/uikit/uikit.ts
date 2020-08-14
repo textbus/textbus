@@ -19,7 +19,7 @@ export interface UIButtonParams {
 
 export interface UIButton {
   label: HTMLElement;
-  button: HTMLButtonElement;
+  elementRef: HTMLButtonElement;
   disabled: boolean;
   highlight: boolean;
 }
@@ -31,7 +31,7 @@ export interface UIDropdownParams<T> {
 }
 
 export interface UIDropdown {
-  dropdown: HTMLElement;
+  elementRef: HTMLElement;
   button: UIButton;
   highlight: boolean;
   disabled: boolean;
@@ -55,6 +55,7 @@ export interface UISelectParams {
   stickyElement: HTMLElement
   options: UISelectOption[];
   classes?: string[];
+  tooltip?: string;
   mini?: boolean;
 
   onSelected?(value: any): any;
@@ -74,6 +75,14 @@ export interface UIActionSheetParams {
   classes?: string[];
   tooltip?: string;
   items: UIActionParams[];
+  stickyElement: HTMLElement;
+}
+
+export interface UIMenuParams {
+  label?: string;
+  classes?: string[];
+  tooltip?: string;
+  menu: Array<{elementRef: HTMLElement}>;
   stickyElement: HTMLElement;
 }
 
@@ -173,7 +182,7 @@ export class UIKit {
 
     const result = {
       label,
-      button: el,
+      elementRef: el,
       set highlight(b: boolean) {
         highlight = b;
         if (b) {
@@ -245,7 +254,7 @@ export class UIKit {
     const el = createElement('span', {
       classes: ['textbus-toolbar-dropdown'],
       children: [
-        uiBtn.button,
+        uiBtn.elementRef,
         menu
       ]
     });
@@ -261,7 +270,7 @@ export class UIKit {
     };
 
     return {
-      dropdown: el,
+      elementRef: el,
       hide,
       show,
       button: uiBtn,
@@ -338,6 +347,7 @@ export class UIKit {
     const dropdown = UIKit.dropdown({
       button: {
         label,
+        tooltip: params.tooltip,
         classes: ['textbus-toolbar-select-btn', ...classes]
       },
       menu: options,
@@ -386,14 +396,28 @@ export class UIKit {
     })
     return UIKit.dropdown({
       button: {
-        label: params.label,
-        classes: params.classes
+        ...params
       },
       menu,
       stickyElement: params.stickyElement
     });
   }
 
-  static menu() {
+  static menu(params: UIMenuParams) {
+    const dropdown = UIKit.dropdown({
+      button: {
+        label: params.label,
+        tooltip: params.tooltip,
+        classes: params.classes
+      },
+      menu: createElement('div', {
+        classes: ['textbus-toolbar-menu'],
+        children: params.menu.map(value => {
+          return value.elementRef;
+        })
+      }),
+      stickyElement: params.stickyElement
+    });
+    return dropdown;
   }
 }
