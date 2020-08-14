@@ -70,11 +70,11 @@ export class DropdownHandler implements Tool {
     if (typeof viewer.setEventDelegator === 'function') {
       viewer.setEventDelegator(delegate);
     }
-    // if (viewer.freezeState instanceof Observable) {
-    //   viewer.freezeState.subscribe(b => {
-    //     this.dropdown.freeze = b;
-    //   });
-    // }
+    if (viewer.freezeState instanceof Observable) {
+      viewer.freezeState.subscribe(b => {
+        this.dropdown.freeze = b;
+      });
+    }
   }
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {

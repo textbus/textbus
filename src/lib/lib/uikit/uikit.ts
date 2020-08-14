@@ -35,6 +35,7 @@ export interface UIDropdown {
   button: UIButton;
   highlight: boolean;
   disabled: boolean;
+  freeze: boolean;
 
   hide(): void;
 
@@ -204,6 +205,7 @@ export class UIKit {
   static dropdown<T>(params: UIDropdownParams<T>): UIDropdown {
     const p = Object.assign({}, params.button);
     let isSelfClick = false;
+    let freeze = false;
     p.canExpand = true;
 
     const updatePosition = function () {
@@ -214,11 +216,11 @@ export class UIKit {
     };
     window.addEventListener('resize', updatePosition);
     document.addEventListener('click', () => {
-      // if (this.freeze) {
-      //   return;
-      // }
+      if (freeze) {
+        return;
+      }
       if (!isSelfClick) {
-        hide()
+        hide();
       }
       isSelfClick = false;
     });
@@ -250,6 +252,7 @@ export class UIKit {
     let b = false;
     const hide = function () {
       b = false;
+      freeze = false;
       el.classList.remove('textbus-toolbar-dropdown-open');
     };
     const show = function () {
@@ -262,6 +265,12 @@ export class UIKit {
       hide,
       show,
       button: uiBtn,
+      set freeze(b: boolean) {
+        freeze = b;
+      },
+      get freeze() {
+        return freeze;
+      },
       get highlight() {
         return uiBtn.highlight;
       },
