@@ -4,7 +4,6 @@ import { HighlightState } from './help';
 import {
   AdditionalHandler,
   AdditionalViewer,
-  createKeymapHTML,
   Tool,
   ToolConfig,
   ToolFactory,
@@ -15,6 +14,7 @@ import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
 import { ContextMenu } from './context-menu';
+import { createKeymapHTML } from '../uikit/uikit';
 
 export class Toolbar {
   elementRef = document.createElement('div');
@@ -107,7 +107,8 @@ export class Toolbar {
       if (keymap) {
         try {
           const config: Keymap = JSON.parse(keymap);
-          this.keymapPrompt.innerHTML = createKeymapHTML(config);
+          this.keymapPrompt.innerHTML = '';
+          this.keymapPrompt.append(...createKeymapHTML(config));
           this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
           return;
         } catch (e) {

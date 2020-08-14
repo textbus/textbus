@@ -6,6 +6,7 @@ import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/commander';
 import { Matcher } from '../matcher/matcher';
 import { ContextMenuConfig } from './help';
+import { UIButton, UIKit } from '../../uikit/uikit';
 
 /**
  * 按扭型工具的配置接口
@@ -30,51 +31,49 @@ export interface ButtonConfig {
 }
 
 export class ButtonHandler implements Tool {
-  readonly elementRef = document.createElement('button');
+  readonly elementRef: HTMLButtonElement;
   onApply: Observable<void>;
   keymapAction: KeymapAction;
   commander: Commander;
   private eventSource = new Subject<void>();
+  private btn: UIButton;
 
   constructor(private config: ButtonConfig) {
     this.commander = config.commanderFactory();
     this.onApply = this.eventSource.asObservable();
-    this.elementRef.type = 'button';
-    this.elementRef.title = config.tooltip || '';
-    this.elementRef.classList.add('textbus-handler');
-    const inner = document.createElement('span');
-    inner.innerText = config.label || '';
-    inner.classList.add(...(config.classes || []));
-    this.elementRef.appendChild(inner);
+
+    this.btn = UIKit.button({
+      label: config.label,
+      classes: config.classes,
+      onChecked: () => {
+        this.eventSource.next();
+      }
+    })
+    this.elementRef = this.btn.button;
     if (config.keymap) {
       this.keymapAction = {
         keymap: config.keymap,
         action: () => {
-          if (!this.elementRef.disabled) {
+          if (!this.btn.disabled) {
             this.eventSource.next();
           }
         }
       };
       this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
     }
-    this.elementRef.addEventListener('click', () => {
-      this.eventSource.next();
-    });
   }
 
   updateStatus(selectionMatchDelta: any): void {
     switch (selectionMatchDelta.state) {
       case HighlightState.Highlight:
-        this.elementRef.disabled = false;
-        this.elementRef.classList.add('textbus-handler-active');
+        this.btn.highlight = true;
         break;
       case HighlightState.Normal:
-        this.elementRef.disabled = false;
-        this.elementRef.classList.remove('textbus-handler-active');
+        this.btn.disabled = false;
+        this.btn.highlight = false;
         break;
       case HighlightState.Disabled:
-        this.elementRef.classList.remove('textbus-handler-active');
-        this.elementRef.disabled = true;
+        this.btn.disabled = true;
         break
     }
   }

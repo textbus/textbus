@@ -12,7 +12,7 @@
     border-bottom: 0;
   }
 
-  .textbus-handler {
+  .textbus-toolbar-action {
     color: $color-gray;
 
     &-active {
@@ -38,7 +38,7 @@
     }
   }
 
-  .textbus-dropdown.textbus-dropdown-open > .textbus-handler {
+  .textbus-toolbar-dropdown.textbus-toolbar-dropdown-open > .textbus-toolbar-action {
     background-color: $color-gray;
     color: $color-darker;
   }

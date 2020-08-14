@@ -2,7 +2,7 @@ import { createPicker, Picker } from '@tanbo/color-picker';
 import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Observable, Subject } from 'rxjs';
 
-import { DropdownViewer } from '../../toolkit/utils/dropdown';
+import { DropdownViewer } from '../../toolkit/dropdown.handler';
 import { FormatAbstractData } from '../../../core/_api';
 
 export class Palette implements DropdownViewer {

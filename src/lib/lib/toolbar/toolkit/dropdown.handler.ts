@@ -1,10 +1,22 @@
 import { Observable } from 'rxjs';
 
 import { ContextMenuConfig, Tool } from './help';
-import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { EventDelegate, HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
+import { UIDropdown, UIKit } from '../../uikit/uikit';
+
+export interface DropdownViewer<T = any> {
+  elementRef: HTMLElement | DocumentFragment;
+  onComplete: Observable<any>;
+  freezeState?: Observable<boolean>;
+
+  update?(value?: T): void;
+
+  reset?(): void;
+
+  setEventDelegator?(delegate: EventDelegate): void;
+}
 
 export interface DropdownConfig {
   /** 下拉控件展开后显示的内容 */
@@ -32,8 +44,7 @@ export class DropdownHandler implements Tool {
   elementRef: HTMLElement;
   onApply: Observable<any>;
   commander: Commander;
-  private dropdownButton = document.createElement('span');
-  private dropdown: Dropdown;
+  private dropdown: UIDropdown;
   private viewer: DropdownViewer;
 
   constructor(private config: DropdownConfig,
@@ -43,27 +54,27 @@ export class DropdownHandler implements Tool {
     const viewer = config.menuFactory();
     this.viewer = viewer;
     this.onApply = viewer.onComplete;
-    this.dropdownButton.innerText = config.label || '';
 
-    this.dropdownButton.classList.add(...(config.classes || []));
-
-    this.dropdown = new Dropdown(
-      this.dropdownButton,
-      viewer,
-      config.tooltip,
+    this.dropdown = UIKit.dropdown({
+      button: {
+        label: config.label,
+        classes: config.classes,
+        tooltip: config.tooltip
+      },
+      menu: viewer.elementRef,
       stickyElement
-    );
+    });
 
-    this.elementRef = this.dropdown.elementRef;
+    this.elementRef = this.dropdown.dropdown;
 
     if (typeof viewer.setEventDelegator === 'function') {
       viewer.setEventDelegator(delegate);
     }
-    if (viewer.freezeState instanceof Observable) {
-      viewer.freezeState.subscribe(b => {
-        this.dropdown.freeze = b;
-      });
-    }
+    // if (viewer.freezeState instanceof Observable) {
+    //   viewer.freezeState.subscribe(b => {
+    //     this.dropdown.freeze = b;
+    //   });
+    // }
   }
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
@@ -85,6 +96,6 @@ export class DropdownHandler implements Tool {
   }
 
   expand(is: boolean) {
-    this.dropdown.expand = is;
+    // this.dropdown.expand = is;
   }
 }

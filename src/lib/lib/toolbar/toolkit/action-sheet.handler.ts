@@ -1,11 +1,11 @@
-import { merge, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { HighlightState } from '../help';
-import { Dropdown, DropdownViewer } from './utils/dropdown';
-import { Tool, createKeymapHTML, ContextMenuConfig } from './help';
+import { Tool, ContextMenuConfig } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/_api';
 import { Matcher } from '../matcher/_api';
+import { UIDropdown, UIKit } from '../../uikit/uikit';
 
 export interface ActionConfig {
   /** 设置当前 action 的 value */
@@ -39,56 +39,6 @@ export interface ActionSheetConfig {
   supportSourceCodeModel?: boolean;
 }
 
-class ActionSheetOptionHandler {
-  readonly elementRef = document.createElement('button');
-  onCheck: Observable<any>;
-  private eventSource = new Subject<any>();
-
-  constructor(private option: ActionConfig) {
-    this.onCheck = this.eventSource.asObservable();
-    this.elementRef.classList.add('textbus-toolbar-menu-item');
-    this.elementRef.type = 'button';
-    const label = document.createElement('span');
-    label.classList.add('textbus-toolbar-menu-item-label');
-    if (option.classes) {
-      label.classList.add(...(option.classes || []));
-    }
-
-    label.innerText = option.label;
-    this.elementRef.appendChild(label);
-    if (option.keymap) {
-      const keymapHTML = document.createElement('span');
-      keymapHTML.classList.add('textbus-toolbar-menu-item-keymap');
-      keymapHTML.innerHTML = createKeymapHTML(option.keymap);
-      this.elementRef.appendChild(keymapHTML);
-    }
-    this.elementRef.addEventListener('click', () => {
-      this.eventSource.next(option.value);
-    });
-  }
-}
-
-class ActionSheetViewer implements DropdownViewer {
-  elementRef: HTMLElement = document.createElement('div');
-  onComplete: Observable<void>;
-  private completeEvent = new Subject<void>();
-  private options: ActionSheetOptionHandler[] = [];
-
-  constructor(private actions: ActionConfig[] = []) {
-    this.onComplete = this.completeEvent.asObservable();
-    this.elementRef.classList.add('textbus-toolbar-menu');
-
-    actions.forEach(option => {
-      const item = new ActionSheetOptionHandler(option);
-      this.elementRef.appendChild(item.elementRef);
-      this.options.push(item);
-    });
-    merge(...this.options.map(item => item.onCheck)).subscribe(v => {
-      this.completeEvent.next(v)
-    });
-  }
-}
-
 export class ActionSheetHandler implements Tool {
   readonly elementRef: HTMLElement;
   onMatched: Observable<ActionConfig>;
@@ -98,16 +48,26 @@ export class ActionSheetHandler implements Tool {
 
   private matchedEvent = new Subject<ActionConfig>();
   private eventSource = new Subject<any>();
-  private dropdown: Dropdown;
-  private viewer = new ActionSheetViewer(this.config.actions);
+  private dropdown: UIDropdown;
 
   constructor(private config: ActionSheetConfig,
               private stickyElement: HTMLElement) {
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();
 
-    const dropdownButton = document.createElement('span');
-    dropdownButton.classList.add(...config.classes || []);
+    this.dropdown = UIKit.actions({
+      label: config.label,
+      classes: config.classes,
+      stickyElement,
+      items: config.actions.map(v => {
+        return {
+          ...v,
+          onChecked() {
+            this.eventSource.next(v.value);
+          }
+        }
+      })
+    })
 
     this.commander = config.commanderFactory();
 
@@ -123,20 +83,7 @@ export class ActionSheetHandler implements Tool {
         })
       }
     })
-
-    this.viewer.onComplete.subscribe(v => {
-      if (!this.dropdown.disabled) {
-        this.eventSource.next(v);
-      }
-    })
-
-    this.dropdown = new Dropdown(
-      dropdownButton,
-      this.viewer,
-      config.tooltip,
-      stickyElement
-    );
-    this.elementRef = this.dropdown.elementRef;
+    this.elementRef = this.dropdown.dropdown;
   }
 
   updateStatus(selectionMatchDelta: any): void {

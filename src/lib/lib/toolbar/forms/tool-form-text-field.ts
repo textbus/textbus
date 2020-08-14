@@ -12,10 +12,10 @@ export class ToolFormTextField implements ToolFormItem {
   constructor(private config: AttrTextField,
               private delegate: (type: string) => Observable<string>) {
     this.name = config.name;
-    this.elementRef.classList.add('textbus-form-group');
+    this.elementRef.classList.add('textbus-toolbar-form-group');
     this.elementRef.innerHTML = `
-    <div class="textbus-control-label">${config.label}</div>
-    <div class="textbus-control-value">
+    <div class="textbus-toolbar-control-label">${config.label}</div>
+    <div class="textbus-toolbar-control-value">
       <div class="textbus-input-group textbus-input-block">
         <input class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
         `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">

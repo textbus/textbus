@@ -1,5 +1,3 @@
-export * from './utils/dropdown';
-
 export * from './action-sheet.handler';
 export * from './additional.handler';
 export * from './button.handler';

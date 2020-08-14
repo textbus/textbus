@@ -21,7 +21,7 @@ const editor = createEditor('#editor', {
   expandComponentLibrary: true,
   deviceWidth: '768px',
   theme: 'dark',
-  fullScreen: true,
+  // fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');
@@ -46,4 +46,5 @@ editor.onChange.subscribe(() => {
 document.getElementById('btn').addEventListener('click', () => {
   console.log(editor.getContents().html)
 })
+
 // editor.setContents(`<h1>textbus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

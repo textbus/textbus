@@ -1,8 +1,8 @@
 import { Observable, Subject } from 'rxjs';
 
-import { DropdownViewer } from '../toolkit/utils/dropdown';
 import { EmojiCommander } from '../commands/emoji.commander';
 import { Toolkit } from '../toolkit/toolkit';
+import { DropdownViewer } from '../toolkit/dropdown.handler';
 
 class Emoji implements DropdownViewer {
   elementRef = document.createElement('div');

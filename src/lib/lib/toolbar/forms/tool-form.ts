@@ -22,7 +22,7 @@ export class ToolForm implements DropdownViewer {
   constructor(forms: Array<AttrConfig>) {
     this.onComplete = this.completeEvent.asObservable();
     this.freezeState = this.freezeStateSource.asObservable();
-    this.elementRef.classList.add('textbus-form', 'textbus-form-flow', 'textbus-form-tool');
+    this.elementRef.classList.add('textbus-toolbar-form');
     forms.forEach(attr => {
       switch (attr.type) {
         case AttrType.TextField:
@@ -51,7 +51,7 @@ export class ToolForm implements DropdownViewer {
     this.elementRef.setAttribute('novalidate', 'novalidate');
 
     const btnWrap = document.createElement('div');
-    btnWrap.classList.add('textbus-btn-wrap');
+    btnWrap.classList.add('textbus-toolbar-btn-wrap');
     btnWrap.innerHTML = '<button class="textbus-btn textbus-btn-block textbus-btn-primary" type="submit">确定</button>';
 
     this.elementRef.appendChild(btnWrap);
