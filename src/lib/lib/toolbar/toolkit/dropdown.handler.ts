@@ -5,7 +5,6 @@ import { Dropdown, DropdownViewer } from './utils/dropdown';
 import { EventDelegate, HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
-import { map } from 'rxjs/operators';
 
 export interface DropdownConfig {
   /** 下拉控件展开后显示的内容 */
