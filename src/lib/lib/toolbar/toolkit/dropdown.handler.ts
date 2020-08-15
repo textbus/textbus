@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
 
-import { ContextMenuConfig, Tool } from './help';
+import { Tool } from './help';
 import { EventDelegate, HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 
 export interface DropdownViewer<T = any> {
-  elementRef: HTMLElement | DocumentFragment;
+  elementRef: HTMLElement;
   onComplete: Observable<any>;
   freezeState?: Observable<boolean>;
 
@@ -28,10 +28,10 @@ export interface DropdownConfig {
   /** 订阅下拉控件操作完成时调用的命令 */
   commanderFactory(): Commander;
 
-  /** 设置上下文菜单 */
-  contextMenu?: Array<ContextMenuConfig>;
   /** 给当前控件添加一组 css class */
   classes?: string[];
+  /** 给当前控件添加一组 icon css class */
+  iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
   tooltip?: string;
   /** 设置控件显示的文字 */
@@ -57,9 +57,7 @@ export class DropdownHandler implements Tool {
 
     this.dropdown = UIKit.dropdown({
       button: {
-        label: config.label,
-        classes: config.classes,
-        tooltip: config.tooltip
+        ...config
       },
       menu: viewer.elementRef,
       stickyElement

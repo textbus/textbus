@@ -3,8 +3,8 @@ import { ToggleBlockCommander } from '../commands/toggle-block.commander';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { BlockComponent } from '../../components/block.component';
 
-export const blockquoteTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-quotes-right'],
+export const blockquoteToolConfig = {
+  iconClasses: ['textbus-icon-quotes-right'],
   tooltip: '引用',
   keymap: {
     ctrlKey: true,
@@ -14,4 +14,5 @@ export const blockquoteTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new ToggleBlockCommander('blockquote');
   }
-});
+}
+export const blockquoteTool = Toolkit.makeButtonTool(blockquoteToolConfig);

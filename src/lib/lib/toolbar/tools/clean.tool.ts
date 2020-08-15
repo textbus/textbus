@@ -2,8 +2,8 @@ import { CleanCommander } from '../commands/clean.commander';
 import { LinkFormatter } from '../../formatter/link.formatter';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const cleanTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-clear-formatting'],
+export const cleanToolConfig = {
+  iconClasses: ['textbus-icon-clear-formatting'],
   tooltip: '清除格式',
   keymap: {
     ctrlKey: true,
@@ -14,4 +14,5 @@ export const cleanTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new CleanCommander([LinkFormatter]);
   }
-});
+};
+export const cleanTool = Toolkit.makeButtonTool(cleanToolConfig);

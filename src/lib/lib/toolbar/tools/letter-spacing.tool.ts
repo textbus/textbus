@@ -4,10 +4,11 @@ import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const letterSpacingTool = Toolkit.makeSelectTool({
+export const letterSpacingToolConfig: SelectConfig = {
   tooltip: '字间距',
-  classes: ['textbus-icon-letter-spacing'],
+  iconClasses: ['textbus-icon-letter-spacing'],
   mini: true,
   options: [{
     label: '0px',
@@ -48,4 +49,5 @@ export const letterSpacingTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new StyleCommander('letterSpacing', letterSpacingFormatter);
   }
-});
+};
+export const letterSpacingTool = Toolkit.makeSelectTool(letterSpacingToolConfig);

@@ -5,8 +5,8 @@ import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const videoTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-video'],
+export const videoToolConfig = {
+  iconClasses: ['textbus-icon-video'],
   tooltip: '视频',
   menuFactory() {
     return new ToolForm([{
@@ -48,4 +48,5 @@ export const videoTool = Toolkit.makeDropdownTool({
   commanderFactory() {
     return new VideoCommander();
   }
-});
+};
+export const videoTool = Toolkit.makeDropdownTool(videoToolConfig);

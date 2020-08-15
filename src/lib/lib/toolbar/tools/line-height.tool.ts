@@ -4,10 +4,11 @@ import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const lineHeightTool = Toolkit.makeSelectTool({
+export const lineHeightToolConfig: SelectConfig = {
   tooltip: '行高',
-  classes: ['textbus-icon-line-height'],
+  iconClasses: ['textbus-icon-line-height'],
   mini: true,
   options: [{
     label: '1x',
@@ -56,4 +57,5 @@ export const lineHeightTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new StyleCommander('lineHeight', lineHeightFormatter);
   }
-});
+};
+export const lineHeightTool = Toolkit.makeSelectTool(lineHeightToolConfig);

@@ -2,8 +2,8 @@ import { HistoryMatcher } from '../matcher/history.matcher';
 import { HistoryCommander } from '../commands/history.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const historyForwardTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-history-forward'],
+export const historyForwardToolConfig = {
+  iconClasses: ['textbus-icon-history-forward'],
   tooltip: '重做',
   matcher: new HistoryMatcher('forward'),
   commanderFactory() {
@@ -14,4 +14,5 @@ export const historyForwardTool = Toolkit.makeButtonTool({
     shiftKey: true,
     key: 'z'
   }
-});
+};
+export const historyForwardTool = Toolkit.makeButtonTool(historyForwardToolConfig);

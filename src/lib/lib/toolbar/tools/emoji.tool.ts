@@ -42,8 +42,8 @@ class Emoji implements DropdownViewer {
   }
 }
 
-export const emojiTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-emoji'],
+export const emojiToolConfig = {
+  iconClasses: ['textbus-icon-emoji'],
   tooltip: '表情',
   commanderFactory() {
     return new EmojiCommander()
@@ -52,4 +52,5 @@ export const emojiTool = Toolkit.makeDropdownTool({
     return new Emoji();
   },
   supportSourceCodeModel: true
-});
+};
+export const emojiTool = Toolkit.makeDropdownTool(emojiToolConfig);

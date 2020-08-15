@@ -15,7 +15,13 @@ export enum ToolType {
   Group
 }
 
-export type ToolConfig = ButtonConfig | SelectConfig | DropdownConfig | ActionSheetConfig | AdditionalConfig;
+export type ToolConfig =
+  ButtonConfig
+  | SelectConfig
+  | DropdownConfig
+  | ActionSheetConfig
+  | AdditionalConfig
+  | GroupConfig;
 
 export interface ButtonToolFactory {
   type: ToolType.Button;
@@ -56,8 +62,7 @@ export interface GroupToolFactory {
   type: ToolType.Group,
   config: GroupConfig,
 
-  factory(menu: Array<ButtonHandler | SelectHandler | ActionSheetHandler | DropdownHandler>,
-          delegate: EventDelegate,
+  factory(delegate: EventDelegate,
           stickyElement: HTMLElement): GroupHandler
 }
 
@@ -129,10 +134,9 @@ export class Toolkit {
     const op: GroupToolFactory = {
       type: ToolType.Group,
       config,
-      factory(menu: Array<ButtonHandler | SelectHandler | ActionSheetHandler | DropdownHandler>,
-              delegate: EventDelegate,
+      factory(delegate: EventDelegate,
               stickyElement: HTMLElement) {
-        return new GroupHandler(op.config, menu, delegate, stickyElement);
+        return new GroupHandler(op.config, delegate, stickyElement);
       }
     };
     return op;

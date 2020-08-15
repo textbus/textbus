@@ -5,8 +5,8 @@ import { Palette } from './utils/palette';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
-export const colorTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-color'],
+export const colorToolConfig = {
+  iconClasses: ['textbus-icon-color'],
   tooltip: '文字颜色',
   menuFactory() {
     return new Palette('color');
@@ -15,4 +15,5 @@ export const colorTool = Toolkit.makeDropdownTool({
   commanderFactory() {
     return new StyleCommander('color', colorFormatter);
   }
-});
+};
+export const colorTool = Toolkit.makeDropdownTool(colorToolConfig);

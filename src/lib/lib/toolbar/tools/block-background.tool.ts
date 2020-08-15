@@ -5,8 +5,8 @@ import { BlockStyleCommander } from '../commands/block-style.commander';
 import { blockBackgroundColorFormatter } from '../../formatter/block-style.formatter';
 import { PreComponent } from '../../components/pre.component';
 
-export const blockBackgroundTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-paint-bucket'],
+export const blockBackgroundToolConfig = {
+  iconClasses: ['textbus-icon-paint-bucket'],
   tooltip: '元素背景颜色',
   menuFactory() {
     return new Palette('backgroundColor');
@@ -15,4 +15,6 @@ export const blockBackgroundTool = Toolkit.makeDropdownTool({
   commanderFactory() {
     return new BlockStyleCommander('backgroundColor', blockBackgroundColorFormatter);
   }
-});
+}
+
+export const blockBackgroundTool = Toolkit.makeDropdownTool(blockBackgroundToolConfig);

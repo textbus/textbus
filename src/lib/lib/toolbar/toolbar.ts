@@ -13,7 +13,6 @@ import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
-import { ContextMenu } from './context-menu';
 import { createKeymapHTML } from '../uikit/uikit';
 
 export class Toolbar {
@@ -56,7 +55,6 @@ export class Toolbar {
   private subs: Subscription[] = [];
 
   constructor(private context: Editor,
-              private contextMenu: ContextMenu,
               private config: (ToolFactory | ToolFactory[])[],
               private options = {
                 showComponentStage: true,
@@ -137,15 +135,6 @@ export class Toolbar {
           tool.instance.updateStatus(s);
         }
       }
-      if (Array.isArray(tool.config.contextMenu)) {
-        const menus = tool.config.contextMenu.filter(m => {
-          if (typeof m.displayNeedMatch === 'boolean') {
-            return m.displayNeedMatch === (s.state === HighlightState.Highlight);
-          }
-          return true;
-        });
-        this.contextMenu.setMenus(menus, selection, tool.instance);
-      }
     })
   }
 
@@ -210,7 +199,10 @@ export class Toolbar {
         }));
         break;
       case ToolType.Group:
-        return option.factory(this.createHandlers(option.config.menu as ToolFactory[]) as any, this.context, this.toolsElement);
+        const m = option.factory(this.context, this.toolsElement);
+        this.tools.push(...m.tools);
+        h = m;
+        break;
       default:
         throw new Error('未被支持的工具！');
     }

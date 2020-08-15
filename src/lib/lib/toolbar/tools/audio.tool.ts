@@ -5,8 +5,8 @@ import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const audioTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-music'],
+export const audioToolConfig = {
+  iconClasses: ['textbus-icon-music'],
   tooltip: '音频',
   menuFactory() {
     return new ToolForm([{
@@ -34,4 +34,5 @@ export const audioTool = Toolkit.makeDropdownTool({
   commanderFactory() {
     return new AudioCommander();
   }
-});
+}
+export const audioTool = Toolkit.makeDropdownTool(audioToolConfig);

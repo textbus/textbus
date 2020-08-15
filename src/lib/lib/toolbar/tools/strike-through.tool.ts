@@ -4,8 +4,8 @@ import { InlineCommander } from '../commands/inline.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
-export const strikeThroughTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-strikethrough'],
+export const strikeThroughToolConfig = {
+  iconClasses: ['textbus-icon-strikethrough'],
   tooltip: '删除线',
   keymap: {
     ctrlKey: true,
@@ -15,4 +15,5 @@ export const strikeThroughTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new InlineCommander('del', strikeThroughFormatter);
   }
-});
+};
+export const strikeThroughTool = Toolkit.makeButtonTool(strikeThroughToolConfig);

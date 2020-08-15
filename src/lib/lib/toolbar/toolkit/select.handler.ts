@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { Tool, ContextMenuConfig } from './help';
+import { Tool } from './help';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
@@ -35,13 +35,12 @@ export interface SelectConfig {
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
   highlight?<T = FormatAbstractData | Component>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
 
-  /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig[];
-
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
   /** 给 Select 控件添加一组 css class */
   classes?: string[];
+  /** 给 select 控件添加一组 icon css class 类 */
+  iconClasses?: string[];
   /** 设置当前 Select 是否根据内容扩展宽度 */
   mini?: boolean;
   /** 当鼠标放在控件上的提示文字 */
@@ -65,9 +64,7 @@ export class SelectHandler implements Tool {
     this.onApply = this.applyEventSource.asObservable();
 
     this.dropdown = UIKit.select({
-      classes: config.classes,
-      options: config.options,
-      mini: config.mini,
+      ...config,
       stickyElement,
       onSelected: (value: any) => {
         this.value = value;

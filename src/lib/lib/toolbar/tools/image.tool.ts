@@ -5,8 +5,8 @@ import { ImageComponent, PreComponent } from '../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const imageTool = Toolkit.makeDropdownTool({
-  classes: ['textbus-icon-image'],
+export const imageToolConfig = {
+  iconClasses: ['textbus-icon-image'],
   tooltip: '图片',
   menuFactory() {
     return new ToolForm([{
@@ -38,4 +38,5 @@ export const imageTool = Toolkit.makeDropdownTool({
   commanderFactory() {
     return new ImageCommander();
   }
-});
+};
+export const imageTool = Toolkit.makeDropdownTool(imageToolConfig);

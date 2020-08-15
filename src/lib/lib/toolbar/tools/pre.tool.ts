@@ -2,9 +2,10 @@ import { PreCommander } from '../commands/pre.commander';
 import { PreComponent } from '../../components/pre.component';
 import { CodeMatcher } from '../matcher/code.matcher';
 import { Toolkit } from '../toolkit/toolkit';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const preTool = Toolkit.makeSelectTool({
-  classes: ['textbus-icon-terminal'],
+export const preToolConfig: SelectConfig = {
+  iconClasses: ['textbus-icon-terminal'],
   tooltip: '代码',
   mini: true,
   options: [{
@@ -51,4 +52,5 @@ export const preTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new PreCommander();
   }
-});
+}
+export const preTool = Toolkit.makeSelectTool(preToolConfig);

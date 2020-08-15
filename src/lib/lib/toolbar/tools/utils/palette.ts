@@ -13,6 +13,7 @@ export class Palette implements DropdownViewer {
   private completeEvent = new Subject<string>();
 
   constructor(private styleName: string) {
+    this.elementRef.classList.add('textbus-toolbar-palette');
     this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef);
     this.picker.onSelected = (ev) => {

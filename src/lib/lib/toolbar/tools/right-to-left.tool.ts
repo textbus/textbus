@@ -4,11 +4,12 @@ import { dirFormatter } from '../../formatter/dir.formatter';
 import { Commander } from '../../core/commander';
 import { DirMatcher } from '../matcher/dir.matcher';
 
-export const rightToLeftTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-rtl'],
+export const rightToLeftToolConfig = {
+  iconClasses: ['textbus-icon-rtl'],
   tooltip: '从右向左',
   matcher: new DirMatcher('rtl'),
   commanderFactory(): Commander {
     return new DirCommander(dirFormatter, 'rtl');
   }
-})
+}
+export const rightToLeftTool = Toolkit.makeButtonTool(rightToLeftToolConfig)

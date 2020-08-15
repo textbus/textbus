@@ -5,7 +5,6 @@ import { Tool } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/commander';
 import { Matcher } from '../matcher/matcher';
-import { ContextMenuConfig } from './help';
 import { UIButton, UIKit } from '../../uikit/uikit';
 
 /**
@@ -14,14 +13,14 @@ import { UIButton, UIKit } from '../../uikit/uikit';
 export interface ButtonConfig {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
-  /** 设置上下文菜单 */
-  contextMenu?: ContextMenuConfig[];
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
   /** 设置按扭显示的文字 */
   label?: string;
   /** 给按扭控件添加一组 css class 类 */
   classes?: string[];
+  /** 给按扭控件添加一组 icon css class 类 */
+  iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
   tooltip?: string;
   /** 当前按扭控件的快捷键配置 */
@@ -43,8 +42,7 @@ export class ButtonHandler implements Tool {
     this.onApply = this.eventSource.asObservable();
 
     this.btn = UIKit.button({
-      label: config.label,
-      classes: config.classes,
+      ...config,
       onChecked: () => {
         this.eventSource.next();
       }

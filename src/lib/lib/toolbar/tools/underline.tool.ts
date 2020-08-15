@@ -4,8 +4,8 @@ import { InlineCommander } from '../commands/inline.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
-export const underlineTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-underline'],
+export const underlineToolConfig = {
+  iconClasses: ['textbus-icon-underline'],
   tooltip: '下划线',
   keymap: {
     ctrlKey: true,
@@ -15,4 +15,5 @@ export const underlineTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new InlineCommander('u', underlineFormatter);
   }
-});
+};
+export const underlineTool = Toolkit.makeButtonTool(underlineToolConfig);

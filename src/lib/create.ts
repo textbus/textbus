@@ -44,7 +44,7 @@ import {
   subscriptTool,
   superscriptTool,
   tableEditTool,
-  tableTool,
+  tableAddTool,
   textAlignTool,
   textBackgroundTool,
   textIndentTool,
@@ -58,7 +58,7 @@ import {
   tableRemoveTool,
   tdBorderColorTool,
   unlinkTool,
-  findTool
+  findTool, insertObjectTool, tableTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, FindHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {
@@ -175,18 +175,20 @@ export const defaultOptions: EditorOptions = {
     [historyBackTool, historyForwardTool],
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
-    [blockquoteTool, codeTool],
-    [preTool],
+    // [blockquoteTool, codeTool],
+    // [preTool],
     [olTool, ulTool],
-    [fontSizeTool, lineHeightTool, letterSpacingTool, textIndentTool],
-    [subscriptTool, superscriptTool],
-    [leftToRightTool, rightToLeftTool],
-    [colorTool, textBackgroundTool, blockBackgroundTool, emojiTool],
+    [fontSizeTool, textIndentTool],
+    // [subscriptTool, superscriptTool],
+    // [leftToRightTool, rightToLeftTool],
+    [colorTool, textBackgroundTool],
     [fontFamilyTool],
     [linkTool, unlinkTool],
-    [imageTool, audioTool, videoTool],
+    [imageTool],
     [textAlignTool],
-    [tableTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
+    [tableTool],
+    // [tableAddTool, tableEditTool, tdBorderColorTool, tableAddParagraphTool, tableRemoveTool],
+    [insertObjectTool],
     [findTool],
     [cleanTool]
   ],

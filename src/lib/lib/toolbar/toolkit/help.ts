@@ -12,10 +12,3 @@ export interface Tool<T = any> {
 
   updateStatus?(selectionMatchDelta: SelectionMatchDelta): void;
 }
-
-export interface ContextMenuConfig {
-  classes?: string[];
-  label?: string;
-  displayNeedMatch?: boolean;
-  action?: (renderer: Renderer, selection: TBSelection, tool: Tool) => void;
-}

@@ -4,10 +4,11 @@ import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const fontSizeTool = Toolkit.makeSelectTool({
+export const fontSizeToolConfig: SelectConfig = {
   tooltip: '字体大小',
-  classes: ['textbus-icon-font-size'],
+  iconClasses: ['textbus-icon-font-size'],
   mini: true,
   options: [{
     label: '12px',
@@ -64,4 +65,5 @@ export const fontSizeTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new StyleCommander('fontSize', fontSizeFormatter);
   }
-});
+};
+export const fontSizeTool = Toolkit.makeSelectTool(fontSizeToolConfig);

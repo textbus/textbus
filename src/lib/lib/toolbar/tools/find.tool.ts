@@ -105,9 +105,9 @@ class FindForm implements AdditionalViewer {
   }
 }
 
-export const findTool = Toolkit.makeAdditionalTool({
+export const findToolConfig = {
   tooltip: '查找与替换',
-  classes: ['textbus-icon-search'],
+  iconClasses: ['textbus-icon-search'],
   keymap: {
     ctrlKey: true,
     key: 'f'
@@ -119,4 +119,5 @@ export const findTool = Toolkit.makeAdditionalTool({
     return new FindCommander()
   },
   supportSourceCodeModel: true
-})
+};
+export const findTool = Toolkit.makeAdditionalTool(findToolConfig);

@@ -3,8 +3,9 @@ import { BlockComponent } from '../../components/block.component';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const headingTool = Toolkit.makeSelectTool({
+export const headingToolConfig: SelectConfig = {
   tooltip: '段落与标题',
   matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
   highlight(options, t) {
@@ -76,4 +77,5 @@ export const headingTool = Toolkit.makeSelectTool({
       key: '0'
     }
   }]
-});
+};
+export const headingTool = Toolkit.makeSelectTool(headingToolConfig);

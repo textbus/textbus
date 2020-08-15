@@ -3,8 +3,8 @@ import { ListCommander } from '../commands/list.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
-export const olTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-list-numbered'],
+export const olToolConfig = {
+  iconClasses: ['textbus-icon-list-numbered'],
   tooltip: '有序列表',
   keymap: {
     shiftKey: true,
@@ -15,4 +15,5 @@ export const olTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new ListCommander('ol');
   }
-});
+};
+export const olTool = Toolkit.makeButtonTool(olToolConfig);

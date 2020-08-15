@@ -22,7 +22,7 @@ import {
   VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
-import { ContextMenu, EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
+import { EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockComponent, BrComponent, PreComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
@@ -97,7 +97,6 @@ export class Editor implements EventDelegate {
   private toolbar: Toolbar;
   private renderer = new Renderer();
   private statusBar = new StatusBar();
-  private contextMenu = new ContextMenu(this.renderer);
 
   private readyState = false;
   private openSourceCodeModel = false;
@@ -140,7 +139,7 @@ export class Editor implements EventDelegate {
 
     this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options.componentReaders, options.formatters);
-    this.toolbar = new Toolbar(this, this.contextMenu, options.toolbar, {
+    this.toolbar = new Toolbar(this, options.toolbar, {
       showComponentStage: this.options.componentLibrary?.length > 0,
       openComponentState: this.options.expandComponentLibrary
     });

@@ -4,8 +4,9 @@ import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const fontFamilyTool = Toolkit.makeSelectTool({
+export const fontFamilyToolConfig: SelectConfig = {
   tooltip: '字体',
   options: [{
     label: 'sans-serif',
@@ -70,4 +71,5 @@ export const fontFamilyTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new StyleCommander('fontFamily', fontFamilyFormatter)
   }
-});
+};
+export const fontFamilyTool = Toolkit.makeSelectTool(fontFamilyToolConfig);

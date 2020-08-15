@@ -10,6 +10,7 @@ export interface UIElementParams {
 
 export interface UIButtonParams {
   classes?: string[];
+  iconClasses?: string[];
   label?: string;
   canExpand?: boolean;
   tooltip?: string;
@@ -55,6 +56,7 @@ export interface UISelectParams {
   stickyElement: HTMLElement
   options: UISelectOption[];
   classes?: string[];
+  iconClasses?: string[];
   tooltip?: string;
   mini?: boolean;
 
@@ -67,12 +69,13 @@ export interface UIActionParams {
   label?: string;
   keymap?: Keymap;
 
-  onChecked?(): any;
+  onChecked(): any;
 }
 
 export interface UIActionSheetParams {
   label?: string;
   classes?: string[];
+  iconClasses?: string[];
   tooltip?: string;
   items: UIActionParams[];
   stickyElement: HTMLElement;
@@ -80,10 +83,153 @@ export interface UIActionSheetParams {
 
 export interface UIMenuParams {
   label?: string;
+  iconClasses?: string[];
   classes?: string[];
   tooltip?: string;
-  menu: Array<{elementRef: HTMLElement}>;
+  menu: Array<{ elementRef: HTMLElement }>;
   stickyElement: HTMLElement;
+}
+
+export interface UIMenuItemParams {
+  label?: string;
+  iconClasses?: string[];
+  classes?: string[];
+  keymap?: Keymap;
+
+  onChecked?(): any;
+}
+
+export interface UIMenuItem {
+  elementRef: HTMLElement;
+  highlight: boolean;
+  disabled: boolean;
+}
+
+
+export interface UIMenuSelectParams {
+  stickyElement: HTMLElement;
+  iconClasses?: string[];
+  classes?: string[];
+  label?: string;
+  tooltip?: string;
+  options: UISelectOption[];
+
+  onSelected?(value: any): any;
+}
+
+export interface UIMenuActionSheetParams {
+  stickyElement: HTMLElement;
+  iconClasses?: string[];
+  classes?: string[];
+  label?: string;
+  tooltip?: string;
+  actions: UIActionParams[];
+
+  onChecked?(value: any): any;
+}
+
+export interface UIMenuDropdownParams {
+  stickyElement: HTMLElement;
+  iconClasses?: string[];
+  classes?: string[];
+  label?: string;
+  tooltip?: string;
+  menu?: HTMLElement;
+}
+
+function createSelectOptions(options: UISelectOption[], onSelected: (option: UISelectOption) => any) {
+  let label = '';
+  const map = new Map<UISelectOption, (b: boolean) => void>();
+  const items = createElement('div', {
+    classes: ['textbus-toolbar-select-options'],
+    children: options.map(option => {
+      if (option.default) {
+        label = option.label || option.value + '';
+      }
+      const children = [
+        createElement('span', {
+          classes: ['textbus-toolbar-select-option-label', ...(option.classes || [])],
+          children: [
+            createTextNode(option.label || option.value + '')
+          ]
+        })
+      ];
+      if (option.iconClasses) {
+        children.unshift(createElement('span', {
+          classes: ['textbus-toolbar-select-option-icon', ...option.iconClasses]
+        }));
+      }
+      if (option.keymap) {
+        children.push(createElement('span', {
+          classes: ['textbus-toolbar-select-option-keymap'],
+          children: createKeymapHTML(option.keymap)
+        }));
+      }
+      const item = createElement('button', {
+        classes: ['textbus-toolbar-select-option'],
+        attrs: {
+          type: 'button'
+        },
+        children
+      });
+      item.addEventListener('click', function () {
+        onSelected(option);
+      })
+      map.set(option, function (b: boolean) {
+        if (b) {
+          item.classList.add('textbus-toolbar-select-option-active');
+        } else {
+          item.classList.remove('textbus-toolbar-select-option-active');
+        }
+      });
+      return item;
+    })
+  });
+  return {
+    label,
+    items,
+    map
+  }
+}
+
+function createActions(actions: UIActionParams[]) {
+  return createElement('div', {
+    classes: ['textbus-toolbar-actionsheet-wrap'],
+    children: actions.map(value => {
+      const children = [
+        createElement('span', {
+          classes: ['textbus-toolbar-actionsheet-item-label', ...(value.classes || [])],
+          children: value.label ? [
+            createTextNode(value.label)
+          ] : []
+        })
+      ];
+      if (value.iconClasses) {
+        children.unshift(createElement('span', {
+          classes: ['textbus-toolbar-actionsheet-item-icon', ...value.iconClasses]
+        }));
+      }
+      if (value.keymap) {
+        children.push(createElement('span', {
+          classes: ['textbus-toolbar-actionsheet-item-keymap'],
+          children: createKeymapHTML(value.keymap)
+        }));
+      }
+      const item = createElement('button', {
+        classes: ['textbus-toolbar-actionsheet-item'],
+        attrs: {
+          type: 'button'
+        },
+        children
+      });
+      item.addEventListener('click', function () {
+        if (value.onChecked) {
+          value.onChecked();
+        }
+      })
+      return item;
+    })
+  });
 }
 
 export function createElement(tagName: string, options: UIElementParams = {}): HTMLElement {
@@ -150,6 +296,7 @@ export function createKeymapHTML(config: Keymap): Node[] {
 
 export class UIKit {
   static button(params: UIButtonParams): UIButton {
+
     const label = createElement('span', {
       classes: params.classes,
       children: params.label ? [createTextNode(params.label)] : null
@@ -157,17 +304,25 @@ export class UIKit {
     const children = [
       label
     ];
+    if (params.iconClasses) {
+      children.unshift(createElement('span', {
+        classes: params.iconClasses
+      }))
+    }
     if (params.canExpand) {
       children.push(createElement('span', {
         classes: ['textbus-dropdown-caret']
       }))
     }
+    const attrs: any = {
+      type: 'button'
+    };
+    if (params.tooltip) {
+      attrs.title = params.tooltip;
+    }
     const el = createElement('button', {
       classes: ['textbus-toolbar-action'],
-      attrs: {
-        title: params.tooltip,
-        type: 'button'
-      },
+      attrs,
       children
     }) as HTMLButtonElement;
 
@@ -187,9 +342,9 @@ export class UIKit {
         highlight = b;
         if (b) {
           result.disabled = false;
-          el.classList.add('textbus-toolbar-btn-active');
+          el.classList.add('textbus-toolbar-action-active');
         } else {
-          el.classList.remove('textbus-toolbar-btn-active');
+          el.classList.remove('textbus-toolbar-action-active');
         }
       },
       get highlight() {
@@ -296,104 +451,32 @@ export class UIKit {
   }
 
   static select(params: UISelectParams) {
-    let label = '';
-    const options = createElement('div', {
-      classes: ['textbus-toolbar-select-options'],
-      children: params.options.map(option => {
-        if (option.default) {
-          label = option.label || option.value + '';
-        }
-        const children = [
-          createElement('span', {
-            classes: ['textbus-toolbar-select-option-label', ...(option.classes || [])],
-            children: [
-              createTextNode(option.label || option.value + '')
-            ]
-          })
-        ];
-        if (option.iconClasses) {
-          children.unshift(createElement('span', {
-            classes: ['textbus-toolbar-select-option-icon', ...option.iconClasses]
-          }));
-        }
-        if (option.keymap) {
-          children.push(createElement('span', {
-            classes: ['textbus-toolbar-select-option-keymap'],
-            children: createKeymapHTML(option.keymap)
-          }));
-        }
-        const item = createElement('button', {
-          classes: ['textbus-toolbar-select-option'],
-          attrs: {
-            type: 'button'
-          },
-          children
-        });
-        item.addEventListener('click', function () {
-          dropdown.button.label.innerText = option.label || option.value + '';
-          dropdown.hide();
-          if (params.onSelected) {
-            params.onSelected(option.value);
-          }
-        })
-        return item;
-      })
-    })
     const classes = [...(params.classes || [])];
     if (params.mini) {
       classes.push('textbus-toolbar-select-btn-mini');
     }
-
+    const options = createSelectOptions(params.options, function (option: UISelectOption) {
+      dropdown.button.label.innerText = option.label || option.value + '';
+      dropdown.hide();
+      if (params.onSelected) {
+        params.onSelected(option.value);
+      }
+    })
     const dropdown = UIKit.dropdown({
       button: {
-        label,
+        label: options.label,
         tooltip: params.tooltip,
+        iconClasses: params.iconClasses ? ['textbus-toolbar-select-btn-icon', ...params.iconClasses] : null,
         classes: ['textbus-toolbar-select-btn', ...classes]
       },
-      menu: options,
+      menu: options.items,
       stickyElement: params.stickyElement
     })
     return dropdown;
   }
 
   static actions(params: UIActionSheetParams) {
-    const menu = createElement('div', {
-      classes: ['textbus-toolbar-actionsheet-wrap'],
-      children: params.items.map(value => {
-        const children = [
-          createElement('span', {
-            classes: ['textbus-toolbar-actionsheet-item-label', ...(value.classes || [])],
-            children: value.label ? [
-              createTextNode(value.label)
-            ] : []
-          })
-        ];
-        if (value.iconClasses) {
-          children.unshift(createElement('span', {
-            classes: ['textbus-toolbar-actionsheet-item-icon', ...value.iconClasses]
-          }));
-        }
-        if (value.keymap) {
-          children.push(createElement('span', {
-            classes: ['textbus-toolbar-actionsheet-item-keymap'],
-            children: createKeymapHTML(value.keymap)
-          }));
-        }
-        const item = createElement('button', {
-          classes: ['textbus-toolbar-actionsheet-item'],
-          attrs: {
-            type: 'button'
-          },
-          children
-        });
-        item.addEventListener('click', function () {
-          if (value.onChecked) {
-            value.onChecked();
-          }
-        })
-        return item;
-      })
-    })
+    const menu = createActions(params.items);
     return UIKit.dropdown({
       button: {
         ...params
@@ -406,9 +489,7 @@ export class UIKit {
   static menu(params: UIMenuParams) {
     const dropdown = UIKit.dropdown({
       button: {
-        label: params.label,
-        tooltip: params.tooltip,
-        classes: params.classes
+        ...params
       },
       menu: createElement('div', {
         classes: ['textbus-toolbar-menu'],
@@ -419,5 +500,271 @@ export class UIKit {
       stickyElement: params.stickyElement
     });
     return dropdown;
+  }
+
+  static actionMenu(params: UIMenuItemParams): UIMenuItem {
+    const children = [];
+    if (params.iconClasses) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-icon', ...params.iconClasses]
+      }))
+    }
+    children.push(createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-label', ...(params.classes || [])],
+      children: [createTextNode(params.label || '')]
+    }))
+    if (params.keymap) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-keymap'],
+        children: createKeymapHTML(params.keymap)
+      }))
+    }
+    const button = createElement('button', {
+      classes: ['textbus-toolbar-menu-item-btn'],
+      attrs: {
+        type: 'button'
+      },
+      children
+    }) as HTMLButtonElement;
+    button.addEventListener('click', function () {
+      if (!disabled) {
+        params.onChecked();
+      }
+    });
+    const item = createElement('div', {
+      classes: ['textbus-toolbar-menu-item'],
+      children: [button]
+    });
+
+    let highlight = false;
+    let disabled = false;
+
+    const result = {
+      elementRef: item,
+      set highlight(b: boolean) {
+        highlight = b;
+        if (b) {
+          result.disabled = false;
+          button.classList.add('textbus-toolbar-menu-item-btn-active');
+        } else {
+          button.classList.remove('textbus-toolbar-menu-item-btn-active');
+        }
+      },
+      get highlight() {
+        return highlight;
+      },
+      set disabled(b: boolean) {
+        disabled = b;
+        if (b) {
+          result.highlight = false;
+          button.disabled = true;
+        } else {
+          button.disabled = false;
+        }
+      },
+      get disabled() {
+        return disabled;
+      }
+    }
+    return result;
+  }
+
+  static selectMenu(params: UIMenuSelectParams) {
+    const options = createSelectOptions(params.options, function (option: UISelectOption) {
+      if (!button.disabled) {
+        params.onSelected(option.value);
+      }
+    })
+    const children = [];
+    if (params.iconClasses) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-icon', ...params.iconClasses]
+      }))
+    }
+
+    const label = createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-label', ...(params.classes || [])],
+      children: [createTextNode(params.label || '')]
+    })
+    children.push(label, createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-arrow']
+    }))
+
+    const button = createElement('button', {
+      classes: ['textbus-toolbar-menu-item-btn'],
+      attrs: {
+        type: 'button'
+      },
+      children
+    }) as HTMLButtonElement;
+    const menu = createElement('div', {
+      classes: ['textbus-toolbar-menu-item-dropmenu'],
+      children: [options.items]
+    });
+    const item = createElement('div', {
+      classes: ['textbus-toolbar-menu-item'],
+      children: [button, menu]
+    });
+
+    item.addEventListener('mouseenter', function () {
+      const menuRect = menu.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const stickyRect = params.stickyElement.getBoundingClientRect();
+      if (itemRect.right + menuRect.width > stickyRect.right) {
+        menu.style.left = 'auto';
+        menu.style.right = '100%';
+      } else {
+        menu.style.left = '';
+        menu.style.right = '';
+      }
+      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
+      menu.style.transform = 'scaleY(1)';
+    })
+
+    item.addEventListener('mouseleave', function () {
+      menu.style.transform = 'scaleY(0)';
+    })
+
+    return {
+      label,
+      elementRef: item,
+      highlight(option: UISelectOption) {
+        Array.from(options.map.values()).forEach(fn => {
+          fn(false);
+        })
+        options.map.get(option)?.(true);
+      },
+      set disabled(b: boolean) {
+        button.disabled = b;
+      },
+      get disabled() {
+        return button.disabled;
+      }
+    }
+  }
+
+  static actionSheetMenu(params: UIMenuActionSheetParams) {
+    const options = createActions(params.actions);
+    const children = [];
+    if (params.iconClasses) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-icon', ...params.iconClasses]
+      }))
+    }
+
+    const label = createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-label', ...(params.classes || [])],
+      children: [createTextNode(params.label || '')]
+    })
+    children.push(label, createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-arrow']
+    }))
+
+    const button = createElement('button', {
+      classes: ['textbus-toolbar-menu-item-btn'],
+      attrs: {
+        type: 'button'
+      },
+      children
+    }) as HTMLButtonElement;
+    const menu = createElement('div', {
+      classes: ['textbus-toolbar-menu-item-dropmenu'],
+      children: [options]
+    });
+    const item = createElement('div', {
+      classes: ['textbus-toolbar-menu-item'],
+      children: [button, menu]
+    });
+
+    item.addEventListener('mouseenter', function () {
+      const menuRect = menu.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const stickyRect = params.stickyElement.getBoundingClientRect();
+      if (itemRect.right + menuRect.width > stickyRect.right) {
+        menu.style.left = 'auto';
+        menu.style.right = '100%';
+      } else {
+        menu.style.left = '';
+        menu.style.right = '';
+      }
+      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
+      menu.style.transform = 'scaleY(1)';
+    })
+
+    item.addEventListener('mouseleave', function () {
+      menu.style.transform = 'scaleY(0)';
+    })
+
+    return {
+      elementRef: item,
+      set disabled(b: boolean) {
+        button.disabled = b;
+      },
+      get disabled() {
+        return button.disabled;
+      }
+    }
+  }
+
+  static dropdownMenu(params: UIMenuDropdownParams) {
+    const children = [];
+    if (params.iconClasses) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-icon', ...params.iconClasses]
+      }))
+    }
+
+    const label = createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-label', ...(params.classes || [])],
+      children: [createTextNode(params.label || '')]
+    })
+    children.push(label, createElement('span', {
+      classes: ['textbus-toolbar-menu-item-btn-arrow']
+    }))
+
+    const button = createElement('button', {
+      classes: ['textbus-toolbar-menu-item-btn'],
+      attrs: {
+        type: 'button'
+      },
+      children
+    }) as HTMLButtonElement;
+    const menu = createElement('div', {
+      classes: ['textbus-toolbar-menu-item-dropmenu'],
+      children: [params.menu]
+    });
+    const item = createElement('div', {
+      classes: ['textbus-toolbar-menu-item'],
+      children: [button, menu]
+    });
+
+    item.addEventListener('mouseenter', function () {
+      const menuRect = menu.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const stickyRect = params.stickyElement.getBoundingClientRect();
+      if (itemRect.right + menuRect.width > stickyRect.right) {
+        menu.style.left = 'auto';
+        menu.style.right = '100%';
+      } else {
+        menu.style.left = '';
+        menu.style.right = '';
+      }
+      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
+      menu.style.transform = 'scaleY(1)';
+    })
+
+    item.addEventListener('mouseleave', function () {
+      menu.style.transform = 'scaleY(0)';
+    })
+
+    return {
+      elementRef: item,
+      set disabled(b: boolean) {
+        button.disabled = b;
+      },
+      get disabled() {
+        return button.disabled;
+      }
+    }
   }
 }

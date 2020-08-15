@@ -4,10 +4,11 @@ import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const textIndentTool = Toolkit.makeSelectTool({
+export const textIndentToolConfig: SelectConfig = {
   tooltip: '首行缩进',
-  classes: ['textbus-icon-text-indent'],
+  iconClasses: ['textbus-icon-text-indent'],
   mini: true,
   options: [{
     label: '0x',
@@ -41,4 +42,5 @@ export const textIndentTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new BlockStyleCommander('textIndent', textIndentFormatter);
   }
-});
+};
+export const textIndentTool = Toolkit.makeSelectTool(textIndentToolConfig);

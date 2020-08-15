@@ -2,8 +2,8 @@ import { HistoryMatcher } from '../matcher/history.matcher';
 import { HistoryCommander } from '../commands/history.commander';
 import { Toolkit } from '../toolkit/toolkit';
 
-export const historyBackTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-history-back'],
+export const historyBackToolConfig = {
+  iconClasses: ['textbus-icon-history-back'],
   tooltip: '撤消',
   matcher: new HistoryMatcher('back'),
   commanderFactory() {
@@ -13,4 +13,5 @@ export const historyBackTool = Toolkit.makeButtonTool({
     ctrlKey: true,
     key: 'z'
   }
-});
+};
+export const historyBackTool = Toolkit.makeButtonTool(historyBackToolConfig);

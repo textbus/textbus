@@ -4,8 +4,8 @@ import { BoldMatcher } from '../matcher/bold.matcher';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
 
-export const boldTool = Toolkit.makeButtonTool({
-  classes: ['textbus-icon-bold'],
+export const boldToolConfig = {
+  iconClasses: ['textbus-icon-bold'],
   tooltip: '加粗',
   keymap: {
     ctrlKey: true,
@@ -15,4 +15,5 @@ export const boldTool = Toolkit.makeButtonTool({
   commanderFactory() {
     return new BoldCommander(boldFormatter);
   }
-});
+};
+export const boldTool = Toolkit.makeButtonTool(boldToolConfig);

@@ -3,8 +3,9 @@ import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { Toolkit } from '../toolkit/toolkit';
+import { SelectConfig } from '../toolkit/select.handler';
 
-export const textAlignTool = Toolkit.makeSelectTool({
+export const textAlignToolConfig: SelectConfig = {
   tooltip: '对齐方式',
   options: [{
     label: '左对齐',
@@ -53,4 +54,5 @@ export const textAlignTool = Toolkit.makeSelectTool({
   commanderFactory() {
     return new BlockStyleCommander('textAlign', textAlignFormatter);
   }
-});
+};
+export const textAlignTool = Toolkit.makeSelectTool(textAlignToolConfig);
