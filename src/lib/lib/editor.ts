@@ -139,13 +139,14 @@ export class Editor implements EventDelegate {
 
     this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options.componentReaders, options.formatters);
-    this.toolbar = new Toolbar(this, options.toolbar, {
-      showComponentStage: this.options.componentLibrary?.length > 0,
-      openComponentState: this.options.expandComponentLibrary
-    });
+    this.toolbar = new Toolbar(this, options.toolbar);
     this.viewer = new Viewer([...(options.styleSheets || []), ...(options.editingStyleSheets || [])]);
     this.workbench = new Workbench(this.viewer);
     let deviceWidth = options.deviceWidth || '100%';
+
+    this.statusBar.libSwitch.expand = this.options.expandComponentLibrary;
+    this.statusBar.libSwitch.show = this.options.componentLibrary?.length > 0;
+
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = this.options.fullScreen;
 
@@ -159,7 +160,7 @@ export class Editor implements EventDelegate {
     }
 
     this.subs.push(
-      this.toolbar.onComponentsStageChange.subscribe(b => {
+      this.statusBar.libSwitch.onSwitch.subscribe(b => {
         this.workbench.componentStage.expand = b;
       }),
       this.workbench.componentStage.onCheck.subscribe(component => {
@@ -176,7 +177,7 @@ export class Editor implements EventDelegate {
         this.openSourceCodeModel = b;
         if (this.readyState) {
           this.selection.removeAllRanges();
-          this.toolbar.componentsSwitch = !b;
+          this.statusBar.libSwitch.show = !b;
           this.viewer.sourceCodeModel = b;
           if (b) {
             if (this.snapshotSubscription) {

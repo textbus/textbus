@@ -18,82 +18,32 @@ import { createKeymapHTML } from '../uikit/uikit';
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<{ config: ToolConfig, instance: Tool, params: any }>;
-  onComponentsStageChange: Observable<boolean>;
-
-  set componentsSwitch(b: boolean) {
-    this._componentsSwitch = b;
-    this.componentsElement.style.display = b ? '' : 'none';
-    if (!b) {
-      this.componentStageExpand = false;
-      this.componentsSwitchBtn.classList.remove('textbus-toolbar-components-btn-active');
-      this.componentStageEvent.next(false);
-    }
-  }
-
-  get componentsSwitch() {
-    return this._componentsSwitch;
-  }
-
   readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
 
-  private _componentsSwitch = true;
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
-  private componentStageEvent = new Subject<boolean>();
   private toolWrapper = document.createElement('div');
-  private toolsElement = document.createElement('div');
-  private componentsElement = document.createElement('div');
-  private componentsSwitchBtn = document.createElement('button');
   private additionalWorktable = document.createElement('div');
   private additionalWorktableContent = document.createElement('div');
   private additionalWorktableClose = document.createElement('div');
   private additionalWorktableCloseBtn = document.createElement('button');
   private keymapPrompt = document.createElement('div');
-  private componentStageExpand = false;
 
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
   private subs: Subscription[] = [];
 
   constructor(private context: Editor,
-              private config: (ToolFactory | ToolFactory[])[],
-              private options = {
-                showComponentStage: true,
-                openComponentState: false
-              }) {
+              private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
-    this.onComponentsStageChange = this.componentStageEvent.asObservable();
     this.elementRef.classList.add('textbus-toolbar');
     this.toolWrapper.classList.add('textbus-toolbar-wrapper');
-    this.toolsElement.classList.add('textbus-toolbar-tools');
-    this.componentsElement.classList.add('textbus-toolbar-components');
     this.additionalWorktable.classList.add('textbus-toolbar-additional-worktable');
     this.additionalWorktableContent.classList.add('textbus-toolbar-additional-worktable-content');
     this.additionalWorktableClose.classList.add('textbus-toolbar-additional-worktable-close');
     this.additionalWorktableCloseBtn.innerHTML = '&times;';
     this.additionalWorktableCloseBtn.type = 'button';
     this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt');
-    this.componentStageExpand = options.openComponentState;
-    if (options.showComponentStage) {
-      const btn = this.componentsSwitchBtn;
-      btn.type = 'button';
-      btn.innerText = '组件库';
-      btn.title = '展开或收起组件库';
-      btn.classList.add('textbus-toolbar-components-btn');
-      btn.addEventListener('click', () => {
-        this.componentStageExpand = !this.componentStageExpand;
-        this.componentStageExpand ?
-          btn.classList.add('textbus-toolbar-components-btn-active') :
-          btn.classList.remove('textbus-toolbar-components-btn-active');
-        this.componentStageEvent.next(this.componentStageExpand);
-      })
 
-      if (options.openComponentState) {
-        btn.classList.add('textbus-toolbar-components-btn-active');
-      }
-      this.componentsElement.appendChild(btn);
-    }
-
-    this.toolWrapper.append(this.toolsElement, this.componentsElement);
     this.additionalWorktableClose.append(this.additionalWorktableCloseBtn);
     this.additionalWorktable.append(this.additionalWorktableContent, this.additionalWorktableClose);
     this.elementRef.append(this.toolWrapper, this.additionalWorktable, this.keymapPrompt);
@@ -162,7 +112,7 @@ export class Toolbar {
         } else {
           group.appendChild(this.createHandler(handler).elementRef);
         }
-        this.toolsElement.appendChild(group);
+        this.toolWrapper.appendChild(group);
       });
       this.listenUserAction();
     }
@@ -181,13 +131,13 @@ export class Toolbar {
         h = option.factory();
         break;
       case ToolType.Select:
-        h = option.factory(this.toolsElement);
+        h = option.factory(this.toolWrapper);
         break;
       case ToolType.Dropdown:
-        h = option.factory(this.context, this.toolsElement);
+        h = option.factory(this.context, this.toolWrapper);
         break;
       case ToolType.ActionSheet:
-        h = option.factory(this.toolsElement);
+        h = option.factory(this.toolWrapper);
         break;
       case ToolType.Additional:
         h = option.factory();
@@ -199,7 +149,7 @@ export class Toolbar {
         }));
         break;
       case ToolType.Group:
-        const m = option.factory(this.context, this.toolsElement);
+        const m = option.factory(this.context, this.toolWrapper);
         this.tools.push(...m.tools);
         h = m;
         break;

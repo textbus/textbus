@@ -18,8 +18,8 @@ const form = new Form({
 // document.body.insertBefore(form.elementRef, document.body.children[0]);
 
 const editor = createEditor('#editor', {
-  expandComponentLibrary: true,
-  deviceWidth: '768px',
+  // expandComponentLibrary: true,
+  // deviceWidth: '768px',
   theme: 'dark',
   // fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {

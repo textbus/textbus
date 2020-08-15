@@ -607,6 +607,9 @@ export class UIKit {
     });
 
     item.addEventListener('mouseenter', function () {
+      if (button.disabled) {
+        return;
+      }
       const menuRect = menu.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const stickyRect = params.stickyElement.getBoundingClientRect();
@@ -677,6 +680,9 @@ export class UIKit {
     });
 
     item.addEventListener('mouseenter', function () {
+      if (button.disabled) {
+        return;
+      }
       const menuRect = menu.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const stickyRect = params.stickyElement.getBoundingClientRect();
@@ -739,6 +745,9 @@ export class UIKit {
     });
 
     item.addEventListener('mouseenter', function () {
+      if (button.disabled) {
+        return;
+      }
       const menuRect = menu.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const stickyRect = params.stickyElement.getBoundingClientRect();

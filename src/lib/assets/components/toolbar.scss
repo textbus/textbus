@@ -14,13 +14,8 @@
 
 .textbus-toolbar-wrapper {
   border: 1px solid $color-gray-light;
-  display: flex;
   padding: 8px 15px 3px;
   min-height: 24px;
-}
-
-.textbus-toolbar-tools {
-  flex: 1;
 }
 
 .textbus-toolbar-group {
@@ -214,6 +209,11 @@
     cursor: not-allowed;
     background: inherit;
     color: inherit;
+
+    &:hover {
+      color: inherit;
+      background: inherit;
+    }
   }
 }
 
@@ -273,28 +273,6 @@
         transform: scale(1.1);
       }
     }
-  }
-}
-
-.textbus-toolbar-components {
-  border-left: 1px solid rgba(0, 0, 0, .1);
-  padding-left: 1em;
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.textbus-toolbar-components-btn {
-  background: none;
-  border: none;
-  outline: none;
-  color: inherit;
-  font-size: 14px;
-  height: 28px;
-  cursor: pointer;
-
-  &-active {
-    color: $color-primary;
   }
 }
 

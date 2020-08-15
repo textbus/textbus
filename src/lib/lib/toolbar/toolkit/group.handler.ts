@@ -93,6 +93,10 @@ export class GroupHandler implements Tool {
     this.elementRef = this.dropdown.elementRef;
   }
 
+  updateStatus(selectionMatchDelta: SelectionMatchDelta) {
+    this.dropdown.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+  }
+
   private createButton(c: ActionMenu) {
     const s = new Subject<any>();
     const item = UIKit.actionMenu({
