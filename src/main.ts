@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 const editor = createEditor('#editor', {
   // expandComponentLibrary: true,
   // deviceWidth: '768px',
-  theme: 'dark',
+  theme: 'mac-os-dark',
   // fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');

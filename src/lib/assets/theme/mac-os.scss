@@ -1,9 +1,10 @@
 .textbus-container.textbus-theme-mac-os {
   .textbus-toolbar-group {
-    .textbus-handler {
+    .textbus-toolbar-action {
       background: linear-gradient(#fff 3px, #eee 17px, $color-gray-light);
       border: 1px solid darken($color-gray-light, 3);
       border-radius: 0;
+
       &-active {
         background: linear-gradient(
                 lighten($color-primary, 20) 1px,
@@ -18,7 +19,7 @@
       }
     }
 
-    > .textbus-handler {
+    > .textbus-toolbar-action {
       &-active {
         background: linear-gradient(
                 lighten($color-primary, 20) 1px,
@@ -31,6 +32,7 @@
         position: relative;
         z-index: 1;
       }
+
       &:not(:first-child) {
         margin-left: -1px;
       }
@@ -46,17 +48,17 @@
       }
     }
 
-    .textbus-dropdown {
+    .textbus-toolbar-dropdown {
       &:not(:first-child) {
         margin-left: -1px;
       }
 
-      &:last-child .textbus-handler {
+      &:last-child .textbus-toolbar-action {
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
       }
 
-      &:first-child .textbus-handler {
+      &:first-child .textbus-toolbar-action {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }

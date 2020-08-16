@@ -1,5 +1,4 @@
 .textbus-toolbar {
-  background-color: $color-light;
   font-size: 14px;
   color: $color-default;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -13,6 +12,7 @@
 }
 
 .textbus-toolbar-wrapper {
+  background-color: $color-light;
   border: 1px solid $color-gray-light;
   padding: 8px 15px 3px;
   min-height: 24px;
