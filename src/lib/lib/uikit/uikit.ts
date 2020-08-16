@@ -232,6 +232,24 @@ function createActions(actions: UIActionParams[]) {
   });
 }
 
+function guardPositionInSafeArea(target: HTMLElement, reference: HTMLElement, limit: HTMLElement) {
+  const menuRect = target.getBoundingClientRect();
+  const referenceRect = reference.getBoundingClientRect();
+  const stickyRect = limit.getBoundingClientRect();
+  if (referenceRect.right + menuRect.width > stickyRect.right) {
+    target.style.left = 'auto';
+    target.style.right = '100%';
+  } else {
+    target.style.left = '';
+    target.style.right = '';
+  }
+
+  const bottom = target.scrollHeight + referenceRect.top;
+  const maxBottom = document.documentElement.scrollTop + document.documentElement.clientHeight - 20;
+  target.style.top = Math.min(0, maxBottom - bottom) + 'px';
+  target.style.transform = 'scaleY(1)';
+}
+
 export function createElement(tagName: string, options: UIElementParams = {}): HTMLElement {
   const el = document.createElement(tagName);
   if (options.classes) {
@@ -610,18 +628,7 @@ export class UIKit {
       if (button.disabled) {
         return;
       }
-      const menuRect = menu.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const stickyRect = params.stickyElement.getBoundingClientRect();
-      if (itemRect.right + menuRect.width > stickyRect.right) {
-        menu.style.left = 'auto';
-        menu.style.right = '100%';
-      } else {
-        menu.style.left = '';
-        menu.style.right = '';
-      }
-      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
-      menu.style.transform = 'scaleY(1)';
+      guardPositionInSafeArea(menu, item, params.stickyElement);
     })
 
     item.addEventListener('mouseleave', function () {
@@ -683,18 +690,7 @@ export class UIKit {
       if (button.disabled) {
         return;
       }
-      const menuRect = menu.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const stickyRect = params.stickyElement.getBoundingClientRect();
-      if (itemRect.right + menuRect.width > stickyRect.right) {
-        menu.style.left = 'auto';
-        menu.style.right = '100%';
-      } else {
-        menu.style.left = '';
-        menu.style.right = '';
-      }
-      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
-      menu.style.transform = 'scaleY(1)';
+      guardPositionInSafeArea(menu, item, params.stickyElement);
     })
 
     item.addEventListener('mouseleave', function () {
@@ -748,18 +744,7 @@ export class UIKit {
       if (button.disabled) {
         return;
       }
-      const menuRect = menu.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const stickyRect = params.stickyElement.getBoundingClientRect();
-      if (itemRect.right + menuRect.width > stickyRect.right) {
-        menu.style.left = 'auto';
-        menu.style.right = '100%';
-      } else {
-        menu.style.left = '';
-        menu.style.right = '';
-      }
-      // menu.style.top = Math.min(0, stickyRect.bottom - menuRect.bottom) + 'px';
-      menu.style.transform = 'scaleY(1)';
+      guardPositionInSafeArea(menu, item, params.stickyElement);
     })
 
     item.addEventListener('mouseleave', function () {
