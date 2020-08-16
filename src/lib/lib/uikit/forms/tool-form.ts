@@ -6,10 +6,10 @@ import { ToolFormTextField } from './tool-form-text-field';
 import { ToolFormOptions } from './tool-form-options';
 import { ToolFormSwitch } from './tool-form-switch';
 import { ToolFormHidden } from './tool-form-hidden';
-import { DropdownViewer } from '../../toolbar/toolkit/_api';
+import { FormViewer } from '../../toolbar/toolkit/_api';
 import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
 
-export class ToolForm implements DropdownViewer {
+export class ToolForm implements FormViewer {
   onComplete: Observable<AttrState[]>;
   freezeState: Observable<boolean>;
   readonly elementRef = document.createElement('form');
