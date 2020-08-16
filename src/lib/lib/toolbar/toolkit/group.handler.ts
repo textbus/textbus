@@ -207,6 +207,10 @@ export class GroupHandler implements Tool {
       menu: menu.elementRef,
       label: c.label
     })
+
+    menu.onComplete.subscribe(value => {
+      s.next(value);
+    });
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
       selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
     });
