@@ -46,4 +46,4 @@ editor.onChange.subscribe(() => {
 });
 ```
 ## 官网地址
-[TextBus 官网](https://www.tanboui.com/textbus)
+[TextBus 官网](https://textbus.tanboui.com)
