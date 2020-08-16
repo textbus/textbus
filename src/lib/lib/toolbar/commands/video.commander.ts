@@ -1,16 +1,10 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../../uikit/forms/help';
 import { VideoComponent } from '../../components/video.component';
 
-export class VideoCommander implements Commander<AttrState[]> {
+export class VideoCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, states: AttrState[], overlap: boolean): void {
-    const attrs = new Map<string, string | number | boolean>();
-    states.forEach(attr => {
-      attrs.set(attr.name, attr.value);
-    });
-
+  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
     const fn = function (component: VideoComponent) {
       component.src = attrs.get('src') as string;
       component.autoplay = attrs.get('autoplay') as boolean;

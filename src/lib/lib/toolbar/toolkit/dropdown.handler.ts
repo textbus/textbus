@@ -9,6 +9,7 @@ import { UIDropdown, UIKit } from '../../uikit/uikit';
 export interface DropdownViewer<T = any> {
   elementRef: HTMLElement;
   onComplete: Observable<any>;
+  onClose?: Observable<void>;
 
   update?(value?: T): void;
 

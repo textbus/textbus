@@ -1,6 +1,7 @@
 import { ComponentReader, DivisionComponent, VElement, ViewData } from '../core/_api';
-import { ComponentExample, Form, TextField, Workbench } from '../workbench/_api';
+import { ComponentExample, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
+import { Form, FormType } from '../uikit/_api';
 
 export interface JumbotronOptions {
   minHeight: string;
@@ -72,31 +73,28 @@ export const jumbotronComponentExample: ComponentExample = {
 
     const form = new Form({
       title: '巨幕设置',
-      items: [
-        new TextField({
-          label: '巨幕最小高度',
-          name: 'minHeight',
-          defaultValue: '200px',
-          placeholder: '请输入巨幕最小高度'
-        }),
-        new TextField({
-          label: '背景图片地址',
-          name: 'backgroundImage',
-          placeholder: '请输入背景图片地址',
-          validateFn(value: string): string | null {
-            if (!value) {
-              return '必填项不能为空';
-            }
-            return null;
+      items: [{
+        type: FormType.TextField,
+        name: 'minHeight',
+        value: '200px',
+        placeholder: '请输入巨幕最小高度',
+        label: '巨幕最小高度'
+      }, {
+        type: FormType.TextField,
+        label: '背景图片地址',
+        name: 'backgroundImage',
+        placeholder: '请输入背景图片地址',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
           }
-        })
-      ]
-    });
-
+          return null;
+        }
+      }]
+    })
     return new Promise<JumbotronComponent>((resolve, reject) => {
       workbench.dialog(form.elementRef);
-      form.onSubmit = function () {
-        const data = form.getData();
+      const s = form.onComplete.subscribe(data => {
         const component = new JumbotronComponent({
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
@@ -114,13 +112,16 @@ export const jumbotronComponentExample: ComponentExample = {
         component.slot.append(p1);
         component.slot.append(p2);
 
-        resolve(component);
+        s.unsubscribe();
+        resolve(component)
         workbench.close();
-      }
-      form.onClose = function () {
+      });
+      const b = form.onClose.subscribe(() => {
+        s.unsubscribe();
+        b.unsubscribe();
         workbench.close();
         reject();
-      }
+      })
     })
   }
 }

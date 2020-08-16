@@ -138,6 +138,7 @@
 
   &:hover {
     z-index: 4;
+
     .textbus-toolbar-menu-item-btn {
       color: #fff;
       background-color: $color-primary;
@@ -379,13 +380,20 @@
   user-select: none;
   border-radius: 4px;
 
-  .textbus-toolbar-form-group {
-    padding-bottom: 15px;
+  .textbus-form-group {
+    padding: 0 0 5px;
+    display: block;
   }
 
-  .textbus-toolbar-control-label {
+  .textbus-control-label {
     padding-bottom: 5px;
     text-align: left;
+  }
+
+  .textbus-form-footer {
+    border: none;
+    background: none;
+    padding: 0;
   }
 
   .textbus-form-control, .textbus-btn {
@@ -393,15 +401,11 @@
     font-size: 13px;
   }
 
-  .textbus-toolbar-btn-wrap {
-    min-width: 46px;
-  }
-
-  .textbus-toolbar-control-label {
+  .textbus-control-label {
     font-weight: bold;
   }
 
-  .textbus-toolbar-control-static {
+  .textbus-control-static {
     label {
       margin-right: 1em;
       display: inline-flex;
@@ -415,6 +419,7 @@
 
     input {
       margin-right: .3em;
+      vertical-align: middle;
     }
   }
 }

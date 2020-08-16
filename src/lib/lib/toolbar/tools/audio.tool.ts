@@ -1,5 +1,5 @@
-import { ToolForm } from '../../uikit/forms/tool-form';
-import { AttrType } from '../../uikit/forms/help';
+import { Form } from '../../uikit/forms/form';
+import { FormType } from '../../uikit/forms/help';
 import { AudioComponent, PreComponent } from '../../components/_api';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
@@ -9,26 +9,27 @@ export const audioToolConfig = {
   iconClasses: ['textbus-icon-music'],
   tooltip: '音频',
   menuFactory() {
-    return new ToolForm([{
-      type: AttrType.TextField,
-      label: '音频链接地址',
-      name: 'src',
-      required: true,
-      placeholder: '请输入链接地址',
-      canUpload: true,
-      uploadType: 'audio',
-      uploadBtnText: '上传新音频'
-    }, {
-      type: AttrType.Switch,
-      label: '自动播放',
-      required: true,
-      checked: false,
-      name: 'autoplay'
-    }, {
-      type: AttrType.Hidden,
-      name: 'controls',
-      value: 'controls'
-    }]);
+    return new Form({
+      title: '音频设置',
+      items: [{
+        type: FormType.TextField,
+        label: '音频链接地址',
+        name: 'src',
+        placeholder: '请输入链接地址',
+        canUpload: true,
+        uploadType: 'audio',
+        uploadBtnText: '上传新音频'
+      }, {
+        type: FormType.Switch,
+        label: '自动播放',
+        checked: false,
+        name: 'autoplay'
+      }, {
+        type: FormType.Hidden,
+        name: 'controls',
+        value: 'controls'
+      }]
+    });
   },
   matcher: new MediaMatcher(AudioComponent, 'audio', [PreComponent]),
   commanderFactory() {

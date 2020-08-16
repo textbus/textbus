@@ -3,6 +3,29 @@
   background-color: $color-lighter;
   font-size: 14px;
 
+  &-title {
+    background-color: $color-lighter;
+    border-bottom: 1px solid $color-light;
+    padding: 15px 20px;
+    margin: 0;
+  }
+
+  &-body {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  &-footer {
+    border-top: 1px solid $color-light;
+    padding: 10px 20px;
+    background-color: #fff;
+    text-align: right;
+
+    button {
+      margin-left: .5em;
+    }
+  }
+
   &.textbus-form-flow {
     .textbus-form-group {
       display: block;
@@ -19,78 +42,6 @@
       display: inline-flex;
       align-items: center;
       margin-right: 1em;
-    }
-  }
-
-  &.textbus-form-tool {
-    padding: 15px 20px;
-    min-width: 160px;
-    box-sizing: content-box;
-    user-select: none;
-
-    .textbus-form-group {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .textbus-form-control, .textbus-btn {
-      padding: 3px 6px;
-      font-size: 13px;
-    }
-
-    .textbus-btn-wrap .textbus-btn {
-      min-width: 46px;
-    }
-
-    .textbus-control-label {
-      font-weight: bold;
-    }
-
-    .textbus-control-static {
-      margin: 0;
-
-      label {
-        margin-right: 1em;
-        display: inline-flex;
-        align-items: center;
-        cursor: pointer;
-
-        &:last-child {
-          margin-right: 0;
-        }
-      }
-
-      input {
-        margin-right: .3em;
-      }
-    }
-  }
-
-  &.textbus-form-workbench {
-    min-width: 400px;
-
-    .textbus-form-title {
-      background-color: $color-lighter;
-      border-bottom: 1px solid $color-light;
-      padding: 20px;
-      margin: 0;
-    }
-
-    .textbus-control-label {
-      width: 100px;
-    }
-
-    .textbus-btn-wrap {
-      margin-top: 15px;
-      border-top: 1px solid $color-light;
-      text-align: right;
-      padding-left: 20px;
-      padding-right: 20px;
-      background-color: #fff;
-
-      .textbus-btn {
-        margin-left: 10px;
-      }
     }
   }
 }
@@ -112,6 +63,7 @@
   padding-top: 5px;
   padding-bottom: 5px;
   box-sizing: border-box;
+  width: 100px;
 }
 
 .textbus-control-static {
@@ -127,13 +79,6 @@
     width: 100%;
   }
 }
-
-.textbus-btn-wrap {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  @include clearfix;
-}
-
 
 .textbus-form-control {
   position: relative;

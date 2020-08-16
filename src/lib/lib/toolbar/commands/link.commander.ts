@@ -1,23 +1,18 @@
 import { BranchComponent, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
-import { AttrState } from '../../uikit/forms/help';
 
-export class LinkCommander implements Commander<AttrState[]> {
+export class LinkCommander implements Commander<Map<string, string>> {
   recordHistory = true;
 
 
   constructor(private formatter: LinkFormatter) {
   }
 
-  command(selection: TBSelection, states: AttrState[], overlap: boolean): void {
+  command(selection: TBSelection, attrs: Map<string, string>, overlap: boolean): void {
     this.recordHistory = !selection.collapsed;
     if (!this.recordHistory) {
       return;
     }
-    const attrs = new Map<string, string>();
-    states.forEach(attr => {
-      attrs.set(attr.name, attr.value.toString());
-    });
     selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (overlap) {

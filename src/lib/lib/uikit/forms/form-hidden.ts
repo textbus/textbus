@@ -1,11 +1,11 @@
-import { AttrHidden, AttrState, ToolFormItem } from './help';
+import { Hidden, AttrState, FormItem } from './help';
 
-export class ToolFormHidden implements ToolFormItem {
+export class FormHidden implements FormItem {
   readonly elementRef = document.createElement('input');
   readonly name: string;
   private readonly value: string | boolean | number;
 
-  constructor(private config: AttrHidden) {
+  constructor(private config: Hidden) {
     this.name = config.name;
     this.value = config.value;
     this.elementRef.type = 'hidden';
@@ -19,8 +19,11 @@ export class ToolFormHidden implements ToolFormItem {
   getAttr(): AttrState {
     return {
       name: this.name,
-      required: true,
       value: this.value
     }
+  }
+
+  validateFn(): string | null {
+    return null;
   }
 }

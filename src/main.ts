@@ -2,18 +2,6 @@ import 'core-js';
 import { createEditor } from './lib/create';
 import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
-import { Form, TextField } from './lib/lib/workbench/forms/_api';
-
-
-const form = new Form({
-  title: '测试标题',
-  items: [
-    new TextField({
-      name: 'name',
-      label: '文字'
-    })
-  ]
-});
 
 // document.body.insertBefore(form.elementRef, document.body.children[0]);
 

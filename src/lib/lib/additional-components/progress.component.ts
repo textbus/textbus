@@ -1,5 +1,6 @@
 import { ComponentReader, LeafComponent, VElement, ViewData, VTextNode } from '../core/_api';
-import { ComponentExample, Workbench, Form, TextField, Select } from '../workbench/_api';
+import { ComponentExample, Workbench } from '../workbench/_api';
+import { Form, FormType } from '../uikit/_api';
 
 export interface ProgressConfig {
   type: 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'gray' | 'dark';
@@ -76,78 +77,77 @@ export const progressComponentExample: ComponentExample = {
   name: '进度条',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#fff" height="100%" width="100%"/></g><line x1="10" y1="40" x2="90" y2="40" stroke="#ddd" stroke-width="4" stroke-linecap="round"></line><line x1="10" y1="40" x2="50" y2="40" stroke="#1296db" stroke-width="4" stroke-linecap="round"></line><text font-family="Helvetica, Arial, sans-serif" font-size="10" x="42" y="35" stroke-width="0" stroke="#000" fill="#000000">50%</text></svg>')}">`,
   componentFactory(workbench: Workbench) {
-    const form = new Form<Node, any>({
+    const form = new Form({
       title: '进度条设置',
-      items: [
-        new TextField({
-          label: '最大值',
-          name: 'max',
-          defaultValue: '100',
-          placeholder: '请输入最大值'
-        }),
-        new TextField({
-          label: '最小值',
-          name: 'min',
-          defaultValue: '0',
-          placeholder: '请输入最小值',
-          validateFn(value: string): string | null {
-            if (!value) {
-              return '必填项不能为空';
-            }
-            return null;
+      items: [{
+        type: FormType.TextField,
+        label: '最大值',
+        name: 'max',
+        value: '100',
+        placeholder: '请输入最大值'
+      }, {
+        type: FormType.TextField,
+        label: '最小值',
+        name: 'min',
+        value: '0',
+        placeholder: '请输入最小值',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
           }
-        }),
-        new TextField({
-          label: '当前进度',
-          name: 'progress',
-          defaultValue: '50',
-          placeholder: '请输入当前进度',
-          validateFn(value: string): string | null {
-            if (!value) {
-              return '必填项不能为空';
-            }
-            return null;
+          return null;
+        }
+      }, {
+        type: FormType.TextField,
+        label: '当前进度',
+        name: 'progress',
+        value: '50',
+        placeholder: '请输入当前进度',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
           }
-        }),
-        new Select({
-          label: '进度条类型',
-          name: 'type',
-          options: [{
-            label: 'Primary',
-            value: 'primary'
-          }, {
-            label: 'Info',
-            value: 'info'
-          }, {
-            label: 'Success',
-            value: 'success'
-          }, {
-            label: 'Warning',
-            value: 'warning'
-          }, {
-            label: 'Danger',
-            value: 'danger'
-          }, {
-            label: 'Dark',
-            value: 'dark'
-          }, {
-            label: 'Gray',
-            value: 'gray'
-          }],
-          validateFn(value: string): string | null {
-            if (!value) {
-              return '必填项不能为空';
-            }
-            return null;
+          return null;
+        }
+      }, {
+        type: FormType.Select,
+        label: '进度条类型',
+        name: 'type',
+        options: [{
+          label: 'Primary',
+          value: 'primary'
+        }, {
+          label: 'Info',
+          value: 'info'
+        }, {
+          label: 'Success',
+          value: 'success'
+        }, {
+          label: 'Warning',
+          value: 'warning'
+        }, {
+          label: 'Danger',
+          value: 'danger'
+        }, {
+          label: 'Dark',
+          value: 'dark'
+        }, {
+          label: 'Gray',
+          value: 'gray'
+        }],
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
           }
-        })
-      ]
-    });
+          return null;
+        }
+      }]
+    })
 
     return new Promise<ProgressComponent>((resolve, reject) => {
       workbench.dialog(form.elementRef);
-      form.onSubmit = function () {
-        const data = form.getData();
+      const s = form.onComplete.subscribe(data => {
+        s.unsubscribe();
         const component = new ProgressComponent({
           type: data.get('type') as any,
           max: +data.get('max'),
@@ -157,11 +157,13 @@ export const progressComponentExample: ComponentExample = {
 
         workbench.close();
         resolve(component);
-      };
-      form.onClose = function () {
+      });
+      const b = form.onClose.subscribe(() => {
+        s.unsubscribe();
+        b.unsubscribe();
         workbench.close();
         reject();
-      }
+      });
     })
   }
 };

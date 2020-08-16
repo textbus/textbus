@@ -60,7 +60,7 @@ export const baiduMapComponentExample: ComponentExample = {
     <button type="submit" class="textbus-btn textbus-btn-primary">搜索</button>          
   </form>
 </div>
-<div class="textbus-btn-wrap" style="margin-top: 0;">
+<div class="textbus-btn-wrap" style="padding: 10px 20px; text-align: right; border-top: 1px solid #e9eaec; background: #fff">
 <button type="button" class="textbus-btn textbus-btn-primary">确定</button>
 <button type="button" class="textbus-btn textbus-btn-default">取消</button>
 </div>

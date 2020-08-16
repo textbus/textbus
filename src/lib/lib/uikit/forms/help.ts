@@ -1,15 +1,15 @@
 import { Observable } from 'rxjs';
 
-export enum AttrType {
+export enum FormType {
   TextField,
-  Options,
+  Select,
+  Radio,
   Switch,
   Hidden
 }
 
-export interface AttrTextField {
-  type: AttrType.TextField;
-  required: boolean;
+export interface TextField {
+  type: FormType.TextField;
   label: string;
   name: string;
   placeholder: string;
@@ -17,51 +17,71 @@ export interface AttrTextField {
   canUpload?: boolean;
   uploadType?: string;
   uploadBtnText?: string;
+
+  validateFn?(value: any): string
 }
 
-export interface AttrOptionsItem {
+export interface Radio {
   label: string;
   value: string | number | boolean;
   default?: boolean;
 }
 
-export interface AttrOptions {
-  type: AttrType.Options;
-  required: boolean;
+export interface RadioGroup {
+  type: FormType.Radio;
   label: string;
   name: string;
-  values: AttrOptionsItem[];
+  values: Radio[];
+
+  validateFn?(value: any): string
 }
 
-export interface AttrSwitch {
-  type: AttrType.Switch;
-  required: boolean;
+export interface Switch {
+  type: FormType.Switch;
   label: string;
   name: string;
   checked: boolean;
+
+  validateFn?(value: any): string
 }
 
-export interface AttrHidden {
-  type: AttrType.Hidden;
+export interface Hidden {
+  type: FormType.Hidden;
   name: string;
   value: string | number | boolean;
 }
 
-export type AttrConfig = AttrTextField | AttrOptions | AttrSwitch | AttrHidden;
+export interface SelectOption {
+  label: string;
+  value: string;
+  selected?: boolean;
+}
+
+export interface Select {
+  type: FormType.Select,
+  label: string;
+  name: string;
+  options: SelectOption[];
+
+  validateFn?(value: string): string
+}
+
+export type FormItemConfig = TextField | RadioGroup | Switch | Hidden | Select;
 
 export interface AttrState {
   name: string;
-  required: boolean;
   value: string | boolean | number;
 }
 
-export interface ToolFormItem {
+export interface FormItem {
   elementRef: HTMLElement;
   name: string;
 
   update(value?: any): void;
 
   getAttr(): AttrState;
+
+  validateFn(): string| null;
 }
 
 export interface EventDelegate {

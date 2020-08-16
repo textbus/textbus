@@ -1,15 +1,10 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../../uikit/forms/help';
 import { AudioComponent } from '../../components/audio.component';
 
-export class AudioCommander implements Commander<AttrState[]> {
+export class AudioCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, config: AttrState[], overlap: boolean): void {
-    const attrs = new Map<string, string | number | boolean>();
-    config.forEach(attr => {
-      attrs.set(attr.name, attr.value);
-    });
+  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
 
     selection.ranges.forEach(range => {
       if (range.collapsed) {

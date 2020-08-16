@@ -41,6 +41,11 @@ export class FormHandler implements Tool {
           dialogManager.close();
           s.unsubscribe();
         })
+        const b = viewer.onClose?.subscribe(() => {
+          dialogManager.close();
+          s.unsubscribe();
+          b.unsubscribe();
+        })
       }
     });
 

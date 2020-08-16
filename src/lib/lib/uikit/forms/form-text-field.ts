@@ -1,21 +1,21 @@
 import { Observable, Subscription } from 'rxjs';
 
-import { AttrState, AttrTextField, ToolFormItem } from './help';
+import { AttrState, TextField, FormItem } from './help';
 
-export class ToolFormTextField implements ToolFormItem {
+export class FormTextField implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
   private sub: Subscription;
   private readonly btn: HTMLButtonElement;
 
-  constructor(private config: AttrTextField,
+  constructor(private config: TextField,
               private delegate: (type: string) => Observable<string>) {
     this.name = config.name;
-    this.elementRef.classList.add('textbus-toolbar-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="textbus-toolbar-control-label">${config.label}</div>
-    <div class="textbus-toolbar-control-value">
+    <div class="textbus-control-label">${config.label}</div>
+    <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
         <input class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
         `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
@@ -60,9 +60,12 @@ export class ToolFormTextField implements ToolFormItem {
   getAttr(): AttrState {
     return {
       name: this.config.name,
-      required: this.config.required,
       value: this.input.value
     }
+  }
+
+  validateFn(): string | null {
+    return this.config.validateFn?.(this.getAttr().value)
   }
 
   private reset() {

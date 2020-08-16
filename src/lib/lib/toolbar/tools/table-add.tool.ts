@@ -1,5 +1,5 @@
-import { ToolForm } from '../../uikit/forms/tool-form';
-import { AttrType } from '../../uikit/forms/help';
+import { Form } from '../../uikit/forms/form';
+import { FormType } from '../../uikit/forms/help';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
@@ -10,25 +10,25 @@ export const tableAddToolConfig = {
   iconClasses: ['textbus-icon-table'],
   tooltip: '表格',
   menuFactory() {
-    const form = new ToolForm([{
-      type: AttrType.TextField,
-      required: true,
-      name: 'rows',
-      label: '表格行数',
-      placeholder: '请输入表格行数'
-    }, {
-      type: AttrType.TextField,
-      required: true,
-      name: 'cols',
-      label: '表格列数',
-      placeholder: '请输入表格列数'
-    }, {
-      type: AttrType.Switch,
-      label: '使用 TextBus 样式',
-      required: false,
-      name: 'useTextBusStyle',
-      checked: true
-    }]);
+    const form = new Form({
+      mini: true,
+      items: [{
+        type: FormType.TextField,
+        name: 'rows',
+        label: '表格行数',
+        placeholder: '请输入表格行数'
+      }, {
+        type: FormType.TextField,
+        name: 'cols',
+        label: '表格列数',
+        placeholder: '请输入表格列数'
+      }, {
+        type: FormType.Switch,
+        label: '使用 TextBus 样式',
+        name: 'useTextBusStyle',
+        checked: true
+      }]
+    });
 
     const quickSelector = document.createElement('div');
     quickSelector.classList.add('textbus-table-quick-selector');

@@ -1,17 +1,11 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../../uikit/forms/help';
 import { ImageComponent } from '../../components/image.component';
 
-export class ImageCommander implements Commander<AttrState[]> {
+export class ImageCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
 
-  command(selection: TBSelection, states: AttrState[], overlap: boolean): void {
-    const attrs = new Map<string, string | number | boolean>();
-    states.forEach(attr => {
-      attrs.set(attr.name, attr.value);
-    });
-
+  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
     const fn = function (component: ImageComponent) {
       component.src = attrs.get('src') as string;
       component.width = attrs.get('width') as string;

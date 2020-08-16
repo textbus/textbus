@@ -228,9 +228,15 @@ export class GroupHandler implements Tool {
       onChecked: () => {
         this.dialogManager.dialog(menu.elementRef);
         this.dropdown.hide();
-        const s = menu.onComplete.subscribe(() => {
+        const subscription = menu.onComplete.subscribe(value => {
           this.dialogManager.close();
-          s.unsubscribe();
+          s.next(value);
+          subscription.unsubscribe();
+        })
+        const b = menu.onClose?.subscribe(() => {
+          b.unsubscribe();
+          subscription.unsubscribe();
+          this.dialogManager.close();
         })
       }
     })

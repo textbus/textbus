@@ -1,15 +1,10 @@
 import { DivisionComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
-import { AttrState } from '../../uikit/forms/help';
 import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
-export class TableCommander implements Commander<AttrState[]> {
+export class TableCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, states: AttrState[],  overlap: boolean, renderer: Renderer): void {
-    const attrs = new Map<string, string | number | boolean>();
-    states.forEach(attr => {
-      attrs.set(attr.name, attr.value);
-    });
+  command(selection: TBSelection, attrs: Map<string, string | number | boolean>,  overlap: boolean, renderer: Renderer): void {
     const rows = +attrs.get('rows') || 0;
     const cols = +attrs.get('cols') || 0;
     const useTextBusStyle = !!attrs.get('useTextBusStyle');

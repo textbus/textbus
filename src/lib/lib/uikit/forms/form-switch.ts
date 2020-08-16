@@ -1,15 +1,16 @@
-import { AttrSwitch, AttrState, ToolFormItem } from './help';
+import { Switch, AttrState, FormItem } from './help';
 
-export class ToolFormSwitch implements ToolFormItem {
+export class FormSwitch implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
 
-  constructor(private config: AttrSwitch) {
+  constructor(private config: Switch) {
     this.name = config.name;
-    this.elementRef.classList.add('textbus-toolbar-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="textbus-toolbar-control-static">
+    <div class="textbus-control-label"></div>
+    <div class="textbus-control-static">
       <label><input type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
     </div>
     `;
@@ -27,8 +28,11 @@ export class ToolFormSwitch implements ToolFormItem {
   getAttr(): AttrState {
     return {
       name: this.name,
-      required: this.config.required,
       value: this.input.checked
     }
+  }
+
+  validateFn(): string | null {
+    return this.config.validateFn?.(this.getAttr().value);
   }
 }

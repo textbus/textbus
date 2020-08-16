@@ -1,16 +1,16 @@
-import { AttrOptions, AttrState, ToolFormItem } from './help';
+import { RadioGroup, AttrState, FormItem } from './help';
 
-export class ToolFormOptions implements ToolFormItem {
+export class FormRadio implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];
 
-  constructor(private config: AttrOptions) {
+  constructor(private config: RadioGroup) {
     this.name = config.name;
-    this.elementRef.classList.add('textbus-toolbar-form-group');
+    this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
-    <div class="textbus-toolbar-control-label">${config.label}</div>
-    <div class="textbus-toolbar-control-static">${
+    <div class="textbus-control-label">${config.label}</div>
+    <div class="textbus-control-static">${
       config.values.map(c => {
         return `<label>
                   <input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}">
@@ -53,8 +53,11 @@ export class ToolFormOptions implements ToolFormItem {
     }
     return {
       name: this.config.name,
-      required: this.config.required,
       value
     }
+  }
+
+  validateFn(): string | null {
+    return this.config.validateFn?.(this.getAttr().value);
   }
 }
