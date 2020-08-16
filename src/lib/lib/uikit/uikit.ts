@@ -743,11 +743,11 @@ export class UIKit {
       button.classList.add('textbus-toolbar-menu-item-btn-expand');
       guardPositionInSafeArea(menu, item, params.stickyElement);
     })
-    item.addEventListener('focusin', function () {
+    menu.addEventListener('focusin', function () {
       canHide = false;
     })
 
-    item.addEventListener('focusout', function () {
+    menu.addEventListener('focusout', function () {
       canHide = true;
       if (isLeave) {
         hide();
