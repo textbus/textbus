@@ -155,11 +155,11 @@ export const progressComponentExample: ComponentExample = {
           progress: +data.get('progress')
         });
 
-        workbench.closeDialog();
+        workbench.close();
         resolve(component);
       };
       form.onClose = function () {
-        workbench.closeDialog();
+        workbench.close();
         reject();
       }
     })

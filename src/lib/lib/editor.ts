@@ -22,7 +22,7 @@ import {
   VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
-import { EventDelegate, HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
+import { HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
 import { BlockComponent, BrComponent, PreComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
@@ -30,6 +30,7 @@ import { ComponentExample } from './workbench/component-stage';
 import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
+import { EventDelegate } from './uikit/forms/help';
 
 /**
  * TextBus 初始化时的配置参数
@@ -139,9 +140,9 @@ export class Editor implements EventDelegate {
 
     this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options.componentReaders, options.formatters);
-    this.toolbar = new Toolbar(this, options.toolbar);
     this.viewer = new Viewer([...(options.styleSheets || []), ...(options.editingStyleSheets || [])]);
-    this.workbench = new Workbench(this.viewer);
+    this.workbench = new Workbench(this.viewer, this);
+    this.toolbar = new Toolbar(this, this, this.workbench, options.toolbar);
     let deviceWidth = options.deviceWidth || '100%';
 
     this.statusBar.libSwitch.expand = this.options.expandComponentLibrary;

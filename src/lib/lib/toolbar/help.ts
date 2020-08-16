@@ -8,7 +8,3 @@ export enum HighlightState {
   Normal = 'Normal',
   Disabled = 'Disabled'
 }
-
-export interface EventDelegate {
-  dispatchEvent(type: string): Observable<string>
-}

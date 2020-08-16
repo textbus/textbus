@@ -13,7 +13,8 @@ import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
-import { createKeymapHTML } from '../uikit/uikit';
+import { createKeymapHTML, EventDelegate } from '../uikit/_api';
+import { DialogManager } from '../workbench/workbench';
 
 export class Toolbar {
   elementRef = document.createElement('div');
@@ -33,6 +34,8 @@ export class Toolbar {
   private subs: Subscription[] = [];
 
   constructor(private context: Editor,
+              private delegate: EventDelegate,
+              private dialogManager: DialogManager,
               private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('textbus-toolbar');
@@ -134,7 +137,10 @@ export class Toolbar {
         h = option.factory(this.toolWrapper);
         break;
       case ToolType.Dropdown:
-        h = option.factory(this.context, this.toolWrapper);
+        h = option.factory(this.toolWrapper);
+        break;
+      case ToolType.Form:
+        h = option.factory(this.delegate, this.dialogManager);
         break;
       case ToolType.ActionSheet:
         h = option.factory(this.toolWrapper);
@@ -149,7 +155,7 @@ export class Toolbar {
         }));
         break;
       case ToolType.Group:
-        const m = option.factory(this.context, this.toolWrapper);
+        const m = option.factory(this.delegate, this.toolWrapper, this.dialogManager);
         this.tools.push(...m.tools);
         h = m;
         break;

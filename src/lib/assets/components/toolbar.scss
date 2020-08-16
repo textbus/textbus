@@ -16,6 +16,7 @@
   border: 1px solid $color-gray-light;
   padding: 8px 15px 3px;
   min-height: 24px;
+  border-radius: inherit;
 }
 
 .textbus-toolbar-group {
@@ -136,6 +137,7 @@
   }
 
   &:hover {
+    z-index: 4;
     .textbus-toolbar-menu-item-btn {
       color: #fff;
       background-color: $color-primary;
@@ -203,7 +205,7 @@
     color: $color-primary;
   }
 
-  &:hover {
+  &:hover, &-expand {
     color: #fff;
     background-color: $color-primary;
   }

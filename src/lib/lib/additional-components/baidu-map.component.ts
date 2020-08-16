@@ -108,7 +108,7 @@ export const baiduMapComponentExample: ComponentExample = {
 
     return new Promise<BaiduMapComponent>((resolve, reject) => {
       buttons.item(1).addEventListener('click', () => {
-        workbench.closeDialog();
+        workbench.close();
         reject();
       })
       buttons.item(0).addEventListener('click', () => {
@@ -118,7 +118,7 @@ export const baiduMapComponentExample: ComponentExample = {
 
         const url = `https://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=300&zoom=${zoom}`
         resolve(new BaiduMapComponent(url));
-        workbench.closeDialog();
+        workbench.close();
       })
     })
   }

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Tool } from './help';
-import { EventDelegate, HighlightState } from '../help';
+import { HighlightState } from '../help';
 import { Matcher, SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
@@ -9,13 +9,10 @@ import { UIDropdown, UIKit } from '../../uikit/uikit';
 export interface DropdownViewer<T = any> {
   elementRef: HTMLElement;
   onComplete: Observable<any>;
-  freezeState?: Observable<boolean>;
 
   update?(value?: T): void;
 
   reset?(): void;
-
-  setEventDelegator?(delegate: EventDelegate): void;
 }
 
 export interface DropdownConfig {
@@ -48,7 +45,6 @@ export class DropdownHandler implements Tool {
   private viewer: DropdownViewer;
 
   constructor(private config: DropdownConfig,
-              private delegate: EventDelegate,
               private stickyElement: HTMLElement) {
     this.commander = config.commanderFactory();
     const viewer = config.menuFactory();
@@ -64,15 +60,6 @@ export class DropdownHandler implements Tool {
     });
 
     this.elementRef = this.dropdown.elementRef;
-
-    if (typeof viewer.setEventDelegator === 'function') {
-      viewer.setEventDelegator(delegate);
-    }
-    if (viewer.freezeState instanceof Observable) {
-      viewer.freezeState.subscribe(b => {
-        this.dropdown.freeze = b;
-      });
-    }
   }
 
   updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
@@ -91,9 +78,5 @@ export class DropdownHandler implements Tool {
         this.dropdown.highlight = false;
         break
     }
-  }
-
-  expand(is: boolean) {
-    // this.dropdown.expand = is;
   }
 }

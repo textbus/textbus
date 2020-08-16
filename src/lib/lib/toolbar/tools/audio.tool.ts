@@ -1,5 +1,5 @@
-import { ToolForm } from '../forms/tool-form';
-import { AttrType } from '../forms/help';
+import { ToolForm } from '../../uikit/forms/tool-form';
+import { AttrType } from '../../uikit/forms/help';
 import { AudioComponent, PreComponent } from '../../components/_api';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
@@ -35,4 +35,4 @@ export const audioToolConfig = {
     return new AudioCommander();
   }
 }
-export const audioTool = Toolkit.makeDropdownTool(audioToolConfig);
+export const audioTool = Toolkit.makeFormTool(audioToolConfig);

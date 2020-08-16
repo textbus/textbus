@@ -1,13 +1,12 @@
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ToolFormItem, AttrType, AttrState, AttrConfig } from './help';
+import { ToolFormItem, AttrType, AttrState, AttrConfig, EventDelegate } from './help';
 import { ToolFormTextField } from './tool-form-text-field';
 import { ToolFormOptions } from './tool-form-options';
 import { ToolFormSwitch } from './tool-form-switch';
 import { ToolFormHidden } from './tool-form-hidden';
-import { EventDelegate } from '../help';
-import { DropdownViewer } from '../toolkit/_api';
+import { DropdownViewer } from '../../toolbar/toolkit/_api';
 import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
 
 export class ToolForm implements DropdownViewer {

@@ -3,19 +3,23 @@ import { Observable, Subject } from 'rxjs';
 import { Tool } from './help';
 import { Commander } from '../../core/commander';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
-import { EventDelegate, HighlightState } from '../help';
+import { HighlightState } from '../help';
 import { ButtonConfig } from './button.handler';
 import { ActionSheetConfig } from './action-sheet.handler';
 import { SelectConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchDelta } from '../matcher/matcher';
 import { DropdownConfig } from './dropdown.handler';
+import { DialogManager } from '../../workbench/workbench';
+import { FormConfig } from './form.handler';
+import { EventDelegate } from '../../uikit/forms/help';
 
 export enum MenuType {
   Action,
   Select,
   ActionSheet,
-  Dropdown
+  Dropdown,
+  Form
 }
 
 export interface ActionMenu extends ButtonConfig {
@@ -35,12 +39,16 @@ export interface DropdownMenu extends DropdownConfig {
   type: MenuType.Dropdown
 }
 
+export interface FormMenu extends FormConfig {
+  type: MenuType.Form
+}
+
 export interface GroupConfig {
   label?: string;
   classes?: string[];
   iconClasses?: string[];
   tooltip?: string;
-  menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu>;
+  menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu | FormMenu>;
   matcher?: Matcher;
   /** 是否支持源代码编辑模式 */
   supportSourceCodeModel?: boolean;
@@ -70,7 +78,8 @@ export class GroupHandler implements Tool {
 
   constructor(private config: GroupConfig,
               private delegate: EventDelegate,
-              private stickyElement: HTMLElement) {
+              private stickyElement: HTMLElement,
+              private dialogManager: DialogManager) {
     this.dropdown = UIKit.menu({
       label: config.label,
       classes: config.classes,
@@ -82,11 +91,13 @@ export class GroupHandler implements Tool {
           case MenuType.Action:
             return this.createButton(c);
           case MenuType.Select:
-            return this.createSelect(c, stickyElement);
+            return this.createSelect(c);
           case MenuType.ActionSheet:
-            return this.createActions(c, stickyElement);
+            return this.createActions(c);
           case MenuType.Dropdown:
-            return this.createDropdown(c, stickyElement);
+            return this.createDropdown(c);
+          case MenuType.Form:
+            return this.createForm(c);
         }
       })
     });
@@ -128,10 +139,10 @@ export class GroupHandler implements Tool {
     return instance;
   }
 
-  private createSelect(c: SelectMenu, stickyElement: HTMLElement) {
+  private createSelect(c: SelectMenu) {
     const s = new Subject<any>();
     const selectMenu = UIKit.selectMenu({
-      stickyElement,
+      stickyElement: this.stickyElement,
       classes: c.classes,
       iconClasses: c.iconClasses,
       options: c.options,
@@ -159,10 +170,10 @@ export class GroupHandler implements Tool {
     return instance;
   }
 
-  private createActions(c: ActionSheetMenu, stickyElement: HTMLElement) {
+  private createActions(c: ActionSheetMenu) {
     const s = new Subject<any>();
     const selectMenu = UIKit.actionSheetMenu({
-      stickyElement,
+      stickyElement: this.stickyElement,
       classes: c.classes,
       iconClasses: c.iconClasses,
       actions: c.actions.map(c => {
@@ -185,15 +196,43 @@ export class GroupHandler implements Tool {
     return instance;
   }
 
-  private createDropdown(c: DropdownMenu, stickyElement: HTMLElement) {
+  private createDropdown(c: DropdownMenu) {
     const s = new Subject<any>();
     const menu = c.menuFactory();
+
     const selectMenu = UIKit.dropdownMenu({
-      stickyElement,
+      stickyElement: this.stickyElement,
       classes: c.classes,
       iconClasses: c.iconClasses,
       menu: menu.elementRef,
       label: c.label
+    })
+    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
+      selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+    });
+    this.tools.push({
+      config: c,
+      instance
+    });
+    return instance;
+  }
+
+  private createForm(c: FormMenu) {
+    const s = new Subject<any>();
+    const menu = c.menuFactory();
+    if (typeof menu.setEventDelegator === 'function') {
+      menu.setEventDelegator(this.delegate);
+    }
+    const selectMenu = UIKit.actionMenu({
+      ...c,
+      onChecked: () => {
+        this.dialogManager.dialog(menu.elementRef);
+        this.dropdown.hide();
+        const s = menu.onComplete.subscribe(() => {
+          this.dialogManager.close();
+          s.unsubscribe();
+        })
+      }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
       selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;

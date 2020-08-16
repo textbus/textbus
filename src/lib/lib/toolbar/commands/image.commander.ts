@@ -1,5 +1,5 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../forms/help';
+import { AttrState } from '../../uikit/forms/help';
 import { ImageComponent } from '../../components/image.component';
 
 export class ImageCommander implements Commander<AttrState[]> {

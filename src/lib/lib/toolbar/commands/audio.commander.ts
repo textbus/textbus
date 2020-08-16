@@ -1,5 +1,5 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../forms/help';
+import { AttrState } from '../../uikit/forms/help';
 import { AudioComponent } from '../../components/audio.component';
 
 export class AudioCommander implements Commander<AttrState[]> {

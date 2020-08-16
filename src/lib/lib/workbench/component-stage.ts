@@ -2,13 +2,14 @@ import { Observable, Subject } from 'rxjs';
 
 import { Component } from '../core/_api';
 import { Workbench } from './workbench';
+import { EventDelegate } from '../uikit/forms/help';
 
 export interface ComponentExample {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  componentFactory(workbench: Workbench): Component | Promise<Component> | Observable<Component>;
+  componentFactory(workbench: Workbench, delegate: EventDelegate): Component | Promise<Component> | Observable<Component>;
 }
 
 export class ComponentStage {
@@ -30,7 +31,7 @@ export class ComponentStage {
   private _expand = false;
   private checkEvent = new Subject<Component>();
 
-  constructor(private workbench: Workbench) {
+  constructor(private workbench: Workbench, private delegate: EventDelegate) {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('textbus-component-stage');
     this.componentListWrapper.classList.add('textbus-component-stage-list');
@@ -40,7 +41,7 @@ export class ComponentStage {
   addExample(example: ComponentExample) {
     const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
-      const t = example.componentFactory(this.workbench);
+      const t = example.componentFactory(this.workbench, this.delegate);
       if (t instanceof Component) {
         this.checkEvent.next(t);
       } else if (t instanceof Promise) {

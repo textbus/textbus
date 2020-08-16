@@ -21,14 +21,6 @@ export const insertObjectToolConfig: GroupConfig = {
     type: MenuType.Select,
     label: '源代码'
   }, {
-    ...audioToolConfig,
-    type: MenuType.Dropdown,
-    label: '音频'
-  }, {
-    ...videoToolConfig,
-    type: MenuType.Dropdown,
-    label: '视频'
-  }, {
     ...lineHeightToolConfig,
     type: MenuType.Select,
     label: '行高'
@@ -44,6 +36,14 @@ export const insertObjectToolConfig: GroupConfig = {
     ...emojiToolConfig,
     type: MenuType.Dropdown,
     label: '表情'
+  }, {
+    ...audioToolConfig,
+    type: MenuType.Form,
+    label: '音频...'
+  }, {
+    ...videoToolConfig,
+    type: MenuType.Form,
+    label: '视频...'
   }, {
     ...subscriptToolConfig,
     type: MenuType.Action,

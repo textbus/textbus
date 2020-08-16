@@ -1,5 +1,5 @@
-import { ToolForm } from '../forms/tool-form';
-import { AttrType } from '../forms/help';
+import { ToolForm } from '../../uikit/forms/tool-form';
+import { AttrType } from '../../uikit/forms/help';
 import { VideoComponent, PreComponent } from '../../components/_api';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
@@ -49,4 +49,4 @@ export const videoToolConfig = {
     return new VideoCommander();
   }
 };
-export const videoTool = Toolkit.makeDropdownTool(videoToolConfig);
+export const videoTool = Toolkit.makeFormTool(videoToolConfig);

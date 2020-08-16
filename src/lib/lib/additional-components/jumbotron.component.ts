@@ -115,10 +115,10 @@ export const jumbotronComponentExample: ComponentExample = {
         component.slot.append(p2);
 
         resolve(component);
-        workbench.closeDialog();
+        workbench.close();
       }
       form.onClose = function () {
-        workbench.closeDialog();
+        workbench.close();
         reject();
       }
     })

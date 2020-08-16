@@ -5,10 +5,13 @@ import { tableEditToolConfig } from './table-edit.tool';
 import { tableAddParagraphToolConfig } from './table-add-paragraph.tool';
 import { tableRemoveToolConfig } from './table-remove.tool';
 import { tdBorderColorToolConfig } from './td-border-color.tool';
+import { TableMatcher } from '../matcher/table.matcher';
+import { PreComponent } from '../../components/pre.component';
 
 export const tableToolConfig: GroupConfig = {
   iconClasses: ['textbus-icon-table'],
   tooltip: '表格',
+  matcher: new TableMatcher([PreComponent]),
   menu: [{
     type: MenuType.Dropdown,
     ...tableAddToolConfig,

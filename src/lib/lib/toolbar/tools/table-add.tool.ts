@@ -1,5 +1,5 @@
-import { ToolForm } from '../forms/tool-form';
-import { AttrType } from '../forms/help';
+import { ToolForm } from '../../uikit/forms/tool-form';
+import { AttrType } from '../../uikit/forms/help';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';

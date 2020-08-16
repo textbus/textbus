@@ -1,6 +1,6 @@
 import { BranchComponent, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
-import { AttrState } from '../forms/help';
+import { AttrState } from '../../uikit/forms/help';
 
 export class LinkCommander implements Commander<AttrState[]> {
   recordHistory = true;

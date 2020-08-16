@@ -1,5 +1,5 @@
 import { DivisionComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
-import { AttrState } from '../forms/help';
+import { AttrState } from '../../uikit/forms/help';
 import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<AttrState[]> {

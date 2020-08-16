@@ -4,7 +4,9 @@ import { DropdownConfig, DropdownHandler } from './dropdown.handler';
 import { ActionSheetConfig, ActionSheetHandler } from './action-sheet.handler';
 import { AdditionalConfig, AdditionalHandler } from './additional.handler';
 import { GroupConfig, GroupHandler } from './group.handler';
-import { EventDelegate } from '../help';
+import { FormConfig, FormHandler } from './form.handler';
+import { DialogManager } from '../../workbench/workbench';
+import { EventDelegate } from '../../uikit/forms/help';
 
 export enum ToolType {
   Button,
@@ -12,6 +14,7 @@ export enum ToolType {
   Dropdown,
   ActionSheet,
   Additional,
+  Form,
   Group
 }
 
@@ -21,6 +24,7 @@ export type ToolConfig =
   | DropdownConfig
   | ActionSheetConfig
   | AdditionalConfig
+  | FormConfig
   | GroupConfig;
 
 export interface ButtonToolFactory {
@@ -41,7 +45,7 @@ export interface DropdownToolFactory {
   type: ToolType.Dropdown;
   config: DropdownConfig;
 
-  factory(delegate: EventDelegate, stickyElement: HTMLElement): DropdownHandler;
+  factory(stickyElement: HTMLElement): DropdownHandler;
 }
 
 export interface ActionSheetToolFactory {
@@ -58,12 +62,20 @@ export interface AdditionalToolFactory {
   factory(): AdditionalHandler
 }
 
+export interface FormToolFactory {
+  type: ToolType.Form,
+  config: FormConfig,
+
+  factory(delegate: EventDelegate, dialogManager: DialogManager): FormHandler
+}
+
 export interface GroupToolFactory {
   type: ToolType.Group,
   config: GroupConfig,
 
   factory(delegate: EventDelegate,
-          stickyElement: HTMLElement): GroupHandler
+          stickyElement: HTMLElement,
+          dialogManager: DialogManager): GroupHandler
 }
 
 export type ToolFactory =
@@ -72,6 +84,7 @@ export type ToolFactory =
   | DropdownToolFactory
   | ActionSheetToolFactory
   | AdditionalToolFactory
+  | FormToolFactory
   | GroupToolFactory;
 
 export class Toolkit {
@@ -101,8 +114,8 @@ export class Toolkit {
     const op: DropdownToolFactory = {
       type: ToolType.Dropdown,
       config,
-      factory(delegate: EventDelegate, stickyElement: HTMLElement) {
-        return new DropdownHandler(op.config, delegate, stickyElement)
+      factory(stickyElement: HTMLElement) {
+        return new DropdownHandler(op.config, stickyElement)
       }
     };
     return op;
@@ -116,6 +129,17 @@ export class Toolkit {
         return new ActionSheetHandler(op.config, stickElement)
       }
     };
+    return op;
+  }
+
+  static makeFormTool(config: FormConfig): FormToolFactory {
+    const op: FormToolFactory = {
+      type: ToolType.Form,
+      config,
+      factory(delegate: EventDelegate, dialogManager: DialogManager): FormHandler {
+        return new FormHandler(op.config, delegate, dialogManager);
+      }
+    }
     return op;
   }
 
@@ -135,8 +159,9 @@ export class Toolkit {
       type: ToolType.Group,
       config,
       factory(delegate: EventDelegate,
-              stickyElement: HTMLElement) {
-        return new GroupHandler(op.config, delegate, stickyElement);
+              stickyElement: HTMLElement,
+              dialogManager: DialogManager) {
+        return new GroupHandler(op.config, delegate, stickyElement, dialogManager);
       }
     };
     return op;

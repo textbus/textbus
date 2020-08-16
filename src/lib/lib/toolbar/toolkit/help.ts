@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { KeymapAction } from '../../viewer/input';
-import { Commander, Renderer, TBSelection } from '../../core/_api';
+import { Commander } from '../../core/_api';
 import { SelectionMatchDelta } from '../matcher/matcher';
 
 export interface Tool<T = any> {

@@ -1,9 +1,16 @@
 import { ComponentStage } from './component-stage';
 import { Viewer } from '../viewer/viewer';
+import { EventDelegate } from '../uikit/forms/help';
 
-export class Workbench {
+export interface DialogManager {
+  dialog(content: HTMLElement): void;
+
+  close(): void;
+}
+
+export class Workbench implements DialogManager {
   elementRef = document.createElement('div');
-  readonly componentStage = new ComponentStage(this);
+  readonly componentStage = new ComponentStage(this, this.delegate);
   readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');
@@ -13,7 +20,7 @@ export class Workbench {
   private editableArea = document.createElement('div');
   private loading = document.createElement('div');
 
-  constructor(private viewer: Viewer) {
+  constructor(private viewer: Viewer, private delegate: EventDelegate) {
     this.elementRef.classList.add('textbus-workbench');
 
     this.additionalWorktable.classList.add('textbus-additional-worktable');
@@ -53,6 +60,7 @@ export class Workbench {
   }
 
   dialog(element: HTMLElement) {
+    this.dialogWrapper.innerHTML = '';
     this.dialogWrapper.appendChild(element);
     this.dialogBg.classList.add('textbus-dialog-active');
     setTimeout(() => {
@@ -60,7 +68,7 @@ export class Workbench {
     }, 200)
   }
 
-  closeDialog() {
+  close() {
     this.dialogWrapper.classList.remove('textbus-dialog-wrapper-active');
     setTimeout(() => {
       this.dialogBg.classList.remove('textbus-dialog-active');

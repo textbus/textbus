@@ -1,6 +1,6 @@
 import { LinkCommander } from '../commands/link.commander';
-import { ToolForm } from '../forms/tool-form';
-import { AttrType } from '../forms/help';
+import { ToolForm } from '../../uikit/forms/tool-form';
+import { AttrType } from '../../uikit/forms/help';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
 import { Toolkit } from '../toolkit/toolkit';

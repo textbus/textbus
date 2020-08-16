@@ -36,7 +36,6 @@ export interface UIDropdown {
   button: UIButton;
   highlight: boolean;
   disabled: boolean;
-  freeze: boolean;
 
   hide(): void;
 
@@ -387,7 +386,6 @@ export class UIKit {
   static dropdown<T>(params: UIDropdownParams<T>): UIDropdown {
     const p = Object.assign({}, params.button);
     let isSelfClick = false;
-    let freeze = false;
     p.canExpand = true;
 
     const updatePosition = function () {
@@ -398,9 +396,6 @@ export class UIKit {
     };
     window.addEventListener('resize', updatePosition);
     document.addEventListener('click', () => {
-      if (freeze) {
-        return;
-      }
       if (!isSelfClick) {
         hide();
       }
@@ -434,7 +429,6 @@ export class UIKit {
     let b = false;
     const hide = function () {
       b = false;
-      freeze = false;
       el.classList.remove('textbus-toolbar-dropdown-open');
     };
     const show = function () {
@@ -447,12 +441,6 @@ export class UIKit {
       hide,
       show,
       button: uiBtn,
-      set freeze(b: boolean) {
-        freeze = b;
-      },
-      get freeze() {
-        return freeze;
-      },
       get highlight() {
         return uiBtn.highlight;
       },
@@ -740,16 +728,39 @@ export class UIKit {
       children: [button, menu]
     });
 
+    const hide = function () {
+      button.classList.remove('textbus-toolbar-menu-item-btn-expand');
+      menu.style.transform = 'scaleY(0)';
+    }
+
+    let canHide = true;
+    let isLeave = true;
     item.addEventListener('mouseenter', function () {
+      isLeave = false;
       if (button.disabled) {
         return;
       }
+      button.classList.add('textbus-toolbar-menu-item-btn-expand');
       guardPositionInSafeArea(menu, item, params.stickyElement);
+    })
+    item.addEventListener('focusin', function () {
+      canHide = false;
+    })
+
+    item.addEventListener('focusout', function () {
+      canHide = true;
+      if (isLeave) {
+        hide();
+      }
     })
 
     item.addEventListener('mouseleave', function () {
-      menu.style.transform = 'scaleY(0)';
+      isLeave = true;
+      if (canHide) {
+        hide();
+      }
     })
+
 
     return {
       elementRef: item,

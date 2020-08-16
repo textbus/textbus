@@ -1,5 +1,5 @@
 import { Commander, TBSelection } from '../../core/_api';
-import { AttrState } from '../forms/help';
+import { AttrState } from '../../uikit/forms/help';
 import { VideoComponent } from '../../components/video.component';
 
 export class VideoCommander implements Commander<AttrState[]> {

@@ -1,5 +1,5 @@
-import { ToolForm } from '../forms/tool-form';
-import { AttrType } from '../forms/help';
+import { ToolForm } from '../../uikit/forms/tool-form';
+import { AttrType } from '../../uikit/forms/help';
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageComponent, PreComponent } from '../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
@@ -39,4 +39,4 @@ export const imageToolConfig = {
     return new ImageCommander();
   }
 };
-export const imageTool = Toolkit.makeDropdownTool(imageToolConfig);
+export const imageTool = Toolkit.makeFormTool(imageToolConfig);

@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 export enum AttrType {
   TextField,
   Options,
@@ -62,3 +64,6 @@ export interface ToolFormItem {
   getAttr(): AttrState;
 }
 
+export interface EventDelegate {
+  dispatchEvent(type: string): Observable<string>
+}
