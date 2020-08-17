@@ -5,8 +5,15 @@ import { Input } from './input';
 
 export class Viewer {
   onReady: Observable<Document>;
-  contentWindow: Window;
-  contentDocument: Document;
+
+  get contentWindow() {
+    return this.elementRef.contentWindow;
+  }
+
+  get contentDocument() {
+    return this.elementRef.contentDocument;
+  };
+
   input: Input;
   elementRef = document.createElement('iframe');
 
@@ -30,24 +37,22 @@ export class Viewer {
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
     this.sourceCodeModelStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
-    this.elementRef.onload = () => {
+
+    this.elementRef.setAttribute('scrolling', 'no');
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = styleSheets.join('');
+
+    const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
+    this.elementRef.src = `javascript:void((function () {document.open();document.write('${html}');document.close();})())`;
+
+    this.elementRef.onload = (event: any) => {
+      this.elementRef.onload = null; // 低版本 chrome 会触发两次 load
       const doc = this.elementRef.contentDocument;
-      this.contentDocument = doc;
-      this.contentWindow = this.elementRef.contentWindow;
-      (styleSheets).forEach(s => {
-        const style = doc.createElement('style');
-        style.innerHTML = s;
-        doc.head.appendChild(style);
-      });
       this.sourceCodeModel = this._sourceCodeModel;
       this.input = new Input(doc);
       this.readyEvent.next(doc);
       this.listen();
     };
-
-    this.elementRef.setAttribute('scrolling', 'no');
-    this.elementRef.src = `javascript:void((function () {document.open();document.write('${iframeHTML}');document.close();})())`;
-
     this.elementRef.classList.add('textbus-frame');
   }
 
@@ -60,8 +65,8 @@ export class Viewer {
   }
 
   private listen() {
-    const childBody = this.contentDocument.body;
     const fn = () => {
+      const childBody = this.contentDocument.body;
       const lastChild = childBody.lastChild;
       let height = 0;
       if (lastChild) {

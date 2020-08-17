@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 // document.body.insertBefore(form.elementRef, document.body.children[0]);
 
 const editor = createEditor('#editor', {
-  // expandComponentLibrary: true,
-  // deviceWidth: '768px',
+  expandComponentLibrary: true,
+  deviceWidth: '768px',
   theme: 'dark',
-  // fullScreen: true,
+  fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');
