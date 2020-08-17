@@ -192,6 +192,7 @@ export class Editor implements EventDelegate {
             this.render();
           } else {
             const html = this.getHTMLBySourceCodeModel();
+            console.log(html)
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();
@@ -785,8 +786,8 @@ export class Editor implements EventDelegate {
   }
 
   private getHTMLBySourceCodeModel() {
-    return this.sourceCodeComponent.slot.sliceContents(0).filter(i => {
-      return typeof i === 'string';
+    return this.sourceCodeComponent.slot.sliceContents(0).map(i => {
+      return typeof i === 'string' ? i.trim() : '';
     }).join('');
   }
 
