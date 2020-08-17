@@ -23,7 +23,7 @@ class FindForm implements AdditionalViewer {
   constructor() {
     this.onAction = this.actionEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
-    this.elementRef.classList.add('textbus-form', 'textbus-form-inline', 'textbus-form-tool');
+    this.elementRef.classList.add('textbus-form', 'textbus-form-inline');
     this.elementRef.innerHTML = `
 <div class="textbus-form-group">
   <label class="textbus-control-label">查找</label>

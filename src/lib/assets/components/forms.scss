@@ -38,10 +38,19 @@
   }
 
   &.textbus-form-inline {
+    .textbus-form-control, .textbus-btn {
+      padding: 3px 6px;
+      font-size: 13px;
+    }
+    .textbus-control-label {
+      width: auto;
+    }
     .textbus-form-group {
       display: inline-flex;
       align-items: center;
       margin-right: 1em;
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 }
