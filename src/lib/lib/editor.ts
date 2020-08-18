@@ -192,7 +192,6 @@ export class Editor implements EventDelegate {
             this.render();
           } else {
             const html = this.getHTMLBySourceCodeModel();
-            console.log(html)
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();

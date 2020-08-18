@@ -1,7 +1,7 @@
 import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { TBRange, TBSelection } from '../core/_api';
+import { TBSelection } from '../core/_api';
 
 /**
  * 快捷键配置项
@@ -181,30 +181,17 @@ export class Input {
   }
 
   private updateCursorPosition(limit: HTMLElement) {
-    if (!this.selection || !this.selection.rangeCount) {
+    if (!this.selection || this.selection.rangeCount === 0) {
       return;
     }
-    const firstRange = this.selection.firstRange.nativeRange;
-    let startContainer = firstRange.startContainer;
-    let startOffset = firstRange.startOffset;
+    const startContainer = this.selection.firstRange.nativeRange.startContainer;
 
-
-    // 当一个只有 br 子节点的容器，同时，后一个容器的开始子元素是文本时。
-    // 用户双击选择 br 所在的容器时，startContainer 会是下一个容器，且 offset 指向下一个容器的首个文本节点
-    // 这时会引起计算光标位置全部为 0，下面这段代码是修复这个问题
-    if (startContainer.nodeType === Node.ELEMENT_NODE) {
-      const offsetNode = startContainer.childNodes[startOffset];
-      if (offsetNode?.nodeType === Node.TEXT_NODE) {
-        startContainer = offsetNode;
-        startOffset = 0;
-      }
+    const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement;
+    if (!(node instanceof Node)) {
+      return;
     }
-
-    const range = document.createRange();
-    range.setStart(startContainer, startOffset);
-    range.collapse();
-    let rect = TBRange.getRangePosition(range);
-    const {fontSize, lineHeight, color} = getComputedStyle((startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement);
+    const rect = this.selection.firstRange.getRangePosition();
+    const {fontSize, lineHeight, color} = getComputedStyle(node);
 
     if (isWindows) {
       this.inputWrap.style.top = fontSize;
