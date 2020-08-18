@@ -1,7 +1,7 @@
 import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { TBRange } from '../core/range';
+import { TBRange, TBSelection } from '../core/_api';
 
 /**
  * 快捷键配置项
@@ -112,7 +112,7 @@ export class Input {
   private _display = true;
   private flashing = true;
 
-  private selection: Selection;
+  private selection: TBSelection;
 
   constructor(private context: Document) {
 
@@ -152,14 +152,14 @@ export class Input {
    * @param selection
    * @param limit 光标显示的范围
    */
-  updateStateBySelection(selection: Selection, limit: HTMLElement) {
+  updateStateBySelection(selection: TBSelection, limit: HTMLElement) {
     this.selection = selection;
     if (!selection.rangeCount) {
       this.hide();
       return;
     }
     this.updateCursorPosition(limit);
-    if (selection.isCollapsed) {
+    if (selection.collapsed) {
       this.show();
     } else {
       this.hide();
@@ -184,8 +184,10 @@ export class Input {
     if (!this.selection || !this.selection.rangeCount) {
       return;
     }
-    let startContainer = this.selection.focusNode;
-    let startOffset = this.selection.focusOffset;
+    const firstRange = this.selection.firstRange.nativeRange;
+    let startContainer = firstRange.startContainer;
+    let startOffset = firstRange.startOffset;
+
 
     // 当一个只有 br 子节点的容器，同时，后一个容器的开始子元素是文本时。
     // 用户双击选择 br 所在的容器时，startContainer 会是下一个容器，且 offset 指向下一个容器的首个文本节点
@@ -234,7 +236,7 @@ export class Input {
     this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
 
-    if (this.selection.isCollapsed && this.selection.rangeCount === 1) {
+    if (this.selection.collapsed && this.selection.rangeCount === 1) {
       const scrollTop = limit.scrollTop;
       const offsetHeight = limit.offsetHeight;
       const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;

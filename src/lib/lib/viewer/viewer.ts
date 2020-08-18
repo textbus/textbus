@@ -45,7 +45,7 @@ export class Viewer {
     const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
     this.elementRef.src = `javascript:void((function () {document.open();document.write('${html}');document.close();})())`;
 
-    this.elementRef.onload = (event: any) => {
+    this.elementRef.onload = () => {
       this.elementRef.onload = null; // 低版本 chrome 会触发两次 load
       const doc = this.elementRef.contentDocument;
       this.sourceCodeModel = this._sourceCodeModel;
