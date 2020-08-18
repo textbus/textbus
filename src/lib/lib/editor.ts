@@ -410,7 +410,20 @@ export class Editor implements EventDelegate {
         document.body.appendChild(div);
         div.focus();
         setTimeout(() => {
+          let html = div.innerHTML;
+          let hasEmpty = true;
+          const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g;
+          while (hasEmpty) {
+            hasEmpty = false;
+            html = html.replace(reg, function () {
+              hasEmpty = true;
+              return '';
+            });
+          }
+          div.innerHTML = html;
+
           const fragment = this.parser.parse(div);
+
           const contents = new Contents();
           fragment.sliceContents(0).forEach(i => contents.append(i));
           document.body.removeChild(div);
