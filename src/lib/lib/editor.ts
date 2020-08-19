@@ -309,6 +309,8 @@ export class Editor implements EventDelegate {
 
   private setup() {
     fromEvent(this.viewer.contentDocument, 'mousedown').subscribe((ev: MouseEvent) => {
+      this.oldCursorPosition = null;
+      clearTimeout(this.cleanOldCursorTimer);
       if (ev.button === 2) {
         return;
       }
