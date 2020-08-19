@@ -308,14 +308,12 @@ export class Editor implements EventDelegate {
   }
 
   private setup() {
-    this.subs.push(merge(...['selectstart', 'mousedown'].map(type => {
-      return fromEvent(this.viewer.contentDocument, type);
-    })).subscribe((ev: MouseEvent) => {
+    fromEvent(this.viewer.contentDocument, 'mousedown').subscribe((ev: MouseEvent) => {
       if (ev.button === 2) {
         return;
       }
       this.nativeSelection.removeAllRanges();
-    }));
+    });
 
     (this.options.hooks || []).forEach(hooks => {
       if (typeof hooks.setup === 'function') {
