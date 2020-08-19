@@ -10,20 +10,20 @@ export class LibSwitch {
     },
     classes: ['textbus-lib-switch'],
     children: [createTextNode('组件库')]
-  });
+  }) as HTMLButtonElement;
 
-  set show(b: boolean) {
-    this._show = b;
-    this.elementRef.style.display = b ? '' : 'none';
-    if (!b) {
+  set disabled(b: boolean) {
+    this._disabled = b;
+    this.elementRef.disabled = b;
+    if (b) {
       this.expand = false;
       this.elementRef.classList.remove('textbus-lib-switch-active');
       this.switchEvent.next(false);
     }
   }
 
-  get show() {
-    return this._show;
+  get disabled() {
+    return this._disabled;
   }
 
   set expand(b: boolean) {
@@ -39,7 +39,7 @@ export class LibSwitch {
     return this._expand;
   }
 
-  private _show = false;
+  private _disabled = false;
   private _expand = false;
   private switchEvent = new Subject<boolean>();
 

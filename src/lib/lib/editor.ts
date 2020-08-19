@@ -146,7 +146,9 @@ export class Editor implements FileUploader {
     let deviceWidth = options.deviceWidth || '100%';
 
     this.statusBar.libSwitch.expand = this.options.expandComponentLibrary;
-    this.statusBar.libSwitch.show = this.options.componentLibrary?.length > 0;
+    if (!this.options.componentLibrary?.length) {
+      this.statusBar.libSwitch.elementRef.style.display = 'none';
+    }
 
     this.statusBar.device.update(deviceWidth);
     this.statusBar.fullScreen.full = this.options.fullScreen;
@@ -178,7 +180,7 @@ export class Editor implements FileUploader {
         this.openSourceCodeModel = b;
         if (this.readyState) {
           this.selection.removeAllRanges();
-          this.statusBar.libSwitch.show = !b;
+          this.statusBar.libSwitch.disabled = b;
           this.viewer.sourceCodeModel = b;
           if (b) {
             if (this.snapshotSubscription) {
