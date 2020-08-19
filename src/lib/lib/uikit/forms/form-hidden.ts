@@ -23,7 +23,7 @@ export class FormHidden implements FormItem {
     }
   }
 
-  validateFn(): string | null {
-    return null;
+  validate() {
+    return true;
   }
 }

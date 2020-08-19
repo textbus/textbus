@@ -162,7 +162,6 @@ export const progressComponentExample: ComponentExample = {
         s.unsubscribe();
         b.unsubscribe();
         workbench.close();
-        reject();
       });
     })
   }

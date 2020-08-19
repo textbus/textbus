@@ -81,7 +81,7 @@ export interface FormItem {
 
   getAttr(): AttrState;
 
-  validateFn(): string| null;
+  validate(): boolean;
 }
 
 export interface FileUploader {

@@ -104,13 +104,17 @@ export class Form implements FormViewer {
     }));
 
     this.elementRef.addEventListener('submit', (ev: Event) => {
-      const map = new Map<string, any>();
-      this.items.map(item => {
-        const i = item.getAttr()
-        map.set(i.name, i.value);
-      })
-      this.completeEvent.next(map);
       ev.preventDefault();
+
+      const map = new Map<string, any>();
+      for (const item of this.items) {
+        if (!item.validate()) {
+          return;
+        }
+        const i = item.getAttr();
+        map.set(i.name, i.value);
+      }
+      this.completeEvent.next(map);
     });
   }
 

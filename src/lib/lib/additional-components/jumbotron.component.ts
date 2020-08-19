@@ -125,7 +125,6 @@ export const jumbotronComponentExample: ComponentExample = {
         s.unsubscribe();
         b.unsubscribe();
         workbench.close();
-        reject();
       })
     })
   }

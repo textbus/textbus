@@ -18,7 +18,13 @@ export const audioToolConfig = {
         placeholder: '请输入链接地址',
         canUpload: true,
         uploadType: 'audio',
-        uploadBtnText: '上传新音频'
+        uploadBtnText: '上传新音频',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
+          }
+          return null;
+        }
       }, {
         type: FormType.Switch,
         label: '自动播放',

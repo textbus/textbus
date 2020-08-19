@@ -8,6 +8,7 @@ export class FormTextField implements FormItem {
   private input: HTMLInputElement;
   private sub: Subscription;
   private readonly btn: HTMLButtonElement;
+  private readonly feedbackEle: HTMLElement;
 
   constructor(private config: TextField,
               private delegate: (type: string) => Observable<string>) {
@@ -18,15 +19,16 @@ export class FormTextField implements FormItem {
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
         <input class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
-        `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
-          <span class="textbus-icon-upload"></span>
-         </button>
-      </div>
-      `
+      `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
+        <span class="textbus-icon-upload"></span>
+       </button>`
       : ''
-      }
-    </div>`;
+    }
+     </div>
+     <div class="textbus-control-feedback-invalid"></div>
+   </div>`;
     this.input = this.elementRef.querySelector('input');
+    this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
     if (config.canUpload) {
       this.btn = this.elementRef.querySelector('button');
       this.btn.addEventListener('click', () => {
@@ -64,8 +66,10 @@ export class FormTextField implements FormItem {
     }
   }
 
-  validateFn(): string | null {
-    return this.config.validateFn?.(this.getAttr().value)
+  validate() {
+    const feedback = this.config.validateFn?.(this.getAttr().value);
+    this.feedbackEle.innerText = feedback || '';
+    return !feedback;
   }
 
   private reset() {

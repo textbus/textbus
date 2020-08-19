@@ -18,7 +18,13 @@ export const videoToolConfig = {
         placeholder: '请输入链接地址',
         canUpload: true,
         uploadType: 'video',
-        uploadBtnText: '上传新视频'
+        uploadBtnText: '上传新视频',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
+          }
+          return null;
+        }
       }, {
         type: FormType.Hidden,
         name: 'controls',

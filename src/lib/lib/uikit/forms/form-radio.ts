@@ -4,6 +4,7 @@ export class FormRadio implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];
+  private readonly feedbackEle: HTMLElement;
 
   constructor(private config: RadioGroup) {
     this.name = config.name;
@@ -18,9 +19,11 @@ export class FormRadio implements FormItem {
                  </label>`;
       }).join('')
       }
+    <div class="textbus-control-feedback-invalid"></div>
     </div>
     `;
     this.inputs = Array.from(this.elementRef.querySelectorAll('input'));
+    this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
   }
 
   update(value?: any): void {
@@ -57,7 +60,9 @@ export class FormRadio implements FormItem {
     }
   }
 
-  validateFn(): string | null {
-    return this.config.validateFn?.(this.getAttr().value);
+  validate() {
+    const feedback = this.config.validateFn?.(this.getAttr().value);
+    this.feedbackEle.innerText = feedback || '';
+    return !feedback;
   }
 }

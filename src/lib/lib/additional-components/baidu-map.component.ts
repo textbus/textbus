@@ -109,7 +109,6 @@ export const baiduMapComponentExample: ComponentExample = {
     return new Promise<BaiduMapComponent>((resolve, reject) => {
       buttons.item(1).addEventListener('click', () => {
         workbench.close();
-        reject();
       })
       buttons.item(0).addEventListener('click', () => {
         const center = map.getCenter().lng + ',' + map.getCenter().lat;

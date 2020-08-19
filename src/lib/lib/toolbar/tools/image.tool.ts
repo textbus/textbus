@@ -18,7 +18,13 @@ export const imageToolConfig = {
         placeholder: '请输入链接地址',
         canUpload: true,
         uploadType: 'image',
-        uploadBtnText: '上传新图片'
+        uploadBtnText: '上传新图片',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
+          }
+          return null;
+        }
       }, {
         type: FormType.TextField,
         label: '图片宽度',
