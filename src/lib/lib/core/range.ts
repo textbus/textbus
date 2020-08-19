@@ -876,10 +876,10 @@ export class TBRange {
         const childSlots = endParentComponent instanceof BranchComponent ?
           endParentComponent.slots :
           Array.from(endParentComponent);
-        const start = childSlots.indexOf(this.startFragment);
+        const index = childSlots.indexOf(this.startFragment);
 
         endFragmentPosition = childSlots.indexOf(endFragment);
-        if (endParentComponent !== this.commonAncestorComponent && start === -1) {
+        if (endParentComponent !== this.commonAncestorComponent && index === -1) {
           end.push(...childSlots.slice(0, endFragmentPosition).map(fragment => {
             return {
               startIndex: 0,
@@ -918,7 +918,8 @@ export class TBRange {
         fragment: this.commonAncestorFragment
       })
     }
-    result.push(...end.reverse());
+    // result.push(...end.reverse()); // 忘记原来为什么要翻转了，但这里引起了新的问题
+    result.push(...end);
 
     return result.filter(item => {
       return item.startIndex < item.endIndex

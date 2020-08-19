@@ -64,7 +64,7 @@ export class ListCommander implements Commander<null> {
             if (fragment === commonAncestorFragment) {
               break;
             }
-            const parentComponent = renderer.getParentComponent(scope.fragment);
+            const parentComponent = renderer.getParentComponent(fragment);
             fragment = renderer.getParentFragment(parentComponent);
             if (parentComponent instanceof BackboneComponent) {
               lastBackboneComponent = parentComponent;
@@ -107,7 +107,7 @@ export class ListCommander implements Commander<null> {
           }
         });
         if (startFragment !== commonAncestorFragment) {
-          if (commonScope.startChildComponent && commonScope.startChildComponent instanceof BranchComponent && commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
+          if (commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
             commonAncestorFragment.insertAfter(list, commonScope.startChildComponent);
           } else {
             commonAncestorFragment.insert(list, commonScope.startIndex);
