@@ -84,6 +84,6 @@ export interface FormItem {
   validateFn(): string| null;
 }
 
-export interface EventDelegate {
-  dispatchEvent(type: string): Observable<string>
+export interface FileUploader {
+  upload(uploadType: string): Observable<string>
 }

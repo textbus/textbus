@@ -12,7 +12,7 @@ import { Matcher, SelectionMatchDelta } from '../matcher/matcher';
 import { DropdownConfig } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
 import { FormConfig } from './form.handler';
-import { EventDelegate } from '../../uikit/forms/help';
+import { FileUploader } from '../../uikit/forms/help';
 
 export enum MenuType {
   Action,
@@ -77,7 +77,7 @@ export class GroupHandler implements Tool {
   private dropdown: UIDropdown;
 
   constructor(private config: GroupConfig,
-              private delegate: EventDelegate,
+              private delegate: FileUploader,
               private stickyElement: HTMLElement,
               private dialogManager: DialogManager) {
     this.dropdown = UIKit.menu({
@@ -224,8 +224,8 @@ export class GroupHandler implements Tool {
   private createForm(c: FormMenu) {
     const s = new Subject<any>();
     const menu = c.menuFactory();
-    if (typeof menu.setEventDelegator === 'function') {
-      menu.setEventDelegator(this.delegate);
+    if (typeof menu.setFileUploader === 'function') {
+      menu.setFileUploader(this.delegate);
     }
     const selectMenu = UIKit.actionMenu({
       ...c,

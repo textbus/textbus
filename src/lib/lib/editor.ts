@@ -30,7 +30,7 @@ import { ComponentExample } from './workbench/component-stage';
 import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
-import { EventDelegate } from './uikit/forms/help';
+import { FileUploader } from './uikit/forms/help';
 
 /**
  * TextBus 初始化时的配置参数
@@ -80,7 +80,7 @@ export enum CursorMoveDirection {
 /**
  * TextBus 主类
  */
-export class Editor implements EventDelegate {
+export class Editor implements FileUploader {
   /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
@@ -246,7 +246,7 @@ export class Editor implements EventDelegate {
     })
   }
 
-  dispatchEvent(type: string): Observable<string> {
+  upload(type: string): Observable<string> {
     if (typeof this.options.uploader === 'function') {
       const result = this.options.uploader(type);
       if (result instanceof Observable) {

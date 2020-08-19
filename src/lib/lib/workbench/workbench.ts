@@ -1,6 +1,6 @@
 import { ComponentStage } from './component-stage';
 import { Viewer } from '../viewer/viewer';
-import { EventDelegate } from '../uikit/forms/help';
+import { FileUploader } from '../uikit/forms/help';
 
 export interface DialogManager {
   dialog(content: HTMLElement): void;
@@ -10,7 +10,7 @@ export interface DialogManager {
 
 export class Workbench implements DialogManager {
   elementRef = document.createElement('div');
-  readonly componentStage = new ComponentStage(this, this.delegate);
+  readonly componentStage = new ComponentStage(this, this.fileUploader);
   readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');
@@ -20,7 +20,7 @@ export class Workbench implements DialogManager {
   private editableArea = document.createElement('div');
   private loading = document.createElement('div');
 
-  constructor(private viewer: Viewer, private delegate: EventDelegate) {
+  constructor(private viewer: Viewer, private fileUploader: FileUploader) {
     this.elementRef.classList.add('textbus-workbench');
 
     this.additionalWorktable.classList.add('textbus-additional-worktable');

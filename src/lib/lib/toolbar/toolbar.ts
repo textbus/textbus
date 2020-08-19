@@ -13,7 +13,7 @@ import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
 import { SelectionMatchDelta } from './matcher/matcher';
-import { createKeymapHTML, EventDelegate } from '../uikit/_api';
+import { createKeymapHTML, FileUploader } from '../uikit/_api';
 import { DialogManager } from '../workbench/workbench';
 
 export class Toolbar {
@@ -34,7 +34,7 @@ export class Toolbar {
   private subs: Subscription[] = [];
 
   constructor(private context: Editor,
-              private delegate: EventDelegate,
+              private fileUploader: FileUploader,
               private dialogManager: DialogManager,
               private config: (ToolFactory | ToolFactory[])[]) {
     this.onAction = this.actionEvent.asObservable();
@@ -140,7 +140,7 @@ export class Toolbar {
         h = option.factory(this.toolWrapper);
         break;
       case ToolType.Form:
-        h = option.factory(this.delegate, this.dialogManager);
+        h = option.factory(this.fileUploader, this.dialogManager);
         break;
       case ToolType.ActionSheet:
         h = option.factory(this.toolWrapper);
@@ -155,7 +155,7 @@ export class Toolbar {
         }));
         break;
       case ToolType.Group:
-        const m = option.factory(this.delegate, this.toolWrapper, this.dialogManager);
+        const m = option.factory(this.fileUploader, this.toolWrapper, this.dialogManager);
         this.tools.push(...m.tools);
         h = m;
         break;

@@ -6,7 +6,7 @@ import { AdditionalConfig, AdditionalHandler } from './additional.handler';
 import { GroupConfig, GroupHandler } from './group.handler';
 import { FormConfig, FormHandler } from './form.handler';
 import { DialogManager } from '../../workbench/workbench';
-import { EventDelegate } from '../../uikit/forms/help';
+import { FileUploader } from '../../uikit/forms/help';
 
 export enum ToolType {
   Button,
@@ -66,14 +66,14 @@ export interface FormToolFactory {
   type: ToolType.Form,
   config: FormConfig,
 
-  factory(delegate: EventDelegate, dialogManager: DialogManager): FormHandler
+  factory(delegate: FileUploader, dialogManager: DialogManager): FormHandler
 }
 
 export interface GroupToolFactory {
   type: ToolType.Group,
   config: GroupConfig,
 
-  factory(delegate: EventDelegate,
+  factory(delegate: FileUploader,
           stickyElement: HTMLElement,
           dialogManager: DialogManager): GroupHandler
 }
@@ -136,7 +136,7 @@ export class Toolkit {
     const op: FormToolFactory = {
       type: ToolType.Form,
       config,
-      factory(delegate: EventDelegate, dialogManager: DialogManager): FormHandler {
+      factory(delegate: FileUploader, dialogManager: DialogManager): FormHandler {
         return new FormHandler(op.config, delegate, dialogManager);
       }
     }
@@ -158,7 +158,7 @@ export class Toolkit {
     const op: GroupToolFactory = {
       type: ToolType.Group,
       config,
-      factory(delegate: EventDelegate,
+      factory(delegate: FileUploader,
               stickyElement: HTMLElement,
               dialogManager: DialogManager) {
         return new GroupHandler(op.config, delegate, stickyElement, dialogManager);

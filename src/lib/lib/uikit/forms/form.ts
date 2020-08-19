@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { FormItem, FormType, FormItemConfig, EventDelegate } from './help';
+import { FormItem, FormType, FormItemConfig, FileUploader } from './help';
 import { FormTextField } from './form-text-field';
 import { FormRadio } from './form-radio';
 import { FormSwitch } from './form-switch';
@@ -21,7 +21,7 @@ export class Form implements FormViewer {
 
   readonly elementRef = document.createElement('form');
   private items: FormItem[] = [];
-  private delegator: EventDelegate;
+  private fileUploader: FileUploader;
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
 
@@ -33,7 +33,7 @@ export class Form implements FormViewer {
       switch (attr.type) {
         case FormType.TextField:
           this.items.push(new FormTextField(attr, (type: string) => {
-            return this.delegator.dispatchEvent(type);
+            return this.fileUploader.upload(type);
           }));
           break;
         case FormType.Radio:
@@ -126,8 +126,8 @@ export class Form implements FormViewer {
     });
   }
 
-  setEventDelegator(delegate: EventDelegate): void {
-    this.delegator = delegate;
+  setFileUploader(fileUploader: FileUploader): void {
+    this.fileUploader = fileUploader;
   }
 
   update(d: FormatAbstractData | BranchComponent | LeafComponent): void {

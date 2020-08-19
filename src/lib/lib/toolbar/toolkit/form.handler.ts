@@ -7,10 +7,10 @@ import { Commander } from '../../core/_api';
 import { UIButton, UIKit } from '../../uikit/uikit';
 import { DropdownConfig, DropdownViewer } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
-import { EventDelegate } from '../../uikit/forms/help';
+import { FileUploader } from '../../uikit/forms/help';
 
 export interface FormViewer<T = any> extends DropdownViewer {
-  setEventDelegator(delegate: EventDelegate): void;
+  setFileUploader(fileUploader: FileUploader): void;
 }
 
 export interface FormConfig extends DropdownConfig {
@@ -25,7 +25,7 @@ export class FormHandler implements Tool {
   private viewer: DropdownViewer;
 
   constructor(private config: FormConfig,
-              private delegate: EventDelegate,
+              private delegate: FileUploader,
               private dialogManager: DialogManager) {
     this.commander = config.commanderFactory();
     const viewer = config.menuFactory();
@@ -51,8 +51,8 @@ export class FormHandler implements Tool {
 
     this.elementRef = this.button.elementRef;
 
-    if (typeof viewer.setEventDelegator === 'function') {
-      viewer.setEventDelegator(delegate);
+    if (typeof viewer.setFileUploader === 'function') {
+      viewer.setFileUploader(delegate);
     }
   }
 
