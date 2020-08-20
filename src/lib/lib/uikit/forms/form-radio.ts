@@ -11,14 +11,15 @@ export class FormRadio implements FormItem {
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
     <div class="textbus-control-label">${config.label}</div>
-    <div class="textbus-control-static">${
+    <div class="textbus-control-static">
+    <div>${
       config.values.map(c => {
         return `<label>
                   <input type="radio" ${c.default ? 'checked="checked"' : ''} name="${config.name}" value="${c.value}">
                   ${c.label}
                  </label>`;
       }).join('')
-      }
+    }</div>
     <div class="textbus-control-feedback-invalid"></div>
     </div>
     `;
