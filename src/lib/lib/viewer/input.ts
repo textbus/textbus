@@ -187,7 +187,7 @@ export class Input {
     const startContainer = this.selection.firstRange.nativeRange.startContainer;
 
     const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement;
-    if (!(node instanceof Node)) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
       return;
     }
     const rect = this.selection.firstRange.getRangePosition();

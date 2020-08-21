@@ -30,7 +30,7 @@ editor.onChange.subscribe(() => {
   // console.log(i, Date.now());
   i++;
 })
-
+window['editor'] = editor;
 document.getElementById('btn').addEventListener('click', () => {
   console.log(editor.getContents().html)
 })
