@@ -70,7 +70,7 @@ export class EventHandler {
 
   private onPaste(event: TBEvent) {
     const firstRange = event.selection.firstRange;
-    const contents = event.data.clipboard as Contents;
+    const contents = event.data.clipboard.contents as Contents;
     const fragment = firstRange.startFragment;
 
     const parentComponent = event.renderer.getParentComponent(fragment);

@@ -1,4 +1,4 @@
-import { Contents, Lifecycle, Renderer, TBSelection } from '../core/_api';
+import { Lifecycle, Clipboard, Renderer, TBSelection } from '../core/_api';
 
 export class DefaultHook implements Lifecycle {
   onInput(renderer: Renderer, selection: TBSelection) {
@@ -8,7 +8,7 @@ export class DefaultHook implements Lifecycle {
     return selection.collapsed && selection.rangeCount === 1;
   }
 
-  onPaste(contents: Contents, renderer: Renderer, selection: TBSelection): boolean {
+  onPaste(contents: Clipboard, renderer: Renderer, selection: TBSelection): boolean {
     selection.ranges.forEach(range => {
       range.connect();
     });

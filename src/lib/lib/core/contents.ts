@@ -21,6 +21,9 @@ export class Contents {
    * @param content 新内容
    */
   append(content: Component | string) {
+    if (content === '') {
+      return;
+    }
     const lastChildIndex = this.elements.length - 1;
     const lastChild = this.elements[lastChildIndex];
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -81,6 +84,9 @@ export class Contents {
    * @param index
    */
   insert(content: string | Component, index: number) {
+    if (content === '') {
+      return;
+    }
     if (index >= this.length) {
       if (typeof content === 'string') {
         const last = this.elements[this.elements.length - 1];

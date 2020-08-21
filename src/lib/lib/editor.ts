@@ -405,7 +405,8 @@ export class Editor implements FileUploader {
         this.selection.restore();
         this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
       }),
-      this.viewer.input.events.onPaste.subscribe(() => {
+      this.viewer.input.events.onPaste.subscribe((ev: ClipboardEvent) => {
+        const text = ev.clipboardData.getData('Text');
         const div = document.createElement('div');
         div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
         div.contentEditable = 'true';
@@ -431,12 +432,18 @@ export class Editor implements FileUploader {
           document.body.removeChild(div);
 
           this.dispatchEventAndCallHooks(EventType.onPaste, {
-            clipboard: contents
+            clipboard: {
+              contents,
+              text
+            }
           }, () => {
             let isNext = true;
             (this.options.hooks || []).forEach(lifecycle => {
               if (typeof lifecycle.onPaste === 'function') {
-                if (lifecycle.onPaste(contents, this.renderer, this.selection) === false) {
+                if (lifecycle.onPaste({
+                  contents,
+                  text
+                }, this.renderer, this.selection) === false) {
                   isNext = false;
                 }
               }

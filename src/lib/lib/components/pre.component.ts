@@ -1,16 +1,17 @@
 import {
   BlockFormatter,
   ChildSlotModel,
+  ComponentReader,
+  DivisionComponent,
   EventType,
   FormatAbstractData,
   FormatEffect,
   Fragment,
+  InlineFormatParams,
   InlineFormatter,
   ReplaceModel,
-  DivisionComponent,
-  ComponentReader,
   VElement,
-  ViewData, InlineFormatParams
+  ViewData
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { highlight } from 'highlight.js';
@@ -204,6 +205,23 @@ export class PreComponent extends DivisionComponent {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new BrComponent(), firstRange.startIndex);
         firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+        event.stopPropagation();
+      } else if (event.type === EventType.onPaste) {
+        const text = event.data.clipboard.text as string;
+        const firstRange = event.selection.firstRange;
+        const startIndex = firstRange.startIndex;
+        const lines = text.split(/(?=\n)/g);
+        let i = 0;
+        lines.forEach(item => {
+          if (item === '\n') {
+            this.slot.insert(new BrComponent(), startIndex + i);
+          } else {
+            this.slot.insert(item, startIndex + i);
+          }
+          i += item.length;
+        })
+        firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
+        firstRange.collapse();
         event.stopPropagation();
       }
     })

@@ -5,6 +5,11 @@ import { Editor } from '../editor';
 import { Contents } from './contents';
 import { Fragment } from './fragment';
 
+export interface Clipboard {
+  contents: Contents
+  text: string;
+}
+
 /**
  * TextBus 生命周期方法。
  * 在 TextBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
@@ -29,11 +34,11 @@ export interface Lifecycle {
 
   /**
    * 用户粘贴时调用。
-   * @param contents 粘贴的内容。
+   * @param clipboard 粘贴的内容。
    * @param renderer
    * @param selection
    */
-  onPaste?(contents: Contents, renderer: Renderer, selection: TBSelection): boolean;
+  onPaste?(clipboard: Clipboard, renderer: Renderer, selection: TBSelection): boolean;
 
   /**
    * 当用户敲击回车时调用。
