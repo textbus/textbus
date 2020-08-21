@@ -21,14 +21,9 @@ import {
   tdBorderColorFormatter
 } from './lib/formatter/_api';
 import {
-  audioTool,
-  blockBackgroundTool,
-  blockquoteTool,
   boldTool,
   cleanTool,
-  preTool,
   colorTool,
-  emojiTool,
   fontFamilyTool,
   fontSizeTool,
   headingTool,
@@ -36,29 +31,18 @@ import {
   historyForwardTool,
   imageTool,
   italicTool,
-  letterSpacingTool,
-  lineHeightTool,
   linkTool,
   olTool,
   strikeThroughTool,
-  subscriptTool,
-  superscriptTool,
-  tableEditTool,
-  tableAddTool,
   textAlignTool,
   textBackgroundTool,
   textIndentTool,
   ulTool,
   underlineTool,
-  videoTool,
-  codeTool,
-  leftToRightTool,
-  rightToLeftTool,
-  tableAddParagraphTool,
-  tableRemoveTool,
-  tdBorderColorTool,
   unlinkTool,
-  findTool, insertObjectTool, tableTool
+  findTool,
+  insertObjectTool,
+  tableTool
 } from './lib/toolbar/tools/_api';
 import { DefaultHook, FindHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
 import {

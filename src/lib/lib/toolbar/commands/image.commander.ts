@@ -20,7 +20,10 @@ export class ImageCommander implements Commander<Map<string, string | number | b
             fn(component);
           }
         } else {
-          range.commonAncestorFragment.insert(new ImageComponent(attrs.get('src') as string), range.startIndex);
+          range.commonAncestorFragment.insert(new ImageComponent(attrs.get('src') as string, {
+            width: attrs.get('width') as string,
+            height: attrs.get('height') as string
+          }), range.startIndex);
         }
       } else {
         range.getSelectedScope().forEach(scope => {

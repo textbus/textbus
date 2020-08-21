@@ -1,13 +1,23 @@
 import { Observable, Subject } from 'rxjs';
+import { createElement, createTextNode } from '../uikit/uikit';
 
 export class Paths {
   onCheck: Observable<HTMLElement>;
-  readonly elementRef = document.createElement('div');
+  readonly elementRef = createElement('div', {
+    classes: ['textbus-paths'],
+    children: [createElement('div', {
+      classes: ['textbus-paths-label'],
+      children: [createTextNode('路径：')]
+    })]
+  });
+  readonly pathLinks = createElement('div', {
+    classes: ['textbus-paths-links']
+  });
   private checkEvent = new Subject<HTMLElement>();
 
   constructor() {
     this.onCheck = this.checkEvent.asObservable();
-    this.elementRef.classList.add('textbus-paths');
+    this.elementRef.appendChild(this.pathLinks);
   }
 
   update(node: Node) {
@@ -45,7 +55,7 @@ export class Paths {
         fragment.appendChild(split);
       }
     }
-    this.elementRef.innerHTML = '';
-    this.elementRef.appendChild(fragment);
+    this.pathLinks.innerHTML = '';
+    this.pathLinks.appendChild(fragment);
   }
 }

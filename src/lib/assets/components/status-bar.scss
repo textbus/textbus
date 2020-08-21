@@ -18,10 +18,7 @@
 
 .textbus-paths {
   flex: 1;
-
-  &:before {
-    content: "路径：";
-  }
+  display: flex;
 }
 
 .textbus-paths-link {
@@ -53,6 +50,8 @@
     outline: none;
     cursor: pointer;
     color: inherit;
+    padding-left: .5em;
+    padding-right: .5em;
 
     &:hover {
       color: $color-primary;
@@ -126,6 +125,8 @@
   outline: none;
   font-size: inherit;
   cursor: pointer;
+  padding-left: .5em;
+  padding-right: .5em;
 
   &:hover {
     color: $color-primary;
@@ -139,10 +140,13 @@
   outline: none;
   font-size: inherit;
   cursor: pointer;
+  padding-left: .5em;
+  padding-right: .5em;
 
   &-active {
     color: $color-primary;
   }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
