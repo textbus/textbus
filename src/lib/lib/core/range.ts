@@ -763,6 +763,7 @@ export class TBRange {
       this.deleteSelectedScope();
     } else {
       let isDeleteFragment = false;
+      const endFragmentIsCommon = this.endFragment === this.commonAncestorFragment;
       if (this.startIndex === 0) {
         const {fragment, index} = this.findFirstPosition(startFragment);
         isDeleteFragment = fragment === startFragment && index === this.startIndex;
@@ -770,27 +771,34 @@ export class TBRange {
 
       this.deleteSelectedScope();
       if (isDeleteFragment && startFragment === this.startFragment) {
-        this.startFragment.from(this.endFragment);
+        this.startFragment.from(endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment);
         const firstPosition = this.findFirstPosition(this.startFragment);
         this.setStart(firstPosition.fragment, firstPosition.index);
-        this.deleteEmptyTree(this.endFragment);
-      } else {
-        if (this.startFragment !== this.endFragment) {
-          const last = this.endFragment.cut(0);
+        if (!endFragmentIsCommon) {
           this.deleteEmptyTree(this.endFragment);
-          const startIndex = this.startIndex + 1;
-          last.sliceContents(0).reverse().forEach(c => this.startFragment.insert(c, startIndex));
-          last.getFormatKeys().filter(token => !(token instanceof BlockFormatter))
-            .map(token => {
-              const formats = last.getFormatRanges(token) || [];
+        }
+      } else {
+        if (!endFragmentIsCommon && this.startFragment !== this.endFragment) {
+          const endLast = this.endFragment.cut(0);
+          this.deleteEmptyTree(this.endFragment);
+          const startLast = this.startFragment.cut(this.startIndex);
+          const startIndex = this.startIndex;
+
+          const append = function (fragment: Fragment, index: number, newContent: Fragment) {
+            newContent.sliceContents(0).forEach(c => fragment.append(c));
+            newContent.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
+              const formats = newContent.getFormatRanges(token) || [];
               formats.forEach(f => {
                 f.startIndex += startIndex;
                 f.endIndex += startIndex;
-                this.startFragment.apply(token, f);
+                fragment.apply(token, f);
               })
-            });
-        }
+            })
+          };
 
+          append(this.startFragment, this.startIndex, endLast);
+          append(this.startFragment, this.startIndex + endLast.contentLength, startLast);
+        }
       }
     }
 

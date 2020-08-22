@@ -144,26 +144,19 @@ export class EventHandler {
       }
       let prevPosition = range.getPreviousPosition();
       if (range.startIndex > 0) {
-
+        range.setStart(prevPosition.fragment, prevPosition.index);
+        range.connect();
         const commonAncestorFragment = range.commonAncestorFragment;
-        const c = commonAncestorFragment.getContentAtIndex(prevPosition.index - 1);
-        if (typeof c === 'string' || c instanceof LeafComponent) {
-          commonAncestorFragment.cut(range.startIndex - 1, 1);
-          range.startIndex = range.endIndex = range.startIndex - 1;
-        } else if (prevPosition.index === 0 && prevPosition.fragment === commonAncestorFragment) {
-          commonAncestorFragment.cut(range.startIndex - 1, 1);
-          range.startIndex = range.endIndex = range.startIndex - 1;
-          if (commonAncestorFragment.contentLength === 0) {
+        const len = commonAncestorFragment.contentLength;
+        if (range.startIndex === 0 && len === 0) {
+          commonAncestorFragment.append(new BrComponent());
+        } else if (range.startIndex === len) {
+          const last = commonAncestorFragment.getContentAtIndex(len - 1);
+          if (last instanceof BrComponent) {
             commonAncestorFragment.append(new BrComponent());
           }
-        } else {
-          while (prevPosition.fragment.contentLength === 0) {
-            range.deleteEmptyTree(prevPosition.fragment);
-            prevPosition = range.getPreviousPosition();
-          }
-          range.setStart(prevPosition.fragment, prevPosition.index);
-          range.connect();
         }
+
       } else {
         while (prevPosition.fragment.contentLength === 0) {
           range.deleteEmptyTree(prevPosition.fragment);
