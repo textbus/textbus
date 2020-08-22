@@ -758,6 +758,18 @@ export class TBRange {
     if (this.collapsed) {
       return;
     }
+
+    const append = function (fragment: Fragment, index: number, newContent: Fragment) {
+      newContent.sliceContents(0).forEach(c => fragment.append(c));
+      newContent.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
+        const formats = newContent.getFormatRanges(token) || [];
+        formats.forEach(f => {
+          f.startIndex += index;
+          f.endIndex += index;
+          fragment.apply(token, f);
+        })
+      })
+    };
     const startFragment = this.startFragment;
     if (startFragment === this.endFragment) {
       this.deleteSelectedScope();
@@ -771,7 +783,8 @@ export class TBRange {
 
       this.deleteSelectedScope();
       if (isDeleteFragment && startFragment === this.startFragment) {
-        this.startFragment.from(endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment);
+        const c = endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment;
+        append(this.startFragment, this.startIndex, c);
         const firstPosition = this.findFirstPosition(this.startFragment);
         this.setStart(firstPosition.fragment, firstPosition.index);
         if (!endFragmentIsCommon) {
@@ -782,19 +795,6 @@ export class TBRange {
           const endLast = this.endFragment.cut(0);
           this.deleteEmptyTree(this.endFragment);
           const startLast = this.startFragment.cut(this.startIndex);
-          const startIndex = this.startIndex;
-
-          const append = function (fragment: Fragment, index: number, newContent: Fragment) {
-            newContent.sliceContents(0).forEach(c => fragment.append(c));
-            newContent.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
-              const formats = newContent.getFormatRanges(token) || [];
-              formats.forEach(f => {
-                f.startIndex += startIndex;
-                f.endIndex += startIndex;
-                fragment.apply(token, f);
-              })
-            })
-          };
 
           append(this.startFragment, this.startIndex, endLast);
           append(this.startFragment, this.startIndex + endLast.contentLength, startLast);

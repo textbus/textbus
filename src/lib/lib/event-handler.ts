@@ -1,10 +1,14 @@
 import {
   BranchComponent,
-  DivisionComponent, Contents,
-  EventType, Fragment, InlineFormatter,
+  DivisionComponent,
+  Contents,
+  EventType,
+  Fragment,
+  InlineFormatter,
   LeafComponent,
   TBEvent,
-  VElement
+  VElement,
+  Component
 } from './core/_api';
 import { BrComponent } from './components/_api';
 import { Input } from './viewer/input';
@@ -154,6 +158,10 @@ export class EventHandler {
           const last = commonAncestorFragment.getContentAtIndex(len - 1);
           if (last instanceof BrComponent) {
             commonAncestorFragment.append(new BrComponent());
+          } else if (last instanceof Component && !(last instanceof LeafComponent)) {
+            prevPosition = range.getPreviousPosition();
+            range.setStart(prevPosition.fragment, prevPosition.index);
+            range.collapse();
           }
         }
 
