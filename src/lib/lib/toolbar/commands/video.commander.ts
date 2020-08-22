@@ -22,7 +22,13 @@ export class VideoCommander implements Commander<Map<string, string | number | b
           }
         } else {
           range.commonAncestorFragment.insert(
-            new VideoComponent(attrs.get('src') as string, !!attrs.get('autoplay'), !!attrs.get('controls')),
+            new VideoComponent(
+              attrs.get('src') as string,
+              !!attrs.get('autoplay'),
+              !!attrs.get('controls'), {
+                width: attrs.get('width') as string,
+                height: attrs.get('height') as string
+              }),
             range.startIndex);
         }
       } else {
