@@ -12,6 +12,9 @@ export class FormHidden implements FormItem {
     this.elementRef.value = config.value + '';
   }
 
+  reset() {
+  }
+
   update(): void {
     // this.value = value;
   }

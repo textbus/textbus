@@ -27,6 +27,13 @@ export class FormRadio implements FormItem {
     this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
   }
 
+  reset() {
+    const values = this.config.values;
+    for (let i = 0; i < values.length; i++) {
+      this.inputs[i].checked = values[i].default;
+    }
+  }
+
   update(value?: any): void {
     const values = this.config.values;
     let isMatch = false;

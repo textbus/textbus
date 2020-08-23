@@ -1,5 +1,4 @@
-import { Form } from '../../uikit/forms/form';
-import { FormType } from '../../uikit/forms/help';
+import { Form, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 import { TableCommander } from '../commands/table.commander';
 import { Toolkit } from '../toolkit/toolkit';
 import { PreComponent } from '../../components/pre.component';
@@ -12,22 +11,23 @@ export const tableAddToolConfig = {
   menuFactory() {
     const form = new Form({
       mini: true,
-      items: [{
-        type: FormType.TextField,
-        name: 'rows',
-        label: '表格行数',
-        placeholder: '请输入表格行数'
-      }, {
-        type: FormType.TextField,
-        name: 'cols',
-        label: '表格列数',
-        placeholder: '请输入表格列数'
-      }, {
-        type: FormType.Switch,
-        label: '使用 TextBus 样式',
-        name: 'useTextBusStyle',
-        checked: true
-      }]
+      items: [
+        new FormTextField({
+          name: 'rows',
+          label: '表格行数',
+          placeholder: '请输入表格行数'
+        }),
+        new FormTextField({
+          name: 'cols',
+          label: '表格列数',
+          placeholder: '请输入表格列数'
+        }),
+        new FormSwitch({
+          label: '使用 TextBus 样式',
+          name: 'useTextBusStyle',
+          checked: true
+        })
+      ]
     });
 
     const quickSelector = document.createElement('div');

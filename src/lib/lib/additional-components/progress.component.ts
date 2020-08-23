@@ -1,6 +1,6 @@
 import { ComponentReader, LeafComponent, VElement, ViewData, VTextNode } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
-import { Form, FormType } from '../uikit/_api';
+import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
 export interface ProgressConfig {
   type: 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'gray' | 'dark';
@@ -79,69 +79,70 @@ export const progressComponentExample: ComponentExample = {
   componentFactory(workbench: Workbench) {
     const form = new Form({
       title: '进度条设置',
-      items: [{
-        type: FormType.TextField,
-        label: '最大值',
-        name: 'max',
-        value: '100',
-        placeholder: '请输入最大值'
-      }, {
-        type: FormType.TextField,
-        label: '最小值',
-        name: 'min',
-        value: '0',
-        placeholder: '请输入最小值',
-        validateFn(value: string): string | null {
-          if (!value) {
-            return '必填项不能为空';
+      items: [
+        new FormTextField({
+          label: '最大值',
+          name: 'max',
+          value: '100',
+          placeholder: '请输入最大值'
+        }),
+        new FormTextField({
+          label: '最小值',
+          name: 'min',
+          value: '0',
+          placeholder: '请输入最小值',
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
           }
-          return null;
-        }
-      }, {
-        type: FormType.TextField,
-        label: '当前进度',
-        name: 'progress',
-        value: '50',
-        placeholder: '请输入当前进度',
-        validateFn(value: string): string | null {
-          if (!value) {
-            return '必填项不能为空';
+        }),
+        new FormTextField({
+          label: '当前进度',
+          name: 'progress',
+          value: '50',
+          placeholder: '请输入当前进度',
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
           }
-          return null;
-        }
-      }, {
-        type: FormType.Select,
-        label: '进度条类型',
-        name: 'type',
-        options: [{
-          label: 'Primary',
-          value: 'primary'
-        }, {
-          label: 'Info',
-          value: 'info'
-        }, {
-          label: 'Success',
-          value: 'success'
-        }, {
-          label: 'Warning',
-          value: 'warning'
-        }, {
-          label: 'Danger',
-          value: 'danger'
-        }, {
-          label: 'Dark',
-          value: 'dark'
-        }, {
-          label: 'Gray',
-          value: 'gray'
-        }],
-        validateFn(value: string): string | null {
-          if (!value) {
-            return '必填项不能为空';
+        }),
+        new FormSelect({
+          label: '进度条类型',
+          name: 'type',
+          options: [{
+            label: 'Primary',
+            value: 'primary'
+          }, {
+            label: 'Info',
+            value: 'info'
+          }, {
+            label: 'Success',
+            value: 'success'
+          }, {
+            label: 'Warning',
+            value: 'warning'
+          }, {
+            label: 'Danger',
+            value: 'danger'
+          }, {
+            label: 'Dark',
+            value: 'dark'
+          }, {
+            label: 'Gray',
+            value: 'gray'
+          }],
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
           }
-          return null;
-        }
-      }]
+        })
+      ]
     })
 
     return new Promise<ProgressComponent>((resolve, reject) => {

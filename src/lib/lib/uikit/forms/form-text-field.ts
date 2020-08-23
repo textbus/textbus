@@ -1,6 +1,6 @@
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-import { AttrState, TextField, FormItem } from './help';
+import { AttrState, TextField, FormItem, FileUploader } from './help';
 
 export class FormTextField implements FormItem {
   elementRef = document.createElement('div');
@@ -9,16 +9,16 @@ export class FormTextField implements FormItem {
   private sub: Subscription;
   private readonly btn: HTMLButtonElement;
   private readonly feedbackEle: HTMLElement;
+  private uploader: FileUploader;
 
-  constructor(private config: TextField,
-              private delegate: (type: string) => Observable<string>) {
+  constructor(private config: TextField) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
     <div class="textbus-control-label">${config.label}</div>
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
-        <input class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
+        <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
       `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
         <span class="textbus-icon-upload"></span>
        </button>`
@@ -38,20 +38,28 @@ export class FormTextField implements FormItem {
         if (this.sub) {
           this.sub.unsubscribe();
         }
-        this.sub = delegate(this.config.uploadType).subscribe({
+        this.sub = this.uploader.upload(this.config.uploadType).subscribe({
           next: url => {
             this.update(url);
           },
           complete: () => {
-            this.reset();
+            this.uploaded();
           }
         });
       });
     }
   }
 
+  useUploader(uploader: FileUploader) {
+    this.uploader = uploader;
+  }
+
+  reset() {
+    this.input.value = this.config.value;
+  }
+
   update(value?: any): void {
-    this.reset();
+    this.uploaded();
     if ([undefined, null].includes(value)) {
       this.input.value = this.config.value || '';
     } else {
@@ -72,7 +80,7 @@ export class FormTextField implements FormItem {
     return !feedback;
   }
 
-  private reset() {
+  private uploaded() {
     if (this.sub) {
       this.sub.unsubscribe();
     }

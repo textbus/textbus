@@ -1,15 +1,6 @@
 import { Observable } from 'rxjs';
 
-export enum FormType {
-  TextField,
-  Select,
-  Radio,
-  Switch,
-  Hidden
-}
-
 export interface TextField {
-  type: FormType.TextField;
   label: string;
   name: string;
   placeholder: string;
@@ -28,7 +19,6 @@ export interface Radio {
 }
 
 export interface RadioGroup {
-  type: FormType.Radio;
   label: string;
   name: string;
   values: Radio[];
@@ -37,7 +27,6 @@ export interface RadioGroup {
 }
 
 export interface Switch {
-  type: FormType.Switch;
   label: string;
   name: string;
   checked: boolean;
@@ -46,7 +35,6 @@ export interface Switch {
 }
 
 export interface Hidden {
-  type: FormType.Hidden;
   name: string;
   value: string | number | boolean;
 }
@@ -58,15 +46,12 @@ export interface SelectOption {
 }
 
 export interface Select {
-  type: FormType.Select,
   label: string;
   name: string;
   options: SelectOption[];
 
-  validateFn?(value: string): string
+  validateFn?(value: any): string
 }
-
-export type FormItemConfig = TextField | RadioGroup | Switch | Hidden | Select;
 
 export interface AttrState {
   name: string;
@@ -79,9 +64,13 @@ export interface FormItem {
 
   update(value?: any): void;
 
+  reset(): void;
+
   getAttr(): AttrState;
 
   validate(): boolean;
+
+  useUploader?(uploader: FileUploader): void;
 }
 
 export interface FileUploader {

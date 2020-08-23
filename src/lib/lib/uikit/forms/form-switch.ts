@@ -12,7 +12,7 @@ export class FormSwitch implements FormItem {
     this.elementRef.innerHTML = `
     <div class="textbus-control-label"></div>
     <div class="textbus-control-static">
-      <label><input type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
+      <label><input name="${config.name}" type="checkbox" ${config.checked ? 'checked="checked"' : ''}> ${config.label}</label>
       <div class="textbus-control-feedback-invalid"></div>
     </div>
     `;
@@ -20,12 +20,12 @@ export class FormSwitch implements FormItem {
     this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
   }
 
+  reset() {
+    this.input.checked = this.config.checked;
+  }
+
   update(value?: any): void {
-    if (value === undefined) {
-      this.input.checked = this.config.checked;
-    } else {
-      this.input.checked = value;
-    }
+    this.input.checked = value;
   }
 
   getAttr(): AttrState {

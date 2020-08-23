@@ -1,7 +1,7 @@
 import { ComponentReader, DivisionComponent, VElement, ViewData } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
-import { FileUploader, Form, FormType } from '../uikit/_api';
+import { FileUploader, Form, FormTextField } from '../uikit/_api';
 
 export interface JumbotronOptions {
   minHeight: string;
@@ -73,27 +73,27 @@ export const jumbotronComponentExample: ComponentExample = {
 
     const form = new Form({
       title: '巨幕设置',
-      items: [{
-        type: FormType.TextField,
-        name: 'minHeight',
-        value: '200px',
-        placeholder: '请输入巨幕最小高度',
-        label: '巨幕最小高度'
-      }, {
-        type: FormType.TextField,
-        label: '背景图片地址',
-        name: 'backgroundImage',
-        placeholder: '请输入背景图片地址',
-        canUpload: true,
-        uploadType: 'image',
-        uploadBtnText: '上传新图片',
-        validateFn(value: string): string | null {
-          if (!value) {
-            return '必填项不能为空';
+      items: [
+        new FormTextField({
+          name: 'minHeight',
+          value: '200px',
+          placeholder: '请输入巨幕最小高度',
+          label: '巨幕最小高度'
+        }),
+        new FormTextField({
+          label: '背景图片地址',
+          name: 'backgroundImage',
+          placeholder: '请输入背景图片地址',
+          canUpload: true,
+          uploadType: 'image',
+          uploadBtnText: '上传新图片',
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
           }
-          return null;
-        }
-      }]
+        })]
     })
 
     form.setFileUploader(fileUploader);
