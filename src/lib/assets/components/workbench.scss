@@ -66,6 +66,7 @@
     transform: translateX(-50%);
     transition: top .15s cubic-bezier(.36, .66, .04, 1);
     pointer-events: auto;
+    //max-height: calc(100% - 20px);
 
     &-active {
       top: 0;

@@ -42,6 +42,8 @@ export class FormRadio implements FormItem {
         this.inputs[i].checked = true;
         isMatch = true;
         break;
+      } else {
+        this.inputs[i].checked = true;
       }
     }
     if (!isMatch) {

@@ -215,4 +215,40 @@
   }
 }
 
-//.textbus-
+.textbus-toolbar-image-margin-setter {
+  width: 40px;
+  height: 30px;
+  position: relative;
+  background-color: $color-gray;
+  margin-left: 55px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  > input {
+    position: absolute;
+    width: 50px;
+    padding: 3px 6px;
+    font-size: 13px;
+    text-align: center;
+
+    &:nth-child(1) {
+      left: -5px;
+      bottom: 35px;
+    }
+
+    &:nth-child(2) {
+      left: 45px;
+      top: 0;
+    }
+
+    &:nth-child(3) {
+      top: 35px;
+      left: -5px;
+    }
+
+    &:nth-child(4) {
+      right: 45px;
+      top: 0;
+    }
+  }
+}

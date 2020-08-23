@@ -10,6 +10,8 @@ export class ImageCommander implements Commander<Map<string, string | number | b
       component.src = attrs.get('src') as string;
       component.width = attrs.get('width') as string;
       component.height = attrs.get('height') as string;
+      component.float = attrs.get('float') as string;
+      component.margin = attrs.get('margin') as string;
     }
 
     selection.ranges.forEach(range => {
@@ -22,7 +24,9 @@ export class ImageCommander implements Commander<Map<string, string | number | b
         } else {
           range.commonAncestorFragment.insert(new ImageComponent(attrs.get('src') as string, {
             width: attrs.get('width') as string,
-            height: attrs.get('height') as string
+            height: attrs.get('height') as string,
+            float: attrs.get('float') as string,
+            margin: attrs.get('margin') as string
           }), range.startIndex);
         }
       } else {
