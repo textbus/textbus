@@ -31,7 +31,7 @@
   }
 }
 
-.textbus-font {
+.textbus-toolbar-font-family {
   &-sans-serif {
     font-family: sans-serif;
   }
@@ -81,7 +81,7 @@
   }
 }
 
-.textbus-text {
+.textbus-toolbar-text-align {
   &-left {
     text-align: left;
   }
@@ -100,14 +100,14 @@
 }
 
 @each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
-  .textbus-font-size-#{$t} {
+  .textbus-toolbar-font-size-#{$t} {
     line-height: 1.2;
     font-size: #{$t}px;
   }
 }
 
 @each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
-  .textbus-line-height-#{str-replace($t + '', '.', '_')} {
+  .textbus-toolbar-line-height-#{str-replace($t + '', '.', '_')} {
     &:before {
       content: "";
       margin-right: 10px;
@@ -126,7 +126,7 @@
 }
 
 @each $t in 0, 1, 2, 3, 4, 5 {
-  .textbus-letter-spacing-#{$t} {
+  .textbus-toolbar-letter-spacing-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -144,7 +144,7 @@
 }
 
 @each $t in 0, 1, 2, 4 {
-  .textbus-text-indent-#{$t} {
+  .textbus-toolbar-text-indent-#{$t} {
     font-variant-numeric: tabular-nums;
 
     &:after {
@@ -165,7 +165,7 @@
 }
 
 
-.textbus-emoji-menu {
+.textbus-toolbar-emoji-menu {
   width: 220px;
   padding: 10px 5px;
   box-sizing: border-box;
@@ -187,7 +187,7 @@
   }
 }
 
-.textbus-table-quick-selector {
+.textbus-toolbar-table-quick-selector {
   overflow: hidden;
   padding-left: 1px;
   padding-top: 1px;
@@ -207,10 +207,12 @@
     margin-top: -1px;
     position: relative;
 
-    &.textbus-table-quick-selector-selected {
+    &.textbus-toolbar-table-quick-selector-selected {
       background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
       border-color: $color-primary;
       z-index: 1;
     }
   }
 }
+
+//.textbus-

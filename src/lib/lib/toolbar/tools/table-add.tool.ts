@@ -31,7 +31,7 @@ export const tableAddToolConfig = {
     });
 
     const quickSelector = document.createElement('div');
-    quickSelector.classList.add('textbus-table-quick-selector');
+    quickSelector.classList.add('textbus-toolbar-table-quick-selector');
     const map = new Map<HTMLElement, { row: number, col: number }>();
     for (let row = 0; row < 10; row++) {
       for (let col = 0; col < 10; col++) {
@@ -56,9 +56,9 @@ export const tableAddToolConfig = {
       if (config) {
         map.forEach((value, key) => {
           if (value.row <= config.row && value.col <= config.col) {
-            key.classList.add('textbus-table-quick-selector-selected');
+            key.classList.add('textbus-toolbar-table-quick-selector-selected');
           } else {
-            key.classList.remove('textbus-table-quick-selector-selected');
+            key.classList.remove('textbus-toolbar-table-quick-selector-selected');
           }
         })
         form.update(new FormatAbstractData({
@@ -72,7 +72,7 @@ export const tableAddToolConfig = {
 
     quickSelector.addEventListener('mouseleave', () => {
       if (flag === false) {
-        Array.from(map.keys()).forEach(el => el.classList.remove('textbus-table-quick-selector-selected'));
+        Array.from(map.keys()).forEach(el => el.classList.remove('textbus-toolbar-table-quick-selector-selected'));
         form.update(new FormatAbstractData({
           attrs: null
         }))

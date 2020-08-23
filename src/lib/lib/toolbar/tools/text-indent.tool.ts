@@ -13,20 +13,20 @@ export const textIndentToolConfig: SelectConfig = {
   options: [{
     label: '0x',
     value: '0',
-    classes: ['textbus-text-indent-0'],
+    classes: ['textbus-toolbar-text-indent-0'],
     default: true
   }, {
     label: '1x',
     value: '1em',
-    classes: ['textbus-text-indent-1'],
+    classes: ['textbus-toolbar-text-indent-1'],
     default: true
   }, {
     label: '2x',
-    classes: ['textbus-text-indent-2'],
+    classes: ['textbus-toolbar-text-indent-2'],
     value: '2em',
   }, {
     label: '4x',
-    classes: ['textbus-text-indent-4'],
+    classes: ['textbus-toolbar-text-indent-4'],
     value: '4em'
   }],
   matcher: new FormatMatcher(textIndentFormatter, [PreComponent]),

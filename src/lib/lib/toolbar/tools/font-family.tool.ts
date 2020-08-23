@@ -10,52 +10,52 @@ export const fontFamilyToolConfig: SelectConfig = {
   tooltip: '字体',
   options: [{
     label: 'sans-serif',
-    classes: ['textbus-font-sans-serif'],
+    classes: ['textbus-toolbar-font-family-sans-serif'],
     value: '',
     default: true
   }, {
     label: '宋体',
-    classes: ['textbus-font-SimSun'],
+    classes: ['textbus-toolbar-font-family-SimSun'],
     value: 'SimSun'
   }, {
     label: '黑体',
-    classes: ['textbus-font-SimHei'],
+    classes: ['textbus-toolbar-font-family-SimHei'],
     value: 'SimHei'
   }, {
     label: '微软雅黑',
-    classes: ['textbus-font-Microsoft-YaHei'],
+    classes: ['textbus-toolbar-font-family-Microsoft-YaHei'],
     value: 'Microsoft YaHei'
   }, {
     label: '楷体',
-    classes: ['textbus-font-KaiTi'],
+    classes: ['textbus-toolbar-font-family-KaiTi'],
     value: 'KaiTi'
   }, {
     label: '仿宋',
-    classes: ['textbus-font-FangSong'],
+    classes: ['textbus-toolbar-font-family-FangSong'],
     value: 'FangSong',
   }, {
     label: '隶书',
-    classes: ['textbus-font-SimLi'],
+    classes: ['textbus-toolbar-font-family-SimLi'],
     value: 'SimLi'
   }, {
     label: 'Andale Mono',
-    classes: ['textbus-font-andale-mono'],
+    classes: ['textbus-toolbar-font-family-andale-mono'],
     value: 'Andale Mono'
   }, {
     label: 'Arial',
-    classes: ['textbus-font-Arial'],
+    classes: ['textbus-toolbar-font-family-Arial'],
     value: 'Arial'
   }, {
     label: 'Helvetica',
-    classes: ['textbus-font-Helvetica'],
+    classes: ['textbus-toolbar-font-family-Helvetica'],
     value: 'Helvetica'
   }, {
     label: 'Impact',
-    classes: ['textbus-font-Impact'],
+    classes: ['textbus-toolbar-font-family-Impact'],
     value: 'Impact'
   }, {
     label: 'Times New Roman',
-    classes: ['textbus-font-Times-New-Roman'],
+    classes: ['textbus-toolbar-font-family-Times-New-Roman'],
     value: 'Times New Roman'
   }],
   matcher: new FormatMatcher(fontFamilyFormatter, [PreComponent]),
