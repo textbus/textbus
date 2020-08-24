@@ -77,18 +77,16 @@ export class ImageVideoResizeHook implements Lifecycle {
             proportion = -proportion;
           }
 
-          endWidth = startWidth + startWidth * proportion;
-          endHeight = startHeight + startHeight * proportion;
-          this.currentElement.style.width = endWidth + 'px';
-          this.currentElement.style.height = endHeight + 'px';
-        } else if ([1, 5].includes(index)) {
-          endHeight = startHeight + (index === 1 ? -offsetY : offsetY);
-          this.currentElement.style.height = endHeight + 'px';
-        } else if ([3, 7].includes(index)) {
-          endWidth = startWidth + (index === 3 ? offsetX : -offsetX)
-          this.currentElement.style.width = endWidth + 'px';
-        }
+          endWidth = Math.round(startWidth + startWidth * proportion);
+          endHeight = Math.round(startHeight + startHeight * proportion);
 
+        } else if ([1, 5].includes(index)) {
+          endHeight = Math.round(startHeight + (index === 1 ? -offsetY : offsetY));
+        } else if ([3, 7].includes(index)) {
+          endWidth = Math.round(startWidth + (index === 3 ? offsetX : -offsetX));
+        }
+        this.currentElement.style.width = endWidth + 'px';
+        this.currentElement.style.height = endHeight + 'px';
         this.updateStyle();
       };
 
