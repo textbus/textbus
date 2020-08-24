@@ -212,6 +212,7 @@ export class GroupHandler implements Tool {
       s.next(value);
     });
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
+      menu.update?.(selectionMatchDelta.matchData);
       selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
     });
     this.tools.push({
@@ -245,7 +246,21 @@ export class GroupHandler implements Tool {
       }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+      menu.update?.(selectionMatchDelta.matchData);
+      switch (selectionMatchDelta.state) {
+        case HighlightState.Highlight:
+          selectMenu.disabled = false;
+          selectMenu.highlight = true;
+          break;
+        case HighlightState.Normal:
+          selectMenu.disabled = false;
+          selectMenu.highlight = false;
+          break;
+        case HighlightState.Disabled:
+          selectMenu.disabled = true;
+          selectMenu.highlight = false;
+          break
+      }
     });
     this.tools.push({
       config: c,
