@@ -127,20 +127,27 @@ export abstract class Formatter {
   /**
    * 当 TextBus 渲染样式时，会调用 Formatter 类 render 方法，并根据 render 方法返回的渲染模式，处理虚拟 DOM 结构。
    *
-   * @param isOutputModel  是否是输出模式，有些情况下，编辑模式和输出模式渲染的结果是需要不一样的。
-   *                      如在编辑状态下，可能会添加一些临时的属性来做交互，或者兼听一些事件等等，这在输出结果时，是不需要的。
-   * @param state         当前样式的状态，一般来说有两种，生效的（Valid）和不生效的（Invalid），但有些情况下，可能还有其它状态。
-   *                      如：继承（Inherit）、排除（Exclude）。
-   *                      如果当前是状态是 Invalid，是不会调用 render 方法的，只有是其它三种中的一种才会调用。
-   *                      Formatter 在渲染的时候，可以根据不同的状态来渲染出不同的结果。
-   * @param abstractData  渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
-   * @param existingElement 是否已有同级元素。如：当两个样式的范围是一样的，其中一个样式先渲染时，第二个样式渲染时，则会拿到第一个样式渲染后的元素。
-   * @return              ReplaceModel | ChildSlotModel | null
-   *                      ReplaceModel: 替换模式———用新渲染出的元素替换已渲染出的同级元素；
-   *                      ChildSlotModel: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
-   *                      null: 如果已有渲染出的元素，则使用渲染出的元素，否则创建一个虚拟节点
+   * @param isOutputModel   是否是输出模式，有些情况下，编辑模式和输出模式渲染的结果是需要不一样的。
+   *                        如在编辑状态下，可能会添加一些临时的属性来做交互，或者兼听一些事件等等，
+   *                        这在输出结果时，是不需要的。
+   * @param state           当前样式的状态，一般来说有两种，生效的（Valid）和不生效的（Invalid），但
+   *                        有些情况下，可能还有其它状态。
+   *                        如：继承（Inherit）、排除（Exclude）。
+   *                        如果当前是状态是 Invalid，是不会调用 render 方法的，只有是其它三种中的一种
+   *                        才会调用。
+   *                        Formatter 在渲染的时候，可以根据不同的状态来渲染出不同的结果。
+   * @param abstractData    渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
+   * @param existingElement 是否已有同级元素。如：当两个样式的范围是一样的，其中一个样式先渲染时，第二个样式
+   *                        渲染时，则会拿到第一个样式渲染后的元素。
+   * @return                ReplaceModel | ChildSlotModel | null
+   *                        ReplaceModel: 替换模式———用新渲染出的元素替换已渲染出的同级元素；
+   *                        ChildSlotModel: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
+   *                        null: 如果已有渲染出的元素，则使用渲染出的元素，否则创建一个虚拟节点
    */
-  abstract render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
+  abstract render(isOutputModel: boolean,
+                  state: FormatEffect,
+                  abstractData: FormatAbstractData,
+                  existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
 
   /**
    * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。

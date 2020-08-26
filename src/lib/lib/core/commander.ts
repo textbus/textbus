@@ -7,7 +7,7 @@ import { Fragment } from './fragment';
  */
 export interface Commander<T = any> {
   /**
-   * 当调用 command 方法时，是否把操作前的数据存入历史栈
+   * 当调用 command 方法后，是否把当前操作存入历史栈
    */
   recordHistory: boolean;
   /**

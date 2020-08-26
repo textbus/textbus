@@ -19,7 +19,12 @@ export class FindHook implements Lifecycle {
   private positionIndex = 0;
   private isJustFind = true;
 
-  onApplyCommand(commander: Commander, selection: TBSelection, editor: Editor, rootFragment: Fragment, params: any, updateParamsFn: (newParams: any) => void): boolean {
+  onApplyCommand(commander: Commander,
+                 selection: TBSelection,
+                 editor: Editor,
+                 rootFragment: Fragment,
+                 params: any,
+                 updateParamsFn: (newParams: any) => void): boolean {
     this.isJustFind = false;
     if (commander instanceof FindCommander) {
       const rule = params as FindAndReplaceRule;

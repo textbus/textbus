@@ -180,10 +180,10 @@ export class TableComponent extends BackboneComponent {
         for (const col of row) {
           const td = new VElement('td');
           if (col.colspan > 1) {
-            td.attrs.set('colSpan', col.colspan);
+            td.attrs.set('colspan', col.colspan);
           }
           if (col.rowspan > 1) {
-            td.attrs.set('rowSpan', col.rowspan);
+            td.attrs.set('rowspan', col.rowspan);
           }
           if (col.fragment.contentLength === 0) {
             col.fragment.append(new BrComponent());
