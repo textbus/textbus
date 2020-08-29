@@ -46,14 +46,17 @@ code, kbd, pre, samp {
   font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
 }`, `[style*=color]:not([style*=background-color]) a {
   color: inherit;
-}`, `table {
+}`, `td,th{
+  border-width: 1px;
+  border-style: solid;
+}
+table {
       border-spacing: 0;
       border-collapse: collapse;
       width: 100%;
-      background-color: #fff;
     }
     .tb-table td, th {
-      border: 1px solid #aaa;
+      border-color: #aaa;
 }`, `a {
       text-decoration: underline;
       color: #449fdb;
