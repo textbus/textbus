@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
-  deviceWidth: '768px',
+  deviceWidth: '375px',
   theme: 'dark',
   fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
