@@ -147,8 +147,9 @@ export class GroupHandler implements Tool {
       iconClasses: c.iconClasses,
       options: c.options,
       label: c.label,
-      onSelected(value: any): any {
+      onSelected: (value: any) => {
         s.next(value);
+        this.dropdown.hide();
       }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
@@ -179,8 +180,9 @@ export class GroupHandler implements Tool {
       actions: c.actions.map(c => {
         return {
           ...c,
-          onChecked(): any {
+          onChecked: () => {
             s.next(c.value);
+            this.dropdown.hide();
           }
         }
       }),
@@ -210,6 +212,7 @@ export class GroupHandler implements Tool {
 
     menu.onComplete.subscribe(value => {
       s.next(value);
+      this.dropdown.hide();
     });
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
       menu.update?.(selectionMatchDelta.matchData);
