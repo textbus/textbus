@@ -40,13 +40,13 @@ export const italicFormatter = new InlineTagFormatter('em', {
 export const strikeThroughFormatter = new InlineTagFormatter('del', {
   tags: ['strike', 'del', 's'],
   styles: {
-    textDecoration: ['line-through']
+    textDecoration: /\bline-through\b/
   }
 });
 export const underlineFormatter = new InlineTagFormatter('u', {
   tags: ['u'],
   styles: {
-    textDecoration: ['underline']
+    textDecoration: /\bunderline\b/
   }
 });
 export const subscriptFormatter = new InlineTagFormatter('sub', {
