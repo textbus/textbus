@@ -88,6 +88,11 @@ export class Editor implements FileUploader {
   /** 当 TextBus 历史记录管理器 */
   readonly history: HistoryManager;
 
+
+  selection: TBSelection;
+  rootFragment: Fragment;
+  readonly toolbar: Toolbar;
+  readonly renderer = new Renderer();
   readonly elementRef = document.createElement('div');
 
   private readonly container: HTMLElement;
@@ -95,8 +100,6 @@ export class Editor implements FileUploader {
   private workbench: Workbench;
   private viewer: Viewer;
   private parser: Parser;
-  private toolbar: Toolbar;
-  private renderer = new Renderer();
   private statusBar = new StatusBar();
 
   private readyState = false;
@@ -104,10 +107,8 @@ export class Editor implements FileUploader {
   private tasks: Array<() => void> = [];
 
   private nativeSelection: Selection;
-  private selection: TBSelection;
 
   private defaultHTML = '<p><br></p>';
-  private rootFragment: Fragment;
   private snapshotSubscription: Subscription;
   private readyEvent = new Subject<void>();
   private changeEvent = new Subject<void>();

@@ -1,9 +1,9 @@
-import 'core-js';
-import { createEditor, fontSizeToolConfig } from './lib/public-api';
-import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
+import 'core-js';
+import './lib/assets/index.scss';
 
-// document.body.insertBefore(form.elementRef, document.body.children[0]);
+
+import { createEditor, fontSizeToolConfig, HighlightState } from './lib/public-api';
 
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
@@ -25,14 +25,17 @@ const editor = createEditor('#editor', {
   },
   contents: document.getElementById('table').innerHTML
 });
-let i = 0;
-editor.onChange.subscribe(() => {
-  // console.log(i, Date.now());
-  i++;
-})
-window['editor'] = editor;
+
 document.getElementById('btn').addEventListener('click', () => {
-  console.log(editor.getContents().html)
+  editor.toolbar.tools.forEach(tool => {
+    if (tool.config === fontSizeToolConfig) {
+      const selectionMatchDelta = tool.config.matcher.queryState(editor.selection, editor.renderer, editor);
+      const overlap = selectionMatchDelta.state === HighlightState.Highlight;
+      tool.instance.commander.command(editor.selection, {}, overlap, editor.renderer, editor.rootFragment);
+    }
+  })
 })
+
+
 
 // editor.setContents(`<h1>textbus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);
