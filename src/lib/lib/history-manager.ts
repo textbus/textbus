@@ -55,6 +55,11 @@ export class HistoryManager {
     this.historySequence = null;
   }
 
+  clean() {
+    this.historyIndex = 0;
+    this.historySequence = [];
+  }
+
   private static cloneHistoryData(snapshot: Snapshot): Snapshot {
     return {
       contents: snapshot.contents.clone(),
