@@ -29,9 +29,7 @@ const editor = createEditor('#editor', {
 document.getElementById('btn').addEventListener('click', () => {
   editor.toolbar.tools.forEach(tool => {
     if (tool.config === fontSizeToolConfig) {
-      const selectionMatchDelta = tool.config.matcher.queryState(editor.selection, editor.renderer, editor);
-      const overlap = selectionMatchDelta.state === HighlightState.Highlight;
-      tool.instance.commander.command(editor.selection, {}, overlap, editor.renderer, editor.rootFragment);
+      editor.invoke(tool, '72px');
     }
   })
 })

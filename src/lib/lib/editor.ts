@@ -1,5 +1,5 @@
 import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
-import { from, fromEvent, merge, Observable, of, Subject, Subscription, zip } from 'rxjs';
+import { from, fromEvent, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import pretty from 'pretty';
 
 import {
@@ -22,7 +22,7 @@ import {
   VElement
 } from './core/_api';
 import { Viewer } from './viewer/viewer';
-import { HighlightState, Toolbar, ToolConfig, ToolFactory } from './toolbar/_api';
+import { HighlightState, Toolbar, ToolConfig, ToolEntity, ToolFactory } from './toolbar/_api';
 import { BlockComponent, BrComponent, PreComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
@@ -89,14 +89,14 @@ export class Editor implements FileUploader {
   readonly history: HistoryManager;
 
 
-  selection: TBSelection;
-  rootFragment: Fragment;
   readonly toolbar: Toolbar;
-  readonly renderer = new Renderer();
   readonly elementRef = document.createElement('div');
 
   private readonly container: HTMLElement;
 
+  private renderer = new Renderer();
+  private selection: TBSelection;
+  private rootFragment: Fragment;
   private workbench: Workbench;
   private viewer: Viewer;
   private parser: Parser;
@@ -297,6 +297,15 @@ export class Editor implements FileUploader {
   }
 
   /**
+   * 应用工具方法
+   * @param tool
+   * @param params
+   */
+  invoke(tool: ToolEntity, params?: any) {
+    this.execCommand(tool.config, params, tool.instance.commander);
+  }
+
+  /**
    * 销毁 TextBus 实例。
    */
   destroy() {
@@ -353,13 +362,7 @@ export class Editor implements FileUploader {
         this.statusBar.paths.update(node);
       }),
       this.toolbar.onAction.subscribe(config => {
-        if (this.selection) {
-          this.apply(config.config, config.params, config.instance.commander);
-          if (config.instance.commander.recordHistory) {
-            this.history.recordSnapshot(this.rootFragment, this.selection);
-            this.listenUserWriteEvent();
-          }
-        }
+        this.execCommand(config.config, config.params, config.instance.commander);
       }),
       this.viewer.input.events.onFocus.subscribe(() => {
         this.recordSnapshotFromEditingBefore();
@@ -586,8 +589,14 @@ export class Editor implements FileUploader {
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
   }
 
-  private apply(config: ToolConfig, params: any, commander: Commander) {
+  private execCommand(config: ToolConfig, params: any, commander: Commander) {
+
     const selection = this.selection;
+
+    if (!this.selection) {
+      return;
+    }
+
     const state = config.matcher ?
       config.matcher.queryState(selection, this.renderer, this).state :
       HighlightState.Normal;
@@ -609,6 +618,11 @@ export class Editor implements FileUploader {
       this.render();
       selection.restore();
       this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);
+    }
+
+    if (commander.recordHistory) {
+      this.history.recordSnapshot(this.rootFragment, this.selection);
+      this.listenUserWriteEvent();
     }
   }
 

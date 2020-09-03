@@ -16,10 +16,15 @@ import { SelectionMatchDelta } from './matcher/matcher';
 import { createKeymapHTML, FileUploader } from '../uikit/_api';
 import { DialogManager } from '../workbench/workbench';
 
+export interface ToolEntity {
+  config: ToolConfig;
+  instance: Tool;
+}
+
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable<{ config: ToolConfig, instance: Tool, params: any }>;
-  readonly tools: Array<{ config: ToolConfig, instance: Tool }> = [];
+  onAction: Observable< ToolEntity & { params: any }>;
+  readonly tools: ToolEntity[] = [];
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
   private toolWrapper = document.createElement('div');
