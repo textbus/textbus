@@ -25,7 +25,7 @@ export interface SelectOptionConfig {
   keymap?: Keymap;
 }
 
-export interface SelectConfig {
+export interface SelectToolConfig {
   /** 当前 Select 某项点击后，应用的命令 */
   commanderFactory(): Commander;
 
@@ -58,7 +58,7 @@ export class SelectHandler implements Tool {
   private value = '';
   private dropdown: UIDropdown;
 
-  constructor(private config: SelectConfig,
+  constructor(private config: SelectToolConfig,
               private stickyElement: HTMLElement) {
     this.commander = config.commanderFactory();
     this.onApply = this.applyEventSource.asObservable();

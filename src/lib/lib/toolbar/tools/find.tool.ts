@@ -1,8 +1,7 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
-import { Toolkit } from '../toolkit/toolkit';
-import { AdditionalViewer } from '../toolkit/_api';
+import { AdditionalToolConfig, AdditionalViewer, Toolkit } from '../toolkit/_api';
 import { FindCommander } from '../commands/find.commander';
 
 export interface FindAndReplaceRule {
@@ -105,7 +104,7 @@ class FindForm implements AdditionalViewer {
   }
 }
 
-export const findToolConfig = {
+export const findToolConfig: AdditionalToolConfig = {
   tooltip: '查找与替换',
   iconClasses: ['textbus-icon-search'],
   keymap: {

@@ -2,10 +2,9 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Toolkit } from '../toolkit/toolkit';
-import { SelectConfig } from '../toolkit/select.handler';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 
-export const textAlignToolConfig: SelectConfig = {
+export const textAlignToolConfig: SelectToolConfig = {
   tooltip: '对齐方式',
   options: [{
     label: '左对齐',

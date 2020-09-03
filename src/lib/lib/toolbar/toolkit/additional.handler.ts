@@ -17,7 +17,7 @@ export interface AdditionalViewer<T = any> {
 /**
  * 按扭型工具的配置接口
  */
-export interface AdditionalConfig<T = any> {
+export interface AdditionalToolConfig<T = any> {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
 
@@ -50,7 +50,7 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   private button: UIButton;
   private showEvent = new Subject<AdditionalViewer>();
 
-  constructor(private config: AdditionalConfig) {
+  constructor(private config: AdditionalToolConfig) {
     this.commander = config.commanderFactory();
 
     this.onShow = this.showEvent.asObservable();

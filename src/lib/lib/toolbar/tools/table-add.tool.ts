@@ -1,11 +1,11 @@
 import { Form, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 import { TableCommander } from '../commands/table.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 import { TableMatcher } from '../matcher/table.matcher';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 
-export const tableAddToolConfig = {
+export const tableAddToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table'],
   tooltip: '表格',
   menuFactory() {

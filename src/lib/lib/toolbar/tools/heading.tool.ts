@@ -1,11 +1,10 @@
 import { BlockCommander } from '../commands/block.commander';
 import { BlockComponent } from '../../components/block.component';
 import { BlockMatcher } from '../matcher/block.matcher';
-import { Toolkit } from '../toolkit/toolkit';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { SelectConfig } from '../toolkit/select.handler';
 
-export const headingToolConfig: SelectConfig = {
+export const headingToolConfig: SelectToolConfig = {
   tooltip: '段落与标题',
   matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
   highlight(options, t) {

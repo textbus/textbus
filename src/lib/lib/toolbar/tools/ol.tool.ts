@@ -1,9 +1,9 @@
 import { ListMatcher } from '../matcher/list.matcher';
 import { ListCommander } from '../commands/list.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const olToolConfig = {
+export const olToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-list-numbered'],
   tooltip: '有序列表',
   keymap: {

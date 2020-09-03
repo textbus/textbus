@@ -1,5 +1,5 @@
 import 'core-js';
-import { createEditor } from './lib/create';
+import { createEditor, fontSizeToolConfig } from './lib/public-api';
 import './lib/assets/index.scss';
 import { Observable } from 'rxjs';
 

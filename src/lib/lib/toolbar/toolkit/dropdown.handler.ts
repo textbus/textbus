@@ -16,7 +16,7 @@ export interface DropdownViewer<T = any> {
   reset?(): void;
 }
 
-export interface DropdownConfig {
+export interface DropdownToolConfig {
   /** 下拉控件展开后显示的内容 */
   menuFactory(): DropdownViewer;
 
@@ -45,7 +45,7 @@ export class DropdownHandler implements Tool {
   private dropdown: UIDropdown;
   private viewer: DropdownViewer;
 
-  constructor(private config: DropdownConfig,
+  constructor(private config: DropdownToolConfig,
               private stickyElement: HTMLElement) {
     this.commander = config.commanderFactory();
     const viewer = config.menuFactory();

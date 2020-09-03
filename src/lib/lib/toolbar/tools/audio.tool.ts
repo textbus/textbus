@@ -1,10 +1,10 @@
 import { AudioComponent, PreComponent } from '../../components/_api';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
-import { Toolkit } from '../toolkit/toolkit';
+import { FormToolConfig, Toolkit } from '../toolkit/_api';
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 
-export const audioToolConfig = {
+export const audioToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-music'],
   tooltip: '音频',
   menuFactory() {

@@ -5,7 +5,7 @@ import { HighlightState } from '../help';
 import { SelectionMatchDelta } from '../matcher/_api';
 import { Commander } from '../../core/_api';
 import { UIButton, UIKit } from '../../uikit/uikit';
-import { DropdownConfig, DropdownViewer } from './dropdown.handler';
+import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
 import { FileUploader } from '../../uikit/forms/help';
 
@@ -13,7 +13,7 @@ export interface FormViewer<T = any> extends DropdownViewer {
   setFileUploader(fileUploader: FileUploader): void;
 }
 
-export interface FormConfig extends DropdownConfig {
+export interface FormToolConfig extends DropdownToolConfig {
   menuFactory(): FormViewer;
 }
 
@@ -24,7 +24,7 @@ export class FormHandler implements Tool {
   private button: UIButton;
   private viewer: DropdownViewer;
 
-  constructor(private config: FormConfig,
+  constructor(private config: FormToolConfig,
               private delegate: FileUploader,
               private dialogManager: DialogManager) {
     this.commander = config.commanderFactory();

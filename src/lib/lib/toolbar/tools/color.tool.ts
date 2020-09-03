@@ -2,10 +2,10 @@ import { colorFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
-import { Toolkit } from '../toolkit/toolkit';
+import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const colorToolConfig = {
+export const colorToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-color'],
   tooltip: '文字颜色',
   menuFactory() {

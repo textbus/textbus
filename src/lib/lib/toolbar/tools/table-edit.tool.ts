@@ -1,8 +1,8 @@
 import { TableEditActions, TableEditCommander } from '../commands/table-edit.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { ActionSheetToolConfig, Toolkit } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 
-export const tableEditToolConfig = {
+export const tableEditToolConfig: ActionSheetToolConfig = {
   iconClasses: ['textbus-icon-table-edit'],
   tooltip: '编辑表格',
   matcher: new TableEditMatcher(),

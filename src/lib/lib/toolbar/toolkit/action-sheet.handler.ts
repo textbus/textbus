@@ -20,7 +20,7 @@ export interface ActionConfig {
   keymap?: Keymap;
 }
 
-export interface ActionSheetConfig {
+export interface ActionSheetToolConfig {
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
 
@@ -52,7 +52,7 @@ export class ActionSheetHandler implements Tool {
   private eventSource = new Subject<any>();
   private dropdown: UIDropdown;
 
-  constructor(private config: ActionSheetConfig,
+  constructor(private config: ActionSheetToolConfig,
               private stickyElement: HTMLElement) {
     this.onApply = this.eventSource.asObservable();
     this.onMatched = this.matchedEvent.asObservable();

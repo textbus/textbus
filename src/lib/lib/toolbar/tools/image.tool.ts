@@ -2,7 +2,7 @@ import { AttrState, createElement, createTextNode, Form, FormItem, FormRadio, Fo
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageComponent, PreComponent } from '../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { FormToolConfig, Toolkit } from '../toolkit/_api';
 
 class MarginSetter implements FormItem {
   name = 'margin';
@@ -71,7 +71,7 @@ class MarginSetter implements FormItem {
   }
 }
 
-export const imageToolConfig = {
+export const imageToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-image'],
   tooltip: '图片',
   menuFactory() {

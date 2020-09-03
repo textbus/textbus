@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { EmojiCommander } from '../commands/emoji.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { DropdownViewer } from '../toolkit/dropdown.handler';
 
 class Emoji implements DropdownViewer {
@@ -42,7 +42,7 @@ class Emoji implements DropdownViewer {
   }
 }
 
-export const emojiToolConfig = {
+export const emojiToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-emoji'],
   tooltip: '表情',
   commanderFactory() {

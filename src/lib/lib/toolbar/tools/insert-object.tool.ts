@@ -1,5 +1,4 @@
-import { Toolkit } from '../toolkit/toolkit';
-import { GroupConfig, MenuType } from '../toolkit/group.handler';
+import { Toolkit, GroupConfig, MenuType } from '../toolkit/_api';
 import { preToolConfig } from './pre.tool';
 import { subscriptToolConfig } from './subscript.tool';
 import { superscriptToolConfig } from './superscript.tool';

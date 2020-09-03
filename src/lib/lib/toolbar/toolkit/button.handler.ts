@@ -10,7 +10,7 @@ import { UIButton, UIKit } from '../../uikit/uikit';
 /**
  * 按扭型工具的配置接口
  */
-export interface ButtonConfig {
+export interface ButtonToolConfig {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
   /** 锚中节点的的匹配项配置 */
@@ -37,7 +37,7 @@ export class ButtonHandler implements Tool {
   private eventSource = new Subject<void>();
   private btn: UIButton;
 
-  constructor(private config: ButtonConfig) {
+  constructor(private config: ButtonToolConfig) {
     this.commander = config.commanderFactory();
     this.onApply = this.eventSource.asObservable();
 

@@ -1,9 +1,9 @@
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { ToggleBlockCommander } from '../commands/toggle-block.commander';
 import { BlockMatcher } from '../matcher/block.matcher';
 import { BlockComponent } from '../../components/block.component';
 
-export const blockquoteToolConfig = {
+export const blockquoteToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-quotes-right'],
   tooltip: '引用',
   keymap: {

@@ -2,11 +2,10 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { fontFamilyFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Toolkit } from '../toolkit/toolkit';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { SelectConfig } from '../toolkit/select.handler';
 
-export const fontFamilyToolConfig: SelectConfig = {
+export const fontFamilyToolConfig: SelectToolConfig = {
   tooltip: '字体',
   options: [{
     label: 'sans-serif',

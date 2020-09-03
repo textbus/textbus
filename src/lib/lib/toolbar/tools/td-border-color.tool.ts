@@ -1,9 +1,9 @@
 import { Palette } from './utils/palette';
-import { Toolkit } from '../toolkit/toolkit';
+import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 import { TdBorderColorCommander } from '../commands/td-border-color.commander';
 
-export const tdBorderColorToolConfig = {
+export const tdBorderColorToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table-border'],
   tooltip: '表格边框颜色',
   menuFactory() {

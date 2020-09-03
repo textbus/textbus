@@ -1,10 +1,10 @@
 import { italicFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const italicToolConfig = {
+export const italicToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-italic'],
   tooltip: '斜体',
   keymap: {

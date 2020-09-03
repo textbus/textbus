@@ -1,10 +1,10 @@
 import { codeFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const codeToolConfig = {
+export const codeToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-code'],
   tooltip: '代码',
   // keymap: {

@@ -2,11 +2,10 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { textIndentFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Toolkit } from '../toolkit/toolkit';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { SelectConfig } from '../toolkit/select.handler';
 
-export const textIndentToolConfig: SelectConfig = {
+export const textIndentToolConfig: SelectToolConfig = {
   tooltip: '首行缩进',
   iconClasses: ['textbus-icon-text-indent'],
   mini: true,

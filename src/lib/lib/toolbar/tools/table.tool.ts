@@ -1,5 +1,4 @@
-import { Toolkit } from '../toolkit/toolkit';
-import { GroupConfig, MenuType } from '../toolkit/group.handler';
+import { Toolkit, GroupConfig, MenuType } from '../toolkit/_api';
 import { tableAddToolConfig } from './table-add.tool';
 import { tableEditToolConfig } from './table-edit.tool';
 import { tableAddParagraphToolConfig } from './table-add-paragraph.tool';

@@ -4,14 +4,14 @@ import { Tool } from './help';
 import { Commander } from '../../core/commander';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 import { HighlightState } from '../help';
-import { ButtonConfig } from './button.handler';
-import { ActionSheetConfig } from './action-sheet.handler';
-import { SelectConfig } from './select.handler';
+import { ButtonToolConfig } from './button.handler';
+import { ActionSheetToolConfig } from './action-sheet.handler';
+import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchDelta } from '../matcher/matcher';
-import { DropdownConfig } from './dropdown.handler';
+import { DropdownToolConfig } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
-import { FormConfig } from './form.handler';
+import { FormToolConfig } from './form.handler';
 import { FileUploader } from '../../uikit/forms/help';
 
 export enum MenuType {
@@ -22,24 +22,24 @@ export enum MenuType {
   Form
 }
 
-export interface ActionMenu extends ButtonConfig {
+export interface ActionMenu extends ButtonToolConfig {
   type: MenuType.Action;
 }
 
-export interface SelectMenu extends SelectConfig {
+export interface SelectMenu extends SelectToolConfig {
   type: MenuType.Select;
   label: string;
 }
 
-export interface ActionSheetMenu extends ActionSheetConfig {
+export interface ActionSheetMenu extends ActionSheetToolConfig {
   type: MenuType.ActionSheet;
 }
 
-export interface DropdownMenu extends DropdownConfig {
+export interface DropdownMenu extends DropdownToolConfig {
   type: MenuType.Dropdown
 }
 
-export interface FormMenu extends FormConfig {
+export interface FormMenu extends FormToolConfig {
   type: MenuType.Form
 }
 

@@ -2,9 +2,9 @@ import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_
 import { VideoComponent, PreComponent } from '../../components/_api';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
-import { Toolkit } from '../toolkit/toolkit';
+import { FormToolConfig, Toolkit } from '../toolkit/_api';
 
-export const videoToolConfig = {
+export const videoToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-video'],
   tooltip: '视频',
   menuFactory() {

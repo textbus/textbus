@@ -2,11 +2,10 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Toolkit } from '../toolkit/toolkit';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { SelectConfig } from '../toolkit/select.handler';
 
-export const letterSpacingToolConfig: SelectConfig = {
+export const letterSpacingToolConfig: SelectToolConfig = {
   tooltip: '字间距',
   iconClasses: ['textbus-icon-letter-spacing'],
   mini: true,

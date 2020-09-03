@@ -1,10 +1,10 @@
-import { ButtonConfig, ButtonHandler } from './button.handler';
-import { SelectConfig, SelectHandler } from './select.handler';
-import { DropdownConfig, DropdownHandler } from './dropdown.handler';
-import { ActionSheetConfig, ActionSheetHandler } from './action-sheet.handler';
-import { AdditionalConfig, AdditionalHandler } from './additional.handler';
+import { ButtonToolConfig, ButtonHandler } from './button.handler';
+import { SelectToolConfig, SelectHandler } from './select.handler';
+import { DropdownToolConfig, DropdownHandler } from './dropdown.handler';
+import { ActionSheetToolConfig, ActionSheetHandler } from './action-sheet.handler';
+import { AdditionalToolConfig, AdditionalHandler } from './additional.handler';
 import { GroupConfig, GroupHandler } from './group.handler';
-import { FormConfig, FormHandler } from './form.handler';
+import { FormToolConfig, FormHandler } from './form.handler';
 import { DialogManager } from '../../workbench/workbench';
 import { FileUploader } from '../../uikit/forms/help';
 
@@ -19,52 +19,52 @@ export enum ToolType {
 }
 
 export type ToolConfig =
-  ButtonConfig
-  | SelectConfig
-  | DropdownConfig
-  | ActionSheetConfig
-  | AdditionalConfig
-  | FormConfig
+  ButtonToolConfig
+  | SelectToolConfig
+  | DropdownToolConfig
+  | ActionSheetToolConfig
+  | AdditionalToolConfig
+  | FormToolConfig
   | GroupConfig;
 
 export interface ButtonToolFactory {
   type: ToolType.Button;
-  config: ButtonConfig;
+  config: ButtonToolConfig;
 
   factory(): ButtonHandler;
 }
 
 export interface SelectToolFactory {
   type: ToolType.Select;
-  config: SelectConfig;
+  config: SelectToolConfig;
 
   factory(stickyElement: HTMLElement): SelectHandler;
 }
 
 export interface DropdownToolFactory {
   type: ToolType.Dropdown;
-  config: DropdownConfig;
+  config: DropdownToolConfig;
 
   factory(stickyElement: HTMLElement): DropdownHandler;
 }
 
 export interface ActionSheetToolFactory {
   type: ToolType.ActionSheet,
-  config: ActionSheetConfig,
+  config: ActionSheetToolConfig,
 
   factory(stickElement: HTMLElement): ActionSheetHandler
 }
 
 export interface AdditionalToolFactory {
   type: ToolType.Additional,
-  config: AdditionalConfig,
+  config: AdditionalToolConfig,
 
   factory(): AdditionalHandler
 }
 
 export interface FormToolFactory {
   type: ToolType.Form,
-  config: FormConfig,
+  config: FormToolConfig,
 
   factory(delegate: FileUploader, dialogManager: DialogManager): FormHandler
 }
@@ -88,7 +88,7 @@ export type ToolFactory =
   | GroupToolFactory;
 
 export class Toolkit {
-  static makeButtonTool(config: ButtonConfig): ButtonToolFactory {
+  static makeButtonTool(config: ButtonToolConfig): ButtonToolFactory {
     const op: ButtonToolFactory = {
       type: ToolType.Button,
       config,
@@ -99,7 +99,7 @@ export class Toolkit {
     return op;
   }
 
-  static makeSelectTool(config: SelectConfig): SelectToolFactory {
+  static makeSelectTool(config: SelectToolConfig): SelectToolFactory {
     const op: SelectToolFactory = {
       type: ToolType.Select,
       config,
@@ -110,7 +110,7 @@ export class Toolkit {
     return op;
   }
 
-  static makeDropdownTool(config: DropdownConfig): DropdownToolFactory {
+  static makeDropdownTool(config: DropdownToolConfig): DropdownToolFactory {
     const op: DropdownToolFactory = {
       type: ToolType.Dropdown,
       config,
@@ -121,7 +121,7 @@ export class Toolkit {
     return op;
   }
 
-  static makeActionSheetTool(config: ActionSheetConfig): ActionSheetToolFactory {
+  static makeActionSheetTool(config: ActionSheetToolConfig): ActionSheetToolFactory {
     const op: ActionSheetToolFactory = {
       type: ToolType.ActionSheet,
       config,
@@ -132,7 +132,7 @@ export class Toolkit {
     return op;
   }
 
-  static makeFormTool(config: FormConfig): FormToolFactory {
+  static makeFormTool(config: FormToolConfig): FormToolFactory {
     const op: FormToolFactory = {
       type: ToolType.Form,
       config,
@@ -143,7 +143,7 @@ export class Toolkit {
     return op;
   }
 
-  static makeAdditionalTool(config: AdditionalConfig): AdditionalToolFactory {
+  static makeAdditionalTool(config: AdditionalToolConfig): AdditionalToolFactory {
     const op: AdditionalToolFactory = {
       type: ToolType.Additional,
       config,

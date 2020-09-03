@@ -2,11 +2,10 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { fontSizeFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
-import { Toolkit } from '../toolkit/toolkit';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { SelectConfig } from '../toolkit/select.handler';
 
-export const fontSizeToolConfig: SelectConfig = {
+export const fontSizeToolConfig: SelectToolConfig = {
   tooltip: '字体大小',
   iconClasses: ['textbus-icon-font-size'],
   mini: true,

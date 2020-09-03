@@ -1,8 +1,8 @@
 import { CleanCommander } from '../commands/clean.commander';
 import { LinkFormatter } from '../../formatter/link.formatter';
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 
-export const cleanToolConfig = {
+export const cleanToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-clear-formatting'],
   tooltip: '清除格式',
   keymap: {

@@ -1,10 +1,10 @@
 import { underlineFormatter } from '../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const underlineToolConfig = {
+export const underlineToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-underline'],
   tooltip: '下划线',
   keymap: {

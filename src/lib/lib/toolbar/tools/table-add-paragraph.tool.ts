@@ -1,8 +1,8 @@
-import { Toolkit } from '../toolkit/toolkit';
+import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 import { TableAddParagraphCommander } from '../commands/table-add-paragraph.commander';
 
-export const tableAddParagraphToolConfig = {
+export const tableAddParagraphToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-table-add-paragraph'],
   tooltip: '在表格后添加段落',
   matcher: new TableEditMatcher(),

@@ -1,10 +1,9 @@
 import { PreCommander } from '../commands/pre.commander';
 import { PreComponent } from '../../components/pre.component';
 import { CodeMatcher } from '../matcher/code.matcher';
-import { Toolkit } from '../toolkit/toolkit';
-import { SelectConfig } from '../toolkit/select.handler';
+import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 
-export const preToolConfig: SelectConfig = {
+export const preToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-terminal'],
   tooltip: '代码',
   mini: true,

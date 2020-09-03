@@ -2,10 +2,10 @@ import { LinkCommander } from '../commands/link.commander';
 import { Form, FormRadio, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../formatter/link.formatter';
-import { Toolkit } from '../toolkit/toolkit';
+import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
-export const linkToolConfig = {
+export const linkToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-link'],
   tooltip: '链接',
   menuFactory() {
