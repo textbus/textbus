@@ -5,7 +5,7 @@ import {
   FormatAbstractData,
   VElement,
   ChildSlotModel,
-  FormatterPriority
+  FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
 export class BlockStyleFormatter extends BlockFormatter {
@@ -19,11 +19,11 @@ export class BlockStyleFormatter extends BlockFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     const b = !!existingElement;
     existingElement = existingElement || new VElement('div');
     (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
-      existingElement.styles.set(name, abstractData.styles.get(name));
+      existingElement.styles.set(name, context.abstractData.styles.get(name));
     })
     if (!b) {
       return new ChildSlotModel(existingElement);

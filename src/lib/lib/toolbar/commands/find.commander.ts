@@ -3,7 +3,7 @@ import {
   Commander,
   ElementPosition,
   FormatAbstractData,
-  FormatEffect,
+  FormatEffect, FormatRendingContext,
   FormatterPriority,
   Fragment,
   InlineFormatter,
@@ -26,11 +26,8 @@ class FindFormatter extends InlineFormatter {
     return null;
   }
 
-  render(isOutputModel: boolean,
-         state: FormatEffect,
-         abstractData: FormatAbstractData,
-         existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
-    if (isOutputModel) {
+  render(context: FormatRendingContext, existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
+    if (context.isOutputModel) {
       return null;
     }
     const flag = !!existingElement;

@@ -5,7 +5,7 @@ import {
   FormatAbstractData,
   VElement,
   ChildSlotModel,
-  FormatterPriority
+  FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
 const inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
@@ -22,12 +22,12 @@ export class StyleFormatter extends InlineFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement) {
-      existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
+      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
+      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
       return new ChildSlotModel(el);
     }
   }
@@ -76,12 +76,12 @@ backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) 
   return match.call(backgroundColorFormatter, p);
 }
 
-backgroundColorFormatter.render = function (isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+backgroundColorFormatter.render = function (context: FormatRendingContext, existingElement?: VElement) {
   if (existingElement && reg.test(existingElement.tagName)) {
-    existingElement.styles.set(this.styleName, abstractData.styles.get(this.styleName));
+    existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
   } else {
     const el = new VElement('span');
-    el.styles.set(this.styleName, abstractData.styles.get(this.styleName));
+    el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
     return new ChildSlotModel(el);
   }
 };

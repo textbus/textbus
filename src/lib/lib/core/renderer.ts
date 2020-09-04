@@ -1,11 +1,6 @@
 import { VElement, VElementLiteral, VTextNode } from './element';
 import { Fragment } from './fragment';
-import {
-  BlockFormatter,
-  FormatEffect,
-  FormatRange,
-  InlineFormatter
-} from './formatter';
+import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 import { BranchComponent, DivisionComponent, Component, BackboneComponent, LeafComponent } from './component';
 import { EventType, TBEvent } from './events';
 import { TBSelection } from './selection';
@@ -561,7 +556,15 @@ export class Renderer {
     host?: VElement): { host: VElement, slot: VElement } {
     let slot = host;
     formats.reduce((vEle, next) => {
-      const renderModel = next.token.render(this.outputModal, next.params.state, next.params.abstractData, vEle);
+      const context: FormatRendingContext = {
+        isOutputModel: this.outputModal,
+        state: next.params.state,
+        abstractData: next.params.abstractData,
+      };
+      if (!this.outputModal) {
+        context.nativeEventManager = this.nativeEventManager;
+      }
+      const renderModel = next.token.render(context, vEle);
       if (renderModel instanceof ReplaceModel) {
         host = slot = renderModel.replaceElement;
         return host;

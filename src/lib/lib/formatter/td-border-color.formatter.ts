@@ -1,4 +1,11 @@
-import { BlockFormatter, FormatAbstractData, FormatEffect, FormatterPriority, VElement } from '../core/_api';
+import {
+  BlockFormatter,
+  FormatAbstractData,
+  FormatEffect,
+  FormatRendingContext,
+  FormatterPriority,
+  VElement
+} from '../core/_api';
 
 export class TdBorderColorFormatter extends BlockFormatter {
   constructor() {
@@ -45,9 +52,9 @@ export class TdBorderColorFormatter extends BlockFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): null {
+  render(context: FormatRendingContext, existingElement?: VElement): null {
     if (existingElement) {
-      abstractData.styles.forEach((value, key) => {
+      context.abstractData.styles.forEach((value, key) => {
         existingElement.styles.set(key, value);
       });
     }

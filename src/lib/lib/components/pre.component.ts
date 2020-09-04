@@ -5,7 +5,7 @@ import {
   DivisionComponent,
   EventType,
   FormatAbstractData,
-  FormatEffect,
+  FormatEffect, FormatRendingContext,
   Fragment,
   InlineFormatParams,
   InlineFormatter,
@@ -120,7 +120,7 @@ class CodeFormatter extends BlockFormatter {
     return undefined;
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
     return new ChildSlotModel(new VElement('code'));
   }
 }
@@ -134,11 +134,11 @@ class CodeStyleFormatter extends InlineFormatter {
     return undefined;
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
     if (!existingElement) {
       existingElement = new VElement('span');
     }
-    abstractData.styles.forEach((value, key) => {
+    context.abstractData.styles.forEach((value, key) => {
       existingElement.styles.set(key, value);
     })
     return new ReplaceModel(existingElement);

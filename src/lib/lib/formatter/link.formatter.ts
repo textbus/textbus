@@ -1,10 +1,9 @@
 import {
   InlineFormatter,
-  FormatEffect,
   FormatAbstractData,
   VElement,
   ChildSlotModel,
-  FormatterPriority
+  FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
 export class LinkFormatter extends InlineFormatter {
@@ -21,12 +20,12 @@ export class LinkFormatter extends InlineFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     const el = new VElement('a');
-    const target = abstractData.attrs.get('target');
-    const href = abstractData.attrs.get('href');
+    const target = context.abstractData.attrs.get('target');
+    const href = context.abstractData.attrs.get('href');
     target && el.attrs.set('target', target);
-    href && el.attrs.set(isOutputModel ? 'href' : 'data-href', href);
+    href && el.attrs.set(context.isOutputModel ? 'href' : 'data-href', href);
     return new ChildSlotModel(el);
   }
 }

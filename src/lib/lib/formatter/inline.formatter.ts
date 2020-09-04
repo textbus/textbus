@@ -1,11 +1,10 @@
 import {
   InlineFormatter,
   MatchRule,
-  FormatEffect,
   FormatAbstractData,
   VElement,
   ChildSlotModel,
-  FormatterPriority
+  FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
 export class InlineTagFormatter extends InlineFormatter {
@@ -19,7 +18,7 @@ export class InlineTagFormatter extends InlineFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement && existingElement.tagName === 'span') {
       existingElement.tagName = this.tagName;
       return;

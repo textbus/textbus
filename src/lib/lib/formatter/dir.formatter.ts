@@ -1,7 +1,7 @@
 import {
   BlockFormatter,
   FormatAbstractData,
-  FormatEffect,
+  FormatEffect, FormatRendingContext,
   FormatterPriority,
   ReplaceModel,
   VElement
@@ -23,10 +23,10 @@ export class DirFormatter extends BlockFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement): ReplaceModel | null {
-    if (state === FormatEffect.Valid) {
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | null {
+    if (context.state === FormatEffect.Valid) {
       existingElement = existingElement || new VElement('div');
-      existingElement.attrs.set('dir', abstractData.attrs.get('dir'));
+      existingElement.attrs.set('dir', context.abstractData.attrs.get('dir'));
       return new ReplaceModel(existingElement);
     }
     return null;

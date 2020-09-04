@@ -15,7 +15,12 @@ export class Form implements FormViewer {
   onComplete: Observable<Map<string, any>>;
   onClose: Observable<void>;
 
-  readonly elementRef = document.createElement('form');
+  readonly elementRef = createElement('form', {
+    attrs: {
+      novalidate: true,
+      autocomplete: 'off'
+    }
+  });
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
 

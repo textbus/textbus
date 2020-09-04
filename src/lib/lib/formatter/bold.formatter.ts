@@ -1,7 +1,7 @@
 import {
   ChildSlotModel,
   FormatAbstractData,
-  FormatEffect,
+  FormatEffect, FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
   VElement
@@ -28,11 +28,11 @@ export class BoldFormatter extends InlineFormatter {
     });
   }
 
-  render(isOutputModel: boolean, state: FormatEffect, abstractData: FormatAbstractData, existingElement?: VElement) {
-    if (state === FormatEffect.Inherit) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
+    if (context.state === FormatEffect.Inherit) {
       return;
     }
-    if (state === FormatEffect.Exclude) {
+    if (context.state === FormatEffect.Exclude) {
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
       return new ChildSlotModel(el);
