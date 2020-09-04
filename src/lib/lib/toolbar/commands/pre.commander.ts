@@ -1,14 +1,14 @@
 import {
+  CommandContext,
   Commander,
-  Renderer,
-  TBSelection
 } from '../../core/_api';
 import { PreComponent, BrComponent } from '../../components/_api';
 
 export class PreCommander implements Commander<string> {
   recordHistory = true;
 
-  command(selection: TBSelection, lang: string, overlap: boolean, renderer: Renderer): void {
+  command(context: CommandContext, lang: string): void {
+    const {overlap, selection, renderer} = context;
     let b = true;
     if (overlap) {
       selection.ranges.forEach(range => {

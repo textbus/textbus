@@ -3,8 +3,8 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  Renderer, DivisionComponent,
-  TBSelection, BranchComponent, BackboneComponent
+  DivisionComponent,
+  BranchComponent, BackboneComponent, CommandContext
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
@@ -14,14 +14,14 @@ export class BlockCommander implements Commander<string> {
 
   private tagName: string;
 
-  command(selection: TBSelection, tagName: string, overlap: boolean, renderer: Renderer): void {
+  command(context: CommandContext, tagName: string): void {
     this.tagName = tagName;
-    selection.ranges.forEach(range => {
+    context.selection.ranges.forEach(range => {
 
       range.getSuccessiveContents().forEach(scope => {
         const blockComponent = new BlockComponent(tagName);
 
-        const parentComponent = renderer.getParentComponent(scope.fragment);
+        const parentComponent = context.renderer.getParentComponent(scope.fragment);
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
           if (scope.fragment === range.startFragment) {
@@ -31,7 +31,7 @@ export class BlockCommander implements Commander<string> {
             range.endFragment = blockComponent.slot;
           }
           if (parentComponent instanceof DivisionComponent) {
-            const parentFragment = renderer.getParentFragment(parentComponent);
+            const parentFragment = context.renderer.getParentFragment(parentComponent);
             blockComponent.slot.from(scope.fragment);
             parentFragment.insertBefore(blockComponent, parentComponent);
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);

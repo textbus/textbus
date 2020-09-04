@@ -1,10 +1,10 @@
-import { Commander, TBSelection } from '../../core/_api';
+import { CommandContext, Commander } from '../../core/_api';
 
 export class EmojiCommander implements Commander<string> {
   recordHistory = true;
 
-  command(selection: TBSelection, f: string): void {
-    selection.ranges.forEach(range => {
+  command(context: CommandContext, f: string): void {
+    context.selection.ranges.forEach(range => {
       range.startFragment.insert(f, range.startIndex);
       range.startIndex = range.endIndex = range.startIndex + f.length;
     });

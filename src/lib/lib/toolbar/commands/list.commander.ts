@@ -1,11 +1,9 @@
 import {
   Commander,
-  TBSelection,
-  Renderer,
   Fragment,
   BranchComponent,
   DivisionComponent,
-  TBRangeScope, BackboneComponent
+  TBRangeScope, BackboneComponent, CommandContext
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
 
@@ -15,7 +13,8 @@ export class ListCommander implements Commander<null> {
   constructor(private tagName: 'ol' | 'ul') {
   }
 
-  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer): void {
+  command(context: CommandContext): void {
+    const {selection, renderer, overlap} = context;
     selection.ranges.forEach(range => {
       if (overlap) {
         range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {

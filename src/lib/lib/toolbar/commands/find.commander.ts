@@ -1,15 +1,12 @@
 import {
-  ChildSlotModel,
+  ChildSlotModel, CommandContext,
   Commander,
   ElementPosition,
   FormatAbstractData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
-  Fragment,
   InlineFormatter,
-  Renderer,
   ReplaceModel,
-  TBSelection,
   VElement
 } from '../../core/_api';
 
@@ -47,12 +44,12 @@ export const findFormatter = new FindFormatter();
 export class FindCommander implements Commander<ElementPosition[]> {
   recordHistory = false;
 
-  command(selection: TBSelection, positions: ElementPosition[], overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
-    rootFragment.apply(findFormatter, {
+  command(context: CommandContext, positions: ElementPosition[]) {
+    context.rootFragment.apply(findFormatter, {
       state: FormatEffect.Invalid,
       abstractData: null,
       startIndex: 0,
-      endIndex: rootFragment.contentLength
+      endIndex: context.rootFragment.contentLength
     })
     positions.forEach(item => {
       item.fragment.apply(findFormatter, {

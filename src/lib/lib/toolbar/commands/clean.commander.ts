@@ -1,11 +1,10 @@
 import {
   Commander,
-  TBSelection,
   FormatEffect,
   FormatAbstractData,
   Constructor,
   BlockFormatter,
-  InlineFormatter
+  InlineFormatter, CommandContext
 } from '../../core/_api';
 import { BrComponent } from '../../components/br.component';
 
@@ -15,9 +14,9 @@ export class CleanCommander implements Commander<null> {
   constructor(private excludeFormatters: Constructor<BlockFormatter | InlineFormatter>[] = []) {
   }
 
-  command(selection: TBSelection, _: null, overlap: boolean): void {
+  command(context: CommandContext): void {
     let b = false;
-    selection.ranges.forEach(range => {
+    context.selection.ranges.forEach(range => {
       range.getSuccessiveContents().forEach(scope => {
         if (scope.fragment === range.startFragment &&
           scope.startIndex <= range.startIndex &&

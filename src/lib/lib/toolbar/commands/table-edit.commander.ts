@@ -1,4 +1,4 @@
-import { Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { CommandContext, Commander, Fragment, TBSelection } from '../../core/_api';
 import { TableCellPosition, TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export enum TableEditActions {
@@ -27,7 +27,8 @@ export class TableEditCommander implements Commander<TableEditActions> {
     this.params = value;
   }
 
-  command(selection: TBSelection, actionType: TableEditActions, overlap: boolean, renderer: Renderer) {
+  command(c: CommandContext, actionType: TableEditActions) {
+    const {selection, renderer} = c;
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
     this.recordHistory = true;
     if (!context) {

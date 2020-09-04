@@ -1,10 +1,11 @@
-import { DivisionComponent, Commander, Fragment, Renderer, TBSelection } from '../../core/_api';
+import { DivisionComponent, Commander, Fragment, CommandContext } from '../../core/_api';
 import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, attrs: Map<string, string | number | boolean>,  overlap: boolean, renderer: Renderer): void {
+  command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
+    const {selection, renderer} = context;
     const rows = +attrs.get('rows') || 0;
     const cols = +attrs.get('cols') || 0;
     const useTextBusStyle = !!attrs.get('useTextBusStyle');

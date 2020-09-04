@@ -1,4 +1,10 @@
-import { Commander, FormatAbstractData, FormatEffect, InlineFormatter, TBSelection } from '../../core/_api';
+import {
+  CommandContext,
+  Commander,
+  FormatAbstractData,
+  FormatEffect,
+  InlineFormatter,
+} from '../../core/_api';
 
 export class StyleCommander implements Commander<string> {
   recordHistory = true;
@@ -6,7 +12,8 @@ export class StyleCommander implements Commander<string> {
   constructor(private name: string, private formatter: InlineFormatter) {
   }
 
-  command(selection: TBSelection, value: string) {
+  command(context: CommandContext, value: string) {
+    const {selection} = context;
     this.recordHistory = !selection.collapsed;
     if (!this.recordHistory) {
       return;

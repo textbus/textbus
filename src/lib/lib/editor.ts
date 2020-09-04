@@ -614,7 +614,12 @@ export class Editor implements FileUploader {
       }
     })
     if (isNext) {
-      commander.command(selection, params, overlap, this.renderer, this.rootFragment);
+      commander.command({
+        selection,
+        overlap,
+        renderer: this.renderer,
+        rootFragment: this.rootFragment
+      }, params);
       this.render();
       selection.restore();
       this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);

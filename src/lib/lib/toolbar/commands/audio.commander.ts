@@ -1,14 +1,13 @@
-import { Commander, TBSelection } from '../../core/_api';
+import { CommandContext, Commander } from '../../core/_api';
 import { AudioComponent } from '../../components/audio.component';
 
 export class AudioCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
-
-    selection.ranges.forEach(range => {
+  command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
+    context.selection.ranges.forEach(range => {
       if (range.collapsed) {
-        if (overlap) {
+        if (context.overlap) {
           const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
           if (component instanceof AudioComponent) {
             component.src = attrs.get('src') as string;

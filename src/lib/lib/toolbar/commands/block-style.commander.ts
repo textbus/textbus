@@ -3,7 +3,7 @@ import {
   Commander,
   FormatAbstractData,
   FormatEffect, Fragment,
-  TBSelection, BackboneComponent
+  BackboneComponent, CommandContext
 } from '../../core/_api';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
@@ -13,8 +13,8 @@ export class BlockStyleCommander implements Commander<string> {
   constructor(private name: string, private formatter: BlockStyleFormatter) {
   }
 
-  command(selection: TBSelection, value: string) {
-    selection.ranges.forEach(range => {
+  command(context: CommandContext, value: string) {
+    context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         let fragments: Fragment[] = [];
         if (item.fragment === range.startFragment || item.fragment === range.endFragment) {

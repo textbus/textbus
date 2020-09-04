@@ -1,4 +1,10 @@
-import { Commander, TBSelection, InlineFormatter, FormatEffect, FormatAbstractData } from '../../core/_api';
+import {
+  Commander,
+  InlineFormatter,
+  FormatEffect,
+  FormatAbstractData,
+  CommandContext
+} from '../../core/_api';
 
 export class InlineCommander implements Commander<null> {
   recordHistory = true;
@@ -6,15 +12,15 @@ export class InlineCommander implements Commander<null> {
   constructor(private tagName: string, private formatter: InlineFormatter) {
   }
 
-  command(selection: TBSelection, _: null, overlap: boolean) {
-    this.recordHistory = !selection.collapsed;
+  command(context: CommandContext) {
+    this.recordHistory = !context.selection.collapsed;
     if (!this.recordHistory) {
       return;
     }
-    selection.ranges.forEach(range => {
+    context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state: overlap ? FormatEffect.Invalid : FormatEffect.Valid,
+          state: context.overlap ? FormatEffect.Invalid : FormatEffect.Valid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
           abstractData: new FormatAbstractData({

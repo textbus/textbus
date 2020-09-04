@@ -1,4 +1,9 @@
-import { Commander, FormatAbstractData, FormatEffect, Fragment, Renderer, TBSelection } from '../../core/_api';
+import {
+  CommandContext,
+  Commander,
+  FormatAbstractData,
+  FormatEffect,
+} from '../../core/_api';
 import { TableEditRange } from './table-edit.commander';
 import { TableComponent } from '../../components/table.component';
 import { tdBorderColorFormatter } from '../../formatter/td-border-color.formatter';
@@ -11,7 +16,8 @@ export class TdBorderColorCommander implements Commander<string> {
     this.range = range;
   }
 
-  command(selection: TBSelection, color: string, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+  command(c: CommandContext, color: string) {
+    const {renderer, selection} = c;
     this.recordHistory = true;
     const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
     if (!context) {

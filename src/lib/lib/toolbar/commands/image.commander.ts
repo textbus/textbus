@@ -1,11 +1,11 @@
-import { Commander, TBSelection } from '../../core/_api';
+import { CommandContext, Commander } from '../../core/_api';
 import { ImageComponent } from '../../components/image.component';
 
 export class ImageCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
 
-  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
+  command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
     const fn = function (component: ImageComponent) {
       component.src = attrs.get('src') as string;
       component.width = attrs.get('width') as string;
@@ -14,9 +14,9 @@ export class ImageCommander implements Commander<Map<string, string | number | b
       component.margin = attrs.get('margin') as string;
     }
 
-    selection.ranges.forEach(range => {
+    context.selection.ranges.forEach(range => {
       if (range.collapsed) {
-        if (overlap) {
+        if (context.overlap) {
           const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
           if (component instanceof ImageComponent) {
             fn(component);

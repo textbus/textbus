@@ -1,10 +1,11 @@
-import { Commander, TBSelection } from '../../core/_api';
+import { CommandContext, Commander } from '../../core/_api';
 import { VideoComponent } from '../../components/video.component';
 
 export class VideoCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;
 
-  command(selection: TBSelection, attrs: Map<string, string | number | boolean>, overlap: boolean): void {
+  command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
+    const {selection, overlap} = context;
     const fn = function (component: VideoComponent) {
       component.src = attrs.get('src') as string;
       component.autoplay = attrs.get('autoplay') as boolean;

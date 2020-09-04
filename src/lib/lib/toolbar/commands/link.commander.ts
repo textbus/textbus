@@ -1,4 +1,10 @@
-import { BranchComponent, Commander, FormatAbstractData, FormatEffect, TBSelection } from '../../core/_api';
+import {
+  BranchComponent,
+  CommandContext,
+  Commander,
+  FormatAbstractData,
+  FormatEffect,
+} from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
 
 export class LinkCommander implements Commander<Map<string, string>> {
@@ -8,14 +14,14 @@ export class LinkCommander implements Commander<Map<string, string>> {
   constructor(private formatter: LinkFormatter) {
   }
 
-  command(selection: TBSelection, attrs: Map<string, string>, overlap: boolean): void {
-    this.recordHistory = !selection.collapsed;
+  command(context: CommandContext, attrs: Map<string, string>): void {
+    this.recordHistory = !context.selection.collapsed;
     if (!this.recordHistory) {
       return;
     }
-    selection.ranges.forEach(range => {
+    context.selection.ranges.forEach(range => {
       if (range.collapsed) {
-        if (overlap) {
+        if (context.overlap) {
           const commonAncestorFragment = range.commonAncestorFragment;
           commonAncestorFragment.getFormatKeys().forEach(token => {
             commonAncestorFragment.getFormatRanges(token).forEach(format => {

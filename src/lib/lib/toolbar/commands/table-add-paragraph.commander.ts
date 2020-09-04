@@ -1,10 +1,11 @@
-import { Commander, TBSelection, Renderer } from '../../core/_api';
+import { Commander, CommandContext } from '../../core/_api';
 import { TableComponent, BlockComponent, BrComponent } from '../../components/_api';
 
 export class TableAddParagraphCommander implements Commander<null> {
   recordHistory = true;
 
-  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer) {
+  command(c: CommandContext) {
+    const {renderer, selection} = c;
     this.recordHistory = true;
     const firstRange = selection.firstRange;
     const context = renderer.getContext(firstRange.startFragment, TableComponent);

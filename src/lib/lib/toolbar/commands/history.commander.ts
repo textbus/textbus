@@ -1,4 +1,4 @@
-import { Commander, TBSelection, Renderer, Fragment } from '../../core/_api';
+import { Commander, CommandContext } from '../../core/_api';
 import { Editor } from '../../editor';
 
 export class HistoryCommander implements Commander<null> {
@@ -13,13 +13,13 @@ export class HistoryCommander implements Commander<null> {
     this.editor = v;
   }
 
-  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer, rootFragment: Fragment) {
+  command(context: CommandContext) {
     const snapshot = this.action === 'back' ?
       this.editor.history.getPreviousSnapshot() :
       this.editor.history.getNextSnapshot();
     if (snapshot) {
-      rootFragment.from(snapshot.contents);
-      selection.usePaths(snapshot.paths, rootFragment);
+      context.rootFragment.from(snapshot.contents);
+      context.selection.usePaths(snapshot.paths, context.rootFragment);
     }
   }
 }

@@ -1,7 +1,6 @@
 import {
   Commander,
-  TBSelection,
-  Renderer
+  CommandContext
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 
@@ -11,7 +10,8 @@ export class ToggleBlockCommander implements Commander<null> {
   constructor(private tagName: string) {
   }
 
-  command(selection: TBSelection, _: null, overlap: boolean, renderer: Renderer) {
+  command(context: CommandContext) {
+    const {selection, overlap, renderer} = context;
     selection.ranges.forEach(range => {
       if (overlap) {
         const context = renderer.getContext(range.commonAncestorFragment,
