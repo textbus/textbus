@@ -55,7 +55,7 @@ export const baiduMapComponentExample: ComponentExample = {
     div.innerHTML = `
 <div style="height: 300px; position: relative">
   <div class="textbus-baidu-map-container" style="height: 100%; position: relative; z-index: 0"></div>
-  <form class="textbus-input-group" style="position: absolute; z-index: 1; left: 50px; top: 20px; width: 400px; box-shadow: 1px 2px 3px rgba(0,0,0,0.2)">
+  <form class="textbus-input-group" style="position: absolute; z-index: 1; left: 50px; top: 20px; width: 400px; box-shadow: 1px 2px 3px rgba(0,0,0,0.2); border-radius: 4px;">
     <input type="search" class="textbus-form-control textbus-input-block" placeholder="请输入地址">
     <button type="submit" class="textbus-btn textbus-btn-primary">搜索</button>          
   </form>
@@ -106,7 +106,7 @@ export const baiduMapComponentExample: ComponentExample = {
 
     const buttons = div.querySelectorAll('.textbus-btn-wrap button');
 
-    return new Promise<BaiduMapComponent>((resolve, reject) => {
+    return new Promise<BaiduMapComponent>((resolve) => {
       buttons.item(1).addEventListener('click', () => {
         workbench.close();
       })
