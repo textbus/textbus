@@ -1,5 +1,5 @@
 import { createPicker, Picker } from '@tanbo/color-picker';
-import { ColorHSL, ColorRGB, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
+import { ColorHSL, ColorRGB, ColorRGBA, hsl2Hex, parseCss, rgb2Hex } from '@tanbo/color';
 import { Observable, Subject } from 'rxjs';
 
 import { DropdownViewer } from '../../toolkit/dropdown.handler';
@@ -17,7 +17,12 @@ export class Palette implements DropdownViewer {
     this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef);
     this.picker.onSelected = (ev) => {
-      this.completeEvent.next(ev.hex);
+      if (ev.rgba.a === 1) {
+        this.completeEvent.next(ev.hex);
+      } else {
+        const {r, g, b, a} = ev.rgba;
+        this.completeEvent.next(`rgba(${r},${g},${b},${a})`);
+      }
     };
   }
 
@@ -25,7 +30,9 @@ export class Palette implements DropdownViewer {
     const color = d ? (d.styles.get(this.styleName) + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;
-    } else if (/^rgba?/.test(color)) {
+    } else if (/^rgba/.test(color)) {
+      this.picker.rgba = parseCss(color) as ColorRGBA;
+    } else if (/^rgb/.test(color)) {
       this.picker.hex = rgb2Hex((parseCss(color) as ColorRGB));
     } else if (/^hsl/.test(color)) {
       this.picker.hex = hsl2Hex((parseCss(color) as ColorHSL));

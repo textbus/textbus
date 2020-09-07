@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/textbus",
-  "version": "0.0.1-beta.35",
+  "version": "0.0.1-beta.36",
   "description": "A rich text editor",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@tanbo/bezier": "0.0.1",
     "@tanbo/color": "^0.0.3",
-    "@tanbo/color-picker": "^0.0.15",
+    "@tanbo/color-picker": "^0.0.17",
     "@tanbo/css-themes": "^0.0.1",
     "@types/highlight.js": "^9.12.3",
     "@types/pretty": "^2.0.0",
