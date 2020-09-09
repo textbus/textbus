@@ -64,7 +64,7 @@
   "dependencies": {
     "@tanbo/bezier": "0.0.1",
     "@tanbo/color": "^0.0.3",
-    "@tanbo/color-picker": "^0.0.18",
+    "@tanbo/color-picker": "^0.0.19",
     "@tanbo/css-themes": "^0.0.1",
     "@types/highlight.js": "^9.12.3",
     "@types/pretty": "^2.0.0",
