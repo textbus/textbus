@@ -5,7 +5,7 @@ const DisableOutputWebpackPlugin = require('./disable-output-webpack-plugin');
 module.exports = {
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/lib/assets/index.scss')
+    index: path.resolve(__dirname, 'src/textbus/assets/index.scss')
   },
   output: {
     path: path.resolve(__dirname, 'package/bundles/')

@@ -7,8 +7,8 @@
   "typings": "./bundles/public-api.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
-    "test": "jest",
-    "test-c": "jest --coverage",
+    "test": "cross-env env=test jest",
+    "test-c": "cross-env env=test jest --coverage",
     "build:lib": "rimraf package/bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-build.config.js",
     "publish:lib": "npm run build:lib && cd package && npm publish --access=public"
   },
@@ -26,11 +26,16 @@
     "note"
   ],
   "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
     "@types/jest": "^25.1.2",
     "@types/node": "^12.7.1",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^9.6.1",
+    "babel-jest": "^26.3.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "core-js": "^3.6.4",
+    "cross-env": "^7.0.2",
     "css-loader": "^3.1.0",
     "extract-loader": "^3.1.0",
     "file-loader": "^4.1.0",

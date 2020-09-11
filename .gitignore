@@ -7,5 +7,6 @@ package/bundles
 bundles/
 zip
 .idea
+coverage/
 *.swp
 *.swo

@@ -1,7 +1,4 @@
-import { Fragment } from '@tanbo/tbus/core/fragment';
-import { BoldFormatter } from '@tanbo/tbus/formatter/bold.formatter';
-import { FormatEffect } from '@tanbo/tbus/core/formatter';
-import { FormatAbstractData } from '@tanbo/tbus/core/format-abstract-data';
+import { BoldFormatter, FormatAbstractData, FormatEffect, Fragment } from '@tanbo/textbus';
 
 const formatter = new BoldFormatter();
 

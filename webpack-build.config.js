@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   entry: {
-    index: path.resolve(__dirname, 'src/lib/public-api.ts')
+    index: path.resolve(__dirname, 'src/textbus/public-api.ts')
   },
   output: {
     path: path.resolve(__dirname, './package/bundles'),

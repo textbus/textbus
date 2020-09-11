@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import 'core-js';
-import './lib/assets/index.scss';
+import './textbus/assets/index.scss';
 
 
-import { createEditor, fontSizeToolConfig } from './lib/public-api';
+import { createEditor, fontSizeToolConfig } from './textbus/public-api';
 
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,

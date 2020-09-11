@@ -5,7 +5,7 @@ const ip = require('ip');
 
 module.exports = {
   mode: 'development',
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'cheap-module-source-map',
   entry: {
     index: path.resolve(__dirname, 'src/main.ts')
   },
