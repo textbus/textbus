@@ -17,7 +17,9 @@ export class Palette implements DropdownViewer {
     this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef);
     this.picker.onSelected = (ev) => {
-      if (ev.rgba.a === 1) {
+      if (!ev.rgba) {
+        this.completeEvent.next(null);
+      } else if (ev.rgba.a === 1) {
         this.completeEvent.next(ev.hex);
       } else {
         const {r, g, b, a} = ev.rgba;

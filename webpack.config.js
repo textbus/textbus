@@ -37,7 +37,7 @@ module.exports = {
           }
         }
       }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/lib/assets/')]
+      include: [path.resolve(__dirname, 'src/textbus/assets/')]
     }, {
       test: /\.s?css$/,
       loader: ['to-string-loader', 'css-loader', {
@@ -48,7 +48,7 @@ module.exports = {
           }
         }
       }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/lib/lib/')]
+      include: [path.resolve(__dirname, 'src/textbus/lib/')]
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
       use: [{
