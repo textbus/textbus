@@ -65,9 +65,8 @@ export class FormatAbstractData {
   /**
    * 判断 data 是否和自己相等。
    * @param data
-   * @param diffValue 是否比较值
    */
-  equal(data: FormatAbstractData, diffValue = true) {
+  equal(data: FormatAbstractData) {
     if (data === this) {
       return true;
     }
@@ -77,13 +76,12 @@ export class FormatAbstractData {
     const left = data;
     const right = this;
     return left.tag == right.tag &&
-      FormatAbstractData.equalMap(left.attrs, right.attrs, diffValue) &&
-      FormatAbstractData.equalMap(left.styles, right.styles, diffValue);
+      FormatAbstractData.equalMap(left.attrs, right.attrs) &&
+      FormatAbstractData.equalMap(left.styles, right.styles);
   }
 
   private static equalMap(left: Map<string, string | number | boolean>,
-                          right: Map<string, string | number | boolean>,
-                          diffValue: boolean) {
+                          right: Map<string, string | number | boolean>) {
     if (left === right || !left === true && !right === true) {
       return true;
     }
@@ -92,7 +90,7 @@ export class FormatAbstractData {
     }
 
     return Array.from(left.keys()).reduce((v, key) => {
-      return v && (diffValue ? left.get(key) === right.get(key) : left.has(key));
+      return v && left.get(key) === right.get(key);
     }, true);
   }
 }

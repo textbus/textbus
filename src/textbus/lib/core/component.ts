@@ -36,7 +36,8 @@ export abstract class ComponentReader {
 }
 
 /**
- * TextBus 组件基类，不可直接继承 Component 类，如要扩展功能，请继承 BranchComponent、BackboneComponent 或 LeafComponent 类。
+ * TextBus 组件基类，不可直接继承 Component 类。
+ * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
  */
 export abstract class Component {
   /**

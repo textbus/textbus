@@ -3,7 +3,68 @@ import 'core-js';
 import './textbus/assets/index.scss';
 
 
-import { createEditor, fontSizeToolConfig } from './textbus/public-api';
+import {
+  createEditor,
+  fontSizeToolConfig,
+  Form,
+  FormHidden, FormRadio, FormSwitch,
+  FormTextField,
+  videoToolConfig
+} from './textbus/public-api';
+
+videoToolConfig.menuFactory = function () {
+  return new Form({
+    title: '视频设置',
+    items: [
+      new FormRadio({
+        label: '本地/调用',
+        name: 'local',
+        values: [{
+          label: '本地',
+          value: true
+        }, {
+          label: '调用',
+          value: false
+        }]
+      }),
+      new FormTextField({
+        label: '视频链接地址',
+        name: 'src',
+        placeholder: '请输入链接地址',
+        canUpload: true,
+        uploadType: 'video',
+        uploadBtnText: '上传新视频',
+        validateFn(value: string): string | null {
+          if (!value) {
+            return '必填项不能为空';
+          }
+          return null;
+        }
+      }),
+      new FormHidden({
+        name: 'controls',
+        value: 'controls'
+      }),
+      new FormTextField({
+        label: '视频宽度',
+        name: 'width',
+        placeholder: '支持任意 CSS 单位',
+        value: '100%'
+      }),
+      new FormTextField({
+        label: '视频高度',
+        name: 'height',
+        placeholder: '支持任意 CSS 单位',
+        value: 'auto'
+      }),
+      new FormSwitch({
+        label: '自动播放',
+        checked: false,
+        name: 'autoplay'
+      })
+    ]
+  });
+}
 
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,

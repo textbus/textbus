@@ -7,6 +7,7 @@ import {
   ChildSlotModel,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
+import { ColorRGB, parseCss, rgb2Hex } from '@tanbo/color';
 
 export class BlockStyleFormatter extends BlockFormatter {
   constructor(public styleName: string | string[], rule: MatchRule) {
@@ -41,19 +42,32 @@ export const textAlignFormatter = new BlockStyleFormatter('textAlign', {
     textAlign: /.+/
   }
 });
-export const blockBackgroundColorFormatter = new BlockStyleFormatter('backgroundColor', {
+
+export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
+  read(node: HTMLElement): FormatAbstractData {
+    return new FormatAbstractData({
+      styles: {
+        backgroundColor: (color => {
+          if (/^rgb\b/.test(color)) {
+            return rgb2Hex(parseCss(color) as ColorRGB);
+          }
+        })(node.style.backgroundColor)
+      }
+    })
+  }
+
+  match(p: HTMLElement | FormatAbstractData) {
+    const blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
+    const reg = new RegExp(`^(${blockTags.join('|')})$`, 'i');
+    if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+      return FormatEffect.Invalid;
+    }
+    return super.match(p);
+  }
+}
+
+export const blockBackgroundColorFormatter = new BlockBackgroundColorFormatter('backgroundColor', {
   styles: {
     backgroundColor: /.+/
   }
 });
-
-const match = blockBackgroundColorFormatter.match;
-
-blockBackgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) {
-  const blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
-  const reg = new RegExp(`^(${blockTags.join('|')})$`, 'i');
-  if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
-    return FormatEffect.Invalid;
-  }
-  return match.call(blockBackgroundColorFormatter, p);
-};
