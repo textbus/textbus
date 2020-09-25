@@ -1,6 +1,6 @@
 import { RadioGroup, AttrState, FormItem } from './help';
 
-export class FormRadio implements FormItem {
+export class FormRadio implements FormItem<any> {
   elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];
@@ -55,7 +55,7 @@ export class FormRadio implements FormItem {
     }
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<any> {
     const inputs = this.inputs;
     let value;
     for (let i = 0; i < inputs.length; i++) {

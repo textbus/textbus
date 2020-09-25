@@ -53,20 +53,20 @@ export interface Select {
   validateFn?(value: any): string
 }
 
-export interface AttrState {
+export interface AttrState<T> {
   name: string;
-  value: string | boolean | number;
+  value: T;
 }
 
-export interface FormItem {
+export interface FormItem<T> {
   elementRef: HTMLElement;
   name: string;
 
-  update(value?: any): void;
+  update(value?: T): void;
 
   reset(): void;
 
-  getAttr(): AttrState;
+  getAttr(): AttrState<T>;
 
   validate(): boolean;
 

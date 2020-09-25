@@ -4,7 +4,7 @@ import { ImageComponent, PreComponent } from '../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
 import { FormToolConfig, Toolkit } from '../toolkit/_api';
 
-class MarginSetter implements FormItem {
+class MarginSetter implements FormItem<string> {
   name = 'margin';
   elementRef: HTMLElement;
 
@@ -54,7 +54,7 @@ class MarginSetter implements FormItem {
     }
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<string> {
     return {
       name: this.name,
       value: this.inputs.map(input => {
@@ -67,6 +67,76 @@ class MarginSetter implements FormItem {
   }
 
   validate() {
+    return true;
+  }
+}
+
+interface Size {
+  width?: string;
+  height?: string;
+}
+
+class SizeSetter implements FormItem<any> {
+  elementRef: HTMLElement;
+
+  private inputs: HTMLInputElement[] = [];
+  constructor(public name: string,
+              private label: string,
+              private size: Size = {}) {
+    this.elementRef = createElement('div', {
+      classes: ['textbus-form-group'],
+      children: [
+        createElement('label', {
+          classes: ['textbus-control-label'],
+          children: [
+            createTextNode(this.label)
+          ]
+        }),
+        createElement('div', {
+          classes: ['textbus-control-value'],
+          children: [
+            createElement('div', {
+              classes: ['textbus-toolbar-image-size-setter'],
+              children: [
+                createElement('input', {
+                  attrs: {type: 'text', placeholder: '宽度'},
+                  classes: ['textbus-form-control']
+                }),
+                createTextNode(' * '),
+                createElement('input', {
+                  attrs: {type: 'text', placeholder: '高度'},
+                  classes: ['textbus-form-control']
+                })
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    this.inputs = Array.from(this.elementRef.querySelectorAll('input'));
+  }
+
+  reset() {
+    this.inputs.forEach(input => input.value = '');
+  }
+
+  update(value?: Size) {
+    console.log(value)
+    this.inputs[0].value = value?.width || '';
+    this.inputs[1].value = value?.height || '';
+  }
+
+  getAttr(): AttrState<Size> {
+    return {
+      name: this.name,
+      value: {
+        width: this.inputs[0].value,
+        height: this.inputs[1].value
+      }
+    };
+  }
+
+  validate(): boolean {
     return true;
   }
 }
@@ -92,30 +162,20 @@ export const imageToolConfig: FormToolConfig = {
             return null;
           }
         }),
-        new FormTextField({
-          label: '图片宽度',
-          name: 'width',
-          placeholder: '支持任意 CSS 单位',
-          value: '100%'
-        }),
-        new FormTextField({
-          label: '图片高度',
-          name: 'height',
-          placeholder: '支持任意 CSS 单位',
-          value: 'auto'
-        }),
+        new SizeSetter('size', '宽高设置'),
+        new SizeSetter('maxSize', '最大尺寸'),
         new FormRadio({
-          label: '（可选）浮动',
+          label: '浮动设置',
           name: 'float',
           values: [{
-            label: '默认',
+            label: '不浮动',
             value: 'none',
             default: true
           }, {
-            label: '左边',
+            label: '到左边',
             value: 'left'
           }, {
-            label: '右边',
+            label: '到右边',
             value: 'right'
           }]
         }),

@@ -1,15 +1,20 @@
 import { CommandContext, Commander } from '../../core/_api';
 import { ImageComponent } from '../../components/image.component';
 
-export class ImageCommander implements Commander<Map<string, string | number | boolean>> {
+export class ImageCommander implements Commander<Map<string, any>> {
   recordHistory = true;
 
 
-  command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
+  command(context: CommandContext, attrs: Map<string, any>): void {
+    const size = attrs.get('size');
+    const maxSize = attrs.get('maxSize');
     const fn = function (component: ImageComponent) {
       component.src = attrs.get('src') as string;
-      component.width = attrs.get('width') as string;
-      component.height = attrs.get('height') as string;
+
+      component.width = size.width || '';
+      component.height = size.height || '';
+      component.maxWidth = maxSize.width || '';
+      component.maxHeight = maxSize.height || '';
       component.float = attrs.get('float') as string;
       component.margin = attrs.get('margin') as string;
     }
@@ -23,8 +28,10 @@ export class ImageCommander implements Commander<Map<string, string | number | b
           }
         } else {
           range.commonAncestorFragment.insert(new ImageComponent(attrs.get('src') as string, {
-            width: attrs.get('width') as string,
-            height: attrs.get('height') as string,
+            width: size.width || '',
+            height: size.height || '',
+            maxWidth: maxSize.width || '',
+            maxHeight: maxSize.height || '',
             float: attrs.get('float') as string,
             margin: attrs.get('margin') as string
           }), range.startIndex);

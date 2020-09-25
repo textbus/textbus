@@ -5,9 +5,9 @@ import { FormViewer } from '../../toolbar/toolkit/_api';
 import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
 import { createElement, createTextNode } from '../uikit';
 
-export interface FormConfig {
+export interface FormConfig<T> {
   title?: string;
-  items: FormItem[];
+  items: Array<FormItem<T>>;
   mini?: boolean;
 }
 
@@ -24,7 +24,7 @@ export class Form implements FormViewer {
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
 
-  constructor(private config: FormConfig) {
+  constructor(private config: FormConfig<any>) {
     this.onComplete = this.completeEvent.asObservable();
     this.onClose = this.closeEvent.asObservable();
     this.elementRef.classList.add(config.mini ? 'textbus-toolbar-form' : 'textbus-form');

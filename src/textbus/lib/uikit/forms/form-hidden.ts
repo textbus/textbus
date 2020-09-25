@@ -1,6 +1,6 @@
 import { Hidden, AttrState, FormItem } from './help';
 
-export class FormHidden implements FormItem {
+export class FormHidden implements FormItem<any> {
   readonly elementRef = document.createElement('input');
   readonly name: string;
   private readonly value: string | boolean | number;
@@ -19,7 +19,7 @@ export class FormHidden implements FormItem {
     // this.value = value;
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<any> {
     return {
       name: this.name,
       value: this.value

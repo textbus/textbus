@@ -1,6 +1,6 @@
 import { Switch, AttrState, FormItem } from './help';
 
-export class FormSwitch implements FormItem {
+export class FormSwitch implements FormItem<boolean> {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
@@ -28,7 +28,7 @@ export class FormSwitch implements FormItem {
     this.input.checked = value;
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<boolean> {
     return {
       name: this.name,
       value: this.input.checked

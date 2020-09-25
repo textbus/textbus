@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 
 import { AttrState, TextField, FormItem, FileUploader } from './help';
 
-export class FormTextField implements FormItem {
+export class FormTextField implements FormItem<string> {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
@@ -67,7 +67,7 @@ export class FormTextField implements FormItem {
     }
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<string> {
     return {
       name: this.config.name,
       value: this.input.value

@@ -3,6 +3,8 @@ import { fromEvent } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
 export interface ImageOptions {
+  maxWidth?: string;
+  maxHeight?: string;
   width?: string;
   height?: string;
   margin?: string;
@@ -23,6 +25,8 @@ export class ImageComponentReader implements ComponentReader {
       component: new ImageComponent(el.src, {
         width: el.style.width || el.width + '',
         height: el.style.height || el.height + '',
+        maxWidth: el.style.maxWidth,
+        maxHeight: el.style.maxHeight,
         margin: el.style.margin,
         float: el.style.float
       }),
@@ -34,18 +38,35 @@ export class ImageComponentReader implements ComponentReader {
 export class ImageComponent extends LeafComponent {
   width: string = null;
   height: string = null;
+  maxWidth: string = null;
+  maxHeight: string = null;
   float: string;
   margin: string;
+
+  get size() {
+    return {
+      width: this.width,
+      height: this.height
+    };
+  }
+
+  get maxSize() {
+    return {
+      width: this.maxWidth,
+      height: this.maxHeight
+    };
+  }
 
   private loadedImages: string[] = [];
 
   constructor(public src: string, options: ImageOptions = {
-    width: '100%',
-    height: 'auto',
+    maxWidth: '100%'
   }) {
     super('img');
     this.width = options.width;
     this.height = options.height;
+    this.maxWidth = options.maxWidth;
+    this.maxHeight = options.maxHeight;
     this.float = options.float;
     this.margin = options.margin;
   }
@@ -77,6 +98,12 @@ export class ImageComponent extends LeafComponent {
     if (this.height) {
       el.styles.set('height', this.height);
     }
+    if (this.maxWidth) {
+      el.styles.set('maxWidth', this.maxWidth);
+    }
+    if (this.maxHeight) {
+      el.styles.set('maxHeight', this.maxHeight);
+    }
     if (['left', 'right'].includes(this.float)) {
       el.styles.set('float', this.float);
     }
@@ -90,6 +117,8 @@ export class ImageComponent extends LeafComponent {
     return new ImageComponent(this.src, {
       width: this.width,
       height: this.height,
+      maxWidth: this.maxWidth,
+      maxHeight: this.maxHeight,
       float: this.float,
       margin: this.margin
     });

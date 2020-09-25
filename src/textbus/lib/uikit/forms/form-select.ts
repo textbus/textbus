@@ -1,6 +1,6 @@
 import { AttrState, FormItem, Select } from './help';
 
-export class FormSelect implements FormItem {
+export class FormSelect implements FormItem<any> {
   elementRef = document.createElement('div');
   name: string;
   private select: HTMLSelectElement;
@@ -39,7 +39,7 @@ export class FormSelect implements FormItem {
     })
   }
 
-  getAttr(): AttrState {
+  getAttr(): AttrState<any> {
     return {
       name: this.config.name,
       value: this.select.value
