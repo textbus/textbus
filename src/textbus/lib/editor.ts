@@ -241,11 +241,14 @@ export class Editor implements FileUploader {
    * @param html
    */
   setContents(html: string) {
-    this.run(() => {
-      this.writeContents(html).then(el => {
-        this.rootFragment = this.parser.parse(el);
-        this.render();
-      });
+    return new Promise((resolve, reject) => {
+      this.run(() => {
+        this.writeContents(html).then(el => {
+          this.rootFragment = this.parser.parse(el);
+          this.render();
+          resolve();
+        }).catch(reject);
+      })
     })
   }
 
