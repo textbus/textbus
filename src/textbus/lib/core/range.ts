@@ -507,7 +507,7 @@ export class TBRange {
         }
         return {
           fragment: parentFragment,
-          index: componentIndex
+          index: prevContent instanceof LeafComponent ? componentIndex - 1 : componentIndex
         }
       } else {
         fragment = parentFragment;
@@ -528,15 +528,19 @@ export class TBRange {
       }
     }
     if (offset < fragment.contentLength) {
-      const next = fragment.getContentAtIndex(offset);
-      if (next instanceof DivisionComponent) {
-        return this.findFirstPosition(next.slot);
+      let current = fragment.getContentAtIndex(offset);
+
+      if (current instanceof LeafComponent) {
+        current = fragment.getContentAtIndex(offset + 1);
       }
-      if (next instanceof BranchComponent) {
-        return this.findFirstPosition(next.slots[0]);
+      if (current instanceof DivisionComponent) {
+        return this.findFirstPosition(current.slot);
       }
-      if (next instanceof BackboneComponent) {
-        return this.findFirstPosition(next.getSlotAtIndex(0));
+      if (current instanceof BranchComponent) {
+        return this.findFirstPosition(current.slots[0]);
+      }
+      if (current instanceof BackboneComponent) {
+        return this.findFirstPosition(current.getSlotAtIndex(0));
       }
       return {
         fragment,
@@ -748,7 +752,33 @@ export class TBRange {
    * 获取选区范围在文档中的坐标位置。
    */
   getRangePosition() {
-    return TBRange.getRangePosition(this.nativeRange);
+    const range: Range = this.nativeRange;
+    let rect = range.getBoundingClientRect();
+    const {startContainer, startOffset} = range;
+    const offsetNode = startContainer.childNodes[startOffset];
+    if (startContainer.nodeType === Node.ELEMENT_NODE) {
+      if (offsetNode) {
+        const p = this.renderer.getPositionByNode(offsetNode);
+        if (p.endIndex - p.startIndex === 1 && p.fragment.getContentAtIndex(p.startIndex) instanceof LeafComponent) {
+          rect = (offsetNode as HTMLElement).getBoundingClientRect();
+        } else if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.childNodes.length === 0) {
+          const cloneRange = range.cloneRange();
+          const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
+          offsetNode.appendChild(textNode);
+          cloneRange.selectNodeContents(offsetNode);
+          rect = cloneRange.getBoundingClientRect();
+          cloneRange.detach();
+        }
+      } else {
+        const span = startContainer.ownerDocument.createElement('span');
+        span.innerText = 'x';
+        span.style.display = 'inline-block';
+        startContainer.appendChild(span);
+        rect = span.getBoundingClientRect();
+        startContainer.removeChild(span);
+      }
+    }
+    return rect;
   }
 
   /**
@@ -776,6 +806,7 @@ export class TBRange {
     } else {
       let isDeleteFragment = false;
       const endFragmentIsCommon = this.endFragment === this.commonAncestorFragment;
+      const scopeStartIndex = this.getCommonAncestorFragmentScope().startIndex;
       if (this.startIndex === 0) {
         const {fragment, index} = this.findFirstPosition(startFragment);
         isDeleteFragment = fragment === startFragment && index === this.startIndex;
@@ -791,44 +822,34 @@ export class TBRange {
           this.deleteEmptyTree(this.endFragment);
         }
       } else {
-        if (!endFragmentIsCommon && this.startFragment !== this.endFragment) {
-          const endLast = this.endFragment.cut(0);
-          this.deleteEmptyTree(this.endFragment);
-          const startLast = this.startFragment.cut(this.startIndex);
+        if (this.startFragment !== this.endFragment) {
+          if (endFragmentIsCommon) {
+            const lastContents = this.endFragment.sliceContents(scopeStartIndex + 1);
+            let count = 0;
+            while (lastContents.length) {
+              const first = lastContents.shift();
+              if (first instanceof LeafComponent || typeof first === 'string') {
+                this.startFragment.append(first);
+                count += first.length;
+              } else {
+                break;
+              }
+            }
 
-          append(this.startFragment, this.startIndex, endLast);
-          append(this.startFragment, this.startIndex + endLast.contentLength, startLast);
+            this.endFragment.remove(scopeStartIndex + 1, count);
+          } else {
+            const endLast = this.endFragment.cut(0);
+            this.deleteEmptyTree(this.endFragment);
+            const startLast = this.startFragment.cut(this.startIndex);
+
+            append(this.startFragment, this.startIndex, endLast);
+            append(this.startFragment, this.startIndex + endLast.contentLength, startLast);
+          }
         }
       }
     }
 
     this.collapse();
-  }
-
-  static getRangePosition(range: Range) {
-    let rect = range.getBoundingClientRect();
-    const {startContainer, startOffset} = range;
-    const offsetNode = startContainer.childNodes[startOffset];
-    if (startContainer.nodeType === Node.ELEMENT_NODE) {
-      if (offsetNode && /^(br|img)$/i.test(offsetNode.nodeName)) {
-        rect = (offsetNode as HTMLElement).getBoundingClientRect();
-      } else if (offsetNode && offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.childNodes.length === 0) {
-        const cloneRange = range.cloneRange();
-        const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
-        offsetNode.appendChild(textNode);
-        cloneRange.selectNodeContents(offsetNode);
-        rect = cloneRange.getBoundingClientRect();
-        cloneRange.detach();
-      } else if (!offsetNode) {
-        const span = startContainer.ownerDocument.createElement('span');
-        span.innerText = 'x';
-        span.style.display = 'inline-block';
-        startContainer.appendChild(span);
-        rect = span.getBoundingClientRect();
-        startContainer.removeChild(span);
-      }
-    }
-    return rect;
   }
 
   private getScopes(startFragment: Fragment,
@@ -1070,6 +1091,16 @@ export class TBRange {
               continue;
             }
             if (child instanceof VElement) {
+              if (position.endIndex - position.startIndex === 1) {
+                if (fragment.sliceContents(position.startIndex, position.endIndex)[0] instanceof LeafComponent) {
+                  const node = this.renderer.getNativeNodeByVDom(child);
+                  const parentNode = node.parentNode;
+                  return {
+                    node: parentNode,
+                    offset: Array.from(parentNode.childNodes).indexOf(node as any)
+                  };
+                }
+              }
               if (child.childNodes.length === 0) {
                 const node = this.renderer.getNativeNodeByVDom(child);
                 const parentNode = node.parentNode;
@@ -1077,7 +1108,7 @@ export class TBRange {
                 return {
                   node: parentNode,
                   offset: position.endIndex === offset ? index + 1 : index
-                }
+                };
               }
               vElement = child;
               continue parentLoop;
