@@ -121,7 +121,6 @@ class SizeSetter implements FormItem<any> {
   }
 
   update(value?: Size) {
-    console.log(value)
     this.inputs[0].value = value?.width || '';
     this.inputs[1].value = value?.height || '';
   }
