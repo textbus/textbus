@@ -67,9 +67,16 @@ export class TodoListComponent extends BranchComponent {
 
   render(isOutputModel: boolean, eventManager: NativeEventManager): VElement {
     const list = new VElement('tb-todo-list');
-    this.listConfigs = this.listConfigs.filter(i => {
-      return this.slots.includes(i.slot);
-    });
+
+    if (this.listConfigs.length === this.slots.length) {
+      this.slots.forEach((slot, index) => {
+        this.listConfigs[index].slot = slot;
+      })
+    } else {
+      this.listConfigs = this.listConfigs.filter(i => {
+        return this.slots.includes(i.slot);
+      });
+    }
 
     this.viewMap.clear();
     this.slots.length = 0;
