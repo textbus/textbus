@@ -14,10 +14,10 @@
     "baseUrl": "./",
     "paths": {
       "@tanbo/textbus": [
-        "src/textbus/public-api.ts"
+        "src/public-api.ts"
       ],
       "@tanbo/textbus/*": [
-        "src/textbus/*"
+        "src/*"
       ]
     }
   }

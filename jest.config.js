@@ -11,7 +11,7 @@ module.exports = {
   moduleDirectories: ['node_modules', 'src'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
-    '@tanbo/textbus': '<rootDir>/src/textbus/public-api.ts',
-    '@tanbo/textbus/(.*)': '<rootDir>/src/textbus/$1'
+    '@tanbo/textbus': '<rootDir>/src/public-api.ts',
+    '@tanbo/textbus/(.*)': '<rootDir>/src/$1'
   }
 };

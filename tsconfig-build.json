@@ -15,6 +15,6 @@
     "downlevelIteration": true
   },
   "include": [
-    "src/textbus/"
+    "src/"
   ]
 }

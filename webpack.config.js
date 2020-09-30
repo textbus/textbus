@@ -7,7 +7,7 @@ module.exports = {
   mode: 'development',
   devtool: 'cheap-module-source-map',
   entry: {
-    index: path.resolve(__dirname, 'src/main.ts')
+    index: path.resolve(__dirname, 'index.ts')
   },
   output: {
     path: path.resolve(__dirname, 'dist')
@@ -37,7 +37,7 @@ module.exports = {
           }
         }
       }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/textbus/assets/')]
+      include: [path.resolve(__dirname, 'src/assets/')]
     }, {
       test: /\.s?css$/,
       loader: ['to-string-loader', 'css-loader', {
@@ -48,7 +48,7 @@ module.exports = {
           }
         }
       }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/textbus/lib/')]
+      include: [path.resolve(__dirname, 'src/lib/')]
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
       use: [{
@@ -72,7 +72,7 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
+      template: 'index.html'
     })
   ]
 };

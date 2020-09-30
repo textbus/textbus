@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import 'core-js';
-import './textbus/assets/index.scss';
+import './src/assets/index.scss';
 
 
 import {
@@ -11,7 +11,7 @@ import {
   FormTextField,
   videoToolConfig,
   defaultOptions
-} from './textbus/public-api';
+} from './src/public-api';
 
 
 defaultOptions.styleSheets.push(`
