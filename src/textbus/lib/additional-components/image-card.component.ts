@@ -62,7 +62,7 @@ export class ImageCardComponent extends BackboneComponent {
     return deletedSlot === this.imgFragment;
   }
 
-  render(isOutputModel: boolean): VElement {
+  render(isOutputMode: boolean): VElement {
     this.viewMap.clear();
     this.slots = [this.imgFragment, this.descFragment];
     const card = new VElement(this.tagName);
@@ -76,7 +76,7 @@ export class ImageCardComponent extends BackboneComponent {
       this.descFragment.append(new BrComponent());
     }
     this.viewMap.set(this.descFragment, desc);
-    if (!isOutputModel) {
+    if (!isOutputMode) {
       imgWrapper.events.subscribe(ev => {
         ev.stopPropagation();
       });

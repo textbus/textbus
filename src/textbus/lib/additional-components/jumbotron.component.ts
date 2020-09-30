@@ -52,7 +52,7 @@ export class JumbotronComponent extends DivisionComponent {
     return component;
   }
 
-  render(isOutputModel: boolean): VElement {
+  render(isOutputMode: boolean): VElement {
     const vEle = new VElement(this.tagName, {
       styles: {
         backgroundImage: this.options.backgroundImage,

@@ -37,7 +37,7 @@ export class ProgressComponent extends LeafComponent {
     return undefined;
   }
 
-  render(isOutputModel: boolean): VElement {
+  render(isOutputMode: boolean): VElement {
     const config = this.config;
     const wrap = new VElement(this.tagName, {
       attrs: {...config}

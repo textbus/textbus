@@ -92,7 +92,7 @@ export interface FormatRendingContext {
    * 如在编辑状态下，可能会添加一些临时的属性来做交互，或者兼听一些事件等等，
    * 这在输出结果时，是不需要的。
    */
-  isOutputModel: boolean;
+  isOutputMode: boolean;
   /**
    * 当前样式的状态，一般来说有两种，生效的（Valid）和不生效的（Invalid），有些情况下，可能还有其它状态。
    * 如：继承（Inherit）、排除（Exclude）。

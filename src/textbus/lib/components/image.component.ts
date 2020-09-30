@@ -71,9 +71,9 @@ export class ImageComponent extends LeafComponent {
     this.margin = options.margin;
   }
 
-  render(isOutputModel: boolean) {
+  render(isOutputMode: boolean) {
     const el = new VElement(this.tagName);
-    if (isOutputModel || this.loadedImages.includes(this.src)) {
+    if (isOutputMode || this.loadedImages.includes(this.src)) {
       el.attrs.set('src', this.src);
     } else {
       el.attrs.set('src', imageLoadingSrc);

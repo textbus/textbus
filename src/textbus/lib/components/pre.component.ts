@@ -195,12 +195,12 @@ export class PreComponent extends DivisionComponent {
     return component;
   }
 
-  render(isOutputModel: boolean) {
+  render(isOutputMode: boolean) {
     this.format();
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     this.vEle = block;
-    !isOutputModel && block.events.subscribe(event => {
+    !isOutputMode && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
         this.slot.insert(new BrComponent(), firstRange.startIndex);

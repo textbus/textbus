@@ -162,7 +162,7 @@ export class TableComponent extends BackboneComponent {
     return new TableComponent(config);
   }
 
-  render(isOutputModel: boolean) {
+  render(isOutputMode: boolean) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
       table.classes.push('tb-table');
@@ -191,7 +191,7 @@ export class TableComponent extends BackboneComponent {
           this.slots.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
-          !isOutputModel && td.events.subscribe(event => {
+          !isOutputMode && td.events.subscribe(event => {
             if (event.type === EventType.onEnter) {
               const firstRange = event.selection.firstRange;
               col.fragment.insert(new BrComponent(), firstRange.startIndex);

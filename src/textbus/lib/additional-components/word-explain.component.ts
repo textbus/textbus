@@ -83,7 +83,7 @@ export class WordExplainComponent extends BackboneComponent {
     });
   }
 
-  render(isOutputModel: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
     this.slots.forEach(f => {
@@ -114,7 +114,7 @@ export class WordExplainComponent extends BackboneComponent {
     this.viewMap.set(this.title, title);
     this.viewMap.set(this.subtitle, subtitle);
     this.viewMap.set(this.detail, detail);
-    if (!isOutputModel) {
+    if (!isOutputMode) {
       const close = new VElement('span', {
         classes: ['tb-word-explain-close'],
         attrs: {

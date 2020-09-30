@@ -557,7 +557,7 @@ export class Renderer {
     let slot = host;
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
-        isOutputModel: this.outputModal,
+        isOutputMode: this.outputModal,
         state: next.params.state,
         abstractData: next.params.abstractData,
       };

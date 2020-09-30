@@ -25,7 +25,7 @@ export class LinkFormatter extends InlineFormatter {
     const target = context.abstractData.attrs.get('target');
     const href = context.abstractData.attrs.get('href');
     target && el.attrs.set('target', target);
-    href && el.attrs.set(context.isOutputModel ? 'href' : 'data-href', href);
+    href && el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
     return new ChildSlotModel(el);
   }
 }

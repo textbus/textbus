@@ -24,7 +24,7 @@ class FindFormatter extends InlineFormatter {
   }
 
   render(context: FormatRendingContext, existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
-    if (context.isOutputModel) {
+    if (context.isOutputMode) {
       return null;
     }
     const flag = !!existingElement;
