@@ -132,24 +132,24 @@ export class PreComponent extends DivisionComponent {
   render(isOutputMode: boolean) {
     this.slot.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
     const languageGrammar = this.getLanguageGrammar();
-    if (languageGrammar) {
-      const content = this.slot.sliceContents(0).map(item => {
-        if (typeof item === 'string') {
-          return item;
+    const content = this.slot.sliceContents(0).map(item => {
+      if (typeof item === 'string') {
+        return item;
 
-        } else if (item instanceof BrComponent) {
-          return '\n';
-        }
-      }).join('');
+      } else if (item instanceof BrComponent) {
+        return '\n';
+      }
+    }).join('');
+    const fragment = new Fragment();
+    content.replace(/\n|[^\n]/g, str => {
+      fragment.append(str === '\n' ? new BrComponent() : str);
+      return '';
+    })
+    if (languageGrammar) {
       const tokens = tokenize(content, languageGrammar);
-      const fragment = new Fragment();
-      content.replace(/\n|[^\n]/g, str => {
-        fragment.append(str === '\n' ? new BrComponent() : str);
-        return '';
-      })
       this.format(tokens, fragment, 0);
-      this.slot.from(fragment);
     }
+    this.slot.from(fragment);
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     this.vEle = block;

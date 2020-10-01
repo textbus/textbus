@@ -127,7 +127,7 @@ export class Editor implements FileUploader {
   private subs: Subscription[] = [];
   private contentUnexpectedlyChangedSub: Subscription;
 
-  private sourceCodeComponent = new PreComponent('html');
+  private sourceCodeComponent = new PreComponent('HTML');
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     this.onUserWrite = this.userWriteEvent.asObservable();
