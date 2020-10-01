@@ -27,5 +27,8 @@ export const defaultStyleSheets = [
   .tb-hl-attr-value { color: rgb(221, 17, 68) }
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
   `,
-  `pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }`
+  `
+  pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
+  pre[theme=dark] .tb-hl-tag {color: rgb(91 155 190)}
+  `
 ]
