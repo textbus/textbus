@@ -37,15 +37,17 @@ export const codeStyles = {
   tag: 'tag',
   comment: 'comment',
   boolean: 'boolean',
-  operator: 'operator',
+  operator: false,
   builtin: 'builtin',
-  punctuation: 'punctuation',
+  punctuation: false,
   regex: 'regex',
   'class-name': 'class-name',
   'attr-name': 'attr-name',
   'attr-value': 'attr-value',
   'template-punctuation': 'string',
 };
+
+export type PreTheme = 'dark' | 'light';
 
 class CodeFormatter extends BlockFormatter {
   constructor() {
@@ -90,7 +92,7 @@ export class PreComponentReader implements ComponentReader {
   }
 
   from(el: HTMLElement): ViewData {
-    const component = new PreComponent(el.getAttribute('lang'));
+    const component = new PreComponent(el.getAttribute('lang'), el.getAttribute('theme') as PreTheme);
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -113,9 +115,10 @@ export class PreComponentReader implements ComponentReader {
 }
 
 export class PreComponent extends DivisionComponent {
+  static theme: PreTheme= 'light';
   private vEle: VElement;
 
-  constructor(public lang: string) {
+  constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
   }
 
@@ -159,6 +162,7 @@ export class PreComponent extends DivisionComponent {
     this.slot.from(fragment);
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
+    block.attrs.set('theme', this.theme || PreComponent.theme);
     this.vEle = block;
     !isOutputMode && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
@@ -201,6 +205,13 @@ export class PreComponent extends DivisionComponent {
               classes: ['tb-hl-' + styleName]
             })
           });
+        } else if (styleName === false) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
+            state: FormatEffect.Invalid,
+            abstractData: null
+          })
         }
         if (Array.isArray(token.content)) {
           this.format(token.content, slot, index);

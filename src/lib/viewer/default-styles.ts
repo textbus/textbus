@@ -14,18 +14,18 @@ export const defaultStyleSheets = [
   `a {text-decoration: underline; color: #449fdb; cursor: text;}`,
   `img {vertical-align:bottom}`,
   `
-  .tb-hl-keyword { color: rgb(51, 51, 51); font-weight: bold; }
+  .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
   .tb-hl-function { color: rgb(0, 134, 179); }
   .tb-hl-number { color: #388138 }
   .tb-hl-tag { color: rgb(0, 0, 128) }
   .tb-hl-comment { color: rgb(153, 153, 136); font-style: italic; }
   .tb-hl-boolean { color: #388138; font-weight: bold }
-  .tb-hl-operator, .tb-hl-punctuation { color: rgb(51, 51, 51); }
   .tb-hl-builtin { color: rgb(0, 134, 179); }
   .tb-hl-regex { color: #f60; }
   .tb-hl-attr-name { color: rgb(0, 128, 128) }
   .tb-hl-attr-value { color: rgb(221, 17, 68) }
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
-  `
+  `,
+  `pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }`
 ]

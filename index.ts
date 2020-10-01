@@ -10,7 +10,7 @@ import {
   FormHidden, FormRadio, FormSwitch,
   FormTextField,
   videoToolConfig,
-  defaultOptions
+  defaultOptions, PreComponent
 } from './src/public-api';
 
 
@@ -18,6 +18,7 @@ defaultOptions.styleSheets.push(`
 img {max-width: 100%}
 `)
 
+PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   // expandComponentLibrary: true,
   deviceWidth: '768px',
