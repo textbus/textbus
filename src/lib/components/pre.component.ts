@@ -130,7 +130,6 @@ export class PreComponent extends DivisionComponent {
   }
 
   render(isOutputMode: boolean) {
-    this.slot.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
     const languageGrammar = this.getLanguageGrammar();
     const content = this.slot.sliceContents(0).map(item => {
       if (typeof item === 'string') {
@@ -149,6 +148,14 @@ export class PreComponent extends DivisionComponent {
       const tokens = tokenize(content, languageGrammar);
       this.format(tokens, fragment, 0);
     }
+    this.slot.getFormatKeys().forEach(format => {
+      if (format instanceof BlockFormatter) {
+        this.slot.getFormatRanges(format).forEach(r => {
+          fragment.apply(format, r);
+        })
+      }
+    })
+    fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
     this.slot.from(fragment);
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
