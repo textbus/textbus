@@ -5,111 +5,47 @@ import {
   DivisionComponent,
   EventType,
   FormatAbstractData,
-  FormatEffect, FormatRendingContext,
+  FormatEffect,
+  FormatRendingContext,
   Fragment,
-  InlineFormatParams,
   InlineFormatter,
   ReplaceModel,
   VElement,
   ViewData
 } from '../core/_api';
 import { BrComponent } from './br.component';
-import { highlight } from 'highlight.js';
+import { Grammar, languages, Token, tokenize } from 'prismjs';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-powershell';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-swift';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-less';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-stylus';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
 
-const theme = [
-  {
-    classes: ['hljs'],
-    styles: {
-      color: '#333',
-      backgroundColor: '#f8f8f8'
-    }
-  }, {
-    classes: ['hljs-comment', 'hljs-quote'],
-    styles: {
-      color: '#998',
-      fontStyle: 'italic'
-    }
-  }, {
-    classes: ['hljs-keyword', 'hljs-selector-tag', 'hljs-subst'],
-    styles: {
-      color: '#333',
-      fontWeight: 'bold'
-    }
-  }, {
-    classes: ['hljs-number', 'hljs-literal', 'hljs-variable', 'hljs-component-variable', 'hljs-tag', 'hljs-attr'],
-    styles: {
-      color: '#008080'
-    }
-  }, {
-    classes: ['hljs-string', 'hljs-doctag'],
-    styles: {
-      color: '#d14'
-    }
-  }, {
-    classes: ['hljs-title', 'hljs-section', 'hljs-selector-id'],
-    styles: {
-      color: '#900',
-      fontWeight: 'bold'
-    }
-  }, {
-    classes: ['hljs-subst'],
-    styles: {
-      fontWeight: 'normal'
-    }
-  }, {
-    classes: ['hljs-type', 'hljs-class', 'hljs-title'], styles: {
-      color: '#458',
-      fontWeight: 'bold'
-    }
-  }, {
-    classes: ['hljs-tag', 'hljs-name', 'hljs-attribute'],
-    styles: {
-      color: '#000080',
-      fontWeight: 'normal'
-    }
-  }, {
-    classes: ['hljs-regexp', 'hljs-link'],
-    styles: {
-      color: '#009926'
-    }
-  }, {
-    classes: ['hljs-symbol', 'hljs-bullet'],
-    styles: {
-      color: '#990073'
-    }
-  }, {
-    classes: ['hljs-built_in', 'hljs-builtin-name'],
-    styles: {
-      color: '#0086b3'
-    }
-  }, {
-    classes: ['hljs-meta'],
-    styles: {
-      color: '#999',
-      fontWeight: 'bold'
-    }
-  }, {
-    classes: ['hljs-deletion'],
-    styles: {
-      backgroundColor: '#fdd'
-    }
-  }, {
-    classes: ['hljs-addition'],
-    styles: {
-      backgroundColor: '#dfd'
-    }
-  }, {
-    classes: ['hljs-emphasis'],
-    styles: {
-      fontStyle: 'italic'
-    }
-  }, {
-    classes: ['hljs-strong'],
-    styles: {
-      fontWeight: 'bold'
-    }
-  }
-];
+export const codeStyles = {
+  keyword: 'keyword',
+  string: 'string',
+  function: 'function',
+  number: 'number',
+  tag: 'tag',
+  comment: 'comment',
+  boolean: 'boolean',
+  operator: 'operator',
+  builtin: 'builtin',
+  punctuation: 'punctuation',
+  regex: 'regex',
+  'class-name': 'class-name',
+  'attr-name': 'attr-name',
+  'attr-value': 'attr-value',
+  'template-punctuation': 'string',
+};
 
 class CodeFormatter extends BlockFormatter {
   constructor() {
@@ -138,9 +74,7 @@ class CodeStyleFormatter extends InlineFormatter {
     if (!existingElement) {
       existingElement = new VElement('span');
     }
-    context.abstractData.styles.forEach((value, key) => {
-      existingElement.styles.set(key, value);
-    })
+    existingElement.classes.push(...context.abstractData.classes);
     return new ReplaceModel(existingElement);
   }
 }
@@ -196,7 +130,26 @@ export class PreComponent extends DivisionComponent {
   }
 
   render(isOutputMode: boolean) {
-    this.format();
+    this.slot.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+    const languageGrammar = this.getLanguageGrammar();
+    if (languageGrammar) {
+      const content = this.slot.sliceContents(0).map(item => {
+        if (typeof item === 'string') {
+          return item;
+
+        } else if (item instanceof BrComponent) {
+          return '\n';
+        }
+      }).join('');
+      const tokens = tokenize(content, languageGrammar);
+      const fragment = new Fragment();
+      content.replace(/\n|[^\n]/g, str => {
+        fragment.append(str === '\n' ? new BrComponent() : str);
+        return '';
+      })
+      this.format(tokens, fragment, 0);
+      this.slot.from(fragment);
+    }
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     this.vEle = block;
@@ -228,88 +181,46 @@ export class PreComponent extends DivisionComponent {
     return block;
   }
 
-  private format() {
-    const fragment = this.slot;
-
-    const sourceCode = fragment.sliceContents(0).map(item => {
-      if (typeof item === 'string') {
-        return item;
-
-      } else if (item instanceof BrComponent) {
-        return '\n';
-      }
-    }).join('');
-    const blockFormats = Array.from(fragment.getFormatKeys())
-      .filter(f => f instanceof BlockFormatter).map(token => {
-        return {
-          token,
-          ranges: fragment.getFormatRanges(token)
-        }
-      });
-    fragment.clean();
-    fragment.apply(codeFormatter, {
-      abstractData: new FormatAbstractData({
-        tag: 'code'
-      }),
-      state: FormatEffect.Valid
-    });
-    blockFormats.forEach(c => {
-      c.ranges.forEach(r => {
-        fragment.apply(c.token, r);
-      })
-    });
-    const lang = this.lang || 'bash';
-    try {
-      const html = highlight(lang, sourceCode).value.replace(/\n/g, '<br>');
-      const div = document.createElement('div');
-      div.innerHTML = html;
-      this.getFormats(0, div, fragment).formats.forEach(f => {
-        fragment.apply(codeStyleFormatter, f);
-      });
-    } catch (e) {
-      // console.log(e);
-    }
-  }
-
-  private getFormats(index: number, node: HTMLElement, context: Fragment) {
-    const start = index;
-    const childFormats: Array<InlineFormatParams> = [];
-    Array.from(node.childNodes).forEach(item => {
-      if (item.nodeType === Node.ELEMENT_NODE) {
-        if (item.nodeName.toLowerCase() === 'br') {
-          index++;
-          context.append(new BrComponent());
-          return;
-        }
-        const result = this.getFormats(index, item as HTMLElement, context);
-        index = result.index;
-        childFormats.push(...result.formats);
-      } else if (item.nodeType === Node.TEXT_NODE) {
-        context.append(item.textContent);
-        index += item.textContent.length;
-      }
-    });
-
-    const formats: Array<InlineFormatParams> = [];
-    node.classList.forEach(value => {
-      for (const item of theme) {
-        if (item.classes.includes(value)) {
-          const styles = item.styles;
-          formats.push({
-            startIndex: start,
-            endIndex: index,
+  format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+    tokens.forEach(token => {
+      if (token instanceof Token) {
+        const styleName = codeStyles[token.type];
+        if (styleName) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
             state: FormatEffect.Valid,
             abstractData: new FormatAbstractData({
-              styles
+              classes: ['tb-hl-' + styleName]
             })
-          })
+          });
+        }
+        if (Array.isArray(token.content)) {
+          this.format(token.content, slot, index);
         }
       }
-    });
-    formats.push(...childFormats);
+      index += token.length;
+    })
+  }
+
+  private getLanguageGrammar(): Grammar {
     return {
-      index,
-      formats
-    };
+      HTML: languages.html,
+      Javascript: languages.javascript,
+      CSS: languages.css,
+      Typescript: languages.typescript,
+      Java: languages.java,
+      Shell: languages.shell,
+      Python: languages.python,
+      Swift: languages.swift,
+      JSON: languages.json,
+      Ruby: languages.ruby,
+      Less: languages.less,
+      SCSS: languages.scss,
+      Stylus: languages.stylus,
+      C: languages.c,
+      CPP: languages.cpp,
+      CSharp: languages.csharp
+    }[this.lang];
   }
 }

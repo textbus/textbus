@@ -71,10 +71,10 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.0.21",
     "@tanbo/css-themes": "^0.0.1",
-    "@types/highlight.js": "^9.12.3",
     "@types/pretty": "^2.0.0",
-    "highlight.js": "^9.17.1",
+    "@types/prismjs": "^1.16.1",
     "pretty": "^2.0.0",
+    "prismjs": "^1.21.0",
     "rxjs": "^6.0.0"
   }
 }

@@ -3,6 +3,7 @@
  */
 export interface AbstractDataParams {
   tag?: string;
+  classes?: string[];
   attrs?: { [key: string]: string | number | boolean } | Map<string, string | number | boolean>;
   styles?: { [key: string]: string | number } | Map<string, string | number>;
 }
@@ -14,6 +15,7 @@ export class FormatAbstractData {
   readonly tag: string;
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
+  readonly classes: string[] = [];
 
   constructor(params: AbstractDataParams = {}) {
     this.tag = params.tag;
@@ -37,6 +39,9 @@ export class FormatAbstractData {
         });
       }
     }
+    if (params.classes) {
+      this.classes = [...params.classes];
+    }
   }
 
   /**
@@ -59,6 +64,7 @@ export class FormatAbstractData {
         })
         return obj;
       })() : null,
+      classes: this.classes
     });
   }
 
@@ -74,10 +80,22 @@ export class FormatAbstractData {
       return false;
     }
     const left = data;
-    const right = this;
-    return left.tag == right.tag &&
-      FormatAbstractData.equalMap(left.attrs, right.attrs) &&
-      FormatAbstractData.equalMap(left.styles, right.styles);
+    return left.tag == this.tag &&
+      FormatAbstractData.equalMap(left.attrs, this.attrs) &&
+      FormatAbstractData.equalMap(left.styles, this.styles) &&
+      FormatAbstractData.equalStringList(left.classes, this.classes);
+  }
+
+  private static equalStringList(left: string[], right: string[]) {
+    if (left.length !== right.length) {
+      return false;
+    }
+    for (const item of left) {
+      if (!right.includes(item)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private static equalMap(left: Map<string, string | number | boolean>,

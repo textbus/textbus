@@ -18,6 +18,14 @@ export const preToolConfig: SelectToolConfig = {
   }, {
     value: 'Java'
   }, {
+    value: 'C'
+  }, {
+    label: 'C++',
+    value: 'CPP'
+  }, {
+    label: 'C#',
+    value: 'CSharp'
+  }, {
     value: 'Shell'
   }, {
     value: 'Python'

@@ -12,6 +12,8 @@ export const iframeHTML = `
       height: 100%
     }
     body {
+      padding: 8px;
+      margin: 0;
       min-height: 100%;
       box-sizing: border-box;
       text-size-adjust: none;
