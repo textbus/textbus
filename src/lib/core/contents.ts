@@ -102,9 +102,6 @@ export class Contents {
     let ii = 0;
     for (const el of this.elements) {
       if (index >= i) {
-        if (i > index) {
-          break;
-        }
         if ((el instanceof Component) && index === i) {
           const prev = this.elements[ii - 1];
           if (typeof prev === 'string' && typeof content === 'string') {
