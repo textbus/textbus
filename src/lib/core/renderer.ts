@@ -114,7 +114,7 @@ export class Renderer {
 
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
-    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
+    const vDom = this.createVDOMIntoView(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
@@ -132,7 +132,7 @@ export class Renderer {
   renderToHTML(fragment: Fragment): string {
     this.outputModal = true;
     const root = new VElement('root');
-    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
+    const vDom = this.createVDOMIntoView(fragment, root);
     return vDom.childNodes.map(child => {
       return this.vDomToHTMLString(child);
     }).join('');
@@ -145,7 +145,7 @@ export class Renderer {
   renderToJSON(fragment: Fragment): VElementLiteral {
     this.outputModal = true;
     const root = new VElement('body');
-    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
+    const vDom = this.createVDOMIntoView(fragment, root);
     return vDom.toJSON();
   }
 
@@ -373,7 +373,7 @@ export class Renderer {
     })
   }
 
-  private createVDOMIntoSpecifiedView(fragment: Fragment, host: VElement) {
+  private createVDOMIntoView(fragment: Fragment, host: VElement) {
     if (!this.outputModal) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
@@ -532,7 +532,7 @@ export class Renderer {
               view.styles.set('userSelect', 'text');
             }
           }
-          this.createVDOMIntoSpecifiedView(item.slot, view);
+          this.createVDOMIntoView(item.slot, view);
         } else if (item instanceof BranchComponent) {
           if (!this.outputModal) {
             vDom.styles.set('userSelect', 'none');
@@ -543,7 +543,7 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDOMIntoSpecifiedView(slot, parent);
+            this.createVDOMIntoView(slot, parent);
           });
         } else if (item instanceof BackboneComponent) {
           if (!this.outputModal) {
@@ -555,7 +555,7 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDOMIntoSpecifiedView(slot, parent);
+            this.createVDOMIntoView(slot, parent);
           }
         }
       }
