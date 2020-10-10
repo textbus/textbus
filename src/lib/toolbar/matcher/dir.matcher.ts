@@ -1,6 +1,6 @@
 import { FormatMatcher } from './format.matcher';
 import { TBSelection, Renderer, FormatAbstractData } from '../../core/_api';
-import { SelectionMatchDelta } from './matcher';
+import { SelectionMatchState } from './matcher';
 import { HighlightState } from '../help';
 import { dirFormatter } from '../../formatter/dir.formatter';
 
@@ -9,7 +9,7 @@ export class DirMatcher extends FormatMatcher {
     super(dirFormatter);
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

@@ -12,7 +12,7 @@ import {
   Constructor
 } from '../../core/_api';
 import { HighlightState } from '../help';
-import { FormatMatchData, Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { FormatMatchData, Matcher, RangeMatchState, SelectionMatchState } from './matcher';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class FormatMatcher implements Matcher {
@@ -20,7 +20,7 @@ export class FormatMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (!selection.rangeCount) {
       return {
         srcStates: [],
@@ -28,7 +28,7 @@ export class FormatMatcher implements Matcher {
         matchData: null
       };
     }
-    const srcStates: RangeMatchDelta<FormatAbstractData>[] = selection.ranges.map(range => {
+    const srcStates: RangeMatchState<FormatAbstractData>[] = selection.ranges.map(range => {
 
       let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
 

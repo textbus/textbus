@@ -1,18 +1,11 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { HighlightState } from './help';
-import {
-  AdditionalHandler,
-  AdditionalViewer,
-  Tool,
-  ToolConfig,
-  ToolFactory,
-  ToolType
-} from './toolkit/_api';
+import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
 import { Editor } from '../editor';
 import { Keymap } from '../viewer/input';
 import { Renderer, TBSelection } from '../core/_api';
-import { SelectionMatchDelta } from './matcher/matcher';
+import { SelectionMatchState } from './matcher/matcher';
 import { createKeymapHTML, FileUploader } from '../uikit/_api';
 import { DialogManager } from '../workbench/workbench';
 
@@ -23,8 +16,27 @@ export interface ToolEntity {
 
 export class Toolbar {
   elementRef = document.createElement('div');
-  onAction: Observable< ToolEntity & { params: any }>;
+  onAction: Observable<ToolEntity & { params: any }>;
   readonly tools: ToolEntity[] = [];
+
+  set disabled(b: boolean) {
+    if (b !== this._disabled) {
+      this.tools.forEach(tool => {
+        tool.instance.updateStatus({
+          matchData: null,
+          srcStates: [],
+          state: b ? HighlightState.Disabled : HighlightState.Normal
+        })
+      })
+    }
+    this._disabled = b;
+  }
+
+  get disabled() {
+    return this._disabled;
+  }
+
+  private _disabled = false;
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
   private toolWrapper = document.createElement('div');
@@ -81,8 +93,11 @@ export class Toolbar {
   }
 
   updateHandlerState(selection: TBSelection, renderer: Renderer, sourceCodeModal: boolean) {
+    if (this._disabled) {
+      return;
+    }
     this.tools.forEach(tool => {
-      let s: SelectionMatchDelta;
+      let s: SelectionMatchState;
       if (typeof tool.instance.updateStatus === 'function') {
         s = sourceCodeModal && !tool.config.supportSourceCodeModel ? {
           srcStates: [],

@@ -1,4 +1,4 @@
-import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
 import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
 import { ListComponent } from '../../components/list.component';
 import { HighlightState } from '../help';
@@ -9,7 +9,7 @@ export class ListMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],
@@ -29,7 +29,7 @@ export class ListMatcher implements Matcher {
       }
     }
 
-    const states = selection.ranges.map<RangeMatchDelta<ListComponent>>(range => {
+    const states = selection.ranges.map<RangeMatchState<ListComponent>>(range => {
       if (range.commonAncestorComponent instanceof ListComponent &&
         range.commonAncestorComponent.tagName === this.tagName) {
         return {

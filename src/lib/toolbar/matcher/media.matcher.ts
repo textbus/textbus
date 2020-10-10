@@ -1,4 +1,4 @@
-import { Matcher, RangeMatchDelta, SelectionMatchDelta } from './matcher';
+import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
 import { BranchComponent, DivisionComponent, Constructor, LeafComponent, Renderer, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
@@ -8,7 +8,7 @@ export class MediaMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],
@@ -28,7 +28,7 @@ export class MediaMatcher implements Matcher {
       }
     }
 
-    const states: RangeMatchDelta<LeafComponent>[] = selection.ranges.map(range => {
+    const states: RangeMatchState<LeafComponent>[] = selection.ranges.map(range => {
       if (range.startFragment === range.endFragment && range.endIndex - range.startIndex === 1) {
         const content = range.startFragment.sliceContents(range.startIndex, range.endIndex);
         if (content[0] instanceof this.componentConstructor && content[0].tagName === this.tagName) {

@@ -2,14 +2,14 @@ import { Observable } from 'rxjs';
 
 import { Tool } from './help';
 import { HighlightState } from '../help';
-import { SelectionMatchDelta } from '../matcher/_api';
+import { SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../../core/_api';
 import { UIButton, UIKit } from '../../uikit/uikit';
 import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
 import { FileUploader } from '../../uikit/forms/help';
 
-export interface FormViewer<T = any> extends DropdownViewer {
+export interface FormViewer extends DropdownViewer {
   setFileUploader(fileUploader: FileUploader): void;
 }
 
@@ -56,9 +56,9 @@ export class FormHandler implements Tool {
     }
   }
 
-  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
-    this.viewer.update(selectionMatchDelta.matchData);
-    switch (selectionMatchDelta.state) {
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    this.viewer.update(selectionMatchState.matchData);
+    switch (selectionMatchState.state) {
       case HighlightState.Highlight:
         this.button.disabled = false;
         this.button.highlight = true;

@@ -92,6 +92,20 @@ export class Editor implements FileUploader {
   readonly toolbar: Toolbar;
   readonly elementRef = document.createElement('div');
 
+  set readonly(b: boolean) {
+    this._readonly = b;
+    if (this.readyState) {
+      this.viewer.input.readonly = b;
+      this.toolbar.disabled = b;
+    }
+  }
+
+  get readonly() {
+    return this._readonly;
+  }
+
+  private _readonly = false;
+
   private readonly container: HTMLElement;
 
   private renderer = new Renderer();
@@ -168,7 +182,7 @@ export class Editor implements FileUploader {
         this.workbench.componentStage.expand = b;
       }),
       this.workbench.componentStage.onCheck.subscribe(component => {
-        if (this.selection && this.selection.rangeCount) {
+        if (!this.readonly && this.selection && this.selection.rangeCount) {
           this.insertComponent(component);
         }
       }),
@@ -216,6 +230,7 @@ export class Editor implements FileUploader {
         this.nativeSelection = this.viewer.contentDocument.getSelection();
         this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
         this.readyState = true;
+        this.viewer.input.readonly = this.toolbar.disabled = this.readonly;
         this.setup();
         this.readyEvent.next();
         this.workbench.loaded();
@@ -365,12 +380,14 @@ export class Editor implements FileUploader {
         this.statusBar.paths.update(node);
       }),
       this.toolbar.onAction.subscribe(config => {
-        this.execCommand(config.config, config.params, config.instance.commander);
+        if (!this.readonly) {
+          this.execCommand(config.config, config.params, config.instance.commander);
+        }
       }),
-      this.viewer.input.events.onFocus.subscribe(() => {
+      this.viewer.input.onFocus.subscribe(() => {
         this.recordSnapshotFromEditingBefore();
       }),
-      this.viewer.input.events.onInput.subscribe(() => {
+      this.viewer.input.onInput.subscribe(() => {
 
         const data = {
           selectionSnapshot: this.selectionSnapshot,
@@ -412,7 +429,7 @@ export class Editor implements FileUploader {
         this.selection.restore();
         this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
       }),
-      this.viewer.input.events.onPaste.subscribe((ev: ClipboardEvent) => {
+      this.viewer.input.onPaste.subscribe((ev: ClipboardEvent) => {
         const text = ev.clipboardData.getData('Text');
         const div = document.createElement('div');
         div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
@@ -462,10 +479,10 @@ export class Editor implements FileUploader {
           this.invokeViewUpdatedHooks();
         });
       }),
-      this.viewer.input.events.onCopy.subscribe(() => {
+      this.viewer.input.onCopy.subscribe(() => {
         this.viewer.contentDocument.execCommand('copy');
       }),
-      this.viewer.input.events.onCut.subscribe(() => {
+      this.viewer.input.onCut.subscribe(() => {
         this.viewer.contentDocument.execCommand('copy');
         this.selection.ranges.forEach(range => {
           range.connect();
@@ -478,7 +495,7 @@ export class Editor implements FileUploader {
       })
     );
 
-    this.viewer.input.events.addKeymap({
+    this.viewer.input.keymap({
       keymap: {
         key: 'Enter'
       },
@@ -502,7 +519,7 @@ export class Editor implements FileUploader {
         this.userWriteEvent.next();
       }
     })
-    this.viewer.input.events.addKeymap({
+    this.viewer.input.keymap({
       keymap: {
         key: ['Backspace', 'Delete']
       },

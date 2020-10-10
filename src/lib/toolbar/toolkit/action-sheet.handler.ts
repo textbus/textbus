@@ -4,7 +4,7 @@ import { HighlightState } from '../help';
 import { Tool } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/_api';
-import { Matcher } from '../matcher/_api';
+import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 
 export interface ActionConfig {
@@ -87,8 +87,8 @@ export class ActionSheetHandler implements Tool {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(selectionMatchDelta: any): void {
-    switch (selectionMatchDelta.state) {
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    switch (selectionMatchState.state) {
       case HighlightState.Highlight:
         this.dropdown.disabled = false;
         this.dropdown.highlight = true;

@@ -20,7 +20,7 @@ export interface FormatMatchData {
 /**
  * 一个 Range 匹配出的结果详情
  */
-export interface RangeMatchDelta<T> {
+export interface RangeMatchState<T> {
   state: HighlightState;
   fromRange: TBRange;
   srcData: T;
@@ -29,12 +29,12 @@ export interface RangeMatchDelta<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchDelta<T = FormatAbstractData | Component > {
+export interface SelectionMatchState<T = FormatAbstractData | Component > {
   state: HighlightState;
-  srcStates: RangeMatchDelta<T>[];
+  srcStates: RangeMatchState<T>[];
   matchData: T;
 }
 
 export interface Matcher {
-  queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchDelta;
+  queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchState;
 }

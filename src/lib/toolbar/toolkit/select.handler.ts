@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { Tool } from './help';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../viewer/input';
-import { Matcher, SelectionMatchDelta } from '../matcher/_api';
+import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { Commander, FormatAbstractData, Component } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 
@@ -88,9 +88,9 @@ export class SelectHandler implements Tool {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
-    if (selectionMatchDelta.matchData) {
-      const option = this.config.highlight?.(this.config.options, selectionMatchDelta.matchData);
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    if (selectionMatchState.matchData) {
+      const option = this.config.highlight?.(this.config.options, selectionMatchState.matchData);
       if (option) {
         this.dropdown.button.label.innerText = option.label || option.value;
         this.dropdown.disabled = false;
@@ -99,7 +99,7 @@ export class SelectHandler implements Tool {
       }
     }
     this.dropdown.highlight = false;
-    this.dropdown.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+    this.dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
     let defaultOption: SelectOptionConfig;
     for (const op of this.config.options) {
       if (op.default) {

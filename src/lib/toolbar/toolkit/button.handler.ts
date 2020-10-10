@@ -4,7 +4,7 @@ import { HighlightState } from '../help';
 import { Tool } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/commander';
-import { Matcher } from '../matcher/matcher';
+import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { UIButton, UIKit } from '../../uikit/uikit';
 
 /**
@@ -61,8 +61,8 @@ export class ButtonHandler implements Tool {
     }
   }
 
-  updateStatus(selectionMatchDelta: any): void {
-    switch (selectionMatchDelta.state) {
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    switch (selectionMatchState.state) {
       case HighlightState.Highlight:
         this.btn.highlight = true;
         break;

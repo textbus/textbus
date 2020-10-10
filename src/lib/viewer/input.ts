@@ -30,7 +30,8 @@ export const isMac = /mac os/i.test(navigator.userAgent);
 /**
  * 事件劫持类，用于分配用户鼠标和键盘操作后的逻辑
  */
-export class Events {
+
+export class Input {
   onInput: Observable<Event>;
   onFocus: Observable<Event>;
   onBlur: Observable<Event>;
@@ -38,60 +39,27 @@ export class Events {
   onCopy: Observable<Event>;
   onCut: Observable<Event>;
 
+  get value() {
+    return this.input.value;
+  }
+
+  get selectionStart() {
+    return this.input.selectionStart;
+  }
+
+  set readonly(b: boolean) {
+    this._readonly = b;
+    this.input.disabled = b;
+  }
+
+  get readonly() {
+    return this._readonly;
+  }
+
+  private _readonly = false;
+
+  private input = document.createElement('textarea');
   private keymaps: KeymapAction[] = [];
-
-  constructor(private input: HTMLInputElement | HTMLTextAreaElement) {
-    this.setup();
-  }
-
-  /**
-   * 添加快捷键
-   * @param keymap
-   */
-  addKeymap(keymap: KeymapAction) {
-    this.keymaps.push(keymap);
-  }
-
-  private setup() {
-    this.onInput = fromEvent(this.input, 'input');
-    this.onFocus = fromEvent(this.input, 'focus');
-    this.onBlur = fromEvent(this.input, 'blur');
-    this.onPaste = fromEvent(this.input, 'paste');
-    this.onCopy = fromEvent(this.input, 'copy');
-    this.onCut = fromEvent(this.input, 'cut');
-
-    let isWriting = false;
-    fromEvent(this.input, 'compositionstart').subscribe(() => {
-      isWriting = true;
-    });
-
-    fromEvent(this.input, 'compositionend').subscribe(() => {
-      isWriting = false;
-    });
-    fromEvent(this.input, 'keydown').pipe(filter(() => {
-      // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
-      return !isWriting || !this.input.value;
-    })).subscribe((ev: KeyboardEvent) => {
-      const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
-      for (const config of this.keymaps) {
-        const test = Array.isArray(config.keymap.key) ?
-          config.keymap.key.map(k => reg.test(k)).includes(true) :
-          reg.test(config.keymap.key);
-        if (test &&
-          !!config.keymap.altKey === ev.altKey &&
-          !!config.keymap.shiftKey === ev.shiftKey &&
-          !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
-          ev.preventDefault();
-          return config.action(ev);
-        }
-      }
-    });
-  }
-}
-
-export class Input {
-  events: Events;
-  input = document.createElement('textarea');
 
   readonly elementRef = document.createElement('div');
 
@@ -126,7 +94,40 @@ export class Input {
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
 
-    this.events = new Events(this.input);
+    this.onInput = fromEvent(this.input, 'input');
+    this.onFocus = fromEvent(this.input, 'focus');
+    this.onBlur = fromEvent(this.input, 'blur');
+    this.onPaste = fromEvent(this.input, 'paste');
+    this.onCopy = fromEvent(this.input, 'copy');
+    this.onCut = fromEvent(this.input, 'cut');
+
+    let isWriting = false;
+    fromEvent(this.input, 'compositionstart').subscribe(() => {
+      isWriting = true;
+    });
+
+    fromEvent(this.input, 'compositionend').subscribe(() => {
+      isWriting = false;
+    });
+    fromEvent(this.input, 'keydown').pipe(filter(() => {
+      // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
+      return !isWriting || !this.input.value;
+    })).subscribe((ev: KeyboardEvent) => {
+      const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
+      for (const config of this.keymaps) {
+        const test = Array.isArray(config.keymap.key) ?
+          config.keymap.key.map(k => reg.test(k)).includes(true) :
+          reg.test(config.keymap.key);
+        if (test &&
+          !!config.keymap.altKey === ev.altKey &&
+          !!config.keymap.shiftKey === ev.shiftKey &&
+          !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
+          ev.preventDefault();
+          return config.action(ev);
+        }
+      }
+    });
+
     fromEvent(context, 'mousedown').subscribe(() => {
       this.flashing = false;
     });
@@ -134,7 +135,7 @@ export class Input {
       this.flashing = true;
     });
 
-    this.events.onBlur.subscribe(() => {
+    this.onBlur.subscribe(() => {
       this.hide();
     })
   }
@@ -144,7 +145,7 @@ export class Input {
    * @param keymap
    */
   keymap(keymap: KeymapAction) {
-    this.events.addKeymap(keymap);
+    this.keymaps.push(keymap);
   }
 
   /**
@@ -154,7 +155,7 @@ export class Input {
    */
   updateStateBySelection(selection: TBSelection, limit: HTMLElement) {
     this.selection = selection;
-    if (!selection.rangeCount) {
+    if (this.readonly || !selection.rangeCount) {
       this.hide();
       return;
     }

@@ -1,7 +1,7 @@
 import { FormatMatcher } from './format.matcher';
 import { boldFormatter } from '../../formatter/bold.formatter';
 import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
-import { SelectionMatchDelta } from './matcher';
+import { SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { BlockMatcher } from './block.matcher';
 import { BlockComponent } from '../../components/block.component';
@@ -13,7 +13,7 @@ export class BoldMatcher extends FormatMatcher {
     super(boldFormatter, excludeComponents);
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

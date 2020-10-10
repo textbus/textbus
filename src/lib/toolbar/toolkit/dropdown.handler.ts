@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Tool } from './help';
 import { HighlightState } from '../help';
-import { Matcher, SelectionMatchDelta } from '../matcher/_api';
+import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 
@@ -63,9 +63,9 @@ export class DropdownHandler implements Tool {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(selectionMatchDelta: SelectionMatchDelta): void {
-    this.viewer.update(selectionMatchDelta.matchData);
-    switch (selectionMatchDelta.state) {
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    this.viewer.update(selectionMatchState.matchData);
+    switch (selectionMatchState.state) {
       case HighlightState.Highlight:
         this.dropdown.disabled = false;
         this.dropdown.highlight = true;

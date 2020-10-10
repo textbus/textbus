@@ -8,7 +8,7 @@ import { ButtonToolConfig } from './button.handler';
 import { ActionSheetToolConfig } from './action-sheet.handler';
 import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
-import { Matcher, SelectionMatchDelta } from '../matcher/matcher';
+import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
 import { DialogManager } from '../../workbench/workbench';
 import { FormToolConfig } from './form.handler';
@@ -60,12 +60,12 @@ class MenuHandler implements Tool {
   constructor(public elementRef: HTMLElement,
               public commander: Commander,
               private eventSource: Subject<any>,
-              private updateStateFn: (selectionMatchDelta: SelectionMatchDelta) => void) {
+              private updateStateFn: (selectionMatchState: SelectionMatchState) => void) {
     this.onApply = this.eventSource.asObservable();
   }
 
-  updateStatus(selectionMatchDelta: SelectionMatchDelta) {
-    this.updateStateFn(selectionMatchDelta);
+  updateStatus(selectionMatchState: SelectionMatchState) {
+    this.updateStateFn(selectionMatchState);
   }
 }
 
@@ -104,8 +104,8 @@ export class GroupHandler implements Tool {
     this.elementRef = this.dropdown.elementRef;
   }
 
-  updateStatus(selectionMatchDelta: SelectionMatchDelta) {
-    this.dropdown.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+  updateStatus(selectionMatchState: SelectionMatchState) {
+    this.dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
   }
 
   private createButton(c: ActionMenu) {
@@ -118,8 +118,8 @@ export class GroupHandler implements Tool {
         s.next();
       }
     })
-    const instance = new MenuHandler(item.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      switch (selectionMatchDelta.state) {
+    const instance = new MenuHandler(item.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
+      switch (selectionMatchState.state) {
         case HighlightState.Highlight:
           item.highlight = true;
           break;
@@ -152,16 +152,16 @@ export class GroupHandler implements Tool {
         this.dropdown.hide();
       }
     })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      if (selectionMatchDelta.matchData) {
-        const option = c.highlight?.(c.options, selectionMatchDelta.matchData);
+    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
+      if (selectionMatchState.matchData) {
+        const option = c.highlight?.(c.options, selectionMatchState.matchData);
         if (option) {
           selectMenu.disabled = false;
           selectMenu.highlight(option);
           return;
         }
       }
-      selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
       selectMenu.highlight(null);
     });
     this.tools.push({
@@ -188,8 +188,8 @@ export class GroupHandler implements Tool {
       }),
       label: c.label
     })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
+      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
     });
     this.tools.push({
       config: c,
@@ -214,9 +214,9 @@ export class GroupHandler implements Tool {
       s.next(value);
       this.dropdown.hide();
     });
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      menu.update?.(selectionMatchDelta.matchData);
-      selectMenu.disabled = selectionMatchDelta.state === HighlightState.Disabled;
+    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
+      menu.update?.(selectionMatchState.matchData);
+      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
     });
     this.tools.push({
       config: c,
@@ -248,9 +248,9 @@ export class GroupHandler implements Tool {
         })
       }
     })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchDelta) {
-      menu.update?.(selectionMatchDelta.matchData);
-      switch (selectionMatchDelta.state) {
+    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
+      menu.update?.(selectionMatchState.matchData);
+      switch (selectionMatchState.state) {
         case HighlightState.Highlight:
           selectMenu.disabled = false;
           selectMenu.highlight = true;

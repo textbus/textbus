@@ -3,8 +3,9 @@ import { Observable, Subject } from 'rxjs';
 import { Tool } from './help';
 import { Keymap, KeymapAction } from '../../viewer/input';
 import { Commander } from '../../core/commander';
-import { Matcher } from '../matcher/matcher';
+import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { UIButton, UIKit } from '../../uikit/uikit';
+import { HighlightState } from '../../toolbar/help';
 
 export interface AdditionalViewer<T = any> {
   elementRef: HTMLElement;
@@ -82,7 +83,21 @@ export class AdditionalHandler<T = any> implements Tool<T> {
     }
   }
 
-  updateStatus(): void {
+  updateStatus(selectionMatchState: SelectionMatchState): void {
+    switch (selectionMatchState.state) {
+      case HighlightState.Highlight:
+        this.button.disabled = false;
+        this.button.highlight = true;
+        break;
+      case HighlightState.Normal:
+        this.button.disabled = false;
+        this.button.highlight = false;
+        break;
+      case HighlightState.Disabled:
+        this.button.disabled = true;
+        this.button.highlight = false;
+        break;
+    }
   }
 
   private show() {

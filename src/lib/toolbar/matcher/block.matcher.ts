@@ -1,5 +1,5 @@
 import { TBSelection, Constructor, Renderer, BranchComponent, DivisionComponent } from '../../core/_api';
-import { Matcher, SelectionMatchDelta } from './matcher';
+import { Matcher, SelectionMatchState } from './matcher';
 import { BlockComponent } from '../../components/block.component';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
@@ -10,7 +10,7 @@ export class BlockMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchDelta {
+  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

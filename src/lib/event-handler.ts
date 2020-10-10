@@ -50,7 +50,7 @@ export class EventHandler {
     })
 
     let index = 0;
-    input.input.value.replace(/\n+|[^\n]+/g, (str) => {
+    input.value.replace(/\n+|[^\n]+/g, (str) => {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
           const s = new BrComponent();
@@ -64,9 +64,9 @@ export class EventHandler {
       return str;
     });
 
-    selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.input.selectionStart;
+    selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.selectionStart;
     const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + input.input.selectionStart === commonAncestorFragment.contentLength &&
+    if (startIndex + input.selectionStart === commonAncestorFragment.contentLength &&
       last instanceof BrComponent) {
       commonAncestorFragment.append(new BrComponent());
     }
