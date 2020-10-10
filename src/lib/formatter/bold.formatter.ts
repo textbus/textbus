@@ -1,5 +1,5 @@
 import {
-  ChildSlotModel,
+  ChildSlotMode,
   FormatAbstractData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
@@ -35,9 +35,9 @@ export class BoldFormatter extends InlineFormatter {
     if (context.state === FormatEffect.Exclude) {
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
-      return new ChildSlotModel(el);
+      return new ChildSlotMode(el);
     }
-    return new ChildSlotModel(new VElement('strong'));
+    return new ChildSlotMode(new VElement('strong'));
   }
 }
 

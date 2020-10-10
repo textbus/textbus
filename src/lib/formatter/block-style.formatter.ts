@@ -4,7 +4,7 @@ import {
   BlockFormatter,
   FormatAbstractData,
   VElement,
-  ChildSlotModel,
+  ChildSlotMode,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 import { ColorRGB, parseCss, rgb2Hex } from '@tanbo/color';
@@ -27,7 +27,7 @@ export class BlockStyleFormatter extends BlockFormatter {
       existingElement.styles.set(name, context.abstractData.styles.get(name));
     })
     if (!b) {
-      return new ChildSlotModel(existingElement);
+      return new ChildSlotMode(existingElement);
     }
   }
 }

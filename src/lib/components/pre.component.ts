@@ -1,6 +1,6 @@
 import {
   BlockFormatter,
-  ChildSlotModel,
+  ChildSlotMode,
   ComponentReader,
   DivisionComponent,
   EventType,
@@ -9,7 +9,7 @@ import {
   FormatRendingContext,
   Fragment,
   InlineFormatter,
-  ReplaceModel,
+  ReplaceMode,
   VElement,
   ViewData
 } from '../core/_api';
@@ -58,8 +58,8 @@ class CodeFormatter extends BlockFormatter {
     return undefined;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
-    return new ChildSlotModel(new VElement('code'));
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+    return new ChildSlotMode(new VElement('code'));
   }
 }
 
@@ -72,12 +72,12 @@ class CodeStyleFormatter extends InlineFormatter {
     return undefined;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | ChildSlotModel | null {
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
     if (!existingElement) {
       existingElement = new VElement('span');
     }
     existingElement.classes.push(...context.abstractData.classes);
-    return new ReplaceModel(existingElement);
+    return new ReplaceMode(existingElement);
   }
 }
 

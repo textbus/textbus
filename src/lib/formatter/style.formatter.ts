@@ -4,7 +4,7 @@ import {
   FormatEffect,
   FormatAbstractData,
   VElement,
-  ChildSlotModel,
+  ChildSlotMode,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
@@ -28,7 +28,7 @@ export class StyleFormatter extends InlineFormatter {
     } else {
       const el = new VElement('span');
       el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
-      return new ChildSlotModel(el);
+      return new ChildSlotMode(el);
     }
   }
 }
@@ -82,6 +82,6 @@ backgroundColorFormatter.render = function (context: FormatRendingContext, exist
   } else {
     const el = new VElement('span');
     el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
-    return new ChildSlotModel(el);
+    return new ChildSlotMode(el);
   }
 };

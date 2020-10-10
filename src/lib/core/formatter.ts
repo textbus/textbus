@@ -1,6 +1,6 @@
 import { FormatAbstractData } from './format-abstract-data';
 import { VElement } from './element';
-import { ChildSlotModel, ReplaceModel } from './renderer';
+import { ChildSlotMode, ReplaceMode } from './renderer';
 import { NativeEventManager } from './native-event-manager';
 
 export interface EditableOptions {
@@ -157,12 +157,12 @@ export abstract class Formatter {
    * @param context         渲染上下文本
    * @param existingElement 是否已有同级元素。如：当两个样式的范围是一样的，其中一个样式先渲染时，第二个样式
    *                        渲染时，则会拿到第一个样式渲染后的元素。
-   * @return                ReplaceModel | ChildSlotModel | null
-   *                        ReplaceModel: 替换模式———用新渲染出的元素替换已渲染出的同级元素；
-   *                        ChildSlotModel: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
+   * @return                ReplaceMode | ChildSlotMode | null
+   *                        ReplaceMode: 替换模式———用新渲染出的元素替换已渲染出的同级元素；
+   *                        ChildSlotMode: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
    *                        null: 如果已有渲染出的元素，则使用渲染出的元素，否则创建一个虚拟节点
    */
-  abstract render(context: FormatRendingContext, existingElement?: VElement): ReplaceModel | ChildSlotModel | null;
+  abstract render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null;
 
   /**
    * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。

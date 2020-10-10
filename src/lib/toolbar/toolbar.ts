@@ -92,14 +92,14 @@ export class Toolbar {
     })
   }
 
-  updateHandlerState(selection: TBSelection, renderer: Renderer, sourceCodeModal: boolean) {
+  updateHandlerState(selection: TBSelection, renderer: Renderer, sourceCodeMode: boolean) {
     if (this._disabled) {
       return;
     }
     this.tools.forEach(tool => {
       let s: SelectionMatchState;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = sourceCodeModal && !tool.config.supportSourceCodeModel ? {
+        s = sourceCodeMode && !tool.config.supportSourceCodeMode ? {
           srcStates: [],
           matchData: null,
           state: HighlightState.Disabled

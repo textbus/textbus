@@ -10,7 +10,7 @@ import { EventCache, NativeEventManager } from './native-event-manager';
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替。
  */
-export class ReplaceModel {
+export class ReplaceMode {
   constructor(public replaceElement: VElement) {
   }
 }
@@ -18,7 +18,7 @@ export class ReplaceModel {
 /**
  * 把当前的渲染结果作为插槽返回，并且把后续的渲染结果插入在当前节点内。
  */
-export class ChildSlotModel {
+export class ChildSlotMode {
   constructor(public childElement: VElement) {
   }
 }
@@ -94,7 +94,7 @@ export class Renderer {
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
   private oldVDom: VElement;
 
-  private outputModal = false;
+  private outputMode = false;
 
   private eventCache = new EventCache(this);
   private nativeEventManager = new NativeEventManager(this.eventCache);
@@ -105,7 +105,7 @@ export class Renderer {
    * @param host 承载渲染结果的 HTML 元素。
    */
   render(fragment: Fragment, host: HTMLElement) {
-    this.outputModal = false;
+    this.outputMode = false;
     this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
     this.fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent | BackboneComponent>();
     this.componentHierarchyMapping = new WeakMap<Component, Fragment>();
@@ -130,7 +130,7 @@ export class Renderer {
    * @param fragment
    */
   renderToHTML(fragment: Fragment): string {
-    this.outputModal = true;
+    this.outputMode = true;
     const root = new VElement('root');
     const vDom = this.createVDOMIntoView(fragment, root);
     return vDom.childNodes.map(child => {
@@ -143,7 +143,7 @@ export class Renderer {
    * @param fragment
    */
   renderToJSON(fragment: Fragment): VElementLiteral {
-    this.outputModal = true;
+    this.outputMode = true;
     const root = new VElement('body');
     const vDom = this.createVDOMIntoView(fragment, root);
     return vDom.toJSON();
@@ -374,7 +374,7 @@ export class Renderer {
   }
 
   private createVDOMIntoView(fragment: Fragment, host: VElement) {
-    if (!this.outputModal) {
+    if (!this.outputMode) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
     const containerFormats: FormatConfig[] = [];
@@ -496,7 +496,7 @@ export class Renderer {
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        !this.outputModal && this.vDomPositionMapping.set(textNode, {
+        !this.outputMode && this.vDomPositionMapping.set(textNode, {
           fragment,
           startIndex: i,
           endIndex: i + item.length
@@ -505,27 +505,27 @@ export class Renderer {
         children.push(textNode);
       } else {
         let vDom: VElement;
-        if (!this.outputModal) {
+        if (!this.outputMode) {
           this.componentHierarchyMapping.set(item, fragment);
-          vDom = item.render(this.outputModal, this.nativeEventManager);
+          vDom = item.render(this.outputMode, this.nativeEventManager);
           this.vDomPositionMapping.set(vDom, {
             fragment,
             startIndex: i,
             endIndex: i + 1
           })
         } else {
-          vDom = item.render(this.outputModal);
+          vDom = item.render(this.outputMode);
         }
 
         i++;
         children.push(vDom);
         if (item instanceof LeafComponent) {
-          if (!this.outputModal && vDom.childNodes.length) {
+          if (!this.outputMode && vDom.childNodes.length) {
             vDom.styles.set('userSelect', 'none');
           }
         } else if (item instanceof DivisionComponent) {
           let view = item.getSlotView();
-          if (!this.outputModal) {
+          if (!this.outputMode) {
             this.fragmentHierarchyMapping.set(item.slot, item);
             if (view !== vDom) {
               vDom.styles.set('userSelect', 'none');
@@ -534,24 +534,24 @@ export class Renderer {
           }
           this.createVDOMIntoView(item.slot, view);
         } else if (item instanceof BranchComponent) {
-          if (!this.outputModal) {
+          if (!this.outputMode) {
             vDom.styles.set('userSelect', 'none');
           }
           item.slots.forEach(slot => {
             const parent = item.getSlotView(slot);
-            if (!this.outputModal) {
+            if (!this.outputMode) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
             this.createVDOMIntoView(slot, parent);
           });
         } else if (item instanceof BackboneComponent) {
-          if (!this.outputModal) {
+          if (!this.outputMode) {
             vDom.styles.set('userSelect', 'none');
           }
           for (const slot of item) {
             const parent = item.getSlotView(slot);
-            if (!this.outputModal) {
+            if (!this.outputMode) {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
@@ -581,30 +581,30 @@ export class Renderer {
     let slot = host;
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
-        isOutputMode: this.outputModal,
+        isOutputMode: this.outputMode,
         state: next.params.state,
         abstractData: next.params.abstractData,
       };
-      if (!this.outputModal) {
+      if (!this.outputMode) {
         context.nativeEventManager = this.nativeEventManager;
       }
-      const renderModel = next.token.render(context, vEle);
-      if (renderModel instanceof ReplaceModel) {
-        host = slot = renderModel.replaceElement;
+      const renderMode = next.token.render(context, vEle);
+      if (renderMode instanceof ReplaceMode) {
+        host = slot = renderMode.replaceElement;
         return host;
-      } else if (renderModel instanceof ChildSlotModel) {
+      } else if (renderMode instanceof ChildSlotMode) {
         if (vEle) {
-          vEle.appendChild(renderModel.childElement);
+          vEle.appendChild(renderMode.childElement);
         } else {
-          host = renderModel.childElement;
+          host = renderMode.childElement;
         }
-        slot = renderModel.childElement;
+        slot = renderMode.childElement;
         return slot;
       }
       return vEle;
     }, host);
     
-    if (!this.outputModal) {
+    if (!this.outputMode) {
       let el = host;
       while (el) {
         this.vDomPositionMapping.set(el, {

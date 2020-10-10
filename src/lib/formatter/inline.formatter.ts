@@ -3,7 +3,7 @@ import {
   MatchRule,
   FormatAbstractData,
   VElement,
-  ChildSlotModel,
+  ChildSlotMode,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
@@ -23,7 +23,7 @@ export class InlineTagFormatter extends InlineFormatter {
       existingElement.tagName = this.tagName;
       return;
     }
-    return new ChildSlotModel(new VElement(this.tagName));
+    return new ChildSlotMode(new VElement(this.tagName));
   }
 }
 

@@ -2,7 +2,7 @@ import {
   InlineFormatter,
   FormatAbstractData,
   VElement,
-  ChildSlotModel,
+  ChildSlotMode,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
@@ -26,7 +26,7 @@ export class LinkFormatter extends InlineFormatter {
     const href = context.abstractData.attrs.get('href');
     target && el.attrs.set('target', target);
     href && el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
-    return new ChildSlotModel(el);
+    return new ChildSlotMode(el);
   }
 }
 

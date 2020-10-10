@@ -117,6 +117,6 @@ export const findToolConfig: AdditionalToolConfig = {
   commanderFactory() {
     return new FindCommander()
   },
-  supportSourceCodeModel: true
+  supportSourceCodeMode: true
 };
 export const findTool = Toolkit.makeAdditionalTool(findToolConfig);

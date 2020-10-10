@@ -17,26 +17,26 @@ export class Viewer {
   input: Input;
   elementRef = document.createElement('iframe');
 
-  set sourceCodeModel(b: boolean) {
-    this._sourceCodeModel = b;
+  set sourceCodeMode(b: boolean) {
+    this._sourceCodeMode = b;
     if (this.contentDocument) {
       if (b) {
-        this.contentDocument.head.append(this.sourceCodeModelStyleSheet)
+        this.contentDocument.head.append(this.sourceCodeModeStyleSheet)
       } else {
-        this.sourceCodeModelStyleSheet.parentNode?.removeChild(this.sourceCodeModelStyleSheet);
+        this.sourceCodeModeStyleSheet.parentNode?.removeChild(this.sourceCodeModeStyleSheet);
       }
     }
   }
 
-  private _sourceCodeModel = false;
-  private sourceCodeModelStyleSheet = document.createElement('style');
+  private _sourceCodeMode = false;
+  private sourceCodeModeStyleSheet = document.createElement('style');
   private readyEvent = new Subject<Document>();
   private id: number = null;
   private minHeight = 400;
 
   constructor(private styleSheets: string[] = []) {
     this.onReady = this.readyEvent.asObservable();
-    this.sourceCodeModelStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
+    this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
 
     this.elementRef.setAttribute('scrolling', 'no');
     const styleEl = document.createElement('style');
@@ -48,7 +48,7 @@ export class Viewer {
     this.elementRef.onload = () => {
       this.elementRef.onload = null; // 低版本 chrome 会触发两次 load
       const doc = this.elementRef.contentDocument;
-      this.sourceCodeModel = this._sourceCodeModel;
+      this.sourceCodeMode = this._sourceCodeMode;
       this.input = new Input(doc);
       this.readyEvent.next(doc);
       this.listen();

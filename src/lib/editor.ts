@@ -117,7 +117,7 @@ export class Editor implements FileUploader {
   private statusBar = new StatusBar();
 
   private readyState = false;
-  private openSourceCodeModel = false;
+  private openSourceCodeMode = false;
   private tasks: Array<() => void> = [];
 
   private nativeSelection: Selection;
@@ -191,12 +191,12 @@ export class Editor implements FileUploader {
         this.workbench.setTabletWidth(value);
         this.invokeViewUpdatedHooks();
       }),
-      this.statusBar.editingModel.onChange.subscribe(b => {
-        this.openSourceCodeModel = b;
+      this.statusBar.editingMode.onChange.subscribe(b => {
+        this.openSourceCodeMode = b;
         if (this.readyState) {
           this.selection.removeAllRanges();
           this.statusBar.libSwitch.disabled = b;
-          this.viewer.sourceCodeModel = b;
+          this.viewer.sourceCodeMode = b;
           if (b) {
             if (this.snapshotSubscription) {
               this.snapshotSubscription.unsubscribe();
@@ -208,7 +208,7 @@ export class Editor implements FileUploader {
             this.rootFragment.append(this.sourceCodeComponent);
             this.render();
           } else {
-            const html = this.getHTMLBySourceCodeModel();
+            const html = this.getHTMLBySourceCodeMode();
             this.writeContents(html).then(dom => {
               this.rootFragment = this.parser.parse(dom);
               this.render();
@@ -287,7 +287,7 @@ export class Editor implements FileUploader {
   getContents() {
     return {
       styleSheets: this.options.styleSheets,
-      html: this.openSourceCodeModel ? this.getHTMLBySourceCodeModel() : this.renderer.renderToHTML(this.rootFragment)
+      html: this.openSourceCodeMode ? this.getHTMLBySourceCodeMode() : this.renderer.renderToHTML(this.rootFragment)
     };
   }
 
@@ -295,7 +295,7 @@ export class Editor implements FileUploader {
    * 获取 TextBus 内容的 JSON 字面量。
    */
   getJSONLiteral() {
-    if (this.openSourceCodeModel) {
+    if (this.openSourceCodeMode) {
       throw new Error('源代码模式下，不支持获取 JSON 字面量！');
     }
     return {
@@ -369,7 +369,7 @@ export class Editor implements FileUploader {
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
         this.elementRef.dispatchEvent(event);
-        this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeModel);
+        this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeMode);
       }), map(() => {
         return this.nativeSelection.focusNode;
       }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
@@ -642,7 +642,7 @@ export class Editor implements FileUploader {
       }, params);
       this.render();
       selection.restore();
-      this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeModel);
+      this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
     }
 
     if (commander.recordHistory) {
@@ -668,7 +668,7 @@ export class Editor implements FileUploader {
     }
     const rootFragment = this.rootFragment;
 
-    if (this.openSourceCodeModel) {
+    if (this.openSourceCodeMode) {
       Editor.guardContentIsPre(rootFragment, this.sourceCodeComponent);
     } else {
       Editor.guardLastIsParagraph(rootFragment);
@@ -846,7 +846,7 @@ export class Editor implements FileUploader {
     });
   }
 
-  private getHTMLBySourceCodeModel() {
+  private getHTMLBySourceCodeMode() {
     return this.sourceCodeComponent.slot.sliceContents(0).map(i => {
       return typeof i === 'string' ? i.trim() : '';
     }).join('');

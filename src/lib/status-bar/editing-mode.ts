@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-export class EditingModel {
+export class EditingMode {
   onChange: Observable<boolean>;
   elementRef = document.createElement('button');
 
@@ -22,7 +22,7 @@ export class EditingModel {
     this.onChange = this.changeEvent.asObservable();
     this.elementRef.type = 'button';
     this.elementRef.title = '切换为源代码编辑模式';
-    this.elementRef.className = 'textbus-editing-model';
+    this.elementRef.className = 'textbus-editing-mode';
     this.icon.className = 'textbus-icon-code';
     this.elementRef.appendChild(this.icon);
     this.elementRef.addEventListener('click', () => {

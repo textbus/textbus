@@ -1,12 +1,12 @@
 import {
-  ChildSlotModel, CommandContext,
+  ChildSlotMode, CommandContext,
   Commander,
   ElementPosition,
   FormatAbstractData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
-  ReplaceModel,
+  ReplaceMode,
   VElement
 } from '../../core/_api';
 
@@ -23,7 +23,7 @@ class FindFormatter extends InlineFormatter {
     return null;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ChildSlotModel | ReplaceModel | null {
+  render(context: FormatRendingContext, existingElement?: VElement): ChildSlotMode | ReplaceMode | null {
     if (context.isOutputMode) {
       return null;
     }
@@ -35,7 +35,7 @@ class FindFormatter extends InlineFormatter {
     existingElement.styles.set('backgroundColor', '#ff0');
     existingElement.styles.set('color', '#000');
 
-    return flag ? null : new ReplaceModel(existingElement);
+    return flag ? null : new ReplaceMode(existingElement);
   }
 }
 

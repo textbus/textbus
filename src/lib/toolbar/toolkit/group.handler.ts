@@ -51,7 +51,7 @@ export interface GroupConfig {
   menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu | FormMenu>;
   matcher?: Matcher;
   /** 是否支持源代码编辑模式 */
-  supportSourceCodeModel?: boolean;
+  supportSourceCodeMode?: boolean;
 }
 
 class MenuHandler implements Tool {
