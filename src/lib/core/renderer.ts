@@ -114,7 +114,7 @@ export class Renderer {
 
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
-    const vDom = this.createVDom(fragment, root);
+    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
@@ -132,7 +132,7 @@ export class Renderer {
   renderToHTML(fragment: Fragment): string {
     this.outputModal = true;
     const root = new VElement('root');
-    const vDom = this.createVDom(fragment, root);
+    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
     return vDom.childNodes.map(child => {
       return this.vDomToHTMLString(child);
     }).join('');
@@ -145,7 +145,7 @@ export class Renderer {
   renderToJSON(fragment: Fragment): VElementLiteral {
     this.outputModal = true;
     const root = new VElement('body');
-    const vDom = this.createVDom(fragment, root);
+    const vDom = this.createVDOMIntoSpecifiedView(fragment, root);
     return vDom.toJSON();
   }
 
@@ -373,7 +373,7 @@ export class Renderer {
     })
   }
 
-  private createVDom(fragment: Fragment, host: VElement) {
+  private createVDOMIntoSpecifiedView(fragment: Fragment, host: VElement) {
     if (!this.outputModal) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
@@ -397,20 +397,28 @@ export class Renderer {
         childFormats.push(f);
       }
     });
-    const r = this.createVDomByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
-    this.vDomBuilder(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
+    const r = this.createVDOMByFormats(containerFormats, fragment, 0, fragment.contentLength, host);
+    this.createVDOMByRange(fragment, childFormats, 0, fragment.contentLength).forEach(item => {
       r.slot.appendChild(item);
     });
     return r.host;
   }
 
-  private vDomBuilder(fragment: Fragment, formats: FormatConfig[], startIndex: number, endIndex: number) {
+  /**
+   * 根据 fragment 和 formats 在指定范围内创建虚拟 DOM
+   * @param fragment
+   * @param formats
+   * @param startIndex
+   * @param endIndex
+   * @private
+   */
+  private createVDOMByRange(fragment: Fragment, formats: FormatConfig[], startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
       let firstRange = formats.shift();
       if (firstRange) {
         if (startIndex < firstRange.params.startIndex) {
-          children.push(...this.createNodesByRange(fragment, startIndex, firstRange.params.startIndex));
+          children.push(...this.createVDOMByExtractContent(fragment, startIndex, firstRange.params.startIndex));
         }
         const childFormats: FormatConfig[] = [firstRange];
         while (true) {
@@ -421,7 +429,7 @@ export class Renderer {
             break;
           }
         }
-        const {host, slot} = this.createVDomByFormats(
+        const {host, slot} = this.createVDOMByFormats(
           childFormats,
           fragment,
           firstRange.params.startIndex,
@@ -456,25 +464,32 @@ export class Renderer {
         formats = Renderer.calculatePriority(formats);
 
         if (progenyFormats.length) {
-          this.vDomBuilder(fragment, progenyFormats, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
+          this.createVDOMByRange(fragment, progenyFormats, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
             slot ? slot.appendChild(item) : children.push(item);
           });
         } else {
-          this.createNodesByRange(fragment, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
+          this.createVDOMByExtractContent(fragment, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
             slot ? slot.appendChild(item) : children.push(item);
           })
         }
         host && children.push(host);
         startIndex = firstRange.params.endIndex;
       } else {
-        children.push(...this.createNodesByRange(fragment, startIndex, endIndex));
+        children.push(...this.createVDOMByExtractContent(fragment, startIndex, endIndex));
         break;
       }
     }
     return children;
   }
 
-  private createNodesByRange(fragment: Fragment, startIndex: number, endIndex: number) {
+  /**
+   * 提取 Fragment 的一段内容并创建虚拟 DOM 树
+   * @param fragment
+   * @param startIndex
+   * @param endIndex
+   * @private
+   */
+  private createVDOMByExtractContent(fragment: Fragment, startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     const contents = fragment.sliceContents(startIndex, endIndex);
     let i = startIndex;
@@ -517,7 +532,7 @@ export class Renderer {
               view.styles.set('userSelect', 'text');
             }
           }
-          this.createVDom(item.slot, view);
+          this.createVDOMIntoSpecifiedView(item.slot, view);
         } else if (item instanceof BranchComponent) {
           if (!this.outputModal) {
             vDom.styles.set('userSelect', 'none');
@@ -528,7 +543,7 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDom(slot, parent);
+            this.createVDOMIntoSpecifiedView(slot, parent);
           });
         } else if (item instanceof BackboneComponent) {
           if (!this.outputModal) {
@@ -540,7 +555,7 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDom(slot, parent);
+            this.createVDOMIntoSpecifiedView(slot, parent);
           }
         }
       }
@@ -548,7 +563,16 @@ export class Renderer {
     return children;
   }
 
-  private createVDomByFormats(
+  /**
+   * 根据一组 format 创建虚拟 DOM 树
+   * @param formats
+   * @param fragment
+   * @param startIndex
+   * @param endIndex
+   * @param host
+   * @private
+   */
+  private createVDOMByFormats(
     formats: Array<FormatConfig>,
     fragment: Fragment,
     startIndex: number,
@@ -579,15 +603,19 @@ export class Renderer {
       }
       return vEle;
     }, host);
-    let el = host;
-    while (el) {
-      !this.outputModal && this.vDomPositionMapping.set(el, {
-        fragment,
-        startIndex,
-        endIndex
-      });
-      el = el.childNodes[0] as VElement;
+    
+    if (!this.outputModal) {
+      let el = host;
+      while (el) {
+        this.vDomPositionMapping.set(el, {
+          fragment,
+          startIndex,
+          endIndex
+        });
+        el = el.childNodes[0] as VElement;
+      }
     }
+
     return {
       host,
       slot
