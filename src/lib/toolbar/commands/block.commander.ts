@@ -51,7 +51,14 @@ export class BlockCommander implements Commander<string> {
         } else {
           const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
           blockComponent.slot.from(c);
-
+          if (scope.fragment === range.startFragment) {
+            range.startFragment = blockComponent.slot;
+            range.startIndex = range.startIndex - scope.startIndex;
+          }
+          if (scope.fragment === range.endFragment) {
+            range.endFragment = blockComponent.slot;
+            range.endIndex = range.endIndex - scope.startIndex;
+          }
           scope.fragment.insert(blockComponent, scope.startIndex);
           this.effect(blockComponent.slot, '');
         }
