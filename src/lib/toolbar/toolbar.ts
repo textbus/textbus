@@ -103,10 +103,12 @@ export class Toolbar {
           srcStates: [],
           matchData: null,
           state: HighlightState.Disabled
-        } : tool.config.matcher?.queryState(selection, renderer, this.context);
-        if (s) {
-          tool.instance.updateStatus(s);
-        }
+        } : tool.config.matcher?.queryState(selection, renderer, this.context) || {
+          srcStates: [],
+          matchData: null,
+          state: HighlightState.Normal
+        };
+        tool.instance.updateStatus(s);
       }
     })
   }
