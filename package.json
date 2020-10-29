@@ -30,6 +30,8 @@
     "@babel/preset-env": "^7.11.5",
     "@types/jest": "^25.1.2",
     "@types/node": "^12.7.1",
+    "@types/pretty": "^2.0.0",
+    "@types/prismjs": "^1.16.1",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^9.6.1",
     "babel-jest": "^26.3.0",
@@ -67,12 +69,10 @@
     "webpack-hot-middleware": "2.21.0"
   },
   "dependencies": {
-    "@tanbo/bezier": "0.0.1",
+    "@tanbo/bezier": "1.0.0",
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.0.21",
     "@tanbo/css-themes": "^0.0.1",
-    "@types/pretty": "^2.0.0",
-    "@types/prismjs": "^1.16.1",
     "pretty": "^2.0.0",
     "prismjs": "^1.21.0",
     "rxjs": "^6.0.0"

@@ -233,7 +233,7 @@ export class TableEditHook implements Lifecycle {
     const maxStep = 6;
     const animate = () => {
       step++;
-      const ratio = this.animateBezier.update(step / maxStep);
+      const ratio = this.animateBezier.update(step / maxStep).y;
       const left = start.left + toInt((target.left - start.left) * ratio);
       const top = start.top + toInt((target.top - start.top) * ratio);
       const width = start.width + toInt((target.width - start.width) * ratio);
