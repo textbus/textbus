@@ -22,7 +22,7 @@ export class ListCommander implements Commander<null> {
           const parentFragment = renderer.getParentFragment(item.component);
           if (slots.before.length) {
             const beforeList = new ListComponent(this.tagName);
-            beforeList.slots.push(...slots.before);
+            beforeList.push(...slots.before);
             parentFragment.insertBefore(beforeList, item.component);
           }
           if (slots.center.length) {
@@ -44,7 +44,7 @@ export class ListCommander implements Commander<null> {
           }
           if (slots.after.length) {
             const afterList = new ListComponent(this.tagName);
-            afterList.slots.push(...slots.after);
+            afterList.push(...slots.after);
             parentFragment.insertBefore(afterList, item.component);
           }
           parentFragment.cut(parentFragment.indexOf(item.component), 1);
@@ -87,14 +87,14 @@ export class ListCommander implements Commander<null> {
         });
         scopes.reverse().forEach(scope => {
           if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength && scope.fragment !== commonAncestorFragment) {
-            list.slots.unshift(scope.fragment);
+            list.unshift(scope.fragment);
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
             return;
           }
           const fragment = new Fragment();
           fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
 
-          list.slots.unshift(fragment);
+          list.unshift(fragment);
           if (scope.fragment.contentLength === 0) {
             range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
           }
@@ -119,20 +119,20 @@ export class ListCommander implements Commander<null> {
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
           } else if (parentComponent instanceof BranchComponent) {
-            const index = parentComponent.slots.indexOf(commonAncestorFragment);
+            const index = parentComponent.indexOf(commonAncestorFragment);
             const before = parentComponent.clone() as BranchComponent;
-            before.slots.splice(index);
+            before.splice(index);
             const after = parentComponent.clone() as BranchComponent;
-            after.slots.splice(0, index + 1);
+            after.splice(0, index + 1);
 
             const parentFragment = renderer.getParentFragment(parentComponent);
             const position = parentFragment.indexOf(parentComponent);
 
-            if (after.slots.length) {
+            if (after.slotCount) {
               parentFragment.insert(after, position)
             }
             parentFragment.insert(list, position);
-            if (before.slots.length) {
+            if (before.slotCount) {
               parentFragment.insert(before, position);
             }
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);

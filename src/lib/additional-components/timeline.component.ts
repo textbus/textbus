@@ -122,7 +122,7 @@ export class TimelineComponent extends BranchComponent {
   constructor(private list: TimelineConfig[]) {
     super('tb-timeline');
     list.forEach(i => {
-      this.slots.push(i.fragment);
+      this.push(i.fragment);
     });
   }
 
@@ -140,7 +140,7 @@ export class TimelineComponent extends BranchComponent {
     const list = new VElement('tb-timeline');
     this.vEle = list;
     this.list = this.list.filter(i => {
-      return this.slots.includes(i.fragment);
+      return this.includes(i.fragment);
     });
 
     this.list.forEach((item) => {
@@ -189,9 +189,9 @@ export class TimelineComponent extends BranchComponent {
             checked: item.checked,
             fragment: createTimelineItem().fragment
           };
-          const index = this.slots.indexOf(item.fragment) + 1;
+          const index = this.indexOf(item.fragment) + 1;
           this.list.splice(index, 0, newSlot);
-          this.slots.splice(index, 0, newSlot.fragment);
+          this.splice(index, 0, newSlot.fragment);
         })
       }
 

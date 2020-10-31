@@ -1,3 +1,5 @@
+import { Observable, Subject, Subscription } from 'rxjs';
+
 import { Contents } from './contents';
 import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
 import {
@@ -8,6 +10,7 @@ import {
   BlockFormatParams
 } from './formatter';
 import { FormatMap } from './format-map';
+import { VElement } from './element';
 
 /**
  * 应用样式的可选参数。
@@ -23,8 +26,15 @@ export interface ApplyFormatOptions {
  * TextBus 抽象数据类
  */
 export class Fragment {
-  private contents = new Contents();
-  private formatMap = new FormatMap();
+  onChange: Observable<void>;
+
+  get dirty() {
+    return this._dirty;
+  }
+
+  get changed() {
+    return this._changed;
+  }
 
   /**
    * fragment 内容的长度
@@ -33,11 +43,39 @@ export class Fragment {
     return this.contents.length;
   }
 
+  private _dirty = true;
+  private _changed = true;
+  private contents = new Contents();
+  private formatMap = new FormatMap();
+  private changeEvent = new Subject<void>();
+
+  private eventMap = new Map<Component, Subscription>();
+
+  constructor() {
+    this.onChange = this.changeEvent.asObservable();
+  }
+
+  markAsDirtied() {
+    this._dirty = true;
+    this.markAsChanged();
+  }
+
+  markAsChanged() {
+    this._changed = true;
+    this.changeEvent.next();
+  }
+
+  rendered() {
+    this._changed = false;
+    this._dirty = false;
+  }
+
   /**
    * 用一个新的 fragment 覆盖当前 fragment。
    * @param source
    */
   from(source: Fragment) {
+    this.markAsChanged();
     this.contents = source.contents;
     this.formatMap = source.formatMap;
     source.clean();
@@ -52,6 +90,13 @@ export class Fragment {
     const offset = content.length;
     const length = this.contentLength;
     this.contents.append(content);
+
+    this.markAsDirtied();
+    if (content instanceof Component) {
+      this.eventMap.set(content, content.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    }
 
     if (insertAdjacentInlineFormat) {
       this.getFormatKeys().forEach(token => {
@@ -107,6 +152,13 @@ export class Fragment {
    * @param index
    */
   insert(contents: Component | string, index: number) {
+    this.markAsDirtied();
+    if (contents instanceof Component) {
+      this.eventMap.set(contents, contents.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    }
+
     this.contents.insert(contents, index);
     const formatMap = new FormatMap();
     Array.from(this.formatMap.keys()).forEach(token => {
@@ -188,6 +240,9 @@ export class Fragment {
    * 清除当前 fragment 的内容及格式。
    */
   clean() {
+    this.markAsDirtied();
+    Array.from(this.eventMap.values()).map(i => i.unsubscribe());
+    this.eventMap.clear();
     this.contents = new Contents();
     this.formatMap = new FormatMap();
   }
@@ -315,7 +370,13 @@ export class Fragment {
     })
     this.formatMap = selfFormatMap;
     const fragment = new Fragment()
-    this.contents.cut(startIndex, endIndex).forEach(i => fragment.append(i));
+    this.contents.cut(startIndex, endIndex).forEach(i => {
+      fragment.append(i);
+      if (i instanceof Component) {
+        this.eventMap.get(i).unsubscribe();
+        this.eventMap.delete(i);
+      }
+    });
     fragment.formatMap = discardedFormatMap;
     return fragment;
   }
@@ -388,7 +449,7 @@ export class Fragment {
       } else if (item instanceof BranchComponent) {
         newFormat = null;
         if (coverChild) {
-          item.slots.forEach(fragment => {
+          item.forEach(fragment => {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;

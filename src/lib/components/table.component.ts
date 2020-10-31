@@ -132,14 +132,14 @@ export class TableComponent extends BackboneComponent {
     const bodyConfig = config.bodies;
     for (const row of bodyConfig) {
       for (const col of row) {
-        this.slots.push(col.fragment);
+        this.push(col.fragment);
       }
     }
   }
 
   canDelete(deletedSlot: Fragment): boolean {
     this.deleteMarkFragments.push(deletedSlot);
-    return !this.slots.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
+    return !this.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
   }
 
   clone() {
@@ -168,7 +168,7 @@ export class TableComponent extends BackboneComponent {
       table.classes.push('tb-table');
     }
     this.viewMap.clear();
-    this.slots = [];
+    this.clean();
     this.deleteMarkFragments = [];
     const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
@@ -188,7 +188,7 @@ export class TableComponent extends BackboneComponent {
           if (col.fragment.contentLength === 0) {
             col.fragment.append(new BrComponent());
           }
-          this.slots.push(col.fragment);
+          this.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
           !isOutputMode && td.events.subscribe(event => {

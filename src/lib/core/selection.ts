@@ -114,7 +114,7 @@ export class TBSelection {
         const parentComponent = this.renderer.getParentComponent(fragment);
         if (parentComponent) {
           if (parentComponent instanceof BranchComponent) {
-            paths.push(parentComponent.slots.indexOf(fragment))
+            paths.push(parentComponent.indexOf(fragment))
           } else if (parentComponent instanceof BackboneComponent) {
             paths.push(parentComponent.indexOf(fragment));
           } else {
@@ -162,7 +162,7 @@ export class TBSelection {
         if (c instanceof DivisionComponent && last === 0) {
           fragment = c.slot;
         } else if (c instanceof BranchComponent) {
-          fragment = c.slots[last];
+          fragment = c.getSlotAtIndex(last);
         } else if (c instanceof BackboneComponent) {
           fragment = c.getSlotAtIndex(last);
         } else {

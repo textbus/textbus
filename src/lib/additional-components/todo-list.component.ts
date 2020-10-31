@@ -62,24 +62,24 @@ export class TodoListComponent extends BranchComponent {
 
   constructor(public listConfigs: TodoListConfig[]) {
     super('tb-todo-list');
-    this.slots.push(...listConfigs.map(i => i.slot));
+    this.push(...listConfigs.map(i => i.slot));
   }
 
   render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
     const list = new VElement('tb-todo-list');
 
-    if (this.listConfigs.length === this.slots.length) {
-      this.slots.forEach((slot, index) => {
+    if (this.listConfigs.length === this.slotCount) {
+      this.forEach((slot, index) => {
         this.listConfigs[index].slot = slot;
       })
     } else {
       this.listConfigs = this.listConfigs.filter(i => {
-        return this.slots.includes(i.slot);
+        return this.includes(i.slot);
       });
     }
 
     this.viewMap.clear();
-    this.slots.length = 0;
+    this.clean();
     this.listConfigs.forEach((config, index) => {
       const slot = config.slot;
 
@@ -108,7 +108,7 @@ export class TodoListComponent extends BranchComponent {
         slot.append(new BrComponent());
       }
       this.viewMap.set(slot, content);
-      this.slots.push(slot);
+      this.push(slot);
       list.appendChild(item);
       if (!isOutputMode) {
         eventManager.listen(state, 'click', ev => {
@@ -130,11 +130,11 @@ export class TodoListComponent extends BranchComponent {
 
             const firstRange = event.selection.firstRange;
 
-            if (slot === this.slots[this.slots.length - 1]) {
+            if (slot === this.getSlotAtIndex(this.slotCount - 1)) {
               const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
               if (slot.contentLength === 0 ||
                 slot.contentLength === 1 && lastContent instanceof BrComponent) {
-                this.slots.pop();
+                this.pop();
                 const parentFragment = event.renderer.getParentFragment(this);
                 const p = new BlockComponent('p');
                 p.slot.append(new BrComponent());
@@ -151,7 +151,7 @@ export class TodoListComponent extends BranchComponent {
               ...config,
               slot: next
             });
-            this.slots.splice(index + 1, 0, next);
+            this.splice(index + 1, 0, next);
             firstRange.startFragment = firstRange.endFragment = next;
             firstRange.startIndex = firstRange.endIndex = 0;
           }

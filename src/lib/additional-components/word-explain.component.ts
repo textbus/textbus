@@ -68,7 +68,8 @@ export class WordExplainComponent extends BackboneComponent {
     this.subtitle = params.subtitle;
     this.detail = params.detail;
 
-    this.slots = [this.title, this.subtitle, this.detail];
+    this.clean();
+    this.push(this.title, this.subtitle, this.detail);
   }
 
   canDelete(): boolean {
@@ -86,7 +87,7 @@ export class WordExplainComponent extends BackboneComponent {
   render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
-    this.slots.forEach(f => {
+    Array.from(this).forEach(f => {
       if (f.contentLength === 0) {
         f.append(new BrComponent());
       }

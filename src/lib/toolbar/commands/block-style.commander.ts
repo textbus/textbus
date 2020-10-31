@@ -29,7 +29,7 @@ export class BlockStyleCommander implements Commander<string> {
               if (content instanceof DivisionComponent) {
                 fragments.push(content.slot);
               } else if (content instanceof BranchComponent) {
-                fragments.push(...content.slots);
+                fragments.push(...content.slice());
               } else if (content instanceof BackboneComponent) {
                 fragments.push(...Array.from(content));
               } else {

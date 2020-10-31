@@ -54,8 +54,8 @@ export class ImageCardComponent extends BackboneComponent {
       this.descFragment.append('图片描述');
     }
 
-    this.slots.push(this.imgFragment);
-    this.slots.push(this.descFragment);
+    this.push(this.imgFragment);
+    this.push(this.descFragment);
   }
 
   canDelete(deletedSlot: Fragment): boolean {
@@ -64,7 +64,8 @@ export class ImageCardComponent extends BackboneComponent {
 
   render(isOutputMode: boolean): VElement {
     this.viewMap.clear();
-    this.slots = [this.imgFragment, this.descFragment];
+    this.clean();
+    this.push(this.imgFragment, this.descFragment);
     const card = new VElement(this.tagName);
     const imgWrapper = new VElement('div');
     const desc = new VElement('p');

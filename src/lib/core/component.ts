@@ -1,3 +1,5 @@
+import { Observable, Subject, Subscription } from 'rxjs';
+
 import { Fragment } from './fragment';
 import { VElement } from './element';
 import { NativeEventManager } from './native-event-manager';
@@ -40,12 +42,46 @@ export abstract class ComponentReader {
  * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
  */
 export abstract class Component {
+  onChange: Observable<void>;
+
+  get dirty() {
+    return this._dirty;
+  }
+
+  get changed() {
+    return this._changed;
+  }
+
   /**
    * 在 TextBus 中，视所有模板为一个单独的个体，且规定长度为 1。
    */
   readonly length = 1;
 
+  private _dirty = true;
+  private _changed = true;
+  private cachedVDom: VElement;
+  private changeEvent = new Subject<void>();
+
   protected constructor(public tagName: string) {
+    this.onChange = this.changeEvent.asObservable();
+  }
+
+  getView(isOutputMode: boolean, eventManager?: NativeEventManager) {
+    this.cachedVDom = this.dirty ? this.render(isOutputMode, eventManager) : this.cachedVDom;
+    // this.cachedVDom = this.render(isOutputMode, eventManager);
+    this._dirty = false;
+    this._changed = false;
+    return this.cachedVDom;
+  }
+
+  markAsDirtied() {
+    this._dirty = true;
+    this.markAsChanged();
+  }
+
+  markAsChanged() {
+    this._changed = true;
+    this.changeEvent.next();
   }
 
   /**
@@ -69,6 +105,14 @@ export abstract class Component {
  */
 export abstract class DivisionComponent extends Component {
   readonly slot = new Fragment();
+
+  protected constructor(tagName: string) {
+    super(tagName);
+    this.slot.onChange.subscribe(() => {
+      this.markAsChanged();
+    })
+  }
+
   abstract getSlotView(): VElement;
 }
 
@@ -78,10 +122,81 @@ export abstract class DivisionComponent extends Component {
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
 export abstract class BranchComponent extends Component {
+  private eventMap = new Map<Fragment, Subscription>();
+
   /**
    * 子插槽的集合
    */
-  readonly slots: Fragment[] = [];
+  private slots: Fragment[] = [];
+
+  get slotCount() {
+    return this.slots.length;
+  }
+
+  unshift(...fragments: Fragment[]) {
+    fragments.forEach(f => {
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    })
+    this.slots.unshift(...fragments);
+  }
+
+  getSlotAtIndex(index: number) {
+    return this.slots[index];
+  }
+
+  clean() {
+    this.slots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+    })
+    this.eventMap.clear();
+    this.slots = [];
+  }
+
+  includes(f: Fragment, fromIndex?: number) {
+    return this.slots.includes(f, fromIndex);
+  }
+
+  slice(start?: number, end?: number) {
+    return this.slots.slice(start, end);
+  }
+
+  push(...fragments: Fragment[]) {
+    fragments.forEach(f => {
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    })
+    this.slots.push(...fragments);
+  }
+
+  pop() {
+    const f = this.slots.pop();
+    if (f) {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    }
+    return f;
+  }
+
+  splice(start: number, deleteCount?: number, ...items: Fragment[]): Fragment[] {
+    const deletedSlots = this.slots.splice(start, deleteCount, ...items);
+
+    deletedSlots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    })
+    return deletedSlots;
+  }
+
+  indexOf(f: Fragment, fromIndex?: number) {
+    return this.slots.indexOf(f, fromIndex);
+  }
+
+  forEach(callbackFn: (value: Fragment, index: number, array: Fragment[]) => void, thisArg?: any) {
+    this.slots.forEach(callbackFn, thisArg);
+  }
 
   /**
    * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
@@ -111,7 +226,8 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   /**
    * 子插槽的集合
    */
-  protected slots: Fragment[] = [];
+  private eventMap = new Map<Fragment, Subscription>();
+  private slots: Fragment[] = [];
   /**
    * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
    */
@@ -126,6 +242,43 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
    * @param deletedSlot 当前清空的 fragment。
    */
   abstract canDelete(deletedSlot: Fragment): boolean;
+
+  clean() {
+    this.slots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+    })
+    this.eventMap.clear();
+    this.slots = [];
+  }
+
+  push(...fragments: Fragment[]) {
+    fragments.forEach(f => {
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    })
+    this.slots.push(...fragments);
+  }
+
+  pop() {
+    const f = this.slots.pop();
+    if (f) {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    }
+    return f;
+  }
+
+  splice(start: number, deleteCount?: number): Fragment[];
+  splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
+    const deletedSlots = this.slots.splice(start, deleteCount, ...items);
+
+    deletedSlots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    })
+    return deletedSlots;
+  }
 
   /**
    * 通过子插槽获取对应的虚拟 DOM 节点。
@@ -163,6 +316,10 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
 
   indexOf(fragment: Fragment) {
     return this.slots.indexOf(fragment);
+  }
+
+  map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
+    return this.slots.map(callbackFn, thisArg);
   }
 }
 

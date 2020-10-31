@@ -37,12 +37,12 @@ export class BlockCommander implements Commander<string> {
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
             this.effect(blockComponent.slot, parentComponent.tagName);
           } else if (parentComponent instanceof BranchComponent) {
-            const index = parentComponent.slots.indexOf(scope.fragment);
+            const index = parentComponent.indexOf(scope.fragment);
             blockComponent.slot.from(scope.fragment);
             this.effect(blockComponent.slot, parentComponent.tagName);
             const fragment = new Fragment();
             fragment.append(blockComponent);
-            parentComponent.slots.splice(index, 1, fragment);
+            parentComponent.splice(index, 1, fragment);
           } else if (parentComponent instanceof BackboneComponent) {
             blockComponent.slot.from(scope.fragment);
             scope.fragment.append(blockComponent);

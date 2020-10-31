@@ -116,7 +116,7 @@ export class FindHook implements Lifecycle {
       } else if (item instanceof DivisionComponent) {
         result.push(...this.find(item.slot, search));
       } else if (item instanceof BranchComponent) {
-        item.slots.forEach(s => result.push(...this.find(s, search)));
+        item.forEach(s => result.push(...this.find(s, search)));
       } else if (item instanceof BackboneComponent) {
         Array.from(item).forEach(s => result.push(...this.find(s, search)));
       }
