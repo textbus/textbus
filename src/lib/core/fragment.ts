@@ -10,7 +10,7 @@ import {
   BlockFormatParams
 } from './formatter';
 import { FormatMap } from './format-map';
-import { AbstractData } from './abstract-data';
+import { Marker } from './marker';
 
 /**
  * 应用样式的可选参数。
@@ -25,7 +25,7 @@ export interface ApplyFormatOptions {
 /**
  * TextBus 抽象数据类
  */
-export class Fragment extends AbstractData {
+export class Fragment extends Marker {
   /**
    * fragment 内容的长度
    */

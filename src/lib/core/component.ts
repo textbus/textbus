@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { Fragment } from './fragment';
 import { VElement } from './element';
 import { NativeEventManager } from './native-event-manager';
-import { AbstractData } from './abstract-data';
+import { Marker } from './marker';
 
 /**
  * 用于保存读取 DOM 时，Fragment 和 DOM 节点的对应关系。
@@ -42,7 +42,7 @@ export abstract class ComponentReader {
  * TextBus 组件基类，不可直接继承 Component 类。
  * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
  */
-export abstract class Component extends AbstractData {
+export abstract class Component extends Marker {
   /**
    * 在 TextBus 中，视所有模板为一个单独的个体，且规定长度为 1。
    */

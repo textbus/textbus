@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-export abstract class AbstractData {
+export abstract class Marker {
   onChange: Observable<void>;
 
   get dirty() {
