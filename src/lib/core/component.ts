@@ -202,12 +202,12 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
    */
   private eventMap = new Map<Fragment, Subscription>();
   private slots: Fragment[] = [];
+  private iteratorIndex = 0;
   /**
    * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
    */
   protected viewMap = new Map<Fragment, VElement>();
 
-  private iteratorIndex = 0;
 
   /**
    * 当用户在文档中作框选删除时，由于 BackboneComponent 是不可编辑的，所以会导致 TextBus 无法判断当前组件是否为空组件，
@@ -216,49 +216,6 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
    * @param deletedSlot 当前清空的 fragment。
    */
   abstract canDelete(deletedSlot: Fragment): boolean;
-
-  clean() {
-    this.slots.forEach(f => {
-      this.eventMap.get(f).unsubscribe();
-    })
-    this.eventMap.clear();
-    this.slots = [];
-  }
-
-  push(...fragments: Fragment[]) {
-    fragments.forEach(f => {
-      this.eventMap.set(f, f.onChange.subscribe(() => {
-        for (const item of this.slots) {
-          if (item.dirty) {
-            this.markAsDirtied();
-            return;
-          }
-        }
-        this.markAsChanged();
-      }))
-    })
-    this.slots.push(...fragments);
-  }
-
-  pop() {
-    const f = this.slots.pop();
-    if (f) {
-      this.eventMap.get(f).unsubscribe();
-      this.eventMap.delete(f);
-    }
-    return f;
-  }
-
-  splice(start: number, deleteCount?: number): Fragment[];
-  splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
-    const deletedSlots = this.slots.splice(start, deleteCount, ...items);
-
-    deletedSlots.forEach(f => {
-      this.eventMap.get(f).unsubscribe();
-      this.eventMap.delete(f);
-    })
-    return deletedSlots;
-  }
 
   /**
    * 通过子插槽获取对应的虚拟 DOM 节点。
@@ -298,7 +255,50 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
     return this.slots.indexOf(fragment);
   }
 
-  map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
+  protected clean() {
+    this.slots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+    })
+    this.eventMap.clear();
+    this.slots = [];
+  }
+
+  protected push(...fragments: Fragment[]) {
+    fragments.forEach(f => {
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        for (const item of this.slots) {
+          if (item.dirty) {
+            this.markAsDirtied();
+            return;
+          }
+        }
+        this.markAsChanged();
+      }))
+    })
+    this.slots.push(...fragments);
+  }
+
+  protected pop() {
+    const f = this.slots.pop();
+    if (f) {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    }
+    return f;
+  }
+
+  protected splice(start: number, deleteCount?: number): Fragment[];
+  protected splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
+    const deletedSlots = this.slots.splice(start, deleteCount, ...items);
+
+    deletedSlots.forEach(f => {
+      this.eventMap.get(f).unsubscribe();
+      this.eventMap.delete(f);
+    })
+    return deletedSlots;
+  }
+
+  protected map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
     return this.slots.map(callbackFn, thisArg);
   }
 }
