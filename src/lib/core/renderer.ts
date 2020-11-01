@@ -290,26 +290,25 @@ export class Renderer {
   }
 
   private renderComponent(component: Component): VElement {
-    if (!component.changed) {
-      if (!component.dirty) {
-        if (component instanceof DivisionComponent) {
-          this.renderFragment(component.slot, component.getSlotView());
-        } else if (component instanceof BranchComponent) {
-          component.forEach(f => this.renderFragment(f, component.getSlotView(f)));
-        } else if (component instanceof BackboneComponent) {
-          Array.from(component).forEach(f => this.renderFragment(f, component.getSlotView(f)));
+    if (component.changed) {
+      if (component.dirty) {
+        if (this.outputMode) {
+          return component.render(this.outputMode);
         }
+        const vDom = component.render(this.outputMode, this.nativeEventManager);
+        this.componentVDomMap.set(component, vDom);
+        component.rendered();
+        return vDom;
       }
-      return this.componentVDomMap.get(component);
     }
-
-    if (this.outputMode) {
-      return component.render(this.outputMode);
+    if (component instanceof DivisionComponent) {
+      this.renderFragment(component.slot, component.getSlotView());
+    } else if (component instanceof BranchComponent) {
+      component.forEach(f => this.renderFragment(f, component.getSlotView(f)));
+    } else if (component instanceof BackboneComponent) {
+      Array.from(component).forEach(f => this.renderFragment(f, component.getSlotView(f)));
     }
-    const vDom = component.render(this.outputMode, this.nativeEventManager);
-    this.componentVDomMap.set(component, vDom);
-    component.rendered();
-    return vDom;
+    return this.componentVDomMap.get(component);
   }
 
   private getParentVDom(child: VElement | VTextNode) {
@@ -392,6 +391,7 @@ export class Renderer {
         max--;
       }
     }
+
     oldChildNodes.forEach(v => {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);

@@ -1,4 +1,4 @@
-import { auditTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
+import { auditTime, debounceTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
 import { from, fromEvent, Observable, of, Subject, Subscription, zip } from 'rxjs';
 import pretty from 'pretty';
 
@@ -139,7 +139,8 @@ export class Editor implements FileUploader {
   private eventHandler = new EventHandler();
 
   private subs: Subscription[] = [];
-  private contentUnexpectedlyChangedSub: Subscription;
+
+  private renderedCallbacks: Array<() => void> = [];
 
   private sourceCodeComponent = new PreComponent('HTML');
 
@@ -248,7 +249,6 @@ export class Editor implements FileUploader {
     this.container.appendChild(this.elementRef);
 
     this.listenUserWriteEvent();
-
   }
 
   /**
@@ -329,15 +329,22 @@ export class Editor implements FileUploader {
   destroy() {
     this.container.removeChild(this.elementRef);
     this.subs.forEach(s => s.unsubscribe());
-    if (this.contentUnexpectedlyChangedSub) {
-      this.contentUnexpectedlyChangedSub.unsubscribe();
-    }
     this.readyEvent.complete();
     this.changeEvent.complete();
     this.history.destroy();
   }
 
+  private addRenderedTask(fn: () => void) {
+    this.renderedCallbacks.push(fn);
+  }
+
   private setup() {
+    this.rootFragment.onChange.pipe(debounceTime(1)).subscribe(() => {
+      this.render();
+      while (this.renderedCallbacks.length) {
+        this.renderedCallbacks.shift()();
+      }
+    })
     fromEvent(this.viewer.contentDocument, 'mousedown').subscribe((ev: MouseEvent) => {
       this.oldCursorPosition = null;
       clearTimeout(this.cleanOldCursorTimer);
@@ -425,9 +432,10 @@ export class Editor implements FileUploader {
           return;
         }
         this.userWriteEvent.next();
-        this.render();
-        this.selection.restore();
-        this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
+        this.addRenderedTask(() => {
+          this.selection.restore();
+          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
+        })
       }),
       this.viewer.input.onPaste.subscribe((ev: ClipboardEvent) => {
         const text = ev.clipboardData.getData('Text');
@@ -474,9 +482,10 @@ export class Editor implements FileUploader {
             })
             return isNext;
           })
-          this.render();
-          this.selection.restore();
-          this.invokeViewUpdatedHooks();
+          this.addRenderedTask(() => {
+            this.selection.restore();
+            this.invokeViewUpdatedHooks();
+          })
         });
       }),
       this.viewer.input.onCopy.subscribe(() => {
@@ -487,11 +496,12 @@ export class Editor implements FileUploader {
         this.selection.ranges.forEach(range => {
           range.connect();
         });
-        this.render();
-        this.selection.restore();
-        this.invokeViewUpdatedHooks();
-        this.history.recordSnapshot(this.rootFragment, this.selection);
-        this.recordSnapshotFromEditingBefore();
+        this.addRenderedTask(() => {
+          this.selection.restore();
+          this.invokeViewUpdatedHooks();
+          this.history.recordSnapshot(this.rootFragment, this.selection);
+          this.recordSnapshotFromEditingBefore();
+        })
       })
     );
 
@@ -512,11 +522,12 @@ export class Editor implements FileUploader {
           return isNext;
         })
 
-        this.render();
-        this.selection.restore();
-        this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-        this.recordSnapshotFromEditingBefore();
-        this.userWriteEvent.next();
+        this.addRenderedTask(() => {
+          this.selection.restore();
+          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
+          this.recordSnapshotFromEditingBefore();
+          this.userWriteEvent.next();
+        })
       }
     })
     this.viewer.input.keymap({
@@ -544,16 +555,18 @@ export class Editor implements FileUploader {
         }
         const isEmpty = this.rootFragment.contentLength === 0;
         const firstRange = selection.firstRange;
-        this.render();
-        if (isEmpty) {
-          const position = firstRange.findFirstPosition(this.rootFragment);
-          firstRange.setStart(position.fragment, position.index);
-          firstRange.collapse();
-        }
-        selection.restore();
-        this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-        this.recordSnapshotFromEditingBefore();
-        this.userWriteEvent.next();
+        this.addRenderedTask(() => {
+          if (isEmpty) {
+            const position = firstRange.findFirstPosition(this.rootFragment);
+            firstRange.setStart(position.fragment, position.index);
+            firstRange.collapse();
+          }
+          selection.restore();
+          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
+          this.recordSnapshotFromEditingBefore();
+          this.userWriteEvent.next();
+        })
+
       }
     })
     this.viewer.input.keymap({
@@ -640,15 +653,18 @@ export class Editor implements FileUploader {
         renderer: this.renderer,
         rootFragment: this.rootFragment
       }, params);
-      this.render();
-      selection.restore();
-      this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
+      this.addRenderedTask(() => {
+        selection.restore();
+        this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
+      })
     }
+    this.addRenderedTask(() => {
+      if (commander.recordHistory) {
+        this.history.recordSnapshot(this.rootFragment, this.selection);
+        this.listenUserWriteEvent();
+      }
+    })
 
-    if (commander.recordHistory) {
-      this.history.recordSnapshot(this.rootFragment, this.selection);
-      this.listenUserWriteEvent();
-    }
   }
 
   private render() {
@@ -662,10 +678,6 @@ export class Editor implements FileUploader {
     if (!isNext) {
       return;
     }
-
-    if (this.contentUnexpectedlyChangedSub) {
-      this.contentUnexpectedlyChangedSub.unsubscribe();
-    }
     const rootFragment = this.rootFragment;
 
     if (this.openSourceCodeMode) {
@@ -675,11 +687,6 @@ export class Editor implements FileUploader {
     }
     const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
     this.eventHandler.listen(vEle);
-    this.contentUnexpectedlyChangedSub = vEle.events.subscribe(ev => {
-      if (ev.type === EventType.onContentUnexpectedlyChanged) {
-        this.render();
-      }
-    })
     this.invokeViewUpdatedHooks();
     if (this.readyState) {
       this.dispatchContentChangeEvent();
@@ -784,10 +791,11 @@ export class Editor implements FileUploader {
       }
     }
     this.selection.removeAllRanges();
-    this.render();
-    this.invokeViewUpdatedHooks();
-    this.history.recordSnapshot(this.rootFragment, this.selection);
-    this.recordSnapshotFromEditingBefore();
+    this.addRenderedTask(() => {
+      this.invokeViewUpdatedHooks();
+      this.history.recordSnapshot(this.rootFragment, this.selection);
+      this.recordSnapshotFromEditingBefore();
+    })
   }
 
   private run(fn: () => void) {

@@ -108,13 +108,10 @@ export class EventCache {
       this.eventDelegateCache.set(vDom, delegateMap);
     }
 
-    const self = this;
     const fn = function (event: Event) {
-      const b = listeners.reduce((previousValue, currentValue) => {
+      return listeners.reduce((previousValue, currentValue) => {
         return currentValue(event) && previousValue;
       }, true);
-      self.renderer.dispatchEvent(vDom as VElement, EventType.onContentUnexpectedlyChanged, null);
-      return b;
     }
     if (!delegateMap.has(type)) {
       delegateMap.set(type, fn);

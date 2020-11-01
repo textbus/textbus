@@ -11,8 +11,7 @@ export enum EventType {
   onDelete = 'delete',
   onInput = 'input',
   onPaste = 'paste',
-  onRendered = 'rendered',
-  onContentUnexpectedlyChanged = 'contentUnexpectedlyChanged'
+  onRendered = 'rendered'
 }
 
 /**

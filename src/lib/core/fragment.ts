@@ -47,10 +47,17 @@ export class Fragment extends Marker {
    * @param source
    */
   from(source: Fragment) {
-    this.markAsChanged();
     this.contents = source.contents;
+    this.sliceContents().forEach(c => {
+      if (c instanceof Component) {
+        this.eventMap.set(c, c.onChange.subscribe(() => {
+          this.markAsChanged();
+        }));
+      }
+    })
     this.formatMap = source.formatMap;
     source.clean();
+    this.markAsDirtied();
   }
 
   /**
@@ -63,7 +70,6 @@ export class Fragment extends Marker {
     const length = this.contentLength;
     this.contents.append(content);
 
-    this.markAsDirtied();
     if (content instanceof Component) {
       this.eventMap.set(content, content.onChange.subscribe(() => {
         this.markAsChanged();
@@ -81,6 +87,7 @@ export class Fragment extends Marker {
         }
       })
     }
+    this.markAsDirtied();
   }
 
   /**
@@ -124,7 +131,6 @@ export class Fragment extends Marker {
    * @param index
    */
   insert(contents: Component | string, index: number) {
-    this.markAsDirtied();
     if (contents instanceof Component) {
       this.eventMap.set(contents, contents.onChange.subscribe(() => {
         this.markAsChanged();
@@ -180,6 +186,7 @@ export class Fragment extends Marker {
       })
     })
     this.formatMap = formatMap;
+    this.markAsDirtied();
   }
 
   /**
@@ -350,6 +357,7 @@ export class Fragment extends Marker {
       }
     });
     fragment.formatMap = discardedFormatMap;
+    this.markAsDirtied();
     return fragment;
   }
 
@@ -457,5 +465,6 @@ export class Fragment extends Marker {
       index += item.length;
     });
     cacheFormats.forEach(f => this.formatMap.merge(f.token, f.params, important));
+    this.markAsDirtied();
   }
 }

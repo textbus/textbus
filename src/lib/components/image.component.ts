@@ -23,8 +23,8 @@ export class ImageComponentReader implements ComponentReader {
   from(el: HTMLImageElement): ViewData {
     return {
       component: new ImageComponent(el.src, {
-        width: el.style.width || el.width + '',
-        height: el.style.height || el.height + '',
+        width: el.style.width || el.width === 0 ? null : el.width + '',
+        height: el.style.height || el.height === 0 ? null : el.height + '',
         maxWidth: el.style.maxWidth,
         maxHeight: el.style.maxHeight,
         margin: el.style.margin,

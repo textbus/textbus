@@ -94,14 +94,11 @@ export class ImageVideoResizeHook implements Lifecycle {
         this.currentComponent.width = endWidth + 'px';
         this.currentComponent.height = endHeight + 'px';
         this.frameContainer.style.pointerEvents = '';
+        this.currentComponent.markAsDirtied();
         if (this.renderer) {
           const vEle = this.renderer.getVDomByNativeNode(this.currentElement) as VElement;
           vEle.styles.set('width', endWidth + 'px');
           vEle.styles.set('height', endHeight + 'px');
-          this.renderer.dispatchEvent(
-            vEle,
-            EventType.onContentUnexpectedlyChanged,
-            null);
         }
         document.removeEventListener('mousemove', mouseMoveFn);
         document.removeEventListener('mouseup', mouseUpFn);
