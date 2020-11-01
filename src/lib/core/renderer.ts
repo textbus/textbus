@@ -92,6 +92,11 @@ export class Renderer {
   private componentHierarchyMapping = new WeakMap<Component, Fragment>();
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
+
+  // private fragmentVDomMap = new WeakMap<Fragment, VElement | VTextNode[]>();
+  private componentVDomMap = new WeakMap<Component, VElement>();
+  private pureSlotDataMap = new WeakMap<Fragment, VElementLiteral>();
+
   private oldVDom: VElement;
 
   private outputMode = false;
@@ -106,15 +111,10 @@ export class Renderer {
    */
   render(fragment: Fragment, host: HTMLElement) {
     this.outputMode = false;
-    // this.vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
-    // this.fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent | BackboneComponent>();
-    // this.componentHierarchyMapping = new WeakMap<Component, Fragment>();
-    // this.fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
-    // this.vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
 
     const root = new VElement('root');
     this.NVMappingTable.set(host, root);
-    const vDom = this.createVDOMIntoView(fragment, root);
+    const vDom = this.renderFragment(fragment, root);
     if (this.oldVDom) {
       this.diffAndUpdate(host, vDom, this.oldVDom);
     } else {
@@ -254,6 +254,64 @@ export class Renderer {
     } while (!stopped && by);
   }
 
+  private renderFragment(fragment: Fragment, host: VElement): VElement {
+    if (!fragment.changed) {
+      if (!fragment.dirty) {
+        fragment.sliceContents().forEach(i => {
+          if (i instanceof Component) {
+            this.renderComponent(i);
+          }
+        })
+      }
+      return host;
+    }
+
+    const cachedHostData = this.pureSlotDataMap.get(fragment);
+
+    if (cachedHostData) {
+      // 因 Formatter 有可能会修改插槽的数据，所以复用的时候，为了防卫脏数据，需要从缓存重新获取原来生成的插槽数据，并覆盖
+      host.tagName = cachedHostData.tagName;
+      host.attrs.clear();
+      Object.keys(cachedHostData.attrs).forEach(key => {
+        host.attrs.set(key, cachedHostData.attrs[key])
+      })
+      host.styles.clear();
+      Object.keys(cachedHostData.styles).forEach(key => {
+        host.styles.set(key, cachedHostData.styles[key]);
+      })
+      host.classes.length = 0;
+      host.classes.push(...cachedHostData.classes);
+      host.childNodes.length = 0;
+    }
+
+    const vDom = this.createVDOMIntoView(fragment, host);
+    fragment.rendered();
+    return vDom;
+  }
+
+  private renderComponent(component: Component): VElement {
+    if (!component.changed) {
+      if (!component.dirty) {
+        if (component instanceof DivisionComponent) {
+          this.renderFragment(component.slot, component.getSlotView());
+        } else if (component instanceof BranchComponent) {
+          component.forEach(f => this.renderFragment(f, component.getSlotView(f)));
+        } else if (component instanceof BackboneComponent) {
+          Array.from(component).forEach(f => this.renderFragment(f, component.getSlotView(f)));
+        }
+      }
+      return this.componentVDomMap.get(component);
+    }
+
+    if (this.outputMode) {
+      return component.render(this.outputMode);
+    }
+    const vDom = component.render(this.outputMode, this.nativeEventManager);
+    this.componentVDomMap.set(component, vDom);
+    component.rendered();
+    return vDom;
+  }
+
   private getParentVDom(child: VElement | VTextNode) {
     return this.vDomHierarchyMapping.get(child);
   }
@@ -268,22 +326,18 @@ export class Renderer {
   }
 
   private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
-    console.log(vDom === oldVDom)
-    if (oldVDom === vDom) {
-      return
-    } else {
-      console.log(vDom, oldVDom)
-    }
     let min = 0;
     let max = vDom.childNodes.length - 1;
     let minToMax = true;
 
     const childNodes: Node[] = [];
+    // 防止 diff 过程中更改数据
+    const oldChildNodes = oldVDom.childNodes.map(i => i);
     while (min <= max) {
       if (minToMax) {
         const current = vDom.childNodes[min];
-        if (Renderer.equal(current, oldVDom.childNodes[0])) {
-          const oldFirst = oldVDom.childNodes.shift();
+        if (Renderer.equal(current, oldChildNodes[0])) {
+          const oldFirst = oldChildNodes.shift();
           const el = this.NVMappingTable.get(oldFirst);
           childNodes[min] = el;
           min++;
@@ -298,11 +352,11 @@ export class Renderer {
           minToMax = false;
         }
       } else {
-        const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
+        const oldLast = oldChildNodes[oldChildNodes.length - 1];
         const current = vDom.childNodes[max];
 
         if (Renderer.equal(current, oldLast)) {
-          const last = oldVDom.childNodes.pop();
+          const last = oldChildNodes.pop();
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
 
@@ -332,13 +386,13 @@ export class Renderer {
             const el = this.NVMappingTable.get(oldLast);
             el.parentNode.removeChild(el);
             this.cleanVDom(oldLast);
-            oldVDom.childNodes.pop();
+            oldChildNodes.pop();
           }
         }
         max--;
       }
     }
-    oldVDom.childNodes.forEach(v => {
+    oldChildNodes.forEach(v => {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);
       this.cleanVDom(v);
@@ -380,14 +434,6 @@ export class Renderer {
   }
 
   private createVDOMIntoView(fragment: Fragment, host: VElement) {
-    if (!fragment.changed) {
-      return;
-    }
-    if (!fragment.dirty) {
-
-    }
-
-    fragment.rendered();
     if (!this.outputMode) {
       this.fragmentAndVDomMapping.set(fragment, host);
     }
@@ -518,28 +564,19 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else {
-        let vDom: VElement;
-        const isDirty = item.dirty;
-        const isChanged = item.changed;
-        console.log(item)
+        const vDom = this.renderComponent(item);
+
         if (!this.outputMode) {
           this.componentHierarchyMapping.set(item, fragment);
-          vDom = item.render(this.outputMode, this.nativeEventManager);
           this.vDomPositionMapping.set(vDom, {
             fragment,
             startIndex: i,
             endIndex: i + 1
           })
-        } else {
-          vDom = item.render(this.outputMode);
         }
 
         i++;
         children.push(vDom);
-
-        if (!isChanged) {
-          return;
-        }
 
         if (item instanceof LeafComponent) {
           if (!this.outputMode && vDom.childNodes.length) {
@@ -554,7 +591,8 @@ export class Renderer {
               view.styles.set('userSelect', 'text');
             }
           }
-          this.createVDOMIntoView(item.slot, view);
+          this.renderFragment(item.slot, view);
+          this.pureSlotDataMap.set(item.slot, view.toJSON());
         } else if (item instanceof BranchComponent) {
           if (!this.outputMode) {
             vDom.styles.set('userSelect', 'none');
@@ -565,7 +603,8 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDOMIntoView(slot, parent);
+            this.renderFragment(slot, parent);
+            this.pureSlotDataMap.set(slot, parent.toJSON());
           });
         } else if (item instanceof BackboneComponent) {
           if (!this.outputMode) {
@@ -577,7 +616,8 @@ export class Renderer {
               parent.styles.set('userSelect', 'text');
               this.fragmentHierarchyMapping.set(slot, item);
             }
-            this.createVDOMIntoView(slot, parent);
+            this.renderFragment(slot, parent);
+            this.pureSlotDataMap.set(slot, parent.toJSON());
           }
         }
       }

@@ -88,7 +88,7 @@ export class Fragment extends AbstractData {
    * @param startIndex
    * @param endIndex
    */
-  sliceContents(startIndex: number, endIndex?: number) {
+  sliceContents(startIndex = 0, endIndex?: number) {
     return this.contents.slice(startIndex, endIndex);
   }
 
