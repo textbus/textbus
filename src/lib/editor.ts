@@ -107,10 +107,10 @@ export class Editor implements FileUploader {
   private _readonly = false;
 
   private readonly container: HTMLElement;
+  private readonly rootFragment = new Fragment();
 
   private renderer = new Renderer();
   private selection: TBSelection;
-  private rootFragment: Fragment;
   private workbench: Workbench;
   private viewer: Viewer;
   private parser: Parser;
@@ -210,7 +210,7 @@ export class Editor implements FileUploader {
           } else {
             const html = this.getHTMLBySourceCodeMode();
             this.writeContents(html).then(dom => {
-              this.rootFragment = this.parser.parse(dom);
+              this.rootFragment.from(this.parser.parse(dom));
               this.render();
               this.history.recordSnapshot(this.rootFragment, this.selection);
               this.listenUserWriteEvent();
@@ -225,7 +225,7 @@ export class Editor implements FileUploader {
         this.invokeViewUpdatedHooks();
       }),
       zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
-        this.rootFragment = this.parser.parse(result[0]);
+        this.rootFragment.from(this.parser.parse(result[0]));
         this.render();
         this.nativeSelection = this.viewer.contentDocument.getSelection();
         this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
@@ -259,7 +259,7 @@ export class Editor implements FileUploader {
     return new Promise((resolve, reject) => {
       this.run(() => {
         this.writeContents(html).then(el => {
-          this.rootFragment = this.parser.parse(el);
+          this.rootFragment.from(this.parser.parse(el));
           this.render();
           resolve();
         }).catch(reject);
