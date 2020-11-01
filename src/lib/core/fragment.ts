@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { Contents } from './contents';
 import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
@@ -10,7 +10,7 @@ import {
   BlockFormatParams
 } from './formatter';
 import { FormatMap } from './format-map';
-import { VElement } from './element';
+import { AbstractData } from './abstract-data';
 
 /**
  * 应用样式的可选参数。
@@ -25,17 +25,7 @@ export interface ApplyFormatOptions {
 /**
  * TextBus 抽象数据类
  */
-export class Fragment {
-  onChange: Observable<void>;
-
-  get dirty() {
-    return this._dirty;
-  }
-
-  get changed() {
-    return this._changed;
-  }
-
+export class Fragment extends AbstractData {
   /**
    * fragment 内容的长度
    */
@@ -43,31 +33,13 @@ export class Fragment {
     return this.contents.length;
   }
 
-  private _dirty = true;
-  private _changed = true;
   private contents = new Contents();
   private formatMap = new FormatMap();
-  private changeEvent = new Subject<void>();
 
   private eventMap = new Map<Component, Subscription>();
 
   constructor() {
-    this.onChange = this.changeEvent.asObservable();
-  }
-
-  markAsDirtied() {
-    this._dirty = true;
-    this.markAsChanged();
-  }
-
-  markAsChanged() {
-    this._changed = true;
-    this.changeEvent.next();
-  }
-
-  rendered() {
-    this._changed = false;
-    this._dirty = false;
+    super();
   }
 
   /**

@@ -269,7 +269,7 @@ export class Renderer {
 
   private diffAndUpdate(host: HTMLElement, vDom: VElement, oldVDom: VElement) {
     console.log(vDom === oldVDom)
-    if(oldVDom === vDom) {
+    if (oldVDom === vDom) {
       return
     } else {
       console.log(vDom, oldVDom)
@@ -380,6 +380,13 @@ export class Renderer {
   }
 
   private createVDOMIntoView(fragment: Fragment, host: VElement) {
+    if (!fragment.changed) {
+      return;
+    }
+    if (!fragment.dirty) {
+
+    }
+
     fragment.rendered();
     if (!this.outputMode) {
       this.fragmentAndVDomMapping.set(fragment, host);
@@ -517,14 +524,14 @@ export class Renderer {
         console.log(item)
         if (!this.outputMode) {
           this.componentHierarchyMapping.set(item, fragment);
-          vDom = item.getView(this.outputMode, this.nativeEventManager);
+          vDom = item.render(this.outputMode, this.nativeEventManager);
           this.vDomPositionMapping.set(vDom, {
             fragment,
             startIndex: i,
             endIndex: i + 1
           })
         } else {
-          vDom = item.getView(this.outputMode);
+          vDom = item.render(this.outputMode);
         }
 
         i++;

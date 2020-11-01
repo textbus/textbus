@@ -1,3 +1,4 @@
+export * from './abstract-data';
 export * from './commander';
 export * from './component';
 export * from './contents';
