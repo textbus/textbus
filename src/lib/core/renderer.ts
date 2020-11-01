@@ -120,7 +120,7 @@ export class Renderer {
     } else {
       this.renderingNewTree(host, vDom);
     }
-    this.oldVDom = vDom;
+    this.oldVDom = vDom.clone();
     this.setupVDomHierarchy(vDom);
     return vDom;
   }
@@ -254,63 +254,6 @@ export class Renderer {
     } while (!stopped && by);
   }
 
-  private renderFragment(fragment: Fragment, host: VElement): VElement {
-    if (!fragment.changed) {
-      if (!fragment.dirty) {
-        fragment.sliceContents().forEach(i => {
-          if (i instanceof Component) {
-            this.renderComponent(i);
-          }
-        })
-      }
-      return host;
-    }
-
-    const cachedHostData = this.pureSlotDataMap.get(fragment);
-
-    if (cachedHostData) {
-      // 因 Formatter 有可能会修改插槽的数据，所以复用的时候，为了防卫脏数据，需要从缓存重新获取原来生成的插槽数据，并覆盖
-      host.tagName = cachedHostData.tagName;
-      host.attrs.clear();
-      Object.keys(cachedHostData.attrs).forEach(key => {
-        host.attrs.set(key, cachedHostData.attrs[key])
-      })
-      host.styles.clear();
-      Object.keys(cachedHostData.styles).forEach(key => {
-        host.styles.set(key, cachedHostData.styles[key]);
-      })
-      host.classes.length = 0;
-      host.classes.push(...cachedHostData.classes);
-      host.childNodes.length = 0;
-    }
-
-    const vDom = this.createVDOMIntoView(fragment, host);
-    fragment.rendered();
-    return vDom;
-  }
-
-  private renderComponent(component: Component): VElement {
-    if (component.changed) {
-      if (component.dirty) {
-        if (this.outputMode) {
-          return component.render(this.outputMode);
-        }
-        const vDom = component.render(this.outputMode, this.nativeEventManager);
-        this.componentVDomMap.set(component, vDom);
-        component.rendered();
-        return vDom;
-      }
-    }
-    if (component instanceof DivisionComponent) {
-      this.renderFragment(component.slot, component.getSlotView());
-    } else if (component instanceof BranchComponent) {
-      component.forEach(f => this.renderFragment(f, component.getSlotView(f)));
-    } else if (component instanceof BackboneComponent) {
-      Array.from(component).forEach(f => this.renderFragment(f, component.getSlotView(f)));
-    }
-    return this.componentVDomMap.get(component);
-  }
-
   private getParentVDom(child: VElement | VTextNode) {
     return this.vDomHierarchyMapping.get(child);
   }
@@ -408,6 +351,63 @@ export class Renderer {
         host.appendChild(child);
       }
     })
+  }
+
+  private renderFragment(fragment: Fragment, host: VElement): VElement {
+    if (!fragment.changed) {
+      if (!fragment.dirty) {
+        fragment.sliceContents().forEach(i => {
+          if (i instanceof Component) {
+            this.renderComponent(i);
+          }
+        })
+      }
+      return host;
+    }
+
+    const cachedHostData = this.pureSlotDataMap.get(fragment);
+
+    if (cachedHostData) {
+      // 因 Formatter 有可能会修改插槽的数据，所以复用的时候，为了防卫脏数据，需要从缓存重新获取原来生成的插槽数据，并覆盖
+      host.tagName = cachedHostData.tagName;
+      host.attrs.clear();
+      Object.keys(cachedHostData.attrs).forEach(key => {
+        host.attrs.set(key, cachedHostData.attrs[key])
+      })
+      host.styles.clear();
+      Object.keys(cachedHostData.styles).forEach(key => {
+        host.styles.set(key, cachedHostData.styles[key]);
+      })
+      host.classes.length = 0;
+      host.classes.push(...cachedHostData.classes);
+      host.childNodes.length = 0;
+    }
+
+    const vDom = this.createVDOMIntoView(fragment, host);
+    fragment.rendered();
+    return vDom;
+  }
+
+  private renderComponent(component: Component): VElement {
+    if (component.changed) {
+      if (component.dirty) {
+        if (this.outputMode) {
+          return component.render(this.outputMode);
+        }
+        const vDom = component.render(this.outputMode, this.nativeEventManager);
+        this.componentVDomMap.set(component, vDom);
+        component.rendered();
+        return vDom;
+      }
+    }
+    if (component instanceof DivisionComponent) {
+      this.renderFragment(component.slot, component.getSlotView());
+    } else if (component instanceof BranchComponent) {
+      component.forEach(f => this.renderFragment(f, component.getSlotView(f)));
+    } else if (component instanceof BackboneComponent) {
+      Array.from(component).forEach(f => this.renderFragment(f, component.getSlotView(f)));
+    }
+    return this.componentVDomMap.get(component);
   }
 
   private cleanVDom(vDom: VElement | VTextNode) {

@@ -77,7 +77,7 @@ export abstract class DivisionComponent extends Component {
   protected constructor(tagName: string) {
     super(tagName);
     this.slot.onChange.subscribe(() => {
-      this.markAsChanged();
+      this.slot.dirty ? this.markAsDirtied() : this.markAsChanged();
     })
   }
 
@@ -102,12 +102,8 @@ export abstract class BranchComponent extends Component {
   }
 
   unshift(...fragments: Fragment[]) {
-    fragments.forEach(f => {
-      this.eventMap.set(f, f.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
-    })
     this.slots.unshift(...fragments);
+    this.listenChangeEvent(fragments);
   }
 
   getSlotAtIndex(index: number) {
@@ -131,12 +127,8 @@ export abstract class BranchComponent extends Component {
   }
 
   push(...fragments: Fragment[]) {
-    fragments.forEach(f => {
-      this.eventMap.set(f, f.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
-    })
     this.slots.push(...fragments);
+    this.listenChangeEvent(fragments);
   }
 
   pop() {
@@ -180,6 +172,20 @@ export abstract class BranchComponent extends Component {
   getSlotView(slot: Fragment): VElement {
     return this.viewMap.get(slot);
   }
+
+  private listenChangeEvent(fragments: Fragment[]) {
+    fragments.forEach(f => {
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        for (const item of this.slots) {
+          if (item.dirty) {
+            this.markAsDirtied();
+            return;
+          }
+        }
+        this.markAsChanged();
+      }))
+    })
+  }
 }
 
 /**
@@ -222,6 +228,12 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   push(...fragments: Fragment[]) {
     fragments.forEach(f => {
       this.eventMap.set(f, f.onChange.subscribe(() => {
+        for (const item of this.slots) {
+          if (item.dirty) {
+            this.markAsDirtied();
+            return;
+          }
+        }
         this.markAsChanged();
       }))
     })

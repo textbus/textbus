@@ -17,6 +17,10 @@ export interface VElementLiteral {
 export class VTextNode {
   constructor(public readonly textContent: string = '') {
   }
+
+  clone() {
+    return new VTextNode(this.textContent);
+  }
 }
 
 /**
@@ -54,6 +58,23 @@ export class VElement {
         this.childNodes.push(...options.childNodes);
       }
     }
+  }
+
+  clone(): VElement {
+    const attrs: { [key: string]: boolean | string | number } = {};
+    const styles: { [key: string]: string | number } = {};
+    this.attrs.forEach(((value, key) => {
+      attrs[key] = value
+    }));
+    this.styles.forEach((value, key) => {
+      styles[key] = value;
+    })
+    return new VElement(this.tagName, {
+      classes: [...this.classes],
+      attrs,
+      styles,
+      childNodes: this.childNodes.map(i => i.clone())
+    })
   }
 
   /**
