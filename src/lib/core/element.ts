@@ -11,11 +11,81 @@ export interface VElementLiteral {
   childNodes: Array<VElementLiteral | string>;
 }
 
+
+function equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
+  if (left === right || !left === true && !right === true) {
+    return true;
+  }
+  if (!left !== !right || left.size !== right.size) {
+    return false;
+  }
+  return Array.from(left.keys()).reduce((v, key) => {
+    return v && left.get(key) === right.get(key);
+  }, true);
+}
+
+export const vNodeNextAccessToken = Symbol('NextNodeAccessToken');
+
+export abstract class VNode {
+  [vNodeNextAccessToken]: VNode | null;
+
+  protected constructor() {
+    this[vNodeNextAccessToken] = this;
+  }
+
+  /**
+   * 判断一个虚拟 DOM 节点是否和自己相等。
+   * @param vNode
+   */
+  equal(vNode: VNode): boolean {
+    if (vNode === this) {
+      return true;
+    }
+    if (!vNode) {
+      return false;
+    }
+    const left = vNode;
+    const right = this;
+
+    if (left instanceof VElement) {
+      if (right instanceof VElement) {
+        return left.tagName == right.tagName &&
+          equalMap(left.attrs, right.attrs) &&
+          equalMap(left.styles, right.styles) &&
+          equalClasses(left.classes, right.classes);
+      }
+      return false
+    }
+
+    if (right instanceof VTextNode) {
+      return (left as VTextNode).textContent === right.textContent;
+    }
+    return false;
+  }
+}
+
+function equalClasses(left: string[], right: string[]) {
+  if (left === right) {
+    return true;
+  }
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (const k of left) {
+    if (!right.includes(k)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * 虚拟文本节点。
  */
-export class VTextNode {
+export class VTextNode extends VNode {
   constructor(public readonly textContent: string = '') {
+    super()
   }
 
   clone() {
@@ -36,7 +106,7 @@ export interface VElementOption {
 /**
  * 虚拟 DOM 节点
  */
-export class VElement {
+export class VElement extends VNode {
   readonly events = new EventEmitter();
   readonly childNodes: Array<VElement | VTextNode> = [];
   readonly attrs = new Map<string, string | number | boolean>();
@@ -44,6 +114,7 @@ export class VElement {
   readonly classes: string[] = [];
 
   constructor(public tagName: string, options?: VElementOption) {
+    super();
     if (options) {
       if (options.attrs) {
         Object.keys(options.attrs).forEach(key => this.attrs.set(key, options.attrs[key]));
@@ -87,25 +158,6 @@ export class VElement {
   }
 
   /**
-   * 判断一个虚拟 DOM 节点是否和自己相等。
-   * @param vElement
-   */
-  equal(vElement: VElement) {
-    if (vElement === this) {
-      return true;
-    }
-    if (!vElement) {
-      return false;
-    }
-    const left = vElement;
-    const right = this;
-    return left.tagName == right.tagName &&
-      VElement.equalMap(left.attrs, right.attrs) &&
-      VElement.equalMap(left.styles, right.styles) &&
-      VElement.equalClasses(left.classes, right.classes);
-  }
-
-  /**
    * 把当前虚拟 DOM 节点转换为 JSON 字面量。
    */
   toJSON(): VElementLiteral {
@@ -129,33 +181,5 @@ export class VElement {
       obj[key] = value
     });
     return obj;
-  }
-
-  private static equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
-    if (left === right || !left === true && !right === true) {
-      return true;
-    }
-    if (!left !== !right || left.size !== right.size) {
-      return false;
-    }
-    return Array.from(left.keys()).reduce((v, key) => {
-      return v && left.get(key) === right.get(key);
-    }, true);
-  }
-
-  private static equalClasses(left: string[], right: string[]) {
-    if (left === right) {
-      return true;
-    }
-    if (left.length !== right.length) {
-      return false;
-    }
-
-    for (const k of left) {
-      if (!right.includes(k)) {
-        return false;
-      }
-    }
-    return true;
   }
 }

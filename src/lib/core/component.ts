@@ -77,7 +77,7 @@ export abstract class DivisionComponent extends Component {
   protected constructor(tagName: string) {
     super(tagName);
     this.slot.onChange.subscribe(() => {
-      this.slot.dirty ? this.markAsDirtied() : this.markAsChanged();
+      this.markAsChanged();
     })
   }
 
@@ -176,12 +176,6 @@ export abstract class BranchComponent extends Component {
   private listenChangeEvent(fragments: Fragment[]) {
     fragments.forEach(f => {
       this.eventMap.set(f, f.onChange.subscribe(() => {
-        for (const item of this.slots) {
-          if (item.dirty) {
-            this.markAsDirtied();
-            return;
-          }
-        }
         this.markAsChanged();
       }))
     })
@@ -266,12 +260,6 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   protected push(...fragments: Fragment[]) {
     fragments.forEach(f => {
       this.eventMap.set(f, f.onChange.subscribe(() => {
-        for (const item of this.slots) {
-          if (item.dirty) {
-            this.markAsDirtied();
-            return;
-          }
-        }
         this.markAsChanged();
       }))
     })
