@@ -33,6 +33,8 @@ export abstract class VNode {
     this[vNodeNextAccessToken] = this;
   }
 
+  abstract clone(): any;
+
   /**
    * 判断一个虚拟 DOM 节点是否和自己相等。
    * @param vNode

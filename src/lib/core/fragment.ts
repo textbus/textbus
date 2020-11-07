@@ -55,7 +55,25 @@ export class Fragment extends Marker {
         }));
       }
     })
-    this.formatMap = source.formatMap;
+    this.formatMap = new FormatMap();
+    const self = this;
+    Array.from(source.formatMap.keys()).forEach(token => {
+      this.formatMap.set(token, [...source.formatMap.get(token).map(f => {
+        return token instanceof InlineFormatter ? {
+          ...f,
+          abstractData: f.abstractData?.clone()
+        } : {
+          get startIndex() {
+            return 0;
+          },
+          get endIndex() {
+            return self.contentLength;
+          },
+          state: f.state,
+          abstractData: f.abstractData
+        }
+      })])
+    });
     source.clean();
     this.markAsDirtied();
   }
@@ -392,12 +410,10 @@ export class Fragment extends Marker {
    */
   apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
   apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
-  apply(token: InlineFormatter | BlockFormatter,
-        params: InlineFormatParams | BlockFormatParams,
-        options: ApplyFormatOptions = {
-          important: true,
-          coverChild: true
-        }) {
+  apply(token: any, params: any, options: ApplyFormatOptions = {
+    important: true,
+    coverChild: true
+  }) {
     const {coverChild, important} = options;
     if (token instanceof BlockFormatter) {
       let self = this;
@@ -410,9 +426,10 @@ export class Fragment extends Marker {
           return self.contentLength;
         }
       }, important);
+      this.markAsDirtied();
       return;
     }
-    const formatRange = params as InlineFormatParams;
+    const formatRange = params;
     const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
     let index = 0;
     const cacheFormats: Array<{ token: InlineFormatter, params: InlineFormatParams }> = [];

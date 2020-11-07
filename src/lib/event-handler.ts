@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import {
   BranchComponent,
   DivisionComponent,
@@ -14,8 +15,13 @@ import { BrComponent } from './components/_api';
 import { Input } from './viewer/input';
 
 export class EventHandler {
+  private sub: Subscription;
+
   listen(vElement: VElement) {
-    vElement.events.subscribe(event => {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+    this.sub = vElement.events.subscribe(event => {
       switch (event.type) {
         case EventType.onDelete:
           this.onDelete(event);
@@ -40,14 +46,7 @@ export class EventHandler {
     const fragmentSnapshot = event.data.fragmentSnapshot.clone() as Fragment;
     const input = event.data.input as Input;
 
-    commonAncestorFragment.cut(0);
-    fragmentSnapshot.sliceContents(0).forEach(item => commonAncestorFragment.append(item));
-    fragmentSnapshot.getFormatKeys().forEach(token => {
-      fragmentSnapshot.getFormatRanges(token).forEach(f => commonAncestorFragment.apply(token, f, {
-        important: true,
-        coverChild: false
-      }));
-    })
+    commonAncestorFragment.from(fragmentSnapshot);
 
     let index = 0;
     input.value.replace(/\n+|[^\n]+/g, (str) => {

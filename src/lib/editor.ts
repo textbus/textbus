@@ -207,12 +207,10 @@ export class Editor implements FileUploader {
             this.sourceCodeComponent.slot.clean();
             this.sourceCodeComponent.slot.append(pretty(html));
             this.rootFragment.append(this.sourceCodeComponent);
-            this.render();
           } else {
             const html = this.getHTMLBySourceCodeMode();
             this.writeContents(html).then(dom => {
               this.rootFragment.from(this.parser.parse(dom));
-              this.render();
               this.history.recordSnapshot(this.rootFragment, this.selection);
               this.listenUserWriteEvent();
             })
@@ -260,7 +258,6 @@ export class Editor implements FileUploader {
       this.run(() => {
         this.writeContents(html).then(el => {
           this.rootFragment.from(this.parser.parse(el));
-          this.render();
           resolve();
         }).catch(reject);
       })
@@ -521,7 +518,6 @@ export class Editor implements FileUploader {
           });
           return isNext;
         })
-
         this.addRenderedTask(() => {
           this.selection.restore();
           this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
@@ -654,6 +650,7 @@ export class Editor implements FileUploader {
         rootFragment: this.rootFragment
       }, params);
       this.addRenderedTask(() => {
+        this.recordSnapshotFromEditingBefore();
         selection.restore();
         this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
       })

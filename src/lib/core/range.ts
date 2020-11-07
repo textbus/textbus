@@ -60,18 +60,18 @@ export class TBRange {
 
   constructor(public nativeRange: Range,
               private renderer: Renderer) {
-    if ([1, 3].includes(nativeRange.commonAncestorContainer?.nodeType) &&
-      renderer.getPositionByNode(nativeRange.startContainer) &&
-      renderer.getPositionByNode(nativeRange.endContainer)) {
-      this.startFragment = renderer.getPositionByNode(nativeRange.startContainer).fragment;
-      this.endFragment = renderer.getPositionByNode(nativeRange.endContainer).fragment;
+    const startPosition = renderer.getPositionByNode(nativeRange.startContainer);
+    const endPosition = renderer.getPositionByNode(nativeRange.endContainer);
+    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) && startPosition && endPosition) {
+      this.startFragment = startPosition.fragment;
+      this.endFragment = endPosition.fragment;
       if (nativeRange.startContainer.nodeType === Node.TEXT_NODE) {
-        this.startIndex = renderer.getPositionByNode(nativeRange.startContainer).startIndex + nativeRange.startOffset;
+        this.startIndex = startPosition.startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
         this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset, this.startFragment);
       }
       if (nativeRange.endContainer.nodeType === Node.TEXT_NODE) {
-        this.endIndex = renderer.getPositionByNode(nativeRange.endContainer).startIndex + nativeRange.endOffset;
+        this.endIndex = endPosition.startIndex + nativeRange.endOffset;
       } else if (nativeRange.endContainer.nodeType === Node.ELEMENT_NODE) {
         this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset, this.endFragment);
       }
