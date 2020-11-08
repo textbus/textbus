@@ -152,6 +152,9 @@ export abstract class BranchComponent extends Component {
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     })
+    if (items) {
+      this.listenChangeEvent(items);
+    }
     this.markAsDirtied();
     return deletedSlots;
   }

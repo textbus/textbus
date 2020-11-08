@@ -424,7 +424,23 @@ export class Renderer {
     }
     fragment.sliceContents().forEach(content => {
       if (content instanceof Component && content.changed) {
-        this.rendingComponent(content);
+        const isDirty = content.dirty;
+        const oldVDom = this.componentVDomCacheMap.get(content);
+        const oldNativeNode = this.getNativeNodeByVDom(oldVDom);
+        const newVDom = this.rendingComponent(content);
+        if (isDirty) {
+          const newNativeNode = this.diff(newVDom, oldVDom);
+          this.componentVDomCacheMap.set(content, newVDom);
+          this.NVMappingTable.set(newVDom, newNativeNode);
+          const parent = this.vDomHierarchyMapping.get(oldVDom);
+
+          const index = parent.childNodes.indexOf(oldVDom);
+          parent.childNodes.splice(index, 1, newVDom);
+          // Object.assign(oldVDom, newVDom);
+          if (newNativeNode !== oldNativeNode) {
+            oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
+          }
+        }
       }
     })
     return host;
