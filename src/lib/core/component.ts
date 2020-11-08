@@ -104,6 +104,7 @@ export abstract class BranchComponent extends Component {
   unshift(...fragments: Fragment[]) {
     this.slots.unshift(...fragments);
     this.listenChangeEvent(fragments);
+    this.markAsDirtied();
   }
 
   getSlotAtIndex(index: number) {
@@ -129,6 +130,8 @@ export abstract class BranchComponent extends Component {
   push(...fragments: Fragment[]) {
     this.slots.push(...fragments);
     this.listenChangeEvent(fragments);
+
+    this.markAsDirtied();
   }
 
   pop() {
@@ -137,6 +140,8 @@ export abstract class BranchComponent extends Component {
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     }
+
+    this.markAsDirtied();
     return f;
   }
 
@@ -147,6 +152,7 @@ export abstract class BranchComponent extends Component {
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     })
+    this.markAsDirtied();
     return deletedSlots;
   }
 
@@ -264,6 +270,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
       }))
     })
     this.slots.push(...fragments);
+    this.markAsDirtied();
   }
 
   protected pop() {
@@ -272,6 +279,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     }
+    this.markAsDirtied();
     return f;
   }
 
@@ -283,6 +291,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     })
+    this.markAsDirtied();
     return deletedSlots;
   }
 
