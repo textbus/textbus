@@ -143,18 +143,19 @@ export class Renderer {
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
+    // this.outputMode = true;
     if (fragment.changed) {
       const dirty = fragment.dirty;
       const vDom = fragment.dirty ? new VElement('body') : this.oldVDom;
       const root = this.rendingFragment(fragment, vDom);
 
       if (dirty) {
-        const nativeNode = this.patch(vDom);
+        const nativeNode = this.patch(root);
         if (nativeNode !== host) {
           host.parentNode.replaceChild(nativeNode, host);
         }
       }
-      this.oldVDom = vDom;
+      this.oldVDom = root;
     }
     this.setupVDomHierarchy(this.oldVDom);
     return this.oldVDom;
@@ -283,6 +284,7 @@ export class Renderer {
         data
       });
       by.events.emit(event);
+      console.log(this.NVMappingTable.get(by))
       stopped = event.stopped;
       if (!stopped) {
         by = this.vDomHierarchyMapping.get(by);
