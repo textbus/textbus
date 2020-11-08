@@ -125,25 +125,37 @@ class NativeElementMappingTable {
 }
 
 export class Renderer {
+  // 是否是输出模式
   private outputMode = false;
-
+  // 记录虚拟节点的位置
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
+  // 记录组件在哪一个 fragment 内
   private componentHierarchyMapping = new WeakMap<Component, Fragment>();
+  // 记录 fragment 对应的虚拟节点
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
+  // 记录虚拟节点的父级
   private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
+  // 记录 fragment 属于哪一个组件
   private fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent | BackboneComponent>();
+  // 记录已渲染的虚拟节点
   private rendererVNodeMap = new WeakMap<VNode, true>();
-
+  // 记录虚拟节点和真实 DOM 节点的映射关系
   private NVMappingTable = new NativeElementMappingTable();
+  // 记录干净的组件插槽虚拟节点
   private pureSlotCacheMap = new WeakMap<Fragment, VElement>();
+  // 记录已渲染的组件
   private componentVDomCacheMap = new WeakMap<Component, VElement>();
+  // 记录输出模式的已渲染组件
+  private componentOutputModeVDomCacheMap = new WeakMap<Component, VElement>();
+
   private eventCache = new EventCache(this);
   private nativeEventManager = new NativeEventManager(this.eventCache);
 
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
-    // this.outputMode = true;
+    this.outputMode = false;
+    console.time()
     if (fragment.changed) {
       const dirty = fragment.dirty;
       const vDom = fragment.dirty ? new VElement('body') : this.oldVDom;
@@ -158,6 +170,7 @@ export class Renderer {
       this.oldVDom = root;
     }
     this.setupVDomHierarchy(this.oldVDom);
+    console.timeEnd()
     return this.oldVDom;
   }
 
@@ -284,7 +297,6 @@ export class Renderer {
         data
       });
       by.events.emit(event);
-      console.log(this.NVMappingTable.get(by))
       stopped = event.stopped;
       if (!stopped) {
         by = this.vDomHierarchyMapping.get(by);
@@ -396,9 +408,9 @@ export class Renderer {
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
       });
-      fragment.rendered();
       const vDom = root || host;
       if (!this.outputMode) {
+        fragment.rendered();
         this.fragmentAndVDomMapping.set(fragment, vDom);
         elements.forEach(el => {
           this.vDomPositionMapping.set(el, {
@@ -420,8 +432,14 @@ export class Renderer {
 
   private rendingComponent(component: Component): VElement {
     if (component.dirty) {
-      const vElement = component.render(this.outputMode);
-      this.componentVDomCacheMap.set(component, vElement);
+      let vElement: VElement;
+      if (this.outputMode) {
+        vElement = component.render(this.outputMode);
+      } else {
+        vElement = component.render(this.outputMode, this.nativeEventManager);
+        this.componentVDomCacheMap.set(component, vElement);
+        component.rendered();
+      }
       if (component instanceof DivisionComponent) {
         this.rendingSlot(component.slot, component.getSlotView(), component);
       } else if (component instanceof BranchComponent) {
@@ -433,7 +451,6 @@ export class Renderer {
           this.rendingSlot(fragment, component.getSlotView(fragment), component);
         })
       }
-      component.rendered();
       return vElement;
     }
     if (component instanceof DivisionComponent) {
@@ -453,11 +470,16 @@ export class Renderer {
         }
       })
     }
+    if (this.outputMode) {
+      return this.componentOutputModeVDomCacheMap.get(component);
+    }
     component.rendered();
     return this.componentVDomCacheMap.get(component);
   }
 
-  private rendingSlot(fragment: Fragment, view: VElement, component: DivisionComponent | BranchComponent | BackboneComponent) {
+  private rendingSlot(fragment: Fragment,
+                      view: VElement,
+                      component: DivisionComponent | BranchComponent | BackboneComponent) {
     this.fragmentHierarchyMapping.set(fragment, component);
     this.pureSlotCacheMap.set(fragment, view.clone());
     this.rendingFragment(fragment, view, true);
@@ -669,22 +691,6 @@ export class Renderer {
     this.NVMappingTable.set(el, vDom);
     this.eventCache.bindNativeEvent(el);
     return el;
-  }
-
-  private resetVDom(source: VElement, target: VElement): VElement {
-    target.tagName = source.tagName;
-    target.childNodes.length = 0;
-    target.classes.length = 0;
-    target.classes.push(...source.classes);
-    target.styles.clear();
-    source.styles.forEach((value, key) => {
-      target.styles.set(key, value);
-    });
-    target.attrs.clear();
-    source.attrs.forEach((value, key) => {
-      target.attrs.set(key, value);
-    });
-    return target;
   }
 
   /**

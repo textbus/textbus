@@ -41,11 +41,7 @@ const editor = createEditor('#editor', {
 });
 
 document.getElementById('btn').addEventListener('click', () => {
-  editor.toolbar.tools.forEach(tool => {
-    if (tool.config === fontSizeToolConfig) {
-      editor.invoke(tool, '72px');
-    }
-  })
+  (editor as any).rootFragment.sliceContents()[1].slot.append('333')
 })
 
 window['editor'] = editor;
