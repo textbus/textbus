@@ -134,12 +134,14 @@ export class VElement extends VNode {
     this.styles.forEach((value, key) => {
       styles[key] = value;
     })
-    return new VElement(this.tagName, {
+    const el = new VElement(this.tagName, {
       classes: [...this.classes],
       attrs,
       styles,
       childNodes: this.childNodes.map(i => i.clone())
-    })
+    });
+    (el as { events: EventEmitter }).events = this.events;
+    return el;
   }
 
   /**
