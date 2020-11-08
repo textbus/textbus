@@ -24,15 +24,7 @@ function equalMap(left: Map<string, string | number | boolean>, right: Map<strin
   }, true);
 }
 
-export const vNodeNextAccessToken = Symbol('NextNodeAccessToken');
-
 export abstract class VNode {
-  [vNodeNextAccessToken]: VNode | null;
-
-  protected constructor() {
-    this[vNodeNextAccessToken] = this;
-  }
-
   abstract clone(): any;
 
   /**
