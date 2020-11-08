@@ -456,17 +456,23 @@ export class Renderer {
     if (component instanceof DivisionComponent) {
       if (component.slot.dirty) {
         this.reuseSlot(component.slot, component.getSlotView());
+      } else if (component.slot.changed) {
+        this.rendingFragment(component.slot, component.getSlotView())
       }
     } else if (component instanceof BranchComponent) {
       component.forEach(fragment => {
         if (fragment.dirty) {
           this.reuseSlot(fragment, component.getSlotView(fragment));
+        } else if (fragment.changed) {
+          this.rendingFragment(fragment, component.getSlotView(fragment));
         }
       })
     } else if (component instanceof BackboneComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.dirty) {
           this.reuseSlot(fragment, component.getSlotView(fragment));
+        } else if (fragment.changed) {
+          this.rendingFragment(fragment, component.getSlotView(fragment));
         }
       })
     }
