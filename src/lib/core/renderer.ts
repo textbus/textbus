@@ -149,7 +149,7 @@ export class Renderer {
       const root = this.rendingFragment(fragment, vDom);
 
       if (dirty) {
-        const nativeNode = this.oldVDom ? this.diff(root, vDom) : this.patch(vDom);
+        const nativeNode = this.patch(vDom);
         if (nativeNode !== host) {
           host.parentNode.replaceChild(nativeNode, host);
         }
@@ -421,59 +421,56 @@ export class Renderer {
       const vElement = component.render(this.outputMode);
       this.componentVDomCacheMap.set(component, vElement);
       if (component instanceof DivisionComponent) {
-        const view = component.getSlotView();
-        this.fragmentHierarchyMapping.set(component.slot, component);
-        this.pureSlotCacheMap.set(component.slot, view.clone());
-        this.rendingFragment(component.slot, view, true);
+        this.rendingSlot(component.slot, component.getSlotView(), component);
       } else if (component instanceof BranchComponent) {
         component.forEach(fragment => {
-          const view = component.getSlotView(fragment);
-          this.fragmentHierarchyMapping.set(fragment, component);
-          this.pureSlotCacheMap.set(fragment, view.clone());
-          this.rendingFragment(fragment, view, true);
+          this.rendingSlot(fragment, component.getSlotView(fragment), component);
         })
       } else if (component instanceof BackboneComponent) {
         Array.from(component).forEach(fragment => {
-          const view = component.getSlotView(fragment);
-          this.fragmentHierarchyMapping.set(fragment, component);
-          this.pureSlotCacheMap.set(fragment, view.clone());
-          this.rendingFragment(fragment, view, true);
+          this.rendingSlot(fragment, component.getSlotView(fragment), component);
         })
       }
       component.rendered();
       return vElement;
     }
     if (component instanceof DivisionComponent) {
-      const view = component.getSlotView();
       if (component.slot.dirty) {
-        const pureView = this.pureSlotCacheMap.get(component.slot);
-        const vDom = this.rendingFragment(component.slot, pureView.clone());
-        // 局部更新
-        const newNativeNode = this.diff(vDom, view);
-        const oldNativeNode = this.NVMappingTable.get(view);
-        if (newNativeNode !== oldNativeNode) {
-          oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
-        }
-        Object.assign(view, vDom);
+        this.reuseSlot(component.slot, component.getSlotView());
       }
     } else if (component instanceof BranchComponent) {
       component.forEach(fragment => {
-        const view = component.getSlotView(fragment);
         if (fragment.dirty) {
-          const pureView = this.pureSlotCacheMap.get(fragment);
-          this.resetVDom(pureView, view);
-          const vDom = this.rendingFragment(fragment, view);
-          // 局部更新
-          const oldNativeNode = this.NVMappingTable.get(view);
-          const newNativeNode = this.diff(vDom, view);
-          if (newNativeNode !== oldNativeNode) {
-            oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
-          }
+          this.reuseSlot(fragment, component.getSlotView(fragment));
+        }
+      })
+    } else if (component instanceof BackboneComponent) {
+      Array.from(component).forEach(fragment => {
+        if (fragment.dirty) {
+          this.reuseSlot(fragment, component.getSlotView(fragment));
         }
       })
     }
     component.rendered();
     return this.componentVDomCacheMap.get(component);
+  }
+
+  private rendingSlot(fragment: Fragment, view: VElement, component: DivisionComponent | BranchComponent | BackboneComponent) {
+    this.fragmentHierarchyMapping.set(fragment, component);
+    this.pureSlotCacheMap.set(fragment, view.clone());
+    this.rendingFragment(fragment, view, true);
+  }
+
+  private reuseSlot(slot: Fragment, view: VElement) {
+    const pureView = this.pureSlotCacheMap.get(slot);
+    const vDom = this.rendingFragment(slot, pureView.clone());
+    // 局部更新
+    const newNativeNode = this.diff(vDom, view);
+    const oldNativeNode = this.NVMappingTable.get(view);
+    if (newNativeNode !== oldNativeNode) {
+      oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
+    }
+    Object.assign(view, vDom);
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {
