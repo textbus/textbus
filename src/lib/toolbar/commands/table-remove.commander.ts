@@ -17,7 +17,7 @@ export class TableRemoveCommander implements Commander<null> {
       const p = firstRange.getPreviousPosition();
       const flag = p.fragment === position.fragment;
 
-      const parentFragment = renderer.getParentFragment(context);
+      const parentFragment = context.parentFragment;
       parentFragment.remove(parentFragment.indexOf(context), 1);
 
       if (flag) {

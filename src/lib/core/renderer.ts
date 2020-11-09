@@ -1,6 +1,12 @@
 import { Fragment } from './fragment';
-import { VElement, VElementLiteral, VNode, VTextNode } from './element';
-import { BackboneComponent, BranchComponent, Component, DivisionComponent } from './component';
+import { VElement, VElementLiteral, VTextNode } from './element';
+import {
+  BackboneComponent,
+  BranchComponent,
+  Component,
+  DivisionComponent,
+  parentFragmentAccessToken
+} from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 import { EventType, TBEvent } from './events';
 import { Constructor } from './constructor';
@@ -129,16 +135,10 @@ export class Renderer {
   private outputMode = false;
   // 记录虚拟节点的位置
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
-  // 记录组件在哪一个 fragment 内
-  private componentHierarchyMapping = new WeakMap<Component, Fragment>();
   // 记录 fragment 对应的虚拟节点
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
-  // 记录虚拟节点的父级
-  private vDomHierarchyMapping = new WeakMap<VTextNode | VElement, VElement>();
-  // 记录 fragment 属于哪一个组件
-  private fragmentHierarchyMapping = new WeakMap<Fragment, BranchComponent | DivisionComponent | BackboneComponent>();
   // 记录已渲染的虚拟节点
-  private rendererVNodeMap = new WeakMap<VNode, true>();
+  private rendererVNodeMap = new WeakMap<VTextNode | VElement, true>();
   // 记录虚拟节点和真实 DOM 节点的映射关系
   private NVMappingTable = new NativeElementMappingTable();
   // 记录干净的组件插槽虚拟节点
@@ -169,7 +169,6 @@ export class Renderer {
       }
       this.oldVDom = root;
     }
-    this.setupVDomHierarchy(this.oldVDom);
     console.timeEnd()
     return this.oldVDom;
   }
@@ -233,22 +232,6 @@ export class Renderer {
   }
 
   /**
-   * 获取 fragment 所属的 Component。
-   * @param fragment
-   */
-  getParentComponent(fragment: Fragment): DivisionComponent | BranchComponent | BackboneComponent {
-    return this.fragmentHierarchyMapping.get(fragment);
-  }
-
-  /**
-   * 获取 component 所在的 fragment。
-   * @param component
-   */
-  getParentFragment(component: Component): Fragment {
-    return this.componentHierarchyMapping.get(component);
-  }
-
-  /**
    * 获取 fragment 对应的虚拟 DOM 节点。
    * @param fragment
    */
@@ -263,7 +246,10 @@ export class Renderer {
    * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
    */
   getContext<T extends Component>(by: Fragment, context: Constructor<T>, filter?: (instance: T) => boolean): T {
-    const componentInstance = this.fragmentHierarchyMapping.get(by);
+    const componentInstance = by.parentComponent;
+    if (!componentInstance) {
+      return null;
+    }
     if (componentInstance instanceof context) {
       if (typeof filter === 'function') {
         if (filter(componentInstance)) {
@@ -273,7 +259,7 @@ export class Renderer {
         return componentInstance;
       }
     }
-    const parentFragment = this.componentHierarchyMapping.get(componentInstance);
+    const parentFragment = componentInstance.parentFragment;
     if (!parentFragment) {
       return null;
     }
@@ -298,8 +284,9 @@ export class Renderer {
       });
       by.events.emit(event);
       stopped = event.stopped;
+      console.log(by)
       if (!stopped) {
-        by = this.vDomHierarchyMapping.get(by);
+        by = by.parentNode;
       }
     } while (!stopped && by);
   }
@@ -313,15 +300,15 @@ export class Renderer {
     }
 
     let min = 0;
-    let max = vDom.childNodes.length - 1;
+    let max = vDom.children.length - 1;
     let minToMax = true;
 
     const childNodes: Node[] = [];
     while (min <= max) {
       if (minToMax) {
-        const current = vDom.childNodes[min];
-        if (current.equal(oldVDom.childNodes[0])) {
-          const oldFirst = oldVDom.childNodes.shift();
+        const current = vDom.children[min];
+        if (current.equal(oldVDom.children[0])) {
+          const oldFirst = oldVDom.removeFirstChild();
           if (!this.rendererVNodeMap.has(current)) {
             const el = this.NVMappingTable.get(oldFirst);
             childNodes[min] = el;
@@ -338,11 +325,11 @@ export class Renderer {
           minToMax = false;
         }
       } else {
-        const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
-        const current = vDom.childNodes[max];
+        const oldLast = oldVDom.children[oldVDom.children.length - 1];
+        const current = vDom.children[max];
 
         if (current.equal(oldLast)) {
-          const last = oldVDom.childNodes.pop();
+          const last = oldVDom.removeLastChild();
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
           this.eventCache.unbindNativeEvent(last);
@@ -359,14 +346,14 @@ export class Renderer {
           if (oldLast) {
             const el = this.NVMappingTable.get(oldLast);
             el.parentNode.removeChild(el);
-            oldVDom.childNodes.pop();
+            oldVDom.removeLastChild();
           }
         }
         max--;
       }
     }
     // 删除过期的节点
-    oldVDom.childNodes.forEach(v => {
+    oldVDom.children.forEach(v => {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);
     });
@@ -390,7 +377,7 @@ export class Renderer {
     const newNode = vDom instanceof VElement ? this.createElement(vDom) : this.createTextNode(vDom);
 
     if (vDom instanceof VElement) {
-      vDom.childNodes.forEach(child => {
+      vDom.children.forEach(child => {
         if (this.rendererVNodeMap.get(child)) {
           newNode.appendChild(this.getNativeNodeByVDom(child));
         } else {
@@ -434,10 +421,8 @@ export class Renderer {
           const newNativeNode = this.diff(newVDom, oldVDom);
           this.componentVDomCacheMap.set(content, newVDom);
           this.NVMappingTable.set(newVDom, newNativeNode);
-          const parent = this.vDomHierarchyMapping.get(oldVDom);
 
-          const index = parent.childNodes.indexOf(oldVDom);
-          parent.childNodes.splice(index, 1, newVDom);
+          oldVDom.parentNode.replaceChild(newVDom, oldVDom);
           // Object.assign(oldVDom, newVDom);
           if (newNativeNode !== oldNativeNode) {
             oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
@@ -460,20 +445,20 @@ export class Renderer {
           vElement.styles.set('userSelect', 'none');
           view.styles.set('userSelect', 'text');
         }
-        this.rendingSlot(component.slot, view, component);
+        this.rendingSlot(component.slot, view);
       } else if (component instanceof BranchComponent) {
         vElement.styles.set('userSelect', 'none');
         component.forEach(fragment => {
           const view = component.getSlotView(fragment);
           view.styles.set('userSelect', 'text');
-          this.rendingSlot(fragment, view, component);
+          this.rendingSlot(fragment, view);
         })
       } else if (component instanceof BackboneComponent) {
         vElement.styles.set('userSelect', 'none');
         Array.from(component).forEach(fragment => {
           const view = component.getSlotView(fragment);
           view.styles.set('userSelect', 'text');
-          this.rendingSlot(fragment, view, component);
+          this.rendingSlot(fragment, view);
         })
       }
       return vElement;
@@ -509,9 +494,7 @@ export class Renderer {
   }
 
   private rendingSlot(fragment: Fragment,
-                      view: VElement,
-                      component: DivisionComponent | BranchComponent | BackboneComponent) {
-    this.fragmentHierarchyMapping.set(fragment, component);
+                      view: VElement) {
     this.pureSlotCacheMap.set(fragment, view.clone());
     return this.rendingFragment(fragment, view, true);
   }
@@ -586,7 +569,6 @@ export class Renderer {
       } else {
         const vDom = this.rendingComponent(item);
         if (!this.outputMode) {
-          this.componentHierarchyMapping.set(item, fragment);
           if (!(item instanceof DivisionComponent) || item.getSlotView() !== vDom) {
             this.vDomPositionMapping.set(vDom, {
               fragment,
@@ -677,15 +659,6 @@ export class Renderer {
       }
     }
     return children;
-  }
-
-  private setupVDomHierarchy(vDom: VElement) {
-    vDom.childNodes.forEach(child => {
-      this.vDomHierarchyMapping.set(child, vDom);
-      if (child instanceof VElement) {
-        this.setupVDomHierarchy(child);
-      }
-    })
   }
 
   private createElement(vDom: VElement): HTMLElement {

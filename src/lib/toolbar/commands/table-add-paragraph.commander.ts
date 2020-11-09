@@ -10,7 +10,7 @@ export class TableAddParagraphCommander implements Commander<null> {
     const firstRange = selection.firstRange;
     const context = renderer.getContext(firstRange.startFragment, TableComponent);
     if (context) {
-      const parentFragment = renderer.getParentFragment(context);
+      const parentFragment = context.parentFragment;
       const p = new BlockComponent('p');
       p.slot.append(new BrComponent());
 

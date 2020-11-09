@@ -48,7 +48,7 @@ export class BlockComponent extends DivisionComponent {
     this.v = block;
     !isOutputMode && block.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
-        const parent = event.renderer.getParentFragment(this);
+        const parent = this.parentFragment;
 
         const component = new BlockComponent('p');
         const firstRange = event.selection.firstRange;

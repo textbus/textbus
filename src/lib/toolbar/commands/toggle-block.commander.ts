@@ -19,7 +19,7 @@ export class ToggleBlockCommander implements Commander<null> {
           instance => {
             return instance.tagName === this.tagName;
           });
-        const parentFragment = renderer.getParentFragment(context);
+        const parentFragment = context.parentFragment;
         const position = parentFragment.indexOf(context);
         parentFragment.cut(position, 1);
         const fragment = context.slot;
@@ -38,8 +38,8 @@ export class ToggleBlockCommander implements Commander<null> {
         const block = new BlockComponent(this.tagName);
         const fragment = block.slot;
         if (range.startFragment === range.endFragment) {
-          const parentComponent = renderer.getParentComponent(range.startFragment)
-          let parentFragment = renderer.getParentFragment(parentComponent);
+          const parentComponent = range.startFragment.parentComponent
+          let parentFragment = parentComponent.parentFragment;
           const position = parentFragment.indexOf(parentComponent);
           fragment.append(parentComponent);
           parentFragment.cut(position, 1);

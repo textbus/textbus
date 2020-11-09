@@ -1,7 +1,13 @@
 import { Subscription } from 'rxjs';
 
 import { Contents } from './contents';
-import { BranchComponent, DivisionComponent, Component, BackboneComponent } from './component';
+import {
+  BranchComponent,
+  DivisionComponent,
+  Component,
+  BackboneComponent,
+  parentFragmentAccessToken
+} from './component';
 import {
   BlockFormatter,
   FormatEffect,
@@ -22,10 +28,18 @@ export interface ApplyFormatOptions {
   coverChild?: boolean;
 }
 
+export const parentComponentAccessToken = Symbol('ParentComponentAccessToken');
+
 /**
  * TextBus 抽象数据类
  */
 export class Fragment extends Marker {
+  [parentComponentAccessToken]: DivisionComponent | BranchComponent | BackboneComponent | null;
+
+  get parentComponent() {
+    return this[parentComponentAccessToken];
+  }
+
   /**
    * fragment 内容的长度
    */
@@ -50,6 +64,7 @@ export class Fragment extends Marker {
     this.contents = source.contents;
     this.sliceContents().forEach(c => {
       if (c instanceof Component) {
+        c[parentFragmentAccessToken] = this;
         this.eventMap.set(c, c.onChange.subscribe(() => {
           this.markAsChanged();
         }));
@@ -89,6 +104,7 @@ export class Fragment extends Marker {
     this.contents.append(content);
 
     if (content instanceof Component) {
+      content[parentFragmentAccessToken] = this;
       this.eventMap.set(content, content.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -150,6 +166,7 @@ export class Fragment extends Marker {
    */
   insert(contents: Component | string, index: number) {
     if (contents instanceof Component) {
+      contents[parentFragmentAccessToken] = this;
       this.eventMap.set(contents, contents.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -213,6 +230,11 @@ export class Fragment extends Marker {
   clone() {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
+    ff.sliceContents().forEach(i => {
+      if (i instanceof Component) {
+        i[parentFragmentAccessToken] = ff;
+      }
+    })
     Array.from(this.formatMap.keys()).forEach(token => {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
@@ -240,6 +262,11 @@ export class Fragment extends Marker {
     this.markAsDirtied();
     Array.from(this.eventMap.values()).map(i => i.unsubscribe());
     this.eventMap.clear();
+    this.sliceContents().forEach(i => {
+      if (i instanceof Component && i[parentFragmentAccessToken] === this) {
+        i[parentFragmentAccessToken] = null;
+      }
+    })
     this.contents = new Contents();
     this.formatMap = new FormatMap();
   }

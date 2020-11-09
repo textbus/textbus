@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 
-import { Fragment } from './fragment';
+import { Fragment, parentComponentAccessToken } from './fragment';
 import { VElement } from './element';
 import { NativeEventManager } from './native-event-manager';
 import { Marker } from './marker';
@@ -38,11 +38,19 @@ export abstract class ComponentReader {
   abstract from(element: HTMLElement): ViewData;
 }
 
+export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
+
 /**
  * TextBus 组件基类，不可直接继承 Component 类。
  * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
  */
 export abstract class Component extends Marker {
+  [parentFragmentAccessToken]: Fragment | null;
+
+  get parentFragment() {
+    return this[parentFragmentAccessToken];
+  }
+
   /**
    * 在 TextBus 中，视所有模板为一个单独的个体，且规定长度为 1。
    */
@@ -76,6 +84,7 @@ export abstract class DivisionComponent extends Component {
 
   protected constructor(tagName: string) {
     super(tagName);
+    this.slot[parentComponentAccessToken] = this;
     this.slot.onChange.subscribe(() => {
       this.markAsChanged();
     })
@@ -103,7 +112,7 @@ export abstract class BranchComponent extends Component {
 
   unshift(...fragments: Fragment[]) {
     this.slots.unshift(...fragments);
-    this.listenChangeEvent(fragments);
+    this.setup(fragments);
     this.markAsDirtied();
   }
 
@@ -113,6 +122,7 @@ export abstract class BranchComponent extends Component {
 
   clean() {
     this.slots.forEach(f => {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
     })
     this.eventMap.clear();
@@ -129,7 +139,7 @@ export abstract class BranchComponent extends Component {
 
   push(...fragments: Fragment[]) {
     this.slots.push(...fragments);
-    this.listenChangeEvent(fragments);
+    this.setup(fragments);
 
     this.markAsDirtied();
   }
@@ -137,6 +147,7 @@ export abstract class BranchComponent extends Component {
   pop() {
     const f = this.slots.pop();
     if (f) {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     }
@@ -149,11 +160,12 @@ export abstract class BranchComponent extends Component {
     const deletedSlots = this.slots.splice(start, deleteCount, ...items);
 
     deletedSlots.forEach(f => {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     })
     if (items) {
-      this.listenChangeEvent(items);
+      this.setup(items);
     }
     this.markAsDirtied();
     return deletedSlots;
@@ -182,8 +194,9 @@ export abstract class BranchComponent extends Component {
     return this.viewMap.get(slot);
   }
 
-  private listenChangeEvent(fragments: Fragment[]) {
+  private setup(fragments: Fragment[]) {
     fragments.forEach(f => {
+      f[parentComponentAccessToken] = this;
       this.eventMap.set(f, f.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -260,6 +273,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
 
   protected clean() {
     this.slots.forEach(f => {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
     })
     this.eventMap.clear();
@@ -267,11 +281,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   }
 
   protected push(...fragments: Fragment[]) {
-    fragments.forEach(f => {
-      this.eventMap.set(f, f.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
-    })
+    this.setup(fragments);
     this.slots.push(...fragments);
     this.markAsDirtied();
   }
@@ -279,6 +289,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   protected pop() {
     const f = this.slots.pop();
     if (f) {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     }
@@ -291,15 +302,28 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
     const deletedSlots = this.slots.splice(start, deleteCount, ...items);
 
     deletedSlots.forEach(f => {
+      f[parentComponentAccessToken] = null;
       this.eventMap.get(f).unsubscribe();
       this.eventMap.delete(f);
     })
+    if (items) {
+      this.setup(items);
+    }
     this.markAsDirtied();
     return deletedSlots;
   }
 
   protected map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
     return this.slots.map(callbackFn, thisArg);
+  }
+
+  private setup(fragments: Fragment[]) {
+    fragments.forEach(f => {
+      f[parentComponentAccessToken] = this;
+      this.eventMap.set(f, f.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    })
   }
 }
 

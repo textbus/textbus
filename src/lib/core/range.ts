@@ -132,14 +132,14 @@ export class TBRange {
     let endChildComponent: BranchComponent | DivisionComponent | BackboneComponent = null;
 
     while (startFragment !== commonAncestorFragment) {
-      startChildComponent = this.renderer.getParentComponent(startFragment);
-      startFragment = this.renderer.getParentFragment(startChildComponent);
+      startChildComponent = startFragment.parentComponent;
+      startFragment = startChildComponent.parentFragment;
       startIndex = startFragment.indexOf(startChildComponent);
     }
 
     while (endFragment !== commonAncestorFragment) {
-      endChildComponent = this.renderer.getParentComponent(endFragment);
-      endFragment = this.renderer.getParentFragment(endChildComponent);
+      endChildComponent = endFragment.parentComponent;
+      endFragment = endChildComponent.parentFragment;
       endIndex = endFragment.indexOf(endChildComponent);
     }
 
@@ -164,7 +164,7 @@ export class TBRange {
       const context = this.renderer.getContext(scope.fragment, of, filter);
       let fragment: Fragment = scope.fragment;
       while (fragment) {
-        const parentComponent = this.renderer.getParentComponent(fragment);
+        const parentComponent = fragment.parentComponent;
         if (parentComponent === context) {
           maps.push({
             component: context,
@@ -174,7 +174,7 @@ export class TBRange {
           })
           break;
         }
-        fragment = this.renderer.getParentFragment(parentComponent);
+        fragment = parentComponent.parentFragment;
       }
     });
     const components: T[] = [];
@@ -340,12 +340,12 @@ export class TBRange {
   deleteSelectedScope() {
     this.getSelectedScope().reverse().forEach(scope => {
       if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        const parentComponent = this.renderer.getParentComponent(scope.fragment);
+        const parentComponent = scope.fragment.parentComponent;
         scope.fragment.remove(0);
         if (parentComponent instanceof BackboneComponent) {
           if (parentComponent.canDelete(scope.fragment)) {
             let position = this.getPreviousPosition();
-            const parentFragment = this.renderer.getParentFragment(parentComponent);
+            const parentFragment = parentComponent.parentFragment;
             const index = parentFragment.indexOf(parentComponent);
             parentFragment.remove(index, 1);
 
@@ -391,9 +391,9 @@ export class TBRange {
     if (fragment === endFragment) {
       return fragment;
     }
-    const parentComponent = this.renderer.getParentComponent(fragment);
+    const parentComponent = fragment.parentComponent;
     if (parentComponent instanceof DivisionComponent) {
-      const parentFragment = this.renderer.getParentFragment(parentComponent);
+      const parentFragment = parentComponent.parentFragment;
       parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
@@ -402,7 +402,7 @@ export class TBRange {
     } else if (parentComponent instanceof BranchComponent) {
       parentComponent.splice(parentComponent.indexOf(fragment), 1);
       if (parentComponent.slotCount === 0) {
-        const parentFragment = this.renderer.getParentFragment(parentComponent);
+        const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
         parentFragment.cut(index, 1);
         if (parentFragment.contentLength === 0) {
@@ -415,7 +415,7 @@ export class TBRange {
       fragment.clean();
       const b = parentComponent.canDelete(fragment);
       if (b) {
-        const parentFragment = this.renderer.getParentFragment(parentComponent);
+        const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
         parentFragment.cut(index, 1);
         if (parentFragment.contentLength === 0) {
@@ -471,7 +471,7 @@ export class TBRange {
     const cacheFragment = fragment;
 
     while (true) {
-      const parentComponent = this.renderer.getParentComponent(fragment);
+      const parentComponent = fragment.parentComponent;
       if (!parentComponent) {
         return {
           fragment: cacheFragment,
@@ -492,7 +492,7 @@ export class TBRange {
         }
       }
 
-      const parentFragment = this.renderer.getParentFragment(parentComponent);
+      const parentFragment = parentComponent.parentFragment;
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex > 0) {
         const prevContent = parentFragment.getContentAtIndex(componentIndex - 1);
@@ -553,7 +553,7 @@ export class TBRange {
     const cacheFragment = fragment;
 
     while (true) {
-      const parentComponent = this.renderer.getParentComponent(fragment);
+      const parentComponent = fragment.parentComponent;
       if (!parentComponent) {
         const len = cacheFragment.contentLength;
         const last = cacheFragment.getContentAtIndex(len - 1);
@@ -574,7 +574,7 @@ export class TBRange {
           return this.findFirstPosition(parentComponent.getSlotAtIndex(fragmentIndex + 1));
         }
       }
-      const parentFragment = this.renderer.getParentFragment(parentComponent);
+      const parentFragment = parentComponent.parentFragment;
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex < parentFragment.contentLength - 1) {
         const nextContent = parentFragment.getContentAtIndex(componentIndex + 1);
@@ -876,7 +876,7 @@ export class TBRange {
         fragment: startFragment
       });
 
-      startParentComponent = this.renderer.getParentComponent(startFragment);
+      startParentComponent = startFragment.parentComponent;
       if (startParentComponent instanceof BranchComponent || startParentComponent instanceof BackboneComponent) {
         const childSlots = startParentComponent instanceof BranchComponent ?
           startParentComponent.slice() :
@@ -893,14 +893,14 @@ export class TBRange {
           }));
         }
       }
-      startFragment = this.renderer.getParentFragment(startParentComponent);
+      startFragment = startParentComponent.parentFragment;
       startIndex = startFragment.indexOf(startParentComponent) + 1;
     }
     while (endFragment !== this.commonAncestorFragment) {
       if (commonAncestorComponent && endParentComponent === this.commonAncestorComponent) {
         return;
       }
-      endParentComponent = this.renderer.getParentComponent(endFragment);
+      endParentComponent = endFragment.parentComponent;
       if (endParentComponent instanceof BranchComponent || endParentComponent instanceof BackboneComponent) {
         const childSlots = endParentComponent instanceof BranchComponent ?
           endParentComponent.slice() :
@@ -924,7 +924,7 @@ export class TBRange {
         endIndex,
         fragment: endFragment
       });
-      endFragment = this.renderer.getParentFragment(endParentComponent);
+      endFragment = endParentComponent.parentFragment;
       endIndex = endFragment.indexOf(endParentComponent);
     }
     let result: TBRangeScope[] = [...start];
@@ -967,20 +967,20 @@ export class TBRange {
 
     while (startFragment) {
       startPaths.push(startFragment);
-      const parentComponent = this.renderer.getParentComponent(startFragment);
+      const parentComponent = startFragment.parentComponent;
       if (!parentComponent) {
         break;
       }
-      startFragment = this.renderer.getParentFragment(parentComponent);
+      startFragment = parentComponent.parentFragment;
     }
 
     while (endFragment) {
       endPaths.push(endFragment);
-      const parentComponent = this.renderer.getParentComponent(endFragment);
+      const parentComponent = endFragment.parentComponent;
       if (!parentComponent) {
         break;
       }
-      endFragment = this.renderer.getParentFragment(parentComponent);
+      endFragment = parentComponent.parentFragment;
     }
     let f: Fragment = null;
     while (startPaths.length && endPaths.length) {
@@ -996,8 +996,8 @@ export class TBRange {
   }
 
   private getCommonAncestorComponent() {
-    let startComponent = this.renderer.getParentComponent(this.startFragment);
-    let endComponent = this.renderer.getParentComponent(this.endFragment);
+    let startComponent = this.startFragment.parentComponent;
+    let endComponent = this.endFragment.parentComponent;
     if (startComponent === endComponent) {
       return startComponent;
     }
@@ -1006,20 +1006,20 @@ export class TBRange {
 
     while (startComponent) {
       startPaths.push(startComponent);
-      const parentFragment = this.renderer.getParentFragment(startComponent);
+      const parentFragment = startComponent.parentFragment;
       if (!parentFragment) {
         break;
       }
-      startComponent = this.renderer.getParentComponent(parentFragment);
+      startComponent = parentFragment.parentComponent;
     }
 
     while (endComponent) {
       endPaths.push(endComponent);
-      const parentFragment = this.renderer.getParentFragment(endComponent);
+      const parentFragment = endComponent.parentFragment;
       if (!parentFragment) {
         break;
       }
-      endComponent = this.renderer.getParentComponent(parentFragment);
+      endComponent = parentFragment.parentComponent;
     }
     let f: Component = null;
     while (startPaths.length && endPaths.length) {
@@ -1058,7 +1058,7 @@ export class TBRange {
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
     let vElement = this.renderer.getVElementByFragment(fragment);
     parentLoop: while (vElement) {
-      const len = vElement.childNodes.length;
+      const len = vElement.children.length;
       if (len === 0) {
         return {
           node: this.renderer.getNativeNodeByVDom(vElement),
@@ -1067,7 +1067,7 @@ export class TBRange {
       }
       let index = 0;
       for (let i = 0; i < len; i++) {
-        const child = vElement.childNodes[i];
+        const child = vElement.children[i];
         const position = this.renderer.getPositionByVDom(child);
         if (position.fragment === fragment) {
           index = position.endIndex;
@@ -1101,7 +1101,7 @@ export class TBRange {
                   };
                 }
               }
-              if (child.childNodes.length === 0) {
+              if (child.children.length === 0) {
                 const node = this.renderer.getNativeNodeByVDom(child);
                 const parentNode = node.parentNode;
                 const index = Array.from(parentNode.childNodes).indexOf(node as any);

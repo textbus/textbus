@@ -111,7 +111,7 @@ export class TBSelection {
     const getPaths = (fragment: Fragment): number[] => {
       const paths = [];
       while (fragment) {
-        const parentComponent = this.renderer.getParentComponent(fragment);
+        const parentComponent = fragment.parentComponent;
         if (parentComponent) {
           if (parentComponent instanceof BranchComponent) {
             paths.push(parentComponent.indexOf(fragment))
@@ -120,7 +120,7 @@ export class TBSelection {
           } else {
             paths.push(0);
           }
-          fragment = this.renderer.getParentFragment(parentComponent);
+          fragment = parentComponent.parentFragment;
           paths.push(fragment.indexOf(parentComponent));
         } else {
           break;
@@ -226,7 +226,7 @@ export class TBSelection {
       const tree = [];
       while (fragment) {
         tree.push(fragment);
-        fragment = this.renderer.getParentFragment(this.renderer.getParentComponent(fragment));
+        fragment = fragment.parentComponent.parentFragment;
       }
       depth.push(tree);
     });

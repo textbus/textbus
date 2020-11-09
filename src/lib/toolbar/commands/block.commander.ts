@@ -21,7 +21,7 @@ export class BlockCommander implements Commander<string> {
       range.getSuccessiveContents().forEach(scope => {
         const blockComponent = new BlockComponent(tagName);
 
-        const parentComponent = context.renderer.getParentComponent(scope.fragment);
+        const parentComponent = scope.fragment.parentComponent;
 
         if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
           if (scope.fragment === range.startFragment) {
@@ -31,7 +31,7 @@ export class BlockCommander implements Commander<string> {
             range.endFragment = blockComponent.slot;
           }
           if (parentComponent instanceof DivisionComponent) {
-            const parentFragment = context.renderer.getParentFragment(parentComponent);
+            const parentFragment = parentComponent.parentFragment;
             blockComponent.slot.from(scope.fragment);
             parentFragment.insertBefore(blockComponent, parentComponent);
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);

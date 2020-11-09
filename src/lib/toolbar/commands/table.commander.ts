@@ -24,8 +24,8 @@ export class TableCommander implements Commander<Map<string, string | number | b
         bodies
       });
 
-      const parentComponent = renderer.getParentComponent(range.startFragment);
-      const parentFragment = renderer.getParentFragment(parentComponent);
+      const parentComponent = range.startFragment.parentComponent;
+      const parentFragment = parentComponent.parentFragment;
       const firstContent = range.startFragment.getContentAtIndex(0);
       if (parentComponent instanceof DivisionComponent) {
         if (range.startFragment.contentLength === 0 ||

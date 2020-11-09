@@ -87,7 +87,7 @@ export class ListComponent extends BranchComponent {
             if (slot.contentLength === 0 ||
               slot.contentLength === 1 && lastContent instanceof BrComponent) {
               this.pop();
-              const parentFragment = event.renderer.getParentFragment(this);
+              const parentFragment = this.parentFragment;
               const p = new BlockComponent('p');
               p.slot.from(new Fragment());
               p.slot.append(new BrComponent());

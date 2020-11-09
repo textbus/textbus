@@ -80,7 +80,7 @@ export class ImageCardComponent extends BackboneComponent {
         }
         const firstRange = ev.selection.firstRange;
         if (ev.type === EventType.onEnter) {
-          const parentFragment = ev.renderer.getParentFragment(this);
+          const parentFragment = this.parentFragment;
           const p = new BlockComponent('p');
           p.slot.append(new BrComponent());
           parentFragment.insertAfter(p, this);

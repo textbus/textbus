@@ -24,14 +24,164 @@ function equalMap(left: Map<string, string | number | boolean>, right: Map<strin
   }, true);
 }
 
-export abstract class VNode {
-  abstract clone(): any;
+function equalClasses(left: string[], right: string[]) {
+  if (left === right) {
+    return true;
+  }
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (const k of left) {
+    if (!right.includes(k)) {
+      return false;
+    }
+  }
+  return true;
+}
+const parentNode = Symbol('parentNode');
+/**
+ * 虚拟文本节点。
+ */
+export class VTextNode {
+  [parentNode]: VElement | null;
+
+  constructor(public readonly textContent: string = '') {
+  }
+
+  clone() {
+    return new VTextNode(this.textContent);
+  }
+
+  equal(vNode: VElement | VTextNode): boolean {
+    if (vNode === this) {
+      return true;
+    }
+    if (vNode instanceof VTextNode) {
+      return vNode.textContent === this.textContent;
+    }
+    return false;
+  }
+}
+
+/**
+ * 配置虚拟 DOM 节点的属性选项。
+ */
+export interface VElementOption {
+  attrs?: { [key: string]: boolean | string | number };
+  styles?: { [key: string]: string | number };
+  classes?: string[];
+  childNodes?: Array<VElement | VTextNode>;
+}
+
+/**
+ * 虚拟 DOM 节点
+ */
+export class VElement {
+  [parentNode]: VElement | null;
+  readonly events = new EventEmitter();
+  readonly attrs = new Map<string, string | number | boolean>();
+  readonly styles = new Map<string, string | number>();
+  readonly classes: string[] = [];
+
+  get parentNode() {
+    return this[parentNode];
+  }
+
+  get children() {
+    return this._childNodes.map(i => i);
+  }
+
+  private _childNodes: Array<VElement | VTextNode> = [];
+
+  constructor(public tagName: string, options?: VElementOption) {
+    if (options) {
+      if (options.attrs) {
+        Object.keys(options.attrs).forEach(key => this.attrs.set(key, options.attrs[key]));
+      }
+      if (options.styles) {
+        Object.keys(options.styles).forEach(key => this.styles.set(key, options.styles[key]));
+      }
+      if (options.classes) {
+        this.classes.push(...options.classes);
+      }
+      if (options.childNodes) {
+        this.appendChild(...options.childNodes);
+      }
+    }
+  }
+
+  clone(): VElement {
+    const attrs: { [key: string]: boolean | string | number } = {};
+    const styles: { [key: string]: string | number } = {};
+    this.attrs.forEach(((value, key) => {
+      attrs[key] = value
+    }));
+    this.styles.forEach((value, key) => {
+      styles[key] = value;
+    })
+    const el = new VElement(this.tagName, {
+      classes: [...this.classes],
+      attrs,
+      styles,
+      childNodes: this._childNodes.map(i => i.clone())
+    });
+    (el as { events: EventEmitter }).events = this.events;
+    return el;
+  }
+
+  /**
+   * 在最后位置添加一个子节点。
+   * @param newNodes
+   */
+  appendChild(...newNodes: Array<VElement | VTextNode>) {
+    newNodes.forEach(node => {
+      node[parentNode] = this;
+      this._childNodes.push(node);
+    })
+  }
+
+  removeChild(node: VTextNode | VElement) {
+    const index = this._childNodes.indexOf(node);
+    if (index > -1) {
+      this._childNodes.splice(index, 1);
+      node[parentNode] = null;
+    }
+    throw new Error('要删除的节点不是当前节点的子级！');
+  }
+
+  replaceChild(newNode: VElement | VTextNode, oldNode: VElement | VTextNode) {
+    const index = this._childNodes.indexOf(oldNode);
+    if (index > -1) {
+      this._childNodes.splice(index, 1, newNode);
+      oldNode[parentNode] = null;
+      newNode[parentNode] = this;
+      return;
+    }
+    throw new Error('要替换的节点不是当前节点的子级！');
+  }
+
+  removeLastChild() {
+    const node = this._childNodes.pop();
+    if (node) {
+      node[parentNode] = null;
+    }
+    return node;
+  }
+
+  removeFirstChild() {
+    const node = this._childNodes.shift();
+    if (node) {
+      node[parentNode] = null;
+    }
+    return node;
+  }
 
   /**
    * 判断一个虚拟 DOM 节点是否和自己相等。
    * @param vNode
    */
-  equal(vNode: VNode): boolean {
+  equal(vNode: VElement | VTextNode): boolean {
     if (vNode === this) {
       return true;
     }
@@ -51,106 +201,7 @@ export abstract class VNode {
       return false
     }
 
-    if (right instanceof VTextNode) {
-      return (left as VTextNode).textContent === right.textContent;
-    }
     return false;
-  }
-}
-
-function equalClasses(left: string[], right: string[]) {
-  if (left === right) {
-    return true;
-  }
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (const k of left) {
-    if (!right.includes(k)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * 虚拟文本节点。
- */
-export class VTextNode extends VNode {
-  constructor(public readonly textContent: string = '') {
-    super()
-  }
-
-  clone() {
-    return new VTextNode(this.textContent);
-  }
-}
-
-/**
- * 配置虚拟 DOM 节点的属性选项。
- */
-export interface VElementOption {
-  attrs?: { [key: string]: boolean | string | number };
-  styles?: { [key: string]: string | number };
-  classes?: string[];
-  childNodes?: Array<VElement | VTextNode>;
-}
-
-/**
- * 虚拟 DOM 节点
- */
-export class VElement extends VNode {
-  readonly events = new EventEmitter();
-  readonly childNodes: Array<VElement | VTextNode> = [];
-  readonly attrs = new Map<string, string | number | boolean>();
-  readonly styles = new Map<string, string | number>();
-  readonly classes: string[] = [];
-
-  constructor(public tagName: string, options?: VElementOption) {
-    super();
-    if (options) {
-      if (options.attrs) {
-        Object.keys(options.attrs).forEach(key => this.attrs.set(key, options.attrs[key]));
-      }
-      if (options.styles) {
-        Object.keys(options.styles).forEach(key => this.styles.set(key, options.styles[key]));
-      }
-      if (options.classes) {
-        this.classes.push(...options.classes);
-      }
-      if (options.childNodes) {
-        this.childNodes.push(...options.childNodes);
-      }
-    }
-  }
-
-  clone(): VElement {
-    const attrs: { [key: string]: boolean | string | number } = {};
-    const styles: { [key: string]: string | number } = {};
-    this.attrs.forEach(((value, key) => {
-      attrs[key] = value
-    }));
-    this.styles.forEach((value, key) => {
-      styles[key] = value;
-    })
-    const el = new VElement(this.tagName, {
-      classes: [...this.classes],
-      attrs,
-      styles,
-      childNodes: this.childNodes.map(i => i.clone())
-    });
-    (el as { events: EventEmitter }).events = this.events;
-    return el;
-  }
-
-  /**
-   * 在最后位置添加一个子节点。
-   * @param newChild
-   */
-  appendChild(newChild: VElement | VTextNode) {
-    this.childNodes.push(newChild);
-    return newChild;
   }
 
   /**
@@ -162,7 +213,7 @@ export class VElement extends VNode {
       styles: VElement.mapToJSON(this.styles),
       attrs: VElement.mapToJSON(this.attrs),
       classes: this.classes.map(i => i),
-      childNodes: this.childNodes.map(c => {
+      childNodes: this._childNodes.map(c => {
         if (c instanceof VElement) {
           return c.toJSON();
         }

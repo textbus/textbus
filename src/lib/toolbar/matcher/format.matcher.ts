@@ -45,7 +45,7 @@ export class FormatMatcher implements Matcher {
         const state = this.getStatesByRange(s.fragment, this.formatter, s.startIndex, s.endIndex);
 
         if (state.effect === FormatEffect.Invalid) {
-          const inSingleContainer = FormatMatcher.inSingleContainer(renderer, s.fragment, this.formatter, s.startIndex, s.endIndex);
+          const inSingleContainer = FormatMatcher.inSingleContainer(s.fragment, this.formatter, s.startIndex, s.endIndex);
           if (inSingleContainer.effect !== FormatEffect.Invalid) {
             states.push(inSingleContainer);
           } else {
@@ -148,7 +148,7 @@ export class FormatMatcher implements Matcher {
     return FormatMatcher.mergeStates(states);
   }
 
-  private static inSingleContainer(renderer: Renderer, fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
+  private static inSingleContainer(fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
 
     while (true) {
       const formatRanges = fragment.getFormatRanges(formatter) || [];
@@ -184,8 +184,11 @@ export class FormatMatcher implements Matcher {
         }
       }
 
-      const parentComponent = renderer.getParentComponent(fragment);
-      const parentFragment = renderer.getParentFragment(parentComponent);
+      const parentComponent = fragment.parentComponent;
+      if (!parentComponent) {
+        break;
+      }
+      const parentFragment = parentComponent.parentFragment;
       if (parentFragment) {
         startIndex = parentFragment.sliceContents(0).indexOf(parentComponent);
         endIndex = startIndex + 1;

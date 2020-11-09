@@ -76,7 +76,7 @@ export class EventHandler {
     const contents = event.data.clipboard.contents as Contents;
     const fragment = firstRange.startFragment;
 
-    const parentComponent = event.renderer.getParentComponent(fragment);
+    const parentComponent = fragment.parentComponent;
 
     if (parentComponent instanceof BranchComponent) {
       let i = 0
@@ -87,7 +87,7 @@ export class EventHandler {
       firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
     } else {
       const firstChild = fragment.getContentAtIndex(0);
-      const parentFragment = event.renderer.getParentFragment(parentComponent);
+      const parentFragment = parentComponent.parentFragment;
       const contentsArr = contents.slice(0);
       if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof BrComponent) {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));

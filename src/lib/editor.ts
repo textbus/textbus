@@ -767,12 +767,12 @@ export class Editor implements FileUploader {
   private insertComponent(component: Component) {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
-    const parentComponent = this.renderer.getParentComponent(startFragment);
+    const parentComponent = startFragment.parentComponent;
     if (component instanceof LeafComponent) {
       startFragment.insert(component, firstRange.endIndex);
     } else {
       if (parentComponent instanceof DivisionComponent) {
-        const parentFragment = this.renderer.getParentFragment(parentComponent);
+        const parentFragment = parentComponent.parentFragment;
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
         if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {

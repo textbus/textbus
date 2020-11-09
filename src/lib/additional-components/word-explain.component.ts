@@ -125,7 +125,7 @@ export class WordExplainComponent extends BackboneComponent {
       wrap.appendChild(close);
       let renderer: Renderer;
       eventManager.listen(close, 'click', () => {
-        const parentFragment = renderer.getParentFragment(this);
+        const parentFragment = this.parentFragment;
         parentFragment.remove(parentFragment.indexOf(this), 1);
       })
       close.events.subscribe(event => {

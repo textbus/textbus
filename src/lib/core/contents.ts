@@ -1,4 +1,4 @@
-import { Component } from './component';
+import { Component, parentFragmentAccessToken } from './component';
 
 /**
  * 储存 Fragment 内容的类。
@@ -144,7 +144,12 @@ export class Contents {
     const elements = this.slice(0, startIndex).concat(this.slice(endIndex, this.length));
     this.elements = [];
     elements.forEach(item => this.append(item));
-    return discardedContents;
+    return discardedContents.map(i => {
+      if (i instanceof Component) {
+        i[parentFragmentAccessToken] = null;
+      }
+      return i;
+    });
   }
 
   /**
@@ -164,6 +169,8 @@ export class Contents {
       if (typeof item === 'string') {
         newContents.append(item)
       } else {
+        const c = item.clone();
+        c[parentFragmentAccessToken] = null;
         newContents.append(item.clone());
       }
     });

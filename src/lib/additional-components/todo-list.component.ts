@@ -135,7 +135,7 @@ export class TodoListComponent extends BranchComponent {
               if (slot.contentLength === 0 ||
                 slot.contentLength === 1 && lastContent instanceof BrComponent) {
                 this.pop();
-                const parentFragment = event.renderer.getParentFragment(this);
+                const parentFragment = this.parentFragment;
                 const p = new BlockComponent('p');
                 p.slot.append(new BrComponent());
                 parentFragment.insertAfter(p, this);

@@ -19,7 +19,7 @@ export class ListCommander implements Commander<null> {
       if (overlap) {
         range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {
           const slots = item.component.split(item.startIndex, item.endIndex);
-          const parentFragment = renderer.getParentFragment(item.component);
+          const parentFragment = item.component.parentFragment;
           if (slots.before.length) {
             const beforeList = new ListComponent(this.tagName);
             beforeList.push(...slots.before);
@@ -63,8 +63,8 @@ export class ListCommander implements Commander<null> {
             if (fragment === commonAncestorFragment) {
               break;
             }
-            const parentComponent = renderer.getParentComponent(fragment);
-            fragment = renderer.getParentFragment(parentComponent);
+            const parentComponent = fragment.parentComponent;
+            fragment = parentComponent.parentFragment;
             if (parentComponent instanceof BackboneComponent) {
               lastBackboneComponent = parentComponent;
             }
@@ -74,7 +74,7 @@ export class ListCommander implements Commander<null> {
               return;
             }
             branchComponents.push(lastBackboneComponent);
-            const parentFragment = renderer.getParentFragment(lastBackboneComponent);
+            const parentFragment = lastBackboneComponent.parentFragment;
             const index = parentFragment.indexOf(lastBackboneComponent);
             scopes.push({
               startIndex: index,
@@ -112,9 +112,9 @@ export class ListCommander implements Commander<null> {
             commonAncestorFragment.insert(list, commonScope.startIndex);
           }
         } else {
-          const parentComponent = renderer.getParentComponent(commonAncestorFragment);
+          const parentComponent = commonAncestorFragment.parentComponent;
           if (parentComponent instanceof DivisionComponent || parentComponent instanceof BackboneComponent) {
-            const parentFragment = renderer.getParentFragment(parentComponent);
+            const parentFragment = parentComponent.parentFragment;
             const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
@@ -125,7 +125,7 @@ export class ListCommander implements Commander<null> {
             const after = parentComponent.clone() as BranchComponent;
             after.splice(0, index + 1);
 
-            const parentFragment = renderer.getParentFragment(parentComponent);
+            const parentFragment = parentComponent.parentFragment;
             const position = parentFragment.indexOf(parentComponent);
 
             if (after.slotCount) {
