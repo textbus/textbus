@@ -449,22 +449,29 @@ export class Renderer {
   private rendingComponent(component: Component): VElement {
     if (component.dirty) {
       let vElement: VElement;
-      if (this.outputMode) {
-        vElement = component.render(this.outputMode);
-      } else {
-        vElement = component.render(this.outputMode, this.nativeEventManager);
-        this.componentVDomCacheMap.set(component, vElement);
-        component.rendered();
-      }
+      vElement = component.render(this.outputMode, this.nativeEventManager);
+      this.componentVDomCacheMap.set(component, vElement);
+      component.rendered();
       if (component instanceof DivisionComponent) {
-        this.rendingSlot(component.slot, component.getSlotView(), component);
+        const view = component.getSlotView();
+        if (view !== vElement) {
+          vElement.styles.set('userSelect', 'none');
+          view.styles.set('userSelect', 'text');
+        }
+        this.rendingSlot(component.slot, view, component);
       } else if (component instanceof BranchComponent) {
+        vElement.styles.set('userSelect', 'none');
         component.forEach(fragment => {
-          this.rendingSlot(fragment, component.getSlotView(fragment), component);
+          const view = component.getSlotView(fragment);
+          view.styles.set('userSelect', 'text');
+          this.rendingSlot(fragment, view, component);
         })
       } else if (component instanceof BackboneComponent) {
+        vElement.styles.set('userSelect', 'none');
         Array.from(component).forEach(fragment => {
-          this.rendingSlot(fragment, component.getSlotView(fragment), component);
+          const view = component.getSlotView(fragment);
+          view.styles.set('userSelect', 'text');
+          this.rendingSlot(fragment, view, component);
         })
       }
       return vElement;
@@ -504,7 +511,7 @@ export class Renderer {
                       component: DivisionComponent | BranchComponent | BackboneComponent) {
     this.fragmentHierarchyMapping.set(fragment, component);
     this.pureSlotCacheMap.set(fragment, view.clone());
-    this.rendingFragment(fragment, view, true);
+    return this.rendingFragment(fragment, view, true);
   }
 
   private reuseSlot(slot: Fragment, view: VElement) {
