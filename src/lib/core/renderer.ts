@@ -308,6 +308,8 @@ export class Renderer {
     let host: HTMLElement;
     if (vDom.equal(oldVDom)) {
       host = this.NVMappingTable.get(oldVDom) as HTMLElement;
+    } else {
+      host = this.createElement(vDom);
     }
 
     let min = 0;
@@ -524,6 +526,7 @@ export class Renderer {
       oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
     }
     Object.assign(view, vDom);
+    this.NVMappingTable.set(view, newNativeNode);
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {

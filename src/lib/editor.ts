@@ -650,8 +650,8 @@ export class Editor implements FileUploader {
         rootFragment: this.rootFragment
       }, params);
       this.addRenderedTask(() => {
-        this.recordSnapshotFromEditingBefore();
         selection.restore();
+        this.recordSnapshotFromEditingBefore();
         this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
       })
     }
