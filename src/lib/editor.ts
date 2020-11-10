@@ -364,7 +364,7 @@ export class Editor implements FileUploader {
       fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
         this.selection = this.options.hooks.reduce((selection, lifecycle) => {
           if (typeof lifecycle.onSelectionChange === 'function') {
-            lifecycle.onSelectionChange(this.renderer, selection, this.viewer.contentDocument);
+            lifecycle.onSelectionChange(selection, this.viewer.contentDocument);
           }
           return selection;
         }, new TBSelection(this.viewer.contentDocument, this.renderer));
@@ -404,7 +404,7 @@ export class Editor implements FileUploader {
           let isNext = true;
           (this.options.hooks || []).forEach(lifecycle => {
             if (typeof lifecycle.onInput === 'function') {
-              if (lifecycle.onInput(this.renderer, selection) === false) {
+              if (lifecycle.onInput(selection) === false) {
                 isNext = false;
               } else {
                 if (!selection.collapsed) {
@@ -472,7 +472,7 @@ export class Editor implements FileUploader {
                 if (lifecycle.onPaste({
                   contents,
                   text
-                }, this.renderer, this.selection) === false) {
+                }, this.selection) === false) {
                   isNext = false;
                 }
               }
@@ -511,7 +511,7 @@ export class Editor implements FileUploader {
           let isNext = true;
           (this.options.hooks || []).forEach(lifecycle => {
             if (typeof lifecycle.onEnter === 'function') {
-              if (lifecycle.onEnter(this.renderer, this.selection) === false) {
+              if (lifecycle.onEnter(this.selection) === false) {
                 isNext = false;
               }
             }
@@ -541,7 +541,7 @@ export class Editor implements FileUploader {
         let isNext = true;
         (this.options.hooks || []).forEach(lifecycle => {
           if (typeof lifecycle.onDelete === 'function') {
-            if (lifecycle.onDelete(this.renderer, selection) === false) {
+            if (lifecycle.onDelete(selection) === false) {
               isNext = false;
             }
           }
@@ -667,7 +667,7 @@ export class Editor implements FileUploader {
     let isNext = true;
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onRenderingBefore === 'function' &&
-        lifecycle.onRenderingBefore(this.renderer, this.selection, this, this.rootFragment) === false) {
+        lifecycle.onRenderingBefore(this.selection, this, this.rootFragment) === false) {
         isNext = false;
       }
     })
@@ -692,7 +692,7 @@ export class Editor implements FileUploader {
   private invokeViewUpdatedHooks() {
     (this.options.hooks || []).forEach(lifecycle => {
       if (typeof lifecycle.onViewUpdated === 'function') {
-        lifecycle.onViewUpdated(this.renderer, this.selection, this, this.rootFragment, this.workbench.tablet);
+        lifecycle.onViewUpdated(this.selection, this, this.rootFragment, this.workbench.tablet);
       }
     })
   }

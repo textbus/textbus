@@ -5,7 +5,6 @@ import {
   FormatEffect,
   Fragment,
   NativeEventManager,
-  Renderer,
   VElement,
   ViewData
 } from '../core/_api';
@@ -123,13 +122,9 @@ export class WordExplainComponent extends BackboneComponent {
         }
       });
       wrap.appendChild(close);
-      let renderer: Renderer;
       eventManager.listen(close, 'click', () => {
         const parentFragment = this.parentFragment;
         parentFragment.remove(parentFragment.indexOf(this), 1);
-      })
-      close.events.subscribe(event => {
-        renderer = event.renderer;
       })
     }
 

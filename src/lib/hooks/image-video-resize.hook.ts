@@ -1,4 +1,4 @@
-import { EventType, Lifecycle, Renderer, TBSelection, VElement } from '../core/_api';
+import { Lifecycle, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
@@ -143,7 +143,7 @@ export class ImageVideoResizeHook implements Lifecycle {
     }
   }
 
-  onSelectionChange(renderer: Renderer, selection: TBSelection) {
+  onSelectionChange(selection: TBSelection) {
     if (selection.collapsed) {
       this.currentElement = null;
       this.mask.parentNode?.removeChild(this.mask);

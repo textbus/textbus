@@ -1,6 +1,5 @@
 import { Subject } from 'rxjs';
 import { TBSelection } from './selection';
-import { Renderer } from './renderer';
 
 /**
  * 虚拟 DOM 节点上支持的事件类型。
@@ -20,7 +19,6 @@ export enum EventType {
 export interface EventParams {
   type: EventType;
   selection: TBSelection;
-  renderer: Renderer;
   data?: { [key: string]: any };
 }
 
@@ -37,7 +35,6 @@ export class TBEvent {
 
   readonly type: EventType;
   readonly selection: TBSelection;
-  readonly renderer: Renderer;
   readonly data: { [key: string]: any };
 
   private _stopped = false;
@@ -45,7 +42,6 @@ export class TBEvent {
   constructor(config: EventParams) {
     this.type = config.type;
     this.selection = config.selection;
-    this.renderer = config.renderer;
     this.data = config.data;
   }
 

@@ -1,21 +1,21 @@
-import { Lifecycle, Clipboard, Renderer, TBSelection } from '../core/_api';
+import { Lifecycle, Clipboard, TBSelection } from '../core/_api';
 
 export class DefaultHook implements Lifecycle {
-  onInput(renderer: Renderer, selection: TBSelection) {
+  onInput(selection: TBSelection) {
     selection.ranges.forEach(range => {
       range.connect();
     })
     return selection.collapsed && selection.rangeCount === 1;
   }
 
-  onPaste(contents: Clipboard, renderer: Renderer, selection: TBSelection): boolean {
+  onPaste(contents: Clipboard, selection: TBSelection): boolean {
     selection.ranges.forEach(range => {
       range.connect();
     });
     return true;
   }
 
-  onEnter(renderer: Renderer, selection: TBSelection) {
+  onEnter(selection: TBSelection) {
     if (!selection.collapsed) {
       const b = selection.ranges.map(range => {
         const flag = range.startFragment === range.endFragment;
@@ -31,7 +31,7 @@ export class DefaultHook implements Lifecycle {
     return true;
   }
 
-  onDelete(renderer: Renderer, selection: TBSelection): boolean {
+  onDelete(selection: TBSelection): boolean {
     if (!selection.collapsed) {
       selection.ranges.forEach(range => {
         range.connect();

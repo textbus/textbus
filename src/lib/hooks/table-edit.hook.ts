@@ -61,7 +61,7 @@ export class TableEditHook implements Lifecycle {
     style.innerText = '::selection { background: transparent; }';
   }
 
-  onSelectionChange(renderer: Renderer, selection: TBSelection, context: Document) {
+  onSelectionChange(selection: TBSelection, context: Document) {
     const nativeSelection = context.getSelection();
     this.inTable = false;
     this.startCell = null;
@@ -111,7 +111,7 @@ export class TableEditHook implements Lifecycle {
       }
       selection.removeAllRanges();
       this.selectedCells.map(cell => {
-        const range = new TBRange(context.createRange(), renderer);
+        const range = new TBRange(context.createRange(), this.renderer);
         const firstContent = cell.getContentAtIndex(0);
         if (cell.contentLength === 1 && firstContent instanceof BrComponent) {
           range.setStart(cell, 0);

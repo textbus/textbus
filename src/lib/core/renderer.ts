@@ -252,7 +252,6 @@ export class Renderer {
       const event = new TBEvent({
         type,
         selection,
-        renderer: this,
         data
       });
       by.events.emit(event);
@@ -657,8 +656,10 @@ export class Renderer {
 
     vDom.events.emit(new TBEvent({
       type: EventType.onRendered,
-      renderer: this,
-      selection: null
+      selection: null,
+      data: {
+        nativeNode: el
+      }
     }));
     return el;
   }

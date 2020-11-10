@@ -4,7 +4,7 @@ import {
   Commander,
   DivisionComponent, ElementPosition,
   Fragment,
-  Lifecycle, Renderer,
+  Lifecycle,
   TBSelection
 } from '../core/_api';
 import { Editor } from '../editor';
@@ -60,7 +60,7 @@ export class FindHook implements Lifecycle {
     return true;
   }
 
-  onRenderingBefore(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean {
+  onRenderingBefore(selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean {
     if (this.findValue && this.commander && !this.isJustFind) {
       this.positions = this.find(rootFragment, this.findValue);
       this.commander.command({
@@ -72,7 +72,7 @@ export class FindHook implements Lifecycle {
     return true;
   }
 
-  onViewUpdated(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement) {
+  onViewUpdated(selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement) {
     if (this.positions.length) {
       const range = selection.createRange();
       const current = this.positions[this.positionIndex];

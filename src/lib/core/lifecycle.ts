@@ -27,40 +27,35 @@ export interface Lifecycle {
 
   /**
    * 当用户输入时调用。
-   * @param renderer
    * @param selection
    */
-  onInput?(renderer: Renderer, selection: TBSelection): boolean;
+  onInput?(selection: TBSelection): boolean;
 
   /**
    * 用户粘贴时调用。
    * @param clipboard 粘贴的内容。
-   * @param renderer
    * @param selection
    */
-  onPaste?(clipboard: Clipboard, renderer: Renderer, selection: TBSelection): boolean;
+  onPaste?(clipboard: Clipboard, selection: TBSelection): boolean;
 
   /**
    * 当用户敲击回车时调用。
-   * @param renderer
    * @param selection
    */
-  onEnter?(renderer: Renderer, selection: TBSelection): boolean;
+  onEnter?(selection: TBSelection): boolean;
 
   /**
    * 当用户删除时调用。
-   * @param renderer
    * @param selection
    */
-  onDelete?(renderer: Renderer, selection: TBSelection): boolean;
+  onDelete?(selection: TBSelection): boolean;
 
   /**
    * 当选区发生变化时调用。
-   * @param renderer
    * @param selection
    * @param contextDocument
    */
-  onSelectionChange?(renderer: Renderer, selection: TBSelection, contextDocument: Document): void;
+  onSelectionChange?(selection: TBSelection, contextDocument: Document): void;
 
   /**
    * 当应用某 Commander 类时调用。
@@ -75,20 +70,18 @@ export interface Lifecycle {
 
   /**
    * 当视图更新前调用
-   * @param renderer
    * @param selection
    * @param editor
    * @param rootFragment
    */
-  onRenderingBefore?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean;
+  onRenderingBefore?(selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean;
 
   /**
    * 当视图更新后调用。
-   * @param renderer
    * @param selection
    * @param editor
    * @param rootFragment
    * @param frameContainer
    */
-  onViewUpdated?(renderer: Renderer, selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement): void;
+  onViewUpdated?(selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement): void;
 }
