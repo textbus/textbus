@@ -4,7 +4,6 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  NativeEventManager,
   VElement,
   ViewData,
   VTextNode
@@ -84,7 +83,7 @@ export class StepComponent extends BranchComponent {
     });
   }
 
-  render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputMode: boolean): VElement {
     const wrap = new VElement('tb-step');
     this.viewMap.clear();
 
@@ -122,19 +121,23 @@ export class StepComponent extends BranchComponent {
         const add = new VElement('span', {
           classes: ['tb-step-item-add']
         });
-        eventManager.listen(add, 'click', () => {
-          this.splice(index, 0, createItem());
-        })
-        eventManager.listen(icon, 'click', () => {
-          const currentStep = this.config.step;
-          if (index === currentStep) {
-            this.config.step = index + 1;
-          } else if (index + 1 === currentStep) {
-            this.config.step = index - 1;
-          } else {
-            this.config.step = index;
-          }
-        })
+        add.onRendered = nativeNode => {
+          nativeNode.addEventListener('click', () => {
+            this.splice(index, 0, createItem());
+          })
+        }
+        icon.onRendered = nativeNode => {
+          nativeNode.addEventListener('click', () => {
+            const currentStep = this.config.step;
+            if (index === currentStep) {
+              this.config.step = index + 1;
+            } else if (index + 1 === currentStep) {
+              this.config.step = index - 1;
+            } else {
+              this.config.step = index;
+            }
+          })
+        }
         item.appendChild(add);
       }
       wrap.appendChild(item);
@@ -146,7 +149,7 @@ export class StepComponent extends BranchComponent {
 
 export const stepsComponentExample: ComponentExample = {
   name: '步骤条',
-  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><circle r="2" cx="10" cy="12"></circle><line x1="12" y1="12" x2="38" y2="12" stroke-width="0.5"></line><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="8" y="22" stroke-width="0" stroke="#000" fill="#000000">标题</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="8" y="27" stroke-width="0" stroke="#000" fill="#000">描述信息...</text></g></defs><use xlink:href="#item" transform="translate(0, 20)" fill="#15bd9a" stroke="#15bd9a"></use><use xlink:href="#item" transform="translate(30, 20)" fill="#1296db" stroke="#1296db"></use><use xlink:href="#item" transform="translate(60, 20)" fill="#aaa" stroke="#aaa"></use></svg>')}">`,
+  example: `<img alt="示例" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><circle r="2" cx="10" cy="12"></circle><line x1="12" y1="12" x2="38" y2="12" stroke-width="0.5"></line><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="8" y="22" stroke-width="0" stroke="#000" fill="#000000">标题</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="8" y="27" stroke-width="0" stroke="#000" fill="#000">描述信息...</text></g></defs><use xlink:href="#item" transform="translate(0, 20)" fill="#15bd9a" stroke="#15bd9a"></use><use xlink:href="#item" transform="translate(30, 20)" fill="#1296db" stroke="#1296db"></use><use xlink:href="#item" transform="translate(60, 20)" fill="#aaa" stroke="#aaa"></use></svg>')}">`,
   componentFactory() {
     return new StepComponent({
       step: 0,

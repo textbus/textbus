@@ -1,7 +1,6 @@
 import { FormatAbstractData } from './format-abstract-data';
 import { VElement } from './element';
 import { ChildSlotMode, ReplaceMode } from './renderer';
-import { NativeEventManager } from './native-event-manager';
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -104,10 +103,6 @@ export interface FormatRendingContext {
    * 渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
    */
   abstractData: FormatAbstractData;
-  /**
-   * 原生事件管理器，用于通过虚拟 DOM 注册或取消原生事件。该对象只在编辑模式下才会传入。
-   */
-  nativeEventManager?: NativeEventManager;
 }
 
 /**

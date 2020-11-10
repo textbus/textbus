@@ -7,7 +7,6 @@ import {
   DivisionComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
-import { EventCache, NativeEventManager } from './native-event-manager';
 
 export interface ElementPosition {
   startIndex: number;
@@ -144,9 +143,6 @@ export class Renderer {
   // 记录输出模式的已渲染组件
   private componentOutputModeVDomCacheMap = new WeakMap<Component, VElement>();
 
-  private eventCache = new EventCache(this);
-  private nativeEventManager = new NativeEventManager(this.eventCache);
-
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
@@ -256,8 +252,6 @@ export class Renderer {
           if (!this.rendererVNodeMap.has(current)) {
             const el = this.NVMappingTable.get(oldFirst);
             childNodes[min] = el;
-            this.eventCache.unbindNativeEvent(oldFirst);
-            this.eventCache.bindNativeEvent(el);
 
             if (current instanceof VElement) {
               this.diff(current, oldFirst as VElement);
@@ -276,9 +270,6 @@ export class Renderer {
           const last = oldVDom.removeLastChild();
           const el = this.NVMappingTable.get(last);
           childNodes[max] = el;
-          this.eventCache.unbindNativeEvent(last);
-
-          this.eventCache.bindNativeEvent(el);
           if (current instanceof VElement) {
             this.diff(current, last as VElement);
           }
@@ -380,7 +371,7 @@ export class Renderer {
   private rendingComponent(component: Component): VElement {
     if (component.dirty) {
       let vElement: VElement;
-      vElement = component.render(this.outputMode, this.nativeEventManager);
+      vElement = component.render(this.outputMode);
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
       if (component instanceof DivisionComponent) {
@@ -467,9 +458,6 @@ export class Renderer {
         state: next.params.state,
         abstractData: next.params.abstractData,
       };
-      if (!this.outputMode) {
-        context.nativeEventManager = this.nativeEventManager;
-      }
       const renderMode = next.token.render(context, vEle);
       if (renderMode instanceof ReplaceMode) {
         elements = [renderMode.replaceElement]
@@ -624,7 +612,6 @@ export class Renderer {
     vDom.classes.forEach(k => el.classList.add(k));
     this.NVMappingTable.set(el, vDom);
 
-    this.eventCache.bindNativeEvent(el);
     if (typeof vDom.onRendered === 'function') {
       vDom.onRendered(el);
     }
@@ -635,7 +622,6 @@ export class Renderer {
     this.rendererVNodeMap.set(vDom, true);
     const el = document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
     this.NVMappingTable.set(el, vDom);
-    this.eventCache.bindNativeEvent(el);
     return el;
   }
 

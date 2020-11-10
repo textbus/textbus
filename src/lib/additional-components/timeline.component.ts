@@ -4,7 +4,6 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  NativeEventManager,
   SlotMap,
   VElement,
   ViewData
@@ -16,7 +15,7 @@ import { colorFormatter, fontSizeFormatter, boldFormatter } from '../formatter/_
 const timelineTypes = ['primary', 'info', 'success', 'warning', 'danger', 'dark', 'gray'];
 const colors = ['#1296db', '#6ad1ec', '#15bd9a', '#ff9900', '#E74F5E', '#495060', '#bbbec4'];
 
-export type TimelineType = 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'dark' | 'gray' ;
+export type TimelineType = 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'dark' | 'gray';
 
 export interface TimelineConfig {
   type: TimelineType;
@@ -135,7 +134,7 @@ export class TimelineComponent extends BranchComponent {
     }));
   }
 
-  render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputMode: boolean): VElement {
     this.viewMap.clear();
     const list = new VElement('tb-timeline');
     this.vEle = list;
@@ -169,30 +168,34 @@ export class TimelineComponent extends BranchComponent {
       if (!isOutputMode) {
         icon.attrs.set('title', '点击切换颜色');
 
-        eventManager.listen(icon, 'click', () => {
-          const currentType = item.type;
-          if (!currentType) {
-            item.type = timelineTypes[0] as TimelineType;
-          } else {
-            item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
-          }
-        })
+        icon.onRendered = nativeNode => {
+          nativeNode.addEventListener('click', () => {
+            const currentType = item.type;
+            if (!currentType) {
+              item.type = timelineTypes[0] as TimelineType;
+            } else {
+              item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
+            }
+          })
+        }
 
         const btn = new VElement('span', {
           classes: ['tb-timeline-add']
         });
         child.appendChild(btn);
 
-        eventManager.listen(btn, 'click', () => {
-          const newSlot = {
-            type: item.type,
-            checked: item.checked,
-            fragment: createTimelineItem().fragment
-          };
-          const index = this.indexOf(item.fragment) + 1;
-          this.list.splice(index, 0, newSlot);
-          this.splice(index, 0, newSlot.fragment);
-        })
+        btn.onRendered = nativeNode => {
+          nativeNode.addEventListener('click', () => {
+            const newSlot = {
+              type: item.type,
+              checked: item.checked,
+              fragment: createTimelineItem().fragment
+            };
+            const index = this.indexOf(item.fragment) + 1;
+            this.list.splice(index, 0, newSlot);
+            this.splice(index, 0, newSlot.fragment);
+          })
+        }
       }
 
       child.appendChild(content);
@@ -207,7 +210,7 @@ export class TimelineComponent extends BranchComponent {
 
 export const timelineComponentExample: ComponentExample = {
   name: '时间轴',
-  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><circle r="2" cx="10" cy="12"></circle><line x1="10" y1="12" x2="10" y2="24" stroke-width="0.5"></line><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="16" y="14" stroke-width="0" stroke="#000" fill="#000000">事件主题</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="38" y="13.5" stroke-width="0" stroke="#000" fill="#888">2020-08-08</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="16" y="20" stroke-width="0" stroke="#000" fill="#000000">详细说明...</text></g></defs><use xlink:href="#item" fill="#1296db" stroke="#1296db"></use><use xlink:href="#item" transform="translate(0, 14)" fill="#15bd9a" stroke="#15bd9a"></use><use xlink:href="#item" transform="translate(0, 28)" fill="#495060" stroke="#495060"></use><use xlink:href="#item" transform="translate(0, 42)" fill="#E74F5E" stroke="#E74F5E"></use></svg>')}">`,
+  example: `<img alt="示例" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><circle r="2" cx="10" cy="12"></circle><line x1="10" y1="12" x2="10" y2="24" stroke-width="0.5"></line><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="16" y="14" stroke-width="0" stroke="#000" fill="#000000">事件主题</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="38" y="13.5" stroke-width="0" stroke="#000" fill="#888">2020-08-08</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="16" y="20" stroke-width="0" stroke="#000" fill="#000000">详细说明...</text></g></defs><use xlink:href="#item" fill="#1296db" stroke="#1296db"></use><use xlink:href="#item" transform="translate(0, 14)" fill="#15bd9a" stroke="#15bd9a"></use><use xlink:href="#item" transform="translate(0, 28)" fill="#495060" stroke="#495060"></use><use xlink:href="#item" transform="translate(0, 42)" fill="#E74F5E" stroke="#E74F5E"></use></svg>')}">`,
   componentFactory() {
     return new TimelineComponent([createTimelineItem()]);
   }

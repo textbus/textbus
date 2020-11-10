@@ -4,7 +4,6 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  NativeEventManager,
   VElement,
   ViewData
 } from '../core/_api';
@@ -83,7 +82,7 @@ export class WordExplainComponent extends BackboneComponent {
     });
   }
 
-  render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputMode: boolean): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
     Array.from(this).forEach(f => {
@@ -122,10 +121,12 @@ export class WordExplainComponent extends BackboneComponent {
         }
       });
       wrap.appendChild(close);
-      eventManager.listen(close, 'click', () => {
-        const parentFragment = this.parentFragment;
-        parentFragment.remove(parentFragment.indexOf(this), 1);
-      })
+      close.onRendered = nativeNode => {
+        nativeNode.addEventListener('click', () => {
+          const parentFragment = this.parentFragment;
+          parentFragment.remove(parentFragment.indexOf(this), 1);
+        })
+      }
     }
 
     return wrap;
@@ -134,7 +135,7 @@ export class WordExplainComponent extends BackboneComponent {
 
 export const wordExplainComponentExample: ComponentExample = {
   name: '名词释义',
-  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#eee" height="18" width="90" rx="2" x="5" y="6"/><line x1="26" y1="9" x2="26" y2="20.5" stroke="#000" stroke-dasharray="0.8 0.8" stroke-width="0.1"></line><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="14" stroke-width="0" stroke="#000" fill="#000000">名词</text><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="12" y="20" stroke-width="0" stroke="#000" fill="#000000">说明</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="30" y="14" stroke-width="0" stroke="#000" fill="#000000">详细解释...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 20)"></use><use xlink:href="#item" transform="translate(0, 40)"></use></svg>')}">`,
+  example: `<img alt="示例" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#eee" height="18" width="90" rx="2" x="5" y="6"/><line x1="26" y1="9" x2="26" y2="20.5" stroke="#000" stroke-dasharray="0.8 0.8" stroke-width="0.1"></line><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="14" stroke-width="0" stroke="#000" fill="#000000">名词</text><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="12" y="20" stroke-width="0" stroke="#000" fill="#000000">说明</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="30" y="14" stroke-width="0" stroke="#000" fill="#000000">详细解释...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 20)"></use><use xlink:href="#item" transform="translate(0, 40)"></use></svg>')}">`,
   componentFactory() {
     const title = new Fragment();
     title.append('名词');
