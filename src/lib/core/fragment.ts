@@ -17,7 +17,8 @@ import {
 } from './formatter';
 import { FormatMap } from './format-map';
 import { Marker } from './marker';
-import { Constructor } from '@tanbo/textbus/lib/core/constructor';
+import { Constructor } from './constructor';
+import { EventEmitter } from './events';
 
 /**
  * 应用样式的可选参数。
@@ -35,6 +36,7 @@ export const parentComponentAccessToken = Symbol('ParentComponentAccessToken');
  * TextBus 抽象数据类
  */
 export class Fragment extends Marker {
+  readonly events = new EventEmitter();
   [parentComponentAccessToken]: DivisionComponent | BranchComponent | BackboneComponent | null;
 
   get parentComponent() {

@@ -1,5 +1,3 @@
-import { EventEmitter } from './events';
-
 /**
  * 虚拟 DOM 节点的字面量表示。
  */
@@ -78,8 +76,8 @@ export interface VElementOption {
  * 虚拟 DOM 节点
  */
 export class VElement {
+  onRendered: (nativeNode: HTMLElement) => void;
   [parentNode]: VElement | null;
-  readonly events = new EventEmitter();
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
   readonly classes: string[] = [];
@@ -120,14 +118,12 @@ export class VElement {
     this.styles.forEach((value, key) => {
       styles[key] = value;
     })
-    const el = new VElement(this.tagName, {
+    return new VElement(this.tagName, {
       classes: [...this.classes],
       attrs,
       styles,
       childNodes: this._childNodes.map(i => i.clone())
     });
-    (el as { events: EventEmitter }).events = this.events;
-    return el;
   }
 
   /**

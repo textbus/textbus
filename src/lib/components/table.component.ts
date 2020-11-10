@@ -9,6 +9,7 @@ import {
   BackboneComponent
 } from '../core/_api';
 import { BrComponent } from './br.component';
+import { Subscription } from 'rxjs';
 
 export interface TableCell {
   colspan: number;
@@ -123,8 +124,8 @@ export class TableComponent extends BackboneComponent {
     return n;
   }
 
+  private subs: Subscription[] = [];
   private _cellMatrix: TableRowPosition[];
-
   private deleteMarkFragments: Fragment[] = [];
 
   constructor(public config: TableInitParams) {
@@ -191,23 +192,11 @@ export class TableComponent extends BackboneComponent {
           this.push(col.fragment);
           this.viewMap.set(col.fragment, td);
           tr.appendChild(td);
-          !isOutputMode && td.events.subscribe(event => {
-            if (event.type === EventType.onEnter) {
-              const firstRange = event.selection.firstRange;
-              col.fragment.insert(new BrComponent(), firstRange.startIndex);
-              firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-              const afterContent = col.fragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-              if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
-                event.stopPropagation();
-                return;
-              }
-              col.fragment.insert(new BrComponent(), firstRange.startIndex);
-            } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
-              event.stopPropagation();
-            }
-          })
         }
       }
+    }
+    if (!isOutputMode) {
+      this.handleEvent();
     }
     return table;
   }
@@ -221,6 +210,27 @@ export class TableComponent extends BackboneComponent {
     const maxRow = Math.max(p1.maxRow, p2.maxRow);
     const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
     return this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
+  }
+
+  private handleEvent() {
+    this.subs.forEach(s => s.unsubscribe());
+    this.subs = Array.from(this).map(slot => {
+      return slot.events.subscribe(event => {
+        if (event.type === EventType.onEnter) {
+          const firstRange = event.selection.firstRange;
+          slot.insert(new BrComponent(), firstRange.startIndex);
+          firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+          const afterContent = slot.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+          if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
+            event.stopPropagation();
+            return;
+          }
+          slot.insert(new BrComponent(), firstRange.startIndex);
+        } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
+          event.stopPropagation();
+        }
+      })
+    })
   }
 
   private selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableRange {

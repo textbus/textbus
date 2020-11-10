@@ -8,7 +8,6 @@ import {
   InlineFormatter,
   LeafComponent,
   TBEvent,
-  VElement,
   Component
 } from './core/_api';
 import { BrComponent } from './components/_api';
@@ -17,11 +16,11 @@ import { Input } from './viewer/input';
 export class EventHandler {
   private sub: Subscription;
 
-  listen(vElement: VElement) {
+  listen(fragment: Fragment) {
     if (this.sub) {
       this.sub.unsubscribe();
     }
-    this.sub = vElement.events.subscribe(event => {
+    this.sub = fragment.events.subscribe(event => {
       switch (event.type) {
         case EventType.onDelete:
           this.onDelete(event);

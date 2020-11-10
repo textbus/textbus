@@ -115,11 +115,36 @@ export class PreComponentReader implements ComponentReader {
 }
 
 export class PreComponent extends DivisionComponent {
-  static theme: PreTheme= 'light';
+  static theme: PreTheme = 'light';
   private vEle: VElement;
 
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
+    this.slot.events.subscribe(event => {
+      if (event.type === EventType.onEnter) {
+        const firstRange = event.selection.firstRange;
+        this.slot.insert(new BrComponent(), firstRange.startIndex);
+        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+        event.stopPropagation();
+      } else if (event.type === EventType.onPaste) {
+        const text = event.data.clipboard.text as string;
+        const firstRange = event.selection.firstRange;
+        const startIndex = firstRange.startIndex;
+        const lines = text.split(/(?=\n)/g);
+        let i = 0;
+        lines.forEach(item => {
+          if (item === '\n') {
+            this.slot.insert(new BrComponent(), startIndex + i);
+          } else {
+            this.slot.insert(item, startIndex + i);
+          }
+          i += item.length;
+        })
+        firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
+        firstRange.collapse();
+        event.stopPropagation();
+      }
+    })
   }
 
   getSlotView(): VElement {
@@ -164,31 +189,6 @@ export class PreComponent extends DivisionComponent {
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
     this.vEle = block;
-    !isOutputMode && block.events.subscribe(event => {
-      if (event.type === EventType.onEnter) {
-        const firstRange = event.selection.firstRange;
-        this.slot.insert(new BrComponent(), firstRange.startIndex);
-        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-        event.stopPropagation();
-      } else if (event.type === EventType.onPaste) {
-        const text = event.data.clipboard.text as string;
-        const firstRange = event.selection.firstRange;
-        const startIndex = firstRange.startIndex;
-        const lines = text.split(/(?=\n)/g);
-        let i = 0;
-        lines.forEach(item => {
-          if (item === '\n') {
-            this.slot.insert(new BrComponent(), startIndex + i);
-          } else {
-            this.slot.insert(item, startIndex + i);
-          }
-          i += item.length;
-        })
-        firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
-        firstRange.collapse();
-        event.stopPropagation();
-      }
-    })
     return block;
   }
 

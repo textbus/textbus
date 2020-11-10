@@ -10,6 +10,7 @@ import {
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
+import { Subscription } from 'rxjs';
 
 export class ListComponentReader implements ComponentReader {
 
@@ -60,6 +61,8 @@ export class ListComponentReader implements ComponentReader {
 }
 
 export class ListComponent extends BranchComponent {
+  private subs: Subscription[] = [];
+
   constructor(tagName: string) {
     super(tagName);
   }
@@ -75,9 +78,30 @@ export class ListComponent extends BranchComponent {
   render(isOutputMode: boolean) {
     const list = new VElement(this.tagName);
     this.viewMap.clear();
-    this.forEach((slot, index) => {
+    this.forEach(slot => {
       const li = new VElement('li');
-      !isOutputMode && li.events.subscribe(event => {
+      list.appendChild(li);
+      this.viewMap.set(slot, li);
+    })
+    if (!isOutputMode) {
+      this.handleEnter();
+    }
+    return list;
+  }
+
+  split(startIndex: number, endIndex: number) {
+    return {
+      before: this.slice(0, startIndex),
+      center: this.slice(startIndex, endIndex),
+      after: this.slice(endIndex)
+    }
+  }
+
+  private handleEnter() {
+    this.subs.forEach(i => i.unsubscribe());
+    this.subs = [];
+    this.forEach((slot, index) => {
+      const s = slot.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
           event.stopPropagation();
 
@@ -105,17 +129,7 @@ export class ListComponent extends BranchComponent {
           firstRange.startIndex = firstRange.endIndex = 0;
         }
       });
-      list.appendChild(li);
-      this.viewMap.set(slot, li);
+      this.subs.push(s);
     })
-    return list;
-  }
-
-  split(startIndex: number, endIndex: number) {
-    return {
-      before: this.slice(0, startIndex),
-      center: this.slice(startIndex, endIndex),
-      after: this.slice(endIndex)
-    }
   }
 }

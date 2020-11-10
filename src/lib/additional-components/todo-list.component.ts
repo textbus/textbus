@@ -5,10 +5,10 @@ import {
   ComponentReader,
   VElement,
   ViewData,
-  NativeEventManager
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
+import { Subscription } from 'rxjs';
 
 export interface TodoListConfig {
   active: boolean;
@@ -45,7 +45,7 @@ export class TodoListComponentReader implements ComponentReader {
 }
 
 export class TodoListComponent extends BranchComponent {
-
+  private subs: Subscription[] = [];
   private stateCollection = [{
     active: false,
     disabled: false
@@ -65,7 +65,7 @@ export class TodoListComponent extends BranchComponent {
     this.push(...listConfigs.map(i => i.slot));
   }
 
-  render(isOutputMode: boolean, eventManager: NativeEventManager): VElement {
+  render(isOutputMode: boolean): VElement {
     const list = new VElement('tb-todo-list');
 
     if (this.listConfigs.length === this.slotCount) {
@@ -80,7 +80,7 @@ export class TodoListComponent extends BranchComponent {
 
     this.viewMap.clear();
     this.clean();
-    this.listConfigs.forEach((config, index) => {
+    this.listConfigs.forEach((config) => {
       const slot = config.slot;
 
       const item = new VElement('div', {
@@ -111,51 +111,21 @@ export class TodoListComponent extends BranchComponent {
       this.push(slot);
       list.appendChild(item);
       if (!isOutputMode) {
-        eventManager.listen(state, 'click', ev => {
-          const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
-          const newState = this.stateCollection[i];
-          config.active = newState.active;
-          config.disabled = newState.disabled;
-          const element = ev.target as HTMLElement;
-          config.active ?
-            element.classList.add('tb-todo-list-state-active') :
-            element.classList.remove('tb-todo-list-state-active');
-          config.disabled ?
-            element.classList.add('tb-todo-list-state-disabled') :
-            element.classList.remove('tb-todo-list-state-disabled');
-        })
-        content.events.subscribe(event => {
-          if (event.type === EventType.onEnter) {
-            event.stopPropagation();
-
-            const firstRange = event.selection.firstRange;
-
-            if (slot === this.getSlotAtIndex(this.slotCount - 1)) {
-              const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
-              if (slot.contentLength === 0 ||
-                slot.contentLength === 1 && lastContent instanceof BrComponent) {
-                this.pop();
-                const parentFragment = this.parentFragment;
-                const p = new BlockComponent('p');
-                p.slot.append(new BrComponent());
-                parentFragment.insertAfter(p, this);
-                firstRange.setStart(p.slot, 0);
-                firstRange.collapse();
-                return;
-              }
-            }
-
-            const next = breakingLine(slot, firstRange.startIndex);
-
-            this.listConfigs.splice(index + 1, 0, {
-              ...config,
-              slot: next
-            });
-            this.splice(index + 1, 0, next);
-            firstRange.startFragment = firstRange.endFragment = next;
-            firstRange.startIndex = firstRange.endIndex = 0;
-          }
-        })
+        this.handleEnter();
+        state.onRendered = element => {
+          element.addEventListener('click', () => {
+            const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
+            const newState = this.stateCollection[i];
+            config.active = newState.active;
+            config.disabled = newState.disabled;
+            config.active ?
+              element.classList.add('tb-todo-list-state-active') :
+              element.classList.remove('tb-todo-list-state-active');
+            config.disabled ?
+              element.classList.add('tb-todo-list-state-disabled') :
+              element.classList.remove('tb-todo-list-state-disabled');
+          })
+        }
       }
     })
     return list;
@@ -171,6 +141,46 @@ export class TodoListComponent extends BranchComponent {
     return new TodoListComponent(configs);
   }
 
+  private handleEnter() {
+    this.subs.forEach(s => s.unsubscribe());
+    this.subs = this.listConfigs.map((config, index) => {
+      const slot = config.slot;
+      return slot.events.subscribe(event => {
+        if (event.type === EventType.onEnter) {
+          event.stopPropagation();
+
+          const firstRange = event.selection.firstRange;
+
+          if (slot === this.getSlotAtIndex(this.slotCount - 1)) {
+            const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
+            if (slot.contentLength === 0 ||
+              slot.contentLength === 1 && lastContent instanceof BrComponent) {
+              this.pop();
+              const parentFragment = this.parentFragment;
+              const p = new BlockComponent('p');
+              p.slot.append(new BrComponent());
+              parentFragment.insertAfter(p, this);
+              firstRange.setStart(p.slot, 0);
+              firstRange.collapse();
+              return;
+            }
+          }
+
+          const next = breakingLine(slot, firstRange.startIndex);
+
+          this.listConfigs.splice(index + 1, 0, {
+            ...config,
+            slot: next
+          });
+          this.splice(index + 1, 0, next);
+          firstRange.startFragment = firstRange.endFragment = next;
+          firstRange.startIndex = firstRange.endIndex = 0;
+        }
+      })
+    })
+
+  }
+
   private getStateIndex(active: boolean, disabled: boolean) {
     for (let i = 0; i < 4; i++) {
       const item = this.stateCollection[i];
@@ -184,7 +194,7 @@ export class TodoListComponent extends BranchComponent {
 
 export const todoListComponentExample: ComponentExample = {
   name: '待办事项列表',
-  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#fff" stroke="#1296db" height="8" width="8" rx="2" x="15" y="12"/><text font-family="Helvetica, Arial, sans-serif" font-size="8" x="28" y="19"  stroke-width="0" stroke="#000" fill="#000000">待办事项...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 12)"></use><use xlink:href="#item" transform="translate(0, 24)"></use><use xlink:href="#item" transform="translate(0, 36)"></use></svg>')}">`,
+  example: `<img alt="默认图片" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#fff" stroke="#1296db" height="8" width="8" rx="2" x="15" y="12"/><text font-family="Helvetica, Arial, sans-serif" font-size="8" x="28" y="19"  stroke-width="0" stroke="#000" fill="#000000">待办事项...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 12)"></use><use xlink:href="#item" transform="translate(0, 24)"></use><use xlink:href="#item" transform="translate(0, 36)"></use></svg>')}">`,
   componentFactory() {
     const fragment = new Fragment();
     fragment.append('待办事项...');

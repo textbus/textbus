@@ -48,6 +48,29 @@ export class ImageCardComponent extends BackboneComponent {
 
     this.push(this.imgFragment);
     this.push(this.descFragment);
+
+    this.imgFragment.events.subscribe(ev => {
+      ev.stopPropagation();
+    });
+
+    this.descFragment.events.subscribe(ev => {
+      if (!ev.selection) {
+        return;
+      }
+      const firstRange = ev.selection.firstRange;
+      if (ev.type === EventType.onEnter) {
+        const parentFragment = this.parentFragment;
+        const p = new BlockComponent('p');
+        p.slot.append(new BrComponent());
+        parentFragment.insertAfter(p, this);
+        firstRange.setStart(p.slot, 0);
+        firstRange.collapse();
+        ev.stopPropagation();
+      }
+      if (ev.type === EventType.onDelete && firstRange.startIndex === 0) {
+        ev.stopPropagation();
+      }
+    })
   }
 
   canDelete(deletedSlot: Fragment): boolean {
@@ -69,31 +92,6 @@ export class ImageCardComponent extends BackboneComponent {
       this.descFragment.append(new BrComponent());
     }
     this.viewMap.set(this.descFragment, desc);
-    if (!isOutputMode) {
-      imgWrapper.events.subscribe(ev => {
-        ev.stopPropagation();
-      });
-
-      desc.events.subscribe(ev => {
-        if (!ev.selection) {
-          return;
-        }
-        const firstRange = ev.selection.firstRange;
-        if (ev.type === EventType.onEnter) {
-          const parentFragment = this.parentFragment;
-          const p = new BlockComponent('p');
-          p.slot.append(new BrComponent());
-          parentFragment.insertAfter(p, this);
-          firstRange.setStart(p.slot, 0);
-          firstRange.collapse();
-          ev.stopPropagation();
-        }
-        if (ev.type === EventType.onDelete && firstRange.startIndex === 0) {
-          ev.stopPropagation();
-        }
-      })
-    }
-
     return card;
   }
 

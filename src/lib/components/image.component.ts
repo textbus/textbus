@@ -1,4 +1,4 @@
-import { ComponentReader, EventType, LeafComponent, VElement, ViewData } from '../core/_api';
+import { ComponentReader, LeafComponent, VElement, ViewData } from '../core/_api';
 import { fromEvent } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
@@ -80,11 +80,9 @@ export class ImageComponent extends LeafComponent {
       const shadowImage = new Image();
       const src = this.src;
       let nativeImage: HTMLImageElement;
-      el.events.subscribe(ev => {
-        if (ev.type === EventType.onRendered) {
-          nativeImage = ev.data.nativeNode as HTMLImageElement;
-        }
-      })
+      el.onRendered = nativeNode => {
+        nativeImage = nativeNode as HTMLImageElement
+      };
 
       const s = fromEvent(shadowImage, 'load').pipe(auditTime(300)).subscribe(() => {
         this.loadedImages.push(src);

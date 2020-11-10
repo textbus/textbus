@@ -31,6 +31,21 @@ export class BlockComponent extends DivisionComponent {
   private v: VElement;
   constructor(tagName: string) {
     super(tagName);
+    this.slot.events.subscribe(event => {
+      if (event.type === EventType.onEnter) {
+        const parent = this.parentFragment;
+
+        const component = new BlockComponent('p');
+        const firstRange = event.selection.firstRange;
+        const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
+        component.slot.from(next);
+        parent.insertAfter(component, this);
+        const position = firstRange.findFirstPosition(component.slot);
+        firstRange.startFragment = firstRange.endFragment = position.fragment;
+        firstRange.startIndex = firstRange.endIndex = position.index;
+        event.stopPropagation();
+      }
+    })
   }
 
   getSlotView(): VElement {
@@ -46,21 +61,6 @@ export class BlockComponent extends DivisionComponent {
   render(isOutputMode: boolean) {
     const block = new VElement(this.tagName);
     this.v = block;
-    !isOutputMode && block.events.subscribe(event => {
-      if (event.type === EventType.onEnter) {
-        const parent = this.parentFragment;
-
-        const component = new BlockComponent('p');
-        const firstRange = event.selection.firstRange;
-        const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
-        component.slot.from(next);
-        parent.insertAfter(component, this);
-        const position = firstRange.findFirstPosition(component.slot);
-        firstRange.startFragment = firstRange.endFragment = position.fragment;
-        firstRange.startIndex = firstRange.endIndex = position.index;
-        event.stopPropagation();
-      }
-    })
     return block;
   }
 }

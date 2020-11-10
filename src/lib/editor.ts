@@ -16,6 +16,7 @@ import {
   Lifecycle,
   Parser,
   Renderer,
+  TBEvent,
   TBRange,
   TBRangePosition,
   TBSelection,
@@ -336,6 +337,7 @@ export class Editor implements FileUploader {
   }
 
   private setup() {
+    this.eventHandler.listen(this.rootFragment);
     this.rootFragment.onChange.pipe(debounceTime(1)).subscribe(() => {
       this.render();
       while (this.renderedCallbacks.length) {
@@ -377,10 +379,10 @@ export class Editor implements FileUploader {
       }), map(() => {
         return this.nativeSelection.focusNode;
       }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
-        const vEle = this.renderer.getVDomByNativeNode(node.nodeType === 3 ? node.parentNode : node) as VElement;
-        if (vEle) {
-          this.renderer.dispatchEvent(vEle, EventType.onFocus, this.selection);
-        }
+        // const vEle = this.renderer.getVDomByNativeNode(node.nodeType === 3 ? node.parentNode : node) as VElement;
+        // if (vEle) {
+        //   this.renderer.dispatchEvent(vEle, EventType.onFocus, this.selection);
+        // }
         this.statusBar.paths.update(node);
       }),
       this.toolbar.onAction.subscribe(config => {
@@ -531,12 +533,6 @@ export class Editor implements FileUploader {
         key: ['Backspace', 'Delete']
       },
       action: () => {
-        const focusNode = this.nativeSelection.focusNode;
-        let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
-        const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
-        if (!vElement) {
-          return;
-        }
         const selection = this.selection;
         let isNext = true;
         (this.options.hooks || []).forEach(lifecycle => {
@@ -547,7 +543,7 @@ export class Editor implements FileUploader {
           }
         })
         if (isNext) {
-          this.renderer.dispatchEvent(vElement, EventType.onDelete, selection);
+          this.dispatchEvent(selection.commonAncestorFragment, EventType.onDelete);
         }
         const isEmpty = this.rootFragment.contentLength === 0;
         const firstRange = selection.firstRange;
@@ -681,8 +677,7 @@ export class Editor implements FileUploader {
     } else {
       Editor.guardLastIsParagraph(rootFragment);
     }
-    const vEle = this.renderer.render(rootFragment, this.viewer.contentDocument.body);
-    this.eventHandler.listen(vEle);
+    this.renderer.render(rootFragment, this.viewer.contentDocument.body);
     this.invokeViewUpdatedHooks();
     if (this.readyState) {
       this.dispatchContentChangeEvent();
@@ -701,16 +696,37 @@ export class Editor implements FileUploader {
                                     eventData: { [key: string]: any },
                                     callHooksFn: () => boolean): boolean {
     const focusNode = this.nativeSelection.focusNode;
-    let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
-    const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
-    if (!vElement) {
+    const position = this.renderer.getPositionByNode(focusNode);
+    if (!position) {
       return;
     }
     const isNext = callHooksFn();
     if (isNext) {
-      this.renderer.dispatchEvent(vElement, eventType, this.selection, eventData);
+      this.dispatchEvent(position.fragment, eventType, eventData);
     }
     return isNext;
+  }
+
+  /**
+   * 发布事件
+   * @param by        最开始发生事件的虚拟 DOM 元素。
+   * @param type      事件类型。
+   * @param data      附加的数据。
+   */
+  dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
+    let stopped = false;
+    do {
+      const event = new TBEvent({
+        type,
+        selection: this.selection,
+        data
+      });
+      by.events.emit(event);
+      stopped = event.stopped;
+      if (!stopped) {
+        by = by.parentComponent?.parentFragment;
+      }
+    } while (!stopped && by);
   }
 
   private moveCursor(direction: CursorMoveDirection) {

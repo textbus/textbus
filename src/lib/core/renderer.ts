@@ -7,8 +7,6 @@ import {
   DivisionComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
-import { EventType, TBEvent } from './events';
-import { TBSelection } from './selection';
 import { EventCache, NativeEventManager } from './native-event-manager';
 
 export interface ElementPosition {
@@ -235,30 +233,6 @@ export class Renderer {
    */
   getVElementByFragment(fragment: Fragment): VElement {
     return this.fragmentAndVDomMapping.get(fragment);
-  }
-
-  /**
-   * 发布事件
-   * @param by        最开始发生事件的虚拟 DOM 元素。
-   * @param type      事件类型。
-   * @param selection 当前的选区对象。
-   * @param data      附加的数据。
-   */
-  dispatchEvent(by: VElement, type: EventType, selection: TBSelection, data?: { [key: string]: any }) {
-    let stopped = false;
-    do {
-      const event = new TBEvent({
-        type,
-        selection,
-        data
-      });
-      by.events.emit(event);
-      stopped = event.stopped;
-      console.log(by)
-      if (!stopped) {
-        by = by.parentNode;
-      }
-    } while (!stopped && by);
   }
 
   private diff(vDom: VElement, oldVDom: VElement): Node {
@@ -651,14 +625,9 @@ export class Renderer {
     this.NVMappingTable.set(el, vDom);
 
     this.eventCache.bindNativeEvent(el);
-
-    vDom.events.emit(new TBEvent({
-      type: EventType.onRendered,
-      selection: null,
-      data: {
-        nativeNode: el
-      }
-    }));
+    if (typeof vDom.onRendered === 'function') {
+      vDom.onRendered(el);
+    }
     return el;
   }
 
