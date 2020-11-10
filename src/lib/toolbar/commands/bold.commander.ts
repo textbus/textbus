@@ -19,7 +19,7 @@ export class BoldCommander implements Commander<null> {
       return;
     }
     context.selection.ranges.forEach(range => {
-      const componentContext = context.renderer.getContext(range.commonAncestorFragment, BlockComponent);
+      const componentContext = range.commonAncestorFragment.getContext(BlockComponent);
       const hasContext = componentContext && /h[1-6]/i.test(componentContext.tagName);
       const state = hasContext ?
         (context.overlap ? FormatEffect.Exclude : FormatEffect.Inherit) :

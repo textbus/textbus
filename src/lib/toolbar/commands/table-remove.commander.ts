@@ -5,10 +5,10 @@ export class TableRemoveCommander implements Commander<null> {
   recordHistory = true;
 
   command(c: CommandContext) {
-    const {selection, renderer, rootFragment} = c;
+    const {selection, rootFragment} = c;
     this.recordHistory = true;
     const firstRange = selection.firstRange;
-    const context = renderer.getContext(firstRange.startFragment, TableComponent);
+    const context = firstRange.startFragment.getContext(TableComponent);
     if (context) {
       let position = firstRange.findFirstPosition(context.getSlotAtIndex(0));
       firstRange.setStart(position.fragment, position.index);

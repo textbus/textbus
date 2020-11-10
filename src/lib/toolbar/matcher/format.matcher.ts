@@ -30,7 +30,7 @@ export class FormatMatcher implements Matcher {
     }
     const srcStates: RangeMatchState<FormatAbstractData>[] = selection.ranges.map(range => {
 
-      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
+      let isDisable = rangeContentInComponent(range, this.excludeComponents);
 
       if (isDisable) {
         return {

@@ -14,7 +14,7 @@ export class ToggleBlockCommander implements Commander<null> {
     const {selection, overlap, renderer} = context;
     selection.ranges.forEach(range => {
       if (overlap) {
-        const context = renderer.getContext(range.commonAncestorFragment,
+        const context = range.commonAncestorFragment.getContext(
           BlockComponent,
           instance => {
             return instance.tagName === this.tagName;

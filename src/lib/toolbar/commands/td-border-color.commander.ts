@@ -17,9 +17,9 @@ export class TdBorderColorCommander implements Commander<string> {
   }
 
   command(c: CommandContext, color: string) {
-    const {renderer, selection} = c;
+    const {selection} = c;
     this.recordHistory = true;
-    const context = renderer.getContext(selection.firstRange.startFragment, TableComponent);
+    const context = selection.firstRange.startFragment.getContext(TableComponent);
     if (!context) {
       this.recordHistory = false;
       return;

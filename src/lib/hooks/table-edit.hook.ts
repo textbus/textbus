@@ -177,7 +177,7 @@ export class TableEditHook implements Lifecycle {
 
     const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
     const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
-    const table = this.renderer.getContext(cell1Fragment, TableComponent);
+    const table = cell1Fragment.getContext(TableComponent);
     this.tableComponent = table;
 
     const {startCellPosition, endCellPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);

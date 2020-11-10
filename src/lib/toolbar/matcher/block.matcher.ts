@@ -20,7 +20,7 @@ export class BlockMatcher implements Matcher {
     }
 
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
+      let isDisable = rangeContentInComponent(range, this.excludeComponents);
 
       if (isDisable) {
         return {
@@ -36,7 +36,7 @@ export class BlockMatcher implements Matcher {
         this.tagNames.includes(range.commonAncestorComponent.tagName)) {
         return range.commonAncestorComponent;
       }
-      return renderer.getContext(range.commonAncestorFragment, this.componentConstructor, instance => {
+      return range.commonAncestorFragment.getContext(this.componentConstructor, instance => {
         return this.tagNames.includes(instance.tagName);
       });
     });

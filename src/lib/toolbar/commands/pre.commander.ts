@@ -8,11 +8,11 @@ export class PreCommander implements Commander<string> {
   recordHistory = true;
 
   command(context: CommandContext, lang: string): void {
-    const {overlap, selection, renderer} = context;
+    const {overlap, selection} = context;
     let b = true;
     if (overlap) {
       selection.ranges.forEach(range => {
-        const context = renderer.getContext(range.startFragment, PreComponent);
+        const context = range.startFragment.getContext(PreComponent);
         if (context.lang === lang) {
           b = false;
           return;

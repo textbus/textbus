@@ -8,7 +8,7 @@ export class TableEditMatcher implements Matcher {
 
   queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
     for (const range of selection.ranges) {
-      let has = rangeContentInComponent(range, renderer, [TableComponent]);
+      let has = rangeContentInComponent(range, [TableComponent]);
       if (!has) {
         return {
           state: HighlightState.Disabled,

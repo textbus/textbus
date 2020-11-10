@@ -17,6 +17,7 @@ import {
 } from './formatter';
 import { FormatMap } from './format-map';
 import { Marker } from './marker';
+import { Constructor } from '@tanbo/textbus/lib/core/constructor';
 
 /**
  * 应用样式的可选参数。
@@ -510,5 +511,31 @@ export class Fragment extends Marker {
     });
     cacheFormats.forEach(f => this.formatMap.merge(f.token, f.params, important));
     this.markAsDirtied();
+  }
+
+  /**
+   * 根据 fragment，向上查找最近的某类组件实例。
+   * @param context 指定组件的构造类。
+   * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
+   */
+  getContext<T extends Component>(context: Constructor<T>, filter?: (instance: T) => boolean): T {
+    const componentInstance = this.parentComponent;
+    if (!componentInstance) {
+      return null;
+    }
+    if (componentInstance instanceof context) {
+      if (typeof filter === 'function') {
+        if (filter(componentInstance)) {
+          return componentInstance;
+        }
+      } else {
+        return componentInstance;
+      }
+    }
+    const parentFragment = componentInstance.parentFragment;
+    if (!parentFragment) {
+      return null;
+    }
+    return parentFragment.getContext(context, filter);
   }
 }

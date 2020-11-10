@@ -161,7 +161,7 @@ export class TBRange {
   getSlotRange<T extends BranchComponent | BackboneComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ component: T, index: number }> = [];
     this.getSelectedScope().forEach(scope => {
-      const context = this.renderer.getContext(scope.fragment, of, filter);
+      const context = scope.fragment.getContext(of, filter);
       let fragment: Fragment = scope.fragment;
       while (fragment) {
         const parentComponent = fragment.parentComponent;

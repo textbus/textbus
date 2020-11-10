@@ -1,4 +1,4 @@
-import { TBSelection, Constructor, Renderer, BranchComponent, DivisionComponent } from '../../core/_api';
+import { TBSelection, Constructor, BranchComponent, DivisionComponent } from '../../core/_api';
 import { Matcher, SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
@@ -7,9 +7,9 @@ export class TableMatcher implements Matcher {
   constructor(private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
+      let isDisable = rangeContentInComponent(range, this.excludeComponents);
 
       if (isDisable) {
         return {

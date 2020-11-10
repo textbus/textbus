@@ -17,7 +17,7 @@ export class CodeMatcher implements Matcher {
       if (range.commonAncestorComponent instanceof PreComponent) {
         return range.commonAncestorComponent;
       }
-      return renderer.getContext(range.commonAncestorFragment, PreComponent);
+      return range.commonAncestorFragment.getContext(PreComponent);
     });
     return {
       state: contextComponents.map(i => !!i).includes(false) ? HighlightState.Normal : HighlightState.Highlight,

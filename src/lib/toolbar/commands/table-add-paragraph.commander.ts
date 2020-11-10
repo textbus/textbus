@@ -5,10 +5,10 @@ export class TableAddParagraphCommander implements Commander<null> {
   recordHistory = true;
 
   command(c: CommandContext) {
-    const {renderer, selection} = c;
+    const {selection} = c;
     this.recordHistory = true;
     const firstRange = selection.firstRange;
-    const context = renderer.getContext(firstRange.startFragment, TableComponent);
+    const context = firstRange.startFragment.getContext(TableComponent);
     if (context) {
       const parentFragment = context.parentFragment;
       const p = new BlockComponent('p');

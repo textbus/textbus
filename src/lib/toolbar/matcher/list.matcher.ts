@@ -19,7 +19,7 @@ export class ListMatcher implements Matcher {
     }
 
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInComponent(range, renderer, this.excludeComponents);
+      let isDisable = rangeContentInComponent(range, this.excludeComponents);
       if (isDisable) {
         return {
           state: HighlightState.Disabled,
@@ -39,7 +39,7 @@ export class ListMatcher implements Matcher {
         }
       }
 
-      const context = renderer.getContext(range.commonAncestorFragment, ListComponent);
+      const context = range.commonAncestorFragment.getContext(ListComponent);
       return {
         state: context && context.tagName === this.tagName ? HighlightState.Highlight : HighlightState.Normal,
         srcData: context,
