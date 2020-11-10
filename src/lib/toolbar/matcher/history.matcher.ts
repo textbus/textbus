@@ -1,5 +1,5 @@
 import { Matcher, SelectionMatchState } from './matcher';
-import { TBSelection, Renderer } from '../../core/_api';
+import { TBSelection } from '../../core/_api';
 import { Editor } from '../../editor';
 import { HighlightState } from '../help';
 
@@ -7,7 +7,7 @@ export class HistoryMatcher implements Matcher {
   constructor(private type: 'forward' | 'back') {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchState {
+  queryState(selection: TBSelection, editor: Editor): SelectionMatchState {
     switch (this.type) {
       case 'back':
         return {

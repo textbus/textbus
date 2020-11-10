@@ -28,7 +28,7 @@ export class TableEditCommander implements Commander<TableEditActions> {
   }
 
   command(c: CommandContext, actionType: TableEditActions) {
-    const {selection, renderer} = c;
+    const {selection} = c;
     const context = selection.firstRange.startFragment.getContext(TableComponent);
     this.recordHistory = true;
     if (!context) {

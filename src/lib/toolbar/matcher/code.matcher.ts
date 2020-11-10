@@ -1,11 +1,11 @@
 import { Matcher, SelectionMatchState } from './matcher';
-import { TBSelection, Renderer } from '../../core/_api';
+import { TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 import { PreComponent } from '../../components/pre.component';
 
 export class CodeMatcher implements Matcher {
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

@@ -373,7 +373,7 @@ export class Editor implements FileUploader {
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
         this.elementRef.dispatchEvent(event);
-        this.toolbar.updateHandlerState(this.selection, this.renderer, this.openSourceCodeMode);
+        this.toolbar.updateHandlerState(this.selection, this.openSourceCodeMode);
       }), map(() => {
         return this.nativeSelection.focusNode;
       }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
@@ -627,7 +627,7 @@ export class Editor implements FileUploader {
     }
 
     const state = config.matcher ?
-      config.matcher.queryState(selection, this.renderer, this).state :
+      config.matcher.queryState(selection, this).state :
       HighlightState.Normal;
     if (state === HighlightState.Disabled) {
       return;
@@ -646,13 +646,12 @@ export class Editor implements FileUploader {
       commander.command({
         selection,
         overlap,
-        renderer: this.renderer,
         rootFragment: this.rootFragment
       }, params);
       this.addRenderedTask(() => {
         selection.restore();
         this.recordSnapshotFromEditingBefore();
-        this.toolbar.updateHandlerState(selection, this.renderer, this.openSourceCodeMode);
+        this.toolbar.updateHandlerState(selection, this.openSourceCodeMode);
       })
     }
     this.addRenderedTask(() => {

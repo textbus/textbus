@@ -92,7 +92,7 @@ export class Toolbar {
     })
   }
 
-  updateHandlerState(selection: TBSelection, renderer: Renderer, sourceCodeMode: boolean) {
+  updateHandlerState(selection: TBSelection, sourceCodeMode: boolean) {
     if (this._disabled) {
       return;
     }
@@ -103,7 +103,7 @@ export class Toolbar {
           srcStates: [],
           matchData: null,
           state: HighlightState.Disabled
-        } : tool.config.matcher?.queryState(selection, renderer, this.context) || {
+        } : tool.config.matcher?.queryState(selection, this.context) || {
           srcStates: [],
           matchData: null,
           state: HighlightState.Normal

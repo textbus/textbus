@@ -6,7 +6,6 @@ import {
   FormatRange,
   Fragment,
   InlineFormatter,
-  Renderer,
   DivisionComponent,
   TBSelection,
   Constructor
@@ -20,7 +19,7 @@ export class FormatMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (!selection.rangeCount) {
       return {
         srcStates: [],

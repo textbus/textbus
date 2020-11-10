@@ -1,5 +1,5 @@
 import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
-import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, TBSelection } from '../../core/_api';
 import { ListComponent } from '../../components/list.component';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
@@ -9,7 +9,7 @@ export class ListMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

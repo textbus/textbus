@@ -1,4 +1,4 @@
-import { TBSelection, Renderer } from '../../core/_api';
+import { TBSelection } from '../../core/_api';
 import { Matcher, SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
@@ -6,7 +6,7 @@ import { TableComponent } from '../../components/table.component';
 
 export class TableEditMatcher implements Matcher {
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     for (const range of selection.ranges) {
       let has = rangeContentInComponent(range, [TableComponent]);
       if (!has) {

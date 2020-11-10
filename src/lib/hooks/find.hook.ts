@@ -66,7 +66,6 @@ export class FindHook implements Lifecycle {
       this.commander.command({
         selection,
         overlap: false,
-        renderer,
         rootFragment
       }, this.positions);
     }

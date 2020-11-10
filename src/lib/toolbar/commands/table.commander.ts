@@ -5,7 +5,7 @@ export class TableCommander implements Commander<Map<string, string | number | b
   recordHistory = true;
 
   command(context: CommandContext, attrs: Map<string, string | number | boolean>): void {
-    const {selection, renderer} = context;
+    const {selection} = context;
     const rows = +attrs.get('rows') || 0;
     const cols = +attrs.get('cols') || 0;
     const useTextBusStyle = !!attrs.get('useTextBusStyle');

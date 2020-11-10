@@ -36,5 +36,5 @@ export interface SelectionMatchState<T = FormatAbstractData | Component > {
 }
 
 export interface Matcher {
-  queryState(selection: TBSelection, renderer: Renderer, editor: Editor): SelectionMatchState;
+  queryState(selection: TBSelection, editor: Editor): SelectionMatchState;
 }

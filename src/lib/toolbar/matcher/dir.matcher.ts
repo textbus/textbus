@@ -1,5 +1,5 @@
 import { FormatMatcher } from './format.matcher';
-import { TBSelection, Renderer, FormatAbstractData } from '../../core/_api';
+import { TBSelection, FormatAbstractData } from '../../core/_api';
 import { SelectionMatchState } from './matcher';
 import { HighlightState } from '../help';
 import { dirFormatter } from '../../formatter/dir.formatter';
@@ -9,7 +9,7 @@ export class DirMatcher extends FormatMatcher {
     super(dirFormatter);
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],
@@ -17,7 +17,7 @@ export class DirMatcher extends FormatMatcher {
         state: HighlightState.Normal
       }
     }
-    const result = super.queryState(selection, renderer);
+    const result = super.queryState(selection);
     if (result.state === HighlightState.Highlight) {
       const matchData = result.matchData as FormatAbstractData;
       if (matchData.attrs.get('dir') !== this.dir) {

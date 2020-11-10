@@ -1,6 +1,6 @@
 import { FormatMatcher } from './format.matcher';
 import { boldFormatter } from '../../formatter/bold.formatter';
-import { BranchComponent, DivisionComponent, Constructor, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, TBSelection } from '../../core/_api';
 import { SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { BlockMatcher } from './block.matcher';
@@ -13,7 +13,7 @@ export class BoldMatcher extends FormatMatcher {
     super(boldFormatter, excludeComponents);
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],
@@ -21,11 +21,11 @@ export class BoldMatcher extends FormatMatcher {
         state: HighlightState.Normal
       }
     }
-    const result = super.queryState(selection, renderer);
+    const result = super.queryState(selection);
     if (result.state !== HighlightState.Normal) {
       return result;
     }
-    const contextMatchResult = this.contextMatcher.queryState(selection, renderer);
+    const contextMatchResult = this.contextMatcher.queryState(selection);
     if (contextMatchResult.state === HighlightState.Highlight &&
       /h[1-6]/i.test((contextMatchResult.matchData as BlockComponent)?.tagName)) {
       return {

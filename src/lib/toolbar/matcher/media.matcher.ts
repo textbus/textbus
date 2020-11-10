@@ -1,5 +1,5 @@
 import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
-import { BranchComponent, DivisionComponent, Constructor, LeafComponent, Renderer, TBSelection } from '../../core/_api';
+import { BranchComponent, DivisionComponent, Constructor, LeafComponent, TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
@@ -8,7 +8,7 @@ export class MediaMatcher implements Matcher {
               private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
   }
 
-  queryState(selection: TBSelection, renderer: Renderer): SelectionMatchState {
+  queryState(selection: TBSelection): SelectionMatchState {
     if (selection.rangeCount === 0) {
       return {
         srcStates: [],

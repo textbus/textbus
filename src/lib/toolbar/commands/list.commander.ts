@@ -14,7 +14,7 @@ export class ListCommander implements Commander<null> {
   }
 
   command(context: CommandContext): void {
-    const {selection, renderer, overlap} = context;
+    const {selection, overlap} = context;
     selection.ranges.forEach(range => {
       if (overlap) {
         range.getSlotRange(ListComponent, instance => instance.tagName === this.tagName).forEach(item => {
