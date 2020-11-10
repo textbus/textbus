@@ -4,12 +4,10 @@ import {
   BackboneComponent,
   BranchComponent,
   Component,
-  DivisionComponent,
-  parentFragmentAccessToken
+  DivisionComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 import { EventType, TBEvent } from './events';
-import { Constructor } from './constructor';
 import { TBSelection } from './selection';
 import { EventCache, NativeEventManager } from './native-event-manager';
 
