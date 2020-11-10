@@ -272,14 +272,14 @@ export class Renderer {
     }
 
     let min = 0;
-    let max = vDom.children.length - 1;
+    let max = vDom.childNodes.length - 1;
     let minToMax = true;
 
     const childNodes: Node[] = [];
     while (min <= max) {
       if (minToMax) {
-        const current = vDom.children[min];
-        if (current.equal(oldVDom.children[0])) {
+        const current = vDom.childNodes[min];
+        if (current.equal(oldVDom.childNodes[0])) {
           const oldFirst = oldVDom.removeFirstChild();
           if (!this.rendererVNodeMap.has(current)) {
             const el = this.NVMappingTable.get(oldFirst);
@@ -297,8 +297,8 @@ export class Renderer {
           minToMax = false;
         }
       } else {
-        const oldLast = oldVDom.children[oldVDom.children.length - 1];
-        const current = vDom.children[max];
+        const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
+        const current = vDom.childNodes[max];
 
         if (current.equal(oldLast)) {
           const last = oldVDom.removeLastChild();
@@ -325,7 +325,7 @@ export class Renderer {
       }
     }
     // 删除过期的节点
-    oldVDom.children.forEach(v => {
+    oldVDom.childNodes.forEach(v => {
       const node = this.NVMappingTable.get(v);
       node.parentNode.removeChild(node);
     });
@@ -349,7 +349,7 @@ export class Renderer {
     const newNode = vDom instanceof VElement ? this.createElement(vDom) : this.createTextNode(vDom);
 
     if (vDom instanceof VElement) {
-      vDom.children.forEach(child => {
+      vDom.childNodes.forEach(child => {
         if (this.rendererVNodeMap.get(child)) {
           newNode.appendChild(this.getNativeNodeByVDom(child));
         } else {

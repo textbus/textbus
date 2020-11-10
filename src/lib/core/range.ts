@@ -1058,7 +1058,7 @@ export class TBRange {
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
     let vElement = this.renderer.getVElementByFragment(fragment);
     parentLoop: while (vElement) {
-      const len = vElement.children.length;
+      const len = vElement.childNodes.length;
       if (len === 0) {
         return {
           node: this.renderer.getNativeNodeByVDom(vElement),
@@ -1067,7 +1067,7 @@ export class TBRange {
       }
       let index = 0;
       for (let i = 0; i < len; i++) {
-        const child = vElement.children[i];
+        const child = vElement.childNodes[i];
         const position = this.renderer.getPositionByVDom(child);
         if (position.fragment === fragment) {
           index = position.endIndex;
@@ -1101,7 +1101,7 @@ export class TBRange {
                   };
                 }
               }
-              if (child.children.length === 0) {
+              if (child.childNodes.length === 0) {
                 const node = this.renderer.getNativeNodeByVDom(child);
                 const parentNode = node.parentNode;
                 const index = Array.from(parentNode.childNodes).indexOf(node as any);

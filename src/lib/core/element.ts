@@ -88,7 +88,7 @@ export class VElement {
     return this[parentNode];
   }
 
-  get children() {
+  get childNodes() {
     return this._childNodes.map(i => i);
   }
 
