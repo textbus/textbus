@@ -120,6 +120,9 @@ export class PreComponent extends DivisionComponent {
 
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
+    this.slot.onChange.subscribe(() => {
+      this.markAsDirtied();
+    })
     this.slot.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
