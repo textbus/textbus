@@ -154,9 +154,9 @@ export class TBRange {
   }
 
   /**
-   * 获取当前选区范围在 BackboneComponent 插槽的范围。
-   * @param of BackboneComponent 子类的构造 class。
-   * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 BackboneComponent 实例。
+   * 获取当前选区范围在 T 插槽的范围。
+   * @param of 子类的构造 class。
+   * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 T 实例。
    */
   getSlotRange<T extends BranchComponent | BackboneComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ component: T, index: number }> = [];

@@ -3,9 +3,15 @@ import {
   Fragment,
   BranchComponent,
   DivisionComponent,
-  TBRangeScope, BackboneComponent, CommandContext
+  TBRangeScope, BackboneComponent, CommandContext, TBRange
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
+
+interface ContentPosition {
+  startIndex: number;
+  endIndex: number;
+  fragment: Fragment;
+}
 
 export class ListCommander implements Commander<null> {
   recordHistory = true;
@@ -53,58 +59,11 @@ export class ListCommander implements Commander<null> {
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const startFragment = range.startFragment;
-        const list = new ListComponent(this.tagName);
-        const branchComponents: Array<BackboneComponent | BranchComponent> = [];
-        const scopes: TBRangeScope[] = [];
-        range.getSuccessiveContents().forEach(scope => {
-          let fragment = scope.fragment;
-          let lastBackboneComponent: BranchComponent | BackboneComponent;
-          while (true) {
-            if (fragment === commonAncestorFragment) {
-              break;
-            }
-            const parentComponent = fragment.parentComponent;
-            fragment = parentComponent.parentFragment;
-            if (parentComponent instanceof BackboneComponent) {
-              lastBackboneComponent = parentComponent;
-            }
-          }
-          if (lastBackboneComponent) {
-            if (branchComponents.includes(lastBackboneComponent)) {
-              return;
-            }
-            branchComponents.push(lastBackboneComponent);
-            const parentFragment = lastBackboneComponent.parentFragment;
-            const index = parentFragment.indexOf(lastBackboneComponent);
-            scopes.push({
-              startIndex: index,
-              endIndex: index + 1,
-              fragment: parentFragment
-            })
-          } else {
-            scopes.push(scope);
-          }
-        });
-        scopes.reverse().forEach(scope => {
-          if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength && scope.fragment !== commonAncestorFragment) {
-            list.unshift(scope.fragment);
-            range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
-            return;
-          }
-          const fragment = new Fragment();
-          fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
 
-          list.unshift(fragment);
-          if (scope.fragment.contentLength === 0) {
-            range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
-          }
-          if (scope.fragment === range.startFragment) {
-            range.setStart(fragment, range.startIndex - scope.startIndex);
-          }
-          if (scope.fragment === range.endFragment) {
-            range.setEnd(fragment, range.endIndex - scope.startIndex);
-          }
-        });
+
+        const scopes = this.getMovableContents(range, commonAncestorFragment);
+        const list = this.buildNewList(scopes, commonAncestorFragment, range);
+
         if (startFragment !== commonAncestorFragment) {
           if (commonAncestorFragment.indexOf(commonScope.startChildComponent) !== -1) {
             commonAncestorFragment.insertAfter(list, commonScope.startChildComponent);
@@ -140,5 +99,67 @@ export class ListCommander implements Commander<null> {
         }
       }
     })
+  }
+
+  private buildNewList(scopes: ContentPosition[],
+                       commonAncestorFragment: Fragment,
+                       range: TBRange) {
+    const list = new ListComponent(this.tagName);
+    scopes.reverse().forEach(scope => {
+      if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength && scope.fragment !== commonAncestorFragment) {
+        range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
+        list.unshift(scope.fragment);
+        return;
+      }
+      const fragment = new Fragment();
+      fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
+
+      list.unshift(fragment);
+      if (scope.fragment.contentLength === 0) {
+        range.deleteEmptyTree(scope.fragment, commonAncestorFragment);
+      }
+      if (scope.fragment === range.startFragment) {
+        range.setStart(fragment, range.startIndex - scope.startIndex);
+      }
+      if (scope.fragment === range.endFragment) {
+        range.setEnd(fragment, range.endIndex - scope.startIndex);
+      }
+    });
+    return list
+  }
+
+  private getMovableContents(range: TBRange, commonAncestorFragment: Fragment): ContentPosition[] {
+    const scopes: TBRangeScope[] = [];
+    const backboneComponents: Array<BackboneComponent> = [];
+    range.getSuccessiveContents().forEach(scope => {
+      let fragment = scope.fragment;
+      let lastBackboneComponent: BackboneComponent;
+      while (true) {
+        if (fragment === commonAncestorFragment) {
+          break;
+        }
+        const parentComponent = fragment.parentComponent;
+        fragment = parentComponent.parentFragment;
+        if (parentComponent instanceof BackboneComponent) {
+          lastBackboneComponent = parentComponent;
+        }
+      }
+      if (lastBackboneComponent) {
+        if (backboneComponents.includes(lastBackboneComponent)) {
+          return;
+        }
+        backboneComponents.push(lastBackboneComponent);
+        const parentFragment = lastBackboneComponent.parentFragment;
+        const index = parentFragment.indexOf(lastBackboneComponent);
+        scopes.push({
+          startIndex: index,
+          endIndex: index + 1,
+          fragment: parentFragment
+        })
+      } else {
+        scopes.push(scope);
+      }
+    });
+    return scopes;
   }
 }
