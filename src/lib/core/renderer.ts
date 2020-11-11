@@ -136,8 +136,6 @@ export class Renderer {
   private rendererVNodeMap = new WeakMap<VTextNode | VElement, true>();
   // 记录虚拟节点和真实 DOM 节点的映射关系
   private NVMappingTable = new NativeElementMappingTable();
-  // 记录干净的组件插槽虚拟节点
-  private pureSlotCacheMap = new WeakMap<Fragment, VElement>();
   // 记录已渲染的组件
   private componentVDomCacheMap = new WeakMap<Component, VElement>();
   // 记录输出模式的已渲染组件
@@ -231,12 +229,13 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  private diff(vDom: VElement, oldVDom: VElement): Node {
-    let host: HTMLElement;
-    if (vDom.equal(oldVDom)) {
-      host = this.NVMappingTable.get(oldVDom) as HTMLElement;
-    } else {
-      host = this.createElement(vDom);
+  private diff(vDom: VElement, oldVDom: VElement, host?: HTMLElement): Node {
+    if (!host) {
+      if (vDom.equal(oldVDom)) {
+        host = this.NVMappingTable.get(oldVDom) as HTMLElement;
+      } else {
+        host = this.createElement(vDom);
+      }
     }
 
     let min = 0;
@@ -325,6 +324,7 @@ export class Renderer {
 
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
     if (fragment.dirty || forceUpdate) {
+      host.clearChildNodes();
       const {childFormats, containerFormats} = formatSeparate(fragment);
       const elements = this.rendingSlotFormats(containerFormats, host);
       const root = elements[0];
@@ -332,10 +332,12 @@ export class Renderer {
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
       });
-      const vDom = root || host;
+      if (root !== host) {
+        throw new Error('插槽节点不能被替换！')
+      }
       if (!this.outputMode) {
         fragment.rendered();
-        this.fragmentAndVDomMapping.set(fragment, vDom);
+        this.fragmentAndVDomMapping.set(fragment, host);
         elements.forEach(el => {
           this.vDomPositionMapping.set(el, {
             fragment,
@@ -344,7 +346,7 @@ export class Renderer {
           })
         })
       }
-      return vDom;
+      return host;
     }
     fragment.sliceContents().forEach(content => {
       if (content instanceof Component && content.changed) {
@@ -380,20 +382,20 @@ export class Renderer {
           vElement.styles.set('userSelect', 'none');
           view.styles.set('userSelect', 'text');
         }
-        this.rendingSlot(component.slot, view);
+        this.rendingFragment(component.slot, view, true);
       } else if (component instanceof BranchComponent) {
         vElement.styles.set('userSelect', 'none');
         component.forEach(fragment => {
           const view = component.getSlotView(fragment);
           view.styles.set('userSelect', 'text');
-          this.rendingSlot(fragment, view);
+          this.rendingFragment(fragment, view, true);
         })
       } else if (component instanceof BackboneComponent) {
         vElement.styles.set('userSelect', 'none');
         Array.from(component).forEach(fragment => {
           const view = component.getSlotView(fragment);
           view.styles.set('userSelect', 'text');
-          this.rendingSlot(fragment, view);
+          this.rendingFragment(fragment, view, true);
         })
       }
       return vElement;
@@ -428,23 +430,14 @@ export class Renderer {
     return this.componentVDomCacheMap.get(component);
   }
 
-  private rendingSlot(fragment: Fragment,
-                      view: VElement) {
-    this.pureSlotCacheMap.set(fragment, view.clone());
-    return this.rendingFragment(fragment, view, true);
-  }
-
   private reuseSlot(slot: Fragment, view: VElement) {
-    const pureView = this.pureSlotCacheMap.get(slot);
-    const vDom = this.rendingFragment(slot, pureView.clone());
-    // 局部更新
-    const newNativeNode = this.diff(vDom, view);
-    const oldNativeNode = this.NVMappingTable.get(view);
-    if (newNativeNode !== oldNativeNode) {
-      oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
-    }
-    Object.assign(view, vDom);
-    this.NVMappingTable.set(view, newNativeNode);
+    const oldView = new VElement(view.tagName);
+    oldView.appendChild(...view.childNodes);
+
+    view.clearChildNodes();
+    const vDom = this.rendingFragment(slot, view);
+
+    this.diff(vDom, oldView, this.getNativeNodeByVDom(view) as HTMLElement);
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {

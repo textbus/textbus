@@ -37,12 +37,18 @@ function equalClasses(left: string[], right: string[]) {
   }
   return true;
 }
+
 const parentNode = Symbol('parentNode');
+
 /**
  * 虚拟文本节点。
  */
 export class VTextNode {
   [parentNode]: VElement | null;
+
+  get parentNode() {
+    return this[parentNode];
+  }
 
   constructor(public readonly textContent: string = '') {
   }
@@ -107,6 +113,10 @@ export class VElement {
         this.appendChild(...options.childNodes);
       }
     }
+  }
+
+  clearChildNodes() {
+    this._childNodes = [];
   }
 
   clone(): VElement {

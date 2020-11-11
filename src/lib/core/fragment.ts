@@ -456,6 +456,7 @@ export class Fragment extends Marker {
           return self.contentLength;
         }
       }, important);
+      this.parentComponent?.markAsDirtied();
       this.markAsDirtied();
       return;
     }
@@ -512,6 +513,9 @@ export class Fragment extends Marker {
       index += item.length;
     });
     cacheFormats.forEach(f => this.formatMap.merge(f.token, f.params, important));
+    if (formatRange.startIndex === 0 && formatRange.endIndex === this.contentLength) {
+      this.parentComponent?.markAsDirtied();
+    }
     this.markAsDirtied();
   }
 
