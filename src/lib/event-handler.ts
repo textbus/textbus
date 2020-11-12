@@ -176,6 +176,9 @@ export class EventHandler {
 
         const firstContent = range.startFragment.getContentAtIndex(0);
         if (firstContent instanceof BrComponent) {
+          if (prevPosition.fragment === range.startFragment && prevPosition.index === range.startIndex) {
+            prevPosition = range.getNextPosition();
+          }
           range.startFragment.cut(0, 1);
           if (range.startFragment.contentLength === 0) {
             range.deleteEmptyTree(range.startFragment);
