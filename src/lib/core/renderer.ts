@@ -153,9 +153,9 @@ export class Renderer {
         if (this.oldVDom) {
           this.diff(root, this.oldVDom, host);
         } else {
-          this.oldVDom = root;
           this.patch(root, host);
         }
+        this.oldVDom = root;
       } else {
         this.rendingFragment(fragment, this.oldVDom);
       }
