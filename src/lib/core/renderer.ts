@@ -230,84 +230,6 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  private diff2(vDom: VElement, oldVDom: VElement, host?: HTMLElement): Node {
-    if (!host) {
-      if (vDom.equal(oldVDom)) {
-        host = this.NVMappingTable.get(oldVDom) as HTMLElement;
-      } else {
-        host = this.createElement(vDom);
-      }
-    }
-
-    let min = 0;
-    let max = vDom.childNodes.length - 1;
-    let minToMax = true;
-
-    const childNodes: Node[] = [];
-    while (min <= max) {
-      if (minToMax) {
-        const current = vDom.childNodes[min];
-        if (current.equal(oldVDom.childNodes[0])) {
-          const oldFirst = oldVDom.removeFirstChild();
-          const el = this.NVMappingTable.get(oldFirst);
-          childNodes[min] = el;
-          this.NVMappingTable.set(current, el);
-          if (!this.rendererVNodeMap.has(current)) {
-            if (current instanceof VElement) {
-              this.diff(current, oldFirst as VElement, el as HTMLElement);
-            }
-            this.rendererVNodeMap.set(current, true);
-          }
-          min++;
-        } else {
-          minToMax = false;
-        }
-      } else {
-        const oldLast = oldVDom.childNodes[oldVDom.childNodes.length - 1];
-        const current = vDom.childNodes[max];
-
-        if (current.equal(oldLast)) {
-          const last = oldVDom.removeLastChild();
-          const el = this.NVMappingTable.get(last);
-          childNodes[max] = el;
-          if (current instanceof VElement) {
-            this.diff(current, last as VElement);
-          }
-          this.NVMappingTable.set(el, current);
-        } else {
-          const el = this.patch(current);
-          childNodes[max] = el;
-          host.appendChild(el);
-          if (oldLast) {
-            const el = this.NVMappingTable.get(oldLast);
-            el.parentNode.removeChild(el);
-            oldVDom.removeLastChild();
-          }
-        }
-        max--;
-      }
-    }
-    // 删除过期的节点
-    oldVDom.childNodes.forEach(v => {
-      const node = this.NVMappingTable.get(v);
-      node.parentNode.removeChild(node);
-    });
-    // 确保新节点顺序和预期一致
-    childNodes.forEach((child, index) => {
-      const nativeChildNodes = host.childNodes;
-      const oldChild = nativeChildNodes[index];
-      if (oldChild) {
-        if (oldChild !== child) {
-          host.insertBefore(child, oldChild);
-        }
-      } else {
-        host.appendChild(child);
-      }
-    })
-
-    return host;
-  }
-
   diff(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
     if (!host) {
       if (vDom.equal(oldVDom)) {
@@ -569,11 +491,13 @@ export class Renderer {
       } else {
         const vDom = this.rendingComponent(item);
         if (!this.outputMode) {
-          this.vDomPositionMapping.set(vDom, {
-            fragment,
-            startIndex: i,
-            endIndex: i + 1
-          })
+          if (!(item instanceof DivisionComponent) || item.getSlotView() !== vDom) {
+            this.vDomPositionMapping.set(vDom, {
+              fragment,
+              startIndex: i,
+              endIndex: i + 1
+            })
+          }
         }
         children.push(vDom);
         i++;
