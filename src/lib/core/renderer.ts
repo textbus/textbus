@@ -148,16 +148,17 @@ export class Renderer {
     console.time()
     if (fragment.changed) {
       const dirty = fragment.dirty;
-      const vDom = fragment.dirty ? new VElement('body') : this.oldVDom;
-      const root = this.rendingFragment(fragment, vDom);
-
       if (dirty) {
-        const nativeNode = this.patch(root);
-        if (nativeNode !== host) {
-          host.parentNode.replaceChild(nativeNode, host);
+        const root = this.rendingFragment(fragment, new VElement('body'))
+        if (this.oldVDom) {
+          this.diff(root, this.oldVDom, host);
+        } else {
+          this.oldVDom = root;
+          this.patch(root, host);
         }
+      } else {
+        this.rendingFragment(fragment, this.oldVDom);
       }
-      this.oldVDom = root;
     }
     console.timeEnd()
     return this.oldVDom;
@@ -229,7 +230,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  private diff(vDom: VElement, oldVDom: VElement, host?: HTMLElement): Node {
+  private diff2(vDom: VElement, oldVDom: VElement, host?: HTMLElement): Node {
     if (!host) {
       if (vDom.equal(oldVDom)) {
         host = this.NVMappingTable.get(oldVDom) as HTMLElement;
@@ -248,14 +249,14 @@ export class Renderer {
         const current = vDom.childNodes[min];
         if (current.equal(oldVDom.childNodes[0])) {
           const oldFirst = oldVDom.removeFirstChild();
+          const el = this.NVMappingTable.get(oldFirst);
+          childNodes[min] = el;
+          this.NVMappingTable.set(current, el);
           if (!this.rendererVNodeMap.has(current)) {
-            const el = this.NVMappingTable.get(oldFirst);
-            childNodes[min] = el;
-
             if (current instanceof VElement) {
-              this.diff(current, oldFirst as VElement);
+              this.diff(current, oldFirst as VElement, el as HTMLElement);
             }
-            this.NVMappingTable.set(current, el);
+            this.rendererVNodeMap.set(current, true);
           }
           min++;
         } else {
@@ -307,8 +308,82 @@ export class Renderer {
     return host;
   }
 
-  private patch(vDom: VElement | VTextNode) {
-    const newNode = vDom instanceof VElement ? this.createElement(vDom) : this.createTextNode(vDom);
+  diff(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
+    if (!host) {
+      if (vDom.equal(oldVDom)) {
+        host = this.NVMappingTable.get(oldVDom) as HTMLElement;
+      } else {
+        host = this.createElement(vDom);
+      }
+    }
+
+    const leftChildNodes = vDom.childNodes;
+    const rightChildNodes = oldVDom.childNodes;
+
+    let leftIndex = 0;
+    let rightIndex = 0;
+    const leftLength = leftChildNodes.length;
+    const rightLength = rightChildNodes.length;
+
+    let rightStartIndex = 0;
+
+    const childNodes: Node[] = [];
+
+    while (leftIndex < leftLength) {
+      const left = leftChildNodes[leftIndex];
+
+      let isFind = false;
+      let right: VTextNode | VElement;
+      while (rightIndex < rightLength) {
+        right = rightChildNodes[rightIndex];
+        if (left === right) {
+          let i = rightStartIndex;
+          while (i < rightIndex) {
+            const abandonedVNode = rightChildNodes[i];
+            const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
+            abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
+            i++;
+          }
+          rightStartIndex = rightIndex + 1;
+          isFind = true;
+          break;
+        } else {
+          rightIndex++;
+        }
+      }
+      if (isFind) {
+        childNodes[leftIndex] = this.getNativeNodeByVDom(right);
+        rightChildNodes[rightIndex] = null;
+        rightIndex++;
+      } else {
+        childNodes[leftIndex] = this.patch(left);
+        rightIndex = rightStartIndex;
+      }
+      leftIndex++;
+    }
+    while (rightStartIndex < rightLength) {
+      const abandonedVNode = rightChildNodes[rightStartIndex];
+      const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
+      abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
+      rightStartIndex++;
+    }
+    // 确保新节点顺序和预期一致
+    childNodes.forEach((child, index) => {
+      const nativeChildNodes = host.childNodes;
+      const oldChild = nativeChildNodes[index];
+      if (oldChild) {
+        if (oldChild !== child) {
+          host.insertBefore(child, oldChild);
+        }
+      } else {
+        host.appendChild(child);
+      }
+    })
+    return host;
+  }
+
+  private patch(vDom: VElement | VTextNode, host?: HTMLElement) {
+    const newNode = host || (vDom instanceof VElement ? this.createElement(vDom) : this.createTextNode(vDom));
 
     if (vDom instanceof VElement) {
       vDom.childNodes.forEach(child => {
@@ -494,13 +569,11 @@ export class Renderer {
       } else {
         const vDom = this.rendingComponent(item);
         if (!this.outputMode) {
-          if (!(item instanceof DivisionComponent) || item.getSlotView() !== vDom) {
-            this.vDomPositionMapping.set(vDom, {
-              fragment,
-              startIndex: i,
-              endIndex: i + 1
-            })
-          }
+          this.vDomPositionMapping.set(vDom, {
+            fragment,
+            startIndex: i,
+            endIndex: i + 1
+          })
         }
         children.push(vDom);
         i++;

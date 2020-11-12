@@ -221,11 +221,10 @@ export class TableComponent extends BackboneComponent {
           slot.insert(new BrComponent(), firstRange.startIndex);
           firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
           const afterContent = slot.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-          if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
-            event.stopPropagation();
-            return;
+          if (!afterContent) {
+            slot.append(new BrComponent());
           }
-          slot.insert(new BrComponent(), firstRange.startIndex);
+          event.stopPropagation();
         } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
           event.stopPropagation();
         }

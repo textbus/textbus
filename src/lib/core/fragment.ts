@@ -297,6 +297,10 @@ export class Fragment extends Marker {
    * @param count
    */
   cut(startIndex: number, count = this.contents.length - startIndex) {
+    const fragment = new Fragment()
+    if (count === 0) {
+      return fragment;
+    }
     const endIndex = startIndex + count;
     const selfFormatMap = new FormatMap();
     const discardedFormatMap = new FormatMap();
@@ -396,7 +400,6 @@ export class Fragment extends Marker {
       })
     })
     this.formatMap = selfFormatMap;
-    const fragment = new Fragment()
     this.contents.cut(startIndex, endIndex).forEach(i => {
       fragment.append(i);
       if (i instanceof Component) {
