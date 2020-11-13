@@ -171,7 +171,7 @@ export class Contents {
       } else {
         const c = item.clone();
         c[parentFragmentAccessToken] = null;
-        newContents.append(item.clone());
+        newContents.append(c);
       }
     });
     return newContents;
