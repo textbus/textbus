@@ -322,6 +322,28 @@ export class Editor implements FileUploader {
   }
 
   /**
+   * 发布事件
+   * @param by        最开始发生事件的虚拟 DOM 元素。
+   * @param type      事件类型。
+   * @param data      附加的数据。
+   */
+  dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
+    let stopped = false;
+    do {
+      const event = new TBEvent({
+        type,
+        selection: this.selection,
+        data
+      });
+      by.events.emit(event);
+      stopped = event.stopped;
+      if (!stopped) {
+        by = by.parentComponent?.parentFragment;
+      }
+    } while (!stopped && by);
+  }
+
+  /**
    * 销毁 TextBus 实例。
    */
   destroy() {
@@ -705,28 +727,6 @@ export class Editor implements FileUploader {
       this.dispatchEvent(position.fragment, eventType, eventData);
     }
     return isNext;
-  }
-
-  /**
-   * 发布事件
-   * @param by        最开始发生事件的虚拟 DOM 元素。
-   * @param type      事件类型。
-   * @param data      附加的数据。
-   */
-  dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
-    let stopped = false;
-    do {
-      const event = new TBEvent({
-        type,
-        selection: this.selection,
-        data
-      });
-      by.events.emit(event);
-      stopped = event.stopped;
-      if (!stopped) {
-        by = by.parentComponent?.parentFragment;
-      }
-    } while (!stopped && by);
   }
 
   private moveCursor(direction: CursorMoveDirection) {
