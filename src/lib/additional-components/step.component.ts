@@ -3,7 +3,7 @@ import {
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
-  Fragment,
+  Fragment, SlotRendererFn,
   VElement,
   ViewData,
   VTextNode
@@ -83,9 +83,8 @@ export class StepComponent extends BranchComponent {
     });
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const wrap = new VElement('tb-step');
-    this.viewMap.clear();
 
     this.slots.forEach((slot, index) => {
 
@@ -114,7 +113,7 @@ export class StepComponent extends BranchComponent {
               icon
             ]
           }),
-          content
+          slotRendererFn(slot, content)
         ]
       });
       if (!isOutputMode) {
@@ -141,7 +140,6 @@ export class StepComponent extends BranchComponent {
         item.appendChild(add);
       }
       wrap.appendChild(item);
-      this.viewMap.set(slot, content);
     })
     return wrap;
   }

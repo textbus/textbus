@@ -39,7 +39,7 @@ export abstract class ComponentReader {
 
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
-export type SlotRendererFn = (slot: Fragment, host: VElement) => (VElement | VTextNode);
+export type SlotRendererFn = (slot: Fragment, host: VElement) => VElement;
 
 /**
  * TextBus 组件基类，不可直接继承 Component 类。
@@ -90,8 +90,6 @@ export abstract class DivisionComponent extends Component {
       this.markAsChanged();
     })
   }
-
-  abstract getSlotView(): VElement;
 }
 
 /**
@@ -141,21 +139,6 @@ export abstract class BranchComponent extends Component {
       return Reflect.deleteProperty(target, p);
     }
   })
-
-  /**
-   * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
-   */
-  protected viewMap = new Map<Fragment, VElement>();
-
-  /**
-   * 通过子插槽获取对应的虚拟 DOM 节点。
-   * Renderer 类在渲染组件时，只能获取到当前组件的子插槽，但子插槽的内容要渲染到哪个节点内，
-   * Renderer 是不知道的，这时，需要组件明确返回对应的子节点，以便 Renderer 能继续正常工作。
-   * @param slot 当前组件的某一个子插槽
-   */
-  getSlotView(slot: Fragment): VElement {
-    return this.viewMap.get(slot);
-  }
 }
 
 /**
@@ -173,11 +156,6 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   private eventMap = new Map<Fragment, Subscription>();
   private slots: Fragment[] = [];
   private iteratorIndex = 0;
-  /**
-   * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。
-   */
-  protected viewMap = new Map<Fragment, VElement>();
-
 
   /**
    * 当用户在文档中作框选删除时，由于 BackboneComponent 是不可编辑的，所以会导致 TextBus 无法判断当前组件是否为空组件，
@@ -186,16 +164,6 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
    * @param deletedSlot 当前清空的 fragment。
    */
   abstract canDelete(deletedSlot: Fragment): boolean;
-
-  /**
-   * 通过子插槽获取对应的虚拟 DOM 节点。
-   * Renderer 类在渲染组件时，只能获取到当前组件的子插槽，但子插槽的内容要渲染到哪个节点内，
-   * Renderer 是不知道的，这时，需要组件明确返回对应的子节点，以便 Renderer 能继续正常工作。
-   * @param slot 当前组件的某一个子插槽
-   */
-  getSlotView(slot: Fragment): VElement {
-    return this.viewMap.get(slot);
-  }
 
   [Symbol.iterator]() {
     this.iteratorIndex = 0;

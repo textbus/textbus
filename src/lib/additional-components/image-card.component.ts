@@ -4,7 +4,7 @@ import {
   VElement,
   ViewData,
   BackboneComponent,
-  Fragment
+  Fragment, SlotRendererFn
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
@@ -77,21 +77,18 @@ export class ImageCardComponent extends BackboneComponent {
     return deletedSlot === this.imgFragment;
   }
 
-  render(isOutputMode: boolean): VElement {
-    this.viewMap.clear();
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     this.clean();
     this.push(this.imgFragment, this.descFragment);
     const card = new VElement(this.tagName);
     const imgWrapper = new VElement('div');
     const desc = new VElement('p');
-    card.appendChild(imgWrapper);
-    card.appendChild(desc);
-    this.viewMap.set(this.imgFragment, imgWrapper);
+    card.appendChild(slotRendererFn(this.imgFragment, imgWrapper));
+    card.appendChild(slotRendererFn(this.descFragment, desc));
 
     if (this.descFragment.contentLength === 0) {
       this.descFragment.append(new BrComponent());
     }
-    this.viewMap.set(this.descFragment, desc);
     return card;
   }
 

@@ -5,7 +5,7 @@ import {
   ViewData,
   Fragment,
   VElement,
-  EventType, TBEvent
+  EventType, TBEvent, SlotRendererFn
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
@@ -75,13 +75,11 @@ export class ListComponent extends BranchComponent {
     return component;
   }
 
-  render(isOutputMode: boolean) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const list = new VElement(this.tagName);
-    this.viewMap.clear();
     this.slots.forEach(slot => {
       const li = new VElement('li');
-      list.appendChild(li);
-      this.viewMap.set(slot, li);
+      list.appendChild(slotRendererFn(slot, li));
     })
     if (!isOutputMode) {
       this.handleEnter();

@@ -6,7 +6,7 @@ import {
   ComponentReader,
   VElement,
   ViewData,
-  BackboneComponent
+  BackboneComponent, SlotRendererFn
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { Subscription } from 'rxjs';
@@ -163,12 +163,11 @@ export class TableComponent extends BackboneComponent {
     return new TableComponent(config);
   }
 
-  render(isOutputMode: boolean) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
       table.classes.push('tb-table');
     }
-    this.viewMap.clear();
     this.clean();
     this.deleteMarkFragments = [];
     const bodyConfig = this.config.bodies;
@@ -190,8 +189,7 @@ export class TableComponent extends BackboneComponent {
             col.fragment.append(new BrComponent());
           }
           this.push(col.fragment);
-          this.viewMap.set(col.fragment, td);
-          tr.appendChild(td);
+          tr.appendChild(slotRendererFn(col.fragment, td));
         }
       }
     }

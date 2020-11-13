@@ -1,4 +1,4 @@
-import { ComponentReader, DivisionComponent, VElement, ViewData } from '../core/_api';
+import { ComponentReader, DivisionComponent, SlotRendererFn, VElement, ViewData } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
 import { FileUploader, Form, FormTextField } from '../uikit/_api';
@@ -34,14 +34,8 @@ export class JumbotronComponentReader implements ComponentReader {
 }
 
 export class JumbotronComponent extends DivisionComponent {
-  private vEle: VElement;
-
   constructor(private options: JumbotronOptions) {
     super('tb-jumbotron');
-  }
-
-  getSlotView(): VElement {
-    return this.vEle;
   }
 
   clone(): JumbotronComponent {
@@ -52,7 +46,7 @@ export class JumbotronComponent extends DivisionComponent {
     return component;
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const vEle = new VElement(this.tagName, {
       styles: {
         backgroundImage: this.options.backgroundImage,
@@ -61,8 +55,7 @@ export class JumbotronComponent extends DivisionComponent {
         minHeight: this.options.minHeight
       }
     });
-    this.vEle = vEle;
-    return vEle;
+    return slotRendererFn(this.slot, vEle);
   }
 }
 

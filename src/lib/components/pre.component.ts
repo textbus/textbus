@@ -9,7 +9,7 @@ import {
   FormatRendingContext,
   Fragment,
   InlineFormatter,
-  ReplaceMode,
+  ReplaceMode, SlotRendererFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -116,7 +116,6 @@ export class PreComponentReader implements ComponentReader {
 
 export class PreComponent extends DivisionComponent {
   static theme: PreTheme = 'light';
-  private vEle: VElement;
 
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
@@ -150,17 +149,13 @@ export class PreComponent extends DivisionComponent {
     })
   }
 
-  getSlotView(): VElement {
-    return this.vEle;
-  }
-
   clone() {
     const component = new PreComponent(this.lang);
     component.slot.from(this.slot.clone());
     return component;
   }
 
-  render(isOutputMode: boolean) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const languageGrammar = this.getLanguageGrammar();
     const content = this.slot.sliceContents(0).map(item => {
       if (typeof item === 'string') {
@@ -191,8 +186,7 @@ export class PreComponent extends DivisionComponent {
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
-    this.vEle = block;
-    return block;
+    return slotRendererFn(this.slot, block);
   }
 
   format(tokens: Array<string | Token>, slot: Fragment, index: number) {

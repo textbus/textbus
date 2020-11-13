@@ -4,7 +4,7 @@ import {
   Fragment,
   ComponentReader,
   VElement,
-  ViewData,
+  ViewData, SlotRendererFn,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -65,7 +65,7 @@ export class TodoListComponent extends BranchComponent {
     this.slots.push(...listConfigs.map(i => i.slot));
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const list = new VElement('tb-todo-list');
 
     if (this.listConfigs.length === this.slots.length) {
@@ -78,7 +78,6 @@ export class TodoListComponent extends BranchComponent {
       });
     }
 
-    this.viewMap.clear();
     this.slots.length = 0;
     this.listConfigs.forEach((config) => {
       const slot = config.slot;
@@ -103,11 +102,10 @@ export class TodoListComponent extends BranchComponent {
       const content = new VElement('div', {
         classes: ['tb-todo-list-content']
       });
-      item.appendChild(content);
+      item.appendChild(slotRendererFn(slot, content));
       if (slot.contentLength === 0) {
         slot.append(new BrComponent());
       }
-      this.viewMap.set(slot, content);
       this.slots.push(slot);
       list.appendChild(item);
       if (!isOutputMode) {

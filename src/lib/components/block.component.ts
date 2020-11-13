@@ -3,7 +3,7 @@ import {
   ViewData,
   VElement,
   EventType,
-  DivisionComponent
+  DivisionComponent, SlotRendererFn
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -28,7 +28,6 @@ export class BlockComponentReader implements ComponentReader {
 }
 
 export class BlockComponent extends DivisionComponent {
-  private v: VElement;
   constructor(tagName: string) {
     super(tagName);
     this.slot.events.subscribe(event => {
@@ -48,19 +47,14 @@ export class BlockComponent extends DivisionComponent {
     })
   }
 
-  getSlotView(): VElement {
-    return this.v;
-  }
-
   clone() {
     const component = new BlockComponent(this.tagName);
     component.slot.from(this.slot.clone());
     return component;
   }
 
-  render(isOutputMode: boolean) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const block = new VElement(this.tagName);
-    this.v = block;
-    return block;
+    return slotRendererFn(this.slot, block);
   }
 }

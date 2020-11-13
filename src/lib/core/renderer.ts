@@ -392,24 +392,24 @@ export class Renderer {
     }
     if (component instanceof DivisionComponent) {
       if (component.slot.dirty) {
-        this.reuseSlot(component.slot, component.getSlotView());
+        this.reuseSlot(component.slot, this.fragmentAndVDomMapping.get(component.slot));
       } else if (component.slot.changed) {
-        this.rendingFragment(component.slot, component.getSlotView())
+        this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
       }
     } else if (component instanceof BranchComponent) {
       component.slots.forEach(fragment => {
         if (fragment.dirty) {
-          this.reuseSlot(fragment, component.getSlotView(fragment));
+          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.changed) {
-          this.rendingFragment(fragment, component.getSlotView(fragment));
+          this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
       })
     } else if (component instanceof BackboneComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.dirty) {
-          this.reuseSlot(fragment, component.getSlotView(fragment));
+          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.changed) {
-          this.rendingFragment(fragment, component.getSlotView(fragment));
+          this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
       })
     }
@@ -484,7 +484,7 @@ export class Renderer {
       } else {
         const vDom = this.rendingComponent(item);
         if (!this.outputMode) {
-          if (!(item instanceof DivisionComponent) || item.getSlotView() !== vDom) {
+          if (!(item instanceof DivisionComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
             this.vDomPositionMapping.set(vDom, {
               fragment,
               startIndex: i,

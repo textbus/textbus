@@ -4,7 +4,7 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  SlotMap,
+  SlotMap, SlotRendererFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -134,8 +134,7 @@ export class TimelineComponent extends BranchComponent {
     }));
   }
 
-  render(isOutputMode: boolean): VElement {
-    this.viewMap.clear();
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const list = new VElement('tb-timeline');
     this.vEle = list;
     this.list = this.list.filter(i => {
@@ -198,10 +197,8 @@ export class TimelineComponent extends BranchComponent {
         }
       }
 
-      child.appendChild(content);
+      child.appendChild(slotRendererFn(item.fragment, content));
       list.appendChild(child);
-
-      this.viewMap.set(item.fragment, content);
     })
 
     return list;

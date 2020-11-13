@@ -3,7 +3,7 @@ import {
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
-  Fragment,
+  Fragment, SlotRendererFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -82,7 +82,7 @@ export class WordExplainComponent extends BackboneComponent {
     });
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(isOutputMode: boolean, slotRenderFn: SlotRendererFn): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
     Array.from(this).forEach(f => {
@@ -98,21 +98,18 @@ export class WordExplainComponent extends BackboneComponent {
     const title = new VElement('h3', {
       classes: ['tb-word-explain-title']
     });
-    titleGroup.appendChild(title);
+    titleGroup.appendChild(slotRenderFn(this.title, title));
 
     const subtitle = new VElement('div', {
       classes: ['tb-word-explain-subtitle']
     });
-    titleGroup.appendChild(subtitle);
+    titleGroup.appendChild(slotRenderFn(this.subtitle, subtitle));
 
     const detail = new VElement('div', {
       classes: ['tb-word-explain-detail']
     });
-    wrap.appendChild(detail);
+    wrap.appendChild(slotRenderFn(this.detail, detail));
 
-    this.viewMap.set(this.title, title);
-    this.viewMap.set(this.subtitle, subtitle);
-    this.viewMap.set(this.detail, detail);
     if (!isOutputMode) {
       const close = new VElement('span', {
         classes: ['tb-word-explain-close'],
