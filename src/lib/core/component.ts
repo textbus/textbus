@@ -102,7 +102,7 @@ export abstract class BranchComponent extends Component {
   /**
    * 子插槽的集合
    */
-  readonly slots = new Proxy([] as Fragment[], {
+  readonly slots = new Proxy<Fragment[]>([], {
     set: (target: any[], p: PropertyKey, value: any, receiver: any) => {
       if (typeof p === 'string') {
         if (/\d+/.test(p) && value instanceof Fragment) {
@@ -114,9 +114,13 @@ export abstract class BranchComponent extends Component {
         } else if (p === 'length' && typeof value === 'number') {
           for (let i = value; i < target.length; i++) {
             const deletedValue = target[i];
-            this.eventMap.get(deletedValue).unsubscribe();
-            this.eventMap.delete(deletedValue);
-            deletedValue[parentComponentAccessToken] = null;
+            if (deletedValue) {
+              this.eventMap.get(deletedValue).unsubscribe();
+              this.eventMap.delete(deletedValue);
+              deletedValue[parentComponentAccessToken] = null;
+
+              this.markAsDirtied();
+            }
           }
         }
       }
@@ -128,6 +132,8 @@ export abstract class BranchComponent extends Component {
         this.eventMap.get(deletedValue).unsubscribe();
         this.eventMap.delete(deletedValue);
         deletedValue[parentComponentAccessToken] = null;
+
+        this.markAsDirtied();
       }
       return Reflect.deleteProperty(target, p);
     }
