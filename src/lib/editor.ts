@@ -797,7 +797,7 @@ export class Editor implements FileUploader {
       } else if (parentComponent instanceof BranchComponent) {
         const ff = new Fragment();
         ff.append(component);
-        parentComponent.splice(parentComponent.indexOf(startFragment) + 1, 0, ff);
+        parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);
       } else {
         startFragment.insert(component, firstRange.endIndex);
       }

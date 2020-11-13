@@ -382,7 +382,7 @@ export class Renderer {
         this.rendingFragment(component.slot, view, true);
       } else if (component instanceof BranchComponent) {
         vElement.styles.set('userSelect', 'none');
-        component.forEach(fragment => {
+        component.slots.forEach(fragment => {
           const view = component.getSlotView(fragment);
           view.styles.set('userSelect', 'text');
           this.rendingFragment(fragment, view, true);
@@ -404,7 +404,7 @@ export class Renderer {
         this.rendingFragment(component.slot, component.getSlotView())
       }
     } else if (component instanceof BranchComponent) {
-      component.forEach(fragment => {
+      component.slots.forEach(fragment => {
         if (fragment.dirty) {
           this.reuseSlot(fragment, component.getSlotView(fragment));
         } else if (fragment.changed) {

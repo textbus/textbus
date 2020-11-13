@@ -5,7 +5,7 @@ import {
   ViewData,
   Fragment,
   VElement,
-  EventType
+  EventType, TBEvent
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
@@ -28,7 +28,7 @@ export class ListComponentReader implements ComponentReader {
     const childNodes = Array.from(el.childNodes);
     while (childNodes.length) {
       const slot = new Fragment();
-      component.push(slot);
+      component.slots.push(slot);
       let first = childNodes.shift();
       let newLi: HTMLElement;
       while (first) {
@@ -69,8 +69,8 @@ export class ListComponent extends BranchComponent {
 
   clone() {
     const component = new ListComponent(this.tagName);
-    this.forEach(f => {
-      component.push(f.clone());
+    this.slots.forEach(f => {
+      component.slots.push(f.clone());
     });
     return component;
   }
@@ -78,7 +78,7 @@ export class ListComponent extends BranchComponent {
   render(isOutputMode: boolean) {
     const list = new VElement(this.tagName);
     this.viewMap.clear();
-    this.forEach(slot => {
+    this.slots.forEach(slot => {
       const li = new VElement('li');
       list.appendChild(li);
       this.viewMap.set(slot, li);
@@ -91,26 +91,26 @@ export class ListComponent extends BranchComponent {
 
   split(startIndex: number, endIndex: number) {
     return {
-      before: this.slice(0, startIndex),
-      center: this.slice(startIndex, endIndex),
-      after: this.slice(endIndex)
+      before: this.slots.slice(0, startIndex),
+      center: this.slots.slice(startIndex, endIndex),
+      after: this.slots.slice(endIndex)
     }
   }
 
   private handleEnter() {
     this.subs.forEach(i => i.unsubscribe());
     this.subs = [];
-    this.forEach((slot, index) => {
-      const s = slot.events.subscribe(event => {
+    this.slots.forEach((slot, index) => {
+      const s = slot.events.subscribe((event: TBEvent) => {
         if (event.type === EventType.onEnter) {
           event.stopPropagation();
 
           const firstRange = event.selection.firstRange;
-          if (slot === this.getSlotAtIndex(this.slotCount - 1)) {
+          if (slot === this.getSlotAtIndex(this.slots.length - 1)) {
             const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
             if (slot.contentLength === 0 ||
               slot.contentLength === 1 && lastContent instanceof BrComponent) {
-              this.pop();
+              this.slots.pop();
               const parentFragment = this.parentFragment;
               const p = new BlockComponent('p');
               p.slot.from(new Fragment());
@@ -124,7 +124,7 @@ export class ListComponent extends BranchComponent {
 
           const next = breakingLine(slot, firstRange.startIndex);
 
-          this.splice(index + 1, 0, next);
+          this.slots.splice(index + 1, 0, next);
           firstRange.startFragment = firstRange.endFragment = next;
           firstRange.startIndex = firstRange.endIndex = 0;
         }

@@ -46,7 +46,7 @@ export class LinkCommander implements Commander<Map<string, string>> {
         let index = 0;
         scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(content => {
           if (content instanceof BranchComponent) {
-            content.forEach(item => {
+            content.slots.forEach(item => {
               item.apply(this.formatter, {
                 startIndex: 0,
                 endIndex: item.contentLength,

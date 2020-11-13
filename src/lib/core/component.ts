@@ -102,79 +102,32 @@ export abstract class BranchComponent extends Component {
   /**
    * 子插槽的集合
    */
-  private slots: Fragment[] = [];
-
-  get slotCount() {
-    return this.slots.length;
-  }
-
-  unshift(...fragments: Fragment[]) {
-    this.slots.unshift(...fragments);
-    this.setup(fragments);
-    this.markAsDirtied();
-  }
+  readonly slots = new Proxy([] as Fragment[], {
+    set: (target: any[], p: PropertyKey, value: any, receiver: any) => {
+      if (typeof p === 'string' && /\d+/.test(p) && value instanceof Fragment) {
+        value[parentComponentAccessToken] = this;
+        this.eventMap.set(value, value.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+        this.markAsDirtied();
+      }
+      Reflect.set(target, p, value, receiver);
+      return true;
+    },
+    deleteProperty: (target: any[], p: PropertyKey) => {
+      const deletedValue = target[p];
+      if (typeof p ==='string' && /\d+/.test(p) && deletedValue instanceof Fragment) {
+        this.eventMap.get(deletedValue).unsubscribe();
+        this.eventMap.delete(deletedValue);
+        deletedValue[parentComponentAccessToken] = null;
+      }
+      Reflect.deleteProperty(target, p);
+      return true;
+    }
+  })
 
   getSlotAtIndex(index: number) {
     return this.slots[index];
-  }
-
-  clean() {
-    this.slots.forEach(f => {
-      f[parentComponentAccessToken] = null;
-      this.eventMap.get(f).unsubscribe();
-    })
-    this.eventMap.clear();
-    this.slots = [];
-  }
-
-  includes(f: Fragment, fromIndex?: number) {
-    return this.slots.includes(f, fromIndex);
-  }
-
-  slice(start?: number, end?: number) {
-    return this.slots.slice(start, end);
-  }
-
-  push(...fragments: Fragment[]) {
-    this.slots.push(...fragments);
-    this.setup(fragments);
-
-    this.markAsDirtied();
-  }
-
-  pop() {
-    const f = this.slots.pop();
-    if (f) {
-      f[parentComponentAccessToken] = null;
-      this.eventMap.get(f).unsubscribe();
-      this.eventMap.delete(f);
-    }
-
-    this.markAsDirtied();
-    return f;
-  }
-
-  splice(start: number, deleteCount?: number, ...items: Fragment[]): Fragment[] {
-    const deletedSlots = this.slots.splice(start, deleteCount, ...items);
-
-    deletedSlots.forEach(f => {
-      f[parentComponentAccessToken] = null;
-      this.eventMap.get(f).unsubscribe();
-      this.eventMap.delete(f);
-    })
-    if (items) {
-      this.setup(items);
-    }
-    this.markAsDirtied();
-    return deletedSlots;
-  }
-
-  indexOf(f: Fragment, fromIndex?: number) {
-    return this.slots.indexOf(f, fromIndex);
-  }
-
-  forEach(callbackFn: (value: Fragment, index: number, array: Fragment[]) => void, thisArg?: any) {
-    this.slots.forEach(callbackFn, thisArg);
   }
 
   /**
@@ -190,15 +143,6 @@ export abstract class BranchComponent extends Component {
    */
   getSlotView(slot: Fragment): VElement {
     return this.viewMap.get(slot);
-  }
-
-  private setup(fragments: Fragment[]) {
-    fragments.forEach(f => {
-      f[parentComponentAccessToken] = this;
-      this.eventMap.set(f, f.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
-    })
   }
 }
 

@@ -73,13 +73,13 @@ export class StepComponent extends BranchComponent {
   constructor(private config: StepsConfig) {
     super('tb-steps');
 
-    this.push(...config.slots);
+    this.slots.push(...config.slots);
   }
 
   clone(): StepComponent {
     return new StepComponent({
       step: this.config.step,
-      slots: [...this.slice()]
+      slots: [...this.slots]
     });
   }
 
@@ -87,7 +87,7 @@ export class StepComponent extends BranchComponent {
     const wrap = new VElement('tb-step');
     this.viewMap.clear();
 
-    this.forEach((slot, index) => {
+    this.slots.forEach((slot, index) => {
 
       const content = new VElement('div', {
         classes: ['tb-step-item-content']
@@ -123,7 +123,7 @@ export class StepComponent extends BranchComponent {
         });
         add.onRendered = nativeNode => {
           nativeNode.addEventListener('click', () => {
-            this.splice(index, 0, createItem());
+            this.slots.splice(index, 0, createItem());
           })
         }
         icon.onRendered = nativeNode => {

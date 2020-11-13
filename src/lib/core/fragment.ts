@@ -480,7 +480,7 @@ export class Fragment extends Marker {
       } else if (item instanceof BranchComponent) {
         newFormat = null;
         if (coverChild) {
-          item.forEach(fragment => {
+          item.slots.forEach(fragment => {
             const newFormatRange = Object.assign({}, formatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
