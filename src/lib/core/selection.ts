@@ -162,7 +162,7 @@ export class TBSelection {
         if (c instanceof DivisionComponent && last === 0) {
           fragment = c.slot;
         } else if (c instanceof BranchComponent) {
-          fragment = c.getSlotAtIndex(last);
+          fragment = c.slots[last];
         } else if (c instanceof BackboneComponent) {
           fragment = c.getSlotAtIndex(last);
         } else {

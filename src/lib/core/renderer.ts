@@ -4,7 +4,7 @@ import {
   BackboneComponent,
   BranchComponent,
   Component,
-  DivisionComponent
+  DivisionComponent, LeafComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 
@@ -370,30 +370,23 @@ export class Renderer {
   private rendingComponent(component: Component): VElement {
     if (component.dirty) {
       let vElement: VElement;
-      vElement = component.render(this.outputMode);
+      vElement = component.render(this.outputMode, (slot, host) => {
+        if (component instanceof LeafComponent) {
+          return null
+        }
+        const view = this.rendingFragment(slot, host, true);
+        view.styles.set('userSelect', 'text');
+        return view;
+      });
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
       if (component instanceof DivisionComponent) {
-        const view = component.getSlotView();
-        if (view !== vElement) {
-          vElement.styles.set('userSelect', 'none');
-          view.styles.set('userSelect', 'text');
+        const slotView = this.fragmentAndVDomMapping.get(component.slot);
+        if (slotView instanceof VElement && slotView !== vElement) {
+          slotView.styles.set('userSelect', 'text');
         }
-        this.rendingFragment(component.slot, view, true);
-      } else if (component instanceof BranchComponent) {
+      } else if (component instanceof BranchComponent || component instanceof BackboneComponent) {
         vElement.styles.set('userSelect', 'none');
-        component.slots.forEach(fragment => {
-          const view = component.getSlotView(fragment);
-          view.styles.set('userSelect', 'text');
-          this.rendingFragment(fragment, view, true);
-        })
-      } else if (component instanceof BackboneComponent) {
-        vElement.styles.set('userSelect', 'none');
-        Array.from(component).forEach(fragment => {
-          const view = component.getSlotView(fragment);
-          view.styles.set('userSelect', 'text');
-          this.rendingFragment(fragment, view, true);
-        })
       }
       return vElement;
     }

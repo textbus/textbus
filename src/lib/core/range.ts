@@ -358,8 +358,8 @@ export class TBRange {
               if (nextContent instanceof DivisionComponent) {
                 position = this.findFirstPosition(nextContent.slot);
               } else if (nextContent instanceof BranchComponent) {
-                if (nextContent.getSlotAtIndex(0)) {
-                  position = this.findFirstPosition(nextContent.getSlotAtIndex(0));
+                if (nextContent.slots[0]) {
+                  position = this.findFirstPosition(nextContent.slots[0]);
                 }
               } else {
                 position = {
@@ -455,7 +455,7 @@ export class TBRange {
         return this.findLastChild(prev.slot);
       }
       if (prev instanceof BranchComponent) {
-        return this.findLastChild(prev.getSlotAtIndex(prev.slots.length - 1));
+        return this.findLastChild(prev.slots[prev.slots.length - 1]);
       }
       if (prev instanceof BackboneComponent) {
         return this.findLastChild(prev.getSlotAtIndex(prev.slotCount - 1));
@@ -481,7 +481,7 @@ export class TBRange {
       if (parentComponent instanceof BranchComponent) {
         const fragmentIndex = parentComponent.slots.indexOf(fragment);
         if (fragmentIndex > 0) {
-          return this.findLastChild(parentComponent.getSlotAtIndex(fragmentIndex - 1));
+          return this.findLastChild(parentComponent.slots[fragmentIndex - 1]);
         }
       }
 
@@ -500,7 +500,7 @@ export class TBRange {
           return this.findLastChild(prevContent.slot);
         }
         if (prevContent instanceof BranchComponent) {
-          return this.findLastChild(prevContent.getSlotAtIndex(prevContent.slots.length - 1));
+          return this.findLastChild(prevContent.slots[prevContent.slots.length - 1]);
         }
         if (prevContent instanceof BackboneComponent) {
           return this.findLastChild(prevContent.getSlotAtIndex(prevContent.slotCount - 1));
@@ -537,7 +537,7 @@ export class TBRange {
         return this.findFirstPosition(current.slot);
       }
       if (current instanceof BranchComponent) {
-        return this.findFirstPosition(current.getSlotAtIndex(0));
+        return this.findFirstPosition(current.slots[0]);
       }
       if (current instanceof BackboneComponent) {
         return this.findFirstPosition(current.getSlotAtIndex(0));
@@ -565,7 +565,7 @@ export class TBRange {
       if (parentComponent instanceof BranchComponent) {
         const fragmentIndex = parentComponent.slots.indexOf(fragment);
         if (fragmentIndex < parentComponent.slots.length - 1) {
-          return this.findFirstPosition(parentComponent.getSlotAtIndex(fragmentIndex + 1));
+          return this.findFirstPosition(parentComponent.slots[fragmentIndex + 1]);
         }
       }
       if (parentComponent instanceof BackboneComponent) {
@@ -582,7 +582,7 @@ export class TBRange {
           return this.findFirstPosition(nextContent.slot);
         }
         if (nextContent instanceof BranchComponent) {
-          return this.findFirstPosition(nextContent.getSlotAtIndex(0));
+          return this.findFirstPosition(nextContent.slots[0]);
         }
         if (nextContent instanceof BackboneComponent) {
           return this.findFirstPosition(nextContent.getSlotAtIndex(0));
@@ -709,7 +709,7 @@ export class TBRange {
       return this.findFirstPosition(first.slot);
     }
     if (first instanceof BranchComponent) {
-      const firstFragment = first.getSlotAtIndex(0);
+      const firstFragment = first.slots[0];
       return this.findFirstPosition(firstFragment);
     }
 
@@ -733,7 +733,7 @@ export class TBRange {
       return this.findLastChild(last.slot);
     }
     if (last instanceof BranchComponent) {
-      const lastFragment = last.getSlotAtIndex(last.slots.length - 1);
+      const lastFragment = last.slots[last.slots.length - 1];
       return this.findLastChild(lastFragment);
     }
     if (last instanceof BackboneComponent) {

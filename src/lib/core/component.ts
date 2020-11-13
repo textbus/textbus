@@ -1,7 +1,7 @@
 import { Subscription } from 'rxjs';
 
 import { Fragment, parentComponentAccessToken } from './fragment';
-import { VElement } from './element';
+import { VElement, VTextNode } from './element';
 import { Marker } from './marker';
 
 /**
@@ -39,6 +39,8 @@ export abstract class ComponentReader {
 
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
+export type SlotRendererFn = (slot: Fragment, host: VElement) => (VElement | VTextNode);
+
 /**
  * TextBus 组件基类，不可直接继承 Component 类。
  * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
@@ -64,8 +66,9 @@ export abstract class Component extends Marker {
    * @param isOutputMode  是否为输出模式。
    *                      当有些情况下，编辑模式和输出模式需要生成不一样的 DOM，且编辑模式可能需要监听一些事件，
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
+   * @param slotRendererFn 渲染插槽的工具函数
    */
-  abstract render(isOutputMode: boolean): VElement;
+  abstract render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 
   /**
    * 克隆自己，返回一个完全一样的副本。
@@ -138,10 +141,6 @@ export abstract class BranchComponent extends Component {
       return Reflect.deleteProperty(target, p);
     }
   })
-
-  getSlotAtIndex(index: number) {
-    return this.slots[index];
-  }
 
   /**
    * 保存子插槽和虚拟 DOM 节点的映射关系，一般会随着 render 方法的调用，而发生变化。

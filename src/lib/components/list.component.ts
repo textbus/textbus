@@ -106,7 +106,7 @@ export class ListComponent extends BranchComponent {
           event.stopPropagation();
 
           const firstRange = event.selection.firstRange;
-          if (slot === this.getSlotAtIndex(this.slots.length - 1)) {
+          if (slot === this.slots[this.slots.length - 1]) {
             const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
             if (slot.contentLength === 0 ||
               slot.contentLength === 1 && lastContent instanceof BrComponent) {
