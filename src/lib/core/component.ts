@@ -104,25 +104,32 @@ export abstract class BranchComponent extends Component {
    */
   readonly slots = new Proxy([] as Fragment[], {
     set: (target: any[], p: PropertyKey, value: any, receiver: any) => {
-      if (typeof p === 'string' && /\d+/.test(p) && value instanceof Fragment) {
-        value[parentComponentAccessToken] = this;
-        this.eventMap.set(value, value.onChange.subscribe(() => {
-          this.markAsChanged();
-        }))
-        this.markAsDirtied();
+      if (typeof p === 'string') {
+        if (/\d+/.test(p) && value instanceof Fragment) {
+          value[parentComponentAccessToken] = this;
+          this.eventMap.set(value, value.onChange.subscribe(() => {
+            this.markAsChanged();
+          }))
+          this.markAsDirtied();
+        } else if (p === 'length' && typeof value === 'number') {
+          for (let i = value; i < target.length; i++) {
+            const deletedValue = target[i];
+            this.eventMap.get(deletedValue).unsubscribe();
+            this.eventMap.delete(deletedValue);
+            deletedValue[parentComponentAccessToken] = null;
+          }
+        }
       }
-      Reflect.set(target, p, value, receiver);
-      return true;
+      return Reflect.set(target, p, value, receiver);
     },
     deleteProperty: (target: any[], p: PropertyKey) => {
       const deletedValue = target[p];
-      if (typeof p ==='string' && /\d+/.test(p) && deletedValue instanceof Fragment) {
+      if (typeof p === 'string' && /\d+/.test(p) && deletedValue instanceof Fragment) {
         this.eventMap.get(deletedValue).unsubscribe();
         this.eventMap.delete(deletedValue);
         deletedValue[parentComponentAccessToken] = null;
       }
-      Reflect.deleteProperty(target, p);
-      return true;
+      return Reflect.deleteProperty(target, p);
     }
   })
 
