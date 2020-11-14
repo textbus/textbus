@@ -116,7 +116,7 @@ export abstract class BranchComponent extends Component {
           for (let i = value; i < target.length; i++) {
             const deletedValue = target[i];
             if (deletedValue) {
-              this.eventMap.get(deletedValue).unsubscribe();
+              this.eventMap.get(deletedValue)?.unsubscribe();
               this.eventMap.delete(deletedValue);
               deletedValue[parentComponentAccessToken] = null;
 
@@ -130,7 +130,7 @@ export abstract class BranchComponent extends Component {
     deleteProperty: (target: any[], p: PropertyKey) => {
       const deletedValue = target[p];
       if (typeof p === 'string' && /\d+/.test(p) && deletedValue instanceof Fragment) {
-        this.eventMap.get(deletedValue).unsubscribe();
+        this.eventMap.get(deletedValue)?.unsubscribe();
         this.eventMap.delete(deletedValue);
         deletedValue[parentComponentAccessToken] = null;
 
