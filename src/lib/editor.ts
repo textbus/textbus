@@ -306,7 +306,7 @@ export class Editor<T = any> implements FileUploader {
     }
     return {
       styleSheets: this.options.styleSheets,
-      json: this.renderer.renderToJSON(this.rootFragment)
+      json: this.outputRenderer.render(this.rootFragment).toJSON()
     };
   }
 
