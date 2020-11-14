@@ -117,8 +117,6 @@ export class PreComponentReader implements ComponentReader {
 export class PreComponent extends DivisionComponent {
   static theme: PreTheme = 'light';
 
-  private isUpdate = true;
-
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
     this.slot.events.subscribe(event => {
@@ -148,21 +146,14 @@ export class PreComponent extends DivisionComponent {
     })
   }
 
-  onContentChange() {
-    this.isUpdate = false;
-    this.reformat();
-    this.isUpdate = true;
-    this.markAsDirtied();
-  }
-
-  componentShouldUpdate(): boolean {
-    return this.isUpdate;
-  }
-
   clone() {
     const component = new PreComponent(this.lang);
     component.slot.from(this.slot.clone());
     return component;
+  }
+
+  componentContentChange() {
+    this.reformat();
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {

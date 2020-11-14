@@ -163,12 +163,20 @@ export class TableComponent extends BackboneComponent {
     return new TableComponent(config);
   }
 
+  componentDataChange() {
+    this.clean();
+    this.config.bodies.forEach(row => {
+      row.forEach(cell => {
+        this.push(cell.fragment);
+      })
+    })
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
       table.classes.push('tb-table');
     }
-    this.clean();
     this.deleteMarkFragments = [];
     const bodyConfig = this.config.bodies;
     if (bodyConfig.length) {
@@ -188,7 +196,6 @@ export class TableComponent extends BackboneComponent {
           if (col.fragment.contentLength === 0) {
             col.fragment.append(new BrComponent());
           }
-          this.push(col.fragment);
           tr.appendChild(slotRendererFn(col.fragment, td));
         }
       }

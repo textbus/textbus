@@ -65,9 +65,7 @@ export class TodoListComponent extends BranchComponent {
     this.slots.push(...listConfigs.map(i => i.slot));
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const list = new VElement('tb-todo-list');
-
+  componentDataChange() {
     if (this.listConfigs.length === this.slots.length) {
       this.slots.forEach((slot, index) => {
         this.listConfigs[index].slot = slot;
@@ -77,8 +75,19 @@ export class TodoListComponent extends BranchComponent {
         return this.slots.includes(i.slot);
       });
     }
-
     this.slots.length = 0;
+    this.listConfigs.forEach(config => {
+      const slot = config.slot;
+      if (slot.contentLength === 0) {
+        slot.append(new BrComponent());
+      }
+      this.slots.push(slot);
+    })
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    const list = new VElement('tb-todo-list');
+
     this.listConfigs.forEach((config) => {
       const slot = config.slot;
 
@@ -103,10 +112,7 @@ export class TodoListComponent extends BranchComponent {
         classes: ['tb-todo-list-content']
       });
       item.appendChild(slotRendererFn(slot, content));
-      if (slot.contentLength === 0) {
-        slot.append(new BrComponent());
-      }
-      this.slots.push(slot);
+
       list.appendChild(item);
       if (!isOutputMode) {
         this.handleEnter();

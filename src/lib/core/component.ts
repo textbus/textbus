@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs';
 import { Fragment, parentComponentAccessToken } from './fragment';
 import { VElement } from './element';
 import { Marker } from './marker';
-import { filter } from 'rxjs/operators';
 
 /**
  * 用于保存读取 DOM 时，Fragment 和 DOM 节点的对应关系。
@@ -42,6 +41,12 @@ export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
 export type SlotRendererFn = (slot: Fragment, host: VElement) => VElement;
 
+export interface Component {
+  componentContentChange?(): void;
+
+  componentDataChange?(): void;
+}
+
 /**
  * TextBus 组件基类，不可直接继承 Component 类。
  * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
@@ -58,8 +63,35 @@ export abstract class Component extends Marker {
    */
   readonly length = 1;
 
+  private canDispatchDataChange = true;
+  private canDispatchContentChange = true;
+
   protected constructor(public tagName: string) {
     super();
+  }
+
+  markAsDirtied() {
+    if (this.canDispatchDataChange === false) {
+      return;
+    }
+    if (typeof this.componentDataChange === 'function') {
+      this.canDispatchDataChange = false;
+      this.componentDataChange();
+      this.canDispatchDataChange = true;
+    }
+    super.markAsDirtied();
+  }
+
+  markAsChanged() {
+    if (this.canDispatchContentChange === false) {
+      return;
+    }
+    if (typeof this.componentContentChange === 'function') {
+      this.canDispatchContentChange = false;
+      this.componentContentChange();
+      this.canDispatchContentChange = true;
+    }
+    super.markAsChanged();
   }
 
   /**
@@ -75,8 +107,6 @@ export abstract class Component extends Marker {
    * 克隆自己，返回一个完全一样的副本。
    */
   abstract clone(): Component;
-
-  componentShouldUpdate?(): boolean;
 }
 
 /**
@@ -89,20 +119,10 @@ export abstract class DivisionComponent extends Component {
   protected constructor(tagName: string) {
     super(tagName);
     this.slot[parentComponentAccessToken] = this;
-    this.slot.onChange.pipe(filter(() => {
-      if (typeof this.componentShouldUpdate === 'function') {
-        return this.componentShouldUpdate();
-      }
-      return true;
-    })).subscribe(() => {
-      if (typeof this.onContentChange === 'function') {
-        this.onContentChange();
-      }
+    this.slot.onChange.subscribe(() => {
       this.markAsChanged();
     })
   }
-
-  onContentChange?(): void;
 }
 
 /**
@@ -121,15 +141,7 @@ export abstract class BranchComponent extends Component {
       if (typeof p === 'string') {
         if (/\d+/.test(p) && value instanceof Fragment) {
           value[parentComponentAccessToken] = this;
-          this.eventMap.set(value, value.onChange.pipe(filter(() => {
-            if (typeof this.componentShouldUpdate === 'function') {
-              return this.componentShouldUpdate();
-            }
-            return true;
-          })).subscribe(() => {
-            if (typeof this.onContentChange === 'function') {
-              this.onContentChange();
-            }
+          this.eventMap.set(value, value.onChange.subscribe(() => {
             this.markAsChanged();
           }))
           this.markAsDirtied();
@@ -160,8 +172,6 @@ export abstract class BranchComponent extends Component {
       return Reflect.deleteProperty(target, p);
     }
   })
-
-  onContentChange?(): void;
 }
 
 /**
@@ -216,8 +226,6 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
     return this.slots.indexOf(fragment);
   }
 
-  onContentChange?(): void;
-
   protected clean() {
     this.slots.forEach(f => {
       f[parentComponentAccessToken] = null;
@@ -267,15 +275,7 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   private setup(fragments: Fragment[]) {
     fragments.forEach(f => {
       f[parentComponentAccessToken] = this;
-      this.eventMap.set(f, f.onChange.pipe(filter(() => {
-        if (typeof this.componentShouldUpdate === 'function') {
-          return this.componentShouldUpdate();
-        }
-        return true;
-      })).subscribe(() => {
-        if (typeof this.onContentChange === 'function') {
-          this.onContentChange();
-        }
+      this.eventMap.set(f, f.onChange.subscribe(() => {
         this.markAsChanged();
       }))
     })

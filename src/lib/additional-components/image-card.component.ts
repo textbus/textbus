@@ -77,18 +77,21 @@ export class ImageCardComponent extends BackboneComponent {
     return deletedSlot === this.imgFragment;
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    this.clean();
+  componentContentChange() {
     this.push(this.imgFragment, this.descFragment);
+    this.clean();
+    if (this.descFragment.contentLength === 0) {
+      this.descFragment.append(new BrComponent());
+    }
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const card = new VElement(this.tagName);
     const imgWrapper = new VElement('div');
     const desc = new VElement('p');
     card.appendChild(slotRendererFn(this.imgFragment, imgWrapper));
     card.appendChild(slotRendererFn(this.descFragment, desc));
 
-    if (this.descFragment.contentLength === 0) {
-      this.descFragment.append(new BrComponent());
-    }
     return card;
   }
 
