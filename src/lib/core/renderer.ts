@@ -126,8 +126,6 @@ class NativeElementMappingTable {
 }
 
 export class Renderer {
-  // 是否是输出模式
-  private outputMode = false;
   // 记录虚拟节点的位置
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
   // 记录 fragment 对应的虚拟节点
@@ -138,13 +136,10 @@ export class Renderer {
   private NVMappingTable = new NativeElementMappingTable();
   // 记录已渲染的组件
   private componentVDomCacheMap = new WeakMap<Component, VElement>();
-  // 记录输出模式的已渲染组件
-  private componentOutputModeVDomCacheMap = new WeakMap<Component, VElement>();
 
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
-    this.outputMode = false;
     console.time()
     if (fragment.changed) {
       const dirty = fragment.dirty;
@@ -183,7 +178,6 @@ export class Renderer {
    * @param fragment
    */
   renderToJSON(fragment: Fragment): VElementLiteral {
-    this.outputMode = true;
     const root = new VElement('body');
     this.patch(root);
     return root.toJSON();
@@ -333,17 +327,15 @@ export class Renderer {
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
       });
-      if (!this.outputMode) {
-        fragment.rendered();
-        this.fragmentAndVDomMapping.set(fragment, host);
-        elements.forEach(el => {
-          this.vDomPositionMapping.set(el, {
-            fragment,
-            startIndex: 0,
-            endIndex: fragment.contentLength
-          })
+      fragment.rendered();
+      this.fragmentAndVDomMapping.set(fragment, host);
+      elements.forEach(el => {
+        this.vDomPositionMapping.set(el, {
+          fragment,
+          startIndex: 0,
+          endIndex: fragment.contentLength
         })
-      }
+      })
       return host;
     }
     fragment.sliceContents().forEach(content => {
@@ -371,7 +363,7 @@ export class Renderer {
   private rendingComponent(component: Component): VElement {
     if (component.dirty) {
       let vElement: VElement;
-      vElement = component.render(this.outputMode, (slot, host) => {
+      vElement = component.render(false, (slot, host) => {
         if (component instanceof LeafComponent) {
           return null
         }
@@ -414,9 +406,6 @@ export class Renderer {
         }
       })
     }
-    if (this.outputMode) {
-      return this.componentOutputModeVDomCacheMap.get(component);
-    }
     component.rendered();
     return this.componentVDomCacheMap.get(component);
   }
@@ -438,7 +427,7 @@ export class Renderer {
     }
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
-        isOutputMode: this.outputMode,
+        isOutputMode: false,
         state: next.params.state,
         abstractData: next.params.abstractData,
       };
@@ -475,7 +464,7 @@ export class Renderer {
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        !this.outputMode && this.vDomPositionMapping.set(textNode, {
+        this.vDomPositionMapping.set(textNode, {
           fragment,
           startIndex: i,
           endIndex: i + item.length
@@ -484,14 +473,12 @@ export class Renderer {
         children.push(textNode);
       } else {
         const vDom = this.rendingComponent(item);
-        if (!this.outputMode) {
-          if (!(item instanceof DivisionComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
-            this.vDomPositionMapping.set(vDom, {
-              fragment,
-              startIndex: i,
-              endIndex: i + 1
-            })
-          }
+        if (!(item instanceof DivisionComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
+          this.vDomPositionMapping.set(vDom, {
+            fragment,
+            startIndex: i,
+            endIndex: i + 1
+          })
         }
         children.push(vDom);
         i++;
@@ -519,15 +506,13 @@ export class Renderer {
         }
         const elements = this.rendingSlotFormats(childFormats);
 
-        if (!this.outputMode) {
-          elements.forEach(el => {
-            this.vDomPositionMapping.set(el, {
-              fragment,
-              startIndex: firstRange.params.startIndex,
-              endIndex: firstRange.params.endIndex
-            });
-          })
-        }
+        elements.forEach(el => {
+          this.vDomPositionMapping.set(el, {
+            fragment,
+            startIndex: firstRange.params.startIndex,
+            endIndex: firstRange.params.endIndex
+          });
+        })
 
         const host = elements[0];
         const slot = elements[elements.length - 1];
