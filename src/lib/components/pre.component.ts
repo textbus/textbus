@@ -117,11 +117,10 @@ export class PreComponentReader implements ComponentReader {
 export class PreComponent extends DivisionComponent {
   static theme: PreTheme = 'light';
 
+  private isUpdate = true;
+
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
-    this.slot.onChange.subscribe(() => {
-      this.markAsDirtied();
-    })
     this.slot.events.subscribe(event => {
       if (event.type === EventType.onEnter) {
         const firstRange = event.selection.firstRange;
@@ -149,6 +148,17 @@ export class PreComponent extends DivisionComponent {
     })
   }
 
+  onContentChange() {
+    this.isUpdate = false;
+    this.reformat();
+    this.isUpdate = true;
+    this.markAsDirtied();
+  }
+
+  componentShouldUpdate(): boolean {
+    return this.isUpdate;
+  }
+
   clone() {
     const component = new PreComponent(this.lang);
     component.slot.from(this.slot.clone());
@@ -156,33 +166,6 @@ export class PreComponent extends DivisionComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
-    const languageGrammar = this.getLanguageGrammar();
-    const content = this.slot.sliceContents(0).map(item => {
-      if (typeof item === 'string') {
-        return item;
-
-      } else if (item instanceof BrComponent) {
-        return '\n';
-      }
-    }).join('');
-    const fragment = new Fragment();
-    content.replace(/\n|[^\n]/g, str => {
-      fragment.append(str === '\n' ? new BrComponent() : str);
-      return '';
-    })
-    if (languageGrammar) {
-      const tokens = tokenize(content, languageGrammar);
-      this.format(tokens, fragment, 0);
-    }
-    this.slot.getFormatKeys().forEach(format => {
-      if (format instanceof BlockFormatter) {
-        this.slot.getFormatRanges(format).forEach(r => {
-          fragment.apply(format, r);
-        })
-      }
-    })
-    fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
-    this.slot.from(fragment);
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
@@ -216,6 +199,36 @@ export class PreComponent extends DivisionComponent {
       }
       index += token.length;
     })
+  }
+
+  private reformat() {
+    const languageGrammar = this.getLanguageGrammar();
+    const content = this.slot.sliceContents(0).map(item => {
+      if (typeof item === 'string') {
+        return item;
+
+      } else if (item instanceof BrComponent) {
+        return '\n';
+      }
+    }).join('');
+    const fragment = new Fragment();
+    content.replace(/\n|[^\n]/g, str => {
+      fragment.append(str === '\n' ? new BrComponent() : str);
+      return '';
+    })
+    if (languageGrammar) {
+      const tokens = tokenize(content, languageGrammar);
+      this.format(tokens, fragment, 0);
+    }
+    this.slot.getFormatKeys().forEach(format => {
+      if (format instanceof BlockFormatter) {
+        this.slot.getFormatRanges(format).forEach(r => {
+          fragment.apply(format, r);
+        })
+      }
+    })
+    fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+    this.slot.from(fragment);
   }
 
   private getLanguageGrammar(): Grammar {

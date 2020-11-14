@@ -1,8 +1,9 @@
 import { Subscription } from 'rxjs';
 
 import { Fragment, parentComponentAccessToken } from './fragment';
-import { VElement, VTextNode } from './element';
+import { VElement } from './element';
 import { Marker } from './marker';
+import { filter } from 'rxjs/operators';
 
 /**
  * 用于保存读取 DOM 时，Fragment 和 DOM 节点的对应关系。
@@ -74,6 +75,8 @@ export abstract class Component extends Marker {
    * 克隆自己，返回一个完全一样的副本。
    */
   abstract clone(): Component;
+
+  componentShouldUpdate?(): boolean;
 }
 
 /**
@@ -86,10 +89,20 @@ export abstract class DivisionComponent extends Component {
   protected constructor(tagName: string) {
     super(tagName);
     this.slot[parentComponentAccessToken] = this;
-    this.slot.onChange.subscribe(() => {
+    this.slot.onChange.pipe(filter(() => {
+      if (typeof this.componentShouldUpdate === 'function') {
+        return this.componentShouldUpdate();
+      }
+      return true;
+    })).subscribe(() => {
+      if (typeof this.onContentChange === 'function') {
+        this.onContentChange();
+      }
       this.markAsChanged();
     })
   }
+
+  onContentChange?(): void;
 }
 
 /**
@@ -108,7 +121,15 @@ export abstract class BranchComponent extends Component {
       if (typeof p === 'string') {
         if (/\d+/.test(p) && value instanceof Fragment) {
           value[parentComponentAccessToken] = this;
-          this.eventMap.set(value, value.onChange.subscribe(() => {
+          this.eventMap.set(value, value.onChange.pipe(filter(() => {
+            if (typeof this.componentShouldUpdate === 'function') {
+              return this.componentShouldUpdate();
+            }
+            return true;
+          })).subscribe(() => {
+            if (typeof this.onContentChange === 'function') {
+              this.onContentChange();
+            }
             this.markAsChanged();
           }))
           this.markAsDirtied();
@@ -139,6 +160,8 @@ export abstract class BranchComponent extends Component {
       return Reflect.deleteProperty(target, p);
     }
   })
+
+  onContentChange?(): void;
 }
 
 /**
@@ -193,6 +216,8 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
     return this.slots.indexOf(fragment);
   }
 
+  onContentChange?(): void;
+
   protected clean() {
     this.slots.forEach(f => {
       f[parentComponentAccessToken] = null;
@@ -242,7 +267,15 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
   private setup(fragments: Fragment[]) {
     fragments.forEach(f => {
       f[parentComponentAccessToken] = this;
-      this.eventMap.set(f, f.onChange.subscribe(() => {
+      this.eventMap.set(f, f.onChange.pipe(filter(() => {
+        if (typeof this.componentShouldUpdate === 'function') {
+          return this.componentShouldUpdate();
+        }
+        return true;
+      })).subscribe(() => {
+        if (typeof this.onContentChange === 'function') {
+          this.onContentChange();
+        }
         this.markAsChanged();
       }))
     })

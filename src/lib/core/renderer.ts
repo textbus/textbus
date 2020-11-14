@@ -14,7 +14,7 @@ export interface ElementPosition {
   fragment: Fragment;
 }
 
-type FormatConfig = {
+export type FormatConfig = {
   token: InlineFormatter,
   params: FormatRange
 };
@@ -32,49 +32,6 @@ export class ReplaceMode {
  */
 export class ChildSlotMode {
   constructor(public childElement: VElement) {
-  }
-}
-
-function calculatePriority(formats: FormatConfig[]) {
-  return formats.filter(i => {
-    return i.params.state !== FormatEffect.Inherit;
-  }).sort((next, prev) => {
-    const a = next.params.startIndex - prev.params.startIndex;
-    if (a === 0) {
-      const b = prev.params.endIndex - next.params.endIndex;
-      if (b === 0) {
-        return next.token.priority - prev.token.priority;
-      }
-      return b;
-    }
-    return a;
-  });
-}
-
-function formatSeparate(fragment: Fragment) {
-  const containerFormats: FormatConfig[] = [];
-  const childFormats: FormatConfig[] = [];
-  const formatRangeConfigList: Array<FormatConfig> = [];
-  fragment.getFormatKeys().forEach(token => {
-    fragment.getFormatRanges(token).forEach(f => {
-      formatRangeConfigList.push({
-        token,
-        params: {
-          ...f
-        }
-      });
-    })
-  })
-  calculatePriority(formatRangeConfigList).forEach(f => {
-    if (f.token instanceof BlockFormatter || f.params.startIndex === 0 && f.params.endIndex === fragment.contentLength) {
-      containerFormats.push(f);
-    } else {
-      childFormats.push(f);
-    }
-  });
-  return {
-    containerFormats,
-    childFormats
   }
 }
 
@@ -157,20 +114,6 @@ export class Renderer {
     }
     console.timeEnd()
     return this.oldVDom;
-  }
-
-  /**
-   * 把 fragment 转换成 HTML 字符串。
-   * @param fragment
-   */
-  renderToHTML(fragment: Fragment): string {
-    // this.outputMode = true;
-    // const root = new VElement('root');
-    // const vDom = this.createVDOMIntoView(fragment, root);
-    // return vDom.childNodes.map(child => {
-    //   return this.vDomToHTMLString(child);
-    // }).join('');
-    return null
   }
 
   /**
@@ -316,7 +259,7 @@ export class Renderer {
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
     if (fragment.dirty || forceUpdate) {
       host.clearChildNodes();
-      const {childFormats, containerFormats} = formatSeparate(fragment);
+      const {childFormats, containerFormats} = Renderer.formatSeparate(fragment);
       const elements = this.rendingSlotFormats(containerFormats, host);
       const root = elements[0];
       const slot = elements[elements.length - 1];
@@ -541,7 +484,7 @@ export class Renderer {
           }
         }
 
-        formats = calculatePriority(formats);
+        formats = Renderer.calculatePriority(formats);
 
         if (progenyFormats.length) {
           this.rendingContents(fragment, progenyFormats, firstRange.params.startIndex, firstRange.params.endIndex).forEach(item => {
@@ -599,11 +542,54 @@ export class Renderer {
    * @param s
    * @param target
    */
-  private static replaceEmpty(s: string, target: string) {
+  static replaceEmpty(s: string, target: string) {
     return s.replace(/\s\s+/g, str => {
       return ' ' + Array.from({
         length: str.length - 1
       }).fill(target).join('');
     }).replace(/^\s|\s$/g, target);
+  }
+
+  static calculatePriority(formats: FormatConfig[]) {
+    return formats.filter(i => {
+      return i.params.state !== FormatEffect.Inherit;
+    }).sort((next, prev) => {
+      const a = next.params.startIndex - prev.params.startIndex;
+      if (a === 0) {
+        const b = prev.params.endIndex - next.params.endIndex;
+        if (b === 0) {
+          return next.token.priority - prev.token.priority;
+        }
+        return b;
+      }
+      return a;
+    });
+  }
+
+  static formatSeparate(fragment: Fragment) {
+    const containerFormats: FormatConfig[] = [];
+    const childFormats: FormatConfig[] = [];
+    const formatRangeConfigList: Array<FormatConfig> = [];
+    fragment.getFormatKeys().forEach(token => {
+      fragment.getFormatRanges(token).forEach(f => {
+        formatRangeConfigList.push({
+          token,
+          params: {
+            ...f
+          }
+        });
+      })
+    })
+    Renderer.calculatePriority(formatRangeConfigList).forEach(f => {
+      if (f.token instanceof BlockFormatter || f.params.startIndex === 0 && f.params.endIndex === fragment.contentLength) {
+        containerFormats.push(f);
+      } else {
+        childFormats.push(f);
+      }
+    });
+    return {
+      containerFormats,
+      childFormats
+    }
   }
 }

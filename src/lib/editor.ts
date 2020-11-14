@@ -14,6 +14,7 @@ import {
   Fragment,
   LeafComponent,
   Lifecycle,
+  OutputRenderer,
   Parser,
   Renderer,
   TBEvent,
@@ -32,11 +33,12 @@ import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
 import { FileUploader } from './uikit/forms/help';
+import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 
 /**
  * TextBus 初始化时的配置参数
  */
-export interface EditorOptions {
+export interface EditorOptions<T> {
   /** 设置主题 */
   theme?: string;
   /** 设备宽度 */
@@ -63,6 +65,8 @@ export interface EditorOptions {
   contents?: string;
   /** 设置可选的自定义组件 */
   componentLibrary?: ComponentExample[];
+  /** 设置输出转换器 */
+  outputTranslator?: OutputTranslator<T>;
 
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string): (string | Promise<string> | Observable<string>);
@@ -81,7 +85,7 @@ export enum CursorMoveDirection {
 /**
  * TextBus 主类
  */
-export class Editor implements FileUploader {
+export class Editor<T = any> implements FileUploader {
   /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
@@ -111,6 +115,8 @@ export class Editor implements FileUploader {
   private readonly rootFragment = new Fragment();
 
   private renderer = new Renderer();
+  private outputRenderer = new OutputRenderer();
+  private outputTranslator = new HTMLOutputTranslator();
   private selection: TBSelection;
   private workbench: Workbench;
   private viewer: Viewer;
@@ -145,7 +151,7 @@ export class Editor implements FileUploader {
 
   private sourceCodeComponent = new PreComponent('HTML');
 
-  constructor(public selector: string | HTMLElement, public options: EditorOptions) {
+  constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
     this.onUserWrite = this.userWriteEvent.asObservable();
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
@@ -203,7 +209,7 @@ export class Editor implements FileUploader {
             if (this.snapshotSubscription) {
               this.snapshotSubscription.unsubscribe();
             }
-            const html = this.renderer.renderToHTML(this.rootFragment);
+            const html = this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment));
             this.rootFragment.clean();
             this.sourceCodeComponent.slot.clean();
             this.sourceCodeComponent.slot.append(pretty(html));
@@ -285,7 +291,9 @@ export class Editor implements FileUploader {
   getContents() {
     return {
       styleSheets: this.options.styleSheets,
-      html: this.openSourceCodeMode ? this.getHTMLBySourceCodeMode() : this.renderer.renderToHTML(this.rootFragment)
+      content: this.openSourceCodeMode ?
+        this.getHTMLBySourceCodeMode() :
+        this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment))
     };
   }
 

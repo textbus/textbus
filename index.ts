@@ -46,5 +46,8 @@ document.getElementById('btn').addEventListener('click', () => {
 
 window['editor'] = editor;
 
+editor.onChange.subscribe(() => {
+  console.log(editor.getContents().content)
+})
 
 // editor.setContents(`<h1>textbus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

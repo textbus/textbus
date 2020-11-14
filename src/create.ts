@@ -91,8 +91,9 @@ import {
   stepsComponentStyleSheet,
   stepsComponentEditingStyleSheet
 } from './lib/additional-components/_api';
+import { HTMLOutputTranslator } from './lib/output-translator';
 
-export const defaultOptions: EditorOptions = {
+export const defaultOptions: EditorOptions<string> = {
   styleSheets: [
     ...defaultStyleSheets,
     imageCardStyleSheet,
@@ -180,9 +181,10 @@ export const defaultOptions: EditorOptions = {
     timelineComponentExample,
     progressComponentExample,
     stepsComponentExample
-  ]
+  ],
+  outputTranslator: new HTMLOutputTranslator()
 };
 
-export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
-  return new Editor(selector, Object.assign(defaultOptions, options));
+export function createEditor<T = string>(selector: string | HTMLElement, options: EditorOptions<T> = {}) {
+  return new Editor<T>(selector, Object.assign(defaultOptions, options));
 }
