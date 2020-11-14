@@ -33,6 +33,7 @@ export class OutputRenderer {
         (slot || host).appendChild(child);
       });
       fragment.outputRendered();
+      this.fragmentAndVDomMapping.set(fragment, host);
       return host;
     }
     fragment.sliceContents().forEach(content => {
