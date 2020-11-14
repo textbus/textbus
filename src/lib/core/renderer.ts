@@ -326,12 +326,13 @@ export class Renderer {
       const elements = this.rendingSlotFormats(containerFormats, host);
       const root = elements[0];
       const slot = elements[elements.length - 1];
-      this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
-        (slot || host).appendChild(child);
-      });
+
       if (root !== host) {
         throw new Error('插槽节点不能被替换！')
       }
+      this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
+        (slot || host).appendChild(child);
+      });
       if (!this.outputMode) {
         fragment.rendered();
         this.fragmentAndVDomMapping.set(fragment, host);
