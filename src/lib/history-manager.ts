@@ -37,18 +37,17 @@ export class HistoryManager {
   }
 
   recordSnapshot(fragment: Fragment, selection: TBSelection) {
-    // if (this.historySequence.length !== this.historyIndex) {
-    //   this.historySequence.length = this.historyIndex + 1;
-    // }
-    // this.historySequence.push({
-    //   contents: fragment.clone(),
-    //   paths: selection ? selection.getRangePaths() : []
-    // });
-    // if (this.historySequence.length > this.historyStackSize) {
-    //   this.historySequence.shift();
-    // }
-    // this.historyIndex = this.historySequence.length - 1;
-    // this.editor.dispatchContentChangeEvent();
+    if (this.historySequence.length !== this.historyIndex) {
+      this.historySequence.length = this.historyIndex + 1;
+    }
+    this.historySequence.push({
+      contents: fragment.clone(),
+      paths: selection ? selection.getRangePaths() : []
+    });
+    if (this.historySequence.length > this.historyStackSize) {
+      this.historySequence.shift();
+    }
+    this.historyIndex = this.historySequence.length - 1;
   }
 
   destroy() {
