@@ -72,12 +72,10 @@ class CodeStyleFormatter extends InlineFormatter {
     return undefined;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
-    if (!existingElement) {
-      existingElement = new VElement('span');
-    }
-    existingElement.classes.push(...context.abstractData.classes);
-    return new ReplaceMode(existingElement);
+  render(context: FormatRendingContext): ReplaceMode | ChildSlotMode | null {
+    const el = new VElement('span');
+    el.classes.push(...context.abstractData.classes);
+    return new ChildSlotMode(el);
   }
 }
 
