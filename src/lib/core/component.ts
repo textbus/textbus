@@ -137,7 +137,7 @@ export abstract class BranchComponent<T extends Fragment = Fragment> extends Com
    * 子插槽的集合
    */
   readonly slots: T[] = new Proxy<T[]>([], {
-    set: (target: any[], p: PropertyKey, value: any, receiver: any) => {
+    set: (target: T[], p: PropertyKey, value: any, receiver: any) => {
       const b = Reflect.set(target, p, value, receiver);
       if (typeof p === 'string') {
         if (/\d+/.test(p)) {
@@ -161,9 +161,9 @@ export abstract class BranchComponent<T extends Fragment = Fragment> extends Com
       }
       return b;
     },
-    deleteProperty: (target: any[], p: PropertyKey) => {
-      const b = Reflect.deleteProperty(target, p);
+    deleteProperty: (target: T[], p: PropertyKey) => {
       const deletedValue = target[p];
+      const b = Reflect.deleteProperty(target, p);
       if (typeof p === 'string' && /\d+/.test(p) && deletedValue) {
         this.eventMap.get(deletedValue)?.unsubscribe();
         this.eventMap.delete(deletedValue);
