@@ -67,6 +67,7 @@ export class TableEditCommander implements Commander<TableEditActions> {
         this.deleteRightColumn(context);
         break;
     }
+    context.markAsDirtied();
   }
 
   private addColumnToLeft(context: TableComponent) {
