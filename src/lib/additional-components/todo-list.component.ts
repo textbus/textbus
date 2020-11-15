@@ -10,10 +10,10 @@ import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { Subscription } from 'rxjs';
 
-export interface TodoListConfig {
-  active: boolean;
-  disabled: boolean;
-  slot: Fragment;
+class TodoListFragment extends Fragment {
+  constructor(public active: boolean, public disabled: boolean) {
+    super();
+  }
 }
 
 export class TodoListComponentReader implements ComponentReader {
@@ -25,13 +25,13 @@ export class TodoListComponentReader implements ComponentReader {
     const listConfig = Array.from(element.children).map(child => {
       const stateElement = child.querySelector('span.tb-todo-list-state');
       return {
-        active: stateElement.classList.contains('tb-todo-list-state-active'),
-        disabled: stateElement.classList.contains('tb-todo-list-state-disabled'),
         childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
-        slot: new Fragment()
+        slot: new TodoListFragment(
+          stateElement.classList.contains('tb-todo-list-state-active'),
+          stateElement.classList.contains('tb-todo-list-state-disabled'))
       }
     })
-    const component = new TodoListComponent(listConfig);
+    const component = new TodoListComponent(listConfig.map(i => i.slot));
     return {
       component: component,
       slotsMap: listConfig.map(i => {
@@ -44,7 +44,7 @@ export class TodoListComponentReader implements ComponentReader {
   }
 }
 
-export class TodoListComponent extends BranchComponent {
+export class TodoListComponent extends BranchComponent<TodoListFragment> {
   private subs: Subscription[] = [];
   private stateCollection = [{
     active: false,
@@ -60,36 +60,15 @@ export class TodoListComponent extends BranchComponent {
     disabled: true
   }]
 
-  constructor(public listConfigs: TodoListConfig[]) {
+  constructor(public listConfigs: TodoListFragment[]) {
     super('tb-todo-list');
-    this.slots.push(...listConfigs.map(i => i.slot));
-  }
-
-  componentDataChange() {
-    if (this.listConfigs.length === this.slots.length) {
-      this.slots.forEach((slot, index) => {
-        this.listConfigs[index].slot = slot;
-      })
-    } else {
-      this.listConfigs = this.listConfigs.filter(i => {
-        return this.slots.includes(i.slot);
-      });
-    }
-    this.slots.length = 0;
-    this.listConfigs.forEach(config => {
-      const slot = config.slot;
-      if (slot.contentLength === 0) {
-        slot.append(new BrComponent());
-      }
-      this.slots.push(slot);
-    })
+    this.slots.push(...listConfigs);
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const list = new VElement('tb-todo-list');
 
-    this.listConfigs.forEach((config) => {
-      const slot = config.slot;
+    this.slots.forEach(slot => {
 
       const item = new VElement('div', {
         classes: ['tb-todo-list-item']
@@ -100,10 +79,10 @@ export class TodoListComponent extends BranchComponent {
       const state = new VElement('span', {
         classes: ['tb-todo-list-state']
       });
-      if (config.active) {
+      if (slot.active) {
         state.classes.push('tb-todo-list-state-active');
       }
-      if (config.disabled) {
+      if (slot.disabled) {
         state.classes.push('tb-todo-list-state-disabled');
       }
       btn.appendChild(state);
@@ -118,14 +97,14 @@ export class TodoListComponent extends BranchComponent {
         this.handleEnter();
         state.onRendered = element => {
           element.addEventListener('click', () => {
-            const i = (this.getStateIndex(config.active, config.disabled) + 1) % 4;
+            const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
             const newState = this.stateCollection[i];
-            config.active = newState.active;
-            config.disabled = newState.disabled;
-            config.active ?
+            slot.active = newState.active;
+            slot.disabled = newState.disabled;
+            slot.active ?
               element.classList.add('tb-todo-list-state-active') :
               element.classList.remove('tb-todo-list-state-active');
-            config.disabled ?
+            slot.disabled ?
               element.classList.add('tb-todo-list-state-disabled') :
               element.classList.remove('tb-todo-list-state-disabled');
           })
@@ -136,19 +115,15 @@ export class TodoListComponent extends BranchComponent {
   }
 
   clone(): TodoListComponent {
-    const configs = this.listConfigs.map(i => {
-      return {
-        ...i,
-        slot: i.slot.clone()
-      }
+    const configs = this.slots.map(i => {
+      return i.clone()
     });
-    return new TodoListComponent(configs);
+    return new TodoListComponent(configs as TodoListFragment[]);
   }
 
   private handleEnter() {
     this.subs.forEach(s => s.unsubscribe());
-    this.subs = this.listConfigs.map((config, index) => {
-      const slot = config.slot;
+    this.subs = this.slots.map((slot, index) => {
       return slot.events.subscribe(event => {
         if (event.type === EventType.onEnter) {
           event.stopPropagation();
@@ -170,12 +145,9 @@ export class TodoListComponent extends BranchComponent {
             }
           }
 
-          const next = breakingLine(slot, firstRange.startIndex);
+          const next = new TodoListFragment(slot.active, slot.disabled);
+          next.from(breakingLine(slot, firstRange.startIndex));
 
-          this.listConfigs.splice(index + 1, 0, {
-            ...config,
-            slot: next
-          });
           this.slots.splice(index + 1, 0, next);
           firstRange.startFragment = firstRange.endFragment = next;
           firstRange.startIndex = firstRange.endIndex = 0;
@@ -200,13 +172,9 @@ export const todoListComponentExample: ComponentExample = {
   name: '待办事项列表',
   example: `<img alt="默认图片" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><rect fill="#fff" stroke="#1296db" height="8" width="8" rx="2" x="15" y="12"/><text font-family="Helvetica, Arial, sans-serif" font-size="8" x="28" y="19"  stroke-width="0" stroke="#000" fill="#000000">待办事项...</text></g></defs><use xlink:href="#item"></use><use xlink:href="#item" transform="translate(0, 12)"></use><use xlink:href="#item" transform="translate(0, 24)"></use><use xlink:href="#item" transform="translate(0, 36)"></use></svg>')}">`,
   componentFactory() {
-    const fragment = new Fragment();
+    const fragment = new TodoListFragment(false, false);
     fragment.append('待办事项...');
-    return new TodoListComponent([{
-      active: false,
-      disabled: false,
-      slot: fragment
-    }]);
+    return new TodoListComponent([fragment]);
   }
 }
 

@@ -107,7 +107,7 @@ export class Fragment extends Marker {
     this.contents.append(content);
 
     if (content instanceof Component) {
-      content[parentFragmentAccessToken] = this;
+      this.gourdComponentInSelf(content);
       this.eventMap.set(content, content.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -169,7 +169,7 @@ export class Fragment extends Marker {
    */
   insert(contents: Component | string, index: number) {
     if (contents instanceof Component) {
-      contents[parentFragmentAccessToken] = this;
+      this.gourdComponentInSelf(contents);
       this.eventMap.set(contents, contents.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -546,5 +546,14 @@ export class Fragment extends Marker {
       return null;
     }
     return parentFragment.getContext(context, filter);
+  }
+
+  private gourdComponentInSelf(component: Component) {
+    const parentFragment = component.parentFragment;
+    if (parentFragment) {
+      const index = parentFragment.indexOf(component);
+      parentFragment.remove(index, 1);
+    }
+    component[parentFragmentAccessToken] = this;
   }
 }

@@ -130,16 +130,17 @@ export abstract class DivisionComponent extends Component {
  * 如 ul、ol 等，都保持一个固定的结构，但 li 的个数是不限制的，且是可以更改的。也可以用户自定义的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
-export abstract class BranchComponent extends Component {
-  private eventMap = new Map<Fragment, Subscription>();
+export abstract class BranchComponent<T extends Fragment = Fragment> extends Component {
+  private eventMap = new Map<T, Subscription>();
 
   /**
    * 子插槽的集合
    */
-  readonly slots = new Proxy<Fragment[]>([], {
+  readonly slots: T[] = new Proxy<T[]>([], {
     set: (target: any[], p: PropertyKey, value: any, receiver: any) => {
+      const b = Reflect.set(target, p, value, receiver);
       if (typeof p === 'string') {
-        if (/\d+/.test(p) && value instanceof Fragment) {
+        if (/\d+/.test(p)) {
           value[parentComponentAccessToken] = this;
           this.eventMap.set(value, value.onChange.subscribe(() => {
             this.markAsChanged();
@@ -158,18 +159,19 @@ export abstract class BranchComponent extends Component {
           }
         }
       }
-      return Reflect.set(target, p, value, receiver);
+      return b;
     },
     deleteProperty: (target: any[], p: PropertyKey) => {
+      const b = Reflect.deleteProperty(target, p);
       const deletedValue = target[p];
-      if (typeof p === 'string' && /\d+/.test(p) && deletedValue instanceof Fragment) {
+      if (typeof p === 'string' && /\d+/.test(p) && deletedValue) {
         this.eventMap.get(deletedValue)?.unsubscribe();
         this.eventMap.delete(deletedValue);
         deletedValue[parentComponentAccessToken] = null;
 
         this.markAsDirtied();
       }
-      return Reflect.deleteProperty(target, p);
+      return b;
     }
   })
 }
