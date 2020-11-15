@@ -61,13 +61,21 @@ export class FindHook implements Lifecycle {
   }
 
   onRenderingBefore(selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean {
-    if (this.findValue && this.commander && !this.isJustFind) {
-      this.positions = this.find(rootFragment, this.findValue);
-      this.commander.command({
-        selection,
-        overlap: false,
-        rootFragment
-      }, this.positions);
+    if (this.findValue && this.commander) {
+      const newPositions = this.find(rootFragment, this.findValue);
+      if (newPositions.length !== this.positions.length) {
+        this.positions = newPositions;
+        this.positions.forEach((p, i) => {
+          if (p.fragment === selection.commonAncestorFragment) {
+            this.positionIndex = i;
+          }
+        })
+        this.commander.command({
+          selection,
+          overlap: false,
+          rootFragment
+        }, this.positions);
+      }
     }
     return true;
   }
