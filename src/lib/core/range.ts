@@ -996,8 +996,8 @@ export class TBRange {
   }
 
   private getCommonAncestorComponent() {
-    let startComponent = this.startFragment.parentComponent;
-    let endComponent = this.endFragment.parentComponent;
+    let startComponent = this.startFragment?.parentComponent;
+    let endComponent = this.endFragment?.parentComponent;
     if (startComponent === endComponent) {
       return startComponent;
     }
