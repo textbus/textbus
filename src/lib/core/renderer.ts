@@ -103,7 +103,7 @@ export class Renderer {
       if (dirty) {
         const root = this.rendingFragment(fragment, new VElement('body'))
         if (this.oldVDom) {
-          this.diff(root, this.oldVDom, host);
+          this.diffAndUpdate(root, this.oldVDom, host);
         } else {
           this.patch(root, host);
         }
@@ -114,16 +114,6 @@ export class Renderer {
     }
     console.timeEnd()
     return this.oldVDom;
-  }
-
-  /**
-   * 把 fragment 转换成虚拟 DOM JSON 字面量。
-   * @param fragment
-   */
-  renderToJSON(fragment: Fragment): VElementLiteral {
-    const root = new VElement('body');
-    this.patch(root);
-    return root.toJSON();
   }
 
   /**
@@ -167,7 +157,7 @@ export class Renderer {
     return this.fragmentAndVDomMapping.get(fragment);
   }
 
-  diff(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
+  private diffAndUpdate(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
     if (!host) {
       if (vDom.equal(oldVDom)) {
         host = this.NVMappingTable.get(oldVDom) as HTMLElement;
@@ -288,7 +278,7 @@ export class Renderer {
         const oldNativeNode = this.getNativeNodeByVDom(oldVDom);
         const newVDom = this.rendingComponent(content);
         if (isDirty) {
-          const newNativeNode = this.diff(newVDom, oldVDom);
+          const newNativeNode = this.diffAndUpdate(newVDom, oldVDom);
           this.componentVDomCacheMap.set(content, newVDom);
           this.NVMappingTable.set(newVDom, newNativeNode);
 
@@ -360,7 +350,7 @@ export class Renderer {
     view.clearChildNodes();
     const vDom = this.rendingFragment(slot, view);
 
-    this.diff(vDom, oldView, this.getNativeNodeByVDom(view) as HTMLElement);
+    this.diffAndUpdate(vDom, oldView, this.getNativeNodeByVDom(view) as HTMLElement);
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {
