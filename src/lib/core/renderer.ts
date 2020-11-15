@@ -189,8 +189,11 @@ export class Renderer {
           let i = rightStartIndex;
           while (i < rightIndex) {
             const abandonedVNode = rightChildNodes[i];
-            const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
-            abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
+            if (abandonedVNode.parentNode === oldVDom) {
+              // 当前项有可能被复用到了 left 节点内部，因此要做此判断
+              const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
+              abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
+            }
             i++;
           }
           rightStartIndex = rightIndex + 1;
