@@ -226,7 +226,7 @@ export class TBSelection {
       const tree = [];
       while (fragment) {
         tree.push(fragment);
-        fragment = fragment.parentComponent.parentFragment;
+        fragment = fragment.parentComponent?.parentFragment;
       }
       depth.push(tree);
     });
