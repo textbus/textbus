@@ -175,6 +175,7 @@ export class TimelineComponent extends BranchComponent {
             } else {
               item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
             }
+            this.markAsDirtied();
           })
         }
 

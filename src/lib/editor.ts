@@ -118,8 +118,8 @@ export class Editor<T = any> implements FileUploader {
   private outputRenderer = new OutputRenderer();
   private outputTranslator = new HTMLOutputTranslator();
   private selection: TBSelection;
-  private workbench: Workbench;
-  private viewer: Viewer;
+  private readonly workbench: Workbench;
+  private readonly viewer: Viewer;
   private parser: Parser;
   private statusBar = new StatusBar();
 

@@ -135,6 +135,7 @@ export class StepComponent extends BranchComponent {
             } else {
               this.config.step = index;
             }
+            this.markAsDirtied();
           })
         }
         item.appendChild(add);
