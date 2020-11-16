@@ -311,8 +311,8 @@ export class Renderer {
       component.rendered();
       if (component instanceof DivisionComponent) {
         const slotView = this.fragmentAndVDomMapping.get(component.slot);
-        if (slotView instanceof VElement && slotView !== vElement) {
-          slotView.styles.set('userSelect', 'text');
+        if (slotView === vElement) {
+          slotView.styles.delete('userSelect');
         }
       } else if (component instanceof BranchComponent || component instanceof BackboneComponent) {
         vElement.styles.set('userSelect', 'none');
