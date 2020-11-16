@@ -1,5 +1,5 @@
 import { auditTime, debounceTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
-import { from, fromEvent, Observable, of, Subject, Subscription, zip } from 'rxjs';
+import { from, fromEvent, Observable, of, Subject, Subscription } from 'rxjs';
 import pretty from 'pretty';
 
 import {
@@ -216,11 +216,10 @@ export class Editor<T = any> implements FileUploader {
             this.rootFragment.append(this.sourceCodeComponent);
           } else {
             const html = this.getHTMLBySourceCodeMode();
-            this.writeContents(html).then(dom => {
-              this.rootFragment.from(this.parser.parse(dom));
-              this.history.recordSnapshot(this.rootFragment, this.selection);
-              this.listenUserWriteEvent();
-            })
+            const dom = Editor.parserHTML(html)
+            this.rootFragment.from(this.parser.parse(dom));
+            this.history.recordSnapshot(this.rootFragment, this.selection);
+            this.listenUserWriteEvent();
           }
         }
       }),
@@ -230,8 +229,9 @@ export class Editor<T = any> implements FileUploader {
         this.workbench.setTabletWidth(deviceWidth);
         this.invokeViewUpdatedHooks();
       }),
-      zip(from(this.writeContents(options.contents || this.defaultHTML)), this.viewer.onReady).subscribe(result => {
-        this.rootFragment.from(this.parser.parse(result[0]));
+      this.viewer.onReady.subscribe(() => {
+        const dom = Editor.parserHTML(options.contents || this.defaultHTML);
+        this.rootFragment.from(this.parser.parse(dom));
         this.render();
         this.nativeSelection = this.viewer.contentDocument.getSelection();
         this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
@@ -261,12 +261,11 @@ export class Editor<T = any> implements FileUploader {
    * @param html
    */
   setContents(html: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.run(() => {
-        this.writeContents(html).then(el => {
-          this.rootFragment.from(this.parser.parse(el));
-          resolve();
-        }).catch(reject);
+        const el = Editor.parserHTML(html)
+        this.rootFragment.from(this.parser.parse(el));
+        resolve();
       })
     })
   }
@@ -826,40 +825,6 @@ export class Editor<T = any> implements FileUploader {
     fn();
   }
 
-  private writeContents(html: string) {
-    return new Promise<HTMLElement>(resolve => {
-      const temporaryIframe = document.createElement('iframe');
-      const loadedId = 'loadedID' + Math.random();
-      const src = `javascript:void((function () {
-                      document.open();
-                      document.domain=\'${document.domain}\';
-                      document.write('<script>document.addEventListener(\\\'DOMContentLoaded\\\', function(){window.parent.postMessage(\\\'${loadedId}\\\', \\\'${location.origin}\\\')})</script>');
-                      document.write('${html.replace(/[']/g, '\\\'')}');
-                      document.close();
-                    })())`;
-
-      const onMessage = (ev: MessageEvent) => {
-        if (ev.data === loadedId) {
-          window.removeEventListener('message', onMessage);
-          const body = temporaryIframe.contentDocument.body;
-          document.body.removeChild(temporaryIframe);
-          resolve(body);
-        }
-      }
-
-      window.addEventListener('message', onMessage);
-      temporaryIframe.style.cssText =
-        'position: absolute;' +
-        'left: -9999px;' +
-        'top: -9999px;' +
-        'width:0;' +
-        'height:0;' +
-        'opacity:0';
-      temporaryIframe.src = src;
-
-      document.body.appendChild(temporaryIframe);
-    });
-  }
 
   private dispatchContentChangeEvent() {
     this.changeEvent.next();
@@ -902,5 +867,9 @@ export class Editor<T = any> implements FileUploader {
     if (pre.slot.contentLength === 0) {
       pre.slot.append(new BrComponent());
     }
+  }
+
+  private static parserHTML(html: string) {
+    return new DOMParser().parseFromString(html, 'text/html').body;
   }
 }
