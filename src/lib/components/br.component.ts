@@ -5,7 +5,7 @@ export class BrComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === 'br';
   }
 
-  from(el: HTMLElement): ViewData {
+  read(el: HTMLElement): ViewData {
     const component = new BrComponent();
     return {
       component: component,

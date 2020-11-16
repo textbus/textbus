@@ -7,7 +7,7 @@ export class VideoComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLVideoElement): ViewData {
+  read(el: HTMLVideoElement): ViewData {
     return {
       component: new VideoComponent(el.src, el.autoplay, el.controls, {
         width: el.style.width || el.width + '',

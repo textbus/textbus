@@ -85,7 +85,7 @@ export class TimelineComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-timeline';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const slots: SlotMap[] = [];
 
     const list: TimelineConfig[] = Array.from(element.children).map(child => {

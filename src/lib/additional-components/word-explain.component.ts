@@ -22,7 +22,7 @@ export class WordExplainComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-word-explain';
   }
 
-  from(element: Element): ViewData {
+  read(element: Element): ViewData {
     const title = element.querySelector('.tb-word-explain-title');
     const subtitle = element.querySelector('.tb-word-explain-subtitle');
     const detail = element.querySelector('.tb-word-explain-detail');

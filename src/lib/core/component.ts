@@ -25,7 +25,7 @@ export interface ViewData {
  */
 export abstract class ComponentReader {
   /**
-   * 匹配一个 DOM 节点或 DOM 片段，如果为 true，则 Parser 会接着调用 from 方法，获取转换后的抽象数据。
+   * 匹配一个 DOM 节点或 DOM 片段，如果为 true，则 Parser 会接着调用 read 方法，获取转换后的抽象数据。
    * @param element 当前要匹配的元素。
    */
   abstract match(element: HTMLElement): boolean;
@@ -34,7 +34,7 @@ export abstract class ComponentReader {
    * 用于将一个 DOM 节点或 DOM 树，转换为抽象的 Component，并返回子插槽和后代 DOM 节点的映射关系。
    * @param element 当前要转换的元素。
    */
-  abstract from(element: HTMLElement): ViewData;
+  abstract read(element: HTMLElement): ViewData;
 }
 
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');

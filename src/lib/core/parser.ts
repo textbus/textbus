@@ -20,7 +20,7 @@ export class Parser {
     if (el.nodeType === Node.ELEMENT_NODE) {
       for (const t of this.componentReaders) {
         if (t.match(el as HTMLElement)) {
-          const viewData = t.from(el as HTMLElement);
+          const viewData = t.read(el as HTMLElement);
           slot.append(viewData.component, false);
           viewData.slotsMap.forEach(item => {
             if (!item.from) {

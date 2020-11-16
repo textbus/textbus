@@ -14,7 +14,7 @@ export class ProgressComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-progress';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const component = new ProgressComponent({
       type: element.getAttribute('type') as any,
       progress: +element.getAttribute('progress') || 0,

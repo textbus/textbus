@@ -10,7 +10,7 @@ export class BaiduMapComponentReader implements ComponentReader {
       /^https:\/\/api\.map\.baidu\.com\/staticimage\/v2/.test((element as HTMLImageElement).src);
   }
 
-  from(element: HTMLImageElement): ViewData {
+  read(element: HTMLImageElement): ViewData {
     const component = new BaiduMapComponent(element.src, {
       width: element?.style.width || '',
       height: element?.style.height || ''

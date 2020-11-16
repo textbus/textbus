@@ -21,7 +21,7 @@ export class ListComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLElement): ViewData {
+  read(el: HTMLElement): ViewData {
     const component = new ListComponent(this.tagName);
     const childrenSlots: SlotMap[] = [];
 

@@ -51,7 +51,7 @@ export class StepComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-step';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const listConfig = Array.from(element.children).map(child => {
       return {
         from: child.querySelector('.tb-step-content') as HTMLElement,

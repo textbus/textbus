@@ -7,7 +7,7 @@ export class AudioComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLAudioElement): ViewData {
+  read(el: HTMLAudioElement): ViewData {
     return {
       component: new AudioComponent(el.src, el.autoplay, el.controls),
       slotsMap: []

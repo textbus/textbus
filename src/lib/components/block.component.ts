@@ -15,7 +15,7 @@ export class BlockComponentReader implements ComponentReader {
     return this.tagNames.includes(component.nodeName.toLowerCase());
   }
 
-  from(el: HTMLElement): ViewData {
+  read(el: HTMLElement): ViewData {
     const component = new BlockComponent(el.tagName.toLocaleLowerCase());
     return {
       component: component,

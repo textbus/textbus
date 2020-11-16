@@ -61,7 +61,7 @@ export class TableComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLTableElement): ViewData {
+  read(el: HTMLTableElement): ViewData {
     const {tHead, tBodies, tFoot} = el;
     const slots: SlotMap[] = [];
     const headers: TableCell[][] = [];

@@ -89,7 +89,7 @@ export class PreComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLElement): ViewData {
+  read(el: HTMLElement): ViewData {
     const component = new PreComponent(el.getAttribute('lang'), el.getAttribute('theme') as PreTheme);
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {

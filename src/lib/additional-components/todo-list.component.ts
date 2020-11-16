@@ -21,7 +21,7 @@ export class TodoListComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-todo-list';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const listConfig = Array.from(element.children).map(child => {
       const stateElement = child.querySelector('span.tb-todo-list-state');
       return {

@@ -20,7 +20,7 @@ export class ImageComponentReader implements ComponentReader {
     return component.nodeName.toLowerCase() === this.tagName;
   }
 
-  from(el: HTMLImageElement): ViewData {
+  read(el: HTMLImageElement): ViewData {
     return {
       component: new ImageComponent(el.src, {
         width: el.style.width || (el.width === 0 ? null : el.width + ''),

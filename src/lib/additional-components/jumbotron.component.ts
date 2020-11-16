@@ -15,7 +15,7 @@ export class JumbotronComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-jumbotron';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const style = element.style;
     const component = new JumbotronComponent({
       backgroundImage: style.backgroundImage,

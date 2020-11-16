@@ -17,7 +17,7 @@ export class ImageCardComponentReader implements ComponentReader {
     return element.nodeName.toLowerCase() === 'tb-image-card';
   }
 
-  from(element: HTMLElement): ViewData {
+  read(element: HTMLElement): ViewData {
     const imageWrapper = new Fragment();
     const desc = new Fragment();
     const component = new ImageCardComponent({
