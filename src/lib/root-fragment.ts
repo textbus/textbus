@@ -1,4 +1,3 @@
-import { Subscription } from 'rxjs';
 import {
   BranchComponent,
   DivisionComponent,
@@ -13,14 +12,10 @@ import {
 import { BrComponent } from './components/_api';
 import { Input } from './viewer/input';
 
-export class EventHandler {
-  private sub: Subscription;
-
-  listen(fragment: Fragment) {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
-    this.sub = fragment.events.subscribe(event => {
+export class RootFragment extends Fragment {
+  constructor() {
+    super();
+    this.events.subscribe(event => {
       switch (event.type) {
         case EventType.onDelete:
           this.onDelete(event);

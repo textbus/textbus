@@ -29,11 +29,11 @@ import { BlockComponent, BrComponent, PreComponent } from './components/_api';
 import { KeymapAction } from './viewer/input';
 import { StatusBar } from './status-bar/status-bar';
 import { ComponentExample } from './workbench/component-stage';
-import { EventHandler } from './event-handler';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
 import { FileUploader } from './uikit/forms/help';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
+import { RootFragment } from './root-fragment';
 
 /**
  * TextBus 初始化时的配置参数
@@ -112,7 +112,7 @@ export class Editor<T = any> implements FileUploader {
   private _readonly = false;
 
   private readonly container: HTMLElement;
-  private readonly rootFragment = new Fragment();
+  private readonly rootFragment = new RootFragment();
 
   private renderer = new Renderer();
   private outputRenderer = new OutputRenderer();
@@ -142,8 +142,6 @@ export class Editor<T = any> implements FileUploader {
 
   private onUserWrite: Observable<void>;
   private userWriteEvent = new Subject<void>();
-
-  private eventHandler = new EventHandler();
 
   private subs: Subscription[] = [];
 
@@ -366,7 +364,6 @@ export class Editor<T = any> implements FileUploader {
   }
 
   private setup() {
-    this.eventHandler.listen(this.rootFragment);
     this.rootFragment.onChange.pipe(debounceTime(1)).subscribe(() => {
       this.render();
       while (this.renderedCallbacks.length) {

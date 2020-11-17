@@ -20,7 +20,7 @@ img {max-width: 100%}
 
 PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
-  // expandComponentLibrary: true,
+  expandComponentLibrary: true,
   deviceWidth: '768px',
   theme: 'dark',
   fullScreen: true,
