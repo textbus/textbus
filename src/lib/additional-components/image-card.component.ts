@@ -78,8 +78,6 @@ export class ImageCardComponent extends BackboneComponent {
   }
 
   componentContentChange() {
-    this.push(this.imgFragment, this.descFragment);
-    this.clean();
     if (this.descFragment.contentLength === 0) {
       this.descFragment.append(new BrComponent());
     }
