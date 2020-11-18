@@ -88,6 +88,7 @@ export class ImageComponent extends LeafComponent {
         this.loadedImages.push(src);
         nativeImage.classList.add('tb-image-loaded');
         nativeImage.src = src;
+        el.attrs.set('src', src);
         s.unsubscribe();
       })
       shadowImage.src = src;

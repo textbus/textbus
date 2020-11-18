@@ -281,6 +281,7 @@ export class Renderer {
         const oldNativeNode = this.getNativeNodeByVDom(oldVDom);
         const newVDom = this.rendingComponent(content);
         if (isDirty) {
+          this.vDomPositionMapping.set(newVDom, this.vDomPositionMapping.get(oldVDom));
           const newNativeNode = this.diffAndUpdate(newVDom, oldVDom);
           this.componentVDomCacheMap.set(content, newVDom);
           this.NVMappingTable.set(newVDom, newNativeNode);
