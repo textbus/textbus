@@ -259,6 +259,7 @@ export class Editor<T = any> implements FileUploader {
    * @param html
    */
   setContents(html: string) {
+    html = html + '';
     return new Promise((resolve) => {
       this.run(() => {
         const el = Editor.parserHTML(html)
@@ -327,12 +328,23 @@ export class Editor<T = any> implements FileUploader {
   }
 
   /**
+   * 销毁 TextBus 实例。
+   */
+  destroy() {
+    this.container.removeChild(this.elementRef);
+    this.subs.forEach(s => s.unsubscribe());
+    this.readyEvent.complete();
+    this.changeEvent.complete();
+    this.history.destroy();
+  }
+
+  /**
    * 发布事件
    * @param by        最开始发生事件的虚拟 DOM 元素。
    * @param type      事件类型。
    * @param data      附加的数据。
    */
-  dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
+  private dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
     let stopped = false;
     do {
       const event = new TBEvent({
@@ -346,17 +358,6 @@ export class Editor<T = any> implements FileUploader {
         by = by.parentComponent?.parentFragment;
       }
     } while (!stopped && by);
-  }
-
-  /**
-   * 销毁 TextBus 实例。
-   */
-  destroy() {
-    this.container.removeChild(this.elementRef);
-    this.subs.forEach(s => s.unsubscribe());
-    this.readyEvent.complete();
-    this.changeEvent.complete();
-    this.history.destroy();
   }
 
   private addRenderedTask(fn: () => void) {
