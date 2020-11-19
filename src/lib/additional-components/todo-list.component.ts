@@ -27,8 +27,8 @@ export class TodoListComponentReader implements ComponentReader {
       return {
         childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
         slot: new TodoListFragment(
-          stateElement.classList.contains('tb-todo-list-state-active'),
-          stateElement.classList.contains('tb-todo-list-state-disabled'))
+          stateElement?.classList.contains('tb-todo-list-state-active'),
+          stateElement?.classList.contains('tb-todo-list-state-disabled'))
       }
     })
     const component = new TodoListComponent(listConfig.map(i => i.slot));
