@@ -811,7 +811,7 @@ export class Editor<T = any> implements FileUploader {
     this.addRenderedTask(() => {
       this.invokeViewUpdatedHooks();
       this.history.recordSnapshot(this.rootFragment, this.selection);
-      this.recordSnapshotFromEditingBefore();
+      // this.recordSnapshotFromEditingBefore();
     })
   }
 
