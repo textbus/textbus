@@ -91,6 +91,7 @@ export class PreComponentReader implements ComponentReader {
 
   read(el: HTMLElement): ViewData {
     const component = new PreComponent(el.getAttribute('lang'), el.getAttribute('theme') as PreTheme);
+    const fragment = new Fragment();
     const fn = function (node: HTMLElement, fragment: Fragment) {
       node.childNodes.forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -104,7 +105,8 @@ export class PreComponentReader implements ComponentReader {
         }
       })
     };
-    fn(el, component.slot);
+    fn(el, fragment);
+    component.slot.from(fragment);
     return {
       component: component,
       slotsMap: []
@@ -201,7 +203,7 @@ export class PreComponent extends DivisionComponent {
       }
     }).join('');
     const fragment = new Fragment();
-    content.replace(/\n|[^\n]/g, str => {
+    content.replace(/\n|[^\n]+/g, str => {
       fragment.append(str === '\n' ? new BrComponent() : str);
       return '';
     })
