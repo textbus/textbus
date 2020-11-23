@@ -23,6 +23,7 @@ export class BaiduMapComponentReader implements ComponentReader {
 }
 
 export class BaiduMapComponent extends ImageComponent {
+  static ak = '';
 
   render(): VElement {
     const el = new VElement(this.tagName);
@@ -78,7 +79,7 @@ export const baiduMapComponentExample: ComponentExample = {
         point = new BMapGL.Point(116.404, 39.915);  // 创建点坐标
         map.centerAndZoom(point, 15);
       }
-      const url = 'https://api.map.baidu.com/api?v=1.0&type=webgl&ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&callback=' + callbackName;
+      const url = 'https://api.map.baidu.com/api?v=1.0&type=webgl&ak=' +BaiduMapComponent.ak +'&callback=' + callbackName;
       const jsApi = document.createElement('script');
       jsApi.src = url;
       document.head.appendChild(jsApi);
@@ -115,7 +116,7 @@ export const baiduMapComponentExample: ComponentExample = {
         const markers = point.lng + ',' + point.lat;
         const zoom = map.getZoom();
 
-        const url = `https://api.map.baidu.com/staticimage/v2?ak=aRsXEo3UFgKwRF6UGZCbNno5rTwlz2zH&scale=2&markers=${markers}&center=${center}&width=500&height=300&zoom=${zoom}`
+        const url = `https://api.map.baidu.com/staticimage/v2?ak=${BaiduMapComponent.ak}&scale=2&markers=${markers}&center=${center}&width=500&height=300&zoom=${zoom}`
         resolve(new BaiduMapComponent(url));
         workbench.close();
       })
