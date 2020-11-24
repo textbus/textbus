@@ -42,6 +42,9 @@ export class FormTextField implements FormItem<string> {
           next: url => {
             this.update(url);
           },
+          error: () => {
+            this.uploaded();
+          },
           complete: () => {
             this.uploaded();
           }

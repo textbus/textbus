@@ -1,5 +1,5 @@
 import { auditTime, debounceTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
-import { from, fromEvent, Observable, of, Subject, Subscription } from 'rxjs';
+import { from, fromEvent, Observable, of, Subject, Subscription, throwError } from 'rxjs';
 import pretty from 'pretty';
 
 import {
@@ -31,7 +31,6 @@ import { StatusBar } from './status-bar/status-bar';
 import { ComponentExample } from './workbench/component-stage';
 import { Workbench } from './workbench/workbench';
 import { HistoryManager } from './history-manager';
-import { FileUploader } from './uikit/forms/help';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { RootFragment } from './root-fragment';
 
@@ -85,7 +84,7 @@ export enum CursorMoveDirection {
 /**
  * TextBus 主类
  */
-export class Editor<T = any> implements FileUploader {
+export class Editor<T = any> {
   /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
@@ -162,8 +161,27 @@ export class Editor<T = any> implements FileUploader {
     this.history = new HistoryManager(options.historyStackSize)
     this.parser = new Parser(options.componentReaders, options.formatters);
     this.viewer = new Viewer([...(options.styleSheets || []), ...(options.editingStyleSheets || [])]);
-    this.workbench = new Workbench(this.viewer, this);
-    this.toolbar = new Toolbar(this, this, this.workbench, options.toolbar);
+    const uploader = {
+      upload: (type: string): Observable<string> => {
+        if (typeof this.options.uploader === 'function') {
+          if (this.selection.rangeCount === 0) {
+            alert('请先选择插入资源位置！');
+            return throwError(new Error('请先选择插入资源位置！'));
+          }
+          const result = this.options.uploader(type);
+          if (result instanceof Observable) {
+            return result;
+          } else if (result instanceof Promise) {
+            return from(result);
+          } else if (typeof result === 'string') {
+            return of(result);
+          }
+        }
+        return of('');
+      }
+    }
+    this.workbench = new Workbench(this.viewer, uploader);
+    this.toolbar = new Toolbar(this, uploader, this.workbench, options.toolbar);
     let deviceWidth = options.deviceWidth || '100%';
 
     this.statusBar.libSwitch.expand = this.options.expandComponentLibrary;
@@ -267,20 +285,6 @@ export class Editor<T = any> implements FileUploader {
         resolve();
       })
     })
-  }
-
-  upload(type: string): Observable<string> {
-    if (typeof this.options.uploader === 'function') {
-      const result = this.options.uploader(type);
-      if (result instanceof Observable) {
-        return result;
-      } else if (result instanceof Promise) {
-        return from(result);
-      } else if (typeof result === 'string') {
-        return of(result);
-      }
-    }
-    return of('');
   }
 
   /**

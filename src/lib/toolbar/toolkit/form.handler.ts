@@ -22,7 +22,7 @@ export class FormHandler implements Tool {
   onApply: Observable<any>;
   commander: Commander;
   private button: UIButton;
-  private viewer: DropdownViewer;
+  private viewer: FormViewer;
 
   constructor(private config: FormToolConfig,
               private delegate: FileUploader,
