@@ -43,16 +43,33 @@ export class Viewer {
     styleEl.innerHTML = styleSheets.join('');
 
     const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
-    this.elementRef.src = `javascript:void((function () {document.open();document.write('${html}');document.close();})())`;
+    this.elementRef.src = `javascript:void(
+      (function () {
+        document.open();
+        document.domain='${document.domain}';
+        document.write('${html}');
+        document.close();
+        window.parent.postMessage('complete','${location.origin}');
+      })()
+      )`;
 
     this.elementRef.onload = () => {
       this.elementRef.onload = null; // 低版本 chrome 会触发两次 load
       const doc = this.elementRef.contentDocument;
       this.sourceCodeMode = this._sourceCodeMode;
       this.input = new Input(doc);
-      this.readyEvent.next(doc);
-      this.listen();
+      // this.readyEvent.next(doc);
+      // this.listen();
     };
+    const onMessage = (ev: MessageEvent) => {
+      if (ev.data === 'complete') {
+        window.removeEventListener('message', onMessage);
+        const doc = this.elementRef.contentDocument;
+        this.readyEvent.next(doc);
+        this.listen();
+      }
+    }
+    window.addEventListener('message', onMessage);
     this.elementRef.classList.add('textbus-frame');
   }
 
