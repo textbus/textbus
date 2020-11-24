@@ -71,7 +71,7 @@ class MenuHandler implements Tool {
 
 export class GroupHandler implements Tool {
   elementRef: HTMLElement;
-  onApply: null;
+  onApply: Observable<any>;
   commander: Commander;
   tools: Array<{ config: ToolConfig, instance: Tool }> = [];
   private dropdown: UIDropdown;
