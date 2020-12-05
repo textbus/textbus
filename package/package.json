@@ -5,7 +5,7 @@
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
   "typings": "./bundles/public-api.d.ts",
-  "license": "GPL",
+  "license": "GPL-3.0-only",
   "keywords": [
     "editor",
     "text",
