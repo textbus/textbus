@@ -1,5 +1,5 @@
 import {
-  BackboneComponent,
+  BackboneAbstractComponent,
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
@@ -52,7 +52,7 @@ export class WordExplainComponentReader implements ComponentReader {
   }
 }
 
-export class WordExplainComponent extends BackboneComponent {
+export class WordExplainComponent extends BackboneAbstractComponent {
   private readonly title: Fragment;
   private readonly subtitle: Fragment;
   private readonly detail: Fragment;

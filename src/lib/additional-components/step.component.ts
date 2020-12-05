@@ -1,5 +1,5 @@
 import {
-  BranchComponent,
+  BranchAbstractComponent,
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
@@ -69,7 +69,7 @@ export class StepComponentReader implements ComponentReader {
   }
 }
 
-export class StepComponent extends BranchComponent {
+export class StepComponent extends BranchAbstractComponent {
   constructor(private config: StepsConfig) {
     super('tb-steps');
 

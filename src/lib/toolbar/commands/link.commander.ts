@@ -1,5 +1,5 @@
 import {
-  BranchComponent,
+  BranchAbstractComponent,
   CommandContext,
   Commander,
   FormatAbstractData,
@@ -45,7 +45,7 @@ export class LinkCommander implements Commander<Map<string, string>> {
       range.getSelectedScope().forEach(scope => {
         let index = 0;
         scope.fragment.sliceContents(scope.startIndex, scope.endIndex).forEach(content => {
-          if (content instanceof BranchComponent) {
+          if (content instanceof BranchAbstractComponent) {
             content.slots.forEach(item => {
               item.apply(this.formatter, {
                 startIndex: 0,

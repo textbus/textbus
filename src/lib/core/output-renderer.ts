@@ -1,12 +1,12 @@
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
-import { BackboneComponent, BranchComponent, Component, DivisionComponent, LeafComponent } from './component';
+import { BackboneAbstractComponent, BranchAbstractComponent, AbstractComponent, DivisionAbstractComponent, LeafAbstractComponent } from './component';
 import { ChildSlotMode, Renderer, ReplaceMode, FormatConfig } from './renderer';
 import { FormatRendingContext } from './formatter';
 
 export class OutputRenderer {
   // 记录已渲染的组件
-  private componentVDomCacheMap = new WeakMap<Component, VElement>();
+  private componentVDomCacheMap = new WeakMap<AbstractComponent, VElement>();
   // 记录 fragment 对应的虚拟节点
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
   private rootVElement = new VElement('body');
@@ -37,7 +37,7 @@ export class OutputRenderer {
       return host;
     }
     fragment.sliceContents().forEach(content => {
-      if (content instanceof Component && content.outputChanged) {
+      if (content instanceof AbstractComponent && content.outputChanged) {
         const isDirty = content.outputDirty;
         const oldVDom = this.componentVDomCacheMap.get(content);
         const newVDom = this.rendingComponent(content);
@@ -50,11 +50,11 @@ export class OutputRenderer {
     return host;
   }
 
-  private rendingComponent(component: Component): VElement {
+  private rendingComponent(component: AbstractComponent): VElement {
     if (component.outputDirty) {
       let vElement: VElement;
       vElement = component.render(true, (slot, host) => {
-        if (component instanceof LeafComponent) {
+        if (component instanceof LeafAbstractComponent) {
           return null
         }
         return this.rendingFragment(slot, host, true);
@@ -63,13 +63,13 @@ export class OutputRenderer {
       component.outputRendered();
       return vElement;
     }
-    if (component instanceof DivisionComponent) {
+    if (component instanceof DivisionAbstractComponent) {
       if (component.slot.outputDirty) {
         this.reuseSlot(component.slot, this.fragmentAndVDomMapping.get(component.slot));
       } else if (component.slot.outputChanged) {
         this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
       }
-    } else if (component instanceof BranchComponent) {
+    } else if (component instanceof BranchAbstractComponent) {
       component.slots.forEach(fragment => {
         if (fragment.outputDirty) {
           this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
@@ -77,7 +77,7 @@ export class OutputRenderer {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
       })
-    } else if (component instanceof BackboneComponent) {
+    } else if (component instanceof BackboneAbstractComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.outputDirty) {
           this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));

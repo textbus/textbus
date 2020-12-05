@@ -1,8 +1,8 @@
 import {
-  BackboneComponent,
-  BranchComponent,
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
   Commander,
-  DivisionComponent, ElementPosition,
+  DivisionAbstractComponent, ElementPosition,
   Fragment,
   Lifecycle,
   TBSelection
@@ -120,11 +120,11 @@ export class FindHook implements Lifecycle {
             break;
           }
         }
-      } else if (item instanceof DivisionComponent) {
+      } else if (item instanceof DivisionAbstractComponent) {
         result.push(...this.find(item.slot, search));
-      } else if (item instanceof BranchComponent) {
+      } else if (item instanceof BranchAbstractComponent) {
         item.slots.forEach(s => result.push(...this.find(s, search)));
-      } else if (item instanceof BackboneComponent) {
+      } else if (item instanceof BackboneAbstractComponent) {
         Array.from(item).forEach(s => result.push(...this.find(s, search)));
       }
       index += item.length;

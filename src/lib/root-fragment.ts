@@ -1,13 +1,13 @@
 import {
-  BranchComponent,
-  DivisionComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
   Contents,
   EventType,
   Fragment,
   InlineFormatter,
-  LeafComponent,
+  LeafAbstractComponent,
   TBEvent,
-  Component
+  AbstractComponent
 } from './core/_api';
 import { BrComponent } from './components/_api';
 import { Input } from './viewer/input';
@@ -72,7 +72,7 @@ export class RootFragment extends Fragment {
 
     const parentComponent = fragment.parentComponent;
 
-    if (parentComponent instanceof BranchComponent) {
+    if (parentComponent instanceof BranchAbstractComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);
@@ -87,9 +87,9 @@ export class RootFragment extends Fragment {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
       } else {
         const firstContent = contentsArr.shift();
-        if (firstContent instanceof BranchComponent) {
+        if (firstContent instanceof BranchAbstractComponent) {
           parentFragment.insertAfter(firstContent, parentComponent);
-        } else if (firstContent instanceof DivisionComponent) {
+        } else if (firstContent instanceof DivisionAbstractComponent) {
           const length = firstContent.slot.contentLength;
           const firstContents = firstContent.slot.cut(0);
           firstContents.sliceContents(0).reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
@@ -109,7 +109,7 @@ export class RootFragment extends Fragment {
           } else {
             const afterContents = fragment.cut(firstRange.startIndex);
             contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentComponent));
-            const afterComponent = parentComponent.clone() as DivisionComponent;
+            const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
             afterComponent.slot.from(new Fragment());
             afterContents.sliceContents(0).forEach(c => afterComponent.slot.append(c));
             Array.from(afterContents.getFormatKeys()).forEach(token => {
@@ -151,7 +151,7 @@ export class RootFragment extends Fragment {
           const last = commonAncestorFragment.getContentAtIndex(len - 1);
           if (last instanceof BrComponent) {
             commonAncestorFragment.append(new BrComponent());
-          } else if (last instanceof Component && !(last instanceof LeafComponent)) {
+          } else if (last instanceof AbstractComponent && !(last instanceof LeafAbstractComponent)) {
             prevPosition = range.getPreviousPosition();
             range.setStart(prevPosition.fragment, prevPosition.index);
             range.collapse();
@@ -209,7 +209,7 @@ export class RootFragment extends Fragment {
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
     const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-    if (typeof afterContent === 'string' || afterContent instanceof LeafComponent) {
+    if (typeof afterContent === 'string' || afterContent instanceof LeafAbstractComponent) {
       return;
     }
     rootFragment.insert(new BrComponent(), firstRange.startIndex);

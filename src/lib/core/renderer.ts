@@ -1,10 +1,10 @@
 import { Fragment } from './fragment';
 import { VElement, VElementLiteral, VTextNode } from './element';
 import {
-  BackboneComponent,
-  BranchComponent,
-  Component,
-  DivisionComponent, LeafComponent
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  AbstractComponent,
+  DivisionAbstractComponent, LeafAbstractComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 
@@ -92,7 +92,7 @@ export class Renderer {
   // 记录虚拟节点和真实 DOM 节点的映射关系
   private NVMappingTable = new NativeElementMappingTable();
   // 记录已渲染的组件
-  private componentVDomCacheMap = new WeakMap<Component, VElement>();
+  private componentVDomCacheMap = new WeakMap<AbstractComponent, VElement>();
 
   private oldVDom: VElement;
 
@@ -275,7 +275,7 @@ export class Renderer {
       return host;
     }
     fragment.sliceContents().forEach(content => {
-      if (content instanceof Component && content.changed) {
+      if (content instanceof AbstractComponent && content.changed) {
         const isDirty = content.dirty;
         const oldVDom = this.componentVDomCacheMap.get(content);
         const oldNativeNode = this.getNativeNodeByVDom(oldVDom);
@@ -297,11 +297,11 @@ export class Renderer {
     return host;
   }
 
-  private rendingComponent(component: Component): VElement {
+  private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
       let vElement: VElement;
       vElement = component.render(false, (slot, host) => {
-        if (component instanceof LeafComponent) {
+        if (component instanceof LeafAbstractComponent) {
           return null
         }
         const view = this.rendingFragment(slot, host, true);
@@ -310,23 +310,23 @@ export class Renderer {
       });
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
-      if (component instanceof DivisionComponent) {
+      if (component instanceof DivisionAbstractComponent) {
         const slotView = this.fragmentAndVDomMapping.get(component.slot);
         if (slotView === vElement) {
           slotView.styles.delete('userSelect');
         }
-      } else if (component instanceof BranchComponent || component instanceof BackboneComponent) {
+      } else if (component instanceof BranchAbstractComponent || component instanceof BackboneAbstractComponent) {
         vElement.styles.set('userSelect', 'none');
       }
       return vElement;
     }
-    if (component instanceof DivisionComponent) {
+    if (component instanceof DivisionAbstractComponent) {
       if (component.slot.dirty) {
         this.reuseSlot(component.slot, this.fragmentAndVDomMapping.get(component.slot));
       } else if (component.slot.changed) {
         this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
       }
-    } else if (component instanceof BranchComponent) {
+    } else if (component instanceof BranchAbstractComponent) {
       component.slots.forEach(fragment => {
         if (fragment.dirty) {
           this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
@@ -334,7 +334,7 @@ export class Renderer {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
       })
-    } else if (component instanceof BackboneComponent) {
+    } else if (component instanceof BackboneAbstractComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.dirty) {
           this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
@@ -410,7 +410,7 @@ export class Renderer {
         children.push(textNode);
       } else {
         const vDom = this.rendingComponent(item);
-        if (!(item instanceof DivisionComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
+        if (!(item instanceof DivisionAbstractComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
           this.vDomPositionMapping.set(vDom, {
             fragment,
             startIndex: i,

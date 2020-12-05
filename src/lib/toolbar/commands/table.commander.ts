@@ -1,4 +1,4 @@
-import { DivisionComponent, Commander, Fragment, CommandContext } from '../../core/_api';
+import { DivisionAbstractComponent, Commander, Fragment, CommandContext } from '../../core/_api';
 import { TableComponent, BrComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<Map<string, string | number | boolean>> {
@@ -27,7 +27,7 @@ export class TableCommander implements Commander<Map<string, string | number | b
       const parentComponent = range.startFragment.parentComponent;
       const parentFragment = parentComponent.parentFragment;
       const firstContent = range.startFragment.getContentAtIndex(0);
-      if (parentComponent instanceof DivisionComponent) {
+      if (parentComponent instanceof DivisionAbstractComponent) {
         if (range.startFragment.contentLength === 0 ||
           range.startFragment.contentLength === 1 &&
           firstContent instanceof BrComponent) {

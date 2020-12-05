@@ -1,5 +1,5 @@
 import {
-  BranchComponent,
+  BranchAbstractComponent,
   EventType,
   Fragment,
   ComponentReader,
@@ -44,7 +44,7 @@ export class TodoListComponentReader implements ComponentReader {
   }
 }
 
-export class TodoListComponent extends BranchComponent<TodoListFragment> {
+export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
   private subs: Subscription[] = [];
   private stateCollection = [{
     active: false,

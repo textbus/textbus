@@ -1,4 +1,4 @@
-import { Component, parentFragmentAccessToken } from './component';
+import { AbstractComponent, parentFragmentAccessToken } from './component';
 
 /**
  * 储存 Fragment 内容的类。
@@ -14,13 +14,13 @@ export class Contents {
   /**
    * 当前内容。
    */
-  private elements: Array<Component | string> = [];
+  private elements: Array<AbstractComponent | string> = [];
 
   /**
    * 把新内容添加到 elements 末尾。
    * @param content 新内容
    */
-  append(content: Component | string) {
+  append(content: AbstractComponent | string) {
     if (content === '') {
       return;
     }
@@ -43,7 +43,7 @@ export class Contents {
       return [];
     }
     let index = 0;
-    const result: Array<string | Component> = [];
+    const result: Array<string | AbstractComponent> = [];
     for (const el of this.elements) {
       const fragmentStartIndex = index;
       const fragmentEndIndex = index + el.length;
@@ -67,7 +67,7 @@ export class Contents {
    * 查找一个节点在当前内容的中下标位置，如没有，则返回 -1。
    * @param element
    */
-  indexOf(element: Component): number {
+  indexOf(element: AbstractComponent): number {
     let index = 0;
     for (const item of this.elements) {
       if (item === element) {
@@ -83,7 +83,7 @@ export class Contents {
    * @param content
    * @param index
    */
-  insert(content: string | Component, index: number) {
+  insert(content: string | AbstractComponent, index: number) {
     if (content === '') {
       return;
     }
@@ -102,7 +102,7 @@ export class Contents {
     let ii = 0;
     for (const el of this.elements) {
       if (index >= i) {
-        if ((el instanceof Component) && index === i) {
+        if ((el instanceof AbstractComponent) && index === i) {
           const prev = this.elements[ii - 1];
           if (typeof prev === 'string' && typeof content === 'string') {
             this.elements[ii - 1] = prev + content;
@@ -117,7 +117,7 @@ export class Contents {
         } else if (typeof el === 'string') {
           if (index >= i && index < i + el.length) {
             const cc = [el.slice(0, index - i), content, el.slice(index - i)].filter(i => i);
-            if (content instanceof Component) {
+            if (content instanceof AbstractComponent) {
               this.elements.splice(ii, 1, ...cc);
             } else {
               this.elements.splice(ii, 1, cc.join(''));
@@ -145,7 +145,7 @@ export class Contents {
     this.elements = [];
     elements.forEach(item => this.append(item));
     return discardedContents.map(i => {
-      if (i instanceof Component) {
+      if (i instanceof AbstractComponent) {
         i[parentFragmentAccessToken] = null;
       }
       return i;

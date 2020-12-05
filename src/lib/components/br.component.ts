@@ -1,4 +1,4 @@
-import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
+import { LeafAbstractComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
 export class BrComponentReader implements ComponentReader {
   match(component: HTMLElement): boolean {
@@ -14,7 +14,7 @@ export class BrComponentReader implements ComponentReader {
   }
 }
 
-export class BrComponent extends LeafComponent {
+export class BrComponent extends LeafAbstractComponent {
   constructor() {
     super('br');
   }

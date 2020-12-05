@@ -1,4 +1,4 @@
-import { ComponentReader, LeafComponent, VElement, ViewData, VTextNode } from '../core/_api';
+import { ComponentReader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
@@ -28,7 +28,7 @@ export class ProgressComponentReader implements ComponentReader {
   }
 }
 
-export class ProgressComponent extends LeafComponent {
+export class ProgressComponent extends LeafAbstractComponent {
   constructor(private config: ProgressConfig) {
     super('tb-progress');
   }

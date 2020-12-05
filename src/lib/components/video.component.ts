@@ -1,4 +1,4 @@
-import { LeafComponent, ComponentReader, ViewData, VElement } from '../core/_api';
+import { LeafAbstractComponent, ComponentReader, ViewData, VElement } from '../core/_api';
 
 export class VideoComponentReader implements ComponentReader {
   private tagName = 'video';
@@ -18,7 +18,7 @@ export class VideoComponentReader implements ComponentReader {
   }
 }
 
-export class VideoComponent extends LeafComponent {
+export class VideoComponent extends LeafAbstractComponent {
   width: string = null;
   height: string = null;
 

@@ -1,9 +1,9 @@
 import {
   Commander,
   Fragment,
-  BranchComponent,
-  DivisionComponent,
-  TBRangeScope, BackboneComponent, CommandContext, TBRange
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  TBRangeScope, BackboneAbstractComponent, CommandContext, TBRange
 } from '../../core/_api';
 import { ListComponent, BlockComponent } from '../../components/_api';
 
@@ -33,8 +33,8 @@ export class ListCommander implements Commander<null> {
           }
           if (slots.center.length) {
             slots.center.forEach(fragment => {
-              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BranchComponent) {
-                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BranchComponent, item.component)
+              if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BranchAbstractComponent) {
+                parentFragment.insertBefore(fragment.getContentAtIndex(0) as BranchAbstractComponent, item.component)
               } else {
                 const t = new BlockComponent('p');
                 if (fragment === range.startFragment) {
@@ -72,16 +72,16 @@ export class ListCommander implements Commander<null> {
           }
         } else {
           const parentComponent = commonAncestorFragment.parentComponent;
-          if (parentComponent instanceof DivisionComponent || parentComponent instanceof BackboneComponent) {
+          if (parentComponent instanceof DivisionAbstractComponent || parentComponent instanceof BackboneAbstractComponent) {
             const parentFragment = parentComponent.parentFragment;
             const position = parentFragment.indexOf(parentComponent);
             parentFragment.cut(position, 1);
             parentFragment.insert(list, position);
-          } else if (parentComponent instanceof BranchComponent) {
+          } else if (parentComponent instanceof BranchAbstractComponent) {
             const index = parentComponent.slots.indexOf(commonAncestorFragment);
-            const before = parentComponent.clone() as BranchComponent;
+            const before = parentComponent.clone() as BranchAbstractComponent;
             before.slots.splice(index);
-            const after = parentComponent.clone() as BranchComponent;
+            const after = parentComponent.clone() as BranchAbstractComponent;
             after.slots.splice(0, index + 1);
 
             const parentFragment = parentComponent.parentFragment;
@@ -130,17 +130,17 @@ export class ListCommander implements Commander<null> {
 
   private getMovableContents(range: TBRange, commonAncestorFragment: Fragment): ContentPosition[] {
     const scopes: TBRangeScope[] = [];
-    const backboneComponents: Array<BackboneComponent> = [];
+    const backboneComponents: Array<BackboneAbstractComponent> = [];
     range.getSuccessiveContents().forEach(scope => {
       let fragment = scope.fragment;
-      let lastBackboneComponent: BackboneComponent;
+      let lastBackboneComponent: BackboneAbstractComponent;
       while (true) {
         if (fragment === commonAncestorFragment) {
           break;
         }
         const parentComponent = fragment.parentComponent;
         fragment = parentComponent.parentFragment;
-        if (parentComponent instanceof BackboneComponent) {
+        if (parentComponent instanceof BackboneAbstractComponent) {
           lastBackboneComponent = parentComponent;
         }
       }

@@ -3,7 +3,7 @@ import {
   ComponentReader,
   VElement,
   ViewData,
-  BackboneComponent,
+  BackboneAbstractComponent,
   Fragment, SlotRendererFn
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -37,7 +37,7 @@ export class ImageCardComponentReader implements ComponentReader {
   }
 }
 
-export class ImageCardComponent extends BackboneComponent {
+export class ImageCardComponent extends BackboneAbstractComponent {
   readonly imgFragment: Fragment;
   readonly descFragment: Fragment;
 

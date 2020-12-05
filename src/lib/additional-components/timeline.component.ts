@@ -1,5 +1,5 @@
 import {
-  BranchComponent,
+  BranchAbstractComponent,
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
@@ -115,7 +115,7 @@ export class TimelineComponentReader implements ComponentReader {
   }
 }
 
-export class TimelineComponent extends BranchComponent {
+export class TimelineComponent extends BranchAbstractComponent {
   private vEle: VElement;
 
   constructor(private list: TimelineConfig[]) {

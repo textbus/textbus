@@ -3,8 +3,8 @@ import {
   FormatAbstractData,
   FormatEffect,
   Fragment,
-  DivisionComponent,
-  BranchComponent, BackboneComponent, CommandContext
+  DivisionAbstractComponent,
+  BranchAbstractComponent, BackboneAbstractComponent, CommandContext
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
 import { boldFormatter } from '../../formatter/bold.formatter';
@@ -30,20 +30,20 @@ export class BlockCommander implements Commander<string> {
           if (scope.fragment === range.endFragment) {
             range.endFragment = blockComponent.slot;
           }
-          if (parentComponent instanceof DivisionComponent) {
+          if (parentComponent instanceof DivisionAbstractComponent) {
             const parentFragment = parentComponent.parentFragment;
             blockComponent.slot.from(scope.fragment);
             parentFragment.insertBefore(blockComponent, parentComponent);
             parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
             this.effect(blockComponent.slot, parentComponent.tagName);
-          } else if (parentComponent instanceof BranchComponent) {
+          } else if (parentComponent instanceof BranchAbstractComponent) {
             const index = parentComponent.slots.indexOf(scope.fragment);
             blockComponent.slot.from(scope.fragment);
             this.effect(blockComponent.slot, parentComponent.tagName);
             const fragment = new Fragment();
             fragment.append(blockComponent);
             parentComponent.slots.splice(index, 1, fragment);
-          } else if (parentComponent instanceof BackboneComponent) {
+          } else if (parentComponent instanceof BackboneAbstractComponent) {
             blockComponent.slot.from(scope.fragment);
             scope.fragment.append(blockComponent);
             this.effect(blockComponent.slot, parentComponent.tagName);

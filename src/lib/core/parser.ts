@@ -1,6 +1,6 @@
 import { Fragment } from './fragment';
 import { FormatEffect, Formatter } from './formatter';
-import { BranchComponent, DivisionComponent, ComponentReader, BackboneComponent } from './component';
+import { BranchAbstractComponent, DivisionAbstractComponent, ComponentReader, BackboneAbstractComponent } from './component';
 
 /**
  * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
@@ -26,9 +26,9 @@ export class Parser {
             if (!item.from) {
               return;
             }
-            if (viewData.component instanceof DivisionComponent ||
-              viewData.component instanceof BranchComponent ||
-              viewData.component instanceof BackboneComponent ||
+            if (viewData.component instanceof DivisionAbstractComponent ||
+              viewData.component instanceof BranchAbstractComponent ||
+              viewData.component instanceof BackboneAbstractComponent ||
               item.from === el) {
               this.readFormats(item.from, item.toSlot);
             } else {

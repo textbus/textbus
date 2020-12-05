@@ -1,10 +1,10 @@
-import { TBSelection, Constructor, BranchComponent, DivisionComponent } from '../../core/_api';
+import { TBSelection, Constructor, BranchAbstractComponent, DivisionAbstractComponent } from '../../core/_api';
 import { Matcher, SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class TableMatcher implements Matcher {
-  constructor(private excludeComponents: Array<Constructor<BranchComponent | DivisionComponent>> = []) {
+  constructor(private excludeComponents: Array<Constructor<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {

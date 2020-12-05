@@ -16,7 +16,7 @@ export interface SlotMap {
  * 用于向 Parser 返回当前组件的实例及其插槽和 DOM 节点的对应关系，以便 Parser 能够正常的向下读取 DOM 树。
  */
 export interface ViewData {
-  component: Component;
+  component: AbstractComponent;
   slotsMap: SlotMap[];
 }
 
@@ -41,7 +41,7 @@ export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
 export type SlotRendererFn = (slot: Fragment, host: VElement) => VElement;
 
-export interface Component {
+export interface AbstractComponent {
   componentContentChange?(): void;
 
   componentDataChange?(): void;
@@ -49,9 +49,9 @@ export interface Component {
 
 /**
  * TextBus 组件基类，不可直接继承 Component 类。
- * 如要扩展功能。请继承 DivisionComponent、BranchComponent、BackboneComponent 或 LeafComponent 类。
+ * 如要扩展功能。请继承 DivisionAbstractComponent、BranchAbstractComponent、BackboneAbstractComponent 或 LeafAbstractComponent 类。
  */
-export abstract class Component extends Marker {
+export abstract class AbstractComponent extends Marker {
   [parentFragmentAccessToken]: Fragment | null;
 
   get parentFragment() {
@@ -106,14 +106,14 @@ export abstract class Component extends Marker {
   /**
    * 克隆自己，返回一个完全一样的副本。
    */
-  abstract clone(): Component;
+  abstract clone(): AbstractComponent;
 }
 
 /**
  * 只有一个子插槽的组件，如 p、div、h1~h6、blockquote 等，也可以是用户自定义的只有一个子插槽的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
-export abstract class DivisionComponent extends Component {
+export abstract class DivisionAbstractComponent extends AbstractComponent {
   readonly slot = new Fragment();
 
   protected constructor(tagName: string) {
@@ -130,7 +130,7 @@ export abstract class DivisionComponent extends Component {
  * 如 ul、ol 等，都保持一个固定的结构，但 li 的个数是不限制的，且是可以更改的。也可以用户自定义的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
-export abstract class BranchComponent<T extends Fragment = Fragment> extends Component {
+export abstract class BranchAbstractComponent<T extends Fragment = Fragment> extends AbstractComponent {
   private eventMap = new Map<T, Subscription>();
 
   /**
@@ -180,7 +180,7 @@ export abstract class BranchComponent<T extends Fragment = Fragment> extends Com
  * 有任意个子插槽，且子插槽不可随意更改的组件。
  * 如 table，可以有多个 td，但 td 是不能随意删除的，否则会破坏 table 的结构。
  */
-export abstract class BackboneComponent extends Component implements Iterable<Fragment> {
+export abstract class BackboneAbstractComponent extends AbstractComponent implements Iterable<Fragment> {
   get slotCount() {
     return this.slots.length;
   }
@@ -288,5 +288,8 @@ export abstract class BackboneComponent extends Component implements Iterable<Fr
  * 没有子插槽的组件，如 br、img等。也可以是用户自定义的组件。
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
-export abstract class LeafComponent extends Component {
+export abstract class LeafAbstractComponent extends AbstractComponent {
+  protected constructor(tagName: string) {
+    super(tagName);
+  }
 }

@@ -2,7 +2,7 @@ import {
   BlockFormatter,
   ChildSlotMode,
   ComponentReader,
-  DivisionComponent,
+  DivisionAbstractComponent,
   EventType,
   FormatAbstractData,
   FormatEffect,
@@ -114,7 +114,7 @@ export class PreComponentReader implements ComponentReader {
   }
 }
 
-export class PreComponent extends DivisionComponent {
+export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';
 
   constructor(public lang: string, private theme?: PreTheme) {

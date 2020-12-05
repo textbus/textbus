@@ -1,13 +1,13 @@
 import {
-  BranchComponent,
-  DivisionComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
   Constructor,
   TBRange,
-  BackboneComponent
+  BackboneAbstractComponent
 } from '../../../core/_api';
 
 export function rangeContentInComponent(range: TBRange,
-                                        componentConstructorList: Array<Constructor<BranchComponent | DivisionComponent | BackboneComponent>> = []) {
+                                        componentConstructorList: Array<Constructor<BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent>> = []) {
   let has = true;
   if (componentConstructorList.length === 0) {
     return false;

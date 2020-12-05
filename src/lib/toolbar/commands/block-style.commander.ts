@@ -1,9 +1,9 @@
 import {
-  BranchComponent, DivisionComponent,
+  BranchAbstractComponent, DivisionAbstractComponent,
   Commander,
   FormatAbstractData,
   FormatEffect, Fragment,
-  BackboneComponent, CommandContext
+  BackboneAbstractComponent, CommandContext
 } from '../../core/_api';
 import { BlockStyleFormatter } from '../../formatter/block-style.formatter';
 
@@ -26,11 +26,11 @@ export class BlockStyleCommander implements Commander<string> {
             const ff: Fragment[] = [];
             let flag = false;
             item.fragment.sliceContents(item.startIndex, item.endIndex).forEach(content => {
-              if (content instanceof DivisionComponent) {
+              if (content instanceof DivisionAbstractComponent) {
                 fragments.push(content.slot);
-              } else if (content instanceof BranchComponent) {
+              } else if (content instanceof BranchAbstractComponent) {
                 fragments.push(...content.slots);
-              } else if (content instanceof BackboneComponent) {
+              } else if (content instanceof BackboneAbstractComponent) {
                 fragments.push(...Array.from(content));
               } else {
                 flag = true;

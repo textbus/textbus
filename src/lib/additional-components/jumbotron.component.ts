@@ -1,4 +1,4 @@
-import { ComponentReader, DivisionComponent, SlotRendererFn, VElement, ViewData } from '../core/_api';
+import { ComponentReader, DivisionAbstractComponent, SlotRendererFn, VElement, ViewData } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
 import { FileUploader, Form, FormTextField } from '../uikit/_api';
@@ -33,7 +33,7 @@ export class JumbotronComponentReader implements ComponentReader {
   }
 }
 
-export class JumbotronComponent extends DivisionComponent {
+export class JumbotronComponent extends DivisionAbstractComponent {
   constructor(private options: JumbotronOptions) {
     super('tb-jumbotron');
   }

@@ -1,4 +1,4 @@
-import { ComponentReader, LeafComponent, VElement, ViewData } from '../core/_api';
+import { ComponentReader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 import { fromEvent } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 
@@ -35,7 +35,7 @@ export class ImageComponentReader implements ComponentReader {
   }
 }
 
-export class ImageComponent extends LeafComponent {
+export class ImageComponent extends LeafAbstractComponent {
   width: string = null;
   height: string = null;
   maxWidth: string = null;

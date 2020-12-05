@@ -1,12 +1,12 @@
 import {
   EventType,
   Fragment,
-  LeafComponent,
+  LeafAbstractComponent,
   SlotMap,
   ComponentReader,
   VElement,
   ViewData,
-  BackboneComponent, SlotRendererFn
+  BackboneAbstractComponent, SlotRendererFn
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { Subscription } from 'rxjs';
@@ -117,7 +117,7 @@ export class TableComponentReader implements ComponentReader {
   }
 }
 
-export class TableComponent extends BackboneComponent {
+export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {
     const n = this.serialize();
     this._cellMatrix = n;

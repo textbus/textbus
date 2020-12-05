@@ -1,6 +1,6 @@
 import {
   SlotMap,
-  BranchComponent,
+  BranchAbstractComponent,
   ComponentReader,
   ViewData,
   Fragment,
@@ -60,7 +60,7 @@ export class ListComponentReader implements ComponentReader {
   }
 }
 
-export class ListComponent extends BranchComponent {
+export class ListComponent extends BranchAbstractComponent {
   private subs: Subscription[] = [];
 
   constructor(tagName: string) {

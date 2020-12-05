@@ -3,16 +3,16 @@ import { from, fromEvent, Observable, of, Subject, Subscription, throwError } fr
 import pretty from 'pretty';
 
 import {
-  BranchComponent,
+  BranchAbstractComponent,
   Commander,
-  Component,
+  AbstractComponent,
   ComponentReader,
   Contents,
-  DivisionComponent,
+  DivisionAbstractComponent,
   EventType,
   Formatter,
   Fragment,
-  LeafComponent,
+  LeafAbstractComponent,
   Lifecycle,
   OutputRenderer,
   Parser,
@@ -788,14 +788,14 @@ export class Editor<T = any> {
     this.recordSnapshotFromEditingBefore();
   }
 
-  private insertComponent(component: Component) {
+  private insertComponent(component: AbstractComponent) {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
     const parentComponent = startFragment.parentComponent;
-    if (component instanceof LeafComponent) {
+    if (component instanceof LeafAbstractComponent) {
       startFragment.insert(component, firstRange.endIndex);
     } else {
-      if (parentComponent instanceof DivisionComponent) {
+      if (parentComponent instanceof DivisionAbstractComponent) {
         const parentFragment = parentComponent.parentFragment;
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
@@ -803,7 +803,7 @@ export class Editor<T = any> {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
 
         }
-      } else if (parentComponent instanceof BranchComponent) {
+      } else if (parentComponent instanceof BranchAbstractComponent) {
         const ff = new Fragment();
         ff.append(component);
         parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);

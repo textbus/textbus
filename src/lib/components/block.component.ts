@@ -3,7 +3,7 @@ import {
   ViewData,
   VElement,
   EventType,
-  DivisionComponent, SlotRendererFn
+  DivisionAbstractComponent, SlotRendererFn
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -27,7 +27,7 @@ export class BlockComponentReader implements ComponentReader {
   }
 }
 
-export class BlockComponent extends DivisionComponent {
+export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {
     super(tagName);
     this.slot.events.subscribe(event => {

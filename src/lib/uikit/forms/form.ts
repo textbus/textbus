@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { FormItem, FileUploader } from './help';
 import { FormViewer } from '../../toolbar/toolkit/_api';
-import { FormatAbstractData, BranchComponent, LeafComponent } from '../../core/_api';
+import { FormatAbstractData, BranchAbstractComponent, LeafAbstractComponent } from '../../core/_api';
 import { createElement, createTextNode } from '../uikit';
 
 export interface FormConfig<T> {
@@ -113,7 +113,7 @@ export class Form implements FormViewer {
     })
   }
 
-  update(d: FormatAbstractData | BranchComponent | LeafComponent): void {
+  update(d: FormatAbstractData | BranchAbstractComponent | LeafAbstractComponent): void {
     this.config.items.forEach(item => {
       const value = d ? d instanceof FormatAbstractData ? d.attrs.get(item.name) : d[item.name] : null;
       item.update(value);

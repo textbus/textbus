@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 
-import { Component } from '../core/_api';
+import { AbstractComponent } from '../core/_api';
 import { Workbench } from './workbench';
 import { FileUploader } from '../uikit/forms/help';
 
@@ -9,11 +9,11 @@ export interface ComponentExample {
   name: string;
   category?: string;
 
-  componentFactory(workbench: Workbench, delegate: FileUploader): Component | Promise<Component> | Observable<Component>;
+  componentFactory(workbench: Workbench, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
 export class ComponentStage {
-  onCheck: Observable<Component>;
+  onCheck: Observable<AbstractComponent>;
   elementRef = document.createElement('div');
 
   set expand(b: boolean) {
@@ -29,7 +29,7 @@ export class ComponentStage {
 
   private componentListWrapper = document.createElement('div');
   private _expand = false;
-  private checkEvent = new Subject<Component>();
+  private checkEvent = new Subject<AbstractComponent>();
 
   constructor(private workbench: Workbench, private fileUploader: FileUploader) {
     this.onCheck = this.checkEvent.asObservable();
@@ -42,7 +42,7 @@ export class ComponentStage {
     const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
       const t = example.componentFactory(this.workbench, this.fileUploader);
-      if (t instanceof Component) {
+      if (t instanceof AbstractComponent) {
         this.checkEvent.next(t);
       } else if (t instanceof Promise) {
         t.then(instance => {

@@ -1,7 +1,7 @@
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { BackboneComponent, BranchComponent, DivisionComponent } from './component';
+import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
 
 /**
  * 记录选区路径数据。
@@ -113,9 +113,9 @@ export class TBSelection {
       while (fragment) {
         const parentComponent = fragment.parentComponent;
         if (parentComponent) {
-          if (parentComponent instanceof BranchComponent) {
+          if (parentComponent instanceof BranchAbstractComponent) {
             paths.push(parentComponent.slots.indexOf(fragment))
-          } else if (parentComponent instanceof BackboneComponent) {
+          } else if (parentComponent instanceof BackboneAbstractComponent) {
             paths.push(parentComponent.indexOf(fragment));
           } else {
             paths.push(0);
@@ -159,11 +159,11 @@ export class TBSelection {
         const index = paths.pop();
         const c = fragment.getContentAtIndex(index);
         const last = paths.pop();
-        if (c instanceof DivisionComponent && last === 0) {
+        if (c instanceof DivisionAbstractComponent && last === 0) {
           fragment = c.slot;
-        } else if (c instanceof BranchComponent) {
+        } else if (c instanceof BranchAbstractComponent) {
           fragment = c.slots[last];
-        } else if (c instanceof BackboneComponent) {
+        } else if (c instanceof BackboneAbstractComponent) {
           fragment = c.getSlotAtIndex(last);
         } else {
           throw new Error('未找到历史位置')

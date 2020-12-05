@@ -2,10 +2,10 @@ import { Subscription } from 'rxjs';
 
 import { Contents } from './contents';
 import {
-  BranchComponent,
-  DivisionComponent,
-  Component,
-  BackboneComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  AbstractComponent,
+  BackboneAbstractComponent,
   parentFragmentAccessToken
 } from './component';
 import {
@@ -37,7 +37,7 @@ export const parentComponentAccessToken = Symbol('ParentComponentAccessToken');
  */
 export class Fragment extends Marker {
   readonly events = new EventEmitter();
-  [parentComponentAccessToken]: DivisionComponent | BranchComponent | BackboneComponent | null;
+  [parentComponentAccessToken]: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent | null;
 
   get parentComponent() {
     return this[parentComponentAccessToken];
@@ -53,7 +53,7 @@ export class Fragment extends Marker {
   private contents = new Contents();
   private formatMap = new FormatMap();
 
-  private eventMap = new Map<Component, Subscription>();
+  private eventMap = new Map<AbstractComponent, Subscription>();
 
   constructor() {
     super();
@@ -66,7 +66,7 @@ export class Fragment extends Marker {
   from(source: Fragment) {
     this.contents = source.contents;
     this.sliceContents().forEach(c => {
-      if (c instanceof Component) {
+      if (c instanceof AbstractComponent) {
         c[parentFragmentAccessToken] = this;
         this.eventMap.set(c, c.onChange.subscribe(() => {
           this.markAsChanged();
@@ -101,12 +101,12 @@ export class Fragment extends Marker {
    * @param content
    * @param insertAdjacentInlineFormat
    */
-  append(content: string | Component, insertAdjacentInlineFormat = false) {
+  append(content: string | AbstractComponent, insertAdjacentInlineFormat = false) {
     const offset = content.length;
     const length = this.contentLength;
     this.contents.append(content);
 
-    if (content instanceof Component) {
+    if (content instanceof AbstractComponent) {
       this.gourdComponentInSelf(content);
       this.eventMap.set(content, content.onChange.subscribe(() => {
         this.markAsChanged();
@@ -141,7 +141,7 @@ export class Fragment extends Marker {
    * @param contents
    * @param ref
    */
-  insertBefore(contents: Component | string, ref: Component) {
+  insertBefore(contents: AbstractComponent | string, ref: AbstractComponent) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -154,7 +154,7 @@ export class Fragment extends Marker {
    * @param contents
    * @param ref
    */
-  insertAfter(contents: Component | string, ref: Component) {
+  insertAfter(contents: AbstractComponent | string, ref: AbstractComponent) {
     const index = this.indexOf(ref);
     if (index === -1) {
       throw new Error('引用的节点不属于当前 Fragment 的子级！');
@@ -167,8 +167,8 @@ export class Fragment extends Marker {
    * @param contents
    * @param index
    */
-  insert(contents: Component | string, index: number) {
-    if (contents instanceof Component) {
+  insert(contents: AbstractComponent | string, index: number) {
+    if (contents instanceof AbstractComponent) {
       this.gourdComponentInSelf(contents);
       this.eventMap.set(contents, contents.onChange.subscribe(() => {
         this.markAsChanged();
@@ -186,9 +186,9 @@ export class Fragment extends Marker {
           return;
         }
         if (format.startIndex < index && format.endIndex >= index) {
-          if (contents instanceof DivisionComponent ||
-            contents instanceof BranchComponent ||
-            contents instanceof BackboneComponent) {
+          if (contents instanceof DivisionAbstractComponent ||
+            contents instanceof BranchAbstractComponent ||
+            contents instanceof BackboneAbstractComponent) {
             formatMap.merge(token, {
               ...format,
               endIndex: index
@@ -234,7 +234,7 @@ export class Fragment extends Marker {
     const ff = new Fragment();
     ff.contents = this.contents.clone();
     ff.sliceContents().forEach(i => {
-      if (i instanceof Component) {
+      if (i instanceof AbstractComponent) {
         i[parentFragmentAccessToken] = ff;
       }
     })
@@ -266,7 +266,7 @@ export class Fragment extends Marker {
     Array.from(this.eventMap.values()).map(i => i.unsubscribe());
     this.eventMap.clear();
     this.sliceContents().forEach(i => {
-      if (i instanceof Component && i[parentFragmentAccessToken] === this) {
+      if (i instanceof AbstractComponent && i[parentFragmentAccessToken] === this) {
         i[parentFragmentAccessToken] = null;
       }
     })
@@ -402,7 +402,7 @@ export class Fragment extends Marker {
     this.formatMap = selfFormatMap;
     this.contents.cut(startIndex, endIndex).forEach(i => {
       fragment.append(i);
-      if (i instanceof Component) {
+      if (i instanceof AbstractComponent) {
         this.eventMap.get(i).unsubscribe();
         this.eventMap.delete(i);
       }
@@ -431,7 +431,7 @@ export class Fragment extends Marker {
    * 查找一个组件在当前 fragment 的下标位置。
    * @param component
    */
-  indexOf(component: Component) {
+  indexOf(component: AbstractComponent) {
     return this.contents.indexOf(component);
   }
 
@@ -469,7 +469,7 @@ export class Fragment extends Marker {
     const cacheFormats: Array<{ token: InlineFormatter, params: InlineFormatParams }> = [];
     let newFormat: InlineFormatParams;
     contents.forEach(item => {
-      if (item instanceof DivisionComponent) {
+      if (item instanceof DivisionAbstractComponent) {
         newFormat = null;
         if (coverChild) {
           const newFormatRange = Object.assign({}, formatRange);
@@ -477,7 +477,7 @@ export class Fragment extends Marker {
           newFormatRange.endIndex = item.slot.contentLength;
           item.slot.apply(token, newFormatRange, options);
         }
-      } else if (item instanceof BranchComponent) {
+      } else if (item instanceof BranchAbstractComponent) {
         newFormat = null;
         if (coverChild) {
           item.slots.forEach(fragment => {
@@ -487,7 +487,7 @@ export class Fragment extends Marker {
             fragment.apply(token, newFormatRange, options);
           })
         }
-      } else if (item instanceof BackboneComponent) {
+      } else if (item instanceof BackboneAbstractComponent) {
         newFormat = null;
         if (coverChild) {
           for (const fragment of item) {
@@ -527,7 +527,7 @@ export class Fragment extends Marker {
    * @param context 指定组件的构造类。
    * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
    */
-  getContext<T extends Component>(context: Constructor<T>, filter?: (instance: T) => boolean): T {
+  getContext<T extends AbstractComponent>(context: Constructor<T>, filter?: (instance: T) => boolean): T {
     const componentInstance = this.parentComponent;
     if (!componentInstance) {
       return null;
@@ -548,7 +548,7 @@ export class Fragment extends Marker {
     return parentFragment.getContext(context, filter);
   }
 
-  private gourdComponentInSelf(component: Component) {
+  private gourdComponentInSelf(component: AbstractComponent) {
     const parentFragment = component.parentFragment;
     if (parentFragment) {
       const index = parentFragment.indexOf(component);

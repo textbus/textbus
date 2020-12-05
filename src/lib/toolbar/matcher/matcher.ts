@@ -4,7 +4,7 @@ import {
   FormatAbstractData,
   TBRange,
   FormatEffect,
-  Component
+  AbstractComponent
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { Editor } from '../../editor';
@@ -29,7 +29,7 @@ export interface RangeMatchState<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchState<T = FormatAbstractData | Component > {
+export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent > {
   state: HighlightState;
   srcStates: RangeMatchState<T>[];
   matchData: T;
