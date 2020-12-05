@@ -1,5 +1,5 @@
 import { Fragment } from './fragment';
-import { VElement, VElementLiteral, VTextNode } from './element';
+import { VElement, VTextNode } from './element';
 import {
   BackboneAbstractComponent,
   BranchAbstractComponent,
@@ -14,10 +14,10 @@ export interface ElementPosition {
   fragment: Fragment;
 }
 
-export type FormatConfig = {
+export interface FormatConfig {
   token: InlineFormatter,
   params: FormatRange
-};
+}
 
 /**
  * 丢弃前一个 Format 渲染的结果，并用自己代替。
