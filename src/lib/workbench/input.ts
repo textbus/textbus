@@ -1,7 +1,9 @@
 import { fromEvent, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { Inject, Injectable } from '@tanbo/di';
 
-import { TBSelection } from '../core/_api';
+import { EventType, Fragment, TBEvent, TBSelection } from '../core/_api';
+import { EDITABLE_DOCUMENT } from '../editor';
 
 /**
  * 快捷键配置项
@@ -31,6 +33,7 @@ export const isMac = /mac os/i.test(navigator.userAgent);
  * 事件劫持类，用于分配用户鼠标和键盘操作后的逻辑
  */
 
+@Injectable()
 export class Input {
   onInput: Observable<Event>;
   onFocus: Observable<Event>;
@@ -80,9 +83,8 @@ export class Input {
   private _display = true;
   private flashing = true;
 
-  private selection: TBSelection;
-
-  constructor(private context: Document) {
+  constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
+              private selection: TBSelection) {
 
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
@@ -102,6 +104,13 @@ export class Input {
     this.onCut = fromEvent(this.input, 'cut');
 
     let isWriting = false;
+
+    fromEvent(this.context, 'mousedown').subscribe((ev: MouseEvent) => {
+      if (ev.button === 2) {
+        return;
+      }
+      this.selection.removeAllRanges(true);
+    });
     fromEvent(this.input, 'compositionstart').subscribe(() => {
       isWriting = true;
     });
@@ -150,17 +159,15 @@ export class Input {
 
   /**
    * 根据 Selection 更新光标显示位置及状态
-   * @param selection
    * @param limit 光标显示的范围
    */
-  updateStateBySelection(selection: TBSelection, limit: HTMLElement) {
-    this.selection = selection;
-    if (this.readonly || !selection.rangeCount) {
+  updateStateBySelection(limit: HTMLElement) {
+    if (this.readonly || !this.selection.rangeCount) {
       this.hide();
       return;
     }
     this.updateCursorPosition(limit);
-    if (selection.collapsed) {
+    if (this.selection.collapsed) {
       this.show();
     } else {
       this.hide();
@@ -179,6 +186,28 @@ export class Input {
     this.input.value = '';
     this.input.blur();
     this.input.focus();
+  }
+
+  /**
+   * 发布事件
+   * @param by        最开始发生事件的虚拟 DOM 元素。
+   * @param type      事件类型。
+   * @param data      附加的数据。
+   */
+  private dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
+    let stopped = false;
+    do {
+      const event = new TBEvent({
+        type,
+        selection: this.selection,
+        data
+      });
+      by.events.emit(event);
+      stopped = event.stopped;
+      if (!stopped) {
+        by = by.parentComponent?.parentFragment;
+      }
+    } while (!stopped && by);
   }
 
   private updateCursorPosition(limit: HTMLElement) {

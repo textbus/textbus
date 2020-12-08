@@ -1,16 +1,18 @@
+import { Injectable } from '@tanbo/di';
+
 import { ComponentStage } from './component-stage';
-import { Viewer } from '../viewer/viewer';
-import { FileUploader } from '../uikit/forms/help';
+import { Viewer } from './viewer';
+import { Device } from './device';
 
-export interface DialogManager {
-  dialog(content: HTMLElement): void;
+export abstract class DialogManager {
+  abstract dialog(content: HTMLElement): void;
 
-  close(): void;
+  abstract close(): void;
 }
 
+@Injectable()
 export class Workbench implements DialogManager {
   elementRef = document.createElement('div');
-  readonly componentStage = new ComponentStage(this, this.fileUploader);
   readonly tablet = document.createElement('div');
 
   private additionalWorktable = document.createElement('div');
@@ -20,7 +22,9 @@ export class Workbench implements DialogManager {
   private editableArea = document.createElement('div');
   private loading = document.createElement('div');
 
-  constructor(private viewer: Viewer, private fileUploader: FileUploader) {
+  constructor(private device: Device,
+              private componentStage: ComponentStage,
+              private viewer: Viewer) {
     this.elementRef.classList.add('textbus-workbench');
 
     this.additionalWorktable.classList.add('textbus-additional-worktable');
@@ -52,10 +56,13 @@ export class Workbench implements DialogManager {
     <div>S</div>
     `;
     this.editableArea.appendChild(loading);
-    const sub = this.viewer.onReady.subscribe(() => {
-      this.tablet.appendChild(this.viewer.input.elementRef);
-      this.viewer.setMinHeight(this.editableArea.offsetHeight);
-      sub.unsubscribe();
+
+    // this.device.onChange.subscribe(value => {
+    //   this.setTabletWidth(value);
+    // })
+
+    this.viewer.onReady.subscribe(() => {
+      this.loaded()
     })
   }
 
@@ -76,18 +83,8 @@ export class Workbench implements DialogManager {
     }, 200)
   }
 
-  setTabletWidth(width: string) {
-    if (width === '100%') {
-      this.editableArea.style.padding = '';
-      this.viewer.setMinHeight(this.editableArea.offsetHeight);
-    } else {
-      this.editableArea.style.padding = '20px';
-      this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
-    }
-    this.tablet.style.width = width;
-  }
-
-  loaded() {
+  private loaded() {
+    this.viewer.setMinHeight(this.editableArea.offsetHeight);
     setTimeout(() => {
       this.loading.classList.add('textbus-workbench-loading-done');
       this.tablet.classList.add('textbus-tablet-ready');
@@ -95,5 +92,14 @@ export class Workbench implements DialogManager {
         this.editableArea.removeChild(this.loading);
       }, 300);
     }, 1000)
+  }
+
+  private setTabletWidth(width: string) {
+    if (width === '100%') {
+      this.editableArea.style.padding = '';
+    } else {
+      this.editableArea.style.padding = '20px';
+    }
+    this.tablet.style.width = width;
   }
 }

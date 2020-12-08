@@ -55,7 +55,7 @@ import {
   TableComponentReader,
   VideoComponentReader
 } from './lib/components/_api';
-import { defaultStyleSheets } from './lib/viewer/default-styles';
+import { defaultStyleSheets } from './lib/workbench/default-styles';
 import {
   imageCardStyleSheet,
   imageCardComponentExample,

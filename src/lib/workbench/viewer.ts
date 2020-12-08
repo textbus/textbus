@@ -1,8 +1,15 @@
 import { Observable, Subject } from 'rxjs';
+import { forwardRef, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
+import { debounceTime } from 'rxjs/operators';
 
+import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { Parser, Renderer, TBSelection } from '../core/_api';
 import { iframeHTML } from './iframe-html';
+import { HistoryManager } from '../history-manager';
 import { Input } from './input';
+import { RootComponent } from '../root-component';
 
+@Injectable()
 export class Viewer {
   onReady: Observable<Document>;
 
@@ -14,7 +21,6 @@ export class Viewer {
     return this.elementRef.contentDocument;
   };
 
-  input: Input;
   elementRef = document.createElement('iframe');
 
   set sourceCodeMode(b: boolean) {
@@ -33,14 +39,19 @@ export class Viewer {
   private readyEvent = new Subject<Document>();
   private id: number = null;
   private minHeight = 400;
+  private renderedCallbacks: Array<() => void> = [];
 
-  constructor(private styleSheets: string[] = []) {
+
+  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
+              private renderer: Renderer,
+              private parser: Parser,
+              private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
 
     this.elementRef.setAttribute('scrolling', 'no');
     const styleEl = document.createElement('style');
-    styleEl.innerHTML = styleSheets.join('');
+    styleEl.innerHTML = [...(options.styleSheets || []), ...(options.editingStyleSheets || [])].join('');
 
     const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
     this.elementRef.src = `javascript:void(
@@ -52,19 +63,11 @@ export class Viewer {
         window.parent.postMessage('complete','${location.origin}');
       })()
       )`;
-
-    this.elementRef.onload = () => {
-      this.elementRef.onload = null; // 低版本 chrome 会触发两次 load
-      const doc = this.elementRef.contentDocument;
-      this.sourceCodeMode = this._sourceCodeMode;
-      this.input = new Input(doc);
-      // this.readyEvent.next(doc);
-      // this.listen();
-    };
     const onMessage = (ev: MessageEvent) => {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
         const doc = this.elementRef.contentDocument;
+        this.setup();
         this.readyEvent.next(doc);
         this.listen();
       }
@@ -80,6 +83,37 @@ export class Viewer {
   destroy() {
     cancelAnimationFrame(this.id);
   }
+
+  setup() {
+    const viewProviders: Provider[] = [{
+      provide: EDITABLE_DOCUMENT,
+      useValue: this.contentDocument
+    }, {
+      provide: HistoryManager,
+      useValue: new HistoryManager(this.options.historyStackSize)
+    }, {
+      provide: TBSelection,
+      useValue: new TBSelection(this.contentDocument, this.renderer)
+    }];
+    const viewInjector = new ReflectiveInjector(this.injector, [
+      Input,
+      RootComponent,
+      ...viewProviders
+    ]);
+
+    const rootComponent = viewInjector.get<RootComponent>(RootComponent);
+
+    rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
+      this.renderer.render(rootComponent.slot, this.contentDocument.body);
+      while (this.renderedCallbacks.length) {
+        this.renderedCallbacks.shift()();
+      }
+    })
+
+    const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
+    rootComponent.slot.from(this.parser.parse(dom));
+  }
+
 
   private listen() {
     const fn = () => {
@@ -100,5 +134,9 @@ export class Viewer {
       this.id = requestAnimationFrame(fn);
     }
     this.id = requestAnimationFrame(fn);
+  }
+
+  private static parserHTML(html: string) {
+    return new DOMParser().parseFromString(html, 'text/html').body;
   }
 }

@@ -3,7 +3,7 @@ import {
   ViewData,
   VElement,
   EventType,
-  DivisionAbstractComponent, SlotRendererFn
+  DivisionAbstractComponent, SlotRendererFn, Component
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -26,7 +26,6 @@ export class BlockComponentReader implements ComponentReader {
     };
   }
 }
-
 export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {
     super(tagName);

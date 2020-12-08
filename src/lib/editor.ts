@@ -1,38 +1,29 @@
-import { auditTime, debounceTime, distinctUntilChanged, filter, map, sampleTime, tap } from 'rxjs/operators';
-import { from, fromEvent, Observable, of, Subject, Subscription, throwError } from 'rxjs';
-import pretty from 'pretty';
+import { from, Observable, of, Subject, Subscription } from 'rxjs';
+import { Injectable, InjectionToken, Injector, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di';
 
 import {
-  BranchAbstractComponent,
-  Commander,
-  AbstractComponent,
   ComponentReader,
-  Contents,
-  DivisionAbstractComponent,
-  EventType,
   Formatter,
-  Fragment,
-  LeafAbstractComponent,
   Lifecycle,
-  OutputRenderer,
-  Parser,
+  OutputRenderer, Parser,
   Renderer,
-  TBEvent,
-  TBRange,
-  TBRangePosition,
-  TBSelection,
-  VElement
 } from './core/_api';
-import { Viewer } from './viewer/viewer';
-import { HighlightState, Toolbar, ToolConfig, ToolEntity, ToolFactory } from './toolbar/_api';
-import { BlockComponent, BrComponent, PreComponent } from './components/_api';
-import { KeymapAction } from './viewer/input';
-import { StatusBar } from './status-bar/status-bar';
-import { ComponentExample } from './workbench/component-stage';
-import { Workbench } from './workbench/workbench';
-import { HistoryManager } from './history-manager';
+import { Viewer } from './workbench/viewer';
+import {
+  Device,
+  DeviceOption,
+  EditingMode,
+  FullScreen,
+  LibSwitch,
+  Paths,
+  StatusBar
+} from './workbench/_api';
+import { ComponentExample, ComponentStage } from './workbench/component-stage';
+import { DialogManager, Workbench } from './workbench/workbench';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
-import { RootFragment } from './root-fragment';
+import { Toolbar, ToolEntity, ToolFactory } from './toolbar/_api';
+import { EditorController } from './editor-controller';
+import { FileUploader } from './uikit/forms/help';
 
 /**
  * TextBus 初始化时的配置参数
@@ -41,7 +32,7 @@ export interface EditorOptions<T> {
   /** 设置主题 */
   theme?: string;
   /** 设备宽度 */
-  deviceWidth?: string;
+  deviceOptions?: DeviceOption[];
   /** 默认是否全屏*/
   fullScreen?: boolean;
   /** 默认是否展开组件库 */
@@ -71,82 +62,44 @@ export interface EditorOptions<T> {
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 }
 
-/**
- * 方向键标识
- */
-export enum CursorMoveDirection {
-  Left,
-  Right,
-  Up,
-  Down
-}
+export const EDITOR_OPTIONS = new InjectionToken('EDITOR_OPTIONS');
+export const EDITABLE_DOCUMENT = new InjectionToken('EDITABLE_DOCUMENT');
+
 
 /**
  * TextBus 主类
  */
+@Injectable()
 export class Editor<T = any> {
   /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
-  /** 当 TextBus 历史记录管理器 */
-  readonly history: HistoryManager;
 
-
-  readonly toolbar: Toolbar;
   readonly elementRef = document.createElement('div');
 
+  readonly stateController: EditorController;
+
   set readonly(b: boolean) {
-    this._readonly = b;
-    if (this.readyState) {
-      this.viewer.input.readonly = b;
-      this.toolbar.disabled = b;
-    }
+    this.stateController.readonly = b;
   }
 
   get readonly() {
-    return this._readonly;
+    return this.stateController.readonly;
   }
 
-  private _readonly = false;
-
   private readonly container: HTMLElement;
-  private readonly rootFragment = new RootFragment();
-
-  private renderer = new Renderer();
-  private outputRenderer = new OutputRenderer();
-  private outputTranslator = new HTMLOutputTranslator();
-  private selection: TBSelection;
-  private readonly workbench: Workbench;
-  private readonly viewer: Viewer;
-  private parser: Parser;
-  private statusBar = new StatusBar();
 
   private readyState = false;
-  private openSourceCodeMode = false;
   private tasks: Array<() => void> = [];
 
-  private nativeSelection: Selection;
-
-  private defaultHTML = '<p><br></p>';
-  private snapshotSubscription: Subscription;
   private readyEvent = new Subject<void>();
   private changeEvent = new Subject<void>();
-
-  private selectionSnapshot: TBSelection;
-  private fragmentSnapshot: Fragment;
-
-  private oldCursorPosition: { left: number, top: number } = null;
-  private cleanOldCursorTimer: any;
 
   private onUserWrite: Observable<void>;
   private userWriteEvent = new Subject<void>();
 
   private subs: Subscription[] = [];
-
-  private renderedCallbacks: Array<() => void> = [];
-
-  private sourceCodeComponent = new PreComponent('HTML');
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
     this.onUserWrite = this.userWriteEvent.asObservable();
@@ -158,118 +111,100 @@ export class Editor<T = any> {
     this.onReady = this.readyEvent.asObservable();
     this.onChange = this.changeEvent.asObservable();
 
-    this.history = new HistoryManager(options.historyStackSize)
-    this.parser = new Parser(options.componentReaders, options.formatters);
-    this.viewer = new Viewer([...(options.styleSheets || []), ...(options.editingStyleSheets || [])]);
-    const uploader = {
-      upload: (type: string): Observable<string> => {
-        if (typeof this.options.uploader === 'function') {
-          if (this.selection.rangeCount === 0) {
-            alert('请先选择插入资源位置！');
-            return throwError(new Error('请先选择插入资源位置！'));
+    this.stateController = new EditorController({
+      readonly: false,
+      expandComponentLibrary: true,
+      sourceCodeMode: false,
+      deviceType: 'PC',
+      fullScreen: true
+    });
+
+    this.fullScreen(true)
+    const staticProviders: Provider[] = [{
+      provide: Editor,
+      useValue: this,
+    }, {
+      provide: EDITOR_OPTIONS,
+      useValue: options
+    }, {
+      provide: EditorController,
+      useValue: this.stateController
+    }, {
+      provide: FileUploader,
+      useValue: {
+        upload: (type: string): Observable<string> => {
+          if (typeof this.options.uploader === 'function') {
+            // if (this.selection.rangeCount === 0) {
+            //   alert('请先选择插入资源位置！');
+            //   return throwError(new Error('请先选择插入资源位置！'));
+            // }
+            const result = this.options.uploader(type);
+            if (result instanceof Observable) {
+              return result;
+            } else if (result instanceof Promise) {
+              return from(result);
+            } else if (typeof result === 'string') {
+              return of(result);
+            }
           }
-          const result = this.options.uploader(type);
-          if (result instanceof Observable) {
-            return result;
-          } else if (result instanceof Promise) {
-            return from(result);
-          } else if (typeof result === 'string') {
-            return of(result);
-          }
+          return of('');
         }
-        return of('');
       }
-    }
-    this.workbench = new Workbench(this.viewer, uploader);
-    this.toolbar = new Toolbar(this, uploader, this.workbench, options.toolbar);
-    let deviceWidth = options.deviceWidth || '100%';
+    }, {
+      provide: Renderer,
+      useValue: new Renderer()
+    }, {
+      provide: OutputRenderer,
+      useValue: new OutputRenderer()
+    }, {
+      provide: Parser,
+      useValue: new Parser(options.componentReaders, options.formatters)
+    }, {
+      provide: OutputTranslator,
+      useValue: new HTMLOutputTranslator()
+    }, {
+      provide: Injector,
+      useFactory() {
+        return rootInjector;
+      }
+    }, {
+      provide: DialogManager,
+      useClass: Workbench
+    }];
 
-    this.statusBar.libSwitch.expand = this.options.expandComponentLibrary;
-    if (!this.options.componentLibrary?.length) {
-      this.statusBar.libSwitch.elementRef.style.display = 'none';
-    }
-
-    this.statusBar.device.update(deviceWidth);
-    this.statusBar.fullScreen.full = this.options.fullScreen;
-
-    this.statusBar.fullScreen.full ? this.elementRef.classList.add('textbus-container-full-screen') : this.elementRef.classList.remove('textbus-container-full-screen');
-
-    this.workbench.setTabletWidth(deviceWidth);
-    this.workbench.componentStage.expand = this.options.expandComponentLibrary;
-
-    if (Array.isArray(options.componentLibrary)) {
-      options.componentLibrary.forEach(i => this.workbench.componentStage.addExample(i));
-    }
+    const rootInjector = new ReflectiveInjector(new NullInjector(), [
+      Toolbar,
+      Workbench,
+      Device,
+      EditingMode,
+      FullScreen,
+      LibSwitch,
+      Paths,
+      StatusBar,
+      Viewer,
+      ComponentStage,
+      ...staticProviders
+    ]);
 
     this.subs.push(
-      this.statusBar.libSwitch.onSwitch.subscribe(b => {
-        this.workbench.componentStage.expand = b;
-      }),
-      this.workbench.componentStage.onCheck.subscribe(component => {
-        if (!this.readonly && this.selection && this.selection.rangeCount) {
-          this.insertComponent(component);
-        }
-      }),
-      this.statusBar.device.onChange.subscribe(value => {
-        deviceWidth = value;
-        this.workbench.setTabletWidth(value);
-        this.invokeViewUpdatedHooks();
-      }),
-      this.statusBar.editingMode.onChange.subscribe(b => {
-        this.openSourceCodeMode = b;
-        if (this.readyState) {
-          this.selection.removeAllRanges();
-          this.statusBar.libSwitch.disabled = b;
-          this.viewer.sourceCodeMode = b;
-          if (b) {
-            if (this.snapshotSubscription) {
-              this.snapshotSubscription.unsubscribe();
-            }
-            const html = this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment));
-            this.rootFragment.clean();
-            this.sourceCodeComponent.slot.clean();
-            this.sourceCodeComponent.slot.append(pretty(html));
-            this.rootFragment.append(this.sourceCodeComponent);
-          } else {
-            const html = this.getHTMLBySourceCodeMode();
-            const dom = Editor.parserHTML(html)
-            this.rootFragment.from(this.parser.parse(dom));
-            this.history.recordSnapshot(this.rootFragment, this.selection);
-            this.listenUserWriteEvent();
-          }
-        }
-      }),
-      this.statusBar.fullScreen.onChange.subscribe(b => {
-        b ? this.elementRef.classList.add('textbus-container-full-screen') : this.elementRef.classList.remove('textbus-container-full-screen');
-
-        this.workbench.setTabletWidth(deviceWidth);
-        this.invokeViewUpdatedHooks();
-      }),
-      this.viewer.onReady.subscribe(() => {
-        const dom = Editor.parserHTML(options.contents || this.defaultHTML);
-        this.rootFragment.from(this.parser.parse(dom));
-        this.render();
-        this.nativeSelection = this.viewer.contentDocument.getSelection();
-        this.selection = new TBSelection(this.viewer.contentDocument, this.renderer);
+      rootInjector.get<Viewer>(Viewer).onReady.subscribe(() => {
         this.readyState = true;
-        this.viewer.input.readonly = this.toolbar.disabled = this.readonly;
-        this.setup();
         this.readyEvent.next();
-        this.workbench.loaded();
       })
     );
 
-    this.elementRef.appendChild(this.toolbar.elementRef);
-    this.elementRef.appendChild(this.workbench.elementRef);
-    this.elementRef.append(this.statusBar.elementRef);
+    this.elementRef.append(
+      rootInjector.get<Toolbar>(Toolbar).elementRef,
+      rootInjector.get<Workbench>(Workbench).elementRef,
+      rootInjector.get<StatusBar>(StatusBar).elementRef
+    )
+
     this.elementRef.classList.add('textbus-container');
 
     if (options.theme) {
       this.elementRef.classList.add('textbus-theme-' + options.theme);
     }
     this.container.appendChild(this.elementRef);
-
-    this.listenUserWriteEvent();
   }
 
   /**
@@ -280,8 +215,8 @@ export class Editor<T = any> {
     html = html + '';
     return new Promise((resolve) => {
       this.run(() => {
-        const el = Editor.parserHTML(html)
-        this.rootFragment.from(this.parser.parse(el));
+        // const el = Editor.parserHTML(html)
+        // this.rootFragment.from(this.parser.parse(el));
         resolve();
       })
     })
@@ -290,36 +225,26 @@ export class Editor<T = any> {
   /**
    * 获取 TextBus 的内容。
    */
-  getContents() {
-    return {
-      styleSheets: this.options.styleSheets,
-      content: this.openSourceCodeMode ?
-        this.getHTMLBySourceCodeMode() :
-        this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment))
-    };
-  }
+  // getContents() {
+  //   return {
+  //     styleSheets: this.options.styleSheets,
+  //     content: this.openSourceCodeMode ?
+  //       this.getHTMLBySourceCodeMode() :
+  //       this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment))
+  //   };
+  // }
 
   /**
    * 获取 TextBus 内容的 JSON 字面量。
    */
   getJSONLiteral() {
-    if (this.openSourceCodeMode) {
+    if (this.stateController.sourceCodeMode) {
       throw new Error('源代码模式下，不支持获取 JSON 字面量！');
     }
-    return {
-      styleSheets: this.options.styleSheets,
-      json: this.outputRenderer.render(this.rootFragment).toJSON()
-    };
-  }
-
-  /**
-   * 注册快捷键。
-   * @param action
-   */
-  registerKeymap(action: KeymapAction) {
-    this.run(() => {
-      this.viewer.input.keymap(action);
-    });
+    // return {
+    //   styleSheets: this.options.styleSheets,
+    //   json: this.outputRenderer.render(this.rootFragment).toJSON()
+    // };
   }
 
   /**
@@ -328,7 +253,7 @@ export class Editor<T = any> {
    * @param params
    */
   invoke(tool: ToolEntity, params?: any) {
-    this.execCommand(tool.config, params, tool.instance.commander);
+    // this.execCommand(tool.config, params, tool.instance.commander);
   }
 
   /**
@@ -339,484 +264,13 @@ export class Editor<T = any> {
     this.subs.forEach(s => s.unsubscribe());
     this.readyEvent.complete();
     this.changeEvent.complete();
-    this.history.destroy();
+    // this.history.destroy();
   }
 
-  /**
-   * 发布事件
-   * @param by        最开始发生事件的虚拟 DOM 元素。
-   * @param type      事件类型。
-   * @param data      附加的数据。
-   */
-  private dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
-    let stopped = false;
-    do {
-      const event = new TBEvent({
-        type,
-        selection: this.selection,
-        data
-      });
-      by.events.emit(event);
-      stopped = event.stopped;
-      if (!stopped) {
-        by = by.parentComponent?.parentFragment;
-      }
-    } while (!stopped && by);
-  }
-
-  private addRenderedTask(fn: () => void) {
-    this.renderedCallbacks.push(fn);
-  }
-
-  private setup() {
-    this.rootFragment.onChange.pipe(debounceTime(1)).subscribe(() => {
-      this.render();
-      while (this.renderedCallbacks.length) {
-        this.renderedCallbacks.shift()();
-      }
-    })
-    fromEvent(this.viewer.contentDocument, 'mousedown').subscribe((ev: MouseEvent) => {
-      this.oldCursorPosition = null;
-      clearTimeout(this.cleanOldCursorTimer);
-      if (ev.button === 2) {
-        return;
-      }
-      this.nativeSelection.removeAllRanges();
-    });
-
-    (this.options.hooks || []).forEach(hooks => {
-      if (typeof hooks.setup === 'function') {
-        hooks.setup(this.renderer,
-          this.viewer.contentDocument,
-          this.viewer.contentWindow,
-          this.workbench.tablet);
-      }
-    })
-
-    this.subs.push(
-      fromEvent(this.viewer.contentDocument, 'selectionchange').pipe(tap(() => {
-        this.selection = this.options.hooks.reduce((selection, lifecycle) => {
-          if (typeof lifecycle.onSelectionChange === 'function') {
-            lifecycle.onSelectionChange(selection, this.viewer.contentDocument);
-          }
-          return selection;
-        }, new TBSelection(this.viewer.contentDocument, this.renderer));
-        this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-      }), auditTime(100), tap(() => {
-        const event = document.createEvent('Event');
-        event.initEvent('click', true, true);
-        this.elementRef.dispatchEvent(event);
-        this.toolbar.updateHandlerState(this.selection, this.openSourceCodeMode);
-      }), map(() => {
-        return this.nativeSelection.focusNode;
-      }), filter(b => !!b), distinctUntilChanged()).subscribe(node => {
-        // const vEle = this.renderer.getVDomByNativeNode(node.nodeType === 3 ? node.parentNode : node) as VElement;
-        // if (vEle) {
-        //   this.renderer.dispatchEvent(vEle, EventType.onFocus, this.selection);
-        // }
-        this.statusBar.paths.update(node);
-      }),
-      this.toolbar.onAction.subscribe(config => {
-        if (!this.readonly) {
-          this.execCommand(config.config, config.params, config.instance.commander);
-        }
-      }),
-      this.viewer.input.onFocus.subscribe(() => {
-        this.recordSnapshotFromEditingBefore();
-      }),
-      this.viewer.input.onInput.subscribe(() => {
-
-        const data = {
-          selectionSnapshot: this.selectionSnapshot,
-          fragmentSnapshot: this.fragmentSnapshot,
-          input: this.viewer.input
-        };
-        this.dispatchEventAndCallHooks(EventType.onInput, data, () => {
-          const selection = this.selection;
-          const collapsed = selection.collapsed;
-          let isNext = true;
-          (this.options.hooks || []).forEach(lifecycle => {
-            if (typeof lifecycle.onInput === 'function') {
-              if (lifecycle.onInput(selection) === false) {
-                isNext = false;
-              } else {
-                if (!selection.collapsed) {
-                  throw new Error('输入前选区必须闭合！');
-                }
-              }
-            }
-          })
-          if (isNext) {
-            if (!collapsed) {
-              this.recordSnapshotFromEditingBefore(true);
-              data.fragmentSnapshot = this.fragmentSnapshot;
-              data.selectionSnapshot = this.selectionSnapshot;
-            }
-          }
-          return isNext;
-        })
-        const focusNode = this.nativeSelection.focusNode;
-        let el = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode;
-        const vElement = this.renderer.getVDomByNativeNode(el) as VElement;
-        if (!vElement) {
-          return;
-        }
-        this.userWriteEvent.next();
-        this.addRenderedTask(() => {
-          this.selection.restore();
-          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-        })
-      }),
-      this.viewer.input.onPaste.subscribe((ev: ClipboardEvent) => {
-        const text = ev.clipboardData.getData('Text');
-        const div = document.createElement('div');
-        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-        div.contentEditable = 'true';
-        document.body.appendChild(div);
-        div.focus();
-        setTimeout(() => {
-          let html = div.innerHTML;
-          let hasEmpty = true;
-          const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g;
-          while (hasEmpty) {
-            hasEmpty = false;
-            html = html.replace(reg, function () {
-              hasEmpty = true;
-              return '';
-            });
-          }
-          div.innerHTML = html;
-
-          const fragment = this.parser.parse(div);
-
-          const contents = new Contents();
-          fragment.sliceContents(0).forEach(i => contents.append(i));
-          document.body.removeChild(div);
-
-          this.dispatchEventAndCallHooks(EventType.onPaste, {
-            clipboard: {
-              contents,
-              text
-            }
-          }, () => {
-            let isNext = true;
-            (this.options.hooks || []).forEach(lifecycle => {
-              if (typeof lifecycle.onPaste === 'function') {
-                if (lifecycle.onPaste({
-                  contents,
-                  text
-                }, this.selection) === false) {
-                  isNext = false;
-                }
-              }
-            })
-            return isNext;
-          })
-          this.addRenderedTask(() => {
-            this.selection.restore();
-            this.invokeViewUpdatedHooks();
-          })
-        });
-      }),
-      this.viewer.input.onCopy.subscribe(() => {
-        this.viewer.contentDocument.execCommand('copy');
-      }),
-      this.viewer.input.onCut.subscribe(() => {
-        this.viewer.contentDocument.execCommand('copy');
-        this.selection.ranges.forEach(range => {
-          range.connect();
-        });
-        this.addRenderedTask(() => {
-          this.selection.restore();
-          this.invokeViewUpdatedHooks();
-          this.history.recordSnapshot(this.rootFragment, this.selection);
-          this.recordSnapshotFromEditingBefore();
-        })
-      })
-    );
-
-    this.viewer.input.keymap({
-      keymap: {
-        key: 'Enter'
-      },
-      action: () => {
-        this.dispatchEventAndCallHooks(EventType.onEnter, null, () => {
-          let isNext = true;
-          (this.options.hooks || []).forEach(lifecycle => {
-            if (typeof lifecycle.onEnter === 'function') {
-              if (lifecycle.onEnter(this.selection) === false) {
-                isNext = false;
-              }
-            }
-          });
-          return isNext;
-        })
-        this.addRenderedTask(() => {
-          this.selection.restore();
-          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-          this.recordSnapshotFromEditingBefore();
-          this.userWriteEvent.next();
-        })
-      }
-    })
-    this.viewer.input.keymap({
-      keymap: {
-        key: ['Backspace', 'Delete']
-      },
-      action: () => {
-        const selection = this.selection;
-        let isNext = true;
-        (this.options.hooks || []).forEach(lifecycle => {
-          if (typeof lifecycle.onDelete === 'function') {
-            if (lifecycle.onDelete(selection) === false) {
-              isNext = false;
-            }
-          }
-        })
-        if (isNext) {
-          this.dispatchEvent(selection.commonAncestorFragment, EventType.onDelete);
-        }
-        const isEmpty = this.rootFragment.contentLength === 0;
-        const firstRange = selection.firstRange;
-        this.addRenderedTask(() => {
-          if (isEmpty) {
-            const position = firstRange.findFirstPosition(this.rootFragment);
-            firstRange.setStart(position.fragment, position.index);
-            firstRange.collapse();
-          }
-          selection.restore();
-          this.viewer.input.updateStateBySelection(this.selection, this.workbench.tablet.parentNode as HTMLElement);
-          this.recordSnapshotFromEditingBefore();
-          this.userWriteEvent.next();
-        })
-
-      }
-    })
-    this.viewer.input.keymap({
-      keymap: {
-        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
-      },
-      action: (ev: KeyboardEvent) => {
-        const map: { [key: string]: CursorMoveDirection } = {
-          ArrowLeft: CursorMoveDirection.Left,
-          ArrowRight: CursorMoveDirection.Right,
-          ArrowUp: CursorMoveDirection.Up,
-          ArrowDown: CursorMoveDirection.Down
-        };
-        this.moveCursor(map[ev.key]);
-      }
-    });
-    this.viewer.input.keymap({
-      keymap: {
-        key: 'a',
-        ctrlKey: true
-      },
-      action: () => {
-        this.selectAll();
-      }
-    });
-
-    this.tasks.forEach(fn => fn());
-    this.history.recordSnapshot(this.rootFragment, this.selection);
-  }
-
-  private selectAll() {
-    const selection = this.selection;
-    const firstRange = selection.firstRange;
-    const firstPosition = firstRange.findFirstPosition(this.rootFragment);
-    const lastPosition = firstRange.findLastChild(this.rootFragment);
-    selection.removeAllRanges();
-
-    firstRange.setStart(firstPosition.fragment, firstPosition.index);
-    firstRange.setEnd(lastPosition.fragment, lastPosition.index);
-
-    selection.addRange(firstRange);
-    selection.restore();
-  }
-
-  /**
-   * 记录编辑前的快照
-   */
-  private recordSnapshotFromEditingBefore(keepInputStatus = false) {
-    if (!keepInputStatus) {
-      this.viewer.input.cleanValue();
-    }
-    this.selectionSnapshot = this.selection.clone();
-    this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
-  }
-
-  private execCommand(config: ToolConfig, params: any, commander: Commander) {
-
-    const selection = this.selection;
-
-    if (!this.selection) {
-      return;
-    }
-
-    const state = config.matcher ?
-      config.matcher.queryState(selection, this).state :
-      HighlightState.Normal;
-    if (state === HighlightState.Disabled) {
-      return;
-    }
-    const overlap = state === HighlightState.Highlight;
-    let isNext = true;
-    (this.options.hooks || []).forEach(lifecycle => {
-      if (typeof lifecycle.onApplyCommand === 'function' &&
-        lifecycle.onApplyCommand(commander, selection, this, this.rootFragment, params, newParams => {
-          params = newParams;
-        }) === false) {
-        isNext = false;
-      }
-    })
-    if (isNext) {
-      commander.command({
-        selection,
-        overlap,
-        rootFragment: this.rootFragment
-      }, params);
-      this.addRenderedTask(() => {
-        selection.restore();
-        this.recordSnapshotFromEditingBefore();
-        this.toolbar.updateHandlerState(selection, this.openSourceCodeMode);
-      })
-    }
-    this.addRenderedTask(() => {
-      if (commander.recordHistory) {
-        this.history.recordSnapshot(this.rootFragment, this.selection);
-        this.listenUserWriteEvent();
-      }
-    })
-
-  }
-
-  private render() {
-    let isNext = true;
-    (this.options.hooks || []).forEach(lifecycle => {
-      if (typeof lifecycle.onRenderingBefore === 'function' &&
-        lifecycle.onRenderingBefore(this.selection, this, this.rootFragment) === false) {
-        isNext = false;
-      }
-    })
-    if (!isNext) {
-      return;
-    }
-    const rootFragment = this.rootFragment;
-
-    if (this.openSourceCodeMode) {
-      Editor.guardContentIsPre(rootFragment, this.sourceCodeComponent);
-    } else {
-      Editor.guardLastIsParagraph(rootFragment);
-    }
-    this.renderer.render(rootFragment, this.viewer.contentDocument.body);
-    this.invokeViewUpdatedHooks();
-    if (this.readyState) {
-      this.dispatchContentChangeEvent();
-    }
-  }
-
-  private invokeViewUpdatedHooks() {
-    (this.options.hooks || []).forEach(lifecycle => {
-      if (typeof lifecycle.onViewUpdated === 'function') {
-        lifecycle.onViewUpdated(this.selection, this, this.rootFragment, this.workbench.tablet);
-      }
-    })
-  }
-
-  private dispatchEventAndCallHooks(eventType: EventType,
-                                    eventData: { [key: string]: any },
-                                    callHooksFn: () => boolean): boolean {
-    const focusNode = this.nativeSelection.focusNode;
-    const position = this.renderer.getPositionByNode(focusNode);
-    if (!position) {
-      return;
-    }
-    const isNext = callHooksFn();
-    if (isNext) {
-      this.dispatchEvent(position.fragment, eventType, eventData);
-    }
-    return isNext;
-  }
-
-  private moveCursor(direction: CursorMoveDirection) {
-    const selection = this.selection;
-    selection.ranges.forEach(range => {
-      let p: TBRangePosition;
-      let range2: TBRange;
-      switch (direction) {
-        case CursorMoveDirection.Left:
-          p = range.getPreviousPosition();
-          break;
-        case CursorMoveDirection.Right:
-          p = range.getNextPosition();
-          break;
-        case CursorMoveDirection.Up:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getPreviousLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-        case CursorMoveDirection.Down:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getNextLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getNextLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-      }
-      range.startFragment = range.endFragment = p.fragment;
-      range.startIndex = range.endIndex = p.index;
-    });
-    selection.restore();
-    this.recordSnapshotFromEditingBefore();
-  }
-
-  private insertComponent(component: AbstractComponent) {
-    const firstRange = this.selection.firstRange;
-    const startFragment = firstRange.startFragment;
-    const parentComponent = startFragment.parentComponent;
-    if (component instanceof LeafAbstractComponent) {
-      startFragment.insert(component, firstRange.endIndex);
-    } else {
-      if (parentComponent instanceof DivisionAbstractComponent) {
-        const parentFragment = parentComponent.parentFragment;
-        const firstContent = startFragment.getContentAtIndex(0);
-        parentFragment.insertAfter(component, parentComponent);
-        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {
-          parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
-
-        }
-      } else if (parentComponent instanceof BranchAbstractComponent) {
-        const ff = new Fragment();
-        ff.append(component);
-        parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);
-      } else {
-        startFragment.insert(component, firstRange.endIndex);
-      }
-    }
-    this.selection.removeAllRanges();
-    this.addRenderedTask(() => {
-      this.invokeViewUpdatedHooks();
-      this.history.recordSnapshot(this.rootFragment, this.selection);
-      // this.recordSnapshotFromEditingBefore();
-    })
+  fullScreen(is: boolean) {
+    is ?
+      this.elementRef.classList.add('textbus-container-full-screen') :
+      this.elementRef.classList.remove('textbus-container-full-screen')
   }
 
   private run(fn: () => void) {
@@ -825,53 +279,5 @@ export class Editor<T = any> {
       return;
     }
     fn();
-  }
-
-
-  private dispatchContentChangeEvent() {
-    this.changeEvent.next();
-  }
-
-  private listenUserWriteEvent() {
-    if (this.snapshotSubscription) {
-      this.snapshotSubscription.unsubscribe();
-    }
-    this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
-      this.history.recordSnapshot(this.rootFragment, this.selection);
-    });
-  }
-
-  private getHTMLBySourceCodeMode() {
-    return this.sourceCodeComponent.slot.sliceContents(0).map(i => {
-      return typeof i === 'string' ? i.trim() : '';
-    }).join('');
-  }
-
-  private static guardLastIsParagraph(fragment: Fragment) {
-    const last = fragment.sliceContents(fragment.contentLength - 1)[0];
-    if (last instanceof BlockComponent) {
-      if (last.tagName === 'p') {
-        if (last.slot.contentLength === 0) {
-          last.slot.append(new BrComponent());
-        }
-        return;
-      }
-    }
-    const p = new BlockComponent('p');
-    p.slot.append(new BrComponent());
-    fragment.append(p);
-  }
-
-  private static guardContentIsPre(fragment: Fragment, pre: PreComponent) {
-    if (fragment.contentLength === 0) {
-      fragment.append(pre);
-    }
-    if (pre.slot.contentLength === 0) {
-      pre.slot.append(new BrComponent());
-    }
-  }
-
-  private static parserHTML(html: string) {
-    return new DOMParser().parseFromString(html, 'text/html').body;
   }
 }

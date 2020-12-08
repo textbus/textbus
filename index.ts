@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { Observable } from 'rxjs';
 import 'core-js';
 import './src/assets/index.scss';
@@ -14,6 +16,7 @@ import {
 } from './src/public-api';
 
 
+
 defaultOptions.styleSheets.push(`
 img {max-width: 100%}
 `)
@@ -21,7 +24,7 @@ img {max-width: 100%}
 PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
-  deviceWidth: '768px',
+  // deviceWidth: '768px',
   theme: 'dark',
   fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {

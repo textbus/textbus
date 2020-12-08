@@ -1,8 +1,9 @@
+import { Injectable } from '@tanbo/di';
 import { createElement, createTextNode } from '../uikit/uikit';
-import { Observable, Subject } from 'rxjs';
+import { EditorController } from '../editor-controller';
 
+@Injectable()
 export class LibSwitch {
-  onSwitch: Observable<boolean>;
   elementRef = createElement('button', {
     attrs: {
       type: 'button',
@@ -18,7 +19,6 @@ export class LibSwitch {
     if (b) {
       this.expand = false;
       this.elementRef.classList.remove('textbus-lib-switch-active');
-      this.switchEvent.next(false);
     }
   }
 
@@ -41,14 +41,14 @@ export class LibSwitch {
 
   private _disabled = false;
   private _expand = false;
-  private switchEvent = new Subject<boolean>();
 
-  constructor() {
-    this.onSwitch = this.switchEvent.asObservable();
-
+  constructor(private editorController: EditorController) {
     this.elementRef.addEventListener('click', () => {
       this.expand = !this.expand;
-      this.switchEvent.next(this.expand);
+      editorController.expandComponentLibrary = this.expand;
+    })
+    editorController.onStateChange.subscribe(status => {
+      this.expand = status.expandComponentLibrary;
     })
   }
 }

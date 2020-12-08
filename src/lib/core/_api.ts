@@ -1,3 +1,5 @@
+export * from './di/_api';
+
 export * from './commander';
 export * from './component';
 export * from './constructor';

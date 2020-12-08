@@ -1,7 +1,9 @@
-import { Observable, Subject } from 'rxjs';
+import { Injectable } from '@tanbo/di';
 
+import { EditorController } from '../editor-controller';
+
+@Injectable()
 export class FullScreen {
-  onChange: Observable<boolean>;
   elementRef = document.createElement('button');
 
   set full(b: boolean) {
@@ -15,17 +17,19 @@ export class FullScreen {
 
   private _full = false;
   private icon = document.createElement('span');
-  private changeEvent = new Subject<boolean>();
 
-  constructor() {
-    this.onChange = this.changeEvent.asObservable();
+  constructor(private editorController: EditorController) {
     this.elementRef.type = 'button';
     this.elementRef.title = '切换全屏模式';
     this.elementRef.className = 'textbus-full-screen';
     this.elementRef.appendChild(this.icon);
+
     this.elementRef.addEventListener('click', () => {
       this.full = !this.full;
-      this.changeEvent.next(this.full);
+      this.editorController.fullScreen = this.full;
     });
+    editorController.onStateChange.subscribe(status => {
+      this.full = status.fullScreen;
+    })
   }
 }

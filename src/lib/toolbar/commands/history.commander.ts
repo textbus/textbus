@@ -1,22 +1,22 @@
 import { Commander, CommandContext } from '../../core/_api';
-import { Editor } from '../../editor';
+import { HistoryManager } from '../../history-manager';
 
 export class HistoryCommander implements Commander<null> {
   recordHistory = false;
 
-  private editor: Editor;
+  private history: HistoryManager;
 
   constructor(private action: 'forward' | 'back') {
   }
 
-  set(v: Editor) {
-    this.editor = v;
+  set(v: HistoryManager) {
+    this.history = v;
   }
 
   command(context: CommandContext) {
     const snapshot = this.action === 'back' ?
-      this.editor.history.getPreviousSnapshot() :
-      this.editor.history.getNextSnapshot();
+      this.history.getPreviousSnapshot() :
+      this.history.getNextSnapshot();
     if (snapshot) {
       context.rootFragment.from(snapshot.contents);
       context.selection.usePaths(snapshot.paths, context.rootFragment);

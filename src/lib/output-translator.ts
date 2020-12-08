@@ -1,7 +1,7 @@
 import { VElement, Renderer, VTextNode } from './core/_api';
 
-export interface OutputTranslator<T> {
-  transform(vDom: VElement): T;
+export abstract class OutputTranslator<T> {
+  abstract transform(vDom: VElement): T;
 }
 
 export class HTMLOutputTranslator implements OutputTranslator<string> {

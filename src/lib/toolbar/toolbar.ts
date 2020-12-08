@@ -1,25 +1,28 @@
 import { Observable, Subject, Subscription } from 'rxjs';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
-import { Editor } from '../editor';
-import { Keymap } from '../viewer/input';
-import { Renderer, TBSelection } from '../core/_api';
+import { Keymap } from '../workbench/input';
 import { SelectionMatchState } from './matcher/matcher';
 import { createKeymapHTML, FileUploader } from '../uikit/_api';
 import { DialogManager } from '../workbench/workbench';
+import { Editor } from '../editor';
+import { EditorController } from '../editor-controller';
+import { TBSelection } from '../core/selection';
 
 export interface ToolEntity {
   config: ToolConfig;
   instance: Tool;
 }
 
+@Injectable()
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<ToolEntity & { params: any }>;
   readonly tools: ToolEntity[] = [];
 
-  set disabled(b: boolean) {
+  private set disabled(b: boolean) {
     if (b !== this._disabled) {
       this.tools.forEach(tool => {
         tool.instance.updateStatus({
@@ -32,7 +35,7 @@ export class Toolbar {
     this._disabled = b;
   }
 
-  get disabled() {
+  private get disabled() {
     return this._disabled;
   }
 
@@ -49,11 +52,18 @@ export class Toolbar {
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
   private subs: Subscription[] = [];
+  config: (ToolFactory | ToolFactory[])[]
 
-  constructor(private context: Editor,
-              private fileUploader: FileUploader,
-              private dialogManager: DialogManager,
-              private config: (ToolFactory | ToolFactory[])[]) {
+  constructor(@Inject(forwardRef(() => Editor)) private context: Editor,
+              @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
+              @Inject(forwardRef(() => FileUploader)) private fileUploader: FileUploader,
+              @Inject(forwardRef(() => DialogManager)) private dialogManager: DialogManager) {
+    this.config = context.options.toolbar;
+
+    this.editorController.onStateChange.subscribe(status => {
+      this.disabled = status.readonly;
+    })
+
     this.onAction = this.actionEvent.asObservable();
     this.elementRef.classList.add('textbus-toolbar');
     this.toolWrapper.classList.add('textbus-toolbar-wrapper');
@@ -68,7 +78,7 @@ export class Toolbar {
     this.additionalWorktable.append(this.additionalWorktableContent, this.additionalWorktableClose);
     this.elementRef.append(this.toolWrapper, this.additionalWorktable, this.keymapPrompt);
 
-    this.createToolbar(config);
+    this.createToolbar(this.config);
 
     this.elementRef.addEventListener('mouseover', (ev) => {
       const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
@@ -187,7 +197,7 @@ export class Toolbar {
     if (h.keymapAction) {
       const keymaps = Array.isArray(h.keymapAction) ? h.keymapAction : [h.keymapAction];
       keymaps.forEach(k => {
-        this.context.registerKeymap(k);
+        // this.context.registerKeymap(k);
       });
     }
     this.tools.push({

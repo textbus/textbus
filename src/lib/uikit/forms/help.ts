@@ -73,6 +73,6 @@ export interface FormItem<T> {
   useUploader?(uploader: FileUploader): void;
 }
 
-export interface FileUploader {
-  upload(uploadType: string): Observable<string>
+export abstract class FileUploader {
+  abstract upload(uploadType: string): Observable<string>
 }

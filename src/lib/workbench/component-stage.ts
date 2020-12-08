@@ -1,17 +1,20 @@
 import { Observable, Subject } from 'rxjs';
+import { Injectable } from '@tanbo/di';
 
 import { AbstractComponent } from '../core/_api';
-import { Workbench } from './workbench';
+import { DialogManager } from './workbench';
 import { FileUploader } from '../uikit/forms/help';
+import { EditorController } from '../editor-controller';
 
 export interface ComponentExample {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  componentFactory(workbench: Workbench, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
+  componentFactory(workbench: DialogManager, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
+@Injectable()
 export class ComponentStage {
   onCheck: Observable<AbstractComponent>;
   elementRef = document.createElement('div');
@@ -31,17 +34,22 @@ export class ComponentStage {
   private _expand = false;
   private checkEvent = new Subject<AbstractComponent>();
 
-  constructor(private workbench: Workbench, private fileUploader: FileUploader) {
+  constructor(private fileUploader: FileUploader,
+              private editorController: EditorController) {
     this.onCheck = this.checkEvent.asObservable();
     this.elementRef.classList.add('textbus-component-stage');
     this.componentListWrapper.classList.add('textbus-component-stage-list');
     this.elementRef.appendChild(this.componentListWrapper);
+
+    editorController.onStateChange.subscribe(status => {
+      this.expand = status.expandComponentLibrary;
+    })
   }
 
-  addExample(example: ComponentExample) {
+  addExample(example: ComponentExample, dialogManager: DialogManager) {
     const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
-      const t = example.componentFactory(this.workbench, this.fileUploader);
+      const t = example.componentFactory(dialogManager, this.fileUploader);
       if (t instanceof AbstractComponent) {
         this.checkEvent.next(t);
       } else if (t instanceof Promise) {

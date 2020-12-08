@@ -1,40 +1,28 @@
-import { Observable, Subject } from 'rxjs';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
+import { Editor } from '../editor';
+import { EditorController } from '../editor-controller';
 
+export interface DeviceOption {
+  label: string;
+  value: string;
+  default?: boolean;
+}
+
+@Injectable()
 export class Device {
   elementRef = document.createElement('div');
-  onChange: Observable<string>;
 
-  private options = [{
-    label: 'PC',
-    value: '100%',
-  }, {
-    label: 'iPhone5/SE',
-    value: '320px'
-  }, {
-    label: 'iPhone6/7/8/X',
-    value: '375px'
-  }, {
-    label: 'iPhone6/7/8 Plus',
-    value: '414px'
-  }, {
-    label: 'iPad',
-    value: '768px'
-  }, {
-    label: 'iPad Pro',
-    value: '1024px'
-  }, {
-    label: 'A4',
-    value: '842px'
-  }];
+  private options: DeviceOption[];
   private button = document.createElement('button');
   private label = document.createElement('span');
   private menus = document.createElement('div');
   private menuItems: HTMLElement[] = [];
 
-  private changeEvent = new Subject<string>();
+  constructor(@Inject(forwardRef(() => Editor)) private editor: Editor,
+              private editorController: EditorController) {
 
-  constructor() {
-    this.onChange = this.changeEvent.asObservable();
+    this.options = editor.options.deviceOptions || [];
+
     this.button.type = 'button';
     this.button.title = '切换设备宽度';
     this.options.forEach(item => {
@@ -57,10 +45,11 @@ export class Device {
     this.menus.addEventListener('click', ev => {
       const index = this.menuItems.indexOf(ev.target as HTMLElement);
       if (index > -1) {
-        const value = this.options[index].value;
-        this.update(value);
-        this.changeEvent.next(value);
+        this.editorController.viewDeviceType = this.options[index].value;
       }
+    })
+    this.editorController.onStateChange.subscribe(status => {
+      this.set(status.deviceType);
     })
     let isSelfClick = false;
     document.addEventListener('click', () => {
@@ -75,10 +64,10 @@ export class Device {
     });
   }
 
-  update(value: string) {
+  set(name: string) {
     let flag = false;
     this.options.forEach((item, index) => {
-      if (item.value === value) {
+      if (item.label === name) {
         flag = true;
         this.label.innerText = item.label;
         this.menuItems[index].classList.add('textbus-device-option-active');

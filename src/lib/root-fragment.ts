@@ -10,7 +10,7 @@ import {
   AbstractComponent
 } from './core/_api';
 import { BrComponent } from './components/_api';
-import { Input } from './viewer/input';
+import { Input } from './workbench/input';
 
 export class RootFragment extends Fragment {
   constructor() {

@@ -1,3 +1,6 @@
+import { Subscription } from 'rxjs';
+import { Inject, Injectable, InjectionToken } from '@tanbo/di';
+
 import { Fragment, RangePath, TBSelection } from './core/_api';
 
 export interface Snapshot {
@@ -5,6 +8,9 @@ export interface Snapshot {
   paths: RangePath[];
 }
 
+export const HISTORY_STACK_SIZE = new InjectionToken('HISTORY_STACK_SIZE');
+
+@Injectable()
 export class HistoryManager {
   get canBack() {
     return this.historySequence.length > 0 && this.historyIndex > 0;
@@ -13,10 +19,11 @@ export class HistoryManager {
   get canForward() {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
+  private snapshotSubscription: Subscription;
 
   private historySequence: Array<Snapshot> = [];
   private historyIndex = 0;
-  constructor(private historyStackSize = 50) {
+  constructor(@Inject(HISTORY_STACK_SIZE) private historyStackSize = 50) {
   }
 
   getPreviousSnapshot() {
@@ -58,6 +65,16 @@ export class HistoryManager {
     this.historyIndex = 0;
     this.historySequence = [];
   }
+
+  // private listenUserWriteEvent() {
+  //   if (this.snapshotSubscription) {
+  //     this.snapshotSubscription.unsubscribe();
+  //   }
+  //   this.snapshotSubscription = this.onUserWrite.pipe(sampleTime(5000)).subscribe(() => {
+  //     this.history.recordSnapshot(this.rootFragment, this.selection);
+  //   });
+  // }
+
 
   private static cloneHistoryData(snapshot: Snapshot): Snapshot {
     return {

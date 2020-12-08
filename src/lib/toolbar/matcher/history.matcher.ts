@@ -7,7 +7,7 @@ export class HistoryMatcher implements Matcher {
   constructor(private type: 'forward' | 'back') {
   }
 
-  queryState(selection: TBSelection, editor: Editor): SelectionMatchState {
+  queryState(selection: TBSelection, editor: any): SelectionMatchState {
     switch (this.type) {
       case 'back':
         return {

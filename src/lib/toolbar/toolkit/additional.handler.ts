@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { Tool } from './help';
-import { Keymap, KeymapAction } from '../../viewer/input';
+import { Keymap, KeymapAction } from '../../workbench/input';
 import { Commander } from '../../core/commander';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { UIButton, UIKit } from '../../uikit/uikit';

@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KeymapAction } from '../../viewer/input';
+import { KeymapAction } from '../../workbench/input';
 import { Commander } from '../../core/_api';
 import { SelectionMatchState } from '../matcher/matcher';
 

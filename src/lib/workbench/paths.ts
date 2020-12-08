@@ -1,6 +1,8 @@
 import { Observable, Subject } from 'rxjs';
+import { Injectable } from '@tanbo/di';
 import { createElement, createTextNode } from '../uikit/uikit';
 
+@Injectable()
 export class Paths {
   onCheck: Observable<HTMLElement>;
   readonly elementRef = createElement('div', {

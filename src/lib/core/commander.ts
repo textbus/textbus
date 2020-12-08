@@ -1,5 +1,4 @@
 import { TBSelection } from './selection';
-import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 
 /**
