@@ -1,3 +1,6 @@
+import { fromEvent } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
@@ -57,14 +60,18 @@ export class TBSelection {
     return this.ranges.length === 1 && this.firstRange.collapsed || this.ranges.length === 0;
   }
 
+  onChange = fromEvent(this.context, 'selectionchange').pipe(tap(() => {
+    this._ranges = [];
+    for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
+      this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
+    }
+  }));
+
   private _ranges: TBRange[] = [];
   private nativeSelection: Selection;
 
   constructor(private context: Document, private renderer: Renderer) {
     this.nativeSelection = context.getSelection();
-    for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
-      this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
-    }
   }
 
   /**

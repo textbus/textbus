@@ -1,7 +1,9 @@
 import { makeClassDecorator, Provider, TypeDecorator } from '@tanbo/di';
 import { Lifecycle } from '../lifecycle';
+import { ComponentReader } from '../component';
 
 export interface Component {
+  reader: ComponentReader;
   lifecycle?: Lifecycle;
   providers?: Provider[];
 }
@@ -13,9 +15,7 @@ export interface ComponentDecorator {
 }
 
 export const Component: ComponentDecorator = function ComponentDecorator(define: Component): ClassDecorator {
-  if (this instanceof ComponentDecorator) {
-    this.define = define
-  } else {
-    return makeClassDecorator(ComponentDecorator, new Component(define));
+  if (!(this instanceof ComponentDecorator)) {
+    return makeClassDecorator(ComponentDecorator, define);
   }
 } as ComponentDecorator;

@@ -1,6 +1,6 @@
 import { Lifecycle, Clipboard, TBSelection } from '../core/_api';
 
-export class DefaultHook implements Lifecycle {
+export class DefaultHook {
   onInput(selection: TBSelection) {
     selection.ranges.forEach(range => {
       range.connect();

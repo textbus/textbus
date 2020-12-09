@@ -1,3 +1,5 @@
+import { Type } from '@tanbo/di';
+
 import {
   BranchAbstractComponent,
   BlockFormatter,
@@ -8,7 +10,6 @@ import {
   InlineFormatter,
   DivisionAbstractComponent,
   TBSelection,
-  Constructor
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchState, SelectionMatchState } from './matcher';
@@ -16,7 +17,7 @@ import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class FormatMatcher implements Matcher {
   constructor(private formatter: InlineFormatter | BlockFormatter,
-              private excludeComponents: Array<Constructor<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {

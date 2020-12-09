@@ -44,54 +44,54 @@ import {
   insertObjectTool,
   tableTool
 } from './lib/toolbar/tools/_api';
-import { DefaultHook, FindHook, HistoryHook, ImageVideoResizeHook, TableEditHook } from './lib/hooks/_api';
-import {
-  AudioComponentReader,
-  BlockComponentReader,
-  PreComponentReader,
-  ImageComponentReader,
-  ListComponentReader,
-  BrComponentReader,
-  TableComponentReader,
-  VideoComponentReader
-} from './lib/components/_api';
 import { defaultStyleSheets } from './lib/workbench/default-styles';
 import {
   imageCardStyleSheet,
   imageCardComponentExample,
-  ImageCardComponentReader,
 
   todoListStyleSheet,
   todoListComponentExample,
-  TodoListComponentReader,
 
   baiduMapComponentExample,
-  BaiduMapComponentReader,
 
-  JumbotronComponentReader,
   jumbotronComponentExample,
   jumbotronStyleSheet,
 
-  WordExplainComponentReader,
   wordExplainComponentExample,
   wordExplainStyleSheet,
   wordExplainComponentEditingStyleSheet,
 
   timelineComponentStyleSheet,
-  TimelineComponentReader,
   timelineComponentExample,
   timelineComponentEditingStyleSheet,
 
   progressComponentExample,
-  ProgressComponentReader,
   progressComponentStyleSheet,
 
   stepsComponentExample,
-  StepComponentReader,
   stepsComponentStyleSheet,
-  stepsComponentEditingStyleSheet
+  stepsComponentEditingStyleSheet,
+
+  StepComponent,
+  ProgressComponent,
+  TimelineComponent,
+  WordExplainComponent,
+  JumbotronComponent,
+  BaiduMapComponent,
+  TodoListComponent,
+  ImageCardComponent
 } from './lib/additional-components/_api';
 import { HTMLOutputTranslator } from './lib/output-translator';
+import {
+  ListComponent,
+  BlockComponent,
+  BrComponent,
+  PreComponent,
+  AudioComponent,
+  VideoComponent,
+  ImageComponent,
+  TableComponent
+} from './lib/components/_api';
 
 export const defaultOptions: EditorOptions<string> = {
   styleSheets: [
@@ -109,31 +109,24 @@ export const defaultOptions: EditorOptions<string> = {
     timelineComponentEditingStyleSheet,
     stepsComponentEditingStyleSheet
   ],
-  hooks: [
-    new DefaultHook(),
-    new HistoryHook(),
-    new ImageVideoResizeHook(),
-    new TableEditHook(),
-    new FindHook()
-  ],
-  componentReaders: [
-    new StepComponentReader(),
-    new ProgressComponentReader(),
-    new TimelineComponentReader(),
-    new WordExplainComponentReader(),
-    new JumbotronComponentReader(),
-    new BaiduMapComponentReader(),
-    new TodoListComponentReader(),
-    new ImageCardComponentReader(),
-    new ListComponentReader('ul'),
-    new ListComponentReader('ol'),
-    new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-    new BrComponentReader(),
-    new PreComponentReader(),
-    new AudioComponentReader(),
-    new VideoComponentReader(),
-    new ImageComponentReader(),
-    new TableComponentReader()
+  hooks: [],
+  components: [
+    StepComponent,
+    ProgressComponent,
+    TimelineComponent,
+    WordExplainComponent,
+    JumbotronComponent,
+    BaiduMapComponent,
+    TodoListComponent,
+    ImageCardComponent,
+    ListComponent,
+    BlockComponent,
+    BrComponent,
+    PreComponent,
+    AudioComponent,
+    VideoComponent,
+    ImageComponent,
+    TableComponent
   ],
   formatters: [
     fontFamilyFormatter,

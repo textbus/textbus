@@ -1,8 +1,9 @@
+import { Type } from '@tanbo/di';
+
 import {
   Commander,
   FormatEffect,
   FormatAbstractData,
-  Constructor,
   BlockFormatter,
   InlineFormatter, CommandContext
 } from '../../core/_api';
@@ -11,7 +12,7 @@ import { BrComponent } from '../../components/br.component';
 export class CleanCommander implements Commander<null> {
   recordHistory = true;
 
-  constructor(private excludeFormatters: Constructor<BlockFormatter | InlineFormatter>[] = []) {
+  constructor(private excludeFormatters: Type<BlockFormatter | InlineFormatter>[] = []) {
   }
 
   command(context: CommandContext): void {

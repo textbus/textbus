@@ -1,6 +1,6 @@
-import { LeafAbstractComponent, ComponentReader, ViewData, VElement } from '../core/_api';
+import { LeafAbstractComponent, ComponentReader, ViewData, VElement, Component } from '../core/_api';
 
-export class AudioComponentReader implements ComponentReader {
+class AudioComponentReader implements ComponentReader {
   private tagName = 'audio';
 
   match(component: HTMLElement): boolean {
@@ -14,7 +14,9 @@ export class AudioComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new AudioComponentReader()
+})
 export class AudioComponent extends LeafAbstractComponent {
 
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {

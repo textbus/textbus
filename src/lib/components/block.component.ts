@@ -7,7 +7,7 @@ import {
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
-export class BlockComponentReader implements ComponentReader {
+class BlockComponentReader implements ComponentReader {
   constructor(private tagNames: string[]) {
   }
 
@@ -26,6 +26,9 @@ export class BlockComponentReader implements ComponentReader {
     };
   }
 }
+@Component({
+  reader: new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(','))
+})
 export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {
     super(tagName);

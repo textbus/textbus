@@ -1,11 +1,19 @@
 import { from, Observable, of, Subject, Subscription } from 'rxjs';
-import { Injectable, InjectionToken, Injector, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di';
+import {
+  Injectable,
+  InjectionToken,
+  Injector,
+  NullInjector,
+  Provider,
+  ReflectiveInjector,
+  Type
+} from '@tanbo/di';
 
 import {
-  ComponentReader,
+  AbstractComponent,
   Formatter,
   Lifecycle,
-  OutputRenderer, Parser,
+  OutputRenderer,
   Renderer,
 } from './core/_api';
 import { Viewer } from './workbench/viewer';
@@ -40,7 +48,7 @@ export interface EditorOptions<T> {
   /** 设置最大历史栈 */
   historyStackSize?: number;
   /** 设置组件读取转换器 */
-  componentReaders?: ComponentReader[];
+  components?: Array<Type<AbstractComponent>>;
   /** 设置格式转换器 */
   formatters?: Formatter[];
   /** 工具条配置 */
@@ -62,8 +70,8 @@ export interface EditorOptions<T> {
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 }
 
-export const EDITOR_OPTIONS = new InjectionToken('EDITOR_OPTIONS');
-export const EDITABLE_DOCUMENT = new InjectionToken('EDITABLE_DOCUMENT');
+export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPTIONS');
+export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
 
 
 /**
@@ -120,6 +128,7 @@ export class Editor<T = any> {
     });
 
     this.fullScreen(true)
+
     const staticProviders: Provider[] = [{
       provide: Editor,
       useValue: this,
@@ -157,9 +166,6 @@ export class Editor<T = any> {
       provide: OutputRenderer,
       useValue: new OutputRenderer()
     }, {
-      provide: Parser,
-      useValue: new Parser(options.componentReaders, options.formatters)
-    }, {
       provide: OutputTranslator,
       useValue: new HTMLOutputTranslator()
     }, {
@@ -187,16 +193,16 @@ export class Editor<T = any> {
     ]);
 
     this.subs.push(
-      rootInjector.get<Viewer>(Viewer).onReady.subscribe(() => {
+      rootInjector.get(Viewer).onReady.subscribe(() => {
         this.readyState = true;
         this.readyEvent.next();
       })
     );
 
     this.elementRef.append(
-      rootInjector.get<Toolbar>(Toolbar).elementRef,
-      rootInjector.get<Workbench>(Workbench).elementRef,
-      rootInjector.get<StatusBar>(StatusBar).elementRef
+      rootInjector.get(Toolbar).elementRef,
+      rootInjector.get(Workbench).elementRef,
+      rootInjector.get(StatusBar).elementRef
     )
 
     this.elementRef.classList.add('textbus-container');

@@ -5,24 +5,24 @@ import {
   ViewData,
   Fragment,
   VElement,
-  EventType, TBEvent, SlotRendererFn
+  EventType, TBEvent, SlotRendererFn, Component
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
 import { Subscription } from 'rxjs';
 
-export class ListComponentReader implements ComponentReader {
+class ListComponentReader implements ComponentReader {
 
-  constructor(private tagName: string) {
+  constructor(private tagNames: string[]) {
   }
 
   match(component: HTMLElement): boolean {
-    return component.nodeName.toLowerCase() === this.tagName;
+    return this.tagNames.includes(component.nodeName.toLowerCase());
   }
 
   read(el: HTMLElement): ViewData {
-    const component = new ListComponent(this.tagName);
+    const component = new ListComponent(el.tagName.toLowerCase());
     const childrenSlots: SlotMap[] = [];
 
     const childNodes = Array.from(el.childNodes);
@@ -59,7 +59,9 @@ export class ListComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new ListComponentReader(['ul', 'ol'])
+})
 export class ListComponent extends BranchAbstractComponent {
   private subs: Subscription[] = [];
 

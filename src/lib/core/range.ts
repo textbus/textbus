@@ -1,5 +1,6 @@
+import { Type } from '@tanbo/di';
+
 import { Renderer } from './renderer';
-import { Constructor } from './constructor';
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
 import { BranchAbstractComponent, LeafAbstractComponent, DivisionAbstractComponent, AbstractComponent, BackboneAbstractComponent } from './component';
@@ -158,7 +159,7 @@ export class TBRange {
    * @param of 子类的构造 class。
    * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 T 实例。
    */
-  getSlotRange<T extends BranchAbstractComponent | BackboneAbstractComponent>(of: Constructor<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
+  getSlotRange<T extends BranchAbstractComponent | BackboneAbstractComponent>(of: Type<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
     const maps: Array<{ component: T, index: number }> = [];
     this.getSelectedScope().forEach(scope => {
       const context = scope.fragment.getContext(of, filter);

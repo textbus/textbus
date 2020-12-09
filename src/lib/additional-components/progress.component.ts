@@ -1,4 +1,4 @@
-import { ComponentReader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
+import { Component, ComponentReader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
@@ -9,7 +9,7 @@ export interface ProgressConfig {
   min: number;
 }
 
-export class ProgressComponentReader implements ComponentReader {
+class ProgressComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-progress';
   }
@@ -27,7 +27,9 @@ export class ProgressComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new ProgressComponentReader()
+})
 export class ProgressComponent extends LeafAbstractComponent {
   constructor(private config: ProgressConfig) {
     super('tb-progress');

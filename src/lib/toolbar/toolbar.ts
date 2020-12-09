@@ -3,13 +3,15 @@ import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
-import { Keymap } from '../workbench/input';
+import { Input, Keymap, KeymapAction } from '../workbench/input';
 import { SelectionMatchState } from './matcher/matcher';
 import { createKeymapHTML, FileUploader } from '../uikit/_api';
 import { DialogManager } from '../workbench/workbench';
-import { Editor } from '../editor';
+import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
+import { Commander, Fragment } from '../core/_api';
+import { HistoryManager } from '../history-manager';
 
 export interface ToolEntity {
   config: ToolConfig;
@@ -20,6 +22,7 @@ export interface ToolEntity {
 export class Toolbar {
   elementRef = document.createElement('div');
   onAction: Observable<ToolEntity & { params: any }>;
+  config: (ToolFactory | ToolFactory[])[];
   readonly tools: ToolEntity[] = [];
 
   private set disabled(b: boolean) {
@@ -51,14 +54,18 @@ export class Toolbar {
 
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
+  private selection: TBSelection;
+  private input: Input;
+  private rootFragment: Fragment;
+  private historyManager: HistoryManager;
+  private keymaps: KeymapAction[] = [];
   private subs: Subscription[] = [];
-  config: (ToolFactory | ToolFactory[])[]
 
-  constructor(@Inject(forwardRef(() => Editor)) private context: Editor,
+  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => FileUploader)) private fileUploader: FileUploader,
               @Inject(forwardRef(() => DialogManager)) private dialogManager: DialogManager) {
-    this.config = context.options.toolbar;
+    this.config = options.toolbar;
 
     this.editorController.onStateChange.subscribe(status => {
       this.disabled = status.readonly;
@@ -102,18 +109,35 @@ export class Toolbar {
     })
   }
 
-  updateHandlerState(selection: TBSelection, sourceCodeMode: boolean) {
+  setup(selection: TBSelection, input: Input, historyManage: HistoryManager, rootFragment: Fragment) {
+    this.selection = selection;
+    this.input = input;
+    this.historyManager = historyManage;
+    this.rootFragment = rootFragment;
+
+    this.keymaps.forEach(k => input.keymap(k));
+
+    this.selection.onChange.subscribe(() => {
+      this.updateHandlerState();
+    })
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private updateHandlerState() {
     if (this._disabled) {
       return;
     }
     this.tools.forEach(tool => {
       let s: SelectionMatchState;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = sourceCodeMode && !tool.config.supportSourceCodeMode ? {
+        s = this.editorController.sourceCodeMode && !tool.config.supportSourceCodeMode ? {
           srcStates: [],
           matchData: null,
           state: HighlightState.Disabled
-        } : tool.config.matcher?.queryState(selection, this.context) || {
+        } : tool.config.matcher?.queryState(this.selection, this.historyManager) || {
           srcStates: [],
           matchData: null,
           state: HighlightState.Normal
@@ -121,10 +145,6 @@ export class Toolbar {
         tool.instance.updateStatus(s);
       }
     })
-  }
-
-  destroy() {
-    this.subs.forEach(s => s.unsubscribe());
   }
 
   private findNeedShowKeymapHandler(el: HTMLElement): string {
@@ -196,9 +216,7 @@ export class Toolbar {
     }
     if (h.keymapAction) {
       const keymaps = Array.isArray(h.keymapAction) ? h.keymapAction : [h.keymapAction];
-      keymaps.forEach(k => {
-        // this.context.registerKeymap(k);
-      });
+      this.keymaps.push(...keymaps);
     }
     this.tools.push({
       config: option.config,
@@ -211,12 +229,34 @@ export class Toolbar {
     this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
         item.instance.onApply.subscribe(params => {
-          this.actionEvent.next({
+          this.execCommand(item.config, {
             ...item,
             params
-          });
+          }, item.instance.commander);
+          // this.actionEvent.next({
+          //   ...item,
+          //   params
+          // });
         })
       }
     });
+  }
+
+  private execCommand(config: ToolConfig, params: any, commander: Commander) {
+
+    const selection = this.selection;
+
+    const state = config.matcher ?
+      config.matcher.queryState(selection, this.historyManager).state :
+      HighlightState.Normal;
+    if (state === HighlightState.Disabled) {
+      return;
+    }
+    const overlap = state === HighlightState.Highlight;
+    commander.command({
+      selection,
+      overlap,
+      rootFragment: this.rootFragment
+    }, params);
   }
 }

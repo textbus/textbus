@@ -15,7 +15,7 @@ function matchAngle(x: number, y: number, startAngle: number, endAngle: number) 
   return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0;
 }
 
-export class ImageVideoResizeHook implements Lifecycle {
+export class ImageVideoResizeHook {
   private mask = document.createElement('div');
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];

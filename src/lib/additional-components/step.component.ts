@@ -1,5 +1,5 @@
 import {
-  BranchAbstractComponent,
+  BranchAbstractComponent, Component,
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
@@ -46,7 +46,7 @@ export interface StepsConfig {
   slots: Fragment[];
 }
 
-export class StepComponentReader implements ComponentReader {
+class StepComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-step';
   }
@@ -68,7 +68,9 @@ export class StepComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new StepComponentReader()
+})
 export class StepComponent extends BranchAbstractComponent {
   constructor(private config: StepsConfig) {
     super('tb-steps');

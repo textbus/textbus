@@ -1,10 +1,10 @@
-import { ComponentReader, VElement, ViewData } from '../core/_api';
+import { Component, ComponentReader, VElement, ViewData } from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { ImageComponent } from '../components/image.component';
 
 declare const BMapGL: any;
 
-export class BaiduMapComponentReader implements ComponentReader {
+class BaiduMapComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'img' &&
       /^https:\/\/api\.map\.baidu\.com\/staticimage\/v2/.test((element as HTMLImageElement).src);
@@ -22,6 +22,9 @@ export class BaiduMapComponentReader implements ComponentReader {
   }
 }
 
+@Component({
+  reader: new BaiduMapComponentReader()
+})
 export class BaiduMapComponent extends ImageComponent {
   static ak = '';
 

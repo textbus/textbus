@@ -1,4 +1,11 @@
-import { ComponentReader, DivisionAbstractComponent, SlotRendererFn, VElement, ViewData } from '../core/_api';
+import {
+  Component,
+  ComponentReader,
+  DivisionAbstractComponent,
+  SlotRendererFn,
+  VElement,
+  ViewData
+} from '../core/_api';
 import { ComponentExample, Workbench } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
 import { FileUploader, Form, FormTextField } from '../uikit/_api';
@@ -10,7 +17,7 @@ export interface JumbotronOptions {
   backgroundPosition: string;
 }
 
-export class JumbotronComponentReader implements ComponentReader {
+class JumbotronComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-jumbotron';
   }
@@ -32,7 +39,9 @@ export class JumbotronComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new JumbotronComponentReader()
+})
 export class JumbotronComponent extends DivisionAbstractComponent {
   constructor(private options: JumbotronOptions) {
     super('tb-jumbotron');

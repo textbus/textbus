@@ -1,23 +1,23 @@
 import { Matcher, SelectionMatchState } from './matcher';
 import { TBSelection } from '../../core/_api';
-import { Editor } from '../../editor';
 import { HighlightState } from '../help';
+import { HistoryManager } from '../../history-manager';
 
 export class HistoryMatcher implements Matcher {
   constructor(private type: 'forward' | 'back') {
   }
 
-  queryState(selection: TBSelection, editor: any): SelectionMatchState {
+  queryState(selection: TBSelection, history: HistoryManager): SelectionMatchState {
     switch (this.type) {
       case 'back':
         return {
-          state: editor.history.canBack ? HighlightState.Normal : HighlightState.Disabled,
+          state: history.canBack ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };
       case 'forward':
         return {
-          state: editor.history.canForward ? HighlightState.Normal : HighlightState.Disabled,
+          state: history.canForward ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };

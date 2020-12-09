@@ -1,17 +1,18 @@
 import { Observable, Subject } from 'rxjs';
-import { forwardRef, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
+import { forwardRef, getAnnotations, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
 import { debounceTime } from 'rxjs/operators';
 
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
-import { Parser, Renderer, TBSelection } from '../core/_api';
+import { Component, Parser, Renderer, TBSelection } from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
 import { Input } from './input';
 import { RootComponent } from '../root-component';
+import { Toolbar } from '../toolbar/toolbar';
 
 @Injectable()
 export class Viewer {
-  onReady: Observable<Document>;
+  onReady: Observable<void>;
 
   get contentWindow() {
     return this.elementRef.contentWindow;
@@ -36,7 +37,7 @@ export class Viewer {
 
   private _sourceCodeMode = false;
   private sourceCodeModeStyleSheet = document.createElement('style');
-  private readyEvent = new Subject<Document>();
+  private readyEvent = new Subject<void>();
   private id: number = null;
   private minHeight = 400;
   private renderedCallbacks: Array<() => void> = [];
@@ -44,7 +45,6 @@ export class Viewer {
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               private renderer: Renderer,
-              private parser: Parser,
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
@@ -66,10 +66,11 @@ export class Viewer {
     const onMessage = (ev: MessageEvent) => {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
-        const doc = this.elementRef.contentDocument;
-        this.setup();
-        this.readyEvent.next(doc);
-        this.listen();
+        if (this.contentDocument) {
+          this.setup();
+          this.readyEvent.next();
+          this.listen();
+        }
       }
     }
     window.addEventListener('message', onMessage);
@@ -85,15 +86,23 @@ export class Viewer {
   }
 
   setup() {
+    const componentAnnotations = this.options.components.map(c => {
+      return getAnnotations(c).getClassMetadata(Component).params[0] as Component
+    })
+    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const parser = new Parser(componentAnnotations.map(c => c.reader), this.options.formatters);
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
       useValue: this.contentDocument
+    }, {
+      provide: Parser,
+      useValue: parser
     }, {
       provide: HistoryManager,
       useValue: new HistoryManager(this.options.historyStackSize)
     }, {
       provide: TBSelection,
-      useValue: new TBSelection(this.contentDocument, this.renderer)
+      useValue: selection
     }];
     const viewInjector = new ReflectiveInjector(this.injector, [
       Input,
@@ -101,7 +110,14 @@ export class Viewer {
       ...viewProviders
     ]);
 
-    const rootComponent = viewInjector.get<RootComponent>(RootComponent);
+    const rootComponent = viewInjector.get(RootComponent);
+    const toolbar = viewInjector.get(Toolbar);
+    toolbar.setup(
+      selection,
+      viewInjector.get(Input),
+      viewInjector.get(HistoryManager),
+      rootComponent.slot,);
+
 
     rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
       this.renderer.render(rootComponent.slot, this.contentDocument.body);
@@ -111,7 +127,12 @@ export class Viewer {
     })
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
-    rootComponent.slot.from(this.parser.parse(dom));
+    rootComponent.slot.from(parser.parse(dom));
+    const rootAnnotation = getAnnotations(RootComponent).getClassMetadata(Component).params[0] as Component;
+    rootAnnotation.lifecycle.setup(viewInjector);
+    componentAnnotations.forEach(c => {
+      c.lifecycle?.setup(viewInjector);
+    })
   }
 
 

@@ -1,8 +1,9 @@
-import { Injectable } from '@tanbo/di';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { ComponentStage } from './component-stage';
 import { Viewer } from './viewer';
 import { Device } from './device';
+import { EDITOR_OPTIONS } from '@tanbo/textbus/lib/editor';
 
 export abstract class DialogManager {
   abstract dialog(content: HTMLElement): void;
@@ -22,9 +23,9 @@ export class Workbench implements DialogManager {
   private editableArea = document.createElement('div');
   private loading = document.createElement('div');
 
-  constructor(private device: Device,
-              private componentStage: ComponentStage,
-              private viewer: Viewer) {
+  constructor(@Inject(forwardRef(() => Device)) private device: Device,
+              @Inject(forwardRef(() => ComponentStage)) private componentStage: ComponentStage,
+              @Inject(forwardRef(() => Viewer)) private viewer: Viewer) {
     this.elementRef.classList.add('textbus-workbench');
 
     this.additionalWorktable.classList.add('textbus-additional-worktable');

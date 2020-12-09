@@ -4,7 +4,7 @@ import {
   Fragment,
   ComponentReader,
   VElement,
-  ViewData, SlotRendererFn,
+  ViewData, SlotRendererFn, Component,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -16,7 +16,7 @@ class TodoListFragment extends Fragment {
   }
 }
 
-export class TodoListComponentReader implements ComponentReader {
+class TodoListComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-todo-list';
   }
@@ -43,7 +43,9 @@ export class TodoListComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new TodoListComponentReader()
+})
 export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
   private subs: Subscription[] = [];
   private stateCollection = [{

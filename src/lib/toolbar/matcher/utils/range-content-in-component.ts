@@ -1,13 +1,14 @@
+import { Type } from '@tanbo/di';
+
 import {
   BranchAbstractComponent,
   DivisionAbstractComponent,
-  Constructor,
   TBRange,
   BackboneAbstractComponent
 } from '../../../core/_api';
 
 export function rangeContentInComponent(range: TBRange,
-                                        componentConstructorList: Array<Constructor<BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent>> = []) {
+                                        componentConstructorList: Array<Type<BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent>> = []) {
   let has = true;
   if (componentConstructorList.length === 0) {
     return false;

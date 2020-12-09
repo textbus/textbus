@@ -1,6 +1,6 @@
 import {
   BlockFormatter,
-  ChildSlotMode,
+  ChildSlotMode, Component,
   ComponentReader,
   DivisionAbstractComponent,
   EventType,
@@ -82,7 +82,7 @@ class CodeStyleFormatter extends InlineFormatter {
 const codeStyleFormatter = new CodeStyleFormatter();
 const codeFormatter = new CodeFormatter();
 
-export class PreComponentReader implements ComponentReader {
+class PreComponentReader implements ComponentReader {
   private tagName = 'pre';
 
   match(component: HTMLElement): boolean {
@@ -113,7 +113,9 @@ export class PreComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new PreComponentReader()
+})
 export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';
 

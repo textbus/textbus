@@ -1,5 +1,5 @@
 import {
-  BranchAbstractComponent,
+  BranchAbstractComponent, Component,
   ComponentReader,
   FormatAbstractData,
   FormatEffect,
@@ -80,7 +80,7 @@ function createTimelineItem(): TimelineConfig {
   };
 }
 
-export class TimelineComponentReader implements ComponentReader {
+class TimelineComponentReader implements ComponentReader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-timeline';
   }
@@ -114,7 +114,9 @@ export class TimelineComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new TimelineComponentReader()
+})
 export class TimelineComponent extends BranchAbstractComponent {
   private vEle: VElement;
 

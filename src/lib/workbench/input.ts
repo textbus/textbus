@@ -4,6 +4,7 @@ import { Inject, Injectable } from '@tanbo/di';
 
 import { EventType, Fragment, TBEvent, TBSelection } from '../core/_api';
 import { EDITABLE_DOCUMENT } from '../editor';
+import { Workbench } from './workbench';
 
 /**
  * 快捷键配置项
@@ -84,8 +85,9 @@ export class Input {
   private flashing = true;
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
+              private workbench: Workbench,
               private selection: TBSelection) {
-
+    this.workbench.tablet.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
     this.inputWrap.classList.add('textbus-input-wrap');
@@ -147,6 +149,10 @@ export class Input {
     this.onBlur.subscribe(() => {
       this.hide();
     })
+
+    this.selection.onChange.subscribe(() => {
+      this.updateStateBySelection()
+    })
   }
 
   /**
@@ -157,11 +163,8 @@ export class Input {
     this.keymaps.push(keymap);
   }
 
-  /**
-   * 根据 Selection 更新光标显示位置及状态
-   * @param limit 光标显示的范围
-   */
-  updateStateBySelection(limit: HTMLElement) {
+  private updateStateBySelection() {
+    const limit = this.workbench.tablet.parentNode as HTMLElement;
     if (this.readonly || !this.selection.rangeCount) {
       this.hide();
       return;

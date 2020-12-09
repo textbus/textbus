@@ -6,7 +6,7 @@ import {
   ComponentReader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn
+  BackboneAbstractComponent, SlotRendererFn, Component
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { Subscription } from 'rxjs';
@@ -54,7 +54,7 @@ export interface TableRange {
   selectedCells: Fragment[];
 }
 
-export class TableComponentReader implements ComponentReader {
+class TableComponentReader implements ComponentReader {
   private tagName = 'table';
 
   match(component: HTMLElement): boolean {
@@ -116,7 +116,9 @@ export class TableComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new TableComponentReader()
+})
 export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {
     const n = this.serialize();

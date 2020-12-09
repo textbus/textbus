@@ -25,7 +25,7 @@ function findParentByTagName(node: Node, tagNames: string[]): HTMLElement {
   return null;
 }
 
-export class TableEditHook implements Lifecycle {
+export class TableEditHook {
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
   private insertMask = false;

@@ -7,7 +7,7 @@ import {
   AbstractComponent
 } from '../../core/_api';
 import { HighlightState } from '../help';
-import { Editor } from '../../editor';
+import { HistoryManager } from '../../history-manager';
 
 /**
  * 匹配到的抽象数据及状态
@@ -36,5 +36,5 @@ export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent 
 }
 
 export interface Matcher {
-  queryState(selection: TBSelection, editor: Editor): SelectionMatchState;
+  queryState(selection: TBSelection, historyManager: HistoryManager): SelectionMatchState;
 }

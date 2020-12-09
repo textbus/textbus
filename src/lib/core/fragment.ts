@@ -1,4 +1,5 @@
 import { Subscription } from 'rxjs';
+import { Type } from '@tanbo/di';
 
 import { Contents } from './contents';
 import {
@@ -17,7 +18,6 @@ import {
 } from './formatter';
 import { FormatMap } from './format-map';
 import { Marker } from './marker';
-import { Constructor } from './constructor';
 import { EventEmitter } from './events';
 
 /**
@@ -527,7 +527,7 @@ export class Fragment extends Marker {
    * @param context 指定组件的构造类。
    * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
    */
-  getContext<T extends AbstractComponent>(context: Constructor<T>, filter?: (instance: T) => boolean): T {
+  getContext<T extends AbstractComponent>(context: Type<T>, filter?: (instance: T) => boolean): T {
     const componentInstance = this.parentComponent;
     if (!componentInstance) {
       return null;

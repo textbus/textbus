@@ -4,6 +4,8 @@ import { Commander } from './commander';
 import { Editor } from '../editor';
 import { Contents } from './contents';
 import { Fragment } from './fragment';
+import { Input } from '../workbench/input';
+import { Injector } from '@tanbo/di';
 
 export interface Clipboard {
   contents: Contents
@@ -15,6 +17,10 @@ export interface Clipboard {
  * 在 TextBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
  */
 export interface Lifecycle {
+  setup(injector: Injector): void;
+  onFocus?(): void;
+  onInputBefore?(): boolean;
+  onInput?(): boolean;
 
   /**
    * 当 TextBus 初始化时调用。
@@ -23,13 +29,12 @@ export interface Lifecycle {
    * @param contextWindow
    * @param frameContainer
    */
-  setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
+  // setup?(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement): void;
 
   /**
    * 当用户输入时调用。
    * @param selection
    */
-  onInput?(selection: TBSelection): boolean;
 
   /**
    * 用户粘贴时调用。

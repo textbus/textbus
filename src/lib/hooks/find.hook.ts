@@ -12,7 +12,7 @@ import { FindCommander } from '../toolbar/commands/find.commander';
 import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
 import { PreComponent } from '../components/pre.component';
 
-export class FindHook implements Lifecycle {
+export class FindHook {
   private findValue: string;
   private commander: FindCommander;
   private positions: ElementPosition[] = [];

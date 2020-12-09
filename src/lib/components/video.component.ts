@@ -1,6 +1,6 @@
-import { LeafAbstractComponent, ComponentReader, ViewData, VElement } from '../core/_api';
+import { LeafAbstractComponent, ComponentReader, ViewData, VElement, Component } from '../core/_api';
 
-export class VideoComponentReader implements ComponentReader {
+class VideoComponentReader implements ComponentReader {
   private tagName = 'video';
 
   match(component: HTMLElement): boolean {
@@ -17,7 +17,9 @@ export class VideoComponentReader implements ComponentReader {
     };
   }
 }
-
+@Component({
+  reader: new VideoComponentReader()
+})
 export class VideoComponent extends LeafAbstractComponent {
   width: string = null;
   height: string = null;

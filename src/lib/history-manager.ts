@@ -8,7 +8,7 @@ export interface Snapshot {
   paths: RangePath[];
 }
 
-export const HISTORY_STACK_SIZE = new InjectionToken('HISTORY_STACK_SIZE');
+export const HISTORY_STACK_SIZE = new InjectionToken<number>('HISTORY_STACK_SIZE');
 
 @Injectable()
 export class HistoryManager {
