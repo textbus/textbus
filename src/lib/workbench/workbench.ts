@@ -3,7 +3,6 @@ import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import { ComponentStage } from './component-stage';
 import { Viewer } from './viewer';
 import { Device } from './device';
-import { EDITOR_OPTIONS } from '@tanbo/textbus/lib/editor';
 
 export abstract class DialogManager {
   abstract dialog(content: HTMLElement): void;

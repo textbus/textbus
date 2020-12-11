@@ -1,3 +1,5 @@
+import { Injector } from '@tanbo/di';
+
 import {
   SlotMap,
   BranchAbstractComponent,
@@ -5,12 +7,11 @@ import {
   ViewData,
   Fragment,
   VElement,
-  EventType, TBEvent, SlotRendererFn, Component
+  TBEvent, SlotRendererFn, Component, Lifecycle, TBSelection
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
-import { Subscription } from 'rxjs';
 
 class ListComponentReader implements ComponentReader {
 
@@ -59,12 +60,49 @@ class ListComponentReader implements ComponentReader {
     };
   }
 }
+
+class ListComponentLifecycle implements Lifecycle<ListComponent> {
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+  }
+
+  onEnter(event: TBEvent<ListComponent>) {
+    event.stopPropagation();
+    const slot = this.selection.commonAncestorFragment;
+    const instance = event.instance;
+    const firstRange = this.selection.firstRange;
+    const index = instance.slots.indexOf(slot);
+    if (slot === instance.slots[instance.slots.length - 1]) {
+      const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
+      if (slot.contentLength === 0 ||
+        slot.contentLength === 1 && lastContent instanceof BrComponent) {
+        instance.slots.pop();
+        const parentFragment = instance.parentFragment;
+        const p = new BlockComponent('p');
+        p.slot.from(new Fragment());
+        p.slot.append(new BrComponent());
+        parentFragment.insertAfter(p, instance);
+        firstRange.setStart(p.slot, 0);
+        firstRange.collapse();
+        return;
+      }
+    }
+
+    const next = breakingLine(slot, firstRange.startIndex);
+
+    instance.slots.splice(index + 1, 0, next);
+    firstRange.startFragment = firstRange.endFragment = next;
+    firstRange.startIndex = firstRange.endIndex = 0;
+  }
+}
+
 @Component({
-  reader: new ListComponentReader(['ul', 'ol'])
+  reader: new ListComponentReader(['ul', 'ol']),
+  lifecycle: new ListComponentLifecycle()
 })
 export class ListComponent extends BranchAbstractComponent {
-  private subs: Subscription[] = [];
-
   constructor(tagName: string) {
     super(tagName);
   }
@@ -83,9 +121,6 @@ export class ListComponent extends BranchAbstractComponent {
       const li = new VElement('li');
       list.appendChild(slotRendererFn(slot, li));
     })
-    if (!isOutputMode) {
-      this.handleEnter();
-    }
     return list;
   }
 
@@ -95,41 +130,5 @@ export class ListComponent extends BranchAbstractComponent {
       center: this.slots.slice(startIndex, endIndex),
       after: this.slots.slice(endIndex)
     }
-  }
-
-  private handleEnter() {
-    this.subs.forEach(i => i.unsubscribe());
-    this.subs = [];
-    this.slots.forEach((slot, index) => {
-      const s = slot.events.subscribe((event: TBEvent) => {
-        if (event.type === EventType.onEnter) {
-          event.stopPropagation();
-
-          const firstRange = event.selection.firstRange;
-          if (slot === this.slots[this.slots.length - 1]) {
-            const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
-            if (slot.contentLength === 0 ||
-              slot.contentLength === 1 && lastContent instanceof BrComponent) {
-              this.slots.pop();
-              const parentFragment = this.parentFragment;
-              const p = new BlockComponent('p');
-              p.slot.from(new Fragment());
-              p.slot.append(new BrComponent());
-              parentFragment.insertAfter(p, this);
-              firstRange.setStart(p.slot, 0);
-              firstRange.collapse();
-              return;
-            }
-          }
-
-          const next = breakingLine(slot, firstRange.startIndex);
-
-          this.slots.splice(index + 1, 0, next);
-          firstRange.startFragment = firstRange.endFragment = next;
-          firstRange.startIndex = firstRange.endIndex = 0;
-        }
-      });
-      this.subs.push(s);
-    })
   }
 }

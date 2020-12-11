@@ -6,8 +6,10 @@ import { Contents } from './contents';
 import { Fragment } from './fragment';
 import { Input } from '../workbench/input';
 import { Injector } from '@tanbo/di';
+import { TBEvent } from '@tanbo/textbus/lib/core/events';
+import { AbstractComponent } from '@tanbo/textbus/lib/core/component';
 
-export interface Clipboard {
+export interface TBClipboard {
   contents: Contents
   text: string;
 }
@@ -16,11 +18,17 @@ export interface Clipboard {
  * TextBus 生命周期方法。
  * 在 TextBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
  */
-export interface Lifecycle {
+export interface Lifecycle<T extends AbstractComponent> {
   setup(injector: Injector): void;
   onFocus?(): void;
-  onInputBefore?(): boolean;
-  onInput?(): boolean;
+  onInputBefore?(event: TBEvent<T>): void;
+  onInput?(event: TBEvent<T>): void;
+  onDeleteBefore?(event: TBEvent<T>): void;
+  onDelete?(event: TBEvent<T>): void;
+  onEnterBefore?(event: TBEvent<T>): void;
+  onEnter?(event: TBEvent<T>): void;
+  onPasteBefore?(event: TBEvent<T, TBClipboard>): void;
+  onPaste?(event: TBEvent<T, TBClipboard>): void;
 
   /**
    * 当 TextBus 初始化时调用。
@@ -41,19 +49,6 @@ export interface Lifecycle {
    * @param clipboard 粘贴的内容。
    * @param selection
    */
-  onPaste?(clipboard: Clipboard, selection: TBSelection): boolean;
-
-  /**
-   * 当用户敲击回车时调用。
-   * @param selection
-   */
-  onEnter?(selection: TBSelection): boolean;
-
-  /**
-   * 当用户删除时调用。
-   * @param selection
-   */
-  onDelete?(selection: TBSelection): boolean;
 
   /**
    * 当选区发生变化时调用。

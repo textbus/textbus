@@ -1,10 +1,19 @@
-import { fromEvent, Observable } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Inject, Injectable } from '@tanbo/di';
+import { getAnnotations, Inject, Injectable } from '@tanbo/di';
 
-import { EventType, Fragment, TBEvent, TBSelection } from '../core/_api';
+import {
+  Component,
+  Contents,
+  Parser,
+  Renderer,
+  TBEvent,
+  TBSelection,
+  TBRangePosition, TBRange, AbstractComponent
+} from '../core/_api';
 import { EDITABLE_DOCUMENT } from '../editor';
 import { Workbench } from './workbench';
+import { RootComponent } from '../root-component';
 
 /**
  * 快捷键配置项
@@ -14,6 +23,13 @@ export interface Keymap {
   shiftKey?: boolean;
   altKey?: boolean;
   key: string | string[];
+}
+
+export enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
 }
 
 /**
@@ -36,13 +52,6 @@ export const isMac = /mac os/i.test(navigator.userAgent);
 
 @Injectable()
 export class Input {
-  onInput: Observable<Event>;
-  onFocus: Observable<Event>;
-  onBlur: Observable<Event>;
-  onPaste: Observable<Event>;
-  onCopy: Observable<Event>;
-  onCut: Observable<Event>;
-
   get value() {
     return this.input.value;
   }
@@ -83,10 +92,18 @@ export class Input {
 
   private _display = true;
   private flashing = true;
+  private nativeSelection: Selection;
+
+  private oldCursorPosition: { left: number, top: number } = null;
+  private cleanOldCursorTimer: any;
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               private workbench: Workbench,
+              private renderer: Renderer,
+              private rootComponent: RootComponent,
+              private parser: Parser,
               private selection: TBSelection) {
+    this.nativeSelection = context.getSelection();
     this.workbench.tablet.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
@@ -98,12 +115,6 @@ export class Input {
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
 
-    this.onInput = fromEvent(this.input, 'input');
-    this.onFocus = fromEvent(this.input, 'focus');
-    this.onBlur = fromEvent(this.input, 'blur');
-    this.onPaste = fromEvent(this.input, 'paste');
-    this.onCopy = fromEvent(this.input, 'copy');
-    this.onCut = fromEvent(this.input, 'cut');
 
     let isWriting = false;
 
@@ -146,13 +157,11 @@ export class Input {
       this.flashing = true;
     });
 
-    this.onBlur.subscribe(() => {
-      this.hide();
-    })
-
     this.selection.onChange.subscribe(() => {
       this.updateStateBySelection()
     })
+
+    this.initEvent()
   }
 
   /**
@@ -191,26 +200,221 @@ export class Input {
     this.input.focus();
   }
 
-  /**
-   * 发布事件
-   * @param by        最开始发生事件的虚拟 DOM 元素。
-   * @param type      事件类型。
-   * @param data      附加的数据。
-   */
-  private dispatchEvent(by: Fragment, type: EventType, data?: { [key: string]: any }) {
-    let stopped = false;
-    do {
-      const event = new TBEvent({
-        type,
-        selection: this.selection,
-        data
-      });
-      by.events.emit(event);
-      stopped = event.stopped;
-      if (!stopped) {
-        by = by.parentComponent?.parentFragment;
+  private initEvent() {
+    fromEvent(this.input, 'input').subscribe(() => {
+      if (this.selection.collapsed) {
+        this.dispatchEvent((component, instance) => {
+          const event = new TBEvent(instance);
+          component.lifecycle?.onInput?.(event)
+          return !event.stopped;
+        })
+      } else {
+        this.dispatchEvent((component, instance) => {
+          const event = new TBEvent(instance);
+          return !event.stopped;
+        })
       }
-    } while (!stopped && by);
+    });
+    fromEvent(this.input, 'focus').subscribe(() => {
+      this.dispatchEvent(component => {
+        component.lifecycle?.onFocus?.()
+        return true;
+      })
+    });
+    fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
+      const text = ev.clipboardData.getData('Text');
+      const div = document.createElement('div');
+      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+      div.contentEditable = 'true';
+      document.body.appendChild(div);
+      div.focus();
+      setTimeout(() => {
+        let html = div.innerHTML;
+        let hasEmpty = true;
+        const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g;
+        while (hasEmpty) {
+          hasEmpty = false;
+          html = html.replace(reg, function () {
+            hasEmpty = true;
+            return '';
+          });
+        }
+        div.innerHTML = html;
+
+        const fragment = this.parser.parse(div);
+        const contents = new Contents();
+        fragment.sliceContents(0).forEach(i => contents.append(i));
+        document.body.removeChild(div);
+
+        if (this.selection.collapsed) {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance, {contents, text});
+            component.lifecycle?.onPaste(event);
+            return !event.stopped;
+          })
+        } else {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance, {contents, text});
+            component.lifecycle?.onPasteBefore(event);
+            return !event.stopped;
+          })
+        }
+      });
+    });
+    fromEvent(this.input, 'copy').subscribe(() => {
+      this.context.execCommand('copy');
+    });
+    fromEvent(this.input, 'cut').subscribe(() => {
+      this.context.execCommand('copy');
+      this.selection.ranges.forEach(range => {
+        range.connect();
+      });
+    });
+
+    this.keymap({
+      keymap: {
+        key: ['Backspace', 'Delete']
+      },
+      action: () => {
+        if (this.selection.collapsed) {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance);
+            component.lifecycle?.onDelete(event)
+            return !event.stopped;
+          })
+        } else {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance);
+            component.lifecycle?.onDeleteBefore(event)
+            return !event.stopped;
+          })
+        }
+      }
+    })
+    this.keymap({
+      keymap: {
+        key: 'Enter'
+      },
+      action: () => {
+        if (this.selection.collapsed) {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance);
+            component.lifecycle?.onEnter(event);
+            return !event.stopped;
+          })
+        } else {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance);
+            component.lifecycle?.onEnterBefore(event)
+            return !event.stopped;
+          })
+        }
+      }
+    })
+    this.keymap({
+      keymap: {
+        key: 'a',
+        ctrlKey: true
+      },
+      action: () => {
+        const selection = this.selection;
+        const firstRange = selection.firstRange;
+        const firstPosition = firstRange.findFirstPosition(this.rootComponent.slot);
+        const lastPosition = firstRange.findLastChild(this.rootComponent.slot);
+        selection.removeAllRanges();
+
+        firstRange.setStart(firstPosition.fragment, firstPosition.index);
+        firstRange.setEnd(lastPosition.fragment, lastPosition.index);
+
+        selection.addRange(firstRange);
+        selection.restore();
+      }
+    })
+    this.keymap({
+      keymap: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+      },
+      action: (ev: KeyboardEvent) => {
+        const map: { [key: string]: CursorMoveDirection } = {
+          ArrowLeft: CursorMoveDirection.Left,
+          ArrowRight: CursorMoveDirection.Right,
+          ArrowUp: CursorMoveDirection.Up,
+          ArrowDown: CursorMoveDirection.Down
+        };
+        this.moveCursor(map[ev.key]);
+      }
+    })
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    const selection = this.selection;
+    selection.ranges.forEach(range => {
+      let p: TBRangePosition;
+      let range2: TBRange;
+      switch (direction) {
+        case CursorMoveDirection.Left:
+          p = range.getPreviousPosition();
+          break;
+        case CursorMoveDirection.Right:
+          p = range.getNextPosition();
+          break;
+        case CursorMoveDirection.Up:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
+          } else {
+            const rect = range2.getRangePosition();
+            this.oldCursorPosition = rect;
+            p = range.getPreviousLinePosition(rect.left);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
+        case CursorMoveDirection.Down:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = range2.getNextLinePosition(this.oldCursorPosition.left);
+          } else {
+            const rect = range2.getRangePosition();
+            this.oldCursorPosition = rect;
+            p = range.getNextLinePosition(rect.left);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
+      }
+      range.startFragment = range.endFragment = p.fragment;
+      range.startIndex = range.endIndex = p.index;
+    });
+    selection.restore();
+    this.dispatchEvent(component => {
+      component.lifecycle?.onFocus?.()
+      return true;
+    })
+  }
+
+  private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
+    const focusNode = this.nativeSelection.focusNode;
+    const position = this.renderer.getPositionByNode(focusNode);
+    if (!position) {
+      return;
+    }
+    let component = position.fragment.parentComponent;
+    while (component) {
+      const annotations = getAnnotations(component.constructor);
+      const componentAnnotation = annotations.getClassMetadata(Component);
+      const params = componentAnnotation.params[0] as Component;
+      if (!invokeFn(params, component)) {
+        break;
+      }
+      component = component.parentFragment?.parentComponent;
+    }
   }
 
   private updateCursorPosition(limit: HTMLElement) {

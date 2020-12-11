@@ -1,19 +1,4 @@
-import {
-  BlockFormatter,
-  ChildSlotMode, Component,
-  ComponentReader,
-  DivisionAbstractComponent,
-  EventType,
-  FormatAbstractData,
-  FormatEffect,
-  FormatRendingContext,
-  Fragment,
-  InlineFormatter,
-  ReplaceMode, SlotRendererFn,
-  VElement,
-  ViewData
-} from '../core/_api';
-import { BrComponent } from './br.component';
+import { Injector } from '@tanbo/di';
 import { Grammar, languages, Token, tokenize } from 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-java';
@@ -28,6 +13,22 @@ import 'prismjs/components/prism-stylus';
 import 'prismjs/components/prism-c';
 import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-csharp';
+
+import {
+  BlockFormatter,
+  ChildSlotMode, Component,
+  ComponentReader,
+  DivisionAbstractComponent,
+  FormatAbstractData,
+  FormatEffect,
+  FormatRendingContext,
+  Fragment,
+  InlineFormatter, Lifecycle,
+  ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
+  VElement,
+  ViewData
+} from '../core/_api';
+import { BrComponent } from './br.component';
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -113,39 +114,51 @@ class PreComponentReader implements ComponentReader {
     };
   }
 }
+
+class PreComponentLifecycle implements Lifecycle<PreComponent> {
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+  }
+
+  onEnter(event: TBEvent<PreComponent>) {
+    const firstRange = this.selection.firstRange;
+    event.instance.slot.insert(new BrComponent(), firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+    event.stopPropagation();
+  }
+
+  onPaste(event: TBEvent<PreComponent, TBClipboard>) {
+
+    const text = event.data.text;
+    const firstRange = this.selection.firstRange;
+    const startIndex = firstRange.startIndex;
+    const lines = text.split(/(?=\n)/g);
+    let i = 0;
+    lines.forEach(item => {
+      if (item === '\n') {
+        event.instance.slot.insert(new BrComponent(), startIndex + i);
+      } else {
+        event.instance.slot.insert(item, startIndex + i);
+      }
+      i += item.length;
+    })
+    firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
+    firstRange.collapse();
+    event.stopPropagation();
+  }
+}
+
 @Component({
-  reader: new PreComponentReader()
+  reader: new PreComponentReader(),
+  lifecycle: new PreComponentLifecycle()
 })
 export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';
 
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
-    this.slot.events.subscribe(event => {
-      if (event.type === EventType.onEnter) {
-        const firstRange = event.selection.firstRange;
-        this.slot.insert(new BrComponent(), firstRange.startIndex);
-        firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-        event.stopPropagation();
-      } else if (event.type === EventType.onPaste) {
-        const text = event.data.clipboard.text as string;
-        const firstRange = event.selection.firstRange;
-        const startIndex = firstRange.startIndex;
-        const lines = text.split(/(?=\n)/g);
-        let i = 0;
-        lines.forEach(item => {
-          if (item === '\n') {
-            this.slot.insert(new BrComponent(), startIndex + i);
-          } else {
-            this.slot.insert(item, startIndex + i);
-          }
-          i += item.length;
-        })
-        firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
-        firstRange.collapse();
-        event.stopPropagation();
-      }
-    })
   }
 
   clone() {

@@ -1,15 +1,14 @@
+import { Injector } from '@tanbo/di';
+
 import {
-  EventType,
   Fragment,
-  LeafAbstractComponent,
   SlotMap,
   ComponentReader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn, Component
+  BackboneAbstractComponent, SlotRendererFn, Component, Lifecycle, TBSelection, TBEvent
 } from '../core/_api';
 import { BrComponent } from './br.component';
-import { Subscription } from 'rxjs';
 
 export interface TableCell {
   colspan: number;
@@ -116,8 +115,36 @@ class TableComponentReader implements ComponentReader {
     };
   }
 }
+
+class TableComponentLifecycle implements Lifecycle<TableComponent> {
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+  }
+
+  onEnter(event: TBEvent<TableComponent>) {
+    const firstRange = this.selection.firstRange;
+    const slot = this.selection.commonAncestorFragment;
+    slot.insert(new BrComponent(), firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+    const afterContent = slot.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+    if (!afterContent) {
+      slot.append(new BrComponent());
+    }
+    event.stopPropagation();
+  }
+
+  onDelete(event: TBEvent<TableComponent>) {
+    if (this.selection.firstRange.startIndex === 0) {
+      event.stopPropagation();
+    }
+  }
+}
+
 @Component({
-  reader: new TableComponentReader()
+  reader: new TableComponentReader(),
+  lifecycle: new TableComponentLifecycle()
 })
 export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {
@@ -126,7 +153,6 @@ export class TableComponent extends BackboneAbstractComponent {
     return n;
   }
 
-  private subs: Subscription[] = [];
   private _cellMatrix: TableRowPosition[];
   private deleteMarkFragments: Fragment[] = [];
 
@@ -202,9 +228,6 @@ export class TableComponent extends BackboneAbstractComponent {
         }
       }
     }
-    if (!isOutputMode) {
-      this.handleEvent();
-    }
     return table;
   }
 
@@ -217,26 +240,6 @@ export class TableComponent extends BackboneAbstractComponent {
     const maxRow = Math.max(p1.maxRow, p2.maxRow);
     const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
     return this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
-  }
-
-  private handleEvent() {
-    this.subs.forEach(s => s.unsubscribe());
-    this.subs = Array.from(this).map(slot => {
-      return slot.events.subscribe(event => {
-        if (event.type === EventType.onEnter) {
-          const firstRange = event.selection.firstRange;
-          slot.insert(new BrComponent(), firstRange.startIndex);
-          firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-          const afterContent = slot.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
-          if (!afterContent) {
-            slot.append(new BrComponent());
-          }
-          event.stopPropagation();
-        } else if (event.type === EventType.onDelete && event.selection.firstRange.startIndex === 0) {
-          event.stopPropagation();
-        }
-      })
-    })
   }
 
   private selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableRange {

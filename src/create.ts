@@ -109,7 +109,6 @@ export const defaultOptions: EditorOptions<string> = {
     timelineComponentEditingStyleSheet,
     stepsComponentEditingStyleSheet
   ],
-  hooks: [],
   components: [
     StepComponent,
     ProgressComponent,

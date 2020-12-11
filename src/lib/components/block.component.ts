@@ -1,9 +1,10 @@
+import { Injector } from '@tanbo/di';
+
 import {
   ComponentReader,
   ViewData,
   VElement,
-  EventType,
-  DivisionAbstractComponent, SlotRendererFn, Component
+  DivisionAbstractComponent, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -26,27 +27,36 @@ class BlockComponentReader implements ComponentReader {
     };
   }
 }
+
+class BlockComponentLifecycle implements Lifecycle<BlockComponent> {
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+  }
+
+  onEnter(event: TBEvent<BlockComponent>) {
+    const parent = event.instance.parentFragment;
+
+    const component = new BlockComponent('p');
+    const firstRange = this.selection.firstRange;
+    const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
+    component.slot.from(next);
+    parent.insertAfter(component, event.instance);
+    const position = firstRange.findFirstPosition(component.slot);
+    firstRange.startFragment = firstRange.endFragment = position.fragment;
+    firstRange.startIndex = firstRange.endIndex = position.index;
+    event.stopPropagation();
+  }
+}
+
 @Component({
-  reader: new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(','))
+  reader: new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
+  lifecycle: new BlockComponentLifecycle()
 })
 export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {
     super(tagName);
-    this.slot.events.subscribe(event => {
-      if (event.type === EventType.onEnter) {
-        const parent = this.parentFragment;
-
-        const component = new BlockComponent('p');
-        const firstRange = event.selection.firstRange;
-        const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
-        component.slot.from(next);
-        parent.insertAfter(component, this);
-        const position = firstRange.findFirstPosition(component.slot);
-        firstRange.startFragment = firstRange.endFragment = position.fragment;
-        firstRange.startIndex = firstRange.endIndex = position.index;
-        event.stopPropagation();
-      }
-    })
   }
 
   clone() {

@@ -1,10 +1,11 @@
+import { Injector } from '@tanbo/di';
+
 import {
-  EventType,
   ComponentReader,
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRendererFn, Component
+  Fragment, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
@@ -36,8 +37,52 @@ class ImageCardComponentReader implements ComponentReader {
     }
   }
 }
+
+class ImageCardComponentLifecycle implements Lifecycle<ImageCardComponent> {
+  private injector: Injector;
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.injector = injector;
+    this.selection = injector.get(TBSelection);
+  }
+
+  onInput(event: TBEvent<ImageCardComponent>) {
+    if (this.selection.commonAncestorFragment === event.data.imgFragment) {
+      event.stopPropagation();
+    }
+  }
+
+  onPaste(event: TBEvent<ImageCardComponent, TBClipboard>) {
+    this.onInput(event);
+  }
+
+  onDelete(event: TBEvent<ImageCardComponent>) {
+    const {commonAncestorFragment, firstRange} = this.selection;
+    if (commonAncestorFragment === event.data.imgFragment) {
+      event.stopPropagation();
+    } else if (commonAncestorFragment === event.data.descFragment && firstRange.startIndex === 0) {
+      event.stopPropagation();
+    }
+  }
+
+  onEnter(event: TBEvent<ImageCardComponent>) {
+    const {firstRange, commonAncestorFragment} = this.selection;
+    if (commonAncestorFragment === event.data.descFragment) {
+      const parentFragment = event.data.parentFragment;
+      const p = new BlockComponent('p');
+      p.slot.append(new BrComponent());
+      parentFragment.insertAfter(p, this);
+      firstRange.setStart(p.slot, 0);
+      firstRange.collapse();
+    }
+    event.stopPropagation();
+  }
+}
+
 @Component({
-  reader: new ImageCardComponentReader()
+  reader: new ImageCardComponentReader(),
+  lifecycle: new ImageCardComponentLifecycle()
 })
 export class ImageCardComponent extends BackboneAbstractComponent {
   readonly imgFragment: Fragment;
@@ -50,29 +95,6 @@ export class ImageCardComponent extends BackboneAbstractComponent {
 
     this.push(this.imgFragment);
     this.push(this.descFragment);
-
-    this.imgFragment.events.subscribe(ev => {
-      ev.stopPropagation();
-    });
-
-    this.descFragment.events.subscribe(ev => {
-      if (!ev.selection) {
-        return;
-      }
-      const firstRange = ev.selection.firstRange;
-      if (ev.type === EventType.onEnter) {
-        const parentFragment = this.parentFragment;
-        const p = new BlockComponent('p');
-        p.slot.append(new BrComponent());
-        parentFragment.insertAfter(p, this);
-        firstRange.setStart(p.slot, 0);
-        firstRange.collapse();
-        ev.stopPropagation();
-      }
-      if (ev.type === EventType.onDelete && firstRange.startIndex === 0) {
-        ev.stopPropagation();
-      }
-    })
   }
 
   canDelete(deletedSlot: Fragment): boolean {
@@ -106,7 +128,7 @@ export class ImageCardComponent extends BackboneAbstractComponent {
 
 export const imageCardComponentExample: ComponentExample = {
   name: '卡片',
-  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f90"/><stop offset="100%" stop-color="#fff"/></linearGradient></defs><g><rect fill="url(#bg)" height="50" width="100%"/></g><g><path fill="#f00" opacity="0.2" d="M81.25 28.125c0 5.178-4.197 9.375-9.375 9.375s-9.375-4.197-9.375-9.375 4.197-9.375 9.375-9.375 9.375 4.197 9.375 9.375z"></path><path fill="#0e0" opacity="0.3" d="M87.5 81.25h-75v-12.5l21.875-37.5 25 31.25h6.25l21.875-18.75z"></path></g><g><rect fill="#fff" height="20" width="100%" y="50"></rect></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="12" y="63" x="50%" text-anchor="middle" stroke-width="0" stroke="#000" fill="#000000">描述文字</text></g></svg>')}">`,
+  example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f90"/><stop offset="100%" stop-color="#fff"/></linearGradient></defs><g><rect fill="url(#bg)" height="50" width="100%"/></g><g><path fill="#f00" opacity="0.2" d="M81.25 28.125c0 5.178-4.197 9.375-9.375 9.375s-9.375-4.197-9.375-9.375 4.197-9.375 9.375-9.375 9.375 4.197 9.375 9.375z"></path><path fill="#0e0" opacity="0.3" d="M87.5 81.25h-75v-12.5l21.875-37.5 25 31.25h6.25l21.875-18.75z"></path></g><g><rect fill="#fff" height="20" width="100%" y="50"></rect></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="12" y="63" x="50%" text-anchor="middle" stroke-width="0" stroke="#000" fill="#000000">描述文字</text></g></svg>')}" alt="">`,
   componentFactory() {
     const imgFragment = new Fragment();
     imgFragment.append(new ImageComponent(defaultImageSrc));

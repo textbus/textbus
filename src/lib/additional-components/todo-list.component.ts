@@ -1,14 +1,14 @@
+import { Injector } from '@tanbo/di';
+
 import {
   BranchAbstractComponent,
-  EventType,
   Fragment,
   ComponentReader,
   VElement,
-  ViewData, SlotRendererFn, Component,
+  ViewData, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
-import { Subscription } from 'rxjs';
 
 class TodoListFragment extends Fragment {
   constructor(public active: boolean, public disabled: boolean) {
@@ -43,11 +43,51 @@ class TodoListComponentReader implements ComponentReader {
     };
   }
 }
+
+class TodoListComponentLifecycle implements Lifecycle<TodoListComponent> {
+  private selection: TBSelection;
+
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+  }
+
+  onEnter(event: TBEvent<TodoListComponent>) {
+    const component = event.instance;
+    event.stopPropagation();
+
+    const firstRange = this.selection.firstRange;
+    const slot = this.selection.commonAncestorFragment as TodoListFragment;
+
+    const index = component.slots.indexOf(slot);
+
+    if (slot === component.slots[component.slots.length - 1]) {
+      const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
+      if (slot.contentLength === 0 ||
+        slot.contentLength === 1 && lastContent instanceof BrComponent) {
+        component.slots.pop();
+        const parentFragment = component.parentFragment;
+        const p = new BlockComponent('p');
+        p.slot.append(new BrComponent());
+        parentFragment.insertAfter(p, component);
+        firstRange.setStart(p.slot, 0);
+        firstRange.collapse();
+        return;
+      }
+    }
+    const next = new TodoListFragment(slot.active, slot.disabled);
+    next.from(breakingLine(slot, firstRange.startIndex));
+
+    component.slots.splice(index + 1, 0, next);
+    firstRange.startFragment = firstRange.endFragment = next;
+    firstRange.startIndex = firstRange.endIndex = 0;
+  }
+}
+
 @Component({
-  reader: new TodoListComponentReader()
+  reader: new TodoListComponentReader(),
+  lifecycle: new TodoListComponentLifecycle()
 })
 export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
-  private subs: Subscription[] = [];
   private stateCollection = [{
     active: false,
     disabled: false
@@ -96,7 +136,6 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
 
       list.appendChild(item);
       if (!isOutputMode) {
-        this.handleEnter();
         state.onRendered = element => {
           element.addEventListener('click', () => {
             const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
@@ -121,42 +160,6 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
       return i.clone()
     });
     return new TodoListComponent(configs as TodoListFragment[]);
-  }
-
-  private handleEnter() {
-    this.subs.forEach(s => s.unsubscribe());
-    this.subs = this.slots.map((slot, index) => {
-      return slot.events.subscribe(event => {
-        if (event.type === EventType.onEnter) {
-          event.stopPropagation();
-
-          const firstRange = event.selection.firstRange;
-
-          if (slot === this.slots[this.slots.length - 1]) {
-            const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
-            if (slot.contentLength === 0 ||
-              slot.contentLength === 1 && lastContent instanceof BrComponent) {
-              this.slots.pop();
-              const parentFragment = this.parentFragment;
-              const p = new BlockComponent('p');
-              p.slot.append(new BrComponent());
-              parentFragment.insertAfter(p, this);
-              firstRange.setStart(p.slot, 0);
-              firstRange.collapse();
-              return;
-            }
-          }
-
-          const next = new TodoListFragment(slot.active, slot.disabled);
-          next.from(breakingLine(slot, firstRange.startIndex));
-
-          this.slots.splice(index + 1, 0, next);
-          firstRange.startFragment = firstRange.endFragment = next;
-          firstRange.startIndex = firstRange.endIndex = 0;
-        }
-      })
-    })
-
   }
 
   private getStateIndex(active: boolean, disabled: boolean) {

@@ -40,11 +40,8 @@ export class Viewer {
   private readyEvent = new Subject<void>();
   private id: number = null;
   private minHeight = 400;
-  private renderedCallbacks: Array<() => void> = [];
-
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
-              private renderer: Renderer,
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
@@ -89,7 +86,8 @@ export class Viewer {
     const componentAnnotations = this.options.components.map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
-    const selection = new TBSelection(this.contentDocument, this.renderer);
+    const renderer = new Renderer();
+    const selection = new TBSelection(this.contentDocument, renderer);
     const parser = new Parser(componentAnnotations.map(c => c.reader), this.options.formatters);
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
@@ -103,6 +101,9 @@ export class Viewer {
     }, {
       provide: TBSelection,
       useValue: selection
+    }, {
+      provide: Renderer,
+      useValue: renderer
     }];
     const viewInjector = new ReflectiveInjector(this.injector, [
       Input,
@@ -116,14 +117,12 @@ export class Viewer {
       selection,
       viewInjector.get(Input),
       viewInjector.get(HistoryManager),
-      rootComponent.slot,);
+      rootComponent.slot);
 
 
     rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
-      this.renderer.render(rootComponent.slot, this.contentDocument.body);
-      while (this.renderedCallbacks.length) {
-        this.renderedCallbacks.shift()();
-      }
+      renderer.render(rootComponent.slot, this.contentDocument.body);
+      selection.restore();
     })
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');

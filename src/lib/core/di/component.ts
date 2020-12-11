@@ -4,7 +4,7 @@ import { ComponentReader } from '../component';
 
 export interface Component {
   reader: ComponentReader;
-  lifecycle?: Lifecycle;
+  lifecycle?: Lifecycle<any>;
   providers?: Provider[];
 }
 

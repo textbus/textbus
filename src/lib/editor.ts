@@ -12,9 +12,7 @@ import {
 import {
   AbstractComponent,
   Formatter,
-  Lifecycle,
   OutputRenderer,
-  Renderer,
 } from './core/_api';
 import { Viewer } from './workbench/viewer';
 import {
@@ -53,8 +51,6 @@ export interface EditorOptions<T> {
   formatters?: Formatter[];
   /** 工具条配置 */
   toolbar?: (ToolFactory | ToolFactory[])[];
-  /** 配置生命周期勾子 */
-  hooks?: Lifecycle[];
   /** 配置文档的默认样式 */
   styleSheets?: string[];
   /** 配置文档编辑状态下用到的样式 */
@@ -159,9 +155,6 @@ export class Editor<T = any> {
           return of('');
         }
       }
-    }, {
-      provide: Renderer,
-      useValue: new Renderer()
     }, {
       provide: OutputRenderer,
       useValue: new OutputRenderer()
