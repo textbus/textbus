@@ -17,13 +17,13 @@ import 'prismjs/components/prism-csharp';
 import {
   BlockFormatter,
   ChildSlotMode, Component,
-  ComponentReader,
+  ComponentLoader,
   DivisionAbstractComponent,
   FormatAbstractData,
   FormatEffect,
   FormatRendingContext,
   Fragment,
-  InlineFormatter, EditActionInterceptor,
+  InlineFormatter, Interceptor,
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData
@@ -83,7 +83,7 @@ class CodeStyleFormatter extends InlineFormatter {
 const codeStyleFormatter = new CodeStyleFormatter();
 const codeFormatter = new CodeFormatter();
 
-class PreComponentReader implements ComponentReader {
+class PreComponentLoader implements ComponentLoader {
   private tagName = 'pre';
 
   match(component: HTMLElement): boolean {
@@ -115,7 +115,7 @@ class PreComponentReader implements ComponentReader {
   }
 }
 
-class PreComponentEditActionInterceptor implements EditActionInterceptor<PreComponent> {
+class PreComponentInterceptor implements Interceptor<PreComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -151,8 +151,8 @@ class PreComponentEditActionInterceptor implements EditActionInterceptor<PreComp
 }
 
 @Component({
-  reader: new PreComponentReader(),
-  editActionInterceptor: new PreComponentEditActionInterceptor()
+  loader: new PreComponentLoader(),
+  interceptor: new PreComponentInterceptor()
 })
 export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';

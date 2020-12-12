@@ -10,9 +10,8 @@ import { DialogManager } from '../workbench/workbench';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
-import { Commander, Fragment } from '../core/_api';
+import { Commander } from '../core/_api';
 import { HistoryManager } from '../history-manager';
-import { RootComponent } from '../root-component';
 
 export interface ToolEntity {
   config: ToolConfig;
@@ -53,7 +52,6 @@ export class Toolbar {
 
   private selection: TBSelection;
   private input: Input;
-  private rootFragment: Fragment;
   private historyManager: HistoryManager;
   private keymaps: KeymapAction[] = [];
   private subs: Subscription[] = [];
@@ -110,7 +108,6 @@ export class Toolbar {
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
     this.historyManager = injector.get(HistoryManager);
-    this.rootFragment = injector.get(RootComponent).slot;
 
     this.keymaps.forEach(k => this.input.keymap(k));
 
@@ -258,7 +255,6 @@ export class Toolbar {
     commander.command({
       selection,
       overlap,
-      rootFragment: this.rootFragment
     }, params);
   }
 }

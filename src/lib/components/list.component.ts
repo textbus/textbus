@@ -3,17 +3,17 @@ import { Injector } from '@tanbo/di';
 import {
   SlotMap,
   BranchAbstractComponent,
-  ComponentReader,
+  ComponentLoader,
   ViewData,
   Fragment,
   VElement,
-  TBEvent, SlotRendererFn, Component, EditActionInterceptor, TBSelection
+  TBEvent, SlotRendererFn, Component, Interceptor, TBSelection
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
 
-class ListComponentReader implements ComponentReader {
+class ListComponentLoader implements ComponentLoader {
 
   constructor(private tagNames: string[]) {
   }
@@ -61,7 +61,7 @@ class ListComponentReader implements ComponentReader {
   }
 }
 
-class ListComponentEditActionInterceptor implements EditActionInterceptor<ListComponent> {
+class ListComponentInterceptor implements Interceptor<ListComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -99,8 +99,8 @@ class ListComponentEditActionInterceptor implements EditActionInterceptor<ListCo
 }
 
 @Component({
-  reader: new ListComponentReader(['ul', 'ol']),
-  editActionInterceptor: new ListComponentEditActionInterceptor()
+  loader: new ListComponentLoader(['ul', 'ol']),
+  interceptor: new ListComponentInterceptor()
 })
 export class ListComponent extends BranchAbstractComponent {
   constructor(tagName: string) {

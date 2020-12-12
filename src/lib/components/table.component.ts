@@ -3,10 +3,10 @@ import { Injector } from '@tanbo/di';
 import {
   Fragment,
   SlotMap,
-  ComponentReader,
+  ComponentLoader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn, Component, EditActionInterceptor, TBSelection, TBEvent
+  BackboneAbstractComponent, SlotRendererFn, Component, Interceptor, TBSelection, TBEvent
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -53,7 +53,7 @@ export interface TableRange {
   selectedCells: Fragment[];
 }
 
-class TableComponentReader implements ComponentReader {
+class TableComponentLoader implements ComponentLoader {
   private tagName = 'table';
 
   match(component: HTMLElement): boolean {
@@ -116,7 +116,7 @@ class TableComponentReader implements ComponentReader {
   }
 }
 
-class TableComponentEditActionInterceptor implements EditActionInterceptor<TableComponent> {
+class TableComponentInterceptor implements Interceptor<TableComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -143,8 +143,8 @@ class TableComponentEditActionInterceptor implements EditActionInterceptor<Table
 }
 
 @Component({
-  reader: new TableComponentReader(),
-  editActionInterceptor: new TableComponentEditActionInterceptor()
+  loader: new TableComponentLoader(),
+  interceptor: new TableComponentInterceptor()
 })
 export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {

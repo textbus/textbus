@@ -13,6 +13,7 @@ import {
   AbstractComponent,
   Formatter,
   OutputRenderer,
+  Plugin
 } from './core/_api';
 import { Viewer } from './workbench/viewer';
 import {
@@ -51,6 +52,8 @@ export interface EditorOptions<T> {
   formatters?: Formatter[];
   /** 工具条配置 */
   toolbar?: (ToolFactory | ToolFactory[])[];
+  /** 扩展增强插件 */
+  plugins?: Plugin[];
   /** 配置文档的默认样式 */
   styleSheets?: string[];
   /** 配置文档编辑状态下用到的样式 */
@@ -68,7 +71,7 @@ export interface EditorOptions<T> {
 
 export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPTIONS');
 export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
-
+export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
 
 /**
  * TextBus 主类
@@ -169,6 +172,12 @@ export class Editor<T = any> {
     }, {
       provide: DialogManager,
       useClass: Workbench
+    }, {
+      provide: EDITABLE_DOCUMENT_CONTAINER,
+      useFactory(workbench: Workbench) {
+        return workbench.tablet;
+      },
+      deps: [Workbench]
     }];
 
     const rootInjector = new ReflectiveInjector(new NullInjector(), [

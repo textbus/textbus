@@ -1,14 +1,14 @@
 import { Injector } from '@tanbo/di';
 
 import {
-  ComponentReader,
+  ComponentLoader,
   ViewData,
   VElement,
-  DivisionAbstractComponent, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection
+  DivisionAbstractComponent, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
-class BlockComponentReader implements ComponentReader {
+class BlockComponentLoader implements ComponentLoader {
   constructor(private tagNames: string[]) {
   }
 
@@ -28,7 +28,7 @@ class BlockComponentReader implements ComponentReader {
   }
 }
 
-class BlockComponentEditActionInterceptor implements EditActionInterceptor<BlockComponent> {
+class BlockComponentInterceptor implements Interceptor<BlockComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -51,8 +51,8 @@ class BlockComponentEditActionInterceptor implements EditActionInterceptor<Block
 }
 
 @Component({
-  reader: new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-  editActionInterceptor: new BlockComponentEditActionInterceptor()
+  loader: new BlockComponentLoader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
+  interceptor: new BlockComponentInterceptor()
 })
 export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {

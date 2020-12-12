@@ -1,10 +1,10 @@
-import { makeClassDecorator, Provider, TypeDecorator } from '@tanbo/di';
-import { EditActionInterceptor } from '../edit-action-interceptor';
-import { ComponentReader } from '../component';
+import { makeClassDecorator, TypeDecorator } from '@tanbo/di';
+import { Interceptor } from '../interceptor';
+import { ComponentLoader } from '../component';
 
 export interface Component {
-  reader: ComponentReader;
-  editActionInterceptor?: EditActionInterceptor<any>;
+  loader: ComponentLoader;
+  interceptor?: Interceptor<any>;
 }
 
 export interface ComponentDecorator {

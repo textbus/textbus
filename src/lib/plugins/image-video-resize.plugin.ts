@@ -1,5 +1,8 @@
-import { EditActionInterceptor, Renderer, TBSelection, VElement } from '../core/_api';
+import { Injector } from '@tanbo/di';
+
+import { Plugin, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);
@@ -15,7 +18,7 @@ function matchAngle(x: number, y: number, startAngle: number, endAngle: number) 
   return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0;
 }
 
-export class ImageVideoResizeHook {
+export class ImageVideoResizePlugin implements Plugin {
   private mask = document.createElement('div');
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];
@@ -25,9 +28,11 @@ export class ImageVideoResizeHook {
   private frameContainer: HTMLElement;
 
   private renderer: Renderer;
+  private contentDocument: Document;
+  private selection: TBSelection;
 
   constructor() {
-    this.mask.className = 'textbus-image-video-resize-hooks-handler';
+    this.mask.className = 'textbus-image-video-resize-plugins-handler';
     for (let i = 0; i < 8; i++) {
       const button = document.createElement('button');
       button.type = 'button';
@@ -108,8 +113,17 @@ export class ImageVideoResizeHook {
     })
   }
 
-  setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
-    this.renderer = renderer;
+  setup(injector: Injector) {
+    this.renderer = injector.get(Renderer);
+    this.contentDocument = injector.get(EDITABLE_DOCUMENT);
+    this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+    this.selection = injector.get(TBSelection);
+    this.init();
+  }
+
+  init() {
+    const renderer = this.renderer;
+    const contextDocument = this.contentDocument;
     contextDocument.addEventListener('click', ev => {
       const srcElement = ev.target as HTMLImageElement;
       if (/^img$|video/i.test(srcElement.nodeName)) {
@@ -119,14 +133,13 @@ export class ImageVideoResizeHook {
         }
         this.currentElement = srcElement;
         this.currentComponent = position.fragment.getContentAtIndex(position.startIndex) as ImageComponent;
-        this.frameContainer = frameContainer;
         const selection = contextDocument.getSelection();
         selection.removeAllRanges();
         const range = contextDocument.createRange();
         range.selectNode(srcElement);
         selection.addRange(range);
         this.updateStyle();
-        frameContainer.append(this.mask);
+        this.frameContainer.append(this.mask);
       } else {
         this.currentElement = null;
         this.currentComponent = null;
@@ -143,8 +156,8 @@ export class ImageVideoResizeHook {
     }
   }
 
-  onSelectionChange(selection: TBSelection) {
-    if (selection.collapsed) {
+  onSelectionChange() {
+    if (this.selection.collapsed) {
       this.currentElement = null;
       this.mask.parentNode?.removeChild(this.mask);
     }

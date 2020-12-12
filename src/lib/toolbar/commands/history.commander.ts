@@ -1,18 +1,21 @@
 import { Injector } from '@tanbo/di';
 
-import { Commander, CommandContext } from '../../core/_api';
+import { Commander, CommandContext, Fragment } from '../../core/_api';
 import { HistoryManager } from '../../history-manager';
+import { RootComponent } from '../../root-component';
 
 export class HistoryCommander implements Commander<null> {
   recordHistory = false;
 
   private history: HistoryManager;
+  private rootFragment: Fragment;
 
   constructor(private action: 'forward' | 'back') {
   }
 
   onInit(injector: Injector) {
     this.history = injector.get(HistoryManager);
+    this.rootFragment = injector.get(RootComponent).slot;
   }
 
   command(context: CommandContext) {
@@ -20,8 +23,8 @@ export class HistoryCommander implements Commander<null> {
       this.history.getPreviousSnapshot() :
       this.history.getNextSnapshot();
     if (snapshot) {
-      context.rootFragment.from(snapshot.contents);
-      context.selection.usePaths(snapshot.paths, context.rootFragment);
+      this.rootFragment.from(snapshot.contents);
+      context.selection.usePaths(snapshot.paths, this.rootFragment);
     }
   }
 }

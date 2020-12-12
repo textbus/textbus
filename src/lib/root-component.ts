@@ -4,14 +4,14 @@ import {
   Component,
   DivisionAbstractComponent,
   Fragment, InlineFormatter, LeafAbstractComponent,
-  EditActionInterceptor, TBEvent,
+  Interceptor, TBEvent,
   TBSelection,
   VElement
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';
 
-class DefaultLifecycle implements EditActionInterceptor<RootComponent> {
+class DefaultLifecycle implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
   private injector: Injector;
@@ -223,8 +223,8 @@ class DefaultLifecycle implements EditActionInterceptor<RootComponent> {
 }
 
 @Component({
-  reader: null,
-  editActionInterceptor: new DefaultLifecycle()
+  loader: null,
+  interceptor: new DefaultLifecycle()
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {

@@ -3,9 +3,9 @@ import { Injector } from '@tanbo/di';
 import {
   BranchAbstractComponent,
   Fragment,
-  ComponentReader,
+  ComponentLoader,
   VElement,
-  ViewData, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection,
+  ViewData, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -16,7 +16,7 @@ class TodoListFragment extends Fragment {
   }
 }
 
-class TodoListComponentReader implements ComponentReader {
+class TodoListComponentLoader implements ComponentLoader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-todo-list';
   }
@@ -44,7 +44,7 @@ class TodoListComponentReader implements ComponentReader {
   }
 }
 
-class TodoListComponentEditActionInterceptor implements EditActionInterceptor<TodoListComponent> {
+class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -84,8 +84,8 @@ class TodoListComponentEditActionInterceptor implements EditActionInterceptor<To
 }
 
 @Component({
-  reader: new TodoListComponentReader(),
-  editActionInterceptor: new TodoListComponentEditActionInterceptor()
+  loader: new TodoListComponentLoader(),
+  interceptor: new TodoListComponentInterceptor()
 })
 export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
   private stateCollection = [{

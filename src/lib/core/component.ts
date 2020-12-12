@@ -23,7 +23,7 @@ export interface ViewData {
 /**
  * 当 TextBus 需要把一段文本转换为抽象数据时使用，用于把 DOM 树转换为抽象的 Component 和 Fragment 的类。
  */
-export abstract class ComponentReader {
+export abstract class ComponentLoader {
   /**
    * 匹配一个 DOM 节点或 DOM 片段，如果为 true，则 Parser 会接着调用 read 方法，获取转换后的抽象数据。
    * @param element 当前要匹配的元素。

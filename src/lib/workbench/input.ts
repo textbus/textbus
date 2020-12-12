@@ -11,7 +11,7 @@ import {
   TBSelection,
   TBRangePosition, TBRange, AbstractComponent
 } from '../core/_api';
-import { EDITABLE_DOCUMENT } from '../editor';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 import { Workbench } from './workbench';
 import { RootComponent } from '../root-component';
 
@@ -98,13 +98,13 @@ export class Input {
   private cleanOldCursorTimer: any;
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
-              private workbench: Workbench,
+              @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
               private selection: TBSelection) {
     this.nativeSelection = context.getSelection();
-    this.workbench.tablet.append(this.elementRef);
+    this.container.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
     this.inputWrap.classList.add('textbus-input-wrap');
@@ -173,7 +173,7 @@ export class Input {
   }
 
   private updateStateBySelection() {
-    const limit = this.workbench.tablet.parentNode as HTMLElement;
+    const limit = this.container.parentNode as HTMLElement;
     if (this.readonly || !this.selection.rangeCount) {
       this.hide();
       return;
@@ -192,7 +192,7 @@ export class Input {
       if (!this.selection.collapsed) {
         this.dispatchEvent((component, instance) => {
           const event = new TBEvent(instance);
-          component.editActionInterceptor?.onDeleteRange?.(event)
+          component.interceptor?.onDeleteRange?.(event)
           return !event.stopped;
         })
         this.dispatchInputReadyEvent(true);
@@ -200,7 +200,7 @@ export class Input {
       if (this.selection.collapsed) {
         this.dispatchEvent((component, instance) => {
           const event = new TBEvent(instance);
-          component.editActionInterceptor?.onInput?.(event);
+          component.interceptor?.onInput?.(event);
           return !event.stopped;
         })
       }
@@ -236,14 +236,14 @@ export class Input {
         if (!this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.editActionInterceptor?.onDeleteRange?.(event);
+            component.interceptor?.onDeleteRange?.(event);
             return !event.stopped;
           })
         }
         if (this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance, {contents, text});
-            component.editActionInterceptor?.onPaste?.(event);
+            component.interceptor?.onPaste?.(event);
             return !event.stopped;
           })
         }
@@ -268,13 +268,13 @@ export class Input {
         if (this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.editActionInterceptor?.onDelete?.(event)
+            component.interceptor?.onDelete?.(event)
             return !event.stopped;
           })
         } else {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.editActionInterceptor?.onDeleteRange?.(event)
+            component.interceptor?.onDeleteRange?.(event)
             return !event.stopped;
           })
         }
@@ -289,14 +289,14 @@ export class Input {
         if (!this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.editActionInterceptor?.onDeleteRange?.(event);
+            component.interceptor?.onDeleteRange?.(event);
             return !event.stopped;
           })
         }
         if (this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.editActionInterceptor?.onEnter?.(event)
+            component.interceptor?.onEnter?.(event)
             return !event.stopped;
           })
         }
@@ -345,7 +345,7 @@ export class Input {
     }
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
       this.dispatchEvent(component => {
-        component.editActionInterceptor?.onInputReady?.()
+        component.interceptor?.onInputReady?.()
         return true;
       })
     }

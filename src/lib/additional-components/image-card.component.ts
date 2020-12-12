@@ -1,11 +1,11 @@
 import { Injector } from '@tanbo/di';
 
 import {
-  ComponentReader,
+  ComponentLoader,
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection, TBClipboard
+  Fragment, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
@@ -13,7 +13,7 @@ import { BlockComponent, ImageComponent, BrComponent } from '../components/_api'
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
 const defaultImageSrc = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 
-class ImageCardComponentReader implements ComponentReader {
+class ImageCardComponentLoader implements ComponentLoader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-image-card';
   }
@@ -38,7 +38,7 @@ class ImageCardComponentReader implements ComponentReader {
   }
 }
 
-class ImageCardComponentEditActionInterceptor implements EditActionInterceptor<ImageCardComponent> {
+class ImageCardComponentInterceptor implements Interceptor<ImageCardComponent> {
   private injector: Injector;
   private selection: TBSelection;
 
@@ -81,8 +81,8 @@ class ImageCardComponentEditActionInterceptor implements EditActionInterceptor<I
 }
 
 @Component({
-  reader: new ImageCardComponentReader(),
-  editActionInterceptor: new ImageCardComponentEditActionInterceptor()
+  loader: new ImageCardComponentLoader(),
+  interceptor: new ImageCardComponentInterceptor()
 })
 export class ImageCardComponent extends BackboneAbstractComponent {
   readonly imgFragment: Fragment;

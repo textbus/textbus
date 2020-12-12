@@ -1,6 +1,6 @@
 import {
   BackboneAbstractComponent, Component,
-  ComponentReader,
+  ComponentLoader,
   FormatAbstractData,
   FormatEffect,
   Fragment, SlotRendererFn,
@@ -17,7 +17,7 @@ export interface WordExplainParams {
   detail: Fragment;
 }
 
-class WordExplainComponentReader implements ComponentReader {
+class WordExplainComponentLoader implements ComponentLoader {
   match(element: Element): boolean {
     return element.nodeName.toLowerCase() === 'tb-word-explain';
   }
@@ -52,7 +52,7 @@ class WordExplainComponentReader implements ComponentReader {
   }
 }
 @Component({
-  reader: new WordExplainComponentReader()
+  loader: new WordExplainComponentLoader()
 })
 export class WordExplainComponent extends BackboneAbstractComponent {
   private readonly title: Fragment;

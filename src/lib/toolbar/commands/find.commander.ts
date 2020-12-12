@@ -1,14 +1,17 @@
+import { Injector } from '@tanbo/di';
+
 import {
   ChildSlotMode, CommandContext,
   Commander,
   ElementPosition,
   FormatAbstractData,
   FormatEffect, FormatRendingContext,
-  FormatterPriority,
+  FormatterPriority, Fragment,
   InlineFormatter,
   ReplaceMode,
   VElement
 } from '../../core/_api';
+import { RootComponent } from '../../root-component';
 
 class FindFormatter extends InlineFormatter {
   constructor() {
@@ -44,12 +47,18 @@ export const findFormatter = new FindFormatter();
 export class FindCommander implements Commander<ElementPosition[]> {
   recordHistory = false;
 
+  private rootFragment: Fragment;
+
+  onInit(injector: Injector) {
+    this.rootFragment = injector.get(RootComponent).slot;
+  }
+
   command(context: CommandContext, positions: ElementPosition[]) {
-    context.rootFragment.apply(findFormatter, {
+    this.rootFragment.apply(findFormatter, {
       state: FormatEffect.Invalid,
       abstractData: null,
       startIndex: 0,
-      endIndex: context.rootFragment.contentLength
+      endIndex: this.rootFragment.contentLength
     })
     positions.forEach(item => {
       item.fragment.apply(findFormatter, {

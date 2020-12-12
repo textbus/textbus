@@ -1,6 +1,6 @@
-import { LeafAbstractComponent, ComponentReader, ViewData, VElement, Component } from '../core/_api';
+import { LeafAbstractComponent, ComponentLoader, ViewData, VElement, Component } from '../core/_api';
 
-class BrComponentReader implements ComponentReader {
+class BrComponentLoader implements ComponentLoader {
   match(component: HTMLElement): boolean {
     return component.nodeName.toLowerCase() === 'br';
   }
@@ -14,7 +14,7 @@ class BrComponentReader implements ComponentReader {
   }
 }
 @Component({
-  reader: new BrComponentReader()
+  loader: new BrComponentLoader()
 })
 export class BrComponent extends LeafAbstractComponent {
   constructor() {

@@ -1,28 +1,38 @@
+import { Injector } from '@tanbo/di';
+
 import {
   BackboneAbstractComponent,
   BranchAbstractComponent,
   Commander,
   DivisionAbstractComponent, ElementPosition,
   Fragment,
-  EditActionInterceptor,
+  Plugin,
   TBSelection
 } from '../core/_api';
-import { Editor } from '../editor';
 import { FindCommander } from '../toolbar/commands/find.commander';
 import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
 import { PreComponent } from '../components/pre.component';
+import { RootComponent } from '../root-component';
+import { EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
-export class FindHook {
+export class FindPlugin implements Plugin {
   private findValue: string;
   private commander: FindCommander;
   private positions: ElementPosition[] = [];
   private positionIndex = 0;
   private isJustFind = true;
+  private frameContainer: HTMLElement;
+
+  private selection: TBSelection;
+  private rootComponent: RootComponent;
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+    this.rootComponent = injector.get(RootComponent);
+    this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+
+  }
 
   onApplyCommand(commander: Commander,
-                 selection: TBSelection,
-                 editor: Editor,
-                 rootFragment: Fragment,
                  params: any,
                  updateParamsFn: (newParams: any) => void): boolean {
     this.isJustFind = false;
@@ -48,11 +58,11 @@ export class FindHook {
         this.isJustFind = true;
         commander.recordHistory = false;
         this.positionIndex = 0;
-        selection.removeAllRanges();
+        this.selection.removeAllRanges();
         this.commander = commander;
         this.findValue = params.findValue;
       }
-      const newParams = this.findValue ? this.find(rootFragment, this.findValue) : [];
+      const newParams = this.findValue ? this.find(this.rootComponent.slot, this.findValue) : [];
       this.positions = newParams;
       this.positionIndex = this.positionIndex % this.positions.length || 0;
       updateParamsFn(newParams);
@@ -60,40 +70,39 @@ export class FindHook {
     return true;
   }
 
-  onRenderingBefore(selection: TBSelection, editor: Editor, rootFragment: Fragment): boolean {
+  onRenderingBefore(): boolean {
     if (this.findValue && this.commander) {
-      const newPositions = this.find(rootFragment, this.findValue);
+      const newPositions = this.find(this.rootComponent.slot, this.findValue);
       if (newPositions.length !== this.positions.length) {
         this.positions = newPositions;
         this.positions.forEach((p, i) => {
-          if (p.fragment === selection.commonAncestorFragment) {
+          if (p.fragment === this.selection.commonAncestorFragment) {
             this.positionIndex = i;
           }
         })
         this.commander.command({
-          selection,
-          overlap: false,
-          rootFragment
+          selection: this.selection,
+          overlap: false
         }, this.positions);
       }
     }
     return true;
   }
 
-  onViewUpdated(selection: TBSelection, editor: Editor, rootFragment: Fragment, frameContainer: HTMLElement) {
+  onViewUpdated() {
     if (this.positions.length) {
-      const range = selection.createRange();
+      const range = this.selection.createRange();
       const current = this.positions[this.positionIndex];
       range.setStart(current.fragment, current.startIndex);
       range.setEnd(current.fragment, current.endIndex);
       if (this.isJustFind) {
         range.restore();
         const position = range.getRangePosition();
-        (frameContainer.parentNode as HTMLElement).scrollTop = position.top;
+        (this.frameContainer.parentNode as HTMLElement).scrollTop = position.top;
       } else {
-        selection.removeAllRanges(true);
-        selection.addRange(range, true);
-        selection.restore();
+        this.selection.removeAllRanges(true);
+        this.selection.addRange(range, true);
+        this.selection.restore();
       }
     }
   }

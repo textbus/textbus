@@ -1,7 +1,6 @@
 import { Injector } from '@tanbo/di';
 
 import { TBSelection } from './selection';
-import { Fragment } from './fragment';
 
 /**
  * 调用 command 命令时的实时上下文本
@@ -11,8 +10,6 @@ export interface CommandContext {
   selection: TBSelection;
   /** 根据当前选区和工具类的 `Matcher` 匹配出的结果得到的状态，`true` 为完全重叠，`false` 为不完全重叠或不重叠 */
   overlap: boolean;
-  /** 根编辑片段 */
-  rootFragment: Fragment;
 }
 
 /**

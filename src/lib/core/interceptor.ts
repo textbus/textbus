@@ -17,7 +17,7 @@ export interface TBClipboard {
  * TextBus 生命周期方法。
  * 在 TextBus 中，任意与操作数据有关的生命周期方法，都先于虚拟 DOM 的事件执行。
  */
-export interface EditActionInterceptor<T extends AbstractComponent> {
+export interface Interceptor<T extends AbstractComponent> {
   setup(injector: Injector): void;
   onInputReady?(): void;
   onInput?(event: TBEvent<T>): void;

@@ -1,11 +1,18 @@
-import { Commander, CommandContext } from '../../core/_api';
+import { Injector } from '@tanbo/di';
+
+import { Commander, CommandContext, Fragment } from '../../core/_api';
 import { TableComponent } from '../../components/_api';
+import { RootComponent } from '../../root-component';
 
 export class TableRemoveCommander implements Commander<null> {
   recordHistory = true;
+  private rootFragment: Fragment;
+  onInit(injector: Injector) {
+    this.rootFragment = injector.get(RootComponent).slot;
+  }
 
   command(c: CommandContext) {
-    const {selection, rootFragment} = c;
+    const {selection} = c;
     this.recordHistory = true;
     const firstRange = selection.firstRange;
     const context = firstRange.startFragment.getContext(TableComponent);
@@ -21,7 +28,7 @@ export class TableRemoveCommander implements Commander<null> {
       parentFragment.remove(parentFragment.indexOf(context), 1);
 
       if (flag) {
-        position = firstRange.findFirstPosition(rootFragment);
+        position = firstRange.findFirstPosition(this.rootFragment);
       } else {
         position = p;
       }

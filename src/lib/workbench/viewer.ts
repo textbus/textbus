@@ -88,7 +88,7 @@ export class Viewer {
     })
     const renderer = new Renderer();
     const selection = new TBSelection(this.contentDocument, renderer);
-    const parser = new Parser(componentAnnotations.map(c => c.reader), this.options.formatters);
+    const parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
       useValue: this.contentDocument
@@ -124,9 +124,9 @@ export class Viewer {
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     const rootAnnotation = getAnnotations(RootComponent).getClassMetadata(Component).params[0] as Component;
-    rootAnnotation.editActionInterceptor.setup(viewInjector);
+    rootAnnotation.interceptor.setup(viewInjector);
     componentAnnotations.forEach(c => {
-      c.editActionInterceptor?.setup(viewInjector);
+      c.interceptor?.setup(viewInjector);
     })
   }
 

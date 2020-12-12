@@ -44,6 +44,7 @@ import {
   insertObjectTool,
   tableTool
 } from './lib/toolbar/tools/_api';
+import { FindPlugin, ImageVideoResizePlugin, TableEditPlugin } from './lib/plugins/_api';
 import { defaultStyleSheets } from './lib/workbench/default-styles';
 import {
   imageCardStyleSheet,
@@ -163,6 +164,11 @@ export const defaultOptions: EditorOptions<string> = {
     [tableTool],
     [findTool],
     [cleanTool]
+  ],
+  plugins: [
+    new FindPlugin(),
+    new ImageVideoResizePlugin(),
+    new TableEditPlugin()
   ],
   componentLibrary: [
     imageCardComponentExample,

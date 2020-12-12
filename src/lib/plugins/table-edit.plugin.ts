@@ -1,8 +1,10 @@
 import { CubicBezier } from '@tanbo/bezier';
 
-import { Commander, Fragment, Renderer, TBRange, TBSelection, EditActionInterceptor } from '../core/_api';
+import { Commander, Fragment, Renderer, TBRange, TBSelection, Plugin } from '../core/_api';
 import { TableEditCommander, TdBorderColorCommander } from '../toolbar/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
+import { Injector } from '@tanbo/di';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '@tanbo/textbus/lib/editor';
 
 interface ElementPosition {
   left: number;
@@ -25,7 +27,7 @@ function findParentByTagName(node: Node, tagNames: string[]): HTMLElement {
   return null;
 }
 
-export class TableEditHook {
+export class TableEditPlugin implements Plugin {
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
   private insertMask = false;
@@ -45,6 +47,7 @@ export class TableEditHook {
   private frameContainer: HTMLElement;
   private contextDocument: Document;
   private inTable = true;
+  private selection: TBSelection;
 
   constructor() {
     this.mask.classList.add('textbus-table-editor-hook-mask');
@@ -52,17 +55,18 @@ export class TableEditHook {
     this.mask.appendChild(this.firstMask);
   }
 
-  setup(renderer: Renderer, contextDocument: Document, contextWindow: Window, frameContainer: HTMLElement) {
-    this.contextDocument = contextDocument;
-    this.frameContainer = frameContainer;
-    this.renderer = renderer;
-    let style = contextDocument.createElement('style');
+  setup(injector: Injector) {
+    this.contextDocument = injector.get(EDITABLE_DOCUMENT);
+    this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+    this.renderer = injector.get(Renderer);
+    this.selection = injector.get(TBSelection);
+    let style = this.contextDocument.createElement('style');
     this.styleElement = style;
     style.innerText = '::selection { background: transparent; }';
   }
 
-  onSelectionChange(selection: TBSelection, context: Document) {
-    const nativeSelection = context.getSelection();
+  onSelectionChange() {
+    const nativeSelection = this.contextDocument.getSelection();
     this.inTable = false;
     this.startCell = null;
     this.endCell = null;
@@ -109,9 +113,9 @@ export class TableEditHook {
       if (this.selectedCells.length === 1) {
         return;
       }
-      selection.removeAllRanges();
+      this.selection.removeAllRanges();
       this.selectedCells.map(cell => {
-        const range = new TBRange(context.createRange(), this.renderer);
+        const range = new TBRange(this.contextDocument.createRange(), this.renderer);
         const firstContent = cell.getContentAtIndex(0);
         if (cell.contentLength === 1 && firstContent instanceof BrComponent) {
           range.setStart(cell, 0);
@@ -122,7 +126,7 @@ export class TableEditHook {
           range.setStart(startPosition.fragment, startPosition.index);
           range.setEnd(endPosition.fragment, endPosition.index);
         }
-        selection.addRange(range);
+        this.selection.addRange(range);
       });
     }
   }

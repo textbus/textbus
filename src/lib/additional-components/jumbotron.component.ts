@@ -1,6 +1,6 @@
 import {
   Component,
-  ComponentReader,
+  ComponentLoader,
   DivisionAbstractComponent,
   SlotRendererFn,
   VElement,
@@ -17,7 +17,7 @@ export interface JumbotronOptions {
   backgroundPosition: string;
 }
 
-class JumbotronComponentReader implements ComponentReader {
+class JumbotronComponentLoader implements ComponentLoader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-jumbotron';
   }
@@ -40,7 +40,7 @@ class JumbotronComponentReader implements ComponentReader {
   }
 }
 @Component({
-  reader: new JumbotronComponentReader()
+  loader: new JumbotronComponentLoader()
 })
 export class JumbotronComponent extends DivisionAbstractComponent {
   constructor(private options: JumbotronOptions) {
