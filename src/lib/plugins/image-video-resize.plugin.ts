@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di';
 
-import { Plugin, Renderer, TBSelection, VElement } from '../core/_api';
+import { TBPlugin, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
@@ -18,7 +18,7 @@ function matchAngle(x: number, y: number, startAngle: number, endAngle: number) 
   return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0;
 }
 
-export class ImageVideoResizePlugin implements Plugin {
+export class ImageVideoResizePlugin implements TBPlugin {
   private mask = document.createElement('div');
   private text = document.createElement('div');
   private handlers: HTMLButtonElement[] = [];
@@ -32,7 +32,7 @@ export class ImageVideoResizePlugin implements Plugin {
   private selection: TBSelection;
 
   constructor() {
-    this.mask.className = 'textbus-image-video-resize-plugins-handler';
+    this.mask.className = 'textbus-image-video-resize-plugin-handler';
     for (let i = 0; i < 8; i++) {
       const button = document.createElement('button');
       button.type = 'button';

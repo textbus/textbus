@@ -1,10 +1,10 @@
 import { CubicBezier } from '@tanbo/bezier';
+import { Injector } from '@tanbo/di';
 
-import { Commander, Fragment, Renderer, TBRange, TBSelection, Plugin } from '../core/_api';
+import { Commander, Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
 import { TableEditCommander, TdBorderColorCommander } from '../toolbar/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
-import { Injector } from '@tanbo/di';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '@tanbo/textbus/lib/editor';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
 interface ElementPosition {
   left: number;
@@ -27,7 +27,7 @@ function findParentByTagName(node: Node, tagNames: string[]): HTMLElement {
   return null;
 }
 
-export class TableEditPlugin implements Plugin {
+export class TableEditPlugin implements TBPlugin {
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
   private insertMask = false;
@@ -50,8 +50,8 @@ export class TableEditPlugin implements Plugin {
   private selection: TBSelection;
 
   constructor() {
-    this.mask.classList.add('textbus-table-editor-hook-mask');
-    this.firstMask.classList.add('textbus-table-editor-hook-first-cell');
+    this.mask.classList.add('textbus-table-editor-plugin-mask');
+    this.firstMask.classList.add('textbus-table-editor-plugin-first-cell');
     this.mask.appendChild(this.firstMask);
   }
 
@@ -128,6 +128,7 @@ export class TableEditPlugin implements Plugin {
         }
         this.selection.addRange(range);
       });
+      console.log(this.selection.rangeCount)
     }
   }
 

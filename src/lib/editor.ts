@@ -13,7 +13,7 @@ import {
   AbstractComponent,
   Formatter,
   OutputRenderer,
-  Plugin
+  TBPlugin
 } from './core/_api';
 import { Viewer } from './workbench/viewer';
 import {
@@ -53,7 +53,7 @@ export interface EditorOptions<T> {
   /** 工具条配置 */
   toolbar?: (ToolFactory | ToolFactory[])[];
   /** 扩展增强插件 */
-  plugins?: Plugin[];
+  plugins?: TBPlugin[];
   /** 配置文档的默认样式 */
   styleSheets?: string[];
   /** 配置文档编辑状态下用到的样式 */

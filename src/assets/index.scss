@@ -18,5 +18,5 @@ $line-height: 1.4285714 !default;
 @import "./theme/mac-os";
 @import "./theme/mac-os-dark";
 
-@import "./hooks/image-video-resize-hook";
-@import "./hooks/table-edit-hook";
+@import "hooks/image-video-resize-plugin";
+@import "hooks/table-edit-plugin";

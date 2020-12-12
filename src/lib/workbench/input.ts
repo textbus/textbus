@@ -12,7 +12,6 @@ import {
   TBRangePosition, TBRange, AbstractComponent
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
-import { Workbench } from './workbench';
 import { RootComponent } from '../root-component';
 
 /**

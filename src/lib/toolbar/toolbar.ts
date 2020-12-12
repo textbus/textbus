@@ -252,6 +252,13 @@ export class Toolbar {
       return;
     }
     const overlap = state === HighlightState.Highlight;
+
+    (this.options.plugins || []).forEach(plugin => {
+      plugin.onApplyCommand?.(commander, params, newParams => {
+        params = newParams;
+      })
+    })
+
     commander.command({
       selection,
       overlap,

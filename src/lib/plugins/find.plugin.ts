@@ -6,7 +6,7 @@ import {
   Commander,
   DivisionAbstractComponent, ElementPosition,
   Fragment,
-  Plugin,
+  TBPlugin,
   TBSelection
 } from '../core/_api';
 import { FindCommander } from '../toolbar/commands/find.commander';
@@ -15,7 +15,7 @@ import { PreComponent } from '../components/pre.component';
 import { RootComponent } from '../root-component';
 import { EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
-export class FindPlugin implements Plugin {
+export class FindPlugin implements TBPlugin {
   private findValue: string;
   private commander: FindCommander;
   private positions: ElementPosition[] = [];

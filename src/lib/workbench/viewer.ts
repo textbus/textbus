@@ -65,8 +65,8 @@ export class Viewer {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
           this.setup();
-          this.readyEvent.next();
           this.listen();
+          this.readyEvent.next();
         }
       }
     }
@@ -117,8 +117,14 @@ export class Viewer {
 
 
     rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
+      (this.options.plugins || []).forEach(plugin => {
+        plugin.onRenderingBefore?.();
+      })
       renderer.render(rootComponent.slot, this.contentDocument.body);
       selection.restore();
+      (this.options.plugins || []).forEach(plugin => {
+        plugin.onViewUpdated?.();
+      })
     })
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
@@ -127,6 +133,16 @@ export class Viewer {
     rootAnnotation.interceptor.setup(viewInjector);
     componentAnnotations.forEach(c => {
       c.interceptor?.setup(viewInjector);
+    });
+
+    selection.onChange.subscribe(() => {
+      (this.options.plugins || []).forEach(plugin => {
+        plugin.onSelectionChange?.();
+      })
+    });
+
+    (this.options.plugins || []).forEach(plugin => {
+      plugin.setup(viewInjector);
     })
   }
 

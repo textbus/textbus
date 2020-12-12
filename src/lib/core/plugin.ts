@@ -1,7 +1,7 @@
 import { Injector } from '@tanbo/di';
 import { Commander } from './commander';
 
-export interface Plugin {
+export interface TBPlugin {
   setup(injector: Injector): void;
 
   onApplyCommand?(command: Commander,
