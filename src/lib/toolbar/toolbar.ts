@@ -1,5 +1,5 @@
 import { Observable, Subject, Subscription } from 'rxjs';
-import { forwardRef, Inject, Injectable } from '@tanbo/di';
+import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
@@ -12,6 +12,7 @@ import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
 import { Commander, Fragment } from '../core/_api';
 import { HistoryManager } from '../history-manager';
+import { RootComponent } from '../root-component';
 
 export interface ToolEntity {
   config: ToolConfig;
@@ -36,10 +37,6 @@ export class Toolbar {
       })
     }
     this._disabled = b;
-  }
-
-  private get disabled() {
-    return this._disabled;
   }
 
   private _disabled = false;
@@ -109,17 +106,22 @@ export class Toolbar {
     })
   }
 
-  setup(selection: TBSelection, input: Input, historyManage: HistoryManager, rootFragment: Fragment) {
-    this.selection = selection;
-    this.input = input;
-    this.historyManager = historyManage;
-    this.rootFragment = rootFragment;
+  setup(injector: Injector) {
+    this.selection = injector.get(TBSelection);
+    this.input = injector.get(Input);
+    this.historyManager = injector.get(HistoryManager);
+    this.rootFragment = injector.get(RootComponent).slot;
 
-    this.keymaps.forEach(k => input.keymap(k));
+    this.keymaps.forEach(k => this.input.keymap(k));
 
     this.selection.onChange.subscribe(() => {
       this.updateHandlerState();
     })
+
+    this.tools.forEach(tool => {
+      tool.config.matcher?.onInit?.(injector);
+      tool.instance.commander?.onInit?.(injector);
+    });
   }
 
   destroy() {
@@ -137,7 +139,7 @@ export class Toolbar {
           srcStates: [],
           matchData: null,
           state: HighlightState.Disabled
-        } : tool.config.matcher?.queryState(this.selection, this.historyManager) || {
+        } : tool.config.matcher?.queryState(this.selection) || {
           srcStates: [],
           matchData: null,
           state: HighlightState.Normal
@@ -247,7 +249,7 @@ export class Toolbar {
     const selection = this.selection;
 
     const state = config.matcher ?
-      config.matcher.queryState(selection, this.historyManager).state :
+      config.matcher.queryState(selection).state :
       HighlightState.Normal;
     if (state === HighlightState.Disabled) {
       return;

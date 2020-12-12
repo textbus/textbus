@@ -113,11 +113,7 @@ export class Viewer {
 
     const rootComponent = viewInjector.get(RootComponent);
     const toolbar = viewInjector.get(Toolbar);
-    toolbar.setup(
-      selection,
-      viewInjector.get(Input),
-      viewInjector.get(HistoryManager),
-      rootComponent.slot);
+    toolbar.setup(viewInjector);
 
 
     rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {

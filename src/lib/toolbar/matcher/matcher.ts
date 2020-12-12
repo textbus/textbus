@@ -1,13 +1,13 @@
+import { Injector } from '@tanbo/di';
+
 import {
   TBSelection,
-  Renderer,
   FormatAbstractData,
   TBRange,
   FormatEffect,
   AbstractComponent
 } from '../../core/_api';
 import { HighlightState } from '../help';
-import { HistoryManager } from '../../history-manager';
 
 /**
  * 匹配到的抽象数据及状态
@@ -29,12 +29,14 @@ export interface RangeMatchState<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent > {
+export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent> {
   state: HighlightState;
   srcStates: RangeMatchState<T>[];
   matchData: T;
 }
 
 export interface Matcher {
-  queryState(selection: TBSelection, historyManager: HistoryManager): SelectionMatchState;
+  onInit?(injector: Injector): void;
+
+  queryState(selection: TBSelection): SelectionMatchState;
 }

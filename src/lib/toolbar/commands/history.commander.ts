@@ -1,3 +1,5 @@
+import { Injector } from '@tanbo/di';
+
 import { Commander, CommandContext } from '../../core/_api';
 import { HistoryManager } from '../../history-manager';
 
@@ -9,8 +11,8 @@ export class HistoryCommander implements Commander<null> {
   constructor(private action: 'forward' | 'back') {
   }
 
-  set(v: HistoryManager) {
-    this.history = v;
+  onInit(injector: Injector) {
+    this.history = injector.get(HistoryManager);
   }
 
   command(context: CommandContext) {

@@ -1,3 +1,5 @@
+import { Injector } from '@tanbo/di';
+
 import { TBSelection } from './selection';
 import { Fragment } from './fragment';
 
@@ -21,6 +23,8 @@ export interface Commander<T = any> {
    * 当调用 command 方法后，是否把当前操作存入历史栈
    */
   recordHistory: boolean;
+
+  onInit?(injector: Injector): void;
 
   /**
    * 格式化文档的方法

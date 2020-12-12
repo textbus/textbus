@@ -1,23 +1,31 @@
+import { Injector } from '@tanbo/di';
+
 import { Matcher, SelectionMatchState } from './matcher';
 import { TBSelection } from '../../core/_api';
 import { HighlightState } from '../help';
 import { HistoryManager } from '../../history-manager';
 
 export class HistoryMatcher implements Matcher {
+  private history: HistoryManager;
+
   constructor(private type: 'forward' | 'back') {
   }
 
-  queryState(selection: TBSelection, history: HistoryManager): SelectionMatchState {
+  onInit(injector: Injector) {
+    this.history = injector.get(HistoryManager);
+  }
+
+  queryState(selection: TBSelection): SelectionMatchState {
     switch (this.type) {
       case 'back':
         return {
-          state: history.canBack ? HighlightState.Normal : HighlightState.Disabled,
+          state: this.history.canBack ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };
       case 'forward':
         return {
-          state: history.canForward ? HighlightState.Normal : HighlightState.Disabled,
+          state: this.history.canForward ? HighlightState.Normal : HighlightState.Disabled,
           srcStates: [],
           matchData: null
         };
