@@ -1,11 +1,10 @@
 import { makeClassDecorator, Provider, TypeDecorator } from '@tanbo/di';
-import { Lifecycle } from '../lifecycle';
+import { EditActionInterceptor } from '../edit-action-interceptor';
 import { ComponentReader } from '../component';
 
 export interface Component {
   reader: ComponentReader;
-  lifecycle?: Lifecycle<any>;
-  providers?: Provider[];
+  editActionInterceptor?: EditActionInterceptor<any>;
 }
 
 export interface ComponentDecorator {

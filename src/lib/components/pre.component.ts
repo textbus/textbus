@@ -23,7 +23,7 @@ import {
   FormatEffect,
   FormatRendingContext,
   Fragment,
-  InlineFormatter, Lifecycle,
+  InlineFormatter, EditActionInterceptor,
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData
@@ -115,7 +115,7 @@ class PreComponentReader implements ComponentReader {
   }
 }
 
-class PreComponentLifecycle implements Lifecycle<PreComponent> {
+class PreComponentEditActionInterceptor implements EditActionInterceptor<PreComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -152,7 +152,7 @@ class PreComponentLifecycle implements Lifecycle<PreComponent> {
 
 @Component({
   reader: new PreComponentReader(),
-  lifecycle: new PreComponentLifecycle()
+  editActionInterceptor: new PreComponentEditActionInterceptor()
 })
 export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';

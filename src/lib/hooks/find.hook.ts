@@ -4,7 +4,7 @@ import {
   Commander,
   DivisionAbstractComponent, ElementPosition,
   Fragment,
-  Lifecycle,
+  EditActionInterceptor,
   TBSelection
 } from '../core/_api';
 import { Editor } from '../editor';

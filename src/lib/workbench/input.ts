@@ -187,39 +187,26 @@ export class Input {
     this.input.focus()
   }
 
-  /**
-   * 清除当前输入框内的值
-   */
-  cleanValue() {
-    this.input.value = '';
-  }
-
-  focus() {
-    this.input.value = '';
-    this.input.blur();
-    this.input.focus();
-  }
-
   private initEvent() {
     fromEvent(this.input, 'input').subscribe(() => {
+      if (!this.selection.collapsed) {
+        this.dispatchEvent((component, instance) => {
+          const event = new TBEvent(instance);
+          component.editActionInterceptor?.onDeleteRange?.(event)
+          return !event.stopped;
+        })
+        this.dispatchInputReadyEvent(true);
+      }
       if (this.selection.collapsed) {
         this.dispatchEvent((component, instance) => {
           const event = new TBEvent(instance);
-          component.lifecycle?.onInput?.(event)
-          return !event.stopped;
-        })
-      } else {
-        this.dispatchEvent((component, instance) => {
-          const event = new TBEvent(instance);
+          component.editActionInterceptor?.onInput?.(event);
           return !event.stopped;
         })
       }
     });
     fromEvent(this.input, 'focus').subscribe(() => {
-      this.dispatchEvent(component => {
-        component.lifecycle?.onFocus?.()
-        return true;
-      })
+      this.dispatchInputReadyEvent();
     });
     fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
       const text = ev.clipboardData.getData('Text');
@@ -246,19 +233,21 @@ export class Input {
         fragment.sliceContents(0).forEach(i => contents.append(i));
         document.body.removeChild(div);
 
-        if (this.selection.collapsed) {
+        if (!this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
-            const event = new TBEvent(instance, {contents, text});
-            component.lifecycle?.onPaste(event);
-            return !event.stopped;
-          })
-        } else {
-          this.dispatchEvent((component, instance) => {
-            const event = new TBEvent(instance, {contents, text});
-            component.lifecycle?.onPasteBefore(event);
+            const event = new TBEvent(instance);
+            component.editActionInterceptor?.onDeleteRange?.(event);
             return !event.stopped;
           })
         }
+        if (this.selection.collapsed) {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance, {contents, text});
+            component.editActionInterceptor?.onPaste?.(event);
+            return !event.stopped;
+          })
+        }
+        this.dispatchInputReadyEvent();
       });
     });
     fromEvent(this.input, 'copy').subscribe(() => {
@@ -279,16 +268,17 @@ export class Input {
         if (this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.lifecycle?.onDelete(event)
+            component.editActionInterceptor?.onDelete?.(event)
             return !event.stopped;
           })
         } else {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.lifecycle?.onDeleteBefore(event)
+            component.editActionInterceptor?.onDeleteRange?.(event)
             return !event.stopped;
           })
         }
+        this.dispatchInputReadyEvent()
       }
     })
     this.keymap({
@@ -296,19 +286,21 @@ export class Input {
         key: 'Enter'
       },
       action: () => {
-        if (this.selection.collapsed) {
+        if (!this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.lifecycle?.onEnter(event);
-            return !event.stopped;
-          })
-        } else {
-          this.dispatchEvent((component, instance) => {
-            const event = new TBEvent(instance);
-            component.lifecycle?.onEnterBefore(event)
+            component.editActionInterceptor?.onDeleteRange?.(event);
             return !event.stopped;
           })
         }
+        if (this.selection.collapsed) {
+          this.dispatchEvent((component, instance) => {
+            const event = new TBEvent(instance);
+            component.editActionInterceptor?.onEnter?.(event)
+            return !event.stopped;
+          })
+        }
+        this.dispatchInputReadyEvent()
       }
     })
     this.keymap({
@@ -342,8 +334,39 @@ export class Input {
           ArrowDown: CursorMoveDirection.Down
         };
         this.moveCursor(map[ev.key]);
+        this.dispatchInputReadyEvent();
       }
     })
+  }
+
+  private dispatchInputReadyEvent(keepInputContent = false) {
+    if (!keepInputContent) {
+      this.input.value = '';
+    }
+    if (this.selection.collapsed && this.selection.rangeCount === 1) {
+      this.dispatchEvent(component => {
+        component.editActionInterceptor?.onInputReady?.()
+        return true;
+      })
+    }
+  }
+
+  private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
+    const focusNode = this.nativeSelection.focusNode;
+    const position = this.renderer.getPositionByNode(focusNode);
+    if (!position) {
+      return;
+    }
+    let component = position.fragment.parentComponent;
+    while (component) {
+      const annotations = getAnnotations(component.constructor);
+      const componentAnnotation = annotations.getClassMetadata(Component);
+      const params = componentAnnotation.params[0] as Component;
+      if (!invokeFn(params, component)) {
+        break;
+      }
+      component = component.parentFragment?.parentComponent;
+    }
   }
 
   private moveCursor(direction: CursorMoveDirection) {
@@ -393,28 +416,6 @@ export class Input {
       range.startIndex = range.endIndex = p.index;
     });
     selection.restore();
-    this.dispatchEvent(component => {
-      component.lifecycle?.onFocus?.()
-      return true;
-    })
-  }
-
-  private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
-    const focusNode = this.nativeSelection.focusNode;
-    const position = this.renderer.getPositionByNode(focusNode);
-    if (!position) {
-      return;
-    }
-    let component = position.fragment.parentComponent;
-    while (component) {
-      const annotations = getAnnotations(component.constructor);
-      const componentAnnotation = annotations.getClassMetadata(Component);
-      const params = componentAnnotation.params[0] as Component;
-      if (!invokeFn(params, component)) {
-        break;
-      }
-      component = component.parentFragment?.parentComponent;
-    }
   }
 
   private updateCursorPosition(limit: HTMLElement) {

@@ -7,7 +7,7 @@ import {
   ViewData,
   Fragment,
   VElement,
-  TBEvent, SlotRendererFn, Component, Lifecycle, TBSelection
+  TBEvent, SlotRendererFn, Component, EditActionInterceptor, TBSelection
 } from '../core/_api';
 import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
@@ -61,7 +61,7 @@ class ListComponentReader implements ComponentReader {
   }
 }
 
-class ListComponentLifecycle implements Lifecycle<ListComponent> {
+class ListComponentEditActionInterceptor implements EditActionInterceptor<ListComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -100,7 +100,7 @@ class ListComponentLifecycle implements Lifecycle<ListComponent> {
 
 @Component({
   reader: new ListComponentReader(['ul', 'ol']),
-  lifecycle: new ListComponentLifecycle()
+  editActionInterceptor: new ListComponentEditActionInterceptor()
 })
 export class ListComponent extends BranchAbstractComponent {
   constructor(tagName: string) {

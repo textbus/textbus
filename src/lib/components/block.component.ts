@@ -4,7 +4,7 @@ import {
   ComponentReader,
   ViewData,
   VElement,
-  DivisionAbstractComponent, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection
+  DivisionAbstractComponent, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -28,7 +28,7 @@ class BlockComponentReader implements ComponentReader {
   }
 }
 
-class BlockComponentLifecycle implements Lifecycle<BlockComponent> {
+class BlockComponentEditActionInterceptor implements EditActionInterceptor<BlockComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -52,7 +52,7 @@ class BlockComponentLifecycle implements Lifecycle<BlockComponent> {
 
 @Component({
   reader: new BlockComponentReader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-  lifecycle: new BlockComponentLifecycle()
+  editActionInterceptor: new BlockComponentEditActionInterceptor()
 })
 export class BlockComponent extends DivisionAbstractComponent {
   constructor(tagName: string) {

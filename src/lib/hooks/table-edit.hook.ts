@@ -1,6 +1,6 @@
 import { CubicBezier } from '@tanbo/bezier';
 
-import { Commander, Fragment, Renderer, TBRange, TBSelection, Lifecycle } from '../core/_api';
+import { Commander, Fragment, Renderer, TBRange, TBSelection, EditActionInterceptor } from '../core/_api';
 import { TableEditCommander, TdBorderColorCommander } from '../toolbar/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
 

@@ -4,14 +4,14 @@ import {
   Component,
   DivisionAbstractComponent,
   Fragment, InlineFormatter, LeafAbstractComponent,
-  Lifecycle, TBEvent,
+  EditActionInterceptor, TBEvent,
   TBSelection,
   VElement
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';
 
-class DefaultLifecycle implements Lifecycle<RootComponent> {
+class DefaultLifecycle implements EditActionInterceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
   private injector: Injector;
@@ -24,17 +24,8 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
     this.input = injector.get(Input);
   }
 
-  onFocus() {
+  onInputReady() {
     this.recordSnapshotFromEditingBefore();
-  }
-
-  onInputBefore() {
-    if (!this.selection.collapsed) {
-      this.selection.ranges.forEach(range => {
-        range.connect();
-      })
-      this.recordSnapshotFromEditingBefore(true);
-    }
   }
 
   onInput() {
@@ -70,23 +61,6 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
     return false;
   }
 
-  onEnterBefore() {
-    const selection = this.selection;
-    if (!selection.collapsed) {
-      const b = selection.ranges.map(range => {
-        const flag = range.startFragment === range.endFragment;
-        range.deleteSelectedScope();
-        range.startFragment = range.endFragment;
-        range.startIndex = range.endIndex = flag ? range.startIndex : 0;
-        return flag;
-      }).includes(false);
-      if (b) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   onEnter() {
     const firstRange = this.selection.firstRange;
     const rootFragment = firstRange.startFragment;
@@ -97,12 +71,6 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
       return;
     }
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
-  }
-
-  onPasteBefore() {
-    this.selection.ranges.forEach(range => {
-      range.connect();
-    });
   }
 
   onPaste(event: TBEvent<RootComponent, TBClipboard>) {
@@ -172,12 +140,10 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
     }
   }
 
-  onDeleteBefore() {
-    if (!this.selection.collapsed) {
-      this.selection.ranges.forEach(range => {
-        range.connect();
-      })
-    }
+  onDeleteRange() {
+    this.selection.ranges.forEach(range => {
+      range.connect();
+    })
   }
 
   onDelete() {
@@ -250,10 +216,7 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
     });
   }
 
-  private recordSnapshotFromEditingBefore(keepInputStatus = false) {
-    if (!keepInputStatus) {
-      this.input.cleanValue();
-    }
+  private recordSnapshotFromEditingBefore() {
     this.selectionSnapshot = this.selection.clone();
     this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
   }
@@ -261,7 +224,7 @@ class DefaultLifecycle implements Lifecycle<RootComponent> {
 
 @Component({
   reader: null,
-  lifecycle: new DefaultLifecycle()
+  editActionInterceptor: new DefaultLifecycle()
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {

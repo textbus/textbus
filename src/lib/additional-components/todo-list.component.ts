@@ -5,7 +5,7 @@ import {
   Fragment,
   ComponentReader,
   VElement,
-  ViewData, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection,
+  ViewData, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -44,7 +44,7 @@ class TodoListComponentReader implements ComponentReader {
   }
 }
 
-class TodoListComponentLifecycle implements Lifecycle<TodoListComponent> {
+class TodoListComponentEditActionInterceptor implements EditActionInterceptor<TodoListComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -85,7 +85,7 @@ class TodoListComponentLifecycle implements Lifecycle<TodoListComponent> {
 
 @Component({
   reader: new TodoListComponentReader(),
-  lifecycle: new TodoListComponentLifecycle()
+  editActionInterceptor: new TodoListComponentEditActionInterceptor()
 })
 export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
   private stateCollection = [{

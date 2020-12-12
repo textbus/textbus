@@ -9,7 +9,7 @@ export * from './format-abstract-data';
 export * from './format-map';
 export * from './formatter';
 export * from './fragment';
-export * from './lifecycle';
+export * from './edit-action-interceptor';
 export * from './marker';
 export * from './output-renderer';
 export * from './parser';

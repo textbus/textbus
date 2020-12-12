@@ -1,4 +1,4 @@
-import { Lifecycle, TBSelection, Commander } from '../core/_api';
+import { EditActionInterceptor, TBSelection, Commander } from '../core/_api';
 import { HistoryCommander } from '../toolbar/_api';
 import { Editor } from '../editor';
 

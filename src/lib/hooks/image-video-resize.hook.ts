@@ -1,4 +1,4 @@
-import { Lifecycle, Renderer, TBSelection, VElement } from '../core/_api';
+import { EditActionInterceptor, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {

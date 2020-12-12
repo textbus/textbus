@@ -6,7 +6,7 @@ import {
   ComponentReader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn, Component, Lifecycle, TBSelection, TBEvent
+  BackboneAbstractComponent, SlotRendererFn, Component, EditActionInterceptor, TBSelection, TBEvent
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -116,7 +116,7 @@ class TableComponentReader implements ComponentReader {
   }
 }
 
-class TableComponentLifecycle implements Lifecycle<TableComponent> {
+class TableComponentEditActionInterceptor implements EditActionInterceptor<TableComponent> {
   private selection: TBSelection;
 
   setup(injector: Injector) {
@@ -144,7 +144,7 @@ class TableComponentLifecycle implements Lifecycle<TableComponent> {
 
 @Component({
   reader: new TableComponentReader(),
-  lifecycle: new TableComponentLifecycle()
+  editActionInterceptor: new TableComponentEditActionInterceptor()
 })
 export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {

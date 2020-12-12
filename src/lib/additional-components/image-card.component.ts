@@ -5,7 +5,7 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRendererFn, Component, Lifecycle, TBEvent, TBSelection, TBClipboard
+  Fragment, SlotRendererFn, Component, EditActionInterceptor, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
 import { ComponentExample } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
@@ -38,7 +38,7 @@ class ImageCardComponentReader implements ComponentReader {
   }
 }
 
-class ImageCardComponentLifecycle implements Lifecycle<ImageCardComponent> {
+class ImageCardComponentEditActionInterceptor implements EditActionInterceptor<ImageCardComponent> {
   private injector: Injector;
   private selection: TBSelection;
 
@@ -82,7 +82,7 @@ class ImageCardComponentLifecycle implements Lifecycle<ImageCardComponent> {
 
 @Component({
   reader: new ImageCardComponentReader(),
-  lifecycle: new ImageCardComponentLifecycle()
+  editActionInterceptor: new ImageCardComponentEditActionInterceptor()
 })
 export class ImageCardComponent extends BackboneAbstractComponent {
   readonly imgFragment: Fragment;

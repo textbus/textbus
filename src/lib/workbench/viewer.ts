@@ -128,9 +128,9 @@ export class Viewer {
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     const rootAnnotation = getAnnotations(RootComponent).getClassMetadata(Component).params[0] as Component;
-    rootAnnotation.lifecycle.setup(viewInjector);
+    rootAnnotation.editActionInterceptor.setup(viewInjector);
     componentAnnotations.forEach(c => {
-      c.lifecycle?.setup(viewInjector);
+      c.editActionInterceptor?.setup(viewInjector);
     })
   }
 
