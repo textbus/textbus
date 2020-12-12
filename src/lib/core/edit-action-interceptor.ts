@@ -1,13 +1,12 @@
-import { Renderer } from './renderer';
+import { Injector } from '@tanbo/di';
+
 import { TBSelection } from './selection';
 import { Commander } from './commander';
 import { Editor } from '../editor';
 import { Contents } from './contents';
 import { Fragment } from './fragment';
-import { Input } from '../workbench/input';
-import { Injector } from '@tanbo/di';
-import { TBEvent } from '@tanbo/textbus/lib/core/events';
-import { AbstractComponent } from '@tanbo/textbus/lib/core/component';
+import { TBEvent } from './events';
+import { AbstractComponent } from './component';
 
 export interface TBClipboard {
   contents: Contents
