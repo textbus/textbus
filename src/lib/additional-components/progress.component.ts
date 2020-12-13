@@ -1,5 +1,5 @@
 import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
-import { ComponentExample, Workbench } from '../workbench/_api';
+import { ComponentExample, Dialog } from '../workbench/_api';
 import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
 export interface ProgressConfig {
@@ -78,7 +78,7 @@ export class ProgressComponent extends LeafAbstractComponent {
 export const progressComponentExample: ComponentExample = {
   name: '进度条',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#fff" height="100%" width="100%"/></g><line x1="10" y1="40" x2="90" y2="40" stroke="#ddd" stroke-width="4" stroke-linecap="round"></line><line x1="10" y1="40" x2="50" y2="40" stroke="#1296db" stroke-width="4" stroke-linecap="round"></line><text font-family="Helvetica, Arial, sans-serif" font-size="10" x="42" y="35" stroke-width="0" stroke="#000" fill="#000000">50%</text></svg>')}">`,
-  componentFactory(workbench: Workbench) {
+  componentFactory(dialog: Dialog) {
     const form = new Form({
       title: '进度条设置',
       items: [
@@ -148,7 +148,7 @@ export const progressComponentExample: ComponentExample = {
     })
 
     return new Promise<ProgressComponent>((resolve, reject) => {
-      workbench.dialog(form.elementRef);
+      dialog.dialog(form.elementRef);
       const s = form.onComplete.subscribe(data => {
         s.unsubscribe();
         const component = new ProgressComponent({
@@ -158,13 +158,13 @@ export const progressComponentExample: ComponentExample = {
           progress: +data.get('progress')
         });
 
-        workbench.close();
+        dialog.close();
         resolve(component);
       });
       const b = form.onClose.subscribe(() => {
         s.unsubscribe();
         b.unsubscribe();
-        workbench.close();
+        dialog.close();
       });
     })
   }

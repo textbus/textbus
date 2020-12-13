@@ -18,14 +18,14 @@ import {
 import { Viewer } from './workbench/viewer';
 import {
   Device,
-  DeviceOption,
+  DeviceOption, Dialog,
   EditingMode,
   FullScreen,
   LibSwitch,
   StatusBar
 } from './workbench/_api';
 import { ComponentExample, ComponentStage } from './workbench/component-stage';
-import { DialogManager, Workbench } from './workbench/workbench';
+import { Workbench } from './workbench/workbench';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { Toolbar, ToolEntity, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';
@@ -125,7 +125,9 @@ export class Editor<T = any> {
       fullScreen: true
     });
 
-    this.fullScreen(true)
+    this.stateController.onStateChange.subscribe(state => {
+      this.fullScreen(state.fullScreen);
+    })
 
     const staticProviders: Provider[] = [{
       provide: Editor,
@@ -169,9 +171,6 @@ export class Editor<T = any> {
         return rootInjector;
       }
     }, {
-      provide: DialogManager,
-      useClass: Workbench
-    }, {
       provide: EDITABLE_DOCUMENT_CONTAINER,
       useFactory(workbench: Workbench) {
         return workbench.tablet;
@@ -183,6 +182,7 @@ export class Editor<T = any> {
       Toolbar,
       Workbench,
       Device,
+      Dialog,
       EditingMode,
       FullScreen,
       LibSwitch,

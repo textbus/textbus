@@ -3,10 +3,9 @@ import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
-import { Input, Keymap, KeymapAction } from '../workbench/input';
+import { Input, Keymap, KeymapAction, Dialog } from '../workbench/_api';
 import { SelectionMatchState } from './matcher/matcher';
 import { createKeymapHTML, FileUploader } from '../uikit/_api';
-import { DialogManager } from '../workbench/workbench';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
@@ -59,7 +58,7 @@ export class Toolbar {
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => FileUploader)) private fileUploader: FileUploader,
-              @Inject(forwardRef(() => DialogManager)) private dialogManager: DialogManager) {
+              @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog) {
     this.config = options.toolbar;
 
     this.editorController.onStateChange.subscribe(status => {

@@ -9,6 +9,7 @@ import { HistoryManager } from '../history-manager';
 import { Input } from './input';
 import { RootComponent } from '../root-component';
 import { Toolbar } from '../toolbar/toolbar';
+import { ComponentStage } from './component-stage';
 
 @Injectable()
 export class Viewer {
@@ -39,6 +40,7 @@ export class Viewer {
   private minHeight = 400;
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
+              private componentStage: ComponentStage,
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
@@ -113,6 +115,7 @@ export class Viewer {
     const toolbar = viewInjector.get(Toolbar);
 
     toolbar.setup(viewInjector);
+    this.componentStage.setup(viewInjector);
 
 
     rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {

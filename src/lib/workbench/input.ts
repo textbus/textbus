@@ -186,6 +186,9 @@ export class Input {
   }
 
   private initEvent() {
+    fromEvent(this.input, 'blur').subscribe(() => {
+      this.hide();
+    })
     fromEvent(this.input, 'input').subscribe(() => {
       if (!this.selection.collapsed) {
         this.dispatchEvent((component, instance) => {

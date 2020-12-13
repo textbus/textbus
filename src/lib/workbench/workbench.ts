@@ -6,20 +6,12 @@ import { Device } from './device';
 import { createElement } from '../uikit/uikit';
 import { EditorController } from '../editor-controller';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
-
-export abstract class DialogManager {
-  abstract dialog(content: HTMLElement): void;
-
-  abstract close(): void;
-}
+import { Dialog } from './dialog';
 
 @Injectable()
-export class Workbench implements DialogManager {
+export class Workbench {
   elementRef: HTMLElement;
   readonly tablet: HTMLElement;
-
-  private dialogBg: HTMLElement;
-  private dialogWrapper: HTMLElement;
   private editableArea: HTMLElement;
   private loading = document.createElement('div');
 
@@ -27,6 +19,7 @@ export class Workbench implements DialogManager {
               @Inject(forwardRef(() => ComponentStage)) private componentStage: ComponentStage,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
+              @Inject(forwardRef(() => Dialog)) private dialog: Dialog,
               @Inject(forwardRef(() => Viewer)) private viewer: Viewer) {
     this.elementRef = createElement('div', {
       classes: ['textbus-workbench'],
@@ -34,14 +27,7 @@ export class Workbench implements DialogManager {
         createElement('div', {
           classes: ['textbus-additional-worktable'],
           children: [
-            this.dialogBg = createElement('div', {
-              classes: ['textbus-dialog'],
-              children: [
-                this.dialogWrapper = createElement('div', {
-                  classes: ['textbus-dialog-wrapper']
-                })
-              ]
-            })
+            this.dialog.elementRef
           ]
         }),
         createElement('div', {
@@ -78,23 +64,6 @@ export class Workbench implements DialogManager {
     this.viewer.onReady.subscribe(() => {
       this.loaded()
     })
-  }
-
-  dialog(element: HTMLElement) {
-    this.dialogWrapper.innerHTML = '';
-    this.dialogWrapper.appendChild(element);
-    this.dialogBg.classList.add('textbus-dialog-active');
-    setTimeout(() => {
-      this.dialogWrapper.classList.add('textbus-dialog-wrapper-active');
-    }, 200)
-  }
-
-  close() {
-    this.dialogWrapper.classList.remove('textbus-dialog-wrapper-active');
-    setTimeout(() => {
-      this.dialogBg.classList.remove('textbus-dialog-active');
-      this.dialogWrapper.innerHTML = '';
-    }, 200)
   }
 
   private loaded() {
