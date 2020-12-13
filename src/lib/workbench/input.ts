@@ -462,7 +462,7 @@ export class Input {
     this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
 
-    if (this.selection.collapsed && this.selection.rangeCount === 1) {
+    if (this.selection.rangeCount === 1) {
       const scrollTop = limit.scrollTop;
       const offsetHeight = limit.offsetHeight;
       const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;

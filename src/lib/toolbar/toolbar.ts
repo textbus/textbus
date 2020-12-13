@@ -229,21 +229,13 @@ export class Toolbar {
     this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
         item.instance.onApply.subscribe(params => {
-          this.execCommand(item.config, {
-            ...item,
-            params
-          }, item.instance.commander);
-          // this.actionEvent.next({
-          //   ...item,
-          //   params
-          // });
+          this.execCommand(item.config, params, item.instance.commander);
         })
       }
     });
   }
 
   private execCommand(config: ToolConfig, params: any, commander: Commander) {
-
     const selection = this.selection;
 
     const state = config.matcher ?
