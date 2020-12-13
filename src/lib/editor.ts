@@ -39,6 +39,8 @@ export interface EditorOptions<T> {
   theme?: string;
   /** 设备宽度 */
   deviceOptions?: DeviceOption[];
+  /** 指定设备类型 */
+  deviceType?: string;
   /** 默认是否全屏*/
   fullScreen?: boolean;
   /** 默认是否展开组件库 */
@@ -116,12 +118,21 @@ export class Editor<T = any> {
     }
     this.onReady = this.readyEvent.asObservable();
     this.onChange = this.changeEvent.asObservable();
+    let defaultDeviceType = options.deviceType;
+
+    if (!defaultDeviceType) {
+      for (const item of (options.deviceOptions || [])) {
+        if (item.default) {
+          defaultDeviceType = item.label;
+        }
+      }
+    }
 
     this.stateController = new EditorController({
       readonly: false,
       expandComponentLibrary: options.expandComponentLibrary,
       sourceCodeMode: false,
-      deviceType: 'PC',
+      deviceType: defaultDeviceType,
       fullScreen: true
     });
 
