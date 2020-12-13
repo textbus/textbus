@@ -1,4 +1,4 @@
-import { AbstractComponent } from '@tanbo/textbus/lib/core/component';
+import { AbstractComponent } from './component';
 
 /**
  * TextBus 事件对象。
