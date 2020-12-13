@@ -99,14 +99,18 @@ export class TBSelection {
     this._ranges.forEach(range => {
       range.restore();
     });
-    if (this.nativeSelection.rangeCount) {
-      const startNativeRange = this.firstRange?.nativeRange;
-      const endNativeRange = this.lastRange?.nativeRange;
-      const nativeRange = this.nativeSelection.getRangeAt(0);
-      if (startNativeRange && endNativeRange && nativeRange) {
-        nativeRange.setStart(startNativeRange.startContainer, startNativeRange.startOffset);
-        nativeRange.setEnd(endNativeRange.endContainer, endNativeRange.endOffset);
+    const startNativeRange = this.firstRange?.nativeRange;
+    const endNativeRange = this.lastRange?.nativeRange;
+    if (startNativeRange && endNativeRange) {
+      let nativeRange: Range;
+      if (this.nativeSelection.rangeCount) {
+        nativeRange = this.nativeSelection.getRangeAt(0);
+      } else {
+        nativeRange = this.context.createRange();
+        this.nativeSelection.addRange(nativeRange);
       }
+      nativeRange.setStart(startNativeRange.startContainer, startNativeRange.startOffset);
+      nativeRange.setEnd(endNativeRange.endContainer, endNativeRange.endOffset);
     }
   }
 
@@ -127,7 +131,6 @@ export class TBSelection {
    * @param syncNative
    */
   addRange(range: TBRange, syncNative = false) {
-    this.nativeSelection.addRange(range.nativeRange)
     this._ranges.push(range);
   }
 
@@ -146,18 +149,19 @@ export class TBSelection {
       const paths = [];
       while (fragment) {
         const parentComponent = fragment.parentComponent;
-        if (parentComponent) {
-          if (parentComponent instanceof BranchAbstractComponent) {
-            paths.push(parentComponent.slots.indexOf(fragment))
-          } else if (parentComponent instanceof BackboneAbstractComponent) {
-            paths.push(parentComponent.indexOf(fragment));
-          } else {
-            paths.push(0);
-          }
-          fragment = parentComponent.parentFragment;
-          paths.push(fragment.indexOf(parentComponent));
-        } else {
+        if (!parentComponent.parentFragment) {
           break;
+        }
+        if (parentComponent instanceof BranchAbstractComponent) {
+          paths.push(parentComponent.slots.indexOf(fragment))
+        } else if (parentComponent instanceof BackboneAbstractComponent) {
+          paths.push(parentComponent.indexOf(fragment));
+        } else {
+          paths.push(0);
+        }
+        fragment = parentComponent.parentFragment;
+        if (fragment) {
+          paths.push(fragment.indexOf(parentComponent));
         }
       }
       return paths.reverse();
@@ -210,8 +214,7 @@ export class TBSelection {
         }
       }
     };
-    this.removeAllRanges();
-    this.nativeSelection.removeAllRanges();
+    this.removeAllRanges(true);
 
     const len = paths.length;
     if (len === 0) {
@@ -235,7 +238,6 @@ export class TBSelection {
       range.endIndex = end.index;
       range.endFragment = end.fragment;
     }
-    this.nativeSelection.addRange(nativeRange);
     this.addRange(range);
   }
 

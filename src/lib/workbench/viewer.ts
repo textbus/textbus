@@ -14,9 +14,6 @@ import { ComponentStage } from './component-stage';
 @Injectable()
 export class Viewer {
   onReady: Observable<void>;
-
-
-
   elementRef = document.createElement('iframe');
 
   set sourceCodeMode(b: boolean) {
@@ -96,9 +93,6 @@ export class Viewer {
       provide: Parser,
       useValue: parser
     }, {
-      provide: HistoryManager,
-      useValue: new HistoryManager(this.options.historyStackSize)
-    }, {
       provide: TBSelection,
       useValue: selection
     }, {
@@ -107,6 +101,7 @@ export class Viewer {
     }];
     const viewInjector = new ReflectiveInjector(this.injector, [
       Input,
+      HistoryManager,
       RootComponent,
       ...viewProviders
     ]);
@@ -140,8 +135,8 @@ export class Viewer {
     (this.options.plugins || []).forEach(plugin => {
       plugin.setup(viewInjector);
     })
+    viewInjector.get(HistoryManager).startListen();
   }
-
 
   private listen() {
     const fn = () => {

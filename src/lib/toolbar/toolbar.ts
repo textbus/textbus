@@ -1,4 +1,5 @@
 import { Observable, Subject, Subscription } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
@@ -51,7 +52,6 @@ export class Toolbar {
 
   private selection: TBSelection;
   private input: Input;
-  private historyManager: HistoryManager;
   private keymaps: KeymapAction[] = [];
   private subs: Subscription[] = [];
 
@@ -106,11 +106,13 @@ export class Toolbar {
   setup(injector: Injector) {
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
-    this.historyManager = injector.get(HistoryManager);
+    injector.get(HistoryManager).onChange.subscribe(() => {
+      this.updateHandlerState();
+    });
 
     this.keymaps.forEach(k => this.input.keymap(k));
 
-    this.selection.onChange.subscribe(() => {
+    this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
       this.updateHandlerState();
     })
 
