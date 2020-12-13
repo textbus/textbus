@@ -1,4 +1,4 @@
-import { fromEvent, Observable } from 'rxjs';
+import { fromEvent, Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { TBRange, TBRangePosition } from './range';
@@ -6,6 +6,16 @@ import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
 import { TBPlugin } from './plugin';
+
+let event: Observable<any>;
+
+function once(document: Document) {
+  if (event) {
+    return of();
+  }
+  event = fromEvent(document, 'selectionchange');
+  return event;
+}
 
 /**
  * 记录选区路径数据。
@@ -70,7 +80,7 @@ export class TBSelection {
               private renderer: Renderer,
               private pipes: TBPlugin[] = []) {
     this.nativeSelection = context.getSelection();
-    this.onChange = fromEvent(this.context, 'selectionchange').pipe(tap(() => {
+    this.onChange = once(context).pipe(tap(() => {
       this._ranges = [];
       for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
         this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i).cloneRange(), this.renderer));

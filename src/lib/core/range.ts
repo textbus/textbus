@@ -2,7 +2,7 @@ import { Type } from '@tanbo/di';
 
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { VElement, VTextNode } from './element';
+import { VElement } from './element';
 import {
   BranchAbstractComponent,
   LeafAbstractComponent,
@@ -69,18 +69,33 @@ export class TBRange {
               private renderer: Renderer) {
     const startPosition = renderer.getPositionByNode(nativeRange.startContainer);
     const endPosition = renderer.getPositionByNode(nativeRange.endContainer);
-    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) && startPosition && endPosition) {
-      this.startFragment = startPosition.fragment;
-      this.endFragment = endPosition.fragment;
+    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
+      startPosition && endPosition) {
       if (nativeRange.startContainer.nodeType === Node.TEXT_NODE) {
+        this.startFragment = startPosition.fragment;
         this.startIndex = startPosition.startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
-        this.startIndex = this.getOffset(nativeRange.startContainer as HTMLElement, nativeRange.startOffset, this.startFragment);
+        const child = nativeRange.startContainer.childNodes[nativeRange.startOffset];
+        const childPosition = this.renderer.getPositionByNode(child);
+        this.startFragment = childPosition.fragment;
+        this.startIndex = childPosition.startIndex;
       }
       if (nativeRange.endContainer.nodeType === Node.TEXT_NODE) {
+        this.endFragment = endPosition.fragment;
         this.endIndex = endPosition.startIndex + nativeRange.endOffset;
       } else if (nativeRange.endContainer.nodeType === Node.ELEMENT_NODE) {
-        this.endIndex = this.getOffset(nativeRange.endContainer as HTMLElement, nativeRange.endOffset, this.endFragment);
+        const childNodes = nativeRange.endContainer.childNodes;
+        if (childNodes.length === nativeRange.endOffset) {
+          const child = childNodes[childNodes.length - 1];
+          const childPosition = this.renderer.getPositionByNode(child);
+          this.endFragment = childPosition.fragment;
+          this.endIndex = childPosition.endIndex;
+        } else {
+          const child = childNodes[nativeRange.endOffset];
+          const childPosition = this.renderer.getPositionByNode(child);
+          this.endFragment = childPosition.fragment;
+          this.endIndex = childPosition.startIndex;
+        }
       }
     }
   }
@@ -102,6 +117,7 @@ export class TBRange {
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
+    console.log(this)
     return this;
   }
 
@@ -1041,111 +1057,62 @@ export class TBRange {
     return f;
   }
 
-  private getOffset(node: HTMLElement, offset: number, fragment: Fragment) {
-    if (node.childNodes.length === offset) {
-      const position = this.renderer.getPositionByNode(node);
-      // if(position.fragment !== fragment){
-      //   return
-      // }
-      if (position) {
-        return position.endIndex;
-      }
-      return null;
-    }
-    const position = this.renderer.getPositionByNode(node.childNodes[offset]);
-    if (position.fragment !== fragment) {
-      return this.renderer.getPositionByNode(node.childNodes[offset - 1]).endIndex;
-    }
-    if (position) {
-      return position.startIndex;
-    }
-    return null;
-  }
-
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
     let vElement = this.renderer.getVElementByFragment(fragment);
-    parentLoop: while (vElement) {
-      const len = vElement.childNodes.length;
-      if (len === 0) {
-        return {
-          node: this.renderer.getNativeNodeByVDom(vElement),
-          offset: 0
-        };
+
+    let childNodes = vElement.childNodes;
+
+    for (let i = 0; i < childNodes.length; i++) {
+      const child = childNodes[i];
+      const position = this.renderer.getPositionByVDom(child);
+      if (position.fragment !== fragment) {
+        throw new Error('异常节点！');
       }
-      let index = 0;
-      for (let i = 0; i < len; i++) {
-        const child = vElement.childNodes[i];
-        const position = this.renderer.getPositionByVDom(child);
-        if (position.fragment === fragment) {
-          index = position.endIndex;
-          if (position.startIndex <= offset && position.endIndex >= offset) {
-            if (i < len - 1 && position.endIndex === offset) {
-              if (child instanceof VTextNode) {
-                return {
-                  node: this.renderer.getNativeNodeByVDom(child),
-                  offset: child.textContent.length
-                }
-              }
-              if (position.endIndex === offset) {
-                const afterContent = fragment.sliceContents(position.endIndex, position.endIndex + 1)[0];
-                if (afterContent instanceof DivisionAbstractComponent ||
-                  afterContent instanceof BranchAbstractComponent ||
-                  afterContent instanceof BackboneAbstractComponent) {
-                  vElement = child;
-                  continue parentLoop;
-                }
-              }
-              continue;
-            }
-            if (child instanceof VElement) {
-              if (position.endIndex - position.startIndex === 1) {
-                if (fragment.sliceContents(position.startIndex, position.endIndex)[0] instanceof LeafAbstractComponent) {
-                  const node = this.renderer.getNativeNodeByVDom(child);
-                  const parentNode = node.parentNode;
+      if (position.startIndex <= offset && position.endIndex >= offset) {
+        if (child instanceof VElement) {
+          if (position.endIndex - position.startIndex > 1) {
+            // 一定为非子组件
+            childNodes = child.childNodes;
+            i = -1;
+            continue;
+          } else {
+            // 长度为 1 的节点
+            const content = fragment.sliceContents(position.startIndex, position.endIndex)[0];
+            if (content instanceof AbstractComponent) {
+              const nativeNode = this.renderer.getNativeNodeByVDom(child);
+              const parentNode = nativeNode.parentNode as HTMLElement;
+              const index = Array.from(parentNode.childNodes).indexOf(nativeNode as ChildNode);
+              const nextChild = childNodes[i + 1];
+              if (position.endIndex === offset && nextChild) {
+                if (nextChild instanceof VElement) {
                   return {
                     node: parentNode,
-                    offset: Array.from(parentNode.childNodes).indexOf(node as any)
-                  };
+                    offset: index + 1
+                  }
+                } else {
+                  return {
+                    node: this.renderer.getNativeNodeByVDom(nextChild),
+                    offset: 0
+                  }
                 }
               }
-              if (child.childNodes.length === 0) {
-                const node = this.renderer.getNativeNodeByVDom(child);
-                const parentNode = node.parentNode;
-                const index = Array.from(parentNode.childNodes).indexOf(node as any);
-                return {
-                  node: parentNode,
-                  offset: position.endIndex === offset ? index + 1 : index
-                };
-              }
-              vElement = child;
-              continue parentLoop;
-            }
-            return {
-              node: this.renderer.getNativeNodeByVDom(child),
-              offset: offset - position.startIndex
-            }
-          }
-        } else {
-          if (index === offset) {
-            let nextPosition = this.findFirstPosition(position.fragment);
-            if (nextPosition.fragment.contentLength === 0) {
-              const node = this.renderer.getNativeNodeByVDom(vElement);
               return {
-                node,
-                offset: Array.from(node.childNodes).indexOf(this.renderer.getNativeNodeByVDom(child) as ChildNode)
+                node: parentNode,
+                offset: position.startIndex === offset ? index : index + 1
               }
             }
-            this.setStart(position.fragment, 0);
-            this.collapse();
-            return this.findFocusNodeAndOffset(position.fragment, 0);
+            // 如果不是组件节点，则继续向下查找
+            childNodes = child.childNodes;
+            i = -1;
+            continue;
           }
-          index++;
         }
-
+        return {
+          node: this.renderer.getNativeNodeByVDom(child),
+          offset: offset - position.startIndex
+        }
       }
-      throw new Error('未找到对应节点');
     }
-    throw new Error('DOM 与虚拟节点不同步！');
   }
 
   private static findExpandedStartIndex(fragment: Fragment, index: number) {

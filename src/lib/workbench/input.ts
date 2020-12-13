@@ -183,7 +183,6 @@ export class Input {
     } else {
       this.hide();
     }
-    this.input.focus()
   }
 
   private initEvent() {
@@ -203,9 +202,6 @@ export class Input {
           return !event.stopped;
         })
       }
-    });
-    fromEvent(this.input, 'focus').subscribe(() => {
-      this.dispatchInputReadyEvent();
     });
     fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
       const text = ev.clipboardData.getData('Text');
@@ -484,6 +480,7 @@ export class Input {
     };
     this.timer = setTimeout(toggleShowHide, 400);
     this.input.focus();
+    this.dispatchInputReadyEvent();
   }
 
   private hide() {

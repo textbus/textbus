@@ -53,4 +53,8 @@ editor.onChange.subscribe(() => {
   // console.log(editor.getContents().content)
 })
 
+// document.addEventListener('selectionchange', () => {
+//   console.log(4343)
+// })
+
 // editor.setContents(`<h1>textbus&nbsp;<span style="font-weight: normal;"><span style="letter-spacing: 5px;">富文本编</span></span><span style="letter-spacing: 5px;">辑器</span></h1>`);

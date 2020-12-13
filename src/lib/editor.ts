@@ -126,7 +126,7 @@ export class Editor<T = any> {
       fullScreen: true
     });
 
-    this.fullScreen(true)
+    // this.fullScreen(true)
 
     const staticProviders: Provider[] = [{
       provide: Editor,
