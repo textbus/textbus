@@ -161,7 +161,6 @@ export class ImageVideoResizePlugin implements TBPlugin {
       this.currentElement = null;
       this.mask.parentNode?.removeChild(this.mask);
     }
-    console.log(this.selection.firstRange)
   }
 
   private updateStyle() {
