@@ -133,7 +133,7 @@ export class Editor<T = any> {
       expandComponentLibrary: options.expandComponentLibrary,
       sourceCodeMode: false,
       deviceType: defaultDeviceType,
-      fullScreen: true
+      fullScreen: options.fullScreen
     });
 
     this.stateController.onStateChange.subscribe(state => {
