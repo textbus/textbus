@@ -16,31 +16,6 @@
   }
 }
 
-.textbus-paths {
-  flex: 1;
-  display: flex;
-}
-
-.textbus-paths-link {
-  color: inherit;
-  font-weight: bold;
-  text-decoration: none;
-  background: none;
-  border-radius: 5px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-
-  &:hover {
-    color: $color-primary;
-  }
-}
-
-.textbus-paths-split {
-  font-size: .8em;
-  color: $color-gray-dark;
-}
-
 .textbus-device {
   position: relative;
 

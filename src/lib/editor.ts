@@ -22,7 +22,6 @@ import {
   EditingMode,
   FullScreen,
   LibSwitch,
-  Paths,
   StatusBar
 } from './workbench/_api';
 import { ComponentExample, ComponentStage } from './workbench/component-stage';
@@ -187,7 +186,6 @@ export class Editor<T = any> {
       EditingMode,
       FullScreen,
       LibSwitch,
-      Paths,
       StatusBar,
       Viewer,
       ComponentStage,

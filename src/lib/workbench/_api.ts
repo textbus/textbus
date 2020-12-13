@@ -5,7 +5,6 @@ export * from './editing-mode';
 export * from './full-screen';
 export * from './input';
 export * from './lib-switch';
-export * from './paths';
 export * from './status-bar';
 export * from './viewer';
 export * from './workbench';
