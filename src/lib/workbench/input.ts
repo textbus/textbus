@@ -189,6 +189,9 @@ export class Input {
     fromEvent(this.input, 'blur').subscribe(() => {
       this.hide();
     })
+    fromEvent(this.input, 'focus').subscribe(() => {
+      this.dispatchInputReadyEvent();
+    })
     fromEvent(this.input, 'input').subscribe(() => {
       if (!this.selection.collapsed) {
         this.dispatchEvent((component, instance) => {
@@ -483,7 +486,6 @@ export class Input {
     };
     this.timer = setTimeout(toggleShowHide, 400);
     this.input.focus();
-    this.dispatchInputReadyEvent();
   }
 
   private hide() {
