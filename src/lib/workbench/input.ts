@@ -91,7 +91,6 @@ export class Input {
 
   private _display = true;
   private flashing = true;
-  private nativeSelection: Selection;
 
   private oldCursorPosition: { left: number, top: number } = null;
   private cleanOldCursorTimer: any;
@@ -102,7 +101,6 @@ export class Input {
               private rootComponent: RootComponent,
               private parser: Parser,
               private selection: TBSelection) {
-    this.nativeSelection = context.getSelection();
     this.container.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
@@ -259,6 +257,7 @@ export class Input {
       this.selection.ranges.forEach(range => {
         range.connect();
       });
+      this.dispatchInputReadyEvent();
     });
 
     this.keymap({
@@ -346,19 +345,14 @@ export class Input {
     }
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
       this.dispatchEvent(component => {
-        component.interceptor?.onInputReady?.()
+        component.interceptor?.onInputReady?.();
         return true;
       })
     }
   }
 
   private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
-    const focusNode = this.nativeSelection.focusNode;
-    const position = this.renderer.getPositionByNode(focusNode);
-    if (!position) {
-      return;
-    }
-    let component = position.fragment.parentComponent;
+    let component = this.selection.commonAncestorFragment?.parentComponent;
     while (component) {
       const annotations = getAnnotations(component.constructor);
       const componentAnnotation = annotations.getClassMetadata(Component);
