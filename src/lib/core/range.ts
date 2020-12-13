@@ -117,7 +117,6 @@ export class TBRange {
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
     this.nativeRange.setStart(start.node, start.offset);
     this.nativeRange.setEnd(end.node, end.offset);
-    console.log(this)
     return this;
   }
 
