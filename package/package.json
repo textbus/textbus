@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/textbus",
-  "version": "0.1.0-alpha.12",
+  "version": "0.1.0-alpha.13",
   "description": "A rich text editor",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -22,6 +22,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.0.21",
     "@tanbo/css-themes": "^0.0.1",
+    "@tanbo/di": "0.0.15",
     "pretty": "^2.0.0",
     "prismjs": "^1.21.0",
     "reflect-metadata": "^0.1.13",
