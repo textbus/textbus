@@ -11,7 +11,7 @@ import {
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';
 
-class DefaultLifecycle implements Interceptor<RootComponent> {
+class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
   private fragmentSnapshot: Fragment;
   private injector: Injector;
@@ -224,7 +224,7 @@ class DefaultLifecycle implements Interceptor<RootComponent> {
 
 @Component({
   loader: null,
-  interceptor: new DefaultLifecycle()
+  interceptor: new RootComponentInterceptor()
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {
