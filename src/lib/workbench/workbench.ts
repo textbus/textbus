@@ -3,6 +3,9 @@ import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import { ComponentStage } from './component-stage';
 import { Viewer } from './viewer';
 import { Device } from './device';
+import { createElement } from '../uikit/uikit';
+import { EditorController } from '../editor-controller';
+import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 
 export abstract class DialogManager {
   abstract dialog(content: HTMLElement): void;
@@ -12,54 +15,65 @@ export abstract class DialogManager {
 
 @Injectable()
 export class Workbench implements DialogManager {
-  elementRef = document.createElement('div');
-  readonly tablet = document.createElement('div');
+  elementRef: HTMLElement;
+  readonly tablet: HTMLElement;
 
-  private additionalWorktable = document.createElement('div');
-  private dialogBg = document.createElement('div');
-  private dialogWrapper = document.createElement('div');
-  private dashboard = document.createElement('div');
-  private editableArea = document.createElement('div');
+  private dialogBg: HTMLElement;
+  private dialogWrapper: HTMLElement;
+  private editableArea: HTMLElement;
   private loading = document.createElement('div');
 
   constructor(@Inject(forwardRef(() => Device)) private device: Device,
               @Inject(forwardRef(() => ComponentStage)) private componentStage: ComponentStage,
+              @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
+              @Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => Viewer)) private viewer: Viewer) {
-    this.elementRef.classList.add('textbus-workbench');
-
-    this.additionalWorktable.classList.add('textbus-additional-worktable');
-    this.dialogBg.classList.add('textbus-dialog');
-    this.dialogWrapper.classList.add('textbus-dialog-wrapper');
-    this.dashboard.classList.add('textbus-dashboard');
-    this.editableArea.classList.add('textbus-editable-area');
-    this.tablet.classList.add('textbus-tablet');
-
-    this.dialogBg.appendChild(this.dialogWrapper);
-    this.additionalWorktable.appendChild(this.dialogBg);
-    this.elementRef.appendChild(this.additionalWorktable);
-
-    this.tablet.appendChild(this.viewer.elementRef);
-    this.editableArea.appendChild(this.tablet);
-    this.dashboard.appendChild(this.editableArea);
-    this.dashboard.appendChild(this.componentStage.elementRef);
-    this.elementRef.appendChild(this.dashboard);
+    this.elementRef = createElement('div', {
+      classes: ['textbus-workbench'],
+      children: [
+        createElement('div', {
+          classes: ['textbus-additional-worktable'],
+          children: [
+            this.dialogBg = createElement('div', {
+              classes: ['textbus-dialog'],
+              children: [
+                this.dialogWrapper = createElement('div', {
+                  classes: ['textbus-dialog-wrapper']
+                })
+              ]
+            })
+          ]
+        }),
+        createElement('div', {
+          classes: ['textbus-dashboard'],
+          children: [
+            this.editableArea = createElement('div', {
+              classes: ['textbus-editable-area'],
+              children: [
+                this.tablet = createElement('div', {
+                  classes: ['textbus-tablet'],
+                  children: [this.viewer.elementRef]
+                })
+              ]
+            }),
+            this.componentStage.elementRef
+          ]
+        })
+      ]
+    })
 
     const loading = this.loading;
     loading.classList.add('textbus-workbench-loading');
-    loading.innerHTML = `
-    <div>T</div>
-    <div>e</div>
-    <div>x</div>
-    <div>t</div>
-    <div>B</div>
-    <div>U</div>
-    <div>S</div>
-    `;
+    loading.innerHTML = 'TextBus'.split('').map(t => `<div>${t}</div>`).join('');
     this.editableArea.appendChild(loading);
 
-    // this.device.onChange.subscribe(value => {
-    //   this.setTabletWidth(value);
-    // })
+    this.editorController.onStateChange.subscribe(value => {
+      for (const item of (this.options.deviceOptions || [])) {
+        if (value.deviceType === item.label) {
+          this.setTabletWidth(item.value);
+        }
+      }
+    })
 
     this.viewer.onReady.subscribe(() => {
       this.loaded()
@@ -97,8 +111,10 @@ export class Workbench implements DialogManager {
   private setTabletWidth(width: string) {
     if (width === '100%') {
       this.editableArea.style.padding = '';
+      this.viewer.setMinHeight(this.editableArea.offsetHeight);
     } else {
       this.editableArea.style.padding = '20px';
+      this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
     }
     this.tablet.style.width = width;
   }

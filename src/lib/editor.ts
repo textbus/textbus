@@ -120,13 +120,13 @@ export class Editor<T = any> {
 
     this.stateController = new EditorController({
       readonly: false,
-      expandComponentLibrary: true,
+      expandComponentLibrary: options.expandComponentLibrary,
       sourceCodeMode: false,
       deviceType: 'PC',
       fullScreen: true
     });
 
-    // this.fullScreen(true)
+    this.fullScreen(true)
 
     const staticProviders: Provider[] = [{
       provide: Editor,

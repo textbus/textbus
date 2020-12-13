@@ -73,7 +73,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.0.21",
     "@tanbo/css-themes": "^0.0.1",
-    "@tanbo/di": "0.0.11",
+    "@tanbo/di": "0.0.13",
     "pretty": "^2.0.0",
     "prismjs": "^1.21.0",
     "reflect-metadata": "^0.1.13",

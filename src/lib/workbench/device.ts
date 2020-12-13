@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
-import { Editor } from '../editor';
+import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 
 export interface DeviceOption {
@@ -18,10 +18,10 @@ export class Device {
   private menus = document.createElement('div');
   private menuItems: HTMLElement[] = [];
 
-  constructor(@Inject(forwardRef(() => Editor)) private editor: Editor,
+  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private deviceOptions: EditorOptions<any>,
               private editorController: EditorController) {
 
-    this.options = editor.options.deviceOptions || [];
+    this.options = deviceOptions.deviceOptions || [];
 
     this.button.type = 'button';
     this.button.title = '切换设备宽度';
@@ -45,7 +45,7 @@ export class Device {
     this.menus.addEventListener('click', ev => {
       const index = this.menuItems.indexOf(ev.target as HTMLElement);
       if (index > -1) {
-        this.editorController.viewDeviceType = this.options[index].value;
+        this.editorController.viewDeviceType = this.options[index].label;
       }
     })
     this.editorController.onStateChange.subscribe(status => {
