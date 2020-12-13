@@ -75,8 +75,7 @@ export class TBRange {
         this.startFragment = startPosition.fragment;
         this.startIndex = startPosition.startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
-
-        const childNodes = nativeRange.endContainer.childNodes;
+        const childNodes = nativeRange.startContainer.childNodes;
         if (childNodes.length === nativeRange.startOffset) {
           const child = childNodes[childNodes.length - 1];
           const childPosition = this.renderer.getPositionByNode(child);
