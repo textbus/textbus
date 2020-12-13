@@ -75,16 +75,28 @@ export class TBRange {
         this.startFragment = startPosition.fragment;
         this.startIndex = startPosition.startIndex + nativeRange.startOffset;
       } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
-        const child = nativeRange.startContainer.childNodes[nativeRange.startOffset];
-        const childPosition = this.renderer.getPositionByNode(child);
-        this.startFragment = childPosition.fragment;
-        this.startIndex = childPosition.startIndex;
+
+        const childNodes = nativeRange.endContainer.childNodes;
+        if (childNodes.length === nativeRange.startOffset) {
+          const child = childNodes[childNodes.length - 1];
+          const childPosition = this.renderer.getPositionByNode(child);
+          this.startFragment = childPosition.fragment;
+          this.startIndex = childPosition.endIndex;
+        } else {
+          const child = childNodes[nativeRange.startOffset];
+          const childPosition = this.renderer.getPositionByNode(child);
+          this.startFragment = childPosition.fragment;
+          this.startIndex = childPosition.startIndex;
+        }
+
       }
       if (nativeRange.endContainer.nodeType === Node.TEXT_NODE) {
         this.endFragment = endPosition.fragment;
         this.endIndex = endPosition.startIndex + nativeRange.endOffset;
       } else if (nativeRange.endContainer.nodeType === Node.ELEMENT_NODE) {
+
         const childNodes = nativeRange.endContainer.childNodes;
+
         if (childNodes.length === nativeRange.endOffset) {
           const child = childNodes[childNodes.length - 1];
           const childPosition = this.renderer.getPositionByNode(child);
