@@ -134,7 +134,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
         this.currentElement = srcElement;
         this.currentComponent = position.fragment.getContentAtIndex(position.startIndex) as ImageComponent;
         const selection = contextDocument.getSelection();
-        selection.removeAllRanges();
+        this.selection.removeAllRanges(true);
         const range = contextDocument.createRange();
         range.selectNode(srcElement);
         selection.addRange(range);
@@ -161,6 +161,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
       this.currentElement = null;
       this.mask.parentNode?.removeChild(this.mask);
     }
+    console.log(this.selection.firstRange)
   }
 
   private updateStyle() {

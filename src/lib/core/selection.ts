@@ -1,10 +1,11 @@
-import { fromEvent } from 'rxjs';
+import { fromEvent, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
+import { TBPlugin } from './plugin';
 
 /**
  * 记录选区路径数据。
@@ -60,18 +61,25 @@ export class TBSelection {
     return this.ranges.length === 1 && this.firstRange.collapsed || this.ranges.length === 0;
   }
 
-  onChange = fromEvent(this.context, 'selectionchange').pipe(tap(() => {
-    this._ranges = [];
-    for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
-      this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i), this.renderer));
-    }
-  }));
+  onChange: Observable<any>;
 
   private _ranges: TBRange[] = [];
   private nativeSelection: Selection;
 
-  constructor(private context: Document, private renderer: Renderer) {
+  constructor(private context: Document,
+              private renderer: Renderer,
+              private pipes: TBPlugin[] = []) {
     this.nativeSelection = context.getSelection();
+    this.onChange = fromEvent(this.context, 'selectionchange').pipe(tap(() => {
+      this._ranges = [];
+      for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
+        this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i).cloneRange(), this.renderer));
+      }
+    })).pipe(tap(() => {
+      pipes.forEach(plugin => {
+        plugin.onSelectionChange?.();
+      })
+    }));
   }
 
   /**
@@ -81,6 +89,15 @@ export class TBSelection {
     this._ranges.forEach(range => {
       range.restore();
     });
+    if (this.nativeSelection.rangeCount) {
+      const startNativeRange = this.firstRange?.nativeRange;
+      const endNativeRange = this.lastRange?.nativeRange;
+      const nativeRange = this.nativeSelection.getRangeAt(0);
+      if (startNativeRange && endNativeRange && nativeRange) {
+        nativeRange.setStart(startNativeRange.startContainer, startNativeRange.startOffset);
+        nativeRange.setEnd(endNativeRange.endContainer, endNativeRange.endOffset);
+      }
+    }
   }
 
   /**

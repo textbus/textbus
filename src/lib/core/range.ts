@@ -3,7 +3,13 @@ import { Type } from '@tanbo/di';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
-import { BranchAbstractComponent, LeafAbstractComponent, DivisionAbstractComponent, AbstractComponent, BackboneAbstractComponent } from './component';
+import {
+  BranchAbstractComponent,
+  LeafAbstractComponent,
+  DivisionAbstractComponent,
+  AbstractComponent,
+  BackboneAbstractComponent
+} from './component';
 import { BlockFormatter } from './formatter';
 
 /**

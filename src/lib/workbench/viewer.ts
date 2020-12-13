@@ -14,13 +14,7 @@ import { Toolbar } from '../toolbar/toolbar';
 export class Viewer {
   onReady: Observable<void>;
 
-  get contentWindow() {
-    return this.elementRef.contentWindow;
-  }
 
-  get contentDocument() {
-    return this.elementRef.contentDocument;
-  };
 
   elementRef = document.createElement('iframe');
 
@@ -33,6 +27,9 @@ export class Viewer {
         this.sourceCodeModeStyleSheet.parentNode?.removeChild(this.sourceCodeModeStyleSheet);
       }
     }
+  }
+  private get contentDocument() {
+    return this.elementRef.contentDocument;
   }
 
   private _sourceCodeMode = false;
@@ -87,8 +84,9 @@ export class Viewer {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
     const renderer = new Renderer();
-    const selection = new TBSelection(this.contentDocument, renderer);
+    const selection = new TBSelection(this.contentDocument, renderer, (this.options.plugins || []));
     const parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
+
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
       useValue: this.contentDocument
@@ -113,6 +111,7 @@ export class Viewer {
 
     const rootComponent = viewInjector.get(RootComponent);
     const toolbar = viewInjector.get(Toolbar);
+
     toolbar.setup(viewInjector);
 
 
@@ -133,12 +132,6 @@ export class Viewer {
     rootAnnotation.interceptor.setup(viewInjector);
     componentAnnotations.forEach(c => {
       c.interceptor?.setup(viewInjector);
-    });
-
-    selection.onChange.subscribe(() => {
-      (this.options.plugins || []).forEach(plugin => {
-        plugin.onSelectionChange?.();
-      })
     });
 
     (this.options.plugins || []).forEach(plugin => {

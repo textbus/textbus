@@ -128,7 +128,6 @@ export class TableEditPlugin implements TBPlugin {
         }
         this.selection.addRange(range);
       });
-      console.log(this.selection.rangeCount)
     }
   }
 
