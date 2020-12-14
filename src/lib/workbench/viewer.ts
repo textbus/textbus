@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { forwardRef, getAnnotations, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
 import pretty from 'pretty';
 
@@ -144,8 +144,7 @@ export class Viewer {
       this.viewUpdateEvent.next();
     })
 
-    this.editorController.onStateChange.subscribe(status => {
-      const b = status.sourceCodeMode;
+    this.editorController.onStateChange.pipe(map(b => b.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
       selection.removeAllRanges();
       this.sourceCodeMode = b;
       if (b) {
@@ -197,7 +196,8 @@ export class Viewer {
   }
 
   private listen() {
-    const fn = () => {
+    // @ts-ignore
+    const resizeObserver = new ResizeObserver(() => {
       const childBody = this.contentDocument.body;
       const lastChild = childBody.lastChild;
       let height = 0;
@@ -211,10 +211,9 @@ export class Viewer {
           childBody.removeChild(div);
         }
       }
-      this.elementRef.style.height = Math.max(height + 30, this.minHeight) + 'px';
-      this.id = requestAnimationFrame(fn);
-    }
-    this.id = requestAnimationFrame(fn);
+      this.elementRef.style.height = Math.max(height, this.minHeight) + 'px';
+    })
+    resizeObserver.observe(this.contentDocument.body);
   }
 
 

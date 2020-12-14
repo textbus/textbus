@@ -12,6 +12,7 @@ import { Dialog } from './dialog';
 export class Workbench {
   elementRef: HTMLElement;
   readonly tablet: HTMLElement;
+  readonly tabletWrapper: HTMLElement;
   private editableArea: HTMLElement;
   private loading = document.createElement('div');
 
@@ -36,9 +37,14 @@ export class Workbench {
             this.editableArea = createElement('div', {
               classes: ['textbus-editable-area'],
               children: [
-                this.tablet = createElement('div', {
-                  classes: ['textbus-tablet'],
-                  children: [this.viewer.elementRef]
+                this.tabletWrapper = createElement('div', {
+                  classes: ['textbus-tablet-wrapper'],
+                  children: [
+                    this.tablet = createElement('div', {
+                      classes: ['textbus-tablet'],
+                      children: [this.viewer.elementRef]
+                    })
+                  ]
                 })
               ]
             }),
@@ -70,7 +76,7 @@ export class Workbench {
     this.viewer.setMinHeight(this.editableArea.offsetHeight);
     setTimeout(() => {
       this.loading.classList.add('textbus-workbench-loading-done');
-      this.tablet.classList.add('textbus-tablet-ready');
+      this.tabletWrapper.classList.add('textbus-tablet-ready');
       setTimeout(() => {
         this.editableArea.removeChild(this.loading);
       }, 300);
@@ -85,6 +91,6 @@ export class Workbench {
       this.editableArea.style.padding = '20px';
       this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
     }
-    this.tablet.style.width = width;
+    this.tabletWrapper.style.width = width;
   }
 }
