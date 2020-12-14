@@ -113,6 +113,9 @@ export class Toolbar {
     this.keymaps.forEach(k => this.input.keymap(k));
 
     this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
+      const event = document.createEvent('Event');
+      event.initEvent('click', true, true);
+      this.elementRef.dispatchEvent(event);
       this.updateHandlerState();
     })
 
