@@ -141,17 +141,27 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   }
 
   onDeleteRange() {
+    const firstRange = this.selection.firstRange;
+    const prevPosition = firstRange.getPreviousPosition();
+    const nextPosition = this.selection.lastRange.getNextPosition();
+
     this.selection.ranges.forEach(range => {
       range.connect();
     })
+    const commonAncestorFragment = this.selection.commonAncestorFragment;
+    if (commonAncestorFragment.contentLength === 0) {
+      if (commonAncestorFragment === prevPosition.fragment) {
+        firstRange.startFragment = firstRange.endFragment = nextPosition.fragment;
+        firstRange.startIndex = firstRange.endIndex = nextPosition.index
+      } else {
+        firstRange.startFragment = firstRange.endFragment = prevPosition.fragment;
+        firstRange.startIndex = firstRange.endIndex = prevPosition.index
+      }
+    }
   }
 
   onDelete() {
     this.selection.ranges.forEach(range => {
-      if (!range.collapsed) {
-        range.connect();
-        return;
-      }
       let prevPosition = range.getPreviousPosition();
       if (range.startIndex > 0) {
         range.setStart(prevPosition.fragment, prevPosition.index);

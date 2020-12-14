@@ -181,6 +181,114 @@ export class Input {
     } else {
       this.hide();
     }
+    this.input.focus();
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    const selection = this.selection;
+    selection.ranges.forEach(range => {
+      let p: TBRangePosition;
+      let range2: TBRange;
+      switch (direction) {
+        case CursorMoveDirection.Left:
+          p = range.getPreviousPosition();
+          break;
+        case CursorMoveDirection.Right:
+          p = range.getNextPosition();
+          break;
+        case CursorMoveDirection.Up:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
+          } else {
+            const rect = range2.getRangePosition();
+            this.oldCursorPosition = rect;
+            p = range.getPreviousLinePosition(rect.left);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
+        case CursorMoveDirection.Down:
+          clearTimeout(this.cleanOldCursorTimer);
+          range2 = range.clone().restore();
+
+          if (this.oldCursorPosition) {
+            p = range2.getNextLinePosition(this.oldCursorPosition.left);
+          } else {
+            const rect = range2.getRangePosition();
+            this.oldCursorPosition = rect;
+            p = range.getNextLinePosition(rect.left);
+          }
+          this.cleanOldCursorTimer = setTimeout(() => {
+            this.oldCursorPosition = null;
+          }, 3000);
+          break;
+      }
+      range.startFragment = range.endFragment = p.fragment;
+      range.startIndex = range.endIndex = p.index;
+    });
+    selection.restore();
+  }
+
+  private updateCursorPosition(limit: HTMLElement) {
+    if (!this.selection || this.selection.rangeCount === 0) {
+      return;
+    }
+    const startContainer = this.selection.firstRange.nativeRange.startContainer;
+
+    const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement;
+    if (node?.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+    const rect = this.selection.firstRange.getRangePosition();
+    const {fontSize, lineHeight, color} = getComputedStyle(node);
+
+    if (isWindows) {
+      this.inputWrap.style.top = fontSize;
+    }
+
+    let height: number;
+    if (isNaN(+lineHeight)) {
+      const f = parseFloat(lineHeight);
+      if (isNaN(f)) {
+        height = parseFloat(fontSize);
+      } else {
+        height = f;
+      }
+    } else {
+      height = parseFloat(fontSize) * parseFloat(lineHeight);
+    }
+
+    const boxHeight = Math.max(height, rect.height);
+
+    let top = rect.top;
+    if (rect.height < height) {
+      top -= (height - rect.height) / 2;
+    }
+
+    this.elementRef.style.left = rect.left + 'px';
+    this.elementRef.style.top = top + 'px';
+    this.elementRef.style.height = boxHeight + 'px';
+    this.cursor.style.backgroundColor = color;
+    this.input.style.lineHeight = boxHeight + 'px';
+    this.input.style.fontSize = fontSize;
+
+    if (this.selection.collapsed && this.selection.rangeCount === 1) {
+      const scrollTop = limit.scrollTop;
+      const offsetHeight = limit.offsetHeight;
+      const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;
+
+      const cursorTop = top + boxHeight + paddingTop + 5;
+      const viewTop = scrollTop + offsetHeight;
+      if (cursorTop > viewTop) {
+        limit.scrollTop = cursorTop - offsetHeight;
+      } else if (top < scrollTop) {
+        limit.scrollTop = top;
+      }
+    }
   }
 
   private initEvent() {
@@ -364,113 +472,6 @@ export class Input {
     }
   }
 
-  private moveCursor(direction: CursorMoveDirection) {
-    const selection = this.selection;
-    selection.ranges.forEach(range => {
-      let p: TBRangePosition;
-      let range2: TBRange;
-      switch (direction) {
-        case CursorMoveDirection.Left:
-          p = range.getPreviousPosition();
-          break;
-        case CursorMoveDirection.Right:
-          p = range.getNextPosition();
-          break;
-        case CursorMoveDirection.Up:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getPreviousLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-        case CursorMoveDirection.Down:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getNextLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getNextLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-      }
-      range.startFragment = range.endFragment = p.fragment;
-      range.startIndex = range.endIndex = p.index;
-    });
-    selection.restore();
-  }
-
-  private updateCursorPosition(limit: HTMLElement) {
-    if (!this.selection || this.selection.rangeCount === 0) {
-      return;
-    }
-    const startContainer = this.selection.firstRange.nativeRange.startContainer;
-
-    const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement;
-    if (node?.nodeType !== Node.ELEMENT_NODE) {
-      return;
-    }
-    const rect = this.selection.firstRange.getRangePosition();
-    const {fontSize, lineHeight, color} = getComputedStyle(node);
-
-    if (isWindows) {
-      this.inputWrap.style.top = fontSize;
-    }
-
-    let height: number;
-    if (isNaN(+lineHeight)) {
-      const f = parseFloat(lineHeight);
-      if (isNaN(f)) {
-        height = parseFloat(fontSize);
-      } else {
-        height = f;
-      }
-    } else {
-      height = parseFloat(fontSize) * parseFloat(lineHeight);
-    }
-
-    const boxHeight = Math.max(height, rect.height);
-
-    let top = rect.top;
-    if (rect.height < height) {
-      top -= (height - rect.height) / 2;
-    }
-
-    this.elementRef.style.left = rect.left + 'px';
-    this.elementRef.style.top = top + 'px';
-    this.elementRef.style.height = boxHeight + 'px';
-    this.cursor.style.backgroundColor = color;
-    this.input.style.lineHeight = boxHeight + 'px';
-    this.input.style.fontSize = fontSize;
-
-    if (this.selection.collapsed && this.selection.rangeCount === 1) {
-      const scrollTop = limit.scrollTop;
-      const offsetHeight = limit.offsetHeight;
-      const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;
-
-      const cursorTop = top + boxHeight + paddingTop + 5;
-      const viewTop = scrollTop + offsetHeight;
-      if (cursorTop > viewTop) {
-        limit.scrollTop = cursorTop - offsetHeight;
-      } else if (top < scrollTop) {
-        limit.scrollTop = top;
-      }
-    }
-  }
-
   private show() {
     this.display = true;
     clearTimeout(this.timer);
@@ -479,7 +480,6 @@ export class Input {
       this.timer = setTimeout(toggleShowHide, 400);
     };
     this.timer = setTimeout(toggleShowHide, 400);
-    this.input.focus();
   }
 
   private hide() {

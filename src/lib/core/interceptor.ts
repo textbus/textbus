@@ -11,7 +11,7 @@ export interface TBClipboard {
 /**
  * TextBus 事件对象。
  */
-export class TBEvent<T extends AbstractComponent, U = any> {
+export class TBEvent<T extends AbstractComponent, U = null> {
   /**
    * 是否已阻止事件冒泡。
    */

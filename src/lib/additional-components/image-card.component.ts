@@ -48,31 +48,33 @@ class ImageCardComponentInterceptor implements Interceptor<ImageCardComponent> {
   }
 
   onInput(event: TBEvent<ImageCardComponent>) {
-    if (this.selection.commonAncestorFragment === event.data.imgFragment) {
+    if (this.selection.commonAncestorFragment === event.instance.imgFragment) {
       event.stopPropagation();
     }
   }
 
   onPaste(event: TBEvent<ImageCardComponent, TBClipboard>) {
-    this.onInput(event);
+    if (this.selection.commonAncestorFragment === event.instance.imgFragment) {
+      event.stopPropagation();
+    }
   }
 
   onDelete(event: TBEvent<ImageCardComponent>) {
     const {commonAncestorFragment, firstRange} = this.selection;
-    if (commonAncestorFragment === event.data.imgFragment) {
+    if (commonAncestorFragment === event.instance.imgFragment) {
       event.stopPropagation();
-    } else if (commonAncestorFragment === event.data.descFragment && firstRange.startIndex === 0) {
+    } else if (commonAncestorFragment === event.instance.descFragment && firstRange.startIndex === 0) {
       event.stopPropagation();
     }
   }
 
   onEnter(event: TBEvent<ImageCardComponent>) {
     const {firstRange, commonAncestorFragment} = this.selection;
-    if (commonAncestorFragment === event.data.descFragment) {
-      const parentFragment = event.data.parentFragment;
+    if (commonAncestorFragment === event.instance.descFragment) {
+      const parentFragment = event.instance.parentFragment;
       const p = new BlockComponent('p');
       p.slot.append(new BrComponent());
-      parentFragment.insertAfter(p, this);
+      parentFragment.insertAfter(p, event.instance);
       firstRange.setStart(p.slot, 0);
       firstRange.collapse();
     }

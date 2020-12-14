@@ -505,12 +505,6 @@ export class TBRange {
 
     while (true) {
       const parentComponent = fragment.parentComponent;
-      if (!parentComponent) {
-        return {
-          fragment: cacheFragment,
-          index: 0
-        };
-      }
       if (parentComponent instanceof BranchAbstractComponent) {
         const fragmentIndex = parentComponent.slots.indexOf(fragment);
         if (fragmentIndex > 0) {
@@ -526,6 +520,13 @@ export class TBRange {
       }
 
       const parentFragment = parentComponent.parentFragment;
+
+      if (!parentFragment) {
+        return {
+          fragment: cacheFragment,
+          index: 0
+        };
+      }
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex > 0) {
         const prevContent = parentFragment.getContentAtIndex(componentIndex - 1);
@@ -587,14 +588,7 @@ export class TBRange {
 
     while (true) {
       const parentComponent = fragment.parentComponent;
-      if (!parentComponent) {
-        const len = cacheFragment.contentLength;
-        const last = cacheFragment.getContentAtIndex(len - 1);
-        return {
-          fragment: cacheFragment,
-          index: last instanceof LeafAbstractComponent && last.tagName === 'br' ? len - 1 : len
-        }
-      }
+
       if (parentComponent instanceof BranchAbstractComponent) {
         const fragmentIndex = parentComponent.slots.indexOf(fragment);
         if (fragmentIndex < parentComponent.slots.length - 1) {
@@ -608,6 +602,14 @@ export class TBRange {
         }
       }
       const parentFragment = parentComponent.parentFragment;
+      if (!parentFragment) {
+        const len = cacheFragment.contentLength;
+        const last = cacheFragment.getContentAtIndex(len - 1);
+        return {
+          fragment: cacheFragment,
+          index: last instanceof LeafAbstractComponent && last.tagName === 'br' ? len - 1 : len
+        }
+      }
       const componentIndex = parentFragment.indexOf(parentComponent);
       if (componentIndex < parentFragment.contentLength - 1) {
         const nextContent = parentFragment.getContentAtIndex(componentIndex + 1);
