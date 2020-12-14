@@ -63,6 +63,8 @@ export class EditorController {
   }
 
   private dispatch() {
-    this.stateChangeEvent.next(this.status);
+    this.stateChangeEvent.next({
+      ...this.status
+    });
   }
 }

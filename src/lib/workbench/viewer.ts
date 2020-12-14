@@ -1,19 +1,23 @@
 import { Observable, Subject } from 'rxjs';
-import { forwardRef, getAnnotations, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
 import { debounceTime } from 'rxjs/operators';
+import { forwardRef, getAnnotations, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
+import pretty from 'pretty';
 
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
-import { Component, Parser, Renderer, TBSelection } from '../core/_api';
+import { Component, Fragment, OutputRenderer, Parser, Renderer, TBSelection } from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
 import { Input } from './input';
 import { RootComponent } from '../root-component';
 import { Toolbar } from '../toolbar/toolbar';
 import { ComponentStage } from './component-stage';
+import { EditorController } from '../editor-controller';
+import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
 
 @Injectable()
 export class Viewer {
   onReady: Observable<void>;
+  onViewUpdated: Observable<void>;
   elementRef = document.createElement('iframe');
 
   set sourceCodeMode(b: boolean) {
@@ -26,20 +30,30 @@ export class Viewer {
       }
     }
   }
+
   private get contentDocument() {
     return this.elementRef.contentDocument;
   }
 
   private _sourceCodeMode = false;
   private sourceCodeModeStyleSheet = document.createElement('style');
+
+
+  private sourceCodeComponent = new PreComponent('HTML');
+  private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<void>();
+  private viewUpdateEvent = new Subject<void>();
   private id: number = null;
   private minHeight = 400;
+  private rootComponent: RootComponent;
+  private parser: Parser;
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               private componentStage: ComponentStage,
+              private editorController: EditorController,
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
+    this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
 
     this.elementRef.setAttribute('scrolling', 'no');
@@ -84,7 +98,7 @@ export class Viewer {
     })
     const renderer = new Renderer();
     const selection = new TBSelection(this.contentDocument, renderer, (this.options.plugins || []));
-    const parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
+    const parser = this.parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
 
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
@@ -106,7 +120,7 @@ export class Viewer {
       ...viewProviders
     ]);
 
-    const rootComponent = viewInjector.get(RootComponent);
+    const rootComponent = this.rootComponent = viewInjector.get(RootComponent);
     const toolbar = viewInjector.get(Toolbar);
 
     toolbar.setup(viewInjector);
@@ -117,11 +131,34 @@ export class Viewer {
       (this.options.plugins || []).forEach(plugin => {
         plugin.onRenderingBefore?.();
       })
+      if (this.editorController.sourceCodeMode) {
+        Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
+      } else {
+        Viewer.guardLastIsParagraph(rootComponent.slot);
+      }
       renderer.render(rootComponent.slot, this.contentDocument.body);
       selection.restore();
       (this.options.plugins || []).forEach(plugin => {
         plugin.onViewUpdated?.();
       })
+      this.viewUpdateEvent.next();
+    })
+
+    this.editorController.onStateChange.subscribe(status => {
+      const b = status.sourceCodeMode;
+      selection.removeAllRanges();
+      this.sourceCodeMode = b;
+      if (b) {
+        const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
+        this.rootComponent.slot.clean();
+        this.sourceCodeComponent.slot.clean();
+        this.sourceCodeComponent.slot.append(pretty(html));
+        this.rootComponent.slot.append(this.sourceCodeComponent);
+      } else {
+        const html = this.getHTMLBySourceCodeMode();
+        const dom = Viewer.parserHTML(html)
+        this.rootComponent.slot.from(this.parser.parse(dom));
+      }
     })
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
@@ -135,7 +172,31 @@ export class Viewer {
     (this.options.plugins || []).forEach(plugin => {
       plugin.setup(viewInjector);
     })
+
     viewInjector.get(HistoryManager).startListen();
+  }
+
+  updateContent(html: string) {
+    this.rootComponent.slot.from(this.parser.parse(Viewer.parserHTML(html)));
+  }
+
+  getContents() {
+    return {
+      styleSheets: this.options.styleSheets,
+      content: this.editorController.sourceCodeMode ?
+        this.getHTMLBySourceCodeMode() :
+        this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot))
+    };
+  }
+
+  getJSONLiteral() {
+    return this.outputRenderer.render(this.rootComponent.slot).toJSON();
+  }
+
+  private getHTMLBySourceCodeMode() {
+    return this.sourceCodeComponent.slot.sliceContents(0).map(i => {
+      return typeof i === 'string' ? i.trim() : '';
+    }).join('');
   }
 
   private listen() {
@@ -157,6 +218,31 @@ export class Viewer {
       this.id = requestAnimationFrame(fn);
     }
     this.id = requestAnimationFrame(fn);
+  }
+
+
+  private static guardLastIsParagraph(fragment: Fragment) {
+    const last = fragment.sliceContents(fragment.contentLength - 1)[0];
+    if (last instanceof BlockComponent) {
+      if (last.tagName === 'p') {
+        if (last.slot.contentLength === 0) {
+          last.slot.append(new BrComponent());
+        }
+        return;
+      }
+    }
+    const p = new BlockComponent('p');
+    p.slot.append(new BrComponent());
+    fragment.append(p);
+  }
+
+  private static guardContentIsPre(fragment: Fragment, pre: PreComponent) {
+    if (fragment.contentLength === 0) {
+      fragment.append(pre);
+    }
+    if (pre.slot.contentLength === 0) {
+      pre.slot.append(new BrComponent());
+    }
   }
 
   private static parserHTML(html: string) {

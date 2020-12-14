@@ -27,7 +27,7 @@ import {
 import { ComponentExample, ComponentStage } from './workbench/component-stage';
 import { Workbench } from './workbench/workbench';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
-import { Toolbar, ToolEntity, ToolFactory } from './toolbar/_api';
+import { Toolbar, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';
 import { FileUploader } from './uikit/forms/help';
 
@@ -102,10 +102,10 @@ export class Editor<T = any> {
   private tasks: Array<() => void> = [];
 
   private readyEvent = new Subject<void>();
-  private changeEvent = new Subject<void>();
 
   private onUserWrite: Observable<void>;
   private userWriteEvent = new Subject<void>();
+  private viewer: Viewer;
 
   private subs: Subscription[] = [];
 
@@ -117,7 +117,6 @@ export class Editor<T = any> {
       this.container = selector;
     }
     this.onReady = this.readyEvent.asObservable();
-    this.onChange = this.changeEvent.asObservable();
     let defaultDeviceType = options.deviceType;
 
     if (!defaultDeviceType) {
@@ -136,9 +135,9 @@ export class Editor<T = any> {
       fullScreen: options.fullScreen
     });
 
-    this.stateController.onStateChange.subscribe(state => {
+    this.subs.push(this.stateController.onStateChange.subscribe(state => {
       this.fullScreen(state.fullScreen);
-    })
+    }))
 
     const staticProviders: Provider[] = [{
       provide: Editor,
@@ -203,8 +202,12 @@ export class Editor<T = any> {
       ...staticProviders
     ]);
 
+    this.viewer = rootInjector.get(Viewer);
+    this.onChange = this.viewer.onViewUpdated;
+
     this.subs.push(
-      rootInjector.get(Viewer).onReady.subscribe(() => {
+      this.viewer.onReady.subscribe(() => {
+        this.tasks.forEach(fn => fn());
         this.readyState = true;
         this.readyEvent.next();
       })
@@ -229,11 +232,9 @@ export class Editor<T = any> {
    * @param html
    */
   setContents(html: string) {
-    html = html + '';
     return new Promise((resolve) => {
       this.run(() => {
-        // const el = Editor.parserHTML(html)
-        // this.rootFragment.from(this.parser.parse(el));
+        this.viewer.updateContent(html + '');
         resolve();
       })
     })
@@ -242,14 +243,12 @@ export class Editor<T = any> {
   /**
    * 获取 TextBus 的内容。
    */
-  // getContents() {
-  //   return {
-  //     styleSheets: this.options.styleSheets,
-  //     content: this.openSourceCodeMode ?
-  //       this.getHTMLBySourceCodeMode() :
-  //       this.outputTranslator.transform(this.outputRenderer.render(this.rootFragment))
-  //   };
-  // }
+  getContents() {
+    return {
+      styleSheets: this.options.styleSheets,
+      content: this.viewer.getContents()
+    }
+  }
 
   /**
    * 获取 TextBus 内容的 JSON 字面量。
@@ -258,19 +257,10 @@ export class Editor<T = any> {
     if (this.stateController.sourceCodeMode) {
       throw new Error('源代码模式下，不支持获取 JSON 字面量！');
     }
-    // return {
-    //   styleSheets: this.options.styleSheets,
-    //   json: this.outputRenderer.render(this.rootFragment).toJSON()
-    // };
-  }
-
-  /**
-   * 应用工具方法
-   * @param tool
-   * @param params
-   */
-  invoke(tool: ToolEntity, params?: any) {
-    // this.execCommand(tool.config, params, tool.instance.commander);
+    return {
+      styleSheets: this.options.styleSheets,
+      json: this.viewer.getJSONLiteral()
+    };
   }
 
   /**
@@ -279,12 +269,9 @@ export class Editor<T = any> {
   destroy() {
     this.container.removeChild(this.elementRef);
     this.subs.forEach(s => s.unsubscribe());
-    this.readyEvent.complete();
-    this.changeEvent.complete();
-    // this.history.destroy();
   }
 
-  fullScreen(is: boolean) {
+  private fullScreen(is: boolean) {
     is ?
       this.elementRef.classList.add('textbus-container-full-screen') :
       this.elementRef.classList.remove('textbus-container-full-screen')

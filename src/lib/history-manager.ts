@@ -5,6 +5,7 @@ import { forwardRef, Inject, Injectable, InjectionToken } from '@tanbo/di';
 import { Fragment, RangePath, TBSelection } from './core/_api';
 import { EDITOR_OPTIONS, EditorOptions } from './editor';
 import { RootComponent } from './root-component';
+import { EditorController } from './editor-controller';
 
 export interface Snapshot {
   contents: Fragment;
@@ -35,15 +36,21 @@ export class HistoryManager {
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
+              @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent) {
     this.historyStackSize = options.historyStackSize || 50;
     this.onChange = this.historyChangeEvent.asObservable();
-
   }
 
   startListen() {
-    this.recordSnapshot();
-    this.listenUserWriteEvent();
+    // this.editorController.onStateChange.subscribe(status => {
+    //   if (status.sourceCodeMode) {
+    //     this.stopListen();
+    //   } else {
+    //     this.recordSnapshot();
+    //     this.listenUserWriteEvent();
+    //   }
+    // })
   }
 
   usePreviousSnapshot() {
@@ -76,10 +83,14 @@ export class HistoryManager {
     this.historySequence = [];
   }
 
-  private listenUserWriteEvent() {
+  private stopListen() {
     if (this.snapshotSubscription) {
       this.snapshotSubscription.unsubscribe();
     }
+  }
+
+  private listenUserWriteEvent() {
+    this.startListen();
     this.snapshotSubscription = this.rootComponent.onChange.pipe(sampleTime(5000)).subscribe(() => {
       this.recordSnapshot();
     });
