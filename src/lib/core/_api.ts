@@ -4,7 +4,6 @@ export * from './commander';
 export * from './component';
 export * from './contents';
 export * from './element';
-export * from './events';
 export * from './format-abstract-data';
 export * from './format-map';
 export * from './formatter';
