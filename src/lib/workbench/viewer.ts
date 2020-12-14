@@ -181,12 +181,9 @@ export class Viewer {
   }
 
   getContents() {
-    return {
-      styleSheets: this.options.styleSheets,
-      content: this.editorController.sourceCodeMode ?
-        this.getHTMLBySourceCodeMode() :
-        this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot))
-    };
+    return this.editorController.sourceCodeMode ?
+      this.getHTMLBySourceCodeMode() :
+      this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
   }
 
   getJSONLiteral() {

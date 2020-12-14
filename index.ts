@@ -50,7 +50,7 @@ document.getElementById('btn').addEventListener('click', () => {
 window['editor'] = editor;
 
 editor.onChange.subscribe(() => {
-  console.log(editor.getContents().content)
+  console.log(editor.getJSONLiteral().json)
 })
 
 // document.addEventListener('selectionchange', () => {
