@@ -1,4 +1,4 @@
-import { fromEvent, Observable, of } from 'rxjs';
+import { fromEvent, Observable, of, Subject, merge } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { TBRange, TBRangePosition } from './range';
@@ -75,12 +75,15 @@ export class TBSelection {
 
   private _ranges: TBRange[] = [];
   private nativeSelection: Selection;
+  private selectionChangeEvent = new Subject<void>();
+  private isChanged = false;
 
   constructor(private context: Document,
               private renderer: Renderer,
               private pipes: TBPlugin[] = []) {
     this.nativeSelection = context.getSelection();
-    this.onChange = once(context).pipe(tap(() => {
+    this.onChange = merge(once(context), this.selectionChangeEvent.asObservable()).pipe(tap(() => {
+      this.isChanged = true;
       this._ranges = [];
       for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
         this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i).cloneRange(), this.renderer));
@@ -96,6 +99,7 @@ export class TBSelection {
    * 通过 TBRange 复位原生选区。
    */
   restore() {
+    this.isChanged = false;
     this._ranges.forEach(range => {
       range.restore();
     });
@@ -111,6 +115,9 @@ export class TBSelection {
       }
       nativeRange.setStart(startNativeRange.startContainer, startNativeRange.startOffset);
       nativeRange.setEnd(endNativeRange.endContainer, endNativeRange.endOffset);
+    }
+    if (!this.isChanged) {
+      this.selectionChangeEvent.next()
     }
   }
 
