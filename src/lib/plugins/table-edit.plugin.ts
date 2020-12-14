@@ -131,14 +131,13 @@ export class TableEditPlugin implements TBPlugin {
     }
   }
 
-  onApplyCommand(commander: Commander): boolean {
+  onApplyCommand(commander: Commander) {
     if (commander instanceof TableEditCommander || commander instanceof TdBorderColorCommander) {
       commander.setEditRange({
         startPosition: this.startPosition,
         endPosition: this.endPosition
       });
     }
-    return true;
   }
 
   onViewUpdated() {

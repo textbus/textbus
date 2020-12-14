@@ -14,28 +14,28 @@ import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
 import { PreComponent } from '../components/pre.component';
 import { RootComponent } from '../root-component';
 import { EDITABLE_DOCUMENT_CONTAINER } from '../editor';
+import { Input } from '../workbench/_api';
 
 export class FindPlugin implements TBPlugin {
   private findValue: string;
   private commander: FindCommander;
   private positions: ElementPosition[] = [];
   private positionIndex = 0;
-  private isJustFind = true;
   private frameContainer: HTMLElement;
 
   private selection: TBSelection;
   private rootComponent: RootComponent;
+  private input: Input
   setup(injector: Injector) {
     this.selection = injector.get(TBSelection);
     this.rootComponent = injector.get(RootComponent);
+    this.input = injector.get(Input);
     this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
-
   }
 
   onApplyCommand(commander: Commander,
                  params: any,
-                 updateParamsFn: (newParams: any) => void): boolean {
-    this.isJustFind = false;
+                 updateParamsFn: (newParams: any) => void) {
     if (commander instanceof FindCommander) {
       const rule = params as FindAndReplaceRule;
       if (rule.next) {
@@ -55,7 +55,6 @@ export class FindPlugin implements TBPlugin {
           p.fragment.insert(rule.replaceValue, p.startIndex);
         });
       } else {
-        this.isJustFind = true;
         commander.recordHistory = false;
         this.positionIndex = 0;
         this.selection.removeAllRanges();
@@ -67,10 +66,9 @@ export class FindPlugin implements TBPlugin {
       this.positionIndex = this.positionIndex % this.positions.length || 0;
       updateParamsFn(newParams);
     }
-    return true;
   }
 
-  onRenderingBefore(): boolean {
+  onRenderingBefore() {
     if (this.findValue && this.commander) {
       const newPositions = this.find(this.rootComponent.slot, this.findValue);
       if (newPositions.length !== this.positions.length) {
@@ -95,15 +93,11 @@ export class FindPlugin implements TBPlugin {
       const current = this.positions[this.positionIndex];
       range.setStart(current.fragment, current.startIndex);
       range.setEnd(current.fragment, current.endIndex);
-      if (this.isJustFind) {
-        range.restore();
-        const position = range.getRangePosition();
-        (this.frameContainer.parentNode as HTMLElement).scrollTop = position.top;
-      } else {
-        this.selection.removeAllRanges(true);
-        this.selection.addRange(range, true);
-        this.selection.restore();
-      }
+      this.selection.removeAllRanges(true);
+      this.selection.addRange(range, true);
+      this.selection.restore();
+      const position = range.getRangePosition();
+      (this.frameContainer.parentNode as HTMLElement).scrollTop = position.top;
     }
   }
 
