@@ -114,10 +114,7 @@ export class WordExplainComponent extends BackboneAbstractComponent {
 
     if (!isOutputMode) {
       const close = new VElement('span', {
-        classes: ['tb-word-explain-close'],
-        attrs: {
-          'data-guard-new-node': NaN // 确保每一次都渲染成最新的，以便 click 事件能拿到 Renderer 对象
-        }
+        classes: ['tb-word-explain-close']
       });
       wrap.appendChild(close);
       close.onRendered = nativeNode => {
