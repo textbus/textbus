@@ -48,7 +48,7 @@ export class HistoryManager {
         this.stopListen();
       } else {
         this.recordSnapshot();
-        this.listenUserWriteEvent();
+        this.listen();
       }
     })
   }
@@ -60,7 +60,7 @@ export class HistoryManager {
       const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
       this.rootComponent.slot.from(snapshot.contents);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
-      this.listenUserWriteEvent();
+      this.listen();
     }
   }
 
@@ -70,7 +70,7 @@ export class HistoryManager {
       const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
       this.rootComponent.slot.from(snapshot.contents);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
-      this.listenUserWriteEvent();
+      this.listen();
     }
   }
 
@@ -83,13 +83,18 @@ export class HistoryManager {
     this.historySequence = [];
   }
 
+  record() {
+    this.recordSnapshot();
+    this.listen();
+  }
+
   private stopListen() {
     if (this.snapshotSubscription) {
       this.snapshotSubscription.unsubscribe();
     }
   }
 
-  private listenUserWriteEvent() {
+  private listen() {
     this.stopListen();
     this.snapshotSubscription = this.rootComponent.onChange.pipe(sampleTime(5000)).subscribe(() => {
       this.recordSnapshot();

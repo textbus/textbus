@@ -11,6 +11,7 @@ import {
   BackboneAbstractComponent
 } from './component';
 import { BlockFormatter } from './formatter';
+import { BrComponent } from '../components/br.component';
 
 /**
  * 标识 Fragment 中的一个位置。
@@ -557,7 +558,7 @@ export class TBRange {
     let offset = this.endIndex;
     if (offset === fragment.contentLength - 1) {
       const current = fragment.getContentAtIndex(offset);
-      if (current instanceof LeafAbstractComponent && current.tagName === 'br') {
+      if (current instanceof BrComponent) {
         offset++;
       }
     }
@@ -607,7 +608,7 @@ export class TBRange {
         const last = cacheFragment.getContentAtIndex(len - 1);
         return {
           fragment: cacheFragment,
-          index: last instanceof LeafAbstractComponent && last.tagName === 'br' ? len - 1 : len
+          index: last instanceof BrComponent ? len - 1 : len
         }
       }
       const componentIndex = parentFragment.indexOf(parentComponent);
@@ -776,7 +777,7 @@ export class TBRange {
       return this.findLastChild(lastFragment);
     }
     return {
-      index: last instanceof LeafAbstractComponent && last.tagName === 'br' ?
+      index: last instanceof BrComponent ?
         fragment.contentLength - 1 :
         fragment.contentLength,
       fragment

@@ -7,6 +7,7 @@ import {
   DivisionAbstractComponent, LeafAbstractComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
+import { BrComponent } from '../components/br.component';
 
 export interface ElementPosition {
   startIndex: number;
@@ -250,6 +251,9 @@ export class Renderer {
   }
 
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
+    if (fragment.contentLength === 0) {
+      fragment.append(new BrComponent());
+    }
     if (fragment.dirty || forceUpdate) {
       host.clearChildNodes();
       const {childFormats, containerFormats} = Renderer.formatSeparate(fragment);
@@ -411,11 +415,11 @@ export class Renderer {
       } else {
         const vDom = this.rendingComponent(item);
         // if (!(item instanceof DivisionAbstractComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
-          this.vDomPositionMapping.set(vDom, {
-            fragment,
-            startIndex: i,
-            endIndex: i + 1
-          })
+        this.vDomPositionMapping.set(vDom, {
+          fragment,
+          startIndex: i,
+          endIndex: i + 1
+        })
         // }
         children.push(vDom);
         i++;

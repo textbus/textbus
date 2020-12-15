@@ -159,11 +159,11 @@ export class TableComponent extends BackboneAbstractComponent {
   constructor(public config: TableInitParams) {
     super('table')
     const bodyConfig = config.bodies;
+    const cells = [];
     for (const row of bodyConfig) {
-      for (const col of row) {
-        this.push(col.fragment);
-      }
+      cells.push(...row.map(i => i.fragment));
     }
+    this.push(...cells);
   }
 
   canDelete(deletedSlot: Fragment): boolean {

@@ -51,6 +51,7 @@ export class Toolbar {
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
   private selection: TBSelection;
+  private history: HistoryManager;
   private input: Input;
   private keymaps: KeymapAction[] = [];
   private subs: Subscription[] = [];
@@ -106,7 +107,8 @@ export class Toolbar {
   setup(injector: Injector) {
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
-    injector.get(HistoryManager).onChange.subscribe(() => {
+    this.history = injector.get(HistoryManager);
+    this.history.onChange.subscribe(() => {
       this.updateHandlerState();
     });
 
@@ -259,5 +261,9 @@ export class Toolbar {
       selection,
       overlap,
     }, params);
+
+    if(commander.recordHistory) {
+      this.history.startListen();
+    }
   }
 }
