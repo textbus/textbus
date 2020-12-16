@@ -98,7 +98,6 @@ export class Renderer {
   private oldVDom: VElement;
 
   render(fragment: Fragment, host: HTMLElement) {
-    console.time()
     if (fragment.changed) {
       const dirty = fragment.dirty;
       if (dirty) {
@@ -113,7 +112,6 @@ export class Renderer {
         this.rendingFragment(fragment, this.oldVDom);
       }
     }
-    console.timeEnd()
     return this.oldVDom;
   }
 

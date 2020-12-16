@@ -125,10 +125,18 @@ export class TBRange {
    * 根据当前的 startFragment 和 startIndex，endFragment 和 endIndex，设置在浏览器的的选区范围。
    */
   restore() {
+    if (this.startFragment.dirty || this.endFragment.dirty) {
+      console.info('渲染延迟！');
+      return this;
+    }
     const start = this.findFocusNodeAndOffset(this.startFragment, this.startIndex);
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
-    this.nativeRange.setStart(start.node, start.offset);
-    this.nativeRange.setEnd(end.node, end.offset);
+    if (start && end) {
+      this.nativeRange.setStart(start.node, start.offset);
+      this.nativeRange.setEnd(end.node, end.offset);
+    } else {
+      console.warn('未找到焦点元素')
+    }
     return this;
   }
 
