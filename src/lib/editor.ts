@@ -89,7 +89,7 @@ export class Editor<T = any> {
 
   readonly stateController: EditorController;
 
-  injector: Injector;
+  injector: Injector = null;
 
   set readonly(b: boolean) {
     this.stateController.readonly = b;
