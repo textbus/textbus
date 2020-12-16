@@ -412,13 +412,11 @@ export class Renderer {
         children.push(textNode);
       } else {
         const vDom = this.rendingComponent(item);
-        // if (!(item instanceof DivisionAbstractComponent) || this.fragmentAndVDomMapping.get(item.slot) !== vDom) {
         this.vDomPositionMapping.set(vDom, {
           fragment,
           startIndex: i,
           endIndex: i + 1
         })
-        // }
         children.push(vDom);
         i++;
       }
