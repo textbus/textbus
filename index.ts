@@ -12,7 +12,7 @@ import {
   FormHidden, FormRadio, FormSwitch,
   FormTextField,
   videoToolConfig,
-  defaultOptions, PreComponent
+  defaultOptions, PreComponent, HistoryManager
 } from './src/public-api';
 
 
@@ -48,6 +48,11 @@ document.getElementById('btn').addEventListener('click', () => {
 })
 
 window['editor'] = editor;
+
+editor.onReady.subscribe(() => {
+  const history = editor.injector.get(HistoryManager)
+  console.log(history)
+})
 //
 // editor.onChange.subscribe(() => {
 //   console.log(editor.getJSONLiteral().json)

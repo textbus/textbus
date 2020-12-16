@@ -1,6 +1,6 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, sampleTime } from 'rxjs/operators';
-import { forwardRef, Inject, Injectable, InjectionToken } from '@tanbo/di';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { Fragment, RangePath, TBSelection } from './core/_api';
 import { EDITOR_OPTIONS, EditorOptions } from './editor';
@@ -11,8 +11,6 @@ export interface Snapshot {
   contents: Fragment;
   paths: RangePath[];
 }
-
-export const HISTORY_STACK_SIZE = new InjectionToken<number>('HISTORY_STACK_SIZE');
 
 @Injectable()
 export class HistoryManager {

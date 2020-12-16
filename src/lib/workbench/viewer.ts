@@ -16,7 +16,7 @@ import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
 
 @Injectable()
 export class Viewer {
-  onReady: Observable<void>;
+  onReady: Observable<Injector>;
   onViewUpdated: Observable<void>;
   elementRef = document.createElement('iframe');
 
@@ -41,7 +41,7 @@ export class Viewer {
 
   private sourceCodeComponent = new PreComponent('HTML');
   private outputRenderer = new OutputRenderer();
-  private readyEvent = new Subject<void>();
+  private readyEvent = new Subject<Injector>();
   private viewUpdateEvent = new Subject<void>();
   private id: number = null;
   private minHeight = 400;
@@ -76,7 +76,6 @@ export class Viewer {
         if (this.contentDocument) {
           this.setup();
           this.listen();
-          this.readyEvent.next();
         }
       }
     }
@@ -112,6 +111,11 @@ export class Viewer {
     }, {
       provide: Renderer,
       useValue: renderer
+    }, {
+      provide: Injector,
+      useFactory() {
+        return viewInjector;
+      }
     }];
     const viewInjector = new ReflectiveInjector(this.injector, [
       Input,
@@ -173,6 +177,8 @@ export class Viewer {
     })
 
     viewInjector.get(HistoryManager).startListen();
+
+    this.readyEvent.next(viewInjector);
   }
 
   updateContent(html: string) {

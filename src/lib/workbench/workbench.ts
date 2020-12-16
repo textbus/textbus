@@ -91,6 +91,6 @@ export class Workbench {
       this.editableArea.style.padding = '20px';
       this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
     }
-    this.tabletWrapper.style.width = `calc(${width} + 16px)`;
+    this.tabletWrapper.style.width = width;
   }
 }

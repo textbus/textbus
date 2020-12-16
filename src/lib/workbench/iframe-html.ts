@@ -12,7 +12,7 @@ export const iframeHTML = `
       height: 100%
     }
     body {
-      padding: 0;
+      padding: 0 8px;
       margin: 0;
       min-height: 100%;
       box-sizing: border-box;

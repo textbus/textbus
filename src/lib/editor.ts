@@ -18,7 +18,8 @@ import {
 import { Viewer } from './workbench/viewer';
 import {
   Device,
-  DeviceOption, Dialog,
+  DeviceOption,
+  Dialog,
   EditingMode,
   FullScreen,
   LibSwitch,
@@ -37,7 +38,7 @@ import { FileUploader } from './uikit/forms/help';
 export interface EditorOptions<T> {
   /** 设置主题 */
   theme?: string;
-  /** 设备宽度 */
+  /** 配置设备选项 */
   deviceOptions?: DeviceOption[];
   /** 指定设备类型 */
   deviceType?: string;
@@ -87,6 +88,8 @@ export class Editor<T = any> {
   readonly elementRef = document.createElement('div');
 
   readonly stateController: EditorController;
+
+  injector: Injector;
 
   set readonly(b: boolean) {
     this.stateController.readonly = b;
@@ -206,7 +209,8 @@ export class Editor<T = any> {
     this.onChange = this.viewer.onViewUpdated;
 
     this.subs.push(
-      this.viewer.onReady.subscribe(() => {
+      this.viewer.onReady.subscribe(injector => {
+        this.injector = injector;
         this.tasks.forEach(fn => fn());
         this.readyState = true;
         this.readyEvent.next();

@@ -262,7 +262,7 @@ export class Toolbar {
       overlap,
     }, params);
 
-    if(commander.recordHistory) {
+    if (commander.recordHistory) {
       this.history.startListen();
     }
   }
