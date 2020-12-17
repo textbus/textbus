@@ -434,6 +434,9 @@ export class TBRange {
       return fragment;
     }
     const parentComponent = fragment.parentComponent;
+    if (!parentComponent.parentFragment) {
+      return fragment;
+    }
     if (parentComponent instanceof DivisionAbstractComponent) {
       const parentFragment = parentComponent.parentFragment;
       parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
@@ -597,7 +600,14 @@ export class TBRange {
 
     while (true) {
       const parentComponent = fragment.parentComponent;
-
+      if (!parentComponent) {
+        const len = cacheFragment.contentLength;
+        const last = cacheFragment.getContentAtIndex(len - 1);
+        return {
+          fragment: cacheFragment,
+          index: last instanceof BrComponent ? len - 1 : len
+        }
+      }
       if (parentComponent instanceof BranchAbstractComponent) {
         const fragmentIndex = parentComponent.slots.indexOf(fragment);
         if (fragmentIndex < parentComponent.slots.length - 1) {

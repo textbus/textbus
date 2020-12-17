@@ -40,7 +40,8 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  contents: document.getElementById('table').innerHTML
+  contents: ''
+  // contents: document.getElementById('table').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {

@@ -17,11 +17,13 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   private injector: Injector;
   private selection: TBSelection;
   private input: Input;
+  private rootComponent: RootComponent;
 
   setup(injector: Injector) {
     this.injector = injector;
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
+    this.rootComponent = injector.get(RootComponent);
   }
 
   onInputReady() {
@@ -191,7 +193,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
           }
           range.startFragment.cut(0, 1);
           if (range.startFragment.contentLength === 0) {
-            range.deleteEmptyTree(range.startFragment);
+            range.deleteEmptyTree(range.startFragment, this.rootComponent.slot);
             range.setStart(prevPosition.fragment, prevPosition.index);
             range.collapse();
           }
@@ -204,7 +206,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
           if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
             break;
           }
-          range.deleteEmptyTree(prevPosition.fragment);
+          range.deleteEmptyTree(prevPosition.fragment, this.rootComponent.slot);
           range.setStart(position.fragment, position.index);
           range.collapse();
           prevPosition = position;

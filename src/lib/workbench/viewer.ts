@@ -138,7 +138,13 @@ export class Viewer {
       if (this.editorController.sourceCodeMode) {
         Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
       } else {
+        const isEmpty = rootComponent.slot.contentLength === 0;
         Viewer.guardLastIsParagraph(rootComponent.slot);
+        if (isEmpty && selection.firstRange) {
+          const position = selection.firstRange.findFirstPosition(rootComponent.slot);
+          selection.firstRange.setStart(position.fragment, position.index);
+          selection.firstRange.setEnd(position.fragment, position.index);
+        }
       }
       renderer.render(rootComponent.slot, this.contentDocument.body);
       selection.restore();
