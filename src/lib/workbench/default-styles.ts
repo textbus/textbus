@@ -26,6 +26,7 @@ export const defaultStyleSheets = [
   .tb-hl-attr-name { color: rgb(0, 128, 128) }
   .tb-hl-attr-value { color: rgb(221, 17, 68) }
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
+  .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
   `,
   `
   pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }

@@ -7,6 +7,7 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-swift';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-less';
 import 'prismjs/components/prism-scss';
 import 'prismjs/components/prism-stylus';
@@ -29,7 +30,6 @@ import {
   ViewData
 } from '../core/_api';
 import { BrComponent } from './br.component';
-
 export const codeStyles = {
   keyword: 'keyword',
   string: 'string',
@@ -42,6 +42,8 @@ export const codeStyles = {
   builtin: 'builtin',
   punctuation: false,
   regex: 'regex',
+  selector: 'selector',
+  property: 'attr-name',
   'class-name': 'class-name',
   'attr-name': 'attr-name',
   'attr-value': 'attr-value',
@@ -212,7 +214,6 @@ export class PreComponent extends DivisionAbstractComponent {
     const content = this.slot.sliceContents(0).map(item => {
       if (typeof item === 'string') {
         return item;
-
       } else if (item instanceof BrComponent) {
         return '\n';
       }
