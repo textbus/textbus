@@ -13,7 +13,7 @@ import { FindCommander } from '../toolbar/commands/find.commander';
 import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
 import { PreComponent } from '../components/pre.component';
 import { RootComponent } from '../root-component';
-import { EDITABLE_DOCUMENT_CONTAINER } from '../editor';
+import { EDITOR_SCROLL_CONTAINER } from '../editor';
 import { Input } from '../workbench/_api';
 
 export class FindPlugin implements TBPlugin {
@@ -21,7 +21,7 @@ export class FindPlugin implements TBPlugin {
   private commander: FindCommander;
   private positions: ElementPosition[] = [];
   private positionIndex = 0;
-  private frameContainer: HTMLElement;
+  private scrollContainer: HTMLElement;
 
   private selection: TBSelection;
   private rootComponent: RootComponent;
@@ -30,7 +30,7 @@ export class FindPlugin implements TBPlugin {
     this.selection = injector.get(TBSelection);
     this.rootComponent = injector.get(RootComponent);
     this.input = injector.get(Input);
-    this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+    this.scrollContainer = injector.get(EDITOR_SCROLL_CONTAINER);
   }
 
   onApplyCommand(commander: Commander,
@@ -97,7 +97,7 @@ export class FindPlugin implements TBPlugin {
       this.selection.addRange(range, true);
       this.selection.restore();
       const position = range.getRangePosition();
-      (this.frameContainer.parentNode as HTMLElement).scrollTop = position.top;
+      this.scrollContainer.scrollTop = position.top;
     }
   }
 

@@ -11,7 +11,7 @@ import {
   TBSelection,
   TBRangePosition, TBRange, AbstractComponent
 } from '../core/_api';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
 
 /**
@@ -97,6 +97,7 @@ export class Input {
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
+              @Inject(EDITOR_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
@@ -170,12 +171,11 @@ export class Input {
   }
 
   private updateStateBySelection() {
-    const limit = this.container.parentNode as HTMLElement;
     if (this.readonly || !this.selection.rangeCount) {
       this.hide();
       return;
     }
-    this.updateCursorPosition(limit);
+    this.updateCursorPosition();
     if (this.selection.collapsed) {
       this.show();
     } else {
@@ -233,7 +233,7 @@ export class Input {
     selection.restore();
   }
 
-  private updateCursorPosition(limit: HTMLElement) {
+  private updateCursorPosition() {
     if (!this.selection || this.selection.rangeCount === 0) {
       return;
     }
@@ -275,8 +275,8 @@ export class Input {
     this.cursor.style.backgroundColor = color;
     this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
-
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
+      const limit = this.scrollContainer;
       const scrollTop = limit.scrollTop;
       const offsetHeight = limit.offsetHeight;
       const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;

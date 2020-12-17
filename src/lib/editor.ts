@@ -74,6 +74,7 @@ export interface EditorOptions<T> {
 export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPTIONS');
 export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
 export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
+export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
 
 /**
  * TextBus 主类
@@ -187,6 +188,12 @@ export class Editor<T = any> {
       provide: EDITABLE_DOCUMENT_CONTAINER,
       useFactory(workbench: Workbench) {
         return workbench.tablet;
+      },
+      deps: [Workbench]
+    }, {
+      provide: EDITOR_SCROLL_CONTAINER,
+      useFactory(workbench: Workbench) {
+        return workbench.editableArea;
       },
       deps: [Workbench]
     }];

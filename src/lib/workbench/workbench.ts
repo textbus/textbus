@@ -13,7 +13,7 @@ export class Workbench {
   elementRef: HTMLElement;
   readonly tablet: HTMLElement;
   readonly tabletWrapper: HTMLElement;
-  private editableArea: HTMLElement;
+  readonly editableArea: HTMLElement;
   private loading = document.createElement('div');
 
   constructor(@Inject(forwardRef(() => Device)) private device: Device,
