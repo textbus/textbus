@@ -132,7 +132,7 @@ export class Toolbar {
   }
 
   private updateHandlerState() {
-    if (this._disabled) {
+    if (this._disabled || !this.selection.commonAncestorFragment) {
       return;
     }
     this.tools.forEach(tool => {
