@@ -82,7 +82,7 @@ export class ComponentStage {
         startFragment.insert(component, firstRange.endIndex);
       }
     }
-    this.selection.removeAllRanges();
+    this.selection.removeAllRanges(true);
   }
 
   private addExample(example: ComponentExample) {
