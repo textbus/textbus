@@ -230,7 +230,6 @@ export class TBSelection {
       nativeRange = this.nativeSelection.getRangeAt(0);
     } else {
       nativeRange = this.context.createRange();
-      this.nativeSelection.addRange(nativeRange);
     }
 
     const len = paths.length;
