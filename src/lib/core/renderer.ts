@@ -212,12 +212,6 @@ export class Renderer {
       }
       leftIndex++;
     }
-    while (rightStartIndex < rightLength) {
-      const abandonedVNode = rightChildNodes[rightStartIndex];
-      const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
-      abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
-      rightStartIndex++;
-    }
     // 确保新节点顺序和预期一致
     childNodes.forEach((child, index) => {
       const nativeChildNodes = host.childNodes;
@@ -230,6 +224,16 @@ export class Renderer {
         host.appendChild(child);
       }
     })
+    // 清理多余节点
+    while (rightStartIndex < rightLength) {
+      const abandonedVNode = rightChildNodes[rightStartIndex];
+      if (abandonedVNode.parentNode === oldVDom) {
+        // 只还经过 diff 之后，还是 oldVDom 的子节点，才算是多余的，因为有可能已经被复用到了其它地方
+        const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
+        abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
+      }
+      rightStartIndex++;
+    }
     return host;
   }
 

@@ -40,8 +40,8 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  // contents: ''
-  contents: document.getElementById('table').innerHTML
+  contents: '<p><br></p>'
+  // contents: document.getElementById('table').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {
@@ -55,9 +55,9 @@ editor.onReady.subscribe(() => {
   console.log(history)
 })
 //
-// editor.onChange.subscribe(() => {
-//   console.log(editor.getJSONLiteral().json)
-// })
+editor.onChange.subscribe(() => {
+  console.log(editor.getContents().content)
+})
 
 // document.addEventListener('selectionchange', () => {
 //   console.log(4343)
