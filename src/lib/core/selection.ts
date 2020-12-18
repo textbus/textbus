@@ -101,8 +101,11 @@ export class TBSelection {
   restore() {
     this.isChanged = false;
     this._ranges.forEach(range => {
-      range.restore();
+      if (range.commonAncestorComponent) {
+        range.restore();
+      }
     });
+
     const startNativeRange = this.firstRange?.nativeRange;
     const endNativeRange = this.lastRange?.nativeRange;
     if (startNativeRange && endNativeRange) {
@@ -221,7 +224,14 @@ export class TBSelection {
         }
       }
     };
-    this.removeAllRanges(true);
+    let nativeRange: Range;
+
+    if (this.nativeSelection.rangeCount) {
+      nativeRange = this.nativeSelection.getRangeAt(0);
+    } else {
+      nativeRange = this.context.createRange();
+      this.nativeSelection.addRange(nativeRange);
+    }
 
     const len = paths.length;
     if (len === 0) {
@@ -231,7 +241,6 @@ export class TBSelection {
     const startPaths = paths[0].startPaths;
     const endPaths = paths[len - 1].endPaths;
     const start = findPosition(startPaths, fragment);
-    const nativeRange = this.context.createRange();
     const range = new TBRange(nativeRange, this.renderer);
 
     range.startIndex = start.index;
@@ -245,6 +254,7 @@ export class TBSelection {
       range.endIndex = end.index;
       range.endFragment = end.fragment;
     }
+    this.removeAllRanges();
     this.addRange(range);
   }
 

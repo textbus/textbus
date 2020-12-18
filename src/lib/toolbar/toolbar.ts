@@ -262,8 +262,10 @@ export class Toolbar {
       overlap,
     }, params);
 
+    this.updateHandlerState();
+
     if (commander.recordHistory) {
-      this.history.startListen();
+      this.history.record();
     }
   }
 }
