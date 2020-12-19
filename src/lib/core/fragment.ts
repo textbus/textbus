@@ -62,6 +62,7 @@ export class Fragment extends Marker {
    * @param source
    */
   from(source: Fragment) {
+    this.clean();
     this.contents = source.contents;
     this.sliceContents().forEach(c => {
       if (c instanceof AbstractComponent) {
