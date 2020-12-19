@@ -6,14 +6,15 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement
+  VElement, FormatMap, BlockFormatter, FormatRange
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';
 
 class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
-  private fragmentSnapshot: Fragment;
+  private contentSnapshot: Array<AbstractComponent | string> = [];
+  private formatterSnapshot = new Map<BlockFormatter | InlineFormatter, FormatRange[]>();
   private injector: Injector;
   private selection: TBSelection;
   private input: Input;
@@ -34,10 +35,36 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const selection = this.selection;
     const startIndex = this.selectionSnapshot.firstRange.startIndex as number;
     const commonAncestorFragment = selection.commonAncestorFragment;
-    const fragmentSnapshot = this.fragmentSnapshot.clone() as Fragment;
-    const input = this.input;
 
-    commonAncestorFragment.from(fragmentSnapshot);
+    commonAncestorFragment.clean();
+
+    this.contentSnapshot.forEach(i => commonAncestorFragment.append(i));
+
+    this.formatterSnapshot.forEach((formatRanges, key) => {
+      if (key instanceof InlineFormatter) {
+        formatRanges.forEach(formatRange => {
+          commonAncestorFragment.apply(key, {
+            ...formatRange,
+            abstractData: formatRange.abstractData?.clone()
+          })
+        })
+      } else {
+        formatRanges.forEach(formatRange => {
+          commonAncestorFragment.apply(key, {
+            get startIndex() {
+              return 0;
+            },
+            get endIndex() {
+              return commonAncestorFragment.contentLength;
+            },
+            state: formatRange.state,
+            abstractData: formatRange.abstractData?.clone()
+          })
+        })
+      }
+    })
+
+    const input = this.input;
 
     let index = 0;
     input.value.replace(/\n+|[^\n]+/g, (str) => {
@@ -217,7 +244,25 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   private recordSnapshotFromEditingBefore() {
     this.selectionSnapshot = this.selection.clone();
-    this.fragmentSnapshot = this.selectionSnapshot.commonAncestorFragment?.clone();
+    const commonAncestorFragment = this.selectionSnapshot.commonAncestorFragment;
+    this.contentSnapshot = commonAncestorFragment.sliceContents();
+    this.formatterSnapshot.clear();
+    commonAncestorFragment.getFormatKeys().forEach(token => {
+      this.formatterSnapshot.set(token, commonAncestorFragment.getFormatRanges(token).map(formatRange => {
+        if (token instanceof InlineFormatter) {
+          return {
+            ...formatRange,
+            abstractData: formatRange.abstractData?.clone()
+          }
+        }
+        return {
+          startIndex: 0,
+          endIndex: formatRange.endIndex,
+          state: formatRange.state,
+          abstractData: formatRange.abstractData?.clone()
+        }
+      }))
+    })
   }
 }
 
