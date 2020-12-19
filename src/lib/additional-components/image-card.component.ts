@@ -84,7 +84,33 @@ class ImageCardComponentInterceptor implements Interceptor<ImageCardComponent> {
 
 @Component({
   loader: new ImageCardComponentLoader(),
-  interceptor: new ImageCardComponentInterceptor()
+  interceptor: new ImageCardComponentInterceptor(),
+  styles: [
+    `
+tb-image-card {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, .1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+tb-image-card > div > img {
+  width: 100%;
+  display: block;
+  min-height: 40px;
+}
+tb-image-card > p {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  color: #aaa;
+  height: 24px;
+  line-height: 24px;
+  padding: 6px 20px;
+}
+`
+  ]
 })
 export class ImageCardComponent extends BackboneAbstractComponent {
   readonly imgFragment: Fragment;
@@ -142,28 +168,3 @@ export const imageCardComponentExample: ComponentExample = {
     });
   }
 }
-
-export const imageCardStyleSheet = `
-tb-image-card {
-  display: block;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  box-shadow: 1px 2px 3px rgba(0, 0, 0, .1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-tb-image-card > div > img {
-  width: 100%;
-  display: block;
-  min-height: 40px;
-}
-tb-image-card > p {
-  margin: 0;
-  text-align: center;
-  font-size: 15px;
-  color: #aaa;
-  height: 24px;
-  line-height: 24px;
-  padding: 6px 20px;
-}
-`

@@ -1,5 +1,4 @@
 export * from './component-stage';
-export * from './default-styles';
 export * from './device';
 export * from './dialog';
 export * from './editing-mode';

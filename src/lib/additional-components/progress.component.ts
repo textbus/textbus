@@ -27,8 +27,92 @@ class ProgressComponentLoader implements ComponentLoader {
     };
   }
 }
+
+const colors = {
+  primary: '#1296db',
+  info: '#6ad1ec',
+  success: '#15bd9a',
+  warning: '#ff9900',
+  danger: '#E74F5E',
+  dark: '#495060',
+  gray: '#bbbec4'
+}
+
 @Component({
-  loader: new ProgressComponentLoader()
+  loader: new ProgressComponentLoader(),
+  styles: [
+    `
+tb-progress {
+  margin: 2em 0 1em;
+  background-color: #eee;
+  border-radius: 3px;
+  height: 6px;
+  display: block;
+  position: relative;
+}
+tb-progress > div {
+  height: 100%;
+  border-radius: inherit;
+  background-color: #aaa;
+  position: relative;
+}
+tb-progress > span {
+  position: absolute;
+  bottom: 100%;
+  font-size:12px;
+}
+.tb-progress-value {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  background-color: #000;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 13px;
+  transform: translateX(50%) translateY(-4px);
+}
+.tb-progress-value:after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -4px;
+  width: 0;
+  height: 0;
+  border-width: 4px;
+  border-style: solid;
+  border-color: #000 transparent transparent;
+}
+.tb-progress-min {
+  left: 0;
+}
+.tb-progress-max {
+  right: 0;
+}
+tb-progress[type=primary] > div {
+  background-color: ${colors.primary}
+}
+tb-progress[type=info] > div {
+  background-color: ${colors.info}
+}
+tb-progress[type=success] > div {
+  background-color: ${colors.success}
+}
+tb-progress[type=warning] > div {
+  background-color: ${colors.warning}
+}
+tb-progress[type=danger] > div {
+  background-color: ${colors.danger}
+}
+tb-progress[type=dark] > div {
+  background-color: ${colors.dark}
+}
+tb-progress[type=gray] > div {
+  background-color: ${colors.gray}
+}
+`
+  ]
 })
 export class ProgressComponent extends LeafAbstractComponent {
   constructor(private config: ProgressConfig) {
@@ -169,83 +253,3 @@ export const progressComponentExample: ComponentExample = {
     })
   }
 };
-const colors = {
-  primary: '#1296db',
-  info: '#6ad1ec',
-  success: '#15bd9a',
-  warning: '#ff9900',
-  danger: '#E74F5E',
-  dark: '#495060',
-  gray: '#bbbec4'
-}
-export const progressComponentStyleSheet = `
-tb-progress {
-  margin: 2em 0 1em;
-  background-color: #eee;
-  border-radius: 3px;
-  height: 6px;
-  display: block;
-  position: relative;
-}
-tb-progress > div {
-  height: 100%;
-  border-radius: inherit;
-  background-color: #aaa;
-  position: relative;
-}
-tb-progress > span {
-  position: absolute;
-  bottom: 100%;
-  font-size:12px;
-}
-.tb-progress-value {
-  position: absolute;
-  right: 0;
-  bottom: 100%;
-  background-color: #000;
-  color: #fff;
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-size: 13px;
-  transform: translateX(50%) translateY(-4px);
-}
-.tb-progress-value:after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -4px;
-  width: 0;
-  height: 0;
-  border-width: 4px;
-  border-style: solid;
-  border-color: #000 transparent transparent;
-}
-.tb-progress-min {
-  left: 0;
-}
-.tb-progress-max {
-  right: 0;
-}
-tb-progress[type=primary] > div {
-  background-color: ${colors.primary}
-}
-tb-progress[type=info] > div {
-  background-color: ${colors.info}
-}
-tb-progress[type=success] > div {
-  background-color: ${colors.success}
-}
-tb-progress[type=warning] > div {
-  background-color: ${colors.warning}
-}
-tb-progress[type=danger] > div {
-  background-color: ${colors.danger}
-}
-tb-progress[type=dark] > div {
-  background-color: ${colors.dark}
-}
-tb-progress[type=gray] > div {
-  background-color: ${colors.gray}
-}
-`;

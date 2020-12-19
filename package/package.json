@@ -1,21 +1,21 @@
 {
   "name": "@tanbo/textbus",
   "version": "1.0.0-alpha.4",
-  "description": "A rich text editor",
+  "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
   "typings": "./bundles/public-api.d.ts",
   "license": "GPL-3.0-only",
   "keywords": [
+    "textbus",
+    "wysiwyg",
+    "wysiwyg editor",
+    "rich text editor",
     "editor",
-    "text",
-    "rich",
+    "wysiwyg html editor",
     "component editor",
     "web editor",
-    "office",
-    "word",
-    "excel",
-    "note"
+    "typescript editor"
   ],
   "dependencies": {
     "@tanbo/bezier": "1.0.0",

@@ -35,7 +35,10 @@ class ImageComponentLoader implements ComponentLoader {
   }
 }
 @Component({
-  loader: new ImageComponentLoader()
+  loader: new ImageComponentLoader(),
+  styles: [
+    `img {vertical-align:bottom}`
+  ]
 })
 export class ImageComponent extends LeafAbstractComponent {
   width: string = null;

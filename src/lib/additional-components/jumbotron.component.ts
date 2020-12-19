@@ -40,7 +40,18 @@ class JumbotronComponentLoader implements ComponentLoader {
   }
 }
 @Component({
-  loader: new JumbotronComponentLoader()
+  loader: new JumbotronComponentLoader(),
+  styles: [
+    `
+tb-jumbotron {
+  display: block;
+  min-height: 200px;
+  margin-bottom: 1em;
+  background-color: #eee;
+  padding: 20px;
+}
+`
+  ]
 })
 export class JumbotronComponent extends DivisionAbstractComponent {
   constructor(private options: JumbotronOptions) {
@@ -131,13 +142,3 @@ export const jumbotronComponentExample: ComponentExample = {
     })
   }
 }
-
-export const jumbotronStyleSheet = `
-tb-jumbotron {
-  display: block;
-  min-height: 200px;
-  margin-bottom: 1em;
-  background-color: #eee;
-  padding: 20px;
-}
-`;

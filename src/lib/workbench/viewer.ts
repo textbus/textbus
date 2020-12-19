@@ -47,6 +47,7 @@ export class Viewer {
   private minHeight = 400;
   private rootComponent: RootComponent;
   private parser: Parser;
+  private docStyles: string[];
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               private componentStage: ComponentStage,
@@ -56,9 +57,18 @@ export class Viewer {
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
 
+    const componentAnnotations = this.options.components.map(c => {
+      return getAnnotations(c).getClassMetadata(Component).params[0] as Component
+    })
+
+    const componentStyles = componentAnnotations.map(c => {
+      return [c.styles?.join('') || '', c.editModeStyles?.join('') || ''].join('')
+    }).join('')
+
     this.elementRef.setAttribute('scrolling', 'no');
     const styleEl = document.createElement('style');
-    styleEl.innerHTML = [...(options.styleSheets || []), ...(options.editingStyleSheets || [])].join('');
+    this.docStyles = [componentStyles, ...(options.styleSheets || [])];
+    styleEl.innerHTML = [...this.docStyles, ...(options.editingStyleSheets || [])].join('');
 
     const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
     this.elementRef.src = `javascript:void(
@@ -74,7 +84,7 @@ export class Viewer {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
-          this.setup();
+          this.setup(componentAnnotations);
           this.listen();
         }
       }
@@ -91,10 +101,7 @@ export class Viewer {
     cancelAnimationFrame(this.id);
   }
 
-  setup() {
-    const componentAnnotations = this.options.components.map(c => {
-      return getAnnotations(c).getClassMetadata(Component).params[0] as Component
-    })
+  setup(componentAnnotations: Component[]) {
     const renderer = new Renderer();
     const selection = new TBSelection(this.contentDocument, renderer, (this.options.plugins || []));
     const parser = this.parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
@@ -192,13 +199,21 @@ export class Viewer {
   }
 
   getContents() {
-    return this.editorController.sourceCodeMode ?
+    const content = this.editorController.sourceCodeMode ?
       this.getHTMLBySourceCodeMode() :
       this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
+    return {
+      content,
+      styleSheets: this.docStyles
+    }
   }
 
   getJSONLiteral() {
-    return this.outputRenderer.render(this.rootComponent.slot).toJSON();
+    const json = this.outputRenderer.render(this.rootComponent.slot).toJSON();
+    return {
+      json,
+      styleSheets: this.docStyles
+    }
   }
 
   private getHTMLBySourceCodeMode() {

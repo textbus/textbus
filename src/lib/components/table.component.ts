@@ -144,7 +144,12 @@ class TableComponentInterceptor implements Interceptor<TableComponent> {
 
 @Component({
   loader: new TableComponentLoader(),
-  interceptor: new TableComponentInterceptor()
+  interceptor: new TableComponentInterceptor(),
+  styles: [
+    `td,th{border-width: 1px; border-style: solid;}
+   table {border-spacing: 0; border-collapse: collapse; width: 100%; }
+   .tb-table td, th {border-color: #aaa;}`
+  ]
 })
 export class TableComponent extends BackboneAbstractComponent {
   get cellMatrix() {

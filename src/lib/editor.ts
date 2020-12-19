@@ -48,7 +48,7 @@ export interface EditorOptions<T> {
   expandComponentLibrary?: boolean;
   /** 设置最大历史栈 */
   historyStackSize?: number;
-  /** 设置组件读取转换器 */
+  /** 声明组件集合 */
   components?: Array<Type<AbstractComponent>>;
   /** 设置格式转换器 */
   formatters?: Formatter[];
@@ -255,10 +255,7 @@ export class Editor<T = any> {
    * 获取 TextBus 的内容。
    */
   getContents() {
-    return {
-      styleSheets: this.options.styleSheets,
-      content: this.viewer.getContents()
-    }
+    return this.viewer.getContents();
   }
 
   /**
@@ -268,10 +265,7 @@ export class Editor<T = any> {
     if (this.stateController.sourceCodeMode) {
       throw new Error('源代码模式下，不支持获取 JSON 字面量！');
     }
-    return {
-      styleSheets: this.options.styleSheets,
-      json: this.viewer.getJSONLiteral()
-    };
+    return this.viewer.getJSONLiteral();
   }
 
   /**

@@ -85,7 +85,55 @@ class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
 
 @Component({
   loader: new TodoListComponentLoader(),
-  interceptor: new TodoListComponentInterceptor()
+  interceptor: new TodoListComponentInterceptor(),
+  styles: [
+    `
+tb-todo-list {
+  display: block;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.tb-todo-list-item {
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  display: flex;
+}
+.tb-todo-list-btn {
+  margin-right: 0.6em;
+}
+.tb-todo-list-state {
+  display: inline-block;
+  margin-top: 3px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #1296db;
+  background: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+.tb-todo-list-state:after {
+  content: "";
+  position: absolute;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  left: 3px;
+  top: 1px;
+  width: 4px;
+  height: 6px;
+  transform: rotateZ(45deg);
+}
+.tb-todo-list-state-active:after {
+  border-color: #1296db;
+}
+.tb-todo-list-state-disabled {
+  opacity: 0.5;
+}
+.tb-todo-list-content {
+  flex: 1;
+}
+`
+  ]
 })
 export class TodoListComponent extends BranchAbstractComponent<TodoListFragment> {
   private stateCollection = [{
@@ -182,50 +230,3 @@ export const todoListComponentExample: ComponentExample = {
     return new TodoListComponent([fragment]);
   }
 }
-
-export const todoListStyleSheet = `
-tb-todo-list {
-  display: block;
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-.tb-todo-list-item {
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
-  display: flex;
-}
-.tb-todo-list-btn {
-  margin-right: 0.6em;
-}
-.tb-todo-list-state {
-  display: inline-block;
-  margin-top: 3px;
-  width: 12px;
-  height: 12px;
-  border: 2px solid #1296db;
-  background: #fff;
-  border-radius: 3px;
-  cursor: pointer;
-  position: relative;
-}
-.tb-todo-list-state:after {
-  content: "";
-  position: absolute;
-  border-right: 2px solid #fff;
-  border-bottom: 2px solid #fff;
-  left: 3px;
-  top: 1px;
-  width: 4px;
-  height: 6px;
-  transform: rotateZ(45deg);
-}
-.tb-todo-list-state-active:after {
-  border-color: #1296db;
-}
-.tb-todo-list-state-disabled {
-  opacity: 0.5;
-}
-.tb-todo-list-content {
-  flex: 1;
-}
-`;

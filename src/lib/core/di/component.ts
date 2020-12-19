@@ -5,6 +5,8 @@ import { ComponentLoader } from '../component';
 export interface Component {
   loader: ComponentLoader;
   interceptor?: Interceptor<any>;
+  styles?: string[];
+  editModeStyles?: string[];
 }
 
 export interface ComponentDecorator {

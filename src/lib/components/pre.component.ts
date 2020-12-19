@@ -154,7 +154,34 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
 @Component({
   loader: new PreComponentLoader(),
-  interceptor: new PreComponentInterceptor()
+  interceptor: new PreComponentInterceptor(),
+  styles: [
+    `
+   code, pre {background-color: rgba(0, 0, 0, .03);}
+   pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
+   code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
+   pre {line-height: 1.418em; padding: 15px; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
+   code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
+    `
+  .tb-hl-keyword { font-weight: bold; }
+  .tb-hl-string { color: rgb(221, 17, 68) }
+  .tb-hl-function { color: rgb(0, 134, 179); }
+  .tb-hl-number { color: #388138 }
+  .tb-hl-tag { color: rgb(0, 0, 128) }
+  .tb-hl-comment { color: rgb(153, 153, 136); font-style: italic; }
+  .tb-hl-boolean { color: #388138; font-weight: bold }
+  .tb-hl-builtin { color: rgb(0, 134, 179); }
+  .tb-hl-regex { color: #f60; }
+  .tb-hl-attr-name { color: rgb(0, 128, 128) }
+  .tb-hl-attr-value { color: rgb(221, 17, 68) }
+  .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
+  .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
+  `,
+    `
+  pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
+  pre[theme=dark] .tb-hl-tag {color: rgb(91 155 190)}
+  `
+  ]
 })
 export class PreComponent extends DivisionAbstractComponent {
   static theme: PreTheme = 'light';

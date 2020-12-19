@@ -45,33 +45,15 @@ import {
   tableTool
 } from './lib/toolbar/tools/_api';
 import { FindPlugin, ImageVideoResizePlugin, TableEditPlugin } from './lib/plugins/_api';
-import { defaultStyleSheets } from './lib/workbench/default-styles';
 import {
-  imageCardStyleSheet,
   imageCardComponentExample,
-
-  todoListStyleSheet,
   todoListComponentExample,
-
   baiduMapComponentExample,
-
   jumbotronComponentExample,
-  jumbotronStyleSheet,
-
   wordExplainComponentExample,
-  wordExplainStyleSheet,
-  wordExplainComponentEditingStyleSheet,
-
-  timelineComponentStyleSheet,
   timelineComponentExample,
-  timelineComponentEditingStyleSheet,
-
   progressComponentExample,
-  progressComponentStyleSheet,
-
   stepsComponentExample,
-  stepsComponentStyleSheet,
-  stepsComponentEditingStyleSheet,
 
   StepComponent,
   ProgressComponent,
@@ -95,16 +77,6 @@ import {
 } from './lib/components/_api';
 
 export const defaultOptions: EditorOptions<string> = {
-  styleSheets: [
-    ...defaultStyleSheets,
-    imageCardStyleSheet,
-    todoListStyleSheet,
-    jumbotronStyleSheet,
-    wordExplainStyleSheet,
-    timelineComponentStyleSheet,
-    progressComponentStyleSheet,
-    stepsComponentStyleSheet
-  ],
   deviceOptions: [{
     label: 'PC',
     value: '100%',
@@ -128,11 +100,6 @@ export const defaultOptions: EditorOptions<string> = {
     label: 'A4',
     value: '842px'
   }],
-  editingStyleSheets: [
-    wordExplainComponentEditingStyleSheet,
-    timelineComponentEditingStyleSheet,
-    stepsComponentEditingStyleSheet
-  ],
   components: [
     StepComponent,
     ProgressComponent,
