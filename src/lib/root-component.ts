@@ -6,7 +6,7 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, FormatMap, BlockFormatter, FormatRange
+  VElement, BlockFormatter, FormatRange
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';

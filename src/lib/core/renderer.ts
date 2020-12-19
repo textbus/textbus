@@ -182,9 +182,13 @@ export class Renderer {
 
       let isFind = false;
       let right: VTextNode | VElement;
+      let canReuseVTextNode = true;
       while (rightIndex < rightLength) {
         right = rightChildNodes[rightIndex];
-        if (left === right) {
+        if (left === right || left instanceof VTextNode &&
+          right instanceof VTextNode &&
+          left.textContent === right.textContent &&
+          canReuseVTextNode) {
           let i = rightStartIndex;
           while (i < rightIndex) {
             const abandonedVNode = rightChildNodes[i];
@@ -201,11 +205,16 @@ export class Renderer {
         } else {
           rightIndex++;
         }
+        canReuseVTextNode = false
       }
       if (isFind) {
-        childNodes[leftIndex] = this.getNativeNodeByVDom(right);
+        const nativeNode = this.getNativeNodeByVDom(right)
+        childNodes[leftIndex] = nativeNode;
         rightChildNodes[rightIndex] = null;
         rightIndex++;
+        if (left instanceof VTextNode) {
+          this.NVMappingTable.set(left, nativeNode)
+        }
       } else {
         childNodes[leftIndex] = this.patch(left);
         rightIndex = rightStartIndex;
