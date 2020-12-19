@@ -120,7 +120,7 @@ export class ImageComponent extends LeafAbstractComponent {
   }
 
   clone(): ImageComponent {
-    return new ImageComponent(this.src, {
+    const img =  new ImageComponent(this.src, {
       width: this.width,
       height: this.height,
       maxWidth: this.maxWidth,
@@ -128,5 +128,7 @@ export class ImageComponent extends LeafAbstractComponent {
       float: this.float,
       margin: this.margin
     });
+    img.loadedImages = this.loadedImages.map(i => i);
+    return img;
   }
 }
