@@ -1022,7 +1022,7 @@ export class TBRange {
     while (startFragment) {
       startPaths.push(startFragment);
       const parentComponent = startFragment.parentComponent;
-      if (!parentComponent) {
+      if (!parentComponent.parentFragment) {
         break;
       }
       startFragment = parentComponent.parentFragment;
@@ -1031,7 +1031,7 @@ export class TBRange {
     while (endFragment) {
       endPaths.push(endFragment);
       const parentComponent = endFragment.parentComponent;
-      if (!parentComponent) {
+      if (!parentComponent.parentFragment) {
         break;
       }
       endFragment = parentComponent.parentFragment;
