@@ -1,4 +1,4 @@
-import { fromEvent, Observable, of, Subject, merge } from 'rxjs';
+import { Observable, of, Subject, merge } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { TBRange, TBRangePosition } from './range';
@@ -6,16 +6,6 @@ import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
 import { TBPlugin } from './plugin';
-
-let event: Observable<any>;
-
-function once(document: Document) {
-  if (event) {
-    return of();
-  }
-  event = fromEvent(document, 'selectionchange');
-  return event;
-}
 
 /**
  * 记录选区路径数据。
@@ -79,10 +69,11 @@ export class TBSelection {
   private isChanged = false;
 
   constructor(private context: Document,
+              private selectionChange: Observable<any>,
               private renderer: Renderer,
               private pipes: TBPlugin[] = []) {
     this.nativeSelection = context.getSelection();
-    this.onChange = merge(once(context), this.selectionChangeEvent.asObservable()).pipe(tap(() => {
+    this.onChange = merge(selectionChange, this.selectionChangeEvent.asObservable()).pipe(tap(() => {
       this.isChanged = true;
       this._ranges = [];
       for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
@@ -261,7 +252,7 @@ export class TBSelection {
    * 克隆当前 Selection 的副本，并返回。
    */
   clone() {
-    const t = new TBSelection(this.context, this.renderer);
+    const t = new TBSelection(this.context, of(), this.renderer);
     t._ranges = this.ranges.map(r => r.clone());
     return t;
   }

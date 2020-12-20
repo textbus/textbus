@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import {
   forwardRef,
@@ -126,7 +126,11 @@ export class Viewer {
 
   setup() {
     const renderer = new Renderer();
-    const selection = new TBSelection(this.contentDocument, renderer, (this.options.plugins || []));
+    const selection = new TBSelection(
+      this.contentDocument,
+      fromEvent(this.contentDocument, 'selectionchange'),
+      renderer,
+      (this.options.plugins || []));
     const parser = this.parser = new Parser(this.componentAnnotations.map(c => c.loader), this.options.formatters);
 
     const viewProviders: Provider[] = [{
@@ -219,6 +223,7 @@ export class Viewer {
     viewInjector.get(HistoryManager).startListen();
 
     this.readyEvent.next(viewInjector);
+    this.readyEvent.complete();
   }
 
   updateContent(html: string) {
