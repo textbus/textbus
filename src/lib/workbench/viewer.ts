@@ -118,7 +118,8 @@ export class Viewer {
     this.subs.forEach(s => s.unsubscribe());
     [Input, HistoryManager].forEach(c => {
       this.viewInjector.get(c as Type<{ destroy(): void }>).destroy();
-    })
+    });
+    (this.options.plugins || []).forEach(p => p.onDestroy?.());
     this.componentAnnotations.forEach(c => {
       c.interceptor?.onDestroy?.();
     })
