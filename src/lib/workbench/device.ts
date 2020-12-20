@@ -1,4 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
+import { fromEvent, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 
@@ -17,6 +20,7 @@ export class Device {
   private label = document.createElement('span');
   private menus = document.createElement('div');
   private menuItems: HTMLElement[] = [];
+  private subs: Subscription[] = [];
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private deviceOptions: EditorOptions<any>,
               private editorController: EditorController) {
@@ -42,29 +46,38 @@ export class Device {
     this.menus.classList.add('textbus-device-menus');
     this.elementRef.appendChild(this.button);
     this.elementRef.appendChild(this.menus);
-    this.menus.addEventListener('click', ev => {
-      const index = this.menuItems.indexOf(ev.target as HTMLElement);
-      if (index > -1) {
-        this.editorController.viewDeviceType = this.options[index].label;
-      }
-    })
-    this.editorController.onStateChange.subscribe(status => {
-      this.set(status.deviceType);
-    })
+
     let isSelfClick = false;
-    document.addEventListener('click', () => {
-      if (!isSelfClick) {
-        this.elementRef.classList.remove('textbus-device-expand');
-      }
-      isSelfClick = false;
-    });
-    this.button.addEventListener('click', () => {
-      isSelfClick = true;
-      this.elementRef.classList.toggle('textbus-device-expand');
-    });
+
+    this.subs.push(
+      fromEvent(this.menus, 'click').subscribe((ev) => {
+        const index = this.menuItems.indexOf(ev.target as HTMLElement);
+        if (index > -1) {
+          this.editorController.viewDeviceType = this.options[index].label;
+        }
+      }),
+      this.editorController.onStateChange.pipe(map(e => {
+        return e.deviceType;
+      }), distinctUntilChanged()).subscribe(t => {
+        this.set(t);
+      }),
+      fromEvent(document, 'click').subscribe(() => {
+        if (!isSelfClick) {
+          this.elementRef.classList.remove('textbus-device-expand');
+        }
+        isSelfClick = false;
+      }), fromEvent(this.button, 'click').subscribe(() => {
+        isSelfClick = true;
+        this.elementRef.classList.toggle('textbus-device-expand');
+      })
+    )
   }
 
-  set(name: string) {
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private set(name: string) {
     let flag = false;
     this.options.forEach((item, index) => {
       if (item.label === name) {

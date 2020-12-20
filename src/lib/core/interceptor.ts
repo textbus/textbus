@@ -49,4 +49,6 @@ export interface Interceptor<T extends AbstractComponent> {
   onEnter?(event: TBEvent<T>): void;
 
   onPaste?(event: TBEvent<T, TBClipboard>): void;
+
+  onDestroy?(): void;
 }

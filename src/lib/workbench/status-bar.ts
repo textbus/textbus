@@ -27,4 +27,7 @@ export class StatusBar {
       libSwitch.elementRef
     );
   }
+
+  destroy() {
+  }
 }

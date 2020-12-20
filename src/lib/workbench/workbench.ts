@@ -1,4 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
+import { Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { ComponentStage } from './component-stage';
 import { Viewer } from './viewer';
@@ -15,6 +17,7 @@ export class Workbench {
   readonly tabletWrapper: HTMLElement;
   readonly editableArea: HTMLElement;
   private loading = document.createElement('div');
+  private subs: Subscription[] = [];
 
   constructor(@Inject(forwardRef(() => Device)) private device: Device,
               @Inject(forwardRef(() => ComponentStage)) private componentStage: ComponentStage,
@@ -59,17 +62,25 @@ export class Workbench {
     loading.innerHTML = 'TextBus'.split('').map(t => `<div>${t}</div>`).join('');
     this.editableArea.appendChild(loading);
 
-    this.editorController.onStateChange.subscribe(value => {
-      for (const item of (this.options.deviceOptions || [])) {
-        if (value.deviceType === item.label) {
-          this.setTabletWidth(item.value);
+    this.subs.push(
+      this.editorController.onStateChange.pipe(map(s => {
+        return s.deviceType;
+      }), distinctUntilChanged()).subscribe(t => {
+        for (const item of (this.options.deviceOptions || [])) {
+          if (t === item.label) {
+            this.setTabletWidth(item.value);
+          }
         }
-      }
-    })
+      }),
 
-    this.viewer.onReady.subscribe(() => {
-      this.loaded()
-    })
+      this.viewer.onReady.subscribe(() => {
+        this.loaded()
+      })
+    )
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private loaded() {

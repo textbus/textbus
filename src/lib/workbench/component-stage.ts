@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import {
@@ -36,6 +36,7 @@ export class ComponentStage {
   private componentListWrapper = document.createElement('div');
   private _expand = false;
   private selection: TBSelection;
+  private subs: Subscription[] = [];
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog,
@@ -45,15 +46,19 @@ export class ComponentStage {
     this.componentListWrapper.classList.add('textbus-component-stage-list');
     this.elementRef.appendChild(this.componentListWrapper);
 
-    editorController.onStateChange.subscribe(status => {
+    this.subs.push(editorController.onStateChange.subscribe(status => {
       this.expand = status.expandComponentLibrary;
-    });
+    }));
 
     (this.options.componentLibrary || []).forEach(e => this.addExample(e))
   }
 
   setup(injector: Injector) {
     this.selection = injector.get(TBSelection);
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private insertComponent(component: AbstractComponent) {

@@ -3,6 +3,7 @@ import { isMac, Keymap } from '../workbench/input';
 export interface UIElementParams {
   classes?: string[];
   attrs?: { [key: string]: any };
+  props?: { [key: string]: any };
   children?: Node[];
 
   onCreated?(newNode: Node): any;
@@ -257,6 +258,11 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
   if (options.attrs) {
     Object.keys(options.attrs).forEach(key => {
       el.setAttribute(key, options.attrs[key]);
+    })
+  }
+  if (options.props) {
+    Object.keys(options.attrs).forEach(key => {
+      el[key] = options.props[key];
     })
   }
   if (options.children) {

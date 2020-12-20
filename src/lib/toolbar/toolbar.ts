@@ -1,12 +1,12 @@
-import { Observable, Subject, Subscription } from 'rxjs';
-import { auditTime } from 'rxjs/operators';
+import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
+import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
 import { Input, Keymap, KeymapAction, Dialog } from '../workbench/_api';
 import { SelectionMatchState } from './matcher/matcher';
-import { createKeymapHTML, FileUploader } from '../uikit/_api';
+import { createElement, createKeymapHTML, FileUploader } from '../uikit/_api';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
@@ -20,7 +20,7 @@ export interface ToolEntity {
 
 @Injectable()
 export class Toolbar {
-  elementRef = document.createElement('div');
+  elementRef: HTMLElement;
   onAction: Observable<ToolEntity & { params: any }>;
   config: (ToolFactory | ToolFactory[])[];
   readonly tools: ToolEntity[] = [];
@@ -41,12 +41,12 @@ export class Toolbar {
   private _disabled = false;
 
   private actionEvent = new Subject<{ config: ToolConfig, instance: Tool, params: any }>();
-  private toolWrapper = document.createElement('div');
-  private additionalWorktable = document.createElement('div');
-  private additionalWorktableContent = document.createElement('div');
-  private additionalWorktableClose = document.createElement('div');
-  private additionalWorktableCloseBtn = document.createElement('button');
-  private keymapPrompt = document.createElement('div');
+  private toolWrapper: HTMLElement;
+  private additionalWorktable: HTMLElement;
+  private additionalWorktableContent: HTMLElement;
+  private additionalWorktableClose: HTMLElement;
+  private additionalWorktableCloseBtn: HTMLElement;
+  private keymapPrompt: HTMLElement;
 
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
@@ -62,64 +62,91 @@ export class Toolbar {
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog) {
     this.config = options.toolbar;
 
-    this.editorController.onStateChange.subscribe(status => {
-      this.disabled = status.readonly;
-    })
+    this.subs.push(this.editorController.onStateChange.pipe(map(s => {
+      return s.readonly;
+    }), distinctUntilChanged()).subscribe(b => {
+      this.disabled = b;
+    }))
 
     this.onAction = this.actionEvent.asObservable();
-    this.elementRef.classList.add('textbus-toolbar');
-    this.toolWrapper.classList.add('textbus-toolbar-wrapper');
-    this.additionalWorktable.classList.add('textbus-toolbar-additional-worktable');
-    this.additionalWorktableContent.classList.add('textbus-toolbar-additional-worktable-content');
-    this.additionalWorktableClose.classList.add('textbus-toolbar-additional-worktable-close');
-    this.additionalWorktableCloseBtn.innerHTML = '&times;';
-    this.additionalWorktableCloseBtn.type = 'button';
-    this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt');
 
-    this.additionalWorktableClose.append(this.additionalWorktableCloseBtn);
-    this.additionalWorktable.append(this.additionalWorktableContent, this.additionalWorktableClose);
-    this.elementRef.append(this.toolWrapper, this.additionalWorktable, this.keymapPrompt);
+    this.elementRef = createElement('div', {
+      classes: ['textbus-toolbar'],
+      children: [
+        this.toolWrapper = createElement('div', {
+          classes: ['textbus-toolbar-wrapper']
+        }),
+        this.additionalWorktable = createElement('div', {
+          classes: ['textbus-toolbar-additional-worktable'],
+          children: [
+            this.additionalWorktableContent = createElement('div', {
+              classes: ['textbus-toolbar-additional-worktable-content']
+            }),
+            this.additionalWorktableClose = createElement('div', {
+              classes: ['textbus-toolbar-additional-worktable-close'],
+              children: [
+                this.additionalWorktableCloseBtn = createElement('button', {
+                  attrs: {
+                    type: 'button'
+                  },
+                  props: {
+                    innerHTML: '&times;'
+                  }
+                })
+              ]
+            })
+          ]
+        }),
+        this.keymapPrompt = createElement('div', {
+          classes: ['textbus-toolbar-keymap-prompt']
+        })
+      ]
+    })
 
     this.createToolbar(this.config);
 
-    this.elementRef.addEventListener('mouseover', (ev) => {
-      const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
-      if (keymap) {
-        try {
-          const config: Keymap = JSON.parse(keymap);
-          this.keymapPrompt.innerHTML = '';
-          this.keymapPrompt.append(...createKeymapHTML(config));
-          this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
-          return;
-        } catch (e) {
+    this.subs.push(
+      fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
+        const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
+        if (keymap) {
+          try {
+            const config: Keymap = JSON.parse(keymap);
+            this.keymapPrompt.innerHTML = '';
+            this.keymapPrompt.append(...createKeymapHTML(config));
+            this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
+            return;
+          } catch (e) {
 
+          }
         }
-      }
-      this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
-    })
-    this.additionalWorktableCloseBtn.addEventListener('click', () => {
-      this.currentAdditionalWorktableViewer.destroy();
-      this.additionalWorktableContent.innerHTML = '';
-      this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
-    })
+        this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
+      }),
+      fromEvent(this.additionalWorktableCloseBtn, 'click').subscribe(() => {
+        this.currentAdditionalWorktableViewer.destroy();
+        this.additionalWorktableContent.innerHTML = '';
+        this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
+      })
+    )
   }
 
   setup(injector: Injector) {
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
     this.history = injector.get(HistoryManager);
-    this.history.onChange.subscribe(() => {
-      this.updateHandlerState();
-    });
+
 
     this.keymaps.forEach(k => this.input.keymap(k));
-
-    this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
-      const event = document.createEvent('Event');
-      event.initEvent('click', true, true);
-      this.elementRef.dispatchEvent(event);
-      this.updateHandlerState();
-    })
+    this.subs.push(
+      this.history.onChange.subscribe(() => {
+        this.updateHandlerState();
+      }),
+      this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
+        const event = document.createEvent('Event');
+        event.initEvent('click', true, true);
+        this.elementRef.dispatchEvent(event);
+        this.updateHandlerState();
+      })
+    )
 
     this.tools.forEach(tool => {
       tool.config.matcher?.onInit?.(injector);
@@ -233,9 +260,11 @@ export class Toolbar {
   private listenUserAction() {
     this.tools.forEach(item => {
       if (item.instance.onApply instanceof Observable) {
-        item.instance.onApply.subscribe(params => {
-          this.execCommand(item.config, params, item.instance.commander);
-        })
+        this.subs.push(
+          item.instance.onApply.subscribe(params => {
+            this.execCommand(item.config, params, item.instance.commander);
+          })
+        )
       }
     });
   }

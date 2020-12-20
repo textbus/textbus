@@ -6,6 +6,7 @@ import { createElement } from '../uikit/uikit';
 export class Dialog {
   elementRef: HTMLElement;
   private dialogWrapper: HTMLElement;
+  private timer: any = null;
 
   constructor() {
     this.elementRef = createElement('div', {
@@ -22,16 +23,20 @@ export class Dialog {
     this.dialogWrapper.innerHTML = '';
     this.dialogWrapper.appendChild(element);
     this.elementRef.classList.add('textbus-dialog-active');
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.dialogWrapper.classList.add('textbus-dialog-wrapper-active');
     }, 200)
   }
 
   close() {
     this.dialogWrapper.classList.remove('textbus-dialog-wrapper-active');
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.elementRef.classList.remove('textbus-dialog-active');
       this.dialogWrapper.innerHTML = '';
     }, 200)
+  }
+
+  destroy() {
+    clearTimeout(this.timer);
   }
 }

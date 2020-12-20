@@ -1,4 +1,7 @@
 import { Injectable } from '@tanbo/di';
+import { fromEvent, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+
 import { EditorController } from '../editor-controller';
 
 @Injectable()
@@ -17,6 +20,7 @@ export class EditingMode {
 
   private _sourceCode = false;
   private icon = document.createElement('span');
+  private subs: Subscription[] = [];
 
   constructor(private editorController: EditorController) {
     this.elementRef.type = 'button';
@@ -25,12 +29,20 @@ export class EditingMode {
     this.icon.className = 'textbus-icon-code';
     this.elementRef.appendChild(this.icon);
 
-    this.elementRef.addEventListener('click', () => {
-      this.sourceCode = !this.sourceCode;
-      this.editorController.sourceCodeMode = this.sourceCode;
-    });
-    editorController.onStateChange.subscribe(status => {
-      this.sourceCode = status.sourceCodeMode;
-    })
+    this.subs.push(
+      fromEvent(this.elementRef, 'click').subscribe(() => {
+        this.sourceCode = !this.sourceCode;
+        this.editorController.sourceCodeMode = this.sourceCode;
+      }),
+      editorController.onStateChange.pipe(map(s => {
+        return s.sourceCodeMode;
+      }), distinctUntilChanged()).subscribe(b => {
+        this.sourceCode = b;
+      })
+    )
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 }

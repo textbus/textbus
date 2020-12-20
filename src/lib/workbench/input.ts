@@ -1,4 +1,4 @@
-import { fromEvent } from 'rxjs';
+import { fromEvent, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { getAnnotations, Inject, Injectable } from '@tanbo/di';
 
@@ -94,6 +94,7 @@ export class Input {
 
   private oldCursorPosition: { left: number, top: number } = null;
   private cleanOldCursorTimer: any;
+  private subs: Subscription[] = [];
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
@@ -113,53 +114,9 @@ export class Input {
     this.elementRef.appendChild(this.inputWrap);
     this.elementRef.appendChild(this.cursor);
 
-
-    let isWriting = false;
-
-    fromEvent(this.context, 'mousedown').subscribe((ev: MouseEvent) => {
-      if (ev.button === 2) {
-        return;
-      }
-      this.selection.removeAllRanges(true);
-    });
-    fromEvent(this.input, 'compositionstart').subscribe(() => {
-      isWriting = true;
-    });
-
-    fromEvent(this.input, 'compositionend').subscribe(() => {
-      isWriting = false;
-    });
-    fromEvent(this.input, 'keydown').pipe(filter(() => {
-      // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
-      return !isWriting || !this.input.value;
-    })).subscribe((ev: KeyboardEvent) => {
-      const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
-      for (const config of this.keymaps) {
-        const test = Array.isArray(config.keymap.key) ?
-          config.keymap.key.map(k => reg.test(k)).includes(true) :
-          reg.test(config.keymap.key);
-        if (test &&
-          !!config.keymap.altKey === ev.altKey &&
-          !!config.keymap.shiftKey === ev.shiftKey &&
-          !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
-          ev.preventDefault();
-          return config.action(ev);
-        }
-      }
-    });
-
-    fromEvent(context, 'mousedown').subscribe(() => {
-      this.flashing = false;
-    });
-    fromEvent(context, 'mouseup').subscribe(() => {
-      this.flashing = true;
-    });
-
-    this.selection.onChange.subscribe(() => {
-      this.updateStateBySelection()
-    })
-
-    this.initEvent()
+    this.init();
+    this.initEvent();
+    this.bindDefaultKeymap();
   }
 
   /**
@@ -168,6 +125,10 @@ export class Input {
    */
   keymap(keymap: KeymapAction) {
     this.keymaps.push(keymap);
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private updateStateBySelection() {
@@ -291,83 +252,135 @@ export class Input {
     }
   }
 
-  private initEvent() {
-    fromEvent(this.input, 'blur').subscribe(() => {
-      this.hide();
-    })
-    fromEvent(this.input, 'focus').subscribe(() => {
-      this.dispatchInputReadyEvent();
-    })
-    fromEvent(this.input, 'input').subscribe(() => {
-      if (!this.selection.collapsed) {
-        this.dispatchEvent((component, instance) => {
-          const event = new TBEvent(instance);
-          component.interceptor?.onDeleteRange?.(event)
-          return !event.stopped;
-        })
-        this.dispatchInputReadyEvent(true);
-      }
-      if (this.selection.collapsed) {
-        this.dispatchEvent((component, instance) => {
-          const event = new TBEvent(instance);
-          component.interceptor?.onInput?.(event);
-          return !event.stopped;
-        })
-      }
-    });
-    fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
-      const text = ev.clipboardData.getData('Text');
-      const div = document.createElement('div');
-      div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
-      div.contentEditable = 'true';
-      document.body.appendChild(div);
-      div.focus();
-      setTimeout(() => {
-        let html = div.innerHTML;
-        let hasEmpty = true;
-        const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g;
-        while (hasEmpty) {
-          hasEmpty = false;
-          html = html.replace(reg, function () {
-            hasEmpty = true;
-            return '';
-          });
+  private init() {
+    let isWriting = false;
+    this.subs.push(
+      fromEvent(this.context, 'mousedown').subscribe((ev: MouseEvent) => {
+        if (ev.button === 2) {
+          return;
         }
-        div.innerHTML = html;
+        this.selection.removeAllRanges(true);
+      }),
+      fromEvent(this.input, 'compositionstart').subscribe(() => {
+        isWriting = true;
+      }),
 
-        const fragment = this.parser.parse(div);
-        const contents = new Contents();
-        fragment.sliceContents(0).forEach(i => contents.append(i));
-        document.body.removeChild(div);
+      fromEvent(this.input, 'compositionend').subscribe(() => {
+        isWriting = false;
+      }),
+      fromEvent(this.input, 'keydown').pipe(filter(() => {
+        // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
+        return !isWriting || !this.input.value;
+      })).subscribe((ev: KeyboardEvent) => {
+        const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
+        for (const config of this.keymaps) {
+          const test = Array.isArray(config.keymap.key) ?
+            config.keymap.key.map(k => reg.test(k)).includes(true) :
+            reg.test(config.keymap.key);
+          if (test &&
+            !!config.keymap.altKey === ev.altKey &&
+            !!config.keymap.shiftKey === ev.shiftKey &&
+            !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
+            ev.preventDefault();
+            return config.action(ev);
+          }
+        }
+      }),
 
+      fromEvent(this.context, 'mousedown').subscribe(() => {
+        this.flashing = false;
+      }),
+      fromEvent(this.context, 'mouseup').subscribe(() => {
+        this.flashing = true;
+      }),
+
+      this.selection.onChange.subscribe(() => {
+        this.updateStateBySelection()
+      })
+    );
+  }
+
+  private initEvent() {
+    this.subs.push(
+      fromEvent(this.input, 'blur').subscribe(() => {
+        this.hide();
+      }),
+      fromEvent(this.input, 'focus').subscribe(() => {
+        this.dispatchInputReadyEvent();
+      }),
+      fromEvent(this.input, 'input').subscribe(() => {
         if (!this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onDeleteRange?.(event);
+            component.interceptor?.onDeleteRange?.(event)
             return !event.stopped;
           })
+          this.dispatchInputReadyEvent(true);
         }
         if (this.selection.collapsed) {
           this.dispatchEvent((component, instance) => {
-            const event = new TBEvent(instance, {contents, text});
-            component.interceptor?.onPaste?.(event);
+            const event = new TBEvent(instance);
+            component.interceptor?.onInput?.(event);
             return !event.stopped;
           })
         }
-        this.dispatchInputReadyEvent();
-      });
-    });
-    fromEvent(this.input, 'copy').subscribe(() => {
-      this.context.execCommand('copy');
-    });
-    fromEvent(this.input, 'cut').subscribe(() => {
-      this.context.execCommand('copy');
-      this.selection.ranges.forEach(range => {
-        range.connect();
-      });
-      this.dispatchInputReadyEvent();
-    });
+      }),
+      fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
+        const text = ev.clipboardData.getData('Text');
+        const div = document.createElement('div');
+        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
+        div.contentEditable = 'true';
+        document.body.appendChild(div);
+        div.focus();
+        setTimeout(() => {
+          let html = div.innerHTML;
+          let hasEmpty = true;
+          const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g;
+          while (hasEmpty) {
+            hasEmpty = false;
+            html = html.replace(reg, function () {
+              hasEmpty = true;
+              return '';
+            });
+          }
+          div.innerHTML = html;
 
+          const fragment = this.parser.parse(div);
+          const contents = new Contents();
+          fragment.sliceContents(0).forEach(i => contents.append(i));
+          document.body.removeChild(div);
+
+          if (!this.selection.collapsed) {
+            this.dispatchEvent((component, instance) => {
+              const event = new TBEvent(instance);
+              component.interceptor?.onDeleteRange?.(event);
+              return !event.stopped;
+            })
+          }
+          if (this.selection.collapsed) {
+            this.dispatchEvent((component, instance) => {
+              const event = new TBEvent(instance, {contents, text});
+              component.interceptor?.onPaste?.(event);
+              return !event.stopped;
+            })
+          }
+          this.dispatchInputReadyEvent();
+        });
+      }),
+      fromEvent(this.input, 'copy').subscribe(() => {
+        this.context.execCommand('copy');
+      }),
+      fromEvent(this.input, 'cut').subscribe(() => {
+        this.context.execCommand('copy');
+        this.selection.ranges.forEach(range => {
+          range.connect();
+        });
+        this.dispatchInputReadyEvent();
+      })
+    );
+  }
+
+  private bindDefaultKeymap() {
     this.keymap({
       keymap: {
         key: ['Backspace', 'Delete']
