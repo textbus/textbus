@@ -149,13 +149,18 @@ export class Toolbar {
     )
 
     this.tools.forEach(tool => {
-      tool.config.matcher?.onInit?.(injector);
-      tool.instance.commander?.onInit?.(injector);
+      tool.config.matcher?.setup?.(injector);
+      tool.instance.commander?.setup?.(injector);
     });
   }
 
   destroy() {
     this.subs.forEach(s => s.unsubscribe());
+    this.tools.forEach(tool => {
+      tool.config.matcher?.onDestroy?.();
+      tool.instance.commander?.onDestroy?.();
+      tool.instance.onDestroy();
+    });
   }
 
   private updateHandlerState() {

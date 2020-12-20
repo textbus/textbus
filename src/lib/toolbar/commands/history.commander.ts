@@ -11,7 +11,7 @@ export class HistoryCommander implements Commander<null> {
   constructor(private action: 'forward' | 'back') {
   }
 
-  onInit(injector: Injector) {
+  setup(injector: Injector) {
     this.history = injector.get(HistoryManager);
   }
 

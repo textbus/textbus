@@ -80,4 +80,7 @@ export class DropdownHandler implements Tool {
         break
     }
   }
+
+  onDestroy() {
+  }
 }

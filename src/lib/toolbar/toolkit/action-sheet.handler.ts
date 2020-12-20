@@ -103,4 +103,7 @@ export class ActionSheetHandler implements Tool {
         break
     }
   }
+
+  onDestroy() {
+  }
 }

@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 import { Tool } from './help';
 import { Keymap, KeymapAction } from '../../workbench/input';
@@ -51,6 +51,8 @@ export class AdditionalHandler<T = any> implements Tool<T> {
   private button: UIButton;
   private showEvent = new Subject<AdditionalViewer>();
 
+  private subs: Subscription[] = [];
+
   constructor(private config: AdditionalToolConfig) {
     this.commander = config.commanderFactory();
 
@@ -100,14 +102,19 @@ export class AdditionalHandler<T = any> implements Tool<T> {
     }
   }
 
+  onDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   private show() {
     const viewer = this.config.menuFactory();
-    viewer.onAction.subscribe(params => {
-      this.eventSource.next(params);
-    })
-    viewer.onDestroy.subscribe(() => {
-      this.button.highlight = false;
-    });
+    this.subs.push(viewer.onAction.subscribe(params => {
+        this.eventSource.next(params);
+      }),
+      viewer.onDestroy.subscribe(() => {
+        this.button.highlight = false;
+      })
+    );
     this.showEvent.next(viewer);
   }
 }
