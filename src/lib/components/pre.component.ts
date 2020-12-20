@@ -20,6 +20,7 @@ import {
   ChildSlotMode, Component,
   ComponentLoader,
   DivisionAbstractComponent,
+  BackboneAbstractComponent,
   FormatAbstractData,
   FormatEffect,
   FormatRendingContext,
@@ -109,7 +110,10 @@ class PreComponentLoader implements ComponentLoader {
       })
     };
     fn(el, fragment);
-    component.slot.from(fragment);
+    const fragments=[];
+    fragments.push( fragment);
+    component.form( fragments);
+    // component.slot.from(fragment);
     return {
       component: component,
       slotsMap: []
@@ -126,7 +130,17 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
   onEnter(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
-    event.instance.slot.insert(new BrComponent(), firstRange.startIndex);
+    const component: PreComponent=event.instance;
+    component.map((slot, i)=>{
+        if (slot === this.selection.commonAncestorFragment) {
+          const newSlot=new Fragment();
+          newSlot.append('console.log("我是新增内容")');
+          component.splice(i+1, 0, newSlot);
+        }
+      }
+    );
+    // console.log('enter--->', event, this, this.selection.commonAncestorFragment);
+    // event.instance.slot.insert(new BrComponent(), firstRange.startIndex);
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
     event.stopPropagation();
   }
@@ -183,17 +197,39 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   `
   ]
 })
-export class PreComponent extends DivisionAbstractComponent {
+export class PreComponent extends BackboneAbstractComponent {
   static theme: PreTheme = 'light';
 
   constructor(public lang: string, private theme?: PreTheme) {
     super('pre');
   }
 
+  form(fragments: Fragment[]) {
+    fragments.forEach(slot=>{
+      this.push(slot);
+    });
+  }
+
+  public map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
+    return super.map(callbackFn, thisArg);
+  }
+  public splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
+    return super.splice( start, deleteCount, ...items);
+  }
+
+
   clone() {
     const component = new PreComponent(this.lang);
-    component.slot.from(this.slot.clone());
+    // TODO pre clone
+    // component.slot.from(this.slot.clone());
     return component;
+  }
+
+  canDelete(deletedSlot: Fragment): boolean {
+    // TODO can delete
+    // this.deleteMarkFragments.push(deletedSlot);
+    // return !this.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
+    return true;
   }
 
   componentContentChange() {
@@ -204,10 +240,15 @@ export class PreComponent extends DivisionAbstractComponent {
     const block = new VElement('pre');
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
-    return slotRendererFn(this.slot, block);
+    this.map(slot=>{
+      const p = new VElement('p');
+      block.appendChild( slotRendererFn(slot, p));
+    })
+    return block;
   }
 
   format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+    console.log('format-->', tokens);
     tokens.forEach(token => {
       if (token instanceof Token) {
         const styleName = codeStyles[token.type];
@@ -238,31 +279,58 @@ export class PreComponent extends DivisionAbstractComponent {
 
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
-    const content = this.slot.sliceContents(0).map(item => {
-      if (typeof item === 'string') {
-        return item;
-      } else if (item instanceof BrComponent) {
-        return '\n';
+    this.map(slot=>{
+      const content = slot.sliceContents(0).map(item => {
+        if (typeof item === 'string') {
+          return item;
+        } else if (item instanceof BrComponent) {
+          return '\n';
+        }
+      }).join('');
+      const fragment = new Fragment();
+      content.replace(/\n|[^\n]+/g, str => {
+        fragment.append(str === '\n' ? new BrComponent() : str);
+        return '';
+      })
+      if (languageGrammar) {
+        const tokens = tokenize(content, languageGrammar);
+        this.format(tokens, fragment, 0);
       }
-    }).join('');
-    const fragment = new Fragment();
-    content.replace(/\n|[^\n]+/g, str => {
-      fragment.append(str === '\n' ? new BrComponent() : str);
-      return '';
+      slot.getFormatKeys().forEach(format => {
+        if (format instanceof BlockFormatter) {
+          slot.getFormatRanges(format).forEach(r => {
+            fragment.apply(format, r);
+          })
+        }
+      })
+      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+      slot.from(fragment);
     })
-    if (languageGrammar) {
-      const tokens = tokenize(content, languageGrammar);
-      this.format(tokens, fragment, 0);
-    }
-    this.slot.getFormatKeys().forEach(format => {
-      if (format instanceof BlockFormatter) {
-        this.slot.getFormatRanges(format).forEach(r => {
-          fragment.apply(format, r);
-        })
-      }
-    })
-    fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
-    this.slot.from(fragment);
+    // const content = this.slot.sliceContents(0).map(item => {
+    //   if (typeof item === 'string') {
+    //     return item;
+    //   } else if (item instanceof BrComponent) {
+    //     return '\n';
+    //   }
+    // }).join('');
+    // const fragment = new Fragment();
+    // content.replace(/\n|[^\n]+/g, str => {
+    //   fragment.append(str === '\n' ? new BrComponent() : str);
+    //   return '';
+    // })
+    // if (languageGrammar) {
+    //   const tokens = tokenize(content, languageGrammar);
+    //   this.format(tokens, fragment, 0);
+    // }
+    // this.slot.getFormatKeys().forEach(format => {
+    //   if (format instanceof BlockFormatter) {
+    //     this.slot.getFormatRanges(format).forEach(r => {
+    //       fragment.apply(format, r);
+    //     })
+    //   }
+    // })
+    // fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+    // this.slot.from(fragment);
   }
 
   private getLanguageGrammar(): Grammar {
