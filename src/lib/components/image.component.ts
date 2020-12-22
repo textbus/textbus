@@ -1,6 +1,7 @@
-import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 import { fromEvent } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
+
+import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 
 export interface ImageOptions {
   maxWidth?: string;
