@@ -31,6 +31,7 @@ import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { Toolbar, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';
 import { FileUploader } from './uikit/forms/help';
+import { makeError } from './_utils/make-error';
 
 /**
  * TextBus 初始化时的配置参数
@@ -75,6 +76,8 @@ export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPT
 export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
 export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
 export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
+
+const editorErrorFn = makeError('Editor');
 
 /**
  * TextBus 主类
@@ -263,7 +266,7 @@ export class Editor<T = any> {
    */
   getJSONLiteral() {
     if (this.stateController.sourceCodeMode) {
-      throw new Error('源代码模式下，不支持获取 JSON 字面量！');
+      throw editorErrorFn('json results cannot be obtained in source editing mode.');
     }
     return this.viewer.getJSONLiteral();
   }

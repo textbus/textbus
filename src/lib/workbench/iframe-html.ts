@@ -24,12 +24,6 @@ export const iframeHTML = `
     ::selection {
       background-color: rgba(18, 150, 219, .2);
     }
-    img.tb-image-loaded {
-      animation: tb-fadein 1.2s;
-    }
-    @keyframes tb-fadein {
-      from{opacity: 0} to {opacity: 1}
-    }
   </style>
 </head>
 <body></body>

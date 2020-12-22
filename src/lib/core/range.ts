@@ -12,6 +12,7 @@ import {
 } from './component';
 import { BlockFormatter } from './formatter';
 import { BrComponent } from '../components/br.component';
+import { makeError } from '../_utils/make-error';
 
 /**
  * 标识 Fragment 中的一个位置。
@@ -29,6 +30,8 @@ export interface TBRangeScope {
   endIndex: number;
   fragment: Fragment;
 }
+
+const rangeErrorFn = makeError('Range');
 
 /**
  * TextBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
@@ -1097,7 +1100,7 @@ export class TBRange {
       const child = childNodes[i];
       const position = this.renderer.getPositionByVDom(child);
       if (position.fragment !== fragment) {
-        throw new Error('异常节点！');
+        throw rangeErrorFn('unexpected virtual DOM node.');
       }
       if (position.startIndex <= offset && position.endIndex >= offset) {
         if (child instanceof VElement) {

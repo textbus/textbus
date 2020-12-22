@@ -18,6 +18,7 @@ import {
 } from './formatter';
 import { FormatMap } from './format-map';
 import { Marker } from './marker';
+import { makeError } from '../_utils/make-error';
 
 /**
  * 应用样式的可选参数。
@@ -30,6 +31,8 @@ export interface ApplyFormatOptions {
 }
 
 export const parentComponentAccessToken = Symbol('ParentComponentAccessToken');
+
+const fragmentErrorFn = makeError('Fragment');
 
 /**
  * TextBus 抽象数据类
@@ -143,7 +146,7 @@ export class Fragment extends Marker {
   insertBefore(contents: AbstractComponent | string, ref: AbstractComponent) {
     const index = this.indexOf(ref);
     if (index === -1) {
-      throw new Error('引用的节点不属于当前 Fragment 的子级！');
+      throw fragmentErrorFn('component referenced is not a member of the current editable fragment');
     }
     this.insert(contents, index);
   }
@@ -156,7 +159,7 @@ export class Fragment extends Marker {
   insertAfter(contents: AbstractComponent | string, ref: AbstractComponent) {
     const index = this.indexOf(ref);
     if (index === -1) {
-      throw new Error('引用的节点不属于当前 Fragment 的子级！');
+      throw fragmentErrorFn('component referenced is not a member of the current editable fragment');
     }
     this.insert(contents, index + 1);
   }

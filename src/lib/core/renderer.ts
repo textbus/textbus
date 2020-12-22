@@ -8,6 +8,7 @@ import {
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 import { BrComponent } from '../components/br.component';
+import { makeError } from '../_utils/make-error';
 
 export interface ElementPosition {
   startIndex: number;
@@ -82,6 +83,8 @@ class NativeElementMappingTable {
     }
   }
 }
+
+const rendererErrorFn = makeError('Renderer');
 
 export class Renderer {
   // 记录虚拟节点的位置
@@ -273,7 +276,7 @@ export class Renderer {
       const slot = elements[elements.length - 1];
 
       if (root !== host) {
-        throw new Error('插槽节点不能被替换！')
+        throw rendererErrorFn('slot elements cannot be replaced.')
       }
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
@@ -314,8 +317,7 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      let vElement: VElement;
-      vElement = component.render(false, (slot, host) => {
+      let vElement = component.render(false, (slot, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
@@ -323,6 +325,9 @@ export class Renderer {
         view.styles.set('userSelect', 'text');
         return view;
       });
+      if (!(vElement instanceof VElement)) {
+        throw rendererErrorFn(`component render method must return a virtual element.`);
+      }
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
       if (component instanceof DivisionAbstractComponent) {

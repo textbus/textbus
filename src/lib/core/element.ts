@@ -1,3 +1,5 @@
+import { makeError } from '../_utils/make-error';
+
 /**
  * 虚拟 DOM 节点的字面量表示。
  */
@@ -78,6 +80,8 @@ export interface VElementOption {
   childNodes?: Array<VElement | VTextNode>;
 }
 
+const vElementErrorFn = makeError('VElement');
+
 /**
  * 虚拟 DOM 节点
  */
@@ -101,10 +105,20 @@ export class VElement {
   constructor(public tagName: string, options?: VElementOption) {
     if (options) {
       if (options.attrs) {
-        Object.keys(options.attrs).forEach(key => this.attrs.set(key, options.attrs[key]));
+        Object.keys(options.attrs).forEach(key => {
+          const value = options.attrs[key];
+          if (value !== null && typeof value !== 'undefined') {
+            this.attrs.set(key, options.attrs[key])
+          }
+        });
       }
       if (options.styles) {
-        Object.keys(options.styles).forEach(key => this.styles.set(key, options.styles[key]));
+        Object.keys(options.styles).forEach(key => {
+          const value = options.styles[key];
+          if (value !== null && typeof value !== 'undefined') {
+            this.styles.set(key, options.styles[key])
+          }
+        });
       }
       if (options.classes) {
         this.classes.push(...options.classes);
@@ -153,7 +167,7 @@ export class VElement {
       this._childNodes.splice(index, 1);
       node[parentNode] = null;
     }
-    throw new Error('要删除的节点不是当前节点的子级！');
+    throw vElementErrorFn('node to be deleted is not a child of the current node.');
   }
 
   replaceChild(newNode: VElement | VTextNode, oldNode: VElement | VTextNode) {
@@ -164,7 +178,7 @@ export class VElement {
       newNode[parentNode] = this;
       return;
     }
-    throw new Error('要替换的节点不是当前节点的子级！');
+    throw vElementErrorFn('node to be replaced is not a child of the current node.');
   }
 
   removeLastChild() {

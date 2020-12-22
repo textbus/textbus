@@ -1,8 +1,17 @@
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
-import { BackboneAbstractComponent, BranchAbstractComponent, AbstractComponent, DivisionAbstractComponent, LeafAbstractComponent } from './component';
+import {
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  AbstractComponent,
+  DivisionAbstractComponent,
+  LeafAbstractComponent
+} from './component';
 import { ChildSlotMode, Renderer, ReplaceMode, FormatConfig } from './renderer';
 import { FormatRendingContext } from './formatter';
+import { makeError } from '../_utils/make-error';
+
+const outputRendererErrorFn = makeError('OutputRenderer');
 
 export class OutputRenderer {
   // 记录已渲染的组件
@@ -27,7 +36,7 @@ export class OutputRenderer {
       const slot = elements[elements.length - 1];
 
       if (root !== host) {
-        throw new Error('插槽节点不能被替换！')
+        throw outputRendererErrorFn('slot elements cannot be replaced.')
       }
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
@@ -52,13 +61,15 @@ export class OutputRenderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.outputDirty) {
-      let vElement: VElement;
-      vElement = component.render(true, (slot, host) => {
+      let vElement = component.render(true, (slot, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
         return this.rendingFragment(slot, host, true);
       });
+      if (!(vElement instanceof VElement)) {
+        throw outputRendererErrorFn(`component render method must return a virtual element.`);
+      }
       this.componentVDomCacheMap.set(component, vElement);
       component.outputRendered();
       return vElement;

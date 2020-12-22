@@ -6,6 +6,7 @@ import { Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
 import { TBPlugin } from './plugin';
+import { makeError } from '../_utils/make-error';
 
 /**
  * 记录选区路径数据。
@@ -14,6 +15,8 @@ export interface RangePath {
   startPaths: number[];
   endPaths: number[];
 }
+
+const selectionErrorFn = makeError('Selection');
 
 /**
  * TextBus 选区对象
@@ -205,7 +208,7 @@ export class TBSelection {
         } else if (c instanceof BackboneAbstractComponent) {
           fragment = c.getSlotAtIndex(last);
         } else {
-          throw new Error('未找到历史位置')
+          throw selectionErrorFn('location of the history range could not be found.')
         }
         if (paths.length === 1) {
           return {

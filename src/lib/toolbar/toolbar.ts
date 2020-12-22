@@ -12,11 +12,14 @@ import { EditorController } from '../editor-controller';
 import { TBSelection } from '../core/selection';
 import { Commander } from '../core/_api';
 import { HistoryManager } from '../history-manager';
+import { makeError } from '../_utils/make-error';
 
 export interface ToolEntity {
   config: ToolConfig;
   instance: Tool;
 }
+
+const toolErrorFn = makeError('Tool');
 
 @Injectable()
 export class Toolbar {
@@ -249,7 +252,7 @@ export class Toolbar {
         h = m;
         break;
       default:
-        throw new Error('未被支持的工具！');
+        throw toolErrorFn('tool type is not supported.');
     }
     if (h.keymapAction) {
       const keymaps = Array.isArray(h.keymapAction) ? h.keymapAction : [h.keymapAction];
