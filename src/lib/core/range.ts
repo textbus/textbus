@@ -2,7 +2,7 @@ import { Type } from '@tanbo/di';
 
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { VElement } from './element';
+import { VElement, VTextNode } from './element';
 import {
   BranchAbstractComponent,
   LeafAbstractComponent,
@@ -12,7 +12,6 @@ import {
 } from './component';
 import { BlockFormatter } from './formatter';
 import { BrComponent } from '../components/br.component';
-import { makeError } from '../_utils/make-error';
 
 /**
  * 标识 Fragment 中的一个位置。
@@ -30,8 +29,6 @@ export interface TBRangeScope {
   endIndex: number;
   fragment: Fragment;
 }
-
-const rangeErrorFn = makeError('Range');
 
 /**
  * TextBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
@@ -508,6 +505,14 @@ export class TBRange {
       if (prev instanceof BackboneAbstractComponent) {
         return this.findLastChild(prev.getSlotAtIndex(prev.slotCount - 1));
       }
+      // let index = this.startIndex - 1;
+      // if (index > 0) {
+      //   const current = fragment.getContentAtIndex(index);
+      //   const prev = fragment.getContentAtIndex(index - 1);
+      //   if (prev instanceof BrComponent && typeof current === 'string') {
+      //     index--;
+      //   }
+      // }
       return {
         fragment,
         index: this.startIndex - 1
@@ -1094,58 +1099,64 @@ export class TBRange {
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
     let vElement = this.renderer.getVElementByFragment(fragment);
 
-    let childNodes = vElement.childNodes;
+    const current = fragment.getContentAtIndex(offset);
 
-    for (let i = 0; i < childNodes.length; i++) {
-      const child = childNodes[i];
-      const position = this.renderer.getPositionByVDom(child);
-      if (position.fragment !== fragment) {
-        throw rangeErrorFn('unexpected virtual DOM node.');
+    function findFocusNativeTextNode(renderer: Renderer,
+                                     vElement: VElement,
+                                     offset: number): { node: Node, offset: number } {
+      for (const item of vElement.childNodes) {
+        const position = renderer.getPositionByVDom(item);
+        if (position.endIndex <= offset) {
+          continue
+        }
+        if (item instanceof VTextNode) {
+          return {
+            node: renderer.getNativeNodeByVDom(item),
+            offset: offset - position.startIndex
+          };
+        }
+        return findFocusNativeTextNode(renderer, item, offset);
       }
-      if (position.startIndex <= offset && position.endIndex >= offset) {
-        if (child instanceof VElement) {
-          if (position.endIndex - position.startIndex > 1) {
-            // 一定为非子组件
-            childNodes = child.childNodes;
-            i = -1;
-            continue;
-          } else {
-            // 长度为 1 的节点
-            const content = fragment.sliceContents(position.startIndex, position.endIndex)[0];
-            if (content instanceof AbstractComponent) {
-              const nativeNode = this.renderer.getNativeNodeByVDom(child);
-              const parentNode = nativeNode.parentNode as HTMLElement;
-              const index = Array.from(parentNode.childNodes).indexOf(nativeNode as ChildNode);
-              const nextChild = childNodes[i + 1];
-              if (position.endIndex === offset && nextChild) {
-                if (nextChild instanceof VElement) {
-                  return {
-                    node: parentNode,
-                    offset: index + 1
-                  }
-                } else {
-                  return {
-                    node: this.renderer.getNativeNodeByVDom(nextChild),
-                    offset: 0
-                  }
-                }
-              }
-              return {
-                node: parentNode,
-                offset: position.startIndex === offset ? index : index + 1
-              }
-            }
-            // 如果不是组件节点，则继续向下查找
-            childNodes = child.childNodes;
-            i = -1;
-            continue;
+    }
+
+    function findFocusNativeElementNode(renderer: Renderer,
+                                        vElement: VElement,
+                                        offset: number): { node: Node, offset: number } {
+      for (const item of vElement.childNodes) {
+        const position = renderer.getPositionByVDom(item);
+        if (position.endIndex <= offset) {
+          continue
+        }
+        if (item instanceof VElement) {
+          if (item.childNodes.length) {
+            return findFocusNativeElementNode(renderer, item, offset);
+          }
+          const node = renderer.getNativeNodeByVDom(item);
+          const parent = node.parentNode;
+          return {
+            node: parent,
+            offset: Array.from(parent.childNodes).indexOf(node as ChildNode)
           }
         }
-        return {
-          node: this.renderer.getNativeNodeByVDom(child),
-          offset: offset - position.startIndex
-        }
       }
+    }
+
+    if (typeof current === 'string') {
+      return findFocusNativeTextNode(this.renderer, vElement, offset);
+    } else if (current instanceof AbstractComponent) {
+      return findFocusNativeElementNode(this.renderer, vElement, offset);
+    }
+    const container = this.renderer.getNativeNodeByVDom(vElement);
+    const lastChild = container.lastChild;
+    if (lastChild.nodeType === Node.TEXT_NODE) {
+      return {
+        node: lastChild,
+        offset: lastChild.textContent.length
+      }
+    }
+    return {
+      node: container,
+      offset: container.childNodes.length
     }
   }
 
