@@ -80,7 +80,6 @@ export class ImageComponent extends LeafAbstractComponent {
     const el = new VElement(this.tagName);
     if (isOutputMode || this.loadedImages.includes(this.src)) {
       el.attrs.set('src', this.src);
-      return el
     } else {
       el.attrs.set('src', imageLoadingSrc);
       const shadowImage = new Image();
@@ -117,7 +116,7 @@ export class ImageComponent extends LeafAbstractComponent {
     if (/[a-z]/i.test(this.margin)) {
       el.styles.set('margin', this.margin);
     }
-    return null;
+    return el;
   }
 
   clone(): ImageComponent {
