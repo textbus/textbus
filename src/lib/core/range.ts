@@ -1,6 +1,6 @@
 import { Type } from '@tanbo/di';
 
-import { Renderer } from './renderer';
+import { ElementPosition, Renderer } from './renderer';
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
 import {
@@ -72,43 +72,12 @@ export class TBRange {
     const endPosition = renderer.getPositionByNode(nativeRange.endContainer);
     if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       startPosition && endPosition) {
-      if (nativeRange.startContainer.nodeType === Node.TEXT_NODE) {
-        this.startFragment = startPosition.fragment;
-        this.startIndex = startPosition.startIndex + nativeRange.startOffset;
-      } else if (nativeRange.startContainer.nodeType === Node.ELEMENT_NODE) {
-        const childNodes = nativeRange.startContainer.childNodes;
-        if (childNodes.length === nativeRange.startOffset) {
-          const child = childNodes[childNodes.length - 1];
-          const childPosition = this.renderer.getPositionByNode(child);
-          this.startFragment = childPosition.fragment;
-          this.startIndex = childPosition.endIndex;
-        } else {
-          const child = childNodes[nativeRange.startOffset];
-          const childPosition = this.renderer.getPositionByNode(child);
-          this.startFragment = childPosition.fragment;
-          this.startIndex = childPosition.startIndex;
-        }
-
-      }
-      if (nativeRange.endContainer.nodeType === Node.TEXT_NODE) {
-        this.endFragment = endPosition.fragment;
-        this.endIndex = endPosition.startIndex + nativeRange.endOffset;
-      } else if (nativeRange.endContainer.nodeType === Node.ELEMENT_NODE) {
-
-        const childNodes = nativeRange.endContainer.childNodes;
-
-        if (childNodes.length === nativeRange.endOffset) {
-          const child = childNodes[childNodes.length - 1];
-          const childPosition = this.renderer.getPositionByNode(child);
-          this.endFragment = childPosition.fragment;
-          this.endIndex = childPosition.endIndex;
-        } else {
-          const child = childNodes[nativeRange.endOffset];
-          const childPosition = this.renderer.getPositionByNode(child);
-          this.endFragment = childPosition.fragment;
-          this.endIndex = childPosition.startIndex;
-        }
-      }
+      const start = TBRange.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition, renderer);
+      this.startFragment = start.fragment;
+      this.startIndex = start.index
+      const end = TBRange.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition, renderer);
+      this.endFragment = end.fragment;
+      this.endIndex = end.index;
     }
   }
 
@@ -505,14 +474,6 @@ export class TBRange {
       if (prev instanceof BackboneAbstractComponent) {
         return this.findLastChild(prev.getSlotAtIndex(prev.slotCount - 1));
       }
-      // let index = this.startIndex - 1;
-      // if (index > 0) {
-      //   const current = fragment.getContentAtIndex(index);
-      //   const prev = fragment.getContentAtIndex(index - 1);
-      //   if (prev instanceof BrComponent && typeof current === 'string') {
-      //     index--;
-      //   }
-      // }
       return {
         fragment,
         index: this.startIndex - 1
@@ -1186,5 +1147,34 @@ export class TBRange {
       index += item.length;
     }
     return index;
+  }
+
+  private static findPosition(container: Node,
+                              offset: number,
+                              position: ElementPosition,
+                              renderer: Renderer): { fragment: Fragment, index: number } {
+    if (container.nodeType === Node.TEXT_NODE) {
+      return {
+        fragment: position.fragment,
+        index: position.startIndex + offset
+      }
+    } else if (container.nodeType === Node.ELEMENT_NODE) {
+      const childNodes = container.childNodes;
+      if (childNodes.length === offset) {
+        const child = childNodes[childNodes.length - 1];
+        const childPosition = renderer.getPositionByNode(child);
+        return {
+          fragment: childPosition.fragment,
+          index: childPosition.endIndex
+        }
+      } else {
+        const child = childNodes[offset];
+        const childPosition = renderer.getPositionByNode(child);
+        return {
+          fragment: childPosition.fragment,
+          index: childPosition.startIndex
+        }
+      }
+    }
   }
 }
