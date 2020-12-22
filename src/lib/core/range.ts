@@ -1103,10 +1103,11 @@ export class TBRange {
 
     function findFocusNativeTextNode(renderer: Renderer,
                                      vElement: VElement,
-                                     offset: number): { node: Node, offset: number } {
+                                     offset: number,
+                                     toLeft: boolean): { node: Node, offset: number } {
       for (const item of vElement.childNodes) {
         const position = renderer.getPositionByVDom(item);
-        if (position.endIndex <= offset) {
+        if (toLeft ? position.endIndex < offset : position.endIndex <= offset) {
           continue
         }
         if (item instanceof VTextNode) {
@@ -1115,7 +1116,7 @@ export class TBRange {
             offset: offset - position.startIndex
           };
         }
-        return findFocusNativeTextNode(renderer, item, offset);
+        return findFocusNativeTextNode(renderer, item, offset, toLeft);
       }
     }
 
@@ -1142,7 +1143,8 @@ export class TBRange {
     }
 
     if (typeof current === 'string') {
-      return findFocusNativeTextNode(this.renderer, vElement, offset);
+      const prev = fragment.getContentAtIndex(offset - 1);
+      return findFocusNativeTextNode(this.renderer, vElement, offset, typeof prev === 'string');
     } else if (current instanceof AbstractComponent) {
       return findFocusNativeElementNode(this.renderer, vElement, offset);
     }
