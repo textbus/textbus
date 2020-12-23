@@ -305,7 +305,7 @@ export function createKeymapHTML(config: Keymap): Node[] {
     arr.push(keys);
 
     arr.forEach((value, index) => {
-      if (index % 2) {
+      if (index - 1 > -1) {
         result.push(createElement('span', {
           classes: ['textbus-toolbar-keymap-join'],
           children: [createTextNode('+')]
