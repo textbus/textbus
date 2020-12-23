@@ -19,7 +19,6 @@ export type TimelineType = 'primary' | 'info' | 'success' | 'warning' | 'danger'
 
 export interface TimelineConfig {
   type: TimelineType;
-  checked: boolean;
   fragment: Fragment;
 }
 
@@ -75,7 +74,6 @@ function createTimelineItem(): TimelineConfig {
   fragment.append(desc);
   return {
     fragment,
-    checked: false,
     type: 'primary'
   };
 }
@@ -91,7 +89,7 @@ class TimelineComponentLoader implements ComponentLoader {
     const list: TimelineConfig[] = Array.from(element.children).map(child => {
       let type: TimelineType = null;
       for (const k of timelineTypes) {
-        if (child.classList.contains('textbus-timelini-' + k)) {
+        if (child.classList.contains('tb-timeline-item-' + k)) {
           type = k as TimelineType;
           break;
         }
@@ -99,11 +97,11 @@ class TimelineComponentLoader implements ComponentLoader {
       const slot = new Fragment()
       slots.push({
         toSlot: slot,
-        from: child as HTMLElement
+        from: child.lastChild?.nodeType === Node.ELEMENT_NODE ?
+          child.lastChild as HTMLElement : document.createElement('div')
       });
       return {
         type,
-        checked: child.classList.contains('textbus-timeline-checked'),
         fragment: slot
       }
     });
@@ -244,9 +242,6 @@ export class TimelineComponent extends BranchAbstractComponent {
       if (item.type) {
         child.classes.push('tb-timeline-item-' + item.type);
       }
-      if (item.checked) {
-        child.classes.push('tb-timeline-checked');
-      }
 
       const content = new VElement('div');
 
@@ -276,7 +271,6 @@ export class TimelineComponent extends BranchAbstractComponent {
           nativeNode.addEventListener('click', () => {
             const newSlot = {
               type: item.type,
-              checked: item.checked,
               fragment: createTimelineItem().fragment
             };
             const index = this.slots.indexOf(item.fragment) + 1;
