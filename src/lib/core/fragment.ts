@@ -66,14 +66,9 @@ export class Fragment extends Marker {
    */
   from(source: Fragment) {
     this.clean();
-    this.contents = source.contents;
-    this.sliceContents().forEach(c => {
-      if (c instanceof AbstractComponent) {
-        c[parentFragmentAccessToken] = this;
-        this.eventMap.set(c, c.onChange.subscribe(() => {
-          this.markAsChanged();
-        }));
-      }
+    this.contents = new Contents();
+    source.contents.slice(0).forEach(c => {
+      this.append(c);
     })
     this.formatMap = new FormatMap();
     const self = this;
@@ -234,12 +229,7 @@ export class Fragment extends Marker {
    */
   clone() {
     const ff = new Fragment();
-    ff.contents = this.contents.clone();
-    ff.sliceContents().forEach(i => {
-      if (i instanceof AbstractComponent) {
-        i[parentFragmentAccessToken] = ff;
-      }
-    })
+    this.contents.clone().slice(0).forEach(i => ff.append(i));
     Array.from(this.formatMap.keys()).forEach(token => {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
