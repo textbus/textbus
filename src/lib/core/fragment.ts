@@ -66,10 +66,6 @@ export class Fragment extends Marker {
    */
   from(source: Fragment) {
     this.clean();
-    this.contents = new Contents();
-    source.contents.slice(0).forEach(c => {
-      this.append(c);
-    })
     this.formatMap = new FormatMap();
     const self = this;
     Array.from(source.formatMap.keys()).forEach(token => {
@@ -89,6 +85,11 @@ export class Fragment extends Marker {
         }
       })])
     });
+
+    this.contents = new Contents();
+    source.contents.slice(0).forEach(c => {
+      this.append(c);
+    })
     source.clean();
     this.markAsDirtied();
   }
@@ -229,7 +230,6 @@ export class Fragment extends Marker {
    */
   clone() {
     const ff = new Fragment();
-    this.contents.clone().slice(0).forEach(i => ff.append(i));
     Array.from(this.formatMap.keys()).forEach(token => {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
@@ -247,6 +247,7 @@ export class Fragment extends Marker {
         }
       })])
     });
+    this.contents.clone().slice(0).forEach(i => ff.append(i));
     return ff;
   }
 
