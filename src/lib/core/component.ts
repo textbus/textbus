@@ -52,7 +52,7 @@ export interface AbstractComponent {
  * 如要扩展功能。请继承 DivisionAbstractComponent、BranchAbstractComponent、BackboneAbstractComponent 或 LeafAbstractComponent 类。
  */
 export abstract class AbstractComponent extends Marker {
-  [parentFragmentAccessToken]: Fragment | null;
+  [parentFragmentAccessToken]: Fragment | null = null;
 
   get parentFragment() {
     return this[parentFragmentAccessToken];

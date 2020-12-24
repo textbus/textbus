@@ -38,7 +38,7 @@ const fragmentErrorFn = makeError('Fragment');
  * TextBus 抽象数据类
  */
 export class Fragment extends Marker {
-  [parentComponentAccessToken]: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent | null;
+  [parentComponentAccessToken]: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent | null = null;
 
   get parentComponent() {
     return this[parentComponentAccessToken];

@@ -191,7 +191,7 @@ export class StepComponent extends BranchAbstractComponent {
   clone(): StepComponent {
     return new StepComponent({
       step: this.config.step,
-      slots: [...this.slots]
+      slots: [...this.slots.map(i => i.clone())]
     });
   }
 
