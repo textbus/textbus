@@ -87,7 +87,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       last instanceof BrComponent) {
       commonAncestorFragment.append(new BrComponent());
     }
-    return false;
   }
 
   onEnter() {
