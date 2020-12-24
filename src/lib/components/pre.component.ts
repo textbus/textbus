@@ -95,24 +95,31 @@ class PreComponentLoader implements ComponentLoader {
 
   read(el: HTMLElement): ViewData {
     const component = new PreComponent(el.getAttribute('lang'), el.getAttribute('theme') as PreTheme);
-    const fragment = new Fragment();
-    const fn = function (node: HTMLElement, fragment: Fragment) {
-      node.childNodes.forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          fragment.append(node.textContent);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          if (/br/i.test(node.nodeName)) {
-            fragment.append(new BrComponent());
-          } else {
-            fn(node as HTMLElement, fragment);
-          }
-        }
-      })
-    };
-    fn(el, fragment);
-    const fragments=[];
-    fragments.push( fragment);
+    const fragments:Fragment[]=[];
+    el.querySelectorAll('br').forEach( br=>{
+      br.parentNode.replaceChild( document.createTextNode('\n'), br);
+    })
+    el.innerText.split(/[\n]/).forEach( lineContent=>{
+      let frag = new Fragment();
+      frag.append(lineContent);
+      frag.append( new BrComponent());
+      fragments.push( frag);
+    })
     component.form( fragments);
+    // const fn = function (node: HTMLElement, fragment: Fragment) {
+    //   node.childNodes.forEach(node => {
+    //     if (node.nodeType === Node.TEXT_NODE) {
+    //       fragment.append(node.textContent);
+    //     } else if (node.nodeType === Node.ELEMENT_NODE) {
+    //       if (/br/i.test(node.nodeName)) {
+    //         fragment.append(new BrComponent());
+    //       } else {
+    //         fn(node as HTMLElement, fragment);
+    //       }
+    //     }
+    //   })
+    // };
+    // fn(el, fragment);
     // component.slot.from(fragment);
     return {
       component: component,
@@ -135,6 +142,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
         if (slot === this.selection.commonAncestorFragment) {
           const newSlot=new Fragment();
           newSlot.append('console.log("我是新增内容")');
+          newSlot.append(new BrComponent());
           component.splice(i+1, 0, newSlot);
         }
       }
@@ -176,6 +184,13 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
    pre {line-height: 1.418em; padding: 15px; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
+   `
+   pre { counter-reset: codeNum; }
+   pre>p:before {
+    content: counter( codeNum);
+    counter-increment: codeNum;
+    padding-right: 10px;
+   }`,
     `
   .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
@@ -220,16 +235,14 @@ export class PreComponent extends BackboneAbstractComponent {
 
   clone() {
     const component = new PreComponent(this.lang);
-    // TODO pre clone
-    // component.slot.from(this.slot.clone());
+    const fragments=this.map(slot=>slot.clone());
+    component.form(fragments);
     return component;
   }
 
   canDelete(deletedSlot: Fragment): boolean {
-    // TODO can delete
-    // this.deleteMarkFragments.push(deletedSlot);
-    // return !this.map(slot => this.deleteMarkFragments.includes(slot)).includes(false);
-    return true;
+    this.splice(this.indexOf(deletedSlot), 1);
+    return this.slotCount===0;
   }
 
   componentContentChange() {
@@ -280,6 +293,7 @@ export class PreComponent extends BackboneAbstractComponent {
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
     this.map(slot=>{
+      if (slot.dirty===false) return;
       const content = slot.sliceContents(0).map(item => {
         if (typeof item === 'string') {
           return item;
@@ -306,31 +320,6 @@ export class PreComponent extends BackboneAbstractComponent {
       fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
       slot.from(fragment);
     })
-    // const content = this.slot.sliceContents(0).map(item => {
-    //   if (typeof item === 'string') {
-    //     return item;
-    //   } else if (item instanceof BrComponent) {
-    //     return '\n';
-    //   }
-    // }).join('');
-    // const fragment = new Fragment();
-    // content.replace(/\n|[^\n]+/g, str => {
-    //   fragment.append(str === '\n' ? new BrComponent() : str);
-    //   return '';
-    // })
-    // if (languageGrammar) {
-    //   const tokens = tokenize(content, languageGrammar);
-    //   this.format(tokens, fragment, 0);
-    // }
-    // this.slot.getFormatKeys().forEach(format => {
-    //   if (format instanceof BlockFormatter) {
-    //     this.slot.getFormatRanges(format).forEach(r => {
-    //       fragment.apply(format, r);
-    //     })
-    //   }
-    // })
-    // fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
-    // this.slot.from(fragment);
   }
 
   private getLanguageGrammar(): Grammar {
