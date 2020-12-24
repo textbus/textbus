@@ -11,4 +11,6 @@ export interface Tool<T = any> {
   keymapAction?: KeymapAction | KeymapAction[];
 
   updateStatus?(selectionMatchState: SelectionMatchState): void;
+
+  onDestroy(): void;
 }

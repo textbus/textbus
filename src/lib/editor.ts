@@ -31,6 +31,7 @@ import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { Toolbar, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';
 import { FileUploader } from './uikit/forms/help';
+import { makeError } from './_utils/make-error';
 
 /**
  * TextBus 初始化时的配置参数
@@ -76,6 +77,8 @@ export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT
 export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
 export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
 
+const editorErrorFn = makeError('Editor');
+
 /**
  * TextBus 主类
  */
@@ -106,15 +109,12 @@ export class Editor<T = any> {
   private tasks: Array<() => void> = [];
 
   private readyEvent = new Subject<void>();
-
-  private onUserWrite: Observable<void>;
-  private userWriteEvent = new Subject<void>();
   private viewer: Viewer;
+  private readonly rootInjector: Injector;
 
   private subs: Subscription[] = [];
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
-    this.onUserWrite = this.userWriteEvent.asObservable();
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
@@ -143,6 +143,26 @@ export class Editor<T = any> {
       this.fullScreen(state.fullScreen);
     }))
 
+    const fileUploader: FileUploader = {
+      upload: (type: string): Observable<string> => {
+        if (typeof this.options.uploader === 'function') {
+          // if (this.selection.rangeCount === 0) {
+          //   alert('请先选择插入资源位置！');
+          //   return throwError(new Error('请先选择插入资源位置！'));
+          // }
+          const result = this.options.uploader(type);
+          if (result instanceof Observable) {
+            return result;
+          } else if (result instanceof Promise) {
+            return from(result);
+          } else if (typeof result === 'string') {
+            return of(result);
+          }
+        }
+        return of('');
+      }
+    };
+
     const staticProviders: Provider[] = [{
       provide: Editor,
       useValue: this,
@@ -154,25 +174,7 @@ export class Editor<T = any> {
       useValue: this.stateController
     }, {
       provide: FileUploader,
-      useValue: {
-        upload: (type: string): Observable<string> => {
-          if (typeof this.options.uploader === 'function') {
-            // if (this.selection.rangeCount === 0) {
-            //   alert('请先选择插入资源位置！');
-            //   return throwError(new Error('请先选择插入资源位置！'));
-            // }
-            const result = this.options.uploader(type);
-            if (result instanceof Observable) {
-              return result;
-            } else if (result instanceof Promise) {
-              return from(result);
-            } else if (typeof result === 'string') {
-              return of(result);
-            }
-          }
-          return of('');
-        }
-      }
+      useValue: fileUploader
     }, {
       provide: OutputRenderer,
       useValue: new OutputRenderer()
@@ -211,6 +213,7 @@ export class Editor<T = any> {
       ComponentStage,
       ...staticProviders
     ]);
+    this.rootInjector = rootInjector;
 
     this.viewer = rootInjector.get(Viewer);
     this.onChange = this.viewer.onViewUpdated;
@@ -263,7 +266,7 @@ export class Editor<T = any> {
    */
   getJSONLiteral() {
     if (this.stateController.sourceCodeMode) {
-      throw new Error('源代码模式下，不支持获取 JSON 字面量！');
+      throw editorErrorFn('json results cannot be obtained in source editing mode.');
     }
     return this.viewer.getJSONLiteral();
   }
@@ -272,8 +275,21 @@ export class Editor<T = any> {
    * 销毁 TextBus 实例。
    */
   destroy() {
-    this.container.removeChild(this.elementRef);
     this.subs.forEach(s => s.unsubscribe());
+    const rootInjector = this.rootInjector;
+    [Toolbar,
+      Workbench,
+      Device,
+      Dialog,
+      EditingMode,
+      FullScreen,
+      LibSwitch,
+      StatusBar,
+      Viewer,
+      ComponentStage].forEach(c => {
+      rootInjector.get(c as Type<{ destroy(): void }>).destroy();
+    })
+    this.container.removeChild(this.elementRef);
   }
 
   private fullScreen(is: boolean) {

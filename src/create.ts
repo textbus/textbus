@@ -174,5 +174,8 @@ export const defaultOptions: EditorOptions<string> = {
 };
 
 export function createEditor<T = string>(selector: string | HTMLElement, options: EditorOptions<T> = {}) {
-  return new Editor<T>(selector, Object.assign(defaultOptions, options));
+  return new Editor<T>(selector, {
+    ...defaultOptions as EditorOptions<any>,
+    ...options as EditorOptions<any>
+  });
 }

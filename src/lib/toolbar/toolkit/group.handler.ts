@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 import { Tool } from './help';
 import { Commander } from '../../core/commander';
@@ -67,6 +67,9 @@ class MenuHandler implements Tool {
   updateStatus(selectionMatchState: SelectionMatchState) {
     this.updateStateFn(selectionMatchState);
   }
+
+  onDestroy() {
+  }
 }
 
 export class GroupHandler implements Tool {
@@ -75,6 +78,8 @@ export class GroupHandler implements Tool {
   commander: Commander;
   tools: Array<{ config: ToolConfig, instance: Tool }> = [];
   private dropdown: UIDropdown;
+
+  private subs: Subscription[] = [];
 
   constructor(private config: GroupConfig,
               private delegate: FileUploader,
@@ -106,6 +111,10 @@ export class GroupHandler implements Tool {
 
   updateStatus(selectionMatchState: SelectionMatchState) {
     this.dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
+  }
+
+  onDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private createButton(c: ActionMenu) {
@@ -210,10 +219,10 @@ export class GroupHandler implements Tool {
       label: c.label
     })
 
-    menu.onComplete.subscribe(value => {
+    this.subs.push(menu.onComplete.subscribe(value => {
       s.next(value);
       this.dropdown.hide();
-    });
+    }))
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       menu.update?.(selectionMatchState.matchData);
       selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
@@ -246,6 +255,10 @@ export class GroupHandler implements Tool {
           subscription.unsubscribe();
           this.dialogManager.close();
         })
+        this.subs.push(subscription);
+        if (b) {
+          this.subs.push(b);
+        }
       }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {

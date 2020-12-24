@@ -8,6 +8,7 @@ import {
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
 import { BrComponent } from '../components/br.component';
+import { makeError } from '../_utils/make-error';
 
 export interface ElementPosition {
   startIndex: number;
@@ -82,6 +83,8 @@ class NativeElementMappingTable {
     }
   }
 }
+
+const rendererErrorFn = makeError('Renderer');
 
 export class Renderer {
   // 记录虚拟节点的位置
@@ -182,9 +185,13 @@ export class Renderer {
 
       let isFind = false;
       let right: VTextNode | VElement;
+      let canReuseVTextNode = true;
       while (rightIndex < rightLength) {
         right = rightChildNodes[rightIndex];
-        if (left === right) {
+        if (left === right || left instanceof VTextNode &&
+          right instanceof VTextNode &&
+          left.textContent === right.textContent &&
+          canReuseVTextNode) {
           let i = rightStartIndex;
           while (i < rightIndex) {
             const abandonedVNode = rightChildNodes[i];
@@ -201,11 +208,16 @@ export class Renderer {
         } else {
           rightIndex++;
         }
+        canReuseVTextNode = false
       }
       if (isFind) {
-        childNodes[leftIndex] = this.getNativeNodeByVDom(right);
+        const nativeNode = this.getNativeNodeByVDom(right)
+        childNodes[leftIndex] = nativeNode;
         rightChildNodes[rightIndex] = null;
         rightIndex++;
+        if (left instanceof VTextNode) {
+          this.NVMappingTable.set(left, nativeNode)
+        }
       } else {
         childNodes[leftIndex] = this.patch(left);
         rightIndex = rightStartIndex;
@@ -264,7 +276,7 @@ export class Renderer {
       const slot = elements[elements.length - 1];
 
       if (root !== host) {
-        throw new Error('插槽节点不能被替换！')
+        throw rendererErrorFn('slot elements cannot be replaced.')
       }
       this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
         (slot || host).appendChild(child);
@@ -305,8 +317,7 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      let vElement: VElement;
-      vElement = component.render(false, (slot, host) => {
+      let vElement = component.render(false, (slot, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
@@ -314,6 +325,9 @@ export class Renderer {
         view.styles.set('userSelect', 'text');
         return view;
       });
+      if (!(vElement instanceof VElement)) {
+        throw rendererErrorFn(`component render method must return a virtual element.`);
+      }
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
       if (component instanceof DivisionAbstractComponent) {

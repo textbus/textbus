@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { Tool } from './help';
 import { HighlightState } from '../help';
@@ -24,6 +24,8 @@ export class FormHandler implements Tool {
   private button: UIButton;
   private viewer: FormViewer;
 
+  private subs: Subscription[] = [];
+
   constructor(private config: FormToolConfig,
               private delegate: FileUploader,
               private dialogManager: Dialog) {
@@ -35,7 +37,7 @@ export class FormHandler implements Tool {
 
     this.button = UIKit.button({
       ...config,
-      onChecked() {
+      onChecked: () => {
         dialogManager.dialog(viewer.elementRef);
         const s = viewer.onComplete.subscribe(() => {
           dialogManager.close();
@@ -45,7 +47,11 @@ export class FormHandler implements Tool {
           dialogManager.close();
           s.unsubscribe();
           b.unsubscribe();
-        })
+        });
+        this.subs.push(s);
+        if (b) {
+          this.subs.push(b);
+        }
       }
     });
 
@@ -72,5 +78,8 @@ export class FormHandler implements Tool {
         this.button.highlight = false;
         break
     }
+  }
+
+  onDestroy() {
   }
 }

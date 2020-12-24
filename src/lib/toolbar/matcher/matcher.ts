@@ -36,7 +36,9 @@ export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent>
 }
 
 export interface Matcher {
-  onInit?(injector: Injector): void;
+  setup?(injector: Injector): void;
+
+  onDestroy?(): void;
 
   queryState(selection: TBSelection): SelectionMatchState;
 }

@@ -7,7 +7,7 @@ import { RootComponent } from '../../root-component';
 export class TableRemoveCommander implements Commander<null> {
   recordHistory = true;
   private rootFragment: Fragment;
-  onInit(injector: Injector) {
+  setup(injector: Injector) {
     this.rootFragment = injector.get(RootComponent).slot;
   }
 

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { BoldFormatter, FormatAbstractData, FormatEffect, Fragment } from '@tanbo/textbus';
 
 describe('删除内容', () => {

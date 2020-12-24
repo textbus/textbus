@@ -21,4 +21,6 @@ export interface TBPlugin {
    * 当视图更新后调用。
    */
   onViewUpdated?(): void;
+
+  onDestroy?(): void
 }

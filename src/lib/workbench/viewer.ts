@@ -1,6 +1,15 @@
-import { Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { forwardRef, getAnnotations, Inject, Injectable, Injector, Provider, ReflectiveInjector } from '@tanbo/di';
+import {
+  forwardRef,
+  getAnnotations,
+  Inject,
+  Injectable,
+  Injector,
+  Provider,
+  ReflectiveInjector,
+  Type
+} from '@tanbo/di';
 import pretty from 'pretty';
 
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
@@ -48,6 +57,10 @@ export class Viewer {
   private rootComponent: RootComponent;
   private parser: Parser;
   private docStyles: string[];
+  private subs: Subscription[] = [];
+  private resizeObserver: any;
+  private viewInjector: Injector;
+  private componentAnnotations: Component[];
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               private componentStage: ComponentStage,
@@ -60,6 +73,8 @@ export class Viewer {
     const componentAnnotations = this.options.components.map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
+
+    this.componentAnnotations = componentAnnotations;
 
     const componentStyles = componentAnnotations.map(c => {
       return [c.styles?.join('') || '', c.editModeStyles?.join('') || ''].join('')
@@ -84,7 +99,7 @@ export class Viewer {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
-          this.setup(componentAnnotations);
+          this.setup();
           this.listen();
         }
       }
@@ -99,12 +114,25 @@ export class Viewer {
 
   destroy() {
     cancelAnimationFrame(this.id);
+    this.resizeObserver?.unobserve(this.contentDocument.body);
+    this.subs.forEach(s => s.unsubscribe());
+    [Input, HistoryManager].forEach(c => {
+      this.viewInjector.get(c as Type<{ destroy(): void }>).destroy();
+    });
+    (this.options.plugins || []).forEach(p => p.onDestroy?.());
+    this.componentAnnotations.forEach(c => {
+      c.interceptor?.onDestroy?.();
+    })
   }
 
-  setup(componentAnnotations: Component[]) {
+  setup() {
     const renderer = new Renderer();
-    const selection = new TBSelection(this.contentDocument, renderer, (this.options.plugins || []));
-    const parser = this.parser = new Parser(componentAnnotations.map(c => c.loader), this.options.formatters);
+    const selection = new TBSelection(
+      this.contentDocument,
+      fromEvent(this.contentDocument, 'selectionchange'),
+      renderer,
+      (this.options.plugins || []));
+    const parser = this.parser = new Parser(this.componentAnnotations.map(c => c.loader), this.options.formatters);
 
     const viewProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
@@ -131,6 +159,8 @@ export class Viewer {
       ...viewProviders
     ]);
 
+    this.viewInjector = viewInjector;
+
     const rootComponent = this.rootComponent = viewInjector.get(RootComponent);
     const toolbar = viewInjector.get(Toolbar);
 
@@ -138,50 +168,52 @@ export class Viewer {
     this.componentStage.setup(viewInjector);
 
 
-    rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
-      (this.options.plugins || []).forEach(plugin => {
-        plugin.onRenderingBefore?.();
-      })
-      if (this.editorController.sourceCodeMode) {
-        Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
-      } else {
-        const isEmpty = rootComponent.slot.contentLength === 0;
-        Viewer.guardLastIsParagraph(rootComponent.slot);
-        if (isEmpty && selection.firstRange) {
-          const position = selection.firstRange.findFirstPosition(rootComponent.slot);
-          selection.firstRange.setStart(position.fragment, position.index);
-          selection.firstRange.setEnd(position.fragment, position.index);
+    this.subs.push(
+      rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
+        (this.options.plugins || []).forEach(plugin => {
+          plugin.onRenderingBefore?.();
+        })
+        if (this.editorController.sourceCodeMode) {
+          Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
+        } else {
+          const isEmpty = rootComponent.slot.contentLength === 0;
+          Viewer.guardLastIsParagraph(rootComponent.slot);
+          if (isEmpty && selection.firstRange) {
+            const position = selection.firstRange.findFirstPosition(rootComponent.slot);
+            selection.firstRange.setStart(position.fragment, position.index);
+            selection.firstRange.setEnd(position.fragment, position.index);
+          }
         }
-      }
-      renderer.render(rootComponent.slot, this.contentDocument.body);
-      selection.restore();
-      (this.options.plugins || []).forEach(plugin => {
-        plugin.onViewUpdated?.();
-      })
-      this.viewUpdateEvent.next();
-    })
+        renderer.render(rootComponent.slot, this.contentDocument.body);
+        selection.restore();
+        (this.options.plugins || []).forEach(plugin => {
+          plugin.onViewUpdated?.();
+        })
+        this.viewUpdateEvent.next();
+      }),
 
-    this.editorController.onStateChange.pipe(map(b => b.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
-      selection.removeAllRanges();
-      this.sourceCodeMode = b;
-      if (b) {
-        const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
-        this.rootComponent.slot.clean();
-        this.sourceCodeComponent.slot.clean();
-        this.sourceCodeComponent.slot.append(pretty(html));
-        this.rootComponent.slot.append(this.sourceCodeComponent);
-      } else {
-        const html = this.getHTMLBySourceCodeMode();
-        const dom = Viewer.parserHTML(html)
-        this.rootComponent.slot.from(this.parser.parse(dom));
-      }
-    })
+      this.editorController.onStateChange.pipe(map(b => b.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
+        selection.removeAllRanges();
+        this.sourceCodeMode = b;
+        if (b) {
+          const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
+          this.rootComponent.slot.clean();
+          this.sourceCodeComponent.slot.clean();
+          this.sourceCodeComponent.slot.append(pretty(html));
+          this.rootComponent.slot.append(this.sourceCodeComponent);
+        } else {
+          const html = this.getHTMLBySourceCodeMode();
+          const dom = Viewer.parserHTML(html)
+          this.rootComponent.slot.from(this.parser.parse(dom));
+        }
+      })
+    )
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     const rootAnnotation = getAnnotations(RootComponent).getClassMetadata(Component).params[0] as Component;
     rootAnnotation.interceptor.setup(viewInjector);
-    componentAnnotations.forEach(c => {
+    this.componentAnnotations.forEach(c => {
       c.interceptor?.setup(viewInjector);
     });
 
@@ -192,6 +224,7 @@ export class Viewer {
     viewInjector.get(HistoryManager).startListen();
 
     this.readyEvent.next(viewInjector);
+    this.readyEvent.complete();
   }
 
   updateContent(html: string) {
@@ -223,8 +256,11 @@ export class Viewer {
   }
 
   private listen() {
+    if (!this.contentDocument?.body) {
+      return;
+    }
     // @ts-ignore
-    const resizeObserver = new ResizeObserver(() => {
+    this.resizeObserver = new ResizeObserver(() => {
       const childBody = this.contentDocument.body;
       const lastChild = childBody.lastChild;
       let height = 0;
@@ -240,7 +276,7 @@ export class Viewer {
       }
       this.elementRef.style.height = Math.max(height, this.minHeight) + 'px';
     })
-    resizeObserver.observe(this.contentDocument.body);
+    this.resizeObserver.observe(this.contentDocument.body);
   }
 
 

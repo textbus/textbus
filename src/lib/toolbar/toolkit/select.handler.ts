@@ -111,4 +111,7 @@ export class SelectHandler implements Tool {
       this.dropdown.button.label.innerText = defaultOption.label || defaultOption.value;
     }
   }
+
+  onDestroy() {
+  }
 }

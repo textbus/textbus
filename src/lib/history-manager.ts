@@ -25,6 +25,7 @@ export class HistoryManager {
   }
 
   private snapshotSubscription: Subscription;
+  private stateChangeSubscription: Subscription;
 
   private historySequence: Array<Snapshot> = [];
   private historyIndex = 0;
@@ -41,7 +42,12 @@ export class HistoryManager {
   }
 
   startListen() {
-    this.editorController.onStateChange.pipe(map(s => s.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
+    if (this.stateChangeSubscription) {
+      this.stateChangeSubscription.unsubscribe();
+    }
+    this.stateChangeSubscription = this.editorController.onStateChange.pipe(map(s => {
+      return s.sourceCodeMode;
+    }), distinctUntilChanged()).subscribe(b => {
       if (b) {
         this.stopListen();
       } else {
@@ -74,6 +80,8 @@ export class HistoryManager {
 
   destroy() {
     this.historySequence = null;
+    this.stateChangeSubscription?.unsubscribe();
+    this.stopListen();
   }
 
   clean() {

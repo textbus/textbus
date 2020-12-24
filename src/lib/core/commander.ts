@@ -21,7 +21,9 @@ export interface Commander<T = any> {
    */
   recordHistory: boolean;
 
-  onInit?(injector: Injector): void;
+  setup?(injector: Injector): void;
+
+  onDestroy?(): void;
 
   /**
    * 格式化文档的方法

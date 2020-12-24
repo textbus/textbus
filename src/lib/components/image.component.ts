@@ -1,6 +1,7 @@
-import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 import { fromEvent } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
+
+import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 
 export interface ImageOptions {
   maxWidth?: string;
@@ -11,7 +12,7 @@ export interface ImageOptions {
   float?: string;
 }
 
-const imageLoadingSrc = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g style="transform: translate(50%, 50%)"><circle cx="0" cy="0" r="2" fill="none" stroke="#e9eaec" stroke-width="0.5"></circle><circle cx="0" cy="0" r="2" fill="none" stroke="#1296db" stroke-width="0.5" stroke-dasharray="1.5 100"><animateTransform attributeType="xml" attributeName="transform" type="rotateZ" from="0 0 0" to="360 0 0" dur="1s" repeatCount="indefinite"></animateTransform></circle></g></svg>')}`
+const imageLoadingSrc = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g style="transform: translate(50%, 50%)"><circle cx="0" cy="0" r="16px" fill="none" stroke="#e9eaec" stroke-width="4px"></circle><circle cx="0" cy="0" r="16px" fill="none" stroke="#1296db" stroke-width="4px" stroke-dasharray="20px 140px"><animateTransform attributeType="xml" attributeName="transform" type="rotateZ" from="0 0 0" to="360 0 0" dur="1s" repeatCount="indefinite"></animateTransform></circle></g></svg>')}`
 
 class ImageComponentLoader implements ComponentLoader {
   private tagName = 'img';

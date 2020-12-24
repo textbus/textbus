@@ -11,7 +11,7 @@ export class HistoryMatcher implements Matcher {
   constructor(private type: 'forward' | 'back') {
   }
 
-  onInit(injector: Injector) {
+  setup(injector: Injector) {
     this.history = injector.get(HistoryManager);
   }
 

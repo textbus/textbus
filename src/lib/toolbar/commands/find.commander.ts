@@ -49,7 +49,7 @@ export class FindCommander implements Commander<ElementPosition[]> {
 
   private rootFragment: Fragment;
 
-  onInit(injector: Injector) {
+  setup(injector: Injector) {
     this.rootFragment = injector.get(RootComponent).slot;
   }
 

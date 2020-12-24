@@ -3,6 +3,7 @@ import { isMac, Keymap } from '../workbench/input';
 export interface UIElementParams {
   classes?: string[];
   attrs?: { [key: string]: any };
+  props?: { [key: string]: any };
   children?: Node[];
 
   onCreated?(newNode: Node): any;
@@ -259,6 +260,11 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
       el.setAttribute(key, options.attrs[key]);
     })
   }
+  if (options.props) {
+    Object.keys(options.attrs).forEach(key => {
+      el[key] = options.props[key];
+    })
+  }
   if (options.children) {
     options.children.forEach(item => {
       el.appendChild(item);
@@ -299,7 +305,7 @@ export function createKeymapHTML(config: Keymap): Node[] {
     arr.push(keys);
 
     arr.forEach((value, index) => {
-      if (index % 2) {
+      if (index - 1 > -1) {
         result.push(createElement('span', {
           classes: ['textbus-toolbar-keymap-join'],
           children: [createTextNode('+')]
