@@ -114,7 +114,7 @@ export class Viewer {
 
   destroy() {
     cancelAnimationFrame(this.id);
-    this.resizeObserver?.unobserve(this.contentDocument.body);
+    this.resizeObserver?.unobserve(this.contentDocument?.body);
     this.subs.forEach(s => s.unsubscribe());
     [Input, HistoryManager].forEach(c => {
       this.viewInjector.get(c as Type<{ destroy(): void }>).destroy();

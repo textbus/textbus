@@ -278,7 +278,6 @@ export class Editor<T = any> {
     this.subs.forEach(s => s.unsubscribe());
     const rootInjector = this.rootInjector;
     [Toolbar,
-      Workbench,
       Device,
       Dialog,
       EditingMode,
@@ -286,7 +285,9 @@ export class Editor<T = any> {
       LibSwitch,
       StatusBar,
       Viewer,
-      ComponentStage].forEach(c => {
+      ComponentStage,
+      Workbench,
+    ].forEach(c => {
       rootInjector.get(c as Type<{ destroy(): void }>).destroy();
     })
     this.container.removeChild(this.elementRef);
