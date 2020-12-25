@@ -261,7 +261,7 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
     })
   }
   if (options.props) {
-    Object.keys(options.attrs).forEach(key => {
+    Object.keys(options.props).forEach(key => {
       el[key] = options.props[key];
     })
   }
