@@ -137,38 +137,38 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
    * 子插槽的集合
    */
   readonly slots: T[] = new Proxy<T[]>([], {
-    set: (target: T[], p: PropertyKey, value: any, receiver: any) => {
-      const b = Reflect.set(target, p, value, receiver);
-      if (typeof p === 'string') {
-        if (/\d+/.test(p)) {
-          value[parentComponentAccessToken] = this;
-          this.eventMap.set(value, value.onChange.subscribe(() => {
-            this.markAsChanged();
-          }))
-          this.markAsDirtied();
-        } else if (p === 'length' && typeof value === 'number') {
-          for (let i = value; i < target.length; i++) {
-            const deletedValue = target[i];
-            if (deletedValue) {
-              this.eventMap.get(deletedValue)?.unsubscribe();
-              this.eventMap.delete(deletedValue);
-              deletedValue[parentComponentAccessToken] = null;
-
-              this.markAsDirtied();
-            }
+    set: (target: T[], p: PropertyKey, value: T, receiver: any) => {
+      if (!this.eventMap.has(value) && value instanceof Fragment) {
+        this.eventMap.set(value, value.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+      }
+      if (p === 'length' && typeof value === 'number') {
+        for (const item of target) {
+          if (item) {
+            item[parentComponentAccessToken] = null;
           }
         }
       }
+      const b = Reflect.set(target, p, value, receiver);
+      this.eventMap.forEach(v => v.unsubscribe());
+      this.eventMap.clear();
+      target.forEach(f => {
+        this.eventMap.set(f, f.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+        f[parentComponentAccessToken] = this;
+      })
+      this.markAsDirtied();
       return b;
     },
     deleteProperty: (target: T[], p: PropertyKey) => {
       const deletedValue = target[p];
       const b = Reflect.deleteProperty(target, p);
-      if (typeof p === 'string' && /\d+/.test(p) && deletedValue) {
+      if (typeof p === 'string' && /\d+/.test(p) && deletedValue && !target.includes(deletedValue)) {
         this.eventMap.get(deletedValue)?.unsubscribe();
         this.eventMap.delete(deletedValue);
         deletedValue[parentComponentAccessToken] = null;
-
         this.markAsDirtied();
       }
       return b;
