@@ -25,7 +25,7 @@ export class PreCommander implements Commander<string> {
         const context = range.endFragment.parentComponent;
         const parentFragment = context.parentFragment;
         const slot = new Fragment();
-        const t = new PreComponent(lang, [slot]);
+        const t = new PreComponent(lang, '');
         slot.append(new BrComponent());
         parentFragment.insertAfter(t, context);
         range.setStart(slot, 0);

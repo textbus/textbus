@@ -19,7 +19,6 @@ import {
   BlockFormatter,
   ChildSlotMode, Component,
   ComponentLoader,
-  DivisionAbstractComponent,
   BackboneAbstractComponent,
   FormatAbstractData,
   FormatEffect,
@@ -31,12 +30,13 @@ import {
   ViewData
 } from '../core/_api';
 import { BrComponent } from './br.component';
+
 export const codeStyles = {
   keyword: 'keyword',
   string: 'string',
   function: 'function',
   number: 'number',
-  tag: 'tag', 
+  tag: 'tag',
   comment: 'comment',
   boolean: 'boolean',
   operator: false,
@@ -94,17 +94,10 @@ class PreComponentLoader implements ComponentLoader {
   }
 
   read(el: HTMLElement): ViewData {
-    const fragments: Fragment[] = [];
     el.querySelectorAll('br').forEach(br => {
       br.parentNode.replaceChild(document.createTextNode('\n'), br);
     })
-    el.innerText.split(/[\n]/).forEach(lineContent => {
-      let frag = new Fragment();
-      frag.append(lineContent);
-      frag.append(new BrComponent());
-      fragments.push(frag);
-    })
-    const component = new PreComponent(el.getAttribute('lang'), fragments, el.getAttribute('theme') as PreTheme);
+    const component = new PreComponent(el.getAttribute('lang'), el.innerText, el.getAttribute('theme') as PreTheme);
     return {
       component: component,
       slotsMap: []
@@ -124,7 +117,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     const component: PreComponent = event.instance;
     let newSlot = null;
     let i = 0;
-    for (let slot of component) {
+    for (const slot of component) {
       i++;
       if (slot === this.selection.commonAncestorFragment) {
         const startIndex = firstRange.startIndex;
@@ -147,8 +140,8 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     const len = lines.length;
     const lastLine = lines[len - 1];
     const slot = this.selection.commonAncestorFragment;
-    let index = component.indexOf(slot);
-    let endSlot = null;
+    const index = component.indexOf(slot);
+    let endSlot: Fragment;
     let curIndex = lastLine.length;
     const startIndex = firstRange.startIndex;
 
@@ -165,8 +158,8 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       if (len > 2) {
         const betweenSlots: Fragment[] = [];
         for (let i = 1; i < len - 1; ++i) {
-          let line = lines[i];
-          let slot = new Fragment();
+          const line = lines[i];
+          const slot = new Fragment();
           slot.append(line);
           slot.append(new BrComponent());
           betweenSlots.push(slot);
@@ -229,22 +222,24 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 export class PreComponent extends BackboneAbstractComponent {
   static theme: PreTheme = 'light';
 
-  constructor(public lang: string, slots: Fragment[], private theme?: PreTheme) {
+  constructor(public lang: string, code: string, private theme?: PreTheme) {
     super('pre');
-    this.push(...slots);
+    this.setSourceCode(code)
   }
 
   public map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
     return super.map(callbackFn, thisArg);
   }
+
   public splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
     return super.splice(start, deleteCount, ...items);
   }
 
-
   clone() {
     const fragments = this.map(slot => slot.clone());
-    const component = new PreComponent(this.lang, fragments, this.theme);
+    const component = new PreComponent(this.lang, '', this.theme);
+    component.clean();
+    component.push(...fragments);
     return component;
   }
 
@@ -267,6 +262,24 @@ export class PreComponent extends BackboneAbstractComponent {
       block.appendChild(slotRendererFn(slot, line));
     })
     return block;
+  }
+
+  setSourceCode(code: string) {
+    const fragments = code.split(/[\n]/).map(lineContent => {
+      const fragment = new Fragment();
+      fragment.append(lineContent || new BrComponent());
+      return fragment
+    })
+    this.clean();
+    this.push(...fragments);
+  }
+
+  getSourceCode() {
+    return Array.from(this).map(slot => {
+      return slot.sliceContents(0).map(i => {
+        return typeof i === 'string' ? i.trim() : '';
+      }).join('')
+    }).join('');
   }
 
   format(tokens: Array<string | Token>, slot: Fragment, index: number) {
@@ -325,7 +338,7 @@ export class PreComponent extends BackboneAbstractComponent {
           })
         }
       })
-      fragment.apply(codeFormatter, { abstractData: null, state: FormatEffect.Valid });
+      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
       slot.from(fragment);
     })
   }

@@ -50,7 +50,7 @@ export class Viewer {
   private sourceCodeModeStyleSheet = document.createElement('style');
 
 
-  private sourceCodeComponent = new PreComponent('HTML', [new Fragment]);
+  private sourceCodeComponent = new PreComponent('HTML', '');
   private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<Injector>();
   private viewUpdateEvent = new Subject<void>();
@@ -200,8 +200,7 @@ export class Viewer {
         if (b) {
           const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
           this.rootComponent.slot.clean();
-          this.sourceCodeComponent.slot.clean();
-          this.sourceCodeComponent.slot.append(pretty(html));
+          this.sourceCodeComponent.setSourceCode(pretty(html));
           this.rootComponent.slot.append(this.sourceCodeComponent);
         } else {
           const html = this.getHTMLBySourceCodeMode();
@@ -252,9 +251,7 @@ export class Viewer {
   }
 
   private getHTMLBySourceCodeMode() {
-    return this.sourceCodeComponent.slot.sliceContents(0).map(i => {
-      return typeof i === 'string' ? i.trim() : '';
-    }).join('');
+    return this.sourceCodeComponent.getSourceCode();
   }
 
   private listen() {
@@ -299,9 +296,6 @@ export class Viewer {
   private static guardContentIsPre(fragment: Fragment, pre: PreComponent) {
     if (fragment.contentLength === 0) {
       fragment.append(pre);
-    }
-    if (pre.slot.contentLength === 0) {
-      pre.slot.append(new BrComponent());
     }
   }
 
