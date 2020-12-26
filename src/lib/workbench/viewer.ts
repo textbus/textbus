@@ -48,7 +48,7 @@ export class Viewer {
   private sourceCodeModeStyleSheet = document.createElement('style');
 
 
-  private sourceCodeComponent = new PreComponent('HTML');
+  private sourceCodeComponent = new PreComponent('HTML', [new Fragment]);
   private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<Injector>();
   private viewUpdateEvent = new Subject<void>();

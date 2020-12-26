@@ -1,6 +1,7 @@
 import {
   CommandContext,
   Commander,
+  Fragment,
 } from '../../core/_api';
 import { PreComponent, BrComponent } from '../../components/_api';
 
@@ -23,10 +24,11 @@ export class PreCommander implements Commander<string> {
       selection.ranges.forEach(range => {
         const context = range.endFragment.parentComponent;
         const parentFragment = context.parentFragment;
-        const t = new PreComponent(lang);
-        t.slot.append(new BrComponent());
+        const slot = new Fragment();
+        const t = new PreComponent(lang, [slot]);
+        slot.append(new BrComponent());
         parentFragment.insertAfter(t, context);
-        range.setStart(t.slot, 0);
+        range.setStart(slot, 0);
         range.collapse();
       })
     }
