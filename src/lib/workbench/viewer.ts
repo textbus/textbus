@@ -203,7 +203,7 @@ export class Viewer {
           this.sourceCodeComponent.setSourceCode(pretty(html));
           this.rootComponent.slot.append(this.sourceCodeComponent);
         } else {
-          const html = this.getHTMLBySourceCodeMode();
+          const html = this.sourceCodeComponent.getSourceCode();
           const dom = Viewer.parserHTML(html)
           this.rootComponent.slot.from(this.parser.parse(dom));
         }
@@ -234,7 +234,7 @@ export class Viewer {
 
   getContents() {
     const content = this.editorController.sourceCodeMode ?
-      this.getHTMLBySourceCodeMode() :
+      this.sourceCodeComponent.getSourceCode() :
       this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
     return {
       content,
@@ -248,10 +248,6 @@ export class Viewer {
       json,
       styleSheets: this.docStyles
     }
-  }
-
-  private getHTMLBySourceCodeMode() {
-    return this.sourceCodeComponent.getSourceCode();
   }
 
   private listen() {
