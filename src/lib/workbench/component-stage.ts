@@ -77,7 +77,6 @@ export class ComponentStage {
         parentFragment.insertAfter(component, parentComponent);
         if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
-
         }
       } else if (parentComponent instanceof BranchAbstractComponent) {
         const ff = new Fragment();

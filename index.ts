@@ -16,7 +16,7 @@ import {
 } from './src/public-api';
 
 
-PreComponent.theme = 'dark';
+// PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
   deviceType: 'iPad',

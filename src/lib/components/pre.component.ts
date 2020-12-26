@@ -106,21 +106,6 @@ class PreComponentLoader implements ComponentLoader {
       fragments.push( frag);
     })
     component.form( fragments);
-    // const fn = function (node: HTMLElement, fragment: Fragment) {
-    //   node.childNodes.forEach(node => {
-    //     if (node.nodeType === Node.TEXT_NODE) {
-    //       fragment.append(node.textContent);
-    //     } else if (node.nodeType === Node.ELEMENT_NODE) {
-    //       if (/br/i.test(node.nodeName)) {
-    //         fragment.append(new BrComponent());
-    //       } else {
-    //         fn(node as HTMLElement, fragment);
-    //       }
-    //     }
-    //   })
-    // };
-    // fn(el, fragment);
-    // component.slot.from(fragment);
     return {
       component: component,
       slotsMap: []
@@ -138,37 +123,59 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   onEnter(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
     const component: PreComponent=event.instance;
-    component.map((slot, i)=>{
-        if (slot === this.selection.commonAncestorFragment) {
-          const newSlot=new Fragment();
-          newSlot.append('console.log("我是新增内容")');
-          newSlot.append(new BrComponent());
-          component.splice(i+1, 0, newSlot);
-        }
+    let newSlot=null;
+    let i = 0;
+    for (let slot of component) {
+      i++;
+      if (slot === this.selection.commonAncestorFragment) {
+        const startIndex=firstRange.startIndex;
+        newSlot=slot.cut(startIndex, slot.contentLength-startIndex-1);/* 1代表Br */
+        newSlot.append(new BrComponent());
+        component.splice(i, 0, newSlot);
+        break;
       }
-    );
-    // console.log('enter--->', event, this, this.selection.commonAncestorFragment);
-    // event.instance.slot.insert(new BrComponent(), firstRange.startIndex);
-    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+    }
+    firstRange.setStart(newSlot, 0);
+    firstRange.collapse();
     event.stopPropagation();
   }
 
   onPaste(event: TBEvent<PreComponent, TBClipboard>) {
-
     const text = event.data.text;
+    const component=event.instance;
     const firstRange = this.selection.firstRange;
-    const startIndex = firstRange.startIndex;
-    const lines = text.split(/(?=\n)/g);
-    let i = 0;
-    lines.forEach(item => {
-      if (item === '\n') {
-        event.instance.slot.insert(new BrComponent(), startIndex + i);
-      } else {
-        event.instance.slot.insert(item, startIndex + i);
+    const lines = text.split(/\n/g);
+    const len = lines.length;
+    const lastLine = lines[len-1];
+    const slot=this.selection.commonAncestorFragment;
+    let index = component.indexOf(slot);
+    let endSlot=null;
+    let curIndex=lastLine.length;
+    const startIndex=firstRange.startIndex;
+
+    if (len===1) {
+      slot.insert( lines[0], startIndex);
+      curIndex=startIndex+lines[0].length;
+      endSlot=slot;
+    } else {
+      endSlot=slot.cut(startIndex, slot.contentLength-startIndex-1);/* 1代表Br */
+      slot.insert( lines[0], startIndex);
+      endSlot.insert( lastLine, 0);
+      endSlot.append(new BrComponent());
+      component.splice(index+1, 0, endSlot);
+      if (len > 2) {
+        const betweenSlots: Fragment[]=[];
+        for (let i=1; i<len-1; ++i) {
+          let line=lines[i];
+          let slot=new Fragment();
+          slot.append(line);
+          slot.append(new BrComponent());
+          betweenSlots.push( slot);
+        }
+        component.splice(index, 0, ...betweenSlots);
       }
-      i += item.length;
-    })
-    firstRange.setStart(firstRange.startFragment, firstRange.startIndex + text.length);
+    }
+    firstRange.setStart(endSlot, curIndex);
     firstRange.collapse();
     event.stopPropagation();
   }
@@ -184,13 +191,21 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
    pre {line-height: 1.418em; padding: 15px; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
+   // 不要使用block行,会复制出br;
    `
-   pre { counter-reset: codeNum; }
-   pre>p:before {
-    content: counter( codeNum);
-    counter-increment: codeNum;
-    padding-right: 10px;
-   }`,
+   .code-line {
+     display: inline-block;
+     width: 100%;
+   }
+   `,
+  //  `
+  // 伪类实现的下标
+  //  pre { counter-reset: codeNum; }
+  //  pre>p:before {
+  //   content: counter( codeNum);
+  //   counter-increment: codeNum;
+  //   padding-right: 10px;
+  //  }`,
     `
   .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
@@ -254,14 +269,15 @@ export class PreComponent extends BackboneAbstractComponent {
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
     this.map(slot=>{
-      const p = new VElement('p');
-      block.appendChild( slotRendererFn(slot, p));
+      const line = new VElement('p');
+      line.attrs.set('class', 'code-line');
+      block.appendChild( slotRendererFn(slot, line));
     })
     return block;
   }
 
   format(tokens: Array<string | Token>, slot: Fragment, index: number) {
-    console.log('format-->', tokens);
+    // console.log('format-->', tokens, slot);
     tokens.forEach(token => {
       if (token instanceof Token) {
         const styleName = codeStyles[token.type];
