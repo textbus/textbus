@@ -344,6 +344,76 @@ export class TBRange {
   }
 
   /**
+   * 删除选区范围内容，并合并选区范围。
+   */
+  connect() {
+    if (this.collapsed) {
+      return;
+    }
+    const append = function (fragment: Fragment, index: number, newContent: Fragment) {
+      newContent.sliceContents(0).forEach(c => fragment.append(c));
+      newContent.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
+        const formats = newContent.getFormatRanges(token) || [];
+        formats.forEach(f => {
+          f.startIndex += index;
+          f.endIndex += index;
+          fragment.apply(token, f);
+        })
+      })
+    };
+    const startFragment = this.startFragment;
+    if (startFragment === this.endFragment) {
+      startFragment.remove(this.startIndex, this.endIndex);
+    } else {
+      let isDeleteFragment = false;
+      const endFragmentIsCommon = this.endFragment === this.commonAncestorFragment;
+      const scopeStartIndex = this.getCommonAncestorFragmentScope().startIndex;
+      if (this.startIndex === 0) {
+        const {fragment, index} = this.findFirstPosition(startFragment);
+        isDeleteFragment = fragment === startFragment && index === this.startIndex;
+      }
+
+      this.deleteSelectedScope();
+      if (!isDeleteFragment && startFragment === this.startFragment) {
+        const c = endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment;
+        append(this.startFragment, this.startIndex, c);
+        const firstPosition = this.findFirstPosition(this.startFragment);
+        this.setStart(firstPosition.fragment, firstPosition.index);
+        if (!endFragmentIsCommon) {
+          this.deleteEmptyTree(this.endFragment);
+        }
+      } else {
+        if (this.startFragment !== this.endFragment) {
+          if (endFragmentIsCommon) {
+            const lastContents = this.endFragment.sliceContents(scopeStartIndex + 1);
+            let count = 0;
+            while (lastContents.length) {
+              const first = lastContents.shift();
+              if (first instanceof LeafAbstractComponent || typeof first === 'string') {
+                this.startFragment.append(first);
+                count += first.length;
+              } else {
+                break;
+              }
+            }
+
+            this.endFragment.remove(scopeStartIndex + 1, count);
+          } else {
+            const endLast = this.endFragment.cut(0);
+            this.deleteEmptyTree(this.endFragment);
+            const startLast = this.startFragment.cut(this.startIndex);
+
+            append(this.startFragment, this.startIndex, endLast);
+            append(this.startFragment, this.startIndex + endLast.contentLength, startLast);
+          }
+        }
+      }
+    }
+
+    this.collapse();
+  }
+
+  /**
    * 删除选区范围内的内容。
    * 注意：
    * 此方法并不会合并选区。如果要删除内容，且要合并选区，请调用 connect 方法。
@@ -746,6 +816,33 @@ export class TBRange {
     };
   }
 
+  findLastPosition(fragment: Fragment): TBRangePosition {
+    const last = fragment.getContentAtIndex(fragment.contentLength - 1);
+    if (last instanceof DivisionAbstractComponent) {
+      return this.findLastPosition(last.slot);
+    }
+    if (last instanceof BranchAbstractComponent) {
+      const firstFragment = last.slots[last.slots.length - 1];
+      return this.findLastPosition(firstFragment);
+    }
+
+    if (last instanceof BackboneAbstractComponent) {
+      const firstFragment = last.getSlotAtIndex(last.slotCount - 1);
+      return this.findLastPosition(firstFragment);
+    }
+
+    if (last instanceof BrComponent) {
+      return {
+        index: fragment.contentLength - 1,
+        fragment
+      }
+    }
+    return {
+      index: fragment.contentLength,
+      fragment
+    };
+  }
+
   /**
    * 查找一个 fragment 下的最后一个可以放置光标的位置。
    * @param fragment
@@ -802,77 +899,6 @@ export class TBRange {
       }
     }
     return rect;
-  }
-
-  /**
-   * 删除选区范围内容，并合并选区范围。
-   */
-  connect() {
-    if (this.collapsed) {
-      return;
-    }
-
-    const append = function (fragment: Fragment, index: number, newContent: Fragment) {
-      newContent.sliceContents(0).forEach(c => fragment.append(c));
-      newContent.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
-        const formats = newContent.getFormatRanges(token) || [];
-        formats.forEach(f => {
-          f.startIndex += index;
-          f.endIndex += index;
-          fragment.apply(token, f);
-        })
-      })
-    };
-    const startFragment = this.startFragment;
-    if (startFragment === this.endFragment) {
-      this.deleteSelectedScope();
-    } else {
-      let isDeleteFragment = false;
-      const endFragmentIsCommon = this.endFragment === this.commonAncestorFragment;
-      const scopeStartIndex = this.getCommonAncestorFragmentScope().startIndex;
-      if (this.startIndex === 0) {
-        const {fragment, index} = this.findFirstPosition(startFragment);
-        isDeleteFragment = fragment === startFragment && index === this.startIndex;
-      }
-
-      this.deleteSelectedScope();
-      if (isDeleteFragment && startFragment === this.startFragment) {
-        const c = endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment;
-        append(this.startFragment, this.startIndex, c);
-        const firstPosition = this.findFirstPosition(this.startFragment);
-        this.setStart(firstPosition.fragment, firstPosition.index);
-        if (!endFragmentIsCommon) {
-          this.deleteEmptyTree(this.endFragment);
-        }
-      } else {
-        if (this.startFragment !== this.endFragment) {
-          if (endFragmentIsCommon) {
-            const lastContents = this.endFragment.sliceContents(scopeStartIndex + 1);
-            let count = 0;
-            while (lastContents.length) {
-              const first = lastContents.shift();
-              if (first instanceof LeafAbstractComponent || typeof first === 'string') {
-                this.startFragment.append(first);
-                count += first.length;
-              } else {
-                break;
-              }
-            }
-
-            this.endFragment.remove(scopeStartIndex + 1, count);
-          } else {
-            const endLast = this.endFragment.cut(0);
-            this.deleteEmptyTree(this.endFragment);
-            const startLast = this.startFragment.cut(this.startIndex);
-
-            append(this.startFragment, this.startIndex, endLast);
-            append(this.startFragment, this.startIndex + endLast.contentLength, startLast);
-          }
-        }
-      }
-    }
-
-    this.collapse();
   }
 
   private getScopes(startFragment: Fragment,

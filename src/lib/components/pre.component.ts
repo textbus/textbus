@@ -94,10 +94,18 @@ class PreComponentLoader implements ComponentLoader {
   }
 
   read(el: HTMLElement): ViewData {
-    el.querySelectorAll('br').forEach(br => {
-      br.parentNode.replaceChild(document.createTextNode('\n'), br);
-    })
-    const component = new PreComponent(el.getAttribute('lang'), el.innerText, el.getAttribute('theme') as PreTheme);
+    const lines = el.querySelectorAll('.tb-code-line');
+    let code = '';
+    if (lines.length) {
+      code = Array.from(lines).map(i => (i as HTMLElement).innerText).join('\n');
+    } else {
+      el.querySelectorAll('br').forEach(br => {
+        br.parentNode.replaceChild(document.createTextNode('\n'), br);
+      })
+      code = el.innerText;
+    }
+
+    const component = new PreComponent(el.getAttribute('lang'), code, el.getAttribute('theme') as PreTheme);
     return {
       component: component,
       slotsMap: []
@@ -114,61 +122,74 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
   onEnter(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
-    const component: PreComponent = event.instance;
-    let newSlot = null;
-    let i = 0;
-    for (const slot of component) {
-      i++;
-      if (slot === this.selection.commonAncestorFragment) {
-        const startIndex = firstRange.startIndex;
-        newSlot = slot.cut(startIndex, slot.contentLength - startIndex - 1);/* 1代表Br */
-        newSlot.append(new BrComponent());
-        component.splice(i, 0, newSlot);
-        break;
-      }
+    const component = event.instance;
+    const commonAncestorFragment = firstRange.commonAncestorFragment;
+    const nextSlot = commonAncestorFragment.cut(firstRange.startIndex);
+
+    const index = component.indexOf(commonAncestorFragment);
+
+    if (commonAncestorFragment.contentLength === 0) {
+      commonAncestorFragment.append(new BrComponent());
     }
-    firstRange.setStart(newSlot, 0);
+    if (nextSlot.contentLength === 0) {
+      nextSlot.append(new BrComponent());
+    }
+    component.splice(index + 1, 0, nextSlot);
+    firstRange.setStart(nextSlot, 0);
     firstRange.collapse();
     event.stopPropagation();
+  }
+
+  onDelete(event: TBEvent<PreComponent>) {
+    const firstRange = this.selection.firstRange;
+    if (firstRange.startIndex === 0) {
+      const commonAncestorFragment = firstRange.commonAncestorFragment;
+      const component = event.instance;
+      const index = component.indexOf(commonAncestorFragment);
+      if (index > 0) {
+        const prevSlot = component.getSlotAtIndex(index - 1);
+        let len = prevSlot.contentLength;
+        const prevLastContent = prevSlot.getContentAtIndex(len - 1);
+        if (prevLastContent instanceof BrComponent) {
+          prevSlot.remove(len - 1);
+          len--
+        }
+        commonAncestorFragment.sliceContents().forEach(i => prevSlot.append(i));
+        component.splice(index, 1);
+        firstRange.setStart(prevSlot, len);
+        firstRange.collapse();
+      }
+      event.stopPropagation();
+    }
   }
 
   onPaste(event: TBEvent<PreComponent, TBClipboard>) {
     const text = event.data.text;
     const component = event.instance;
     const firstRange = this.selection.firstRange;
-    const lines = text.split(/\n/g);
-    const len = lines.length;
-    const lastLine = lines[len - 1];
-    const slot = this.selection.commonAncestorFragment;
-    const index = component.indexOf(slot);
-    let endSlot: Fragment;
-    let curIndex = lastLine.length;
-    const startIndex = firstRange.startIndex;
+    const commonAncestorFragment = firstRange.commonAncestorFragment;
 
-    if (len === 1) {
-      slot.insert(lines[0], startIndex);
-      curIndex = startIndex + lines[0].length;
-      endSlot = slot;
+    const index = component.indexOf(commonAncestorFragment);
+    const lines = text.split(/\n/g);
+
+    if (lines.length === 1) {
+      commonAncestorFragment.insert(lines[0], firstRange.startIndex);
+      firstRange.startIndex += lines[0].length;
+      firstRange.collapse();
     } else {
-      endSlot = slot.cut(startIndex, slot.contentLength - startIndex - 1);/* 1代表Br */
-      slot.insert(lines[0], startIndex);
-      endSlot.insert(lastLine, 0);
-      endSlot.append(new BrComponent());
-      component.splice(index + 1, 0, endSlot);
-      if (len > 2) {
-        const betweenSlots: Fragment[] = [];
-        for (let i = 1; i < len - 1; ++i) {
-          const line = lines[i];
-          const slot = new Fragment();
-          slot.append(line);
-          slot.append(new BrComponent());
-          betweenSlots.push(slot);
-        }
-        component.splice(index, 0, ...betweenSlots);
-      }
+      const next = commonAncestorFragment.cut(firstRange.startIndex);
+      commonAncestorFragment.append(lines.shift());
+      const fragments = lines.map(str => {
+        const fragment = new Fragment();
+        fragment.append(str || new BrComponent());
+        return fragment;
+      });
+      component.splice(index + 1, 0, next);
+      component.splice(index + 1, 0, ...fragments);
+      const position = firstRange.findLastPosition(fragments.pop());
+      firstRange.setStart(position.fragment, position.index);
+      firstRange.collapse();
     }
-    firstRange.setStart(endSlot, curIndex);
-    firstRange.collapse();
     event.stopPropagation();
   }
 }
@@ -181,23 +202,14 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    code, pre {background-color: rgba(0, 0, 0, .03);}
    pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   pre {line-height: 1.418em; padding: 15px; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
+   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
     `
-    /* 不要使用block行,会复制出br; */
-   .code-line {
-     display: inline-block;
-     width: 100%;
-   }
-   `,
-    `
-  /* 伪类实现的下标 */
-  pre { counter-reset: codeNum; }
-  pre>.code-line::before {
-    counter-increment: codeNum;
-    content: counter(codeNum);
-    padding-right: 10px;
-  }`,
+   .tb-code-line-number-bg { background-color: #efefef; border-right: 1px solid #ddd; width: 3em; }
+   .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
+   .tb-code-line { position: relative; }
+   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; }
+    `,
     `
   .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
@@ -253,22 +265,33 @@ export class PreComponent extends BackboneAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
-    const block = new VElement('pre');
+    const block = new VElement('pre', {
+      childNodes: [
+        new VElement('div', {
+          classes: ['tb-code-line-number-bg']
+        }),
+        new VElement('div', {
+          classes: ['tb-code-content'],
+          childNodes: this.map(slot => {
+            const line = new VElement('div', {
+              classes: ['tb-code-line']
+            });
+            slotRendererFn(slot, line);
+            return line;
+          })
+        })
+      ]
+    });
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
-    this.map(slot => {
-      const line = new VElement('div');
-      line.attrs.set('class', 'code-line');
-      block.appendChild(slotRendererFn(slot, line));
-    })
     return block;
   }
 
   setSourceCode(code: string) {
-    const fragments = code.split(/[\n]/).map(lineContent => {
+    const fragments = code.replace(/[\n\s]+$/g, '').split(/[\n]/).map(lineContent => {
       const fragment = new Fragment();
       fragment.append(lineContent || new BrComponent());
-      return fragment
+      return fragment;
     })
     this.clean();
     this.push(...fragments);

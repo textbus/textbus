@@ -228,6 +228,10 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
     return this.slots.indexOf(fragment);
   }
 
+  protected forEach(callbackFn: (value: Fragment, index: number, array: Fragment[]) => void, thisArg?: any) {
+    this.slots.forEach(callbackFn, thisArg);
+  }
+
   protected clean() {
     this.slots.forEach(f => {
       f[parentComponentAccessToken] = null;
