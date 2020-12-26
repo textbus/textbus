@@ -2,7 +2,12 @@ import { Type } from '@tanbo/di';
 
 import { FormatMatcher } from './format.matcher';
 import { boldFormatter } from '../../formatter/bold.formatter';
-import { BranchAbstractComponent, DivisionAbstractComponent, TBSelection } from '../../core/_api';
+import {
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  TBSelection
+} from '../../core/_api';
 import { SelectionMatchState } from './matcher';
 import { HighlightState } from '../../toolbar/help';
 import { BlockMatcher } from './block.matcher';
@@ -11,7 +16,7 @@ import { BlockComponent } from '../../components/block.component';
 export class BoldMatcher extends FormatMatcher {
   private contextMatcher = new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6'.split(','))
 
-  constructor(excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+  constructor(excludeComponents: Array<Type<BranchAbstractComponent | BackboneAbstractComponent |  DivisionAbstractComponent>> = []) {
     super(boldFormatter, excludeComponents);
   }
 

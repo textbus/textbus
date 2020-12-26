@@ -1,13 +1,19 @@
 import { Type } from '@tanbo/di';
 
 import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
-import { BranchAbstractComponent, DivisionAbstractComponent, LeafAbstractComponent, TBSelection } from '../../core/_api';
+import {
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  LeafAbstractComponent,
+  TBSelection
+} from '../../core/_api';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class MediaMatcher implements Matcher {
   constructor(public componentConstructor: Type<LeafAbstractComponent>, public tagName: string,
-              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+              private excludeComponents: Array<Type<BranchAbstractComponent | BackboneAbstractComponent | DivisionAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {

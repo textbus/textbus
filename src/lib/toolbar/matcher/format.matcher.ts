@@ -9,7 +9,7 @@ import {
   Fragment,
   InlineFormatter,
   DivisionAbstractComponent,
-  TBSelection,
+  TBSelection, BackboneAbstractComponent,
 } from '../../core/_api';
 import { HighlightState } from '../help';
 import { FormatMatchData, Matcher, RangeMatchState, SelectionMatchState } from './matcher';
@@ -17,7 +17,7 @@ import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class FormatMatcher implements Matcher {
   constructor(private formatter: InlineFormatter | BlockFormatter,
-              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {

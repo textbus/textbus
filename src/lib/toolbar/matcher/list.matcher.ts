@@ -1,14 +1,19 @@
 import { Type } from '@tanbo/di';
 
 import { Matcher, RangeMatchState, SelectionMatchState } from './matcher';
-import { BranchAbstractComponent, DivisionAbstractComponent, TBSelection } from '../../core/_api';
+import {
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  TBSelection
+} from '../../core/_api';
 import { ListComponent } from '../../components/list.component';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
 export class ListMatcher implements Matcher {
   constructor(private tagName: 'ul' | 'ol',
-              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+              private excludeComponents: Array<Type<BranchAbstractComponent | BackboneAbstractComponent | DivisionAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {

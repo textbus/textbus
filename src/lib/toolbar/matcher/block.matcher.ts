@@ -1,6 +1,11 @@
 import { Type } from '@tanbo/di';
 
-import { TBSelection, BranchAbstractComponent, DivisionAbstractComponent } from '../../core/_api';
+import {
+  TBSelection,
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  BackboneAbstractComponent
+} from '../../core/_api';
 import { Matcher, SelectionMatchState } from './matcher';
 import { BlockComponent } from '../../components/block.component';
 import { HighlightState } from '../help';
@@ -9,7 +14,7 @@ import { rangeContentInComponent } from './utils/range-content-in-component';
 export class BlockMatcher implements Matcher {
   constructor(public componentConstructor: Type<BlockComponent>,
               private tagNames: string[],
-              private excludeComponents: Array<Type<BranchAbstractComponent | DivisionAbstractComponent>> = []) {
+              private excludeComponents: Array<Type<BranchAbstractComponent | BackboneAbstractComponent| DivisionAbstractComponent>> = []) {
   }
 
   queryState(selection: TBSelection): SelectionMatchState {
