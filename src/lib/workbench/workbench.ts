@@ -72,7 +72,11 @@ export class Workbench {
           }
         }
       }),
-
+      this.editorController.onStateChange.pipe(map(s => {
+        return s.sourceCodeMode;
+      }), distinctUntilChanged()).subscribe(b => {
+        this.tabletWrapper.style.padding = b ? '0' : '';
+      }),
       this.viewer.onReady.subscribe(() => {
         this.loaded()
       })

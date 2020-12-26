@@ -208,7 +208,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    .tb-code-line-number-bg { background-color: #efefef; border-right: 1px solid #ddd; width: 3em; }
    .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
    .tb-code-line { position: relative; }
-   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; }
+   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #999; }
     `,
     `
   .tb-hl-keyword { font-weight: bold; }
