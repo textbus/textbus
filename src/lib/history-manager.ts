@@ -15,6 +15,7 @@ export interface Snapshot {
 @Injectable()
 export class HistoryManager {
   onChange: Observable<void>;
+  onUsed: Observable<void>;
 
   get canBack() {
     return this.historySequence.length > 0 && this.historyIndex > 0;
@@ -32,6 +33,7 @@ export class HistoryManager {
   private historyStackSize: number;
 
   private historyChangeEvent = new Subject<void>();
+  private historyUsedEvent = new Subject<void>();
 
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
@@ -39,6 +41,7 @@ export class HistoryManager {
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent) {
     this.historyStackSize = options.historyStackSize || 50;
     this.onChange = this.historyChangeEvent.asObservable();
+    this.onUsed = this.historyUsedEvent.asObservable();
   }
 
   startListen() {
@@ -65,6 +68,7 @@ export class HistoryManager {
       this.rootComponent.slot.from(snapshot.contents);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();
+      this.historyUsedEvent.next();
     }
   }
 
@@ -75,6 +79,7 @@ export class HistoryManager {
       this.rootComponent.slot.from(snapshot.contents);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();
+      this.historyUsedEvent.next();
     }
   }
 

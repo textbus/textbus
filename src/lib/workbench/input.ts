@@ -13,6 +13,7 @@ import {
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
+import { HistoryManager } from '../history-manager';
 
 /**
  * 快捷键配置项
@@ -102,7 +103,8 @@ export class Input {
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
-              private selection: TBSelection) {
+              private selection: TBSelection,
+              private history: HistoryManager) {
     this.container.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
@@ -117,6 +119,9 @@ export class Input {
     this.init();
     this.initEvent();
     this.bindDefaultKeymap();
+    this.subs.push(history.onUsed.subscribe(() => {
+      this.dispatchInputReadyEvent();
+    }))
   }
 
   /**
