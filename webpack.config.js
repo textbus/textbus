@@ -26,10 +26,17 @@ module.exports = {
   module: {
     rules: [{
       test: /\.ts$/,
-      loader: ['ts-loader']
+      enforce: 'pre',
+      exclude: /node_modules/,
+      use: [{
+        loader: 'eslint-loader'
+      }]
+    }, {
+      test: /\.ts$/,
+      use: ['ts-loader']
     }, {
       test: /\.s?css$/,
-      loader: ['style-loader', 'css-loader', {
+      use: ['style-loader', 'css-loader', {
         loader: 'postcss-loader',
         options: {
           plugins() {
@@ -40,7 +47,7 @@ module.exports = {
       include: [path.resolve(__dirname, 'src/assets/')]
     }, {
       test: /\.s?css$/,
-      loader: ['to-string-loader', 'css-loader', {
+      use: ['to-string-loader', 'css-loader', {
         loader: 'postcss-loader',
         options: {
           plugins() {

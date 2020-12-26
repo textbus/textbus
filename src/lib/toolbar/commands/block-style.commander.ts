@@ -16,7 +16,7 @@ export class BlockStyleCommander implements Commander<string> {
   command(context: CommandContext, value: string) {
     context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
-        let fragments: Fragment[] = [];
+        const fragments: Fragment[] = [];
         if (item.fragment === range.startFragment || item.fragment === range.endFragment) {
           fragments.push(item.fragment);
         } else {

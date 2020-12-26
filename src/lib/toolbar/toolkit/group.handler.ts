@@ -69,6 +69,7 @@ class MenuHandler implements Tool {
   }
 
   onDestroy() {
+    //
   }
 }
 

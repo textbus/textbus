@@ -29,5 +29,6 @@ export class StatusBar {
   }
 
   destroy() {
+    //
   }
 }

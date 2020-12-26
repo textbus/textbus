@@ -5,7 +5,7 @@ class BrComponentLoader implements ComponentLoader {
     return component.nodeName.toLowerCase() === 'br';
   }
 
-  read(el: HTMLElement): ViewData {
+  read(): ViewData {
     const component = new BrComponent();
     return {
       component: component,

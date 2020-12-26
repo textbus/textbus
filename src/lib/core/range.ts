@@ -639,7 +639,7 @@ export class TBRange {
       range2.startIndex = range2.endIndex = position.index;
       range2.startFragment = range2.endFragment = position.fragment;
       range2.restore();
-      let rect2 = range2.getRangePosition();
+      const rect2 = range2.getRangePosition();
       if (!isToPrevLine) {
         if (rect2.left > minLeft || rect2.top < minTop) {
           isToPrevLine = true;
@@ -689,7 +689,7 @@ export class TBRange {
       range2.startIndex = range2.endIndex = position.index;
       range2.startFragment = range2.endFragment = position.fragment;
       range2.restore();
-      let rect2 = range2.getRangePosition();
+      const rect2 = range2.getRangePosition();
       if (!isToNextLine) {
         if (rect2.left < maxRight || rect2.top > minTop) {
           isToNextLine = true;
@@ -950,7 +950,7 @@ export class TBRange {
       endFragment = endParentComponent.parentFragment;
       endIndex = endFragment.indexOf(endParentComponent);
     }
-    let result: TBRangeScope[] = [...start];
+    const result: TBRangeScope[] = [...start];
     if (startParentComponent === endParentComponent &&
       (startParentComponent instanceof BranchAbstractComponent || startParentComponent instanceof BackboneAbstractComponent)) {
       const slots = (startParentComponent instanceof BranchAbstractComponent ?
@@ -1007,8 +1007,8 @@ export class TBRange {
     }
     let f: Fragment = null;
     while (startPaths.length && endPaths.length) {
-      let s = startPaths.pop();
-      let e = endPaths.pop();
+      const s = startPaths.pop();
+      const e = endPaths.pop();
       if (s === e) {
         f = s;
       } else {
@@ -1046,8 +1046,8 @@ export class TBRange {
     }
     let f: AbstractComponent = null;
     while (startPaths.length && endPaths.length) {
-      let s = startPaths.pop();
-      let e = endPaths.pop();
+      const s = startPaths.pop();
+      const e = endPaths.pop();
       if (s === e) {
         f = s;
       } else {
@@ -1058,7 +1058,7 @@ export class TBRange {
   }
 
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
-    let vElement = this.renderer.getVElementByFragment(fragment);
+    const vElement = this.renderer.getVElementByFragment(fragment);
 
     const current = fragment.getContentAtIndex(offset);
 

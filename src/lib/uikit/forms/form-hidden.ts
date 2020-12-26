@@ -13,6 +13,7 @@ export class FormHidden implements FormItem<any> {
   }
 
   reset() {
+    //
   }
 
   update(): void {

@@ -23,6 +23,8 @@ import { ComponentStage } from './component-stage';
 import { EditorController } from '../editor-controller';
 import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
 
+declare const ResizeObserver: any;
+
 @Injectable()
 export class Viewer {
   onReady: Observable<Injector>;
@@ -259,7 +261,6 @@ export class Viewer {
     if (!this.contentDocument?.body) {
       return;
     }
-    // @ts-ignore
     this.resizeObserver = new ResizeObserver(() => {
       const childBody = this.contentDocument.body;
       const lastChild = childBody.lastChild;

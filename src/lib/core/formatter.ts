@@ -191,7 +191,7 @@ export abstract class Formatter {
         attrs.set(key, node.getAttribute(key));
       });
     }
-    let style: { [key: string]: string | number } = {};
+    const style: { [key: string]: string | number } = {};
     if (config.styleName) {
       (Array.isArray(config.styleName) ? config.styleName : [config.styleName]).forEach(name => {
         const v = node.style[name];

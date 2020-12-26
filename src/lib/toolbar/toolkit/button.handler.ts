@@ -77,5 +77,6 @@ export class ButtonHandler implements Tool {
   }
 
   onDestroy() {
+    //
   }
 }

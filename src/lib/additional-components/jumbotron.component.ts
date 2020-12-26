@@ -110,7 +110,7 @@ export const jumbotronComponentExample: ComponentExample = {
     })
 
     form.setFileUploader(fileUploader);
-    return new Promise<JumbotronComponent>((resolve, reject) => {
+    return new Promise<JumbotronComponent>((resolve) => {
       dialog.dialog(form.elementRef);
       const s = form.onComplete.subscribe(data => {
         const component = new JumbotronComponent({

@@ -30,7 +30,7 @@ export class FormatMatcher implements Matcher {
     }
     const srcStates: RangeMatchState<FormatAbstractData>[] = selection.ranges.map(range => {
 
-      let isDisable = rangeContentInComponent(range, this.excludeComponents);
+      const isDisable = rangeContentInComponent(range, this.excludeComponents);
 
       if (isDisable) {
         return {
@@ -55,7 +55,7 @@ export class FormatMatcher implements Matcher {
           states.push(state);
         }
       });
-      let mergedState = FormatMatcher.mergeStates(states) || {effect: FormatEffect.Invalid, srcData: null};
+      const mergedState = FormatMatcher.mergeStates(states) || {effect: FormatEffect.Invalid, srcData: null};
       return {
         state: (mergedState.effect === FormatEffect.Valid || mergedState.effect === FormatEffect.Inherit) ?
           HighlightState.Highlight : HighlightState.Normal,
@@ -149,7 +149,6 @@ export class FormatMatcher implements Matcher {
   }
 
   private static inSingleContainer(fragment: Fragment, formatter: InlineFormatter, startIndex: number, endIndex: number): FormatMatchData {
-
     while (true) {
       const formatRanges = fragment.getFormatRanges(formatter) || [];
       const states: FormatRange[] = [];

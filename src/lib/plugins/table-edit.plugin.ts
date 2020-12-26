@@ -60,7 +60,7 @@ export class TableEditPlugin implements TBPlugin {
     this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
     this.renderer = injector.get(Renderer);
     this.selection = injector.get(TBSelection);
-    let style = this.contextDocument.createElement('style');
+    const style = this.contextDocument.createElement('style');
     this.styleElement = style;
     style.innerText = '::selection { background: transparent; }';
   }

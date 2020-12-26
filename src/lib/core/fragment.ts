@@ -442,7 +442,7 @@ export class Fragment extends Marker {
   }) {
     const {coverChild, important} = options;
     if (token instanceof BlockFormatter) {
-      let self = this;
+      const self = this;
       this.formatMap.merge(token, {
         ...params,
         get startIndex() {

@@ -113,5 +113,6 @@ export class SelectHandler implements Tool {
   }
 
   onDestroy() {
+    //
   }
 }

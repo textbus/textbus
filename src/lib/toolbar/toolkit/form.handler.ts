@@ -81,5 +81,6 @@ export class FormHandler implements Tool {
   }
 
   onDestroy() {
+    this.subs.forEach(i => i.unsubscribe());
   }
 }

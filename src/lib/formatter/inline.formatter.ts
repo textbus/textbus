@@ -12,7 +12,7 @@ export class InlineTagFormatter extends InlineFormatter {
     super(rule, FormatterPriority.InlineTag);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(): FormatAbstractData {
     return new FormatAbstractData({
       tag: this.tagName
     });

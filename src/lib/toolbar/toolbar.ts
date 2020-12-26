@@ -3,7 +3,15 @@ import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
-import { AdditionalHandler, AdditionalViewer, Tool, ToolConfig, ToolFactory, ToolType } from './toolkit/_api';
+import {
+  AdditionalHandler,
+  AdditionalViewer,
+  GroupHandler,
+  Tool,
+  ToolConfig,
+  ToolFactory,
+  ToolType
+} from './toolkit/_api';
 import { Input, Keymap, KeymapAction, Dialog } from '../workbench/_api';
 import { SelectionMatchState } from './matcher/matcher';
 import { createElement, createKeymapHTML, FileUploader } from '../uikit/_api';
@@ -119,7 +127,7 @@ export class Toolbar {
             this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
             return;
           } catch (e) {
-
+            //
           }
         }
         this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
@@ -221,6 +229,7 @@ export class Toolbar {
 
   private createHandler(option: ToolFactory): Tool {
     let h: Tool;
+    let m: GroupHandler;
     switch (option.type) {
       case ToolType.Button:
         h = option.factory();
@@ -247,7 +256,7 @@ export class Toolbar {
         }));
         break;
       case ToolType.Group:
-        const m = option.factory(this.fileUploader, this.toolWrapper, this.dialogManager);
+        m = option.factory(this.fileUploader, this.toolWrapper, this.dialogManager);
         this.tools.push(...m.tools);
         h = m;
         break;

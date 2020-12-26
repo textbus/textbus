@@ -21,7 +21,7 @@ export class ListMatcher implements Matcher {
     }
 
     for (const range of selection.ranges) {
-      let isDisable = rangeContentInComponent(range, this.excludeComponents);
+      const isDisable = rangeContentInComponent(range, this.excludeComponents);
       if (isDisable) {
         return {
           state: HighlightState.Disabled,
