@@ -22,7 +22,7 @@ class FindFormatter extends InlineFormatter {
     return FormatEffect.Invalid;
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(): FormatAbstractData {
     return null;
   }
 

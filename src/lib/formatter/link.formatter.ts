@@ -20,7 +20,7 @@ export class LinkFormatter extends InlineFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement) {
+  render(context: FormatRendingContext) {
     const el = new VElement('a');
     const target = context.abstractData.attrs.get('target');
     const href = context.abstractData.attrs.get('href');

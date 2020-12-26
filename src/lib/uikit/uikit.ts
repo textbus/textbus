@@ -26,7 +26,7 @@ export interface UIButton {
   highlight: boolean;
 }
 
-export interface UIDropdownParams<T> {
+export interface UIDropdownParams {
   button: UIButtonParams;
   menu: HTMLElement | DocumentFragment;
   stickyElement: HTMLElement
@@ -389,7 +389,7 @@ export class UIKit {
     return result;
   }
 
-  static dropdown<T>(params: UIDropdownParams<T>): UIDropdown {
+  static dropdown(params: UIDropdownParams): UIDropdown {
     const p = Object.assign({}, params.button);
     let isSelfClick = false;
     p.canExpand = true;
@@ -499,7 +499,7 @@ export class UIKit {
   }
 
   static menu(params: UIMenuParams) {
-    const dropdown = UIKit.dropdown({
+    return UIKit.dropdown({
       button: {
         ...params
       },
@@ -511,7 +511,6 @@ export class UIKit {
       }),
       stickyElement: params.stickyElement
     });
-    return dropdown;
   }
 
   static actionMenu(params: UIMenuItemParams): UIMenuItem {

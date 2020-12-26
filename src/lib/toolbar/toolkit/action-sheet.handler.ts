@@ -105,5 +105,6 @@ export class ActionSheetHandler implements Tool {
   }
 
   onDestroy() {
+    //
   }
 }

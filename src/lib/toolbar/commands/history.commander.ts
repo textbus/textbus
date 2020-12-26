@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di';
 
-import { Commander, CommandContext } from '../../core/_api';
+import { Commander } from '../../core/_api';
 import { HistoryManager } from '../../history-manager';
 
 export class HistoryCommander implements Commander<null> {
@@ -15,7 +15,7 @@ export class HistoryCommander implements Commander<null> {
     this.history = injector.get(HistoryManager);
   }
 
-  command(context: CommandContext) {
+  command() {
     this.action === 'back' ?
       this.history.usePreviousSnapshot() :
       this.history.useNextSnapshot();

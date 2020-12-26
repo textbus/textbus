@@ -132,9 +132,8 @@ export class TBSelection {
   /**
    * 添加一个 Range。
    * @param range
-   * @param syncNative
    */
-  addRange(range: TBRange, syncNative = false) {
+  addRange(range: TBRange) {
     this._ranges.push(range);
   }
 

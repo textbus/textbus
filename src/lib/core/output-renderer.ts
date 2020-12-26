@@ -61,7 +61,7 @@ export class OutputRenderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.outputDirty) {
-      let vElement = component.render(true, (slot, host) => {
+      const vElement = component.render(true, (slot, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
@@ -146,16 +146,13 @@ export class OutputRenderer {
   private createVDOMByExtractContent(fragment: Fragment, startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     const contents = fragment.sliceContents(startIndex, endIndex);
-    let i = startIndex;
     contents.forEach(item => {
       if (typeof item === 'string') {
         const textNode = new VTextNode(item);
-        i += item.length;
         children.push(textNode);
       } else {
         const vDom = this.rendingComponent(item);
         children.push(vDom);
-        i++;
       }
     });
     return children;
@@ -164,7 +161,7 @@ export class OutputRenderer {
   private rendingContents(fragment: Fragment, formats: FormatConfig[], startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
-      let firstRange = formats.shift();
+      const firstRange = formats.shift();
       if (firstRange) {
         if (startIndex < firstRange.params.startIndex) {
           children.push(...this.createVDOMByExtractContent(fragment, startIndex, firstRange.params.startIndex));

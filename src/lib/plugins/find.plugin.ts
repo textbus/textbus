@@ -94,7 +94,7 @@ export class FindPlugin implements TBPlugin {
       range.setStart(current.fragment, current.startIndex);
       range.setEnd(current.fragment, current.endIndex);
       this.selection.removeAllRanges(true);
-      this.selection.addRange(range, true);
+      this.selection.addRange(range);
       this.selection.restore();
       const position = range.getRangePosition();
       this.scrollContainer.scrollTop = position.top;
@@ -103,7 +103,6 @@ export class FindPlugin implements TBPlugin {
 
   private find(fragment: Fragment, search: string): ElementPosition[] {
     const result: ElementPosition[] = [];
-    let index = 0;
     fragment.sliceContents(0).forEach(item => {
       if (item instanceof PreComponent) {
         return;
@@ -130,7 +129,6 @@ export class FindPlugin implements TBPlugin {
       } else if (item instanceof BackboneAbstractComponent) {
         Array.from(item).forEach(s => result.push(...this.find(s, search)));
       }
-      index += item.length;
     });
     return result;
   }

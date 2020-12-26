@@ -280,7 +280,7 @@ export class RootComponent extends DivisionAbstractComponent {
     return undefined;
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(): VElement {
     return undefined;
   }
 }

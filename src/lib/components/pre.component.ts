@@ -57,11 +57,11 @@ class CodeFormatter extends BlockFormatter {
     super({}, 1);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(): FormatAbstractData {
     return undefined;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  render(): ReplaceMode | ChildSlotMode | null {
     return new ChildSlotMode(new VElement('code'));
   }
 }
@@ -71,7 +71,7 @@ class CodeStyleFormatter extends InlineFormatter {
     super({}, 10);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(): FormatAbstractData {
     return undefined;
   }
 

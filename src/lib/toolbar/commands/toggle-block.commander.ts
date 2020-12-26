@@ -39,7 +39,7 @@ export class ToggleBlockCommander implements Commander<null> {
         const fragment = block.slot;
         if (range.startFragment === range.endFragment) {
           const parentComponent = range.startFragment.parentComponent
-          let parentFragment = parentComponent.parentFragment;
+          const parentFragment = parentComponent.parentFragment;
           const position = parentFragment.indexOf(parentComponent);
           fragment.append(parentComponent);
           parentFragment.insert(block, position);

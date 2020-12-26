@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-
 /**
  * 工具条控件的显示状态
  */

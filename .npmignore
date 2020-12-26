@@ -5,6 +5,7 @@ src/
 test/
 .gitignore
 .npmignore
+.eslintrc.js
 disable-output-webpack-plugin.js
 gulpfile.js
 package-lock.json

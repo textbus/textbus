@@ -209,16 +209,12 @@ export class VElement {
       return false;
     }
     const left = vNode;
-    const right = this;
 
     if (left instanceof VElement) {
-      if (right instanceof VElement) {
-        return left.tagName == right.tagName &&
-          equalMap(left.attrs, right.attrs) &&
-          equalMap(left.styles, right.styles) &&
-          equalClasses(left.classes, right.classes);
-      }
-      return false
+      return left.tagName == this.tagName &&
+        equalMap(left.attrs, this.attrs) &&
+        equalMap(left.styles, this.styles) &&
+        equalClasses(left.classes, this.classes);
     }
 
     return false;

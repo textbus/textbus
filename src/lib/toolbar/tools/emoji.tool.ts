@@ -39,6 +39,7 @@ class Emoji implements DropdownViewer {
   }
 
   update(): void {
+    //
   }
 }
 

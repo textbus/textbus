@@ -317,7 +317,7 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      let vElement = component.render(false, (slot, host) => {
+      const vElement = component.render(false, (slot, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
@@ -445,7 +445,7 @@ export class Renderer {
   private rendingContents(fragment: Fragment, formats: FormatConfig[], startIndex: number, endIndex: number) {
     const children: Array<VElement | VTextNode> = [];
     while (startIndex < endIndex) {
-      let firstRange = formats.shift();
+      const firstRange = formats.shift();
       if (firstRange) {
         if (startIndex < firstRange.params.startIndex) {
           children.push(...this.createVDOMByExtractContent(fragment, startIndex, firstRange.params.startIndex));

@@ -123,7 +123,7 @@ export class ProgressComponent extends LeafAbstractComponent {
     return undefined;
   }
 
-  render(isOutputMode: boolean): VElement {
+  render(): VElement {
     const config = this.config;
     const wrap = new VElement(this.tagName, {
       attrs: {...config}
@@ -231,7 +231,7 @@ export const progressComponentExample: ComponentExample = {
       ]
     })
 
-    return new Promise<ProgressComponent>((resolve, reject) => {
+    return new Promise<ProgressComponent>((resolve) => {
       dialog.dialog(form.elementRef);
       const s = form.onComplete.subscribe(data => {
         s.unsubscribe();
