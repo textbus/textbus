@@ -77,6 +77,11 @@ import {
 } from './lib/components/_api';
 
 export const defaultOptions: EditorOptions<string> = {
+  editingStyleSheets: [
+    `[style*=color]:not([style*=background-color])
+   a {color: inherit;}`,
+    `a {text-decoration: underline; color: #449fdb; cursor: text;}`
+  ],
   deviceOptions: [{
     label: 'PC',
     value: '100%',

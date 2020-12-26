@@ -267,12 +267,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
 @Component({
   loader: null,
-  interceptor: new RootComponentInterceptor(),
-  styles: [
-    `[style*=color]:not([style*=background-color])
-   a {color: inherit;}`,
-    `a {text-decoration: underline; color: #449fdb; cursor: text;}`
-  ]
+  interceptor: new RootComponentInterceptor()
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {
