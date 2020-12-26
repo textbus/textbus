@@ -255,7 +255,8 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
   }
 
   protected splice(start: number, deleteCount?: number): Fragment[];
-  protected splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
+  protected splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[];
+  protected splice(start: any, deleteCount: any, ...items: any[]): Fragment[] {
     const deletedSlots = this.slots.splice(start, deleteCount, ...items);
 
     deletedSlots.forEach(f => {
