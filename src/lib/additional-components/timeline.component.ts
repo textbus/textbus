@@ -97,8 +97,7 @@ class TimelineComponentLoader implements ComponentLoader {
       const slot = new Fragment()
       slots.push({
         toSlot: slot,
-        from: child.lastChild?.nodeType === Node.ELEMENT_NODE ?
-          child.lastChild as HTMLElement : document.createElement('div')
+        from: child.querySelector('div.tb-timeline-content') || document.createElement('div')
       });
       return {
         type,
@@ -243,7 +242,9 @@ export class TimelineComponent extends BranchAbstractComponent {
         child.classes.push('tb-timeline-item-' + item.type);
       }
 
-      const content = new VElement('div');
+      const content = new VElement('div', {
+        classes: ['tb-timeline-content']
+      });
 
       child.appendChild(line);
       child.appendChild(icon);
