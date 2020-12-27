@@ -94,6 +94,19 @@ export class Fragment extends Marker {
     this.markAsDirtied();
   }
 
+  contact(fragment: Fragment) {
+    fragment.sliceContents(0).forEach(c => this.append(c));
+    const index = this.contentLength;
+    fragment.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
+      const formats = fragment.getFormatRanges(token) || [];
+      formats.forEach(f => {
+        f.startIndex += index;
+        f.endIndex += index;
+        this.apply(token, f);
+      })
+    })
+  }
+
   /**
    * 将新内容添加到 fragment 末尾。
    * @param content
@@ -291,7 +304,7 @@ export class Fragment extends Marker {
    */
   cut(startIndex: number, count = this.contents.length - startIndex) {
     const fragment = new Fragment()
-    if (count === 0) {
+    if (count <= 0) {
       return fragment;
     }
     const endIndex = startIndex + count;
