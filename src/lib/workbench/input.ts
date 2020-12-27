@@ -480,7 +480,7 @@ export class Input {
   }
 
   private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
-    let component = this.selection.commonAncestorFragment?.parentComponent;
+    let component = this.selection.commonAncestorComponent;
     while (component) {
       const annotations = getAnnotations(component.constructor);
       const componentAnnotation = annotations.getClassMetadata(Component);

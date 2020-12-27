@@ -95,9 +95,9 @@ class PreComponentLoader implements ComponentLoader {
 
   read(el: HTMLElement): ViewData {
     const lines = el.querySelectorAll('.tb-code-line');
-    let code = '';
+    let code: string;
     if (lines.length) {
-      code = Array.from(lines).map(i => (i as HTMLElement).innerText).join('\n');
+      code = Array.from(lines).map(i => (i as HTMLElement).innerText.replace(/[\s\n]+$/, '')).join('\n');
     } else {
       el.querySelectorAll('br').forEach(br => {
         br.parentNode.replaceChild(document.createTextNode('\n'), br);
@@ -142,23 +142,30 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
   onDelete(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
+    const startFragment = firstRange.startFragment;
+    if (firstRange.startIndex === 1 && startFragment.contentLength === 1) {
+      startFragment.clean()
+      startFragment.append(new BrComponent());
+      firstRange.setStart(startFragment, 0);
+      firstRange.collapse();
+      event.stopPropagation();
+    }
+  }
+
+  onDeleteRange(event: TBEvent<PreComponent>) {
+    const firstRange = this.selection.firstRange;
     if (firstRange.startIndex === 0) {
-      const commonAncestorFragment = firstRange.commonAncestorFragment;
       const component = event.instance;
-      const index = component.indexOf(commonAncestorFragment);
-      if (index > 0) {
-        const prevSlot = component.getSlotAtIndex(index - 1);
-        let len = prevSlot.contentLength;
-        const prevLastContent = prevSlot.getContentAtIndex(len - 1);
-        if (prevLastContent instanceof BrComponent) {
-          prevSlot.remove(len - 1);
-          len--
-        }
-        commonAncestorFragment.sliceContents().forEach(i => prevSlot.append(i));
-        component.splice(index, 1);
-        firstRange.setStart(prevSlot, len);
-        firstRange.collapse();
+      const endFragment = firstRange.endFragment;
+      const startIndex = component.indexOf(firstRange.startFragment);
+      const endIndex = component.indexOf(endFragment);
+      component.splice(startIndex, endIndex - startIndex);
+      endFragment.remove(0, firstRange.endIndex);
+      if (endFragment.contentLength === 0) {
+        endFragment.append(new BrComponent());
       }
+      firstRange.setStart(endFragment, 0);
+      firstRange.collapse();
       event.stopPropagation();
     }
   }
@@ -337,8 +344,10 @@ export class PreComponent extends BackboneAbstractComponent {
 
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
-    this.map(slot => {
-      if (slot.dirty === false) return;
+    this.forEach((slot) => {
+      if (slot.dirty === false) {
+        return;
+      }
       const content = slot.sliceContents(0).map(item => {
         if (typeof item === 'string') {
           return item;

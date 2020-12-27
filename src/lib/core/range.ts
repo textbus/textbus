@@ -349,55 +349,82 @@ export class TBRange {
     if (this.collapsed) {
       return;
     }
-    const startFragment = this.startFragment;
-    if (startFragment === this.endFragment) {
-      startFragment.remove(this.startIndex, this.endIndex - this.startIndex);
-      this.collapse();
-      return;
+
+    const recordPath = () => {
+      const paths: Array<{ data: Fragment | AbstractComponent, index: number }> = [{
+        index: this.startIndex,
+        data: this.startFragment
+      }];
+      let startFragment = this.startFragment;
+      while (true) {
+        const parentComponent = startFragment.parentComponent;
+        let index: number;
+        if (parentComponent instanceof DivisionAbstractComponent) {
+          index = 0
+        } else if (parentComponent instanceof BranchAbstractComponent) {
+          index = parentComponent.slots.indexOf(startFragment);
+        } else if (parentComponent instanceof BackboneAbstractComponent) {
+          index = parentComponent.indexOf(startFragment);
+        }
+        paths.push({
+          index,
+          data: parentComponent
+        })
+        startFragment = parentComponent.parentFragment;
+        if (startFragment) {
+          paths.push({
+            index: startFragment.indexOf(parentComponent),
+            data: startFragment
+          })
+        } else {
+          break;
+        }
+      }
+      return paths;
     }
-    const commonAncestorFragment = this.commonAncestorFragment;
-    const commonScope = this.getCommonAncestorFragmentScope();
+
+    const paths = recordPath();
     this.deleteSelectedScope();
 
-    let start = this.startFragment;
-    let startFragmentInDoc = start === commonAncestorFragment;
-    while (!startFragmentInDoc) {
-      const parentFragment = start.parentComponent?.parentFragment;
-      if (!parentFragment) {
+    const findPath = () => {
+      while (true) {
+        const parentData = paths.pop();
+        const path = paths[paths.length - 1];
+        if (!path) {
+          return parentData;
+        }
+        if (path.data instanceof Fragment) {
+          if (!path.data.parentComponent) {
+            return parentData
+          }
+        } else {
+          if (!path.data.parentFragment) {
+            return parentData;
+          }
+        }
+      }
+    }
+    const root = paths[paths.length - 1].data;
+    const path = findPath();
+
+    let endFragmentInDoc = false;
+    let endFragment = this.endFragment;
+    while (endFragment) {
+      const parentComponent = endFragment.parentComponent;
+      if (!parentComponent) {
         break;
       }
-      if (parentFragment === commonAncestorFragment) {
-        startFragmentInDoc = true;
-        break;
+      if (parentComponent === root) {
+        endFragmentInDoc = true;
       }
-      start = parentFragment;
+      endFragment = parentComponent.parentFragment;
     }
 
-    let end = this.endFragment;
-    let endFragmentInDoc = end === commonAncestorFragment;
-    while (!endFragmentInDoc) {
-      const parentFragment = end.parentComponent?.parentFragment;
-      if (!parentFragment) {
-        break;
-      }
-      if (parentFragment === commonAncestorFragment) {
-        endFragmentInDoc = true;
-        break;
-      }
-      end = parentFragment;
-    }
-    if (startFragmentInDoc) {
-      if (this.endFragment === commonAncestorFragment) {
-        this.collapse();
-        return;
-      }
-      this.startFragment.contact(this.endFragment);
-      this.deleteEmptyTree(this.endFragment);
-    } else {
-      const content = commonAncestorFragment.getContentAtIndex(commonScope.startIndex);
+    if (path.data instanceof Fragment) {
+      const content = path.data.getContentAtIndex(path.index - 1);
       let position: TBRangePosition = {
-        fragment: commonAncestorFragment,
-        index: commonScope.startIndex
+        fragment: path.data,
+        index: path.index
       };
       if (content instanceof DivisionAbstractComponent) {
         position = this.findLastPosition(content.slot);
@@ -407,7 +434,24 @@ export class TBRange {
         position = this.findLastPosition(content.getSlotAtIndex(content.slotCount - 1));
       }
       this.setStart(position.fragment, position.index);
+    } else {
+      const component = path.data;
+      let position: TBRangePosition;
+      if (component instanceof BranchAbstractComponent) {
+        position = this.findLastPosition(component.slots[Math.max(path.index - 1, 0)]);
+      } else if (component instanceof BackboneAbstractComponent) {
+        position = this.findLastPosition(component.getSlotAtIndex(Math.max(path.index - 1, 0)))
+      }
+      this.setStart(position.fragment, position.index);
     }
+
+    if (endFragmentInDoc && this.endFragment !== this.startFragment) {
+      // 防止结尾有 br
+      this.startFragment.remove(this.startIndex);
+      this.startFragment.contact(this.endFragment);
+      this.deleteEmptyTree(this.endFragment);
+    }
+
     this.collapse();
   }
 

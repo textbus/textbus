@@ -295,7 +295,11 @@ export class Fragment extends Marker {
    * @param count
    */
   remove(startIndex: number, count = this.contents.length - startIndex) {
-    this.cut(startIndex, count);
+    this.cut(startIndex, count).sliceContents().forEach(i => {
+      if (i instanceof AbstractComponent) {
+        i[parentFragmentAccessToken] = null;
+      }
+    });
   }
 
   /**

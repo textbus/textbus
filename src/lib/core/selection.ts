@@ -4,7 +4,12 @@ import { tap } from 'rxjs/operators';
 import { TBRange, TBRangePosition } from './range';
 import { Renderer } from './renderer';
 import { Fragment } from './fragment';
-import { BackboneAbstractComponent, BranchAbstractComponent, DivisionAbstractComponent } from './component';
+import {
+  AbstractComponent,
+  BackboneAbstractComponent,
+  BranchAbstractComponent,
+  DivisionAbstractComponent
+} from './component';
 import { TBPlugin } from './plugin';
 import { makeError } from '../_utils/make-error';
 
@@ -41,6 +46,10 @@ export class TBSelection {
    */
   get commonAncestorFragment() {
     return this.getCommonFragment();
+  }
+
+  get commonAncestorComponent() {
+    return this.getCommonComponent()
   }
 
   /**
@@ -257,6 +266,37 @@ export class TBSelection {
     const t = new TBSelection(this.context, of(), this.renderer);
     t._ranges = this.ranges.map(r => r.clone());
     return t;
+  }
+
+  private getCommonComponent(): AbstractComponent {
+    const ranges = this.ranges || [];
+    if (ranges.length === 1) {
+      return ranges[0].commonAncestorComponent;
+    }
+    const depth: AbstractComponent[][] = [];
+
+    ranges.map(range => range.commonAncestorComponent).forEach(component => {
+      const tree = [];
+      while (component) {
+        tree.push(component);
+        component = component.parentFragment?.parentComponent;
+      }
+      depth.push(tree);
+    });
+
+    let component: AbstractComponent = null;
+
+    while (true) {
+      const firstComponents = depth.map(arr => arr.pop()).filter(i => i);
+      if (firstComponents.length === depth.length) {
+        if (new Set(firstComponents).size === 1) {
+          component = firstComponents[0];
+        } else {
+          break;
+        }
+      }
+    }
+    return component;
   }
 
   private getCommonFragment(): Fragment {
