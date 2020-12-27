@@ -172,7 +172,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const firstRange = this.selection.firstRange;
 
     this.selection.ranges.forEach(range => {
-      range.connect();
+      range.deleteContents();
     })
     if (firstRange.startFragment.contentLength === 0) {
       firstRange.startFragment.append(new BrComponent());
@@ -185,7 +185,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       let prevPosition = range.getPreviousPosition();
       if (range.startIndex > 0) {
         range.setStart(prevPosition.fragment, prevPosition.index);
-        range.connect();
+        range.deleteContents();
         const commonAncestorFragment = range.commonAncestorFragment;
         const len = commonAncestorFragment.contentLength;
         if (range.startIndex === 0 && len === 0) {
@@ -225,7 +225,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
           }
         } else {
           range.setStart(prevPosition.fragment, prevPosition.index);
-          range.connect();
+          range.deleteContents();
         }
         while (prevPosition.fragment.contentLength === 0) {
           const position = range.getNextPosition();

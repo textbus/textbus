@@ -345,59 +345,69 @@ export class TBRange {
   /**
    * 删除选区范围内容，并合并选区范围。
    */
-  connect() {
+  deleteContents() {
     if (this.collapsed) {
       return;
     }
     const startFragment = this.startFragment;
     if (startFragment === this.endFragment) {
-      startFragment.remove(this.startIndex, this.endIndex);
-    } else {
-      let isDeleteFragment = false;
-      const endFragmentIsCommon = this.endFragment === this.commonAncestorFragment;
-      const scopeStartIndex = this.getCommonAncestorFragmentScope().startIndex;
-      if (this.startIndex === 0) {
-        const {fragment, index} = this.findFirstPosition(startFragment);
-        isDeleteFragment = fragment === startFragment && index === this.startIndex;
+      startFragment.remove(this.startIndex, this.endIndex - this.startIndex);
+      this.collapse();
+      return;
+    }
+    const commonAncestorFragment = this.commonAncestorFragment;
+    const commonScope = this.getCommonAncestorFragmentScope();
+    this.deleteSelectedScope();
+
+    let start = this.startFragment;
+    let startFragmentInDoc = start === commonAncestorFragment;
+    while (!startFragmentInDoc) {
+      const parentFragment = start.parentComponent?.parentFragment;
+      if (!parentFragment) {
+        break;
       }
-
-      this.deleteSelectedScope();
-      if (isDeleteFragment && startFragment === this.startFragment) {
-        const c = endFragmentIsCommon ? this.endFragment.cut(this.endIndex) : this.endFragment;
-        this.startFragment.contact(c);
-        const firstPosition = this.findFirstPosition(this.startFragment);
-        this.setStart(firstPosition.fragment, firstPosition.index);
-        if (!endFragmentIsCommon) {
-          this.deleteEmptyTree(this.endFragment);
-        }
-      } else {
-        if (this.startFragment !== this.endFragment) {
-          if (endFragmentIsCommon) {
-            const lastContents = this.endFragment.sliceContents(scopeStartIndex + 1);
-            let count = 0;
-            while (lastContents.length) {
-              const first = lastContents.shift();
-              if (first instanceof LeafAbstractComponent || typeof first === 'string') {
-                this.startFragment.append(first);
-                count += first.length;
-              } else {
-                break;
-              }
-            }
-
-            this.endFragment.remove(scopeStartIndex + 1, count);
-          } else {
-            const endLast = this.endFragment.cut(0);
-            this.deleteEmptyTree(this.endFragment);
-            const startLast = this.startFragment.cut(this.startIndex);
-
-            this.startFragment.contact(endLast);
-            this.startFragment.contact(startLast);
-          }
-        }
+      if (parentFragment === commonAncestorFragment) {
+        startFragmentInDoc = true;
+        break;
       }
+      start = parentFragment;
     }
 
+    let end = this.endFragment;
+    let endFragmentInDoc = end === commonAncestorFragment;
+    while (!endFragmentInDoc) {
+      const parentFragment = end.parentComponent?.parentFragment;
+      if (!parentFragment) {
+        break;
+      }
+      if (parentFragment === commonAncestorFragment) {
+        endFragmentInDoc = true;
+        break;
+      }
+      end = parentFragment;
+    }
+    if (startFragmentInDoc) {
+      if (this.endFragment === commonAncestorFragment) {
+        this.collapse();
+        return;
+      }
+      this.startFragment.contact(this.endFragment);
+      this.deleteEmptyTree(this.endFragment);
+    } else {
+      const content = commonAncestorFragment.getContentAtIndex(commonScope.startIndex);
+      let position: TBRangePosition = {
+        fragment: commonAncestorFragment,
+        index: commonScope.startIndex
+      };
+      if (content instanceof DivisionAbstractComponent) {
+        position = this.findLastPosition(content.slot);
+      } else if (content instanceof BranchAbstractComponent) {
+        position = this.findLastPosition(content.slots[content.slots.length - 1]);
+      } else if (content instanceof BackboneAbstractComponent) {
+        position = this.findLastPosition(content.getSlotAtIndex(content.slotCount - 1));
+      }
+      this.setStart(position.fragment, position.index);
+    }
     this.collapse();
   }
 
@@ -413,31 +423,12 @@ export class TBRange {
         scope.fragment.remove(0);
         if (parentComponent instanceof BackboneAbstractComponent) {
           if (parentComponent.canDelete(scope.fragment)) {
-            let position = this.getPreviousPosition();
             const parentFragment = parentComponent.parentFragment;
             const index = parentFragment.indexOf(parentComponent);
             parentFragment.remove(index, 1);
-
             if (parentFragment.contentLength === 0) {
               this.deleteEmptyTree(parentFragment);
             }
-
-            if (position.fragment === this.startFragment) {
-              const nextContent = parentFragment.getContentAtIndex(index);
-              if (nextContent instanceof DivisionAbstractComponent) {
-                position = this.findFirstPosition(nextContent.slot);
-              } else if (nextContent instanceof BranchAbstractComponent) {
-                if (nextContent.slots[0]) {
-                  position = this.findFirstPosition(nextContent.slots[0]);
-                }
-              } else {
-                position = {
-                  fragment: parentFragment,
-                  index
-                };
-              }
-            }
-            this.setStart(position.fragment, position.index);
           }
         } else if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
           this.deleteEmptyTree(scope.fragment);

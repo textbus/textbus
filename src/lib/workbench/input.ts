@@ -380,7 +380,7 @@ export class Input {
       fromEvent(this.input, 'cut').subscribe(() => {
         this.context.execCommand('copy');
         this.selection.ranges.forEach(range => {
-          range.connect();
+          range.deleteContents();
         });
         this.dispatchInputReadyEvent();
       })
