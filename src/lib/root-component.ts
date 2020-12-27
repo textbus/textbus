@@ -6,7 +6,7 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange
+  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent } from './components/br.component';
@@ -108,7 +108,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
     const parentComponent = fragment.parentComponent;
 
-    if (parentComponent instanceof BranchAbstractComponent) {
+    if (parentComponent instanceof BackboneAbstractComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);

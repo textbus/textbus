@@ -9,7 +9,7 @@ import {
   Renderer,
   TBEvent,
   TBSelection,
-  TBRangePosition, TBRange, AbstractComponent
+  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
@@ -352,7 +352,9 @@ export class Input {
 
           const fragment = this.parser.parse(div);
           const contents = new Contents();
-          fragment.sliceContents(0).forEach(i => contents.append(i));
+          (fragment.getContentAtIndex(0) as DivisionAbstractComponent).slot.sliceContents(0).forEach(i => {
+            contents.append(i)
+          });
           document.body.removeChild(div);
 
           if (!this.selection.collapsed) {
