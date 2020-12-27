@@ -412,35 +412,6 @@ export class TBRange {
   }
 
   /**
-   * 删除选区范围内的内容。
-   * 注意：
-   * 此方法并不会合并选区。如果要删除内容，且要合并选区，请调用 connect 方法。
-   */
-  deleteSelectedScope() {
-    this.getSelectedScope().reverse().forEach(scope => {
-      if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
-        const parentComponent = scope.fragment.parentComponent;
-        scope.fragment.remove(0);
-        if (parentComponent instanceof BackboneAbstractComponent) {
-          if (parentComponent.canDelete(scope.fragment)) {
-            const parentFragment = parentComponent.parentFragment;
-            const index = parentFragment.indexOf(parentComponent);
-            parentFragment.remove(index, 1);
-            if (parentFragment.contentLength === 0) {
-              this.deleteEmptyTree(parentFragment);
-            }
-          }
-        } else if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
-          this.deleteEmptyTree(scope.fragment);
-        }
-      } else {
-        scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
-      }
-    });
-    return this;
-  }
-
-  /**
    * 根据 Fragment 依次向上查找，如果 Fragment 为空或 Component 为空，则删除。
    * 直到根 Fragment 或当前 Fragment 等于 endFragment。
    * @param fragment 开始删除的 fragment。
@@ -878,6 +849,33 @@ export class TBRange {
       }
     }
     return rect;
+  }
+
+  /**
+   * 删除选区范围内的内容。
+   */
+  private deleteSelectedScope() {
+    this.getSelectedScope().reverse().forEach(scope => {
+      if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        const parentComponent = scope.fragment.parentComponent;
+        scope.fragment.remove(0);
+        if (parentComponent instanceof BackboneAbstractComponent) {
+          if (parentComponent.canDelete(scope.fragment)) {
+            const parentFragment = parentComponent.parentFragment;
+            const index = parentFragment.indexOf(parentComponent);
+            parentFragment.remove(index, 1);
+            if (parentFragment.contentLength === 0) {
+              this.deleteEmptyTree(parentFragment);
+            }
+          }
+        } else if (scope.fragment !== this.startFragment && scope.fragment !== this.endFragment) {
+          this.deleteEmptyTree(scope.fragment);
+        }
+      } else {
+        scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+      }
+    });
+    return this;
   }
 
   private getScopes(startFragment: Fragment,
