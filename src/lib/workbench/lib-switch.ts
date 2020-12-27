@@ -54,6 +54,7 @@ export class LibSwitch {
         editorController.expandComponentLibrary = this.expand;
       }),
       editorController.onStateChange.pipe(map(s => {
+        this.disabled = editorController.sourceCodeMode;
         return s.expandComponentLibrary;
       }), distinctUntilChanged()).subscribe(b => {
         this.expand = b;

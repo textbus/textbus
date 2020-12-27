@@ -61,12 +61,18 @@ export class Device {
       }), distinctUntilChanged()).subscribe(t => {
         this.set(t);
       }),
+      this.editorController.onStateChange.pipe(map(e => {
+        return e.sourceCodeMode;
+      }), distinctUntilChanged()).subscribe(b => {
+        this.elementRef.style.display = b ? 'none' : '';
+      }),
       fromEvent(document, 'click').subscribe(() => {
         if (!isSelfClick) {
           this.elementRef.classList.remove('textbus-device-expand');
         }
         isSelfClick = false;
-      }), fromEvent(this.button, 'click').subscribe(() => {
+      }),
+      fromEvent(this.button, 'click').subscribe(() => {
         isSelfClick = true;
         this.elementRef.classList.toggle('textbus-device-expand');
       })
