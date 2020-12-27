@@ -10,7 +10,6 @@ import {
   AbstractComponent,
   BackboneAbstractComponent
 } from './component';
-import { BlockFormatter } from './formatter';
 import { BrComponent } from '../components/br.component';
 
 /**
