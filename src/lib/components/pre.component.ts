@@ -202,7 +202,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    code, pre {background-color: rgba(0, 0, 0, .03);}
    pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap;}
+   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden;}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
     `
    .tb-code-line-number-bg { background-color: #efefef; border-right: 1px solid #ddd; width: 3em; }
@@ -228,6 +228,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     `
   pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
   pre[theme=dark] .tb-hl-tag {color: rgb(91 155 190)}
+  pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #1b1b1b; }
   `
   ]
 })
