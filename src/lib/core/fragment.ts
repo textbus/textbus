@@ -105,6 +105,7 @@ export class Fragment extends Marker {
         this.apply(token, f);
       })
     })
+    fragment.clean();
   }
 
   /**
