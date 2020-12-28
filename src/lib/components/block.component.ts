@@ -54,7 +54,6 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
   loader: new BlockComponentLoader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
   interceptor: new BlockComponentInterceptor(),
   styles: [
-    `p { margin-top: 5px; margin-bottom: 5px; }`,
     `blockquote {padding: 10px 15px; border-left: 10px solid #dddee1; background-color: #f8f8f9; margin: 1em 0; border-radius: 4px;}`
   ]
 })
