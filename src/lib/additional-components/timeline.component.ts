@@ -124,7 +124,7 @@ tb-timeline {
   display: block;
   position: relative;
   padding-left: 1.5em;
-  padding-bottom: 1em;
+  padding-bottom: 0.5em;
   opacity: .76;
 }
 
