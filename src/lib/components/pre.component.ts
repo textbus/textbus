@@ -16,16 +16,22 @@ import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-csharp';
 
 import {
-  BlockFormatter,
-  ChildSlotMode, Component,
-  ComponentLoader,
   BackboneAbstractComponent,
+  BlockFormatter,
+  ChildSlotMode,
+  Component,
+  ComponentLoader,
   FormatAbstractData,
   FormatEffect,
   FormatRendingContext,
   Fragment,
-  InlineFormatter, Interceptor,
-  ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
+  InlineFormatter,
+  Interceptor,
+  ReplaceMode,
+  SlotRendererFn,
+  TBClipboard,
+  TBEvent,
+  TBSelection,
   VElement,
   ViewData
 } from '../core/_api';
@@ -329,7 +335,7 @@ export class PreComponent extends BackboneAbstractComponent {
     }).join('');
   }
 
-  format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+  private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
     tokens.forEach(token => {
       if (token instanceof Token) {
         const styleName = codeStyles[token.type];
@@ -360,9 +366,11 @@ export class PreComponent extends BackboneAbstractComponent {
 
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
-    this.forEach((slot) => {
+    const slotCount = this.slotCount;
+    for (let i = 0; i < slotCount; i++) {
+      const slot = this.getSlotAtIndex(i);
       if (slot.dirty === false) {
-        return;
+        continue;
       }
       const content = slot.sliceContents(0).map(item => {
         if (typeof item === 'string') {
@@ -376,20 +384,65 @@ export class PreComponent extends BackboneAbstractComponent {
         fragment.append(str === '\n' ? new BrComponent() : str);
         return '';
       })
+      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
       if (languageGrammar) {
         const tokens = tokenize(content, languageGrammar);
         this.format(tokens, fragment, 0);
-      }
-      slot.getFormatKeys().forEach(format => {
-        if (format instanceof BlockFormatter) {
-          slot.getFormatRanges(format).forEach(r => {
-            fragment.apply(format, r);
-          })
+        while (tokens.length) {
+          const lastToken = tokens.pop();
+          if (typeof lastToken !== 'string') {
+            if (lastToken.type === 'comment' && /^\/\*/.test(lastToken.content as string)) {
+              const {lineIndex, index} = this.markBlockComment(i + 1);
+              i = lineIndex + 1;
+            }
+            break;
+          }
         }
-      })
-      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+      }
       slot.from(fragment);
-    })
+    }
+  }
+
+  private markBlockComment(index: number): { lineIndex: number; index: number } {
+    const slotCount = this.slotCount;
+    let i = 0
+    for (; index < slotCount; index++) {
+      i = 0;
+      const slot = this.getSlotAtIndex(index);
+      const contents = slot.sliceContents();
+      for (const item of contents) {
+        if (typeof item === 'string') {
+          const matchIndex = item.indexOf('*/')
+          if (matchIndex > -1) {
+            slot.apply(codeStyleFormatter, {
+              startIndex: 0,
+              endIndex: i + matchIndex + 2,
+              state: FormatEffect.Valid,
+              abstractData: new FormatAbstractData({
+                classes: ['tb-hl-comment']
+              })
+            })
+            return {
+              lineIndex: index,
+              index: i + matchIndex + 2
+            }
+          }
+        }
+        i += item.length;
+      }
+      slot.apply(codeStyleFormatter, {
+        startIndex: 0,
+        endIndex: i,
+        state: FormatEffect.Valid,
+        abstractData: new FormatAbstractData({
+          classes: ['tb-hl-comment']
+        })
+      })
+    }
+    return {
+      lineIndex: index,
+      index: i
+    };
   }
 
   private getLanguageGrammar(): Grammar {
