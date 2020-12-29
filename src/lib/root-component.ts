@@ -34,28 +34,26 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   onInput() {
     const selection = this.selection;
     const startIndex = this.selectionSnapshot.firstRange.startIndex as number;
-    const commonAncestorFragment = selection.commonAncestorFragment;
+    const latestFragment = new Fragment();
 
-    commonAncestorFragment.clean();
-
-    this.contentSnapshot.forEach(i => commonAncestorFragment.append(i));
+    this.contentSnapshot.forEach(i => latestFragment.append(i));
 
     this.formatterSnapshot.forEach((formatRanges, key) => {
       if (key instanceof InlineFormatter) {
         formatRanges.forEach(formatRange => {
-          commonAncestorFragment.apply(key, {
+          latestFragment.apply(key, {
             ...formatRange,
             abstractData: formatRange.abstractData?.clone()
           })
         })
       } else {
         formatRanges.forEach(formatRange => {
-          commonAncestorFragment.apply(key, {
+          latestFragment.apply(key, {
             get startIndex() {
               return 0;
             },
             get endIndex() {
-              return commonAncestorFragment.contentLength;
+              return latestFragment.contentLength;
             },
             state: formatRange.state,
             abstractData: formatRange.abstractData?.clone()
@@ -71,22 +69,23 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       if (/\n+/.test(str)) {
         for (let i = 0; i < str.length; i++) {
           const s = new BrComponent();
-          commonAncestorFragment.insert(s, index + startIndex);
+          latestFragment.insert(s, index + startIndex);
           index++;
         }
       } else {
-        commonAncestorFragment.insert(str, startIndex + index);
+        latestFragment.insert(str, startIndex + index);
         index += str.length;
       }
       return str;
     });
 
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.selectionStart;
-    const last = commonAncestorFragment.getContentAtIndex(commonAncestorFragment.contentLength - 1);
-    if (startIndex + input.selectionStart === commonAncestorFragment.contentLength &&
+    const last = latestFragment.getContentAtIndex(latestFragment.contentLength - 1);
+    if (startIndex + input.selectionStart === latestFragment.contentLength &&
       last instanceof BrComponent) {
-      commonAncestorFragment.append(new BrComponent());
+      latestFragment.append(new BrComponent());
     }
+    selection.commonAncestorFragment.from(latestFragment);
   }
 
   onEnter() {

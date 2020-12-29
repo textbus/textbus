@@ -65,8 +65,7 @@ export class Fragment extends Marker {
    * @param source
    */
   from(source: Fragment) {
-    this.clean();
-    this.formatMap = new FormatMap();
+    this._clean();
     const self = this;
     Array.from(source.formatMap.keys()).forEach(token => {
       this.formatMap.set(token, [...source.formatMap.get(token).map(f => {
@@ -86,26 +85,40 @@ export class Fragment extends Marker {
       })])
     });
 
-    this.contents = new Contents();
     source.contents.slice(0).forEach(c => {
-      this.append(c);
+      this.contents.append(c);
+      if (c instanceof AbstractComponent) {
+        c[parentFragmentAccessToken] = this;
+        this.eventMap.set(c, c.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+      }
     })
     source.clean();
     this.markAsDirtied();
   }
 
   contact(fragment: Fragment) {
-    fragment.sliceContents(0).forEach(c => this.append(c));
+    fragment.sliceContents(0).forEach(c => {
+      this.contents.append(c);
+      if (c instanceof AbstractComponent) {
+        c[parentFragmentAccessToken] = this;
+        this.eventMap.set(c, c.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+      }
+    });
     const index = this.contentLength;
     fragment.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
       const formats = fragment.getFormatRanges(token) || [];
       formats.forEach(f => {
         f.startIndex += index;
         f.endIndex += index;
-        this.apply(token, f);
+        this._apply(token, f);
       })
     })
     fragment.clean();
+    this.markAsDirtied();
   }
 
   /**
@@ -114,28 +127,7 @@ export class Fragment extends Marker {
    * @param insertAdjacentInlineFormat
    */
   append(content: string | AbstractComponent, insertAdjacentInlineFormat = false) {
-    const offset = content.length;
-    const length = this.contentLength;
-    this.contents.append(content);
-
-    if (content instanceof AbstractComponent) {
-      this.gourdComponentInSelf(content);
-      this.eventMap.set(content, content.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
-    }
-
-    if (insertAdjacentInlineFormat) {
-      this.getFormatKeys().forEach(token => {
-        if (token instanceof InlineFormatter) {
-          this.getFormatRanges(token).forEach(range => {
-            if (range.endIndex === length) {
-              range.endIndex += offset;
-            }
-          })
-        }
-      })
-    }
+    this._append(content, insertAdjacentInlineFormat);
     this.markAsDirtied();
   }
 
@@ -269,16 +261,8 @@ export class Fragment extends Marker {
    * 清除当前 fragment 的内容及格式。
    */
   clean() {
+    this._clean();
     this.markAsDirtied();
-    Array.from(this.eventMap.values()).map(i => i.unsubscribe());
-    this.eventMap.clear();
-    this.sliceContents().forEach(i => {
-      if (i instanceof AbstractComponent && i[parentFragmentAccessToken] === this) {
-        i[parentFragmentAccessToken] = null;
-      }
-    })
-    this.contents = new Contents();
-    this.formatMap = new FormatMap();
   }
 
   /**
@@ -452,9 +436,49 @@ export class Fragment extends Marker {
    * @param params      样式的配置参数。
    * @param options     应用样式的可选项。
    */
+
   apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
   apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
   apply(token: any, params: any, options: ApplyFormatOptions = {
+    important: true,
+    coverChild: true
+  }) {
+    this._apply(token, params, options);
+    if (params.startIndex === 0 && params.endIndex === this.contentLength) {
+      this.parentComponent?.markAsDirtied();
+    }
+    this.markAsDirtied();
+  }
+
+  /**
+   * 根据 fragment，向上查找最近的某类组件实例。
+   * @param context 指定组件的构造类。
+   * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
+   */
+  getContext<T extends AbstractComponent>(context: Type<T>, filter?: (instance: T) => boolean): T {
+    const componentInstance = this.parentComponent;
+    if (!componentInstance) {
+      return null;
+    }
+    if (componentInstance instanceof context) {
+      if (typeof filter === 'function') {
+        if (filter(componentInstance)) {
+          return componentInstance;
+        }
+      } else {
+        return componentInstance;
+      }
+    }
+    const parentFragment = componentInstance.parentFragment;
+    if (!parentFragment) {
+      return null;
+    }
+    return parentFragment.getContext(context, filter);
+  }
+
+  private _apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
+  private _apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
+  private _apply(token: any, params: any, options: ApplyFormatOptions = {
     important: true,
     coverChild: true
   }) {
@@ -470,8 +494,6 @@ export class Fragment extends Marker {
           return self.contentLength;
         }
       }, important);
-      this.parentComponent?.markAsDirtied();
-      this.markAsDirtied();
       return;
     }
     const formatRange = params;
@@ -527,36 +549,43 @@ export class Fragment extends Marker {
       index += item.length;
     });
     cacheFormats.forEach(f => this.formatMap.merge(f.token, f.params, important));
-    if (formatRange.startIndex === 0 && formatRange.endIndex === this.contentLength) {
-      this.parentComponent?.markAsDirtied();
-    }
-    this.markAsDirtied();
   }
 
-  /**
-   * 根据 fragment，向上查找最近的某类组件实例。
-   * @param context 指定组件的构造类。
-   * @param filter  过滤函数，当查找到实例后，可在 filter 函数中作进一步判断，如果返回为 false，则继续向上查找。
-   */
-  getContext<T extends AbstractComponent>(context: Type<T>, filter?: (instance: T) => boolean): T {
-    const componentInstance = this.parentComponent;
-    if (!componentInstance) {
-      return null;
+  private _append(content: string | AbstractComponent, insertAdjacentInlineFormat = false) {
+    const offset = content.length;
+    const length = this.contentLength;
+    this.contents.append(content);
+
+    if (content instanceof AbstractComponent) {
+      this.gourdComponentInSelf(content);
+      this.eventMap.set(content, content.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
     }
-    if (componentInstance instanceof context) {
-      if (typeof filter === 'function') {
-        if (filter(componentInstance)) {
-          return componentInstance;
+
+    if (insertAdjacentInlineFormat) {
+      this.getFormatKeys().forEach(token => {
+        if (token instanceof InlineFormatter) {
+          this.getFormatRanges(token).forEach(range => {
+            if (range.endIndex === length) {
+              range.endIndex += offset;
+            }
+          })
         }
-      } else {
-        return componentInstance;
+      })
+    }
+  }
+
+  private _clean() {
+    Array.from(this.eventMap.values()).map(i => i.unsubscribe());
+    this.eventMap.clear();
+    this.sliceContents().forEach(i => {
+      if (i instanceof AbstractComponent && i[parentFragmentAccessToken] === this) {
+        i[parentFragmentAccessToken] = null;
       }
-    }
-    const parentFragment = componentInstance.parentFragment;
-    if (!parentFragment) {
-      return null;
-    }
-    return parentFragment.getContext(context, filter);
+    })
+    this.contents = new Contents();
+    this.formatMap = new FormatMap();
   }
 
   private gourdComponentInSelf(component: AbstractComponent) {

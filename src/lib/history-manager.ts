@@ -48,16 +48,16 @@ export class HistoryManager {
     if (this.stateChangeSubscription) {
       this.stateChangeSubscription.unsubscribe();
     }
-    this.stateChangeSubscription = this.editorController.onStateChange.pipe(map(s => {
-      return s.sourceCodeMode;
-    }), distinctUntilChanged()).subscribe(b => {
-      if (b) {
-        this.stopListen();
-      } else {
-        this.recordSnapshot();
-        this.listen();
-      }
-    })
+    // this.stateChangeSubscription = this.editorController.onStateChange.pipe(map(s => {
+    //   return s.sourceCodeMode;
+    // }), distinctUntilChanged()).subscribe(b => {
+    //   if (b) {
+    //     this.stopListen();
+    //   } else {
+    //     this.recordSnapshot();
+    //     this.listen();
+    //   }
+    // })
   }
 
   usePreviousSnapshot() {
