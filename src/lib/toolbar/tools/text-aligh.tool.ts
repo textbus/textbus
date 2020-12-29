@@ -3,6 +3,7 @@ import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatAbstractData } from '../../core/format-abstract-data';
 import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { PreComponent } from '../../components/pre.component';
 
 export const textAlignToolConfig: SelectToolConfig = {
   tooltip: '对齐方式',
@@ -40,7 +41,7 @@ export const textAlignToolConfig: SelectToolConfig = {
       key: 'j'
     },
   }],
-  matcher: new FormatMatcher(textAlignFormatter),
+  matcher: new FormatMatcher(textAlignFormatter, [PreComponent]),
   highlight(options, data) {
     if (data instanceof FormatAbstractData) {
       for (const option of options) {

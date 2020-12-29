@@ -19,16 +19,15 @@ export class PreCommander implements Commander<string> {
           return;
         }
         context.lang = lang;
+        context.markAsDirtied();
       });
     } else {
       selection.ranges.forEach(range => {
         const context = range.endFragment.parentComponent;
         const parentFragment = context.parentFragment;
-        const slot = new Fragment();
         const t = new PreComponent(lang, '');
-        slot.append(new BrComponent());
         parentFragment.insertAfter(t, context);
-        range.setStart(slot, 0);
+        range.setStart(t.getSlotAtIndex(0), 0);
         range.collapse();
       })
     }

@@ -242,9 +242,25 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 export class PreComponent extends BackboneAbstractComponent {
   static theme: PreTheme = 'light';
 
-  constructor(public lang: string, code: string, private theme?: PreTheme) {
+  set lang(v: string) {
+    if (v !== this._lang) {
+      this.forEach(slot => {
+        slot.markAsDirtied();
+      })
+    }
+    this._lang = v;
+  }
+
+  get lang() {
+    return this._lang;
+  }
+
+  private _lang: string
+
+  constructor(lang: string, code: string, private theme?: PreTheme) {
     super('pre');
-    this.setSourceCode(code)
+    this.lang = lang;
+    this.setSourceCode(code);
   }
 
   public map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
