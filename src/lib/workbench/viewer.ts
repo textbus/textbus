@@ -83,16 +83,12 @@ export class Viewer {
     }).join('')
 
     this.elementRef.setAttribute('scrolling', 'no');
-    const styleEl = document.createElement('style');
     this.docStyles = [componentStyles, ...(options.styleSheets || [])];
-    styleEl.innerHTML = [...this.docStyles, ...(options.editingStyleSheets || [])].join('');
-
-    const html = iframeHTML.replace(/(?=<\/head>)/, styleEl.outerHTML);
     this.elementRef.src = `javascript:void(
       (function () {
         document.open();
         document.domain='${document.domain}';
-        document.write('${html}');
+        document.write('${iframeHTML}');
         document.close();
         window.parent.postMessage('complete','${location.origin}');
       })()
@@ -101,6 +97,9 @@ export class Viewer {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
+          const styleEl = this.contentDocument.createElement('style');
+          styleEl.innerHTML = [...this.docStyles, ...(options.editingStyleSheets || [])].join('');
+          this.contentDocument.head.append(styleEl);
           this.setup();
           this.listen();
         }
