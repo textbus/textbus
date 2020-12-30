@@ -294,6 +294,8 @@ export class TBSelection {
         } else {
           break;
         }
+      } else {
+        break;
       }
     }
     return component;
