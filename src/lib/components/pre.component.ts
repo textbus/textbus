@@ -262,6 +262,7 @@ export class PreComponent extends BackboneAbstractComponent {
   }
 
   private _lang: string
+  private index = 0;
 
   constructor(lang: string, code: string, private theme?: PreTheme) {
     super('pre');
@@ -335,50 +336,17 @@ export class PreComponent extends BackboneAbstractComponent {
     }).join('');
   }
 
-  private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
-    tokens.forEach(token => {
-      if (token instanceof Token) {
-        const styleName = codeStyles[token.type];
-        if (styleName) {
-          slot.apply(codeStyleFormatter, {
-            startIndex: index,
-            endIndex: index + token.length,
-            state: FormatEffect.Valid,
-            abstractData: new FormatAbstractData({
-              classes: ['tb-hl-' + styleName]
-            })
-          });
-        } else if (styleName === false) {
-          slot.apply(codeStyleFormatter, {
-            startIndex: index,
-            endIndex: index + token.length,
-            state: FormatEffect.Invalid,
-            abstractData: null
-          })
-        }
-        if (Array.isArray(token.content)) {
-          this.format(token.content, slot, index);
-        }
-      }
-      index += token.length;
-    })
-  }
-
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
     const slotCount = this.slotCount;
-    for (let i = 0; i < slotCount; i++) {
-      const slot = this.getSlotAtIndex(i);
+    this.index = 0;
+
+    while (this.index < slotCount) {
+      const slot = this.getSlotAtIndex(this.index);
       if (slot.dirty === false) {
         continue;
       }
-      const content = slot.sliceContents(0).map(item => {
-        if (typeof item === 'string') {
-          return item;
-        } else if (item instanceof BrComponent) {
-          return '\n';
-        }
-      }).join('');
+      const content = this.contentToString(slot);
       const fragment = new Fragment();
       content.replace(/\n|[^\n]+/g, str => {
         fragment.append(str === '\n' ? new BrComponent() : str);
@@ -392,14 +360,15 @@ export class PreComponent extends BackboneAbstractComponent {
           const lastToken = tokens.pop();
           if (typeof lastToken !== 'string') {
             if (lastToken.type === 'comment' && /^\/\*/.test(lastToken.content as string)) {
-              const {lineIndex, index} = this.markBlockComment(i + 1);
-              i = lineIndex + 1;
+              const {lineIndex} = this.markBlockComment(this.index + 1);
+              this.index = lineIndex + 1;
             }
             break;
           }
         }
       }
       slot.from(fragment);
+      this.index++;
     }
   }
 
@@ -443,6 +412,45 @@ export class PreComponent extends BackboneAbstractComponent {
       lineIndex: index,
       index: i
     };
+  }
+
+  private contentToString(slot: Fragment): string {
+    return slot.sliceContents(0).map(item => {
+      if (typeof item === 'string') {
+        return item;
+      } else if (item instanceof BrComponent) {
+        return '\n';
+      }
+    }).join('')
+  }
+
+  private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+    tokens.forEach(token => {
+      if (token instanceof Token) {
+        const styleName = codeStyles[token.type];
+        if (styleName) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
+            state: FormatEffect.Valid,
+            abstractData: new FormatAbstractData({
+              classes: ['tb-hl-' + styleName]
+            })
+          });
+        } else if (styleName === false) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
+            state: FormatEffect.Invalid,
+            abstractData: null
+          })
+        }
+        if (Array.isArray(token.content)) {
+          this.format(token.content, slot, index);
+        }
+      }
+      index += token.length;
+    })
   }
 
   private getLanguageGrammar(): Grammar {
