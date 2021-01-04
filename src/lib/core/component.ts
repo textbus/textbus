@@ -180,7 +180,7 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
  * 有任意个子插槽，且子插槽不可随意更改的组件。
  * 如 table，可以有多个 td，但 td 是不能随意删除的，否则会破坏 table 的结构。
  */
-export abstract class BackboneAbstractComponent extends AbstractComponent implements Iterable<Fragment> {
+export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> extends AbstractComponent implements Iterable<T> {
   get slotCount() {
     return this.slots.length;
   }
@@ -188,8 +188,8 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
   /**
    * 子插槽的集合
    */
-  private eventMap = new Map<Fragment, Subscription>();
-  private slots: Fragment[] = [];
+  private eventMap = new Map<T, Subscription>();
+  private slots: T[] = [];
   private iteratorIndex = 0;
 
   /**
@@ -198,7 +198,7 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
    * 就会询问，当前组件是否可以删除。
    * @param deletedSlot 当前清空的 fragment。
    */
-  abstract canDelete(deletedSlot: Fragment): boolean;
+  abstract canDelete(deletedSlot: T): boolean;
 
   [Symbol.iterator]() {
     this.iteratorIndex = 0;
@@ -224,11 +224,11 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
     return this.slots[index];
   }
 
-  indexOf(fragment: Fragment) {
+  indexOf(fragment: T) {
     return this.slots.indexOf(fragment);
   }
 
-  protected forEach(callbackFn: (value: Fragment, index: number, array: Fragment[]) => void, thisArg?: any) {
+  protected forEach(callbackFn: (value: T, index: number, array: T[]) => void, thisArg?: any) {
     this.slots.forEach(callbackFn, thisArg);
   }
 
@@ -241,7 +241,7 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
     this.slots = [];
   }
 
-  protected push(...fragments: Fragment[]) {
+  protected push(...fragments: T[]) {
     this.setup(fragments);
     this.slots.push(...fragments);
     this.markAsDirtied();
@@ -258,9 +258,9 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
     return f;
   }
 
-  protected splice(start: number, deleteCount?: number): Fragment[];
-  protected splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[];
-  protected splice(start: any, deleteCount: any, ...items: any[]): Fragment[] {
+  protected splice(start: number, deleteCount?: number): T[];
+  protected splice(start: number, deleteCount: number, ...items: T[]): T[];
+  protected splice(start: any, deleteCount: any, ...items: any[]): T[] {
     const deletedSlots = this.slots.splice(start, deleteCount, ...items);
 
     deletedSlots.forEach(f => {
@@ -275,11 +275,11 @@ export abstract class BackboneAbstractComponent extends AbstractComponent implem
     return deletedSlots;
   }
 
-  protected map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
+  protected map<U>(callbackFn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[] {
     return this.slots.map(callbackFn, thisArg);
   }
 
-  private setup(fragments: Fragment[]) {
+  private setup(fragments: T[]) {
     fragments.forEach(f => {
       f[parentComponentAccessToken] = this;
       this.eventMap.set(f, f.onChange.subscribe(() => {

@@ -16,22 +16,16 @@ import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-csharp';
 
 import {
-  BackboneAbstractComponent,
   BlockFormatter,
-  ChildSlotMode,
-  Component,
+  ChildSlotMode, Component,
   ComponentLoader,
+  BackboneAbstractComponent,
   FormatAbstractData,
   FormatEffect,
   FormatRendingContext,
   Fragment,
-  InlineFormatter,
-  Interceptor,
-  ReplaceMode,
-  SlotRendererFn,
-  TBClipboard,
-  TBEvent,
-  TBSelection,
+  InlineFormatter, Interceptor,
+  ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData
 } from '../core/_api';
@@ -262,7 +256,6 @@ export class PreComponent extends BackboneAbstractComponent {
   }
 
   private _lang: string
-  private index = 0;
 
   constructor(lang: string, code: string, private theme?: PreTheme) {
     super('pre');
@@ -336,95 +329,7 @@ export class PreComponent extends BackboneAbstractComponent {
     }).join('');
   }
 
-  private reformat() {
-    const languageGrammar = this.getLanguageGrammar();
-    const slotCount = this.slotCount;
-    this.index = 0;
-
-    while (this.index < slotCount) {
-      const slot = this.getSlotAtIndex(this.index);
-      if (slot.dirty === false) {
-        continue;
-      }
-      const content = this.contentToString(slot);
-      const fragment = new Fragment();
-      content.replace(/\n|[^\n]+/g, str => {
-        fragment.append(str === '\n' ? new BrComponent() : str);
-        return '';
-      })
-      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
-      if (languageGrammar) {
-        const tokens = tokenize(content, languageGrammar);
-        this.format(tokens, fragment, 0);
-        while (tokens.length) {
-          const lastToken = tokens.pop();
-          if (typeof lastToken !== 'string') {
-            if (lastToken.type === 'comment' && /^\/\*/.test(lastToken.content as string)) {
-              const {lineIndex} = this.markBlockComment(this.index + 1);
-              this.index = lineIndex + 1;
-            }
-            break;
-          }
-        }
-      }
-      slot.from(fragment);
-      this.index++;
-    }
-  }
-
-  private markBlockComment(index: number): { lineIndex: number; index: number } {
-    const slotCount = this.slotCount;
-    let i = 0
-    for (; index < slotCount; index++) {
-      i = 0;
-      const slot = this.getSlotAtIndex(index);
-      const contents = slot.sliceContents();
-      for (const item of contents) {
-        if (typeof item === 'string') {
-          const matchIndex = item.indexOf('*/')
-          if (matchIndex > -1) {
-            slot.apply(codeStyleFormatter, {
-              startIndex: 0,
-              endIndex: i + matchIndex + 2,
-              state: FormatEffect.Valid,
-              abstractData: new FormatAbstractData({
-                classes: ['tb-hl-comment']
-              })
-            })
-            return {
-              lineIndex: index,
-              index: i + matchIndex + 2
-            }
-          }
-        }
-        i += item.length;
-      }
-      slot.apply(codeStyleFormatter, {
-        startIndex: 0,
-        endIndex: i,
-        state: FormatEffect.Valid,
-        abstractData: new FormatAbstractData({
-          classes: ['tb-hl-comment']
-        })
-      })
-    }
-    return {
-      lineIndex: index,
-      index: i
-    };
-  }
-
-  private contentToString(slot: Fragment): string {
-    return slot.sliceContents(0).map(item => {
-      if (typeof item === 'string') {
-        return item;
-      } else if (item instanceof BrComponent) {
-        return '\n';
-      }
-    }).join('')
-  }
-
-  private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+  format(tokens: Array<string | Token>, slot: Fragment, index: number) {
     tokens.forEach(token => {
       if (token instanceof Token) {
         const styleName = codeStyles[token.type];
@@ -450,6 +355,40 @@ export class PreComponent extends BackboneAbstractComponent {
         }
       }
       index += token.length;
+    })
+  }
+
+  private reformat() {
+    const languageGrammar = this.getLanguageGrammar();
+    this.forEach((slot) => {
+      if (slot.dirty === false) {
+        return;
+      }
+      const content = slot.sliceContents(0).map(item => {
+        if (typeof item === 'string') {
+          return item;
+        } else if (item instanceof BrComponent) {
+          return '\n';
+        }
+      }).join('');
+      const fragment = new Fragment();
+      content.replace(/\n|[^\n]+/g, str => {
+        fragment.append(str === '\n' ? new BrComponent() : str);
+        return '';
+      })
+      if (languageGrammar) {
+        const tokens = tokenize(content, languageGrammar);
+        this.format(tokens, fragment, 0);
+      }
+      slot.getFormatKeys().forEach(format => {
+        if (format instanceof BlockFormatter) {
+          slot.getFormatRanges(format).forEach(r => {
+            fragment.apply(format, r);
+          })
+        }
+      })
+      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+      slot.from(fragment);
     })
   }
 

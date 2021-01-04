@@ -476,9 +476,9 @@ export class Fragment extends Marker {
     return parentFragment.getContext(context, filter);
   }
 
-  private _apply(token: InlineFormatter, params: InlineFormatParams, options?: ApplyFormatOptions): void;
-  private _apply(token: BlockFormatter, params: BlockFormatParams, options?: ApplyFormatOptions): void;
-  private _apply(token: any, params: any, options: ApplyFormatOptions = {
+  private _apply(token: InlineFormatter, formatRange: InlineFormatParams, options?: ApplyFormatOptions): void;
+  private _apply(token: BlockFormatter, formatRange: BlockFormatParams, options?: ApplyFormatOptions): void;
+  private _apply(token: any, formatRange: any, options: ApplyFormatOptions = {
     important: true,
     coverChild: true
   }) {
@@ -486,7 +486,7 @@ export class Fragment extends Marker {
     if (token instanceof BlockFormatter) {
       const self = this;
       this.formatMap.merge(token, {
-        ...params,
+        ...formatRange,
         get startIndex() {
           return 0;
         },
@@ -496,7 +496,12 @@ export class Fragment extends Marker {
       }, important);
       return;
     }
-    const formatRange = params;
+    if (formatRange.startIndex < 0) {
+      formatRange.startIndex = 0;
+    }
+    if (formatRange.endIndex > this.contentLength) {
+      formatRange.endIndex = this.contentLength;
+    }
     const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
     let index = 0;
     const cacheFormats: Array<{ token: InlineFormatter, params: InlineFormatParams }> = [];
