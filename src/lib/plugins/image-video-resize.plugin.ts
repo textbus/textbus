@@ -151,8 +151,11 @@ export class ImageVideoResizePlugin implements TBPlugin {
   }
 
   onViewUpdated() {
-    if (this.currentElement) {
+    if (this.currentElement?.parentNode) {
       this.updateStyle();
+    } else {
+      this.currentElement = null;
+      this.mask.parentNode?.removeChild(this.mask);
     }
   }
 

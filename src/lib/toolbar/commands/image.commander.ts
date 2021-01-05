@@ -17,6 +17,7 @@ export class ImageCommander implements Commander<Map<string, any>> {
       component.maxHeight = maxSize.height || '';
       component.float = attrs.get('float') as string;
       component.margin = attrs.get('margin') as string;
+      component.markAsDirtied();
     }
 
     context.selection.ranges.forEach(range => {
