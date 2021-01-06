@@ -87,7 +87,7 @@ const vElementErrorFn = makeError('VElement');
  */
 export class VElement {
   onRendered: (nativeNode: HTMLElement) => void;
-  [parentNode]: VElement | null;
+  [parentNode]: VElement | null = null;
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
   readonly classes: string[] = [];
@@ -127,10 +127,6 @@ export class VElement {
         this.appendChild(...options.childNodes);
       }
     }
-  }
-
-  clearChildNodes() {
-    this._childNodes = [];
   }
 
   clone(): VElement {

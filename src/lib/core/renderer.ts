@@ -269,7 +269,6 @@ export class Renderer {
       fragment.append(new BrComponent());
     }
     if (fragment.dirty || forceUpdate) {
-      host.clearChildNodes();
       const {childFormats, containerFormats} = Renderer.formatSeparate(fragment);
       const elements = this.rendingSlotFormats(containerFormats, host);
       const root = elements[0];
@@ -375,7 +374,11 @@ export class Renderer {
     if (component instanceof DivisionAbstractComponent) {
       newView = component.slotRender(false, (slot, host) => {
         const view = this.rendingFragment(slot, host, true);
-        view.styles.set('userSelect', 'text');
+        if (view === host) {
+          this.componentVDomCacheMap.set(component, view);
+        } else {
+          view.styles.set('userSelect', 'text');
+        }
         return view;
       })
     } else {
@@ -385,13 +388,14 @@ export class Renderer {
         return view;
       })
     }
-    oldView.parentNode.replaceChild(newView, oldView);
     const oldNativeNode = this.getNativeNodeByVDom(oldView) as HTMLElement;
     const newNativeNode = this.diffAndUpdate(newView, oldView);
-    this.NVMappingTable.set(newNativeNode, newView)
     if (oldNativeNode !== newNativeNode) {
       oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
     }
+    this.NVMappingTable.set(newNativeNode, newView)
+    oldView.parentNode.replaceChild(newView, oldView);
+    return newView;
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {

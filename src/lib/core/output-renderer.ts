@@ -18,10 +18,13 @@ export class OutputRenderer {
   private componentVDomCacheMap = new WeakMap<AbstractComponent, VElement>();
   // 记录 fragment 对应的虚拟节点
   private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
-  private rootVElement = new VElement('body');
+  private rootVElement: VElement = new VElement('body');
 
   render(fragment: Fragment): VElement {
     if (fragment.outputChanged) {
+      if (fragment.outputDirty) {
+        this.rootVElement = new VElement('body');
+      }
       this.rendingFragment(fragment, this.rootVElement);
     }
     return this.rootVElement;
@@ -29,7 +32,6 @@ export class OutputRenderer {
 
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
     if (fragment.outputDirty || forceUpdate) {
-      host.clearChildNodes();
       const {childFormats, containerFormats} = Renderer.formatSeparate(fragment);
       const elements = this.rendingSlotFormats(containerFormats, host);
       const root = elements[0];
@@ -108,14 +110,17 @@ export class OutputRenderer {
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
       newView = component.slotRender(true, (slot, host) => {
-        return this.rendingFragment(slot, host);
+        const view = this.rendingFragment(slot, host);
+        if (view === host) {
+          this.componentVDomCacheMap.set(component, view);
+        }
+        return view;
       })
     } else {
       newView = component.slotRender(slot, true, (slot, host) => {
         return this.rendingFragment(slot, host);
       })
     }
-
     oldView.parentNode.replaceChild(newView, oldView);
   }
 
