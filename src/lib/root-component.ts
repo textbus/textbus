@@ -279,6 +279,10 @@ export class RootComponent extends DivisionAbstractComponent {
     return undefined;
   }
 
+  slotRender(): VElement {
+    return undefined;
+  }
+
   render(): VElement {
     return undefined;
   }

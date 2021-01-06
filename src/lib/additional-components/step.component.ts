@@ -195,66 +195,67 @@ export class StepComponent extends BranchAbstractComponent {
     });
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    const index = this.slots.indexOf(slot);
+    const content = new VElement('div', {
+      classes: ['tb-step-item-content']
+    });
+    let state = 'tb-waiting';
+    if (index < this.config.step) {
+      state = 'tb-complete';
+    } else if (index === this.config.step) {
+      state = 'tb-current'
+    }
+    const icon = new VElement('div', {
+      classes: ['tb-step-item-icon'],
+      childNodes: [new VTextNode(index + 1 + '')]
+    });
+    const item = new VElement('div', {
+      classes: ['tb-step-item', state],
+      childNodes: [
+        new VElement('div', {
+          classes: ['tb-step-item-header'],
+          childNodes: [
+            new VElement('div', {
+              classes: ['tb-step-item-line']
+            }),
+            icon
+          ]
+        }),
+        slotRendererFn(slot, content)
+      ]
+    });
+    if (!isOutputMode) {
+      const add = new VElement('span', {
+        classes: ['tb-step-item-add']
+      });
+      add.onRendered = nativeNode => {
+        nativeNode.addEventListener('click', () => {
+          this.slots.splice(index, 0, createItem());
+        })
+      }
+      icon.onRendered = nativeNode => {
+        nativeNode.addEventListener('click', () => {
+          const currentStep = this.config.step;
+          if (index === currentStep) {
+            this.config.step = index + 1;
+          } else if (index + 1 === currentStep) {
+            this.config.step = index - 1;
+          } else {
+            this.config.step = index;
+          }
+          this.markAsDirtied();
+        })
+      }
+      item.appendChild(add);
+    }
+    return item;
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const wrap = new VElement('tb-step');
-
-    this.slots.forEach((slot, index) => {
-
-      const content = new VElement('div', {
-        classes: ['tb-step-item-content']
-      });
-      let state = 'tb-waiting';
-      if (index < this.config.step) {
-        state = 'tb-complete';
-      } else if (index === this.config.step) {
-        state = 'tb-current'
-      }
-      const icon = new VElement('div', {
-        classes: ['tb-step-item-icon'],
-        childNodes: [new VTextNode(index + 1 + '')]
-      });
-      const item = new VElement('div', {
-        classes: ['tb-step-item', state],
-        childNodes: [
-          new VElement('div', {
-            classes: ['tb-step-item-header'],
-            childNodes: [
-              new VElement('div', {
-                classes: ['tb-step-item-line']
-              }),
-              icon
-            ]
-          }),
-          slotRendererFn(slot, content)
-        ]
-      });
-      if (!isOutputMode) {
-        const add = new VElement('span', {
-          classes: ['tb-step-item-add']
-        });
-        add.onRendered = nativeNode => {
-          nativeNode.addEventListener('click', () => {
-            this.slots.splice(index, 0, createItem());
-          })
-        }
-        icon.onRendered = nativeNode => {
-          nativeNode.addEventListener('click', () => {
-            const currentStep = this.config.step;
-            if (index === currentStep) {
-              this.config.step = index + 1;
-            } else if (index + 1 === currentStep) {
-              this.config.step = index - 1;
-            } else {
-              this.config.step = index;
-            }
-            this.markAsDirtied();
-          })
-        }
-        item.appendChild(add);
-      }
-      wrap.appendChild(item);
-    })
-    return wrap;
+    return new VElement('tb-step', {
+      childNodes: this.slots.map(slot => this.slotRender(slot, isOutputMode, slotRendererFn))
+    });
   }
 }
 

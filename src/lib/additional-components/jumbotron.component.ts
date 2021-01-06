@@ -66,6 +66,10 @@ export class JumbotronComponent extends DivisionAbstractComponent {
     return component;
   }
 
+  slotRender(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return this.render(isOutputMode, slotRendererFn);
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const vEle = new VElement(this.tagName, {
       styles: {

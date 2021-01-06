@@ -123,6 +123,8 @@ export abstract class DivisionAbstractComponent extends AbstractComponent {
       this.markAsChanged();
     })
   }
+
+  abstract slotRender(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 }
 
 /**
@@ -174,6 +176,8 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
       return b;
     }
   })
+
+  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 }
 
 /**
@@ -278,6 +282,8 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
   protected map<U>(callbackFn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[] {
     return this.slots.map(callbackFn, thisArg);
   }
+
+  // abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 
   private setup(fragments: T[]) {
     fragments.forEach(f => {

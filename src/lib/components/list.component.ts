@@ -115,6 +115,10 @@ export class ListComponent extends BranchAbstractComponent {
     return component;
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return slotRendererFn(slot, new VElement('li'));
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const list = new VElement(this.tagName);
     this.slots.forEach(slot => {

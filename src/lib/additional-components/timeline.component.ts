@@ -17,13 +17,20 @@ const colors = ['#1296db', '#6ad1ec', '#15bd9a', '#ff9900', '#E74F5E', '#495060'
 
 export type TimelineType = 'primary' | 'info' | 'success' | 'warning' | 'danger' | 'dark' | 'gray';
 
-export interface TimelineConfig {
-  type: TimelineType;
-  fragment: Fragment;
+class TimelineFragment extends Fragment {
+  constructor(public type: TimelineType) {
+    super();
+  }
+
+  clone(): TimelineFragment {
+    const f = new TimelineFragment(this.type);
+    f.from(super.clone());
+    return f;
+  }
 }
 
-function createTimelineItem(): TimelineConfig {
-  const fragment = new Fragment();
+function createTimelineItem(): TimelineFragment {
+  const fragment = new TimelineFragment('primary');
 
   const title = new BlockComponent('div');
 
@@ -72,10 +79,7 @@ function createTimelineItem(): TimelineConfig {
 
   fragment.append(title);
   fragment.append(desc);
-  return {
-    fragment,
-    type: 'primary'
-  };
+  return fragment;
 }
 
 class TimelineComponentLoader implements ComponentLoader {
@@ -86,7 +90,7 @@ class TimelineComponentLoader implements ComponentLoader {
   read(element: HTMLElement): ViewData {
     const slots: SlotMap[] = [];
 
-    const list: TimelineConfig[] = Array.from(element.children).map(child => {
+    const list: TimelineFragment[] = Array.from(element.children).map(child => {
       let type: TimelineType = null;
       for (const k of timelineTypes) {
         if (child.classList.contains('tb-timeline-item-' + k)) {
@@ -94,15 +98,12 @@ class TimelineComponentLoader implements ComponentLoader {
           break;
         }
       }
-      const slot = new Fragment()
+      const slot = new TimelineFragment(type)
       slots.push({
         toSlot: slot,
         from: child.querySelector('div.tb-timeline-content') || document.createElement('div')
       });
-      return {
-        type,
-        fragment: slot
-      }
+      return slot;
     });
     const component = new TimelineComponent(list);
     return {
@@ -200,90 +201,77 @@ tb-timeline {
 `
   ]
 })
-export class TimelineComponent extends BranchAbstractComponent {
+export class TimelineComponent extends BranchAbstractComponent<TimelineFragment> {
   private vEle: VElement;
 
-  constructor(private list: TimelineConfig[]) {
+  constructor(list: TimelineFragment[]) {
     super('tb-timeline');
-    list.forEach(i => {
-      this.slots.push(i.fragment);
-    });
+    this.slots.push(...list);
   }
 
   clone(): TimelineComponent {
-    return new TimelineComponent(this.list.map(i => {
-      return {
-        ...i,
-        fragment: i.fragment.clone()
+    return new TimelineComponent(this.slots.map(f => f.clone()));
+  }
+
+  slotRender(slot: TimelineFragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    const child = new VElement('div', {
+      classes: ['tb-timeline-item']
+    });
+
+    const line = new VElement('div', {
+      classes: ['tb-timeline-line']
+    });
+    const icon = new VElement('div', {
+      classes: ['tb-timeline-icon']
+    });
+
+    if (slot.type) {
+      child.classes.push('tb-timeline-item-' + slot.type);
+    }
+
+    const content = new VElement('div', {
+      classes: ['tb-timeline-content']
+    });
+
+    child.appendChild(line);
+    child.appendChild(icon);
+    if (!isOutputMode) {
+      icon.attrs.set('title', '点击切换颜色');
+
+      icon.onRendered = nativeNode => {
+        nativeNode.addEventListener('click', () => {
+          const currentType = slot.type;
+          if (!currentType) {
+            slot.type = timelineTypes[0] as TimelineType;
+          } else {
+            slot.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
+          }
+          this.markAsDirtied();
+        })
       }
-    }));
+
+      const btn = new VElement('span', {
+        classes: ['tb-timeline-add']
+      });
+      child.appendChild(btn);
+
+      btn.onRendered = nativeNode => {
+        nativeNode.addEventListener('click', () => {
+          const index = this.slots.indexOf(slot) + 1;
+          this.slots.splice(index, 0, createTimelineItem());
+        })
+      }
+    }
+
+    child.appendChild(slotRendererFn(slot, content));
+    return child;
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const list = new VElement('tb-timeline');
     this.vEle = list;
-    this.list = this.list.filter(i => {
-      return this.slots.includes(i.fragment);
-    });
 
-    this.list.forEach((item) => {
-      const child = new VElement('div', {
-        classes: ['tb-timeline-item']
-      });
-
-      const line = new VElement('div', {
-        classes: ['tb-timeline-line']
-      });
-      const icon = new VElement('div', {
-        classes: ['tb-timeline-icon']
-      });
-
-      if (item.type) {
-        child.classes.push('tb-timeline-item-' + item.type);
-      }
-
-      const content = new VElement('div', {
-        classes: ['tb-timeline-content']
-      });
-
-      child.appendChild(line);
-      child.appendChild(icon);
-      if (!isOutputMode) {
-        icon.attrs.set('title', '点击切换颜色');
-
-        icon.onRendered = nativeNode => {
-          nativeNode.addEventListener('click', () => {
-            const currentType = item.type;
-            if (!currentType) {
-              item.type = timelineTypes[0] as TimelineType;
-            } else {
-              item.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
-            }
-            this.markAsDirtied();
-          })
-        }
-
-        const btn = new VElement('span', {
-          classes: ['tb-timeline-add']
-        });
-        child.appendChild(btn);
-
-        btn.onRendered = nativeNode => {
-          nativeNode.addEventListener('click', () => {
-            const newSlot = {
-              type: item.type,
-              fragment: createTimelineItem().fragment
-            };
-            const index = this.slots.indexOf(item.fragment) + 1;
-            this.list.splice(index, 0, newSlot);
-            this.slots.splice(index, 0, newSlot.fragment);
-          })
-        }
-      }
-
-      child.appendChild(slotRendererFn(item.fragment, content));
-      list.appendChild(child);
-    })
+    list.appendChild(...this.slots.map(item => this.slotRender(item, isOutputMode, slotRendererFn)));
 
     return list;
   }

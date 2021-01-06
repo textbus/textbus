@@ -155,52 +155,52 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     this.slots.push(...listConfigs);
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const list = new VElement('tb-todo-list');
-
-    this.slots.forEach(slot => {
-
-      const item = new VElement('div', {
-        classes: ['tb-todo-list-item']
-      });
-      const btn = new VElement('div', {
-        classes: ['tb-todo-list-btn']
-      })
-      const state = new VElement('span', {
-        classes: ['tb-todo-list-state']
-      });
-      if (slot.active) {
-        state.classes.push('tb-todo-list-state-active');
-      }
-      if (slot.disabled) {
-        state.classes.push('tb-todo-list-state-disabled');
-      }
-      btn.appendChild(state);
-      item.appendChild(btn);
-      const content = new VElement('div', {
-        classes: ['tb-todo-list-content']
-      });
-      item.appendChild(slotRendererFn(slot, content));
-
-      list.appendChild(item);
-      if (!isOutputMode) {
-        state.onRendered = element => {
-          element.addEventListener('click', () => {
-            const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
-            const newState = this.stateCollection[i];
-            slot.active = newState.active;
-            slot.disabled = newState.disabled;
-            slot.active ?
-              element.classList.add('tb-todo-list-state-active') :
-              element.classList.remove('tb-todo-list-state-active');
-            slot.disabled ?
-              element.classList.add('tb-todo-list-state-disabled') :
-              element.classList.remove('tb-todo-list-state-disabled');
-          })
-        }
-      }
+  slotRender(slot: TodoListFragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    const item = new VElement('div', {
+      classes: ['tb-todo-list-item']
+    });
+    const btn = new VElement('div', {
+      classes: ['tb-todo-list-btn']
     })
-    return list;
+    const state = new VElement('span', {
+      classes: ['tb-todo-list-state']
+    });
+    if (slot.active) {
+      state.classes.push('tb-todo-list-state-active');
+    }
+    if (slot.disabled) {
+      state.classes.push('tb-todo-list-state-disabled');
+    }
+    btn.appendChild(state);
+    item.appendChild(btn);
+    const content = new VElement('div', {
+      classes: ['tb-todo-list-content']
+    });
+    item.appendChild(slotRendererFn(slot, content));
+
+    if (!isOutputMode) {
+      state.onRendered = element => {
+        element.addEventListener('click', () => {
+          const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
+          const newState = this.stateCollection[i];
+          slot.active = newState.active;
+          slot.disabled = newState.disabled;
+          slot.active ?
+            element.classList.add('tb-todo-list-state-active') :
+            element.classList.remove('tb-todo-list-state-active');
+          slot.disabled ?
+            element.classList.add('tb-todo-list-state-disabled') :
+            element.classList.remove('tb-todo-list-state-disabled');
+        })
+      }
+    }
+    return item;
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return new VElement('tb-todo-list', {
+      childNodes: this.slots.map(slot => this.slotRender(slot, isOutputMode, slotRendererFn))
+    });
   }
 
   clone(): TodoListComponent {
