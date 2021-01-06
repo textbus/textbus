@@ -444,7 +444,7 @@ export class Fragment extends Marker {
     coverChild: true
   }) {
     this._apply(token, params, options);
-    if (params.startIndex === 0 && params.endIndex === this.contentLength) {
+    if (token instanceof BlockFormatter || params.startIndex === 0 && params.endIndex === this.contentLength) {
       this.parentComponent?.markAsDirtied();
     }
     this.markAsDirtied();
