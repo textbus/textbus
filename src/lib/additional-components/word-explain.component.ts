@@ -51,6 +51,7 @@ class WordExplainComponentLoader implements ComponentLoader {
     };
   }
 }
+
 @Component({
   loader: new WordExplainComponentLoader(),
   styles: [
@@ -163,6 +164,23 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     });
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    switch (slot) {
+      case this.title:
+        return slotRendererFn(slot, new VElement('h3', {
+          classes: ['tb-word-explain-title']
+        }));
+      case this.subtitle:
+        return slotRendererFn(slot, new VElement('div', {
+          classes: ['tb-word-explain-subtitle']
+        }));
+      case this.detail:
+        return slotRendererFn(slot, new VElement('div', {
+          classes: ['tb-word-explain-detail']
+        }));
+    }
+  }
+
   render(isOutputMode: boolean, slotRenderFn: SlotRendererFn): VElement {
     const wrap = new VElement('tb-word-explain');
     this.wrapper = wrap;
@@ -176,20 +194,10 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     });
     wrap.appendChild(titleGroup);
 
-    const title = new VElement('h3', {
-      classes: ['tb-word-explain-title']
-    });
-    titleGroup.appendChild(slotRenderFn(this.title, title));
+    titleGroup.appendChild(this.slotRender(this.title, isOutputMode, slotRenderFn));
+    titleGroup.appendChild(this.slotRender(this.subtitle, isOutputMode, slotRenderFn));
 
-    const subtitle = new VElement('div', {
-      classes: ['tb-word-explain-subtitle']
-    });
-    titleGroup.appendChild(slotRenderFn(this.subtitle, subtitle));
-
-    const detail = new VElement('div', {
-      classes: ['tb-word-explain-detail']
-    });
-    wrap.appendChild(slotRenderFn(this.detail, detail));
+    wrap.appendChild(this.slotRender(this.detail, isOutputMode, slotRenderFn));
 
     if (!isOutputMode) {
       const close = new VElement('span', {

@@ -135,6 +135,15 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     }
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    switch (slot) {
+      case this.imgFragment:
+        return slotRendererFn(slot, new VElement('div'));
+      case this.descFragment:
+        return slotRendererFn(slot, new VElement('p'));
+    }
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const card = new VElement(this.tagName);
     const imgWrapper = new VElement('div');
@@ -152,7 +161,6 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     });
   }
 }
-
 
 export const imageCardComponentExample: ComponentExample = {
   name: '卡片',

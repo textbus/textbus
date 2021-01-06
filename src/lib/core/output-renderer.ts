@@ -76,14 +76,14 @@ export class OutputRenderer {
     }
     if (component instanceof DivisionAbstractComponent) {
       if (component.slot.outputDirty) {
-        this.reuseSlot(component.slot, this.fragmentAndVDomMapping.get(component.slot));
+        this.replaceSlotView(component, component.slot, this.fragmentAndVDomMapping.get(component.slot));
       } else if (component.slot.outputChanged) {
         this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
       }
     } else if (component instanceof BranchAbstractComponent) {
       component.slots.forEach(fragment => {
         if (fragment.outputDirty) {
-          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.outputChanged) {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
@@ -91,7 +91,7 @@ export class OutputRenderer {
     } else if (component instanceof BackboneAbstractComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.outputDirty) {
-          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.outputChanged) {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
@@ -101,9 +101,22 @@ export class OutputRenderer {
     return this.componentVDomCacheMap.get(component);
   }
 
-  private reuseSlot(slot: Fragment, view: VElement) {
-    view.clearChildNodes();
-    this.rendingFragment(slot, view);
+  private replaceSlotView(
+    component: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent,
+    slot: Fragment,
+    oldView: VElement) {
+    let newView: VElement;
+    if (component instanceof DivisionAbstractComponent) {
+      newView = component.slotRender(true, (slot, host) => {
+        return this.rendingFragment(slot, host);
+      })
+    } else {
+      newView = component.slotRender(slot, true, (slot, host) => {
+        return this.rendingFragment(slot, host);
+      })
+    }
+
+    oldView.parentNode.replaceChild(newView, oldView);
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {

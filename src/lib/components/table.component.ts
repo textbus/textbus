@@ -205,6 +205,17 @@ export class TableComponent extends BackboneAbstractComponent {
     })
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    this.deleteMarkFragments = [];
+    for (const row of this.config.bodies) {
+      for (const col of row) {
+        if (slot === col.fragment) {
+          return slotRendererFn(col.fragment, TableComponent.renderingCell(col));
+        }
+      }
+    }
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
@@ -219,17 +230,7 @@ export class TableComponent extends BackboneAbstractComponent {
         const tr = new VElement('tr');
         body.appendChild(tr);
         for (const col of row) {
-          const td = new VElement('td');
-          if (col.colspan > 1) {
-            td.attrs.set('colspan', col.colspan);
-          }
-          if (col.rowspan > 1) {
-            td.attrs.set('rowspan', col.rowspan);
-          }
-          if (col.fragment.contentLength === 0) {
-            col.fragment.append(new BrComponent());
-          }
-          tr.appendChild(slotRendererFn(col.fragment, td));
+          tr.appendChild(slotRendererFn(col.fragment, TableComponent.renderingCell(col)));
         }
       }
     }
@@ -402,5 +403,19 @@ export class TableComponent extends BackboneAbstractComponent {
       columnIndex++;
     } while (stop);
     return rows;
+  }
+
+  private static renderingCell(col: TableCell) {
+    const td = new VElement('td');
+    if (col.colspan > 1) {
+      td.attrs.set('colspan', col.colspan);
+    }
+    if (col.rowspan > 1) {
+      td.attrs.set('rowspan', col.rowspan);
+    }
+    if (col.fragment.contentLength === 0) {
+      col.fragment.append(new BrComponent());
+    }
+    return td;
   }
 }

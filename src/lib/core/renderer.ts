@@ -342,14 +342,14 @@ export class Renderer {
     }
     if (component instanceof DivisionAbstractComponent) {
       if (component.slot.dirty) {
-        this.reuseSlot(component.slot, this.fragmentAndVDomMapping.get(component.slot));
+        this.replaceSlotView(component, component.slot, this.fragmentAndVDomMapping.get(component.slot));
       } else if (component.slot.changed) {
         this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
       }
     } else if (component instanceof BranchAbstractComponent) {
       component.slots.forEach(fragment => {
         if (fragment.dirty) {
-          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.changed) {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
@@ -357,7 +357,7 @@ export class Renderer {
     } else if (component instanceof BackboneAbstractComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.dirty) {
-          this.reuseSlot(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
         } else if (fragment.changed) {
           this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
         }
@@ -367,14 +367,31 @@ export class Renderer {
     return this.componentVDomCacheMap.get(component);
   }
 
-  private reuseSlot(slot: Fragment, view: VElement) {
-    const oldView = new VElement(view.tagName);
-    oldView.appendChild(...view.childNodes);
-
-    view.clearChildNodes();
-    const vDom = this.rendingFragment(slot, view);
-
-    this.diffAndUpdate(vDom, oldView, this.getNativeNodeByVDom(view) as HTMLElement);
+  private replaceSlotView(
+    component: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent,
+    slot: Fragment,
+    oldView: VElement) {
+    let newView: VElement;
+    if (component instanceof DivisionAbstractComponent) {
+      newView = component.slotRender(false, (slot, host) => {
+        const view = this.rendingFragment(slot, host, true);
+        view.styles.set('userSelect', 'text');
+        return view;
+      })
+    } else {
+      newView = component.slotRender(slot, false, (slot, host) => {
+        const view = this.rendingFragment(slot, host, true);
+        view.styles.set('userSelect', 'text');
+        return view;
+      })
+    }
+    oldView.parentNode.replaceChild(newView, oldView);
+    const oldNativeNode = this.getNativeNodeByVDom(oldView) as HTMLElement;
+    const newNativeNode = this.diffAndUpdate(newView, oldView);
+    this.NVMappingTable.set(newNativeNode, newView)
+    if (oldNativeNode !== newNativeNode) {
+      oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
+    }
   }
 
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {

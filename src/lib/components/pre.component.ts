@@ -288,6 +288,12 @@ export class PreComponent extends BackboneAbstractComponent {
     this.reformat();
   }
 
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return slotRendererFn(slot, new VElement('div', {
+      classes: ['tb-code-line']
+    }));
+  }
+
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
     const block = new VElement('pre', {
       childNodes: [
@@ -297,11 +303,7 @@ export class PreComponent extends BackboneAbstractComponent {
         new VElement('div', {
           classes: ['tb-code-content'],
           childNodes: this.map(slot => {
-            const line = new VElement('div', {
-              classes: ['tb-code-line']
-            });
-            slotRendererFn(slot, line);
-            return line;
+            return this.slotRender(slot, isOutputMode, slotRendererFn);
           })
         })
       ]

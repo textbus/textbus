@@ -283,7 +283,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
     return this.slots.map(callbackFn, thisArg);
   }
 
-  // abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 
   private setup(fragments: T[]) {
     fragments.forEach(f => {
