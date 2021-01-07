@@ -73,12 +73,6 @@ export class Toolbar {
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog) {
     this.config = options.toolbar;
 
-    this.subs.push(this.editorController.onStateChange.pipe(map(s => {
-      return s.readonly;
-    }), distinctUntilChanged()).subscribe(b => {
-      this.disabled = b;
-    }))
-
     this.onAction = this.actionEvent.asObservable();
 
     this.elementRef = createElement('div', {
@@ -136,6 +130,10 @@ export class Toolbar {
         this.currentAdditionalWorktableViewer.destroy();
         this.additionalWorktableContent.innerHTML = '';
         this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
+      }), this.editorController.onStateChange.pipe(map(s => {
+        return s.readonly;
+      }), distinctUntilChanged()).subscribe(b => {
+        this.disabled = b;
       })
     )
   }

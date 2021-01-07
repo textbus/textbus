@@ -1,5 +1,5 @@
 import { fromEvent, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { getAnnotations, Inject, Injectable } from '@tanbo/di';
 
 import {
@@ -14,6 +14,7 @@ import {
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
 import { HistoryManager } from '../history-manager';
+import { EditorController } from '../editor-controller';
 
 /**
  * 快捷键配置项
@@ -62,6 +63,7 @@ export class Input {
 
   set readonly(b: boolean) {
     this._readonly = b;
+    this.hide();
     this.input.disabled = b;
   }
 
@@ -100,6 +102,7 @@ export class Input {
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
               @Inject(EDITOR_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
+              private editorController: EditorController,
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
@@ -121,6 +124,9 @@ export class Input {
     this.bindDefaultKeymap();
     this.subs.push(history.onUsed.subscribe(() => {
       this.dispatchInputReadyEvent();
+    }))
+    this.subs.push(editorController.onStateChange.pipe(map(i => i.readonly)).subscribe(b => {
+      this.readonly = b;
     }))
   }
 

@@ -132,7 +132,7 @@ export class Editor<T = any> {
     }
 
     this.stateController = new EditorController({
-      readonly: false,
+      readonly: true,
       expandComponentLibrary: options.expandComponentLibrary,
       sourceCodeMode: false,
       deviceType: defaultDeviceType,

@@ -63,6 +63,13 @@ export class Workbench {
     this.editableArea.appendChild(loading);
 
     this.subs.push(
+      this.editorController.onStateChange.pipe(map(s => s.readonly)).subscribe(b => {
+        if (b) {
+          this.tablet.classList.add('textbus-readonly');
+        } else {
+          this.tablet.classList.remove('textbus-readonly')
+        }
+      }),
       this.editorController.onStateChange.pipe(map(s => {
         return s.deviceType;
       }), distinctUntilChanged()).subscribe(t => {

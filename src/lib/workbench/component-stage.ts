@@ -62,7 +62,7 @@ export class ComponentStage {
   }
 
   private insertComponent(component: AbstractComponent) {
-    if (!this.selection.rangeCount) {
+    if (this.editorController.readonly || !this.selection.rangeCount) {
       return;
     }
     const firstRange = this.selection.firstRange;

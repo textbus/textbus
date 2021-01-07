@@ -218,6 +218,7 @@
   line-height: 30px;
   margin-top: 1px;
 }
+
 .textbus-tablet-wrapper {
   padding: 8px 0;
   background-color: #fff;
@@ -228,14 +229,28 @@
   transform: scale(0.95);
   transition: all 1.2s cubic-bezier(.36, .66, .04, 1);
   box-sizing: border-box;
+
   &.textbus-tablet-ready {
     opacity: 1;
     transform: scale(1);
   }
 }
+
 .textbus-tablet {
   position: relative;
   min-height: 100%;
+
+  &.textbus-readonly {
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: 10;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+  }
 }
 
 .textbus-frame {
