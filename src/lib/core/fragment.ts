@@ -99,6 +99,8 @@ export class Fragment extends Marker {
   }
 
   contact(fragment: Fragment) {
+    const index = this.contentLength;
+
     fragment.sliceContents(0).forEach(c => {
       this.contents.append(c);
       if (c instanceof AbstractComponent) {
@@ -108,7 +110,6 @@ export class Fragment extends Marker {
         }))
       }
     });
-    const index = this.contentLength;
     fragment.getFormatKeys().filter(token => !(token instanceof BlockFormatter)).forEach(token => {
       const formats = fragment.getFormatRanges(token) || [];
       formats.forEach(f => {
@@ -444,9 +445,6 @@ export class Fragment extends Marker {
     coverChild: true
   }) {
     this._apply(token, params, options);
-    // if (token instanceof BlockFormatter || params.startIndex === 0 && params.endIndex === this.contentLength) {
-    //   this.parentComponent?.markAsDirtied();
-    // }
     this.markAsDirtied();
   }
 
