@@ -136,20 +136,22 @@ export class ImageCardComponent extends BackboneAbstractComponent {
   }
 
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    let imgContainer: VElement;
+    let descContainer: VElement;
     switch (slot) {
       case this.imgFragment:
-        return slotRendererFn(slot, new VElement('div'));
+        imgContainer = new VElement('div');
+        return slotRendererFn(slot, imgContainer, imgContainer);
       case this.descFragment:
-        return slotRendererFn(slot, new VElement('p'));
+        descContainer = new VElement('p');
+        return slotRendererFn(slot, descContainer, descContainer);
     }
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const card = new VElement(this.tagName);
-    const imgWrapper = new VElement('div');
-    const desc = new VElement('p');
-    card.appendChild(slotRendererFn(this.imgFragment, imgWrapper));
-    card.appendChild(slotRendererFn(this.descFragment, desc));
+    card.appendChild(this.slotRender(this.imgFragment, isOutputMode, slotRendererFn));
+    card.appendChild(this.slotRender(this.descFragment, isOutputMode, slotRendererFn));
 
     return card;
   }

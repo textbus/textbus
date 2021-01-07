@@ -210,7 +210,8 @@ export class TableComponent extends BackboneAbstractComponent {
     for (const row of this.config.bodies) {
       for (const col of row) {
         if (slot === col.fragment) {
-          return slotRendererFn(col.fragment, TableComponent.renderingCell(col));
+          const td = TableComponent.renderingCell(col);
+          return slotRendererFn(col.fragment, td, td);
         }
       }
     }
@@ -230,7 +231,8 @@ export class TableComponent extends BackboneAbstractComponent {
         const tr = new VElement('tr');
         body.appendChild(tr);
         for (const col of row) {
-          tr.appendChild(slotRendererFn(col.fragment, TableComponent.renderingCell(col)));
+          const td = TableComponent.renderingCell(col);
+          tr.appendChild(slotRendererFn(col.fragment, td, td));
         }
       }
     }

@@ -58,7 +58,7 @@ export class Viewer {
   private minHeight = 400;
   private rootComponent: RootComponent;
   private parser: Parser;
-  private docStyles: string[];
+  private docStyles: string;
   private subs: Subscription[] = [];
   private resizeObserver: any;
   private viewInjector: Injector;
@@ -83,7 +83,7 @@ export class Viewer {
     }).join('')
 
     this.elementRef.setAttribute('scrolling', 'no');
-    this.docStyles = [componentStyles, ...(options.styleSheets || [])];
+    this.docStyles = Viewer.cssMin([componentStyles, ...(options.styleSheets || [])].join(''));
     this.elementRef.src = `javascript:void(
       (function () {
         document.open();
@@ -98,7 +98,7 @@ export class Viewer {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
           const styleEl = this.contentDocument.createElement('style');
-          styleEl.innerHTML = [...this.docStyles, ...(options.editingStyleSheets || [])].join('');
+          styleEl.innerHTML = Viewer.cssMin([...this.docStyles, ...(options.editingStyleSheets || [])].join(''));
           this.contentDocument.head.append(styleEl);
           this.setup();
           this.listen();
@@ -237,7 +237,7 @@ export class Viewer {
       this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
     return {
       content,
-      styleSheets: this.docStyles
+      styleSheets: [this.docStyles]
     }
   }
 
@@ -245,7 +245,7 @@ export class Viewer {
     const json = this.outputRenderer.render(this.rootComponent.slot).toJSON();
     return {
       json,
-      styleSheets: this.docStyles
+      styleSheets: [this.docStyles]
     }
   }
 
@@ -296,5 +296,12 @@ export class Viewer {
 
   private static parserHTML(html: string) {
     return new DOMParser().parseFromString(html, 'text/html').body;
+  }
+
+  private static cssMin(str: string) {
+    return str
+      .replace(/\s*(?=[>{}:;,[])/g,'')
+      .replace(/([>{}:;,])\s*/g, '$1')
+      .replace(/;}/g, '}').replace(/\s+/, ' ').trim();
   }
 }

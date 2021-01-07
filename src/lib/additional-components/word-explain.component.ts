@@ -165,19 +165,23 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   }
 
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    let title: VElement, subtitle: VElement, detail: VElement;
     switch (slot) {
       case this.title:
-        return slotRendererFn(slot, new VElement('h3', {
+        title = new VElement('h3', {
           classes: ['tb-word-explain-title']
-        }));
+        });
+        return slotRendererFn(slot, title, title);
       case this.subtitle:
-        return slotRendererFn(slot, new VElement('div', {
+        subtitle = new VElement('div', {
           classes: ['tb-word-explain-subtitle']
-        }));
+        })
+        return slotRendererFn(slot, subtitle, subtitle);
       case this.detail:
-        return slotRendererFn(slot, new VElement('div', {
+        detail = new VElement('div', {
           classes: ['tb-word-explain-detail']
-        }));
+        });
+        return slotRendererFn(slot, detail, detail);
     }
   }
 

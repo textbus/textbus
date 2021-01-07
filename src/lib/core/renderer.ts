@@ -90,7 +90,9 @@ export class Renderer {
   // 记录虚拟节点的位置
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
   // 记录 fragment 对应的虚拟节点
-  private fragmentAndVDomMapping = new WeakMap<Fragment, VElement>();
+  private fragmentVDomMapping = new WeakMap<Fragment, VElement>();
+  // 记录 fragment 对应的容器节点
+  private fragmentContentContainerMapping = new WeakMap<Fragment, VElement>();
   // 记录已渲染的虚拟节点
   private rendererVNodeMap = new WeakMap<VTextNode | VElement, true>();
   // 记录虚拟节点和真实 DOM 节点的映射关系
@@ -156,7 +158,7 @@ export class Renderer {
    * @param fragment
    */
   getVElementByFragment(fragment: Fragment): VElement {
-    return this.fragmentAndVDomMapping.get(fragment);
+    return this.fragmentContentContainerMapping.get(fragment);
   }
 
   private diffAndUpdate(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
@@ -281,7 +283,7 @@ export class Renderer {
         (slot || host).appendChild(child);
       });
       fragment.rendered();
-      this.fragmentAndVDomMapping.set(fragment, host);
+      this.fragmentContentContainerMapping.set(fragment, host);
       elements.forEach(el => {
         this.vDomPositionMapping.set(el, {
           fragment,
@@ -316,11 +318,12 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      const vElement = component.render(false, (slot, host) => {
+      const vElement = component.render(false, (slot, contentContainer, host) => {
         if (component instanceof LeafAbstractComponent) {
           return null
         }
-        const view = this.rendingFragment(slot, host, true);
+        this.fragmentVDomMapping.set(slot, host);
+        const view = this.rendingFragment(slot, contentContainer, true);
         view.styles.set('userSelect', 'text');
         return view;
       });
@@ -330,7 +333,7 @@ export class Renderer {
       this.componentVDomCacheMap.set(component, vElement);
       component.rendered();
       if (component instanceof DivisionAbstractComponent) {
-        const slotView = this.fragmentAndVDomMapping.get(component.slot);
+        const slotView = this.fragmentContentContainerMapping.get(component.slot);
         if (slotView === vElement) {
           slotView.styles.delete('userSelect');
         }
@@ -341,24 +344,24 @@ export class Renderer {
     }
     if (component instanceof DivisionAbstractComponent) {
       if (component.slot.dirty) {
-        this.replaceSlotView(component, component.slot, this.fragmentAndVDomMapping.get(component.slot));
+        this.replaceSlotView(component, component.slot);
       } else if (component.slot.changed) {
-        this.rendingFragment(component.slot, this.fragmentAndVDomMapping.get(component.slot))
+        this.rendingFragment(component.slot, this.fragmentContentContainerMapping.get(component.slot))
       }
     } else if (component instanceof BranchAbstractComponent) {
       component.slots.forEach(fragment => {
         if (fragment.dirty) {
-          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment);
         } else if (fragment.changed) {
-          this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.rendingFragment(fragment, this.fragmentContentContainerMapping.get(fragment));
         }
       })
     } else if (component instanceof BackboneAbstractComponent) {
       Array.from(component).forEach(fragment => {
         if (fragment.dirty) {
-          this.replaceSlotView(component, fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.replaceSlotView(component, fragment);
         } else if (fragment.changed) {
-          this.rendingFragment(fragment, this.fragmentAndVDomMapping.get(fragment));
+          this.rendingFragment(fragment, this.fragmentContentContainerMapping.get(fragment));
         }
       })
     }
@@ -368,13 +371,14 @@ export class Renderer {
 
   private replaceSlotView(
     component: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent,
-    slot: Fragment,
-    oldView: VElement) {
+    slot: Fragment) {
+    const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
-      newView = component.slotRender(false, (slot, host) => {
-        const view = this.rendingFragment(slot, host, true);
-        if (view === host) {
+      newView = component.slotRender(false, (slot, contentContainer, host) => {
+        this.fragmentVDomMapping.set(slot, host);
+        const view = this.rendingFragment(slot, contentContainer, true);
+        if (view === contentContainer) {
           this.componentVDomCacheMap.set(component, view);
         } else {
           view.styles.set('userSelect', 'text');
@@ -382,8 +386,9 @@ export class Renderer {
         return view;
       })
     } else {
-      newView = component.slotRender(slot, false, (slot, host) => {
-        const view = this.rendingFragment(slot, host, true);
+      newView = component.slotRender(slot, false, (slot, contentContainer, host) => {
+        this.fragmentVDomMapping.set(slot, host);
+        const view = this.rendingFragment(slot, contentContainer, true);
         view.styles.set('userSelect', 'text');
         return view;
       })

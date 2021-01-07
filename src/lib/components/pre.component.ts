@@ -289,9 +289,10 @@ export class PreComponent extends BackboneAbstractComponent {
   }
 
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    return slotRendererFn(slot, new VElement('div', {
+    const line = new VElement('div', {
       classes: ['tb-code-line']
-    }));
+    });
+    return slotRendererFn(slot, line, line);
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {

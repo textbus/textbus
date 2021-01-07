@@ -246,7 +246,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
           } else {
             slot.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
           }
-          this.markAsDirtied();
+          slot.markAsDirtied();
         })
       }
 
@@ -263,7 +263,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
       }
     }
 
-    child.appendChild(slotRendererFn(slot, content));
+    child.appendChild(slotRendererFn(slot, content, child));
     return child;
   }
 

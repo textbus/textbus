@@ -79,7 +79,7 @@ export class JumbotronComponent extends DivisionAbstractComponent {
         minHeight: this.options.minHeight
       }
     });
-    return slotRendererFn(this.slot, vEle);
+    return slotRendererFn(this.slot, vEle, vEle);
   }
 }
 

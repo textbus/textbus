@@ -222,9 +222,9 @@ export class StepComponent extends BranchAbstractComponent {
             icon
           ]
         }),
-        slotRendererFn(slot, content)
       ]
     });
+    item.appendChild(slotRendererFn(slot, content, item))
     if (!isOutputMode) {
       const add = new VElement('span', {
         classes: ['tb-step-item-add']
@@ -244,7 +244,7 @@ export class StepComponent extends BranchAbstractComponent {
           } else {
             this.config.step = index;
           }
-          this.markAsDirtied();
+          slot.markAsDirtied();
         })
       }
       item.appendChild(add);

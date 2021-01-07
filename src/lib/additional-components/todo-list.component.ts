@@ -176,7 +176,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     const content = new VElement('div', {
       classes: ['tb-todo-list-content']
     });
-    item.appendChild(slotRendererFn(slot, content));
+    item.appendChild(slotRendererFn(slot, content, item));
 
     if (!isOutputMode) {
       state.onRendered = element => {

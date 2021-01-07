@@ -39,7 +39,7 @@ export abstract class ComponentLoader {
 
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
-export type SlotRendererFn = (slot: Fragment, host: VElement) => VElement;
+export type SlotRendererFn = (slot: Fragment, contentContainer: VElement, host: VElement) => VElement;
 
 export interface AbstractComponent {
   componentContentChange?(): void;
