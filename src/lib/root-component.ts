@@ -1,6 +1,6 @@
 import { Injectable, Injector } from '@tanbo/di';
 import {
-  AbstractComponent, BranchAbstractComponent, TBClipboard,
+  AbstractComponent, TBClipboard,
   Component,
   DivisionAbstractComponent,
   Fragment, InlineFormatter, LeafAbstractComponent,
@@ -121,47 +121,35 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof BrComponent) {
         contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
       } else {
-        const firstContent = contentsArr.shift();
-        if (firstContent instanceof BranchAbstractComponent) {
-          parentFragment.insertAfter(firstContent, parentComponent);
-        } else if (firstContent instanceof DivisionAbstractComponent) {
-          const length = firstContent.slot.contentLength;
-          const firstContents = firstContent.slot.cut(0);
-          firstContents.sliceContents(0).reverse().forEach(c => fragment.insert(c, firstRange.startIndex));
-          Array.from(firstContents.getFormatKeys()).forEach(token => {
-            if (token instanceof InlineFormatter) {
-              firstContents.getFormatRanges(token).forEach(format => {
-                fragment.apply(token, {
-                  ...format,
-                  startIndex: format.startIndex + firstRange.startIndex,
-                  endIndex: format.endIndex + firstRange.startIndex
-                },)
-              })
-            }
-          })
-          if (contentsArr.length === 0) {
-            firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + length;
+
+        let firstContent = contentsArr[0];
+        const afterContent = fragment.cut(firstRange.startIndex);
+        let offset = 0;
+        while (contentsArr.length) {
+          firstContent = contentsArr[0];
+          if (typeof firstContent === 'string' || firstContent instanceof LeafAbstractComponent) {
+            offset += firstContent.length;
+            fragment.insert(firstContent, firstRange.startIndex + 1);
+            contentsArr.shift();
           } else {
-            const afterContents = fragment.cut(firstRange.startIndex);
-            contentsArr.reverse().forEach(c => parentFragment.insertAfter(c, parentComponent));
-            const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
-            afterComponent.slot.from(new Fragment());
-            afterContents.sliceContents(0).forEach(c => afterComponent.slot.append(c));
-            Array.from(afterContents.getFormatKeys()).forEach(token => {
-              afterContents.getFormatRanges(token).forEach(f => {
-                afterComponent.slot.apply(token, {
-                  ...f,
-                  startIndex: 0,
-                  endIndex: f.endIndex - f.startIndex
-                });
-              })
-            });
-            if (afterComponent.slot.contentLength === 0) {
-              afterComponent.slot.append(new BrComponent());
-            }
-            firstRange.setStart(afterComponent.slot, 0);
-            firstRange.collapse();
+            break;
           }
+        }
+        firstRange.startIndex += offset;
+
+        if (!contentsArr.length) {
+          fragment.contact(afterContent);
+          firstRange.collapse();
+        } else {
+          const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
+          afterComponent.slot.from(afterContent);
+          if (afterComponent.slot.contentLength === 0) {
+            afterComponent.slot.append(new BrComponent());
+          }
+          firstRange.setStart(afterComponent.slot, 0);
+          firstRange.collapse();
+          parentFragment.insertAfter(afterComponent, parentComponent);
+          contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
         }
       }
     }
