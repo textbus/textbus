@@ -176,6 +176,12 @@ export class Viewer {
         })
         if (this.editorController.sourceCodeMode) {
           Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
+          if (this.sourceCodeComponent.slotCount === 0) {
+            this.sourceCodeComponent.setSourceCode('\n');
+            const position = selection.firstRange.findFirstPosition(this.sourceCodeComponent.getSlotAtIndex(0));
+            selection.firstRange.setStart(position.fragment, position.index);
+            selection.firstRange.setEnd(position.fragment, position.index);
+          }
         } else {
           const isEmpty = rootComponent.slot.contentLength === 0;
           Viewer.guardLastIsParagraph(rootComponent.slot);
@@ -194,7 +200,7 @@ export class Viewer {
       }),
 
       this.editorController.onStateChange.pipe(map(b => b.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
-        selection.removeAllRanges();
+        selection.removeAllRanges(true);
         this.sourceCodeMode = b;
         if (b) {
           const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
@@ -300,7 +306,7 @@ export class Viewer {
 
   private static cssMin(str: string) {
     return str
-      .replace(/\s*(?=[>{}:;,[])/g,'')
+      .replace(/\s*(?=[>{}:;,[])/g, '')
       .replace(/([>{}:;,])\s*/g, '$1')
       .replace(/;}/g, '}').replace(/\s+/, ' ').trim();
   }
