@@ -70,7 +70,7 @@ export class Viewer {
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
-    this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;height:100%;background:none}`;
+    this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
     const componentAnnotations = this.options.components.map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
