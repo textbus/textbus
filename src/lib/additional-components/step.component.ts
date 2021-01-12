@@ -54,7 +54,7 @@ class StepComponentLoader implements ComponentLoader {
   read(element: HTMLElement): ViewData {
     const listConfig = Array.from(element.children).map(child => {
       return {
-        from: child.querySelector('.tb-step-content') as HTMLElement,
+        from: child.querySelector('.tb-step-item-content') as HTMLElement,
         toSlot: new Fragment()
       }
     })
