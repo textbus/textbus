@@ -41,11 +41,6 @@ function createItem(): Fragment {
   return fragment;
 }
 
-export interface StepsConfig {
-  step: number;
-  slots: Fragment[];
-}
-
 class StepComponentLoader implements ComponentLoader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-step';
@@ -58,10 +53,7 @@ class StepComponentLoader implements ComponentLoader {
         toSlot: new Fragment()
       }
     })
-    const component = new StepComponent({
-      step: +element.getAttribute('step') || 0,
-      slots: listConfig.map(i => i.toSlot)
-    });
+    const component = new StepComponent(listConfig.map(i => i.toSlot), +element.getAttribute('step') || 0);
     return {
       component: component,
       slotsMap: listConfig
@@ -182,17 +174,14 @@ tb-step {
   ]
 })
 export class StepComponent extends BranchAbstractComponent {
-  constructor(private config: StepsConfig) {
+  constructor(slots: Fragment[], private step: number) {
     super('tb-steps');
 
-    this.slots.push(...config.slots);
+    this.slots.push(...slots);
   }
 
   clone(): StepComponent {
-    return new StepComponent({
-      step: this.config.step,
-      slots: [...this.slots.map(i => i.clone())]
-    });
+    return new StepComponent(this.slots.map(i => i.clone()), this.step);
   }
 
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
@@ -201,9 +190,9 @@ export class StepComponent extends BranchAbstractComponent {
       classes: ['tb-step-item-content']
     });
     let state = 'tb-waiting';
-    if (index < this.config.step) {
+    if (index < this.step) {
       state = 'tb-complete';
-    } else if (index === this.config.step) {
+    } else if (index === this.step) {
       state = 'tb-current'
     }
     const icon = new VElement('div', {
@@ -236,15 +225,15 @@ export class StepComponent extends BranchAbstractComponent {
       }
       icon.onRendered = nativeNode => {
         nativeNode.addEventListener('click', () => {
-          const currentStep = this.config.step;
+          const currentStep = this.step;
           if (index === currentStep) {
-            this.config.step = index + 1;
+            this.step = index + 1;
           } else if (index + 1 === currentStep) {
-            this.config.step = index - 1;
+            this.step = index - 1;
           } else {
-            this.config.step = index;
+            this.step = index;
           }
-          slot.markAsDirtied();
+          this.markAsDirtied();
         })
       }
       item.appendChild(add);
@@ -254,6 +243,9 @@ export class StepComponent extends BranchAbstractComponent {
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     return new VElement('tb-step', {
+      attrs: {
+        step: this.step
+      },
       childNodes: this.slots.map(slot => this.slotRender(slot, isOutputMode, slotRendererFn))
     });
   }
@@ -263,9 +255,6 @@ export const stepsComponentExample: ComponentExample = {
   name: '步骤条',
   example: `<img alt="示例" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#fff" height="100%" width="100%"/></g><defs><g id="item"><circle r="2" cx="10" cy="12"></circle><line x1="12" y1="12" x2="38" y2="12" stroke-width="0.5"></line><text font-family="Helvetica, Arial, sans-serif" font-size="5" x="8" y="22" stroke-width="0" stroke="#000" fill="#000000">标题</text><text font-family="Helvetica, Arial, sans-serif" font-size="4.5" x="8" y="27" stroke-width="0" stroke="#000" fill="#000">描述信息...</text></g></defs><use xlink:href="#item" transform="translate(0, 20)" fill="#15bd9a" stroke="#15bd9a"></use><use xlink:href="#item" transform="translate(30, 20)" fill="#1296db" stroke="#1296db"></use><use xlink:href="#item" transform="translate(60, 20)" fill="#aaa" stroke="#aaa"></use></svg>')}">`,
   componentFactory() {
-    return new StepComponent({
-      step: 0,
-      slots: [createItem()]
-    });
+    return new StepComponent([createItem()], 0);
   }
 };
