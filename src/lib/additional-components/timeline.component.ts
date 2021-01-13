@@ -3,7 +3,7 @@ import {
   ComponentLoader,
   FormatAbstractData,
   FormatEffect,
-  Fragment,
+  Fragment, SingleSlotRenderFn,
   SlotMap, SlotRendererFn,
   VElement,
   ViewData
@@ -112,6 +112,7 @@ class TimelineComponentLoader implements ComponentLoader {
     };
   }
 }
+
 @Component({
   loader: new TimelineComponentLoader(),
   styles: [
@@ -213,7 +214,26 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
     return new TimelineComponent(this.slots.map(f => f.clone()));
   }
 
-  slotRender(slot: TimelineFragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: TimelineFragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
+    const {host, container} = this.renderItem(slot, isOutputMode);
+    slotRendererFn(slot, container);
+    return host
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    const list = new VElement('tb-timeline');
+    this.vEle = list;
+
+    list.appendChild(...this.slots.map(item => {
+      const {host, container} = this.renderItem(item, isOutputMode);
+      slotRendererFn(item, container, host);
+      return host;
+    }));
+
+    return list;
+  }
+
+  private renderItem(slot: TimelineFragment, isOutput: boolean) {
     const child = new VElement('div', {
       classes: ['tb-timeline-item']
     });
@@ -235,7 +255,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
 
     child.appendChild(line);
     child.appendChild(icon);
-    if (!isOutputMode) {
+    if (!isOutput) {
       icon.attrs.set('title', '点击切换颜色');
 
       icon.onRendered = nativeNode => {
@@ -263,17 +283,11 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
       }
     }
 
-    child.appendChild(slotRendererFn(slot, content, child));
-    return child;
-  }
-
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const list = new VElement('tb-timeline');
-    this.vEle = list;
-
-    list.appendChild(...this.slots.map(item => this.slotRender(item, isOutputMode, slotRendererFn)));
-
-    return list;
+    child.appendChild(content);
+    return {
+      host: child,
+      container: content
+    };
   }
 }
 

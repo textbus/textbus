@@ -375,23 +375,24 @@ export class Renderer {
     const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
-      newView = component.slotRender(false, (slot, contentContainer, host) => {
-        this.fragmentVDomMapping.set(slot, host);
-        const view = this.rendingFragment(slot, contentContainer, true);
-        if (view === contentContainer) {
-          this.componentVDomCacheMap.set(component, view);
-        } else {
-          view.styles.set('userSelect', 'text');
-        }
-        return view;
+      let container: VElement = null;
+      newView = component.slotRender(false, (slot, contentContainer) => {
+        container = contentContainer;
+        return this.rendingFragment(slot, contentContainer, true);
       })
+      if (newView === container) {
+        this.componentVDomCacheMap.set(component, container);
+      } else {
+        container.styles.set('userSelect', 'text');
+      }
+      this.fragmentVDomMapping.set(slot, newView);
     } else {
-      newView = component.slotRender(slot, false, (slot, contentContainer, host) => {
-        this.fragmentVDomMapping.set(slot, host);
+      newView = component.slotRender(slot, false, (slot, contentContainer) => {
         const view = this.rendingFragment(slot, contentContainer, true);
         view.styles.set('userSelect', 'text');
         return view;
       })
+      this.fragmentVDomMapping.set(slot, newView);
     }
     const oldNativeNode = this.getNativeNodeByVDom(oldView) as HTMLElement;
     const newNativeNode = this.diffAndUpdate(newView, oldView);

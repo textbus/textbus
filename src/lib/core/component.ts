@@ -40,6 +40,7 @@ export abstract class ComponentLoader {
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
 export type SlotRendererFn = (slot: Fragment, contentContainer: VElement, host: VElement) => VElement;
+export type SingleSlotRenderFn = (slot: Fragment, contentContainer: VElement) => VElement;
 
 export interface AbstractComponent {
   componentContentChange?(): void;
@@ -124,7 +125,7 @@ export abstract class DivisionAbstractComponent extends AbstractComponent {
     })
   }
 
-  abstract slotRender(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract slotRender(isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement;
 }
 
 /**
@@ -177,7 +178,7 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
     }
   })
 
-  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement;
 }
 
 /**
@@ -283,7 +284,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
     return this.slots.map(callbackFn, thisArg);
   }
 
-  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement;
 
   private setup(fragments: T[]) {
     fragments.forEach(f => {

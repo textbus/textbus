@@ -4,7 +4,7 @@ import {
   ComponentLoader,
   ViewData,
   VElement,
-  DivisionAbstractComponent, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection
+  DivisionAbstractComponent, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -68,8 +68,8 @@ export class BlockComponent extends DivisionAbstractComponent {
     return component;
   }
 
-  slotRender(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    return this.render(isOutputMode, slotRendererFn);
+  slotRender(isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
+    return slotRendererFn(this.slot, new VElement(this.tagName));
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {

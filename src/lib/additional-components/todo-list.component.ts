@@ -5,7 +5,7 @@ import {
   Fragment,
   ComponentLoader,
   VElement,
-  ViewData, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection,
+  ViewData, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn,
 } from '../core/_api';
 import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
 import { ComponentExample } from '../workbench/component-stage';
@@ -155,7 +155,30 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     this.slots.push(...listConfigs);
   }
 
-  slotRender(slot: TodoListFragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: TodoListFragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
+    const {host, container} = this.renderItem(slot, isOutputMode);
+    slotRendererFn(slot, container);
+    return host
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return new VElement('tb-todo-list', {
+      childNodes: this.slots.map(slot => {
+        const {host, container} = this.renderItem(slot, isOutputMode);
+        slotRendererFn(slot, container, host);
+        return host;
+      })
+    });
+  }
+
+  clone(): TodoListComponent {
+    const configs = this.slots.map(i => {
+      return i.clone()
+    });
+    return new TodoListComponent(configs as TodoListFragment[]);
+  }
+
+  private renderItem(slot: TodoListFragment, isOutputMode: boolean) {
     const item = new VElement('div', {
       classes: ['tb-todo-list-item']
     });
@@ -176,7 +199,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     const content = new VElement('div', {
       classes: ['tb-todo-list-content']
     });
-    item.appendChild(slotRendererFn(slot, content, item));
+    item.appendChild(content);
 
     if (!isOutputMode) {
       state.onRendered = element => {
@@ -194,22 +217,11 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
         })
       }
     }
-    return item;
+    return {
+      host: item,
+      container: content
+    };
   }
-
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    return new VElement('tb-todo-list', {
-      childNodes: this.slots.map(slot => this.slotRender(slot, isOutputMode, slotRendererFn))
-    });
-  }
-
-  clone(): TodoListComponent {
-    const configs = this.slots.map(i => {
-      return i.clone()
-    });
-    return new TodoListComponent(configs as TodoListFragment[]);
-  }
-
   private getStateIndex(active: boolean, disabled: boolean) {
     for (let i = 0; i < 4; i++) {
       const item = this.stateCollection[i];

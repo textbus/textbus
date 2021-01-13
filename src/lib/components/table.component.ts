@@ -6,7 +6,7 @@ import {
   ComponentLoader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn, Component, Interceptor, TBSelection, TBEvent
+  BackboneAbstractComponent, SlotRendererFn, Component, Interceptor, TBSelection, TBEvent, SingleSlotRenderFn
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -205,13 +205,13 @@ export class TableComponent extends BackboneAbstractComponent {
     })
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     this.deleteMarkFragments = [];
     for (const row of this.config.bodies) {
       for (const col of row) {
         if (slot === col.fragment) {
           const td = TableComponent.renderingCell(col);
-          return slotRendererFn(col.fragment, td, td);
+          return slotRendererFn(col.fragment, td);
         }
       }
     }

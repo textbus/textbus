@@ -3,7 +3,7 @@ import {
   ComponentLoader,
   FormatAbstractData,
   FormatEffect,
-  Fragment, SlotRendererFn,
+  Fragment, SingleSlotRenderFn, SlotRendererFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -164,24 +164,20 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     });
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    let title: VElement, subtitle: VElement, detail: VElement;
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     switch (slot) {
       case this.title:
-        title = new VElement('h3', {
+        return slotRendererFn(slot, new VElement('h3', {
           classes: ['tb-word-explain-title']
-        });
-        return slotRendererFn(slot, title, title);
+        }));
       case this.subtitle:
-        subtitle = new VElement('div', {
+        return slotRendererFn(slot, new VElement('div', {
           classes: ['tb-word-explain-subtitle']
-        })
-        return slotRendererFn(slot, subtitle, subtitle);
+        }));
       case this.detail:
-        detail = new VElement('div', {
+        return slotRendererFn(slot, new VElement('div', {
           classes: ['tb-word-explain-detail']
-        });
-        return slotRendererFn(slot, detail, detail);
+        }));
     }
   }
 
@@ -198,10 +194,18 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     });
     wrap.appendChild(titleGroup);
 
-    titleGroup.appendChild(this.slotRender(this.title, isOutputMode, slotRenderFn));
-    titleGroup.appendChild(this.slotRender(this.subtitle, isOutputMode, slotRenderFn));
+    const title = this.slotRender(this.title, isOutputMode, (slot, contentContainer) => contentContainer)
+    const subtitle = this.slotRender(this.subtitle, isOutputMode, (slot, contentContainer) => contentContainer);
+    const detail = this.slotRender(this.detail, isOutputMode, (slot, contentContainer) => contentContainer);
 
-    wrap.appendChild(this.slotRender(this.detail, isOutputMode, slotRenderFn));
+    slotRenderFn(this.title, title, title);
+    slotRenderFn(this.subtitle, subtitle, subtitle);
+    slotRenderFn(this.detail, detail, detail);
+
+    titleGroup.appendChild(title);
+    titleGroup.appendChild(subtitle);
+
+    wrap.appendChild(detail);
 
     if (!isOutputMode) {
       const close = new VElement('span', {

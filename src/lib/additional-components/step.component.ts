@@ -3,7 +3,7 @@ import {
   ComponentLoader,
   FormatAbstractData,
   FormatEffect,
-  Fragment, SlotRendererFn,
+  Fragment, SingleSlotRenderFn, SlotRendererFn,
   VElement,
   ViewData,
   VTextNode
@@ -60,6 +60,7 @@ class StepComponentLoader implements ComponentLoader {
     };
   }
 }
+
 @Component({
   loader: new StepComponentLoader(),
   styles: [
@@ -184,7 +185,26 @@ export class StepComponent extends BranchAbstractComponent {
     return new StepComponent(this.slots.map(i => i.clone()), this.step);
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
+    const {host, container} = this.renderItem(slot, isOutputMode);
+    slotRendererFn(slot, container);
+    return host
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+    return new VElement('tb-step', {
+      attrs: {
+        step: this.step
+      },
+      childNodes: this.slots.map(slot => {
+        const {host, container} = this.renderItem(slot, isOutputMode);
+        slotRendererFn(slot, container, host);
+        return host
+      })
+    });
+  }
+
+  private renderItem(slot: Fragment, isOutputMode: boolean) {
     const index = this.slots.indexOf(slot);
     const content = new VElement('div', {
       classes: ['tb-step-item-content']
@@ -213,7 +233,7 @@ export class StepComponent extends BranchAbstractComponent {
         }),
       ]
     });
-    item.appendChild(slotRendererFn(slot, content, item))
+    item.appendChild(content)
     if (!isOutputMode) {
       const add = new VElement('span', {
         classes: ['tb-step-item-add']
@@ -238,16 +258,10 @@ export class StepComponent extends BranchAbstractComponent {
       }
       item.appendChild(add);
     }
-    return item;
-  }
-
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    return new VElement('tb-step', {
-      attrs: {
-        step: this.step
-      },
-      childNodes: this.slots.map(slot => this.slotRender(slot, isOutputMode, slotRendererFn))
-    });
+    return {
+      host: item,
+      container: content
+    };
   }
 }
 

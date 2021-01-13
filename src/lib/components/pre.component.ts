@@ -27,7 +27,7 @@ import {
   InlineFormatter, Interceptor,
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
-  ViewData
+  ViewData, SingleSlotRenderFn
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -288,11 +288,11 @@ export class PreComponent extends BackboneAbstractComponent {
     this.reformat();
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     const line = new VElement('div', {
       classes: ['tb-code-line']
     });
-    return slotRendererFn(slot, line, line);
+    return slotRendererFn(slot, line);
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
@@ -303,8 +303,10 @@ export class PreComponent extends BackboneAbstractComponent {
         }),
         new VElement('div', {
           classes: ['tb-code-content'],
-          childNodes: this.map(slot => {
-            return this.slotRender(slot, isOutputMode, slotRendererFn);
+          childNodes: this.map(item => {
+            const host = this.slotRender(item, isOutputMode, (slot, contentContainer) => contentContainer);
+            slotRendererFn(item, host, host);
+            return host;
           })
         })
       ]
