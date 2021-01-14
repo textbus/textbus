@@ -432,6 +432,8 @@ export class TBRange {
         position = this.findLastPosition(content.slots[content.slots.length - 1]);
       } else if (content instanceof BackboneAbstractComponent) {
         position = this.findLastPosition(content.getSlotAtIndex(content.slotCount - 1));
+      } else {
+        position = this.findFirstPosition(position.fragment);
       }
       this.setStart(position.fragment, position.index);
     } else {
