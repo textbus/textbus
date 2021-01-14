@@ -208,12 +208,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
           const newState = this.stateCollection[i];
           slot.active = newState.active;
           slot.disabled = newState.disabled;
-          slot.active ?
-            element.classList.add('tb-todo-list-state-active') :
-            element.classList.remove('tb-todo-list-state-active');
-          slot.disabled ?
-            element.classList.add('tb-todo-list-state-disabled') :
-            element.classList.remove('tb-todo-list-state-disabled');
+          slot.markAsDirtied();
         })
       }
     }
