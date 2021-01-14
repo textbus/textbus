@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'textbus';
   src:
-    url('fonts/textbus.ttf?uve9xy') format('truetype'),
-    url('fonts/textbus.woff?uve9xy') format('woff'),
-    url('fonts/textbus.svg?uve9xy#textbus') format('svg');
+    url('fonts/textbus.ttf?5b3ahl') format('truetype'),
+    url('fonts/textbus.woff?5b3ahl') format('woff'),
+    url('fonts/textbus.svg?5b3ahl#textbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,80 +24,83 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.textbus-icon-insert-paragraph-before:before {
+  content: "\e900";
+}
+.textbus-icon-insert-paragraph-after:before {
+  content: "\e901";
+}
 .textbus-icon-arrow-right:before {
   content: "\e50f";
 }
 .textbus-icon-table-border:before {
-  content: "\e900";
-}
-.textbus-icon-table-remove:before {
-  content: "\e901";
-}
-.textbus-icon-table-add-paragraph:before {
   content: "\e902";
 }
-.textbus-icon-device:before {
+.textbus-icon-table-remove:before {
   content: "\e903";
 }
-.textbus-icon-paint-bucket:before {
+.textbus-icon-device:before {
   content: "\e904";
 }
-.textbus-icon-background-color:before {
+.textbus-icon-paint-bucket:before {
   content: "\e905";
 }
-.textbus-icon-color:before {
+.textbus-icon-background-color:before {
   content: "\e906";
 }
-.textbus-icon-brush:before {
+.textbus-icon-color:before {
   content: "\e907";
 }
-.textbus-icon-table-edit:before {
+.textbus-icon-brush:before {
   content: "\e908";
 }
-.textbus-icon-table-split-columns:before {
+.textbus-icon-table-edit:before {
   content: "\e909";
 }
-.textbus-icon-table-delete-row-top:before {
+.textbus-icon-table-split-columns:before {
   content: "\e90a";
 }
-.textbus-icon-table-delete-row-bottom:before {
+.textbus-icon-table-delete-row-top:before {
   content: "\e90b";
 }
-.textbus-icon-table-delete-column-right:before {
+.textbus-icon-table-delete-row-bottom:before {
   content: "\e90c";
 }
-.textbus-icon-table-delete-column-left:before {
+.textbus-icon-table-delete-column-right:before {
   content: "\e90d";
 }
-.textbus-icon-table-add-row-top:before {
+.textbus-icon-table-delete-column-left:before {
   content: "\e90e";
 }
-.textbus-icon-table-add-row-bottom:before {
+.textbus-icon-table-add-row-top:before {
   content: "\e90f";
 }
-.textbus-icon-table-add-column-right:before {
+.textbus-icon-table-add-row-bottom:before {
   content: "\e910";
 }
-.textbus-icon-table-add-column-left:before {
+.textbus-icon-table-add-column-right:before {
   content: "\e911";
 }
-.textbus-icon-image:before {
+.textbus-icon-table-add-column-left:before {
   content: "\e912";
 }
-.textbus-icon-text-indent:before {
+.textbus-icon-image:before {
   content: "\e913";
 }
-.textbus-icon-music:before {
+.textbus-icon-text-indent:before {
   content: "\e914";
 }
-.textbus-icon-video:before {
+.textbus-icon-music:before {
   content: "\e915";
 }
-.textbus-icon-unlink:before {
+.textbus-icon-video:before {
   content: "\e916";
 }
-.textbus-icon-quill:before {
+.textbus-icon-unlink:before {
   content: "\e917";
+}
+.textbus-icon-quill:before {
+  content: "\e918";
 }
 .textbus-icon-upload:before {
   content: "\e961";
@@ -137,6 +140,9 @@
 }
 .textbus-icon-emoji:before {
   content: "\e9e2";
+}
+.textbus-icon-plus:before {
+  content: "\ea0a";
 }
 .textbus-icon-command:before {
   content: "\ea4e";
@@ -206,7 +212,4 @@
 }
 .textbus-icon-terminal:before {
   content: "\ea81";
-}
-.textbus-icon-plus:before {
-  content: "\ea0a";
 }

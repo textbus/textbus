@@ -1,7 +1,6 @@
 import { Toolkit, GroupConfig, MenuType } from '../toolkit/_api';
 import { tableAddToolConfig } from './table-add.tool';
 import { tableEditToolConfig } from './table-edit.tool';
-import { tableAddParagraphToolConfig } from './table-add-paragraph.tool';
 import { tableRemoveToolConfig } from './table-remove.tool';
 import { tdBorderColorToolConfig } from './td-border-color.tool';
 import { TableMatcher } from '../matcher/table.matcher';
@@ -23,10 +22,6 @@ export const tableToolConfig: GroupConfig = {
     type: MenuType.Dropdown,
     ...tdBorderColorToolConfig,
     label: '设置单元格边框颜色'
-  }, {
-    type: MenuType.Action,
-    ...tableAddParagraphToolConfig,
-    label: '在表格后添加段落'
   }, {
     type: MenuType.Action,
     ...tableRemoveToolConfig,
