@@ -245,6 +245,7 @@
   border-bottom: 1px solid $color-gray-light;
   height: 23px;
   padding: 11px 10px 0;
+  box-sizing: content-box;
 
   &-btn {
     border: 1px solid $color-gray;
