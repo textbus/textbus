@@ -120,7 +120,9 @@ export class ProgressComponent extends LeafAbstractComponent {
   }
 
   clone(): ProgressComponent {
-    return undefined;
+    return new ProgressComponent({
+      ...this.config
+    });
   }
 
   render(): VElement {

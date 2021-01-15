@@ -89,7 +89,12 @@ export class TBSelection {
       this.isChanged = true;
       this._ranges = [];
       for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
-        this._ranges.push(new TBRange(this.nativeSelection.getRangeAt(i).cloneRange(), this.renderer));
+        const nativeRange = this.nativeSelection.getRangeAt(i);
+        if (!this.renderer.getPositionByNode(nativeRange.startContainer) ||
+          !this.renderer.getPositionByNode(nativeRange.endContainer)) {
+          continue;
+        }
+        this._ranges.push(new TBRange(nativeRange.cloneRange(), this.renderer));
       }
     })).pipe(tap(() => {
       pipes.forEach(plugin => {

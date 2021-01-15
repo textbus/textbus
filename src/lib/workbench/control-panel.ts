@@ -36,7 +36,6 @@ export class ControlPanel {
       this.elementRef.classList.remove('textbus-control-panel-show')
       return
     }
-    views = [...views, ...views]
     this.elementRef.classList.add('textbus-control-panel-show')
     const btns: HTMLElement[] = views.map(view => {
       const btn = createElement('button', {

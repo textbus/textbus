@@ -1,6 +1,8 @@
+import { Injector, Type } from '@tanbo/di';
+
 import {
   Component,
-  ComponentLoader,
+  ComponentLoader, ComponentPreset, ComponentPresetPanelView,
   DivisionAbstractComponent,
   SlotRendererFn,
   VElement,
@@ -17,6 +19,55 @@ export interface JumbotronOptions {
   backgroundPosition: string;
 }
 
+class JumbotronComponentPreset implements ComponentPreset<JumbotronComponent> {
+  private uploader: FileUploader;
+
+  setup(injector: Injector) {
+    this.uploader = injector.get(FileUploader as Type<FileUploader>);
+  }
+
+  receive(instance: JumbotronComponent): ComponentPresetPanelView {
+    const form = new Form({
+      mini: true,
+      items: [
+        new FormTextField({
+          name: 'minHeight',
+          value: instance.options.minHeight,
+          placeholder: '请输入巨幕最小高度',
+          label: '巨幕最小高度'
+        }),
+        new FormTextField({
+          label: '背景图片地址',
+          name: 'backgroundImage',
+          placeholder: '请输入背景图片地址',
+          canUpload: true,
+          uploadType: 'image',
+          uploadBtnText: '上传新图片',
+          value: instance.options.backgroundImage,
+          validateFn(value: string): string | null {
+            if (!value) {
+              return '必填项不能为空';
+            }
+            return null;
+          }
+        })
+      ]
+    })
+
+    form.setFileUploader(this.uploader);
+
+    form.onComplete.subscribe(map => {
+      instance.options.minHeight = map.get('minHeight');
+      instance.options.backgroundImage = map.get('backgroundImage');
+      instance.markAsDirtied();
+    });
+    return {
+      title: '巨幕设置',
+      view: form.elementRef
+    }
+  }
+}
+
 class JumbotronComponentLoader implements ComponentLoader {
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-jumbotron';
@@ -25,7 +76,7 @@ class JumbotronComponentLoader implements ComponentLoader {
   read(element: HTMLElement): ViewData {
     const style = element.style;
     const component = new JumbotronComponent({
-      backgroundImage: style.backgroundImage,
+      backgroundImage: (style.backgroundImage || '').replace(/^url\(['"]?|['"]?\)$/g, ''),
       backgroundSize: style.backgroundSize,
       backgroundPosition: style.backgroundPosition,
       minHeight: style.minHeight
@@ -39,8 +90,10 @@ class JumbotronComponentLoader implements ComponentLoader {
     };
   }
 }
+
 @Component({
   loader: new JumbotronComponentLoader(),
+  preset: new JumbotronComponentPreset(),
   styles: [
     `
 tb-jumbotron {
@@ -54,7 +107,7 @@ tb-jumbotron {
   ]
 })
 export class JumbotronComponent extends DivisionAbstractComponent {
-  constructor(private options: JumbotronOptions) {
+  constructor(public options: JumbotronOptions) {
     super('tb-jumbotron');
   }
 
@@ -73,7 +126,7 @@ export class JumbotronComponent extends DivisionAbstractComponent {
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     const vEle = new VElement(this.tagName, {
       styles: {
-        backgroundImage: this.options.backgroundImage,
+        backgroundImage: `url("${this.options.backgroundImage}")`,
         backgroundSize: this.options.backgroundSize || 'cover',
         backgroundPosition: this.options.backgroundPosition || 'center',
         minHeight: this.options.minHeight
@@ -120,7 +173,7 @@ export const jumbotronComponentExample: ComponentExample = {
         const component = new JumbotronComponent({
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
-          backgroundImage: `url(${data.get('backgroundImage')})`,
+          backgroundImage: data.get('backgroundImage'),
           minHeight: data.get('minHeight') + ''
         });
         const h1 = new BlockComponent('h1');

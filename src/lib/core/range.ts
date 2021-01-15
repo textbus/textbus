@@ -1130,24 +1130,24 @@ export class TBRange {
       }
     }
 
-    function findFocusNativeElementNode(renderer: Renderer,
-                                        vElement: VElement,
-                                        offset: number): { node: Node, offset: number } {
+    function findComponentNativeNode(renderer: Renderer,
+                                     vElement: VElement,
+                                     offset: number): { node: Node, offset: number } {
       for (const item of vElement.childNodes) {
         const position = renderer.getPositionByVDom(item);
         if (position.endIndex <= offset) {
           continue
         }
         if (item instanceof VElement) {
-          if (item.childNodes.length) {
-            return findFocusNativeElementNode(renderer, item, offset);
+          if (position.startIndex === offset && position.endIndex === offset + 1) {
+            const node = renderer.getNativeNodeByVDom(item);
+            const parent = node.parentNode;
+            return {
+              node: parent,
+              offset: Array.from(parent.childNodes).indexOf(node as ChildNode)
+            }
           }
-          const node = renderer.getNativeNodeByVDom(item);
-          const parent = node.parentNode;
-          return {
-            node: parent,
-            offset: Array.from(parent.childNodes).indexOf(node as ChildNode)
-          }
+          return findComponentNativeNode(renderer, item, offset);
         }
       }
     }
@@ -1156,7 +1156,11 @@ export class TBRange {
       const prev = fragment.getContentAtIndex(offset - 1);
       return findFocusNativeTextNode(this.renderer, vElement, offset, typeof prev === 'string');
     } else if (current instanceof AbstractComponent) {
-      return findFocusNativeElementNode(this.renderer, vElement, offset);
+      const prev = fragment.getContentAtIndex(offset - 1);
+      if (typeof prev === 'string') {
+        return findFocusNativeTextNode(this.renderer, vElement, offset, true);
+      }
+      return findComponentNativeNode(this.renderer, vElement, offset);
     }
     const container = this.renderer.getNativeNodeByVDom(vElement);
     const lastChild = container.lastChild;

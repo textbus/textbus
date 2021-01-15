@@ -100,6 +100,8 @@ export class Input {
   private cleanOldCursorTimer: any;
   private subs: Subscription[] = [];
 
+  private prevComponent: AbstractComponent = null;
+
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
               @Inject(EDITOR_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
@@ -208,9 +210,6 @@ export class Input {
   }
 
   private updateCursorPosition() {
-    if (!this.selection || this.selection.rangeCount === 0) {
-      return;
-    }
     const startContainer = this.selection.firstRange.nativeRange.startContainer;
 
     const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement;
@@ -309,35 +308,18 @@ export class Input {
 
       this.selection.onChange.subscribe(() => {
         this.updateStateBySelection()
+        this.dispatchComponentPresetEvent();
       })
     );
   }
 
   private initEvent() {
-    let prevComponent: AbstractComponent = null;
     this.subs.push(
       fromEvent(this.input, 'blur').subscribe(() => {
         this.hide();
       }),
       fromEvent(this.input, 'focus').subscribe(() => {
         this.dispatchInputReadyEvent();
-        let component = this.selection.commonAncestorComponent;
-        if (component === prevComponent) {
-          return;
-        }
-        prevComponent = component;
-        const views = [];
-        while (component) {
-          const annotations = getAnnotations(component.constructor);
-          const componentAnnotation = annotations.getClassMetadata(Component);
-          const params = componentAnnotation.params[0] as Component;
-          const v = params.preset?.receive(component);
-          if (v) {
-            views.push(v);
-          }
-          component = component.parentFragment?.parentComponent;
-        }
-        this.controlPanel.showPanels(views);
       }),
       fromEvent(this.input, 'input').subscribe(() => {
         if (!this.selection.collapsed) {
@@ -491,6 +473,29 @@ export class Input {
         this.dispatchInputReadyEvent();
       }
     })
+  }
+
+  private dispatchComponentPresetEvent() {
+    let component = this.selection.commonAncestorComponent;
+    if (!component) {
+      this.controlPanel.showPanels([]);
+    }
+    if (component === this.prevComponent) {
+      return;
+    }
+    this.prevComponent = component;
+    const views = [];
+    while (component) {
+      const annotations = getAnnotations(component.constructor);
+      const componentAnnotation = annotations.getClassMetadata(Component);
+      const params = componentAnnotation.params[0] as Component;
+      const v = params.preset?.receive(component);
+      if (v) {
+        views.push(v);
+      }
+      component = component.parentFragment?.parentComponent;
+    }
+    this.controlPanel.showPanels(views);
   }
 
   private dispatchInputReadyEvent(keepInputContent = false) {
