@@ -23,7 +23,8 @@ import {
   EditingMode,
   FullScreen,
   LibSwitch,
-  StatusBar
+  StatusBar,
+  ControlPanel
 } from './workbench/_api';
 import { ComponentExample, ComponentStage } from './workbench/component-stage';
 import { Workbench } from './workbench/workbench';
@@ -208,6 +209,7 @@ export class Editor<T = any> {
       EditingMode,
       FullScreen,
       LibSwitch,
+      ControlPanel,
       StatusBar,
       Viewer,
       ComponentStage,

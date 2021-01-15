@@ -9,6 +9,7 @@ import { createElement } from '../uikit/uikit';
 import { EditorController } from '../editor-controller';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { Dialog } from './dialog';
+import { ControlPanel } from './control-panel';
 
 @Injectable()
 export class Workbench {
@@ -21,6 +22,7 @@ export class Workbench {
 
   constructor(@Inject(forwardRef(() => Device)) private device: Device,
               @Inject(forwardRef(() => ComponentStage)) private componentStage: ComponentStage,
+              @Inject(forwardRef(() => ControlPanel)) private controlPanel: ControlPanel,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => Dialog)) private dialog: Dialog,
@@ -37,6 +39,7 @@ export class Workbench {
         createElement('div', {
           classes: ['textbus-dashboard'],
           children: [
+            this.componentStage.elementRef,
             this.editableArea = createElement('div', {
               classes: ['textbus-editable-area'],
               children: [
@@ -51,7 +54,7 @@ export class Workbench {
                 })
               ]
             }),
-            this.componentStage.elementRef
+            this.controlPanel.elementRef
           ]
         })
       ]

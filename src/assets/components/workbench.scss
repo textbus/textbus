@@ -160,13 +160,14 @@
   display: none;
   overflow: auto;
   background-color: #fff;
-  border-left: 1px solid $color-light;
+  border-right: 1px solid $color-light;
   height: 100%;
 
   &-list {
     box-sizing: content-box;
     padding: 15px 10px;
     width: 240px;
+    overflow: hidden;
   }
 
   &-expand {
@@ -217,6 +218,12 @@
   font-size: 12px;
   line-height: 30px;
   margin-top: 1px;
+}
+
+.textbus-control-panel {
+  width: 240px;
+  background-color: #fff;
+  border-left: 1px solid $color-light;
 }
 
 .textbus-tablet-wrapper {

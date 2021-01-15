@@ -15,6 +15,7 @@ import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER
 import { RootComponent } from '../root-component';
 import { HistoryManager } from '../history-manager';
 import { EditorController } from '../editor-controller';
+import { ControlPanel } from './control-panel';
 
 /**
  * 快捷键配置项
@@ -102,6 +103,7 @@ export class Input {
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               @Inject(EDITABLE_DOCUMENT_CONTAINER) private container: HTMLElement,
               @Inject(EDITOR_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
+              private controlPanel: ControlPanel,
               private editorController: EditorController,
               private renderer: Renderer,
               private rootComponent: RootComponent,
@@ -318,6 +320,10 @@ export class Input {
       }),
       fromEvent(this.input, 'focus').subscribe(() => {
         this.dispatchInputReadyEvent();
+        this.dispatchEvent((component, instance) => {
+          component.preset?.receive(instance);
+          return true
+        })
       }),
       fromEvent(this.input, 'input').subscribe(() => {
         if (!this.selection.collapsed) {
