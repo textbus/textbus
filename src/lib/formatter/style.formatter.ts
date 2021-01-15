@@ -8,9 +8,6 @@ import {
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 
-const inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
-const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i');
-
 export class StyleFormatter extends InlineFormatter {
   constructor(public styleName: string, rule: MatchRule) {
     super(rule, FormatterPriority.InlineStyle);
@@ -61,27 +58,35 @@ export const lineHeightFormatter = new StyleFormatter('lineHeight', {
   }
 });
 
-export const backgroundColorFormatter = new StyleFormatter('backgroundColor', {
-  styles: {
-    backgroundColor: /.+/
-  }
-});
+export class InlineBackgroundColorFormatter extends StyleFormatter {
+  static inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
+  private reg: RegExp;
 
-const match = backgroundColorFormatter.match;
-
-backgroundColorFormatter.match = function (p: HTMLElement | FormatAbstractData) {
-  if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
-    return FormatEffect.Invalid;
+  constructor() {
+    super('backgroundColor', {
+      styles: {
+        backgroundColor: /.+/
+      }
+    });
+    this.reg = new RegExp(`^(${InlineBackgroundColorFormatter.inlineTags.join('|')})$`, 'i');
   }
-  return match.call(backgroundColorFormatter, p);
+
+  match(p: HTMLElement | FormatAbstractData) {
+    if (!this.reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+      return FormatEffect.Invalid;
+    }
+    return super.match(p);
+  }
+
+  render(context: FormatRendingContext, existingElement?: VElement) {
+    if (existingElement && this.reg.test(existingElement.tagName)) {
+      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+    } else {
+      const el = new VElement('span');
+      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      return new ChildSlotMode(el);
+    }
+  }
 }
 
-backgroundColorFormatter.render = function (context: FormatRendingContext, existingElement?: VElement) {
-  if (existingElement && reg.test(existingElement.tagName)) {
-    existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
-  } else {
-    const el = new VElement('span');
-    el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
-    return new ChildSlotMode(el);
-  }
-};
+export const backgroundColorFormatter = new InlineBackgroundColorFormatter();

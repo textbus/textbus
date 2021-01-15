@@ -44,6 +44,8 @@ export const textAlignFormatter = new BlockStyleFormatter('textAlign', {
 });
 
 export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
+  static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
+
   read(node: HTMLElement): FormatAbstractData {
     return new FormatAbstractData({
       styles: {
@@ -57,8 +59,7 @@ export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
   }
 
   match(p: HTMLElement | FormatAbstractData) {
-    const blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
-    const reg = new RegExp(`^(${blockTags.join('|')})$`, 'i');
+    const reg = new RegExp(`^(${BlockBackgroundColorFormatter.blockTags.join('|')})$`, 'i');
     if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
       return FormatEffect.Invalid;
     }
