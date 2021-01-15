@@ -224,6 +224,55 @@
   width: 240px;
   background-color: #fff;
   border-left: 1px solid $color-light;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s;
+  &-show {
+    transform: translateX(0);
+  }
+}
+
+.textbus-control-panel-tab {
+  background-color: $color-lighter;
+  border-bottom: 1px solid $color-light;
+  height: 23px;
+  padding: 11px 10px 0;
+
+  &-btn {
+    border: 1px solid $color-gray;
+    border-bottom: 0;
+    background-color: $color-gray-light;
+    border-radius: 5px 5px 0 0;
+    height: 24px;
+    margin-right: 5px;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $color-light;
+    }
+
+    &-active {
+      background-color: #fff;
+      z-index: 1;
+
+      &:hover {
+        background-color: #fff;
+      }
+    }
+  }
+}
+
+.textbus-control-panel-view {
+  padding: 10px 15px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .textbus-tablet-wrapper {

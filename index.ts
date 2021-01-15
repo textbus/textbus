@@ -35,8 +35,8 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  // contents: '<p><br></p>'
-  contents: document.getElementById('table').innerHTML
+  contents: '<p><br></p>'
+  // contents: document.getElementById('table').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {

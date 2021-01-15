@@ -314,16 +314,30 @@ export class Input {
   }
 
   private initEvent() {
+    let prevComponent: AbstractComponent = null;
     this.subs.push(
       fromEvent(this.input, 'blur').subscribe(() => {
         this.hide();
       }),
       fromEvent(this.input, 'focus').subscribe(() => {
         this.dispatchInputReadyEvent();
-        this.dispatchEvent((component, instance) => {
-          component.preset?.receive(instance);
-          return true
-        })
+        let component = this.selection.commonAncestorComponent;
+        if (component === prevComponent) {
+          return;
+        }
+        prevComponent = component;
+        const views = [];
+        while (component) {
+          const annotations = getAnnotations(component.constructor);
+          const componentAnnotation = annotations.getClassMetadata(Component);
+          const params = componentAnnotation.params[0] as Component;
+          const v = params.preset?.receive(component);
+          if (v) {
+            views.push(v);
+          }
+          component = component.parentFragment?.parentComponent;
+        }
+        this.controlPanel.showPanels(views);
       }),
       fromEvent(this.input, 'input').subscribe(() => {
         if (!this.selection.collapsed) {
