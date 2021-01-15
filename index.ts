@@ -12,10 +12,8 @@ import {
   FormHidden, FormRadio, FormSwitch,
   FormTextField,
   videoToolConfig,
-  defaultOptions, PreComponent, HistoryManager
+  defaultOptions, PreComponent, HistoryManager,BlockBackgroundColorFormatter
 } from './src/public-api';
-
-
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
@@ -35,8 +33,8 @@ const editor = createEditor('#editor', {
       }, 3000)
     })
   },
-  contents: '<p><br></p>'
-  // contents: document.getElementById('table').innerHTML
+  // contents: '<p><br></p>'
+  contents: document.getElementById('table').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {

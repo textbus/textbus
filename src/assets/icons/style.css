@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'textbus';
   src:
-    url('fonts/textbus.ttf?5b3ahl') format('truetype'),
-    url('fonts/textbus.woff?5b3ahl') format('woff'),
-    url('fonts/textbus.svg?5b3ahl#textbus') format('svg');
+    url('fonts/textbus.ttf?6zrru6') format('truetype'),
+    url('fonts/textbus.woff?6zrru6') format('woff'),
+    url('fonts/textbus.svg?6zrru6#textbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,11 +24,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.textbus-icon-insert-paragraph-before:before {
+.textbus-icon-components:before {
   content: "\e900";
 }
-.textbus-icon-insert-paragraph-after:before {
+.textbus-icon-insert-paragraph-before:before {
   content: "\e901";
+}
+.textbus-icon-insert-paragraph-after:before {
+  content: "\e919";
 }
 .textbus-icon-arrow-right:before {
   content: "\e50f";

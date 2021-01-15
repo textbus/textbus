@@ -16,6 +16,11 @@
   }
 }
 
+.textbus-status-bar-left {
+  display: flex;
+  flex: 1;
+}
+
 .textbus-device {
   position: relative;
 
@@ -46,7 +51,7 @@
   &-menus {
     position: absolute;
     bottom: 100%;
-    right: 0;
+    left: 0;
     padding-top: 5px;
     padding-bottom: 5px;
     background-color: #fff;

@@ -17,16 +17,14 @@ export class StatusBar {
     this.elementRef.classList.add('textbus-status-bar');
     this.elementRef.append(
       createElement('div', {
-        attrs: {
-          style: 'flex: 1'
-        },
+        classes: ['textbus-status-bar-left'],
         children: [
-          libSwitch.elementRef
+          fullScreen.elementRef,
+          editingMode.elementRef,
+          device.elementRef,
         ]
       }),
-      device.elementRef,
-      editingMode.elementRef,
-      fullScreen.elementRef
+      libSwitch.elementRef
     );
   }
 

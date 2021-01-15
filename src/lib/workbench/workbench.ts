@@ -39,7 +39,6 @@ export class Workbench {
         createElement('div', {
           classes: ['textbus-dashboard'],
           children: [
-            this.componentStage.elementRef,
             this.editableArea = createElement('div', {
               classes: ['textbus-editable-area'],
               children: [
@@ -54,7 +53,8 @@ export class Workbench {
                 })
               ]
             }),
-            this.controlPanel.elementRef
+            this.controlPanel.elementRef,
+            this.componentStage.elementRef
           ]
         })
       ]

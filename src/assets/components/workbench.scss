@@ -160,7 +160,7 @@
   display: none;
   overflow: auto;
   background-color: #fff;
-  border-right: 1px solid $color-light;
+  border-left: 1px solid $color-light;
   height: 100%;
 
   &-list {
@@ -221,25 +221,28 @@
 }
 
 .textbus-control-panel {
-  width: 240px;
+  width: 0;
   background-color: #fff;
   border-left: 1px solid $color-light;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  top: 0;
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
-  transition: transform .3s;
+  transition: width .3s;
+  z-index: 2;
+  overflow: hidden;
+
+  &-container {
+    width: 240px;
+    height: 100%;
+  }
+
   &-show {
-    transform: translateX(0);
+    width: 240px;
   }
 }
 
 .textbus-control-panel-tab {
-  background-color: $color-lighter;
-  border-bottom: 1px solid $color-light;
+  background-color: $color-light;
+  border-bottom: 1px solid $color-gray-light;
   height: 23px;
   padding: 11px 10px 0;
 
@@ -270,7 +273,6 @@
 }
 
 .textbus-control-panel-view {
-  padding: 10px 15px;
   flex: 1;
   overflow-y: auto;
 }

@@ -13,7 +13,12 @@ export class LibSwitch {
       title: '展开或收起组件库',
     },
     classes: ['textbus-lib-switch'],
-    children: [createTextNode('组件库')]
+    children: [
+      createElement('span', {
+        classes: ['textbus-icon-components']
+      }),
+      createTextNode(' 组件库')
+    ]
   }) as HTMLButtonElement;
 
   set disabled(b: boolean) {

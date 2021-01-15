@@ -6,6 +6,7 @@ import { ComponentPresetPanelView } from '../core/component-preset';
 export class ControlPanel {
   elementRef: HTMLElement;
 
+  private container: HTMLElement;
   private titleGroup: HTMLElement;
   private viewWrapper: HTMLElement;
 
@@ -13,11 +14,16 @@ export class ControlPanel {
     this.elementRef = createElement('div', {
       classes: ['textbus-control-panel'],
       children: [
-        this.titleGroup = createElement('div', {
-          classes: ['textbus-control-panel-tab']
-        }),
-        this.viewWrapper = createElement('div', {
-          classes: ['textbus-control-panel-view']
+        this.container = createElement('div', {
+          classes: ['textbus-control-panel-container'],
+          children: [
+            this.titleGroup = createElement('div', {
+              classes: ['textbus-control-panel-tab']
+            }),
+            this.viewWrapper = createElement('div', {
+              classes: ['textbus-control-panel-view']
+            })
+          ]
         })
       ]
     })
@@ -30,6 +36,7 @@ export class ControlPanel {
       this.elementRef.classList.remove('textbus-control-panel-show')
       return
     }
+    views = [...views, ...views]
     this.elementRef.classList.add('textbus-control-panel-show')
     const btns: HTMLElement[] = views.map(view => {
       const btn = createElement('button', {
