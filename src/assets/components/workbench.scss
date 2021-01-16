@@ -162,6 +162,8 @@
   background-color: #fff;
   border-left: 1px solid $color-light;
   height: 100%;
+  position: relative;
+  z-index: 3;
 
   &-list {
     box-sizing: content-box;
@@ -222,30 +224,57 @@
 
 .textbus-control-panel {
   width: 0;
-  background-color: #fff;
-  border-left: 1px solid $color-light;
   display: flex;
   flex-direction: column;
-  transition: width .3s;
   z-index: 2;
-  overflow: hidden;
 
   &-container {
+    overflow: hidden;
     width: 240px;
     height: 100%;
+    background-color: #fff;
+    transition: transform .15s cubic-bezier(.36, .66, .04, 1);
+    border-left: 1px solid $color-light;
   }
 
   &-show {
+    .textbus-control-panel-container {
+      transform: translateX(-100%);
+    }
+  }
+
+  &-fixed {
     width: 240px;
+
+    .textbus-control-panel-container {
+      transform: translateX(0);
+      transition: none;
+    }
   }
 }
 
-.textbus-control-panel-tab {
+.textbus-control-panel-head {
   background-color: $color-light;
   border-bottom: 1px solid $color-gray-light;
   height: 23px;
   padding: 11px 10px 0;
   box-sizing: content-box;
+  display: flex;
+}
+
+.textbus-control-panel-fixed-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+
+  &-active {
+    color: $color-primary;
+  }
+}
+
+.textbus-control-panel-tab {
+  flex: 1;
 
   &-btn {
     border: 1px solid $color-gray;

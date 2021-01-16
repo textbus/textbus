@@ -9,6 +9,9 @@ export class ControlPanel {
   private container: HTMLElement;
   private titleGroup: HTMLElement;
   private viewWrapper: HTMLElement;
+  private fixedBtn: HTMLElement;
+
+  private isFixed = false;
 
   constructor() {
     this.elementRef = createElement('div', {
@@ -17,8 +20,24 @@ export class ControlPanel {
         this.container = createElement('div', {
           classes: ['textbus-control-panel-container'],
           children: [
-            this.titleGroup = createElement('div', {
-              classes: ['textbus-control-panel-tab']
+            createElement('div', {
+              classes: ['textbus-control-panel-head'],
+              children: [
+                this.titleGroup = createElement('div', {
+                  classes: ['textbus-control-panel-tab']
+                }),
+
+                this.fixedBtn = createElement('button', {
+                  attrs: {
+                    type: 'button',
+                    title: '固定'
+                  },
+                  classes: ['textbus-control-panel-fixed-btn'],
+                  children: [createElement('span', {
+                    classes: ['textbus-icon-pushpin']
+                  })]
+                }),
+              ]
             }),
             this.viewWrapper = createElement('div', {
               classes: ['textbus-control-panel-view']
@@ -26,6 +45,19 @@ export class ControlPanel {
           ]
         })
       ]
+    })
+
+    this.fixedBtn.addEventListener('click', () => {
+      this.isFixed = !this.isFixed;
+      if (this.isFixed) {
+        this.elementRef.classList.add('textbus-control-panel-fixed');
+        this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
+        this.fixedBtn.title = '取消固定';
+      } else {
+        this.elementRef.classList.remove('textbus-control-panel-fixed');
+        this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
+        this.fixedBtn.title = '固定';
+      }
     })
   }
 
