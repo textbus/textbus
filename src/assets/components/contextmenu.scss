@@ -41,6 +41,7 @@
   cursor: pointer;
   position: relative;
   padding: 0;
+  line-height: 26px;
 
   &:hover {
     background-color: $color-primary;
@@ -68,13 +69,14 @@
 .textbus-contextmenu-item-label {
   display: block;
   white-space: nowrap;
-  padding: 3px 15px;
+  padding: 0 15px;
+  height: 26px;
 }
 
 .textbus-contextmenu-item-icon {
   position: absolute;
+  height: 26px;
   width: 30px;
-  line-height: 30px;
   right: 100%;
   top: 0;
   bottom: 0;
