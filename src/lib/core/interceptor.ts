@@ -8,6 +8,12 @@ export interface TBClipboard {
   text: string;
 }
 
+export interface ContextMenuAction {
+  icon?: HTMLElement;
+  label: string;
+  action(): void;
+}
+
 /**
  * TextBus 事件对象。
  */
@@ -49,6 +55,8 @@ export interface Interceptor<T extends AbstractComponent> {
   onEnter?(event: TBEvent<T>): void;
 
   onPaste?(event: TBEvent<T, TBClipboard>): void;
+
+  onContextmenu?(instance: T): ContextMenuAction[];
 
   onDestroy?(): void;
 }

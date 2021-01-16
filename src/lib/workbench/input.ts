@@ -9,13 +9,14 @@ import {
   Renderer,
   TBEvent,
   TBSelection,
-  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent
+  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent, ContextMenuAction
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
 import { HistoryManager } from '../history-manager';
 import { EditorController } from '../editor-controller';
 import { ControlPanel } from './control-panel';
+import { createElement, createTextNode } from '../uikit/uikit';
 
 /**
  * 快捷键配置项
@@ -99,6 +100,8 @@ export class Input {
   private oldCursorPosition: { left: number, top: number } = null;
   private cleanOldCursorTimer: any;
   private subs: Subscription[] = [];
+
+  private contextmenu = new ContextMenu();
 
   private prevComponent: AbstractComponent = null;
 
@@ -273,10 +276,60 @@ export class Input {
         }
         this.selection.removeAllRanges(true);
       }),
+      fromEvent(this.context, 'contextmenu').subscribe((ev: MouseEvent) => {
+        const selection = this.context.getSelection();
+        const focusNode = selection.focusNode;
+        const offset = selection.focusOffset;
+        const isCollapsed = selection.isCollapsed;
+        setTimeout(() => {
+          if (isCollapsed) {
+            if (!selection.isCollapsed) {
+              selection.collapse(focusNode, offset);
+            }
+          }
+        })
+        const rect = this.container.getBoundingClientRect();
+        this.contextmenu.showMenus([
+          [{
+            icon: createElement('span', {
+              classes: ['textbus-icon-copy']
+            }),
+            label: '复制',
+            action: () => {
+              this.copy();
+            }
+          }, {
+            icon: createElement('span', {
+              classes: ['textbus-icon-paste']
+            }),
+            label: '粘贴',
+            action: () => {
+              this.paste();
+            }
+          }, {
+            icon: createElement('span', {
+              classes: ['textbus-icon-cut']
+            }),
+            label: '剪切',
+            action: () => {
+              this.cut();
+            }
+          }, {
+            icon: createElement('span', {
+              classes: ['textbus-icon-select']
+            }),
+            label: '全选',
+            action: () => {
+              this.selectAll();
+            }
+          }],
+          ...this.makeContextmenu()
+        ], ev.pageX + rect.x, ev.pageY + rect.y);
+        ev.preventDefault();
+      }),
       fromEvent(this.input, 'compositionstart').subscribe(() => {
         isWriting = true;
       }),
-
       fromEvent(this.input, 'compositionend').subscribe(() => {
         isWriting = false;
       }),
@@ -311,6 +364,25 @@ export class Input {
         this.dispatchComponentPresetEvent();
       })
     );
+  }
+
+  private makeContextmenu() {
+    let component = this.selection.commonAncestorComponent;
+    if (!component) {
+      return [];
+    }
+    const actionGroups: ContextMenuAction[][] = [];
+    while (component) {
+      const annotations = getAnnotations(component.constructor);
+      const componentAnnotation = annotations.getClassMetadata(Component);
+      const params = componentAnnotation.params[0] as Component;
+      const v = params.interceptor?.onContextmenu?.(component);
+      if (v) {
+        actionGroups.push(v);
+      }
+      component = component.parentFragment?.parentComponent;
+    }
+    return actionGroups;
   }
 
   private initEvent() {
@@ -383,14 +455,10 @@ export class Input {
         });
       }),
       fromEvent(this.input, 'copy').subscribe(() => {
-        this.context.execCommand('copy');
+        this.copy();
       }),
       fromEvent(this.input, 'cut').subscribe(() => {
-        this.context.execCommand('copy');
-        this.selection.ranges.forEach(range => {
-          range.deleteContents();
-        });
-        this.dispatchInputReadyEvent();
+        this.cut();
       })
     );
   }
@@ -445,17 +513,7 @@ export class Input {
         ctrlKey: true
       },
       action: () => {
-        const selection = this.selection;
-        const firstRange = selection.firstRange;
-        const firstPosition = firstRange.findFirstPosition(this.rootComponent.slot);
-        const lastPosition = firstRange.findLastChild(this.rootComponent.slot);
-        selection.removeAllRanges();
-
-        firstRange.setStart(firstPosition.fragment, firstPosition.index);
-        firstRange.setEnd(lastPosition.fragment, lastPosition.index);
-
-        selection.addRange(firstRange);
-        selection.restore();
+        this.selectAll();
       }
     })
     this.keymap({
@@ -523,6 +581,37 @@ export class Input {
     }
   }
 
+  private selectAll() {
+    const selection = this.selection;
+    const firstRange = selection.firstRange;
+    const firstPosition = firstRange.findFirstPosition(this.rootComponent.slot);
+    const lastPosition = firstRange.findLastChild(this.rootComponent.slot);
+    selection.removeAllRanges();
+
+    firstRange.setStart(firstPosition.fragment, firstPosition.index);
+    firstRange.setEnd(lastPosition.fragment, lastPosition.index);
+
+    selection.addRange(firstRange);
+    selection.restore();
+  }
+
+  private paste() {
+    this.input.focus();
+    document.execCommand('paste');
+  }
+
+  private cut() {
+    this.context.execCommand('copy');
+    this.selection.ranges.forEach(range => {
+      range.deleteContents();
+    });
+    this.dispatchInputReadyEvent();
+  }
+
+  private copy() {
+    this.context.execCommand('copy');
+  }
+
   private show() {
     this.display = true;
     clearTimeout(this.timer);
@@ -536,5 +625,58 @@ export class Input {
   private hide() {
     this.display = false;
     clearTimeout(this.timer);
+  }
+}
+
+class ContextMenu {
+  private elementRef: HTMLElement;
+
+  constructor() {
+    this.elementRef = createElement('div', {
+      classes: ['textbus-contextmenu']
+    })
+    this.elementRef.addEventListener('click', () => {
+      this.elementRef.parentNode?.removeChild(this.elementRef);
+    })
+    this.elementRef.addEventListener('contextmenu', ev => ev.preventDefault());
+  }
+
+  showMenus(menus: ContextMenuAction[][], x: number, y: number) {
+    this.elementRef.innerHTML = '';
+    Object.assign(this.elementRef.style, {
+      left: x + 'px',
+      top: y + 'px'
+    })
+    menus.forEach(actions => {
+      if (actions.length === 0) {
+        return;
+      }
+      this.elementRef.appendChild(createElement('div', {
+        classes: ['textbus-contextmenu-group'],
+        children: actions.map(item => {
+          const btn = createElement('button', {
+            attrs: {
+              type: 'button'
+            },
+            classes: ['textbus-contextmenu-item'],
+            children: [
+              createElement('span', {
+                classes: ['textbus-contextmenu-item-icon'],
+                children: item.icon ? [item.icon] : []
+              }),
+              createElement('span', {
+                classes: ['textbus-contextmenu-item-label'],
+                children: [createTextNode(item.label)]
+              })
+            ]
+          })
+          btn.addEventListener('click', () => {
+            item.action();
+          })
+          return btn;
+        })
+      }))
+    })
+    document.body.appendChild(this.elementRef);
   }
 }
