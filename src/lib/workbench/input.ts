@@ -296,6 +296,7 @@ export class Input {
               classes: ['textbus-icon-copy']
             }),
             label: '复制',
+            disabled: this.selection.collapsed,
             action: () => {
               this.copy();
             }
@@ -313,6 +314,7 @@ export class Input {
               classes: ['textbus-icon-cut']
             }),
             label: '剪切',
+            disabled: this.selection.collapsed,
             action: () => {
               this.cut();
             }
