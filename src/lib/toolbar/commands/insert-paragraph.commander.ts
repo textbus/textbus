@@ -23,14 +23,24 @@ export class InsertParagraphCommander implements Commander<null> {
     }
     const firstRange = selection.firstRange;
     this.recordHistory = true;
-    const component = selection.commonAncestorComponent;
+    let component = selection.commonAncestorComponent;
+
+    if (component === this.rootComponent) {
+      const commonAncestorFragmentScope = firstRange.getCommonAncestorFragmentScope();
+      component = this.insertBefore ?
+        commonAncestorFragmentScope.startChildComponent :
+        commonAncestorFragmentScope.endChildComponent;
+    }
+
     const parentFragment = component.parentFragment;
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());
 
     this.insertBefore ? parentFragment.insertBefore(p, component) : parentFragment.insertAfter(p, component);
 
+    selection.removeAllRanges();
     firstRange.setStart(p.slot, 0);
     firstRange.collapse();
+    selection.addRange(firstRange);
   }
 }
