@@ -73,7 +73,9 @@ export class ControlPanel {
     })
 
     this.subs.push(this.editorController.onStateChange.subscribe(status => {
-      this.fixed = !status.readonly && !status.sourceCodeMode;
+      if (status.readonly || status.sourceCodeMode) {
+        this.fixed = false;
+      }
     }))
   }
 
