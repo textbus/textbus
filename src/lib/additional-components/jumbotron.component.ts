@@ -2,7 +2,7 @@ import { Injector, Type } from '@tanbo/di';
 
 import {
   Component,
-  ComponentLoader, ComponentPreset, ComponentPresetPanelView,
+  ComponentLoader, ComponentSetter, ComponentPresetPanelView,
   DivisionAbstractComponent,
   SlotRendererFn,
   VElement,
@@ -19,14 +19,14 @@ export interface JumbotronOptions {
   backgroundPosition: string;
 }
 
-class JumbotronComponentPreset implements ComponentPreset<JumbotronComponent> {
+class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
   private uploader: FileUploader;
 
   setup(injector: Injector) {
     this.uploader = injector.get(FileUploader as Type<FileUploader>);
   }
 
-  receive(instance: JumbotronComponent): ComponentPresetPanelView {
+  create(instance: JumbotronComponent): ComponentPresetPanelView {
     const form = new Form({
       mini: true,
       items: [
@@ -93,7 +93,7 @@ class JumbotronComponentLoader implements ComponentLoader {
 
 @Component({
   loader: new JumbotronComponentLoader(),
-  preset: new JumbotronComponentPreset(),
+  setter: new JumbotronComponentSetter(),
   styles: [
     `
 tb-jumbotron {

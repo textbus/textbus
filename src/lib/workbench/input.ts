@@ -489,7 +489,7 @@ export class Input {
       const annotations = getAnnotations(component.constructor);
       const componentAnnotation = annotations.getClassMetadata(Component);
       const params = componentAnnotation.params[0] as Component;
-      const v = params.preset?.receive(component);
+      const v = params.setter?.create(component);
       if (v) {
         views.push(v);
       }

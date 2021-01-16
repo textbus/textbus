@@ -221,7 +221,7 @@ export class Viewer {
     rootAnnotation.interceptor.setup(viewInjector);
     this.componentAnnotations.forEach(c => {
       c.interceptor?.setup(viewInjector);
-      c.preset?.setup(viewInjector);
+      c.setter?.setup(viewInjector);
     });
 
     (this.options.plugins || []).forEach(plugin => {

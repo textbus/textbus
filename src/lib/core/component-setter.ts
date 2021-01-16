@@ -7,9 +7,9 @@ export interface ComponentPresetPanelView {
   view: HTMLElement;
 }
 
-export interface ComponentPreset<T extends AbstractComponent> {
+export interface ComponentSetter<T extends AbstractComponent> {
 
   setup(injector: Injector): void;
 
-  receive(instance: T): ComponentPresetPanelView;
+  create(instance: T): ComponentPresetPanelView;
 }

@@ -2,7 +2,7 @@ export * from './di/_api';
 
 export * from './commander';
 export * from './component';
-export * from './component-preset';
+export * from './component-setter';
 export * from './contents';
 export * from './element';
 export * from './format-abstract-data';

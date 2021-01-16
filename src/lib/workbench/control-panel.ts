@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di';
 import { createElement } from '../uikit/_api';
-import { ComponentPresetPanelView } from '../core/component-preset';
+import { ComponentPresetPanelView } from '../core/component-setter';
 
 @Injectable()
 export class ControlPanel {

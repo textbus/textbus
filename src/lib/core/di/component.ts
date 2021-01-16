@@ -1,12 +1,12 @@
 import { makeClassDecorator, TypeDecorator } from '@tanbo/di';
 import { Interceptor } from '../interceptor';
 import { ComponentLoader } from '../component';
-import { ComponentPreset } from '../component-preset';
+import { ComponentSetter } from '../component-setter';
 
 export interface Component {
   loader: ComponentLoader;
   interceptor?: Interceptor<any>;
-  preset?: ComponentPreset<any>;
+  setter?: ComponentSetter<any>;
   styles?: string[];
   editModeStyles?: string[];
 }
