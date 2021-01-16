@@ -304,7 +304,7 @@ export class Input {
               classes: ['textbus-icon-paste']
             }),
             label: '粘贴',
-            disabled: true,
+            // disabled: true,
             action: () => {
               this.paste();
             }
@@ -431,29 +431,8 @@ export class Input {
             });
           }
           div.innerHTML = html;
-
-          const fragment = this.parser.parse(div);
-          const contents = new Contents();
-          (fragment.getContentAtIndex(0) as DivisionAbstractComponent).slot.sliceContents(0).forEach(i => {
-            contents.append(i)
-          });
+          this.handlePaste(div, text);
           document.body.removeChild(div);
-
-          if (!this.selection.collapsed) {
-            this.dispatchEvent((component, instance) => {
-              const event = new TBEvent(instance);
-              component.interceptor?.onDeleteRange?.(event);
-              return !event.stopped;
-            })
-          }
-          if (this.selection.collapsed) {
-            this.dispatchEvent((component, instance) => {
-              const event = new TBEvent(instance, {contents, text});
-              component.interceptor?.onPaste?.(event);
-              return !event.stopped;
-            })
-          }
-          this.dispatchInputReadyEvent();
         });
       }),
       fromEvent(this.input, 'copy').subscribe(() => {
@@ -570,6 +549,30 @@ export class Input {
     }
   }
 
+  private handlePaste(dom: HTMLElement, text: string) {
+    const fragment = this.parser.parse(dom);
+    const contents = new Contents();
+    (fragment.getContentAtIndex(0) as DivisionAbstractComponent).slot.sliceContents(0).forEach(i => {
+      contents.append(i)
+    });
+
+    if (!this.selection.collapsed) {
+      this.dispatchEvent((component, instance) => {
+        const event = new TBEvent(instance);
+        component.interceptor?.onDeleteRange?.(event);
+        return !event.stopped;
+      })
+    }
+    if (this.selection.collapsed) {
+      this.dispatchEvent((component, instance) => {
+        const event = new TBEvent(instance, {contents, text});
+        component.interceptor?.onPaste?.(event);
+        return !event.stopped;
+      })
+    }
+    this.dispatchInputReadyEvent();
+  }
+
   private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
     let component = this.selection.commonAncestorComponent;
     while (component) {
@@ -598,8 +601,24 @@ export class Input {
   }
 
   private paste() {
-    this.input.focus();
-    document.execCommand('paste');
+    navigator.permissions.query({name: 'clipboard-write'} as any).then((result) => {
+      if (result.state === 'granted') {
+        (navigator.clipboard as any).read().then((items: any[]) => {
+          const item = items[0];
+          item.types.filter((i: string) => i === 'text/html').forEach((type: string) => {
+            (item.getType(type) as Promise<Blob>).then(blob => {
+              return blob.text()
+            }).then(text => {
+              const div = document.createElement('div');
+              div.innerHTML = text;
+              this.handlePaste(div, div.innerText);
+            });
+          })
+        })
+      } else {
+        alert('没有剪切板读取权限！')
+      }
+    })
   }
 
   private cut() {
@@ -656,11 +675,13 @@ class ContextMenu {
 
   show(menus: ContextMenuAction[][], x: number, y: number) {
     this.elementRef.innerHTML = '';
-    Object.assign(this.elementRef.style, {
-      left: x + 'px',
-      top: y + 'px'
-    })
+
+    const clientWidth = document.documentElement.clientWidth;
+    const clientHeight = document.documentElement.clientHeight;
+
+    let itemCount = 0;
     menus.forEach(actions => {
+      itemCount += actions.length;
       if (actions.length === 0) {
         return;
       }
@@ -698,6 +719,20 @@ class ContextMenu {
           return btn;
         })
       }))
+    })
+
+    const menuWidth = 180;
+    const menuHeight = itemCount * 26 + menus.length;
+
+    if (x + menuWidth >= clientWidth) {
+      x -= menuWidth
+    }
+    if (y + menuHeight >= clientHeight) {
+      y -= menuHeight
+    }
+    Object.assign(this.elementRef.style, {
+      left: x + 'px',
+      top: y + 'px'
     })
     document.body.appendChild(this.elementRef);
   }
