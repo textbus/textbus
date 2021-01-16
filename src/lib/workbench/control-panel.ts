@@ -1,6 +1,8 @@
 import { Injectable } from '@tanbo/di';
 import { createElement } from '../uikit/_api';
 import { ComponentPresetPanelView } from '../core/component-setter';
+import { EditorController } from '../editor-controller';
+import { Subscription } from 'rxjs';
 
 @Injectable()
 export class ControlPanel {
@@ -11,9 +13,28 @@ export class ControlPanel {
   private viewWrapper: HTMLElement;
   private fixedBtn: HTMLElement;
 
-  private isFixed = false;
+  private set fixed(b: boolean) {
+    this._fixed = b;
+    if (b) {
+      this.elementRef.classList.add('textbus-control-panel-fixed');
+      this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
+      this.fixedBtn.title = '取消固定';
+    } else {
+      this.elementRef.classList.remove('textbus-control-panel-fixed');
+      this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
+      this.fixedBtn.title = '固定';
+    }
+  }
 
-  constructor() {
+  private get fixed() {
+    return this._fixed;
+  }
+
+  private _fixed = false;
+
+  private subs: Subscription[] = [];
+
+  constructor(private editorController: EditorController) {
     this.elementRef = createElement('div', {
       classes: ['textbus-control-panel'],
       children: [
@@ -48,17 +69,12 @@ export class ControlPanel {
     })
 
     this.fixedBtn.addEventListener('click', () => {
-      this.isFixed = !this.isFixed;
-      if (this.isFixed) {
-        this.elementRef.classList.add('textbus-control-panel-fixed');
-        this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
-        this.fixedBtn.title = '取消固定';
-      } else {
-        this.elementRef.classList.remove('textbus-control-panel-fixed');
-        this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
-        this.fixedBtn.title = '固定';
-      }
+      this.fixed = !this.fixed;
     })
+
+    this.subs.push(this.editorController.onStateChange.subscribe(status => {
+      this.fixed = !status.readonly && !status.sourceCodeMode;
+    }))
   }
 
   showPanels(views: ComponentPresetPanelView[]) {
@@ -91,5 +107,9 @@ export class ControlPanel {
     this.viewWrapper.appendChild(views[0].view);
 
     btns[0].classList.add('textbus-control-panel-tab-btn-active');
+  }
+
+  destroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 }

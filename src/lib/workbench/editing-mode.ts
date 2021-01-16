@@ -10,7 +10,11 @@ export class EditingMode {
 
   set sourceCode(b: boolean) {
     this._sourceCode = b;
-    this.icon.className = b ? 'textbus-icon-quill' : 'textbus-icon-code';
+    if (b) {
+      this.elementRef.classList.add('textbus-status-bar-btn-active');
+    } else {
+      this.elementRef.classList.remove('textbus-status-bar-btn-active');
+    }
     this.elementRef.title = b ? '切换为富文本编辑模式' : '切换为源代码编辑模式';
   }
 
@@ -25,7 +29,7 @@ export class EditingMode {
   constructor(private editorController: EditorController) {
     this.elementRef.type = 'button';
     this.elementRef.title = '切换为源代码编辑模式';
-    this.elementRef.className = 'textbus-editing-mode';
+    this.elementRef.className = 'textbus-status-bar-btn';
     this.icon.className = 'textbus-icon-code';
     this.elementRef.appendChild(this.icon);
 

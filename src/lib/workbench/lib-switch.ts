@@ -12,7 +12,7 @@ export class LibSwitch {
       type: 'button',
       title: '展开或收起组件库',
     },
-    classes: ['textbus-lib-switch'],
+    classes: ['textbus-status-bar-btn'],
     children: [
       createElement('span', {
         classes: ['textbus-icon-components']
@@ -26,7 +26,7 @@ export class LibSwitch {
     this.elementRef.disabled = b;
     if (b) {
       this.expand = false;
-      this.elementRef.classList.remove('textbus-lib-switch-active');
+      this.elementRef.classList.remove('textbus-status-bar-btn-active');
     }
   }
 
@@ -37,9 +37,9 @@ export class LibSwitch {
   set expand(b: boolean) {
     this._expand = b;
     if (b) {
-      this.elementRef.classList.add('textbus-lib-switch-active');
+      this.elementRef.classList.add('textbus-status-bar-btn-active');
     } else {
-      this.elementRef.classList.remove('textbus-lib-switch-active');
+      this.elementRef.classList.remove('textbus-status-bar-btn-active');
     }
   }
 

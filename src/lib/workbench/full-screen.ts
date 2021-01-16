@@ -24,7 +24,7 @@ export class FullScreen {
   constructor(private editorController: EditorController) {
     this.elementRef.type = 'button';
     this.elementRef.title = '切换全屏模式';
-    this.elementRef.className = 'textbus-full-screen';
+    this.elementRef.className = 'textbus-status-bar-btn';
     this.elementRef.appendChild(this.icon);
     this.subs.push(
       fromEvent(this.elementRef, 'click').subscribe(() => {

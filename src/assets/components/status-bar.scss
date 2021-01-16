@@ -25,20 +25,11 @@
   position: relative;
 
   &-btn {
-    background: none;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    color: inherit;
     padding-left: .5em;
     padding-right: .5em;
 
-    &:hover {
-      color: $color-primary;
-    }
-
     span {
-      margin-left: .5em;
+      margin-right: .5em;
     }
   }
 
@@ -65,7 +56,6 @@
     font-size: 13px;
     overflow: hidden;
     z-index: 2;
-
   }
 
   &-option {
@@ -98,7 +88,7 @@
   }
 }
 
-.textbus-full-screen, .textbus-editing-mode {
+.textbus-status-bar-btn {
   background: none;
   color: inherit;
   border: none;
@@ -111,24 +101,13 @@
   &:hover {
     color: $color-primary;
   }
-}
-
-.textbus-lib-switch {
-  background: none;
-  color: inherit;
-  border: none;
-  outline: none;
-  font-size: inherit;
-  cursor: pointer;
-  padding-left: .5em;
-  padding-right: .5em;
-
-  &-active {
-    color: $color-primary;
-  }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  &-active {
+    color: $color-primary;
   }
 }

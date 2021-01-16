@@ -288,6 +288,7 @@ export class Editor<T = any> {
       StatusBar,
       Viewer,
       ComponentStage,
+      ControlPanel,
       Workbench,
     ].forEach(c => {
       rootInjector.get(c as Type<{ destroy(): void }>).destroy();
