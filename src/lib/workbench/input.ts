@@ -274,6 +274,7 @@ export class Input {
         if (ev.button === 2) {
           return;
         }
+        this.contextmenu.hide();
         this.selection.removeAllRanges(true);
       }),
       fromEvent(this.context, 'contextmenu').subscribe((ev: MouseEvent) => {
@@ -289,7 +290,7 @@ export class Input {
           }
         })
         const rect = this.container.getBoundingClientRect();
-        this.contextmenu.showMenus([
+        this.contextmenu.show([
           [{
             icon: createElement('span', {
               classes: ['textbus-icon-copy']
@@ -303,6 +304,7 @@ export class Input {
               classes: ['textbus-icon-paste']
             }),
             label: '粘贴',
+            disabled: true,
             action: () => {
               this.paste();
             }
@@ -631,17 +633,28 @@ export class Input {
 class ContextMenu {
   private elementRef: HTMLElement;
 
+  private eventFromSelf = false;
+
   constructor() {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu']
     })
     this.elementRef.addEventListener('click', () => {
-      this.elementRef.parentNode?.removeChild(this.elementRef);
+      this.hide();
     })
     this.elementRef.addEventListener('contextmenu', ev => ev.preventDefault());
+    document.addEventListener('mousedown', () => {
+      if (!this.eventFromSelf) {
+        this.hide();
+      }
+    })
   }
 
-  showMenus(menus: ContextMenuAction[][], x: number, y: number) {
+  hide() {
+    this.elementRef.parentNode?.removeChild(this.elementRef);
+  }
+
+  show(menus: ContextMenuAction[][], x: number, y: number) {
     this.elementRef.innerHTML = '';
     Object.assign(this.elementRef.style, {
       left: x + 'px',
@@ -658,6 +671,9 @@ class ContextMenu {
             attrs: {
               type: 'button'
             },
+            props: {
+              disabled: item.disabled
+            },
             classes: ['textbus-contextmenu-item'],
             children: [
               createElement('span', {
@@ -670,9 +686,15 @@ class ContextMenu {
               })
             ]
           })
-          btn.addEventListener('click', () => {
-            item.action();
-          })
+          if (!item.disabled) {
+            btn.addEventListener('mousedown', () => {
+              this.eventFromSelf = true;
+            })
+            btn.addEventListener('click', () => {
+              item.action();
+              this.eventFromSelf = false;
+            })
+          }
           return btn;
         })
       }))

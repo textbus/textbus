@@ -11,6 +11,7 @@ export interface TBClipboard {
 export interface ContextMenuAction {
   icon?: HTMLElement;
   label: string;
+  disabled?: boolean;
   action(): void;
 }
 

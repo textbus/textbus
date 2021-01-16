@@ -51,6 +51,18 @@
       color: #fff;
     }
   }
+
+  &:disabled {
+    background: none;
+    color: inherit;
+    opacity: .5;
+    cursor: not-allowed;
+
+    .textbus-contextmenu-item-icon {
+      background: none;
+      color: inherit;
+    }
+  }
 }
 
 .textbus-contextmenu-item-label {
