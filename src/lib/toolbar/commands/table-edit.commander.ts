@@ -27,16 +27,16 @@ export class TableEditCommander implements Commander<TableEditActions> {
     }
     switch (actionType) {
       case TableEditActions.AddColumnToLeft:
-        context.addColumnToLeft();
+        context.addColumnToLeft(selection);
         break;
       case TableEditActions.AddColumnToRight:
-        context.addColumnToRight();
+        context.addColumnToRight(selection);
         break;
       case TableEditActions.AddRowToTop:
-        context.addRowToTop();
+        context.addRowToTop(selection);
         break;
       case TableEditActions.AddRowToBottom:
-        context.addRowToBottom();
+        context.addRowToBottom(selection);
         break;
       case TableEditActions.MergeCells:
         context.mergeCells(selection);
@@ -45,16 +45,16 @@ export class TableEditCommander implements Commander<TableEditActions> {
         context.splitCells(selection);
         break;
       case TableEditActions.DeleteTopRow:
-        context.deleteTopRow();
+        context.deleteTopRow(selection);
         break;
       case TableEditActions.DeleteBottomRow:
-        context.deleteBottomRow();
+        context.deleteBottomRow(selection);
         break;
       case TableEditActions.DeleteLeftColumn:
-        context.deleteLeftColumn();
+        context.deleteLeftColumn(selection);
         break;
       case TableEditActions.DeleteRightColumn:
-        context.deleteRightColumn();
+        context.deleteRightColumn(selection);
         break;
     }
   }

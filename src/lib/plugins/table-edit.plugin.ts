@@ -1,8 +1,7 @@
 import { CubicBezier } from '@tanbo/bezier';
 import { Injector } from '@tanbo/di';
 
-import { Commander, Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
-import { TdBorderColorCommander } from '../toolbar/_api';
+import { Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
@@ -66,39 +65,37 @@ export class TableEditPlugin implements TBPlugin {
   }
 
   onSelectionChange() {
-    const nativeSelection = this.contextDocument.getSelection();
     this.inTable = false;
     this.startCell = null;
     this.endCell = null;
     this.tableElement = null;
     this.selectedCells = [];
 
+    let tableComponent: TableComponent;
+    const commonAncestorComponent = this.selection.commonAncestorComponent;
+    if (commonAncestorComponent instanceof TableComponent) {
+      tableComponent = commonAncestorComponent;
+    } else {
+      tableComponent = commonAncestorComponent?.parentFragment?.getContext(TableComponent);
+    }
+
+    if (!tableComponent) {
+      this.showNativeSelectionMask();
+      this.removeMask();
+      return;
+    }
+
+    this.tableComponent = tableComponent;
+
+    const nativeSelection = this.contextDocument.getSelection();
+
     if (nativeSelection.rangeCount === 0) {
       return;
     }
 
     this.startCell = findParentByTagName(nativeSelection.anchorNode, ['th', 'td']) as HTMLTableCellElement;
-    if (!this.startCell) {
-      // 开始位置不在表格内
-      this.showNativeSelectionMask();
-      this.removeMask();
-      return;
-    }
-    this.tableElement = findParentByTagName(nativeSelection.anchorNode, ['table']) as HTMLTableElement;
     this.endCell = findParentByTagName(nativeSelection.focusNode, ['th', 'td']) as HTMLTableCellElement;
-    if (!this.endCell) {
-      this.showNativeSelectionMask();
-      this.removeMask();
-      // 结束位置不在表格内
-      return;
-    }
-
-    if (this.tableElement !== findParentByTagName(nativeSelection.focusNode, ['table'])) {
-      // 开始的单元格和结束的单元格不在同一个表格
-      this.showNativeSelectionMask();
-      this.removeMask();
-      return;
-    }
+    this.tableElement = findParentByTagName(nativeSelection.anchorNode, ['table']) as HTMLTableElement;
 
     if (this.startCell === this.endCell) {
       this.showNativeSelectionMask();
@@ -107,7 +104,7 @@ export class TableEditPlugin implements TBPlugin {
     }
     this.inTable = true;
 
-    this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+    this.setSelectedCellsAndUpdateMaskStyle();
 
     if (this.selectedCells.length) {
       if (this.selectedCells.length === 1) {
@@ -131,22 +128,12 @@ export class TableEditPlugin implements TBPlugin {
     }
   }
 
-  onApplyCommand(commander: Commander) {
-    if (commander instanceof TdBorderColorCommander) {
-      commander.setEditRange({
-        startPosition: this.startPosition,
-        endPosition: this.endPosition,
-        selectedCells: this.selectedCells
-      });
-    }
-  }
-
   onViewUpdated() {
     if (this.startPosition && this.endPosition && this.tableComponent) {
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
       if (this.startCell && this.endCell && this.inTable) {
-        this.setSelectedCellsAndUpdateMaskStyle(this.startCell, this.endCell);
+        this.setSelectedCellsAndUpdateMaskStyle();
       } else {
         this.removeMask();
         this.showNativeSelectionMask();
@@ -176,15 +163,8 @@ export class TableEditPlugin implements TBPlugin {
     this.insertMask = true;
   }
 
-  private setSelectedCellsAndUpdateMaskStyle(cell1: HTMLTableCellElement,
-                                             cell2: HTMLTableCellElement, animate = true) {
-
-    const cell1Fragment = this.renderer.getPositionByNode(cell1).fragment;
-    const cell2Fragment = this.renderer.getPositionByNode(cell2).fragment;
-    const table = cell1Fragment.getContext(TableComponent);
-    this.tableComponent = table;
-
-    const {startPosition, endPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);
+  private setSelectedCellsAndUpdateMaskStyle(animate = true) {
+    const {startPosition, endPosition, selectedCells} = this.tableComponent.selectCells(this.selection);
 
     const startRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(startPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
     const endRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(endPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();

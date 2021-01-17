@@ -138,49 +138,49 @@ class TableComponentInterceptor implements Interceptor<TableComponent> {
       iconClasses: ['textbus-icon-table-add-column-left'],
       label: '在左边添加列',
       action() {
-        instance.addColumnToLeft();
+        instance.addColumnToLeft(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-column-right'],
       label: '在右边添加列',
       action() {
-        instance.addColumnToRight();
+        instance.addColumnToRight(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-row-top'],
       label: '在上边添加行',
       action() {
-        instance.addRowToTop();
+        instance.addRowToTop(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-row-bottom'],
       label: '在下边添加行',
       action() {
-        instance.addRowToBottom();
+        instance.addRowToBottom(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-column-left'],
       label: '删除左边列',
       action() {
-        instance.deleteLeftColumn();
+        instance.deleteLeftColumn(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-column-right'],
       label: '删除右边列',
       action() {
-        instance.deleteRightColumn();
+        instance.deleteRightColumn(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-row-top'],
       label: '删除上边行',
       action() {
-        instance.deleteTopRow();
+        instance.deleteTopRow(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-row-bottom'],
       label: '删除下边行',
       action() {
-        instance.deleteBottomRow();
+        instance.deleteBottomRow(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-split-columns'],
@@ -234,8 +234,6 @@ export class TableComponent extends BackboneAbstractComponent {
 
   private _cellMatrix: TableRowPosition[];
   private deleteMarkFragments: Fragment[] = [];
-
-  private selectRange: TableRange;
 
   constructor(public config: TableInitParams) {
     super('table')
@@ -315,21 +313,29 @@ export class TableComponent extends BackboneAbstractComponent {
     return table;
   }
 
-  selectCells(startCell: Fragment, endCell: Fragment) {
-    this._cellMatrix = this.serialize();
-    const p1 = this.findCellPosition(startCell);
-    const p2 = this.findCellPosition(endCell);
-    const minRow = Math.min(p1.minRow, p2.minRow);
-    const minColumn = Math.min(p1.minColumn, p2.minColumn);
-    const maxRow = Math.max(p1.maxRow, p2.maxRow);
-    const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
-    this.selectRange = this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
-    return this.selectRange;
+  selectCells(selection: TBSelection) {
+    if (selection.rangeCount === 0) {
+      return null;
+    }
+    const startFragment = this.findFragment(selection.firstRange.startFragment);
+    if (!startFragment) {
+      return null;
+    }
+    const endFragment = this.findFragment(selection.lastRange.endFragment);
+
+    if (!endFragment) {
+      return null;
+    }
+    return this.normalize(startFragment, endFragment);
   }
 
-  addColumnToLeft() {
+  addColumnToLeft(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.startPosition.columnIndex;
+    const index = selectRange.startPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cellsPosition[index];
       if (index === 0) {
@@ -342,18 +348,22 @@ export class TableComponent extends BackboneAbstractComponent {
         }
       }
     });
-    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
-      this.selectRange.startPosition.columnIndex++;
+    if (selectRange.startPosition.cell === selectRange.endPosition.cell) {
+      selectRange.startPosition.columnIndex++;
     } else {
-      this.selectRange.startPosition.columnIndex++;
-      this.selectRange.endPosition.columnIndex++;
+      selectRange.startPosition.columnIndex++;
+      selectRange.endPosition.columnIndex++;
     }
     this.markAsDirtied();
   }
 
-  addColumnToRight() {
+  addColumnToRight(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.endPosition.columnIndex;
+    const index = selectRange.endPosition.columnIndex;
     cellMatrix.forEach(row => {
       const cell = row.cellsPosition[index];
       if (cell.offsetColumn + 1 < cell.cell.colspan) {
@@ -367,9 +377,13 @@ export class TableComponent extends BackboneAbstractComponent {
     this.markAsDirtied();
   }
 
-  addRowToTop() {
+  addRowToTop(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.startPosition.rowIndex;
+    const index = selectRange.startPosition.rowIndex;
 
     const row = cellMatrix[index];
     const tr: TableCell[] = [];
@@ -389,18 +403,22 @@ export class TableComponent extends BackboneAbstractComponent {
       });
     }
     this.config.bodies.splice(this.config.bodies.indexOf(row.cells), 0, tr);
-    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
-      this.selectRange.startPosition.rowIndex++;
+    if (selectRange.startPosition.cell === selectRange.endPosition.cell) {
+      selectRange.startPosition.rowIndex++;
     } else {
-      this.selectRange.startPosition.rowIndex++;
-      this.selectRange.endPosition.rowIndex++;
+      selectRange.startPosition.rowIndex++;
+      selectRange.endPosition.rowIndex++;
     }
     this.markAsDirtied();
   }
 
-  addRowToBottom() {
+  addRowToBottom(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.endPosition.rowIndex;
+    const index = selectRange.endPosition.rowIndex;
 
     const row = cellMatrix[index];
     const tr: TableCell[] = [];
@@ -419,11 +437,15 @@ export class TableComponent extends BackboneAbstractComponent {
   }
 
   mergeCells(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const minRow = this.selectRange.startPosition.rowIndex;
-    const minColumn = this.selectRange.startPosition.columnIndex;
-    const maxRow = this.selectRange.endPosition.rowIndex;
-    const maxColumn = this.selectRange.endPosition.columnIndex;
+    const minRow = selectRange.startPosition.rowIndex;
+    const minColumn = selectRange.startPosition.columnIndex;
+    const maxRow = selectRange.endPosition.rowIndex;
+    const maxColumn = selectRange.endPosition.columnIndex;
 
     const selectedCells = cellMatrix.slice(minRow, maxRow + 1)
       .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1).filter(c => {
@@ -454,16 +476,20 @@ export class TableComponent extends BackboneAbstractComponent {
     range.setStart(start.fragment, start.index);
     range.setEnd(end.fragment, end.index);
     selection.addRange(range);
-    this.selectCells(fragment, fragment);
+    this.normalize(fragment, fragment);
     this.markAsDirtied();
   }
 
   splitCells(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const minRow = this.selectRange.startPosition.rowIndex;
-    const minColumn = this.selectRange.startPosition.columnIndex;
-    const maxRow = this.selectRange.endPosition.rowIndex;
-    const maxColumn = this.selectRange.endPosition.columnIndex;
+    const minRow = selectRange.startPosition.rowIndex;
+    const minColumn = selectRange.startPosition.columnIndex;
+    const maxRow = selectRange.endPosition.rowIndex;
+    const maxColumn = selectRange.endPosition.columnIndex;
 
     const firstRange = selection.firstRange;
     cellMatrix.slice(minRow, maxRow + 1)
@@ -496,9 +522,13 @@ export class TableComponent extends BackboneAbstractComponent {
     this.markAsDirtied();
   }
 
-  deleteTopRow() {
+  deleteTopRow(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.startPosition.rowIndex;
+    const index = selectRange.startPosition.rowIndex;
 
     if (index === 0) {
       return;
@@ -522,18 +552,22 @@ export class TableComponent extends BackboneAbstractComponent {
       }
     });
     this.config.bodies.splice(this.config.bodies.indexOf(prevRow.cells), 1);
-    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
-      this.selectRange.startPosition.rowIndex--;
+    if (selectRange.startPosition.cell === selectRange.endPosition.cell) {
+      selectRange.startPosition.rowIndex--;
     } else {
-      this.selectRange.startPosition.rowIndex--;
-      this.selectRange.endPosition.rowIndex--;
+      selectRange.startPosition.rowIndex--;
+      selectRange.endPosition.rowIndex--;
     }
     this.markAsDirtied();
   }
 
-  deleteBottomRow() {
+  deleteBottomRow(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.endPosition.rowIndex;
+    const index = selectRange.endPosition.rowIndex;
     if (index === cellMatrix.length - 1) {
       return;
     }
@@ -562,9 +596,13 @@ export class TableComponent extends BackboneAbstractComponent {
     this.markAsDirtied();
   }
 
-  deleteLeftColumn() {
+  deleteLeftColumn(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.startPosition.columnIndex;
+    const index = selectRange.startPosition.columnIndex;
 
     if (index === 0) {
       return;
@@ -585,18 +623,22 @@ export class TableComponent extends BackboneAbstractComponent {
         }
       }
     });
-    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
-      this.selectRange.startPosition.columnIndex--;
+    if (selectRange.startPosition.cell === selectRange.endPosition.cell) {
+      selectRange.startPosition.columnIndex--;
     } else {
-      this.selectRange.startPosition.columnIndex--;
-      this.selectRange.endPosition.columnIndex--;
+      selectRange.startPosition.columnIndex--;
+      selectRange.endPosition.columnIndex--;
     }
     this.markAsDirtied();
   }
 
-  deleteRightColumn() {
+  deleteRightColumn(selection: TBSelection) {
+    const selectRange = this.selectCells(selection);
+    if (!selectRange) {
+      return;
+    }
     const cellMatrix = this.cellMatrix;
-    const index = this.selectRange.endPosition.columnIndex;
+    const index = selectRange.endPosition.columnIndex;
     if (index === cellMatrix[0].cellsPosition.length - 1) {
       return;
     }
@@ -648,6 +690,27 @@ export class TableComponent extends BackboneAbstractComponent {
       startPosition: startCellPosition,
       endPosition: endCellPosition
     }
+  }
+
+  private findFragment(source: Fragment) {
+    while (source) {
+      if (this.indexOf(source) > -1) {
+        return source;
+      }
+      source = source.parentComponent?.parentFragment;
+    }
+    return null;
+  }
+
+  private normalize(startCell: Fragment, endCell: Fragment) {
+    this._cellMatrix = this.serialize();
+    const p1 = this.findCellPosition(startCell);
+    const p2 = this.findCellPosition(endCell);
+    const minRow = Math.min(p1.minRow, p2.minRow);
+    const minColumn = Math.min(p1.minColumn, p2.minColumn);
+    const maxRow = Math.max(p1.maxRow, p2.maxRow);
+    const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
+    return this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
   }
 
   private findCellPosition(cell: Fragment): TableCellRect {

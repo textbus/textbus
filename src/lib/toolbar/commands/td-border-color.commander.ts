@@ -4,16 +4,11 @@ import {
   FormatAbstractData,
   FormatEffect,
 } from '../../core/_api';
-import { TableComponent, TableRange } from '../../components/table.component';
+import { TableComponent } from '../../components/table.component';
 import { tdBorderColorFormatter } from '../../formatter/td-border-color.formatter';
 
 export class TdBorderColorCommander implements Commander<string> {
   recordHistory = true;
-  private range: TableRange;
-
-  setEditRange(range: TableRange) {
-    this.range = range;
-  }
 
   command(c: CommandContext, color: string) {
     const {selection} = c;
@@ -24,11 +19,13 @@ export class TdBorderColorCommander implements Commander<string> {
       return;
     }
 
+    const range = context.selectCells(selection);
+
     const cellMatrix = context.cellMatrix;
-    const minRow = this.range.startPosition.rowIndex;
-    const minColumn = this.range.startPosition.columnIndex;
-    const maxRow = this.range.endPosition.rowIndex;
-    const maxColumn = this.range.endPosition.columnIndex;
+    const minRow = range.startPosition.rowIndex;
+    const minColumn = range.startPosition.columnIndex;
+    const maxRow = range.endPosition.rowIndex;
+    const maxColumn = range.endPosition.columnIndex;
 
     const selectedCells = cellMatrix.slice(minRow, maxRow + 1)
       .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1).filter(c => {
