@@ -2,7 +2,7 @@ import { Injector, Type } from '@tanbo/di';
 
 import {
   Component,
-  ComponentLoader, ComponentSetter, ComponentPresetPanelView,
+  ComponentLoader, ComponentSetter, ComponentControlPanelView,
   DivisionAbstractComponent,
   SlotRendererFn,
   VElement,
@@ -26,7 +26,7 @@ class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
     this.uploader = injector.get(FileUploader as Type<FileUploader>);
   }
 
-  create(instance: JumbotronComponent): ComponentPresetPanelView {
+  create(instance: JumbotronComponent): ComponentControlPanelView {
     const form = new Form({
       mini: true,
       items: [

@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di';
 import { createElement } from '../uikit/_api';
-import { ComponentPresetPanelView } from '../core/component-setter';
+import { ComponentControlPanelView } from '../core/component-setter';
 import { EditorController } from '../editor-controller';
 import { Subscription } from 'rxjs';
 
@@ -79,7 +79,7 @@ export class ControlPanel {
     }))
   }
 
-  showPanels(views: ComponentPresetPanelView[]) {
+  showPanels(views: ComponentControlPanelView[]) {
     this.titleGroup.innerHTML = '';
     this.viewWrapper.innerHTML = '';
     if (views.length === 0) {
