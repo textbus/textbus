@@ -727,14 +727,14 @@ class ContextMenu {
       }))
     })
 
-    const menuWidth = 180;
-    const menuHeight = itemCount * 26 + menus.length;
+    const menuWidth = 180 + 10;
+    const menuHeight = itemCount * 26 + menus.length * 10 + menus.length + 10;
 
     if (x + menuWidth >= clientWidth) {
       x -= menuWidth
     }
     if (y + menuHeight >= clientHeight) {
-      y -= menuHeight
+      y -= y + menuHeight - clientHeight;
     }
     Object.assign(this.elementRef.style, {
       left: x + 'px',
