@@ -101,7 +101,7 @@ export class Input {
   private cleanOldCursorTimer: any;
   private subs: Subscription[] = [];
 
-  private contextmenu = new ContextMenu();
+  private contextmenu: ContextMenu;
 
   private prevComponent: AbstractComponent = null;
 
@@ -115,6 +115,7 @@ export class Input {
               private parser: Parser,
               private selection: TBSelection,
               private history: HistoryManager) {
+    this.contextmenu = new ContextMenu(this.history);
     this.container.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
@@ -311,6 +312,7 @@ export class Input {
             disabled: this.selection.collapsed,
             action: () => {
               this.cut();
+              this.history.record();
             }
           }, {
             iconClasses: ['textbus-icon-select'],
@@ -426,7 +428,9 @@ export class Input {
           }
           div.innerHTML = html;
           this.handlePaste(div, text);
+
           document.body.removeChild(div);
+          this.history.record();
         });
       }),
       fromEvent(this.input, 'copy').subscribe(() => {
@@ -434,6 +438,7 @@ export class Input {
       }),
       fromEvent(this.input, 'cut').subscribe(() => {
         this.cut();
+        this.history.record();
       })
     );
   }
@@ -564,7 +569,6 @@ export class Input {
         return !event.stopped;
       })
     }
-    this.history.record();
     this.dispatchInputReadyEvent();
   }
 
@@ -607,6 +611,7 @@ export class Input {
               const div = document.createElement('div');
               div.innerHTML = text;
               this.handlePaste(div, div.innerText);
+              this.history.record();
             });
           })
         })
@@ -622,7 +627,6 @@ export class Input {
       range.deleteContents();
     });
 
-    this.history.record();
     this.dispatchInputReadyEvent();
   }
 
@@ -651,7 +655,7 @@ class ContextMenu {
 
   private eventFromSelf = false;
 
-  constructor() {
+  constructor(private history: HistoryManager) {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu']
     })
@@ -714,6 +718,7 @@ class ContextMenu {
             })
             btn.addEventListener('click', () => {
               item.action();
+              this.history.record();
               this.eventFromSelf = false;
             })
           }
