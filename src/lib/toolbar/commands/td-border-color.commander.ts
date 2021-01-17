@@ -4,15 +4,14 @@ import {
   FormatAbstractData,
   FormatEffect,
 } from '../../core/_api';
-import { TableEditRange } from './table-edit.commander';
-import { TableComponent } from '../../components/table.component';
+import { TableComponent, TableRange } from '../../components/table.component';
 import { tdBorderColorFormatter } from '../../formatter/td-border-color.formatter';
 
 export class TdBorderColorCommander implements Commander<string> {
   recordHistory = true;
-  private range: TableEditRange;
+  private range: TableRange;
 
-  setEditRange(range: TableEditRange) {
+  setEditRange(range: TableRange) {
     this.range = range;
   }
 

@@ -2,7 +2,7 @@ import { CubicBezier } from '@tanbo/bezier';
 import { Injector } from '@tanbo/di';
 
 import { Commander, Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
-import { TableEditCommander, TdBorderColorCommander } from '../toolbar/_api';
+import { TdBorderColorCommander } from '../toolbar/_api';
 import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
@@ -132,10 +132,11 @@ export class TableEditPlugin implements TBPlugin {
   }
 
   onApplyCommand(commander: Commander) {
-    if (commander instanceof TableEditCommander || commander instanceof TdBorderColorCommander) {
+    if (commander instanceof TdBorderColorCommander) {
       commander.setEditRange({
         startPosition: this.startPosition,
-        endPosition: this.endPosition
+        endPosition: this.endPosition,
+        selectedCells: this.selectedCells
       });
     }
   }
@@ -183,10 +184,10 @@ export class TableEditPlugin implements TBPlugin {
     const table = cell1Fragment.getContext(TableComponent);
     this.tableComponent = table;
 
-    const {startCellPosition, endCellPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);
+    const {startPosition, endPosition, selectedCells} = table.selectCells(cell1Fragment, cell2Fragment);
 
-    const startRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(startCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
-    const endRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(endCellPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
+    const startRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(startPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
+    const endRect = (this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(endPosition.cell.fragment)) as HTMLElement).getBoundingClientRect();
 
     const firstCellRect = this.startCell.getBoundingClientRect();
 
@@ -220,8 +221,8 @@ export class TableEditPlugin implements TBPlugin {
       this.firstMask.style.top = firstCellRect.top - startRect.top + 'px';
     }
 
-    this.startPosition = startCellPosition;
-    this.endPosition = endCellPosition;
+    this.startPosition = startPosition;
+    this.endPosition = endPosition;
     this.selectedCells = selectedCells;
   }
 

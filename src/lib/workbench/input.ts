@@ -292,36 +292,28 @@ export class Input {
         const rect = this.container.getBoundingClientRect();
         this.contextmenu.show([
           [{
-            icon: createElement('span', {
-              classes: ['textbus-icon-copy']
-            }),
+            iconClasses: ['textbus-icon-copy'],
             label: '复制',
             disabled: this.selection.collapsed,
             action: () => {
               this.copy();
             }
           }, {
-            icon: createElement('span', {
-              classes: ['textbus-icon-paste']
-            }),
+            iconClasses: ['textbus-icon-paste'],
             label: '粘贴',
             // disabled: true,
             action: () => {
               this.paste();
             }
           }, {
-            icon: createElement('span', {
-              classes: ['textbus-icon-cut']
-            }),
+            iconClasses: ['textbus-icon-cut'],
             label: '剪切',
             disabled: this.selection.collapsed,
             action: () => {
               this.cut();
             }
           }, {
-            icon: createElement('span', {
-              classes: ['textbus-icon-select']
-            }),
+            iconClasses: ['textbus-icon-select'],
             label: '全选',
             action: () => {
               this.selectAll();
@@ -572,6 +564,7 @@ export class Input {
         return !event.stopped;
       })
     }
+    this.history.record();
     this.dispatchInputReadyEvent();
   }
 
@@ -628,6 +621,8 @@ export class Input {
     this.selection.ranges.forEach(range => {
       range.deleteContents();
     });
+
+    this.history.record();
     this.dispatchInputReadyEvent();
   }
 
@@ -701,7 +696,11 @@ class ContextMenu {
             children: [
               createElement('span', {
                 classes: ['textbus-contextmenu-item-icon'],
-                children: item.icon ? [item.icon] : []
+                children: [
+                  createElement('span', {
+                    classes: item.iconClasses ? item.iconClasses : []
+                  })
+                ]
               }),
               createElement('span', {
                 classes: ['textbus-contextmenu-item-label'],

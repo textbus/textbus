@@ -9,7 +9,7 @@ export interface TBClipboard {
 }
 
 export interface ContextMenuAction {
-  icon?: HTMLElement;
+  iconClasses?: string[];
   label: string;
   disabled?: boolean;
   action(): void;

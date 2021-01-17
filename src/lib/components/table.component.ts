@@ -6,7 +6,14 @@ import {
   ComponentLoader,
   VElement,
   ViewData,
-  BackboneAbstractComponent, SlotRendererFn, Component, Interceptor, TBSelection, TBEvent, SingleSlotRenderFn
+  BackboneAbstractComponent,
+  SlotRendererFn,
+  Component,
+  Interceptor,
+  TBSelection,
+  TBEvent,
+  SingleSlotRenderFn,
+  ContextMenuAction
 } from '../core/_api';
 import { BrComponent } from './br.component';
 
@@ -48,8 +55,8 @@ export interface TableCellRect {
 }
 
 export interface TableRange {
-  startCellPosition: TableCellPosition;
-  endCellPosition: TableCellPosition;
+  startPosition: TableCellPosition;
+  endPosition: TableCellPosition;
   selectedCells: Fragment[];
 }
 
@@ -118,9 +125,76 @@ class TableComponentLoader implements ComponentLoader {
 
 class TableComponentInterceptor implements Interceptor<TableComponent> {
   private selection: TBSelection;
+  private injector: Injector;
 
   setup(injector: Injector) {
+    this.injector = injector;
     this.selection = injector.get(TBSelection);
+  }
+
+  onContextmenu(instance: TableComponent): ContextMenuAction[] {
+    const selection = this.selection;
+    return [{
+      iconClasses: ['textbus-icon-table-add-column-left'],
+      label: '在左边添加列',
+      action() {
+        instance.addColumnToLeft();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-add-column-right'],
+      label: '在右边添加列',
+      action() {
+        instance.addColumnToRight();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-add-row-top'],
+      label: '在上边添加行',
+      action() {
+        instance.addRowToTop();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-add-row-bottom'],
+      label: '在下边添加行',
+      action() {
+        instance.addRowToBottom();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-delete-column-left'],
+      label: '删除左边列',
+      action() {
+        instance.deleteLeftColumn();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-delete-column-right'],
+      label: '删除右边列',
+      action() {
+        instance.deleteRightColumn();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-delete-row-top'],
+      label: '删除上边行',
+      action() {
+        instance.deleteTopRow();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-delete-row-bottom'],
+      label: '删除下边行',
+      action() {
+        instance.deleteBottomRow();
+      }
+    }, {
+      iconClasses: ['textbus-icon-table-split-columns'],
+      label: '合并单元格',
+      action() {
+        instance.mergeCells(selection);
+      }
+    }, {
+      iconClasses: ['textbus-icon-table'],
+      label: '取消合并单元格',
+      action() {
+        instance.splitCells(selection);
+      }
+    }]
   }
 
   onEnter(event: TBEvent<TableComponent>) {
@@ -160,6 +234,8 @@ export class TableComponent extends BackboneAbstractComponent {
 
   private _cellMatrix: TableRowPosition[];
   private deleteMarkFragments: Fragment[] = [];
+
+  private selectRange: TableRange;
 
   constructor(public config: TableInitParams) {
     super('table')
@@ -247,7 +323,300 @@ export class TableComponent extends BackboneAbstractComponent {
     const minColumn = Math.min(p1.minColumn, p2.minColumn);
     const maxRow = Math.max(p1.maxRow, p2.maxRow);
     const maxColumn = Math.max(p1.maxColumn, p2.maxColumn);
-    return this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
+    this.selectRange = this.selectCellsByRange(minRow, minColumn, maxRow, maxColumn);
+    return this.selectRange;
+  }
+
+  addColumnToLeft() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.startPosition.columnIndex;
+    cellMatrix.forEach(row => {
+      const cell = row.cellsPosition[index];
+      if (index === 0) {
+        cell.row.unshift(TableComponent.createCell());
+      } else {
+        if (cell.offsetColumn === 0) {
+          cell.row.splice(cell.row.indexOf(cell.cell), 0, TableComponent.createCell());
+        } else if (cell.offsetRow === 0) {
+          cell.cell.colspan++;
+        }
+      }
+    });
+    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
+      this.selectRange.startPosition.columnIndex++;
+    } else {
+      this.selectRange.startPosition.columnIndex++;
+      this.selectRange.endPosition.columnIndex++;
+    }
+    this.markAsDirtied();
+  }
+
+  addColumnToRight() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.endPosition.columnIndex;
+    cellMatrix.forEach(row => {
+      const cell = row.cellsPosition[index];
+      if (cell.offsetColumn + 1 < cell.cell.colspan) {
+        if (cell.offsetRow === 0) {
+          cell.cell.colspan++;
+        }
+      } else {
+        cell.row.splice(cell.row.indexOf(cell.cell) + 1, 0, TableComponent.createCell());
+      }
+    });
+    this.markAsDirtied();
+  }
+
+  addRowToTop() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.startPosition.rowIndex;
+
+    const row = cellMatrix[index];
+    const tr: TableCell[] = [];
+    if (index === 0) {
+      cellMatrix[0].cells.forEach(() => {
+        tr.push(TableComponent.createCell());
+      });
+    } else {
+      row.cellsPosition.forEach(cell => {
+        if (cell.offsetRow > 0) {
+          if (cell.offsetColumn === 0) {
+            cell.cell.rowspan++;
+          }
+        } else {
+          tr.push(TableComponent.createCell());
+        }
+      });
+    }
+    this.config.bodies.splice(this.config.bodies.indexOf(row.cells), 0, tr);
+    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
+      this.selectRange.startPosition.rowIndex++;
+    } else {
+      this.selectRange.startPosition.rowIndex++;
+      this.selectRange.endPosition.rowIndex++;
+    }
+    this.markAsDirtied();
+  }
+
+  addRowToBottom() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.endPosition.rowIndex;
+
+    const row = cellMatrix[index];
+    const tr: TableCell[] = [];
+
+    row.cellsPosition.forEach(cell => {
+      if (cell.offsetRow < cell.cell.rowspan - 1) {
+        if (cell.offsetColumn === 0) {
+          cell.cell.rowspan++;
+        }
+      } else {
+        tr.push(TableComponent.createCell());
+      }
+    });
+    this.config.bodies.splice(this.config.bodies.indexOf(row.cells) + 1, 0, tr);
+    this.markAsDirtied();
+  }
+
+  mergeCells(selection: TBSelection) {
+    const cellMatrix = this.cellMatrix;
+    const minRow = this.selectRange.startPosition.rowIndex;
+    const minColumn = this.selectRange.startPosition.columnIndex;
+    const maxRow = this.selectRange.endPosition.rowIndex;
+    const maxColumn = this.selectRange.endPosition.columnIndex;
+
+    const selectedCells = cellMatrix.slice(minRow, maxRow + 1)
+      .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1).filter(c => {
+        return c.offsetRow === 0 && c.offsetColumn === 0;
+      }))
+      .reduce((p, n) => {
+        return p.concat(n);
+      });
+    const newNode = selectedCells.shift();
+    newNode.cell.rowspan = maxRow - minRow + 1;
+    newNode.cell.colspan = maxColumn - minColumn + 1;
+
+    selectedCells.forEach(cell => {
+      const index = cell.row.indexOf(cell.cell);
+      if (index > -1) {
+        cell.row.splice(index, 1);
+        if (cell.row.length === 0) {
+          this.config.bodies.splice(this.config.bodies.indexOf(cell.row), 1);
+        }
+      }
+    });
+
+    const range = selection.firstRange;
+    selection.removeAllRanges();
+    const fragment = newNode.cell.fragment;
+    const start = range.findFirstPosition(fragment);
+    const end = range.findLastChild(fragment);
+    range.setStart(start.fragment, start.index);
+    range.setEnd(end.fragment, end.index);
+    selection.addRange(range);
+    this.selectCells(fragment, fragment);
+    this.markAsDirtied();
+  }
+
+  splitCells(selection: TBSelection) {
+    const cellMatrix = this.cellMatrix;
+    const minRow = this.selectRange.startPosition.rowIndex;
+    const minColumn = this.selectRange.startPosition.columnIndex;
+    const maxRow = this.selectRange.endPosition.rowIndex;
+    const maxColumn = this.selectRange.endPosition.columnIndex;
+
+    const firstRange = selection.firstRange;
+    cellMatrix.slice(minRow, maxRow + 1)
+      .map(row => row.cellsPosition.slice(minColumn, maxColumn + 1))
+      .reduce((p, c) => {
+        return p.concat(c);
+      }, []).forEach(cell => {
+      if (cell.offsetRow !== 0 || cell.offsetColumn !== 0) {
+        cell.cell.colspan = 1;
+        cell.cell.rowspan = 1;
+        const newCellFragment = TableComponent.createCell();
+
+        if (!this.config.bodies.includes(cell.row)) {
+          this.config.bodies.splice(cell.rowIndex, 0, cell.row);
+        }
+
+        if (cell.afterCell) {
+          const index = cell.row.indexOf(cell.cell);
+          cell.row.splice(index + 1, 0, newCellFragment);
+        } else {
+          cell.row.push(newCellFragment);
+        }
+        const range = firstRange.clone();
+        range.startIndex = 0;
+        range.endIndex = 1;
+        range.startFragment = range.endFragment = newCellFragment.fragment;
+        selection.addRange(range);
+      }
+    });
+    this.markAsDirtied();
+  }
+
+  deleteTopRow() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.startPosition.rowIndex;
+
+    if (index === 0) {
+      return;
+    }
+    const prevRow = cellMatrix[index - 1];
+    prevRow.cellsPosition.forEach((cell, cellIndex) => {
+      if (cell.offsetColumn === 0) {
+        if (cell.offsetRow === 0 && cell.cell.rowspan > 1) {
+          const newCellFragment = TableComponent.createCell(cell.cell.rowspan - 1,
+            cell.cell.colspan);
+          const newPosition = cellMatrix[index].cellsPosition[cellIndex];
+          if (newPosition.afterCell) {
+            const index = newPosition.row.indexOf(newPosition.afterCell);
+            newPosition.row.splice(index, 0, newCellFragment);
+          } else {
+            newPosition.row.push(newCellFragment);
+          }
+        } else {
+          cell.cell.rowspan--;
+        }
+      }
+    });
+    this.config.bodies.splice(this.config.bodies.indexOf(prevRow.cells), 1);
+    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
+      this.selectRange.startPosition.rowIndex--;
+    } else {
+      this.selectRange.startPosition.rowIndex--;
+      this.selectRange.endPosition.rowIndex--;
+    }
+    this.markAsDirtied();
+  }
+
+  deleteBottomRow() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.endPosition.rowIndex;
+    if (index === cellMatrix.length - 1) {
+      return;
+    }
+    const nextRow = cellMatrix[index + 1];
+    nextRow.cellsPosition.forEach((cell, cellIndex) => {
+      if (cell.offsetColumn === 0) {
+        if (cell.offsetRow > 0) {
+          cell.cell.rowspan--;
+        } else if (cell.offsetRow === 0) {
+          if (cell.cell.rowspan > 1) {
+
+            const newPosition = cellMatrix[index + 2].cellsPosition[cellIndex];
+            const newCellFragment = TableComponent.createCell(cell.cell.rowspan - 1,
+              cell.cell.colspan);
+
+            if (newPosition.afterCell) {
+              newPosition.row.splice(newPosition.row.indexOf(newPosition.afterCell), 0, newCellFragment);
+            } else {
+              newPosition.row.push(newCellFragment);
+            }
+          }
+        }
+      }
+    });
+    this.config.bodies.splice(this.config.bodies.indexOf(nextRow.cells), 1);
+    this.markAsDirtied();
+  }
+
+  deleteLeftColumn() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.startPosition.columnIndex;
+
+    if (index === 0) {
+      return;
+    }
+    cellMatrix.forEach(row => {
+      const cell = row.cellsPosition[index - 1];
+      if (cell.offsetRow === 0) {
+        if (cell.offsetColumn > 0) {
+          cell.cell.colspan--;
+        } else {
+          const index = cell.row.indexOf(cell.cell);
+          if (cell.cell.colspan > 1) {
+            const newCellFragment = TableComponent.createCell(cell.cell.rowspan, cell.cell.colspan - 1);
+            cell.row.splice(cell.row.indexOf(cell.cell), 1, newCellFragment);
+          } else {
+            cell.row.splice(index, 1);
+          }
+        }
+      }
+    });
+    if (this.selectRange.startPosition.cell === this.selectRange.endPosition.cell) {
+      this.selectRange.startPosition.columnIndex--;
+    } else {
+      this.selectRange.startPosition.columnIndex--;
+      this.selectRange.endPosition.columnIndex--;
+    }
+    this.markAsDirtied();
+  }
+
+  deleteRightColumn() {
+    const cellMatrix = this.cellMatrix;
+    const index = this.selectRange.endPosition.columnIndex;
+    if (index === cellMatrix[0].cellsPosition.length - 1) {
+      return;
+    }
+    cellMatrix.forEach(row => {
+      const cell = row.cellsPosition[index + 1];
+      if (cell.offsetRow === 0) {
+        if (cell.offsetColumn > 0) {
+          cell.cell.colspan--;
+        } else {
+          const index = cell.row.indexOf(cell.cell);
+          if (cell.cell.colspan > 1) {
+            const newCellFragment = TableComponent.createCell(cell.cell.rowspan, cell.cell.colspan - 1);
+            cell.row.splice(index, 1, newCellFragment);
+          } else {
+            cell.row.splice(index, 1);
+          }
+        }
+      }
+    });
+    this.markAsDirtied();
   }
 
   private selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number): TableRange {
@@ -276,8 +645,8 @@ export class TableComponent extends BackboneAbstractComponent {
 
     return {
       selectedCells: Array.from(new Set(selectedCells)),
-      startCellPosition,
-      endCellPosition
+      startPosition: startCellPosition,
+      endPosition: endCellPosition
     }
   }
 
@@ -419,5 +788,15 @@ export class TableComponent extends BackboneAbstractComponent {
       col.fragment.append(new BrComponent());
     }
     return td;
+  }
+
+  private static createCell(rowspan = 1, colspan = 1) {
+    const fragment = new Fragment();
+    fragment.append(new BrComponent());
+    return {
+      rowspan,
+      colspan,
+      fragment
+    };
   }
 }
