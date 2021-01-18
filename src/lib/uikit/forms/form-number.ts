@@ -1,8 +1,8 @@
 import { Subscription } from 'rxjs';
 
-import { AttrState, FormTextFieldParams, FormItem, FileUploader } from './help';
+import { AttrState, FormItem, FileUploader, FormNumberParams } from './help';
 
-export class FormTextField implements FormItem<string> {
+export class FormTextField implements FormItem<number> {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
@@ -11,46 +11,19 @@ export class FormTextField implements FormItem<string> {
   private readonly feedbackEle: HTMLElement;
   private uploader: FileUploader;
 
-  constructor(private config: FormTextFieldParams) {
+  constructor(private config: FormNumberParams) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `
     <div class="textbus-control-label">${config.label}</div>
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
-        <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
-      `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
-        <span class="textbus-icon-upload"></span>
-       </button>`
-      : ''
-    }
+        <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="number" value="${config.value || ''}">
      </div>
      <div class="textbus-control-feedback-invalid"></div>
    </div>`;
     this.input = this.elementRef.querySelector('input');
     this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
-    if (config.canUpload) {
-      this.btn = this.elementRef.querySelector('button');
-      this.btn.addEventListener('click', () => {
-        this.btn.classList.add('textbus-btn-loading');
-        this.input.disabled = true;
-        this.btn.children[0].className = 'textbus-icon-loading';
-        if (this.sub) {
-          this.sub.unsubscribe();
-        }
-        this.sub = this.uploader.upload(this.config.uploadType).subscribe({
-          next: url => {
-            this.update(url);
-          },
-          error: () => {
-            this.uploaded();
-          },
-          complete: () => {
-            this.uploaded();
-          }
-        });
-      });
-    }
   }
 
   useUploader(uploader: FileUploader) {
@@ -70,10 +43,10 @@ export class FormTextField implements FormItem<string> {
     }
   }
 
-  getAttr(): AttrState<string> {
+  getAttr(): AttrState<number> {
     return {
       name: this.config.name,
-      value: this.input.value
+      value: this.input.value as any as number
     }
   }
 

@@ -1,4 +1,4 @@
-import { Switch, AttrState, FormItem } from './help';
+import { FormSwitchParams, AttrState, FormItem } from './help';
 
 export class FormSwitch implements FormItem<boolean> {
   elementRef = document.createElement('div');
@@ -6,7 +6,7 @@ export class FormSwitch implements FormItem<boolean> {
   private input: HTMLInputElement;
   private readonly feedbackEle: HTMLElement;
 
-  constructor(private config: Switch) {
+  constructor(private config: FormSwitchParams) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `

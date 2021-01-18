@@ -1,4 +1,4 @@
-import { AttrState, FormItem, Select } from './help';
+import { AttrState, FormItem, FormSelectParams } from './help';
 
 export class FormSelect implements FormItem<any> {
   elementRef = document.createElement('div');
@@ -6,7 +6,7 @@ export class FormSelect implements FormItem<any> {
   private select: HTMLSelectElement;
   private readonly feedbackEle: HTMLElement;
 
-  constructor(private config: Select) {
+  constructor(private config: FormSelectParams) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `

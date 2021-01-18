@@ -1,11 +1,11 @@
-import { Hidden, AttrState, FormItem } from './help';
+import { FormHiddenParams, AttrState, FormItem } from './help';
 
 export class FormHidden implements FormItem<any> {
   readonly elementRef = document.createElement('input');
   readonly name: string;
   private readonly value: string | boolean | number;
 
-  constructor(private config: Hidden) {
+  constructor(private config: FormHiddenParams) {
     this.name = config.name;
     this.value = config.value;
     this.elementRef.type = 'hidden';

@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-export interface TextField {
+export interface FormTextFieldParams {
   label: string;
   name: string;
   placeholder: string;
@@ -12,21 +12,29 @@ export interface TextField {
   validateFn?(value: any): string
 }
 
-export interface Radio {
+export interface FormNumberParams {
+  label: string;
+  name: string;
+  placeholder: string;
+  value?: string;
+  validateFn?(value: any): string;
+}
+
+export interface FormRadioParams {
   label: string;
   value: string | number | boolean;
   default?: boolean;
 }
 
-export interface RadioGroup {
+export interface FormRadioGroupParams {
   label: string;
   name: string;
-  values: Radio[];
+  values: FormRadioParams[];
 
   validateFn?(value: any): string
 }
 
-export interface Switch {
+export interface FormSwitchParams {
   label: string;
   name: string;
   checked: boolean;
@@ -34,21 +42,21 @@ export interface Switch {
   validateFn?(value: any): string
 }
 
-export interface Hidden {
+export interface FormHiddenParams {
   name: string;
   value: string | number | boolean;
 }
 
-export interface SelectOption {
+export interface FormSelectOptionParams {
   label: string;
   value: string;
   selected?: boolean;
 }
 
-export interface Select {
+export interface FormSelectParams {
   label: string;
   name: string;
-  options: SelectOption[];
+  options: FormSelectOptionParams[];
 
   validateFn?(value: any): string
 }
