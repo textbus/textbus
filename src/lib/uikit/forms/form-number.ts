@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 
 import { AttrState, FormItem, FileUploader, FormNumberParams } from './help';
 
-export class FormTextField implements FormItem<number> {
+export class FormNumber implements FormItem<number> {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
