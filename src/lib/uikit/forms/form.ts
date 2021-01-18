@@ -15,38 +15,34 @@ export class Form implements FormViewer {
   onComplete: Observable<Map<string, any>>;
   onClose: Observable<void>;
 
-  readonly elementRef = createElement('form', {
-    attrs: {
-      novalidate: true,
-      autocomplete: 'off'
-    }
-  });
+  readonly elementRef: HTMLFormElement;
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
   private footer: HTMLElement;
+  private groups: HTMLElement;
 
   constructor(private config: FormConfig) {
     this.onComplete = this.completeEvent.asObservable();
     this.onClose = this.closeEvent.asObservable();
-    this.elementRef.classList.add(config.mini ? 'textbus-toolbar-form' : 'textbus-form');
+    this.elementRef = createElement('form', {
+      classes: [config.mini ? 'textbus-toolbar-form' : 'textbus-form'],
+      attrs: {
+        novalidate: true,
+        autocomplete: 'off'
+      }
+    }) as HTMLFormElement;
     if (config.title) {
       this.elementRef.appendChild(createElement('h3', {
         classes: ['textbus-form-title'],
         children: [createTextNode(config.title)]
       }))
     }
-    if (config.mini) {
-      config.items.forEach(item => {
-        this.elementRef.appendChild(item.elementRef);
-      });
-    } else {
-      this.elementRef.appendChild(createElement('div', {
-        classes: ['textbus-form-body'],
-        children: config.items.map(item => {
-          return item.elementRef;
-        })
-      }));
-    }
+    this.elementRef.appendChild(this.groups = createElement('div', {
+      classes: config.mini ? [] : ['textbus-form-body'],
+      children: config.items.map(item => {
+        return item.elementRef;
+      })
+    }));
 
     this.elementRef.setAttribute('novalidate', 'novalidate');
 
@@ -110,7 +106,7 @@ export class Form implements FormViewer {
       }
     }
     this.config.items.push(item);
-    this.elementRef.insertBefore(item.elementRef, this.footer);
+    this.groups.appendChild(item.elementRef);
   }
 
   removeItem(item: FormItem) {
