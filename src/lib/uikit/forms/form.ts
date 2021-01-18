@@ -5,9 +5,9 @@ import { FormViewer } from '../../toolbar/toolkit/_api';
 import { FormatAbstractData, BranchAbstractComponent, LeafAbstractComponent } from '../../core/_api';
 import { createElement, createTextNode } from '../uikit';
 
-export interface FormConfig<T> {
+export interface FormConfig {
   title?: string;
-  items: Array<FormItem<T>>;
+  items: Array<FormItem>;
   mini?: boolean;
 }
 
@@ -23,8 +23,9 @@ export class Form implements FormViewer {
   });
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
+  private footer: HTMLElement;
 
-  constructor(private config: FormConfig<any>) {
+  constructor(private config: FormConfig) {
     this.onComplete = this.completeEvent.asObservable();
     this.onClose = this.closeEvent.asObservable();
     this.elementRef.classList.add(config.mini ? 'textbus-toolbar-form' : 'textbus-form');
@@ -79,7 +80,7 @@ export class Form implements FormViewer {
         return cancelBtn;
       })()
     ];
-    this.elementRef.appendChild(createElement('div', {
+    this.elementRef.appendChild(this.footer = createElement('div', {
       classes: ['textbus-form-footer'],
       children: btns
     }));
@@ -97,6 +98,27 @@ export class Form implements FormViewer {
       }
       this.completeEvent.next(map);
     });
+  }
+
+  addItem(item: FormItem, index?: number) {
+    if (typeof index === 'number') {
+      const next = this.config.items[index];
+      if (next) {
+        this.config.items.splice(index, 0, item);
+        this.elementRef.insertBefore(item.elementRef, next.elementRef);
+        return
+      }
+    }
+    this.config.items.push(item);
+    this.elementRef.insertBefore(item.elementRef, this.footer);
+  }
+
+  removeItem(item: FormItem) {
+    const index = this.config.items.indexOf(item);
+    if (index > -1) {
+      this.config.items.splice(index, 1);
+      item.elementRef.parentNode?.removeChild(item.elementRef);
+    }
   }
 
   reset(): void {

@@ -66,7 +66,7 @@ export interface AttrState<T> {
   value: T;
 }
 
-export interface FormItem<T> {
+export interface FormItem<T = any> {
   elementRef: HTMLElement;
   name: string;
 
