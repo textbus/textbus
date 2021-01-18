@@ -16,7 +16,7 @@ export interface FormNumberParams {
   label: string;
   name: string;
   placeholder: string;
-  value?: string;
+  value?: number;
   validateFn?(value: any): string;
 }
 

@@ -1,15 +1,10 @@
-import { Subscription } from 'rxjs';
-
-import { AttrState, FormItem, FileUploader, FormNumberParams } from './help';
+import { AttrState, FormItem, FormNumberParams } from './help';
 
 export class FormNumber implements FormItem<number> {
   elementRef = document.createElement('div');
   name: string;
   private input: HTMLInputElement;
-  private sub: Subscription;
-  private readonly btn: HTMLButtonElement;
   private readonly feedbackEle: HTMLElement;
-  private uploader: FileUploader;
 
   constructor(private config: FormNumberParams) {
     this.name = config.name;
@@ -26,18 +21,13 @@ export class FormNumber implements FormItem<number> {
     this.feedbackEle = this.elementRef.querySelector('.textbus-control-feedback-invalid');
   }
 
-  useUploader(uploader: FileUploader) {
-    this.uploader = uploader;
-  }
-
   reset() {
-    this.input.value = this.config.value;
+    this.input.value = this.config.value as any;
   }
 
   update(value?: any): void {
-    this.uploaded();
     if ([undefined, null].includes(value)) {
-      this.input.value = this.config.value || '';
+      this.input.value = this.config.value as any;
     } else {
       this.input.value = value;
     }
@@ -54,16 +44,5 @@ export class FormNumber implements FormItem<number> {
     const feedback = this.config.validateFn?.(this.getAttr().value);
     this.feedbackEle.innerText = feedback || '';
     return !feedback;
-  }
-
-  private uploaded() {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
-    this.input.disabled = false;
-    if (this.btn) {
-      this.btn.classList.remove('textbus-btn-loading');
-      this.btn.children[0].className = 'textbus-icon-upload';
-    }
   }
 }
