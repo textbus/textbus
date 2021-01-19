@@ -25,6 +25,10 @@ export class OutputRenderer {
   private fragmentContentContainerMapping = new WeakMap<Fragment, VElement>();
   private rootVElement: VElement = new VElement('body');
 
+  /**
+   * 渲染
+   * @param fragment
+   */
   render(fragment: Fragment): VElement {
     if (fragment.outputChanged) {
       if (fragment.outputDirty) {

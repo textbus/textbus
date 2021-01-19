@@ -59,7 +59,7 @@ export class Viewer {
   /**源码模式样式 */
   private sourceCodeModeStyleSheet = document.createElement('style');
 
-
+  /**查看源码组件 */
   private sourceCodeComponent = new PreComponent('HTML', '');
   private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<Injector>();
