@@ -17,6 +17,7 @@ class BrComponentLoader implements ComponentLoader {
   loader: new BrComponentLoader()
 })
 export class BrComponent extends LeafAbstractComponent {
+  block = false;
   constructor() {
     super('br');
   }

@@ -301,6 +301,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
  * 需要注意的是，组件内部的结构是不可以通过用户编辑的。
  */
 export abstract class LeafAbstractComponent extends AbstractComponent {
+  abstract get block(): boolean;
   protected constructor(tagName: string) {
     super(tagName);
   }

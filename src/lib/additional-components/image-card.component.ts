@@ -113,6 +113,7 @@ tb-image-card > p {
   ]
 })
 export class ImageCardComponent extends BackboneAbstractComponent {
+  block = false;
   readonly imgFragment: Fragment;
   readonly descFragment: Fragment;
 

@@ -101,7 +101,7 @@ export class ComponentStage {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
     const parentComponent = startFragment.parentComponent;
-    if (component instanceof LeafAbstractComponent) {
+    if (component instanceof LeafAbstractComponent && !component.block) {
       startFragment.insert(component, firstRange.endIndex);
     } else {
       if (parentComponent instanceof DivisionAbstractComponent) {

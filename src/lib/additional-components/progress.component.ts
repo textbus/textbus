@@ -115,6 +115,7 @@ tb-progress[type=gray] > div {
   ]
 })
 export class ProgressComponent extends LeafAbstractComponent {
+  block = true;
   constructor(private config: ProgressConfig) {
     super('tb-progress');
   }

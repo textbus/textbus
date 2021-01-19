@@ -18,6 +18,7 @@ class AudioComponentLoader implements ComponentLoader {
   loader: new AudioComponentLoader()
 })
 export class AudioComponent extends LeafAbstractComponent {
+  block = false;
 
   constructor(public src: string, public autoplay: boolean, public controls: boolean) {
     super('audio');
