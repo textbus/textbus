@@ -5,6 +5,7 @@ import { AbstractComponent } from './component';
 export interface ComponentControlPanelView {
   title: string;
   view: HTMLElement;
+  onDestroy?(): void;
 }
 
 export interface ComponentSetter<T extends AbstractComponent> {

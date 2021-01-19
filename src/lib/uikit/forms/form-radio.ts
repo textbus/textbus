@@ -1,4 +1,4 @@
-import { RadioGroup, AttrState, FormItem } from './help';
+import { FormRadioGroupParams, AttrState, FormItem } from './help';
 
 export class FormRadio implements FormItem<any> {
   elementRef = document.createElement('div');
@@ -6,7 +6,7 @@ export class FormRadio implements FormItem<any> {
   private readonly inputs: HTMLInputElement[];
   private readonly feedbackEle: HTMLElement;
 
-  constructor(private config: RadioGroup) {
+  constructor(private config: FormRadioGroupParams) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `

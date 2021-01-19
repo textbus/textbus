@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 
-import { AttrState, TextField, FormItem, FileUploader } from './help';
+import { AttrState, FormTextFieldParams, FormItem, FileUploader } from './help';
 
 export class FormTextField implements FormItem<string> {
   elementRef = document.createElement('div');
@@ -11,7 +11,7 @@ export class FormTextField implements FormItem<string> {
   private readonly feedbackEle: HTMLElement;
   private uploader: FileUploader;
 
-  constructor(private config: TextField) {
+  constructor(private config: FormTextFieldParams) {
     this.name = config.name;
     this.elementRef.classList.add('textbus-form-group');
     this.elementRef.innerHTML = `

@@ -34,6 +34,8 @@ export class ControlPanel {
 
   private subs: Subscription[] = [];
 
+  private oldViews: ComponentControlPanelView[] = [];
+
   constructor(private editorController: EditorController) {
     this.elementRef = createElement('div', {
       classes: ['textbus-control-panel'],
@@ -80,6 +82,10 @@ export class ControlPanel {
   }
 
   showPanels(views: ComponentControlPanelView[]) {
+    this.oldViews.forEach(view => {
+      view.onDestroy?.()
+    });
+    this.oldViews = views;
     this.titleGroup.innerHTML = '';
     this.viewWrapper.innerHTML = '';
     if (views.length === 0) {

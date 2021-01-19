@@ -106,7 +106,8 @@ export class Renderer {
     if (fragment.changed) {
       const dirty = fragment.dirty;
       if (dirty) {
-        const root = this.rendingFragment(fragment, new VElement('body'))
+        const root = this.rendingFragment(fragment, new VElement('body'));
+        this.NVMappingTable.set(host, root);
         if (this.oldVDom) {
           this.diffAndUpdate(root, this.oldVDom, host);
         } else {
