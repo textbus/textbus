@@ -7,7 +7,7 @@ import {
   BackboneAbstractComponent,
   Fragment, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
-import { ComponentExample } from '../workbench/component-stage';
+import { ComponentCreator } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
 
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
@@ -164,10 +164,11 @@ export class ImageCardComponent extends BackboneAbstractComponent {
   }
 }
 
-export const imageCardComponentExample: ComponentExample = {
+export const imageCardComponentExample: ComponentCreator = {
   name: '卡片',
+  category: 'TextBus',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f90"/><stop offset="100%" stop-color="#fff"/></linearGradient></defs><g><rect fill="url(#bg)" height="50" width="100%"/></g><g><path fill="#f00" opacity="0.2" d="M81.25 28.125c0 5.178-4.197 9.375-9.375 9.375s-9.375-4.197-9.375-9.375 4.197-9.375 9.375-9.375 9.375 4.197 9.375 9.375z"></path><path fill="#0e0" opacity="0.3" d="M87.5 81.25h-75v-12.5l21.875-37.5 25 31.25h6.25l21.875-18.75z"></path></g><g><rect fill="#fff" height="20" width="100%" y="50"></rect></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="12" y="63" x="50%" text-anchor="middle" stroke-width="0" stroke="#000" fill="#000000">描述文字</text></g></svg>')}" alt="">`,
-  componentFactory() {
+  factory() {
     const imgFragment = new Fragment();
     imgFragment.append(new ImageComponent(defaultImageSrc));
     const descFragment = new Fragment();
