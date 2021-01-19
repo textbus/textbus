@@ -76,6 +76,7 @@ export class ControlPanel {
     });
     this.oldViews = views;
     if (views.length === 0) {
+      this.tab.show([]);
       this.elementRef.classList.remove('textbus-control-panel-show')
       return
     }
