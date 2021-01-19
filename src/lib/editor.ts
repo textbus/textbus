@@ -89,7 +89,7 @@ export class Editor<T = any> {
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
-
+  /** 根元素 */
   readonly elementRef = document.createElement('div');
 
   readonly stateController: EditorController;
@@ -104,13 +104,19 @@ export class Editor<T = any> {
     return this.stateController.readonly;
   }
 
+  /**编辑器container */
   private readonly container: HTMLElement;
 
+  /**是否已准备好 */
   private readyState = false;
+  /**任务 */
   private tasks: Array<() => void> = [];
 
+  /**当TextBus准备就绪时 触发 */
   private readyEvent = new Subject<void>();
+
   private viewer: Viewer;
+  /**根注入器 */
   private readonly rootInjector: Injector;
 
   private subs: Subscription[] = [];

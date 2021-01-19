@@ -25,10 +25,17 @@ import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
 
 declare const ResizeObserver: any;
 
+
 @Injectable()
+/**
+ * 富文本视图层
+ */
 export class Viewer {
+  /**当准备就绪触发 */
   onReady: Observable<Injector>;
+  /**当视图更新时触发 */
   onViewUpdated: Observable<void>;
+  /**iframe元素主要用于样式隔离 */
   elementRef = document.createElement('iframe');
 
   set sourceCodeMode(b: boolean) {
@@ -43,10 +50,13 @@ export class Viewer {
   }
 
   private get contentDocument() {
+    /**返回DOM对象 */
     return this.elementRef.contentDocument;
   }
 
+  /**是否是源码模式 */
   private _sourceCodeMode = false;
+  /**源码模式样式 */
   private sourceCodeModeStyleSheet = document.createElement('style');
 
 
