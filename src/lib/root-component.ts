@@ -163,62 +163,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   onDelete() {
     this.selection.ranges.forEach(range => {
-      let prevPosition = range.getPreviousPosition();
-      if (range.startIndex > 0) {
-        range.setStart(prevPosition.fragment, prevPosition.index);
-        range.deleteContents();
-        const commonAncestorFragment = range.commonAncestorFragment;
-        const len = commonAncestorFragment.contentLength;
-        if (range.startIndex === 0 && len === 0) {
-          commonAncestorFragment.append(new BrComponent());
-        } else if (range.startIndex === len) {
-          const last = commonAncestorFragment.getContentAtIndex(len - 1);
-          if (last instanceof BrComponent) {
-            commonAncestorFragment.append(new BrComponent());
-          } else if (last instanceof AbstractComponent && !(last instanceof LeafAbstractComponent)) {
-            prevPosition = range.getPreviousPosition();
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
-          }
-        }
-
-      } else {
-        while (prevPosition.fragment.contentLength === 0) {
-          range.deleteEmptyTree(prevPosition.fragment);
-          let position = range.getPreviousPosition();
-          if (prevPosition.fragment === position.fragment && prevPosition.index === position.index) {
-            position = range.getNextPosition();
-            break;
-          }
-          prevPosition = position;
-        }
-
-        const firstContent = range.startFragment.getContentAtIndex(0);
-        if (firstContent instanceof BrComponent) {
-          if (prevPosition.fragment === range.startFragment && prevPosition.index === range.startIndex) {
-            prevPosition = range.getNextPosition();
-          }
-          range.startFragment.cut(0, 1);
-          if (range.startFragment.contentLength === 0) {
-            range.deleteEmptyTree(range.startFragment, this.rootComponent.slot);
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
-          }
-        } else {
-          range.setStart(prevPosition.fragment, prevPosition.index);
-          range.deleteContents();
-        }
-        while (prevPosition.fragment.contentLength === 0) {
-          const position = range.getNextPosition();
-          if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
-            break;
-          }
-          range.deleteEmptyTree(prevPosition.fragment, this.rootComponent.slot);
-          range.setStart(position.fragment, position.index);
-          range.collapse();
-          prevPosition = position;
-        }
-      }
+      range.delete();
     });
   }
 

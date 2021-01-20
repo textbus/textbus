@@ -162,6 +162,14 @@ export class Renderer {
     return this.fragmentContentContainerMapping.get(fragment);
   }
 
+  getComponentRootVNode(component: AbstractComponent): VElement {
+    return this.componentVDomCacheMap.get(component);
+  }
+
+  getComponentRootNativeNode(component: AbstractComponent): HTMLElement {
+    return this.getNativeNodeByVDom(this.getComponentRootVNode(component)) as HTMLElement;
+  }
+
   private diffAndUpdate(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
     if (!host) {
       if (vDom.equal(oldVDom)) {
