@@ -72,11 +72,15 @@ export class TBRange {
     if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       startPosition && endPosition) {
       const start = TBRange.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition, renderer);
-      this.startFragment = start.fragment;
-      this.startIndex = start.index
+      if (start) {
+        this.startFragment = start.fragment;
+        this.startIndex = start.index
+      }
       const end = TBRange.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition, renderer);
-      this.endFragment = end.fragment;
-      this.endIndex = end.index;
+      if (end) {
+        this.endFragment = end.fragment;
+        this.endIndex = end.index;
+      }
     }
   }
 
@@ -1430,9 +1434,15 @@ export class TBRange {
       }
     } else if (container.nodeType === Node.ELEMENT_NODE) {
       const childNodes = container.childNodes;
+      if (childNodes.length === 0) {
+        return null;
+      }
       if (childNodes.length === offset) {
         const child = childNodes[childNodes.length - 1];
         const childPosition = renderer.getPositionByNode(child);
+        if (!childPosition) {
+          return null;
+        }
         return {
           fragment: childPosition.fragment,
           index: childPosition.endIndex
@@ -1440,6 +1450,9 @@ export class TBRange {
       } else {
         const child = childNodes[offset];
         const childPosition = renderer.getPositionByNode(child);
+        if (!childPosition) {
+          return null;
+        }
         return {
           fragment: childPosition.fragment,
           index: childPosition.startIndex

@@ -155,6 +155,14 @@ export class Input {
       this.hide();
       return;
     }
+    if (this.selection.collapsed) {
+      const startContainer = this.selection.firstRange.nativeRange.startContainer;
+      const position = this.renderer.getPositionByNode(startContainer);
+      if (!position || position && startContainer.nodeType === Node.ELEMENT_NODE && startContainer.childNodes.length === 0) {
+        this.hide();
+        return;
+      }
+    }
     this.updateCursorPosition();
     if (this.selection.collapsed) {
       this.show();
