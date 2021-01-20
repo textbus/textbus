@@ -6,10 +6,11 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent
+  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction
 } from './core/_api';
 import { Input } from './workbench/input';
-import { BrComponent } from './components/br.component';
+import { BrComponent, BlockComponent } from './components/_api';
+import { EditorController } from './editor-controller';
 
 class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
@@ -19,12 +20,33 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selection: TBSelection;
   private input: Input;
   private rootComponent: RootComponent;
+  private editorController: EditorController;
 
   setup(injector: Injector) {
     this.injector = injector;
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
     this.rootComponent = injector.get(RootComponent);
+    this.editorController = injector.get(EditorController);
+  }
+
+  onContextmenu(): ContextMenuAction[] {
+    if (this.editorController.sourceCodeMode) {
+      return [];
+    }
+    return [{
+      iconClasses: ['textbus-icon-insert-paragraph-before'],
+      label: '在前面插入段落',
+      action: () => {
+        this.insertParagraph(true)
+      }
+    }, {
+      iconClasses: ['textbus-icon-insert-paragraph-after'],
+      label: '在后面插入段落',
+      action: () => {
+        this.insertParagraph(false)
+      }
+    }]
   }
 
   onInputReady() {
@@ -165,6 +187,33 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     this.selection.ranges.forEach(range => {
       range.delete();
     });
+  }
+
+  private insertParagraph(insertBefore: boolean) {
+    const selection = this.selection;
+    if (selection.rangeCount === 0) {
+      return;
+    }
+    const firstRange = selection.firstRange;
+    let component = selection.commonAncestorComponent;
+
+    if (component === this.rootComponent) {
+      const commonAncestorFragmentScope = firstRange.getCommonAncestorFragmentScope();
+      component = insertBefore ?
+        commonAncestorFragmentScope.startChildComponent :
+        commonAncestorFragmentScope.endChildComponent;
+    }
+
+    const parentFragment = component.parentFragment;
+    const p = new BlockComponent('p');
+    p.slot.append(new BrComponent());
+
+    insertBefore ? parentFragment.insertBefore(p, component) : parentFragment.insertAfter(p, component);
+
+    selection.removeAllRanges();
+    firstRange.setStart(p.slot, 0);
+    firstRange.collapse();
+    selection.addRange(firstRange);
   }
 
   private recordSnapshotFromEditingBefore() {
