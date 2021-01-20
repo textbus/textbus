@@ -26,7 +26,7 @@ import {
   StatusBar,
   ControlPanel
 } from './workbench/_api';
-import { ComponentExample, ComponentStage } from './workbench/component-stage';
+import { ComponentCreator, ComponentStage } from './workbench/component-stage';
 import { Workbench } from './workbench/workbench';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { Toolbar, ToolFactory } from './toolbar/_api';
@@ -65,7 +65,7 @@ export interface EditorOptions<T> {
   /** 设置初始化 TextBus 时的默认内容 */
   contents?: string;
   /** 设置可选的自定义组件 */
-  componentLibrary?: ComponentExample[];
+  componentLibrary?: ComponentCreator[];
   /** 设置输出转换器 */
   outputTranslator?: OutputTranslator<T>;
 

@@ -42,6 +42,7 @@ class ImageComponentLoader implements ComponentLoader {
   ]
 })
 export class ImageComponent extends LeafAbstractComponent {
+  block = false;
   width: string = null;
   height: string = null;
   maxWidth: string = null;

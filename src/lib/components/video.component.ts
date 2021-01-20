@@ -21,6 +21,7 @@ class VideoComponentLoader implements ComponentLoader {
   loader: new VideoComponentLoader()
 })
 export class VideoComponent extends LeafAbstractComponent {
+  block = false;
   width: string = null;
   height: string = null;
 

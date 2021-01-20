@@ -1,5 +1,5 @@
 import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
-import { ComponentExample, Dialog } from '../workbench/_api';
+import { ComponentCreator, Dialog } from '../workbench/_api';
 import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
 export interface ProgressConfig {
@@ -115,6 +115,7 @@ tb-progress[type=gray] > div {
   ]
 })
 export class ProgressComponent extends LeafAbstractComponent {
+  block = true;
   constructor(private config: ProgressConfig) {
     super('tb-progress');
   }
@@ -161,10 +162,11 @@ export class ProgressComponent extends LeafAbstractComponent {
   }
 }
 
-export const progressComponentExample: ComponentExample = {
+export const progressComponentExample: ComponentCreator = {
   name: '进度条',
+  category: 'TextBus',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#fff" height="100%" width="100%"/></g><line x1="10" y1="40" x2="90" y2="40" stroke="#ddd" stroke-width="4" stroke-linecap="round"></line><line x1="10" y1="40" x2="50" y2="40" stroke="#1296db" stroke-width="4" stroke-linecap="round"></line><text font-family="Helvetica, Arial, sans-serif" font-size="10" x="42" y="35" stroke-width="0" stroke="#000" fill="#000000">50%</text></svg>')}">`,
-  componentFactory(dialog: Dialog) {
+  factory(dialog: Dialog) {
     const form = new Form({
       title: '进度条设置',
       items: [

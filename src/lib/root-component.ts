@@ -115,42 +115,36 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       });
       firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
     } else {
-      const firstChild = fragment.getContentAtIndex(0);
       const parentFragment = parentComponent.parentFragment;
       const contentsArr = contents.slice(0);
-      if (fragment.contentLength === 0 || fragment.contentLength === 1 && firstChild instanceof BrComponent) {
-        contentsArr.forEach(item => parentFragment.insertBefore(item, parentComponent));
-      } else {
-
-        let firstContent = contentsArr[0];
-        const afterContent = fragment.cut(firstRange.startIndex);
-        let offset = 0;
-        while (contentsArr.length) {
-          firstContent = contentsArr[0];
-          if (typeof firstContent === 'string' || firstContent instanceof LeafAbstractComponent) {
-            offset += firstContent.length;
-            fragment.insert(firstContent, firstRange.startIndex + 1);
-            contentsArr.shift();
-          } else {
-            break;
-          }
-        }
-        firstRange.startIndex += offset;
-
-        if (!contentsArr.length) {
-          fragment.contact(afterContent);
-          firstRange.collapse();
+      let firstContent = contentsArr[0];
+      const afterContent = fragment.cut(firstRange.startIndex);
+      let offset = 0;
+      while (contentsArr.length) {
+        firstContent = contentsArr[0];
+        if (typeof firstContent === 'string' || firstContent instanceof LeafAbstractComponent) {
+          offset += firstContent.length;
+          fragment.insert(firstContent, firstRange.startIndex + 1);
+          contentsArr.shift();
         } else {
-          const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
-          afterComponent.slot.from(afterContent);
-          if (afterComponent.slot.contentLength === 0) {
-            afterComponent.slot.append(new BrComponent());
-          }
-          firstRange.setStart(afterComponent.slot, 0);
-          firstRange.collapse();
-          parentFragment.insertAfter(afterComponent, parentComponent);
-          contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
+          break;
         }
+      }
+      firstRange.startIndex += offset;
+
+      if (!contentsArr.length) {
+        fragment.contact(afterContent);
+        firstRange.collapse();
+      } else {
+        const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
+        afterComponent.slot.from(afterContent);
+        if (afterComponent.slot.contentLength === 0) {
+          afterComponent.slot.append(new BrComponent());
+        }
+        firstRange.setStart(afterComponent.slot, 0);
+        firstRange.collapse();
+        parentFragment.insertAfter(afterComponent, parentComponent);
+        contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
       }
     }
   }

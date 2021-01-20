@@ -13,18 +13,20 @@ import { FileUploader } from '../uikit/forms/help';
 import { EditorController } from '../editor-controller';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { BrComponent } from '../components/br.component';
+import { createElement } from '../uikit/uikit';
+import { Tab } from './tab';
 
-export interface ComponentExample {
+export interface ComponentCreator {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  componentFactory(dialog: Dialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
+  factory(dialog: Dialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
 @Injectable()
 export class ComponentStage {
-  elementRef = document.createElement('div');
+  elementRef: HTMLElement;
 
   private set expand(b: boolean) {
     this._expand = b;
@@ -33,7 +35,6 @@ export class ComponentStage {
       this.elementRef.classList.remove('textbus-component-stage-expand');
   }
 
-  private componentListWrapper = document.createElement('div');
   private _expand = false;
   private selection: TBSelection;
   private subs: Subscription[] = [];
@@ -42,15 +43,29 @@ export class ComponentStage {
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog,
               private fileUploader: FileUploader,
               private editorController: EditorController) {
-    this.elementRef.classList.add('textbus-component-stage');
-    this.componentListWrapper.classList.add('textbus-component-stage-list');
-    this.elementRef.appendChild(this.componentListWrapper);
+
+    const categories = this.classify(this.options.componentLibrary || []);
+    const tab = new Tab();
+    tab.show(categories.map(item => {
+      const view = createElement('div', {
+        classes: ['textbus-component-stage-list']
+      });
+      item.libs.forEach(i => view.appendChild(this.addExample(i)))
+      return {
+        label: item.categoryName,
+        view
+      }
+    }))
+    this.elementRef = createElement('div', {
+      classes: ['textbus-component-stage'],
+      children: [
+        tab.elementRef
+      ]
+    })
 
     this.subs.push(editorController.onStateChange.subscribe(status => {
       this.expand = status.expandComponentLibrary;
     }));
-
-    (this.options.componentLibrary || []).forEach(e => this.addExample(e))
   }
 
   setup(injector: Injector) {
@@ -61,6 +76,24 @@ export class ComponentStage {
     this.subs.forEach(s => s.unsubscribe());
   }
 
+  private classify(libs: ComponentCreator[]) {
+    const categories = new Map<string, ComponentCreator[]>();
+    libs.forEach(item => {
+      const categoryName = item.category || '默认';
+      if (!categories.has(categoryName)) {
+        categories.set(categoryName, []);
+      }
+      const list = categories.get(categoryName);
+      list.push(item);
+    })
+    return Array.from(categories).map(value => {
+      return {
+        categoryName: value[0],
+        libs: value[1]
+      }
+    });
+  }
+
   private insertComponent(component: AbstractComponent) {
     if (this.editorController.readonly || !this.selection.rangeCount) {
       return;
@@ -68,7 +101,7 @@ export class ComponentStage {
     const firstRange = this.selection.firstRange;
     const startFragment = firstRange.startFragment;
     const parentComponent = startFragment.parentComponent;
-    if (component instanceof LeafAbstractComponent) {
+    if (component instanceof LeafAbstractComponent && !component.block) {
       startFragment.insert(component, firstRange.endIndex);
     } else {
       if (parentComponent instanceof DivisionAbstractComponent) {
@@ -89,10 +122,10 @@ export class ComponentStage {
     this.selection.removeAllRanges(true);
   }
 
-  private addExample(example: ComponentExample) {
+  private addExample(example: ComponentCreator) {
     const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
-      const t = example.componentFactory(this.dialogManager, this.fileUploader);
+      const t = example.factory(this.dialogManager, this.fileUploader);
       if (t instanceof AbstractComponent) {
         this.insertComponent(t);
       } else if (t instanceof Promise) {
@@ -106,7 +139,7 @@ export class ComponentStage {
         })
       }
     });
-    this.componentListWrapper.appendChild(wrapper);
+    return wrapper;
   }
 
   private static createViewer(content: string | HTMLElement, name: string) {
