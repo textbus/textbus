@@ -99,7 +99,6 @@ export class TBRange {
     }
     const start = this.findFocusNodeAndOffset(this.startFragment, this.startIndex);
     const end = this.findFocusNodeAndOffset(this.endFragment, this.endIndex);
-    console.log(start)
     if (start && end) {
       this.nativeRange.setStart(start.node, start.offset);
       this.nativeRange.setEnd(end.node, end.offset);
@@ -1090,7 +1089,6 @@ export class TBRange {
     const {startContainer, startOffset} = range;
     if (startContainer.nodeType === Node.ELEMENT_NODE) {
       const offsetNode = startContainer.childNodes[startOffset];
-      console.log(offsetNode)
       if (offsetNode) {
         rect = (offsetNode as HTMLElement).getBoundingClientRect();
       } else {
