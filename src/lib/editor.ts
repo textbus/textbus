@@ -92,6 +92,7 @@ export class Editor<T = any> {
   /** 根元素 */
   readonly elementRef = document.createElement('div');
 
+  /**编辑器状态控制器 */
   readonly stateController: EditorController;
 
   injector: Injector = null;
@@ -115,10 +116,12 @@ export class Editor<T = any> {
   /**当TextBus准备就绪时 触发 */
   private readyEvent = new Subject<void>();
 
+  /**视图 */
   private viewer: Viewer;
   /**根注入器 */
   private readonly rootInjector: Injector;
 
+  /**绑定rxjs,用于取消订阅 */
   private subs: Subscription[] = [];
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
@@ -127,6 +130,7 @@ export class Editor<T = any> {
     } else {
       this.container = selector;
     }
+    /**转化为Observerable */
     this.onReady = this.readyEvent.asObservable();
     let defaultDeviceType = options.deviceType;
 
@@ -146,10 +150,12 @@ export class Editor<T = any> {
       fullScreen: options.fullScreen
     });
 
+    /**监听编辑器状态改变 */
     this.subs.push(this.stateController.onStateChange.subscribe(state => {
       this.fullScreen(state.fullScreen);
     }))
 
+    /**上传 */
     const fileUploader: FileUploader = {
       upload: (type: string): Observable<string> => {
         if (typeof this.options.uploader === 'function') {
@@ -170,6 +176,7 @@ export class Editor<T = any> {
       }
     };
 
+    /** */
     const staticProviders: Provider[] = [{
       provide: Editor,
       useValue: this,
@@ -207,6 +214,7 @@ export class Editor<T = any> {
       deps: [Workbench]
     }];
 
+    /**根注入器 */
     const rootInjector = new ReflectiveInjector(new NullInjector(), [
       Toolbar,
       Workbench,
@@ -224,6 +232,7 @@ export class Editor<T = any> {
     this.rootInjector = rootInjector;
 
     this.viewer = rootInjector.get(Viewer);
+
     this.onChange = this.viewer.onViewUpdated;
 
     this.subs.push(
