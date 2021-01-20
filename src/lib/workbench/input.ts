@@ -9,7 +9,7 @@ import {
   Renderer,
   TBEvent,
   TBSelection,
-  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent, ContextMenuAction
+  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent, ContextMenuAction, LeafAbstractComponent
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
@@ -525,17 +525,30 @@ export class Input {
     let component = this.selection.commonAncestorComponent;
     if (!component) {
       this.controlPanel.showPanels([]);
+      return;
+    }
+    const views = [];
+
+    const createView = function (component: AbstractComponent) {
+      const annotations = getAnnotations(component.constructor);
+      const componentAnnotation = annotations.getClassMetadata(Component);
+      const params = componentAnnotation.params[0] as Component;
+      return params.setter?.create(component);
+    }
+
+    if (this.selection.collapsed) {
+      const firstRange = this.selection.firstRange;
+      const prevContent = firstRange.startFragment.getContentAtIndex(firstRange.startIndex - 1);
+      if (prevContent instanceof LeafAbstractComponent) {
+        component = prevContent;
+      }
     }
     if (component === this.prevComponent) {
       return;
     }
     this.prevComponent = component;
-    const views = [];
     while (component) {
-      const annotations = getAnnotations(component.constructor);
-      const componentAnnotation = annotations.getClassMetadata(Component);
-      const params = componentAnnotation.params[0] as Component;
-      const v = params.setter?.create(component);
+      const v = createView(component);
       if (v) {
         views.push(v);
       }
