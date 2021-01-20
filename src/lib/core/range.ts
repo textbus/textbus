@@ -323,6 +323,9 @@ export class TBRange {
             scopes.push(...fn(childFragment, 0, childFragment.contentLength));
           }
         } else {
+          if (c instanceof LeafAbstractComponent && c.block) {
+            newScope = null;
+          }
           if (!newScope) {
             newScope = {
               startIndex: startIndex + i,
@@ -1402,7 +1405,10 @@ export class TBRange {
     const len = contents.length;
     for (let i = len - 1; i >= 0; i--) {
       const item = contents[i];
-      if (item instanceof DivisionAbstractComponent || item instanceof BranchAbstractComponent || item instanceof BackboneAbstractComponent) {
+      if (item instanceof DivisionAbstractComponent ||
+        item instanceof BranchAbstractComponent ||
+        item instanceof BackboneAbstractComponent ||
+        item instanceof LeafAbstractComponent && item.block) {
         break;
       }
       index -= item.length;
@@ -1415,7 +1421,10 @@ export class TBRange {
 
     for (let i = 0; i < contents.length; i++) {
       const item = contents[i];
-      if (item instanceof DivisionAbstractComponent || item instanceof BranchAbstractComponent || item instanceof BackboneAbstractComponent) {
+      if (item instanceof DivisionAbstractComponent ||
+        item instanceof BranchAbstractComponent ||
+        item instanceof BackboneAbstractComponent ||
+        item instanceof LeafAbstractComponent && item.block) {
         break;
       }
       index += item.length;
