@@ -24,10 +24,10 @@ export const iframeHTML = `
     ::selection {
       background-color: rgba(18, 150, 219, .2);
     }
-    [textbus-editable=off] * {
+    [textbus-editable=off] > * {
       user-select: none;
     }
-    [textbus-editable=on], [textbus-editable=on] * {
+    [textbus-editable=on] {
       user-select: text;
     }
   </style>
