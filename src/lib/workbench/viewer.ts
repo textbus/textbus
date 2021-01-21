@@ -13,7 +13,15 @@ import {
 import pretty from 'pretty';
 
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
-import { Component, Fragment, OutputRenderer, Parser, Renderer, TBSelection } from '../core/_api';
+import {
+  Component,
+  Fragment,
+  LeafAbstractComponent,
+  OutputRenderer,
+  Parser,
+  Renderer, TBRange,
+  TBSelection
+} from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
 import { Input } from './input';
@@ -212,6 +220,26 @@ export class Viewer {
           const dom = Viewer.parserHTML(html)
           this.rootComponent.slot.from(this.parser.parse(dom));
         }
+      }),
+      fromEvent(this.contentDocument, 'click').subscribe((ev: MouseEvent) => {
+        const sourceElement = ev.target as Node;
+        const focusNode = this.findFocusNode(sourceElement, renderer);
+        if (focusNode === sourceElement) {
+          return;
+        }
+        const position = renderer.getPositionByNode(focusNode);
+        if (position.endIndex - position.startIndex === 1) {
+          const content = position.fragment.getContentAtIndex(position.startIndex);
+          if (content instanceof LeafAbstractComponent) {
+            if (!selection.firstRange) {
+              const range = new TBRange(this.contentDocument.createRange(), renderer);
+              selection.addRange(range);
+            }
+            selection.firstRange.setStart(position.fragment, position.endIndex);
+            selection.firstRange.collapse();
+            selection.restore();
+          }
+        }
       })
     )
 
@@ -279,6 +307,17 @@ export class Viewer {
     this.resizeObserver.observe(this.contentDocument.body);
   }
 
+  private findFocusNode(node: Node, renderer: Renderer): Node {
+    const position = renderer.getPositionByNode(node);
+    if (!position) {
+      const parentNode = node.parentNode;
+      if (parentNode) {
+        return this.findFocusNode(parentNode, renderer);
+      }
+      return null;
+    }
+    return node;
+  }
 
   private static guardLastIsParagraph(fragment: Fragment) {
     const last = fragment.sliceContents(fragment.contentLength - 1)[0];
