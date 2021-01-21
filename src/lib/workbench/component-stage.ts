@@ -4,7 +4,6 @@ import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 import {
   AbstractComponent, BackboneAbstractComponent, BranchAbstractComponent,
   DivisionAbstractComponent,
-  Fragment,
   LeafAbstractComponent, TBRangePosition,
   TBSelection
 } from '../core/_api';
