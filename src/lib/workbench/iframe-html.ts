@@ -26,9 +26,11 @@ export const iframeHTML = `
     }
     [textbus-editable=off] > * {
       user-select: none;
+      cursor: default;
     }
     [textbus-editable=on] {
       user-select: text;
+      cursor: text;
     }
   </style>
 </head>
