@@ -333,7 +333,7 @@ export class Renderer {
         }
         this.fragmentVDomMapping.set(slot, host);
         const view = this.rendingFragment(slot, contentContainer, true);
-        view.styles.set('userSelect', 'text');
+        view.attrs.set('textbus-editable', 'on')
         return view;
       });
       if (!(vElement instanceof VElement)) {
@@ -344,10 +344,12 @@ export class Renderer {
       if (component instanceof DivisionAbstractComponent) {
         const slotView = this.fragmentContentContainerMapping.get(component.slot);
         if (slotView === vElement) {
-          slotView.styles.delete('userSelect');
+          slotView.attrs.delete('textbus-editable');
         }
-      } else if (component instanceof BranchAbstractComponent || component instanceof BackboneAbstractComponent) {
-        vElement.styles.set('userSelect', 'none');
+      } else if (component instanceof BranchAbstractComponent ||
+        component instanceof BackboneAbstractComponent ||
+        component instanceof LeafAbstractComponent && vElement.childNodes.length > 0) {
+        vElement.attrs.set('textbus-editable', 'off');
       }
       return vElement;
     }
@@ -392,13 +394,13 @@ export class Renderer {
       if (newView === container) {
         this.componentVDomCacheMap.set(component, container);
       } else {
-        container.styles.set('userSelect', 'text');
+        container.attrs.set('textbus-editable', 'on');
       }
       this.fragmentVDomMapping.set(slot, newView);
     } else {
       newView = component.slotRender(slot, false, (slot, contentContainer) => {
         const view = this.rendingFragment(slot, contentContainer, true);
-        view.styles.set('userSelect', 'text');
+        view.attrs.set('textbus-editable', 'on');
         return view;
       })
       this.fragmentVDomMapping.set(slot, newView);

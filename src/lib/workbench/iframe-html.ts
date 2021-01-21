@@ -24,6 +24,14 @@ export const iframeHTML = `
     ::selection {
       background-color: rgba(18, 150, 219, .2);
     }
+    [textbus-editable=off] > * {
+      user-select: none;
+      cursor: default;
+    }
+    [textbus-editable=on] {
+      user-select: text;
+      cursor: text;
+    }
   </style>
 </head>
 <body></body>
