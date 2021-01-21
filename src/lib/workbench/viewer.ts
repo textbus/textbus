@@ -224,7 +224,7 @@ export class Viewer {
       fromEvent(this.contentDocument, 'click').subscribe((ev: MouseEvent) => {
         const sourceElement = ev.target as Node;
         const focusNode = this.findFocusNode(sourceElement, renderer);
-        if (focusNode === sourceElement) {
+        if (!focusNode || focusNode === sourceElement) {
           return;
         }
         const position = renderer.getPositionByNode(focusNode);
