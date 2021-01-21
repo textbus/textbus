@@ -2,10 +2,10 @@ import { Observable, Subscription } from 'rxjs';
 import { forwardRef, Inject, Injectable, Injector } from '@tanbo/di';
 
 import {
-  AbstractComponent, BranchAbstractComponent,
+  AbstractComponent, BackboneAbstractComponent, BranchAbstractComponent,
   DivisionAbstractComponent,
   Fragment,
-  LeafAbstractComponent,
+  LeafAbstractComponent, TBRangePosition,
   TBSelection
 } from '../core/_api';
 import { Dialog } from './dialog';
@@ -111,15 +111,31 @@ export class ComponentStage {
         if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {
           parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
         }
-      } else if (parentComponent instanceof BranchAbstractComponent) {
-        const ff = new Fragment();
-        ff.append(component);
-        parentComponent.slots.splice(parentComponent.slots.indexOf(startFragment) + 1, 0, ff);
+      } else if (parentComponent instanceof BranchAbstractComponent &&
+        startFragment.contentLength === 1 &&
+        startFragment.getContentAtIndex(0) instanceof BrComponent) {
+        startFragment.clean();
+        startFragment.append(component);
       } else {
         startFragment.insert(component, firstRange.endIndex);
       }
     }
-    this.selection.removeAllRanges(true);
+    let position: TBRangePosition;
+    if (component instanceof DivisionAbstractComponent) {
+      position = firstRange.findFirstPosition(component.slot);
+    } else if (component instanceof BranchAbstractComponent) {
+      position = firstRange.findFirstPosition(component.slots[0]);
+    } else if (component instanceof BackboneAbstractComponent) {
+      position = firstRange.findFirstPosition(component.getSlotAtIndex(0))
+    } else {
+      position = {
+        fragment: component.parentFragment,
+        index: component.parentFragment.indexOf(component)
+      }
+    }
+    firstRange.setStart(position.fragment, position.index);
+    firstRange.collapse();
+    // this.selection.removeAllRanges(true);
   }
 
   private addExample(example: ComponentCreator) {
