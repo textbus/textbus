@@ -93,8 +93,8 @@ export class Contents {
       this.append(content);
       return;
     }
-    let i = 0;  //当前内容下标
-    let ii = 0; //当前数组元素下标
+    let i = 0;  // 当前内容下标
+    let ii = 0; // 当前数组元素下标
     for (const el of this.elements) {
       if (index >= i) {
         if ((el instanceof AbstractComponent) && index === i) {
