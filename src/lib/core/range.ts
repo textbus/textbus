@@ -72,11 +72,15 @@ export class TBRange {
     if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       startPosition && endPosition) {
       const start = TBRange.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition, renderer);
-      this.startFragment = start.fragment;
-      this.startIndex = start.index
+      if (start) {
+        this.startFragment = start.fragment;
+        this.startIndex = start.index
+      }
       const end = TBRange.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition, renderer);
-      this.endFragment = end.fragment;
-      this.endIndex = end.index;
+      if (end) {
+        this.endFragment = end.fragment;
+        this.endIndex = end.index;
+      }
     }
   }
 
@@ -319,6 +323,9 @@ export class TBRange {
             scopes.push(...fn(childFragment, 0, childFragment.contentLength));
           }
         } else {
+          if (c instanceof LeafAbstractComponent && c.block) {
+            newScope = null;
+          }
           if (!newScope) {
             newScope = {
               startIndex: startIndex + i,
@@ -340,6 +347,168 @@ export class TBRange {
       result.push(...fn(scope.fragment, scope.startIndex, scope.endIndex));
     });
     return result;
+  }
+
+  delete() {
+    if (this.collapsed) {
+      /**
+       * xxx ?
+       * <Block>[]<br></Block>
+       * xxx
+       *
+       * to
+       *
+       * []xxx
+       */
+      const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
+      if (currentContent instanceof BrComponent && this.startIndex === 0 && this.startFragment.contentLength === 1) {
+        let position = this.getPreviousPosition();
+        if (position.fragment === this.startFragment) {
+          position = this.getNextPosition();
+        }
+        this.deleteEmptyTree(this.startFragment);
+        this.setStart(position.fragment, position.index);
+        this.collapse();
+        return;
+      }
+      /**
+       * <Block>xxx</Block>
+       * []<br>
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]<Block>
+       * <Block>xxx</Block>
+       */
+
+      const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) &&
+        currentContent instanceof BrComponent) {
+        const prevPosition = this.getPreviousPosition();
+        this.endIndex++;
+        this.deleteContents();
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        this.collapse()
+        return;
+      }
+
+      /**
+       * <br>
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx</Block>
+       */
+      const prevPosition = this.getPreviousPosition();
+      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const startContent = this.startFragment.getContentAtIndex(this.startIndex);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 1 &&
+          this.startFragment === this.commonAncestorFragment &&
+          startContent instanceof BrComponent) {
+          this.deleteContents();
+          this.collapse(true);
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
+
+      /**
+       * <Leaf>
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx</Block>
+       */
+      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 0 &&
+          this.startFragment === this.commonAncestorFragment &&
+          this.startFragment.getContentAtIndex(this.startIndex - 1) instanceof LeafAbstractComponent) {
+          this.startIndex--;
+          this.deleteContents();
+          this.collapse(true);
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
+
+      /**
+       * <Block>xxx</Block>
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]xxx</Block>
+       */
+      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 0 &&
+          this.startFragment !== this.commonAncestorFragment) {
+          this.startFragment.contact(this.endFragment.cut(0));
+          this.deleteEmptyTree(this.endFragment);
+          this.collapse();
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
+
+      /**
+       * <Block><br></Block>
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * <Block>[]xxx</Block>
+       */
+      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 1 &&
+          this.startFragment !== this.commonAncestorFragment &&
+          this.startFragment.contentLength === 1 &&
+          this.startFragment.getContentAtIndex(0) instanceof BrComponent) {
+          this.deleteEmptyTree(this.startFragment);
+          this.collapse(true);
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
+
+      /**
+       * empty[]<br>
+       *
+       * to
+       *
+       * empty[]
+       */
+      if (this.startIndex === 0 && prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
+        this.endIndex++;
+        this.deleteContents();
+        this.collapse();
+        return;
+      }
+
+      if (this.startIndex > 0) {
+        this.startIndex--;
+        this.deleteContents();
+      }
+
+    } else {
+      this.deleteContents();
+    }
   }
 
   /**
@@ -642,7 +811,7 @@ export class TBRange {
         }
         return {
           fragment: parentFragment,
-          index: prevContent instanceof LeafAbstractComponent ? componentIndex - 1 : componentIndex
+          index: prevContent instanceof BrComponent ? componentIndex - 1 : componentIndex
         }
       } else {
         fragment = parentFragment;
@@ -665,7 +834,7 @@ export class TBRange {
     if (offset < fragment.contentLength) {
       let current = fragment.getContentAtIndex(offset);
 
-      if (current instanceof LeafAbstractComponent) {
+      if (current instanceof BrComponent) {
         current = fragment.getContentAtIndex(offset + 1);
       }
       if (current instanceof DivisionAbstractComponent) {
@@ -923,30 +1092,24 @@ export class TBRange {
    */
   getRangePosition() {
     const range: Range = this.nativeRange;
-    let rect = range.getBoundingClientRect();
+    let rect: DOMRect;
     const {startContainer, startOffset} = range;
-    const offsetNode = startContainer.childNodes[startOffset];
     if (startContainer.nodeType === Node.ELEMENT_NODE) {
+      const offsetNode = startContainer.childNodes[startOffset];
       if (offsetNode) {
-        const p = this.renderer.getPositionByNode(offsetNode);
-        if (p.endIndex - p.startIndex === 1 && p.fragment.getContentAtIndex(p.startIndex) instanceof LeafAbstractComponent) {
-          rect = (offsetNode as HTMLElement).getBoundingClientRect();
-        } else if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.childNodes.length === 0) {
-          const cloneRange = range.cloneRange();
-          const textNode = offsetNode.ownerDocument.createTextNode('\u200b');
-          offsetNode.appendChild(textNode);
-          cloneRange.selectNodeContents(offsetNode);
-          rect = cloneRange.getBoundingClientRect();
-          cloneRange.detach();
-        }
+        rect = (offsetNode as HTMLElement).getBoundingClientRect();
       } else {
+        // 最后子元素的后面
         const span = startContainer.ownerDocument.createElement('span');
-        span.innerText = 'x';
+        span.innerText = '\u200b';
         span.style.display = 'inline-block';
-        startContainer.appendChild(span);
+        startContainer.insertBefore(span, offsetNode);
         rect = span.getBoundingClientRect();
         startContainer.removeChild(span);
       }
+
+    } else {
+      rect = range.getBoundingClientRect()
     }
     return rect;
   }
@@ -1161,9 +1324,6 @@ export class TBRange {
   }
 
   private findFocusNodeAndOffset(fragment: Fragment, offset: number): { node: Node, offset: number } {
-    const vElement = this.renderer.getVElementByFragment(fragment);
-
-    const current = fragment.getContentAtIndex(offset);
 
     function findFocusNativeTextNode(renderer: Renderer,
                                      vElement: VElement,
@@ -1206,6 +1366,10 @@ export class TBRange {
       }
     }
 
+    const vElement = this.renderer.getVElementByFragment(fragment);
+
+    const current = fragment.getContentAtIndex(offset);
+
     if (typeof current === 'string') {
       const prev = fragment.getContentAtIndex(offset - 1);
       return findFocusNativeTextNode(this.renderer, vElement, offset, typeof prev === 'string');
@@ -1213,6 +1377,12 @@ export class TBRange {
       const prev = fragment.getContentAtIndex(offset - 1);
       if (typeof prev === 'string') {
         return findFocusNativeTextNode(this.renderer, vElement, offset, true);
+      } else if (prev instanceof LeafAbstractComponent && !(prev instanceof BrComponent)) {
+        const nativeNode = this.renderer.getComponentRootNativeNode(prev);
+        return {
+          node: nativeNode.parentNode,
+          offset: Array.from(nativeNode.parentNode.childNodes).indexOf(nativeNode) + 1
+        }
       }
       return findComponentNativeNode(this.renderer, vElement, offset);
     }
@@ -1235,7 +1405,10 @@ export class TBRange {
     const len = contents.length;
     for (let i = len - 1; i >= 0; i--) {
       const item = contents[i];
-      if (item instanceof DivisionAbstractComponent || item instanceof BranchAbstractComponent || item instanceof BackboneAbstractComponent) {
+      if (item instanceof DivisionAbstractComponent ||
+        item instanceof BranchAbstractComponent ||
+        item instanceof BackboneAbstractComponent ||
+        item instanceof LeafAbstractComponent && item.block) {
         break;
       }
       index -= item.length;
@@ -1248,7 +1421,10 @@ export class TBRange {
 
     for (let i = 0; i < contents.length; i++) {
       const item = contents[i];
-      if (item instanceof DivisionAbstractComponent || item instanceof BranchAbstractComponent || item instanceof BackboneAbstractComponent) {
+      if (item instanceof DivisionAbstractComponent ||
+        item instanceof BranchAbstractComponent ||
+        item instanceof BackboneAbstractComponent ||
+        item instanceof LeafAbstractComponent && item.block) {
         break;
       }
       index += item.length;
@@ -1267,9 +1443,15 @@ export class TBRange {
       }
     } else if (container.nodeType === Node.ELEMENT_NODE) {
       const childNodes = container.childNodes;
+      if (childNodes.length === 0) {
+        return null;
+      }
       if (childNodes.length === offset) {
         const child = childNodes[childNodes.length - 1];
         const childPosition = renderer.getPositionByNode(child);
+        if (!childPosition) {
+          return null;
+        }
         return {
           fragment: childPosition.fragment,
           index: childPosition.endIndex
@@ -1277,6 +1459,9 @@ export class TBRange {
       } else {
         const child = childNodes[offset];
         const childPosition = renderer.getPositionByNode(child);
+        if (!childPosition) {
+          return null;
+        }
         return {
           fragment: childPosition.fragment,
           index: childPosition.startIndex

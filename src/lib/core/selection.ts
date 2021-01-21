@@ -90,9 +90,28 @@ export class TBSelection {
       this._ranges = [];
       for (let i = 0; i < this.nativeSelection.rangeCount; i++) {
         const nativeRange = this.nativeSelection.getRangeAt(i);
-        if (!this.renderer.getPositionByNode(nativeRange.startContainer) ||
-          !this.renderer.getPositionByNode(nativeRange.endContainer)) {
+        const startFocusNode = this.findFocusNode(nativeRange.startContainer);
+        const endFocusNode = this.findFocusNode(nativeRange.endContainer);
+        if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
           continue;
+        }
+        if (startFocusNode !== nativeRange.startContainer) {
+          const startNextSibling = startFocusNode.nextSibling;
+          if (startNextSibling && startNextSibling.nodeType === Node.TEXT_NODE) {
+            nativeRange.setStart(startNextSibling, 0);
+          } else {
+            nativeRange.setStart(startFocusNode.parentNode,
+              Array.from(startFocusNode.parentNode.childNodes).indexOf(startFocusNode as ChildNode) + 1);
+          }
+        }
+        if (endFocusNode !== nativeRange.endContainer) {
+          const endNextSibling = endFocusNode.nextSibling;
+          if (endNextSibling && endNextSibling.nodeType === Node.TEXT_NODE) {
+            nativeRange.setEnd(endNextSibling, 0);
+          } else {
+            nativeRange.setEnd(endFocusNode.parentNode,
+              Array.from(endFocusNode.parentNode.childNodes).indexOf(endFocusNode as ChildNode) + 1);
+          }
         }
         this._ranges.push(new TBRange(nativeRange.cloneRange(), this.renderer));
       }
@@ -336,5 +355,17 @@ export class TBSelection {
       }
     }
     return fragment;
+  }
+
+  private findFocusNode(node: Node): Node {
+    const position = this.renderer.getPositionByNode(node);
+    if (!position) {
+      const parentNode = node.parentNode;
+      if (parentNode) {
+        return this.findFocusNode(parentNode);
+      }
+      return null;
+    }
+    return node;
   }
 }

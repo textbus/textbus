@@ -6,10 +6,11 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent
+  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction
 } from './core/_api';
 import { Input } from './workbench/input';
-import { BrComponent } from './components/br.component';
+import { BrComponent, BlockComponent } from './components/_api';
+import { EditorController } from './editor-controller';
 
 class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
@@ -19,12 +20,33 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selection: TBSelection;
   private input: Input;
   private rootComponent: RootComponent;
+  private editorController: EditorController;
 
   setup(injector: Injector) {
     this.injector = injector;
     this.selection = injector.get(TBSelection);
     this.input = injector.get(Input);
     this.rootComponent = injector.get(RootComponent);
+    this.editorController = injector.get(EditorController);
+  }
+
+  onContextmenu(): ContextMenuAction[] {
+    if (this.editorController.sourceCodeMode) {
+      return [];
+    }
+    return [{
+      iconClasses: ['textbus-icon-insert-paragraph-before'],
+      label: '在前面插入段落',
+      action: () => {
+        this.insertParagraph(true)
+      }
+    }, {
+      iconClasses: ['textbus-icon-insert-paragraph-after'],
+      label: '在后面插入段落',
+      action: () => {
+        this.insertParagraph(false)
+      }
+    }]
   }
 
   onInputReady() {
@@ -163,63 +185,35 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   onDelete() {
     this.selection.ranges.forEach(range => {
-      let prevPosition = range.getPreviousPosition();
-      if (range.startIndex > 0) {
-        range.setStart(prevPosition.fragment, prevPosition.index);
-        range.deleteContents();
-        const commonAncestorFragment = range.commonAncestorFragment;
-        const len = commonAncestorFragment.contentLength;
-        if (range.startIndex === 0 && len === 0) {
-          commonAncestorFragment.append(new BrComponent());
-        } else if (range.startIndex === len) {
-          const last = commonAncestorFragment.getContentAtIndex(len - 1);
-          if (last instanceof BrComponent) {
-            commonAncestorFragment.append(new BrComponent());
-          } else if (last instanceof AbstractComponent && !(last instanceof LeafAbstractComponent)) {
-            prevPosition = range.getPreviousPosition();
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
-          }
-        }
-
-      } else {
-        while (prevPosition.fragment.contentLength === 0) {
-          range.deleteEmptyTree(prevPosition.fragment);
-          let position = range.getPreviousPosition();
-          if (prevPosition.fragment === position.fragment && prevPosition.index === position.index) {
-            position = range.getNextPosition();
-            break;
-          }
-          prevPosition = position;
-        }
-
-        const firstContent = range.startFragment.getContentAtIndex(0);
-        if (firstContent instanceof BrComponent) {
-          if (prevPosition.fragment === range.startFragment && prevPosition.index === range.startIndex) {
-            prevPosition = range.getNextPosition();
-          }
-          range.startFragment.cut(0, 1);
-          if (range.startFragment.contentLength === 0) {
-            range.deleteEmptyTree(range.startFragment, this.rootComponent.slot);
-            range.setStart(prevPosition.fragment, prevPosition.index);
-            range.collapse();
-          }
-        } else {
-          range.setStart(prevPosition.fragment, prevPosition.index);
-          range.deleteContents();
-        }
-        while (prevPosition.fragment.contentLength === 0) {
-          const position = range.getNextPosition();
-          if (position.fragment === prevPosition.fragment && position.index === prevPosition.index) {
-            break;
-          }
-          range.deleteEmptyTree(prevPosition.fragment, this.rootComponent.slot);
-          range.setStart(position.fragment, position.index);
-          range.collapse();
-          prevPosition = position;
-        }
-      }
+      range.delete();
     });
+  }
+
+  private insertParagraph(insertBefore: boolean) {
+    const selection = this.selection;
+    if (selection.rangeCount === 0) {
+      return;
+    }
+    const firstRange = selection.firstRange;
+    let component = selection.commonAncestorComponent;
+
+    if (component === this.rootComponent) {
+      const commonAncestorFragmentScope = firstRange.getCommonAncestorFragmentScope();
+      component = insertBefore ?
+        commonAncestorFragmentScope.startChildComponent :
+        commonAncestorFragmentScope.endChildComponent;
+    }
+
+    const parentFragment = component.parentFragment;
+    const p = new BlockComponent('p');
+    p.slot.append(new BrComponent());
+
+    insertBefore ? parentFragment.insertBefore(p, component) : parentFragment.insertAfter(p, component);
+
+    selection.removeAllRanges();
+    firstRange.setStart(p.slot, 0);
+    firstRange.collapse();
+    selection.addRange(firstRange);
   }
 
   private recordSnapshotFromEditingBefore() {
