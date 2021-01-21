@@ -1,7 +1,8 @@
 import { AbstractComponent, parentFragmentAccessToken } from './component';
 
 /**
- * 储存 Fragment 内容的类。
+ * 用数组储存 Fragment 内容的类，数组元素类型为AbstractComponent或string。
+ * 并提供对内容进行添加，查找，复制等功能。
  */
 export class Contents {
   /**
@@ -34,7 +35,8 @@ export class Contents {
   }
 
   /**
-   * 根据指定位置，切分出内容中的一部分。
+   * 根据指定位置，切分出内容中的一部分。如果切分区间与数组中的字符串元素有部分交集，
+   * 则只取出相交的部分，如果是与组件有交集，则取出整个组件。
    * @param startIndex
    * @param endIndex
    */
@@ -81,25 +83,18 @@ export class Contents {
   /**
    * 在指定下标插入新的文本或节点。
    * @param content
-   * @param index
+   * @param index 要插入的目标位置
    */
   insert(content: string | AbstractComponent, index: number) {
     if (content === '') {
       return;
     }
     if (index >= this.length) {
-      if (typeof content === 'string') {
-        const last = this.elements[this.elements.length - 1];
-        if (typeof last === 'string') {
-          this.elements[this.elements.length - 1] = last + content;
-          return;
-        }
-      }
-      this.elements.push(content);
+      this.append(content);
       return;
     }
-    let i = 0;
-    let ii = 0;
+    let i = 0;  //当前内容下标
+    let ii = 0; //当前数组元素下标
     for (const el of this.elements) {
       if (index >= i) {
         if ((el instanceof AbstractComponent) && index === i) {

@@ -450,7 +450,7 @@ export class TBRange {
     if (endFragmentInDoc && this.endFragment !== this.startFragment) {
       // 防止结尾有 br
       this.startFragment.remove(this.startIndex);
-      this.startFragment.contact(this.endFragment);
+      this.startFragment.concate(this.endFragment);
       this.deleteEmptyTree(this.endFragment);
     }
 
