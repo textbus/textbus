@@ -1,17 +1,6 @@
 import { makeError } from '../_utils/make-error';
 import { Observable, Subject } from 'rxjs';
 
-/**
- * 虚拟 DOM 节点的字面量表示。
- */
-export interface VElementLiteral {
-  tagName: string;
-  styles: { [key: string]: any },
-  attrs: { [key: string]: any },
-  classes: string[];
-  childNodes: Array<VElementLiteral | string>;
-}
-
 const parentNode = Symbol('parentNode');
 
 /**
@@ -29,16 +18,6 @@ export class VTextNode {
 
   clone() {
     return new VTextNode(this.textContent);
-  }
-
-  equal(vNode: VElement | VTextNode): boolean {
-    if (vNode === this) {
-      return true;
-    }
-    if (vNode instanceof VTextNode) {
-      return vNode.textContent === this.textContent;
-    }
-    return false;
   }
 }
 
