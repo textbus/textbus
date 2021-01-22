@@ -306,12 +306,14 @@ export class Renderer {
         const newVDom = this.rendingComponent(content);
         if (isDirty) {
           this.vDomPositionMapping.set(newVDom, this.vDomPositionMapping.get(oldVDom));
-          const newNativeNode = this.diffAndUpdate(newVDom, oldVDom);
+          const isEqual = equal(newVDom, oldVDom);
+          const newNativeNode = this.diffAndUpdate(newVDom, oldVDom,
+            isEqual && this.NVMappingTable.get(oldVDom) as HTMLElement);
           this.componentVDomCacheMap.set(content, newVDom);
           this.NVMappingTable.set(newVDom, newNativeNode);
 
           oldVDom.parentNode.replaceChild(newVDom, oldVDom);
-          this.destroyVDom(oldVDom);
+          this.destroyVDom(oldVDom, !isEqual);
           // Object.assign(oldVDom, newVDom);
           if (newNativeNode !== oldNativeNode) {
             oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
@@ -402,14 +404,16 @@ export class Renderer {
       })
       this.fragmentVDomMapping.set(slot, newView);
     }
+    const isEqual = equal(newView, oldView);
+
     const oldNativeNode = this.getNativeNodeByVDom(oldView) as HTMLElement;
-    const newNativeNode = this.diffAndUpdate(newView, oldView);
+    const newNativeNode = this.diffAndUpdate(newView, oldView, isEqual && oldNativeNode);
     if (oldNativeNode !== newNativeNode) {
       oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
     }
     this.NVMappingTable.set(newNativeNode, newView)
     oldView.parentNode.replaceChild(newView, oldView);
-    this.destroyVDom(oldView);
+    this.destroyVDom(oldView, !isEqual);
     return newView;
   }
 
@@ -589,13 +593,15 @@ export class Renderer {
     return el;
   }
 
-  private destroyVDom(vEle: VElement) {
+  private destroyVDom(vEle: VElement, destroyCurrent = true) {
     for (const child of vEle.childNodes) {
       if (child instanceof VElement) {
         this.destroyVDom(child);
       }
     }
-    vEle.destroy();
+    if (destroyCurrent) {
+      vEle.destroy();
+    }
   }
 
   /**
@@ -653,4 +659,48 @@ export class Renderer {
       childFormats
     }
   }
+}
+
+/**
+ * 判断一个虚拟 DOM 节点是否和自己相等。
+ * @param left
+ * @param right
+ */
+function equal(left: VElement, right: VElement): boolean {
+  if (left === right) {
+    return true;
+  }
+
+  return left.tagName == right.tagName &&
+    equalMap(left.attrs, right.attrs) &&
+    equalMap(left.styles, right.styles) &&
+    equalClasses(left.classes, right.classes);
+}
+
+function equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
+  if (left === right || !left === true && !right === true) {
+    return true;
+  }
+  if (!left !== !right || left.size !== right.size) {
+    return false;
+  }
+  return Array.from(left.keys()).reduce((v, key) => {
+    return v && left.get(key) === right.get(key);
+  }, true);
+}
+
+function equalClasses(left: string[], right: string[]) {
+  if (left === right) {
+    return true;
+  }
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (const k of left) {
+    if (!right.includes(k)) {
+      return false;
+    }
+  }
+  return true;
 }
