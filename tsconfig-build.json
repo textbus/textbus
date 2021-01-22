@@ -12,7 +12,9 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "package/bundles/",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "jsx": "react",
+    "jsxFactory": "VElement.createElement"
   },
   "include": [
     "src/"

@@ -156,7 +156,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
   }
 
   slotRender(slot: TodoListFragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
-    const {host, container} = this.renderItem(slot, isOutputMode);
+    const {host, container} = this.renderItem(slot);
     slotRendererFn(slot, container);
     return host
   }
@@ -164,7 +164,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
     return new VElement('tb-todo-list', {
       childNodes: this.slots.map(slot => {
-        const {host, container} = this.renderItem(slot, isOutputMode);
+        const {host, container} = this.renderItem(slot);
         slotRendererFn(slot, container, host);
         return host;
       })
@@ -178,7 +178,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     return new TodoListComponent(configs as TodoListFragment[]);
   }
 
-  private renderItem(slot: TodoListFragment, isOutputMode: boolean) {
+  private renderItem(slot: TodoListFragment) {
     const item = new VElement('div', {
       classes: ['tb-todo-list-item']
     });
@@ -186,7 +186,16 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
       classes: ['tb-todo-list-btn']
     })
     const state = new VElement('span', {
-      classes: ['tb-todo-list-state']
+      classes: ['tb-todo-list-state'],
+      on: {
+        click: () => {
+          const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
+          const newState = this.stateCollection[i];
+          slot.active = newState.active;
+          slot.disabled = newState.disabled;
+          slot.markAsDirtied();
+        }
+      }
     });
     if (slot.active) {
       state.classes.push('tb-todo-list-state-active');
@@ -200,18 +209,6 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
       classes: ['tb-todo-list-content']
     });
     item.appendChild(content);
-
-    if (!isOutputMode) {
-      state.onRendered = element => {
-        element.addEventListener('click', () => {
-          const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
-          const newState = this.stateCollection[i];
-          slot.active = newState.active;
-          slot.disabled = newState.disabled;
-          slot.markAsDirtied();
-        })
-      }
-    }
     return {
       host: item,
       container: content

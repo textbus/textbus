@@ -19,6 +19,8 @@
       "@tanbo/textbus/*": [
         "src/*"
       ]
-    }
+    },
+    "jsx": "react",
+    "jsxFactory": "VElement.createElement"
   }
 }

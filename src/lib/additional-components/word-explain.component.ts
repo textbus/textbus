@@ -209,15 +209,15 @@ export class WordExplainComponent extends BackboneAbstractComponent {
 
     if (!isOutputMode) {
       const close = new VElement('span', {
-        classes: ['tb-word-explain-close']
+        classes: ['tb-word-explain-close'],
+        on: {
+          click: () => {
+            const parentFragment = this.parentFragment;
+            parentFragment.remove(parentFragment.indexOf(this), 1);
+          }
+        }
       });
       wrap.appendChild(close);
-      close.onRendered = nativeNode => {
-        nativeNode.addEventListener('click', () => {
-          const parentFragment = this.parentFragment;
-          parentFragment.remove(parentFragment.indexOf(this), 1);
-        })
-      }
     }
 
     return wrap;

@@ -13,11 +13,11 @@ module.exports = {
     umdNamedDefine: true
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
   },
   module: {
     rules: [{
-      test: /\.ts$/,
+      test: /\.tsx?$/,
       loader: ['ts-loader']
     }]
   }

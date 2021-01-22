@@ -13,7 +13,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
   },
   devServer: {
     host: ip.address(),
@@ -25,14 +25,14 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.ts$/,
+      test: /\.tsx?$/,
       enforce: 'pre',
       exclude: /node_modules/,
       use: [{
         loader: 'eslint-loader'
       }]
     }, {
-      test: /\.ts$/,
+      test: /\.tsx?$/,
       use: ['ts-loader']
     }, {
       test: /\.s?css$/,
