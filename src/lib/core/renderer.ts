@@ -302,7 +302,6 @@ export class Renderer {
       if (content instanceof AbstractComponent && content.changed) {
         const isDirty = content.dirty;
         const oldVDom = this.componentVDomCacheMap.get(content);
-        const oldNativeNode = this.getNativeNodeByVDom(oldVDom);
         const newVDom = this.rendingComponent(content);
         if (isDirty) {
           this.vDomPositionMapping.set(newVDom, this.vDomPositionMapping.get(oldVDom));
