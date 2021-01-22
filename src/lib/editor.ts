@@ -263,7 +263,7 @@ export class Editor<T = any> {
    * @param html
    */
   setContents(html: string) {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.run(() => {
         this.viewer.updateContent(html + '');
         resolve();
