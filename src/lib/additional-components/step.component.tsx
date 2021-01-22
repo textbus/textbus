@@ -6,7 +6,6 @@ import {
   Fragment, SingleSlotRenderFn, SlotRendererFn,
   VElement,
   ViewData,
-  VTextNode
 } from '../core/_api';
 import { ComponentCreator } from '../workbench/component-stage';
 import { BlockComponent } from '../components/block.component';

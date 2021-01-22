@@ -1,4 +1,4 @@
-import { Component, ComponentLoader, VElement, ViewData } from '../core/_api';
+import { Component, ComponentLoader, ViewData } from '../core/_api';
 import { ComponentCreator, Dialog } from '../workbench/_api';
 import { ImageComponent } from '../components/image.component';
 

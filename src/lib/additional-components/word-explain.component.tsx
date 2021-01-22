@@ -7,7 +7,6 @@ import {
   VElement,
   ViewData
 } from '../core/_api';
-import { BrComponent } from '../components/br.component';
 import { ComponentCreator } from '../workbench/component-stage';
 import { textAlignFormatter } from '../formatter/block-style.formatter';
 
