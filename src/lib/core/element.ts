@@ -12,35 +12,6 @@ export interface VElementLiteral {
   childNodes: Array<VElementLiteral | string>;
 }
 
-
-function equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
-  if (left === right || !left === true && !right === true) {
-    return true;
-  }
-  if (!left !== !right || left.size !== right.size) {
-    return false;
-  }
-  return Array.from(left.keys()).reduce((v, key) => {
-    return v && left.get(key) === right.get(key);
-  }, true);
-}
-
-function equalClasses(left: string[], right: string[]) {
-  if (left === right) {
-    return true;
-  }
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (const k of left) {
-    if (!right.includes(k)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 const parentNode = Symbol('parentNode');
 
 /**
@@ -243,45 +214,6 @@ export class VElement {
       return;
     }
     throw vElementErrorFn('node to be replaced is not a child of the current node.');
-  }
-
-  removeLastChild() {
-    const node = this._childNodes.pop();
-    if (node) {
-      node[parentNode] = null;
-    }
-    return node;
-  }
-
-  removeFirstChild() {
-    const node = this._childNodes.shift();
-    if (node) {
-      node[parentNode] = null;
-    }
-    return node;
-  }
-
-  /**
-   * 判断一个虚拟 DOM 节点是否和自己相等。
-   * @param vNode
-   */
-  equal(vNode: VElement | VTextNode): boolean {
-    if (vNode === this) {
-      return true;
-    }
-    if (!vNode) {
-      return false;
-    }
-    const left = vNode;
-
-    if (left instanceof VElement) {
-      return left.tagName == this.tagName &&
-        equalMap(left.attrs, this.attrs) &&
-        equalMap(left.styles, this.styles) &&
-        equalClasses(left.classes, this.classes);
-    }
-
-    return false;
   }
 
   /**
