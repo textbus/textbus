@@ -4,6 +4,17 @@ import { Observable, Subject } from 'rxjs';
 const parentNode = Symbol('parentNode');
 
 /**
+ * 虚拟 DOM 节点的字面量表示。
+ */
+export interface VElementLiteral {
+  tagName: string;
+  styles: { [key: string]: any },
+  attrs: { [key: string]: any },
+  classes: string[];
+  childNodes: Array<VElementLiteral | string>;
+}
+
+/**
  * 虚拟文本节点。
  */
 export class VTextNode {
