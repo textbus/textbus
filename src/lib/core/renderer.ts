@@ -307,15 +307,16 @@ export class Renderer {
         if (isDirty) {
           this.vDomPositionMapping.set(newVDom, this.vDomPositionMapping.get(oldVDom));
           const isEqual = equal(newVDom, oldVDom);
-          const newNativeNode = this.diffAndUpdate(newVDom, oldVDom,
-            isEqual && this.NVMappingTable.get(oldVDom) as HTMLElement);
+          const oldNativeNode = this.NVMappingTable.get(oldVDom) as HTMLElement;
+          const newNativeNode = this.diffAndUpdate(newVDom, oldVDom, isEqual && oldNativeNode);
           this.componentVDomCacheMap.set(content, newVDom);
           this.NVMappingTable.set(newVDom, newNativeNode);
 
           oldVDom.parentNode.replaceChild(newVDom, oldVDom);
-          this.destroyVDom(oldVDom, !isEqual);
-          // Object.assign(oldVDom, newVDom);
-          if (newNativeNode !== oldNativeNode) {
+          this.destroyVDom(oldVDom);
+          if (isEqual) {
+            newVDom.onRendered(oldNativeNode);
+          } else {
             oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
           }
         }
@@ -408,12 +409,14 @@ export class Renderer {
 
     const oldNativeNode = this.getNativeNodeByVDom(oldView) as HTMLElement;
     const newNativeNode = this.diffAndUpdate(newView, oldView, isEqual && oldNativeNode);
-    if (oldNativeNode !== newNativeNode) {
+    this.destroyVDom(oldView);
+    if (isEqual) {
+      newView.onRendered(oldNativeNode);
+    } else {
       oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
     }
     this.NVMappingTable.set(newNativeNode, newView)
     oldView.parentNode.replaceChild(newView, oldView);
-    this.destroyVDom(oldView, !isEqual);
     return newView;
   }
 
@@ -593,15 +596,13 @@ export class Renderer {
     return el;
   }
 
-  private destroyVDom(vEle: VElement, destroyCurrent = true) {
+  private destroyVDom(vEle: VElement) {
     for (const child of vEle.childNodes) {
       if (child instanceof VElement) {
         this.destroyVDom(child);
       }
     }
-    if (destroyCurrent) {
-      vEle.destroy();
-    }
+    vEle.destroy();
   }
 
   /**
