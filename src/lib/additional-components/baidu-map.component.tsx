@@ -27,19 +27,6 @@ class BaiduMapComponentLoader implements ComponentLoader {
 })
 export class BaiduMapComponent extends ImageComponent {
   static ak = '';
-
-  render(): VElement {
-    const el = new VElement(this.tagName);
-    el.attrs.set('src', this.src);
-    if (this.width) {
-      el.styles.set('width', this.width);
-    }
-    if (this.height) {
-      el.styles.set('height', this.height);
-    }
-    return el;
-  }
-
   clone(): BaiduMapComponent {
     return new BaiduMapComponent(this.src, {
       width: this.width,

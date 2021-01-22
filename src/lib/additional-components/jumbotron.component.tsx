@@ -124,14 +124,12 @@ export class JumbotronComponent extends DivisionAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const vEle = new VElement(this.tagName, {
-      styles: {
-        backgroundImage: `url("${this.options.backgroundImage}")`,
-        backgroundSize: this.options.backgroundSize || 'cover',
-        backgroundPosition: this.options.backgroundPosition || 'center',
-        minHeight: this.options.minHeight
-      }
-    });
+    const vEle = <tb-jumbotron style={{
+      backgroundImage: `url("${this.options.backgroundImage}")`,
+      backgroundSize: this.options.backgroundSize || 'cover',
+      backgroundPosition: this.options.backgroundPosition || 'center',
+      minHeight: this.options.minHeight
+    }}/>;
     return slotRendererFn(this.slot, vEle, vEle);
   }
 }

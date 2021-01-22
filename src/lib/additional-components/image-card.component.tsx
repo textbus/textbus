@@ -141,16 +141,16 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     let descContainer: VElement;
     switch (slot) {
       case this.imgFragment:
-        imgContainer = new VElement('div');
+        imgContainer = <div/>;
         return slotRendererFn(slot, imgContainer, imgContainer);
       case this.descFragment:
-        descContainer = new VElement('p');
+        descContainer = <p/>;
         return slotRendererFn(slot, descContainer, descContainer);
     }
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const card = new VElement(this.tagName);
+    const card = <tb-image-card/>;
     card.appendChild(this.slotRender(this.imgFragment, isOutputMode, slotRendererFn));
     card.appendChild(this.slotRender(this.descFragment, isOutputMode, slotRendererFn));
 

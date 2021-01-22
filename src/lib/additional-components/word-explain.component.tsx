@@ -139,8 +139,6 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   private readonly subtitle: Fragment;
   private readonly detail: Fragment;
 
-  private wrapper: VElement;
-
   constructor(private params: WordExplainParams) {
     super('tb-word-explain');
 
@@ -167,60 +165,35 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     switch (slot) {
       case this.title:
-        return slotRendererFn(slot, new VElement('h3', {
-          classes: ['tb-word-explain-title']
-        }));
+        return slotRendererFn(slot, <h3 className="tb-word-explain-title"/>);
       case this.subtitle:
-        return slotRendererFn(slot, new VElement('div', {
-          classes: ['tb-word-explain-subtitle']
-        }));
+        return slotRendererFn(slot, <div className="tb-word-explain-subtitle"/>);
       case this.detail:
-        return slotRendererFn(slot, new VElement('div', {
-          classes: ['tb-word-explain-detail']
-        }));
+        return slotRendererFn(slot, <div className="tb-word-explain-detail"/>);
     }
   }
 
   render(isOutputMode: boolean, slotRenderFn: SlotRendererFn): VElement {
-    const wrap = new VElement('tb-word-explain');
-    this.wrapper = wrap;
-    Array.from(this).forEach(f => {
-      if (f.contentLength === 0) {
-        f.append(new BrComponent());
-      }
-    })
-    const titleGroup = new VElement('div', {
-      classes: ['tb-word-explain-title-group']
-    });
-    wrap.appendChild(titleGroup);
-
     const title = this.slotRender(this.title, isOutputMode, (slot, contentContainer) => contentContainer)
     const subtitle = this.slotRender(this.subtitle, isOutputMode, (slot, contentContainer) => contentContainer);
     const detail = this.slotRender(this.detail, isOutputMode, (slot, contentContainer) => contentContainer);
 
-    slotRenderFn(this.title, title, title);
-    slotRenderFn(this.subtitle, subtitle, subtitle);
-    slotRenderFn(this.detail, detail, detail);
-
-    titleGroup.appendChild(title);
-    titleGroup.appendChild(subtitle);
-
-    wrap.appendChild(detail);
-
-    if (!isOutputMode) {
-      const close = new VElement('span', {
-        classes: ['tb-word-explain-close'],
-        on: {
-          click: () => {
+    return (
+      <tb-word-explain>
+        <div className="tb-word-explain-title-group">
+          {slotRenderFn(this.title, title, title)}
+          {slotRenderFn(this.subtitle, subtitle, subtitle)}
+        </div>
+        {slotRenderFn(this.detail, detail, detail)}
+        {
+          !isOutputMode && <span className="tb-word-explain-close" onClick={() => {
             const parentFragment = this.parentFragment;
             parentFragment.remove(parentFragment.indexOf(this), 1);
           }
+          }/>
         }
-      });
-      wrap.appendChild(close);
-    }
-
-    return wrap;
+      </tb-word-explain>
+    );
   }
 }
 

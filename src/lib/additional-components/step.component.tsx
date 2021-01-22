@@ -206,58 +206,40 @@ export class StepComponent extends BranchAbstractComponent {
 
   private renderItem(slot: Fragment, isOutputMode: boolean) {
     const index = this.slots.indexOf(slot);
-    const content = new VElement('div', {
-      classes: ['tb-step-item-content']
-    });
     let state = 'tb-waiting';
     if (index < this.step) {
       state = 'tb-complete';
     } else if (index === this.step) {
       state = 'tb-current'
     }
-    const icon = new VElement('div', {
-      classes: ['tb-step-item-icon'],
-      childNodes: [new VTextNode(index + 1 + '')],
-      on: {
-        click: () => {
-          const currentStep = this.step;
-          if (index === currentStep) {
-            this.step = index + 1;
-          } else if (index + 1 === currentStep) {
-            this.step = index - 1;
-          } else {
-            this.step = index;
-          }
-          this.markAsDirtied();
+    const content = <div className="tb-step-item-content"/>;
+
+    const item = (
+      <div className={'tb-step-item ' + state}>
+        <div className="tb-step-item-header">
+          <div className="tb-step-item-line"/>
+          <div className="tb-step-item-icon" onClick={() => {
+            const currentStep = this.step;
+            if (index === currentStep) {
+              this.step = index + 1;
+            } else if (index + 1 === currentStep) {
+              this.step = index - 1;
+            } else {
+              this.step = index;
+            }
+            this.markAsDirtied();
+          }}>{index + 1}</div>
+        </div>
+        {content}
+        {
+          !isOutputMode && <span className="tb-step-item-add" onClick={
+            () => {
+              this.slots.splice(index, 0, createItem());
+            }
+          }/>
         }
-      }
-    });
-    const item = new VElement('div', {
-      classes: ['tb-step-item', state],
-      childNodes: [
-        new VElement('div', {
-          classes: ['tb-step-item-header'],
-          childNodes: [
-            new VElement('div', {
-              classes: ['tb-step-item-line']
-            }),
-            icon
-          ]
-        }),
-      ]
-    });
-    item.appendChild(content)
-    if (!isOutputMode) {
-      const add = new VElement('span', {
-        classes: ['tb-step-item-add'],
-        on: {
-          click: () => {
-            this.slots.splice(index, 0, createItem());
-          }
-        }
-      });
-      item.appendChild(add);
-    }
+      </div>
+    )
     return {
       host: item,
       container: content
