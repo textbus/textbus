@@ -14,7 +14,7 @@ import { makeError } from '../_utils/make-error';
 const outputRendererErrorFn = makeError('OutputRenderer');
 
 /**
- * 输出渲染器
+ * 用于渲染输出内容的渲染器。
  */
 export class OutputRenderer {
   // 记录已渲染的组件

@@ -1,5 +1,8 @@
 import { VElement, Renderer, VTextNode } from './core/_api';
 
+/**
+ * 用于对输出内容作转换的工具类。
+ */
 export abstract class OutputTranslator<T> {
   abstract transform(vDom: VElement): T;
 }

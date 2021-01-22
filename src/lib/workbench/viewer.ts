@@ -36,7 +36,7 @@ declare const ResizeObserver: any;
 
 @Injectable()
 /**
- * 富文本视图层
+ * TextBus富文本编辑域
  */
 export class Viewer {
   /**当准备就绪触发 */
