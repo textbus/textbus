@@ -217,7 +217,20 @@ export class StepComponent extends BranchAbstractComponent {
     }
     const icon = new VElement('div', {
       classes: ['tb-step-item-icon'],
-      childNodes: [new VTextNode(index + 1 + '')]
+      childNodes: [new VTextNode(index + 1 + '')],
+      on: {
+        click: () => {
+          const currentStep = this.step;
+          if (index === currentStep) {
+            this.step = index + 1;
+          } else if (index + 1 === currentStep) {
+            this.step = index - 1;
+          } else {
+            this.step = index;
+          }
+          this.markAsDirtied();
+        }
+      }
     });
     const item = new VElement('div', {
       classes: ['tb-step-item', state],
@@ -236,26 +249,13 @@ export class StepComponent extends BranchAbstractComponent {
     item.appendChild(content)
     if (!isOutputMode) {
       const add = new VElement('span', {
-        classes: ['tb-step-item-add']
-      });
-      add.onRendered = nativeNode => {
-        nativeNode.addEventListener('click', () => {
-          this.slots.splice(index, 0, createItem());
-        })
-      }
-      icon.onRendered = nativeNode => {
-        nativeNode.addEventListener('click', () => {
-          const currentStep = this.step;
-          if (index === currentStep) {
-            this.step = index + 1;
-          } else if (index + 1 === currentStep) {
-            this.step = index - 1;
-          } else {
-            this.step = index;
+        classes: ['tb-step-item-add'],
+        on: {
+          click: () => {
+            this.slots.splice(index, 0, createItem());
           }
-          this.markAsDirtied();
-        })
-      }
+        }
+      });
       item.appendChild(add);
     }
     return {

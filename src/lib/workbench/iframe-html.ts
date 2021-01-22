@@ -20,6 +20,7 @@ export const iframeHTML = `
       cursor: text;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
+      word-break: break-word;
     }
     ::selection {
       background-color: rgba(18, 150, 219, .2);

@@ -234,32 +234,16 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
   }
 
   private renderItem(slot: TimelineFragment, isOutput: boolean) {
-    const child = new VElement('div', {
-      classes: ['tb-timeline-item']
-    });
-
-    const line = new VElement('div', {
-      classes: ['tb-timeline-line']
-    });
-    const icon = new VElement('div', {
-      classes: ['tb-timeline-icon']
-    });
-
+    const classes = ['tb-timeline-item'];
     if (slot.type) {
-      child.classes.push('tb-timeline-item-' + slot.type);
+      classes.push('tb-timeline-item-' + slot.type);
     }
+    const content = <div className="tb-timeline-content"/>;
 
-    const content = new VElement('div', {
-      classes: ['tb-timeline-content']
-    });
-
-    child.appendChild(line);
-    child.appendChild(icon);
-    if (!isOutput) {
-      icon.attrs.set('title', '点击切换颜色');
-
-      icon.onRendered = nativeNode => {
-        nativeNode.addEventListener('click', () => {
+    const child = (
+      <div className={classes.join(' ')}>
+        <div className="tb-timeline-line"/>
+        <div className="tb-timeline-icon" title={isOutput ? null : '点击切换颜色'} onClick={() => {
           const currentType = slot.type;
           if (!currentType) {
             slot.type = timelineTypes[0] as TimelineType;
@@ -267,23 +251,17 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
             slot.type = timelineTypes[timelineTypes.indexOf(currentType) + 1] as TimelineType || null;
           }
           slot.markAsDirtied();
-        })
-      }
+        }}/>
+        {
+          !isOutput && <span className="tb-timeline-add" onClick={() => {
+            const index = this.slots.indexOf(slot) + 1;
+            this.slots.splice(index, 0, createTimelineItem());
+          }}/>
+        }
+        {content}
+      </div>
+    );
 
-      const btn = new VElement('span', {
-        classes: ['tb-timeline-add']
-      });
-      child.appendChild(btn);
-
-      btn.onRendered = nativeNode => {
-        nativeNode.addEventListener('click', () => {
-          const index = this.slots.indexOf(slot) + 1;
-          this.slots.splice(index, 0, createTimelineItem());
-        })
-      }
-    }
-
-    child.appendChild(content);
     return {
       host: child,
       container: content

@@ -1,4 +1,4 @@
-import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData, VTextNode } from '../core/_api';
+import { Component, ComponentLoader, LeafAbstractComponent, VElement, ViewData } from '../core/_api';
 import { ComponentCreator, Dialog } from '../workbench/_api';
 import { Form, FormTextField, FormSelect } from '../uikit/_api';
 
@@ -116,6 +116,7 @@ tb-progress[type=gray] > div {
 })
 export class ProgressComponent extends LeafAbstractComponent {
   block = true;
+
   constructor(private config: ProgressConfig) {
     super('tb-progress');
   }
@@ -128,37 +129,16 @@ export class ProgressComponent extends LeafAbstractComponent {
 
   render(): VElement {
     const config = this.config;
-    const wrap = new VElement(this.tagName, {
-      attrs: {...config}
-    });
-
-    const min = new VElement('span', {
-      classes: ['tb-progress-min']
-    });
-    const max = new VElement('span', {
-      classes: ['tb-progress-max']
-    });
-
-    min.appendChild(new VTextNode(config.min + ''));
-    max.appendChild(new VTextNode(config.max + ''));
-
     const value = Math.round((config.progress - config.min) / (config.max - config.min) * 100) + '%';
-    const progress = new VElement('div', {
-      styles: {
-        width: value
-      }
-    });
-
-    const current = new VElement('span', {
-      classes: ['tb-progress-value']
-    });
-    current.appendChild(new VTextNode(value));
-    progress.appendChild(current);
-
-    wrap.appendChild(min);
-    wrap.appendChild(progress);
-    wrap.appendChild(max);
-    return wrap;
+    return (
+      <tb-progress {...config}>
+        <span className="tb-progress-min">{config.min}</span>
+        <div style={{width: value}}>
+          <span className="tb-progress-value">{value}</span>
+        </div>
+        <span className="tb-progress-max">{config.max}</span>
+      </tb-progress>
+    )
   }
 }
 

@@ -1,4 +1,7 @@
 import { makeError } from '../_utils/make-error';
+import { Observable, Subject } from 'rxjs';
+
+const parentNode = Symbol('parentNode');
 
 /**
  * 虚拟 DOM 节点的字面量表示。
@@ -10,37 +13,6 @@ export interface VElementLiteral {
   classes: string[];
   childNodes: Array<VElementLiteral | string>;
 }
-
-
-function equalMap(left: Map<string, string | number | boolean>, right: Map<string, string | number | boolean>) {
-  if (left === right || !left === true && !right === true) {
-    return true;
-  }
-  if (!left !== !right || left.size !== right.size) {
-    return false;
-  }
-  return Array.from(left.keys()).reduce((v, key) => {
-    return v && left.get(key) === right.get(key);
-  }, true);
-}
-
-function equalClasses(left: string[], right: string[]) {
-  if (left === right) {
-    return true;
-  }
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (const k of left) {
-    if (!right.includes(k)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-const parentNode = Symbol('parentNode');
 
 /**
  * 虚拟文本节点。
@@ -58,16 +30,14 @@ export class VTextNode {
   clone() {
     return new VTextNode(this.textContent);
   }
+}
 
-  equal(vNode: VElement | VTextNode): boolean {
-    if (vNode === this) {
-      return true;
-    }
-    if (vNode instanceof VTextNode) {
-      return vNode.textContent === this.textContent;
-    }
-    return false;
-  }
+export interface VElementListeners {
+  [listenKey: string]: <T extends Event>(ev: T) => any;
+}
+
+export interface VElementRenderFn {
+  (props: { [key: string]: any }): VElement;
 }
 
 /**
@@ -78,6 +48,7 @@ export interface VElementOption {
   styles?: { [key: string]: string | number };
   classes?: string[];
   childNodes?: Array<VElement | VTextNode>;
+  on?: VElementListeners;
 }
 
 const vElementErrorFn = makeError('VElement');
@@ -86,7 +57,58 @@ const vElementErrorFn = makeError('VElement');
  * 虚拟 DOM 节点
  */
 export class VElement {
-  onRendered: (nativeNode: HTMLElement) => void;
+  static createElement(tagName: string | VElementRenderFn,
+                       attrs: { [key: string]: any },
+                       ...children: Array<VElement | string | number | boolean>) {
+    if (typeof tagName === 'function') {
+      return tagName({
+        ...attrs,
+        children
+      })
+    }
+    attrs = attrs || {};
+    const className = (attrs.className || '').trim();
+    const classes = className ? className.split(/\s+/g) : [];
+
+    Reflect.deleteProperty(attrs, 'className');
+
+    const style = attrs.style || '';
+    let styles: { [key: string]: string | number };
+    if (style && typeof style === 'string') {
+      styles = {};
+      style.split(';').map(s => s.split(':')).forEach(v => {
+        styles[v[0].trim()] = v[1].trim();
+      })
+    } else {
+      styles = style
+    }
+
+    Reflect.deleteProperty(attrs, 'style');
+
+    const listeners: VElementListeners = {};
+    const attrs2: { [key: string]: string | boolean | number } = {};
+
+    Object.keys(attrs).forEach(key => {
+      if (/^on[A-Z]/.test(key)) {
+        listeners[key.replace(/^on/, '').toLowerCase()] = attrs[key];
+      } else {
+        attrs2[key] = attrs[key];
+      }
+    })
+    return new VElement(tagName, {
+      styles,
+      attrs: attrs2,
+      classes,
+      on: listeners,
+      childNodes: children.filter(i => i !== false).map(i => {
+        if (i instanceof VElement) {
+          return i;
+        }
+        return new VTextNode(i + '');
+      }) as Array<VElement | VTextNode>
+    })
+  }
+
   [parentNode]: VElement | null = null;
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
@@ -100,9 +122,15 @@ export class VElement {
     return this._childNodes.map(i => i);
   }
 
+  onDestroy: Observable<void>;
+
   private _childNodes: Array<VElement | VTextNode> = [];
+  private listeners: VElementListeners;
+  private unbindFns: Array<() => void> = [];
+  private destroyEvent = new Subject<void>();
 
   constructor(public tagName: string, options?: VElementOption) {
+    this.onDestroy = this.destroyEvent.asObservable();
     if (options) {
       if (options.attrs) {
         Object.keys(options.attrs).forEach(key => {
@@ -126,6 +154,7 @@ export class VElement {
       if (options.childNodes) {
         this.appendChild(...options.childNodes);
       }
+      this.listeners = options.on || {};
     }
   }
 
@@ -177,45 +206,6 @@ export class VElement {
     throw vElementErrorFn('node to be replaced is not a child of the current node.');
   }
 
-  removeLastChild() {
-    const node = this._childNodes.pop();
-    if (node) {
-      node[parentNode] = null;
-    }
-    return node;
-  }
-
-  removeFirstChild() {
-    const node = this._childNodes.shift();
-    if (node) {
-      node[parentNode] = null;
-    }
-    return node;
-  }
-
-  /**
-   * 判断一个虚拟 DOM 节点是否和自己相等。
-   * @param vNode
-   */
-  equal(vNode: VElement | VTextNode): boolean {
-    if (vNode === this) {
-      return true;
-    }
-    if (!vNode) {
-      return false;
-    }
-    const left = vNode;
-
-    if (left instanceof VElement) {
-      return left.tagName == this.tagName &&
-        equalMap(left.attrs, this.attrs) &&
-        equalMap(left.styles, this.styles) &&
-        equalClasses(left.classes, this.classes);
-    }
-
-    return false;
-  }
-
   /**
    * 把当前虚拟 DOM 节点转换为 JSON 字面量。
    */
@@ -232,6 +222,23 @@ export class VElement {
         return c.textContent;
       })
     }
+  }
+
+  onRendered(nativeNode: HTMLElement) {
+    Object.keys(this.listeners || {}).forEach(listenKey => {
+      const callback = this.listeners[listenKey];
+      if (typeof callback === 'function') {
+        nativeNode.addEventListener(listenKey, this.listeners[listenKey]);
+        this.unbindFns.push(function () {
+          nativeNode.removeEventListener(listenKey, callback);
+        })
+      }
+    })
+  }
+
+  destroy() {
+    this.unbindFns.forEach(i => i());
+    this.destroyEvent.next();
   }
 
   private static mapToJSON(map: Map<string, any>) {

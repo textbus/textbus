@@ -172,11 +172,7 @@ export class Renderer {
 
   private diffAndUpdate(vDom: VElement, oldVDom: VElement, host?: HTMLElement) {
     if (!host) {
-      if (vDom.equal(oldVDom)) {
-        host = this.NVMappingTable.get(oldVDom) as HTMLElement;
-      } else {
-        host = this.createElement(vDom);
-      }
+      host = this.createElement(vDom);
     }
 
     const leftChildNodes = vDom.childNodes;
@@ -206,8 +202,8 @@ export class Renderer {
           let i = rightStartIndex;
           while (i < rightIndex) {
             const abandonedVNode = rightChildNodes[i];
+            // 当前项有可能被复用到了 left 节点内部，因此要做此判断
             if (abandonedVNode.parentNode === oldVDom) {
-              // 当前项有可能被复用到了 left 节点内部，因此要做此判断
               const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
               abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
             }
@@ -251,7 +247,7 @@ export class Renderer {
     while (rightStartIndex < rightLength) {
       const abandonedVNode = rightChildNodes[rightStartIndex];
       if (abandonedVNode.parentNode === oldVDom) {
-        // 只还经过 diff 之后，还是 oldVDom 的子节点，才算是多余的，因为有可能已经被复用到了其它地方
+        // 只有经过 diff 之后，还是 oldVDom 的子节点，才算是多余的，因为有可能已经被复用到了其它地方
         const abandonedNativeNode = this.NVMappingTable.get(abandonedVNode);
         abandonedNativeNode.parentNode.removeChild(abandonedNativeNode);
       }
@@ -315,6 +311,7 @@ export class Renderer {
           this.NVMappingTable.set(newVDom, newNativeNode);
 
           oldVDom.parentNode.replaceChild(newVDom, oldVDom);
+          this.destroyVDom(oldVDom);
           // Object.assign(oldVDom, newVDom);
           if (newNativeNode !== oldNativeNode) {
             oldNativeNode.parentNode.replaceChild(newNativeNode, oldNativeNode);
@@ -412,6 +409,7 @@ export class Renderer {
     }
     this.NVMappingTable.set(newNativeNode, newView)
     oldView.parentNode.replaceChild(newView, oldView);
+    this.destroyVDom(oldView);
     return newView;
   }
 
@@ -467,7 +465,11 @@ export class Renderer {
         i += item.length;
         children.push(textNode);
       } else {
+        const oldVDom = this.componentVDomCacheMap.get(item);
         const vDom = this.rendingComponent(item);
+        if (oldVDom && oldVDom !== vDom) {
+          this.destroyVDom(oldVDom);
+        }
         this.vDomPositionMapping.set(vDom, {
           fragment,
           startIndex: i,
@@ -585,6 +587,15 @@ export class Renderer {
     const el = document.createTextNode(Renderer.replaceEmpty(vDom.textContent, '\u00a0'));
     this.NVMappingTable.set(el, vDom);
     return el;
+  }
+
+  private destroyVDom(vEle: VElement) {
+    for (const child of vEle.childNodes) {
+      if (child instanceof VElement) {
+        this.destroyVDom(child);
+      }
+    }
+    vEle.destroy();
   }
 
   /**
