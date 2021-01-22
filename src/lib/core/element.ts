@@ -90,10 +90,10 @@ export class VElement {
       classes,
       on: listeners,
       childNodes: children.filter(i => i !== false).map(i => {
-        if (typeof i === 'string' || typeof i === 'number') {
-          return new VTextNode(i + '');
+        if (i instanceof VElement) {
+          return i;
         }
-        return i;
+        return new VTextNode(i + '');
       }) as Array<VElement | VTextNode>
     })
   }
