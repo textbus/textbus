@@ -8,4 +8,5 @@ export interface ComponentControlPanelView {
 
 export abstract class ComponentSetter<T extends AbstractComponent> {
   abstract create(instance: T): ComponentControlPanelView;
+  abstract onDestroy?(): void;
 }

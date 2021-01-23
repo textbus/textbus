@@ -33,6 +33,7 @@ import { Toolbar, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';
 import { FileUploader } from './uikit/forms/help';
 import { makeError } from './_utils/make-error';
+import { ComponentInjectors } from './component-injectors';
 
 /**
  * TextBus 初始化时的配置参数
@@ -202,6 +203,7 @@ export class Editor<T = any> {
     }];
 
     const rootInjector = new ReflectiveInjector(new NullInjector(), [
+      ComponentInjectors,
       Toolbar,
       Workbench,
       Device,

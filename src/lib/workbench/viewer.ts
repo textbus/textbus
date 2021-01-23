@@ -19,7 +19,8 @@ import {
   LeafAbstractComponent,
   OutputRenderer,
   Parser,
-  Renderer, TBRange,
+  Renderer,
+  TBRange,
   TBSelection
 } from '../core/_api';
 import { iframeHTML } from './iframe-html';
@@ -30,6 +31,7 @@ import { Toolbar } from '../toolbar/toolbar';
 import { ComponentStage } from './component-stage';
 import { EditorController } from '../editor-controller';
 import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
+import { ComponentInjectors } from '../component-injectors';
 
 declare const ResizeObserver: any;
 
@@ -75,6 +77,7 @@ export class Viewer {
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               private componentStage: ComponentStage,
               private editorController: EditorController,
+              private componentInjectors: ComponentInjectors,
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
@@ -125,13 +128,10 @@ export class Viewer {
     cancelAnimationFrame(this.id);
     this.resizeObserver?.disconnect();
     this.subs.forEach(s => s.unsubscribe());
-    [Input, HistoryManager].forEach(c => {
+    [Input, HistoryManager, ComponentInjectors].forEach(c => {
       this.viewInjector.get(c as Type<{ destroy(): void }>).destroy();
     });
     (this.options.plugins || []).forEach(p => p.onDestroy?.());
-    this.componentAnnotations.forEach(c => {
-      c.interceptor?.onDestroy?.();
-    })
   }
 
   setup() {
@@ -245,11 +245,9 @@ export class Viewer {
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
-    const rootAnnotation = getAnnotations(RootComponent).getClassMetadata(Component).params[0] as Component;
-    rootAnnotation.interceptor.setup(viewInjector);
-    this.componentAnnotations.forEach(c => {
-      c.interceptor?.setup(viewInjector);
-      c.setter?.setup(viewInjector);
+    [RootComponent, ...this.options.components].forEach(c => {
+      const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
+      this.componentInjectors.set(c, new ReflectiveInjector(viewInjector, annotation.providers || []));
     });
 
     (this.options.plugins || []).forEach(plugin => {

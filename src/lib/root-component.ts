@@ -1,4 +1,4 @@
-import { Injectable } from '@tanbo/di';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import {
   AbstractComponent, TBClipboard,
   Component,
@@ -18,10 +18,10 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   private contentSnapshot: Array<AbstractComponent | string> = [];
   private formatterSnapshot = new Map<BlockFormatter | InlineFormatter, FormatRange[]>();
 
-  constructor(private selection: TBSelection,
-              private input: Input,
-              private rootComponent: RootComponent,
-              private editorController: EditorController) {
+  constructor(@Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
+              @Inject(forwardRef(() => Input)) private input: Input,
+              @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent,
+              @Inject(forwardRef(() => EditorController)) private editorController: EditorController) {
   }
 
   onContextmenu(): ContextMenuAction[] {

@@ -1,15 +1,21 @@
 import { fromEvent, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { getAnnotations, Inject, Injectable } from '@tanbo/di';
+import { Inject, Injectable, InjectFlags, Injector, Type } from '@tanbo/di';
 
 import {
-  Component,
+  AbstractComponent,
+  ComponentSetter,
   Contents,
+  ContextMenuAction,
+  DivisionAbstractComponent,
+  Interceptor,
+  LeafAbstractComponent,
   Parser,
   Renderer,
   TBEvent,
-  TBSelection,
-  TBRangePosition, TBRange, AbstractComponent, DivisionAbstractComponent, ContextMenuAction, LeafAbstractComponent
+  TBRange,
+  TBRangePosition,
+  TBSelection
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
@@ -17,6 +23,7 @@ import { HistoryManager } from '../history-manager';
 import { EditorController } from '../editor-controller';
 import { ControlPanel } from './control-panel';
 import { createElement, createTextNode } from '../uikit/uikit';
+import { ComponentInjectors } from '../component-injectors';
 
 /**
  * 快捷键配置项
@@ -110,6 +117,7 @@ export class Input {
               @Inject(EDITOR_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
               private controlPanel: ControlPanel,
               private editorController: EditorController,
+              private componentInjectors: ComponentInjectors,
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
@@ -379,10 +387,10 @@ export class Input {
     }
     const actionGroups: ContextMenuAction[][] = [];
     while (component) {
-      const annotations = getAnnotations(component.constructor);
-      const componentAnnotation = annotations.getClassMetadata(Component);
-      const params = componentAnnotation.params[0] as Component;
-      const v = params.interceptor?.onContextmenu?.(component);
+      const injector = this.componentInjectors.get(component.constructor as Type<AbstractComponent>);
+      const interceptor = injector.get(Interceptor as Type<Interceptor<any>>)
+      const v = interceptor?.onContextmenu?.(component);
+
       if (v) {
         actionGroups.push(v);
       }
@@ -401,17 +409,23 @@ export class Input {
       }),
       fromEvent(this.input, 'input').subscribe(() => {
         if (!this.selection.collapsed) {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onDeleteRange?.(event)
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onDeleteRange?.(event);
+            }
             return !event.stopped;
           })
           this.dispatchInputReadyEvent(true);
         }
         if (this.selection.collapsed) {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onInput?.(event);
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onInput?.(event);
+            }
             return !event.stopped;
           })
         }
@@ -458,15 +472,21 @@ export class Input {
       },
       action: () => {
         if (this.selection.collapsed) {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onDelete?.(event)
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onDelete?.(event);
+            }
             return !event.stopped;
           })
         } else {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onDeleteRange?.(event)
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onDeleteRange?.(event);
+            }
             return !event.stopped;
           })
         }
@@ -479,16 +499,22 @@ export class Input {
       },
       action: () => {
         if (!this.selection.collapsed) {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onDeleteRange?.(event);
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onDeleteRange?.(event);
+            }
             return !event.stopped;
           })
         }
         if (this.selection.collapsed) {
-          this.dispatchEvent((component, instance) => {
+          this.dispatchEvent((injector, instance) => {
             const event = new TBEvent(instance);
-            component.interceptor?.onEnter?.(event)
+            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+            if (interceptor) {
+              interceptor.onEnter?.(event);
+            }
             return !event.stopped;
           })
         }
@@ -529,11 +555,13 @@ export class Input {
     }
     const views = [];
 
-    const createView = function (component: AbstractComponent) {
-      const annotations = getAnnotations(component.constructor);
-      const componentAnnotation = annotations.getClassMetadata(Component);
-      const params = componentAnnotation.params[0] as Component;
-      return params.setter?.create(component);
+    const createView = (component: AbstractComponent) => {
+      const injector = this.componentInjectors.get(component.constructor as Type<AbstractComponent>);
+      const setter = injector.get(ComponentSetter as Type<ComponentSetter<any>>, null, InjectFlags.Self);
+      if (setter) {
+        return setter.create(component);
+      }
+      return null;
     }
 
     if (this.selection.collapsed) {
@@ -562,8 +590,11 @@ export class Input {
       this.input.value = '';
     }
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
-      this.dispatchEvent(component => {
-        component.interceptor?.onInputReady?.();
+      this.dispatchEvent(injector => {
+        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+        if (interceptor) {
+          interceptor.onInputReady?.();
+        }
         return true;
       })
     }
@@ -577,29 +608,33 @@ export class Input {
     });
 
     if (!this.selection.collapsed) {
-      this.dispatchEvent((component, instance) => {
+      this.dispatchEvent((injector, instance) => {
         const event = new TBEvent(instance);
-        component.interceptor?.onDeleteRange?.(event);
+        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+        if (interceptor) {
+          interceptor.onDeleteRange?.(event);
+        }
         return !event.stopped;
       })
     }
     if (this.selection.collapsed) {
-      this.dispatchEvent((component, instance) => {
+      this.dispatchEvent((injector, instance) => {
         const event = new TBEvent(instance, {contents, text});
-        component.interceptor?.onPaste?.(event);
+        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+        if (interceptor) {
+          interceptor.onPaste?.(event);
+        }
         return !event.stopped;
       })
     }
     this.dispatchInputReadyEvent();
   }
 
-  private dispatchEvent(invokeFn: (component: Component, instance: AbstractComponent) => boolean) {
+  private dispatchEvent(invokeFn: (injector: Injector, instance: AbstractComponent) => boolean) {
     let component = this.selection.commonAncestorComponent;
     while (component) {
-      const annotations = getAnnotations(component.constructor);
-      const componentAnnotation = annotations.getClassMetadata(Component);
-      const params = componentAnnotation.params[0] as Component;
-      if (!invokeFn(params, component)) {
+      const injector = this.componentInjectors.get(component.constructor as Type<AbstractComponent>);
+      if (!invokeFn(injector, component)) {
         break;
       }
       component = component.parentFragment?.parentComponent;

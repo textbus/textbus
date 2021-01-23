@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   ComponentLoader,
@@ -9,9 +9,6 @@ import {
 import { breakingLine } from './utils/breaking-line';
 
 class BlockComponentLoader implements ComponentLoader {
-  constructor() {
-  }
-
   match(component: HTMLElement): boolean {
     return BlockComponent.blockTags.includes(component.nodeName.toLowerCase());
   }
@@ -30,10 +27,7 @@ class BlockComponentLoader implements ComponentLoader {
 
 @Injectable()
 class BlockComponentInterceptor implements Interceptor<BlockComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<BlockComponent>) {
