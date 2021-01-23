@@ -446,6 +446,30 @@ export class TBRange {
       }
 
       /**
+       * string
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx</Block>
+       */
+      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 0 &&
+          this.startFragment === this.commonAncestorFragment &&
+          typeof this.startFragment.getContentAtIndex(this.startIndex - 1) === 'string') {
+          this.collapse();
+          this.startIndex--;
+          this.deleteContents();
+          this.collapse(true);
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
+
+      /**
        * <Block>xxx</Block>
        * <Block>[]xxx</Block>
        *
