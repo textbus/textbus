@@ -15,15 +15,15 @@
   "author": "tanbo",
   "license": "GPL-3.0-only",
   "keywords": [
+    "textbus",
+    "wysiwyg",
+    "wysiwyg editor",
+    "rich text editor",
     "editor",
-    "text",
-    "rich",
+    "wysiwyg html editor",
     "component editor",
     "web editor",
-    "office",
-    "word",
-    "excel",
-    "note"
+    "typescript editor"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.6.1",

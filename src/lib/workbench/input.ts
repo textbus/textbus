@@ -388,7 +388,7 @@ export class Input {
     const actionGroups: ContextMenuAction[][] = [];
     while (component) {
       const injector = this.componentInjectors.get(component.constructor as Type<AbstractComponent>);
-      const interceptor = injector.get(Interceptor as Type<Interceptor<any>>)
+      const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
       const v = interceptor?.onContextmenu?.(component);
 
       if (v) {
