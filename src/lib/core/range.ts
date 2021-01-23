@@ -460,10 +460,11 @@ export class TBRange {
         if (scopes.length === 0 &&
           this.startFragment === this.commonAncestorFragment &&
           typeof this.startFragment.getContentAtIndex(this.startIndex - 1) === 'string') {
+          const afterContents = this.startFragment.cut(this.startIndex);
+          this.startFragment.contact(this.endFragment);
+          this.deleteEmptyTree(this.endFragment);
+          this.startFragment.contact(afterContents);
           this.collapse();
-          this.startIndex--;
-          this.deleteContents();
-          this.collapse(true);
           return;
         }
         this.setStart(startFragment, 0);
