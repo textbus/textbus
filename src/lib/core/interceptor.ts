@@ -1,5 +1,3 @@
-import { Injector } from '@tanbo/di';
-
 import { Contents } from './contents';
 import { AbstractComponent } from './component';
 
@@ -12,6 +10,7 @@ export interface ContextMenuAction {
   iconClasses?: string[];
   label: string;
   disabled?: boolean;
+
   action(): void;
 }
 
@@ -42,22 +41,20 @@ export class TBEvent<T extends AbstractComponent, U = null> {
 /**
  * TextBus 生命周期方法。
  */
-export interface Interceptor<T extends AbstractComponent> {
-  setup(injector: Injector): void;
+export abstract class Interceptor<T extends AbstractComponent> {
+  abstract onInputReady?(): void;
 
-  onInputReady?(): void;
+  abstract onInput?(event: TBEvent<T>): void;
 
-  onInput?(event: TBEvent<T>): void;
+  abstract onDeleteRange?(event: TBEvent<T>): void;
 
-  onDeleteRange?(event: TBEvent<T>): void;
+  abstract onDelete?(event: TBEvent<T>): void;
 
-  onDelete?(event: TBEvent<T>): void;
+  abstract onEnter?(event: TBEvent<T>): void;
 
-  onEnter?(event: TBEvent<T>): void;
+  abstract onPaste?(event: TBEvent<T, TBClipboard>): void;
 
-  onPaste?(event: TBEvent<T, TBClipboard>): void;
+  abstract onContextmenu?(instance: T): ContextMenuAction[];
 
-  onContextmenu?(instance: T): ContextMenuAction[];
-
-  onDestroy?(): void;
+  abstract onDestroy?(): void;
 }

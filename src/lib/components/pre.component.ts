@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable, Injector } from '@tanbo/di';
 import { Grammar, languages, Token, tokenize } from 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-java';
@@ -113,11 +113,9 @@ class PreComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class PreComponentInterceptor implements Interceptor<PreComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<PreComponent>) {
@@ -203,7 +201,10 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
 @Component({
   loader: new PreComponentLoader(),
-  interceptor: new PreComponentInterceptor(),
+  providers: [{
+    provide: Interceptor,
+    useClass: PreComponentInterceptor
+  }],
   styles: [
     `
    code, pre {background-color: rgba(0, 0, 0, .03);}

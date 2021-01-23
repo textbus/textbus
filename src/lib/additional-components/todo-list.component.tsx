@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   BranchAbstractComponent,
@@ -44,11 +44,9 @@ class TodoListComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<TodoListComponent>) {
@@ -85,7 +83,10 @@ class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
 
 @Component({
   loader: new TodoListComponentLoader(),
-  interceptor: new TodoListComponentInterceptor(),
+  providers: [{
+    provide: Interceptor,
+    useClass: TodoListComponentInterceptor
+  }],
   styles: [
     `
 tb-todo-list {

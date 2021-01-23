@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   SlotMap,
@@ -61,11 +61,9 @@ class ListComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class ListComponentInterceptor implements Interceptor<ListComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<ListComponent>) {
@@ -100,7 +98,10 @@ class ListComponentInterceptor implements Interceptor<ListComponent> {
 
 @Component({
   loader: new ListComponentLoader(['ul', 'ol']),
-  interceptor: new ListComponentInterceptor()
+  providers: [{
+    provide: Interceptor,
+    useClass: ListComponentInterceptor
+  }]
 })
 export class ListComponent extends BranchAbstractComponent {
   constructor(tagName: string) {
