@@ -451,7 +451,7 @@ export class TBRange {
        *
        * to
        *
-       * <Block>xxx</Block>
+       * string[]xxx
        */
       if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
