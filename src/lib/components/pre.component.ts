@@ -144,8 +144,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     if (firstRange.startIndex === 1 && startFragment.contentLength === 1) {
       startFragment.clean()
       startFragment.append(new BrComponent());
-      firstRange.setStart(startFragment, 0);
-      firstRange.collapse();
+      firstRange.setPosition(startFragment, 0);
       event.stopPropagation();
     }
   }

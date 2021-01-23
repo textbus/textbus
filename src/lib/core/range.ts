@@ -11,6 +11,7 @@ import {
   BackboneAbstractComponent
 } from './component';
 import { BrComponent } from '../components/br.component';
+import { of } from 'rxjs';
 
 /**
  * 标识 Fragment 中的一个位置。
@@ -73,13 +74,11 @@ export class TBRange {
       startPosition && endPosition) {
       const start = TBRange.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition, renderer);
       if (start) {
-        this.startFragment = start.fragment;
-        this.startIndex = start.index
+        this.setStart(start.fragment, start.index);
       }
       const end = TBRange.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition, renderer);
       if (end) {
-        this.endFragment = end.fragment;
-        this.endIndex = end.index;
+        this.setEnd(end.fragment, end.index);
       }
     }
   }
@@ -130,6 +129,11 @@ export class TBRange {
   setEnd(fragment: Fragment, offset: number) {
     this.endFragment = fragment;
     this.endIndex = offset;
+  }
+
+  setPosition(fragment: Fragment, offset: number) {
+    this.setStart(fragment, offset);
+    this.setEnd(fragment, offset);
   }
 
   /**
@@ -737,11 +741,9 @@ export class TBRange {
    */
   collapse(toEnd = false) {
     if (toEnd) {
-      this.startIndex = this.endIndex;
-      this.startFragment = this.endFragment;
+      this.setStart(this.endFragment, this.endIndex);
     } else {
-      this.endFragment = this.startFragment;
-      this.endIndex = this.startIndex;
+      this.setEnd(this.startFragment, this.startIndex);
     }
     return this;
   }
@@ -925,8 +927,7 @@ export class TBRange {
     while (true) {
       loopCount++;
       position = range2.getPreviousPosition();
-      range2.startIndex = range2.endIndex = position.index;
-      range2.startFragment = range2.endFragment = position.fragment;
+      range2.setPosition(position.fragment, position.index);
       range2.restore();
       const rect2 = range2.getRangePosition();
       if (!isToPrevLine) {
@@ -975,8 +976,7 @@ export class TBRange {
     while (true) {
       loopCount++;
       const position = range2.getNextPosition();
-      range2.startIndex = range2.endIndex = position.index;
-      range2.startFragment = range2.endFragment = position.fragment;
+      range2.setPosition(position.fragment, position.index);
       range2.restore();
       const rect2 = range2.getRangePosition();
       if (!isToNextLine) {

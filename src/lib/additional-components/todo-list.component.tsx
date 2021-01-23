@@ -76,8 +76,7 @@ class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
     next.from(breakingLine(slot, firstRange.startIndex));
 
     component.slots.splice(index + 1, 0, next);
-    firstRange.startFragment = firstRange.endFragment = next;
-    firstRange.startIndex = firstRange.endIndex = 0;
+    firstRange.setPosition(next, 0);
   }
 }
 

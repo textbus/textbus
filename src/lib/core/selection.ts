@@ -294,16 +294,13 @@ export class TBSelection {
     const start = findPosition(startPaths, fragment);
     const range = new TBRange(nativeRange, this.renderer);
 
-    range.startIndex = start.index;
-    range.startFragment = start.fragment;
+    range.setStart(start.fragment, start.index);
 
     if (endPaths === startPaths) {
-      range.endIndex = start.index;
-      range.endFragment = start.fragment;
+      range.setEnd(start.fragment, start.index);
     } else {
       const end = findPosition(endPaths, fragment);
-      range.endIndex = end.index;
-      range.endFragment = end.fragment;
+      range.setEnd(end.fragment, end.index);
     }
     this.removeAllRanges();
     this.addRange(range);
@@ -442,8 +439,8 @@ export class TBSelection {
         }, 3000);
         break;
     }
-    range.startFragment = range.endFragment = p.fragment;
-    range.startIndex = range.endIndex = p.index;
+
+    range.setPosition(p.fragment, p.index);
     this.restore();
   }
 }
