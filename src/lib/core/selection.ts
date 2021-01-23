@@ -21,6 +21,13 @@ export interface RangePath {
   endPaths: number[];
 }
 
+enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
+}
+
 const selectionErrorFn = makeError('Selection');
 
 /**
@@ -79,6 +86,9 @@ export class TBSelection {
   private nativeSelection: Selection;
   private selectionChangeEvent = new Subject<void>();
   private isChanged = false;
+
+  private oldCursorPosition: { left: number, top: number } = null;
+  private cleanOldCursorTimer: any;
 
   constructor(private context: Document,
               private selectionChange: Observable<any>,
@@ -149,6 +159,22 @@ export class TBSelection {
     if (!this.isChanged) {
       this.selectionChangeEvent.next()
     }
+  }
+
+  toPrevious() {
+    this.moveCursor(CursorMoveDirection.Left);
+  }
+
+  toNext() {
+    this.moveCursor(CursorMoveDirection.Right);
+  }
+
+  toPreviousLine() {
+    this.moveCursor(CursorMoveDirection.Up);
+  }
+
+  toNextLine() {
+    this.moveCursor(CursorMoveDirection.Down);
   }
 
   /**
@@ -367,5 +393,54 @@ export class TBSelection {
       return null;
     }
     return node;
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    const range = direction === CursorMoveDirection.Down ? this.lastRange : this.firstRange;
+    this.removeAllRanges();
+    this.addRange(range);
+    let p: TBRangePosition;
+    let range2: TBRange;
+    switch (direction) {
+      case CursorMoveDirection.Left:
+        p = range.getPreviousPosition();
+        break;
+      case CursorMoveDirection.Right:
+        p = range.getNextPosition();
+        break;
+      case CursorMoveDirection.Up:
+        clearTimeout(this.cleanOldCursorTimer);
+        range2 = range.clone().restore();
+
+        if (this.oldCursorPosition) {
+          p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
+        } else {
+          const rect = range2.getRangePosition();
+          this.oldCursorPosition = rect;
+          p = range.getPreviousLinePosition(rect.left);
+        }
+        this.cleanOldCursorTimer = setTimeout(() => {
+          this.oldCursorPosition = null;
+        }, 3000);
+        break;
+      case CursorMoveDirection.Down:
+        clearTimeout(this.cleanOldCursorTimer);
+        range2 = range.clone().restore();
+
+        if (this.oldCursorPosition) {
+          p = range2.getNextLinePosition(this.oldCursorPosition.left);
+        } else {
+          const rect = range2.getRangePosition();
+          this.oldCursorPosition = rect;
+          p = range.getNextLinePosition(rect.left);
+        }
+        this.cleanOldCursorTimer = setTimeout(() => {
+          this.oldCursorPosition = null;
+        }, 3000);
+        break;
+    }
+    range.startFragment = range.endFragment = p.fragment;
+    range.startIndex = range.endIndex = p.index;
+    this.restore();
   }
 }
