@@ -126,6 +126,7 @@ export class Editor<T = any> {
   private subs: Subscription[] = [];
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
+    console.log('editor-options:', options);
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
