@@ -44,6 +44,8 @@
 
   &-view {
     flex: 1;
+    position: relative;
+    z-index: 0;
   }
 }
 
