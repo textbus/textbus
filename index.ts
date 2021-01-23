@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Observable } from 'rxjs';
 import 'core-js';
 import './src/assets/index.scss';

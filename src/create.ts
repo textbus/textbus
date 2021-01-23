@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { EditorOptions, Editor } from './lib/editor';
 import {
   fontFamilyFormatter,

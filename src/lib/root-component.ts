@@ -6,7 +6,7 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction
+  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BrComponent, BlockComponent } from './components/_api';
@@ -234,12 +234,28 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   }
 }
 
+class RootComponentLoader implements ComponentLoader {
+  match(): boolean {
+    return false;
+  }
+
+  read(): ViewData {
+    return {
+      component: new RootComponent(),
+      slotsMap: []
+    };
+  }
+}
+
 @Component({
-  loader: null,
+  loader: new RootComponentLoader(),
   providers: [{
     provide: Interceptor,
     useClass: RootComponentInterceptor
-  }]
+  }],
+  styles: [
+    `body{word-break: break-word;}`
+  ]
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {

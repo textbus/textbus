@@ -74,7 +74,6 @@ export class Viewer {
   private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<Injector>();
   private viewUpdateEvent = new Subject<void>();
-  private id: number = null;
   private minHeight = 400;
   private rootComponent: RootComponent;
   private parser: Parser;
@@ -93,7 +92,7 @@ export class Viewer {
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
-    const componentAnnotations = this.options.components.map(c => {
+    const componentAnnotations = [RootComponent, ...(this.options.components || [])].map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
 
@@ -135,7 +134,6 @@ export class Viewer {
   }
 
   destroy() {
-    cancelAnimationFrame(this.id);
     this.resizeObserver?.disconnect();
     this.subs.forEach(s => s.unsubscribe());
     [Input, HistoryManager, ComponentInjectors].forEach(c => {
@@ -255,7 +253,7 @@ export class Viewer {
 
     const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
-    [RootComponent, ...this.options.components].forEach(c => {
+    [RootComponent, ...(this.options.components || [])].forEach(c => {
       const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
       this.componentInjectors.set(c, new ReflectiveInjector(viewInjector, annotation.providers || []));
     });
