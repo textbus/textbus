@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   ComponentLoader,
@@ -9,11 +9,8 @@ import {
 import { breakingLine } from './utils/breaking-line';
 
 class BlockComponentLoader implements ComponentLoader {
-  constructor(private tagNames: string[]) {
-  }
-
   match(component: HTMLElement): boolean {
-    return this.tagNames.includes(component.nodeName.toLowerCase());
+    return BlockComponent.blockTags.includes(component.nodeName.toLowerCase());
   }
 
   read(el: HTMLElement): ViewData {
@@ -28,11 +25,9 @@ class BlockComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class BlockComponentInterceptor implements Interceptor<BlockComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<BlockComponent>) {
@@ -51,13 +46,17 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
 }
 
 @Component({
-  loader: new BlockComponentLoader('div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',')),
-  interceptor: new BlockComponentInterceptor(),
+  loader: new BlockComponentLoader(),
+  providers: [{
+    provide: Interceptor,
+    useClass: BlockComponentInterceptor
+  }],
   styles: [
     `blockquote {padding: 10px 15px; border-left: 10px solid #dddee1; background-color: #f8f8f9; margin: 1em 0; border-radius: 4px;}`
   ]
 })
 export class BlockComponent extends DivisionAbstractComponent {
+  static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',');
   constructor(tagName: string) {
     super(tagName);
   }

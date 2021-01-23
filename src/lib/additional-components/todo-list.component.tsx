@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   BranchAbstractComponent,
@@ -44,11 +44,9 @@ class TodoListComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
-  private selection: TBSelection;
-
-  setup(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onEnter(event: TBEvent<TodoListComponent>) {
@@ -85,7 +83,10 @@ class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
 
 @Component({
   loader: new TodoListComponentLoader(),
-  interceptor: new TodoListComponentInterceptor(),
+  providers: [{
+    provide: Interceptor,
+    useClass: TodoListComponentInterceptor
+  }],
   styles: [
     `
 tb-todo-list {
@@ -179,41 +180,35 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
   }
 
   private renderItem(slot: TodoListFragment) {
-    const item = new VElement('div', {
-      classes: ['tb-todo-list-item']
-    });
-    const btn = new VElement('div', {
-      classes: ['tb-todo-list-btn']
-    })
-    const state = new VElement('span', {
-      classes: ['tb-todo-list-state'],
-      on: {
-        click: () => {
-          const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
-          const newState = this.stateCollection[i];
-          slot.active = newState.active;
-          slot.disabled = newState.disabled;
-          slot.markAsDirtied();
-        }
-      }
-    });
+    const state = ['tb-todo-list-state'];
+
     if (slot.active) {
-      state.classes.push('tb-todo-list-state-active');
+      state.push('tb-todo-list-state-active');
     }
     if (slot.disabled) {
-      state.classes.push('tb-todo-list-state-disabled');
+      state.push('tb-todo-list-state-disabled');
     }
-    btn.appendChild(state);
-    item.appendChild(btn);
-    const content = new VElement('div', {
-      classes: ['tb-todo-list-content']
-    });
-    item.appendChild(content);
+    const content = <div className="tb-todo-list-content"/>
+    const item = (
+      <div className="tb-todo-list-item">
+        <div className="tb-todo-list-btn">
+          <div className={state.join(' ')} onClick={() => {
+            const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
+            const newState = this.stateCollection[i];
+            slot.active = newState.active;
+            slot.disabled = newState.disabled;
+            slot.markAsDirtied();
+          }}/>
+        </div>
+        {content}
+      </div>
+    );
     return {
       host: item,
       container: content
     };
   }
+
   private getStateIndex(active: boolean, disabled: boolean) {
     for (let i = 0; i < 4; i++) {
       const item = this.stateCollection[i];

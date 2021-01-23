@@ -1,4 +1,4 @@
-import { Injector, Type } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   Component,
@@ -19,11 +19,9 @@ export interface JumbotronOptions {
   backgroundPosition: string;
 }
 
+@Injectable()
 class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
-  private uploader: FileUploader;
-
-  setup(injector: Injector) {
-    this.uploader = injector.get(FileUploader as Type<FileUploader>);
+  constructor(private uploader: FileUploader) {
   }
 
   create(instance: JumbotronComponent): ComponentControlPanelView {
@@ -93,7 +91,10 @@ class JumbotronComponentLoader implements ComponentLoader {
 
 @Component({
   loader: new JumbotronComponentLoader(),
-  setter: new JumbotronComponentSetter(),
+  providers: [{
+    provide: ComponentSetter,
+    useClass: JumbotronComponentSetter
+  }],
   styles: [
     `
 tb-jumbotron {
@@ -124,14 +125,12 @@ export class JumbotronComponent extends DivisionAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
-    const vEle = new VElement(this.tagName, {
-      styles: {
-        backgroundImage: `url("${this.options.backgroundImage}")`,
-        backgroundSize: this.options.backgroundSize || 'cover',
-        backgroundPosition: this.options.backgroundPosition || 'center',
-        minHeight: this.options.minHeight
-      }
-    });
+    const vEle = <tb-jumbotron style={{
+      backgroundImage: `url("${this.options.backgroundImage}")`,
+      backgroundSize: this.options.backgroundSize || 'cover',
+      backgroundPosition: this.options.backgroundPosition || 'center',
+      minHeight: this.options.minHeight
+    }}/>;
     return slotRendererFn(this.slot, vEle, vEle);
   }
 }

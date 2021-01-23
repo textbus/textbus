@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@tanbo/di';
+import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import {
   AbstractComponent, TBClipboard,
   Component,
@@ -12,22 +12,16 @@ import { Input } from './workbench/input';
 import { BrComponent, BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
 
+@Injectable()
 class RootComponentInterceptor implements Interceptor<RootComponent> {
   private selectionSnapshot: TBSelection;
   private contentSnapshot: Array<AbstractComponent | string> = [];
   private formatterSnapshot = new Map<BlockFormatter | InlineFormatter, FormatRange[]>();
-  private injector: Injector;
-  private selection: TBSelection;
-  private input: Input;
-  private rootComponent: RootComponent;
-  private editorController: EditorController;
 
-  setup(injector: Injector) {
-    this.injector = injector;
-    this.selection = injector.get(TBSelection);
-    this.input = injector.get(Input);
-    this.rootComponent = injector.get(RootComponent);
-    this.editorController = injector.get(EditorController);
+  constructor(@Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
+              @Inject(forwardRef(() => Input)) private input: Input,
+              @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent,
+              @Inject(forwardRef(() => EditorController)) private editorController: EditorController) {
   }
 
   onContextmenu(): ContextMenuAction[] {
@@ -242,7 +236,10 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
 @Component({
   loader: null,
-  interceptor: new RootComponentInterceptor()
+  providers: [{
+    provide: Interceptor,
+    useClass: RootComponentInterceptor
+  }]
 })
 @Injectable()
 export class RootComponent extends DivisionAbstractComponent {

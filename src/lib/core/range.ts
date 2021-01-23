@@ -1092,26 +1092,30 @@ export class TBRange {
    */
   getRangePosition() {
     const range: Range = this.nativeRange;
-    let rect: DOMRect;
     const {startContainer, startOffset} = range;
     if (startContainer.nodeType === Node.ELEMENT_NODE) {
       const offsetNode = startContainer.childNodes[startOffset];
+      let isInsertBefore = false;
       if (offsetNode) {
-        rect = (offsetNode as HTMLElement).getBoundingClientRect();
-      } else {
-        // 最后子元素的后面
-        const span = startContainer.ownerDocument.createElement('span');
-        span.innerText = '\u200b';
-        span.style.display = 'inline-block';
-        startContainer.insertBefore(span, offsetNode);
-        rect = span.getBoundingClientRect();
-        startContainer.removeChild(span);
+        if (offsetNode.nodeType === Node.ELEMENT_NODE) {
+          return (offsetNode as HTMLElement).getBoundingClientRect();
+        } else {
+          isInsertBefore = true;
+        }
       }
-
-    } else {
-      rect = range.getBoundingClientRect()
+      const span = startContainer.ownerDocument.createElement('span');
+      span.innerText = '\u200b';
+      span.style.display = 'inline-block';
+      if (isInsertBefore) {
+        startContainer.insertBefore(span, offsetNode);
+      } else {
+        startContainer.appendChild(span);
+      }
+      const rect = span.getBoundingClientRect();
+      startContainer.removeChild(span);
+      return rect;
     }
-    return rect;
+    return range.getBoundingClientRect();
   }
 
   /**

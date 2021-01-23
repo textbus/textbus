@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import {
   Fragment,
@@ -123,13 +123,9 @@ class TableComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
 class TableComponentInterceptor implements Interceptor<TableComponent> {
-  private selection: TBSelection;
-  private injector: Injector;
-
-  setup(injector: Injector) {
-    this.injector = injector;
-    this.selection = injector.get(TBSelection);
+  constructor(private selection: TBSelection) {
   }
 
   onContextmenu(instance: TableComponent): ContextMenuAction[] {
@@ -218,7 +214,10 @@ class TableComponentInterceptor implements Interceptor<TableComponent> {
 
 @Component({
   loader: new TableComponentLoader(),
-  interceptor: new TableComponentInterceptor(),
+  providers: [{
+    provide: Interceptor,
+    useClass: TableComponentInterceptor
+  }],
   styles: [
     `td,th{border-width: 1px; border-style: solid;}
    table {border-spacing: 0; border-collapse: collapse; width: 100%; }
