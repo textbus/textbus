@@ -11,7 +11,6 @@ import {
   BackboneAbstractComponent
 } from './component';
 import { BrComponent } from '../components/br.component';
-import { of } from 'rxjs';
 
 /**
  * 标识 Fragment 中的一个位置。
