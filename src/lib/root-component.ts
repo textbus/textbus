@@ -166,15 +166,9 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   }
 
   onDeleteRange() {
-    const firstRange = this.selection.firstRange;
-
     this.selection.ranges.forEach(range => {
       range.deleteContents();
     })
-    if (firstRange.startFragment.contentLength === 0) {
-      firstRange.startFragment.append(new BrComponent());
-      firstRange.startIndex = firstRange.endIndex = 0;
-    }
   }
 
   onDelete() {

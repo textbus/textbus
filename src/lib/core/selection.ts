@@ -315,6 +315,10 @@ export class TBSelection {
     return t;
   }
 
+  selectAll() {
+    this.nativeSelection.selectAllChildren(this.context.body);
+  }
+
   private getCommonComponent(): AbstractComponent {
     const ranges = this.ranges || [];
     if (ranges.length === 1) {

@@ -274,7 +274,7 @@ export class Input {
             iconClasses: ['textbus-icon-select'],
             label: '全选',
             action: () => {
-              this.selectAll();
+              this.selection.selectAll();
             }
           }],
           ...this.makeContextmenu()
@@ -467,7 +467,7 @@ export class Input {
         ctrlKey: true
       },
       action: () => {
-        this.selectAll();
+        this.selection.selectAll();
       }
     })
     this.keymap({
@@ -586,20 +586,6 @@ export class Input {
       }
       component = component.parentFragment?.parentComponent;
     }
-  }
-
-  private selectAll() {
-    const selection = this.selection;
-    const firstRange = selection.firstRange;
-    const firstPosition = firstRange.findFirstPosition(this.rootComponent.slot);
-    const lastPosition = firstRange.findLastChild(this.rootComponent.slot);
-    selection.removeAllRanges();
-
-    firstRange.setStart(firstPosition.fragment, firstPosition.index);
-    firstRange.setEnd(lastPosition.fragment, lastPosition.index);
-
-    selection.addRange(firstRange);
-    selection.restore();
   }
 
   private paste() {
