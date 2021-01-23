@@ -397,6 +397,9 @@ export class TBSelection {
 
   private moveCursor(direction: CursorMoveDirection) {
     const range = direction === CursorMoveDirection.Down ? this.lastRange : this.firstRange;
+    if (!range) {
+      return;
+    }
     this.removeAllRanges();
     this.addRange(range);
     let p: TBRangePosition;
