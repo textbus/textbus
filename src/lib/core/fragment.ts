@@ -277,10 +277,10 @@ export class Fragment extends Marker {
   /**
    * 删除指定范围的内容及格式。
    * @param startIndex
-   * @param count
+   * @param endIndex
    */
-  remove(startIndex: number, count = this.contents.length - startIndex) {
-    this.cut(startIndex, count).sliceContents().forEach(i => {
+  remove(startIndex: number, endIndex = this.contents.length) {
+    this.cut(startIndex, endIndex).sliceContents().forEach(i => {
       if (i instanceof AbstractComponent) {
         i[parentFragmentAccessToken] = null;
       }
@@ -290,14 +290,14 @@ export class Fragment extends Marker {
   /**
    * 剪切指定范围的内容及格式，并返回一个新的 fragment。
    * @param startIndex
-   * @param count
+   * @param endIndex
    */
-  cut(startIndex: number, count = this.contents.length - startIndex) {
+  cut(startIndex: number, endIndex = this.contentLength) {
     const fragment = new Fragment()
-    if (count <= 0) {
+    if (endIndex <= startIndex) {
       return fragment;
     }
-    const endIndex = startIndex + count;
+    const count = endIndex - startIndex;
     const selfFormatMap = new FormatMap();
     const discardedFormatMap = new FormatMap();
 
@@ -595,7 +595,7 @@ export class Fragment extends Marker {
     const parentFragment = component.parentFragment;
     if (parentFragment) {
       const index = parentFragment.indexOf(component);
-      parentFragment.remove(index, 1);
+      parentFragment.remove(index, index + 1);
     }
     component[parentFragmentAccessToken] = this;
   }

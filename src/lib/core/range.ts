@@ -549,7 +549,7 @@ export class TBRange {
 
         const scope = this.getExpandedScope()[0];
 
-        const afterContents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+        const afterContents = scope.fragment.cut(scope.startIndex, scope.endIndex);
 
         const prevPosition = this.getPreviousPosition();
         prevPosition.fragment.remove(prevPosition.index);
@@ -750,7 +750,8 @@ export class TBRange {
     }
     if (parentComponent instanceof DivisionAbstractComponent) {
       const parentFragment = parentComponent.parentFragment;
-      parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+      const index = parentFragment.indexOf(parentComponent);
+      parentFragment.cut(index, index + 1);
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
       }
@@ -760,7 +761,7 @@ export class TBRange {
       if (parentComponent.slots.length === 0) {
         const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
-        parentFragment.cut(index, 1);
+        parentFragment.cut(index, index + 1);
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
@@ -773,7 +774,7 @@ export class TBRange {
       if (b) {
         const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
-        parentFragment.cut(index, 1);
+        parentFragment.cut(index, index + 1);
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
@@ -1179,7 +1180,7 @@ export class TBRange {
           if (parentComponent.canDelete(scope.fragment)) {
             const parentFragment = parentComponent.parentFragment;
             const index = parentFragment.indexOf(parentComponent);
-            parentFragment.remove(index, 1);
+            parentFragment.remove(index, index + 1);
             if (parentFragment.contentLength === 0) {
               this.deleteEmptyTree(parentFragment);
             }
@@ -1188,7 +1189,7 @@ export class TBRange {
           this.deleteEmptyTree(scope.fragment);
         }
       } else {
-        scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+        scope.fragment.cut(scope.startIndex, scope.endIndex);
       }
     });
     return this;

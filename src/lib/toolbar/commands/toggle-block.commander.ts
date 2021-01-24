@@ -21,7 +21,7 @@ export class ToggleBlockCommander implements Commander<null> {
           });
         const parentFragment = context.parentFragment;
         const position = parentFragment.indexOf(context);
-        parentFragment.cut(position, 1);
+        parentFragment.cut(position, position + 1);
         const fragment = context.slot;
         const contents = fragment.cut(0);
         contents.sliceContents(0).reverse().forEach(i => parentFragment.insert(i, position));
@@ -46,7 +46,7 @@ export class ToggleBlockCommander implements Commander<null> {
         } else {
           const commonAncestorFragment = range.commonAncestorFragment;
           const scope = range.getCommonAncestorFragmentScope();
-          fragment.from(commonAncestorFragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
+          fragment.from(commonAncestorFragment.cut(scope.startIndex, scope.endIndex));
           commonAncestorFragment.insert(block, scope.startIndex);
         }
       }
