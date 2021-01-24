@@ -470,6 +470,6 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       C: ['/*', '*/'],
       CPP: ['/*', '*/'],
       CSharp: ['/*', '*/']
-    }[this.lang];
+    }[this.lang] || ['', ''];
   }
 }
