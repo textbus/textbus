@@ -544,7 +544,7 @@ export class TBRange {
       if ((prevContent instanceof DivisionAbstractComponent ||
         prevContent instanceof BranchAbstractComponent ||
         prevContent instanceof BackboneAbstractComponent) && (
-        currentContent instanceof LeafAbstractComponent ||
+        currentContent instanceof LeafAbstractComponent && !currentContent.block ||
         typeof currentContent === 'string')) {
 
         const scope = this.getExpandedScope()[0];
@@ -558,6 +558,33 @@ export class TBRange {
         this.setPosition(prevPosition.fragment, prevPosition.index);
         return;
       }
+
+      /**
+       * <Block>xxx</Block>
+       * []<Leaf block=true>
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]<Leaf block=true></Block>
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) && (
+        currentContent instanceof LeafAbstractComponent && currentContent.block)) {
+
+        const afterContents = this.startFragment.cut(this.startIndex, this.startIndex + 1);
+
+        const prevPosition = this.getPreviousPosition();
+        prevPosition.fragment.remove(prevPosition.index);
+
+        prevPosition.fragment.concat(afterContents);
+        this.setPosition(prevPosition.fragment, prevPosition.index);
+        return;
+      }
+
 
       /**
        * <Block>xxx</Block>
