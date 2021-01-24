@@ -559,6 +559,27 @@ export class TBRange {
         return;
       }
 
+      /**
+       * <Block>xxx</Block>
+       * x[]xx
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx</Block>
+       * []xx
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof LeafAbstractComponent ||
+        typeof prevContent === 'string') && (
+        currentContent instanceof LeafAbstractComponent ||
+        typeof currentContent === 'string')) {
+        this.startFragment.remove(this.startIndex - 1, this.startIndex);
+        this.startIndex--;
+        this.collapse();
+        return;
+      }
       this.startIndex--;
       this.deleteContents();
     }
