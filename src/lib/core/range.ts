@@ -440,9 +440,9 @@ export class TBRange {
           this.startFragment === this.commonAncestorFragment &&
           typeof this.startFragment.getContentAtIndex(this.startIndex - 1) === 'string') {
           const afterContents = this.startFragment.cut(this.startIndex);
-          this.startFragment.contact(this.endFragment);
+          this.startFragment.concat(this.endFragment);
           this.deleteEmptyTree(this.endFragment);
-          this.startFragment.contact(afterContents);
+          this.startFragment.concat(afterContents);
           this.collapse();
           return;
         }
@@ -462,7 +462,7 @@ export class TBRange {
         const scopes = this.getSelectedScope();
         if (scopes.length === 0 &&
           this.startFragment !== this.commonAncestorFragment) {
-          this.startFragment.contact(this.endFragment.cut(0));
+          this.startFragment.concat(this.endFragment.cut(0));
           this.deleteEmptyTree(this.endFragment);
           this.collapse();
           return;
@@ -554,7 +554,7 @@ export class TBRange {
         const prevPosition = this.getPreviousPosition();
         prevPosition.fragment.remove(prevPosition.index);
 
-        prevPosition.fragment.contact(afterContents);
+        prevPosition.fragment.concat(afterContents);
         this.setPosition(prevPosition.fragment, prevPosition.index);
         return;
       }
@@ -720,12 +720,12 @@ export class TBRange {
             break;
           }
         }
-        this.endFragment.contact(afterContent.cut(index));
-        this.startFragment.contact(afterContent);
+        this.endFragment.concat(afterContent.cut(index));
+        this.startFragment.concat(afterContent);
       } else {
         // 防止结尾有 br
         this.startFragment.remove(this.startIndex);
-        this.startFragment.contact(this.endFragment);
+        this.startFragment.concat(this.endFragment);
         this.deleteEmptyTree(this.endFragment);
       }
     }

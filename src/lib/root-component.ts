@@ -149,7 +149,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       firstRange.startIndex += offset;
 
       if (!contentsArr.length) {
-        fragment.contact(afterContent);
+        fragment.concat(afterContent);
         firstRange.collapse();
       } else {
         const afterComponent = parentComponent.clone() as DivisionAbstractComponent;

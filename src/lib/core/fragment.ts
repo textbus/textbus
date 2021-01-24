@@ -98,7 +98,7 @@ export class Fragment extends Marker {
     this.markAsDirtied();
   }
 
-  contact(fragment: Fragment) {
+  concat(fragment: Fragment) {
     const index = this.contentLength;
 
     fragment.sliceContents(0).forEach(c => {
