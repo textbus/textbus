@@ -26,15 +26,9 @@ export const preToolConfig: SelectToolConfig = {
     label: 'C#',
     value: 'CSharp'
   }, {
-    value: 'Shell'
-  }, {
-    value: 'Python'
-  }, {
     value: 'Swift'
   }, {
     value: 'JSON'
-  }, {
-    value: 'Ruby'
   }, {
     value: 'Less'
   }, {

@@ -3,10 +3,8 @@ import { Grammar, languages, Token, tokenize } from 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-powershell';
-import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-swift';
 import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-ruby';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-less';
 import 'prismjs/components/prism-scss';
@@ -113,6 +111,23 @@ class PreComponentLoader implements ComponentLoader {
   }
 }
 
+class CodeFragment extends Fragment {
+  set blockComment(b: boolean) {
+    if (b !== this.isBlockComment) {
+      this.isBlockComment = b;
+      if (!this.dirty) {
+        this.markAsDirtied();
+      }
+    }
+  }
+
+  get blockComment() {
+    return this.isBlockComment;
+  }
+
+  private isBlockComment = false;
+}
+
 @Injectable()
 class PreComponentInterceptor implements Interceptor<PreComponent> {
   constructor(private selection: TBSelection) {
@@ -121,7 +136,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   onEnter(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
     const component = event.instance;
-    const commonAncestorFragment = firstRange.commonAncestorFragment;
+    const commonAncestorFragment = firstRange.commonAncestorFragment as CodeFragment;
     const nextSlot = commonAncestorFragment.cut(firstRange.startIndex);
 
     const index = component.indexOf(commonAncestorFragment);
@@ -132,8 +147,10 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     if (nextSlot.contentLength === 0) {
       nextSlot.append(new BrComponent());
     }
-    component.splice(index + 1, 0, nextSlot);
-    firstRange.setStart(nextSlot, 0);
+    const f = new CodeFragment();
+    f.from(nextSlot);
+    component.splice(index + 1, 0, f);
+    firstRange.setStart(f, 0);
     firstRange.collapse();
     event.stopPropagation();
   }
@@ -154,8 +171,8 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     if (firstRange.startIndex === 0) {
       const component = event.instance;
       const endFragment = firstRange.endFragment;
-      const startIndex = component.indexOf(firstRange.startFragment);
-      const endIndex = component.indexOf(endFragment);
+      const startIndex = component.indexOf(firstRange.startFragment as CodeFragment);
+      const endIndex = component.indexOf(endFragment as CodeFragment);
       component.splice(startIndex, endIndex - startIndex);
       endFragment.remove(0, firstRange.endIndex);
       if (endFragment.contentLength === 0) {
@@ -171,7 +188,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     const text = event.data.text;
     const component = event.instance;
     const firstRange = this.selection.firstRange;
-    const commonAncestorFragment = firstRange.commonAncestorFragment;
+    const commonAncestorFragment = firstRange.commonAncestorFragment as CodeFragment;
 
     const index = component.indexOf(commonAncestorFragment);
     const lines = text.split(/\n/g);
@@ -184,11 +201,13 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       const next = commonAncestorFragment.cut(firstRange.startIndex);
       commonAncestorFragment.append(lines.shift());
       const fragments = lines.map(str => {
-        const fragment = new Fragment();
+        const fragment = new CodeFragment();
         fragment.append(str || new BrComponent());
         return fragment;
       });
-      component.splice(index + 1, 0, next);
+      const f = new CodeFragment();
+      f.from(next);
+      component.splice(index + 1, 0, f);
       component.splice(index + 1, 0, ...fragments);
       const position = firstRange.findLastPosition(fragments.pop());
       firstRange.setStart(position.fragment, position.index);
@@ -239,7 +258,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   `
   ]
 })
-export class PreComponent extends BackboneAbstractComponent {
+export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
   static theme: PreTheme = 'light';
 
   set lang(v: string) {
@@ -263,23 +282,27 @@ export class PreComponent extends BackboneAbstractComponent {
     this.setSourceCode(code);
   }
 
-  public map<U>(callbackFn: (value: Fragment, index: number, array: Fragment[]) => U, thisArg?: any): U[] {
+  public map<U>(callbackFn: (value: CodeFragment, index: number, array: CodeFragment[]) => U, thisArg?: any): U[] {
     return super.map(callbackFn, thisArg);
   }
 
-  public splice(start: number, deleteCount: number, ...items: Fragment[]): Fragment[] {
+  public splice(start: number, deleteCount: number, ...items: CodeFragment[]): CodeFragment[] {
     return super.splice(start, deleteCount, ...items);
   }
 
   clone() {
-    const fragments = this.map(slot => slot.clone());
+    const fragments = this.map(slot => {
+      const f = new CodeFragment();
+      f.from(slot.clone());
+      return f;
+    });
     const component = new PreComponent(this.lang, '', this.theme);
     component.clean();
     component.push(...fragments);
     return component;
   }
 
-  canDelete(deletedSlot: Fragment): boolean {
+  canDelete(deletedSlot: CodeFragment): boolean {
     this.splice(this.indexOf(deletedSlot), 1);
     return this.slotCount === 0;
   }
@@ -318,7 +341,7 @@ export class PreComponent extends BackboneAbstractComponent {
 
   setSourceCode(code: string) {
     const fragments = code.replace(/[\n\s]+$/g, '').split(/[\n]/).map(lineContent => {
-      const fragment = new Fragment();
+      const fragment = new CodeFragment();
       fragment.append(lineContent || new BrComponent());
       return fragment;
     })
@@ -365,9 +388,14 @@ export class PreComponent extends BackboneAbstractComponent {
 
   private reformat() {
     const languageGrammar = this.getLanguageGrammar();
-    this.forEach((slot) => {
+    this.forEach((slot, index) => {
       if (slot.dirty === false) {
         return;
+      }
+      const blockCommentStart = this.getLanguageBlockCommentStart();
+
+      if (slot.blockComment) {
+        slot.insert(blockCommentStart, 0);
       }
       const content = slot.sliceContents(0).map(item => {
         if (typeof item === 'string') {
@@ -384,15 +412,18 @@ export class PreComponent extends BackboneAbstractComponent {
       if (languageGrammar) {
         const tokens = tokenize(content, languageGrammar);
         this.format(tokens, fragment, 0);
-      }
-      slot.getFormatKeys().forEach(format => {
-        if (format instanceof BlockFormatter) {
-          slot.getFormatRanges(format).forEach(r => {
-            fragment.apply(format, r);
-          })
+        const lastToken = tokens.pop();
+        const nextSlot = this.getSlotAtIndex(index + 1);
+        if (nextSlot) {
+          nextSlot.blockComment = typeof lastToken !== 'string' &&
+            lastToken.type === 'comment' &&
+            (lastToken.content as string).indexOf(blockCommentStart) === 0;
         }
-      })
+      }
       fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+      if (slot.blockComment) {
+        fragment.remove(0, blockCommentStart.length);
+      }
       slot.from(fragment);
     })
   }
@@ -404,8 +435,6 @@ export class PreComponent extends BackboneAbstractComponent {
       CSS: languages.css,
       Typescript: languages.typescript,
       Java: languages.java,
-      Shell: languages.shell,
-      Python: languages.python,
       Swift: languages.swift,
       JSON: languages.json,
       Ruby: languages.ruby,
@@ -415,6 +444,24 @@ export class PreComponent extends BackboneAbstractComponent {
       C: languages.c,
       CPP: languages.cpp,
       CSharp: languages.csharp
+    }[this.lang];
+  }
+
+  private getLanguageBlockCommentStart(): string {
+    return {
+      HTML: '<!--',
+      Javascript: '/*',
+      CSS: '/*',
+      Typescript: '/*',
+      Java: '/*',
+      Swift: '/*',
+      JSON: '',
+      Less: '/*',
+      SCSS: '/*',
+      Stylus: '/*',
+      C: '/*',
+      CPP: '/*',
+      CSharp: '/*'
     }[this.lang];
   }
 }
