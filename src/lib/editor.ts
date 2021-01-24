@@ -73,10 +73,13 @@ export interface EditorOptions<T> {
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string): (string | Promise<string> | Observable<string>);
 }
-
+/**编辑器参数 */
 export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPTIONS');
+/**可编辑文档实例 */
 export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
+/**可编辑文档DOM容器 */
 export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
+/**可编辑文档滚动容器 */
 export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
 
 const editorErrorFn = makeError('Editor');
@@ -96,6 +99,7 @@ export class Editor<T = any> {
   /**编辑器状态控制器 */
   readonly stateController: EditorController;
 
+  /**Viewer实例 */
   injector: Injector = null;
 
   set readonly(b: boolean) {
