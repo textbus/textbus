@@ -353,7 +353,11 @@ export class TBRange {
   }
 
   delete() {
-    if (this.collapsed) {
+    if (!this.collapsed) {
+      this.deleteContents();
+      return;
+    }
+    if (this.startIndex === 0) {
       /**
        * xxx ?
        * <Block>[]<br></Block>
@@ -364,7 +368,7 @@ export class TBRange {
        * []xxx
        */
       const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
-      if (currentContent instanceof BrComponent && this.startIndex === 0 && this.startFragment.contentLength === 1) {
+      if (currentContent instanceof BrComponent && this.startFragment.contentLength === 1) {
         let position = this.getPreviousPosition();
         if (position.fragment === this.startFragment) {
           position = this.getNextPosition();
@@ -375,30 +379,6 @@ export class TBRange {
         return;
       }
       /**
-       * <Block>xxx</Block>
-       * []<br>
-       * <Block>xxx</Block>
-       *
-       * to
-       *
-       * <Block>xxx[]<Block>
-       * <Block>xxx</Block>
-       */
-
-      const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
-      if ((prevContent instanceof DivisionAbstractComponent ||
-        prevContent instanceof BranchAbstractComponent ||
-        prevContent instanceof BackboneAbstractComponent) &&
-        currentContent instanceof BrComponent) {
-        const prevPosition = this.getPreviousPosition();
-        this.endIndex++;
-        this.deleteContents();
-        this.setStart(prevPosition.fragment, prevPosition.index);
-        this.collapse()
-        return;
-      }
-
-      /**
        * <br>
        * <Block>[]xxx</Block>
        *
@@ -407,7 +387,7 @@ export class TBRange {
        * <Block>xxx</Block>
        */
       const prevPosition = this.getPreviousPosition();
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const startContent = this.startFragment.getContentAtIndex(this.startIndex);
@@ -430,7 +410,7 @@ export class TBRange {
        *
        * <Block>xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -444,7 +424,6 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * string
        * <Block>[]xxx</Block>
@@ -453,7 +432,7 @@ export class TBRange {
        *
        * string[]xxx
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -469,7 +448,6 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * <Block>xxx</Block>
        * <Block>[]xxx</Block>
@@ -478,7 +456,7 @@ export class TBRange {
        *
        * <Block>xxx[]xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -491,7 +469,6 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * <Block><br></Block>
        * <Block>[]xxx</Block>
@@ -500,7 +477,7 @@ export class TBRange {
        *
        * <Block>[]xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -514,7 +491,6 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * empty[]<br>
        *
@@ -522,19 +498,68 @@ export class TBRange {
        *
        * empty[]
        */
-      if (this.startIndex === 0 && prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
+      if (prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
         this.endIndex++;
         this.deleteContents();
         this.collapse();
         return;
       }
+    } else {
+      /**
+       * <Block>xxx</Block>
+       * []<br>
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]<Block>
+       * <Block>xxx</Block>
+       */
 
-      if (this.startIndex > 0) {
-        this.startIndex--;
+      const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
+      const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) &&
+        currentContent instanceof BrComponent) {
+        const prevPosition = this.getPreviousPosition();
+        this.endIndex++;
         this.deleteContents();
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        this.collapse()
+        return;
       }
 
-    } else {
+      /**
+       * <Block>xxx</Block>
+       * []xxx
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]xxx</Block>
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) && (
+        currentContent instanceof LeafAbstractComponent ||
+        typeof currentContent === 'string')) {
+
+        const scope = this.getExpandedScope()[0];
+
+        const afterContents = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+
+        const prevPosition = this.getPreviousPosition();
+        prevPosition.fragment.remove(prevPosition.index);
+
+        prevPosition.fragment.contact(afterContents);
+        this.setPosition(prevPosition.fragment, prevPosition.index);
+        return;
+      }
+
+      this.startIndex--;
       this.deleteContents();
     }
   }
