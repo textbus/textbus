@@ -416,6 +416,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         const tokens = tokenize(content, languageGrammar);
         this.format(tokens, fragment, 0);
         const lastToken = tokens.pop();
+        slot.blockCommentEnd = true;
         const nextSlot = this.getSlotAtIndex(index + 1);
         if (nextSlot) {
           if (typeof lastToken !== 'string' &&
