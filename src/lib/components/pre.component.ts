@@ -112,7 +112,7 @@ class PreComponentLoader implements ComponentLoader {
 }
 
 class CodeFragment extends Fragment {
-  set blockComment(b: boolean) {
+  set blockCommentStart(b: boolean) {
     if (b !== this.isBlockComment) {
       this.isBlockComment = b;
       if (!this.dirty) {
@@ -121,9 +121,11 @@ class CodeFragment extends Fragment {
     }
   }
 
-  get blockComment() {
+  get blockCommentStart() {
     return this.isBlockComment;
   }
+
+  blockCommentEnd = true;
 
   private isBlockComment = false;
 }
@@ -148,6 +150,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       nextSlot.append(new BrComponent());
     }
     const f = new CodeFragment();
+    f.blockCommentStart = !commonAncestorFragment.blockCommentEnd && commonAncestorFragment.blockCommentStart;
     f.from(nextSlot);
     component.splice(index + 1, 0, f);
     firstRange.setStart(f, 0);
@@ -392,9 +395,9 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       if (slot.dirty === false) {
         return;
       }
-      const blockCommentStart = this.getLanguageBlockCommentStart();
+      const [blockCommentStart, blockCommentEnd] = this.getLanguageBlockCommentStart();
 
-      if (slot.blockComment) {
+      if (slot.blockCommentStart) {
         slot.insert(blockCommentStart, 0);
       }
       const content = slot.sliceContents(0).map(item => {
@@ -415,13 +418,18 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         const lastToken = tokens.pop();
         const nextSlot = this.getSlotAtIndex(index + 1);
         if (nextSlot) {
-          nextSlot.blockComment = typeof lastToken !== 'string' &&
+          if (typeof lastToken !== 'string' &&
             lastToken.type === 'comment' &&
-            (lastToken.content as string).indexOf(blockCommentStart) === 0;
+            (lastToken.content as string).indexOf(blockCommentStart) === 0) {
+            slot.blockCommentEnd = new RegExp(blockCommentEnd.replace(/[*/]/g, i => '\\' + i) + '$').test(lastToken.content as string);
+            nextSlot.blockCommentStart = !slot.blockCommentEnd;
+          } else {
+            nextSlot.blockCommentStart = false;
+          }
         }
       }
       fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
-      if (slot.blockComment) {
+      if (slot.blockCommentStart) {
         fragment.remove(0, blockCommentStart.length);
       }
       slot.from(fragment);
@@ -447,21 +455,21 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
     }[this.lang];
   }
 
-  private getLanguageBlockCommentStart(): string {
+  private getLanguageBlockCommentStart(): [string, string] {
     return {
-      HTML: '<!--',
-      Javascript: '/*',
-      CSS: '/*',
-      Typescript: '/*',
-      Java: '/*',
-      Swift: '/*',
-      JSON: '',
-      Less: '/*',
-      SCSS: '/*',
-      Stylus: '/*',
-      C: '/*',
-      CPP: '/*',
-      CSharp: '/*'
+      HTML: ['<!--', '-->'],
+      Javascript: ['/*', '*/'],
+      CSS: ['/*', '*/'],
+      Typescript: ['/*', '*/'],
+      Java: ['/*', '*/'],
+      Swift: ['/*', '*/'],
+      JSON: ['', ''],
+      Less: ['/*', '*/'],
+      SCSS: ['/*', '*/'],
+      Stylus: ['/*', '*/'],
+      C: ['/*', '*/'],
+      CPP: ['/*', '*/'],
+      CSharp: ['/*', '*/']
     }[this.lang];
   }
 }
