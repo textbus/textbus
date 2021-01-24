@@ -91,8 +91,7 @@ class ListComponentInterceptor implements Interceptor<ListComponent> {
     const next = breakingLine(slot, firstRange.startIndex);
 
     instance.slots.splice(index + 1, 0, next);
-    firstRange.startFragment = firstRange.endFragment = next;
-    firstRange.startIndex = firstRange.endIndex = 0;
+    firstRange.setPosition(next, 0);
   }
 }
 

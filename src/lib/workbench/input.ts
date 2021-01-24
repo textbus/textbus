@@ -13,8 +13,6 @@ import {
   Parser,
   Renderer,
   TBEvent,
-  TBRange,
-  TBRangePosition,
   TBSelection
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
@@ -33,13 +31,6 @@ export interface Keymap {
   shiftKey?: boolean;
   altKey?: boolean;
   key: string | string[];
-}
-
-export enum CursorMoveDirection {
-  Left,
-  Right,
-  Up,
-  Down
 }
 
 /**
@@ -103,9 +94,6 @@ export class Input {
 
   private _display = true;
   private flashing = true;
-
-  private oldCursorPosition: { left: number, top: number } = null;
-  private cleanOldCursorTimer: any;
   private subs: Subscription[] = [];
 
   private contextmenu: ContextMenu;
@@ -180,54 +168,6 @@ export class Input {
     this.input.focus();
   }
 
-  private moveCursor(direction: CursorMoveDirection) {
-    const selection = this.selection;
-    selection.ranges.forEach(range => {
-      let p: TBRangePosition;
-      let range2: TBRange;
-      switch (direction) {
-        case CursorMoveDirection.Left:
-          p = range.getPreviousPosition();
-          break;
-        case CursorMoveDirection.Right:
-          p = range.getNextPosition();
-          break;
-        case CursorMoveDirection.Up:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getPreviousLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-        case CursorMoveDirection.Down:
-          clearTimeout(this.cleanOldCursorTimer);
-          range2 = range.clone().restore();
-
-          if (this.oldCursorPosition) {
-            p = range2.getNextLinePosition(this.oldCursorPosition.left);
-          } else {
-            const rect = range2.getRangePosition();
-            this.oldCursorPosition = rect;
-            p = range.getNextLinePosition(rect.left);
-          }
-          this.cleanOldCursorTimer = setTimeout(() => {
-            this.oldCursorPosition = null;
-          }, 3000);
-          break;
-      }
-      range.startFragment = range.endFragment = p.fragment;
-      range.startIndex = range.endIndex = p.index;
-    });
-    selection.restore();
-  }
 
   private updateCursorPosition() {
     const startContainer = this.selection.firstRange.nativeRange.startContainer;
@@ -334,7 +274,7 @@ export class Input {
             iconClasses: ['textbus-icon-select'],
             label: '全选',
             action: () => {
-              this.selectAll();
+              this.selection.selectAll();
             }
           }],
           ...this.makeContextmenu()
@@ -527,7 +467,7 @@ export class Input {
         ctrlKey: true
       },
       action: () => {
-        this.selectAll();
+        this.selection.selectAll();
       }
     })
     this.keymap({
@@ -535,13 +475,20 @@ export class Input {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
       action: (ev: KeyboardEvent) => {
-        const map: { [key: string]: CursorMoveDirection } = {
-          ArrowLeft: CursorMoveDirection.Left,
-          ArrowRight: CursorMoveDirection.Right,
-          ArrowUp: CursorMoveDirection.Up,
-          ArrowDown: CursorMoveDirection.Down
-        };
-        this.moveCursor(map[ev.key]);
+        switch (ev.key) {
+          case 'ArrowLeft':
+            this.selection.toPrevious();
+            break;
+          case 'ArrowRight':
+            this.selection.toNext();
+            break;
+          case 'ArrowUp':
+            this.selection.toPreviousLine();
+            break;
+          case 'ArrowDown':
+            this.selection.toNextLine();
+            break;
+        }
         this.dispatchInputReadyEvent();
       }
     })
@@ -639,20 +586,6 @@ export class Input {
       }
       component = component.parentFragment?.parentComponent;
     }
-  }
-
-  private selectAll() {
-    const selection = this.selection;
-    const firstRange = selection.firstRange;
-    const firstPosition = firstRange.findFirstPosition(this.rootComponent.slot);
-    const lastPosition = firstRange.findLastChild(this.rootComponent.slot);
-    selection.removeAllRanges();
-
-    firstRange.setStart(firstPosition.fragment, firstPosition.index);
-    firstRange.setEnd(lastPosition.fragment, lastPosition.index);
-
-    selection.addRange(firstRange);
-    selection.restore();
   }
 
   private paste() {

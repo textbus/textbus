@@ -34,7 +34,8 @@ export class BlockCommander implements Commander<string> {
             const parentFragment = parentComponent.parentFragment;
             blockComponent.slot.from(scope.fragment);
             parentFragment.insertBefore(blockComponent, parentComponent);
-            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+            const index = parentFragment.indexOf(parentComponent);
+            parentFragment.cut(index, index + 1);
             this.effect(blockComponent.slot, parentComponent.tagName);
           } else if (parentComponent instanceof BranchAbstractComponent) {
             const index = parentComponent.slots.indexOf(scope.fragment);
@@ -49,15 +50,13 @@ export class BlockCommander implements Commander<string> {
             this.effect(blockComponent.slot, parentComponent.tagName);
           }
         } else {
-          const c = scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+          const c = scope.fragment.cut(scope.startIndex, scope.endIndex);
           blockComponent.slot.from(c);
           if (scope.fragment === range.startFragment) {
-            range.startFragment = blockComponent.slot;
-            range.startIndex = range.startIndex - scope.startIndex;
+            range.setStart(blockComponent.slot, range.startIndex - scope.startIndex);
           }
           if (scope.fragment === range.endFragment) {
-            range.endFragment = blockComponent.slot;
-            range.endIndex = range.endIndex - scope.startIndex;
+            range.setEnd(blockComponent.slot, range.endIndex - scope.startIndex);
           }
           scope.fragment.insert(blockComponent, scope.startIndex);
           this.effect(blockComponent.slot, '');

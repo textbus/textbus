@@ -21,6 +21,13 @@ export interface RangePath {
   endPaths: number[];
 }
 
+enum CursorMoveDirection {
+  Left,
+  Right,
+  Up,
+  Down
+}
+
 const selectionErrorFn = makeError('Selection');
 
 /**
@@ -79,6 +86,9 @@ export class TBSelection {
   private nativeSelection: Selection;
   private selectionChangeEvent = new Subject<void>();
   private isChanged = false;
+
+  private oldCursorPosition: { left: number, top: number } = null;
+  private cleanOldCursorTimer: any;
 
   constructor(private context: Document,
               private selectionChange: Observable<any>,
@@ -149,6 +159,22 @@ export class TBSelection {
     if (!this.isChanged) {
       this.selectionChangeEvent.next()
     }
+  }
+
+  toPrevious() {
+    this.moveCursor(CursorMoveDirection.Left);
+  }
+
+  toNext() {
+    this.moveCursor(CursorMoveDirection.Right);
+  }
+
+  toPreviousLine() {
+    this.moveCursor(CursorMoveDirection.Up);
+  }
+
+  toNextLine() {
+    this.moveCursor(CursorMoveDirection.Down);
   }
 
   /**
@@ -268,16 +294,13 @@ export class TBSelection {
     const start = findPosition(startPaths, fragment);
     const range = new TBRange(nativeRange, this.renderer);
 
-    range.startIndex = start.index;
-    range.startFragment = start.fragment;
+    range.setStart(start.fragment, start.index);
 
     if (endPaths === startPaths) {
-      range.endIndex = start.index;
-      range.endFragment = start.fragment;
+      range.setEnd(start.fragment, start.index);
     } else {
       const end = findPosition(endPaths, fragment);
-      range.endIndex = end.index;
-      range.endFragment = end.fragment;
+      range.setEnd(end.fragment, end.index);
     }
     this.removeAllRanges();
     this.addRange(range);
@@ -290,6 +313,10 @@ export class TBSelection {
     const t = new TBSelection(this.context, of(), this.renderer);
     t._ranges = this.ranges.map(r => r.clone());
     return t;
+  }
+
+  selectAll() {
+    this.nativeSelection.selectAllChildren(this.context.body);
   }
 
   private getCommonComponent(): AbstractComponent {
@@ -367,5 +394,57 @@ export class TBSelection {
       return null;
     }
     return node;
+  }
+
+  private moveCursor(direction: CursorMoveDirection) {
+    const range = direction === CursorMoveDirection.Down ? this.lastRange : this.firstRange;
+    if (!range) {
+      return;
+    }
+    this.removeAllRanges();
+    this.addRange(range);
+    let p: TBRangePosition;
+    let range2: TBRange;
+    switch (direction) {
+      case CursorMoveDirection.Left:
+        p = range.getPreviousPosition();
+        break;
+      case CursorMoveDirection.Right:
+        p = range.getNextPosition();
+        break;
+      case CursorMoveDirection.Up:
+        clearTimeout(this.cleanOldCursorTimer);
+        range2 = range.clone().restore();
+
+        if (this.oldCursorPosition) {
+          p = range2.getPreviousLinePosition(this.oldCursorPosition.left);
+        } else {
+          const rect = range2.getRangePosition();
+          this.oldCursorPosition = rect;
+          p = range.getPreviousLinePosition(rect.left);
+        }
+        this.cleanOldCursorTimer = setTimeout(() => {
+          this.oldCursorPosition = null;
+        }, 3000);
+        break;
+      case CursorMoveDirection.Down:
+        clearTimeout(this.cleanOldCursorTimer);
+        range2 = range.clone().restore();
+
+        if (this.oldCursorPosition) {
+          p = range2.getNextLinePosition(this.oldCursorPosition.left);
+        } else {
+          const rect = range2.getRangePosition();
+          this.oldCursorPosition = rect;
+          p = range.getNextLinePosition(rect.left);
+        }
+        this.cleanOldCursorTimer = setTimeout(() => {
+          this.oldCursorPosition = null;
+        }, 3000);
+        break;
+    }
+
+    range.setPosition(p.fragment, p.index);
+    this.restore();
   }
 }

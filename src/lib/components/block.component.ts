@@ -39,8 +39,7 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
     component.slot.from(next);
     parent.insertAfter(component, event.instance);
     const position = firstRange.findFirstPosition(component.slot);
-    firstRange.startFragment = firstRange.endFragment = position.fragment;
-    firstRange.startIndex = firstRange.endIndex = position.index;
+    firstRange.setPosition(position.fragment, position.index);
     event.stopPropagation();
   }
 }

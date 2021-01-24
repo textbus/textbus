@@ -45,13 +45,13 @@ export class FindPlugin implements TBPlugin {
         commander.recordHistory = true;
         const current = this.positions[this.positionIndex];
         if (current) {
-          current.fragment.cut(current.startIndex, current.endIndex - current.startIndex);
+          current.fragment.cut(current.startIndex, current.endIndex);
           current.fragment.insert(rule.replaceValue, current.startIndex);
         }
       } else if (rule.replaceAll) {
         commander.recordHistory = true;
         this.positions.reverse().forEach(p => {
-          p.fragment.cut(p.startIndex, p.endIndex - p.startIndex);
+          p.fragment.cut(p.startIndex, p.endIndex);
           p.fragment.insert(rule.replaceValue, p.startIndex);
         });
       } else {

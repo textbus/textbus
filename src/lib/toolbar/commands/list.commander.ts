@@ -53,7 +53,8 @@ export class ListCommander implements Commander<null> {
             afterList.slots.push(...slots.after);
             parentFragment.insertBefore(afterList, item.component);
           }
-          parentFragment.cut(parentFragment.indexOf(item.component), 1);
+          const index = parentFragment.indexOf(item.component);
+          parentFragment.cut(index, index + 1);
         })
       } else {
         const commonScope = range.getCommonAncestorFragmentScope();
@@ -75,7 +76,7 @@ export class ListCommander implements Commander<null> {
           if (parentComponent instanceof DivisionAbstractComponent || parentComponent instanceof BackboneAbstractComponent) {
             const parentFragment = parentComponent.parentFragment;
             const position = parentFragment.indexOf(parentComponent);
-            parentFragment.cut(position, 1);
+            parentFragment.cut(position, position + 1);
             parentFragment.insert(list, position);
           } else if (parentComponent instanceof BranchAbstractComponent) {
             const index = parentComponent.slots.indexOf(commonAncestorFragment);
@@ -94,7 +95,8 @@ export class ListCommander implements Commander<null> {
             if (before.slots.length) {
               parentFragment.insert(before, position);
             }
-            parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+            const i = parentFragment.indexOf(parentComponent);
+            parentFragment.cut(i, i + 1);
           }
         }
       }
@@ -112,7 +114,7 @@ export class ListCommander implements Commander<null> {
         return;
       }
       const fragment = new Fragment();
-      fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex));
+      fragment.from(scope.fragment.cut(scope.startIndex, scope.endIndex));
 
       list.slots.unshift(fragment);
       if (scope.fragment.contentLength === 0) {

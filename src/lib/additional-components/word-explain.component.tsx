@@ -187,7 +187,8 @@ export class WordExplainComponent extends BackboneAbstractComponent {
         {
           !isOutputMode && <span className="tb-word-explain-close" onClick={() => {
             const parentFragment = this.parentFragment;
-            parentFragment.remove(parentFragment.indexOf(this), 1);
+            const index = parentFragment.indexOf(this);
+            parentFragment.remove(index, index + 1);
           }
           }/>
         }

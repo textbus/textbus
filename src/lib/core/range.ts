@@ -73,13 +73,11 @@ export class TBRange {
       startPosition && endPosition) {
       const start = TBRange.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition, renderer);
       if (start) {
-        this.startFragment = start.fragment;
-        this.startIndex = start.index
+        this.setStart(start.fragment, start.index);
       }
       const end = TBRange.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition, renderer);
       if (end) {
-        this.endFragment = end.fragment;
-        this.endIndex = end.index;
+        this.setEnd(end.fragment, end.index);
       }
     }
   }
@@ -130,6 +128,11 @@ export class TBRange {
   setEnd(fragment: Fragment, offset: number) {
     this.endFragment = fragment;
     this.endIndex = offset;
+  }
+
+  setPosition(fragment: Fragment, offset: number) {
+    this.setStart(fragment, offset);
+    this.setEnd(fragment, offset);
   }
 
   /**
@@ -350,7 +353,11 @@ export class TBRange {
   }
 
   delete() {
-    if (this.collapsed) {
+    if (!this.collapsed) {
+      this.deleteContents();
+      return;
+    }
+    if (this.startIndex === 0) {
       /**
        * xxx ?
        * <Block>[]<br></Block>
@@ -361,7 +368,7 @@ export class TBRange {
        * []xxx
        */
       const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
-      if (currentContent instanceof BrComponent && this.startIndex === 0 && this.startFragment.contentLength === 1) {
+      if (currentContent instanceof BrComponent && this.startFragment.contentLength === 1) {
         let position = this.getPreviousPosition();
         if (position.fragment === this.startFragment) {
           position = this.getNextPosition();
@@ -372,30 +379,6 @@ export class TBRange {
         return;
       }
       /**
-       * <Block>xxx</Block>
-       * []<br>
-       * <Block>xxx</Block>
-       *
-       * to
-       *
-       * <Block>xxx[]<Block>
-       * <Block>xxx</Block>
-       */
-
-      const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
-      if ((prevContent instanceof DivisionAbstractComponent ||
-        prevContent instanceof BranchAbstractComponent ||
-        prevContent instanceof BackboneAbstractComponent) &&
-        currentContent instanceof BrComponent) {
-        const prevPosition = this.getPreviousPosition();
-        this.endIndex++;
-        this.deleteContents();
-        this.setStart(prevPosition.fragment, prevPosition.index);
-        this.collapse()
-        return;
-      }
-
-      /**
        * <br>
        * <Block>[]xxx</Block>
        *
@@ -404,7 +387,7 @@ export class TBRange {
        * <Block>xxx</Block>
        */
       const prevPosition = this.getPreviousPosition();
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const startContent = this.startFragment.getContentAtIndex(this.startIndex);
@@ -427,7 +410,7 @@ export class TBRange {
        *
        * <Block>xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -441,7 +424,30 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
+      /**
+       * string
+       * <Block>[]xxx</Block>
+       *
+       * to
+       *
+       * string[]xxx
+       */
+      if (prevPosition.fragment !== this.startFragment) {
+        const startFragment = this.startFragment;
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        const scopes = this.getSelectedScope();
+        if (scopes.length === 0 &&
+          this.startFragment === this.commonAncestorFragment &&
+          typeof this.startFragment.getContentAtIndex(this.startIndex - 1) === 'string') {
+          const afterContents = this.startFragment.cut(this.startIndex);
+          this.startFragment.concat(this.endFragment);
+          this.deleteEmptyTree(this.endFragment);
+          this.startFragment.concat(afterContents);
+          this.collapse();
+          return;
+        }
+        this.setStart(startFragment, 0);
+      }
       /**
        * <Block>xxx</Block>
        * <Block>[]xxx</Block>
@@ -450,20 +456,19 @@ export class TBRange {
        *
        * <Block>xxx[]xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
         if (scopes.length === 0 &&
           this.startFragment !== this.commonAncestorFragment) {
-          this.startFragment.contact(this.endFragment.cut(0));
+          this.startFragment.concat(this.endFragment.cut(0));
           this.deleteEmptyTree(this.endFragment);
           this.collapse();
           return;
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * <Block><br></Block>
        * <Block>[]xxx</Block>
@@ -472,7 +477,7 @@ export class TBRange {
        *
        * <Block>[]xxx</Block>
        */
-      if (this.startIndex === 0 && prevPosition.fragment !== this.startFragment) {
+      if (prevPosition.fragment !== this.startFragment) {
         const startFragment = this.startFragment;
         this.setStart(prevPosition.fragment, prevPosition.index);
         const scopes = this.getSelectedScope();
@@ -486,7 +491,6 @@ export class TBRange {
         }
         this.setStart(startFragment, 0);
       }
-
       /**
        * empty[]<br>
        *
@@ -494,19 +498,116 @@ export class TBRange {
        *
        * empty[]
        */
-      if (this.startIndex === 0 && prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
+      if (prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
         this.endIndex++;
         this.deleteContents();
         this.collapse();
         return;
       }
+    } else {
+      /**
+       * <Block>xxx</Block>
+       * []<br>
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]<Block>
+       * <Block>xxx</Block>
+       */
 
-      if (this.startIndex > 0) {
-        this.startIndex--;
+      const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
+      const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) &&
+        currentContent instanceof BrComponent) {
+        const prevPosition = this.getPreviousPosition();
+        this.endIndex++;
         this.deleteContents();
+        this.setStart(prevPosition.fragment, prevPosition.index);
+        this.collapse()
+        return;
       }
 
-    } else {
+      /**
+       * <Block>xxx</Block>
+       * []xxx
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]xxx</Block>
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) && (
+        currentContent instanceof LeafAbstractComponent && !currentContent.block ||
+        typeof currentContent === 'string')) {
+
+        const scope = this.getExpandedScope()[0];
+
+        const afterContents = scope.fragment.cut(scope.startIndex, scope.endIndex);
+
+        const prevPosition = this.getPreviousPosition();
+        prevPosition.fragment.remove(prevPosition.index);
+
+        prevPosition.fragment.concat(afterContents);
+        this.setPosition(prevPosition.fragment, prevPosition.index);
+        return;
+      }
+
+      /**
+       * <Block>xxx</Block>
+       * []<Leaf block=true>
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx[]<Leaf block=true></Block>
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof DivisionAbstractComponent ||
+        prevContent instanceof BranchAbstractComponent ||
+        prevContent instanceof BackboneAbstractComponent) && (
+        currentContent instanceof LeafAbstractComponent && currentContent.block)) {
+
+        const afterContents = this.startFragment.cut(this.startIndex, this.startIndex + 1);
+
+        const prevPosition = this.getPreviousPosition();
+        prevPosition.fragment.remove(prevPosition.index);
+
+        prevPosition.fragment.concat(afterContents);
+        this.setPosition(prevPosition.fragment, prevPosition.index);
+        return;
+      }
+
+
+      /**
+       * <Block>xxx</Block>
+       * x[]xx
+       * <Block>xxx</Block>
+       *
+       * to
+       *
+       * <Block>xxx</Block>
+       * []xx
+       * <Block>xxx</Block>
+       */
+
+      if ((prevContent instanceof LeafAbstractComponent ||
+        typeof prevContent === 'string') && (
+        currentContent instanceof LeafAbstractComponent ||
+        typeof currentContent === 'string')) {
+        this.startFragment.remove(this.startIndex - 1, this.startIndex);
+        this.startIndex--;
+        this.collapse();
+        return;
+      }
+      this.startIndex--;
       this.deleteContents();
     }
   }
@@ -667,12 +768,12 @@ export class TBRange {
             break;
           }
         }
-        this.endFragment.contact(afterContent.cut(index));
-        this.startFragment.contact(afterContent);
+        this.endFragment.concat(afterContent.cut(index));
+        this.startFragment.concat(afterContent);
       } else {
         // 防止结尾有 br
         this.startFragment.remove(this.startIndex);
-        this.startFragment.contact(this.endFragment);
+        this.startFragment.concat(this.endFragment);
         this.deleteEmptyTree(this.endFragment);
       }
     }
@@ -697,7 +798,8 @@ export class TBRange {
     }
     if (parentComponent instanceof DivisionAbstractComponent) {
       const parentFragment = parentComponent.parentFragment;
-      parentFragment.cut(parentFragment.indexOf(parentComponent), 1);
+      const index = parentFragment.indexOf(parentComponent);
+      parentFragment.cut(index, index + 1);
       if (parentFragment.contentLength === 0) {
         return this.deleteEmptyTree(parentFragment, endFragment);
       }
@@ -707,7 +809,7 @@ export class TBRange {
       if (parentComponent.slots.length === 0) {
         const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
-        parentFragment.cut(index, 1);
+        parentFragment.cut(index, index + 1);
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
@@ -720,7 +822,7 @@ export class TBRange {
       if (b) {
         const parentFragment = parentComponent.parentFragment;
         const index = parentFragment.indexOf(parentComponent);
-        parentFragment.cut(index, 1);
+        parentFragment.cut(index, index + 1);
         if (parentFragment.contentLength === 0) {
           return this.deleteEmptyTree(parentFragment, endFragment);
         }
@@ -737,11 +839,9 @@ export class TBRange {
    */
   collapse(toEnd = false) {
     if (toEnd) {
-      this.startIndex = this.endIndex;
-      this.startFragment = this.endFragment;
+      this.setStart(this.endFragment, this.endIndex);
     } else {
-      this.endFragment = this.startFragment;
-      this.endIndex = this.startIndex;
+      this.setEnd(this.startFragment, this.startIndex);
     }
     return this;
   }
@@ -925,8 +1025,7 @@ export class TBRange {
     while (true) {
       loopCount++;
       position = range2.getPreviousPosition();
-      range2.startIndex = range2.endIndex = position.index;
-      range2.startFragment = range2.endFragment = position.fragment;
+      range2.setPosition(position.fragment, position.index);
       range2.restore();
       const rect2 = range2.getRangePosition();
       if (!isToPrevLine) {
@@ -975,8 +1074,7 @@ export class TBRange {
     while (true) {
       loopCount++;
       const position = range2.getNextPosition();
-      range2.startIndex = range2.endIndex = position.index;
-      range2.startFragment = range2.endFragment = position.fragment;
+      range2.setPosition(position.fragment, position.index);
       range2.restore();
       const rect2 = range2.getRangePosition();
       if (!isToNextLine) {
@@ -1130,7 +1228,7 @@ export class TBRange {
           if (parentComponent.canDelete(scope.fragment)) {
             const parentFragment = parentComponent.parentFragment;
             const index = parentFragment.indexOf(parentComponent);
-            parentFragment.remove(index, 1);
+            parentFragment.remove(index, index + 1);
             if (parentFragment.contentLength === 0) {
               this.deleteEmptyTree(parentFragment);
             }
@@ -1139,7 +1237,7 @@ export class TBRange {
           this.deleteEmptyTree(scope.fragment);
         }
       } else {
-        scope.fragment.cut(scope.startIndex, scope.endIndex - scope.startIndex);
+        scope.fragment.cut(scope.startIndex, scope.endIndex);
       }
     });
     return this;

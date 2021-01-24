@@ -33,7 +33,7 @@ export class TableCommander implements Commander<Map<string, string | number | b
           firstContent instanceof BrComponent) {
           const i = parentFragment.indexOf(parentComponent);
           parentFragment.insert(table, i);
-          parentFragment.remove(i + 1, 1);
+          parentFragment.remove(i + 1, i + 2);
         } else {
           parentFragment.insertAfter(table, parentComponent);
         }
