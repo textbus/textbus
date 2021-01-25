@@ -148,20 +148,20 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       }
       firstRange.startIndex += offset;
 
-      if (!contentsArr.length) {
-        fragment.concat(afterContent);
-        firstRange.collapse();
-      } else {
-        const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
-        afterComponent.slot.from(afterContent);
-        if (afterComponent.slot.contentLength === 0) {
-          afterComponent.slot.append(new BrComponent());
+        if (!contentsArr.length) {
+          fragment.concate(afterContent);
+          firstRange.collapse();
+        } else {
+          const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
+          afterComponent.slot.from(afterContent);
+          if (afterComponent.slot.contentLength === 0) {
+            afterComponent.slot.append(new BrComponent());
+          }
+          firstRange.setStart(afterComponent.slot, 0);
+          firstRange.collapse();
+          parentFragment.insertAfter(afterComponent, parentComponent);
+          contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
         }
-        firstRange.setStart(afterComponent.slot, 0);
-        firstRange.collapse();
-        parentFragment.insertAfter(afterComponent, parentComponent);
-        contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
-      }
     }
   }
 

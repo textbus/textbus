@@ -11,3 +11,4 @@ coverage/
 *.swp
 *.swo
 .vscode/
+yarn.lock
