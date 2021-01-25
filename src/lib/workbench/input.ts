@@ -492,6 +492,50 @@ export class Input {
         this.dispatchInputReadyEvent();
       }
     })
+    this.keymap({
+      keymap: {
+        key:'Home'
+      },
+      action: () => {
+        // 通过不断向前移动光标，并根据光标纵坐标是否改变来判断是否找到了当前行第一个光标位置
+        let currentRangePosition = this.selection.firstRange.getRangePosition();
+        while(true){
+          this.selection.toPrevious();
+          const previousRangePosition = this.selection.firstRange.getRangePosition();
+          if(Math.abs(currentRangePosition.bottom - previousRangePosition.bottom) > 5) {
+            this.selection.toNext();
+            break;
+          }
+          // 避免光标在文档第一行时死循环
+          else if(previousRangePosition.left === currentRangePosition.left && previousRangePosition.top === currentRangePosition.top){
+            break;
+          }
+          currentRangePosition = previousRangePosition;
+        }
+      }
+    })
+    this.keymap({
+      keymap: {
+        key:'End'
+      },
+      action: () => {
+        // 通过不断向后移动光标，并根据光标纵坐标是否改变来判断是否找到了当前行最后一个光标位置
+        let currentRangePosition = this.selection.firstRange.getRangePosition();
+        while(true){
+          this.selection.toNext();
+          const nextRangePosition = this.selection.firstRange.getRangePosition();
+          if(Math.abs(currentRangePosition.bottom - nextRangePosition.bottom) > 5) {
+            this.selection.toPrevious();
+            break;
+          }
+          // 避免光标在文档最后一行时死循环
+          else if(currentRangePosition.left === nextRangePosition.left && currentRangePosition.top === nextRangePosition.top){
+            break;
+          }
+          currentRangePosition = nextRangePosition;
+        }
+      }
+    })
   }
 
   private dispatchComponentPresetEvent() {
