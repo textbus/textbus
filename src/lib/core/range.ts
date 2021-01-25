@@ -440,9 +440,9 @@ export class TBRange {
           this.startFragment === this.commonAncestorFragment &&
           typeof this.startFragment.getContentAtIndex(this.startIndex - 1) === 'string') {
           const afterContents = this.startFragment.cut(this.startIndex);
-          this.startFragment.concate(this.endFragment);
+          this.startFragment.concat(this.endFragment);
           this.deleteEmptyTree(this.endFragment);
-          this.startFragment.concate(afterContents);
+          this.startFragment.concat(afterContents);
           this.collapse();
           return;
         }
@@ -462,7 +462,7 @@ export class TBRange {
         const scopes = this.getSelectedScope();
         if (scopes.length === 0 &&
           this.startFragment !== this.commonAncestorFragment) {
-          this.startFragment.concate(this.endFragment.cut(0));
+          this.startFragment.concat(this.endFragment.cut(0));
           this.deleteEmptyTree(this.endFragment);
           this.collapse();
           return;
@@ -554,7 +554,7 @@ export class TBRange {
         const prevPosition = this.getPreviousPosition();
         prevPosition.fragment.remove(prevPosition.index);
 
-        prevPosition.fragment.concate(afterContents);
+        prevPosition.fragment.concat(afterContents);
         this.setPosition(prevPosition.fragment, prevPosition.index);
         return;
       }
@@ -745,10 +745,37 @@ export class TBRange {
     }
 
     if (endFragmentInDoc && this.endFragment !== this.startFragment) {
-      // 防止结尾有 br
-      this.startFragment.remove(this.startIndex);
-      this.startFragment.concate(this.endFragment);
-      this.deleteEmptyTree(this.endFragment);
+      if (endFragmentIsCommon) {
+        /**
+         * source:
+         * <Block>xxx[</Block>
+         * ]<Inline>
+         * <Block>xxx</Block>
+         *
+         * target:
+         * <Block>xxx<Inline></Block>
+         * <Block>xxx</Block>
+         */
+        const scope = this.getCommonAncestorFragmentScope();
+        const afterContent = scope.endFragment.cut(scope.endIndex - 1);
+
+        let index = 0;
+        const contents = afterContent.sliceContents();
+        for (const item of contents) {
+          if (item instanceof LeafAbstractComponent && item.block === false || typeof item === 'string') {
+            index += item.length
+          } else {
+            break;
+          }
+        }
+        this.endFragment.concat(afterContent.cut(index));
+        this.startFragment.concat(afterContent);
+      } else {
+        // 防止结尾有 br
+        this.startFragment.remove(this.startIndex);
+        this.startFragment.concat(this.endFragment);
+        this.deleteEmptyTree(this.endFragment);
+      }
     }
 
     this.collapse();

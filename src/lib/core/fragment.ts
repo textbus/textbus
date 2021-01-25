@@ -100,9 +100,9 @@ export class Fragment extends Marker {
 
   /**
    * 合并两个可编辑片段的内容数组。
-   * @param fragment 
+   * @param fragment
    */
-  concate(fragment: Fragment) {
+  concat(fragment: Fragment) {
     const index = this.contentLength;
 
     fragment.sliceContents(0).forEach(c => {
