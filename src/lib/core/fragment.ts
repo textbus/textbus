@@ -98,6 +98,10 @@ export class Fragment extends Marker {
     this.markAsDirtied();
   }
 
+  /**
+   * 合并两个可编辑片段的内容数组。
+   * @param fragment
+   */
   concat(fragment: Fragment) {
     const index = this.contentLength;
 
