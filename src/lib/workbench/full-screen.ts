@@ -4,6 +4,9 @@ import { Injectable } from '@tanbo/di';
 
 import { EditorController } from '../editor-controller';
 
+/**
+ * 全屏类
+ */
 @Injectable()
 export class FullScreen {
   elementRef = document.createElement('button');
@@ -22,6 +25,7 @@ export class FullScreen {
   private subs: Subscription[] = [];
 
   constructor(private editorController: EditorController) {
+    console.log('FullScreen');
     this.elementRef.type = 'button';
     this.elementRef.title = '切换全屏模式';
     this.elementRef.className = 'textbus-status-bar-btn';

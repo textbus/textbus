@@ -9,28 +9,28 @@ export abstract class Marker {
   onChange: Observable<void>;
 
   /**
-   * 脏的
+   * 获取是否是脏数据
    */
   get dirty() {
     return this._dirty;
   }
 
   /**
-   * 改变的
+   * 获取是否是已更改的数据
    */
   get changed() {
     return this._changed;
   }
 
   /**
-   * 输出脏的
+   * 获取是否是要输出的脏数据
    */
   get outputDirty() {
     return this._outputDirty;
   }
 
   /**
-   * 输出改变的
+   * 获取是否是要输出的已更改的数据
    */
   get outputChanged() {
     return this._outputChanged;
@@ -44,6 +44,7 @@ export abstract class Marker {
   private changeEvent = new Subject<void>();
 
   protected constructor() {
+    console.log('Marker');
     this.onChange = this.changeEvent.asObservable();
   }
 
@@ -73,7 +74,7 @@ export abstract class Marker {
   }
 
   /**
-   * 输出渲染完成,标记为正常
+   * 输出渲染完成,标记为正常数据
    */
   outputRendered() {
     this._outputDirty = this._outputChanged = false;

@@ -7,6 +7,9 @@ export abstract class OutputTranslator<T> {
   abstract transform(vDom: VElement): T;
 }
 
+/**
+ * 对输出内容作转换的工具类
+ */
 export class HTMLOutputTranslator implements OutputTranslator<string> {
   transform(vDom: VElement): string {
     return vDom.childNodes.map(child => {

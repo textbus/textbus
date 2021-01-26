@@ -11,6 +11,9 @@ import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { Dialog } from './dialog';
 import { ControlPanel } from './control-panel';
 
+/**
+ * 工作台
+ */
 @Injectable()
 export class Workbench {
   elementRef: HTMLElement;
@@ -27,6 +30,7 @@ export class Workbench {
               @Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
               @Inject(forwardRef(() => Dialog)) private dialog: Dialog,
               @Inject(forwardRef(() => Viewer)) private viewer: Viewer) {
+    console.log('Workbench');
     this.elementRef = createElement('div', {
       classes: ['textbus-workbench'],
       children: [

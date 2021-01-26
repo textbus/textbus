@@ -29,6 +29,9 @@ export interface ToolEntity {
 
 const toolErrorFn = makeError('Tool');
 
+/**
+ * 工具栏
+ */
 @Injectable()
 export class Toolbar {
   elementRef: HTMLElement;
@@ -71,6 +74,7 @@ export class Toolbar {
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => FileUploader)) private fileUploader: FileUploader,
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog) {
+    console.log('ToolBar');
     this.config = options.toolbar;
 
     this.onAction = this.actionEvent.asObservable();

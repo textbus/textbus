@@ -2,6 +2,9 @@ import { Injectable } from '@tanbo/di';
 
 import { createElement } from '../uikit/uikit';
 
+/**
+ * 对话框
+ */
 @Injectable()
 export class Dialog {
   elementRef: HTMLElement;
@@ -9,6 +12,7 @@ export class Dialog {
   private timer: any = null;
 
   constructor() {
+    console.log('Dialog');
     this.elementRef = createElement('div', {
       classes: ['textbus-dialog'],
       children: [

@@ -5,6 +5,9 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 import { createElement, createTextNode } from '../uikit/uikit';
 import { EditorController } from '../editor-controller';
 
+/**
+ * 组件库开关类
+ */
 @Injectable()
 export class LibSwitch {
   elementRef = createElement('button', {
@@ -53,6 +56,7 @@ export class LibSwitch {
   private subs: Subscription[] = [];
 
   constructor(private editorController: EditorController) {
+    console.log('Lib-switch');
     this.subs.push(
       fromEvent(this.elementRef, 'click').subscribe(() => {
         this.expand = !this.expand;

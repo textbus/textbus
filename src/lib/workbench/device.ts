@@ -12,6 +12,9 @@ export interface DeviceOption {
   default?: boolean;
 }
 
+/**
+ * 设备类
+ */
 @Injectable()
 export class Device {
   elementRef: HTMLElement;
@@ -26,6 +29,7 @@ export class Device {
   constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private deviceOptions: EditorOptions<any>,
               private editorController: EditorController) {
 
+    console.log('Device');
     this.options = deviceOptions.deviceOptions || [];
 
     this.elementRef = createElement('div', {
