@@ -326,15 +326,14 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      const vElement = component.render(false, (slot, contentContainer, host) => {
-        if (component instanceof LeafAbstractComponent) {
-          return null
-        }
-        this.fragmentVDomMapping.set(slot, host);
-        const view = this.rendingFragment(slot, contentContainer, true);
-        view.attrs.set('textbus-editable', 'on')
-        return view;
-      });
+      const vElement = component instanceof LeafAbstractComponent ?
+        component.render(false) :
+        (component as DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent).render(false, (slot, contentContainer, host) => {
+          this.fragmentVDomMapping.set(slot, host);
+          const view = this.rendingFragment(slot, contentContainer, true);
+          view.attrs.set('textbus-editable', 'on')
+          return view;
+        });
       if (!(vElement instanceof VElement)) {
         throw rendererErrorFn(`component render method must return a virtual element.`);
       }
