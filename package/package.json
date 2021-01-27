@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/textbus",
-  "version": "1.0.0-alpha.78",
+  "version": "1.0.0-alpha.79",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",

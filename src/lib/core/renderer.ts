@@ -343,6 +343,8 @@ export class Renderer {
         const slotView = this.fragmentContentContainerMapping.get(component.slot);
         if (slotView === vElement) {
           slotView.attrs.delete('textbus-editable');
+        } else {
+          vElement.attrs.set('textbus-editable', 'off');
         }
       } else if (component instanceof BranchAbstractComponent ||
         component instanceof BackboneAbstractComponent ||
