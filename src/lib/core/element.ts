@@ -67,7 +67,7 @@ export class VElement {
       })
     }
     attrs = attrs || {};
-    const className = (attrs.className || '').trim();
+    const className = (attrs.class || '').trim();
     const classes = className ? className.split(/\s+/g) : [];
 
     Reflect.deleteProperty(attrs, 'className');

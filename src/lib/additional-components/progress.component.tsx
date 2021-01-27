@@ -132,11 +132,11 @@ export class ProgressComponent extends LeafAbstractComponent {
     const value = Math.round((config.progress - config.min) / (config.max - config.min) * 100) + '%';
     return (
       <tb-progress {...config}>
-        <span className="tb-progress-min">{config.min}</span>
+        <span class="tb-progress-min">{config.min}</span>
         <div style={{width: value}}>
-          <span className="tb-progress-value">{value}</span>
+          <span class="tb-progress-value">{value}</span>
         </div>
-        <span className="tb-progress-max">{config.max}</span>
+        <span class="tb-progress-max">{config.max}</span>
       </tb-progress>
     )
   }
