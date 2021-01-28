@@ -191,9 +191,10 @@ export class Viewer {
           plugin.onRenderingBefore?.();
         })
         if (this.editorController.sourceCodeMode) {
-          Viewer.guardContentIsPre(rootComponent.slot, this.sourceCodeComponent);
-          if (this.sourceCodeComponent.slotCount === 0) {
-            this.sourceCodeComponent.setSourceCode('\n');
+          const isEmpty = rootComponent.slot.contentLength === 0;
+          if (isEmpty) {
+            this.sourceCodeComponent = new PreComponent('HTML', '\n');
+            this.rootComponent.slot.append(this.sourceCodeComponent);
             const position = selection.firstRange.findFirstPosition(this.sourceCodeComponent.getSlotAtIndex(0));
             selection.firstRange.setStart(position.fragment, position.index);
             selection.firstRange.setEnd(position.fragment, position.index);
@@ -338,12 +339,6 @@ export class Viewer {
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());
     fragment.append(p);
-  }
-
-  private static guardContentIsPre(fragment: Fragment, pre: PreComponent) {
-    if (fragment.contentLength === 0) {
-      fragment.append(pre);
-    }
   }
 
   private static parserHTML(html: string) {

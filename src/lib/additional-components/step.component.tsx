@@ -211,13 +211,13 @@ export class StepComponent extends BranchAbstractComponent {
     } else if (index === this.step) {
       state = 'tb-current'
     }
-    const content = <div className="tb-step-item-content"/>;
+    const content = <div class="tb-step-item-content"/>;
 
     const item = (
-      <div className={'tb-step-item ' + state}>
-        <div className="tb-step-item-header">
-          <div className="tb-step-item-line"/>
-          <div className="tb-step-item-icon" onClick={() => {
+      <div class={'tb-step-item ' + state}>
+        <div class="tb-step-item-header">
+          <div class="tb-step-item-line"/>
+          <div class="tb-step-item-icon" onClick={() => {
             const currentStep = this.step;
             if (index === currentStep) {
               this.step = index + 1;
@@ -231,7 +231,7 @@ export class StepComponent extends BranchAbstractComponent {
         </div>
         {content}
         {
-          !isOutputMode && <span className="tb-step-item-add" onClick={
+          !isOutputMode && <span class="tb-step-item-add" onClick={
             () => {
               this.slots.splice(index, 0, createItem());
             }

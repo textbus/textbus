@@ -241,9 +241,9 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
     const content = <div className="tb-timeline-content"/>;
 
     const child = (
-      <div className={classes.join(' ')}>
-        <div className="tb-timeline-line"/>
-        <div className="tb-timeline-icon" title={isOutput ? null : '点击切换颜色'} onClick={() => {
+      <div class={classes.join(' ')}>
+        <div class="tb-timeline-line"/>
+        <div class="tb-timeline-icon" title={isOutput ? null : '点击切换颜色'} onClick={() => {
           const currentType = slot.type;
           if (!currentType) {
             slot.type = timelineTypes[0] as TimelineType;
@@ -253,7 +253,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
           slot.markAsDirtied();
         }}/>
         {
-          !isOutput && <span className="tb-timeline-add" onClick={() => {
+          !isOutput && <span class="tb-timeline-add" onClick={() => {
             const index = this.slots.indexOf(slot) + 1;
             this.slots.splice(index, 0, createTimelineItem());
           }}/>

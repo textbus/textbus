@@ -537,12 +537,13 @@ export class Input {
       this.input.value = '';
     }
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
-      this.dispatchEvent(injector => {
+      this.dispatchEvent((injector, instance) => {
+        const event = new TBEvent(instance);
         const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
         if (interceptor) {
-          interceptor.onInputReady?.();
+          interceptor.onInputReady?.(event);
         }
-        return true;
+        return !event.stopped;
       })
     }
   }

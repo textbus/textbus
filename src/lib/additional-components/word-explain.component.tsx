@@ -164,11 +164,11 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     switch (slot) {
       case this.title:
-        return slotRendererFn(slot, <h3 className="tb-word-explain-title"/>);
+        return slotRendererFn(slot, <h3 class="tb-word-explain-title"/>);
       case this.subtitle:
-        return slotRendererFn(slot, <div className="tb-word-explain-subtitle"/>);
+        return slotRendererFn(slot, <div class="tb-word-explain-subtitle"/>);
       case this.detail:
-        return slotRendererFn(slot, <div className="tb-word-explain-detail"/>);
+        return slotRendererFn(slot, <div class="tb-word-explain-detail"/>);
     }
   }
 
@@ -179,13 +179,13 @@ export class WordExplainComponent extends BackboneAbstractComponent {
 
     return (
       <tb-word-explain>
-        <div className="tb-word-explain-title-group">
+        <div class="tb-word-explain-title-group">
           {slotRenderFn(this.title, title, title)}
           {slotRenderFn(this.subtitle, subtitle, subtitle)}
         </div>
         {slotRenderFn(this.detail, detail, detail)}
         {
-          !isOutputMode && <span className="tb-word-explain-close" onClick={() => {
+          !isOutputMode && <span class="tb-word-explain-close" onClick={() => {
             const parentFragment = this.parentFragment;
             const index = parentFragment.indexOf(this);
             parentFragment.remove(index, index + 1);

@@ -187,11 +187,11 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     if (slot.disabled) {
       state.push('tb-todo-list-state-disabled');
     }
-    const content = <div className="tb-todo-list-content"/>
+    const content = <div class="tb-todo-list-content"/>
     const item = (
-      <div className="tb-todo-list-item">
-        <div className="tb-todo-list-btn">
-          <div className={state.join(' ')} onClick={() => {
+      <div class="tb-todo-list-item">
+        <div class="tb-todo-list-btn">
+          <div class={state.join(' ')} onClick={() => {
             const i = (this.getStateIndex(slot.active, slot.disabled) + 1) % 4;
             const newState = this.stateCollection[i];
             slot.active = newState.active;

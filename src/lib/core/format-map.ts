@@ -1,5 +1,9 @@
 import { BlockFormatter, FormatEffect, FormatRange, InlineFormatter } from './formatter';
 
+/**
+ * 内部是对 Map<InlineFormatter | BlockFormatter, FormatRange[]> 的封装。
+ * 并提供格式合并的功能。
+ */
 export class FormatMap {
   private map = new Map<InlineFormatter | BlockFormatter, FormatRange[]>();
 
