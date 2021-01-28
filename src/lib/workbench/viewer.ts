@@ -183,7 +183,7 @@ export class Viewer {
         if (this.editorController.sourceCodeMode) {
           const isEmpty = rootComponent.slot.contentLength === 0;
           if (isEmpty) {
-            this.sourceCodeComponent = new PreComponent('html', '\n');
+            this.sourceCodeComponent = new PreComponent('HTML', '\n');
             this.rootComponent.slot.append(this.sourceCodeComponent);
             const position = selection.firstRange.findFirstPosition(this.sourceCodeComponent.getSlotAtIndex(0));
             selection.firstRange.setStart(position.fragment, position.index);
