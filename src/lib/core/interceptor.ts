@@ -42,7 +42,7 @@ export class TBEvent<T extends AbstractComponent, U = null> {
  * TextBus 生命周期方法。
  */
 export abstract class Interceptor<T extends AbstractComponent> {
-  abstract onInputReady?(): void;
+  abstract onInputReady?(event: TBEvent<T>): void;
 
   abstract onInput?(event: TBEvent<T>): void;
 
