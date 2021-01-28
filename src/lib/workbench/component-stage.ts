@@ -23,6 +23,9 @@ export interface ComponentCreator {
   factory(dialog: Dialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
+/**
+ * 组件库展台类
+ */
 @Injectable()
 export class ComponentStage {
   elementRef: HTMLElement;
@@ -42,7 +45,7 @@ export class ComponentStage {
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog,
               private fileUploader: FileUploader,
               private editorController: EditorController) {
-
+    console.log('component-stage');
     const categories = this.classify(this.options.componentLibrary || []);
     const tab = new Tab();
     tab.show(categories.map(item => {

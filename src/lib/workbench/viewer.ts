@@ -38,7 +38,7 @@ declare const ResizeObserver: any;
 
 @Injectable()
 /**
- * TextBus富文本编辑域
+ * 可视化编辑区
  */
 export class Viewer {
   /**当准备就绪触发 */
@@ -88,6 +88,7 @@ export class Viewer {
               private editorController: EditorController,
               private componentInjectors: ComponentInjectors,
               private injector: Injector) {
+    console.log('Viewer');
     this.onReady = this.readyEvent.asObservable();
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;

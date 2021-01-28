@@ -115,7 +115,7 @@ export class Editor<T = any> {
 
   /**是否已准备好 */
   private readyState = false;
-  /**任务 */
+  /**渲染任务 */
   private tasks: Array<() => void> = [];
 
   /**当TextBus准备就绪时 触发 */
@@ -182,7 +182,7 @@ export class Editor<T = any> {
       }
     };
 
-    /** */
+    /**编辑器注入依赖 */
     const staticProviders: Provider[] = [{
       provide: Editor,
       useValue: this,

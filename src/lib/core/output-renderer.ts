@@ -17,12 +17,13 @@ const outputRendererErrorFn = makeError('OutputRenderer');
  * 用于渲染输出内容的渲染器。
  */
 export class OutputRenderer {
-  // 记录已渲染的组件
+  /**记录已渲染的组件 */
   private componentVDomCacheMap = new WeakMap<AbstractComponent, VElement>();
-  // 记录 fragment 对应的虚拟节点
+  /**记录 fragment 对应的虚拟节点 */
   private fragmentVDomMapping = new WeakMap<Fragment, VElement>();
-  // 记录 fragment 对应的容器节点
+  /**记录 fragment 对应的容器节点 */
   private fragmentContentContainerMapping = new WeakMap<Fragment, VElement>();
+  /**根元素 */
   private rootVElement: VElement = new VElement('body');
 
   /**
@@ -39,6 +40,13 @@ export class OutputRenderer {
     return this.rootVElement;
   }
 
+  /**
+   * 抽象数据转为VElement
+   * @param fragment 抽象数据
+   * @param host 渲染到的元素节点
+   * @param forceUpdate 是否强制更新
+   * @private
+   */
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
     if (fragment.outputDirty || forceUpdate) {
       const {childFormats, containerFormats} = Renderer.formatSeparate(fragment);
@@ -70,6 +78,11 @@ export class OutputRenderer {
     return host;
   }
 
+  /**
+   * 组件转化为VElement
+   * @param component
+   * @private
+   */
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.outputDirty) {
       const vElement = component instanceof LeafAbstractComponent ?
@@ -112,6 +125,12 @@ export class OutputRenderer {
     return this.componentVDomCacheMap.get(component);
   }
 
+  /**
+   * 替换插槽
+   * @param component
+   * @param slot
+   * @private
+   */
   private replaceSlotView(
     component: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent,
     slot: Fragment) {
@@ -135,6 +154,12 @@ export class OutputRenderer {
     oldView.parentNode.replaceChild(newView, oldView);
   }
 
+  /**
+   * 转化插槽格式
+   * @param formats
+   * @param vDom
+   * @private
+   */
   private rendingSlotFormats(formats: FormatConfig[], vDom?: VElement): VElement[] {
     let elements: VElement[] = [];
     if (vDom) {

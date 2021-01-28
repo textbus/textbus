@@ -6,6 +6,9 @@ import { ComponentControlPanelView } from '../core/component-setter';
 import { EditorController } from '../editor-controller';
 import { Tab, TabConfig } from './tab';
 
+/**
+ * 控制面板类
+ */
 @Injectable()
 export class ControlPanel {
   elementRef: HTMLElement;
@@ -38,6 +41,7 @@ export class ControlPanel {
   private tab = new Tab();
 
   constructor(private editorController: EditorController) {
+    console.log('control-panel');
     this.elementRef = createElement('div', {
       classes: ['textbus-control-panel'],
       children: [

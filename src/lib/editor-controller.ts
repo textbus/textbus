@@ -79,6 +79,7 @@ export class EditorController {
   private stateChangeEvent = new BehaviorSubject(this.status);
 
   constructor(private status: GlobalStatus) {
+    console.log('editor-controller:', status);
     this.onStateChange = this.stateChangeEvent.asObservable();
   }
 
@@ -87,6 +88,7 @@ export class EditorController {
    * @private
    */
   private dispatch() {
+    console.log('触发全局状态改变');
     this.stateChangeEvent.next({
       ...this.status
     });

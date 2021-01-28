@@ -6,6 +6,9 @@ import { EditingMode } from './editing-mode';
 import { LibSwitch } from './lib-switch';
 import { createElement } from '../uikit/uikit';
 
+/**
+ * 状态栏类
+ */
 @Injectable()
 export class StatusBar {
   elementRef = document.createElement('div');
@@ -14,6 +17,7 @@ export class StatusBar {
               fullScreen: FullScreen,
               editingMode: EditingMode,
               libSwitch: LibSwitch) {
+    console.log('StatusBar');
     this.elementRef.classList.add('textbus-status-bar');
     this.elementRef.append(
       createElement('div', {

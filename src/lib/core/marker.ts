@@ -1,10 +1,16 @@
+/*
+ * @Author: your name
+ * @Date: 2021-01-07 14:33:16
+ * @LastEditTime: 2021-01-26 13:30:00
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \textbus\src\lib\core\marker.ts
+ */
 import { Observable, Subject } from 'rxjs';
 
 /**
-<<<<<<< HEAD
  * 做标记类
  * 主要用于更新DOM
-=======
  * textbus 中所有的内容都通过可编辑片段 (Fragment) 和组件 (Componet) 来描述。Fragment 通过
  * 数组来管理一组元素， 每个元素为字符串或着组件。组件用来描述一个具有特定功能和结构的 UI 部
  * 件(模板，其中包含若千个由 Fragment 描述的可编辑区域, 称为插槽)。
@@ -18,35 +24,34 @@ import { Observable, Subject } from 'rxjs';
  * 当 Fragment/Component 的子部件的数据发生变化时，例如当 Fragment 维护的内容数组中的元素
  * 的数据或 Component 维护的插槽中的数据发生变化时，当前 Fragment/Component 的 changed 会设
  * 为 true.
->>>>>>> 3eb3e512724daa3cc4037f0681c389c377881b8e
  */
 export abstract class Marker {
   /**当标记改变时触发 */
   onChange: Observable<void>;
 
   /**
-   * 脏的
+   * 获取是否是脏数据
    */
   get dirty() {
     return this._dirty;
   }
 
   /**
-   * 改变的
+   * 获取是否是已更改的数据
    */
   get changed() {
     return this._changed;
   }
 
   /**
-   * 输出脏的
+   * 获取是否是要输出的脏数据
    */
   get outputDirty() {
     return this._outputDirty;
   }
 
   /**
-   * 输出改变的
+   * 获取是否是要输出的已更改的数据
    */
   get outputChanged() {
     return this._outputChanged;
@@ -60,6 +65,7 @@ export abstract class Marker {
   private changeEvent = new Subject<void>();
 
   protected constructor() {
+    console.log('Marker');
     this.onChange = this.changeEvent.asObservable();
   }
 
@@ -89,7 +95,7 @@ export abstract class Marker {
   }
 
   /**
-   * 输出渲染完成,标记为正常
+   * 输出渲染完成,标记为正常数据
    */
   outputRendered() {
     this._outputDirty = this._outputChanged = false;

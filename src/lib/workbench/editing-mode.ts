@@ -4,6 +4,9 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { EditorController } from '../editor-controller';
 
+/**
+ * 编辑模式类
+ */
 @Injectable()
 export class EditingMode {
   elementRef = document.createElement('button');
@@ -27,6 +30,7 @@ export class EditingMode {
   private subs: Subscription[] = [];
 
   constructor(private editorController: EditorController) {
+    console.log('editing-mode');
     this.elementRef.type = 'button';
     this.elementRef.title = '切换为源代码编辑模式';
     this.elementRef.className = 'textbus-status-bar-btn';
