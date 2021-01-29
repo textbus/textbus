@@ -258,7 +258,7 @@ export class Fragment extends Marker {
         }
       })])
     });
-    this.contents.clone().slice(0).forEach(i => ff.append(i));
+    this.contents.clone().slice(0).forEach(i => ff._append(i));
     return ff;
   }
 
@@ -401,7 +401,7 @@ export class Fragment extends Marker {
     })
     this.formatMap = selfFormatMap;
     this.contents.cut(startIndex, endIndex).forEach(i => {
-      fragment.append(i);
+      fragment._append(i);
       if (i instanceof AbstractComponent) {
         this.eventMap.get(i).unsubscribe();
         this.eventMap.delete(i);
