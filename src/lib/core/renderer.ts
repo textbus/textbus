@@ -332,7 +332,7 @@ export class Renderer {
           this.fragmentVDomMapping.set(slot, host);
           const view = this.rendingFragment(slot, contentContainer, true);
           view.attrs.set('textbus-editable', 'on')
-          return view;
+          return host;
         });
       if (!(vElement instanceof VElement)) {
         throw rendererErrorFn(`component render method must return a virtual element.`);
