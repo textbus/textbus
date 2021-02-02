@@ -70,7 +70,7 @@ export class VElement {
     const className = (attrs.class || '').trim();
     const classes = className ? className.split(/\s+/g) : [];
 
-    Reflect.deleteProperty(attrs, 'className');
+    Reflect.deleteProperty(attrs, 'class');
 
     const style = attrs.style || '';
     let styles: { [key: string]: string | number };
