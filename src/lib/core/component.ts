@@ -125,7 +125,7 @@ export abstract class DivisionAbstractComponent extends AbstractComponent {
    */
   abstract render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
 
-  abstract slotRender(isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement;
+  abstract slotRender(isOutputMode: boolean, singleSlotRendererFn: SingleSlotRenderFn): VElement;
 }
 
 /**
@@ -186,9 +186,9 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
    * @param isOutputMode  是否为输出模式。
    *                      当有些情况下，编辑模式和输出模式需要生成不一样的 DOM，且编辑模式可能需要监听一些事件，
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
-   * @param slotRendererFn 渲染插槽的工具函数
+   * @param singleSlotRendererFn 渲染插槽的工具函数
    */
-  abstract render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract render(isOutputMode: boolean, singleSlotRendererFn: SlotRendererFn): VElement;
 }
 
 /**
@@ -294,7 +294,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
     return this.slots.map(callbackFn, thisArg);
   }
 
-  abstract slotRender(slot: T, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement;
+  abstract slotRender(slot: T, isOutputMode: boolean, singleSlotRendererFn: SingleSlotRenderFn): VElement;
 
 
   /**
