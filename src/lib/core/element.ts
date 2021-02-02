@@ -100,15 +100,17 @@ export class VElement {
 
     const childNodes: Array<VElement | VTextNode> = [];
 
-    const addChild = function (c: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
-      if (c instanceof VElement) {
-        childNodes.push(c);
-      } else if (typeof c === 'string' && c) {
-        childNodes.push(new VTextNode(c));
-      } else if (Array.isArray(c)) {
-        addChild(c);
-      } else if (c !== false) {
-        childNodes.push(new VTextNode(c + ''));
+    const addChild = function (contents: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
+      for (const c of contents) {
+        if (c instanceof VElement) {
+          childNodes.push(c);
+        } else if (typeof c === 'string' && c) {
+          childNodes.push(new VTextNode(c));
+        } else if (Array.isArray(c)) {
+          addChild(c);
+        } else if (c !== false) {
+          childNodes.push(new VTextNode(c + ''));
+        }
       }
     }
 
