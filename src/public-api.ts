@@ -1,4 +1,7 @@
+import 'reflect-metadata';
+export * from 'reflect-metadata';
 export * from '@tanbo/di';
+
 export * from './lib/additional-components/_api';
 export * from './lib/components/_api';
 export * from './lib/core/_api';
