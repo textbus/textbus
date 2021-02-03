@@ -24,7 +24,7 @@ export class BlockStyleFormatter extends BlockFormatter {
     const b = !!existingElement;
     existingElement = existingElement || new VElement('div');
     (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
-      existingElement.styles.set(name, context.abstractData.styles.get(name));
+      existingElement.styles.set(name, context.formatData.styles.get(name));
     })
     if (!b) {
       return new ChildSlotMode(existingElement);

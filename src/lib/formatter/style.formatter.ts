@@ -21,10 +21,10 @@ export class StyleFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement) {
-      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      existingElement.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      el.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
       return new ChildSlotMode(el);
     }
   }
@@ -80,10 +80,10 @@ export class InlineBackgroundColorFormatter extends StyleFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement && this.reg.test(existingElement.tagName)) {
-      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      existingElement.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      el.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
       return new ChildSlotMode(el);
     }
   }

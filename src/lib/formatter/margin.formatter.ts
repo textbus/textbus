@@ -36,10 +36,10 @@ abstract class MarginFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
     const margin = [
-      context.abstractData.styles.get('marginTop'),
-      context.abstractData.styles.get('marginRight'),
-      context.abstractData.styles.get('marginLeft'),
-      context.abstractData.styles.get('marginBottom'),
+      context.formatData.styles.get('marginTop'),
+      context.formatData.styles.get('marginRight'),
+      context.formatData.styles.get('marginLeft'),
+      context.formatData.styles.get('marginBottom'),
     ].map(i => i || 0);
     if (existingElement && this.reg.test(existingElement.tagName)) {
       existingElement.styles.set('margin', margin.join(' '));

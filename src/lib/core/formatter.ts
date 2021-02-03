@@ -98,11 +98,11 @@ export interface FormatRendingContext {
    * 如果当前是状态是 Invalid，是不会调用 render 方法的，只有是其它三种中的一种才会调用。
    * Formatter 在渲染的时候，可以根据不同的状态来渲染出不同的结果。
    */
-  state: FormatEffect;
+  effect: FormatEffect;
   /**
    * 渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
    */
-  abstractData: FormatData;
+  formatData: FormatData;
 }
 
 /**

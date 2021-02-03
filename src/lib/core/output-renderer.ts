@@ -136,8 +136,8 @@ export class OutputRenderer {
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
         isOutputMode: true,
-        state: next.params.effect,
-        abstractData: next.params.formatData,
+        effect: next.params.effect,
+        formatData: next.params.formatData,
       };
       const renderMode = next.token.render(context, vEle);
       if (renderMode instanceof ReplaceMode) {

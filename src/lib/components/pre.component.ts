@@ -76,7 +76,7 @@ class CodeStyleFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext): ReplaceMode | ChildSlotMode | null {
     const el = new VElement('span');
-    el.classes.push(...context.abstractData.classes);
+    el.classes.push(...context.formatData.classes);
     return new ChildSlotMode(el);
   }
 }

@@ -29,10 +29,10 @@ export class BoldFormatter extends InlineFormatter {
   }
 
   render(context: FormatRendingContext) {
-    if (context.state === FormatEffect.Inherit) {
+    if (context.effect === FormatEffect.Inherit) {
       return;
     }
-    if (context.state === FormatEffect.Exclude) {
+    if (context.effect === FormatEffect.Exclude) {
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
       return new ChildSlotMode(el);

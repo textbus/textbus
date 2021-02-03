@@ -36,10 +36,10 @@ abstract class PaddingFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
     const padding = [
-      context.abstractData.styles.get('paddingTop'),
-      context.abstractData.styles.get('paddingRight'),
-      context.abstractData.styles.get('paddingBottom'),
-      context.abstractData.styles.get('paddingLeft'),
+      context.formatData.styles.get('paddingTop'),
+      context.formatData.styles.get('paddingRight'),
+      context.formatData.styles.get('paddingBottom'),
+      context.formatData.styles.get('paddingLeft'),
     ].map(i => i || 0);
     if (existingElement && this.reg.test(existingElement.tagName)) {
       existingElement.styles.set('padding', padding.join(' '));
