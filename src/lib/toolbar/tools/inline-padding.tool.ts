@@ -7,8 +7,8 @@ import { InlinePaddingCommander } from '../commands/inline-padding.commander';
 
 export const inlinePaddingToolConfig: DropdownToolConfig = {
   // iconClasses: ['textbus-icon-link'],
-  label: 'padding',
-  tooltip: '内边距',
+  label: '行内边距',
+  tooltip: '行内边距',
   menuFactory() {
     return new Form({
       mini: true,

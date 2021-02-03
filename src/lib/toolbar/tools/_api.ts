@@ -1,5 +1,7 @@
 export * from './audio.tool';
 export * from './block-background.tool';
+export * from './block-margin.tool';
+export * from './block-padding.tool';
 export * from './blockquote.tool';
 export * from './bold.tool';
 export * from './clean.tool';

@@ -2,13 +2,13 @@ import { Form, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
-import { InlineMarginCommander } from '../commands/inline-margin.commander';
-import { inlineMarginFormatter } from '../../formatter/margin.formatter';
+import { blockMarginFormatter } from '../../formatter/margin.formatter';
+import { BlockMarginCommander } from '../commands/_api';
 
-export const inlineMarginToolConfig: DropdownToolConfig = {
+export const blockMarginToolConfig: DropdownToolConfig = {
   // iconClasses: ['textbus-icon-link'],
-  label: '行内边距',
-  tooltip: '行内边距',
+  label: '块外边距',
+  tooltip: '块外边距',
   menuFactory() {
     return new Form({
       mini: true,
@@ -37,9 +37,9 @@ export const inlineMarginToolConfig: DropdownToolConfig = {
       ]
     });
   },
-  matcher: new FormatMatcher(inlineMarginFormatter, [PreComponent]),
+  matcher: new FormatMatcher(blockMarginFormatter, [PreComponent]),
   commanderFactory() {
-    return new InlineMarginCommander(inlineMarginFormatter)
+    return new BlockMarginCommander(blockMarginFormatter)
   }
 };
-export const inlineMarginTool = Toolkit.makeDropdownTool(inlineMarginToolConfig);
+export const blockMarginTool = Toolkit.makeDropdownTool(blockMarginToolConfig);
