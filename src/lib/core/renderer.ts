@@ -394,8 +394,7 @@ export class Renderer {
       })
       if (componentRootView === oldView) {
         this.componentVDomCacheMap.set(component, container);
-      }
-      if (newView !== container) {
+      } else {
         container.attrs.set('textbus-editable', 'on');
       }
       this.fragmentVDomMapping.set(slot, newView);
