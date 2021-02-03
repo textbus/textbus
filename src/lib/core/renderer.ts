@@ -386,14 +386,16 @@ export class Renderer {
     const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
+      const componentRootView = this.componentVDomCacheMap.get(component);
       let container: VElement = null;
       newView = component.slotRender(false, (slot, contentContainer) => {
         container = contentContainer;
         return this.rendingFragment(slot, contentContainer, true);
       })
-      if (newView === container) {
+      if (componentRootView === oldView) {
         this.componentVDomCacheMap.set(component, container);
-      } else {
+      }
+      if (newView !== container) {
         container.attrs.set('textbus-editable', 'on');
       }
       this.fragmentVDomMapping.set(slot, newView);

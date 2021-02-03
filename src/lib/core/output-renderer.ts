@@ -111,13 +111,13 @@ export class OutputRenderer {
     const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
+      const componentRootView = this.componentVDomCacheMap.get(component);
       newView = component.slotRender(true, (slot, contentContainer) => {
-        const view = this.rendingFragment(slot, contentContainer);
-        if (view === contentContainer) {
-          this.componentVDomCacheMap.set(component, view);
-        }
-        return view;
+        return this.rendingFragment(slot, contentContainer);
       })
+      if (oldView === componentRootView) {
+        this.componentVDomCacheMap.set(component, newView);
+      }
       this.fragmentVDomMapping.set(slot, newView);
     } else {
       newView = component.slotRender(slot, true, (slot, contentContainer) => {
