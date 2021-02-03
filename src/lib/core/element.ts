@@ -53,13 +53,15 @@ export interface VElementOption {
 
 const vElementErrorFn = makeError('VElement');
 
+export type VElementJSXChildNode = VElement | string | number | boolean;
+
 /**
  * 虚拟 DOM 节点
  */
 export class VElement {
   static createElement(tagName: string | VElementRenderFn,
                        attrs: { [key: string]: any },
-                       ...children: Array<VElement | string | number | boolean>) {
+                       ...children: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
     if (typeof tagName === 'function') {
       return tagName({
         ...attrs,
@@ -70,7 +72,7 @@ export class VElement {
     const className = (attrs.class || '').trim();
     const classes = className ? className.split(/\s+/g) : [];
 
-    Reflect.deleteProperty(attrs, 'className');
+    Reflect.deleteProperty(attrs, 'class');
 
     const style = attrs.style || '';
     let styles: { [key: string]: string | number };
@@ -95,17 +97,31 @@ export class VElement {
         attrs2[key] = attrs[key];
       }
     })
+
+    const childNodes: Array<VElement | VTextNode> = [];
+
+    const addChild = function (contents: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
+      for (const c of contents) {
+        if (c instanceof VElement) {
+          childNodes.push(c);
+        } else if (typeof c === 'string' && c) {
+          childNodes.push(new VTextNode(c));
+        } else if (Array.isArray(c)) {
+          addChild(c);
+        } else if (c !== false) {
+          childNodes.push(new VTextNode(c + ''));
+        }
+      }
+    }
+
+    addChild(children);
+
     return new VElement(tagName, {
       styles,
       attrs: attrs2,
       classes,
       on: listeners,
-      childNodes: children.filter(i => i !== false).map(i => {
-        if (i instanceof VElement) {
-          return i;
-        }
-        return new VTextNode(i + '');
-      }) as Array<VElement | VTextNode>
+      childNodes
     })
   }
 
