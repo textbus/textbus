@@ -13,6 +13,8 @@ export * from './heading.tool';
 export * from './history-back.tool';
 export * from './history-forward.tool';
 export * from './image.tool';
+export * from './inline-margin.tool';
+export * from './inline-padding.tool';
 export * from './insert-object.tool';
 export * from './insert-paragraph-after.tool';
 export * from './insert-paragraph-before.tool';

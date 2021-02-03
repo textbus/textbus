@@ -7,6 +7,7 @@ import { createElement, createTextNode } from '../uikit';
 
 export interface FormConfig {
   title?: string;
+  editProperty?: 'attrs' | 'styles',
   items: Array<FormItem>;
   mini?: boolean;
 }
@@ -133,7 +134,14 @@ export class Form implements FormViewer {
 
   update(d: FormatAbstractData | BranchAbstractComponent | LeafAbstractComponent): void {
     this.config.items.forEach(item => {
-      const value = d ? d instanceof FormatAbstractData ? d.attrs.get(item.name) : d[item.name] : null;
+      let value = null;
+      if (d) {
+        if (d instanceof FormatAbstractData) {
+          value = this.config.editProperty === 'styles' ? d.styles.get(item.name) : d.attrs.get(item.name)
+        } else {
+          value = d[item.name]
+        }
+      }
       item.update(value);
     });
   }

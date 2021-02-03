@@ -18,7 +18,11 @@ import {
   codeFormatter,
   backgroundColorFormatter,
   dirFormatter,
-  tdBorderColorFormatter
+  tdBorderColorFormatter,
+  inlinePaddingFormatter,
+  blockPaddingFormatter,
+  blockMarginFormatter,
+  inlineMarginFormatter
 } from './lib/formatter/_api';
 import {
   boldTool,
@@ -44,7 +48,7 @@ import {
   unlinkTool,
   findTool,
   insertObjectTool,
-  tableTool
+  tableTool, inlineMarginTool, inlinePaddingTool
 } from './lib/toolbar/tools/_api';
 import { FindPlugin, ImageVideoResizePlugin, TableEditPlugin } from './lib/plugins/_api';
 import {
@@ -144,7 +148,11 @@ export const defaultOptions: EditorOptions<string> = {
     textIndentFormatter,
     underlineFormatter,
     dirFormatter,
-    tdBorderColorFormatter
+    tdBorderColorFormatter,
+    inlinePaddingFormatter,
+    blockPaddingFormatter,
+    inlineMarginFormatter,
+    blockMarginFormatter
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],
@@ -152,6 +160,7 @@ export const defaultOptions: EditorOptions<string> = {
     [headingTool],
     [boldTool, italicTool, strikeThroughTool, underlineTool],
     [olTool, ulTool],
+    [inlineMarginTool, inlinePaddingTool],
     [fontSizeTool, textIndentTool],
     [colorTool, textBackgroundTool],
     [insertParagraphBeforeTool, insertParagraphAfterTool],

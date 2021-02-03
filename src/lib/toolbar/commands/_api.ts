@@ -9,6 +9,8 @@ export * from './emoji.commander';
 export * from './history.commander';
 export * from './image.commander';
 export * from './inline.commander';
+export * from './inline-margin.commander';
+export * from './inline-padding.commander';
 export * from './insert-paragraph.commander';
 export * from './list.commander';
 export * from './style.commander';

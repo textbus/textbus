@@ -24,6 +24,9 @@ export class LinkCommander implements Commander<Map<string, string>> {
         if (context.overlap) {
           const commonAncestorFragment = range.commonAncestorFragment;
           commonAncestorFragment.getFormatKeys().forEach(token => {
+            if (token !== this.formatter) {
+              return;
+            }
             commonAncestorFragment.getFormatRanges(token).forEach(format => {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
                 if (attrs.get('href')) {
