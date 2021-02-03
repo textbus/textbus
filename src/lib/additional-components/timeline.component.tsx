@@ -238,7 +238,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
     if (slot.type) {
       classes.push('tb-timeline-item-' + slot.type);
     }
-    const content = <div className="tb-timeline-content"/>;
+    const content = <div class="tb-timeline-content"/>;
 
     const child = (
       <div class={classes.join(' ')}>
