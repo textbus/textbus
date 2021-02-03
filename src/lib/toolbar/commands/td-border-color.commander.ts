@@ -1,7 +1,7 @@
 import {
   CommandContext,
   Commander,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
 } from '../../core/_api';
 import { TableComponent } from '../../components/table.component';
@@ -43,12 +43,12 @@ export class TdBorderColorCommander implements Commander<string> {
             const f = prev.fragment.getFormatRanges(tdBorderColorFormatter);
             if (f.length) {
               f.forEach(ff => {
-                ff.abstractData.styles.set('borderRightColor', color);
+                ff.formatData.styles.set('borderRightColor', color);
               })
             } else {
               prev.fragment.apply(tdBorderColorFormatter, {
-                state: FormatEffect.Valid,
-                abstractData: new FormatAbstractData({
+                effect: FormatEffect.Valid,
+                formatData: new FormatData({
                   styles: {
                     borderRightColor: color
                   }
@@ -64,12 +64,12 @@ export class TdBorderColorCommander implements Commander<string> {
 
             if (f.length) {
               f.forEach(ff => {
-                ff.abstractData.styles.set('borderBottomColor', color);
+                ff.formatData.styles.set('borderBottomColor', color);
               })
             } else {
               prev.fragment.apply(tdBorderColorFormatter, {
-                state: FormatEffect.Valid,
-                abstractData: new FormatAbstractData({
+                effect: FormatEffect.Valid,
+                formatData: new FormatData({
                   styles: {
                     borderBottomColor: color
                   }
@@ -80,12 +80,12 @@ export class TdBorderColorCommander implements Commander<string> {
         }
       }
       c.cell.fragment.apply(tdBorderColorFormatter, {
-        state: FormatEffect.Invalid,
-        abstractData: new FormatAbstractData()
+        effect: FormatEffect.Invalid,
+        formatData: new FormatData()
       });
       c.cell.fragment.apply(tdBorderColorFormatter, {
-        state: color ? FormatEffect.Valid : FormatEffect.Invalid,
-        abstractData: new FormatAbstractData({
+        effect: color ? FormatEffect.Valid : FormatEffect.Invalid,
+        formatData: new FormatData({
           styles: {
             borderColor: color
           }

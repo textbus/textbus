@@ -1,7 +1,7 @@
 import {
   CommandContext,
   Commander,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   InlineFormatter,
 } from '../../core/_api';
@@ -21,10 +21,10 @@ export class StyleCommander implements Commander<string> {
     selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state: value ? FormatEffect.Valid : FormatEffect.Invalid,
+          effect: value ? FormatEffect.Valid : FormatEffect.Invalid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             styles: {
               [this.name]: value
             }

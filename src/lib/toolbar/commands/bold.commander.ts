@@ -2,7 +2,7 @@ import {
   Commander,
   InlineFormatter,
   FormatEffect,
-  FormatAbstractData,
+  FormatData,
   CommandContext
 } from '../../core/_api';
 import { BlockComponent } from '../../components/block.component';
@@ -26,10 +26,10 @@ export class BoldCommander implements Commander<null> {
         (context.overlap ? FormatEffect.Invalid : FormatEffect.Valid)
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state,
+          effect: state,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             tag: 'strong'
           })
         });

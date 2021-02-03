@@ -1,4 +1,4 @@
-import { CommandContext, Commander, FormatAbstractData, FormatEffect } from '../../core/_api';
+import { CommandContext, Commander, FormatData, FormatEffect } from '../../core/_api';
 import { DirFormatter } from '../../formatter/dir.formatter';
 
 export class DirCommander implements Commander<null> {
@@ -11,8 +11,8 @@ export class DirCommander implements Commander<null> {
     context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state: context.overlap ? FormatEffect.Invalid : FormatEffect.Valid,
-          abstractData: new FormatAbstractData({
+          effect: context.overlap ? FormatEffect.Invalid : FormatEffect.Valid,
+          formatData: new FormatData({
             attrs: {
               dir: this.dir
             }

@@ -4,7 +4,7 @@ import {
   ChildSlotMode, CommandContext,
   Commander,
   ElementPosition,
-  FormatAbstractData,
+  FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority, Fragment,
   InlineFormatter,
@@ -22,7 +22,7 @@ class FindFormatter extends InlineFormatter {
     return FormatEffect.Invalid;
   }
 
-  read(): FormatAbstractData {
+  read(): FormatData {
     return null;
   }
 
@@ -55,15 +55,15 @@ export class FindCommander implements Commander<ElementPosition[]> {
 
   command(context: CommandContext, positions: ElementPosition[]) {
     this.rootFragment.apply(findFormatter, {
-      state: FormatEffect.Invalid,
-      abstractData: null,
+      effect: FormatEffect.Invalid,
+      formatData: null,
       startIndex: 0,
       endIndex: this.rootFragment.contentLength
     })
     positions.forEach(item => {
       item.fragment.apply(findFormatter, {
-        state: FormatEffect.Valid,
-        abstractData: null,
+        effect: FormatEffect.Valid,
+        formatData: null,
         startIndex: item.startIndex,
         endIndex: item.endIndex
       })

@@ -27,7 +27,7 @@ export class FormatMap {
    */
   merge(token: InlineFormatter | BlockFormatter, formatter: FormatRange, important: boolean) {
     if (token instanceof BlockFormatter) {
-      if (formatter.state === FormatEffect.Invalid) {
+      if (formatter.effect === FormatEffect.Invalid) {
         this.map.delete(token);
       } else {
         this.map.set(token, [formatter]);
@@ -36,7 +36,7 @@ export class FormatMap {
     }
     const oldFormats = this.map.get(token) as FormatRange[];
     if (!Array.isArray(oldFormats)) {
-      if (formatter.state !== FormatEffect.Invalid) {
+      if (formatter.effect !== FormatEffect.Invalid) {
         this.map.set(token, [formatter]);
       }
       return;
@@ -62,27 +62,27 @@ export class FormatMap {
         newFormatRange = {
           startIndex: i,
           endIndex: i + 1,
-          abstractData: mark.abstractData,
-          state: mark.state
+          formatData: mark.formatData,
+          effect: mark.effect
         };
         formatRanges.push(newFormatRange);
         continue;
       }
-      if (mark.state === newFormatRange.state && (mark.abstractData &&
-        newFormatRange.abstractData &&
-        mark.abstractData.equal(newFormatRange.abstractData) || !mark.abstractData === true && !newFormatRange.abstractData === true)) {
+      if (mark.effect === newFormatRange.effect && (mark.formatData &&
+        newFormatRange.formatData &&
+        mark.formatData.equal(newFormatRange.formatData) || !mark.formatData === true && !newFormatRange.formatData === true)) {
         newFormatRange.endIndex = i + 1;
       } else {
         newFormatRange = {
           startIndex: i,
           endIndex: i + 1,
-          abstractData: mark.abstractData,
-          state: mark.state
+          formatData: mark.formatData,
+          effect: mark.effect
         };
         formatRanges.push(newFormatRange);
       }
     }
-    const ff = formatRanges.filter(f => f.state !== FormatEffect.Invalid);
+    const ff = formatRanges.filter(f => f.effect !== FormatEffect.Invalid);
     if (ff.length) {
       this.map.set(token, ff);
     } else {

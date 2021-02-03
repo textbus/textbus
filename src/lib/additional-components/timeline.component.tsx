@@ -1,7 +1,7 @@
 import {
   BranchAbstractComponent, Component,
   ComponentLoader,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   Fragment, SingleSlotRenderFn,
   SlotMap, SlotRendererFn,
@@ -36,38 +36,38 @@ function createTimelineItem(): TimelineFragment {
 
   title.slot.append('时间主题 2020-02-02');
   title.slot.apply(fontSizeFormatter, {
-    state: FormatEffect.Valid,
+    effect: FormatEffect.Valid,
     startIndex: 0,
     endIndex: 5,
-    abstractData: new FormatAbstractData({
+    formatData: new FormatData({
       styles: {
         fontSize: '18px'
       },
     })
   })
   title.slot.apply(boldFormatter, {
-    state: FormatEffect.Valid,
+    effect: FormatEffect.Valid,
     startIndex: 0,
     endIndex: 5,
-    abstractData: new FormatAbstractData({
+    formatData: new FormatData({
       tag: 'strong'
     })
   })
   title.slot.apply(fontSizeFormatter, {
-    state: FormatEffect.Valid,
+    effect: FormatEffect.Valid,
     startIndex: 5,
     endIndex: 18,
-    abstractData: new FormatAbstractData({
+    formatData: new FormatData({
       styles: {
         fontSize: '15px'
       },
     })
   })
   title.slot.apply(colorFormatter, {
-    state: FormatEffect.Valid,
+    effect: FormatEffect.Valid,
     startIndex: 5,
     endIndex: 18,
-    abstractData: new FormatAbstractData({
+    formatData: new FormatData({
       styles: {
         color: '#777'
       }

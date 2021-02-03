@@ -2,7 +2,7 @@ import {
   BranchAbstractComponent,
   CommandContext,
   Commander,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
 } from '../../core/_api';
 import { LinkFormatter } from '../../formatter/link.formatter';
@@ -30,14 +30,14 @@ export class LinkCommander implements Commander<Map<string, string>> {
             commonAncestorFragment.getFormatRanges(token).forEach(format => {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
                 if (attrs.get('href')) {
-                  format.abstractData.attrs.clear();
+                  format.formatData.attrs.clear();
                   attrs.forEach((value, key) => {
-                    format.abstractData.attrs.set(key, value);
+                    format.formatData.attrs.set(key, value);
                   })
                 } else {
                   commonAncestorFragment.apply(token, {
                     ...format,
-                    state: FormatEffect.Invalid
+                    effect: FormatEffect.Invalid
                   });
                 }
               }
@@ -53,8 +53,8 @@ export class LinkCommander implements Commander<Map<string, string>> {
               item.apply(this.formatter, {
                 startIndex: 0,
                 endIndex: item.contentLength,
-                state: FormatEffect.Valid,
-                abstractData: new FormatAbstractData({
+                effect: FormatEffect.Valid,
+                formatData: new FormatData({
                   attrs
                 })
               })
@@ -63,8 +63,8 @@ export class LinkCommander implements Commander<Map<string, string>> {
             scope.fragment.apply(this.formatter, {
               startIndex: scope.startIndex + index,
               endIndex: scope.startIndex + index + content.length,
-              state: FormatEffect.Valid,
-              abstractData: new FormatAbstractData({
+              effect: FormatEffect.Valid,
+              formatData: new FormatData({
                 attrs
               })
             })

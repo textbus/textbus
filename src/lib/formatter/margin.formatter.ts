@@ -1,6 +1,6 @@
 import {
   ChildSlotMode,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   FormatRendingContext,
   FormatterPriority,
@@ -17,18 +17,18 @@ abstract class MarginFormatter extends InlineFormatter {
     this.reg = new RegExp(`^(${tags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatAbstractData): FormatEffect {
-    if (!this.reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+  match(p: HTMLElement | FormatData): FormatEffect {
+    if (!this.reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
       return FormatEffect.Invalid;
     }
     const styleKeys = ['margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']
-    if (p instanceof FormatAbstractData) {
+    if (p instanceof FormatData) {
       return styleKeys.map(key => p.styles.get(key)).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
     }
     return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       styleName: ['marginLeft', 'marginRight', 'marginTop', 'marginBottom']
     });

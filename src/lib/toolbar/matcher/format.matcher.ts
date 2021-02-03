@@ -3,7 +3,7 @@ import { Type } from '@tanbo/di';
 import {
   BranchAbstractComponent,
   BlockFormatter,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   FormatRange,
   Fragment,
@@ -28,7 +28,7 @@ export class FormatMatcher implements Matcher {
         matchData: null
       };
     }
-    const srcStates: RangeMatchState<FormatAbstractData>[] = selection.ranges.map(range => {
+    const srcStates: RangeMatchState<FormatData>[] = selection.ranges.map(range => {
 
       const isDisable = rangeContentInComponent(range, this.excludeComponents);
 
@@ -90,8 +90,8 @@ export class FormatMatcher implements Matcher {
         const matchClose = endIndex < format.endIndex;
         if (matchBegin && matchClose) {
           return {
-            effect: format.state,
-            srcData: format?.abstractData.clone() || null
+            effect: format.effect,
+            srcData: format?.formatData.clone() || null
           };
         }
       }
@@ -118,15 +118,15 @@ export class FormatMatcher implements Matcher {
       } else {
         for (const format of formatRanges) {
           if (index >= format.startIndex && index + child.length <= format.endIndex) {
-            if (format.state === FormatEffect.Exclude) {
+            if (format.effect === FormatEffect.Exclude) {
               return {
                 effect: FormatEffect.Exclude,
-                srcData: format?.abstractData.clone() || null
+                srcData: format?.formatData.clone() || null
               };
             } else {
               states.push({
-                effect: format.state,
-                srcData: format?.abstractData.clone() || null
+                effect: format.effect,
+                srcData: format?.formatData.clone() || null
               });
             }
           } else {
@@ -167,18 +167,18 @@ export class FormatMatcher implements Matcher {
       }
 
       for (const item of states) {
-        if (item.state === FormatEffect.Exclude) {
+        if (item.effect === FormatEffect.Exclude) {
           return {
             effect: FormatEffect.Exclude,
-            srcData: item.abstractData.clone()
+            srcData: item.formatData.clone()
           }
         }
       }
       for (const item of states) {
-        if (item.state === FormatEffect.Valid) {
+        if (item.effect === FormatEffect.Valid) {
           return {
             effect: FormatEffect.Valid,
-            srcData: item.abstractData.clone()
+            srcData: item.formatData.clone()
           }
         }
       }

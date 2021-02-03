@@ -3,7 +3,7 @@ import { TableCommander } from '../commands/table.commander';
 import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 import { TableMatcher } from '../matcher/table.matcher';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { FormatData } from '../../core/format-data';
 
 export const tableAddToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table'],
@@ -61,7 +61,7 @@ export const tableAddToolConfig: DropdownToolConfig = {
             key.classList.remove('textbus-toolbar-table-quick-selector-selected');
           }
         })
-        form.update(new FormatAbstractData({
+        form.update(new FormatData({
           attrs: {
             cols: config.col + 1,
             rows: config.row + 1
@@ -73,7 +73,7 @@ export const tableAddToolConfig: DropdownToolConfig = {
     quickSelector.addEventListener('mouseleave', () => {
       if (flag === false) {
         Array.from(map.keys()).forEach(el => el.classList.remove('textbus-toolbar-table-quick-selector-selected'));
-        form.update(new FormatAbstractData({
+        form.update(new FormatData({
           attrs: null
         }))
       }

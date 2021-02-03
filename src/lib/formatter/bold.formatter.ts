@@ -1,6 +1,6 @@
 import {
   ChildSlotMode,
-  FormatAbstractData,
+  FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
@@ -21,7 +21,7 @@ export class BoldFormatter extends InlineFormatter {
     }, FormatterPriority.InlineTag);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       tag: true,
       styleName: 'fontWeight'

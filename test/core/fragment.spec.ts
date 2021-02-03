@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { BoldFormatter, FormatAbstractData, FormatEffect, Fragment } from '@tanbo/textbus';
+import { BoldFormatter, FormatData, FormatEffect, Fragment } from '@tanbo/textbus';
 
 describe('删除内容', () => {
   let fragment: Fragment;
@@ -7,8 +7,8 @@ describe('删除内容', () => {
   const f = {
     startIndex: 3,
     endIndex: 6,
-    abstractData: new FormatAbstractData(),
-    state: FormatEffect.Valid
+    formatData: new FormatData(),
+    effect: FormatEffect.Valid
   };
 
   beforeEach(() => {

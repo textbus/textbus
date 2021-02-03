@@ -1,4 +1,4 @@
-import { CommandContext, Commander, FormatAbstractData, FormatEffect } from '../../core/_api';
+import { CommandContext, Commander, FormatData, FormatEffect } from '../../core/_api';
 import { BlockMarginFormatter } from '../../formatter/_api';
 
 export class BlockMarginCommander implements Commander<Map<string, string>> {
@@ -11,10 +11,10 @@ export class BlockMarginCommander implements Commander<Map<string, string>> {
     context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(scope => {
         scope.fragment.apply(this.formatter, {
-          state: Array.from(params.values()).filter(i => i).length ? FormatEffect.Valid : FormatEffect.Invalid,
+          effect: Array.from(params.values()).filter(i => i).length ? FormatEffect.Valid : FormatEffect.Invalid,
           startIndex: scope.startIndex,
           endIndex: scope.endIndex,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             styles: {
               marginTop: params.get('marginTop'),
               marginRight: params.get('marginRight'),

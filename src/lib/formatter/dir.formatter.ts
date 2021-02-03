@@ -1,6 +1,6 @@
 import {
   BlockFormatter,
-  FormatAbstractData,
+  FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
   ReplaceMode,
@@ -17,7 +17,7 @@ export class DirFormatter extends BlockFormatter {
     }, FormatterPriority.Attribute)
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       attrs: ['dir']
     });

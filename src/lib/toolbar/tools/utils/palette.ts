@@ -3,7 +3,7 @@ import { ColorHSL, ColorRGB, ColorRGBA, hsl2Hex, parseCss, rgb2Hex } from '@tanb
 import { Observable, Subject } from 'rxjs';
 
 import { DropdownViewer } from '../../toolkit/dropdown.handler';
-import { FormatAbstractData } from '../../../core/_api';
+import { FormatData } from '../../../core/_api';
 
 export class Palette implements DropdownViewer {
   elementRef = document.createElement('div');
@@ -28,7 +28,7 @@ export class Palette implements DropdownViewer {
     };
   }
 
-  update(d?: FormatAbstractData): void {
+  update(d?: FormatData): void {
     const color = d ? (d.styles.get(this.styleName) + '') : '#f00';
     if (/^#/.test(color)) {
       this.picker.hex = color;

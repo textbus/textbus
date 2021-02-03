@@ -1,7 +1,7 @@
 import {
   BranchAbstractComponent, DivisionAbstractComponent,
   Commander,
-  FormatAbstractData,
+  FormatData,
   FormatEffect, Fragment,
   BackboneAbstractComponent, CommandContext
 } from '../../core/_api';
@@ -45,8 +45,8 @@ export class BlockStyleCommander implements Commander<string> {
         }
         fragments.forEach(slot => {
           slot.apply(this.formatter, {
-            state: value ? FormatEffect.Valid : FormatEffect.Invalid,
-            abstractData: new FormatAbstractData({
+            effect: value ? FormatEffect.Valid : FormatEffect.Invalid,
+            formatData: new FormatData({
               styles: {
                 [this.name]: value
               }

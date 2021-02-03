@@ -1,7 +1,7 @@
 import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { FormatData } from '../../core/format-data';
 import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
@@ -37,7 +37,7 @@ export const letterSpacingToolConfig: SelectToolConfig = {
   }],
   matcher: new FormatMatcher(letterSpacingFormatter, [PreComponent]),
   highlight(options, data) {
-    if (data instanceof FormatAbstractData) {
+    if (data instanceof FormatData) {
       for (const option of options) {
         if (option.value === data.styles.get('letterSpacing')) {
           return option;

@@ -2,7 +2,7 @@ import { Injector } from '@tanbo/di';
 
 import {
   TBSelection,
-  FormatAbstractData,
+  FormatData,
   TBRange,
   FormatEffect,
   AbstractComponent
@@ -14,7 +14,7 @@ import { HighlightState } from '../help';
  */
 export interface FormatMatchData {
   effect: FormatEffect;
-  srcData: FormatAbstractData;
+  srcData: FormatData;
 }
 
 /**
@@ -29,7 +29,7 @@ export interface RangeMatchState<T> {
 /**
  * Selection 对象内所有 Range 匹配出的结果详情
  */
-export interface SelectionMatchState<T = FormatAbstractData | AbstractComponent> {
+export interface SelectionMatchState<T = FormatData | AbstractComponent> {
   state: HighlightState;
   srcStates: RangeMatchState<T>[];
   matchData: T;

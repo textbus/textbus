@@ -3,7 +3,7 @@ import { Type } from '@tanbo/di';
 import { FormatMatcher } from './format.matcher';
 import {
   TBSelection,
-  FormatAbstractData,
+  FormatData,
   BranchAbstractComponent,
   DivisionAbstractComponent,
   BackboneAbstractComponent
@@ -28,7 +28,7 @@ export class DirMatcher extends FormatMatcher {
     }
     const result = super.queryState(selection);
     if (result.state === HighlightState.Highlight) {
-      const matchData = result.matchData as FormatAbstractData;
+      const matchData = result.matchData as FormatData;
       if (matchData.attrs.get('dir') !== this.dir) {
         result.state = HighlightState.Normal;
       }

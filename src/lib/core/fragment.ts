@@ -71,7 +71,7 @@ export class Fragment extends Marker {
       this.formatMap.set(token, [...source.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
           ...f,
-          abstractData: f.abstractData?.clone()
+          formatData: f.formatData?.clone()
         } : {
           get startIndex() {
             return 0;
@@ -79,8 +79,8 @@ export class Fragment extends Marker {
           get endIndex() {
             return self.contentLength;
           },
-          state: f.state,
-          abstractData: f.abstractData
+          effect: f.effect,
+          formatData: f.formatData
         }
       })])
     });
@@ -205,8 +205,8 @@ export class Fragment extends Marker {
             formatMap.merge(token, {
               startIndex: index,
               endIndex: index + 1,
-              state: FormatEffect.Invalid,
-              abstractData: format.abstractData.clone(),
+              effect: FormatEffect.Invalid,
+              formatData: format.formatData.clone(),
             }, true);
             if (format.endIndex > index) {
               formatMap.merge(token, {
@@ -245,7 +245,7 @@ export class Fragment extends Marker {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
           ...f,
-          abstractData: f.abstractData?.clone()
+          formatData: f.formatData?.clone()
         } : {
           get startIndex() {
             return 0;
@@ -253,8 +253,8 @@ export class Fragment extends Marker {
           get endIndex() {
             return ff.contentLength;
           },
-          state: f.state,
-          abstractData: f.abstractData
+          effect: f.effect,
+          formatData: f.formatData
         }
       })])
     });
@@ -542,8 +542,8 @@ export class Fragment extends Marker {
           newFormat = {
             startIndex: formatRange.startIndex + index,
             endIndex: formatRange.startIndex + index + item.length,
-            state: formatRange.state,
-            abstractData: formatRange.abstractData
+            effect: formatRange.state,
+            formatData: formatRange.abstractData
           };
           cacheFormats.push({
             token,

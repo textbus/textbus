@@ -429,8 +429,8 @@ export class Renderer {
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
         isOutputMode: false,
-        state: next.params.state,
-        abstractData: next.params.abstractData,
+        state: next.params.effect,
+        abstractData: next.params.formatData,
       };
       const renderMode = next.token.render(context, vEle);
       if (renderMode instanceof ReplaceMode) {
@@ -621,7 +621,7 @@ export class Renderer {
 
   static calculatePriority(formats: FormatConfig[]) {
     return formats.filter(i => {
-      return i.params.state !== FormatEffect.Inherit;
+      return i.params.effect !== FormatEffect.Inherit;
     }).sort((next, prev) => {
       const a = next.params.startIndex - prev.params.startIndex;
       if (a === 0) {

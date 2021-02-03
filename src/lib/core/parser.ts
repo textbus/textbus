@@ -75,8 +75,8 @@ export class Parser {
       slot.apply(item.formatter, {
         startIndex,
         endIndex: slot.contentLength,
-        abstractData: item.abstractData,
-        state: item.state
+        formatData: item.abstractData,
+        effect: item.state
       }, {
         important: false
       })

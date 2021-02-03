@@ -1,7 +1,7 @@
 import {
   InlineFormatter,
   MatchRule,
-  FormatAbstractData,
+  FormatData,
   VElement,
   ChildSlotMode,
   FormatterPriority, FormatRendingContext
@@ -12,8 +12,8 @@ export class InlineTagFormatter extends InlineFormatter {
     super(rule, FormatterPriority.InlineTag);
   }
 
-  read(): FormatAbstractData {
-    return new FormatAbstractData({
+  read(): FormatData {
+    return new FormatData({
       tag: this.tagName
     });
   }

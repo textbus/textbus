@@ -5,7 +5,7 @@ export * from './component';
 export * from './component-setter';
 export * from './contents';
 export * from './element';
-export * from './format-abstract-data';
+export * from './format-data';
 export * from './format-map';
 export * from './formatter';
 export * from './fragment';

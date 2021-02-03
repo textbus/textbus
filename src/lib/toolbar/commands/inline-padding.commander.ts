@@ -1,4 +1,4 @@
-import { CommandContext, Commander, FormatAbstractData, FormatEffect } from '../../core/_api';
+import { CommandContext, Commander, FormatData, FormatEffect } from '../../core/_api';
 import {
   InlinePaddingFormatter
 } from '../../formatter/_api';
@@ -21,13 +21,13 @@ export class InlinePaddingCommander implements Commander<Map<string, string>> {
             if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
               if (Array.from(params.values()).filter(i => i).length) {
                 params.forEach((value, key) => {
-                  format.abstractData.styles.set(key, value);
+                  format.formatData.styles.set(key, value);
                 })
                 commonAncestorFragment.markAsDirtied();
               } else {
                 commonAncestorFragment.apply(token, {
                   ...format,
-                  state: FormatEffect.Invalid
+                  effect: FormatEffect.Invalid
                 });
               }
             }
@@ -37,10 +37,10 @@ export class InlinePaddingCommander implements Commander<Map<string, string>> {
       }
       range.getSelectedScope().forEach(scope => {
         scope.fragment.apply(this.inlineFormatter, {
-          state: Array.from(params.values()).filter(i => i).length ? FormatEffect.Valid : FormatEffect.Invalid,
+          effect: Array.from(params.values()).filter(i => i).length ? FormatEffect.Valid : FormatEffect.Invalid,
           startIndex: scope.startIndex,
           endIndex: scope.endIndex,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             styles: {
               paddingTop: params.get('paddingTop'),
               paddingRight: params.get('paddingRight'),

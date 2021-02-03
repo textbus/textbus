@@ -19,7 +19,7 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
     next.append(new BrComponent());
     fragment.getFormatKeys().forEach(token => {
       fragment.getFormatRanges(token).filter(f => {
-        if (f.state === FormatEffect.Inherit) {
+        if (f.effect === FormatEffect.Inherit) {
           return false;
         }
         if (token instanceof InlineFormatter) {
@@ -41,7 +41,7 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
 
     f.sliceContents(0).forEach(c => next.append(c));
     f.getFormatKeys().forEach(token => {
-      f.getFormatRanges(token).filter(f => f.state !== FormatEffect.Inherit).forEach(f => next.apply(token, f));
+      f.getFormatRanges(token).filter(f => f.effect !== FormatEffect.Inherit).forEach(f => next.apply(token, f));
     })
   }
   return next;

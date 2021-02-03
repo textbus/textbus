@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { FormItem, FileUploader } from './help';
 import { FormViewer } from '../../toolbar/toolkit/_api';
-import { FormatAbstractData, BranchAbstractComponent, LeafAbstractComponent } from '../../core/_api';
+import { FormatData, BranchAbstractComponent, LeafAbstractComponent } from '../../core/_api';
 import { createElement, createTextNode } from '../uikit';
 
 export interface FormConfig {
@@ -132,11 +132,11 @@ export class Form implements FormViewer {
     })
   }
 
-  update(d: FormatAbstractData | BranchAbstractComponent | LeafAbstractComponent): void {
+  update(d: FormatData | BranchAbstractComponent | LeafAbstractComponent): void {
     this.config.items.forEach(item => {
       let value = null;
       if (d) {
-        if (d instanceof FormatAbstractData) {
+        if (d instanceof FormatData) {
           value = this.config.editProperty === 'styles' ? d.styles.get(item.name) : d.attrs.get(item.name)
         } else {
           value = d[item.name]
