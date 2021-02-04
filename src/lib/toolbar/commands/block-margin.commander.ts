@@ -12,8 +12,8 @@ export class BlockMarginCommander implements Commander<Map<string, string>> {
       range.getSelectedScope().forEach(scope => {
         scope.fragment.apply(this.formatter, {
           effect: Array.from(params.values()).filter(i => i).length ? FormatEffect.Valid : FormatEffect.Invalid,
-          startIndex: scope.startIndex,
-          endIndex: scope.endIndex,
+          startIndex: 0,
+          endIndex: scope.fragment.contentLength,
           formatData: new FormatData({
             styles: {
               marginTop: params.get('marginTop'),

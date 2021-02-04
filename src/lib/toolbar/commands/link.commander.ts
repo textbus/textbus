@@ -34,6 +34,7 @@ export class LinkCommander implements Commander<Map<string, string>> {
                   attrs.forEach((value, key) => {
                     format.formatData.attrs.set(key, value);
                   })
+                  commonAncestorFragment.markAsDirtied();
                 } else {
                   commonAncestorFragment.apply(token, {
                     ...format,
