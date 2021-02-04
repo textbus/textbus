@@ -42,4 +42,5 @@ export * from './text-indent.tool';
 export * from './ul.tool';
 export * from './underline.tool';
 export * from './unlink.tool';
+export * from './vertical-align.tool';
 export * from './video.tool';

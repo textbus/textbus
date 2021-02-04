@@ -7,3 +7,4 @@ export * from './padding.formatter';
 export * from './margin.formatter';
 export * from './style.formatter';
 export * from './td-border-color.formatter';
+export * from './vertical-align.formatter';
