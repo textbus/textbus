@@ -301,9 +301,8 @@ export class Input {
             !!config.keymap.shiftKey === ev.shiftKey &&
             !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
             ev.preventDefault();
-            const result = config.action(ev);
             this.dispatchInputReadyEvent();
-            return result;
+            return config.action(ev);
           }
         }
       }),
