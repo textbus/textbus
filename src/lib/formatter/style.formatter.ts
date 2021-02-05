@@ -71,8 +71,8 @@ export class InlineBackgroundColorFormatter extends StyleFormatter {
     this.reg = new RegExp(`^(${InlineBackgroundColorFormatter.inlineTags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatData) {
-    if (!this.reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
+  match(p: HTMLElement) {
+    if (!this.reg.test(p.tagName)) {
       return FormatEffect.Invalid;
     }
     return super.match(p);

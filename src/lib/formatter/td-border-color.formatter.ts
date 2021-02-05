@@ -16,21 +16,18 @@ export class TdBorderColorFormatter extends BlockFormatter {
     }, FormatterPriority.BlockStyle);
   }
 
-  match(p: HTMLElement | FormatData): FormatEffect {
-    if (p instanceof HTMLElement) {
-      if (/^(td|th)$/.test(p.nodeName.toLowerCase())) {
-        const style = p.style;
-        if (style.borderColor ||
-          style.borderLeftColor ||
-          style.borderTopColor ||
-          style.borderRightColor ||
-          style.borderBottomColor) {
-          return FormatEffect.Valid;
-        }
+  match(p: HTMLElement): FormatEffect {
+    if (/^(td|th)$/.test(p.nodeName.toLowerCase())) {
+      const style = p.style;
+      if (style.borderColor ||
+        style.borderLeftColor ||
+        style.borderTopColor ||
+        style.borderRightColor ||
+        style.borderBottomColor) {
+        return FormatEffect.Valid;
       }
-      return FormatEffect.Invalid;
     }
-    return super.match(p);
+    return FormatEffect.Invalid;
   }
 
   read(node: HTMLElement): FormatData {

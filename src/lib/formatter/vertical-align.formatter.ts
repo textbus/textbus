@@ -1,6 +1,5 @@
 import {
   InlineFormatter,
-  FormatEffect,
   FormatData,
   FormatRendingContext,
   VElement,
@@ -15,10 +14,6 @@ export class VerticalAlignFormatter extends InlineFormatter {
         verticalAlign: /.+/
       }
     }, FormatterPriority.InlineStyle);
-  }
-
-  match(p: HTMLElement | FormatData): FormatEffect {
-    return super.match(p);
   }
 
   read(node: HTMLElement): FormatData {

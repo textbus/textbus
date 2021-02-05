@@ -58,9 +58,9 @@ export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
     })
   }
 
-  match(p: HTMLElement | FormatData) {
+  match(p: HTMLElement) {
     const reg = new RegExp(`^(${BlockBackgroundColorFormatter.blockTags.join('|')})$`, 'i');
-    if (!reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
+    if (!reg.test(p.tagName)) {
       return FormatEffect.Invalid;
     }
     return super.match(p);

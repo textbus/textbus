@@ -69,7 +69,7 @@ export interface MatchRule {
   /** 排除的属性 */
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   /** 自定义过滤器，以适配以上不能满足的特殊需求 */
-  filter?: (node: HTMLElement | FormatData) => boolean;
+  filter?: (node: HTMLElement) => boolean;
 }
 
 /**
@@ -109,9 +109,9 @@ export interface FormatRendingContext {
  * TextBus 格式基类，在扩展格式时，不能直接继承 Formatter，请继承 InlineFormatter、BlockFormatter 或其它子类。
  */
 export abstract class Formatter {
-  private inheritValidators: Array<(node: HTMLElement | FormatData) => boolean> = [];
-  private validators: Array<(node: HTMLElement | FormatData) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement | FormatData) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement) => boolean> = [];
+  private validators: Array<(node: HTMLElement) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement) => boolean> = [];
 
   protected constructor(protected rule: MatchRule, public priority: number) {
 
@@ -161,24 +161,24 @@ export abstract class Formatter {
 
   /**
    * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。
-   * @param p
+   * @param element
    */
-  match(p: HTMLElement | FormatData) {
+  match(element: HTMLElement) {
     if (this.rule.filter) {
-      const b = this.rule.filter(p);
+      const b = this.rule.filter(element);
       if (!b) {
         return FormatEffect.Invalid;
       }
     }
-    const exclude = this.excludeValidators.map(fn => fn(p)).includes(true);
+    const exclude = this.excludeValidators.map(fn => fn(element)).includes(true);
     if (exclude) {
       return FormatEffect.Exclude;
     }
-    const inherit = this.inheritValidators.map(fn => fn(p)).includes(true);
+    const inherit = this.inheritValidators.map(fn => fn(element)).includes(true);
     if (inherit) {
       return FormatEffect.Inherit;
     }
-    return this.validators.map(fn => fn(p)).includes(true) ? FormatEffect.Valid : FormatEffect.Invalid;
+    return this.validators.map(fn => fn(element)).includes(true) ? FormatEffect.Valid : FormatEffect.Invalid;
   }
 
   protected extractData(node: HTMLElement, config: EditableOptions): FormatData {
@@ -209,26 +209,18 @@ export abstract class Formatter {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement | FormatData) => {
-      const tagName = node instanceof FormatData ? node.tag : node.nodeName.toLowerCase();
+    return (node: HTMLElement) => {
+      const tagName = node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement | FormatData) => {
+    return (node: HTMLElement) => {
       return attrs.map(attr => {
         if (attr.value) {
-          if (node instanceof FormatData) {
-            return node?.attrs.get(attr.key) === attr.value;
-          }
-          if (node instanceof HTMLElement) {
-            return node.getAttribute(attr.key) === attr.value;
-          }
+          return node.getAttribute(attr.key) === attr.value;
         } else {
-          if (node instanceof FormatData) {
-            return node?.attrs.has(attr.key);
-          }
           if (node instanceof HTMLElement) {
             return node.hasAttribute(attr.key);
           }
@@ -239,14 +231,12 @@ export abstract class Formatter {
   }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement | FormatData) => {
+    return (node: HTMLElement) => {
       return !Object.keys(styles).map(key => {
         const optionValue = (Array.isArray(styles[key]) ?
           styles[key] :
           [styles[key]]) as Array<string | number | RegExp>;
-        let styleValue = node instanceof FormatData ?
-          (node.styles.has(key) ? node.styles.get(key) : '') :
-          node.style[key];
+        let styleValue = node.style[key];
         if (key === 'fontFamily' && typeof styleValue === 'string') {
           styleValue = styleValue.replace(/['"]/g, '');
         }
