@@ -162,13 +162,13 @@
   margin: 0 auto;
   box-shadow: 1px 2px 4px rgba(0, 0, 0, .2);
   opacity: 0;
-  //transform: scale(0.95);
+  transform: scale(0.95);
   transition: all 1.2s cubic-bezier(.36, .66, .04, 1);
   box-sizing: border-box;
 
   &.textbus-tablet-ready {
     opacity: 1;
-    //transform: scale(1);
+    transform: scale(1);
   }
 }
 
