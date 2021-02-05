@@ -28,12 +28,12 @@ export enum FormatEffect {
 /**
  * 配置一段格式的参数。
  */
-export type BlockFormatParams = {
+export interface BlockFormatParams {
   formatData: FormatData;
   effect: FormatEffect;
-};
+}
 
-export type InlineFormatParams = {
+export interface InlineFormatParams {
   formatData: FormatData;
   effect: FormatEffect;
   startIndex: number;
@@ -220,12 +220,8 @@ export abstract class Formatter {
       return attrs.map(attr => {
         if (attr.value) {
           return node.getAttribute(attr.key) === attr.value;
-        } else {
-          if (node instanceof HTMLElement) {
-            return node.hasAttribute(attr.key);
-          }
         }
-        return false;
+        return node.hasAttribute(attr.key);
       }).includes(true);
     }
   }
