@@ -28,11 +28,15 @@ export class BoldFormatter extends InlineFormatter {
     });
   }
 
-  render(context: FormatRendingContext) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     if (context.effect === FormatEffect.Inherit) {
       return;
     }
     if (context.effect === FormatEffect.Exclude) {
+      if (existingElement) {
+        existingElement.styles.set('fontWeight', 'normal');
+        return
+      }
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
       return new ChildSlotMode(el);
