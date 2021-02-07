@@ -533,6 +533,9 @@ export class Fragment extends Marker {
     if (formatRange.endIndex > this.contentLength) {
       formatRange.endIndex = this.contentLength;
     }
+    if (this.getContentAtIndex(formatRange.endIndex) instanceof BrComponent) {
+      formatRange.endIndex++;
+    }
     const lineFormatRange = formatRange as InlineFormatParams;
     const contents = this.sliceContents(lineFormatRange.startIndex, lineFormatRange.endIndex);
     let index = 0;
