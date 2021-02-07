@@ -6,10 +6,10 @@ import {
   Fragment, InlineFormatter, LeafAbstractComponent,
   Interceptor, TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
+  VElement, BlockFormatter, FormatRange, BrComponent, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
 } from './core/_api';
 import { Input } from './workbench/input';
-import { BrComponent, BlockComponent } from './components/_api';
+import { BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
 
 @Injectable()

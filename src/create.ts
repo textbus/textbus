@@ -70,7 +70,6 @@ import { HTMLOutputTranslator } from './lib/output-translator';
 import {
   ListComponent,
   BlockComponent,
-  BrComponent,
   PreComponent,
   AudioComponent,
   VideoComponent,
@@ -118,7 +117,6 @@ export const defaultOptions: EditorOptions<string> = {
     ImageCardComponent,
     ListComponent,
     BlockComponent,
-    BrComponent,
     PreComponent,
     AudioComponent,
     VideoComponent,

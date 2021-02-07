@@ -25,9 +25,9 @@ import {
   InlineFormatter, Interceptor,
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
-  ViewData, SingleSlotRenderFn
+  ViewData, SingleSlotRenderFn,
+  BrComponent
 } from '../core/_api';
-import { BrComponent } from './br.component';
 
 export const codeStyles = {
   keyword: 'keyword',

@@ -8,9 +8,9 @@ import {
   LeafAbstractComponent,
   DivisionAbstractComponent,
   AbstractComponent,
-  BackboneAbstractComponent
+  BackboneAbstractComponent,
+  BrComponent
 } from './component';
-import { BrComponent } from '../components/br.component';
 
 /**
  * 标识 Fragment 中的一个位置。

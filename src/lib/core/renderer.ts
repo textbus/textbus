@@ -4,10 +4,9 @@ import {
   BackboneAbstractComponent,
   BranchAbstractComponent,
   AbstractComponent,
-  DivisionAbstractComponent, LeafAbstractComponent
+  DivisionAbstractComponent, LeafAbstractComponent, BrComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
-import { BrComponent } from '../components/br.component';
 import { makeError } from '../_utils/make-error';
 
 export interface ElementPosition {

@@ -5,9 +5,9 @@ import {
   FormatEffect,
   FormatData,
   BlockFormatter,
-  InlineFormatter, CommandContext
+  InlineFormatter, CommandContext,
+  BrComponent
 } from '../../core/_api';
-import { BrComponent } from '../../components/br.component';
 
 export class CleanCommander implements Commander<null> {
   recordHistory = true;

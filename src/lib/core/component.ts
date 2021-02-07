@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { Fragment, parentComponentAccessToken } from './fragment';
 import { VElement } from './element';
 import { Marker } from './marker';
+import { Component } from './di/component';
 
 /**
  * 用于保存读取 DOM 时，Fragment 和 DOM 节点的对应关系。
@@ -334,4 +335,34 @@ export abstract class LeafAbstractComponent extends AbstractComponent {
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
    */
   abstract render(isOutputMode: boolean): VElement;
+}
+
+class BrComponentLoader implements ComponentLoader {
+  match(component: HTMLElement): boolean {
+    return component.nodeName.toLowerCase() === 'br';
+  }
+
+  read(): ViewData {
+    const component = new BrComponent();
+    return {
+      component: component,
+      slotsMap: []
+    };
+  }
+}
+@Component({
+  loader: new BrComponentLoader()
+})
+export class BrComponent extends LeafAbstractComponent {
+  block = false;
+  constructor() {
+    super('br');
+  }
+  clone() {
+    return new BrComponent();
+  }
+
+  render() {
+    return new VElement(this.tagName);
+  }
 }

@@ -21,7 +21,8 @@ import {
   Parser,
   Renderer,
   TBRange,
-  TBSelection
+  TBSelection,
+  BrComponent
 } from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
@@ -30,7 +31,7 @@ import { RootComponent } from '../root-component';
 import { Toolbar } from '../toolbar/toolbar';
 import { ComponentStage } from './component-stage';
 import { EditorController } from '../editor-controller';
-import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
+import { BlockComponent, PreComponent } from '../components/_api';
 import { ComponentInjectors } from '../component-injectors';
 
 declare const ResizeObserver: any;
@@ -82,7 +83,7 @@ export class Viewer {
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
-    const componentAnnotations = [RootComponent, ...(this.options.components || [])].map(c => {
+    const componentAnnotations = [RootComponent, ...(this.options.components || []), BrComponent].map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
 
