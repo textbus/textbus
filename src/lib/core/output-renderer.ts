@@ -69,7 +69,8 @@ export class OutputRenderer {
         component.render(true) :
         (component as DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent).render(true, (slot, contentContainer, host) => {
           this.fragmentVDomMapping.set(slot, host);
-          return this.rendingFragment(slot, contentContainer, true);
+          this.rendingFragment(slot, contentContainer, true);
+          return host;
         });
       if (!(vElement instanceof VElement)) {
         throw outputRendererErrorFn(`component render method must return a virtual element.`);
