@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Editor</title>
     <style>
@@ -14,420 +15,506 @@
         }
     </style>
 </head>
-<body>
-<div id="editor"></div>
-<p id="table">你好，啊！</p>
-<!--<div id="table" contenteditable="true">-->
-<!--    <tb-jumbotron-->
-<!--            style="background-image:url(&quot;https://textbus.tanboui.com/static/img/tbus-bg.49d7d956eb051d336e7f788f1b62eeb0.jpg&quot;);background-size:cover;background-position:center center">-->
-<!--        <h1 style="color:rgb(255, 255, 255);font-size:36px">Hello, world!</h1>-->
-<!--        <p style="color:rgb(255, 255, 255)">我是 Te<span style="line-height:1.8em">xtBus 富文本编辑器，等你好久了，<br>快来发挥你</span>的创造力吧！-->
-<!--        </p></tb-jumbotron>-->
-<!--    <p>你也许在找一个既方便定制，又可以自由扩展的富文本编辑器？没错，你现在看到的就是。TextBus 是一个基于组件的编辑器，你可以自由定制你想要的任意组件和效果，而不用关心富文本的底层实现。如果你觉得 TextBus-->
-<!--        默认提供的样式还不够非富，你一样可以自己扩展。总之，限制你的不是 TextBus，而是你自己的想象力！</p>-->
-<!--    <p>来看看当前 TextBus 都有什么亮点：</p>-->
-<!--    <ul>-->
-<!--        <li>默认自带了足够<strong style="color:rgb(18, 150, 219)">丰富的工具</strong>，基本能满足大部分用户的需求；<br></li>-->
-<!--        <li>原生支持<strong style="color:rgb(18, 150, 219)">组件化</strong>，可以<strong-->
-<!--                style="color:rgb(18, 150, 219)">任意定制</strong>自己的组件。默认自带了其它富文本较难实现的可编辑与不可编辑的功能；-->
-<!--        </li>-->
-<!--        <li>强大的<strong style="color:rgb(18, 150, 219)">表格支持</strong>，你可<strong-->
-<!--                style="color:rgb(18, 150, 219)">批量操作</strong>单元格，并随意增加、删除表格内容，也可以修改表格的样式风格；-->
-<!--        </li>-->
-<!--        <li><strong style="color:rgb(18, 150, 219)">实时代码高亮</strong>，其实不用 Markdown，一样可以写一份好的技术文档；</li>-->
-<!--        <li>图片、视频等，自由的<strong style="color:rgb(18, 150, 219)">拖动缩放</strong>，不用再去找插件了；</li>-->
-<!--        <li>丰富的组件库，伸手党也可以创造出不一样的文章。</li>-->
-<!--    </ul>-->
-<!--    <p>说了这么多，赶快运行起来，看一看效果：<br></p>-->
-<!--    <pre lang="Typescript" theme="light"><div class="tb-code-line-number-bg"></div><div class="tb-code-content"><div-->
-<!--            class="tb-code-line"><code><span class="tb-hl-keyword">import</span>&nbsp;{ createEditor }&nbsp;<span-->
-<!--            class="tb-hl-keyword">from</span>&nbsp;<span class="tb-hl-string">'@tanbo/textbus'</span>;</code></div><div-->
-<!--            class="tb-code-line"><code><br></code></div><div class="tb-code-line"><code><span class="tb-hl-keyword">const</span>&nbsp;editor =<span-->
-<!--            class="tb-hl-function">&nbsp;createEditor</span>(document.<span class="tb-hl-function">getElementById</span>(<span-->
-<!--            class="tb-hl-string">'editor'</span>));</code></div><div class="tb-code-line"><code>editor.onChange.<span-->
-<!--            class="tb-hl-function">subscribe</span>(() =&gt; {</code></div><div-->
-<!--            class="tb-code-line"><code>&nbsp;&nbsp;<span class="tb-hl-keyword">const</span>&nbsp;{content, styleSheets} = editor.<span-->
-<!--            class="tb-hl-function">getContents</span>();</code></div><div class="tb-code-line"><code>&nbsp;&nbsp;<span-->
-<!--            class="tb-hl-builtin">console</span>.<span-->
-<!--            class="tb-hl-function">log</span>(content, styleSheets);</code></div><div-->
-<!--            class="tb-code-line"><code>})</code></div></div></pre>-->
-<!--    <p>你也许会好奇，TextBus 到底是如何做到这么多功能的，这其实依赖于 TextBus 底层的数据结构，我们来看一个表格，帮助你理解：</p>-->
-<!--    <table class="tb-table">-->
-<!--        <tbody>-->
-<!--        <tr>-->
-<!--            <td rowspan="3" style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong-->
-<!--                    style="color:rgb(28, 40, 56)">文字内容</strong><br></td>-->
-<!--            <td colspan="21"-->
-<!--                style="border-color:rgb(128, 132, 143) rgb(128, 132, 143) rgb(28, 40, 56);border-left-color:rgb(128, 132, 143);border-top-color:rgb(128, 132, 143);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(28, 40, 56)">-->
-<!--                <u>你好，我是&nbsp;<em><strong>Tex</strong></em></u><em><strong>tBus</strong>&nbsp;<del>富文本编辑器</del>-->
-<!--            </em>-->
-<!--                <del>!</del>-->
-<!--                <br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">0</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">1</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">2</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">3</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">4</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">5</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">6</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">7</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">8</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">9</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">10</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">11</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">12</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">13</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">14</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">15</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">16</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">17</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">18</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236);font-size:14px">19</span><br></td>-->
-<!--            <td style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <span style="color:rgb(233, 234, 236)">20</span><br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">你<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">好<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">，<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">我<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">是<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                T<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                e<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                x<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                t<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                B<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                u<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                s<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">富<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">文<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">本<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">编<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">辑<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">器<br></td>-->
-<!--            <td style="text-align:center;border-color:rgb(233, 234, 236)">!<br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong-->
-<!--                    style="color:rgb(28, 40, 56)">加粗</strong><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(128, 132, 143) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong-->
-<!--                    style="color:rgb(28, 40, 56)">下划线</strong><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong-->
-<!--                    style="color:rgb(28, 40, 56)">斜体</strong><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(233, 234, 236) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">-->
-<!--                <br></td>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong-->
-<!--                    style="color:rgb(28, 40, 56)">中划线</strong><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236)"><br></td>-->
-<!--            <td style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(233, 234, 236) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(233, 234, 236)">-->
-<!--                <br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--            <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>-->
-<!--        </tr>-->
-<!--        </tbody>-->
-<!--    </table>-->
-<!--    <p>在 TextBus-->
-<!--        中，我们会把内容和格式分开处理，并在渲染时根据内容和格式所标注的范围，合并渲染。同时，为了解决富文本编辑中的一些固定的样板，如卡片、时间轴等，我们做了进一步的抽象，把一些结构化的数据抽象成组件。由组件、内容、样式三大块组成了我们最终的渲染结果。</p>-->
-<!--    <p>当然，现在看到的一切设计，都不是轻易得出的结果，而是在一遍遍的试错，一遍遍的思考和验证才得出得最优方案。目前，我们有你信心说，TextBus 就是设计最先进的富文本编辑器之一！</p>-->
-<!--    <p>来回顾一下 TextBus 的发展历史吧：</p>-->
-<!--    <tb-timeline>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">立项&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">需求的起始</span></div>-->
-<!--                <p>因当时工作需要，要 copy 一些表格或 word-->
-<!--                    文档到富文本编辑器内，同时，产品也希望能在富文本内做一些简单的编辑。经过一番调研，市面上的富文本要么把样式丢了，要么表格编辑功能不够，要么产出的样式很脏，会遗留很多从 word 或 excel-->
-<!--                    拷贝过来的脏数据。</p>-->
-<!--                <p>为了先满足暂时的业务的需求，我先使用了某编辑器，同时用所有的业余时间着手展开富文本编辑器的研发工作。<br></p></div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">contenteditable 的实践&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">第一个版本</span></div>-->
-<!--                <p>和其它富文本编辑器一样，一开始也是基于 DOM 的 contenteditable 属性。经过3个月的开发，初具雏形，但发现了一个很大的问题。</p>-->
-<!--                <ol>-->
-<!--                    <li>浏览器的行为不可控，不同的浏览器对同样的操作产出的结果不一样；</li>-->
-<!--                    <li>编辑的数据不可控。我完全不知道一个加粗操作会产生什么样的 DOM 结构；</li>-->
-<!--                    <li>产出的数据很脏，比如加粗一段文字，在经过几次操作之后，可能会同时出现多个 strong 标签并列的情况；</li>-->
-<!--                    <li>因为内容不可控，所以也并没有很好的解决从 word 或 excel 拷贝数据太脏的问题。<br></li>-->
-<!--                </ol>-->
-<!--                <p>其实问题远不止以上 4 点，但这对于我来说，是完全不能接受的。<br></p></div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">数据驱动视图的探索&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">第二个版本</span></div>-->
-<!--                <p>这个版本完全抛弃了 contenteditable 的方案，采用自定义输入功能，重新设计了架构。采用可编辑片段（Fragment）+ 格式化信息（Formatter）的组合方式，和现在大家见到的如-->
-<!--                    Draft.js、Slate.js 类似。这种方案有一个很大的优点，生成的结果不脏了，从 word、excel-->
-<!--                    或网页拷贝过来的数据不但能保留必要的样式，冗余的数据也自动清理掉了。同时也可以很方便的实现一些特定功能，如实时代码高亮等。</p>-->
-<!--                <p>-->
-<!--                    虽然经过以上设计，解决了第一个版本的问题，但又引出的新问题，如：如何保证一个固定的结构不可编辑，同时指定某些内容是可编辑的？这是一个很常见的需求，如卡片，上面一张图片，下面一小段描述性文字。传统的编辑器是把外层设置为-->
-<!--                    contenteditable = false，内层再重置 contenteditable = true，但 TextBus 已抛弃了这种方案，不能重回老路。<br></p></div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">黎明前的黑暗&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">再一次自我否定</span></div>-->
-<!--                <p>经过前面两次版本的经验，首先验证了两件事：</p>-->
-<!--                <ol>-->
-<!--                    <li>基于 contenteditable 的路是行不通的；</li>-->
-<!--                    <li>数据驱动是解决问题的根本之道。<br></li>-->
-<!--                </ol>-->
-<!--                <p>-->
-<!--                    如果说写代码有什么事是令人痛苦的，那么我觉得就是把自己几个月辛苦的成果完全抛弃。如果说有什么是比这个是更痛苦的，那就是抛弃两次！到这个时候，我已经在富文本的研究上花了一年的时间了，最终的结果却不尽人意。如果没有从根本上解决富文本的抽象，那么我所做的一切不过是重复造轮子，最大的作用就是给自己涨一点经验。</p>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">组件化设计&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">打开新世界的大门</span></div>-->
-<!--                <p>我不是一个喜欢轻言放弃的人，尤其是对自己有兴趣的事情上！</p>-->
-<!--                <p>结合我自己的经验和现代前端框架的设计，组件化是一条可行之路。但富文本因有其特殊性，肯定不能照搬前端框架的设计思路。这时，如何在富文本里做组件化，就成了决定 TextBus 成败的关键。</p>-->
-<!--                <div>经过短时间的休整，我重新开始了富文本的探索之路。</div>-->
-<!--                <p>我分析了现代前端框架组件的特点，都是由一段固定的 html 模板，一部分数据，再加上插槽基本就组成了一个组件的形态。而如果要在富文本里做组件，就不仅要具备以上要素，还需要提供动态编辑的能力。</p>-->
-<!--                <p>在典型的前端应用场景里，组件树的形态和分支是可预测的，无非就是根据一些数据，填充占位符，再根据一些条件，判断展示哪一个预设的组件或 DOM-->
-<!--                    节点。富文本不是这样的。富文本所有数据的组装是不可预测的，会随着用户的添加、删除或编辑操作的变化而产生变化。</p>-->
-<!--                <p>基于富文本的特殊需求，我重新设计组件系统，即现在 TextBus 的组件系统。该组件系统抽象了富文本编辑操作特点，提供了统一的封装，只要继承自现有组件系统的的抽象类，就可以自动获得在 TextBus-->
-<!--                    里和其它组件的组合编辑能力。至此，TextBus 终于找到了一条正确的设计思路！</p></div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">性能瓶颈的第一次考验&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">渲染器短板</span></div>-->
-<!--                <p>在组件化设计告一段落之后，我信心十足，以为 TextBus 迎来了春天，但打脸接踵而至。我发现 TextBus 很容易就遇到性能问题，由于 TextBus-->
-<!--                    的视图是由数据驱动的，随着编辑内容的增长，更新所需的 diff-->
-<!--                    时间就会越长，我习惯性的在每一个函数的开始调用和结束调用的地方加上时间戳，发现每一个函数所花费的时间并不长。我又仔细梳理了视图更新的流程，在当前的架构下，也没有哪一步计算是多余的。一时间，我陷入了沉默，因为直觉告诉我，TextBus-->
-<!--                    又要大改了。</p>-->
-<!--                <p>然而，性能优化谈何容易，近两个月的时间，我都没有思考出一个较好的方案。当然，现在早已解决此问题，细节经过就不在这里赘述了。<br></p></div>-->
-<!--        </div>-->
-<!--        <div class="tb-timeline-item tb-timeline-item-primary">-->
-<!--            <div class="tb-timeline-line"></div>-->
-<!--            <div class="tb-timeline-icon"></div>-->
-<!--            <div class="tb-timeline-content">-->
-<!--                <div><strong style="font-size:18px">可维护性的升级&nbsp;</strong><span-->
-<!--                        style="font-size:15px;color:rgb(119, 119, 119)">剪不断，理还乱</span></div>-->
-<!--                <p>相信在读过之前版本源代码的同学应该深有体会，因为 TextBus-->
-<!--                    一直处于探索之中，想用最短的时间验证设计思路和可行性，所以源代码的组织架构上，还存在不少短板。又因为富文本编辑器本身的复杂度较高，导致各个类之间存在的复杂的引用关系。要解决这个问题，还需要从设计上入手，为此，专门写了一套依赖注入的库，即&nbsp;<a-->
-<!--                            target="_self">@tanbo/di</a>&nbsp;，通过依赖注入的方式，实现了各个类之间的解耦。</p>-->
-<!--                <p>至此，TextBus 发布 1.0.0 的 alpha 版本。<br></p></div>-->
-<!--        </div>-->
-<!--    </tb-timeline>-->
-<!--    <p>这就是 TextBus 的诞生之路，一路走来，有成功，有失败。事情往往不会一帆风顺，但只要坚持探索，总能等到柳暗花明的那一天。TextBus 并不完美，但还继续探索下去，这里也感谢 TextBus 的使用者对 TextBus-->
-<!--        的支持与包容，谢谢你们！</p>-->
-<!--    <p>我们再来看看 TextBus 中一些核心的概念吧：<br></p>-->
-<!--    <tb-word-explain>-->
-<!--        <div class="tb-word-explain-title-group"><h3 style="text-align:right" class="tb-word-explain-title"><code>Component</code><br>-->
-<!--        </h3>-->
-<!--            <div style="text-align:right" class="tb-word-explain-subtitle">组件<br></div>-->
-<!--        </div>-->
-<!--        <div class="tb-word-explain-detail">TextBus 的组件和传统 web 开发中的组件其实是差不多的，由一部分相对固定的模板和动态的插槽组成。<br></div>-->
-<!--    </tb-word-explain>-->
-<!--    <tb-word-explain>-->
-<!--        <div class="tb-word-explain-title-group"><h3 style="text-align:right" class="tb-word-explain-title"><code>ComponentReader</code><br>-->
-<!--        </h3>-->
-<!--            <div style="text-align:right" class="tb-word-explain-subtitle">组件转换器<br></div>-->
-<!--        </div>-->
-<!--        <div class="tb-word-explain-detail">用于把 DOM 树转换为 TextBus 组件类的转换器。<br></div>-->
-<!--    </tb-word-explain>-->
-<!--    <tb-word-explain>-->
-<!--        <div class="tb-word-explain-title-group"><h3 style="text-align:right" class="tb-word-explain-title"><code>Fragment</code><br>-->
-<!--        </h3>-->
-<!--            <div style="text-align:right" class="tb-word-explain-subtitle">可编辑片段</div>-->
-<!--        </div>-->
-<!--        <div class="tb-word-explain-detail">一段可编辑的内容，可以是字符串或组件。同时，Fragment 还保存对应内容的样式。<br></div>-->
-<!--    </tb-word-explain>-->
-<!--    <tb-word-explain>-->
-<!--        <div class="tb-word-explain-title-group"><h3 style="text-align:right" class="tb-word-explain-title"><code>FormatMap</code>-->
-<!--        </h3>-->
-<!--            <div style="text-align:right" class="tb-word-explain-subtitle">格式地图<br></div>-->
-<!--        </div>-->
-<!--        <div class="tb-word-explain-detail">Fragment 对应的格式。<br></div>-->
-<!--    </tb-word-explain>-->
-<!--    <tb-word-explain>-->
-<!--        <div class="tb-word-explain-title-group"><h3 style="text-align:right" class="tb-word-explain-title"><code>Formatter</code><br>-->
-<!--        </h3>-->
-<!--            <div style="text-align:right" class="tb-word-explain-subtitle">格式化类</div>-->
-<!--        </div>-->
-<!--        <div class="tb-word-explain-detail">在输入时，用于读取 HTML 的样式。在输出时，用于渲染 Fragment 的样式并生成虚拟 DOM。<br></div>-->
-<!--    </tb-word-explain>-->
-<!--    <p>我们操作 TextBus 设置格式，实际上是操作的这些数据。TextBus 会根据这些数据，自动生成最优化的 DOM。如果你还期待更多的功能，我们目前正在开发的有这些：</p>-->
-<!--    <blockquote>-->
-<!--        <tb-todo-list>-->
-<!--            <div class="tb-todo-list-item">-->
-<!--                <div class="tb-todo-list-btn"><span class="tb-todo-list-state tb-todo-list-state-active"></span></div>-->
-<!--                <div class="tb-todo-list-content">时间轴组件</div>-->
-<!--            </div>-->
-<!--            <div class="tb-todo-list-item">-->
-<!--                <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>-->
-<!--                <div class="tb-todo-list-content">涂鸦板组件</div>-->
-<!--            </div>-->
-<!--            <div class="tb-todo-list-item">-->
-<!--                <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>-->
-<!--                <div class="tb-todo-list-content">公式编辑器组件</div>-->
-<!--            </div>-->
-<!--            <div class="tb-todo-list-item">-->
-<!--                <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>-->
-<!--                <div class="tb-todo-list-content">幻灯片组件<br></div>-->
-<!--            </div>-->
-<!--        </tb-todo-list>-->
-<!--    </blockquote>-->
-<!--    <p>你还可以加入我们的官方 QQ 群，和核心开发人员直接提出需求，我们会尽最大努力满足：</p>-->
-<!--    <p style="text-align:center"><img-->
-<!--            src="https://textbus.tanboui.com/static/img/qq-group.20ce5d73933bb31ff50cbf15cf9e7950.jpg"-->
-<!--            style="width:252px;height:auto"></p>-->
-<!--    <p>好了，简单的介绍就到这里为止吧，希望你使用愉快！</p>-->
-<!--    <p style="text-align:right">——TextBus 开发团队</p>-->
-<!--    <p style="text-align:right">2020 年 7 月 19 日<br></p>-->
-<!--</div>-->
-<p>
-    <button type="button" id="btn">destroy</button>
-</p>
-</body>
-</html>
 
+<body>
+    <div id="editor"></div>
+    <p id="table-own">你好，啊！</p>
+    <div id="table" contenteditable="true">
+        <tb-jumbotron
+            style="background-image:url(&quot;https://textbus.tanboui.com/static/img/tbus-bg.49d7d956eb051d336e7f788f1b62eeb0.jpg&quot;);background-size:cover;background-position:center center">
+            <h1 style="color:rgb(255, 255, 255);font-size:36px">Hello, world!</h1>
+            <p style="color:rgb(255, 255, 255)">我是 Te<span style="line-height:1.8em">xtBus
+                    富文本编辑器，等你好久了，<br>快来发挥你</span>的创造力吧！</p>
+        </tb-jumbotron>
+        <p>你也许在找一个既方便定制，又可以自由扩展的富文本编辑器？没错，你现在看到的就是。TextBus 是一个基于组件的编辑器，你可以自由定制你想要的任意组件和效果，而不用关心富文本的底层实现。如果你觉得 TextBus
+            默认提供的样式还不够非富，你一样可以自己扩展。总之，限制你的不是 TextBus，而是你自己的想象力！</p>
+        <p>来看看当前 TextBus 都有什么亮点：</p>
+        <ul>
+            <li>默认自带了足够<strong style="color:rgb(18, 150, 219)">丰富的工具</strong>，基本能满足大部分用户的需求；<br></li>
+            <li>原生支持<strong style="color:rgb(18, 150, 219)">组件化</strong>，可以<strong
+                    style="color:rgb(18, 150, 219)">任意定制</strong>自己的组件。默认自带了其它富文本较难实现的可编辑与不可编辑的功能；</li>
+            <li>强大的<strong style="color:rgb(18, 150, 219)">表格支持</strong>，你可<strong
+                    style="color:rgb(18, 150, 219)">批量操作</strong>单元格，并随意增加、删除表格内容，也可以修改表格的样式风格；</li>
+            <li><strong style="color:rgb(18, 150, 219)">实时代码高亮</strong>，其实不用 Markdown，一样可以写一份好的技术文档；</li>
+            <li>图片、视频等，自由的<strong style="color:rgb(18, 150, 219)">拖动缩放</strong>，不用再去找插件了；</li>
+            <li>丰富的组件库，伸手党也可以创造出不一样的文章。</li>
+        </ul>
+        <p>说了这么多，赶快运行起来，看一看效果：<br></p>
+        <pre lang="Typescript"
+            theme="light"><div class="tb-code-line-number-bg"></div><div class="tb-code-content"><div class="tb-code-line"><code><span class="tb-hl-keyword">import</span>&nbsp;{ createEditor }&nbsp;<span class="tb-hl-keyword">from</span>&nbsp;<span class="tb-hl-string">'@tanbo/textbus'</span>;</code></div><div class="tb-code-line"><code><br></code></div><div class="tb-code-line"><code><span class="tb-hl-keyword">const</span>&nbsp;editor =<span class="tb-hl-function">&nbsp;createEditor</span>(document.<span class="tb-hl-function">getElementById</span>(<span class="tb-hl-string">'editor'</span>));</code></div><div class="tb-code-line"><code>editor.onChange.<span class="tb-hl-function">subscribe</span>(() =&gt; {</code></div><div class="tb-code-line"><code>&nbsp;&nbsp;<span class="tb-hl-keyword">const</span>&nbsp;{content, styleSheets} = editor.<span class="tb-hl-function">getContents</span>();</code></div><div class="tb-code-line"><code>&nbsp;&nbsp;<span class="tb-hl-builtin">console</span>.<span class="tb-hl-function">log</span>(content, styleSheets);</code></div><div class="tb-code-line"><code>})</code></div></div></pre>
+        <p>你也许会好奇，TextBus 到底是如何做到这么多功能的，这其实依赖于 TextBus 底层的数据结构，我们来看一个表格，帮助你理解：</p>
+        <table class="tb-table">
+            <tbody>
+                <tr>
+                    <td rowspan="3" style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)">
+                        <strong style="color:rgb(28, 40, 56)">文字内容</strong><br>
+                    </td>
+                    <td colspan="21"
+                        style="border-color:rgb(128, 132, 143) rgb(128, 132, 143) rgb(28, 40, 56);border-left-color:rgb(128, 132, 143);border-top-color:rgb(128, 132, 143);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(28, 40, 56)">
+                        <u>你好，我是&nbsp;<em><strong>Tex</strong></em></u><em><strong>tBus</strong>&nbsp;<del>富文本编辑器</del></em><del>!</del><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">0</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">1</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">2</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">3</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">4</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">5</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">6</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">7</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">8</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">9</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">10</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">11</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">12</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">13</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">14</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">15</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">16</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">17</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">18</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236);font-size:14px">19</span><br>
+                    </td>
+                    <td
+                        style="background-color:#495060;text-align:center;border-color:rgb(28, 40, 56) rgb(28, 40, 56) rgb(233, 234, 236);border-left-color:rgb(28, 40, 56);border-top-color:rgb(28, 40, 56);border-right-color:rgb(28, 40, 56);border-bottom-color:rgb(233, 234, 236)">
+                        <span style="color:rgb(233, 234, 236)">20</span><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">你<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">好<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">，<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">我<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">是<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)"><br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        T<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        e<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        x<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        t<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        B<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        u<br></td>
+                    <td
+                        style="text-align:center;border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        s<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">富<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">文<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">本<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">编<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">辑<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">器<br></td>
+                    <td style="text-align:center;border-color:rgb(233, 234, 236)">!<br></td>
+                </tr>
+                <tr>
+                    <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong
+                            style="color:rgb(28, 40, 56)">加粗</strong><br></td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(128, 132, 143) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                </tr>
+                <tr>
+                    <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong
+                            style="color:rgb(28, 40, 56)">下划线</strong><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                </tr>
+                <tr>
+                    <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong
+                            style="color:rgb(28, 40, 56)">斜体</strong><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(233, 234, 236) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(233, 234, 236)">
+                        <br>
+                    </td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(233, 234, 236) rgb(128, 132, 143);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(233, 234, 236);border-bottom-color:rgb(128, 132, 143)">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color:#80848f;text-align:center;border-color:rgb(73, 80, 96)"><strong
+                            style="color:rgb(28, 40, 56)">中划线</strong><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td style="border-color:rgb(233, 234, 236)"><br></td>
+                    <td
+                        style="border-color:rgb(233, 234, 236) rgb(128, 132, 143) rgb(233, 234, 236) rgb(233, 234, 236);border-left-color:rgb(233, 234, 236);border-top-color:rgb(233, 234, 236);border-right-color:rgb(128, 132, 143);border-bottom-color:rgb(233, 234, 236)">
+                        <br>
+                    </td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                    <td style="background-color:#bbbec4;border-color:rgb(128, 132, 143)"><br></td>
+                </tr>
+            </tbody>
+        </table>
+        <p>在 TextBus
+            中，我们会把内容和格式分开处理，并在渲染时根据内容和格式所标注的范围，合并渲染。同时，为了解决富文本编辑中的一些固定的样板，如卡片、时间轴等，我们做了进一步的抽象，把一些结构化的数据抽象成组件。由组件、内容、样式三大块组成了我们最终的渲染结果。
+        </p>
+        <p>当然，现在看到的一切设计，都不是轻易得出的结果，而是在一遍遍的试错，一遍遍的思考和验证才得出得最优方案。目前，我们有你信心说，TextBus 就是设计最先进的富文本编辑器之一！</p>
+        <p>来回顾一下 TextBus 的发展历史吧：</p>
+        <tb-timeline>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">立项&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">需求的起始</span></div>
+                    <p>因当时工作需要，要 copy 一些表格或 word
+                        文档到富文本编辑器内，同时，产品也希望能在富文本内做一些简单的编辑。经过一番调研，市面上的富文本要么把样式丢了，要么表格编辑功能不够，要么产出的样式很脏，会遗留很多从 word 或 excel
+                        拷贝过来的脏数据。</p>
+                    <p>为了先满足暂时的业务的需求，我先使用了某编辑器，同时用所有的业余时间着手展开富文本编辑器的研发工作。<br></p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">contenteditable 的实践&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">第一个版本</span></div>
+                    <p>和其它富文本编辑器一样，一开始也是基于 DOM 的 contenteditable 属性。经过3个月的开发，初具雏形，但发现了一个很大的问题。</p>
+                    <ol>
+                        <li>浏览器的行为不可控，不同的浏览器对同样的操作产出的结果不一样；</li>
+                        <li>编辑的数据不可控。我完全不知道一个加粗操作会产生什么样的 DOM 结构；</li>
+                        <li>产出的数据很脏，比如加粗一段文字，在经过几次操作之后，可能会同时出现多个 strong 标签并列的情况；</li>
+                        <li>因为内容不可控，所以也并没有很好的解决从 word 或 excel 拷贝数据太脏的问题。<br></li>
+                    </ol>
+                    <p>其实问题远不止以上 4 点，但这对于我来说，是完全不能接受的。<br></p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">数据驱动视图的探索&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">第二个版本</span></div>
+                    <p>这个版本完全抛弃了 contenteditable 的方案，采用自定义输入功能，重新设计了架构。采用可编辑片段（Fragment）+
+                        格式化信息（Formatter）的组合方式，和现在大家见到的如 Draft.js、Slate.js 类似。这种方案有一个很大的优点，生成的结果不脏了，从 word、excel
+                        或网页拷贝过来的数据不但能保留必要的样式，冗余的数据也自动清理掉了。同时也可以很方便的实现一些特定功能，如实时代码高亮等。</p>
+                    <p>虽然经过以上设计，解决了第一个版本的问题，但又引出的新问题，如：如何保证一个固定的结构不可编辑，同时指定某些内容是可编辑的？这是一个很常见的需求，如卡片，上面一张图片，下面一小段描述性文字。传统的编辑器是把外层设置为
+                        contenteditable = false，内层再重置 contenteditable = true，但 TextBus 已抛弃了这种方案，不能重回老路。<br></p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">黎明前的黑暗&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">再一次自我否定</span></div>
+                    <p>经过前面两次版本的经验，首先验证了两件事：</p>
+                    <ol>
+                        <li>基于 contenteditable 的路是行不通的；</li>
+                        <li>数据驱动是解决问题的根本之道。<br></li>
+                    </ol>
+                    <p>如果说写代码有什么事是令人痛苦的，那么我觉得就是把自己几个月辛苦的成果完全抛弃。如果说有什么是比这个是更痛苦的，那就是抛弃两次！到这个时候，我已经在富文本的研究上花了一年的时间了，最终的结果却不尽人意。如果没有从根本上解决富文本的抽象，那么我所做的一切不过是重复造轮子，最大的作用就是给自己涨一点经验。
+                    </p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">组件化设计&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">打开新世界的大门</span></div>
+                    <p>我不是一个喜欢轻言放弃的人，尤其是对自己有兴趣的事情上！</p>
+                    <p>结合我自己的经验和现代前端框架的设计，组件化是一条可行之路。但富文本因有其特殊性，肯定不能照搬前端框架的设计思路。这时，如何在富文本里做组件化，就成了决定 TextBus 成败的关键。</p>
+                    <div>经过短时间的休整，我重新开始了富文本的探索之路。</div>
+                    <p>我分析了现代前端框架组件的特点，都是由一段固定的 html 模板，一部分数据，再加上插槽基本就组成了一个组件的形态。而如果要在富文本里做组件，就不仅要具备以上要素，还需要提供动态编辑的能力。
+                    </p>
+                    <p>在典型的前端应用场景里，组件树的形态和分支是可预测的，无非就是根据一些数据，填充占位符，再根据一些条件，判断展示哪一个预设的组件或 DOM
+                        节点。富文本不是这样的。富文本所有数据的组装是不可预测的，会随着用户的添加、删除或编辑操作的变化而产生变化。</p>
+                    <p>基于富文本的特殊需求，我重新设计组件系统，即现在 TextBus 的组件系统。该组件系统抽象了富文本编辑操作特点，提供了统一的封装，只要继承自现有组件系统的的抽象类，就可以自动获得在
+                        TextBus 里和其它组件的组合编辑能力。至此，TextBus 终于找到了一条正确的设计思路！</p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">性能瓶颈的第一次考验&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">渲染器短板</span></div>
+                    <p>在组件化设计告一段落之后，我信心十足，以为 TextBus 迎来了春天，但打脸接踵而至。我发现 TextBus 很容易就遇到性能问题，由于 TextBus
+                        的视图是由数据驱动的，随着编辑内容的增长，更新所需的 diff
+                        时间就会越长，我习惯性的在每一个函数的开始调用和结束调用的地方加上时间戳，发现每一个函数所花费的时间并不长。我又仔细梳理了视图更新的流程，在当前的架构下，也没有哪一步计算是多余的。一时间，我陷入了沉默，因为直觉告诉我，TextBus
+                        又要大改了。</p>
+                    <p>然而，性能优化谈何容易，近两个月的时间，我都没有思考出一个较好的方案。当然，现在早已解决此问题，细节经过就不在这里赘述了。<br></p>
+                </div>
+            </div>
+            <div class="tb-timeline-item tb-timeline-item-primary">
+                <div class="tb-timeline-line"></div>
+                <div class="tb-timeline-icon"></div>
+                <div class="tb-timeline-content">
+                    <div><strong style="font-size:18px">可维护性的升级&nbsp;</strong><span
+                            style="font-size:15px;color:rgb(119, 119, 119)">剪不断，理还乱</span></div>
+                    <p>相信在读过之前版本源代码的同学应该深有体会，因为 TextBus
+                        一直处于探索之中，想用最短的时间验证设计思路和可行性，所以源代码的组织架构上，还存在不少短板。又因为富文本编辑器本身的复杂度较高，导致各个类之间存在的复杂的引用关系。要解决这个问题，还需要从设计上入手，为此，专门写了一套依赖注入的库，即&nbsp;<a
+                            target="_self">@tanbo/di</a>&nbsp;，通过依赖注入的方式，实现了各个类之间的解耦。</p>
+                    <p>至此，TextBus 发布 1.0.0 的 alpha 版本。<br></p>
+                </div>
+            </div>
+        </tb-timeline>
+        <p>这就是 TextBus 的诞生之路，一路走来，有成功，有失败。事情往往不会一帆风顺，但只要坚持探索，总能等到柳暗花明的那一天。TextBus 并不完美，但还继续探索下去，这里也感谢 TextBus 的使用者对
+            TextBus 的支持与包容，谢谢你们！</p>
+        <p>我们再来看看 TextBus 中一些核心的概念吧：<br></p>
+        <tb-word-explain>
+            <div class="tb-word-explain-title-group">
+                <h3 style="text-align:right" class="tb-word-explain-title"><code>Component</code><br></h3>
+                <div style="text-align:right" class="tb-word-explain-subtitle">组件<br></div>
+            </div>
+            <div class="tb-word-explain-detail">TextBus 的组件和传统 web 开发中的组件其实是差不多的，由一部分相对固定的模板和动态的插槽组成。<br></div>
+        </tb-word-explain>
+        <tb-word-explain>
+            <div class="tb-word-explain-title-group">
+                <h3 style="text-align:right" class="tb-word-explain-title"><code>ComponentReader</code><br></h3>
+                <div style="text-align:right" class="tb-word-explain-subtitle">组件转换器<br></div>
+            </div>
+            <div class="tb-word-explain-detail">用于把 DOM 树转换为 TextBus 组件类的转换器。<br></div>
+        </tb-word-explain>
+        <tb-word-explain>
+            <div class="tb-word-explain-title-group">
+                <h3 style="text-align:right" class="tb-word-explain-title"><code>Fragment</code><br></h3>
+                <div style="text-align:right" class="tb-word-explain-subtitle">可编辑片段</div>
+            </div>
+            <div class="tb-word-explain-detail">一段可编辑的内容，可以是字符串或组件。同时，Fragment 还保存对应内容的样式。<br></div>
+        </tb-word-explain>
+        <tb-word-explain>
+            <div class="tb-word-explain-title-group">
+                <h3 style="text-align:right" class="tb-word-explain-title"><code>FormatMap</code></h3>
+                <div style="text-align:right" class="tb-word-explain-subtitle">格式地图<br></div>
+            </div>
+            <div class="tb-word-explain-detail">Fragment 对应的格式。<br></div>
+        </tb-word-explain>
+        <tb-word-explain>
+            <div class="tb-word-explain-title-group">
+                <h3 style="text-align:right" class="tb-word-explain-title"><code>Formatter</code><br></h3>
+                <div style="text-align:right" class="tb-word-explain-subtitle">格式化类</div>
+            </div>
+            <div class="tb-word-explain-detail">在输入时，用于读取 HTML 的样式。在输出时，用于渲染 Fragment 的样式并生成虚拟 DOM。<br></div>
+        </tb-word-explain>
+        <p>我们操作 TextBus 设置格式，实际上是操作的这些数据。TextBus 会根据这些数据，自动生成最优化的 DOM。如果你还期待更多的功能，我们目前正在开发的有这些：</p>
+        <blockquote>
+            <tb-todo-list>
+                <div class="tb-todo-list-item">
+                    <div class="tb-todo-list-btn"><span class="tb-todo-list-state tb-todo-list-state-active"></span>
+                    </div>
+                    <div class="tb-todo-list-content">时间轴组件</div>
+                </div>
+                <div class="tb-todo-list-item">
+                    <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>
+                    <div class="tb-todo-list-content">涂鸦板组件</div>
+                </div>
+                <div class="tb-todo-list-item">
+                    <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>
+                    <div class="tb-todo-list-content">公式编辑器组件</div>
+                </div>
+                <div class="tb-todo-list-item">
+                    <div class="tb-todo-list-btn"><span class="tb-todo-list-state"></span></div>
+                    <div class="tb-todo-list-content">幻灯片组件<br></div>
+                </div>
+            </tb-todo-list>
+        </blockquote>
+        <p>你还可以加入我们的官方 QQ 群，和核心开发人员直接提出需求，我们会尽最大努力满足：</p>
+        <p style="text-align:center"><img
+                src="https://textbus.tanboui.com/static/img/qq-group.20ce5d73933bb31ff50cbf15cf9e7950.jpg"
+                style="width:252px;height:auto"></p>
+        <p>好了，简单的介绍就到这里为止吧，希望你使用愉快！</p>
+        <p style="text-align:right">——TextBus 开发团队</p>
+        <p style="text-align:right">2020 年 7 月 19 日<br></p>
+
+        <p>
+            <button type="button" id="btn">destroy</button>
+        </p>
+</body>
+
+</html>

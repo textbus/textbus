@@ -1,10 +1,10 @@
 import {
   InlineFormatter,
   MatchRule,
-  FormatAbstractData,
+  FormatData,
   VElement,
   ChildSlotMode,
-  FormatterPriority, FormatRendingContext
+  FormatterPriority, FormatRendingContext, FormatEffect
 } from '../core/_api';
 
 export class InlineTagFormatter extends InlineFormatter {
@@ -12,13 +12,16 @@ export class InlineTagFormatter extends InlineFormatter {
     super(rule, FormatterPriority.InlineTag);
   }
 
-  read(): FormatAbstractData {
-    return new FormatAbstractData({
+  read(): FormatData {
+    return new FormatData({
       tag: this.tagName
     });
   }
 
   render(context: FormatRendingContext, existingElement?: VElement) {
+    if (context.effect === FormatEffect.Exclude) {
+      return null;
+    }
     if (existingElement && existingElement.tagName === 'span') {
       existingElement.tagName = this.tagName;
       return;

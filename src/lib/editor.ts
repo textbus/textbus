@@ -15,7 +15,6 @@ import {
   OutputRenderer,
   TBPlugin
 } from './core/_api';
-import { Viewer } from './workbench/viewer';
 import {
   Device,
   DeviceOption,
@@ -24,10 +23,12 @@ import {
   FullScreen,
   LibSwitch,
   StatusBar,
-  ControlPanel
+  ControlPanel,
+  ComponentCreator,
+  Viewer,
+  ComponentStage,
+  Workbench
 } from './workbench/_api';
-import { ComponentCreator, ComponentStage } from './workbench/component-stage';
-import { Workbench } from './workbench/workbench';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { Toolbar, ToolFactory } from './toolbar/_api';
 import { EditorController } from './editor-controller';

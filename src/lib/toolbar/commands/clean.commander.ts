@@ -3,7 +3,7 @@ import { Type } from '@tanbo/di';
 import {
   Commander,
   FormatEffect,
-  FormatAbstractData,
+  FormatData,
   BlockFormatter,
   InlineFormatter, CommandContext
 } from '../../core/_api';
@@ -60,8 +60,8 @@ export class CleanCommander implements Commander<null> {
             scope.fragment.apply(token, {
               startIndex: scope.startIndex,
               endIndex: scope.endIndex,
-              state: FormatEffect.Invalid,
-              abstractData: new FormatAbstractData(),
+              effect: FormatEffect.Invalid,
+              formatData: new FormatData(),
             });
           });
         })

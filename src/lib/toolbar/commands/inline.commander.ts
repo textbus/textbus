@@ -2,7 +2,7 @@ import {
   Commander,
   InlineFormatter,
   FormatEffect,
-  FormatAbstractData,
+  FormatData,
   CommandContext
 } from '../../core/_api';
 
@@ -20,10 +20,10 @@ export class InlineCommander implements Commander<null> {
     context.selection.ranges.forEach(range => {
       range.getSelectedScope().forEach(item => {
         item.fragment.apply(this.formatter, {
-          state: context.overlap ? FormatEffect.Invalid : FormatEffect.Valid,
+          effect: context.overlap ? FormatEffect.Invalid : FormatEffect.Valid,
           startIndex: item.startIndex,
           endIndex: item.endIndex,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             tag: this.tagName
           })
         });

@@ -1,7 +1,7 @@
 import {
   BranchAbstractComponent, Component,
   ComponentLoader,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   Fragment, SingleSlotRenderFn, SlotRendererFn,
   VElement,
@@ -16,8 +16,8 @@ function createItem(): Fragment {
   const title = new BlockComponent('div');
   title.slot.append('标题');
   title.slot.apply(fontSizeFormatter, {
-    state: FormatEffect.Valid,
-    abstractData: new FormatAbstractData({
+    effect: FormatEffect.Valid,
+    formatData: new FormatData({
       styles: {
         fontSize: '18px'
       }
@@ -26,8 +26,8 @@ function createItem(): Fragment {
     endIndex: 2
   });
   title.slot.apply(boldFormatter, {
-    state: FormatEffect.Valid,
-    abstractData: new FormatAbstractData({
+    effect: FormatEffect.Valid,
+    formatData: new FormatData({
       tag: 'strong'
     }),
     startIndex: 0,

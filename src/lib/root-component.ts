@@ -59,7 +59,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
         formatRanges.forEach(formatRange => {
           latestFragment.apply(key, {
             ...formatRange,
-            abstractData: formatRange.abstractData?.clone()
+            formatData: formatRange.formatData?.clone()
           })
         })
       } else {
@@ -71,8 +71,8 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
             get endIndex() {
               return latestFragment.contentLength;
             },
-            state: formatRange.state,
-            abstractData: formatRange.abstractData?.clone()
+            effect: formatRange.effect,
+            formatData: formatRange.formatData?.clone()
           })
         })
       }
@@ -214,14 +214,14 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
         if (token instanceof InlineFormatter) {
           return {
             ...formatRange,
-            abstractData: formatRange.abstractData?.clone()
+            formatData: formatRange.formatData?.clone()
           }
         }
         return {
           startIndex: 0,
           endIndex: formatRange.endIndex,
-          state: formatRange.state,
-          abstractData: formatRange.abstractData?.clone()
+          effect: formatRange.effect,
+          formatData: formatRange.formatData?.clone()
         }
       }))
     })

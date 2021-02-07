@@ -18,7 +18,7 @@ import {
   ChildSlotMode, Component,
   ComponentLoader,
   BackboneAbstractComponent,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   FormatRendingContext,
   Fragment,
@@ -56,7 +56,7 @@ class CodeFormatter extends BlockFormatter {
     super({}, 1);
   }
 
-  read(): FormatAbstractData {
+  read(): FormatData {
     return undefined;
   }
 
@@ -70,13 +70,13 @@ class CodeStyleFormatter extends InlineFormatter {
     super({}, 10);
   }
 
-  read(): FormatAbstractData {
+  read(): FormatData {
     return undefined;
   }
 
   render(context: FormatRendingContext): ReplaceMode | ChildSlotMode | null {
     const el = new VElement('span');
-    el.classes.push(...context.abstractData.classes);
+    el.classes.push(...context.formatData.classes);
     return new ChildSlotMode(el);
   }
 }
@@ -368,8 +368,8 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
           slot.apply(codeStyleFormatter, {
             startIndex: index,
             endIndex: index + token.length,
-            state: FormatEffect.Valid,
-            abstractData: new FormatAbstractData({
+            effect: FormatEffect.Valid,
+            formatData: new FormatData({
               classes: ['tb-hl-' + styleName]
             })
           });
@@ -377,8 +377,8 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
           slot.apply(codeStyleFormatter, {
             startIndex: index,
             endIndex: index + token.length,
-            state: FormatEffect.Invalid,
-            abstractData: null
+            effect: FormatEffect.Invalid,
+            formatData: null
           })
         }
         if (Array.isArray(token.content)) {
@@ -429,7 +429,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
           }
         }
       }
-      fragment.apply(codeFormatter, {abstractData: null, state: FormatEffect.Valid});
+      fragment.apply(codeFormatter, {formatData: null, effect: FormatEffect.Valid});
       if (slot.blockCommentStart) {
         fragment.remove(0, blockCommentStart.length);
       }

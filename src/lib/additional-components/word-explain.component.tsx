@@ -1,7 +1,7 @@
 import {
   BackboneAbstractComponent, Component,
   ComponentLoader,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   Fragment, SingleSlotRenderFn, SlotRendererFn,
   VElement,
@@ -205,8 +205,8 @@ export const wordExplainComponentExample: ComponentCreator = {
     const title = new Fragment();
     title.append('名词');
     title.apply(textAlignFormatter, {
-      state: FormatEffect.Valid,
-      abstractData: new FormatAbstractData({
+      effect: FormatEffect.Valid,
+      formatData: new FormatData({
         styles: {
           textAlign: 'right'
         }
@@ -216,8 +216,8 @@ export const wordExplainComponentExample: ComponentCreator = {
     const subtitle = new Fragment();
     subtitle.append('说明');
     subtitle.apply(textAlignFormatter, {
-      state: FormatEffect.Valid,
-      abstractData: new FormatAbstractData({
+      effect: FormatEffect.Valid,
+      formatData: new FormatData({
         styles: {
           textAlign: 'right'
         }

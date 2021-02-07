@@ -2,7 +2,7 @@ import {
   MatchRule,
   FormatEffect,
   BlockFormatter,
-  FormatAbstractData,
+  FormatData,
   VElement,
   ChildSlotMode,
   FormatterPriority, FormatRendingContext
@@ -14,7 +14,7 @@ export class BlockStyleFormatter extends BlockFormatter {
     super(rule, FormatterPriority.BlockStyle);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       styleName: this.styleName
     });
@@ -24,7 +24,7 @@ export class BlockStyleFormatter extends BlockFormatter {
     const b = !!existingElement;
     existingElement = existingElement || new VElement('div');
     (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
-      existingElement.styles.set(name, context.abstractData.styles.get(name));
+      existingElement.styles.set(name, context.formatData.styles.get(name));
     })
     if (!b) {
       return new ChildSlotMode(existingElement);
@@ -46,8 +46,8 @@ export const textAlignFormatter = new BlockStyleFormatter('textAlign', {
 export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
   static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
 
-  read(node: HTMLElement): FormatAbstractData {
-    return new FormatAbstractData({
+  read(node: HTMLElement): FormatData {
+    return new FormatData({
       styles: {
         backgroundColor: (color => {
           if (/^rgb\b/.test(color)) {
@@ -58,9 +58,9 @@ export class BlockBackgroundColorFormatter extends BlockStyleFormatter {
     })
   }
 
-  match(p: HTMLElement | FormatAbstractData) {
+  match(p: HTMLElement) {
     const reg = new RegExp(`^(${BlockBackgroundColorFormatter.blockTags.join('|')})$`, 'i');
-    if (!reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+    if (!reg.test(p.tagName)) {
       return FormatEffect.Invalid;
     }
     return super.match(p);

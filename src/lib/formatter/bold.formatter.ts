@@ -1,6 +1,6 @@
 import {
   ChildSlotMode,
-  FormatAbstractData,
+  FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
@@ -21,18 +21,22 @@ export class BoldFormatter extends InlineFormatter {
     }, FormatterPriority.InlineTag);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       tag: true,
       styleName: 'fontWeight'
     });
   }
 
-  render(context: FormatRendingContext) {
-    if (context.state === FormatEffect.Inherit) {
+  render(context: FormatRendingContext, existingElement?: VElement) {
+    if (context.effect === FormatEffect.Inherit) {
       return;
     }
-    if (context.state === FormatEffect.Exclude) {
+    if (context.effect === FormatEffect.Exclude) {
+      if (existingElement) {
+        existingElement.styles.set('fontWeight', 'normal');
+        return
+      }
       const el = new VElement('span');
       el.styles.set('fontWeight', 'normal');
       return new ChildSlotMode(el);

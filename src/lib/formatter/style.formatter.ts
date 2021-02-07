@@ -2,7 +2,7 @@ import {
   InlineFormatter,
   MatchRule,
   FormatEffect,
-  FormatAbstractData,
+  FormatData,
   VElement,
   ChildSlotMode,
   FormatterPriority, FormatRendingContext
@@ -13,7 +13,7 @@ export class StyleFormatter extends InlineFormatter {
     super(rule, FormatterPriority.InlineStyle);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       styleName: this.styleName
     });
@@ -21,10 +21,10 @@ export class StyleFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement) {
-      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      existingElement.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      el.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
       return new ChildSlotMode(el);
     }
   }
@@ -71,8 +71,8 @@ export class InlineBackgroundColorFormatter extends StyleFormatter {
     this.reg = new RegExp(`^(${InlineBackgroundColorFormatter.inlineTags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatAbstractData) {
-    if (!this.reg.test(p instanceof FormatAbstractData ? p.tag : p.tagName)) {
+  match(p: HTMLElement) {
+    if (!this.reg.test(p.tagName)) {
       return FormatEffect.Invalid;
     }
     return super.match(p);
@@ -80,10 +80,10 @@ export class InlineBackgroundColorFormatter extends StyleFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement) {
     if (existingElement && this.reg.test(existingElement.tagName)) {
-      existingElement.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      existingElement.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
     } else {
       const el = new VElement('span');
-      el.styles.set(this.styleName, context.abstractData.styles.get(this.styleName));
+      el.styles.set(this.styleName, context.formatData.styles.get(this.styleName));
       return new ChildSlotMode(el);
     }
   }

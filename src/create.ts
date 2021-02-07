@@ -18,7 +18,7 @@ import {
   codeFormatter,
   backgroundColorFormatter,
   dirFormatter,
-  tdBorderColorFormatter
+  tdBorderColorFormatter,
 } from './lib/formatter/_api';
 import {
   boldTool,
@@ -144,7 +144,7 @@ export const defaultOptions: EditorOptions<string> = {
     textIndentFormatter,
     underlineFormatter,
     dirFormatter,
-    tdBorderColorFormatter
+    tdBorderColorFormatter,
   ],
   toolbar: [
     [historyBackTool, historyForwardTool],

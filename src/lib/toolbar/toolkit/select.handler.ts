@@ -4,7 +4,7 @@ import { Tool } from './help';
 import { HighlightState } from '../help';
 import { Keymap, KeymapAction } from '../../workbench/input';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
-import { Commander, FormatAbstractData, AbstractComponent } from '../../core/_api';
+import { Commander, FormatData, AbstractComponent } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 
 /**
@@ -33,7 +33,7 @@ export interface SelectToolConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight?<T = FormatAbstractData | AbstractComponent>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
+  highlight?<T = FormatData | AbstractComponent>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;

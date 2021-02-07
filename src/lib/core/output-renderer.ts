@@ -89,7 +89,8 @@ export class OutputRenderer {
         component.render(true) :
         (component as DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent).render(true, (slot, contentContainer, host) => {
           this.fragmentVDomMapping.set(slot, host);
-          return this.rendingFragment(slot, contentContainer, true);
+          this.rendingFragment(slot, contentContainer, true);
+          return host;
         });
       if (!(vElement instanceof VElement)) {
         throw outputRendererErrorFn(`component render method must return a virtual element.`);
@@ -137,13 +138,13 @@ export class OutputRenderer {
     const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
+      const componentRootView = this.componentVDomCacheMap.get(component);
       newView = component.slotRender(true, (slot, contentContainer) => {
-        const view = this.rendingFragment(slot, contentContainer);
-        if (view === contentContainer) {
-          this.componentVDomCacheMap.set(component, view);
-        }
-        return view;
+        return this.rendingFragment(slot, contentContainer);
       })
+      if (oldView === componentRootView) {
+        this.componentVDomCacheMap.set(component, newView);
+      }
       this.fragmentVDomMapping.set(slot, newView);
     } else {
       newView = component.slotRender(slot, true, (slot, contentContainer) => {
@@ -168,8 +169,8 @@ export class OutputRenderer {
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
         isOutputMode: true,
-        state: next.params.state,
-        abstractData: next.params.abstractData,
+        effect: next.params.effect,
+        formatData: next.params.formatData,
       };
       const renderMode = next.token.render(context, vEle);
       if (renderMode instanceof ReplaceMode) {

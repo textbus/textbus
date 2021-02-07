@@ -1,7 +1,7 @@
 import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
-import { FormatAbstractData } from '../../core/format-abstract-data';
+import { FormatData } from '../../core/format-data';
 import { SelectToolConfig, Toolkit } from '../toolkit/_api';
 import { PreComponent } from '../../components/pre.component';
 
@@ -43,7 +43,7 @@ export const textAlignToolConfig: SelectToolConfig = {
   }],
   matcher: new FormatMatcher(textAlignFormatter, [PreComponent]),
   highlight(options, data) {
-    if (data instanceof FormatAbstractData) {
+    if (data instanceof FormatData) {
       for (const option of options) {
         if (option.value === data.styles.get('textAlign')) {
           return option;

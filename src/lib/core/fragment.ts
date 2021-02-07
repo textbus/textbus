@@ -71,7 +71,7 @@ export class Fragment extends Marker {
       this.formatMap.set(token, [...source.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
           ...f,
-          abstractData: f.abstractData?.clone()
+          formatData: f.formatData?.clone()
         } : {
           get startIndex() {
             return 0;
@@ -79,8 +79,8 @@ export class Fragment extends Marker {
           get endIndex() {
             return self.contentLength;
           },
-          state: f.state,
-          abstractData: f.abstractData
+          effect: f.effect,
+          formatData: f.formatData
         }
       })])
     });
@@ -205,8 +205,8 @@ export class Fragment extends Marker {
             formatMap.merge(token, {
               startIndex: index,
               endIndex: index + 1,
-              state: FormatEffect.Invalid,
-              abstractData: format.abstractData.clone(),
+              effect: FormatEffect.Invalid,
+              formatData: format.formatData.clone(),
             }, true);
             if (format.endIndex > index) {
               formatMap.merge(token, {
@@ -245,7 +245,7 @@ export class Fragment extends Marker {
       ff.formatMap.set(token, [...this.formatMap.get(token).map(f => {
         return token instanceof InlineFormatter ? {
           ...f,
-          abstractData: f.abstractData?.clone()
+          formatData: f.formatData?.clone()
         } : {
           get startIndex() {
             return 0;
@@ -253,8 +253,8 @@ export class Fragment extends Marker {
           get endIndex() {
             return ff.contentLength;
           },
-          state: f.state,
-          abstractData: f.abstractData
+          effect: f.effect,
+          formatData: f.formatData
         }
       })])
     });
@@ -504,7 +504,8 @@ export class Fragment extends Marker {
     if (formatRange.endIndex > this.contentLength) {
       formatRange.endIndex = this.contentLength;
     }
-    const contents = this.sliceContents(formatRange.startIndex, formatRange.endIndex);
+    const lineFormatRange = formatRange as InlineFormatParams;
+    const contents = this.sliceContents(lineFormatRange.startIndex, lineFormatRange.endIndex);
     let index = 0;
     const cacheFormats: Array<{ token: InlineFormatter, params: InlineFormatParams }> = [];
     let newFormat: InlineFormatParams;
@@ -512,7 +513,7 @@ export class Fragment extends Marker {
       if (item instanceof DivisionAbstractComponent) {
         newFormat = null;
         if (coverChild) {
-          const newFormatRange = Object.assign({}, formatRange);
+          const newFormatRange = Object.assign({}, lineFormatRange);
           newFormatRange.startIndex = 0;
           newFormatRange.endIndex = item.slot.contentLength;
           item.slot.apply(token, newFormatRange, options);
@@ -521,7 +522,7 @@ export class Fragment extends Marker {
         newFormat = null;
         if (coverChild) {
           item.slots.forEach(fragment => {
-            const newFormatRange = Object.assign({}, formatRange);
+            const newFormatRange = Object.assign({}, lineFormatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
             fragment.apply(token, newFormatRange, options);
@@ -531,7 +532,7 @@ export class Fragment extends Marker {
         newFormat = null;
         if (coverChild) {
           for (const fragment of item) {
-            const newFormatRange = Object.assign({}, formatRange);
+            const newFormatRange = Object.assign({}, lineFormatRange);
             newFormatRange.startIndex = 0;
             newFormatRange.endIndex = fragment.contentLength;
             fragment.apply(token, newFormatRange, options);
@@ -540,10 +541,10 @@ export class Fragment extends Marker {
       } else {
         if (!newFormat) {
           newFormat = {
-            startIndex: formatRange.startIndex + index,
-            endIndex: formatRange.startIndex + index + item.length,
-            state: formatRange.state,
-            abstractData: formatRange.abstractData
+            startIndex: lineFormatRange.startIndex + index,
+            endIndex: lineFormatRange.startIndex + index + item.length,
+            effect: lineFormatRange.effect,
+            formatData: lineFormatRange.formatData
           };
           cacheFormats.push({
             token,

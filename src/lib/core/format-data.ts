@@ -1,7 +1,7 @@
 /**
  * 抽象数据字面量
  */
-export interface AbstractDataParams {
+export interface FormatDataParams {
   tag?: string;
   classes?: string[];
   attrs?: { [key: string]: string | number | boolean } | Map<string, string | number | boolean>;
@@ -11,13 +11,13 @@ export interface AbstractDataParams {
 /**
  * 抽象数据类，用于记录一个节点或样式的摘要数据
  */
-export class FormatAbstractData {
+export class FormatData {
   readonly tag: string;
   readonly attrs = new Map<string, string | number | boolean>();
   readonly styles = new Map<string, string | number>();
   readonly classes: string[] = [];
 
-  constructor(params: AbstractDataParams = {}) {
+  constructor(params: FormatDataParams = {}) {
     this.tag = params.tag;
     if (params.attrs) {
       if (params.attrs instanceof Map) {
@@ -48,7 +48,7 @@ export class FormatAbstractData {
    * 复制当前抽象数据的副本。
    */
   clone() {
-    return new FormatAbstractData({
+    return new FormatData({
       tag: this.tag,
       attrs: this.attrs.size ? (() => {
         const obj: { [key: string]: string | number | boolean } = {};
@@ -72,7 +72,7 @@ export class FormatAbstractData {
    * 判断 data 是否和自己相等。
    * @param data
    */
-  equal(data: FormatAbstractData) {
+  equal(data: FormatData) {
     if (data === this) {
       return true;
     }
@@ -81,9 +81,9 @@ export class FormatAbstractData {
     }
     const left = data;
     return left.tag == this.tag &&
-      FormatAbstractData.equalMap(left.attrs, this.attrs) &&
-      FormatAbstractData.equalMap(left.styles, this.styles) &&
-      FormatAbstractData.equalStringList(left.classes, this.classes);
+      FormatData.equalMap(left.attrs, this.attrs) &&
+      FormatData.equalMap(left.styles, this.styles) &&
+      FormatData.equalStringList(left.classes, this.classes);
   }
 
   private static equalStringList(left: string[], right: string[]) {

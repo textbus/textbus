@@ -12,14 +12,14 @@ export class UnlinkCommander implements Commander<null> {
         }).forEach(f => {
           range.startFragment.apply(linkFormatter, {
             ...f,
-            state: FormatEffect.Invalid
+            effect: FormatEffect.Invalid
           })
         });
       } else {
         range.getSelectedScope().forEach(item => {
           item.fragment.apply(linkFormatter, {
-            state: FormatEffect.Invalid,
-            abstractData: null,
+            effect: FormatEffect.Invalid,
+            formatData: null,
             startIndex: item.startIndex,
             endIndex: item.endIndex
           });

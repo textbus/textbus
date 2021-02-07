@@ -32,7 +32,7 @@ const editor = createEditor('#editor', {
     })
   },
   // contents: '<p><br></p>'
-  contents: document.getElementById('table').innerHTML
+  contents: document.getElementById('table-own').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {

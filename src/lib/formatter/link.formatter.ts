@@ -1,6 +1,6 @@
 import {
   InlineFormatter,
-  FormatAbstractData,
+  FormatData,
   VElement,
   ChildSlotMode,
   FormatterPriority, FormatRendingContext
@@ -13,7 +13,7 @@ export class LinkFormatter extends InlineFormatter {
     }, FormatterPriority.InlineTag);
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       tag: true,
       attrs: ['target', 'href']
@@ -22,8 +22,8 @@ export class LinkFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext) {
     const el = new VElement('a');
-    const target = context.abstractData.attrs.get('target');
-    const href = context.abstractData.attrs.get('href');
+    const target = context.formatData.attrs.get('target');
+    const href = context.formatData.attrs.get('href');
     target && el.attrs.set('target', target);
     href && el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
     return new ChildSlotMode(el);

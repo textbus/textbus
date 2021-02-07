@@ -1,6 +1,6 @@
 import {
   BlockFormatter,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   FormatRendingContext,
   FormatterPriority,
@@ -16,24 +16,21 @@ export class TdBorderColorFormatter extends BlockFormatter {
     }, FormatterPriority.BlockStyle);
   }
 
-  match(p: HTMLElement | FormatAbstractData): FormatEffect {
-    if (p instanceof HTMLElement) {
-      if (/^(td|th)$/.test(p.nodeName.toLowerCase())) {
-        const style = p.style;
-        if (style.borderColor ||
-          style.borderLeftColor ||
-          style.borderTopColor ||
-          style.borderRightColor ||
-          style.borderBottomColor) {
-          return FormatEffect.Valid;
-        }
+  match(p: HTMLElement): FormatEffect {
+    if (/^(td|th)$/.test(p.nodeName.toLowerCase())) {
+      const style = p.style;
+      if (style.borderColor ||
+        style.borderLeftColor ||
+        style.borderTopColor ||
+        style.borderRightColor ||
+        style.borderBottomColor) {
+        return FormatEffect.Valid;
       }
-      return FormatEffect.Invalid;
     }
-    return super.match(p);
+    return FormatEffect.Invalid;
   }
 
-  read(node: HTMLElement): FormatAbstractData {
+  read(node: HTMLElement): FormatData {
     const styles = node.style;
 
     const obj: { [key: string]: string | number } = {};
@@ -47,14 +44,14 @@ export class TdBorderColorFormatter extends BlockFormatter {
         obj[key] = value;
       }
     })
-    return new FormatAbstractData({
+    return new FormatData({
       styles: obj
     });
   }
 
   render(context: FormatRendingContext, existingElement?: VElement): null {
     if (existingElement) {
-      context.abstractData.styles.forEach((value, key) => {
+      context.formatData.styles.forEach((value, key) => {
         existingElement.styles.set(key, value);
       });
     }

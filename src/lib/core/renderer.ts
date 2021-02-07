@@ -386,12 +386,13 @@ export class Renderer {
     const oldView = this.fragmentVDomMapping.get(slot);
     let newView: VElement;
     if (component instanceof DivisionAbstractComponent) {
+      const componentRootView = this.componentVDomCacheMap.get(component);
       let container: VElement = null;
       newView = component.slotRender(false, (slot, contentContainer) => {
         container = contentContainer;
         return this.rendingFragment(slot, contentContainer, true);
       })
-      if (newView === container) {
+      if (componentRootView === oldView) {
         this.componentVDomCacheMap.set(component, container);
       } else {
         container.attrs.set('textbus-editable', 'on');
@@ -428,8 +429,8 @@ export class Renderer {
     formats.reduce((vEle, next) => {
       const context: FormatRendingContext = {
         isOutputMode: false,
-        state: next.params.state,
-        abstractData: next.params.abstractData,
+        effect: next.params.effect,
+        formatData: next.params.formatData,
       };
       const renderMode = next.token.render(context, vEle);
       if (renderMode instanceof ReplaceMode) {
@@ -620,7 +621,7 @@ export class Renderer {
 
   static calculatePriority(formats: FormatConfig[]) {
     return formats.filter(i => {
-      return i.params.state !== FormatEffect.Inherit;
+      return i.params.effect !== FormatEffect.Inherit;
     }).sort((next, prev) => {
       const a = next.params.startIndex - prev.params.startIndex;
       if (a === 0) {

@@ -1,6 +1,6 @@
 import {
   Commander,
-  FormatAbstractData,
+  FormatData,
   FormatEffect,
   Fragment,
   DivisionAbstractComponent,
@@ -68,10 +68,10 @@ export class BlockCommander implements Commander<string> {
   private effect(fragment: Fragment, oldTagName: string) {
     if (/h[1-6]/.test(this.tagName)) {
       fragment.apply(boldFormatter, {
-        state: FormatEffect.Inherit,
+        effect: FormatEffect.Inherit,
         startIndex: 0,
         endIndex: fragment.contentLength,
-        abstractData: new FormatAbstractData({
+        formatData: new FormatData({
           tag: 'strong'
         })
       })
@@ -79,10 +79,10 @@ export class BlockCommander implements Commander<string> {
       const flag = /h[1-6]/.test(oldTagName);
       if (flag) {
         fragment.apply(boldFormatter, {
-          state: FormatEffect.Invalid,
+          effect: FormatEffect.Invalid,
           startIndex: 0,
           endIndex: fragment.contentLength,
-          abstractData: new FormatAbstractData({
+          formatData: new FormatData({
             tag: 'strong'
           })
         })

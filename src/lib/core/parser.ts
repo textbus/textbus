@@ -59,12 +59,12 @@ export class Parser {
     const maps = this.formatters.map(f => {
       return {
         formatter: f,
-        state: f.match(el)
+        effect: f.match(el)
       }
-    }).filter(p => p.state !== FormatEffect.Invalid).map(p => {
+    }).filter(p => p.effect !== FormatEffect.Invalid).map(p => {
       return {
         ...p,
-        abstractData: p.formatter.read(el as HTMLElement)
+        formatData: p.formatter.read(el as HTMLElement)
       }
     });
     const startIndex = slot.contentLength;
@@ -75,8 +75,8 @@ export class Parser {
       slot.apply(item.formatter, {
         startIndex,
         endIndex: slot.contentLength,
-        abstractData: item.abstractData,
-        state: item.state
+        formatData: item.formatData,
+        effect: item.effect
       }, {
         important: false
       })

@@ -1,4 +1,4 @@
-import { FormatAbstractData } from './format-abstract-data';
+import { FormatData } from './format-data';
 import { VElement } from './element';
 import { ChildSlotMode, ReplaceMode } from './renderer';
 
@@ -28,14 +28,14 @@ export enum FormatEffect {
 /**
  * 配置一段格式的参数。
  */
-export type BlockFormatParams = {
-  abstractData: FormatAbstractData;
-  state: FormatEffect;
-};
+export interface BlockFormatParams {
+  formatData: FormatData;
+  effect: FormatEffect;
+}
 
-export type InlineFormatParams = {
-  abstractData: FormatAbstractData;
-  state: FormatEffect;
+export interface InlineFormatParams {
+  formatData: FormatData;
+  effect: FormatEffect;
   startIndex: number;
   endIndex: number;
 }
@@ -46,8 +46,8 @@ export type InlineFormatParams = {
 export interface FormatRange {
   startIndex: number;
   endIndex: number;
-  abstractData: FormatAbstractData;
-  state: FormatEffect;
+  formatData: FormatData;
+  effect: FormatEffect;
 }
 
 /**
@@ -69,7 +69,7 @@ export interface MatchRule {
   /** 排除的属性 */
   excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   /** 自定义过滤器，以适配以上不能满足的特殊需求 */
-  filter?: (node: HTMLElement | FormatAbstractData) => boolean;
+  filter?: (node: HTMLElement) => boolean;
 }
 
 /**
@@ -98,20 +98,20 @@ export interface FormatRendingContext {
    * 如果当前是状态是 Invalid，是不会调用 render 方法的，只有是其它三种中的一种才会调用。
    * Formatter 在渲染的时候，可以根据不同的状态来渲染出不同的结果。
    */
-  state: FormatEffect;
+  effect: FormatEffect;
   /**
    * 渲染时需要的抽象数据，当外部改变了部分样式时，修改后的值都会保存在抽象的数据中。
    */
-  abstractData: FormatAbstractData;
+  formatData: FormatData;
 }
 
 /**
  * TextBus 格式基类，在扩展格式时，不能直接继承 Formatter，请继承 InlineFormatter、BlockFormatter 或其它子类。
  */
 export abstract class Formatter {
-  private inheritValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
-  private validators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
-  private excludeValidators: Array<(node: HTMLElement | FormatAbstractData) => boolean> = [];
+  private inheritValidators: Array<(node: HTMLElement) => boolean> = [];
+  private validators: Array<(node: HTMLElement) => boolean> = [];
+  private excludeValidators: Array<(node: HTMLElement) => boolean> = [];
 
   protected constructor(protected rule: MatchRule, public priority: number) {
 
@@ -145,7 +145,7 @@ export abstract class Formatter {
    * 读到 DOM 节点，并返回转换后抽象格式数据。
    * @param node
    */
-  abstract read(node: HTMLElement): FormatAbstractData;
+  abstract read(node: HTMLElement): FormatData;
 
   /**
    * 当 TextBus 渲染样式时，会调用 Formatter 类 render 方法，并根据 render 方法返回的渲染模式，处理虚拟 DOM 结构。
@@ -161,29 +161,29 @@ export abstract class Formatter {
 
   /**
    * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。
-   * @param p
+   * @param element
    */
-  match(p: HTMLElement | FormatAbstractData) {
+  match(element: HTMLElement) {
     if (this.rule.filter) {
-      const b = this.rule.filter(p);
+      const b = this.rule.filter(element);
       if (!b) {
         return FormatEffect.Invalid;
       }
     }
-    const exclude = this.excludeValidators.map(fn => fn(p)).includes(true);
+    const exclude = this.excludeValidators.map(fn => fn(element)).includes(true);
     if (exclude) {
       return FormatEffect.Exclude;
     }
-    const inherit = this.inheritValidators.map(fn => fn(p)).includes(true);
+    const inherit = this.inheritValidators.map(fn => fn(element)).includes(true);
     if (inherit) {
       return FormatEffect.Inherit;
     }
-    return this.validators.map(fn => fn(p)).includes(true) ? FormatEffect.Valid : FormatEffect.Invalid;
+    return this.validators.map(fn => fn(element)).includes(true) ? FormatEffect.Valid : FormatEffect.Invalid;
   }
 
-  protected extractData(node: HTMLElement, config: EditableOptions): FormatAbstractData {
+  protected extractData(node: HTMLElement, config: EditableOptions): FormatData {
     if (!config) {
-      return new FormatAbstractData();
+      return new FormatData();
     }
     const attrs = new Map<string, string>();
     if (config.attrs) {
@@ -201,7 +201,7 @@ export abstract class Formatter {
       })
 
     }
-    return new FormatAbstractData({
+    return new FormatData({
       tag: config.tag ? node.nodeName.toLowerCase() : null,
       attrs: attrs.size ? attrs : null,
       styles: style
@@ -209,44 +209,30 @@ export abstract class Formatter {
   }
 
   private makeTagsMatcher(tags: string[] | RegExp) {
-    return (node: HTMLElement | FormatAbstractData) => {
-      const tagName = node instanceof FormatAbstractData ? node.tag : node.nodeName.toLowerCase();
+    return (node: HTMLElement) => {
+      const tagName = node.nodeName.toLowerCase();
       return Array.isArray(tags) ? tags.includes(tagName) : tags.test(tagName);
     };
   }
 
   private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
-    return (node: HTMLElement | FormatAbstractData) => {
+    return (node: HTMLElement) => {
       return attrs.map(attr => {
         if (attr.value) {
-          if (node instanceof FormatAbstractData) {
-            return node?.attrs.get(attr.key) === attr.value;
-          }
-          if (node instanceof HTMLElement) {
-            return node.getAttribute(attr.key) === attr.value;
-          }
-        } else {
-          if (node instanceof FormatAbstractData) {
-            return node?.attrs.has(attr.key);
-          }
-          if (node instanceof HTMLElement) {
-            return node.hasAttribute(attr.key);
-          }
+          return node.getAttribute(attr.key) === attr.value;
         }
-        return false;
+        return node.hasAttribute(attr.key);
       }).includes(true);
     }
   }
 
   private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
-    return (node: HTMLElement | FormatAbstractData) => {
+    return (node: HTMLElement) => {
       return !Object.keys(styles).map(key => {
         const optionValue = (Array.isArray(styles[key]) ?
           styles[key] :
           [styles[key]]) as Array<string | number | RegExp>;
-        let styleValue = node instanceof FormatAbstractData ?
-          (node.styles.has(key) ? node.styles.get(key) : '') :
-          node.style[key];
+        let styleValue = node.style[key];
         if (key === 'fontFamily' && typeof styleValue === 'string') {
           styleValue = styleValue.replace(/['"]/g, '');
         }
