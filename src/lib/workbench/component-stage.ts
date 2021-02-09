@@ -5,13 +5,13 @@ import {
   AbstractComponent, BackboneAbstractComponent, BranchAbstractComponent,
   DivisionAbstractComponent,
   LeafAbstractComponent, TBRangePosition,
-  TBSelection
+  TBSelection,
+  BrComponent
 } from '../core/_api';
 import { Dialog } from './dialog';
 import { FileUploader } from '../uikit/forms/help';
 import { EditorController } from '../editor-controller';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
-import { BrComponent } from '../components/br.component';
 import { createElement } from '../uikit/uikit';
 import { Tab } from './tab';
 

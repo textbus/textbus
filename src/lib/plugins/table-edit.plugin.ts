@@ -1,8 +1,8 @@
 import { CubicBezier } from '@tanbo/bezier';
 import { Injector } from '@tanbo/di';
 
-import { Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
-import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
+import { Fragment, Renderer, TBRange, TBSelection, TBPlugin, BrComponent } from '../core/_api';
+import { TableCellPosition, TableComponent } from '../components/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
 interface ElementPosition {

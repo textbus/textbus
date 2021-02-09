@@ -13,9 +13,9 @@ import {
   TBSelection,
   TBEvent,
   SingleSlotRenderFn,
-  ContextMenuAction
+  ContextMenuAction,
+  BrComponent
 } from '../core/_api';
-import { BrComponent } from './br.component';
 
 export interface TableCell {
   colspan: number;

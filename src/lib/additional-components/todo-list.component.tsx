@@ -5,9 +5,10 @@ import {
   Fragment,
   ComponentLoader,
   VElement,
+  BrComponent,
   ViewData, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn,
 } from '../core/_api';
-import { BlockComponent, breakingLine, BrComponent } from '../components/_api';
+import { BlockComponent, breakingLine } from '../components/_api';
 import { ComponentCreator } from '../workbench/component-stage';
 
 class TodoListFragment extends Fragment {

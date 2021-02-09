@@ -1,5 +1,5 @@
-import { DivisionAbstractComponent, Commander, Fragment, CommandContext } from '../../core/_api';
-import { TableComponent, BrComponent, TableCell } from '../../components/_api';
+import { DivisionAbstractComponent, BrComponent, Commander, Fragment, CommandContext } from '../../core/_api';
+import { TableComponent, TableCell } from '../../components/_api';
 
 export class TableCommander implements Commander<Map<string, string | number | boolean>> {
   recordHistory = true;

@@ -7,7 +7,8 @@ import {
   DivisionAbstractComponent,
   AbstractComponent,
   BackboneAbstractComponent,
-  parentFragmentAccessToken
+  parentFragmentAccessToken,
+  BrComponent
 } from './component';
 import {
   BlockFormatter,
@@ -309,7 +310,17 @@ export class Fragment extends Marker {
       const formats = this.formatMap.get(token);
       if (token instanceof BlockFormatter) {
         selfFormatMap.set(token, [...formats]);
-        discardedFormatMap.set(token, [...formats]);
+        discardedFormatMap.set(token, formats.map(f => {
+          return {
+            ...f,
+            get startIndex() {
+              return 0;
+            },
+            get endIndex() {
+              return fragment.contentLength;
+            }
+          }
+        }));
         return;
       }
       formats.forEach(format => {
@@ -407,7 +418,25 @@ export class Fragment extends Marker {
         this.eventMap.delete(i);
       }
     });
-    fragment.formatMap = discardedFormatMap;
+    let newFormatMap = new FormatMap();
+    if (fragment.contentLength === 1 && fragment.getContentAtIndex(0) instanceof BrComponent) {
+      const contentLength = this.contentLength;
+      this.getFormatKeys().forEach(key => {
+        if (key instanceof InlineFormatter) {
+          this.getFormatRanges(key).forEach(f => {
+            if (f.endIndex === contentLength) {
+              newFormatMap.set(key, [f]);
+            }
+          })
+        }
+      })
+      Array.from(discardedFormatMap.keys()).filter(i => i instanceof BlockFormatter).forEach(key => {
+        newFormatMap.set(key, discardedFormatMap.get(key));
+      })
+    } else {
+      newFormatMap = discardedFormatMap;
+    }
+    fragment.formatMap = newFormatMap;
     this.markAsDirtied();
     return fragment;
   }
@@ -503,6 +532,9 @@ export class Fragment extends Marker {
     }
     if (formatRange.endIndex > this.contentLength) {
       formatRange.endIndex = this.contentLength;
+    }
+    if (this.getContentAtIndex(formatRange.endIndex) instanceof BrComponent) {
+      formatRange.endIndex++;
     }
     const lineFormatRange = formatRange as InlineFormatParams;
     const contents = this.sliceContents(lineFormatRange.startIndex, lineFormatRange.endIndex);

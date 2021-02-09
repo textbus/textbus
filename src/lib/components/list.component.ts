@@ -7,9 +7,9 @@ import {
   ViewData,
   Fragment,
   VElement,
-  TBEvent, SlotRendererFn, Component, Interceptor, TBSelection, SingleSlotRenderFn
+  TBEvent, SlotRendererFn, Component, Interceptor, TBSelection, SingleSlotRenderFn,
+  BrComponent
 } from '../core/_api';
-import { BrComponent } from './br.component';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
 
