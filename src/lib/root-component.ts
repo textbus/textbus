@@ -1,12 +1,24 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import {
-  AbstractComponent, TBClipboard,
+  AbstractComponent,
+  TBClipboard,
   Component,
   DivisionAbstractComponent,
-  Fragment, InlineFormatter, LeafAbstractComponent,
-  Interceptor, TBEvent,
+  Fragment,
+  InlineFormatter,
+  LeafAbstractComponent,
+  Interceptor,
+  TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BrComponent, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
+  VElement,
+  BlockFormatter,
+  FormatRange,
+  BrComponent,
+  BackboneAbstractComponent,
+  ContextMenuAction,
+  ComponentLoader,
+  ViewData,
+  BranchAbstractComponent
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BlockComponent } from './components/_api';
@@ -123,7 +135,8 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
     const parentComponent = fragment.parentComponent;
 
-    if (parentComponent instanceof BackboneAbstractComponent) {
+    if (parentComponent instanceof BackboneAbstractComponent ||
+      parentComponent instanceof BranchAbstractComponent) {
       let i = 0
       contents.slice(0).forEach(item => {
         fragment.insert(item, firstRange.startIndex + i);
