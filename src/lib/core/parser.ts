@@ -6,6 +6,9 @@ import { BranchAbstractComponent, DivisionAbstractComponent, ComponentLoader, Ba
  * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
  */
 export class Parser {
+  static parserHTML(html: string) {
+    return new DOMParser().parseFromString(html, 'text/html').body;
+  }
   constructor(private componentLoaders: ComponentLoader[] = [],
               private formatters: Formatter[] = []) {
   }

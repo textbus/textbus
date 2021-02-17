@@ -217,7 +217,7 @@ export class Viewer {
           this.rootComponent.slot.append(this.sourceCodeComponent);
         } else {
           const html = this.sourceCodeComponent.getSourceCode();
-          const dom = Viewer.parserHTML(html)
+          const dom = Parser.parserHTML(html)
           this.rootComponent.slot.from(this.parser.parse(dom));
         }
       }),
@@ -243,7 +243,7 @@ export class Viewer {
       })
     )
 
-    const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
+    const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     [RootComponent, ...(this.options.components || [])].forEach(c => {
       const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
@@ -261,7 +261,7 @@ export class Viewer {
   }
 
   updateContent(html: string) {
-    this.rootComponent.slot.from(this.parser.parse(Viewer.parserHTML(html)));
+    this.rootComponent.slot.from(this.parser.parse(Parser.parserHTML(html)));
   }
 
   getContents() {
@@ -330,10 +330,6 @@ export class Viewer {
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());
     fragment.append(p);
-  }
-
-  private static parserHTML(html: string) {
-    return new DOMParser().parseFromString(html, 'text/html').body;
   }
 
   private static cssMin(str: string) {
