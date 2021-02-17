@@ -20,13 +20,11 @@ export class CleanCommander implements Commander<null> {
     context.selection.ranges.forEach(range => {
       range.getSuccessiveContents().forEach(scope => {
         if (scope.fragment === range.startFragment &&
-          scope.startIndex <= range.startIndex &&
-          scope.endIndex >= range.endIndex) {
+          scope.startIndex <= range.startIndex) {
           scope.startIndex = range.startIndex;
           b = true;
         }
         if (scope.fragment === range.endFragment &&
-          scope.startIndex <= range.startIndex &&
           scope.endIndex >= range.endIndex) {
           scope.endIndex = range.endIndex;
           b = true;
