@@ -42,9 +42,9 @@ export const textAlignToolConfig: SelectToolConfig = {
     },
   }],
   matcher: new FormatMatcher(textAlignFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of textAlignToolConfig.options) {
         if (option.value === data.styles.get('textAlign')) {
           return option;
         }

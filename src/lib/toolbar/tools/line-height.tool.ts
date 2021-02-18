@@ -44,9 +44,9 @@ export const lineHeightToolConfig: SelectToolConfig = {
     value: '4em'
   }],
   matcher: new FormatMatcher(lineHeightFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of lineHeightToolConfig.options) {
         if (option.value === data.styles.get('lineHeight')) {
           return option;
         }

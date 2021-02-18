@@ -33,7 +33,7 @@ export interface SelectToolConfig {
   options: SelectOptionConfig[];
 
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
-  highlight?<T = FormatData | AbstractComponent>(options: SelectOptionConfig[], data: T): SelectOptionConfig;
+  matchOption?<T = FormatData | AbstractComponent>(data: T): SelectOptionConfig;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
@@ -90,7 +90,7 @@ export class SelectHandler implements Tool {
 
   updateStatus(selectionMatchState: SelectionMatchState): void {
     if (selectionMatchState.matchData) {
-      const option = this.config.highlight?.(this.config.options, selectionMatchState.matchData);
+      const option = this.config.matchOption?.(selectionMatchState.matchData);
       if (option) {
         this.dropdown.button.label.innerText = option.label || option.value;
         this.dropdown.disabled = false;

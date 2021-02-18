@@ -36,9 +36,9 @@ export const letterSpacingToolConfig: SelectToolConfig = {
     value: '5px',
   }],
   matcher: new FormatMatcher(letterSpacingFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of letterSpacingToolConfig.options) {
         if (option.value === data.styles.get('letterSpacing')) {
           return option;
         }

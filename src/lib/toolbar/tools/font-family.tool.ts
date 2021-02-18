@@ -58,10 +58,10 @@ export const fontFamilyToolConfig: SelectToolConfig = {
     value: 'Times New Roman'
   }],
   matcher: new FormatMatcher(fontFamilyFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
-        if (new RegExp(`^['"]${option.value}['"]$`).test(data.styles.get('fontFamily') as string)) {
+      for (const option of fontFamilyToolConfig.options) {
+        if (new RegExp(`^['"]?${option.value}['"]?$`).test(data.styles.get('fontFamily') as string)) {
           return option;
         }
       }

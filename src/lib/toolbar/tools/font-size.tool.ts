@@ -52,9 +52,9 @@ export const fontSizeToolConfig: SelectToolConfig = {
     value: '48px'
   }],
   matcher: new FormatMatcher(fontSizeFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of fontSizeToolConfig.options) {
         if (option.value === data.styles.get('fontSize')) {
           return option;
         }

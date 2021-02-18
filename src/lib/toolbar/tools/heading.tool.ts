@@ -7,9 +7,9 @@ import { PreComponent } from '../../components/pre.component';
 export const headingToolConfig: SelectToolConfig = {
   tooltip: '段落与标题',
   matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
-  highlight(options, t) {
+  matchOption(t) {
     if (t instanceof BlockComponent) {
-      for (const item of options) {
+      for (const item of headingToolConfig.options) {
         if (item.value === t.tagName) {
           return item;
         }
