@@ -61,7 +61,7 @@ export const fontFamilyToolConfig: SelectToolConfig = {
   highlight(options, data) {
     if (data instanceof FormatData) {
       for (const option of options) {
-        if (option.value === data.styles.get('fontFamily')) {
+        if (new RegExp(`^['"]${option.value}['"]$`).test(data.styles.get('fontFamily') as string)) {
           return option;
         }
       }
