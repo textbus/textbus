@@ -182,7 +182,7 @@ export class Viewer {
           plugin.onRenderingBefore?.();
         })
         if (this.editorController.sourceCodeMode) {
-          const isEmpty = rootComponent.slot.contentLength === 0;
+          const isEmpty = rootComponent.slot.length === 0;
           if (isEmpty) {
             this.sourceCodeComponent = new PreComponent('HTML', '\n');
             this.rootComponent.slot.append(this.sourceCodeComponent);
@@ -191,7 +191,7 @@ export class Viewer {
             selection.firstRange.setEnd(position.fragment, position.index);
           }
         } else {
-          const isEmpty = rootComponent.slot.contentLength === 0;
+          const isEmpty = rootComponent.slot.length === 0;
           Viewer.guardLastIsParagraph(rootComponent.slot);
           if (isEmpty && selection.firstRange) {
             const position = selection.firstRange.findFirstPosition(rootComponent.slot);
@@ -318,10 +318,10 @@ export class Viewer {
   }
 
   private static guardLastIsParagraph(fragment: Fragment) {
-    const last = fragment.sliceContents(fragment.contentLength - 1)[0];
+    const last = fragment.sliceContents(fragment.length - 1)[0];
     if (last instanceof BlockComponent) {
       if (last.tagName === 'p') {
-        if (last.slot.contentLength === 0) {
+        if (last.slot.length === 0) {
           last.slot.append(new BrComponent());
         }
         return;

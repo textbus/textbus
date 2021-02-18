@@ -5,9 +5,7 @@ import { Inject, Injectable, InjectFlags, Injector, Type } from '@tanbo/di';
 import {
   AbstractComponent,
   ComponentSetter,
-  Contents,
-  ContextMenuAction,
-  DivisionAbstractComponent,
+  ContextMenuAction, DivisionAbstractComponent,
   Interceptor,
   LeafAbstractComponent,
   Parser,
@@ -594,12 +592,7 @@ export class Input {
   }
 
   private handlePaste(dom: HTMLElement, text: string) {
-    const fragment = this.parser.parse(dom);
-    const contents = new Contents();
-    (fragment.getContentAtIndex(0) as DivisionAbstractComponent).slot.sliceContents(0).forEach(i => {
-      contents.append(i)
-    });
-
+    const fragment = (this.parser.parse(dom).getContentAtIndex(0) as DivisionAbstractComponent).slot;
     if (!this.selection.collapsed) {
       this.dispatchEvent((injector, instance) => {
         const event = new TBEvent(instance);
@@ -612,7 +605,7 @@ export class Input {
     }
     if (this.selection.collapsed) {
       this.dispatchEvent((injector, instance) => {
-        const event = new TBEvent(instance, {contents, text});
+        const event = new TBEvent(instance, {fragment, text});
         const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
         if (interceptor) {
           interceptor.onPaste?.(event);

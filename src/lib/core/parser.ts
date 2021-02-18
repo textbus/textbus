@@ -70,14 +70,14 @@ export class Parser {
         formatData: p.formatter.read(el as HTMLElement)
       }
     });
-    const startIndex = slot.contentLength;
+    const startIndex = slot.length;
     Array.from(el.childNodes).forEach(child => {
       this.readComponent(child, slot);
     })
     maps.forEach(item => {
       slot.apply(item.formatter, {
         startIndex,
-        endIndex: slot.contentLength,
+        endIndex: slot.length,
         formatData: item.formatData,
         effect: item.effect
       }, {

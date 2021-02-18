@@ -107,12 +107,12 @@ export class ComponentStage {
         const parentFragment = parentComponent.parentFragment;
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
-        if (!firstContent || startFragment.contentLength === 1 && firstContent instanceof BrComponent) {
+        if (!firstContent || startFragment.length === 1 && firstContent instanceof BrComponent) {
           const index = parentFragment.indexOf(parentComponent);
           parentFragment.cut(index, index + 1);
         }
       } else if (parentComponent instanceof BranchAbstractComponent &&
-        startFragment.contentLength === 1 &&
+        startFragment.length === 1 &&
         startFragment.getContentAtIndex(0) instanceof BrComponent) {
         startFragment.clean();
         startFragment.append(component);

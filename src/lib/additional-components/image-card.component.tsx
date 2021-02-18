@@ -129,7 +129,7 @@ export class ImageCardComponent extends BackboneAbstractComponent {
   }
 
   componentContentChange() {
-    if (this.descFragment.contentLength === 0) {
+    if (this.descFragment.length === 0) {
       this.descFragment.append(new BrComponent());
     }
   }

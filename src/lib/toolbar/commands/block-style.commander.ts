@@ -20,7 +20,7 @@ export class BlockStyleCommander implements Commander<string> {
         if (item.fragment === range.startFragment || item.fragment === range.endFragment) {
           fragments.push(item.fragment);
         } else {
-          if (item.startIndex === 0 && item.endIndex === item.fragment.contentLength) {
+          if (item.startIndex === 0 && item.endIndex === item.fragment.length) {
             fragments.push(item.fragment);
           } else {
             const ff: Fragment[] = [];

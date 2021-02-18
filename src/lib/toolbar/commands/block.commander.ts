@@ -23,7 +23,7 @@ export class BlockCommander implements Commander<string> {
 
         const parentComponent = scope.fragment.parentComponent;
 
-        if (scope.startIndex === 0 && scope.endIndex === scope.fragment.contentLength) {
+        if (scope.startIndex === 0 && scope.endIndex === scope.fragment.length) {
           if (scope.fragment === range.startFragment) {
             range.startFragment = blockComponent.slot;
           }
@@ -70,7 +70,7 @@ export class BlockCommander implements Commander<string> {
       fragment.apply(boldFormatter, {
         effect: FormatEffect.Inherit,
         startIndex: 0,
-        endIndex: fragment.contentLength,
+        endIndex: fragment.length,
         formatData: new FormatData({
           tag: 'strong'
         })
@@ -81,7 +81,7 @@ export class BlockCommander implements Commander<string> {
         fragment.apply(boldFormatter, {
           effect: FormatEffect.Invalid,
           startIndex: 0,
-          endIndex: fragment.contentLength,
+          endIndex: fragment.length,
           formatData: new FormatData({
             tag: 'strong'
           })

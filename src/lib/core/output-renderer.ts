@@ -42,7 +42,7 @@ export class OutputRenderer {
       if (root !== host) {
         throw outputRendererErrorFn('slot elements cannot be replaced.')
       }
-      this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
+      this.rendingContents(fragment, childFormats, 0, fragment.length).forEach(child => {
         (slot || host).appendChild(child);
       });
       fragment.outputRendered();

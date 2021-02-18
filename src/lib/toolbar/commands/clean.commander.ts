@@ -32,10 +32,10 @@ export class CleanCommander implements Commander<null> {
 
         let isDeleteBlockFormat = false;
         if (scope.startIndex === 0) {
-          if (scope.endIndex === scope.fragment.contentLength) {
+          if (scope.endIndex === scope.fragment.length) {
             isDeleteBlockFormat = true;
-          } else if (scope.endIndex === scope.fragment.contentLength - 1) {
-            const lastContent = scope.fragment.getContentAtIndex(scope.fragment.contentLength - 1);
+          } else if (scope.endIndex === scope.fragment.length - 1) {
+            const lastContent = scope.fragment.getContentAtIndex(scope.fragment.length - 1);
             if (lastContent instanceof BrComponent) {
               isDeleteBlockFormat = true;
             }

@@ -73,9 +73,9 @@ class ListComponentInterceptor implements Interceptor<ListComponent> {
     const firstRange = this.selection.firstRange;
     const index = instance.slots.indexOf(slot);
     if (slot === instance.slots[instance.slots.length - 1]) {
-      const lastContent = slot.getContentAtIndex(slot.contentLength - 1);
-      if (slot.contentLength === 0 ||
-        slot.contentLength === 1 && lastContent instanceof BrComponent) {
+      const lastContent = slot.getContentAtIndex(slot.length - 1);
+      if (slot.length === 0 ||
+        slot.length === 1 && lastContent instanceof BrComponent) {
         instance.slots.pop();
         const parentFragment = instance.parentFragment;
         const p = new BlockComponent('p');
