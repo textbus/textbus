@@ -130,9 +130,47 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const firstRange = this.selection.firstRange;
     const clipboardFragment = event.data.fragment;
     const fragment = firstRange.startFragment;
+
+    const contents = clipboardFragment.sliceContents();
+
+    const hasBlockComponent = contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent);
+    }).includes(true);
+
+    if (!hasBlockComponent) {
+      const len = clipboardFragment.length;
+      fragment.insert(clipboardFragment, firstRange.startIndex);
+      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
+      return
+    }
+
+    const firstContent = clipboardFragment.getContentAtIndex(0);
+    const isSingleComponent = clipboardFragment.length === 1 &&
+      firstContent instanceof AbstractComponent &&
+      !(firstContent instanceof LeafAbstractComponent);
+
+    const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
+    const parentComponent = fragment.parentComponent;
+    const parentFragment = parentComponent.parentFragment;
+    const index = parentFragment.indexOf(parentComponent);
+    if (isEmpty && isSingleComponent) {
+
+      parentFragment.insert(firstContent, index);
+      return;
+    }
+
+    const isAllBlock = !contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent)
+    }).includes(false);
+
+    if (isAllBlock && isEmpty) {
+      contents.reverse().forEach(c => {
+        parentFragment.insert(c, index);
+      })
+      return;
+    }
     const len = clipboardFragment.length;
     fragment.insert(clipboardFragment, firstRange.startIndex);
-
     firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
   }
 

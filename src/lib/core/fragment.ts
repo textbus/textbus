@@ -466,6 +466,12 @@ export class Fragment extends Marker {
     const contents = fragment.sliceContents(0).reverse();
     contents.forEach(c => {
       this.contents.insert(c, index);
+      if (c instanceof AbstractComponent) {
+        c[parentFragmentAccessToken] = this;
+        this.eventMap.set(c, c.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+      }
     })
 
     const len = fragment.length;
@@ -510,6 +516,7 @@ export class Fragment extends Marker {
         }, true);
       })
     })
+    fragment.clean();
     this.markAsDirtied();
   }
 
