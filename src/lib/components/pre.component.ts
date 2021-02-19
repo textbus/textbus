@@ -158,17 +158,6 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     event.stopPropagation();
   }
 
-  onDelete(event: TBEvent<PreComponent>) {
-    const firstRange = this.selection.firstRange;
-    const startFragment = firstRange.startFragment;
-    if (firstRange.startIndex === 1 && startFragment.length === 1) {
-      startFragment.clean()
-      startFragment.append(new BrComponent());
-      firstRange.setPosition(startFragment, 0);
-      event.stopPropagation();
-    }
-  }
-
   onDeleteRange(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
     if (firstRange.startIndex === 0) {
