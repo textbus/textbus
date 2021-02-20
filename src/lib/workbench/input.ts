@@ -742,7 +742,7 @@ class ContextMenu {
         x -= menuWidth
       }
       if (y + menuHeight >= clientHeight) {
-        y -= y + menuHeight - clientHeight;
+        y = clientHeight - menuHeight;
       }
 
       if (y < 20) {
@@ -752,12 +752,7 @@ class ContextMenu {
         left: x + 'px',
         top: y + 'px'
       })
-
-      if (y + menuHeight > clientHeight - 20) {
-        this.elementRef.style.height = clientHeight - 40 + 'px';
-      } else {
-        this.elementRef.style.height = '';
-      }
+      this.elementRef.style.maxHeight = clientHeight - y - 20 + 'px';
     }
 
 
