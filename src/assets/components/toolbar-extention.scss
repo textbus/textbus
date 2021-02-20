@@ -31,9 +31,14 @@
   }
 }
 
+.textbus-toolbar-pre-item {
+  font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+}
+
 .textbus-toolbar-font-family {
-  &-sans-serif {
+  &-inherit {
     font-family: sans-serif;
+    opacity: .7;
   }
 
   &-SimSun {
@@ -99,11 +104,19 @@
   }
 }
 
+.textbus-toolbar-font-size-inherit {
+  opacity: .7;
+}
+
 @each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
   .textbus-toolbar-font-size-#{$t} {
     line-height: 1.2;
     font-size: #{$t}px;
   }
+}
+
+.textbus-toolbar-line-height-inherit {
+  opacity: .7;
 }
 
 @each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
@@ -123,6 +136,10 @@
       background: linear-gradient(to right, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0.3) 4px, rgba(0, 0, 0, .3) 5px, rgba(0, 0, 0, 0) 5px);
     }
   }
+}
+
+.textbus-toolbar-letter-spacing-inherit {
+  opacity: .7;
 }
 
 @each $t in 0, 1, 2, 3, 4, 5 {

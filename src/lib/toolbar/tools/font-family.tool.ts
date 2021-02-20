@@ -8,8 +8,8 @@ import { PreComponent } from '../../components/pre.component';
 export const fontFamilyToolConfig: SelectToolConfig = {
   tooltip: '字体',
   options: [{
-    label: 'sans-serif',
-    classes: ['textbus-toolbar-font-family-sans-serif'],
+    label: '默认',
+    classes: ['textbus-toolbar-font-family-inherit'],
     value: '',
     default: true
   }, {

@@ -10,10 +10,14 @@ export const letterSpacingToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-letter-spacing'],
   mini: true,
   options: [{
+    label: '默认',
+    value: '',
+    classes: ['textbus-toolbar-letter-spacing-inherit'],
+    default: true
+  }, {
     label: '0px',
     value: '0px',
     classes: ['textbus-toolbar-letter-spacing-0'],
-    default: true
   }, {
     label: '1px',
     classes: ['textbus-toolbar-letter-spacing-1'],

@@ -10,10 +10,14 @@ export const lineHeightToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-line-height'],
   mini: true,
   options: [{
+    label: '默认',
+    classes: ['textbus-toolbar-line-height-inherit'],
+    value: '',
+    default: true
+  }, {
     label: '1x',
     classes: ['textbus-toolbar-line-height-1'],
-    value: '1em',
-    default: true
+    value: '1em'
   }, {
     label: '1.2x',
     classes: ['textbus-toolbar-line-height-1_2'],

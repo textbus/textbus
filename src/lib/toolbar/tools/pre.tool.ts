@@ -8,37 +8,51 @@ export const preToolConfig: SelectToolConfig = {
   tooltip: '代码',
   mini: true,
   options: [{
-    value: 'Javascript'
+    value: 'Javascript',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'HTML'
+    value: 'HTML',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'CSS'
+    value: 'CSS',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'Typescript'
+    value: 'Typescript',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'Java'
+    value: 'Java',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'C'
+    value: 'C',
+    classes: ['textbus-toolbar-pre-item']
   }, {
     label: 'C++',
-    value: 'CPP'
+    value: 'CPP',
+    classes: ['textbus-toolbar-pre-item']
   }, {
     label: 'C#',
-    value: 'CSharp'
+    value: 'CSharp',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'Swift'
+    value: 'Swift',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'JSON'
+    value: 'JSON',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'Less'
+    value: 'Less',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'SCSS'
+    value: 'SCSS',
+    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'Stylus'
+    value: 'Stylus',
+    classes: ['textbus-toolbar-pre-item']
   }, {
     value: 'bash',
     label: '无',
-    default: true
+    default: true,
+    classes: ['textbus-toolbar-pre-item']
   }],
   matcher: new CodeMatcher(),
   matchOption(t) {
