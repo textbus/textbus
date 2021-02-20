@@ -141,6 +141,7 @@ export class Input {
   }
 
   destroy() {
+    this.contextmenu.destroy();
     this.subs.forEach(s => s.unsubscribe());
   }
 
@@ -702,6 +703,8 @@ class ContextMenu {
 
   private eventFromSelf = false;
 
+  private subs: Subscription[] = [];
+
   constructor(private history: HistoryManager) {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu']
@@ -710,22 +713,51 @@ class ContextMenu {
       this.hide();
     })
     this.elementRef.addEventListener('contextmenu', ev => ev.preventDefault());
-    document.addEventListener('mousedown', () => {
-      if (!this.eventFromSelf) {
-        this.hide();
-      }
-    })
+
   }
 
   hide() {
+    this.subs.forEach(i => i.unsubscribe());
+    this.subs = [];
     this.elementRef.parentNode?.removeChild(this.elementRef);
   }
 
   show(menus: ContextMenuAction[][], x: number, y: number) {
+    this.subs.push(
+      fromEvent(document, 'mousedown').subscribe(() => {
+        if (!this.eventFromSelf) {
+          this.hide();
+        }
+      }),
+      fromEvent(window, 'resize').subscribe(() => {
+        setPosition();
+      })
+    )
     this.elementRef.innerHTML = '';
 
-    const clientWidth = document.documentElement.clientWidth;
-    const clientHeight = document.documentElement.clientHeight;
+    const setPosition = () => {
+      const clientWidth = document.documentElement.clientWidth;
+      const clientHeight = document.documentElement.clientHeight;
+      if (x + menuWidth >= clientWidth) {
+        x -= menuWidth
+      }
+      if (y + menuHeight >= clientHeight) {
+        y -= y + menuHeight - clientHeight;
+      }
+
+      if (y < 20) {
+        y = 20;
+      }
+      Object.assign(this.elementRef.style, {
+        left: x + 'px',
+        top: y + 'px'
+      })
+
+      if (y + menuHeight > clientHeight - 20) {
+        this.elementRef.style.height = clientHeight - 40 + 'px';
+      }
+    }
+
 
     let itemCount = 0;
     menus.forEach(actions => {
@@ -777,16 +809,12 @@ class ContextMenu {
     const menuWidth = 180 + 10;
     const menuHeight = itemCount * 26 + menus.length * 10 + menus.length + 10;
 
-    if (x + menuWidth >= clientWidth) {
-      x -= menuWidth
-    }
-    if (y + menuHeight >= clientHeight) {
-      y -= y + menuHeight - clientHeight;
-    }
-    Object.assign(this.elementRef.style, {
-      left: x + 'px',
-      top: y + 'px'
-    })
+    setPosition();
+
     document.body.appendChild(this.elementRef);
+  }
+
+  destroy() {
+    this.hide();
   }
 }
