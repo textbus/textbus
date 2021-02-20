@@ -159,6 +159,13 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       return;
     }
 
+    const contentLength = fragment.length;
+    if (isSingleComponent &&
+      (firstRange.endIndex === contentLength || firstRange.endIndex === contentLength - 1 && fragment.getContentAtIndex(contentLength - 1) instanceof BrComponent)) {
+      parentFragment.insertAfter(firstContent, parentComponent);
+      return;
+    }
+
     const isAllBlock = !contents.map(i => {
       return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent)
     }).includes(false);
