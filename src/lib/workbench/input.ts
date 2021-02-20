@@ -755,6 +755,8 @@ class ContextMenu {
 
       if (y + menuHeight > clientHeight - 20) {
         this.elementRef.style.height = clientHeight - 40 + 'px';
+      } else {
+        this.elementRef.style.height = '';
       }
     }
 
