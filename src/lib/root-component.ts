@@ -152,6 +152,12 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
     const parentComponent = fragment.parentComponent;
     const parentFragment = parentComponent.parentFragment;
+
+    if (!parentFragment) {
+      fragment.insert(clipboardFragment, firstRange.startIndex);
+      return;
+    }
+
     const index = parentFragment.indexOf(parentComponent);
     if (isEmpty && isSingleComponent) {
 
