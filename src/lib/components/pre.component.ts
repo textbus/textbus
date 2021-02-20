@@ -26,7 +26,7 @@ import {
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
-  BrComponent
+  BrComponent, ContextMenuAction
 } from '../core/_api';
 
 export const codeStyles = {
@@ -207,6 +207,48 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     }
     event.stopPropagation();
   }
+
+  onContextmenu(instance: PreComponent): ContextMenuAction[] {
+    return [{
+      value: 'Javascript',
+    }, {
+      value: 'HTML',
+    }, {
+      value: 'CSS',
+    }, {
+      value: 'Typescript',
+    }, {
+      value: 'Java',
+    }, {
+      value: 'C',
+    }, {
+      label: 'C++',
+      value: 'CPP',
+    }, {
+      label: 'C#',
+      value: 'CSharp',
+    }, {
+      value: 'Swift',
+    }, {
+      value: 'JSON',
+    }, {
+      value: 'Less',
+    }, {
+      value: 'SCSS',
+    }, {
+      value: 'Stylus',
+    }, {
+      value: 'bash',
+      label: '无',
+    }].map(i => {
+      return {
+        label: i.label || i.value,
+        action() {
+          instance.lang = i.value
+        }
+      }
+    });
+  }
 }
 
 @Component({
@@ -255,11 +297,12 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
 
   set lang(v: string) {
     if (v !== this._lang) {
+      this._lang = v;
       this.forEach(slot => {
         slot.markAsDirtied();
       })
+      this.markAsDirtied();
     }
-    this._lang = v;
   }
 
   get lang() {

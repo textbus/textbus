@@ -9,50 +9,36 @@ export const preToolConfig: SelectToolConfig = {
   mini: true,
   options: [{
     value: 'Javascript',
-    classes: ['textbus-toolbar-pre-item']
   }, {
-    value: 'HTML',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'HTML'
   }, {
-    value: 'CSS',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'CSS'
   }, {
-    value: 'Typescript',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'Typescript'
   }, {
-    value: 'Java',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'Java'
   }, {
-    value: 'C',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'C'
   }, {
     label: 'C++',
-    value: 'CPP',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'CPP'
   }, {
     label: 'C#',
-    value: 'CSharp',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'CSharp'
   }, {
-    value: 'Swift',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'Swift'
   }, {
-    value: 'JSON',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'JSON'
   }, {
-    value: 'Less',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'Less'
   }, {
-    value: 'SCSS',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'SCSS'
   }, {
-    value: 'Stylus',
-    classes: ['textbus-toolbar-pre-item']
+    value: 'Stylus'
   }, {
     value: 'bash',
     label: '无',
-    default: true,
-    classes: ['textbus-toolbar-pre-item']
+    default: true
   }],
   matcher: new CodeMatcher(),
   matchOption(t) {
