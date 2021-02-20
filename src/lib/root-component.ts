@@ -1,15 +1,25 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import {
-  AbstractComponent, TBClipboard,
+  AbstractComponent,
+  TBClipboard,
   Component,
   DivisionAbstractComponent,
-  Fragment, InlineFormatter, LeafAbstractComponent,
-  Interceptor, TBEvent,
+  Fragment,
+  InlineFormatter,
+  LeafAbstractComponent,
+  Interceptor,
+  TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
+  VElement,
+  BlockFormatter,
+  FormatRange,
+  BrComponent,
+  ContextMenuAction,
+  ComponentLoader,
+  ViewData,
 } from './core/_api';
 import { Input } from './workbench/input';
-import { BrComponent, BlockComponent } from './components/_api';
+import { BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
 
 @Injectable()
@@ -69,7 +79,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
               return 0;
             },
             get endIndex() {
-              return latestFragment.contentLength;
+              return latestFragment.length;
             },
             effect: formatRange.effect,
             formatData: formatRange.formatData?.clone()
@@ -96,8 +106,8 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     });
 
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.selectionStart;
-    const last = latestFragment.getContentAtIndex(latestFragment.contentLength - 1);
-    if (startIndex + input.selectionStart === latestFragment.contentLength &&
+    const last = latestFragment.getContentAtIndex(latestFragment.length - 1);
+    if (startIndex + input.selectionStart === latestFragment.length &&
       last instanceof BrComponent) {
       latestFragment.append(new BrComponent());
     }
@@ -118,51 +128,50 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   onPaste(event: TBEvent<RootComponent, TBClipboard>) {
     const firstRange = this.selection.firstRange;
-    const contents = event.data.contents;
+    const clipboardFragment = event.data.fragment;
     const fragment = firstRange.startFragment;
 
-    const parentComponent = fragment.parentComponent;
+    const contents = clipboardFragment.sliceContents();
 
-    if (parentComponent instanceof BackboneAbstractComponent) {
-      let i = 0
-      contents.slice(0).forEach(item => {
-        fragment.insert(item, firstRange.startIndex + i);
-        i += item.length;
-      });
-      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
-    } else {
-      const parentFragment = parentComponent.parentFragment;
-      const contentsArr = contents.slice(0);
-      let firstContent = contentsArr[0];
-      const afterContent = fragment.cut(firstRange.startIndex);
-      let offset = 0;
-      while (contentsArr.length) {
-        firstContent = contentsArr[0];
-        if (typeof firstContent === 'string' || firstContent instanceof LeafAbstractComponent) {
-          offset += firstContent.length;
-          fragment.insert(firstContent, firstRange.startIndex + 1);
-          contentsArr.shift();
-        } else {
-          break;
-        }
-      }
-      firstRange.startIndex += offset;
+    const hasBlockComponent = contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent);
+    }).includes(true);
 
-      if (!contentsArr.length) {
-        fragment.concat(afterContent);
-        firstRange.collapse();
-      } else {
-        const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
-        afterComponent.slot.from(afterContent);
-        if (afterComponent.slot.contentLength === 0) {
-          afterComponent.slot.append(new BrComponent());
-        }
-        firstRange.setStart(afterComponent.slot, 0);
-        firstRange.collapse();
-        parentFragment.insertAfter(afterComponent, parentComponent);
-        contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
-      }
+    if (!hasBlockComponent) {
+      const len = clipboardFragment.length;
+      fragment.insert(clipboardFragment, firstRange.startIndex);
+      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
+      return
     }
+
+    const firstContent = clipboardFragment.getContentAtIndex(0);
+    const isSingleComponent = clipboardFragment.length === 1 &&
+      firstContent instanceof AbstractComponent &&
+      !(firstContent instanceof LeafAbstractComponent);
+
+    const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
+    const parentComponent = fragment.parentComponent;
+    const parentFragment = parentComponent.parentFragment;
+    const index = parentFragment.indexOf(parentComponent);
+    if (isEmpty && isSingleComponent) {
+
+      parentFragment.insert(firstContent, index);
+      return;
+    }
+
+    const isAllBlock = !contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent)
+    }).includes(false);
+
+    if (isAllBlock && isEmpty) {
+      contents.reverse().forEach(c => {
+        parentFragment.insert(c, index);
+      })
+      return;
+    }
+    const len = clipboardFragment.length;
+    fragment.insert(clipboardFragment, firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
   }
 
   onDeleteRange() {

@@ -58,7 +58,7 @@ export class FindCommander implements Commander<ElementPosition[]> {
       effect: FormatEffect.Invalid,
       formatData: null,
       startIndex: 0,
-      endIndex: this.rootFragment.contentLength
+      endIndex: this.rootFragment.length
     })
     positions.forEach(item => {
       item.fragment.apply(findFormatter, {

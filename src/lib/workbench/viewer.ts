@@ -21,7 +21,8 @@ import {
   Parser,
   Renderer,
   TBRange,
-  TBSelection
+  TBSelection,
+  BrComponent
 } from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
@@ -30,7 +31,7 @@ import { RootComponent } from '../root-component';
 import { Toolbar } from '../toolbar/toolbar';
 import { ComponentStage } from './component-stage';
 import { EditorController } from '../editor-controller';
-import { BlockComponent, BrComponent, PreComponent } from '../components/_api';
+import { BlockComponent, PreComponent } from '../components/_api';
 import { ComponentInjectors } from '../component-injectors';
 
 declare const ResizeObserver: any;
@@ -93,7 +94,7 @@ export class Viewer {
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
-    const componentAnnotations = [RootComponent, ...(this.options.components || [])].map(c => {
+    const componentAnnotations = [RootComponent, ...(this.options.components || []), BrComponent].map(c => {
       return getAnnotations(c).getClassMetadata(Component).params[0] as Component
     })
 
@@ -192,7 +193,7 @@ export class Viewer {
           plugin.onRenderingBefore?.();
         })
         if (this.editorController.sourceCodeMode) {
-          const isEmpty = rootComponent.slot.contentLength === 0;
+          const isEmpty = rootComponent.slot.length === 0;
           if (isEmpty) {
             this.sourceCodeComponent = new PreComponent('HTML', '\n');
             this.rootComponent.slot.append(this.sourceCodeComponent);
@@ -201,7 +202,7 @@ export class Viewer {
             selection.firstRange.setEnd(position.fragment, position.index);
           }
         } else {
-          const isEmpty = rootComponent.slot.contentLength === 0;
+          const isEmpty = rootComponent.slot.length === 0;
           Viewer.guardLastIsParagraph(rootComponent.slot);
           if (isEmpty && selection.firstRange) {
             const position = selection.firstRange.findFirstPosition(rootComponent.slot);
@@ -227,7 +228,7 @@ export class Viewer {
           this.rootComponent.slot.append(this.sourceCodeComponent);
         } else {
           const html = this.sourceCodeComponent.getSourceCode();
-          const dom = Viewer.parserHTML(html)
+          const dom = Parser.parserHTML(html)
           this.rootComponent.slot.from(this.parser.parse(dom));
         }
       }),
@@ -253,7 +254,7 @@ export class Viewer {
       })
     )
 
-    const dom = Viewer.parserHTML(this.options.contents || '<p><br></p>');
+    const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     [RootComponent, ...(this.options.components || [])].forEach(c => {
       const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
@@ -271,7 +272,7 @@ export class Viewer {
   }
 
   updateContent(html: string) {
-    this.rootComponent.slot.from(this.parser.parse(Viewer.parserHTML(html)));
+    this.rootComponent.slot.from(this.parser.parse(Parser.parserHTML(html)));
   }
 
   getContents() {
@@ -328,10 +329,10 @@ export class Viewer {
   }
 
   private static guardLastIsParagraph(fragment: Fragment) {
-    const last = fragment.sliceContents(fragment.contentLength - 1)[0];
+    const last = fragment.sliceContents(fragment.length - 1)[0];
     if (last instanceof BlockComponent) {
       if (last.tagName === 'p') {
-        if (last.slot.contentLength === 0) {
+        if (last.slot.length === 0) {
           last.slot.append(new BrComponent());
         }
         return;
@@ -340,10 +341,6 @@ export class Viewer {
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());
     fragment.append(p);
-  }
-
-  private static parserHTML(html: string) {
-    return new DOMParser().parseFromString(html, 'text/html').body;
   }
 
   private static cssMin(str: string) {

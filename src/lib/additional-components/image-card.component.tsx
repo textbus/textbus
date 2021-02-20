@@ -3,10 +3,10 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, TBClipboard
+  Fragment, SlotRendererFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
 import { ComponentCreator } from '../workbench/component-stage';
-import { BlockComponent, ImageComponent, BrComponent } from '../components/_api';
+import { BlockComponent, ImageComponent } from '../components/_api';
 import { Injectable } from '@tanbo/di';
 
 const svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#555" height="100%" width="100%"/></g><g><text font-family="Helvetica, Arial, sans-serif" font-size="24" y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" stroke-width="0" stroke="#000" fill="#000000">Image</text></g></svg>';
@@ -36,6 +36,7 @@ class ImageCardComponentLoader implements ComponentLoader {
     }
   }
 }
+
 @Injectable()
 class ImageCardComponentInterceptor implements Interceptor<ImageCardComponent> {
   constructor(private selection: TBSelection) {
@@ -128,7 +129,7 @@ export class ImageCardComponent extends BackboneAbstractComponent {
   }
 
   componentContentChange() {
-    if (this.descFragment.contentLength === 0) {
+    if (this.descFragment.length === 0) {
       this.descFragment.append(new BrComponent());
     }
   }

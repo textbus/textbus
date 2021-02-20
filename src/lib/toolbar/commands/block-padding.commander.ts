@@ -58,7 +58,7 @@ export class BlockPaddingCommander implements Commander<Map<string, string>> {
     fragment.apply(this.formatter, {
       effect,
       startIndex: 0,
-      endIndex: fragment.contentLength,
+      endIndex: fragment.length,
       formatData: new FormatData({
         styles
       })

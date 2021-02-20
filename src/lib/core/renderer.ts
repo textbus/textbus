@@ -4,10 +4,9 @@ import {
   BackboneAbstractComponent,
   BranchAbstractComponent,
   AbstractComponent,
-  DivisionAbstractComponent, LeafAbstractComponent
+  DivisionAbstractComponent, LeafAbstractComponent, BrComponent
 } from './component';
 import { BlockFormatter, FormatEffect, FormatRange, FormatRendingContext, InlineFormatter } from './formatter';
-import { BrComponent } from '../components/br.component';
 import { makeError } from '../_utils/make-error';
 
 export interface ElementPosition {
@@ -272,7 +271,7 @@ export class Renderer {
   }
 
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {
-    if (fragment.contentLength === 0) {
+    if (fragment.length === 0) {
       fragment.append(new BrComponent());
     }
     if (fragment.dirty || forceUpdate) {
@@ -284,7 +283,7 @@ export class Renderer {
       if (root !== host) {
         throw rendererErrorFn('slot elements cannot be replaced.')
       }
-      this.rendingContents(fragment, childFormats, 0, fragment.contentLength).forEach(child => {
+      this.rendingContents(fragment, childFormats, 0, fragment.length).forEach(child => {
         (slot || host).appendChild(child);
       });
       fragment.rendered();
@@ -293,7 +292,7 @@ export class Renderer {
         this.vDomPositionMapping.set(el, {
           fragment,
           startIndex: 0,
-          endIndex: fragment.contentLength
+          endIndex: fragment.length
         })
       })
       return host;
@@ -650,7 +649,7 @@ export class Renderer {
       })
     })
     Renderer.calculatePriority(formatRangeConfigList).forEach(f => {
-      if (f.token instanceof BlockFormatter || f.params.startIndex === 0 && f.params.endIndex === fragment.contentLength) {
+      if (f.token instanceof BlockFormatter || f.params.startIndex === 0 && f.params.endIndex === fragment.length) {
         containerFormats.push(f);
       } else {
         childFormats.push(f);

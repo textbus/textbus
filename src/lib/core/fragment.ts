@@ -7,14 +7,15 @@ import {
   DivisionAbstractComponent,
   AbstractComponent,
   BackboneAbstractComponent,
-  parentFragmentAccessToken
+  parentFragmentAccessToken,
+  BrComponent
 } from './component';
 import {
   BlockFormatter,
   FormatEffect,
   InlineFormatter,
   InlineFormatParams,
-  BlockFormatParams
+  BlockFormatParams, FormatRange
 } from './formatter';
 import { FormatMap } from './format-map';
 import { Marker } from './marker';
@@ -47,7 +48,7 @@ export class Fragment extends Marker {
   /**
    * fragment 内容的长度
    */
-  get contentLength() {
+  get length() {
     return this.contents.length;
   }
 
@@ -77,7 +78,7 @@ export class Fragment extends Marker {
             return 0;
           },
           get endIndex() {
-            return self.contentLength;
+            return self.length;
           },
           effect: f.effect,
           formatData: f.formatData
@@ -103,7 +104,7 @@ export class Fragment extends Marker {
    * @param fragment
    */
   concat(fragment: Fragment) {
-    const index = this.contentLength;
+    const index = this.length;
 
     fragment.sliceContents(0).forEach(c => {
       this.contents.append(c);
@@ -176,63 +177,15 @@ export class Fragment extends Marker {
    * @param contents
    * @param index
    */
-  insert(contents: AbstractComponent | string, index: number) {
-    if (contents instanceof AbstractComponent) {
-      this.gourdComponentInSelf(contents);
-      this.eventMap.set(contents, contents.onChange.subscribe(() => {
-        this.markAsChanged();
-      }))
+  insert(contents: AbstractComponent | Fragment | string, index: number) {
+    if (contents.length === 0) {
+      return;
     }
-
-    this.contents.insert(contents, index);
-    const formatMap = new FormatMap();
-    Array.from(this.formatMap.keys()).forEach(token => {
-      const formats = this.formatMap.get(token) || [];
-      formats.forEach(format => {
-
-        if (token instanceof BlockFormatter) {
-          formatMap.merge(token, format, true);
-          return;
-        }
-        if (format.startIndex < index && format.endIndex >= index) {
-          if (contents instanceof DivisionAbstractComponent ||
-            contents instanceof BranchAbstractComponent ||
-            contents instanceof BackboneAbstractComponent) {
-            formatMap.merge(token, {
-              ...format,
-              endIndex: index
-            }, true);
-            formatMap.merge(token, {
-              startIndex: index,
-              endIndex: index + 1,
-              effect: FormatEffect.Invalid,
-              formatData: format.formatData.clone(),
-            }, true);
-            if (format.endIndex > index) {
-              formatMap.merge(token, {
-                ...format,
-                startIndex: index + 1,
-                endIndex: format.endIndex + 1
-              }, true);
-            }
-          } else {
-            formatMap.merge(token, {
-              ...format,
-              endIndex: format.endIndex + contents.length
-            }, true);
-          }
-        } else {
-          if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
-            format.startIndex += contents.length;
-          }
-          if (format.endIndex >= index) {
-            format.endIndex += contents.length;
-          }
-          formatMap.merge(token, format, true);
-        }
-      })
-    })
-    this.formatMap = formatMap;
+    if (contents instanceof Fragment) {
+      this.insertFragment(contents, index);
+    } else {
+      this._insert(contents, index);
+    }
     this.markAsDirtied();
   }
 
@@ -251,7 +204,7 @@ export class Fragment extends Marker {
             return 0;
           },
           get endIndex() {
-            return ff.contentLength;
+            return ff.length;
           },
           effect: f.effect,
           formatData: f.formatData
@@ -296,7 +249,7 @@ export class Fragment extends Marker {
    * @param startIndex
    * @param endIndex
    */
-  cut(startIndex: number, endIndex = this.contentLength) {
+  cut(startIndex: number, endIndex = this.length) {
     const fragment = new Fragment()
     if (endIndex <= startIndex) {
       return fragment;
@@ -309,7 +262,17 @@ export class Fragment extends Marker {
       const formats = this.formatMap.get(token);
       if (token instanceof BlockFormatter) {
         selfFormatMap.set(token, [...formats]);
-        discardedFormatMap.set(token, [...formats]);
+        discardedFormatMap.set(token, formats.map(f => {
+          return {
+            ...f,
+            get startIndex() {
+              return 0;
+            },
+            get endIndex() {
+              return fragment.length;
+            }
+          }
+        }));
         return;
       }
       formats.forEach(format => {
@@ -407,7 +370,27 @@ export class Fragment extends Marker {
         this.eventMap.delete(i);
       }
     });
-    fragment.formatMap = discardedFormatMap;
+    let newFormatMap = new FormatMap();
+    if (fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent) {
+      const contentLength = this.length;
+      this.getFormatKeys().forEach(key => {
+        if (key instanceof InlineFormatter) {
+          this.getFormatRanges(key).forEach(f => {
+            if (f.endIndex === contentLength) {
+              newFormatMap.set(key, [{
+                ...f
+              }]);
+            }
+          })
+        }
+      })
+      Array.from(discardedFormatMap.keys()).filter(i => i instanceof BlockFormatter).forEach(key => {
+        newFormatMap.set(key, discardedFormatMap.get(key));
+      })
+    } else {
+      newFormatMap = discardedFormatMap;
+    }
+    fragment.formatMap = newFormatMap;
     this.markAsDirtied();
     return fragment;
   }
@@ -478,6 +461,125 @@ export class Fragment extends Marker {
     return parentFragment.getContext(context, filter);
   }
 
+
+  private insertFragment(fragment: Fragment, index: number) {
+    const contents = fragment.sliceContents(0).reverse();
+    contents.forEach(c => {
+      this.contents.insert(c, index);
+      if (c instanceof AbstractComponent) {
+        c[parentFragmentAccessToken] = this;
+        this.eventMap.set(c, c.onChange.subscribe(() => {
+          this.markAsChanged();
+        }))
+      }
+    })
+
+    const len = fragment.length;
+
+    const splitFormatMap = new FormatMap();
+
+    this.getFormatKeys().filter(key => {
+      return key instanceof InlineFormatter
+    }).forEach(key => {
+      const formats = this.getFormatRanges(key);
+      formats.forEach(format => {
+        if (format.endIndex <= index) {
+          return;
+        }
+        if (format.startIndex >= index) {
+          format.startIndex += len;
+          format.endIndex += len;
+        } else {
+          const format2: FormatRange = {
+            startIndex: index + len,
+            endIndex: format.endIndex + len,
+            effect: format.effect,
+            formatData: format.formatData?.clone()
+          }
+          format.endIndex = index;
+          splitFormatMap.set(key, [format2]);
+        }
+      })
+    })
+    Array.from(splitFormatMap.keys()).forEach(key => {
+      splitFormatMap.get(key).forEach(f => {
+        this.formatMap.merge(key, f, true);
+      })
+    })
+    fragment.getFormatKeys().forEach(key => {
+      fragment.getFormatRanges(key).forEach(f => {
+        this.formatMap.merge(key, {
+          startIndex: f.startIndex + index,
+          endIndex: f.endIndex + index,
+          effect: f.effect,
+          formatData: f.formatData?.clone()
+        }, true);
+      })
+    })
+    fragment.clean();
+    this.markAsDirtied();
+  }
+
+  private _insert(contents: AbstractComponent | string, index: number) {
+    if (contents instanceof AbstractComponent) {
+      this.gourdComponentInSelf(contents);
+      this.eventMap.set(contents, contents.onChange.subscribe(() => {
+        this.markAsChanged();
+      }))
+    }
+
+    this.contents.insert(contents, index);
+    const formatMap = new FormatMap();
+    Array.from(this.formatMap.keys()).forEach(token => {
+      const formats = this.formatMap.get(token) || [];
+      formats.forEach(format => {
+
+        if (token instanceof BlockFormatter) {
+          formatMap.merge(token, format, true);
+          return;
+        }
+        if (format.startIndex < index && format.endIndex >= index) {
+          if (contents instanceof DivisionAbstractComponent ||
+            contents instanceof BranchAbstractComponent ||
+            contents instanceof BackboneAbstractComponent) {
+            formatMap.merge(token, {
+              ...format,
+              endIndex: index
+            }, true);
+            formatMap.merge(token, {
+              startIndex: index,
+              endIndex: index + 1,
+              effect: FormatEffect.Invalid,
+              formatData: format.formatData.clone(),
+            }, true);
+            if (format.endIndex > index) {
+              formatMap.merge(token, {
+                ...format,
+                startIndex: index + 1,
+                endIndex: format.endIndex + 1
+              }, true);
+            }
+          } else {
+            formatMap.merge(token, {
+              ...format,
+              endIndex: format.endIndex + contents.length
+            }, true);
+          }
+        } else {
+          if (format.startIndex >= index && format.startIndex > 0 && format.startIndex < format.endIndex) {
+            format.startIndex += contents.length;
+          }
+          if (format.endIndex >= index) {
+            format.endIndex += contents.length;
+          }
+          formatMap.merge(token, format, true);
+        }
+      })
+    })
+    this.formatMap = formatMap;
+    this.markAsDirtied();
+  }
+
   private _apply(token: InlineFormatter, formatRange: InlineFormatParams, options?: ApplyFormatOptions): void;
   private _apply(token: BlockFormatter, formatRange: BlockFormatParams, options?: ApplyFormatOptions): void;
   private _apply(token: any, formatRange: any, options: ApplyFormatOptions = {
@@ -493,7 +595,7 @@ export class Fragment extends Marker {
           return 0;
         },
         get endIndex() {
-          return self.contentLength;
+          return self.length;
         }
       }, important);
       return;
@@ -501,8 +603,11 @@ export class Fragment extends Marker {
     if (formatRange.startIndex < 0) {
       formatRange.startIndex = 0;
     }
-    if (formatRange.endIndex > this.contentLength) {
-      formatRange.endIndex = this.contentLength;
+    if (formatRange.endIndex > this.length) {
+      formatRange.endIndex = this.length;
+    }
+    if (this.getContentAtIndex(formatRange.endIndex) instanceof BrComponent) {
+      formatRange.endIndex++;
     }
     const lineFormatRange = formatRange as InlineFormatParams;
     const contents = this.sliceContents(lineFormatRange.startIndex, lineFormatRange.endIndex);
@@ -515,7 +620,7 @@ export class Fragment extends Marker {
         if (coverChild) {
           const newFormatRange = Object.assign({}, lineFormatRange);
           newFormatRange.startIndex = 0;
-          newFormatRange.endIndex = item.slot.contentLength;
+          newFormatRange.endIndex = item.slot.length;
           item.slot.apply(token, newFormatRange, options);
         }
       } else if (item instanceof BranchAbstractComponent) {
@@ -524,7 +629,7 @@ export class Fragment extends Marker {
           item.slots.forEach(fragment => {
             const newFormatRange = Object.assign({}, lineFormatRange);
             newFormatRange.startIndex = 0;
-            newFormatRange.endIndex = fragment.contentLength;
+            newFormatRange.endIndex = fragment.length;
             fragment.apply(token, newFormatRange, options);
           })
         }
@@ -534,7 +639,7 @@ export class Fragment extends Marker {
           for (const fragment of item) {
             const newFormatRange = Object.assign({}, lineFormatRange);
             newFormatRange.startIndex = 0;
-            newFormatRange.endIndex = fragment.contentLength;
+            newFormatRange.endIndex = fragment.length;
             fragment.apply(token, newFormatRange, options);
           }
         }
@@ -561,7 +666,7 @@ export class Fragment extends Marker {
 
   private _append(content: string | AbstractComponent, insertAdjacentInlineFormat = false) {
     const offset = content.length;
-    const length = this.contentLength;
+    const length = this.length;
     this.contents.append(content);
 
     if (content instanceof AbstractComponent) {

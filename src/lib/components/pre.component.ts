@@ -25,9 +25,9 @@ import {
   InlineFormatter, Interceptor,
   ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
   VElement,
-  ViewData, SingleSlotRenderFn
+  ViewData, SingleSlotRenderFn,
+  BrComponent
 } from '../core/_api';
-import { BrComponent } from './br.component';
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -143,10 +143,10 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
     const index = component.indexOf(commonAncestorFragment);
 
-    if (commonAncestorFragment.contentLength === 0) {
+    if (commonAncestorFragment.length === 0) {
       commonAncestorFragment.append(new BrComponent());
     }
-    if (nextSlot.contentLength === 0) {
+    if (nextSlot.length === 0) {
       nextSlot.append(new BrComponent());
     }
     const f = new CodeFragment();
@@ -158,17 +158,6 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     event.stopPropagation();
   }
 
-  onDelete(event: TBEvent<PreComponent>) {
-    const firstRange = this.selection.firstRange;
-    const startFragment = firstRange.startFragment;
-    if (firstRange.startIndex === 1 && startFragment.contentLength === 1) {
-      startFragment.clean()
-      startFragment.append(new BrComponent());
-      firstRange.setPosition(startFragment, 0);
-      event.stopPropagation();
-    }
-  }
-
   onDeleteRange(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
     if (firstRange.startIndex === 0) {
@@ -178,7 +167,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       const endIndex = component.indexOf(endFragment as CodeFragment);
       component.splice(startIndex, endIndex - startIndex);
       endFragment.remove(0, firstRange.endIndex);
-      if (endFragment.contentLength === 0) {
+      if (endFragment.length === 0) {
         endFragment.append(new BrComponent());
       }
       firstRange.setStart(endFragment, 0);

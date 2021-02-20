@@ -1,8 +1,8 @@
-import { Contents } from './contents';
 import { AbstractComponent } from './component';
+import { Fragment } from './fragment';
 
 export interface TBClipboard {
-  contents: Contents
+  fragment: Fragment
   text: string;
 }
 

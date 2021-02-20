@@ -13,9 +13,9 @@ import {
   TBSelection,
   TBEvent,
   SingleSlotRenderFn,
-  ContextMenuAction
+  ContextMenuAction,
+  BrComponent
 } from '../core/_api';
-import { BrComponent } from './br.component';
 
 export interface TableCell {
   colspan: number;
@@ -846,7 +846,7 @@ export class TableComponent extends BackboneAbstractComponent {
     if (col.rowspan > 1) {
       td.attrs.set('rowspan', col.rowspan);
     }
-    if (col.fragment.contentLength === 0) {
+    if (col.fragment.length === 0) {
       col.fragment.append(new BrComponent());
     }
     return td;

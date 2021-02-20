@@ -1,8 +1,8 @@
 import { CubicBezier } from '@tanbo/bezier';
 import { Injector } from '@tanbo/di';
 
-import { Fragment, Renderer, TBRange, TBSelection, TBPlugin } from '../core/_api';
-import { TableCellPosition, TableComponent, BrComponent } from '../components/_api';
+import { Fragment, Renderer, TBRange, TBSelection, TBPlugin, BrComponent } from '../core/_api';
+import { TableCellPosition, TableComponent } from '../components/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
 
 interface ElementPosition {
@@ -114,7 +114,7 @@ export class TableEditPlugin implements TBPlugin {
       this.selectedCells.map(cell => {
         const range = new TBRange(this.contextDocument.createRange(), this.renderer);
         const firstContent = cell.getContentAtIndex(0);
-        if (cell.contentLength === 1 && firstContent instanceof BrComponent) {
+        if (cell.length === 1 && firstContent instanceof BrComponent) {
           range.setStart(cell, 0);
           range.setEnd(cell, 1);
         } else {

@@ -164,7 +164,7 @@ export class GroupHandler implements Tool {
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       if (selectionMatchState.matchData) {
-        const option = c.highlight?.(c.options, selectionMatchState.matchData);
+        const option = c.matchOption?.(selectionMatchState.matchData);
         if (option) {
           selectMenu.disabled = false;
           selectMenu.highlight(option);

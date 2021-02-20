@@ -1,7 +1,7 @@
 import { Injector } from '@tanbo/di';
 
-import { Commander, CommandContext } from '../../core/_api';
-import { BlockComponent, BrComponent } from '../../components/_api';
+import { Commander, CommandContext, BrComponent } from '../../core/_api';
+import { BlockComponent } from '../../components/_api';
 import { RootComponent } from '../../root-component';
 
 export class InsertParagraphCommander implements Commander<null> {

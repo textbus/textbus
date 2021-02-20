@@ -96,7 +96,7 @@ export class FormatMatcher implements Matcher {
         }
       }
       return {
-        effect: fragment.contentLength === 0 ? null : FormatEffect.Invalid,
+        effect: fragment.length === 0 ? null : FormatEffect.Invalid,
         srcData: null
       };
     }
@@ -110,10 +110,10 @@ export class FormatMatcher implements Matcher {
 
     for (const child of childContents) {
       if (child instanceof DivisionAbstractComponent) {
-        states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.contentLength));
+        states.push(this.getStatesByRange(child.slot, this.formatter, 0, child.slot.length));
       } else if (child instanceof BranchAbstractComponent) {
         child.slots.forEach(childFragment => {
-          states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.contentLength));
+          states.push(this.getStatesByRange(childFragment, this.formatter, 0, childFragment.length));
         })
       } else {
         for (const format of formatRanges) {
