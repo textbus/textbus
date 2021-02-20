@@ -743,8 +743,8 @@ class ContextMenu {
       if (x + menuWidth >= clientWidth) {
         x -= menuWidth
       }
-      if (y + menuHeight >= clientHeight) {
-        y = clientHeight - menuHeight;
+      if (y + menuHeight >= clientHeight - 20) {
+        y = clientHeight - menuHeight - 20;
       }
 
       if (y < 20) {
