@@ -7,7 +7,7 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  SlotRendererFn,
+  SlotRenderFn,
   Component,
   Interceptor,
   TBSelection,
@@ -290,7 +290,7 @@ export class TableComponent extends BackboneAbstractComponent {
     }
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
       table.classes.push('tb-table');

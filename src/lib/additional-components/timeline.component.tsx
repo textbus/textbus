@@ -4,7 +4,7 @@ import {
   FormatData,
   FormatEffect,
   Fragment, SingleSlotRenderFn,
-  SlotMap, SlotRendererFn,
+  SlotMap, SlotRenderFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -220,7 +220,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
     return host
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     const list = new VElement('tb-timeline');
     this.vEle = list;
 

@@ -6,7 +6,7 @@ import {
   ComponentLoader,
   VElement,
   BrComponent,
-  ViewData, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn,
+  ViewData, SlotRenderFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn,
 } from '../core/_api';
 import { BlockComponent, breakingLine } from '../components/_api';
 import { ComponentCreator } from '../workbench/component-stage';
@@ -162,7 +162,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
     return host
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     return new VElement('tb-todo-list', {
       childNodes: this.slots.map(slot => {
         const {host, container} = this.renderItem(slot);

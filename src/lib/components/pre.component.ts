@@ -23,7 +23,7 @@ import {
   FormatRendingContext,
   Fragment,
   InlineFormatter, Interceptor,
-  ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
+  ReplaceMode, SlotRenderFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
   BrComponent, ContextMenuAction
@@ -353,7 +353,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
     return slotRendererFn(slot, line);
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const block = new VElement('pre', {
       childNodes: [
         new VElement('div', {

@@ -7,7 +7,7 @@ import {
   ViewData,
   Fragment,
   VElement,
-  TBEvent, SlotRendererFn, Component, Interceptor, TBSelection, SingleSlotRenderFn,
+  TBEvent, SlotRenderFn, Component, Interceptor, TBSelection, SingleSlotRenderFn,
   BrComponent
 } from '../core/_api';
 import { BlockComponent } from './block.component';
@@ -120,7 +120,7 @@ export class ListComponent extends BranchAbstractComponent {
     return slotRendererFn(slot, li);
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const list = new VElement(this.tagName);
     this.slots.forEach(slot => {
       const li = new VElement('li');
