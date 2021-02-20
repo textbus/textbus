@@ -136,8 +136,8 @@ export class Input {
    * 添加快捷键
    * @param keymap
    */
-  keymap(keymap: KeymapAction) {
-    this.keymaps.push(keymap);
+  addKeymap(keymap: KeymapAction) {
+    this.keymaps.unshift(keymap);
   }
 
   destroy() {
@@ -405,7 +405,7 @@ export class Input {
   }
 
   private bindDefaultKeymap() {
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: ['Backspace', 'Delete']
       },
@@ -432,7 +432,7 @@ export class Input {
         this.dispatchInputReadyEvent()
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'Enter'
       },
@@ -460,7 +460,7 @@ export class Input {
         this.dispatchInputReadyEvent()
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'a',
         ctrlKey: true
@@ -469,7 +469,7 @@ export class Input {
         this.selection.selectAll();
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -491,7 +491,26 @@ export class Input {
         this.dispatchInputReadyEvent();
       }
     })
-    this.keymap({
+    this.addKeymap({
+      keymap: {
+        key: 'z',
+        ctrlKey: true
+      },
+      action: () => {
+        this.history.usePreviousSnapshot();
+      }
+    })
+    this.addKeymap({
+      keymap: {
+        key: 'z',
+        ctrlKey: true,
+        shiftKey: true
+      },
+      action: () => {
+        this.history.useNextSnapshot();
+      }
+    })
+    this.addKeymap({
       keymap: {
         key: 'Home'
       },
@@ -513,7 +532,7 @@ export class Input {
         }
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'End'
       },

@@ -144,7 +144,7 @@ export class Toolbar {
     this.history = injector.get(HistoryManager);
 
 
-    this.keymaps.forEach(k => this.input.keymap(k));
+    this.keymaps.forEach(k => this.input.addKeymap(k));
     this.subs.push(
       this.history.onChange.subscribe(() => {
         this.updateHandlerState();
