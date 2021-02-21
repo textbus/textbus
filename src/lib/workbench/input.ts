@@ -796,7 +796,9 @@ class ContextMenu {
             })
             btn.addEventListener('click', () => {
               item.action();
-              this.history.record();
+              if (item.autoRecordingHistory !== false) {
+                this.history.record();
+              }
               this.eventFromSelf = false;
             })
           }

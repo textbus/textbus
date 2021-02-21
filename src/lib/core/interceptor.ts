@@ -9,6 +9,7 @@ export interface TBClipboard {
 export interface ContextMenuAction {
   iconClasses?: string[];
   label: string;
+  autoRecordingHistory?: boolean;
   disabled?: boolean;
 
   action(): void;
