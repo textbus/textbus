@@ -61,8 +61,11 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const selection = this.selection;
     const startIndex = this.selectionSnapshot.firstRange.startIndex as number;
     const latestFragment = new Fragment();
-
-    this.contentSnapshot.forEach(i => latestFragment.append(i));
+    let contentSnapshot = this.contentSnapshot;
+    if (contentSnapshot.length === 1 && contentSnapshot[0] instanceof BrComponent && startIndex === 0) {
+      contentSnapshot = [];
+    }
+    contentSnapshot.forEach(i => latestFragment.append(i));
 
     this.formatterSnapshot.forEach((formatRanges, key) => {
       if (key instanceof InlineFormatter) {
@@ -109,7 +112,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const last = latestFragment.getContentAtIndex(latestFragment.length - 1);
     if (startIndex + input.selectionStart === latestFragment.length &&
       last instanceof BrComponent) {
-      latestFragment.append(new BrComponent());
+      latestFragment.append(new BrComponent(), true);
     }
     selection.commonAncestorFragment.from(latestFragment);
   }
@@ -118,12 +121,12 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const firstRange = this.selection.firstRange;
     const rootFragment = firstRange.startFragment;
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
-    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-    const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+    const afterContent = rootFragment.getContentAtIndex(firstRange.startIndex + 1);
     if (typeof afterContent === 'string' || afterContent instanceof LeafAbstractComponent) {
       return;
     }
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
   }
 
   onPaste(event: TBEvent<RootComponent, TBClipboard>) {
