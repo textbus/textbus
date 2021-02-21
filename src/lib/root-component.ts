@@ -115,13 +115,21 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
     const contents = clipboardFragment.sliceContents();
 
+    const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
     const hasBlockComponent = contents.map(i => {
       return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent);
     }).includes(true);
 
     if (!hasBlockComponent) {
       const len = clipboardFragment.length;
+      const formats: FormatRange[] = [];
+      if (isEmpty && firstRange.startIndex === 0) {
+        fragment.getFormatKeys().forEach(key => {
+          formats.push(...fragment.getFormatRanges(key));
+        })
+      }
       fragment.insert(clipboardFragment, firstRange.startIndex);
+      formats.forEach(f => f.startIndex = 0);
       firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
       return
     }
@@ -131,7 +139,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       firstContent instanceof AbstractComponent &&
       !(firstContent instanceof LeafAbstractComponent);
 
-    const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
     const parentComponent = fragment.parentComponent;
     const parentFragment = parentComponent.parentFragment;
 

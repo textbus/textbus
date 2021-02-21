@@ -472,6 +472,8 @@ export class Fragment extends Marker {
 
   private insertFragment(fragment: Fragment, index: number) {
     const contents = fragment.sliceContents(0).reverse();
+    const isEmpty = this.length === 0 || this.length === 1 && this.getContentAtIndex(0) instanceof BrComponent;
+
     contents.forEach(c => {
       this.contents.insert(c, index);
       if (c instanceof AbstractComponent) {
@@ -521,7 +523,7 @@ export class Fragment extends Marker {
           endIndex: f.endIndex + index,
           effect: f.effect,
           formatData: f.formatData?.clone()
-        }, true);
+        }, key instanceof InlineFormatter || !isEmpty);
       })
     })
     fragment.clean();
