@@ -20,13 +20,11 @@ export class CleanCommander implements Commander<null> {
     context.selection.ranges.forEach(range => {
       range.getSuccessiveContents().forEach(scope => {
         if (scope.fragment === range.startFragment &&
-          scope.startIndex <= range.startIndex &&
-          scope.endIndex >= range.endIndex) {
+          scope.startIndex <= range.startIndex) {
           scope.startIndex = range.startIndex;
           b = true;
         }
         if (scope.fragment === range.endFragment &&
-          scope.startIndex <= range.startIndex &&
           scope.endIndex >= range.endIndex) {
           scope.endIndex = range.endIndex;
           b = true;
@@ -34,10 +32,10 @@ export class CleanCommander implements Commander<null> {
 
         let isDeleteBlockFormat = false;
         if (scope.startIndex === 0) {
-          if (scope.endIndex === scope.fragment.contentLength) {
+          if (scope.endIndex === scope.fragment.length) {
             isDeleteBlockFormat = true;
-          } else if (scope.endIndex === scope.fragment.contentLength - 1) {
-            const lastContent = scope.fragment.getContentAtIndex(scope.fragment.contentLength - 1);
+          } else if (scope.endIndex === scope.fragment.length - 1) {
+            const lastContent = scope.fragment.getContentAtIndex(scope.fragment.length - 1);
             if (lastContent instanceof BrComponent) {
               isDeleteBlockFormat = true;
             }

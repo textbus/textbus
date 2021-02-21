@@ -7,7 +7,7 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  SlotRendererFn,
+  SlotRenderFn,
   Component,
   Interceptor,
   TBSelection,
@@ -290,7 +290,7 @@ export class TableComponent extends BackboneAbstractComponent {
     }
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const table = new VElement(this.tagName);
     if (this.config.useTextBusStyle) {
       table.classes.push('tb-table');
@@ -846,7 +846,7 @@ export class TableComponent extends BackboneAbstractComponent {
     if (col.rowspan > 1) {
       td.attrs.set('rowspan', col.rowspan);
     }
-    if (col.fragment.contentLength === 0) {
+    if (col.fragment.length === 0) {
       col.fragment.append(new BrComponent());
     }
     return td;

@@ -3,7 +3,7 @@ import {
   ComponentLoader,
   FormatData,
   FormatEffect,
-  Fragment, SingleSlotRenderFn, SlotRendererFn,
+  Fragment, SingleSlotRenderFn, SlotRenderFn,
   VElement,
   ViewData,
 } from '../core/_api';
@@ -190,7 +190,7 @@ export class StepComponent extends BranchAbstractComponent {
     return host
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     return new VElement('tb-step', {
       attrs: {
         step: this.step

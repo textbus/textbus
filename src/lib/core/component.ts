@@ -40,7 +40,7 @@ export abstract class ComponentLoader {
 
 export const parentFragmentAccessToken = Symbol('ParentFragmentAccessToken');
 
-export type SlotRendererFn = (slot: Fragment, contentContainer: VElement, host: VElement) => VElement;
+export type SlotRenderFn = (slot: Fragment, contentContainer: VElement, host: VElement) => VElement;
 export type SingleSlotRenderFn = (slot: Fragment, contentContainer: VElement) => VElement;
 
 export interface AbstractComponent {
@@ -124,7 +124,7 @@ export abstract class DivisionAbstractComponent extends AbstractComponent {
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
    * @param slotRendererFn 渲染插槽的工具函数
    */
-  abstract render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement;
 
   abstract slotRender(isOutputMode: boolean, singleSlotRendererFn: SingleSlotRenderFn): VElement;
 }
@@ -189,7 +189,7 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
    * @param singleSlotRendererFn 渲染插槽的工具函数
    */
-  abstract render(isOutputMode: boolean, singleSlotRendererFn: SlotRendererFn): VElement;
+  abstract render(isOutputMode: boolean, singleSlotRendererFn: SlotRenderFn): VElement;
 }
 
 /**
@@ -305,7 +305,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
    *                      以方便用户操作，这时可根据 isOutputMode 参数来作区分。
    * @param slotRendererFn 渲染插槽的工具函数
    */
-  abstract render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement;
+  abstract render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement;
 
   private setup(fragments: T[]) {
     fragments.forEach(f => {

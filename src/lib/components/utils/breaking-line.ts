@@ -7,9 +7,9 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
   }
 
   const next = fragment.cut(index);
-  if (next.contentLength === 0) {
+  if (next.length === 0) {
     next.append(new BrComponent());
-    const contentLength = fragment.contentLength;
+    const contentLength = fragment.length;
     fragment.getFormatKeys().forEach(key => {
       if (key instanceof InlineFormatter) {
         fragment.getFormatRanges(key).forEach(f => {

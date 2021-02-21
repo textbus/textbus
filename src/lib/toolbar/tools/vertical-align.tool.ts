@@ -36,9 +36,9 @@ export const verticalAlignToolConfig: SelectToolConfig = {
     value: 'text-bottom'
   }],
   matcher: new FormatMatcher(verticalAlignFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of verticalAlignToolConfig.options) {
         if (option.value === data.styles.get('verticalAlign')) {
           return option;
         }

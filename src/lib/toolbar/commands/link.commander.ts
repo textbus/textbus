@@ -53,7 +53,7 @@ export class LinkCommander implements Commander<Map<string, string>> {
             content.slots.forEach(item => {
               item.apply(this.formatter, {
                 startIndex: 0,
-                endIndex: item.contentLength,
+                endIndex: item.length,
                 effect: FormatEffect.Valid,
                 formatData: new FormatData({
                   attrs

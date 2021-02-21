@@ -3,7 +3,7 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRendererFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard
+  Fragment, SlotRenderFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard
 } from '../core/_api';
 import { ComponentCreator } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent } from '../components/_api';
@@ -129,12 +129,12 @@ export class ImageCardComponent extends BackboneAbstractComponent {
   }
 
   componentContentChange() {
-    if (this.descFragment.contentLength === 0) {
+    if (this.descFragment.length === 0) {
       this.descFragment.append(new BrComponent());
     }
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     let imgContainer: VElement;
     let descContainer: VElement;
     switch (slot) {
@@ -147,7 +147,7 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     }
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn): VElement {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     const card = <tb-image-card/>;
     card.appendChild(this.slotRender(this.imgFragment, isOutputMode, slotRendererFn));
     card.appendChild(this.slotRender(this.descFragment, isOutputMode, slotRendererFn));

@@ -1,12 +1,22 @@
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import {
-  AbstractComponent, TBClipboard,
+  AbstractComponent,
+  TBClipboard,
   Component,
   DivisionAbstractComponent,
-  Fragment, InlineFormatter, LeafAbstractComponent,
-  Interceptor, TBEvent,
+  Fragment,
+  InlineFormatter,
+  LeafAbstractComponent,
+  Interceptor,
+  TBEvent,
   TBSelection,
-  VElement, BlockFormatter, FormatRange, BrComponent, BackboneAbstractComponent, ContextMenuAction, ComponentLoader, ViewData
+  VElement,
+  BlockFormatter,
+  FormatRange,
+  BrComponent,
+  ContextMenuAction,
+  ComponentLoader,
+  ViewData,
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BlockComponent } from './components/_api';
@@ -51,32 +61,10 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const selection = this.selection;
     const startIndex = this.selectionSnapshot.firstRange.startIndex as number;
     const latestFragment = new Fragment();
+    const contentSnapshot = this.contentSnapshot;
+    contentSnapshot.forEach(i => latestFragment.append(i));
 
-    this.contentSnapshot.forEach(i => latestFragment.append(i));
-
-    this.formatterSnapshot.forEach((formatRanges, key) => {
-      if (key instanceof InlineFormatter) {
-        formatRanges.forEach(formatRange => {
-          latestFragment.apply(key, {
-            ...formatRange,
-            formatData: formatRange.formatData?.clone()
-          })
-        })
-      } else {
-        formatRanges.forEach(formatRange => {
-          latestFragment.apply(key, {
-            get startIndex() {
-              return 0;
-            },
-            get endIndex() {
-              return latestFragment.contentLength;
-            },
-            effect: formatRange.effect,
-            formatData: formatRange.formatData?.clone()
-          })
-        })
-      }
-    })
+    this.mergeFormats(latestFragment);
 
     const input = this.input;
 
@@ -94,12 +82,16 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       }
       return str;
     });
+    const isEmptyFragment = contentSnapshot.length === 1 && contentSnapshot[0] instanceof BrComponent;
+    if (isEmptyFragment && latestFragment.length > 1) {
+      latestFragment.remove(latestFragment.length - 1);
+    }
 
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.selectionStart;
-    const last = latestFragment.getContentAtIndex(latestFragment.contentLength - 1);
-    if (startIndex + input.selectionStart === latestFragment.contentLength &&
+    const last = latestFragment.getContentAtIndex(latestFragment.length - 1);
+    if (startIndex + input.selectionStart === latestFragment.length &&
       last instanceof BrComponent) {
-      latestFragment.append(new BrComponent());
+      latestFragment.append(new BrComponent(), true);
     }
     selection.commonAncestorFragment.from(latestFragment);
   }
@@ -108,61 +100,80 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const firstRange = this.selection.firstRange;
     const rootFragment = firstRange.startFragment;
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
-    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
-    const afterContent = rootFragment.sliceContents(firstRange.startIndex, firstRange.startIndex + 1)[0];
+    const afterContent = rootFragment.getContentAtIndex(firstRange.startIndex + 1);
     if (typeof afterContent === 'string' || afterContent instanceof LeafAbstractComponent) {
       return;
     }
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
   }
 
   onPaste(event: TBEvent<RootComponent, TBClipboard>) {
     const firstRange = this.selection.firstRange;
-    const contents = event.data.contents;
+    const clipboardFragment = event.data.fragment;
     const fragment = firstRange.startFragment;
 
-    const parentComponent = fragment.parentComponent;
+    const contents = clipboardFragment.sliceContents();
 
-    if (parentComponent instanceof BackboneAbstractComponent) {
-      let i = 0
-      contents.slice(0).forEach(item => {
-        fragment.insert(item, firstRange.startIndex + i);
-        i += item.length;
-      });
-      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + i;
-    } else {
-      const parentFragment = parentComponent.parentFragment;
-      const contentsArr = contents.slice(0);
-      let firstContent = contentsArr[0];
-      const afterContent = fragment.cut(firstRange.startIndex);
-      let offset = 0;
-      while (contentsArr.length) {
-        firstContent = contentsArr[0];
-        if (typeof firstContent === 'string' || firstContent instanceof LeafAbstractComponent) {
-          offset += firstContent.length;
-          fragment.insert(firstContent, firstRange.startIndex + 1);
-          contentsArr.shift();
-        } else {
-          break;
-        }
-      }
-      firstRange.startIndex += offset;
+    const isEmpty = fragment.length === 0 || fragment.length === 1 && fragment.getContentAtIndex(0) instanceof BrComponent;
+    const hasBlockComponent = contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent);
+    }).includes(true);
 
-      if (!contentsArr.length) {
-        fragment.concat(afterContent);
-        firstRange.collapse();
-      } else {
-        const afterComponent = parentComponent.clone() as DivisionAbstractComponent;
-        afterComponent.slot.from(afterContent);
-        if (afterComponent.slot.contentLength === 0) {
-          afterComponent.slot.append(new BrComponent());
-        }
-        firstRange.setStart(afterComponent.slot, 0);
-        firstRange.collapse();
-        parentFragment.insertAfter(afterComponent, parentComponent);
-        contentsArr.reverse().forEach(item => parentFragment.insertAfter(item, parentComponent));
+    if (!hasBlockComponent) {
+      const len = clipboardFragment.length;
+      const formats: FormatRange[] = [];
+      if (isEmpty && firstRange.startIndex === 0) {
+        fragment.getFormatKeys().forEach(key => {
+          formats.push(...fragment.getFormatRanges(key));
+        })
       }
+      fragment.insert(clipboardFragment, firstRange.startIndex);
+      formats.forEach(f => f.startIndex = 0);
+      firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
+      return
     }
+
+    const firstContent = clipboardFragment.getContentAtIndex(0);
+    const isSingleComponent = clipboardFragment.length === 1 &&
+      firstContent instanceof AbstractComponent &&
+      !(firstContent instanceof LeafAbstractComponent);
+
+    const parentComponent = fragment.parentComponent;
+    const parentFragment = parentComponent.parentFragment;
+
+    if (!parentFragment) {
+      fragment.insert(clipboardFragment, firstRange.startIndex);
+      return;
+    }
+
+    const index = parentFragment.indexOf(parentComponent);
+    if (isEmpty && isSingleComponent) {
+
+      parentFragment.insert(firstContent, index);
+      return;
+    }
+
+    const contentLength = fragment.length;
+    if (isSingleComponent &&
+      (firstRange.endIndex === contentLength || firstRange.endIndex === contentLength - 1 && fragment.getContentAtIndex(contentLength - 1) instanceof BrComponent)) {
+      parentFragment.insertAfter(firstContent, parentComponent);
+      return;
+    }
+
+    const isAllBlock = !contents.map(i => {
+      return i instanceof AbstractComponent && !(i instanceof LeafAbstractComponent)
+    }).includes(false);
+
+    if (isAllBlock && isEmpty) {
+      contents.reverse().forEach(c => {
+        parentFragment.insert(c, index);
+      })
+      return;
+    }
+    const len = clipboardFragment.length;
+    fragment.insert(clipboardFragment, firstRange.startIndex);
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + len;
   }
 
   onDeleteRange() {
@@ -175,6 +186,33 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     this.selection.ranges.forEach(range => {
       range.delete();
     });
+  }
+
+  private mergeFormats(latestFragment: Fragment) {
+    this.formatterSnapshot.forEach((formatRanges, key) => {
+      if (key instanceof InlineFormatter) {
+        formatRanges.forEach(formatRange => {
+          latestFragment.apply(key, {
+            ...formatRange,
+            formatData: formatRange.formatData?.clone()
+          })
+        })
+      } else {
+        formatRanges.forEach(formatRange => {
+          latestFragment.apply(key, {
+            get startIndex() {
+              return 0;
+            },
+            get endIndex() {
+              return latestFragment.length;
+            },
+            effect: formatRange.effect,
+            formatData: formatRange.formatData?.clone()
+          })
+        })
+      }
+    })
+
   }
 
   private insertParagraph(insertBefore: boolean) {

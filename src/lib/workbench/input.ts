@@ -5,9 +5,7 @@ import { Inject, Injectable, InjectFlags, Injector, Type } from '@tanbo/di';
 import {
   AbstractComponent,
   ComponentSetter,
-  Contents,
-  ContextMenuAction,
-  DivisionAbstractComponent,
+  ContextMenuAction, DivisionAbstractComponent,
   Interceptor,
   LeafAbstractComponent,
   Parser,
@@ -138,11 +136,12 @@ export class Input {
    * 添加快捷键
    * @param keymap
    */
-  keymap(keymap: KeymapAction) {
-    this.keymaps.push(keymap);
+  addKeymap(keymap: KeymapAction) {
+    this.keymaps.unshift(keymap);
   }
 
   destroy() {
+    this.contextmenu.destroy();
     this.subs.forEach(s => s.unsubscribe());
   }
 
@@ -302,7 +301,9 @@ export class Input {
             !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
             ev.preventDefault();
             this.dispatchInputReadyEvent();
-            return config.action(ev);
+            const b = config.action(ev);
+            this.dispatchInputReadyEvent()
+            return b;
           }
         }
       }),
@@ -407,7 +408,7 @@ export class Input {
   }
 
   private bindDefaultKeymap() {
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: ['Backspace', 'Delete']
       },
@@ -434,7 +435,7 @@ export class Input {
         this.dispatchInputReadyEvent()
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'Enter'
       },
@@ -462,7 +463,7 @@ export class Input {
         this.dispatchInputReadyEvent()
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'a',
         ctrlKey: true
@@ -471,7 +472,7 @@ export class Input {
         this.selection.selectAll();
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -493,7 +494,26 @@ export class Input {
         this.dispatchInputReadyEvent();
       }
     })
-    this.keymap({
+    this.addKeymap({
+      keymap: {
+        key: 'z',
+        ctrlKey: true
+      },
+      action: () => {
+        this.history.usePreviousSnapshot();
+      }
+    })
+    this.addKeymap({
+      keymap: {
+        key: 'z',
+        ctrlKey: true,
+        shiftKey: true
+      },
+      action: () => {
+        this.history.useNextSnapshot();
+      }
+    })
+    this.addKeymap({
       keymap: {
         key: 'Home'
       },
@@ -515,7 +535,7 @@ export class Input {
         }
       }
     })
-    this.keymap({
+    this.addKeymap({
       keymap: {
         key: 'End'
       },
@@ -594,12 +614,7 @@ export class Input {
   }
 
   private handlePaste(dom: HTMLElement, text: string) {
-    const fragment = this.parser.parse(dom);
-    const contents = new Contents();
-    (fragment.getContentAtIndex(0) as DivisionAbstractComponent).slot.sliceContents(0).forEach(i => {
-      contents.append(i)
-    });
-
+    const fragment = (this.parser.parse(dom).getContentAtIndex(0) as DivisionAbstractComponent).slot;
     if (!this.selection.collapsed) {
       this.dispatchEvent((injector, instance) => {
         const event = new TBEvent(instance);
@@ -612,7 +627,7 @@ export class Input {
     }
     if (this.selection.collapsed) {
       this.dispatchEvent((injector, instance) => {
-        const event = new TBEvent(instance, {contents, text});
+        const event = new TBEvent(instance, {fragment, text});
         const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
         if (interceptor) {
           interceptor.onPaste?.(event);
@@ -690,6 +705,8 @@ class ContextMenu {
 
   private eventFromSelf = false;
 
+  private subs: Subscription[] = [];
+
   constructor(private history: HistoryManager) {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu']
@@ -698,22 +715,48 @@ class ContextMenu {
       this.hide();
     })
     this.elementRef.addEventListener('contextmenu', ev => ev.preventDefault());
-    document.addEventListener('mousedown', () => {
-      if (!this.eventFromSelf) {
-        this.hide();
-      }
-    })
+
   }
 
   hide() {
+    this.subs.forEach(i => i.unsubscribe());
+    this.subs = [];
     this.elementRef.parentNode?.removeChild(this.elementRef);
   }
 
   show(menus: ContextMenuAction[][], x: number, y: number) {
+    this.subs.push(
+      fromEvent(document, 'mousedown').subscribe(() => {
+        if (!this.eventFromSelf) {
+          this.hide();
+        }
+      }),
+      fromEvent(window, 'resize').subscribe(() => {
+        setPosition();
+      })
+    )
     this.elementRef.innerHTML = '';
 
-    const clientWidth = document.documentElement.clientWidth;
-    const clientHeight = document.documentElement.clientHeight;
+    const setPosition = () => {
+      const clientWidth = document.documentElement.clientWidth;
+      const clientHeight = document.documentElement.clientHeight;
+      if (x + menuWidth >= clientWidth) {
+        x -= menuWidth
+      }
+      if (y + menuHeight >= clientHeight - 20) {
+        y = clientHeight - menuHeight - 20;
+      }
+
+      if (y < 20) {
+        y = 20;
+      }
+      Object.assign(this.elementRef.style, {
+        left: x + 'px',
+        top: y + 'px'
+      })
+      this.elementRef.style.maxHeight = clientHeight - y - 20 + 'px';
+    }
+
 
     let itemCount = 0;
     menus.forEach(actions => {
@@ -753,7 +796,9 @@ class ContextMenu {
             })
             btn.addEventListener('click', () => {
               item.action();
-              this.history.record();
+              if (item.autoRecordingHistory !== false) {
+                this.history.record();
+              }
               this.eventFromSelf = false;
             })
           }
@@ -765,16 +810,12 @@ class ContextMenu {
     const menuWidth = 180 + 10;
     const menuHeight = itemCount * 26 + menus.length * 10 + menus.length + 10;
 
-    if (x + menuWidth >= clientWidth) {
-      x -= menuWidth
-    }
-    if (y + menuHeight >= clientHeight) {
-      y -= y + menuHeight - clientHeight;
-    }
-    Object.assign(this.elementRef.style, {
-      left: x + 'px',
-      top: y + 'px'
-    })
+    setPosition();
+
     document.body.appendChild(this.elementRef);
+  }
+
+  destroy() {
+    this.hide();
   }
 }

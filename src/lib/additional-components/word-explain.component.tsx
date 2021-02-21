@@ -3,7 +3,7 @@ import {
   ComponentLoader,
   FormatData,
   FormatEffect,
-  Fragment, SingleSlotRenderFn, SlotRendererFn,
+  Fragment, SingleSlotRenderFn, SlotRenderFn,
   VElement,
   ViewData
 } from '../core/_api';
@@ -172,7 +172,7 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     }
   }
 
-  render(isOutputMode: boolean, slotRenderFn: SlotRendererFn): VElement {
+  render(isOutputMode: boolean, slotRenderFn: SlotRenderFn): VElement {
     const title = this.slotRender(this.title, isOutputMode, (slot, contentContainer) => contentContainer)
     const subtitle = this.slotRender(this.subtitle, isOutputMode, (slot, contentContainer) => contentContainer);
     const detail = this.slotRender(this.detail, isOutputMode, (slot, contentContainer) => contentContainer);

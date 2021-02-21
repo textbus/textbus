@@ -23,10 +23,10 @@ import {
   FormatRendingContext,
   Fragment,
   InlineFormatter, Interceptor,
-  ReplaceMode, SlotRendererFn, TBClipboard, TBEvent, TBSelection,
+  ReplaceMode, SlotRenderFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
-  BrComponent
+  BrComponent, ContextMenuAction
 } from '../core/_api';
 
 export const codeStyles = {
@@ -143,10 +143,10 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
 
     const index = component.indexOf(commonAncestorFragment);
 
-    if (commonAncestorFragment.contentLength === 0) {
+    if (commonAncestorFragment.length === 0) {
       commonAncestorFragment.append(new BrComponent());
     }
-    if (nextSlot.contentLength === 0) {
+    if (nextSlot.length === 0) {
       nextSlot.append(new BrComponent());
     }
     const f = new CodeFragment();
@@ -158,17 +158,6 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     event.stopPropagation();
   }
 
-  onDelete(event: TBEvent<PreComponent>) {
-    const firstRange = this.selection.firstRange;
-    const startFragment = firstRange.startFragment;
-    if (firstRange.startIndex === 1 && startFragment.contentLength === 1) {
-      startFragment.clean()
-      startFragment.append(new BrComponent());
-      firstRange.setPosition(startFragment, 0);
-      event.stopPropagation();
-    }
-  }
-
   onDeleteRange(event: TBEvent<PreComponent>) {
     const firstRange = this.selection.firstRange;
     if (firstRange.startIndex === 0) {
@@ -178,7 +167,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       const endIndex = component.indexOf(endFragment as CodeFragment);
       component.splice(startIndex, endIndex - startIndex);
       endFragment.remove(0, firstRange.endIndex);
-      if (endFragment.contentLength === 0) {
+      if (endFragment.length === 0) {
         endFragment.append(new BrComponent());
       }
       firstRange.setStart(endFragment, 0);
@@ -217,6 +206,48 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       firstRange.collapse();
     }
     event.stopPropagation();
+  }
+
+  onContextmenu(instance: PreComponent): ContextMenuAction[] {
+    return [{
+      value: 'Javascript',
+    }, {
+      value: 'HTML',
+    }, {
+      value: 'CSS',
+    }, {
+      value: 'Typescript',
+    }, {
+      value: 'Java',
+    }, {
+      value: 'C',
+    }, {
+      label: 'C++',
+      value: 'CPP',
+    }, {
+      label: 'C#',
+      value: 'CSharp',
+    }, {
+      value: 'Swift',
+    }, {
+      value: 'JSON',
+    }, {
+      value: 'Less',
+    }, {
+      value: 'SCSS',
+    }, {
+      value: 'Stylus',
+    }, {
+      value: 'bash',
+      label: '无',
+    }].map(i => {
+      return {
+        label: i.label || i.value,
+        action() {
+          instance.lang = i.value
+        }
+      }
+    });
   }
 }
 
@@ -266,11 +297,12 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
 
   set lang(v: string) {
     if (v !== this._lang) {
+      this._lang = v;
       this.forEach(slot => {
         slot.markAsDirtied();
       })
+      this.markAsDirtied();
     }
-    this._lang = v;
   }
 
   get lang() {
@@ -321,7 +353,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
     return slotRendererFn(slot, line);
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const block = new VElement('pre', {
       childNodes: [
         new VElement('div', {

@@ -4,7 +4,7 @@ import {
   ComponentLoader,
   ViewData,
   VElement,
-  DivisionAbstractComponent, SlotRendererFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn
+  DivisionAbstractComponent, SlotRenderFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
 
@@ -56,6 +56,7 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
 })
 export class BlockComponent extends DivisionAbstractComponent {
   static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',');
+
   constructor(tagName: string) {
     super(tagName);
   }
@@ -70,8 +71,8 @@ export class BlockComponent extends DivisionAbstractComponent {
     return slotRendererFn(this.slot, new VElement(this.tagName));
   }
 
-  render(isOutputMode: boolean, slotRendererFn: SlotRendererFn) {
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
     const block = new VElement(this.tagName);
-    return slotRendererFn(this.slot, block,  block);
+    return slotRendererFn(this.slot, block, block);
   }
 }

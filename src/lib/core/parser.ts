@@ -6,6 +6,9 @@ import { BranchAbstractComponent, DivisionAbstractComponent, ComponentLoader, Ba
  * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
  */
 export class Parser {
+  static parserHTML(html: string) {
+    return new DOMParser().parseFromString(html, 'text/html').body;
+  }
   constructor(private componentLoaders: ComponentLoader[] = [],
               private formatters: Formatter[] = []) {
   }
@@ -67,14 +70,14 @@ export class Parser {
         formatData: p.formatter.read(el as HTMLElement)
       }
     });
-    const startIndex = slot.contentLength;
+    const startIndex = slot.length;
     Array.from(el.childNodes).forEach(child => {
       this.readComponent(child, slot);
     })
     maps.forEach(item => {
       slot.apply(item.formatter, {
         startIndex,
-        endIndex: slot.contentLength,
+        endIndex: slot.length,
         formatData: item.formatData,
         effect: item.effect
       }, {

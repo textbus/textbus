@@ -10,6 +10,11 @@ export const fontSizeToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-font-size'],
   mini: true,
   options: [{
+    label: '默认',
+    classes: ['textbus-toolbar-font-size-inherit'],
+    value: '',
+    default: true
+  }, {
     label: '12px',
     classes: ['textbus-toolbar-font-size-12'],
     value: '12px'
@@ -28,8 +33,7 @@ export const fontSizeToolConfig: SelectToolConfig = {
   }, {
     label: '16px',
     classes: ['textbus-toolbar-font-size-16'],
-    value: '16px',
-    default: true
+    value: '16px'
   }, {
     label: '18px',
     classes: ['textbus-toolbar-font-size-18'],
@@ -52,9 +56,9 @@ export const fontSizeToolConfig: SelectToolConfig = {
     value: '48px'
   }],
   matcher: new FormatMatcher(fontSizeFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of fontSizeToolConfig.options) {
         if (option.value === data.styles.get('fontSize')) {
           return option;
         }

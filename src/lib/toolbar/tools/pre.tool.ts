@@ -8,7 +8,7 @@ export const preToolConfig: SelectToolConfig = {
   tooltip: '代码',
   mini: true,
   options: [{
-    value: 'Javascript'
+    value: 'Javascript',
   }, {
     value: 'HTML'
   }, {
@@ -41,9 +41,9 @@ export const preToolConfig: SelectToolConfig = {
     default: true
   }],
   matcher: new CodeMatcher(),
-  highlight(options, t) {
+  matchOption(t) {
     if (t instanceof PreComponent) {
-      for (const item of options) {
+      for (const item of preToolConfig.options) {
         if (item.value === t.lang) {
           return item;
         }

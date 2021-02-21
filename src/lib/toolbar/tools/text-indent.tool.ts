@@ -29,9 +29,9 @@ export const textIndentToolConfig: SelectToolConfig = {
     value: '4em'
   }],
   matcher: new FormatMatcher(textIndentFormatter, [PreComponent]),
-  highlight(options, data) {
+  matchOption(data) {
     if (data instanceof FormatData) {
-      for (const option of options) {
+      for (const option of textIndentToolConfig.options) {
         if (option.value === data.styles.get('textIndent')) {
           return option;
         }

@@ -28,8 +28,8 @@ export class TableCommander implements Commander<Map<string, string | number | b
       const parentFragment = parentComponent.parentFragment;
       const firstContent = range.startFragment.getContentAtIndex(0);
       if (parentComponent instanceof DivisionAbstractComponent) {
-        if (range.startFragment.contentLength === 0 ||
-          range.startFragment.contentLength === 1 &&
+        if (range.startFragment.length === 0 ||
+          range.startFragment.length === 1 &&
           firstContent instanceof BrComponent) {
           const i = parentFragment.indexOf(parentComponent);
           parentFragment.insert(table, i);

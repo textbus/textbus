@@ -16,6 +16,7 @@ import {
 const editor = createEditor('#editor', {
   expandComponentLibrary: true,
   deviceType: 'A4',
+  // deviceType: 'iPad',
   theme: 'dark',
   fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
