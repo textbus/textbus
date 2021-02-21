@@ -57,10 +57,33 @@ export class ListCommander implements Commander<null> {
           parentFragment.cut(index, index + 1);
         })
       } else {
+        const commonAncestorComponent = range.commonAncestorComponent;
+
         const commonScope = range.getCommonAncestorFragmentScope();
         const commonAncestorFragment = range.commonAncestorFragment;
         const startFragment = range.startFragment;
 
+        if (commonAncestorComponent instanceof BranchAbstractComponent) {
+          const parentFragment = commonAncestorComponent.parentFragment;
+          const endSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.endFirstFragment);
+          if (endSlotIndex < commonAncestorComponent.slots.length - 1) {
+            const afterComponent = commonAncestorComponent.clone() as BranchAbstractComponent;
+            afterComponent.slots.splice(0, endSlotIndex + 1);
+            parentFragment.insertAfter(afterComponent, commonAncestorComponent);
+            commonAncestorComponent.slots.length = endSlotIndex + 1;
+          }
+          const startSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.startFirstFragment);
+          const list = new ListComponent(this.tagName);
+          list.slots.push(...commonAncestorComponent.slots.splice(startSlotIndex, endSlotIndex + 1));
+          parentFragment.insertAfter(list, commonAncestorComponent);
+
+          if (commonAncestorComponent.slots.length === 0) {
+            const index = parentFragment.indexOf(commonAncestorComponent);
+            parentFragment.remove(index, index + 1);
+          }
+
+          return;
+        }
 
         const scopes = this.getMovableContents(range, commonAncestorFragment);
         const list = this.buildNewList(scopes, commonAncestorFragment, range);

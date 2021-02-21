@@ -141,21 +141,30 @@ export class TBRange {
   getCommonAncestorFragmentScope() {
     let startFragment = this.startFragment;
     let endFragment = this.endFragment;
+    let startFirstFragment = this.startFragment;
+    let endFirstFragment = this.endFragment;
     let startIndex = this.startIndex;
     let endIndex = this.endIndex;
     const commonAncestorFragment = this.commonAncestorFragment;
+    const commonAncestorComponent = this.commonAncestorComponent;
 
     let startChildComponent: BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent = null;
     let endChildComponent: BranchAbstractComponent | DivisionAbstractComponent | BackboneAbstractComponent = null;
 
     while (startFragment !== commonAncestorFragment) {
       startChildComponent = startFragment.parentComponent;
+      if (startChildComponent === commonAncestorComponent) {
+        startFirstFragment = startFragment;
+      }
       startFragment = startChildComponent.parentFragment;
       startIndex = startFragment.indexOf(startChildComponent);
     }
 
     while (endFragment !== commonAncestorFragment) {
       endChildComponent = endFragment.parentComponent;
+      if (endChildComponent === commonAncestorComponent) {
+        endFirstFragment = endFragment;
+      }
       endFragment = endChildComponent.parentFragment;
       endIndex = endFragment.indexOf(endChildComponent);
     }
@@ -166,7 +175,9 @@ export class TBRange {
       startChildComponent,
       endIndex: endIndex + 1,
       endFragment,
-      endChildComponent
+      endChildComponent,
+      startFirstFragment,
+      endFirstFragment
     }
   }
 
