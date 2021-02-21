@@ -264,7 +264,8 @@ export class Fragment extends Marker {
         selfFormatMap.set(token, [...formats]);
         discardedFormatMap.set(token, formats.map(f => {
           return {
-            ...f,
+            effect: f.effect,
+            formatData: f.formatData?.clone(),
             get startIndex() {
               return 0;
             },
@@ -308,7 +309,8 @@ export class Fragment extends Marker {
             endIndex: format.endIndex - count
           }, true);
           discardedFormatMap.merge(token, {
-            ...format,
+            effect: format.effect,
+            formatData: format.formatData?.clone(),
             startIndex: format.startIndex - startIndex,
             endIndex: count
           }, true);
@@ -327,7 +329,8 @@ export class Fragment extends Marker {
             }, true);
           }
           discardedFormatMap.merge(token, {
-            ...format,
+            effect: format.effect,
+            formatData: format.formatData?.clone(),
             startIndex: 0,
             endIndex: count
           }, true);
@@ -343,7 +346,8 @@ export class Fragment extends Marker {
             endIndex: startIndex
           }, true);
           discardedFormatMap.merge(token, {
-            ...format,
+            effect: format.effect,
+            formatData: format.formatData?.clone(),
             startIndex: 0,
             endIndex: format.endIndex - startIndex
           }, true)
@@ -355,7 +359,8 @@ export class Fragment extends Marker {
         // deleteRange        [         ]
         if (format.startIndex > startIndex && format.endIndex < endIndex) {
           discardedFormatMap.merge(token, {
-            ...format,
+            effect: format.effect,
+            formatData: format.formatData?.clone(),
             startIndex: format.startIndex - startIndex,
             endIndex: format.endIndex - startIndex
           }, true);
@@ -378,7 +383,10 @@ export class Fragment extends Marker {
           this.getFormatRanges(key).forEach(f => {
             if (f.endIndex === contentLength) {
               newFormatMap.set(key, [{
-                ...f
+                effect: f.effect,
+                formatData: f.formatData?.clone(),
+                startIndex: 0,
+                endIndex: 1
               }]);
             }
           })

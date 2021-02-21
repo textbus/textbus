@@ -61,35 +61,10 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const selection = this.selection;
     const startIndex = this.selectionSnapshot.firstRange.startIndex as number;
     const latestFragment = new Fragment();
-    let contentSnapshot = this.contentSnapshot;
-    if (contentSnapshot.length === 1 && contentSnapshot[0] instanceof BrComponent && startIndex === 0) {
-      contentSnapshot = [];
-    }
+    const contentSnapshot = this.contentSnapshot;
     contentSnapshot.forEach(i => latestFragment.append(i));
 
-    this.formatterSnapshot.forEach((formatRanges, key) => {
-      if (key instanceof InlineFormatter) {
-        formatRanges.forEach(formatRange => {
-          latestFragment.apply(key, {
-            ...formatRange,
-            formatData: formatRange.formatData?.clone()
-          })
-        })
-      } else {
-        formatRanges.forEach(formatRange => {
-          latestFragment.apply(key, {
-            get startIndex() {
-              return 0;
-            },
-            get endIndex() {
-              return latestFragment.length;
-            },
-            effect: formatRange.effect,
-            formatData: formatRange.formatData?.clone()
-          })
-        })
-      }
-    })
+    this.mergeFormats(latestFragment);
 
     const input = this.input;
 
@@ -107,6 +82,10 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       }
       return str;
     });
+    const isEmptyFragment = contentSnapshot.length === 1 && contentSnapshot[0] instanceof BrComponent;
+    if (isEmptyFragment && latestFragment.length > 1) {
+      latestFragment.remove(latestFragment.length - 1);
+    }
 
     selection.firstRange.startIndex = selection.firstRange.endIndex = startIndex + input.selectionStart;
     const last = latestFragment.getContentAtIndex(latestFragment.length - 1);
@@ -200,6 +179,33 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     this.selection.ranges.forEach(range => {
       range.delete();
     });
+  }
+
+  private mergeFormats(latestFragment: Fragment) {
+    this.formatterSnapshot.forEach((formatRanges, key) => {
+      if (key instanceof InlineFormatter) {
+        formatRanges.forEach(formatRange => {
+          latestFragment.apply(key, {
+            ...formatRange,
+            formatData: formatRange.formatData?.clone()
+          })
+        })
+      } else {
+        formatRanges.forEach(formatRange => {
+          latestFragment.apply(key, {
+            get startIndex() {
+              return 0;
+            },
+            get endIndex() {
+              return latestFragment.length;
+            },
+            effect: formatRange.effect,
+            formatData: formatRange.formatData?.clone()
+          })
+        })
+      }
+    })
+
   }
 
   private insertParagraph(insertBefore: boolean) {
