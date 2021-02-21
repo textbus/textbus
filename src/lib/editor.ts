@@ -123,6 +123,9 @@ export class Editor<T = any> {
     } else {
       this.container = selector;
     }
+    if (!this.container || !(this.container instanceof HTMLElement)) {
+      throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
+    }
     this.onReady = this.readyEvent.asObservable();
     let defaultDeviceType = options.deviceType;
 
