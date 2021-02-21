@@ -137,13 +137,10 @@ export class Editor<T = any> {
     } else {
       this.container = selector;
     }
-<<<<<<< HEAD
-    /**转化为Observerable */
-=======
     if (!this.container || !(this.container instanceof HTMLElement)) {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
->>>>>>> fc41b4de2f2719bff99d756b079c49916d03f473
+    /**转化为Observerable */
     this.onReady = this.readyEvent.asObservable();
     let defaultDeviceType = options.deviceType;
 
