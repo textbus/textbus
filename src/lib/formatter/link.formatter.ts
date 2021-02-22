@@ -14,10 +14,14 @@ export class LinkFormatter extends InlineFormatter {
   }
 
   read(node: HTMLElement): FormatData {
-    return this.extractData(node, {
+    const data = this.extractData(node, {
       tag: true,
       attrs: ['target', 'href', 'data-href']
     });
+    if (data.attrs.get('href')) {
+      data.attrs.delete('data-href');
+    }
+    return data;
   }
 
   render(context: FormatRendingContext) {
