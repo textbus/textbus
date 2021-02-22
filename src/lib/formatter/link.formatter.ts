@@ -16,14 +16,14 @@ export class LinkFormatter extends InlineFormatter {
   read(node: HTMLElement): FormatData {
     return this.extractData(node, {
       tag: true,
-      attrs: ['target', 'href']
+      attrs: ['target', 'href', 'data-href']
     });
   }
 
   render(context: FormatRendingContext) {
     const el = new VElement('a');
     const target = context.formatData.attrs.get('target');
-    const href = context.formatData.attrs.get('href');
+    const href = context.formatData.attrs.get('href') || context.formatData.attrs.get('data-href');
     target && el.attrs.set('target', target);
     href && el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
     return new ChildSlotMode(el);
