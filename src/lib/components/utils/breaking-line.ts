@@ -1,4 +1,5 @@
-import { Fragment, BrComponent, InlineFormatter } from '../../core/_api';
+import { BrComponent, FormatEffect, Fragment, InlineFormatter } from '../../core/_api';
+import { linkFormatter } from '../../formatter/link.formatter';
 
 export function breakingLine(fragment: Fragment, index: number): Fragment {
   if (index === 0) {
@@ -22,6 +23,14 @@ export function breakingLine(fragment: Fragment, index: number): Fragment {
           }
         })
       }
+    })
+  }
+  if (next.length === 1 && next.getContentAtIndex(0) instanceof BrComponent) {
+    next.apply(linkFormatter, {
+      startIndex: 0,
+      endIndex: 1,
+      effect: FormatEffect.Invalid,
+      formatData: null
     })
   }
   return next;
