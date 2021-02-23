@@ -290,16 +290,16 @@ export class Viewer {
   private getOutputComponentMetadata() {
     const classes = this.getReferencedComponents();
 
-    const styles: string[] = [];
+    const styles: string[] = [...(this.options.styleSheets || '')];
     const scripts: string[] = [];
 
     classes.forEach(c => {
       const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
       if (annotation.styles) {
-        styles.push(...annotation.styles);
+        styles.push(...annotation.styles.filter(i => i));
       }
       if (annotation.scripts) {
-        scripts.push(...annotation.scripts);
+        scripts.push(...annotation.scripts.filter(i => i));
       }
     })
     return {
