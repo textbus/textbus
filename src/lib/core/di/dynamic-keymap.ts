@@ -18,7 +18,7 @@ export interface KeymapAction {
   keymap: Keymap;
 
   /** 当触发快捷键时执行的回调 */
-  action(event: Event): any;
+  action(event: Event): void;
 }
 
 export abstract class DynamicKeymap<T extends AbstractComponent> {

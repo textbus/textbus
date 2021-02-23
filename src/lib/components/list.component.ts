@@ -8,7 +8,7 @@ import {
   Fragment,
   VElement,
   TBEvent, SlotRenderFn, Component, Interceptor, TBSelection, SingleSlotRenderFn,
-  BrComponent
+  BrComponent, DynamicKeymap, KeymapAction
 } from '../core/_api';
 import { BlockComponent } from './block.component';
 import { breakingLine } from './utils/breaking-line';
@@ -62,6 +62,41 @@ class ListComponentLoader implements ComponentLoader {
 }
 
 @Injectable()
+class ListComponentDynamicKeymap implements DynamicKeymap<ListComponent> {
+  constructor(private selection: TBSelection) {
+  }
+
+  provide(instance: ListComponent): KeymapAction[] {
+    return [{
+      keymap: {
+        key: 'Tab'
+      },
+      action: () => {
+        const firstRange = this.selection.firstRange;
+        const startFragment = this.getFragmentsInList(instance, firstRange.startFragment);
+        const endFragment = this.getFragmentsInList(instance, firstRange.endFragment);
+
+        const startIndex = instance.slots.indexOf(startFragment);
+        const endIndex = instance.slots.indexOf(endFragment);
+
+        const childList = new ListComponent(instance.tagName);
+        childList.slots.push(...instance.slots.splice(startIndex, endIndex - startIndex + 1));
+        const newSlot = new Fragment();
+        newSlot.append(childList);
+        instance.slots.splice(startIndex, 0, newSlot);
+      }
+    }];
+  }
+
+  private getFragmentsInList(instance: ListComponent, fragment: Fragment): Fragment {
+    if (instance.slots.includes(fragment)) {
+      return fragment;
+    }
+    return this.getFragmentsInList(instance, fragment.parentComponent.parentFragment);
+  }
+}
+
+@Injectable()
 class ListComponentInterceptor implements Interceptor<ListComponent> {
   constructor(private selection: TBSelection) {
   }
@@ -100,6 +135,9 @@ class ListComponentInterceptor implements Interceptor<ListComponent> {
   providers: [{
     provide: Interceptor,
     useClass: ListComponentInterceptor
+  }, {
+    provide: DynamicKeymap,
+    useClass: ListComponentDynamicKeymap
   }]
 })
 export class ListComponent extends BranchAbstractComponent {

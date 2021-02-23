@@ -12,7 +12,7 @@ import {
   Renderer,
   TBEvent,
   TBSelection,
-  KeymapAction
+  KeymapAction, DynamicKeymap
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
@@ -271,20 +271,43 @@ export class Input {
         return !isWriting || !this.input.value;
       })).subscribe((ev: KeyboardEvent) => {
         const reg = /\w+/.test(ev.key) ? new RegExp(`^${ev.key}$`, 'i') : new RegExp(`^[${ev.key.replace(/([-\\])/g, '\\$1')}]$`, 'i');
-        for (const config of this.keymaps) {
-          const test = Array.isArray(config.keymap.key) ?
-            config.keymap.key.map(k => reg.test(k)).includes(true) :
-            reg.test(config.keymap.key);
-          if (test &&
-            !!config.keymap.altKey === ev.altKey &&
-            !!config.keymap.shiftKey === ev.shiftKey &&
-            !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
-            ev.preventDefault();
-            this.dispatchInputReadyEvent();
-            const b = config.action(ev);
-            this.dispatchInputReadyEvent()
-            return b;
+        let hasMatched = false;
+        const invokeKeymaps = (keymaps: KeymapAction[]) => {
+          for (const config of keymaps) {
+            const test = Array.isArray(config.keymap.key) ?
+              config.keymap.key.map(k => reg.test(k)).includes(true) :
+              reg.test(config.keymap.key);
+            if (test &&
+              !!config.keymap.altKey === ev.altKey &&
+              !!config.keymap.shiftKey === ev.shiftKey &&
+              !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
+              hasMatched = true;
+              this.dispatchInputReadyEvent();
+              config.action(ev);
+              this.dispatchInputReadyEvent();
+              break;
+            }
           }
+        }
+
+        this.dispatchEvent((injector, instance) => {
+          const dynamicKeymap = injector.get(DynamicKeymap as Type<DynamicKeymap<any>>, null, InjectFlags.Self);
+          if (dynamicKeymap) {
+            const keymapActions = dynamicKeymap.provide(instance);
+            invokeKeymaps(keymapActions);
+            if (hasMatched) {
+              return false;
+            }
+          }
+          return true;
+        })
+
+        if (!hasMatched) {
+          invokeKeymaps(this.keymaps);
+        }
+        if (hasMatched) {
+          ev.preventDefault();
+          return false
         }
       }),
 
