@@ -10,7 +10,7 @@ import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
-import { Dialog } from '../../workbench/_api';
+import { Dialog, KeymapAction } from '../../workbench/_api';
 import { FormToolConfig } from './form.handler';
 import { FileUploader } from '../../uikit/forms/help';
 
@@ -78,6 +78,7 @@ export class GroupHandler implements Tool {
   onApply: Observable<any>;
   commander: Commander;
   tools: Array<{ config: ToolConfig, instance: Tool }> = [];
+  keymapAction: KeymapAction[] = [];
   private dropdown: UIDropdown;
 
   private subs: Subscription[] = [];
@@ -128,6 +129,16 @@ export class GroupHandler implements Tool {
         s.next();
       }
     })
+    if (c.keymap) {
+      this.keymapAction.push({
+        keymap: c.keymap,
+        action() {
+          if (!item.disabled) {
+            s.next()
+          }
+        }
+      })
+    }
     const instance = new MenuHandler(item.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       switch (selectionMatchState.state) {
         case HighlightState.Highlight:
@@ -160,6 +171,18 @@ export class GroupHandler implements Tool {
       onSelected: (value: any) => {
         s.next(value);
         this.dropdown.hide();
+      }
+    })
+    c.options.forEach(option => {
+      if (option.keymap) {
+        this.keymapAction.push({
+          keymap: option.keymap,
+          action() {
+            if (!selectMenu.disabled) {
+              s.next(option.value);
+            }
+          }
+        })
       }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
@@ -197,6 +220,18 @@ export class GroupHandler implements Tool {
         }
       }),
       label: c.label
+    })
+    c.actions.forEach(a => {
+      if (a.keymap) {
+        this.keymapAction.push({
+          keymap: a.keymap,
+          action() {
+            if (!selectMenu.disabled) {
+              s.next(a.value)
+            }
+          }
+        })
+      }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
