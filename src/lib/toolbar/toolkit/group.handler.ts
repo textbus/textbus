@@ -125,6 +125,7 @@ export class GroupHandler implements Tool {
       label: c.label,
       classes: c.classes,
       iconClasses: c.iconClasses,
+      keymap: c.keymap,
       onChecked(): any {
         s.next();
       }
