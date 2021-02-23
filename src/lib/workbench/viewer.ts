@@ -22,7 +22,7 @@ import {
   Renderer,
   TBRange,
   TBSelection,
-  BrComponent
+  BrComponent, AbstractComponent, DivisionAbstractComponent, BranchAbstractComponent, BackboneAbstractComponent
 } from '../core/_api';
 import { iframeHTML } from './iframe-html';
 import { HistoryManager } from '../history-manager';
@@ -265,21 +265,74 @@ export class Viewer {
   }
 
   getContents() {
+    const metadata = this.getOutputComponentMetadata()
+
     const content = this.editorController.sourceCodeMode ?
       this.sourceCodeComponent.getSourceCode() :
       this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
     return {
       content,
-      styleSheets: [this.docStyles]
+      styleSheets: metadata.styles,
+      scripts: metadata.scripts
     }
   }
 
   getJSONLiteral() {
     const json = this.outputRenderer.render(this.rootComponent.slot).toJSON();
+    const metadata = this.getOutputComponentMetadata()
     return {
       json,
-      styleSheets: [this.docStyles]
+      styleSheets: metadata.styles,
+      scripts: metadata.scripts
     }
+  }
+
+  private getOutputComponentMetadata() {
+    const classes = this.getReferencedComponents();
+
+    const styles: string[] = [];
+    const scripts: string[] = [];
+
+    classes.forEach(c => {
+      const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
+      if (annotation.styles) {
+        styles.push(...annotation.styles);
+      }
+      if (annotation.scripts) {
+        scripts.push(...annotation.scripts);
+      }
+    })
+    return {
+      styles: Array.from(new Set(styles)).map(i => Viewer.cssMin(i)),
+      scripts: Array.from(new Set(scripts))
+    }
+  }
+
+  private getReferencedComponents() {
+
+    function getComponentCollection(component: AbstractComponent) {
+      const collection: AbstractComponent[] = [component];
+      const fragments: Fragment[] = [];
+      if (component instanceof DivisionAbstractComponent) {
+        fragments.push(component.slot)
+      } else if (component instanceof BranchAbstractComponent) {
+        fragments.push(...component.slots);
+      } else if (component instanceof BackboneAbstractComponent) {
+        fragments.push(...Array.from(component));
+      }
+      fragments.forEach(fragment => {
+        fragment.sliceContents().forEach(i => {
+          if (i instanceof AbstractComponent) {
+            collection.push(...getComponentCollection(i));
+          }
+        })
+      })
+      return collection;
+    }
+
+    const instances = getComponentCollection(this.rootComponent);
+
+    return Array.from(new Set(instances.map(i => i.constructor)))
   }
 
   private listen() {
