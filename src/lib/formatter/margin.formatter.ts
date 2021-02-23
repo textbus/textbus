@@ -10,8 +10,8 @@ import {
   VElement
 } from '../core/_api';
 
-function match(p: HTMLElement): FormatEffect {
-  if (!this.reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
+function match(reg: RegExp, p: HTMLElement): FormatEffect {
+  if (!reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
     return FormatEffect.Invalid;
   }
   const styleKeys = ['margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']
@@ -47,7 +47,7 @@ export class InlineMarginFormatter extends InlineFormatter {
   }
 
   match(p: HTMLElement): FormatEffect {
-    return match(p);
+    return match(this.reg, p);
   }
 
   read(node: HTMLElement): FormatData {
@@ -71,7 +71,7 @@ export class BlockMarginFormatter extends BlockFormatter {
   }
 
   match(p: HTMLElement): FormatEffect {
-    return match(p);
+    return match(this.reg, p);
   }
 
   read(node: HTMLElement): FormatData {
