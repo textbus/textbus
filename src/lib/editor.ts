@@ -257,7 +257,7 @@ export class Editor<T = any> {
     return new Promise((resolve) => {
       this.run(() => {
         this.viewer.updateContent(html + '');
-        resolve();
+        resolve(true);
       })
     })
   }
