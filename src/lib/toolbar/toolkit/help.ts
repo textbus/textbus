@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KeymapAction } from '../../workbench/input';
-import { Commander } from '../../core/_api';
+import { KeymapAction, Commander } from '../../core/_api';
 import { SelectionMatchState } from '../matcher/matcher';
 
 export interface Tool<T = any> {

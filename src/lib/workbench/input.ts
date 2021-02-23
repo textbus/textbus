@@ -11,7 +11,8 @@ import {
   Parser,
   Renderer,
   TBEvent,
-  TBSelection
+  TBSelection,
+  KeymapAction
 } from '../core/_api';
 import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
 import { RootComponent } from '../root-component';
@@ -20,27 +21,6 @@ import { EditorController } from '../editor-controller';
 import { ControlPanel } from './control-panel';
 import { createElement, createTextNode } from '../uikit/uikit';
 import { ComponentInjectors } from '../component-injectors';
-
-/**
- * 快捷键配置项
- */
-export interface Keymap {
-  ctrlKey?: boolean;
-  shiftKey?: boolean;
-  altKey?: boolean;
-  key: string | string[];
-}
-
-/**
- * 添加快捷键配置的参数
- */
-export interface KeymapAction {
-  /** 快捷键配置 */
-  keymap: Keymap;
-
-  /** 当触发快捷键时执行的回调 */
-  action(event: Event): any;
-}
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);

@@ -1,7 +1,7 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { Tool } from './help';
-import { Commander } from '../../core/commander';
+import { Commander, KeymapAction } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 import { HighlightState } from '../help';
 import { ButtonToolConfig } from './button.handler';
@@ -10,7 +10,7 @@ import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
-import { Dialog, KeymapAction } from '../../workbench/_api';
+import { Dialog } from '../../workbench/_api';
 import { FormToolConfig } from './form.handler';
 import { FileUploader } from '../../uikit/forms/help';
 
