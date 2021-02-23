@@ -15,9 +15,6 @@ function match(reg: RegExp, p: HTMLElement): FormatEffect {
     return FormatEffect.Invalid;
   }
   const styleKeys = ['margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']
-  if (p instanceof FormatData) {
-    return styleKeys.map(key => p.styles.get(key)).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
-  }
   return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
 }
 
