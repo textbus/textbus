@@ -13,7 +13,7 @@ import {
   AbstractComponent,
   Formatter,
   OutputRenderer,
-  TBPlugin
+  TBPlugin, VElementLiteral
 } from './core/_api';
 import {
   Device,
@@ -84,6 +84,12 @@ export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDIT
 export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
 
 const editorErrorFn = makeError('Editor');
+
+export interface OutputContent<T> {
+  content: T;
+  styleSheets: string[];
+  scripts: string[];
+}
 
 /**
  * TextBus 主类
@@ -277,7 +283,7 @@ export class Editor<T = any> {
     return new Promise<void>((resolve) => {
       this.run(() => {
         this.viewer.updateContent(html + '');
-        resolve();
+        resolve(true);
       })
     })
   }
@@ -285,18 +291,18 @@ export class Editor<T = any> {
   /**
    * 获取 TextBus 的内容。
    */
-  getContents() {
+  getContents(): OutputContent<T> {
     return this.viewer.getContents();
   }
 
   /**
    * 获取 TextBus 内容的 JSON 字面量。
    */
-  getJSONLiteral() {
+  getJSONLiteral(): OutputContent<VElementLiteral> {
     if (this.stateController.sourceCodeMode) {
       throw editorErrorFn('json results cannot be obtained in source editing mode.');
     }
-    return this.viewer.getJSONLiteral();
+    return this.viewer.getJSONLiteral() as any as OutputContent<VElementLiteral>;
   }
 
   /**

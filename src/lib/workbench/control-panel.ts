@@ -2,7 +2,7 @@ import { Injectable } from '@tanbo/di';
 import { Subscription } from 'rxjs';
 
 import { createElement } from '../uikit/_api';
-import { ComponentControlPanelView } from '../core/component-setter';
+import { ComponentControlPanelView } from '../core/_api';
 import { EditorController } from '../editor-controller';
 import { Tab, TabConfig } from './tab';
 

@@ -1,5 +1,5 @@
-import { AbstractComponent } from './component';
-import { Fragment } from './fragment';
+import { AbstractComponent } from '../component';
+import { Fragment } from '../fragment';
 
 export interface TBClipboard {
   fragment: Fragment

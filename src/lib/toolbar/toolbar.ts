@@ -12,13 +12,12 @@ import {
   ToolFactory,
   ToolType
 } from './toolkit/_api';
-import { Input, Keymap, KeymapAction, Dialog } from '../workbench/_api';
+import { Input, Dialog } from '../workbench/_api';
+import { TBSelection, Keymap, KeymapAction, Commander } from '../core/_api';
 import { SelectionMatchState } from './matcher/matcher';
 import { createElement, createKeymapHTML, FileUploader } from '../uikit/_api';
 import { EDITOR_OPTIONS, EditorOptions } from '../editor';
 import { EditorController } from '../editor-controller';
-import { TBSelection } from '../core/selection';
-import { Commander } from '../core/_api';
 import { HistoryManager } from '../history-manager';
 import { makeError } from '../_utils/make-error';
 

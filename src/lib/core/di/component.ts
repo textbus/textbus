@@ -4,6 +4,7 @@ import { ComponentLoader } from '../component';
 export interface Component {
   loader: ComponentLoader;
   styles?: string[];
+  scripts?: string[];
   editModeStyles?: string[];
   providers?: Provider[];
 }

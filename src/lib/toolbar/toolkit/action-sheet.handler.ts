@@ -2,8 +2,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { HighlightState } from '../help';
 import { Tool } from './help';
-import { Keymap, KeymapAction } from '../../workbench/input';
-import { Commander } from '../../core/_api';
+import { Keymap, KeymapAction, Commander } from '../../core/_api';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 

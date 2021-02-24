@@ -1,4 +1,5 @@
-import { isMac, Keymap } from '../workbench/input';
+import { isMac } from '../workbench/input';
+import { Keymap } from '../core/_api';
 
 export interface UIElementParams {
   classes?: string[];

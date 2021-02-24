@@ -1,7 +1,7 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { Tool } from './help';
-import { Commander } from '../../core/commander';
+import { Commander, KeymapAction } from '../../core/_api';
 import { UIDropdown, UIKit } from '../../uikit/uikit';
 import { HighlightState } from '../help';
 import { ButtonToolConfig } from './button.handler';
@@ -78,6 +78,7 @@ export class GroupHandler implements Tool {
   onApply: Observable<any>;
   commander: Commander;
   tools: Array<{ config: ToolConfig, instance: Tool }> = [];
+  keymapAction: KeymapAction[] = [];
   private dropdown: UIDropdown;
 
   private subs: Subscription[] = [];
@@ -124,10 +125,21 @@ export class GroupHandler implements Tool {
       label: c.label,
       classes: c.classes,
       iconClasses: c.iconClasses,
+      keymap: c.keymap,
       onChecked(): any {
         s.next();
       }
     })
+    if (c.keymap) {
+      this.keymapAction.push({
+        keymap: c.keymap,
+        action() {
+          if (!item.disabled) {
+            s.next()
+          }
+        }
+      })
+    }
     const instance = new MenuHandler(item.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       switch (selectionMatchState.state) {
         case HighlightState.Highlight:
@@ -160,6 +172,18 @@ export class GroupHandler implements Tool {
       onSelected: (value: any) => {
         s.next(value);
         this.dropdown.hide();
+      }
+    })
+    c.options.forEach(option => {
+      if (option.keymap) {
+        this.keymapAction.push({
+          keymap: option.keymap,
+          action() {
+            if (!selectMenu.disabled) {
+              s.next(option.value);
+            }
+          }
+        })
       }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
@@ -197,6 +221,18 @@ export class GroupHandler implements Tool {
         }
       }),
       label: c.label
+    })
+    c.actions.forEach(a => {
+      if (a.keymap) {
+        this.keymapAction.push({
+          keymap: a.keymap,
+          action() {
+            if (!selectMenu.disabled) {
+              s.next(a.value)
+            }
+          }
+        })
+      }
     })
     const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
       selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;

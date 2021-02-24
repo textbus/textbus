@@ -1,4 +1,4 @@
-import { AbstractComponent } from './component';
+import { AbstractComponent } from '../component';
 
 export interface ComponentControlPanelView {
   title: string;

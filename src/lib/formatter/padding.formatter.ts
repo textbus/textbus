@@ -1,7 +1,6 @@
 import {
   BlockFormatter,
-  ChildSlotMode,
-  FormatData,
+  ChildSlotMode, FormatData,
   FormatEffect,
   FormatRendingContext,
   FormatterPriority,
@@ -10,14 +9,11 @@ import {
   VElement
 } from '../core/_api';
 
-function match(reg: RegExp, p: HTMLElement | FormatData): FormatEffect {
-  if (!reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
+function match(reg: RegExp, p: HTMLElement): FormatEffect {
+  if (!reg.test(p.tagName)) {
     return FormatEffect.Invalid;
   }
   const styleKeys = ['padding', 'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom']
-  if (p instanceof FormatData) {
-    return styleKeys.map(key => p.styles.get(key)).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
-  }
   return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
 }
 
@@ -46,7 +42,7 @@ export class InlinePaddingFormatter extends InlineFormatter {
     this.reg = new RegExp(`^(${InlinePaddingFormatter.inlineTags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatData): FormatEffect {
+  match(p: HTMLElement): FormatEffect {
     return match(this.reg, p);
   }
 
@@ -70,7 +66,7 @@ export class BlockPaddingFormatter extends BlockFormatter {
     this.reg = new RegExp(`^(${BlockPaddingFormatter.blockTags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatData): FormatEffect {
+  match(p: HTMLElement): FormatEffect {
     return match(this.reg, p);
   }
 

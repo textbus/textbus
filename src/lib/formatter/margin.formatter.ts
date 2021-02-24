@@ -1,4 +1,5 @@
 import {
+  BlockFormatter,
   ChildSlotMode,
   FormatData,
   FormatEffect,
@@ -9,23 +10,41 @@ import {
   VElement
 } from '../core/_api';
 
-abstract class MarginFormatter extends InlineFormatter {
+function match(reg: RegExp, p: HTMLElement): FormatEffect {
+  if (!reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
+    return FormatEffect.Invalid;
+  }
+  const styleKeys = ['margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']
+  return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
+}
+
+function render(context: FormatRendingContext, reg: RegExp, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  const margin = [
+    context.formatData.styles.get('marginTop'),
+    context.formatData.styles.get('marginRight'),
+    context.formatData.styles.get('marginLeft'),
+    context.formatData.styles.get('marginBottom'),
+  ].map(i => i || 0);
+  if (existingElement && reg.test(existingElement.tagName)) {
+    existingElement.styles.set('margin', margin.join(' '));
+    return null;
+  }
+  existingElement = new VElement('span');
+  existingElement.styles.set('margin', margin.join(' '));
+  return new ChildSlotMode(existingElement);
+}
+
+export class InlineMarginFormatter extends InlineFormatter {
+  static inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
   reg: RegExp;
 
-  protected constructor(private tags: string[]) {
+  constructor() {
     super({}, FormatterPriority.InlineStyle);
-    this.reg = new RegExp(`^(${tags.join('|')})$`, 'i');
+    this.reg = new RegExp(`^(${InlineMarginFormatter.inlineTags.join('|')})$`, 'i');
   }
 
-  match(p: HTMLElement | FormatData): FormatEffect {
-    if (!this.reg.test(p instanceof FormatData ? p.tag : p.tagName)) {
-      return FormatEffect.Invalid;
-    }
-    const styleKeys = ['margin', 'marginLeft', 'marginRight', 'marginTop', 'marginBottom']
-    if (p instanceof FormatData) {
-      return styleKeys.map(key => p.styles.get(key)).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
-    }
-    return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
+  match(p: HTMLElement): FormatEffect {
+    return match(this.reg, p);
   }
 
   read(node: HTMLElement): FormatData {
@@ -35,35 +54,31 @@ abstract class MarginFormatter extends InlineFormatter {
   }
 
   render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
-    const margin = [
-      context.formatData.styles.get('marginTop'),
-      context.formatData.styles.get('marginRight'),
-      context.formatData.styles.get('marginLeft'),
-      context.formatData.styles.get('marginBottom'),
-    ].map(i => i || 0);
-    if (existingElement && this.reg.test(existingElement.tagName)) {
-      existingElement.styles.set('margin', margin.join(' '));
-      return null;
-    }
-    existingElement = new VElement('span');
-    existingElement.styles.set('margin', margin.join(' '));
-    return new ChildSlotMode(existingElement);
+    return render(context, this.reg, existingElement);
   }
 }
 
-export class InlineMarginFormatter extends MarginFormatter {
-  static inlineTags = 'span,em,i,s,del,sup,sub,u,strong'.split(',');
-
-  constructor() {
-    super(InlineMarginFormatter.inlineTags);
-  }
-}
-
-export class BlockMarginFormatter extends MarginFormatter {
+export class BlockMarginFormatter extends BlockFormatter {
   static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,nav,header,footer,td,th,li,article'.split(',');
+  reg: RegExp;
 
   constructor() {
-    super(BlockMarginFormatter.blockTags);
+    super({}, FormatterPriority.BlockStyle);
+    this.reg = new RegExp(`^(${BlockMarginFormatter.blockTags.join('|')})$`, 'i');
+  }
+
+  match(p: HTMLElement): FormatEffect {
+    return match(this.reg, p);
+  }
+
+  read(node: HTMLElement): FormatData {
+    return this.extractData(node, {
+      styleName: ['marginLeft', 'marginRight', 'marginTop', 'marginBottom']
+    });
+  }
+
+  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+    return render(context, this.reg, existingElement);
   }
 }
 
