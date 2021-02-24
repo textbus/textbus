@@ -233,7 +233,7 @@ export class StepComponent extends BranchAbstractComponent {
         {
           !isOutputMode && <span class="tb-step-item-add" onClick={
             () => {
-              this.slots.splice(index, 0, createItem());
+              this.slots.splice(index + 1, 0, createItem());
             }
           }/>
         }
