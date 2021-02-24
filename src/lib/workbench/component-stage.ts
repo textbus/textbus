@@ -105,6 +105,10 @@ export class ComponentStage {
     } else {
       if (parentComponent instanceof DivisionAbstractComponent) {
         const parentFragment = parentComponent.parentFragment;
+        if (!parentFragment) {
+          startFragment.insert(component, firstRange.startIndex);
+          return;
+        }
         const firstContent = startFragment.getContentAtIndex(0);
         parentFragment.insertAfter(component, parentComponent);
         if (!firstContent || startFragment.length === 1 && firstContent instanceof BrComponent) {

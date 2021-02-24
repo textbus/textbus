@@ -100,12 +100,16 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
     const firstRange = this.selection.firstRange;
     const rootFragment = firstRange.startFragment;
     rootFragment.insert(new BrComponent(), firstRange.startIndex);
-    const afterContent = rootFragment.getContentAtIndex(firstRange.startIndex + 1);
-    if (typeof afterContent === 'string' || afterContent instanceof LeafAbstractComponent) {
+    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+    const afterContent = rootFragment.getContentAtIndex(firstRange.startIndex);
+    if (typeof afterContent === 'string') {
       return;
     }
-    rootFragment.insert(new BrComponent(), firstRange.startIndex);
-    firstRange.startIndex = firstRange.endIndex = firstRange.startIndex + 1;
+    if (firstRange.startIndex === rootFragment.length ||
+      afterContent instanceof LeafAbstractComponent && afterContent.block ||
+      afterContent instanceof AbstractComponent && !(afterContent instanceof LeafAbstractComponent)) {
+      rootFragment.insert(new BrComponent(), firstRange.startIndex);
+    }
   }
 
   onPaste(event: TBEvent<RootComponent, TBClipboard>) {
