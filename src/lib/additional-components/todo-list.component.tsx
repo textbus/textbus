@@ -59,7 +59,7 @@ class TodoListComponentInterceptor implements Interceptor<TodoListComponent> {
 
     const index = component.slots.indexOf(slot);
 
-    if (slot === component.slots[component.slots.length - 1]) {
+    if (slot === component.slots[component.slots.length - 1] && index !== 0) {
       const lastContent = slot.getContentAtIndex(slot.length - 1);
       if (slot.length === 0 ||
         slot.length === 1 && lastContent instanceof BrComponent) {

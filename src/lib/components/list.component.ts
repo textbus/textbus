@@ -107,7 +107,7 @@ class ListComponentInterceptor implements Interceptor<ListComponent> {
     const instance = event.instance;
     const firstRange = this.selection.firstRange;
     const index = instance.slots.indexOf(slot);
-    if (slot === instance.slots[instance.slots.length - 1]) {
+    if (slot === instance.slots[instance.slots.length - 1] && index !== 0) {
       const lastContent = slot.getContentAtIndex(slot.length - 1);
       if (slot.length === 0 ||
         slot.length === 1 && lastContent instanceof BrComponent) {
