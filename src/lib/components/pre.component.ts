@@ -488,7 +488,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
     }[this.lang];
   }
 
-  private getLanguageBlockCommentStart(): [string, string] {
+  private getLanguageBlockCommentStart(): string[] {
     return {
       HTML: ['<!--', '-->'],
       Javascript: ['/*', '*/'],
