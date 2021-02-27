@@ -12,7 +12,8 @@ import {
 } from '@tanbo/di';
 import pretty from 'pretty';
 
-import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { EDITOR_OPTIONS, EDITABLE_DOCUMENT } from '../inject-tokens';
+import { EditorOptions } from '../editor-options';
 import {
   Component,
   Fragment,

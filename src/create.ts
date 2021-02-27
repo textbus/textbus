@@ -1,4 +1,5 @@
-import { EditorOptions, Editor } from './lib/editor';
+import { Editor } from './lib/editor';
+import { EditorOptions } from './lib/editor-options';
 import {
   fontFamilyFormatter,
   boldFormatter,

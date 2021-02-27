@@ -1,7 +1,6 @@
 import { from, Observable, of, Subject, Subscription } from 'rxjs';
 import {
   Injectable,
-  InjectionToken,
   Injector,
   NullInjector,
   Provider,
@@ -10,75 +9,28 @@ import {
 } from '@tanbo/di';
 
 import {
-  AbstractComponent,
-  Formatter,
-  OutputRenderer,
-  TBPlugin, VElementLiteral
+  OutputRenderer, VElementLiteral
 } from './core/_api';
 import {
   Device,
-  DeviceOption,
   Dialog,
   EditingMode,
   FullScreen,
   LibSwitch,
   StatusBar,
   ControlPanel,
-  ComponentCreator,
   Viewer,
   ComponentStage,
   Workbench
 } from './workbench/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
-import { Toolbar, ToolFactory } from './toolbar/_api';
+import { Toolbar } from './toolbar/_api';
 import { EditorController } from './editor-controller';
 import { FileUploader } from './uikit/forms/help';
 import { makeError } from './_utils/make-error';
 import { ComponentInjectors } from './component-injectors';
-
-/**
- * TextBus 初始化时的配置参数
- */
-export interface EditorOptions<T> {
-  /** 设置主题 */
-  theme?: string;
-  /** 配置设备选项 */
-  deviceOptions?: DeviceOption[];
-  /** 指定设备类型 */
-  deviceType?: string;
-  /** 默认是否全屏*/
-  fullScreen?: boolean;
-  /** 默认是否展开组件库 */
-  expandComponentLibrary?: boolean;
-  /** 设置最大历史栈 */
-  historyStackSize?: number;
-  /** 声明组件集合 */
-  components?: Array<Type<AbstractComponent>>;
-  /** 设置格式转换器 */
-  formatters?: Formatter[];
-  /** 工具条配置 */
-  toolbar?: (ToolFactory | ToolFactory[])[];
-  /** 扩展增强插件 */
-  plugins?: TBPlugin[];
-  /** 配置文档的默认样式 */
-  styleSheets?: string[];
-  /** 配置文档编辑状态下用到的样式 */
-  editingStyleSheets?: string[];
-  /** 设置初始化 TextBus 时的默认内容 */
-  contents?: string;
-  /** 设置可选的自定义组件 */
-  componentLibrary?: ComponentCreator[];
-  /** 设置输出转换器 */
-  outputTranslator?: OutputTranslator<T>;
-
-  /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
-  uploader?(type: string): (string | Promise<string> | Observable<string>);
-}
-
-export const EDITOR_OPTIONS = new InjectionToken<EditorOptions<any>>('EDITOR_OPTIONS');
-export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT');
-export const EDITABLE_DOCUMENT_CONTAINER = new InjectionToken<HTMLElement>('EDITABLE_DOCUMENT_CONTAINER');
-export const EDITOR_SCROLL_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_SCROLL_CONTAINER');
+import { EditorOptions } from './editor-options';
+import { EDITABLE_DOCUMENT_CONTAINER, EDITOR_OPTIONS, EDITOR_SCROLL_CONTAINER } from './inject-tokens';
 
 const editorErrorFn = makeError('Editor');
 

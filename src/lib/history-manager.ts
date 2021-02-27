@@ -3,7 +3,8 @@ import { distinctUntilChanged, map, sampleTime } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { Fragment, RangePath, TBSelection } from './core/_api';
-import { EDITOR_OPTIONS, EditorOptions } from './editor';
+import { EditorOptions } from './editor-options';
+import { EDITOR_OPTIONS } from './inject-tokens';
 import { RootComponent } from './root-component';
 import { EditorController } from './editor-controller';
 
