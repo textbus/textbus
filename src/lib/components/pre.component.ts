@@ -12,6 +12,7 @@ import 'prismjs/components/prism-stylus';
 import 'prismjs/components/prism-c';
 import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-go';
 
 import {
   BlockFormatter,
@@ -229,6 +230,8 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
       value: 'CSharp',
     }, {
       value: 'Swift',
+    }, {
+      value: 'Go'
     }, {
       value: 'JSON',
     }, {
@@ -478,6 +481,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       Java: languages.java,
       Swift: languages.swift,
       JSON: languages.json,
+      Go: languages.go,
       Ruby: languages.ruby,
       Less: languages.less,
       SCSS: languages.scss,
@@ -496,6 +500,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       Typescript: ['/*', '*/'],
       Java: ['/*', '*/'],
       Swift: ['/*', '*/'],
+      Go: ['/*', '*/'],
       JSON: ['', ''],
       Less: ['/*', '*/'],
       SCSS: ['/*', '*/'],
