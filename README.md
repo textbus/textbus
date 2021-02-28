@@ -56,7 +56,7 @@ editor.onChange.subscribe(() => {
 ## 官网地址
 [TextBus 官网](https://textbus.tanboui.com)
 
-如果在官网还不能找到你想了解的问题，你可以加入 TextBus 的官方 QQ 群：786923770。你也可以直接所码加入：
+如果在官网还不能找到你想了解的问题，你可以加入 TextBus 的官方 QQ 群：786923770。你也可以直接扫码加入：
 
 <div style="text-align: center"><img alt="TextBus QQ 群：786923770" style="width: 252px; border-radius: 5px; box-shadow: 1px 2px 3px rgb(0 0 0 / 20%)" src="https://textbus.tanboui.com/static/img/qq-group.20ce5d73933bb31ff50cbf15cf9e7950.jpg"></div>
 
