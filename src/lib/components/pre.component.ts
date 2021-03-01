@@ -27,7 +27,7 @@ import {
   ReplaceMode, SlotRenderFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
-  BrComponent, ContextMenuAction
+  BrComponent, ContextMenuAction, VTextNode
 } from '../core/_api';
 
 export const codeStyles = {
@@ -131,6 +131,41 @@ class CodeFragment extends Fragment {
   private isBlockComment = false;
 }
 
+const languageList = [{
+  value: 'Javascript',
+}, {
+  value: 'HTML',
+}, {
+  value: 'CSS',
+}, {
+  value: 'Typescript',
+}, {
+  value: 'Java',
+}, {
+  value: 'C',
+}, {
+  label: 'C++',
+  value: 'CPP',
+}, {
+  label: 'C#',
+  value: 'CSharp',
+}, {
+  value: 'Swift',
+}, {
+  value: 'Go'
+}, {
+  value: 'JSON',
+}, {
+  value: 'Less',
+}, {
+  value: 'SCSS',
+}, {
+  value: 'Stylus',
+}, {
+  value: 'bash',
+  label: '无',
+}];
+
 @Injectable()
 class PreComponentInterceptor implements Interceptor<PreComponent> {
   constructor(private selection: TBSelection) {
@@ -210,40 +245,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   }
 
   onContextmenu(instance: PreComponent): ContextMenuAction[] {
-    return [{
-      value: 'Javascript',
-    }, {
-      value: 'HTML',
-    }, {
-      value: 'CSS',
-    }, {
-      value: 'Typescript',
-    }, {
-      value: 'Java',
-    }, {
-      value: 'C',
-    }, {
-      label: 'C++',
-      value: 'CPP',
-    }, {
-      label: 'C#',
-      value: 'CSharp',
-    }, {
-      value: 'Swift',
-    }, {
-      value: 'Go'
-    }, {
-      value: 'JSON',
-    }, {
-      value: 'Less',
-    }, {
-      value: 'SCSS',
-    }, {
-      value: 'Stylus',
-    }, {
-      value: 'bash',
-      label: '无',
-    }].map(i => {
+    return languageList.map(i => {
       return {
         label: i.label || i.value,
         action() {
@@ -265,13 +267,14 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
    code, pre {background-color: rgba(0, 0, 0, .03);}
    pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden;}
+   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
     `
    .tb-code-line-number-bg { background-color: #efefef; border-right: 1px solid #ddd; width: 3em; }
    .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
    .tb-code-line { position: relative; }
    .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #999; }
+   .tb-pre-lang { position: absolute; right: 0; top: 0; opacity: 0.5; pointer-events: none; font-size: 13px; padding: 4px 10px;}
     `,
     `
   .tb-hl-keyword { font-weight: bold; }
@@ -372,6 +375,18 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         })
       ]
     });
+    let lang = ''
+    languageList.forEach(i => {
+      if (i.value === this.lang) {
+        lang = i.label || i.value;
+      }
+    })
+    if (lang) {
+      block.appendChild(new VElement('div', {
+        classes: ['tb-pre-lang'],
+        childNodes: [new VTextNode(lang)]
+      }))
+    }
     block.attrs.set('lang', this.lang);
     block.attrs.set('theme', this.theme || PreComponent.theme);
     return block;
