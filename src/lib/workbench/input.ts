@@ -14,7 +14,7 @@ import {
   TBSelection,
   KeymapAction, DynamicKeymap
 } from '../core/_api';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../editor';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER, EDITOR_SCROLL_CONTAINER } from '../inject-tokens';
 import { RootComponent } from '../root-component';
 import { HistoryManager } from '../history-manager';
 import { EditorController } from '../editor-controller';
@@ -508,9 +508,8 @@ export class Input {
     })
     this.addKeymap({
       keymap: {
-        key: 'z',
+        key: 'y',
         ctrlKey: true,
-        shiftKey: true
       },
       action: () => {
         this.history.useNextSnapshot();

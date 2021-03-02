@@ -13,7 +13,7 @@ import { FindCommander } from '../toolbar/commands/find.commander';
 import { FindAndReplaceRule } from '../toolbar/tools/find.tool';
 import { PreComponent } from '../components/pre.component';
 import { RootComponent } from '../root-component';
-import { EDITOR_SCROLL_CONTAINER } from '../editor';
+import { EDITOR_SCROLL_CONTAINER } from '../inject-tokens';
 import { Input } from '../workbench/_api';
 
 export class FindPlugin implements TBPlugin {

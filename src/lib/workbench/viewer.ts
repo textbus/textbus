@@ -12,7 +12,8 @@ import {
 } from '@tanbo/di';
 import pretty from 'pretty';
 
-import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { EDITOR_OPTIONS, EDITABLE_DOCUMENT } from '../inject-tokens';
+import { EditorOptions } from '../editor-options';
 import {
   Component,
   Fragment,
@@ -95,7 +96,7 @@ export class Viewer {
     this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
     const componentAnnotations = [RootComponent, ...(this.options.components || []), BrComponent].map(c => {
-      return getAnnotations(c).getClassMetadata(Component).params[0] as Component
+      return getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component
     })
 
     this.componentAnnotations = componentAnnotations;
@@ -257,7 +258,8 @@ export class Viewer {
     const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
     [RootComponent, ...(this.options.components || [])].forEach(c => {
-      const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
+      const metadata = getAnnotations(c).getClassMetadata(Component);
+      const annotation = metadata.decoratorArguments[0] as Component;
       this.componentInjectors.set(c, new ReflectiveInjector(viewInjector, annotation.providers || []));
     });
 
@@ -305,7 +307,7 @@ export class Viewer {
     const scripts: string[] = [];
 
     classes.forEach(c => {
-      const annotation = getAnnotations(c).getClassMetadata(Component).params[0] as Component;
+      const annotation = getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component;
       if (annotation.styles) {
         styles.push(...annotation.styles.filter(i => i));
       }

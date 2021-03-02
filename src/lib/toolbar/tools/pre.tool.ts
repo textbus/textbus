@@ -28,6 +28,8 @@ export const preToolConfig: SelectToolConfig = {
   }, {
     value: 'Swift'
   }, {
+    value: 'Go'
+  }, {
     value: 'JSON'
   }, {
     value: 'Less'

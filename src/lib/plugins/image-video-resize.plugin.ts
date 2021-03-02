@@ -2,7 +2,7 @@ import { Injector } from '@tanbo/di';
 
 import { TBPlugin, Renderer, TBSelection, VElement } from '../core/_api';
 import { ImageComponent, VideoComponent } from '../components/_api';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../editor';
+import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../inject-tokens';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);

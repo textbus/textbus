@@ -11,7 +11,8 @@ import {
 import { Dialog } from './dialog';
 import { FileUploader } from '../uikit/forms/help';
 import { EditorController } from '../editor-controller';
-import { EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { EDITOR_OPTIONS } from '../inject-tokens';
+import { EditorOptions } from '../editor-options';
 import { createElement } from '../uikit/uikit';
 import { Tab } from './tab';
 

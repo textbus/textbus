@@ -7,7 +7,8 @@ import { Viewer } from './viewer';
 import { Device } from './device';
 import { createElement } from '../uikit/uikit';
 import { EditorController } from '../editor-controller';
-import { EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { EDITOR_OPTIONS } from '../inject-tokens';
+import { EditorOptions } from '../editor-options';
 import { Dialog } from './dialog';
 import { ControlPanel } from './control-panel';
 

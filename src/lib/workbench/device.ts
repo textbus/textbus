@@ -2,7 +2,8 @@ import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { EDITOR_OPTIONS, EditorOptions } from '../editor';
+import { EditorOptions } from '../editor-options';
+import { EDITOR_OPTIONS } from '../inject-tokens';
 import { EditorController } from '../editor-controller';
 import { createElement } from '../uikit/uikit';
 

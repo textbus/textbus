@@ -11,8 +11,7 @@ export const historyForwardToolConfig: ButtonToolConfig = {
   },
   keymap: {
     ctrlKey: true,
-    shiftKey: true,
-    key: 'z'
+    key: 'y'
   }
 };
 export const historyForwardTool = Toolkit.makeButtonTool(historyForwardToolConfig);
