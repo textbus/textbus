@@ -508,9 +508,8 @@ export class Input {
     })
     this.addKeymap({
       keymap: {
-        key: 'z',
+        key: 'y',
         ctrlKey: true,
-        shiftKey: true
       },
       action: () => {
         this.history.useNextSnapshot();
