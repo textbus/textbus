@@ -33,7 +33,7 @@ const editor = createEditor('#editor', {
     })
   },
   // contents: '<p><br></p>'
-  contents: document.getElementById('table-own').innerHTML
+  contents: document.getElementById('table').innerHTML
 });
 
 document.getElementById('btn').addEventListener('click', () => {
