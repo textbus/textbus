@@ -17,7 +17,7 @@ describe('删除内容', () => {
     fragment.apply(formatter, f);
   })
   test('删除前面', () => {
-    const deletedContents = fragment.cut(1, 2);
+    const deletedContents = fragment.cut(1, 3);
     expect(fragment.getFormatRanges(formatter)[0]).toEqual({
       ...f,
       startIndex: 1,
@@ -28,7 +28,7 @@ describe('删除内容', () => {
     expect(deletedContents.getFormatKeys().length).toEqual(0);
   })
   test('删除前面加中间', () => {
-    const deletedContents = fragment.cut(1, 4);
+    const deletedContents = fragment.cut(1, 5);
     expect(fragment.getFormatRanges(formatter)[0]).toEqual({
       ...f,
       startIndex: 1,
