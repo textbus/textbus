@@ -99,10 +99,12 @@ export class Viewer {
     this.elementRef.src = `javascript:void(
       (function () {
         document.open();
-        document.domain='${document.domain}';
+        if('${document.domain}') {
+          document.domain='${document.domain}';
+        }
         document.write('${iframeHTML}');
         document.close();
-        window.parent.postMessage('complete','${location.origin}');
+        window.parent.postMessage('complete','${document.domain ? location.origin : '*'}');
       })()
       )`;
     const onMessage = (ev: MessageEvent) => {
