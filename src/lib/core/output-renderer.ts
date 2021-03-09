@@ -102,7 +102,7 @@ export class OutputRenderer {
         }
       })
     }
-    component.rendered();
+    component.outputRendered();
     return this.componentVDomCacheMap.get(component);
   }
 
