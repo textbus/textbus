@@ -99,17 +99,22 @@ export class KatexComponent extends LeafAbstractComponent {
   }
 
   render(): VElement {
-    const htmlString = Katex.renderToString(this.source, {
-      displayMode: true,
-      leqno: false,
-      fleqn: false,
-      throwOnError: true,
-      errorColor: '#cc0000',
-      strict: 'warn',
-      output: 'html',
-      trust: false,
-      macros: {'\\f': '#1f(#2)'}
-    });
+    let htmlString: string;
+    try {
+      htmlString = Katex.renderToString(this.source, {
+        displayMode: true,
+        leqno: false,
+        fleqn: false,
+        throwOnError: true,
+        errorColor: '#cc0000',
+        strict: 'warn',
+        output: 'html',
+        trust: false,
+        macros: {'\\f': '#1f(#2)'}
+      })
+    } catch (e) {
+      htmlString = '';
+    }
     const dom = new DOMParser().parseFromString(htmlString, 'text/html').body.children[0] as HTMLElement;
     return new VElement('tb-katex', {
       attrs: {
