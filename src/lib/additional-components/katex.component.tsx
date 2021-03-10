@@ -113,6 +113,7 @@ export class KatexComponent extends LeafAbstractComponent {
         macros: {'\\f': '#1f(#2)'}
       })
     } catch (e) {
+      console.log(e);
       htmlString = '';
     }
     const dom = new DOMParser().parseFromString(htmlString, 'text/html').body.children[0] as HTMLElement;
