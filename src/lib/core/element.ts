@@ -79,6 +79,9 @@ export class VElement {
     if (style && typeof style === 'string') {
       styles = {};
       style.split(';').map(s => s.split(':')).forEach(v => {
+        if (!v[0] || !v[1]) {
+          return;
+        }
         styles[v[0].trim()] = v[1].trim();
       })
     } else {
