@@ -12,12 +12,15 @@ export interface FormTextFieldParams {
   validateFn?(value: any): string
 }
 
-export interface FormNumberParams {
+export interface FormTextareaParams {
   label: string;
   name: string;
   placeholder: string;
-  value?: number;
-  validateFn?(value: any): string;
+  value?: string;
+
+  validateFn?(value: any): string
+}
+export interface FormNumberParams extends FormTextareaParams {
 }
 
 export interface FormRadioParams {

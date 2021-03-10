@@ -57,6 +57,7 @@ import {
   timelineComponentExample,
   progressComponentExample,
   stepsComponentExample,
+  katexComponentExample,
 
   StepComponent,
   ProgressComponent,
@@ -65,7 +66,8 @@ import {
   JumbotronComponent,
   BaiduMapComponent,
   TodoListComponent,
-  ImageCardComponent
+  ImageCardComponent,
+  KatexComponent
 } from './lib/additional-components/_api';
 import { HTMLOutputTranslator } from './lib/output-translator';
 import {
@@ -108,6 +110,7 @@ export const defaultOptions: EditorOptions<string> = {
     value: '842px'
   }],
   components: [
+    KatexComponent,
     StepComponent,
     ProgressComponent,
     TimelineComponent,
@@ -175,7 +178,8 @@ export const defaultOptions: EditorOptions<string> = {
     wordExplainComponentExample,
     timelineComponentExample,
     progressComponentExample,
-    stepsComponentExample
+    stepsComponentExample,
+    katexComponentExample
   ],
   outputTranslator: new HTMLOutputTranslator()
 };

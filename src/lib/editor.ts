@@ -36,6 +36,7 @@ const editorErrorFn = makeError('Editor');
 
 export interface OutputContent<T> {
   content: T;
+  links: Array<{ [key: string]: string }>;
   styleSheets: string[];
   scripts: string[];
 }

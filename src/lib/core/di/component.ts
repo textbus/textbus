@@ -3,6 +3,7 @@ import { ComponentLoader } from '../component';
 
 export interface Component {
   loader: ComponentLoader;
+  links?: Array<{[key: string]: string}>;
   styles?: string[];
   scripts?: string[];
   editModeStyles?: string[];

@@ -90,7 +90,11 @@ export class Viewer {
 
     this.componentAnnotations = componentAnnotations;
 
+    const links: Array<{ [key: string]: string }> = []
     const componentStyles = componentAnnotations.map(c => {
+      if (Array.isArray(c.links)) {
+        links.push(...c.links);
+      }
       return [c.styles?.join('') || '', c.editModeStyles?.join('') || ''].join('')
     }).join('')
 
@@ -111,6 +115,11 @@ export class Viewer {
       if (ev.data === 'complete') {
         window.removeEventListener('message', onMessage);
         if (this.contentDocument) {
+          links.forEach(link => {
+            const linkEle = this.contentDocument.createElement('link');
+            Object.assign(linkEle, link);
+            this.contentDocument.head.appendChild(linkEle);
+          })
           const styleEl = this.contentDocument.createElement('style');
           styleEl.innerHTML = Viewer.cssMin([...this.docStyles, ...(options.editingStyleSheets || [])].join(''));
           this.contentDocument.head.append(styleEl);
@@ -276,6 +285,7 @@ export class Viewer {
       this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
     return {
       content,
+      links: metadata.links,
       styleSheets: metadata.styles,
       scripts: metadata.scripts
     }
@@ -286,6 +296,7 @@ export class Viewer {
     const metadata = this.getOutputComponentMetadata()
     return {
       json,
+      links: metadata.links,
       styleSheets: metadata.styles,
       scripts: metadata.scripts
     }
@@ -296,6 +307,7 @@ export class Viewer {
 
     const styles: string[] = [...(this.options.styleSheets || '')];
     const scripts: string[] = [];
+    const links: Array<{ [key: string]: string }> = [];
 
     classes.forEach(c => {
       const annotation = getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component;
@@ -305,8 +317,12 @@ export class Viewer {
       if (annotation.scripts) {
         scripts.push(...annotation.scripts.filter(i => i));
       }
+      if (annotation.links) {
+        links.push(...annotation.links);
+      }
     })
     return {
+      links,
       styles: Array.from(new Set(styles)).map(i => Viewer.cssMin(i)),
       scripts: Array.from(new Set(scripts))
     }
