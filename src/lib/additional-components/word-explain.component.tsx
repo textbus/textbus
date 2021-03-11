@@ -173,17 +173,13 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRenderFn: SlotRenderFn): VElement {
-    const title = this.slotRender(this.title, isOutputMode, (slot, contentContainer) => contentContainer)
-    const subtitle = this.slotRender(this.subtitle, isOutputMode, (slot, contentContainer) => contentContainer);
-    const detail = this.slotRender(this.detail, isOutputMode, (slot, contentContainer) => contentContainer);
-
     return (
       <tb-word-explain>
         <div class="tb-word-explain-title-group">
-          {slotRenderFn(this.title, title, title)}
-          {slotRenderFn(this.subtitle, subtitle, subtitle)}
+          {slotRenderFn(this.title)}
+          {slotRenderFn(this.subtitle)}
         </div>
-        {slotRenderFn(this.detail, detail, detail)}
+        {slotRenderFn(this.detail)}
         {
           !isOutputMode && <span class="tb-word-explain-close" onClick={() => {
             const parentFragment = this.parentFragment;

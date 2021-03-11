@@ -196,9 +196,7 @@ export class StepComponent extends BranchAbstractComponent {
         step: this.step
       },
       childNodes: this.slots.map(slot => {
-        const {host, container} = this.renderItem(slot, isOutputMode);
-        slotRendererFn(slot, container, host);
-        return host
+        return slotRendererFn(slot)
       })
     });
   }

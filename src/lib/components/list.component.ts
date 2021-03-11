@@ -159,12 +159,9 @@ export class ListComponent extends BranchAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
-    const list = new VElement(this.tagName);
-    this.slots.forEach(slot => {
-      const li = new VElement('li');
-      list.appendChild(slotRendererFn(slot, li, li));
-    })
-    return list;
+    return new VElement(this.tagName, {
+      childNodes: this.slots.map(i => slotRendererFn(i))
+    });
   }
 
   split(startIndex: number, endIndex: number) {

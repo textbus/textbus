@@ -325,14 +325,36 @@ export class Renderer {
 
   private rendingComponent(component: AbstractComponent): VElement {
     if (component.dirty) {
-      const vElement = component instanceof LeafAbstractComponent ?
-        component.render(false) :
-        (component as DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent).render(false, (slot, contentContainer, host) => {
-          this.fragmentVDomMapping.set(slot, host);
-          const view = this.rendingFragment(slot, contentContainer, true);
-          view.attrs.set('textbus-editable', 'on')
-          return host;
-        });
+      let vElement: VElement;
+      if (component instanceof DivisionAbstractComponent) {
+        vElement = component.render(false, slot => {
+          if (slot.dirty) {
+            const host = component.slotRender(false, (s, contentContainer) => {
+              contentContainer.attrs.set('textbus-editable', 'on');
+              return this.rendingFragment(s, contentContainer);
+            })
+            this.fragmentVDomMapping.set(slot, host);
+            return host;
+          } else {
+            return this.fragmentVDomMapping.get(slot)
+          }
+        })
+      } else if (component instanceof BranchAbstractComponent || component instanceof BackboneAbstractComponent) {
+        vElement = component.render(false, slot => {
+          if (slot.dirty) {
+            const host = component.slotRender(slot, false, (s, contentContainer) => {
+              contentContainer.attrs.set('textbus-editable', 'on');
+              return this.rendingFragment(s, contentContainer);
+            })
+            this.fragmentVDomMapping.set(slot, host);
+            return host
+          } else {
+            return this.fragmentVDomMapping.get(slot)
+          }
+        })
+      } else if (component instanceof LeafAbstractComponent) {
+        vElement = component.render(false)
+      }
       if (!(vElement instanceof VElement)) {
         throw rendererErrorFn(`component render method must return a virtual element.`);
       }

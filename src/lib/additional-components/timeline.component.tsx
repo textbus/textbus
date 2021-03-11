@@ -225,9 +225,7 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
     this.vEle = list;
 
     list.appendChild(...this.slots.map(item => {
-      const {host, container} = this.renderItem(item, isOutputMode);
-      slotRendererFn(item, container, host);
-      return host;
+      return slotRendererFn(item)
     }));
 
     return list;

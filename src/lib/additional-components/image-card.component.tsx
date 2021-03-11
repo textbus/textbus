@@ -3,7 +3,7 @@ import {
   VElement,
   ViewData,
   BackboneAbstractComponent,
-  Fragment, SlotRenderFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard
+  Fragment, SlotRenderFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard, SingleSlotRenderFn
 } from '../core/_api';
 import { ComponentCreator } from '../workbench/component-stage';
 import { BlockComponent, ImageComponent } from '../components/_api';
@@ -134,23 +134,23 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     }
   }
 
-  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
+  slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     let imgContainer: VElement;
     let descContainer: VElement;
     switch (slot) {
       case this.imgFragment:
         imgContainer = <div/>;
-        return slotRendererFn(slot, imgContainer, imgContainer);
+        return slotRendererFn(slot, imgContainer);
       case this.descFragment:
         descContainer = <p/>;
-        return slotRendererFn(slot, descContainer, descContainer);
+        return slotRendererFn(slot, descContainer);
     }
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     const card = <tb-image-card/>;
-    card.appendChild(this.slotRender(this.imgFragment, isOutputMode, slotRendererFn));
-    card.appendChild(this.slotRender(this.descFragment, isOutputMode, slotRendererFn));
+    card.appendChild(slotRendererFn(this.imgFragment));
+    card.appendChild(slotRendererFn(this.descFragment));
 
     return card;
   }

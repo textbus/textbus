@@ -72,7 +72,6 @@ export class BlockComponent extends DivisionAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRendererFn: SlotRenderFn) {
-    const block = new VElement(this.tagName);
-    return slotRendererFn(this.slot, block, block);
+    return slotRendererFn(this.slot)
   }
 }

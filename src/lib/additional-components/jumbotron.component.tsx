@@ -6,7 +6,7 @@ import {
   DivisionAbstractComponent,
   SlotRenderFn,
   VElement,
-  ViewData
+  ViewData, SingleSlotRenderFn
 } from '../core/_api';
 import { ComponentCreator, Dialog } from '../workbench/_api';
 import { BlockComponent } from '../components/_api';
@@ -120,18 +120,18 @@ export class JumbotronComponent extends DivisionAbstractComponent {
     return component;
   }
 
-  slotRender(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
-    return this.render(isOutputMode, slotRendererFn);
-  }
-
-  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
+  slotRender(isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     const vEle = <tb-jumbotron style={{
       backgroundImage: `url("${this.options.backgroundImage}")`,
       backgroundSize: this.options.backgroundSize || 'cover',
       backgroundPosition: this.options.backgroundPosition || 'center',
       minHeight: this.options.minHeight
     }}/>;
-    return slotRendererFn(this.slot, vEle, vEle);
+    return slotRendererFn(this.slot, vEle);
+  }
+
+  render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
+    return slotRendererFn(this.slot)
   }
 }
 

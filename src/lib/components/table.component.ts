@@ -304,8 +304,7 @@ export class TableComponent extends BackboneAbstractComponent {
         const tr = new VElement('tr');
         body.appendChild(tr);
         for (const col of row) {
-          const td = TableComponent.renderingCell(col);
-          tr.appendChild(slotRendererFn(col.fragment, td, td));
+          tr.appendChild(slotRendererFn(col.fragment));
         }
       }
     }

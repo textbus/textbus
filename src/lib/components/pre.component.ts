@@ -368,9 +368,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         new VElement('div', {
           classes: ['tb-code-content'],
           childNodes: this.map(item => {
-            const host = this.slotRender(item, isOutputMode, (slot, contentContainer) => contentContainer);
-            slotRendererFn(item, host, host);
-            return host;
+            return slotRendererFn(item)
           })
         })
       ]
@@ -408,35 +406,6 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         return typeof i === 'string' ? i.trim() : '';
       }).join('')
     }).join('');
-  }
-
-  format(tokens: Array<string | Token>, slot: Fragment, index: number) {
-    tokens.forEach(token => {
-      if (token instanceof Token) {
-        const styleName = codeStyles[token.type];
-        if (styleName) {
-          slot.apply(codeStyleFormatter, {
-            startIndex: index,
-            endIndex: index + token.length,
-            effect: FormatEffect.Valid,
-            formatData: new FormatData({
-              classes: ['tb-hl-' + styleName]
-            })
-          });
-        } else if (styleName === false) {
-          slot.apply(codeStyleFormatter, {
-            startIndex: index,
-            endIndex: index + token.length,
-            effect: FormatEffect.Invalid,
-            formatData: null
-          })
-        }
-        if (Array.isArray(token.content)) {
-          this.format(token.content, slot, index);
-        }
-      }
-      index += token.length;
-    })
   }
 
   private reformat() {
@@ -484,6 +453,34 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
         fragment.remove(0, blockCommentStart.length);
       }
       slot.from(fragment);
+    })
+  }
+  private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
+    tokens.forEach(token => {
+      if (token instanceof Token) {
+        const styleName = codeStyles[token.type];
+        if (styleName) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
+            effect: FormatEffect.Valid,
+            formatData: new FormatData({
+              classes: ['tb-hl-' + styleName]
+            })
+          });
+        } else if (styleName === false) {
+          slot.apply(codeStyleFormatter, {
+            startIndex: index,
+            endIndex: index + token.length,
+            effect: FormatEffect.Invalid,
+            formatData: null
+          })
+        }
+        if (Array.isArray(token.content)) {
+          this.format(token.content, slot, index);
+        }
+      }
+      index += token.length;
     })
   }
 

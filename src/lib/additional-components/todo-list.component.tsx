@@ -165,9 +165,7 @@ export class TodoListComponent extends BranchAbstractComponent<TodoListFragment>
   render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     return new VElement('tb-todo-list', {
       childNodes: this.slots.map(slot => {
-        const {host, container} = this.renderItem(slot);
-        slotRendererFn(slot, container, host);
-        return host;
+        return slotRendererFn(slot)
       })
     });
   }
