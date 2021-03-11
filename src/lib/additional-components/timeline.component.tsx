@@ -203,8 +203,6 @@ tb-timeline {
   ]
 })
 export class TimelineComponent extends BranchAbstractComponent<TimelineFragment> {
-  private vEle: VElement;
-
   constructor(list: TimelineFragment[]) {
     super('tb-timeline');
     this.slots.push(...list);
@@ -222,8 +220,6 @@ export class TimelineComponent extends BranchAbstractComponent<TimelineFragment>
 
   render(isOutputMode: boolean, slotRendererFn: SlotRenderFn): VElement {
     const list = new VElement('tb-timeline');
-    this.vEle = list;
-
     list.appendChild(...this.slots.map(item => {
       return slotRendererFn(item)
     }));
