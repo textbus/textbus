@@ -180,6 +180,7 @@ export class Renderer {
       if (oldNativeNode) {
         childNodes.push(oldNativeNode);
       } else {
+        // TODO 此处可以用深比较算法，实现更高层次的 DOM 复用，暂未实现
         childNodes.push(this.patch(child));
       }
     })
