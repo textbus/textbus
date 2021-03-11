@@ -200,6 +200,7 @@ export class VElement {
    */
   appendChild(...newNodes: Array<VElement | VTextNode>) {
     newNodes.forEach(node => {
+      node.parentNode?.removeChild(node);
       node[parentNode] = this;
       this._childNodes.push(node);
     })
@@ -210,6 +211,7 @@ export class VElement {
     if (index > -1) {
       this._childNodes.splice(index, 1);
       node[parentNode] = null;
+      return;
     }
     throw vElementErrorFn('node to be deleted is not a child of the current node.');
   }
@@ -217,6 +219,7 @@ export class VElement {
   replaceChild(newNode: VElement | VTextNode, oldNode: VElement | VTextNode) {
     const index = this._childNodes.indexOf(oldNode);
     if (index > -1) {
+      newNode.parentNode?.removeChild(newNode);
       this._childNodes.splice(index, 1, newNode);
       oldNode[parentNode] = null;
       newNode[parentNode] = this;
