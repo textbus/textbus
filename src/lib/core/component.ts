@@ -142,11 +142,17 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
    */
   readonly slots: T[] = new Proxy<T[]>([], {
     set: (target: T[], p: PropertyKey, value: T, receiver: any) => {
-      if (!this.eventMap.has(value) && value instanceof Fragment) {
-        this.eventMap.set(value, value.onChange.subscribe(() => {
-          this.markAsChanged();
-        }))
+      if (value instanceof Fragment) {
+        if (!value.dirty) {
+          value.markAsDirtied();
+        }
+        if (!this.eventMap.has(value)) {
+          this.eventMap.set(value, value.onChange.subscribe(() => {
+            this.markAsChanged();
+          }))
+        }
       }
+
       if (p === 'length' && typeof value === 'number') {
         for (const item of target) {
           if (item) {
@@ -310,6 +316,9 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
   private setup(fragments: T[]) {
     fragments.forEach(f => {
       f[parentComponentAccessToken] = this;
+      if (!f.dirty) {
+        f.markAsDirtied();
+      }
       this.eventMap.set(f, f.onChange.subscribe(() => {
         this.markAsChanged();
       }))
@@ -350,14 +359,17 @@ class BrComponentLoader implements ComponentLoader {
     };
   }
 }
+
 @Component({
   loader: new BrComponentLoader()
 })
 export class BrComponent extends LeafAbstractComponent {
   block = false;
+
   constructor() {
     super('br');
   }
+
   clone() {
     return new BrComponent();
   }
