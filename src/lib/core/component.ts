@@ -143,7 +143,7 @@ export abstract class BranchAbstractComponent<T extends Fragment = Fragment> ext
   readonly slots: T[] = new Proxy<T[]>([], {
     set: (target: T[], p: PropertyKey, value: T, receiver: any) => {
       if (value instanceof Fragment) {
-        if (!value.dirty) {
+        if (!value.dirty && !target.includes(value)) {
           value.markAsDirtied();
         }
         if (!this.eventMap.has(value)) {
@@ -316,7 +316,7 @@ export abstract class BackboneAbstractComponent<T extends Fragment = Fragment> e
   private setup(fragments: T[]) {
     fragments.forEach(f => {
       f[parentComponentAccessToken] = this;
-      if (!f.dirty) {
+      if (!f.dirty && !this.slots.includes(f)) {
         f.markAsDirtied();
       }
       this.eventMap.set(f, f.onChange.subscribe(() => {

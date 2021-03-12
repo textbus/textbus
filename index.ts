@@ -46,9 +46,9 @@ window['editor'] = editor;
 //   console.log(history)
 // })
 //
-editor.onChange.subscribe(() => {
-  console.log(editor.getContents().content)
-})
+// editor.onChange.subscribe(() => {
+//   console.log(editor.getContents().content)
+// })
 
 // document.addEventListener('selectionchange', () => {
 //   console.log(4343)
