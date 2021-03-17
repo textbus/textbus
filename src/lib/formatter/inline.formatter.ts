@@ -3,7 +3,6 @@ import {
   MatchRule,
   FormatData,
   VElement,
-  ChildSlotMode,
   FormatterPriority, FormatRendingContext, FormatEffect
 } from '../core/_api';
 
@@ -20,13 +19,13 @@ export class InlineTagFormatter extends InlineFormatter {
 
   render(context: FormatRendingContext, existingElement?: VElement) {
     if (context.effect === FormatEffect.Exclude) {
-      return null;
+      return;
     }
     if (existingElement && existingElement.tagName === 'span') {
       existingElement.tagName = this.tagName;
-      return;
+      return existingElement;
     }
-    return new ChildSlotMode(new VElement(this.tagName));
+    return new VElement(this.tagName)
   }
 }
 

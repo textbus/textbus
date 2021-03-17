@@ -7,7 +7,7 @@ import {
   DivisionAbstractComponent,
   LeafAbstractComponent
 } from './component';
-import { ChildSlotMode, Renderer, ReplaceMode, FormatConfig } from './renderer';
+import { Renderer, FormatConfig } from './renderer';
 import { FormatRendingContext } from './formatter';
 import { makeError } from '../_utils/make-error';
 
@@ -161,13 +161,10 @@ export class OutputRenderer {
         effect: next.params.effect,
         formatData: next.params.formatData,
       };
-      const renderMode = next.token.render(context, vEle);
-      if (renderMode instanceof ReplaceMode) {
-        elements = [renderMode.replaceElement]
-        return renderMode.replaceElement;
-      } else if (renderMode instanceof ChildSlotMode) {
-        elements.push(renderMode.childElement);
-        return renderMode.childElement;
+      const newVElement = next.token.render(context, vEle);
+      if (newVElement && newVElement !== vEle) {
+        elements.push(newVElement);
+        return newVElement;
       }
       return vEle;
     }, vDom);

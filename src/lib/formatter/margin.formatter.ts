@@ -1,12 +1,10 @@
 import {
   BlockFormatter,
-  ChildSlotMode,
   FormatData,
   FormatEffect,
   FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
-  ReplaceMode,
   VElement
 } from '../core/_api';
 
@@ -18,7 +16,7 @@ function match(reg: RegExp, p: HTMLElement): FormatEffect {
   return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
 }
 
-function render(context: FormatRendingContext, reg: RegExp, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+function render(context: FormatRendingContext, reg: RegExp, existingElement?: VElement) {
   const margin = [
     context.formatData.styles.get('marginTop'),
     context.formatData.styles.get('marginRight'),
@@ -31,7 +29,7 @@ function render(context: FormatRendingContext, reg: RegExp, existingElement?: VE
   }
   existingElement = new VElement('span');
   existingElement.styles.set('margin', margin.join(' '));
-  return new ChildSlotMode(existingElement);
+  return existingElement;
 }
 
 export class InlineMarginFormatter extends InlineFormatter {
@@ -53,7 +51,7 @@ export class InlineMarginFormatter extends InlineFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     return render(context, this.reg, existingElement);
   }
 }
@@ -77,7 +75,7 @@ export class BlockMarginFormatter extends BlockFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     return render(context, this.reg, existingElement);
   }
 }

@@ -21,22 +21,6 @@ export interface FormatConfig {
 }
 
 /**
- * 丢弃前一个 Format 渲染的结果，并用自己代替。
- */
-export class ReplaceMode {
-  constructor(public replaceElement: VElement) {
-  }
-}
-
-/**
- * 把当前的渲染结果作为插槽返回，并且把后续的渲染结果插入在当前节点内。
- */
-export class ChildSlotMode {
-  constructor(public childElement: VElement) {
-  }
-}
-
-/**
  * 储存虚拟 DOM 节点和真实 DOM 节点的映射关系。
  */
 class NativeElementMappingTable {
@@ -404,13 +388,10 @@ export class Renderer {
         effect: next.params.effect,
         formatData: next.params.formatData,
       };
-      const renderMode = next.token.render(context, vEle);
-      if (renderMode instanceof ReplaceMode) {
-        elements = [renderMode.replaceElement]
-        return renderMode.replaceElement;
-      } else if (renderMode instanceof ChildSlotMode) {
-        elements.push(renderMode.childElement);
-        return renderMode.childElement;
+      const newVElement = next.token.render(context, vEle);
+      if (newVElement && newVElement !== vEle) {
+        elements.push(newVElement);
+        return newVElement;
       }
       return vEle;
     }, vDom);

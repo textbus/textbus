@@ -1,14 +1,13 @@
 import { Injector } from '@tanbo/di';
 
 import {
-  ChildSlotMode, CommandContext,
+  CommandContext,
   Commander,
   ElementPosition,
   FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority, Fragment,
   InlineFormatter,
-  ReplaceMode,
   VElement
 } from '../../core/_api';
 import { RootComponent } from '../../root-component';
@@ -26,7 +25,7 @@ class FindFormatter extends InlineFormatter {
     return null;
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ChildSlotMode | ReplaceMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     if (context.isOutputMode) {
       return null;
     }
@@ -38,7 +37,7 @@ class FindFormatter extends InlineFormatter {
     existingElement.styles.set('backgroundColor', '#ff0');
     existingElement.styles.set('color', '#000');
 
-    return flag ? null : new ReplaceMode(existingElement);
+    return flag ? null : existingElement;
   }
 }
 

@@ -1,11 +1,10 @@
 import {
   BlockFormatter,
-  ChildSlotMode, FormatData,
+  FormatData,
   FormatEffect,
   FormatRendingContext,
   FormatterPriority,
   InlineFormatter,
-  ReplaceMode,
   VElement
 } from '../core/_api';
 
@@ -17,7 +16,7 @@ function match(reg: RegExp, p: HTMLElement): FormatEffect {
   return styleKeys.map(key => p.style[key]).filter(i => !!i).length > 0 ? FormatEffect.Valid : FormatEffect.Invalid;
 }
 
-function render(reg: RegExp, context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+function render(reg: RegExp, context: FormatRendingContext, existingElement?: VElement) {
   const padding = [
     context.formatData.styles.get('paddingTop'),
     context.formatData.styles.get('paddingRight'),
@@ -30,7 +29,7 @@ function render(reg: RegExp, context: FormatRendingContext, existingElement?: VE
   }
   existingElement = new VElement('span');
   existingElement.styles.set('padding', padding.join(' '));
-  return new ChildSlotMode(existingElement);
+  return existingElement;
 }
 
 export class InlinePaddingFormatter extends InlineFormatter {
@@ -52,7 +51,7 @@ export class InlinePaddingFormatter extends InlineFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     return render(this.reg, context, existingElement);
   }
 }
@@ -76,7 +75,7 @@ export class BlockPaddingFormatter extends BlockFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     return render(this.reg, context, existingElement);
   }
 }

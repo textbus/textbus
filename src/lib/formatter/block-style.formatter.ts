@@ -4,7 +4,6 @@ import {
   BlockFormatter,
   FormatData,
   VElement,
-  ChildSlotMode,
   FormatterPriority, FormatRendingContext
 } from '../core/_api';
 import { ColorRGB, parseCss, rgb2Hex } from '@tanbo/color';
@@ -21,14 +20,11 @@ export class BlockStyleFormatter extends BlockFormatter {
   }
 
   render(context: FormatRendingContext, existingElement?: VElement) {
-    const b = !!existingElement;
     existingElement = existingElement || new VElement('div');
     (Array.isArray(this.styleName) ? this.styleName : [this.styleName]).forEach(name => {
       existingElement.styles.set(name, context.formatData.styles.get(name));
     })
-    if (!b) {
-      return new ChildSlotMode(existingElement);
-    }
+    return existingElement;
   }
 }
 

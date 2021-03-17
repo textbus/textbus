@@ -16,7 +16,7 @@ import 'prismjs/components/prism-go';
 
 import {
   BlockFormatter,
-  ChildSlotMode, Component,
+  Component,
   ComponentLoader,
   BackboneAbstractComponent,
   FormatData,
@@ -24,7 +24,7 @@ import {
   FormatRendingContext,
   Fragment,
   InlineFormatter, Interceptor,
-  ReplaceMode, SlotRenderFn, TBClipboard, TBEvent, TBSelection,
+  SlotRenderFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
   BrComponent, ContextMenuAction, VTextNode
@@ -61,8 +61,8 @@ class CodeFormatter extends BlockFormatter {
     return undefined;
   }
 
-  render(): ReplaceMode | ChildSlotMode | null {
-    return new ChildSlotMode(new VElement('code'));
+  render() {
+    return new VElement('code');
   }
 }
 
@@ -75,10 +75,10 @@ class CodeStyleFormatter extends InlineFormatter {
     return undefined;
   }
 
-  render(context: FormatRendingContext): ReplaceMode | ChildSlotMode | null {
+  render(context: FormatRendingContext) {
     const el = new VElement('span');
     el.classes.push(...context.formatData.classes);
-    return new ChildSlotMode(el);
+    return el;
   }
 }
 
@@ -455,6 +455,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       slot.from(fragment);
     })
   }
+
   private format(tokens: Array<string | Token>, slot: Fragment, index: number) {
     tokens.forEach(token => {
       if (token instanceof Token) {

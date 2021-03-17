@@ -1,6 +1,5 @@
 import { FormatData } from './format-data';
 import { VElement } from './element';
-import { ChildSlotMode, ReplaceMode } from './renderer';
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -157,7 +156,7 @@ export abstract class Formatter {
    *                        ChildSlotMode: 如果已有渲染出的元素，则把当前元素作为子元素，否则，直接使用当前元素；
    *                        null: 如果已有渲染出的元素，则使用渲染出的元素，否则创建一个虚拟节点
    */
-  abstract render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | ChildSlotMode | null;
+  abstract render(context: FormatRendingContext, existingElement?: VElement): VElement | void;
 
   /**
    * 匹配一个 DOM 节点或抽象格式数据，返回生效状态。

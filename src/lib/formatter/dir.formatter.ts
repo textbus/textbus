@@ -3,7 +3,6 @@ import {
   FormatData,
   FormatEffect, FormatRendingContext,
   FormatterPriority,
-  ReplaceMode,
   VElement
 } from '../core/_api';
 
@@ -23,11 +22,11 @@ export class DirFormatter extends BlockFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): ReplaceMode | null {
+  render(context: FormatRendingContext, existingElement?: VElement) {
     if (context.effect === FormatEffect.Valid) {
       existingElement = existingElement || new VElement('div');
       existingElement.attrs.set('dir', context.formatData.attrs.get('dir'));
-      return new ReplaceMode(existingElement);
+      return existingElement;
     }
     return null;
   }
