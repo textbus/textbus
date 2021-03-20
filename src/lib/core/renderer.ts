@@ -85,7 +85,7 @@ export class Renderer {
 
   private oldVDom: VElement;
 
-  render(component: AbstractComponent, host: HTMLElement) {
+  render<T extends AbstractComponent>(component: T, host: HTMLElement) {
     if (component.changed) {
       const dirty = component.dirty;
       const root = this.rendingComponent(component);

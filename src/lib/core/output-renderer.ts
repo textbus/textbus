@@ -21,7 +21,7 @@ export class OutputRenderer {
   // 记录 fragment 对应的容器节点
   private fragmentContentContainerMapping = new WeakMap<Fragment, VElement>();
 
-  render(component: AbstractComponent): VElement {
+  render<T extends AbstractComponent>(component: T): VElement {
     const root = this.rendingComponent(component);
     // hack 防止根节点替换插件时，没有父级虚拟 DOM 节点
     new VElement('html', {
