@@ -27,7 +27,7 @@ import {
   SlotRenderFn, TBClipboard, TBEvent, TBSelection,
   VElement,
   ViewData, SingleSlotRenderFn,
-  BrComponent, ContextMenuAction, VTextNode
+  BrComponent, ContextMenuAction, VTextNode, DynamicKeymap, KeymapAction
 } from '../core/_api';
 
 export const codeStyles = {
@@ -126,6 +126,15 @@ class CodeFragment extends Fragment {
     return this.isBlockComment;
   }
 
+  get code() {
+    return this.sliceContents().map(i => {
+      if (typeof i === 'string') {
+        return i;
+      }
+      return '\n';
+    }).join('');
+  }
+
   blockCommentEnd = true;
 
   private isBlockComment = false;
@@ -177,6 +186,20 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     const commonAncestorFragment = firstRange.commonAncestorFragment as CodeFragment;
     const nextSlot = commonAncestorFragment.cut(firstRange.startIndex);
 
+    let offset = 0;
+    if (commonAncestorFragment.blockCommentEnd) {
+      const code = commonAncestorFragment.code;
+      offset = code.replace(/\S.*/g, '').length;
+      if (offset % 2) {
+        offset--;
+      }
+      const reg = component.lang === 'HTML' ? /<[\w-]+>/ : /[{(]$/;
+      if (reg.test(code.trim())) {
+        offset += 2;
+      }
+      nextSlot.insert(Array.from({length: offset}).fill(' ').join(''), 0);
+    }
+
     const index = component.indexOf(commonAncestorFragment);
 
     if (commonAncestorFragment.length === 0) {
@@ -189,7 +212,7 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
     f.blockCommentStart = !commonAncestorFragment.blockCommentEnd && commonAncestorFragment.blockCommentStart;
     f.from(nextSlot);
     component.splice(index + 1, 0, f);
-    firstRange.setStart(f, 0);
+    firstRange.setStart(f, offset);
     firstRange.collapse();
     event.stopPropagation();
   }
@@ -256,11 +279,83 @@ class PreComponentInterceptor implements Interceptor<PreComponent> {
   }
 }
 
+@Injectable()
+class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
+  constructor(private selection: TBSelection) {
+  }
+
+  provide(instance: PreComponent): KeymapAction[] {
+    return [{
+      keymap: {
+        key: 'Tab'
+      },
+      action: () => {
+        if (this.selection.collapsed) {
+          const firstRange = this.selection.firstRange;
+          const fragment = firstRange.commonAncestorFragment;
+          fragment.insert('  ', firstRange.startIndex);
+          firstRange.setPosition(fragment, firstRange.startIndex + 2);
+          firstRange.collapse();
+        }
+      }
+    }, {
+      keymap: {
+        key: '/',
+        ctrlKey: true
+      },
+      action: () => {
+        const firstRange = this.selection.firstRange;
+        const startIndex = instance.indexOf(firstRange.startFragment as CodeFragment);
+        const endIndex = instance.indexOf(firstRange.endFragment as CodeFragment);
+
+        const fragments = Array.from(instance).slice(startIndex, endIndex + 1);
+        const isAllComment = fragments.every(f => {
+          return /^\s*\/\//.test(f.code);
+        })
+        if (isAllComment) {
+          fragments.forEach(f => {
+            const code = f.code;
+            const index = code.indexOf('// ');
+            const index2 = code.indexOf('//');
+
+            if (index >= 0) {
+              f.remove(index, index + 3);
+              if (f === firstRange.startFragment) {
+                firstRange.startIndex -= 3;
+              }
+              if (f === firstRange.endFragment) {
+                firstRange.endIndex -= 3;
+              }
+            } else {
+              f.remove(index2, index2 + 2);
+              if (f === firstRange.startFragment) {
+                firstRange.startIndex -= 2;
+              }
+              if (f === firstRange.endFragment) {
+                firstRange.endIndex -= 2;
+              }
+            }
+          })
+        } else {
+          fragments.forEach(f => {
+            f.insert('// ', 0);
+          });
+          firstRange.startIndex += 3;
+          firstRange.endIndex += 3;
+        }
+      }
+    }];
+  }
+}
+
 @Component({
   loader: new PreComponentLoader(),
   providers: [{
     provide: Interceptor,
     useClass: PreComponentInterceptor
+  }, {
+    provide: DynamicKeymap,
+    useClass: PreComponentDynamicKeymap
   }],
   styles: [
     `
@@ -441,7 +536,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
           if (typeof lastToken !== 'string' &&
             lastToken.type === 'comment' &&
             (lastToken.content as string).indexOf(blockCommentStart) === 0) {
-            slot.blockCommentEnd = new RegExp(blockCommentEnd.replace(/[*/]/g, i => '\\' + i) + '$').test(lastToken.content as string);
+            slot.blockCommentEnd = new RegExp(blockCommentEnd.replace(new RegExp(`[${blockCommentEnd}]`, 'g'), i => '\\' + i) + '$').test(lastToken.content as string);
             nextSlot.blockCommentStart = !slot.blockCommentEnd;
           } else {
             nextSlot.blockCommentStart = false;

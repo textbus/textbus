@@ -353,27 +353,7 @@ export class Input {
         this.dispatchInputReadyEvent();
       }),
       fromEvent(this.input, 'input').subscribe(() => {
-        if (!this.selection.collapsed) {
-          this.dispatchEvent((injector, instance) => {
-            const event = new TBEvent(instance);
-            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
-            if (interceptor) {
-              interceptor.onDeleteRange?.(event);
-            }
-            return !event.stopped;
-          })
-          this.dispatchInputReadyEvent(true);
-        }
-        if (this.selection.collapsed) {
-          this.dispatchEvent((injector, instance) => {
-            const event = new TBEvent(instance);
-            const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
-            if (interceptor) {
-              interceptor.onInput?.(event);
-            }
-            return !event.stopped;
-          })
-        }
+        this.dispatchInputEvent();
       }),
       fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
         const text = ev.clipboardData.getData('Text');
@@ -411,6 +391,15 @@ export class Input {
   }
 
   private bindDefaultKeymap() {
+    this.addKeymap({
+      keymap: {
+        key: 'Tab'
+      },
+      action: () => {
+        this.input.value = '    ';
+        this.dispatchInputEvent();
+      }
+    })
     this.addKeymap({
       keymap: {
         key: ['Backspace', 'Delete']
@@ -559,6 +548,30 @@ export class Input {
         }
       }
     })
+  }
+
+  private dispatchInputEvent() {
+    if (!this.selection.collapsed) {
+      this.dispatchEvent((injector, instance) => {
+        const event = new TBEvent(instance);
+        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+        if (interceptor) {
+          interceptor.onDeleteRange?.(event);
+        }
+        return !event.stopped;
+      })
+      this.dispatchInputReadyEvent(true);
+    }
+    if (this.selection.collapsed) {
+      this.dispatchEvent((injector, instance) => {
+        const event = new TBEvent(instance);
+        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+        if (interceptor) {
+          interceptor.onInput?.(event);
+        }
+        return !event.stopped;
+      })
+    }
   }
 
   private dispatchComponentPresetEvent() {

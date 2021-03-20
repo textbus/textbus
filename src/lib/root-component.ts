@@ -268,8 +268,8 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 }
 
 class RootComponentLoader implements ComponentLoader {
-  match(node: HTMLElement): boolean {
-    return node.tagName.toLowerCase() === 'body';
+  match(): boolean {
+    return false;
   }
 
   read(node: HTMLElement): ViewData {
