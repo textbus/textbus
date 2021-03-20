@@ -47,7 +47,7 @@ import {
   insertObjectTool,
   tableTool
 } from './lib/toolbar/tools/_api';
-import { FindPlugin, ImageVideoResizePlugin, TableEditPlugin } from './lib/plugins/_api';
+import { FindPlugin, ImageVideoResizePlugin, LinkJumpPlugin, TableEditPlugin } from './lib/plugins/_api';
 import {
   imageCardComponentExample,
   todoListComponentExample,
@@ -168,6 +168,7 @@ export const defaultOptions: EditorOptions<string> = {
   plugins: [
     new FindPlugin(),
     new ImageVideoResizePlugin(),
+    new LinkJumpPlugin(),
     new TableEditPlugin()
   ],
   componentLibrary: [
