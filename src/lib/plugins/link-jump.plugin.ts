@@ -65,8 +65,7 @@ export class LinkJumpPlugin implements TBPlugin {
       if (focusNode) {
         const container = (focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentNode : focusNode) as HTMLElement;
         const linkElement = this.getLinkByDOMTree(container);
-
-        if (linkElement) {
+        if (linkElement && linkElement.href || linkElement.dataset.href) {
           this.link.href = linkElement.href || linkElement.dataset.href;
           const rect = this.selection.firstRange.getRangePosition();
           Object.assign(this.link.style, {
