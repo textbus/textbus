@@ -17,7 +17,7 @@ export class HistoryCommander implements Commander<null> {
 
   command() {
     this.action === 'back' ?
-      this.history.usePreviousSnapshot() :
-      this.history.useNextSnapshot();
+      this.history.back() :
+      this.history.forward();
   }
 }

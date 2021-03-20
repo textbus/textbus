@@ -224,7 +224,7 @@ export class Viewer {
       plugin.setup(viewInjector);
     })
 
-    viewInjector.get(HistoryManager).startListen();
+    viewInjector.get(HistoryManager).record();
 
     this.readyEvent.next(viewInjector);
     this.readyEvent.complete();

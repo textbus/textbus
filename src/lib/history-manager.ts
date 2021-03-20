@@ -45,12 +45,7 @@ export class HistoryManager {
     this.onUsed = this.historyUsedEvent.asObservable();
   }
 
-  startListen() {
-    this.recordSnapshot();
-    this.listen();
-  }
-
-  usePreviousSnapshot() {
+  back() {
     if (this.canBack) {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
@@ -62,7 +57,7 @@ export class HistoryManager {
     }
   }
 
-  useNextSnapshot() {
+  forward() {
     if (this.canForward) {
       this.historyIndex++;
       const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);

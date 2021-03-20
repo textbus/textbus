@@ -503,7 +503,7 @@ export class Input {
         ctrlKey: true
       },
       action: () => {
-        this.history.usePreviousSnapshot();
+        this.history.back();
       }
     })
     this.addKeymap({
@@ -512,7 +512,7 @@ export class Input {
         ctrlKey: true,
       },
       action: () => {
-        this.history.useNextSnapshot();
+        this.history.forward();
       }
     })
     this.addKeymap({
