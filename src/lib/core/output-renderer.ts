@@ -20,16 +20,15 @@ export class OutputRenderer {
   private fragmentVDomMapping = new WeakMap<Fragment, VElement>();
   // 记录 fragment 对应的容器节点
   private fragmentContentContainerMapping = new WeakMap<Fragment, VElement>();
-  private rootVElement: VElement = new VElement('body');
 
-  render(fragment: Fragment): VElement {
-    if (fragment.outputChanged) {
-      if (fragment.outputDirty) {
-        this.rootVElement = new VElement('body');
-      }
-      this.rendingFragment(fragment, this.rootVElement);
-    }
-    return this.rootVElement;
+  render(component: AbstractComponent): VElement {
+    const root = this.rendingComponent(component);
+    // hack 防止根节点替换插件时，没有父级虚拟 DOM 节点
+    new VElement('html', {
+      childNodes: [root]
+    })
+    // hack end
+    return root;
   }
 
   private rendingFragment(fragment: Fragment, host: VElement, forceUpdate = false): VElement {

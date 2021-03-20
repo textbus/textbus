@@ -16,7 +16,7 @@ import {
   BrComponent,
   ContextMenuAction,
   ComponentLoader,
-  ViewData,
+  ViewData, SlotRenderFn, SingleSlotRenderFn,
 } from './core/_api';
 import { Input } from './workbench/input';
 import { BlockComponent } from './components/_api';
@@ -304,11 +304,11 @@ export class RootComponent extends DivisionAbstractComponent {
     return undefined;
   }
 
-  slotRender(): VElement {
-    return undefined;
+  slotRender(isOutputMode: boolean, slotRenderFn: SingleSlotRenderFn): VElement {
+    return slotRenderFn(this.slot, new VElement(this.tagName));
   }
 
-  render(): VElement {
-    return undefined;
+  render(isOutputMode: boolean, renderFn: SlotRenderFn): VElement {
+    return renderFn(this.slot);
   }
 }

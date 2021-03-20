@@ -85,20 +85,23 @@ export class Renderer {
 
   private oldVDom: VElement;
 
-  render(fragment: Fragment, host: HTMLElement) {
-    if (fragment.changed) {
-      const dirty = fragment.dirty;
+  render(component: AbstractComponent, host: HTMLElement) {
+    if (component.changed) {
+      const dirty = component.dirty;
+      const root = this.rendingComponent(component);
+      // hack 防止根节点替换插件时，没有父级虚拟 DOM 节点
+      new VElement('html', {
+        childNodes: [root]
+      })
+      // hack end
+      this.NVMappingTable.set(host, root);
       if (dirty) {
-        const root = this.rendingFragment(fragment, new VElement('body'));
-        this.NVMappingTable.set(host, root);
         if (this.oldVDom) {
           this.diffAndUpdate(root, this.oldVDom, host);
         } else {
           this.patch(root, host);
         }
         this.oldVDom = root;
-      } else {
-        this.rendingFragment(fragment, this.oldVDom);
       }
     }
     return this.oldVDom;

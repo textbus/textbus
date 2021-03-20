@@ -211,7 +211,7 @@ export class Viewer {
             selection.firstRange.setEnd(position.fragment, position.index);
           }
         }
-        renderer.render(rootComponent.slot, this.contentDocument.body);
+        renderer.render(rootComponent, this.contentDocument.body);
         selection.restore();
         (this.options.plugins || []).forEach(plugin => {
           plugin.onViewUpdated?.();
@@ -223,7 +223,7 @@ export class Viewer {
         selection.removeAllRanges(true);
         this.sourceCodeMode = b;
         if (b) {
-          const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
+          const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent));
           this.rootComponent.slot.clean();
           this.sourceCodeComponent.setSourceCode(pretty(html));
           this.rootComponent.slot.append(this.sourceCodeComponent);
@@ -282,7 +282,7 @@ export class Viewer {
 
     const content = this.editorController.sourceCodeMode ?
       this.sourceCodeComponent.getSourceCode() :
-      this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent.slot));
+      this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent));
     return {
       content,
       links: metadata.links,
@@ -292,7 +292,7 @@ export class Viewer {
   }
 
   getJSONLiteral() {
-    const json = this.outputRenderer.render(this.rootComponent.slot).toJSON();
+    const json = this.outputRenderer.render(this.rootComponent).toJSON();
     const metadata = this.getOutputComponentMetadata()
     return {
       json,
