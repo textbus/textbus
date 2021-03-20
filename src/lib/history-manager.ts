@@ -2,14 +2,14 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import { sampleTime } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
-import { Fragment, RangePath, TBSelection } from './core/_api';
+import { RangePath, TBSelection } from './core/_api';
 import { EditorOptions } from './editor-options';
 import { EDITOR_OPTIONS } from './inject-tokens';
 import { RootComponent } from './root-component';
 import { EditorController } from './editor-controller';
 
 export interface Snapshot {
-  contents: Fragment;
+  component: RootComponent;
   paths: RangePath[];
 }
 
@@ -55,7 +55,7 @@ export class HistoryManager {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
       const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
-      this.rootComponent.slot.from(snapshot.contents);
+      this.rootComponent.slot.from(snapshot.component.slot);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();
       this.historyUsedEvent.next();
@@ -66,7 +66,7 @@ export class HistoryManager {
     if (this.canForward) {
       this.historyIndex++;
       const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
-      this.rootComponent.slot.from(snapshot.contents);
+      this.rootComponent.slot.from(snapshot.component.slot);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();
       this.historyUsedEvent.next();
@@ -107,7 +107,7 @@ export class HistoryManager {
       this.historySequence.length = this.historyIndex + 1;
     }
     this.historySequence.push({
-      contents: this.rootComponent.slot.clone(),
+      component: this.rootComponent.clone(),
       paths: this.selection.getRangePaths()
     });
     if (this.historySequence.length > this.historyStackSize) {
@@ -119,7 +119,7 @@ export class HistoryManager {
 
   private static cloneHistoryData(snapshot: Snapshot): Snapshot {
     return {
-      contents: snapshot.contents.clone(),
+      component: snapshot.component.clone(),
       paths: snapshot.paths.map(i => i)
     }
   }

@@ -268,14 +268,18 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 }
 
 class RootComponentLoader implements ComponentLoader {
-  match(): boolean {
-    return false;
+  match(node: HTMLElement): boolean {
+    return node.tagName.toLowerCase() === 'body';
   }
 
-  read(): ViewData {
+  read(node: HTMLElement): ViewData {
+    const component = new RootComponent();
     return {
-      component: new RootComponent(),
-      slotsMap: []
+      component,
+      slotsMap: [{
+        toSlot: component.slot,
+        from: node
+      }]
     };
   }
 }
@@ -298,7 +302,9 @@ export class RootComponent extends DivisionAbstractComponent {
   }
 
   clone(): RootComponent {
-    return undefined;
+    const component = new RootComponent();
+    component.slot.from(this.slot.clone());
+    return component;
   }
 
   slotRender(isOutputMode: boolean, slotRenderFn: SingleSlotRenderFn): VElement {
