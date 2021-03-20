@@ -64,7 +64,7 @@ export class ControlPanel {
     })
     this.tab.head.insertBefore(this.fixedBtn, this.tab.head.children[0]);
     this.subs.push(this.editorController.onStateChange.subscribe(status => {
-      if (status.readonly || status.sourceCodeMode) {
+      if (status.readonly) {
         this.fixed = false;
       }
     }))

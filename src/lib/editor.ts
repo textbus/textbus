@@ -14,7 +14,6 @@ import {
 import {
   Device,
   Dialog,
-  EditingMode,
   FullScreen,
   LibSwitch,
   StatusBar,
@@ -99,7 +98,6 @@ export class Editor<T = any> {
     this.stateController = new EditorController({
       readonly: false,
       expandComponentLibrary: options.expandComponentLibrary,
-      sourceCodeMode: false,
       deviceType: defaultDeviceType,
       fullScreen: options.fullScreen
     });
@@ -171,7 +169,6 @@ export class Editor<T = any> {
       Workbench,
       Device,
       Dialog,
-      EditingMode,
       FullScreen,
       LibSwitch,
       ControlPanel,
@@ -232,9 +229,6 @@ export class Editor<T = any> {
    * 获取 TextBus 内容的 JSON 字面量。
    */
   getJSONLiteral(): OutputContent<VElementLiteral> {
-    if (this.stateController.sourceCodeMode) {
-      throw editorErrorFn('json results cannot be obtained in source editing mode.');
-    }
     return this.viewer.getJSONLiteral() as any as OutputContent<VElementLiteral>;
   }
 
@@ -247,7 +241,6 @@ export class Editor<T = any> {
     [Toolbar,
       Device,
       Dialog,
-      EditingMode,
       FullScreen,
       LibSwitch,
       StatusBar,

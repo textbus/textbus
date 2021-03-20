@@ -1,5 +1,5 @@
 import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import {
   forwardRef,
   getAnnotations,
@@ -10,7 +10,6 @@ import {
   ReflectiveInjector,
   Type
 } from '@tanbo/di';
-import pretty from 'pretty';
 
 import { EDITOR_OPTIONS, EDITABLE_DOCUMENT } from '../inject-tokens';
 import { EditorOptions } from '../editor-options';
@@ -32,7 +31,7 @@ import { RootComponent } from '../root-component';
 import { Toolbar } from '../toolbar/toolbar';
 import { ComponentStage } from './component-stage';
 import { EditorController } from '../editor-controller';
-import { BlockComponent, PreComponent } from '../components/_api';
+import { BlockComponent } from '../components/_api';
 import { ComponentInjectors } from '../component-injectors';
 
 declare const ResizeObserver: any;
@@ -43,26 +42,10 @@ export class Viewer {
   onViewUpdated: Observable<void>;
   elementRef = document.createElement('iframe');
 
-  set sourceCodeMode(b: boolean) {
-    this._sourceCodeMode = b;
-    if (this.contentDocument) {
-      if (b) {
-        this.contentDocument.head.append(this.sourceCodeModeStyleSheet)
-      } else {
-        this.sourceCodeModeStyleSheet.parentNode?.removeChild(this.sourceCodeModeStyleSheet);
-      }
-    }
-  }
-
   private get contentDocument() {
     return this.elementRef.contentDocument;
   }
 
-  private _sourceCodeMode = false;
-  private sourceCodeModeStyleSheet = document.createElement('style');
-
-
-  private sourceCodeComponent = new PreComponent('HTML', '');
   private outputRenderer = new OutputRenderer();
   private readyEvent = new Subject<Injector>();
   private viewUpdateEvent = new Subject<void>();
@@ -82,7 +65,6 @@ export class Viewer {
               private injector: Injector) {
     this.onReady = this.readyEvent.asObservable();
     this.onViewUpdated = this.viewUpdateEvent.asObservable();
-    this.sourceCodeModeStyleSheet.innerHTML = `body{padding:0}body>pre{border-radius:0;border:none;margin:0;background:none}`;
 
     const componentAnnotations = [RootComponent, ...(this.options.components || []), BrComponent].map(c => {
       return getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component
@@ -193,23 +175,12 @@ export class Viewer {
         (this.options.plugins || []).forEach(plugin => {
           plugin.onRenderingBefore?.();
         })
-        if (this.editorController.sourceCodeMode) {
-          const isEmpty = rootComponent.slot.length === 0;
-          if (isEmpty) {
-            this.sourceCodeComponent = new PreComponent('HTML', '\n');
-            this.rootComponent.slot.append(this.sourceCodeComponent);
-            const position = selection.firstRange.findFirstPosition(this.sourceCodeComponent.getSlotAtIndex(0));
-            selection.firstRange.setStart(position.fragment, position.index);
-            selection.firstRange.setEnd(position.fragment, position.index);
-          }
-        } else {
-          const isEmpty = rootComponent.slot.length === 0;
-          Viewer.guardLastIsParagraph(rootComponent.slot);
-          if (isEmpty && selection.firstRange) {
-            const position = selection.firstRange.findFirstPosition(rootComponent.slot);
-            selection.firstRange.setStart(position.fragment, position.index);
-            selection.firstRange.setEnd(position.fragment, position.index);
-          }
+        const isEmpty = rootComponent.slot.length === 0;
+        Viewer.guardLastIsParagraph(rootComponent.slot);
+        if (isEmpty && selection.firstRange) {
+          const position = selection.firstRange.findFirstPosition(rootComponent.slot);
+          selection.firstRange.setStart(position.fragment, position.index);
+          selection.firstRange.setEnd(position.fragment, position.index);
         }
         renderer.render(rootComponent, this.contentDocument.body);
         selection.restore();
@@ -219,20 +190,6 @@ export class Viewer {
         this.viewUpdateEvent.next();
       }),
 
-      this.editorController.onStateChange.pipe(map(b => b.sourceCodeMode), distinctUntilChanged()).subscribe(b => {
-        selection.removeAllRanges(true);
-        this.sourceCodeMode = b;
-        if (b) {
-          const html = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent));
-          this.rootComponent.slot.clean();
-          this.sourceCodeComponent.setSourceCode(pretty(html));
-          this.rootComponent.slot.append(this.sourceCodeComponent);
-        } else {
-          const html = this.sourceCodeComponent.getSourceCode();
-          const dom = Parser.parserHTML(html)
-          this.rootComponent.slot.from(this.parser.parse(dom));
-        }
-      }),
       fromEvent(this.contentDocument, 'click').subscribe((ev: MouseEvent) => {
         const sourceElement = ev.target as Node;
         const focusNode = this.findFocusNode(sourceElement, renderer);
@@ -280,9 +237,7 @@ export class Viewer {
   getContents() {
     const metadata = this.getOutputComponentMetadata()
 
-    const content = this.editorController.sourceCodeMode ?
-      this.sourceCodeComponent.getSourceCode() :
-      this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent));
+    const content = this.options.outputTranslator.transform(this.outputRenderer.render(this.rootComponent));
     return {
       content,
       links: metadata.links,

@@ -1,5 +1,5 @@
 import { Observable, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, sampleTime } from 'rxjs/operators';
+import { sampleTime } from 'rxjs/operators';
 import { forwardRef, Inject, Injectable } from '@tanbo/di';
 
 import { Fragment, RangePath, TBSelection } from './core/_api';
@@ -46,19 +46,8 @@ export class HistoryManager {
   }
 
   startListen() {
-    if (this.stateChangeSubscription) {
-      this.stateChangeSubscription.unsubscribe();
-    }
-    this.stateChangeSubscription = this.editorController.onStateChange.pipe(map(s => {
-      return s.sourceCodeMode;
-    }), distinctUntilChanged()).subscribe(b => {
-      if (b) {
-        this.stopListen();
-      } else {
-        this.recordSnapshot();
-        this.listen();
-      }
-    })
+    this.recordSnapshot();
+    this.listen();
   }
 
   usePreviousSnapshot() {

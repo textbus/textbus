@@ -50,8 +50,6 @@ export interface GroupConfig {
   tooltip?: string;
   menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu | FormMenu>;
   matcher?: Matcher;
-  /** 是否支持源代码编辑模式 */
-  supportSourceCodeMode?: boolean;
 }
 
 class MenuHandler implements Tool {

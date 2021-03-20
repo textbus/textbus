@@ -179,11 +179,7 @@ export class Toolbar {
     this.tools.forEach(tool => {
       let s: SelectionMatchState;
       if (typeof tool.instance.updateStatus === 'function') {
-        s = this.editorController.sourceCodeMode && !tool.config.supportSourceCodeMode ? {
-          srcStates: [],
-          matchData: null,
-          state: HighlightState.Disabled
-        } : tool.config.matcher?.queryState(this.selection) || {
+        s = tool.config.matcher?.queryState(this.selection) || {
           srcStates: [],
           matchData: null,
           state: HighlightState.Normal

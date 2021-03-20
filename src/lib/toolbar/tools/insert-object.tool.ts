@@ -14,7 +14,6 @@ import { codeToolConfig } from './code.tool';
 import { blockquoteToolConfig } from './blockquote.tool';
 
 export const insertObjectToolConfig: GroupConfig = {
-  supportSourceCodeMode: true,
   iconClasses: ['textbus-icon-plus'],
   menu: [{
     ...preToolConfig,

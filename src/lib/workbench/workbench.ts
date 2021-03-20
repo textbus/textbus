@@ -83,20 +83,6 @@ export class Workbench {
           }
         }
       }),
-      this.editorController.onStateChange.pipe(map(s => {
-        return s.sourceCodeMode;
-      }), distinctUntilChanged()).subscribe(b => {
-        if (b) {
-          this.setTabletWidth('100%');
-        } else {
-          for (const item of (this.options.deviceOptions || [])) {
-            if (this.editorController.viewDeviceType === item.label) {
-              this.setTabletWidth(item.value);
-            }
-          }
-        }
-        this.tabletWrapper.style.padding = b ? '0' : '';
-      }),
       this.viewer.onReady.subscribe(() => {
         this.loaded()
       })

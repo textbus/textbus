@@ -35,9 +35,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   }
 
   onContextmenu(): ContextMenuAction[] {
-    if (this.editorController.sourceCodeMode) {
-      return [];
-    }
     return [{
       iconClasses: ['textbus-icon-insert-paragraph-before'],
       label: '在前面插入段落',

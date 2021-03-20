@@ -5,7 +5,6 @@ export interface GlobalStatus {
   fullScreen: boolean;
   deviceType: string;
   expandComponentLibrary: boolean;
-  sourceCodeMode: boolean;
 }
 
 export class EditorController {
@@ -46,23 +45,6 @@ export class EditorController {
   get expandComponentLibrary() {
     return this.status.expandComponentLibrary;
   }
-
-  set sourceCodeMode(b: boolean) {
-    this.status.sourceCodeMode = b;
-    if (b) {
-      this.expandComponentLibraryCache = this.expandComponentLibrary;
-      this.status.expandComponentLibrary = false;
-    } else {
-      this.status.expandComponentLibrary = this.expandComponentLibraryCache;
-    }
-    this.dispatch();
-  }
-
-  get sourceCodeMode() {
-    return this.status.sourceCodeMode;
-  }
-
-  private expandComponentLibraryCache = this.expandComponentLibrary;
 
   private stateChangeEvent = new BehaviorSubject(this.status);
 

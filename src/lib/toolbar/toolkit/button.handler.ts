@@ -24,8 +24,6 @@ export interface ButtonToolConfig {
   tooltip?: string;
   /** 当前按扭控件的快捷键配置 */
   keymap?: Keymap;
-  /** 是否支持源代码编辑模式 */
-  supportSourceCodeMode?: boolean;
 }
 
 export class ButtonHandler implements Tool {

@@ -2,7 +2,6 @@ export * from './component-stage';
 export * from './control-panel';
 export * from './device';
 export * from './dialog';
-export * from './editing-mode';
 export * from './full-screen';
 export * from './input';
 export * from './lib-switch';

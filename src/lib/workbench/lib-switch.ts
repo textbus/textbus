@@ -21,19 +21,6 @@ export class LibSwitch {
     ]
   }) as HTMLButtonElement;
 
-  set disabled(b: boolean) {
-    this._disabled = b;
-    this.elementRef.disabled = b;
-    if (b) {
-      this.expand = false;
-      this.elementRef.classList.remove('textbus-status-bar-btn-active');
-    }
-  }
-
-  get disabled() {
-    return this._disabled;
-  }
-
   set expand(b: boolean) {
     this._expand = b;
     if (b) {
@@ -47,7 +34,6 @@ export class LibSwitch {
     return this._expand;
   }
 
-  private _disabled = false;
   private _expand = false;
 
   private subs: Subscription[] = [];
@@ -59,7 +45,6 @@ export class LibSwitch {
         editorController.expandComponentLibrary = this.expand;
       }),
       editorController.onStateChange.pipe(map(s => {
-        this.disabled = editorController.sourceCodeMode;
         return s.expandComponentLibrary;
       }), distinctUntilChanged()).subscribe(b => {
         this.expand = b;

@@ -34,8 +34,6 @@ export interface DropdownToolConfig {
   tooltip?: string;
   /** 设置控件显示的文字 */
   label?: string;
-  /** 是否支持源代码编辑模式 */
-  supportSourceCodeMode?: boolean;
 }
 
 export class DropdownHandler implements Tool {
