@@ -14,10 +14,8 @@ import {
 } from './src/public-api';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
-  expandComponentLibrary: true,
   // deviceType: 'iPad',
   theme: 'dark',
-  fullScreen: true,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');

@@ -5,31 +5,30 @@ import {
   NullInjector,
   Provider,
   ReflectiveInjector,
-  Type
 } from '@tanbo/di';
 
 import {
   OutputRenderer, VElementLiteral
 } from './core/_api';
 import {
-  Device,
-  Dialog,
-  FullScreen,
-  LibSwitch,
-  StatusBar,
   ControlPanel,
+  Dialog,
   Viewer,
-  ComponentStage,
-  Workbench
-} from './workbench/_api';
+} from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
-import { Toolbar } from './toolbar/_api';
 import { EditorController } from './editor-controller';
-import { FileUploader } from './uikit/forms/help';
+import { FileUploader } from './ui/uikit/forms/help';
 import { makeError } from './_utils/make-error';
 import { ComponentInjectors } from './component-injectors';
 import { EditorOptions } from './editor-options';
-import { EDITABLE_DOCUMENT_CONTAINER, EDITOR_OPTIONS, EDITOR_SCROLL_CONTAINER } from './inject-tokens';
+import {
+  EDITOR_OPTIONS, UI_BOTTOM_CONTAINER, UI_DOCUMENT_CONTAINER,
+  UI_RIGHT_CONTAINER, UI_SCROLL_CONTAINER,
+  UI_TOP_CONTAINER,
+  UI_VIEWER_CONTAINER,
+} from './inject-tokens';
+import { createElement } from './ui/uikit/_api';
+import { map } from 'rxjs/operators';
 
 const editorErrorFn = makeError('Editor');
 
@@ -50,7 +49,7 @@ export class Editor<T = any> {
   /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
 
-  readonly elementRef = document.createElement('div');
+  readonly elementRef: HTMLElement;
 
   readonly stateController: EditorController;
 
@@ -65,13 +64,11 @@ export class Editor<T = any> {
   }
 
   private readonly container: HTMLElement;
-
   private readyState = false;
   private tasks: Array<() => void> = [];
 
   private readyEvent = new Subject<void>();
   private viewer: Viewer;
-  private readonly rootInjector: Injector;
 
   private subs: Subscription[] = [];
 
@@ -85,26 +82,10 @@ export class Editor<T = any> {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable();
-    let defaultDeviceType = options.deviceType;
-
-    if (!defaultDeviceType) {
-      for (const item of (options.deviceOptions || [])) {
-        if (item.default) {
-          defaultDeviceType = item.label;
-        }
-      }
-    }
 
     this.stateController = new EditorController({
       readonly: false,
-      expandComponentLibrary: options.expandComponentLibrary,
-      deviceType: defaultDeviceType,
-      fullScreen: options.fullScreen
     });
-
-    this.subs.push(this.stateController.onStateChange.subscribe(state => {
-      this.fullScreen(state.fullScreen);
-    }))
 
     const fileUploader: FileUploader = {
       upload: (type: string): Observable<string> => {
@@ -125,10 +106,84 @@ export class Editor<T = any> {
         return of('');
       }
     };
+    const topContainer = createElement('div', {
+      classes: ['textbus-ui-top']
+    });
+    const bottomContainer = createElement('div', {
+      classes: ['textbus-ui-bottom', 'textbus-status-bar']
+    });
+    let viewer: HTMLElement;
+    let rightContainer: HTMLElement;
+    let docContainer: HTMLElement;
+    let loading: HTMLElement;
+    let scroll: HTMLElement;
+    let wrapper: HTMLElement;
+
+    this.elementRef = createElement('div', {
+      classes: ['textbus-container'],
+      children: [
+        viewer = createElement('div', {
+          classes: ['textbus-ui-middle'],
+          children: [
+            createElement('div', {
+              classes: ['textbus-ui-viewer'],
+              children: [
+                scroll = createElement('div', {
+                  classes: ['textbus-ui-scroll'],
+                  children: [
+                    wrapper = createElement('div', {
+                      classes: ['textbus-ui-doc-wrapper'],
+                      children: [
+                        docContainer = createElement('div', {
+                          classes: ['textbus-ui-doc']
+                        })
+                      ]
+                    }),
+                    loading = createElement('div', {
+                      classes: ['textbus-loading'],
+                      props: {
+                        innerHTML: 'TextBus'.split('').map(t => `<div>${t}</div>`).join('')
+                      }
+                    })
+                  ]
+                }),
+                rightContainer = createElement('div', {
+                  classes: ['textbus-ui-right']
+                })
+              ]
+            })
+          ]
+        })
+      ]
+    })
 
     const staticProviders: Provider[] = [{
       provide: Editor,
       useValue: this,
+    }, {
+      provide: UI_TOP_CONTAINER,
+      useFactory: () => {
+        this.elementRef.prepend(topContainer);
+        return topContainer;
+      }
+    }, {
+      provide: UI_SCROLL_CONTAINER,
+      useValue: scroll
+    }, {
+      provide: UI_VIEWER_CONTAINER,
+      useValue: viewer
+    }, {
+      provide: UI_DOCUMENT_CONTAINER,
+      useValue: docContainer
+    }, {
+      provide: UI_RIGHT_CONTAINER,
+      useValue: rightContainer
+    }, {
+      provide: UI_BOTTOM_CONTAINER,
+      useFactory: () => {
+        this.elementRef.append(bottomContainer);
+        return bottomContainer;
+      }
     }, {
       provide: EDITOR_OPTIONS,
       useValue: options
@@ -149,35 +204,15 @@ export class Editor<T = any> {
       useFactory() {
         return rootInjector;
       }
-    }, {
-      provide: EDITABLE_DOCUMENT_CONTAINER,
-      useFactory(workbench: Workbench) {
-        return workbench.tablet;
-      },
-      deps: [Workbench]
-    }, {
-      provide: EDITOR_SCROLL_CONTAINER,
-      useFactory(workbench: Workbench) {
-        return workbench.editableArea;
-      },
-      deps: [Workbench]
     }];
 
     const rootInjector = new ReflectiveInjector(new NullInjector(), [
       ComponentInjectors,
-      Toolbar,
-      Workbench,
-      Device,
       Dialog,
-      FullScreen,
-      LibSwitch,
-      ControlPanel,
-      StatusBar,
       Viewer,
-      ComponentStage,
+      ControlPanel,
       ...staticProviders
     ]);
-    this.rootInjector = rootInjector;
 
     this.viewer = rootInjector.get(Viewer);
     this.onChange = this.viewer.onViewUpdated;
@@ -188,16 +223,29 @@ export class Editor<T = any> {
         this.tasks.forEach(fn => fn());
         this.readyState = true;
         this.readyEvent.next();
+        setTimeout(() => {
+          loading.classList.add('textbus-loading-done');
+          wrapper.classList.add('textbus-dashboard-ready');
+          setTimeout(() => {
+            scroll.removeChild(loading);
+          }, 300);
+        }, 1000)
+      }),
+      this.stateController.onStateChange.pipe(map(s => s.readonly)).subscribe(b => {
+        if (b) {
+          this.elementRef.classList.add('textbus-readonly');
+        } else {
+          this.elementRef.classList.remove('textbus-readonly')
+        }
       })
     );
 
-    this.elementRef.append(
-      rootInjector.get(Toolbar).elementRef,
-      rootInjector.get(Workbench).elementRef,
-      rootInjector.get(StatusBar).elementRef
-    )
+    docContainer.appendChild(rootInjector.get(Viewer).elementRef);
 
-    this.elementRef.classList.add('textbus-container');
+    (options.ui || []).forEach(ui => {
+      console.log(ui)
+      ui.setup(rootInjector);
+    })
 
     if (options.theme) {
       this.elementRef.classList.add('textbus-theme-' + options.theme);
@@ -237,20 +285,20 @@ export class Editor<T = any> {
    */
   destroy() {
     this.subs.forEach(s => s.unsubscribe());
-    const rootInjector = this.rootInjector;
-    [Toolbar,
-      Device,
-      Dialog,
-      FullScreen,
-      LibSwitch,
-      StatusBar,
-      Viewer,
-      ComponentStage,
-      ControlPanel,
-      Workbench,
-    ].forEach(c => {
-      rootInjector.get(c as Type<{ destroy(): void }>).destroy();
-    })
+    // const rootInjector = this.rootInjector;
+    // [Toolbar,
+    //   Device,
+    //   Dialog,
+    //   FullScreen,
+    //   LibSwitch,
+    //   StatusBar,
+    //   Viewer,
+    //   ComponentStage,
+    //   ControlPanel,
+    //   Workbench,
+    // ].forEach(c => {
+    //   rootInjector.get(c as Type<{ destroy(): void }>).destroy();
+    // })
     this.container.removeChild(this.elementRef);
   }
 

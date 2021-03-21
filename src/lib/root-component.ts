@@ -18,7 +18,7 @@ import {
   ComponentLoader,
   ViewData, SlotRenderFn, SingleSlotRenderFn,
 } from './core/_api';
-import { Input } from './workbench/input';
+import { Input } from './ui/input';
 import { BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
 

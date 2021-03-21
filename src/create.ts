@@ -46,7 +46,7 @@ import {
   findTool,
   insertObjectTool,
   tableTool
-} from './lib/toolbar/tools/_api';
+} from './lib/ui/toolbar/tools/_api';
 import {
   imageCardComponentExample,
   todoListComponentExample,
@@ -67,8 +67,7 @@ import {
   TodoListComponent,
   ImageCardComponent,
   KatexComponent
-} from './lib/additional-components/_api';
-import { HTMLOutputTranslator } from './lib/output-translator';
+} from './lib/components/extensions/_api';
 import {
   ListComponent,
   BlockComponent,
@@ -78,7 +77,8 @@ import {
   ImageComponent,
   TableComponent
 } from './lib/components/_api';
-import { Device } from './lib/workbench/_api';
+import { ComponentStage, Device, FullScreen } from './lib/ui/_api';
+import { Toolbar } from './lib/ui/toolbar/_api';
 
 export const defaultOptions: EditorOptions<string> = {
   editingStyleSheets: [
@@ -125,25 +125,25 @@ export const defaultOptions: EditorOptions<string> = {
     dirFormatter,
     tdBorderColorFormatter,
   ],
-  tools: [
-    [historyBackTool, historyForwardTool],
-    [insertObjectTool],
-    [headingTool],
-    [boldTool, italicTool, strikeThroughTool, underlineTool],
-    [olTool, ulTool],
-    [fontSizeTool, textIndentTool],
-    [colorTool, textBackgroundTool],
-    [insertParagraphBeforeTool, insertParagraphAfterTool],
-    [fontFamilyTool],
-    [linkTool, unlinkTool],
-    [imageTool],
-    [textAlignTool],
-    [tableTool],
-    [findTool],
-    [cleanTool]
-  ],
   ui: [
-
+    new Toolbar([
+      [historyBackTool, historyForwardTool],
+      [insertObjectTool],
+      [headingTool],
+      [boldTool, italicTool, strikeThroughTool, underlineTool],
+      [olTool, ulTool],
+      [fontSizeTool, textIndentTool],
+      [colorTool, textBackgroundTool],
+      [insertParagraphBeforeTool, insertParagraphAfterTool],
+      [fontFamilyTool],
+      [linkTool, unlinkTool],
+      [imageTool],
+      [textAlignTool],
+      [tableTool],
+      [findTool],
+      [cleanTool]
+    ]),
+    new FullScreen(),
     new Device([{
       label: 'PC',
       value: '100%',
@@ -166,8 +166,19 @@ export const defaultOptions: EditorOptions<string> = {
     }, {
       label: 'A4',
       value: '842px'
-    }])
-  ],
+    }]),
+    new ComponentStage([
+      imageCardComponentExample,
+      todoListComponentExample,
+      baiduMapComponentExample,
+      jumbotronComponentExample,
+      wordExplainComponentExample,
+      timelineComponentExample,
+      progressComponentExample,
+      stepsComponentExample,
+      katexComponentExample,
+    ])
+  ]
 };
 
 export function createEditor<T = string>(selector: string | HTMLElement, options: EditorOptions<T> = {}) {

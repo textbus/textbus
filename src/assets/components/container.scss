@@ -1,13 +1,12 @@
 .textbus-container {
   line-height: 1.428;
   border-radius: 5px;
-  //overflow: hidden;
   height: 480px;
   color: $color-dark;
   position: relative;
   display: flex;
   flex-direction: column;
-
+  @include scrollChild();
   > div {
     &:first-child {
       border-top-left-radius: inherit;
@@ -19,15 +18,82 @@
       border-bottom-right-radius: inherit;
     }
   }
+}
 
-  &.textbus-container-full-screen {
-    position: fixed;
+.textbus-ui {
+  &-top {
+    position: relative;
+  }
+
+  &-middle {
+    flex: 1;
+    position: relative;
+  }
+
+  &-viewer {
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    border-radius: 0;
-    z-index: 10000;
-    height: auto;
+    display: flex;
   }
+
+  &-right {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+  }
+
+  &-bottom {
+    position: relative;
+  }
+
+  &-scroll {
+    flex: 1;
+    border-left: 1px solid $color-light;
+    overflow: auto;
+
+    &.textbus-readonly {
+      &::after {
+        content: "";
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+    }
+  }
+  &-doc-wrapper {
+    padding: 8px 0;
+    position: relative;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, .2);
+    background-color: #fff;
+    min-height: 100%;
+    margin: 0 auto;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 1.2s cubic-bezier(.36, .66, .04, 1);
+    box-sizing: border-box;
+    &.textbus-dashboard-ready {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  &-doc {
+    position: relative;
+  }
+}
+.textbus-workbench {
+  background: #fff;
+  flex: 1;
+}
+
+.textbus-frame {
+  border: none;
+  width: 100%;
+  display: block;
+  min-height: 100%;
 }

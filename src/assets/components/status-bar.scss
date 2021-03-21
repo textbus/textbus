@@ -8,30 +8,15 @@
   background-color: lighten($color-lighter, 1);
   user-select: none;
   color: $color-default;
-  display: flex;
-  align-items: center;
 
   button {
     font-family: inherit;
   }
 }
 
-.textbus-status-bar-left {
-  display: flex;
-  flex: 1;
-}
-
 .textbus-device {
+  float: left;
   position: relative;
-
-  &-btn {
-    padding-left: .5em;
-    padding-right: .5em;
-
-    span {
-      margin-right: .5em;
-    }
-  }
 
   &-expand {
     .textbus-device-menus {
@@ -95,8 +80,6 @@
   outline: none;
   font-size: inherit;
   cursor: pointer;
-  padding-left: .5em;
-  padding-right: .5em;
 
   &:hover {
     color: $color-primary;
@@ -110,4 +93,8 @@
   &-active {
     color: $color-primary;
   }
+}
+
+.textbus-full-screen {
+  float: left;
 }

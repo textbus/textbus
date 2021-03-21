@@ -3,7 +3,7 @@ import { Injector } from '@tanbo/di';
 
 import { Fragment, Renderer, TBRange, TBSelection, TBPlugin, BrComponent } from '../core/_api';
 import { TableCellPosition, TableComponent } from '../components/_api';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../inject-tokens';
+import { EDITABLE_DOCUMENT, UI_VIEWER_CONTAINER } from '../inject-tokens';
 
 interface ElementPosition {
   left: number;
@@ -56,7 +56,7 @@ export class TableEditPlugin implements TBPlugin {
 
   setup(injector: Injector) {
     this.contextDocument = injector.get(EDITABLE_DOCUMENT);
-    this.frameContainer = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+    this.frameContainer = injector.get(UI_VIEWER_CONTAINER);
     this.renderer = injector.get(Renderer);
     this.selection = injector.get(TBSelection);
     const style = this.contextDocument.createElement('style');

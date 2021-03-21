@@ -7,3 +7,4 @@ export * from './table.component';
 export * from './video.component';
 
 export * from './utils/breaking-line';
+export * from './extensions/_api';

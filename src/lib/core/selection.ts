@@ -10,7 +10,6 @@ import {
   BranchAbstractComponent,
   DivisionAbstractComponent
 } from './component';
-import { TBPlugin } from './plugin';
 import { makeError } from '../_utils/make-error';
 
 /**
@@ -92,8 +91,7 @@ export class TBSelection {
 
   constructor(private context: Document,
               private selectionChange: Observable<any>,
-              private renderer: Renderer,
-              private pipes: TBPlugin[] = []) {
+              private renderer: Renderer) {
     this.nativeSelection = context.getSelection();
     this.onChange = merge(selectionChange, this.selectionChangeEvent.asObservable()).pipe(tap(() => {
       this.isChanged = true;
@@ -125,10 +123,6 @@ export class TBSelection {
         }
         this._ranges.push(new TBRange(nativeRange.cloneRange(), this.renderer));
       }
-    })).pipe(tap(() => {
-      pipes.forEach(plugin => {
-        plugin.onSelectionChange?.();
-      })
     }));
   }
 

@@ -1,7 +1,7 @@
 import { Injector } from '@tanbo/di';
 
 import { TBPlugin, TBSelection } from '../core/_api';
-import { EDITABLE_DOCUMENT, EDITABLE_DOCUMENT_CONTAINER } from '../inject-tokens';
+import { EDITABLE_DOCUMENT, UI_VIEWER_CONTAINER } from '../inject-tokens';
 
 const styles = `
 .textbus-link-jump-plugin {
@@ -51,7 +51,7 @@ export class LinkJumpPlugin implements TBPlugin {
   setup(injector: Injector) {
     this.contentDocument = injector.get(EDITABLE_DOCUMENT);
     this.selection = injector.get(TBSelection);
-    this.container = injector.get(EDITABLE_DOCUMENT_CONTAINER);
+    this.container = injector.get(UI_VIEWER_CONTAINER);
 
     this.style.innerHTML = styles;
     document.head.appendChild(this.style);
