@@ -91,6 +91,11 @@ export class Renderer {
 
   private oldVDom: VElement;
 
+  constructor() {
+    this.onViewUpdated = this.viewUpdateEvent.asObservable();
+    this.onRendingBefore = this.rendingEvent.asObservable();
+  }
+
   render<T extends AbstractComponent>(component: T, host: HTMLElement) {
     this.rendingEvent.next();
     if (component.changed) {

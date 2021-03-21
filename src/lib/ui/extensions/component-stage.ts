@@ -93,6 +93,9 @@ export class ComponentStage implements TextBusUI {
   }
 
   setup(injector: Injector) {
+    this.editorController = injector.get(EditorController);
+    this.fileUploader = injector.get(FileUploader as Type<FileUploader>);
+    this.dialogManager = injector.get(Dialog);
     const categories = this.classify(this.creators || []);
     const tab = new Tab();
     tab.show(categories.map(item => {
@@ -117,9 +120,6 @@ export class ComponentStage implements TextBusUI {
 
   onReady(injector: Injector) {
     this.selection = injector.get(TBSelection);
-    this.editorController = injector.get(EditorController);
-    this.fileUploader = injector.get(FileUploader as Type<FileUploader>);
-    this.dialogManager = injector.get(Dialog);
   }
 
   onDestroy() {

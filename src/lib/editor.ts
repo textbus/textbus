@@ -221,8 +221,9 @@ export class Editor<T = any> {
       this.viewer.onReady.subscribe(injector => {
         this.injector = injector;
         this.tasks.forEach(fn => fn());
-        this.readyState = true;
-        this.readyEvent.next();
+        (options.ui || []).forEach(ui => {
+          ui.onReady?.(injector);
+        })
         setTimeout(() => {
           loading.classList.add('textbus-loading-done');
           wrapper.classList.add('textbus-dashboard-ready');
@@ -230,6 +231,9 @@ export class Editor<T = any> {
             scroll.removeChild(loading);
           }, 300);
         }, 1000)
+        this.readyState = true;
+
+        this.readyEvent.next();
       }),
       this.stateController.onStateChange.pipe(map(s => s.readonly)).subscribe(b => {
         if (b) {
@@ -243,7 +247,6 @@ export class Editor<T = any> {
     docContainer.appendChild(rootInjector.get(Viewer).elementRef);
 
     (options.ui || []).forEach(ui => {
-      console.log(ui)
       ui.setup(rootInjector);
     })
 
