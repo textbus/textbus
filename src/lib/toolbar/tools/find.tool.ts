@@ -2,15 +2,7 @@ import { fromEvent, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
 import { AdditionalToolConfig, AdditionalViewer, Toolkit } from '../toolkit/_api';
-import { FindCommander } from '../commands/find.commander';
-
-export interface FindAndReplaceRule {
-  findValue: string;
-  next: boolean;
-  replaceValue: string;
-  replace: boolean;
-  replaceAll: boolean;
-}
+import { FindCommander, FindAndReplaceRule } from '../commands/find.commander';
 
 class FindForm implements AdditionalViewer {
   onAction: Observable<FindAndReplaceRule>;

@@ -71,7 +71,7 @@ export class Toolbar {
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => FileUploader)) private fileUploader: FileUploader,
               @Inject(forwardRef(() => Dialog)) private dialogManager: Dialog) {
-    this.config = options.toolbar;
+    this.config = options.tools;
 
     this.onAction = this.actionEvent.asObservable();
 

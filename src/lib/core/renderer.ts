@@ -1,3 +1,5 @@
+import { Observable, Subject } from 'rxjs';
+
 import { Fragment } from './fragment';
 import { VElement, VTextNode } from './element';
 import {
@@ -70,6 +72,10 @@ class NativeElementMappingTable {
 const rendererErrorFn = makeError('Renderer');
 
 export class Renderer {
+  onRendingBefore: Observable<void>;
+  onViewUpdated: Observable<void>;
+  private rendingEvent = new Subject<void>();
+  private viewUpdateEvent = new Subject<void>();
   // 记录虚拟节点的位置
   private vDomPositionMapping = new WeakMap<VTextNode | VElement, ElementPosition>();
   // 记录 fragment 对应的虚拟节点
@@ -86,6 +92,7 @@ export class Renderer {
   private oldVDom: VElement;
 
   render<T extends AbstractComponent>(component: T, host: HTMLElement) {
+    this.rendingEvent.next();
     if (component.changed) {
       const dirty = component.dirty;
       const root = this.rendingComponent(component);
@@ -104,6 +111,7 @@ export class Renderer {
         this.oldVDom = root;
       }
     }
+    this.viewUpdateEvent.next();
     return this.oldVDom;
   }
 

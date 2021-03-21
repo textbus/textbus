@@ -1,11 +1,7 @@
-import { forwardRef, Inject, Injectable } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { EditorOptions } from '../editor-options';
-import { EDITOR_OPTIONS } from '../inject-tokens';
-import { EditorController } from '../editor-controller';
 import { createElement } from '../uikit/uikit';
+import { TextBusUI } from '../ui';
 
 export interface DeviceOption {
   label: string;
@@ -13,22 +9,16 @@ export interface DeviceOption {
   default?: boolean;
 }
 
-@Injectable()
-export class Device {
-  elementRef: HTMLElement;
+export class Device implements TextBusUI {
+  private elementRef: HTMLElement;
 
-  private options: DeviceOption[];
   private button: HTMLElement;
   private label: HTMLElement;
   private menus: HTMLElement;
   private menuItems: HTMLElement[] = [];
   private subs: Subscription[] = [];
 
-  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private deviceOptions: EditorOptions<any>,
-              private editorController: EditorController) {
-
-    this.options = deviceOptions.deviceOptions || [];
-
+  constructor(private options: DeviceOption[]) {
     this.elementRef = createElement('div', {
       classes: ['textbus-device'],
       children: [
@@ -70,20 +60,17 @@ export class Device {
         })
       ]
     })
+  }
 
+  setup() {
     let isSelfClick = false;
 
     this.subs.push(
       fromEvent(this.menus, 'click').subscribe((ev) => {
         const index = this.menuItems.indexOf(ev.target as HTMLElement);
         if (index > -1) {
-          this.editorController.viewDeviceType = this.options[index].label;
+          this.set(this.options[index].label)
         }
-      }),
-      this.editorController.onStateChange.pipe(map(e => {
-        return e.deviceType;
-      }), distinctUntilChanged()).subscribe(t => {
-        this.set(t);
       }),
       fromEvent(document, 'click').subscribe(() => {
         if (!isSelfClick) {
@@ -98,8 +85,8 @@ export class Device {
     )
   }
 
-  destroy() {
-    this.subs.forEach(s => s.unsubscribe());
+  onDestroy() {
+    this.subs.forEach(i => i.unsubscribe());
   }
 
   private set(name: string) {
