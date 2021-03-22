@@ -10,7 +10,7 @@ import {
   FormHidden, FormRadio, FormSwitch,
   FormTextField,
   videoToolConfig,
-  defaultOptions, PreComponent, HistoryManager,BlockBackgroundColorFormatter
+  defaultOptions, PreComponent, TBHistory,BlockBackgroundColorFormatter
 } from './src/public-api';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {

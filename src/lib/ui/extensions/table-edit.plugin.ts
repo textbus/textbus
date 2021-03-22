@@ -1,9 +1,12 @@
 import { CubicBezier } from '@tanbo/bezier';
-import { Injector } from '@tanbo/di';
+import { Inject, Injectable } from '@tanbo/di';
+import { Subscription } from 'rxjs';
 
-import { Fragment, Renderer, TBRange, TBSelection, TBPlugin, BrComponent } from '../core/_api';
-import { TableCellPosition, TableComponent } from '../components/_api';
-import { EDITABLE_DOCUMENT, UI_VIEWER_CONTAINER } from '../inject-tokens';
+import { Fragment, Renderer, TBRange, TBSelection, BrComponent } from '../../core/_api';
+import { TableCellPosition, TableComponent } from '../../components/_api';
+import { EDITABLE_DOCUMENT } from '../../inject-tokens';
+import { Layout } from '../layout';
+import { TBPlugin } from '../plugin';
 
 interface ElementPosition {
   left: number;
@@ -26,6 +29,7 @@ function findParentByTagName(node: Node, tagNames: string[]): HTMLElement {
   return null;
 }
 
+@Injectable()
 export class TableEditPlugin implements TBPlugin {
   private mask = document.createElement('div');
   private firstMask = document.createElement('div');
@@ -41,30 +45,41 @@ export class TableEditPlugin implements TBPlugin {
   private endCell: HTMLTableCellElement;
   private animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1);
   private animateId: number;
-  private renderer: Renderer;
   private tableComponent: TableComponent;
-  private frameContainer: HTMLElement;
-  private contextDocument: Document;
   private inTable = true;
-  private selection: TBSelection;
 
-  constructor() {
+  private subs: Subscription[] = [];
+
+  constructor(@Inject(EDITABLE_DOCUMENT) private contentDocument: Document,
+              private layout: Layout,
+              private renderer: Renderer,
+              private selection: TBSelection) {
+
+    this.subs.push(
+      this.selection.onChange.subscribe(() => {
+        this.onSelectionChange()
+      }),
+      this.renderer.onViewUpdated.subscribe(() => {
+        this.onViewUpdated()
+      })
+    )
+
+  }
+
+  setup() {
     this.mask.classList.add('textbus-table-editor-plugin-mask');
     this.firstMask.classList.add('textbus-table-editor-plugin-first-cell');
     this.mask.appendChild(this.firstMask);
-  }
-
-  setup(injector: Injector) {
-    this.contextDocument = injector.get(EDITABLE_DOCUMENT);
-    this.frameContainer = injector.get(UI_VIEWER_CONTAINER);
-    this.renderer = injector.get(Renderer);
-    this.selection = injector.get(TBSelection);
-    const style = this.contextDocument.createElement('style');
+    const style = this.contentDocument.createElement('style');
     this.styleElement = style;
     style.innerText = '::selection { background: transparent; }';
   }
 
-  onSelectionChange() {
+  onDestroy() {
+    this.subs.forEach(i => i.unsubscribe())
+  }
+
+  private onSelectionChange() {
     this.inTable = false;
     this.startCell = null;
     this.endCell = null;
@@ -87,7 +102,7 @@ export class TableEditPlugin implements TBPlugin {
 
     this.tableComponent = tableComponent;
 
-    const nativeSelection = this.contextDocument.getSelection();
+    const nativeSelection = this.contentDocument.getSelection();
 
     if (nativeSelection.rangeCount === 0) {
       return;
@@ -112,7 +127,7 @@ export class TableEditPlugin implements TBPlugin {
       }
       this.selection.removeAllRanges();
       this.selectedCells.map(cell => {
-        const range = new TBRange(this.contextDocument.createRange(), this.renderer);
+        const range = new TBRange(this.contentDocument.createRange(), this.renderer);
         const firstContent = cell.getContentAtIndex(0);
         if (cell.length === 1 && firstContent instanceof BrComponent) {
           range.setStart(cell, 0);
@@ -128,7 +143,7 @@ export class TableEditPlugin implements TBPlugin {
     }
   }
 
-  onViewUpdated() {
+  private onViewUpdated() {
     if (this.startPosition && this.endPosition && this.tableComponent) {
       this.startCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.startPosition.cell.fragment)) as HTMLTableCellElement;
       this.endCell = this.renderer.getNativeNodeByVDom(this.renderer.getVElementByFragment(this.endPosition.cell.fragment)) as HTMLTableCellElement;
@@ -143,7 +158,7 @@ export class TableEditPlugin implements TBPlugin {
 
   private hideNativeSelectionMask() {
     if (!this.insertStyle) {
-      this.contextDocument.head.appendChild(this.styleElement);
+      this.contentDocument.head.appendChild(this.styleElement);
       this.insertStyle = true;
     }
   }
@@ -159,7 +174,7 @@ export class TableEditPlugin implements TBPlugin {
   }
 
   private addMask() {
-    this.frameContainer.appendChild(this.mask);
+    this.layout.docer.appendChild(this.mask);
     this.insertMask = true;
   }
 

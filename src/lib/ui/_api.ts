@@ -2,7 +2,9 @@ export * from './extensions/_api';
 export * from './toolbar/_api';
 export * from './uikit/_api';
 
-export * from './control-panel';
-export * from './dialog';
+export * from './control-panel.plugin';
+export * from './dialog.plugin';
 export * from './input';
-export * from './viewer';
+export * from './layout';
+export * from './plugin';
+

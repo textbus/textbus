@@ -1,6 +1,6 @@
 import { fromEvent, Observable, Subject, Subscription } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { Injector, Type } from '@tanbo/di';
+import { forwardRef, Inject, Injectable, InjectionToken, Injector } from '@tanbo/di';
 
 import { HighlightState } from './help';
 import {
@@ -12,16 +12,16 @@ import {
   ToolFactory,
   ToolType
 } from './toolkit/_api';
-import { Input, Dialog } from '../_api';
+import { Input, UIDialog } from '../_api';
 import { Commander } from './commander';
 import { TBSelection, Keymap, KeymapAction } from '../../core/_api';
 import { SelectionMatchState } from './matcher/matcher';
 import { createElement, createKeymapHTML, FileUploader } from '../uikit/_api';
 import { EditorController } from '../../editor-controller';
-import { HistoryManager } from '../../history-manager';
+import { TBHistory } from '../../history';
 import { makeError } from '../../_utils/make-error';
-import { TextBusUI } from '../../ui';
-import { UI_TOP_CONTAINER } from '../../inject-tokens';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
 export interface ToolEntity {
   config: ToolConfig;
@@ -30,7 +30,10 @@ export interface ToolEntity {
 
 const toolErrorFn = makeError('Tool');
 
-export class Toolbar implements TextBusUI {
+export const TOOLS = new InjectionToken<(ToolFactory | ToolFactory[])[]>('TOOLS');
+
+@Injectable()
+export class Toolbar implements TBPlugin {
   readonly tools: ToolEntity[] = [];
 
   private elementRef: HTMLElement;
@@ -60,20 +63,22 @@ export class Toolbar implements TextBusUI {
 
   private currentAdditionalWorktableViewer: AdditionalViewer;
 
-  private selection: TBSelection;
-  private history: HistoryManager;
-  private fileUploader: FileUploader;
-  private dialogManager: Dialog;
-  private input: Input;
   private keymaps: KeymapAction[] = [];
   private subs: Subscription[] = [];
 
-  constructor(private config: (ToolFactory | ToolFactory[])[]) {
+  constructor(@Inject(TOOLS) private config: (ToolFactory | ToolFactory[])[],
+              @Inject(forwardRef(() => UIDialog))private dialogManager: UIDialog,
+              @Inject(forwardRef(() => Input))private input: Input,
+              private editorController: EditorController,
+              private fileUploader: FileUploader,
+              private selection: TBSelection,
+              private history: TBHistory,
+              private injector: Injector,
+              private layout: Layout) {
+    this.onAction = this.actionEvent.asObservable();
   }
 
-  setup(injector: Injector) {
-    this.onAction = this.actionEvent.asObservable();
-
+  setup() {
     this.elementRef = createElement('div', {
       classes: ['textbus-toolbar'],
       children: [
@@ -106,64 +111,11 @@ export class Toolbar implements TextBusUI {
         })
       ]
     })
-
-    this.dialogManager = injector.get(Dialog);
-
     this.createToolbar(this.config);
 
-    injector.get(UI_TOP_CONTAINER).appendChild(this.elementRef);
+    this.layout.top.appendChild(this.elementRef);
   }
 
-  onReady(injector: Injector) {
-    this.selection = injector.get(TBSelection);
-    this.input = injector.get(Input);
-    this.history = injector.get(HistoryManager);
-    this.dialogManager= injector.get(Dialog);
-    this.fileUploader = injector.get(FileUploader as Type<FileUploader>);
-    const editorController = injector.get(EditorController);
-
-    this.keymaps.forEach(k => this.input.addKeymap(k));
-    this.subs.push(
-      fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
-        const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
-        if (keymap) {
-          try {
-            const config: Keymap = JSON.parse(keymap);
-            this.keymapPrompt.innerHTML = '';
-            this.keymapPrompt.append(...createKeymapHTML(config));
-            this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
-            return;
-          } catch (e) {
-            //
-          }
-        }
-        this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
-      }),
-      fromEvent(this.additionalWorktableCloseBtn, 'click').subscribe(() => {
-        this.currentAdditionalWorktableViewer.destroy();
-        this.additionalWorktableContent.innerHTML = '';
-        this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
-      }), editorController.onStateChange.pipe(map(s => {
-        return s.readonly;
-      }), distinctUntilChanged()).subscribe(b => {
-        this.disabled = b;
-      }),
-      this.history.onChange.subscribe(() => {
-        this.updateHandlerState();
-      }),
-      this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
-        const event = document.createEvent('Event');
-        event.initEvent('click', true, true);
-        this.elementRef.dispatchEvent(event);
-        this.updateHandlerState();
-      })
-    )
-
-    this.tools.forEach(tool => {
-      tool.config.matcher?.setup?.(injector);
-      tool.instance.commander?.setup?.(injector);
-    });
-  }
 
   onDestroy() {
     this.subs.forEach(s => s.unsubscribe());
@@ -215,6 +167,51 @@ export class Toolbar implements TextBusUI {
       });
       this.listenUserAction();
     }
+    this.listen();
+  }
+
+  private listen() {
+    this.keymaps.forEach(k => this.input.addKeymap(k));
+    this.subs.push(
+      fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
+        const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
+        if (keymap) {
+          try {
+            const config: Keymap = JSON.parse(keymap);
+            this.keymapPrompt.innerHTML = '';
+            this.keymapPrompt.append(...createKeymapHTML(config));
+            this.keymapPrompt.classList.add('textbus-toolbar-keymap-prompt-show');
+            return;
+          } catch (e) {
+            //
+          }
+        }
+        this.keymapPrompt.classList.remove('textbus-toolbar-keymap-prompt-show');
+      }),
+      fromEvent(this.additionalWorktableCloseBtn, 'click').subscribe(() => {
+        this.currentAdditionalWorktableViewer.destroy();
+        this.additionalWorktableContent.innerHTML = '';
+        this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
+      }), this.editorController.onStateChange.pipe(map(s => {
+        return s.readonly;
+      }), distinctUntilChanged()).subscribe(b => {
+        this.disabled = b;
+      }),
+      this.history.onChange.subscribe(() => {
+        this.updateHandlerState();
+      }),
+      this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
+        const event = document.createEvent('Event');
+        event.initEvent('click', true, true);
+        this.elementRef.dispatchEvent(event);
+        this.updateHandlerState();
+      })
+    )
+
+    this.tools.forEach(tool => {
+      tool.config.matcher?.setup?.(this.injector);
+      tool.instance.commander?.setup?.(this.injector);
+    });
   }
 
   private createHandlers(handlers: ToolFactory[]): Tool[] {

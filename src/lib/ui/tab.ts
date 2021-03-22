@@ -1,4 +1,4 @@
-import { createElement, createTextNode } from '../uikit/_api';
+import { createElement, createTextNode } from './uikit/_api';
 
 export interface TabConfig {
   label: string;

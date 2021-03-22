@@ -1,15 +1,19 @@
-import { Inject, Injectable } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
 import { createElement } from './uikit/uikit';
-import { UI_VIEWER_CONTAINER } from '../inject-tokens';
+import { TBPlugin } from './plugin';
+import { Layout } from './layout';
 
 @Injectable()
-export class Dialog {
+export class UIDialog implements TBPlugin {
   private elementRef: HTMLElement;
   private dialogWrapper: HTMLElement;
   private timer: any = null;
 
-  constructor(@Inject(UI_VIEWER_CONTAINER) private viewer: HTMLElement) {
+  constructor(private layout: Layout) {
+  }
+
+  setup() {
     this.elementRef = createElement('div', {
       classes: ['textbus-dialog'],
       children: [
@@ -18,7 +22,7 @@ export class Dialog {
         })
       ]
     })
-    viewer.appendChild(this.elementRef);
+    this.layout.viewer.appendChild(this.elementRef);
   }
 
   dialog(element: HTMLElement) {
@@ -38,7 +42,7 @@ export class Dialog {
     }, 200)
   }
 
-  destroy() {
+  onDestroy() {
     clearTimeout(this.timer);
   }
 }

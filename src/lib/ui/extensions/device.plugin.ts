@@ -1,9 +1,9 @@
 import { fromEvent, Subscription } from 'rxjs';
-import { Injector } from '@tanbo/di';
+import { Inject, Injectable, InjectionToken } from '@tanbo/di';
 
 import { createElement } from '../uikit/uikit';
-import { TextBusUI } from '../../ui';
-import { UI_BOTTOM_CONTAINER } from '../../inject-tokens';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
 export interface DeviceOption {
   label: string;
@@ -11,7 +11,10 @@ export interface DeviceOption {
   default?: boolean;
 }
 
-export class Device implements TextBusUI {
+export const DEVICE_OPTIONS = new InjectionToken<DeviceOption[]>('DEVICE_OPTIONS');
+
+@Injectable()
+export class DevicePlugin implements TBPlugin {
   private elementRef: HTMLElement;
 
   private button: HTMLElement;
@@ -20,7 +23,11 @@ export class Device implements TextBusUI {
   private menuItems: HTMLElement[] = [];
   private subs: Subscription[] = [];
 
-  constructor(private options: DeviceOption[]) {
+  constructor(@Inject(DEVICE_OPTIONS) private options: DeviceOption[],
+              private layout: Layout) {
+  }
+
+  setup() {
     this.elementRef = createElement('div', {
       classes: ['textbus-device'],
       children: [
@@ -57,14 +64,14 @@ export class Device implements TextBusUI {
               ]
             });
             this.menuItems.push(option);
+            if (item.default) {
+              this.setTabletWidth(item.value);
+            }
             return option
           })
         })
       ]
     })
-  }
-
-  setup(injector: Injector) {
     let isSelfClick = false;
 
     this.subs.push(
@@ -85,7 +92,7 @@ export class Device implements TextBusUI {
         this.elementRef.classList.toggle('textbus-device-expand');
       })
     )
-    injector.get(UI_BOTTOM_CONTAINER).appendChild(this.elementRef);
+    this.layout.bottom.appendChild(this.elementRef);
   }
 
   onDestroy() {
@@ -97,6 +104,7 @@ export class Device implements TextBusUI {
     this.options.forEach((item, index) => {
       if (item.label === name) {
         flag = true;
+        this.setTabletWidth(item.value);
         this.label.innerText = item.label;
         this.menuItems[index].classList.add('textbus-device-option-active');
       } else {
@@ -106,5 +114,16 @@ export class Device implements TextBusUI {
     if (!flag) {
       this.label.innerText = '未知设备';
     }
+  }
+
+  private setTabletWidth(width: string) {
+    if (width === '100%') {
+      this.layout.scroller.style.padding = '';
+      // this.layout.docer.setMinHeight(this.editableArea.offsetHeight);
+    } else {
+      this.layout.scroller.style.padding = '20px';
+      // this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
+    }
+    this.layout.wrapper.style.width = width;
   }
 }

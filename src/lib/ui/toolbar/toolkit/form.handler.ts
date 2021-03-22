@@ -6,7 +6,7 @@ import { SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../commander';
 import { UIButton, UIKit } from '../../uikit/uikit';
 import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
-import { Dialog } from '../../_api';
+import { UIDialog } from '../../_api';
 import { FileUploader } from '../../uikit/forms/help';
 
 export interface FormViewer extends DropdownViewer {
@@ -28,7 +28,7 @@ export class FormHandler implements Tool {
 
   constructor(private config: FormToolConfig,
               private delegate: FileUploader,
-              private dialogManager: Dialog) {
+              private dialogManager: UIDialog) {
     this.commander = config.commanderFactory();
     const viewer = config.menuFactory();
     this.viewer = viewer;

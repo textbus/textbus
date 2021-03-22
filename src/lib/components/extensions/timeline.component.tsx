@@ -8,7 +8,7 @@ import {
   VElement,
   ViewData
 } from '../../core/_api';
-import { ComponentCreator } from '../../ui/extensions/component-stage';
+import { ComponentCreator } from '../../ui/extensions/component-stage.plugin';
 import { BlockComponent } from '../block.component';
 import { colorFormatter, fontSizeFormatter, boldFormatter } from '../../formatter/_api';
 

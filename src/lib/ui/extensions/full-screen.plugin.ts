@@ -1,10 +1,11 @@
 import { fromEvent, Subscription } from 'rxjs';
-import { Injector } from '@tanbo/di';
+import { Injectable } from '@tanbo/di';
 
-import { TextBusUI } from '../../ui';
-import { UI_BOTTOM_CONTAINER } from '../../inject-tokens';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
-export class FullScreen implements TextBusUI {
+@Injectable()
+export class FullScreenPlugin implements TBPlugin {
   set full(b: boolean) {
     this._full = b;
     this.icon.className = b ? 'textbus-icon-shrink' : 'textbus-icon-enlarge';
@@ -20,7 +21,10 @@ export class FullScreen implements TextBusUI {
   private icon = document.createElement('span');
   private subs: Subscription[] = [];
 
-  setup(injector: Injector) {
+  constructor(private layout: Layout) {
+  }
+
+  setup() {
     this.elementRef.type = 'button';
     this.elementRef.title = '切换全屏模式';
     this.elementRef.className = 'textbus-status-bar-btn textbus-full-screen';
@@ -29,13 +33,20 @@ export class FullScreen implements TextBusUI {
     this.subs.push(
       fromEvent(this.elementRef, 'click').subscribe(() => {
         this.full = !this.full;
+        this.fullScreen(this.full);
       })
     )
     this.full = false;
-    injector.get(UI_BOTTOM_CONTAINER).appendChild(this.elementRef);
+    this.layout.bottom.appendChild(this.elementRef);
   }
 
   onDestroy() {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private fullScreen(is: boolean) {
+    is ?
+      this.layout.container.classList.add('textbus-container-full-screen') :
+      this.layout.container.classList.remove('textbus-container-full-screen')
   }
 }

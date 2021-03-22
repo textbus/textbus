@@ -10,7 +10,6 @@ export * from './fragment';
 export * from './marker';
 export * from './output-renderer';
 export * from './parser';
-export * from './plugin';
 export * from './range';
 export * from './renderer';
 export * from './selection';

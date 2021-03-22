@@ -1,21 +1,24 @@
-import { Injector } from '@tanbo/di';
+import { Inject, Injectable } from '@tanbo/di';
+import { Subscription } from 'rxjs';
 
-import { TBPlugin, TBSelection } from '../core/_api';
-import { EDITABLE_DOCUMENT, UI_VIEWER_CONTAINER } from '../inject-tokens';
+import { TBSelection } from '../../core/_api';
+import { EDITABLE_DOCUMENT } from '../../inject-tokens';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
 const styles = `
 .textbus-link-jump-plugin {
   border-radius: 3px;
-  position: absolute; 
-  line-height: 1em; 
-  font-size: 12px; 
-  padding: 6px 0; 
-  width: 46px; 
-  text-align: center; 
-  margin-left: -23px; 
-  margin-top: -30px; 
-  background-color: #333; 
-  color: #ddd; 
+  position: absolute;
+  line-height: 1em;
+  font-size: 12px;
+  padding: 6px 0;
+  width: 46px;
+  text-align: center;
+  margin-left: -23px;
+  margin-top: -30px;
+  background-color: #333;
+  color: #ddd;
   box-shadow: 0 1px 2px rgba(0,0,0,0.3);
   text-decoration: none;
 }
@@ -35,29 +38,38 @@ const styles = `
 }
 `
 
+@Injectable()
 export class LinkJumpPlugin implements TBPlugin {
   private link = document.createElement('a');
-  private contentDocument: Document;
-  private container: HTMLElement;
-  private selection: TBSelection;
+
   private style = document.createElement('style');
 
-  constructor() {
+  private subs: Subscription[] = [];
+
+  constructor(private selection: TBSelection,
+              private layout: Layout,
+              @Inject(EDITABLE_DOCUMENT) private contentDocument: Document) {
+    this.subs.push(
+      this.selection.onChange.subscribe(() => {
+        this.onSelectionChange();
+      })
+    )
+  }
+
+  setup() {
     this.link.innerText = '跳转';
     this.link.target = '_blank';
     this.link.className = 'textbus-link-jump-plugin';
-  }
-
-  setup(injector: Injector) {
-    this.contentDocument = injector.get(EDITABLE_DOCUMENT);
-    this.selection = injector.get(TBSelection);
-    this.container = injector.get(UI_VIEWER_CONTAINER);
-
     this.style.innerHTML = styles;
     document.head.appendChild(this.style);
   }
 
-  onSelectionChange() {
+  onDestroy() {
+    this.style.parentNode?.removeChild(this.style);
+    this.subs.forEach(i => i.unsubscribe());
+  }
+
+  private onSelectionChange() {
     const nativeSelection = this.contentDocument.getSelection();
     const firstNativeRange = nativeSelection.rangeCount ? nativeSelection.getRangeAt(0) : null;
     if (firstNativeRange) {
@@ -73,7 +85,7 @@ export class LinkJumpPlugin implements TBPlugin {
             top: rect.top + 'px'
           })
           if (!this.link.parentNode) {
-            this.container.appendChild(this.link);
+            this.layout.docer.appendChild(this.link);
           }
           return;
         }
@@ -83,9 +95,6 @@ export class LinkJumpPlugin implements TBPlugin {
     this.link.parentNode?.removeChild(this.link);
   }
 
-  onDestroy() {
-    this.style.parentNode?.removeChild(this.style);
-  }
 
   private getLinkByDOMTree(node: HTMLElement): HTMLLinkElement | null {
     if (node instanceof HTMLElement) {

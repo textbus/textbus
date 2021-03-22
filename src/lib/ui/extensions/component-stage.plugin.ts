@@ -1,5 +1,5 @@
 import { fromEvent, Observable, Subscription } from 'rxjs';
-import { Injector, Type } from '@tanbo/di';
+import { Inject, Injectable, InjectionToken } from '@tanbo/di';
 
 import {
   AbstractComponent, BackboneAbstractComponent, BranchAbstractComponent,
@@ -8,20 +8,20 @@ import {
   TBSelection,
   BrComponent
 } from '../../core/_api';
-import { Dialog } from '../dialog';
+import { UIDialog } from '../dialog.plugin';
 import { FileUploader } from '../uikit/forms/help';
 import { EditorController } from '../../editor-controller';
-import { UI_BOTTOM_CONTAINER, UI_RIGHT_CONTAINER } from '../../inject-tokens';
 import { createElement, createTextNode } from '../uikit/uikit';
-import { Tab } from './tab';
-import { TextBusUI } from '../../ui';
+import { Tab } from '../tab';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
 export interface ComponentCreator {
   example: string | HTMLElement;
   name: string;
   category?: string;
 
-  factory(dialog: Dialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
+  factory(dialog: UIDialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
 export class LibSwitch {
@@ -70,7 +70,10 @@ export class LibSwitch {
   }
 }
 
-export class ComponentStage implements TextBusUI {
+export const COMPONENT_CREATORS = new InjectionToken<ComponentCreator[]>('COMPONENT_CREATORS');
+
+@Injectable()
+export class ComponentStagePlugin implements TBPlugin {
   private switch = new LibSwitch((b: boolean) => {
     this.expand = b;
   });
@@ -84,18 +87,17 @@ export class ComponentStage implements TextBusUI {
   }
 
   private _expand = false;
-  private selection: TBSelection;
-  private editorController: EditorController;
-  private fileUploader: FileUploader;
-  private dialogManager: Dialog;
 
-  constructor(private creators: ComponentCreator[]) {
+  constructor(@Inject(COMPONENT_CREATORS) private creators: ComponentCreator[],
+              private editorController: EditorController,
+              private fileUploader: FileUploader,
+              private dialogManager: UIDialog,
+              private selection: TBSelection,
+              private layout: Layout) {
+
   }
 
-  setup(injector: Injector) {
-    this.editorController = injector.get(EditorController);
-    this.fileUploader = injector.get(FileUploader as Type<FileUploader>);
-    this.dialogManager = injector.get(Dialog);
+  setup() {
     const categories = this.classify(this.creators || []);
     const tab = new Tab();
     tab.show(categories.map(item => {
@@ -114,12 +116,8 @@ export class ComponentStage implements TextBusUI {
         tab.elementRef
       ]
     })
-    injector.get(UI_RIGHT_CONTAINER).appendChild(this.elementRef);
-    injector.get(UI_BOTTOM_CONTAINER).appendChild(this.switch.elementRef);
-  }
-
-  onReady(injector: Injector) {
-    this.selection = injector.get(TBSelection);
+    this.layout.right.appendChild(this.elementRef);
+    this.layout.bottom.appendChild(this.switch.elementRef);
   }
 
   onDestroy() {
@@ -194,7 +192,7 @@ export class ComponentStage implements TextBusUI {
   }
 
   private addExample(example: ComponentCreator) {
-    const {wrapper, card} = ComponentStage.createViewer(example.example, example.name);
+    const {wrapper, card} = ComponentStagePlugin.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
       const t = example.factory(this.dialogManager, this.fileUploader);
       if (t instanceof AbstractComponent) {

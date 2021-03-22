@@ -17,11 +17,10 @@ $line-height: 1.4285714 !default;
 @import "./components/status-bar";
 @import "./components/toolbar";
 @import "./components/toolbar-extention";
-@import "./components/workbench";
+
+@import "./theme/dark";
+@import "./theme/mac-os";
+@import "./theme/mac-os-dark";
 //
-//@import "./theme/dark";
-//@import "./theme/mac-os";
-//@import "./theme/mac-os-dark";
-//
-//@import "./hooks/image-video-resize-plugin";
-//@import "./hooks/table-edit-plugin";
+@import "./hooks/image-video-resize-plugin";
+@import "./hooks/table-edit-plugin";

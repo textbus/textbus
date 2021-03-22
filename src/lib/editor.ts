@@ -1,19 +1,21 @@
-import { from, Observable, of, Subject, Subscription } from 'rxjs';
+import { from, fromEvent, Observable, of, Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import {
-  Injectable,
+  getAnnotations,
   Injector,
   NullInjector,
-  Provider,
-  ReflectiveInjector,
+  ReflectiveInjector, Type,
 } from '@tanbo/di';
 
 import {
-  OutputRenderer, VElementLiteral
+  AbstractComponent, BackboneAbstractComponent, BranchAbstractComponent,
+  BrComponent,
+  Component, DivisionAbstractComponent, Fragment, LeafAbstractComponent,
+  OutputRenderer, Parser, Renderer, TBRange, TBSelection, VElementLiteral
 } from './core/_api';
 import {
-  ControlPanel,
-  Dialog,
-  Viewer,
+  UIControlPanel,
+  UIDialog, Input,
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
@@ -21,18 +23,16 @@ import { FileUploader } from './ui/uikit/forms/help';
 import { makeError } from './_utils/make-error';
 import { ComponentInjectors } from './component-injectors';
 import { EditorOptions } from './editor-options';
-import {
-  EDITOR_OPTIONS, UI_BOTTOM_CONTAINER, UI_DOCUMENT_CONTAINER,
-  UI_RIGHT_CONTAINER, UI_SCROLL_CONTAINER,
-  UI_TOP_CONTAINER,
-  UI_VIEWER_CONTAINER,
-} from './inject-tokens';
-import { createElement } from './ui/uikit/_api';
-import { map } from 'rxjs/operators';
+import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from './inject-tokens';
+import { Layout } from './ui/layout';
+import { RootComponent } from './root-component';
+import { TBHistory } from './history';
+import { TBPlugin } from './ui/plugin';
+import { BlockComponent } from './components/block.component';
 
 const editorErrorFn = makeError('Editor');
 
-export interface OutputContent<T> {
+export interface OutputContent<T = any> {
   content: T;
   links: Array<{ [key: string]: string }>;
   styleSheets: string[];
@@ -42,14 +42,11 @@ export interface OutputContent<T> {
 /**
  * TextBus 主类
  */
-@Injectable()
-export class Editor<T = any> {
+export class Editor {
   /** 当 TextBus 可用时触发 */
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
-
-  readonly elementRef: HTMLElement;
 
   readonly stateController: EditorController;
 
@@ -64,15 +61,23 @@ export class Editor<T = any> {
   }
 
   private readonly container: HTMLElement;
+
+  private componentAnnotations: Component[];
+  private defaultPlugins: Type<TBPlugin>[] = [
+    UIDialog,
+    UIControlPanel
+  ];
   private readyState = false;
   private tasks: Array<() => void> = [];
 
+  private layout: Layout;
+
   private readyEvent = new Subject<void>();
-  private viewer: Viewer;
+  private resizeObserver: any;
 
   private subs: Subscription[] = [];
 
-  constructor(public selector: string | HTMLElement, public options: EditorOptions<T>) {
+  constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
@@ -82,178 +87,75 @@ export class Editor<T = any> {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable();
-
     this.stateController = new EditorController({
       readonly: false,
     });
 
-    const fileUploader: FileUploader = {
-      upload: (type: string): Observable<string> => {
-        if (typeof this.options.uploader === 'function') {
-          // if (this.selection.rangeCount === 0) {
-          //   alert('请先选择插入资源位置！');
-          //   return throwError(new Error('请先选择插入资源位置！'));
-          // }
-          const result = this.options.uploader(type);
-          if (result instanceof Observable) {
-            return result;
-          } else if (result instanceof Promise) {
-            return from(result);
-          } else if (typeof result === 'string') {
-            return of(result);
-          }
-        }
-        return of('');
-      }
-    };
-    const topContainer = createElement('div', {
-      classes: ['textbus-ui-top']
-    });
-    const bottomContainer = createElement('div', {
-      classes: ['textbus-ui-bottom', 'textbus-status-bar']
-    });
-    let viewer: HTMLElement;
-    let rightContainer: HTMLElement;
-    let docContainer: HTMLElement;
-    let loading: HTMLElement;
-    let scroll: HTMLElement;
-    let wrapper: HTMLElement;
-
-    this.elementRef = createElement('div', {
-      classes: ['textbus-container'],
-      children: [
-        viewer = createElement('div', {
-          classes: ['textbus-ui-middle'],
-          children: [
-            createElement('div', {
-              classes: ['textbus-ui-viewer'],
-              children: [
-                scroll = createElement('div', {
-                  classes: ['textbus-ui-scroll'],
-                  children: [
-                    wrapper = createElement('div', {
-                      classes: ['textbus-ui-doc-wrapper'],
-                      children: [
-                        docContainer = createElement('div', {
-                          classes: ['textbus-ui-doc']
-                        })
-                      ]
-                    }),
-                    loading = createElement('div', {
-                      classes: ['textbus-loading'],
-                      props: {
-                        innerHTML: 'TextBus'.split('').map(t => `<div>${t}</div>`).join('')
-                      }
-                    })
-                  ]
-                }),
-                rightContainer = createElement('div', {
-                  classes: ['textbus-ui-right']
-                })
-              ]
-            })
-          ]
-        })
-      ]
-    })
-
-    const staticProviders: Provider[] = [{
-      provide: Editor,
-      useValue: this,
-    }, {
-      provide: UI_TOP_CONTAINER,
-      useFactory: () => {
-        this.elementRef.prepend(topContainer);
-        return topContainer;
-      }
-    }, {
-      provide: UI_SCROLL_CONTAINER,
-      useValue: scroll
-    }, {
-      provide: UI_VIEWER_CONTAINER,
-      useValue: viewer
-    }, {
-      provide: UI_DOCUMENT_CONTAINER,
-      useValue: docContainer
-    }, {
-      provide: UI_RIGHT_CONTAINER,
-      useValue: rightContainer
-    }, {
-      provide: UI_BOTTOM_CONTAINER,
-      useFactory: () => {
-        this.elementRef.append(bottomContainer);
-        return bottomContainer;
-      }
-    }, {
-      provide: EDITOR_OPTIONS,
-      useValue: options
-    }, {
+    const rootInjector = new ReflectiveInjector(new NullInjector(), [Layout, {
       provide: EditorController,
       useValue: this.stateController
-    }, {
-      provide: FileUploader,
-      useValue: fileUploader
-    }, {
-      provide: OutputRenderer,
-      useValue: new OutputRenderer()
-    }, {
-      provide: OutputTranslator,
-      useValue: new HTMLOutputTranslator()
-    }, {
-      provide: Injector,
-      useFactory() {
-        return rootInjector;
-      }
-    }];
+    }]);
+    const layout = rootInjector.get(Layout);
+    layout.setTheme(options.theme);
+    this.layout = layout;
+    this.subs.push(layout.onReady.subscribe(contentDocument => {
+      const injector = this.init(rootInjector, contentDocument);
+      this.injector = injector;
+      this.tasks.forEach(fn => fn());
+      const rootComponent = injector.get(RootComponent);
+      const selection = injector.get(TBSelection);
+      const renderer = injector.get(Renderer);
+      const parser = injector.get(Parser);
+      this.subs.push(
+        rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
+          const isEmpty = rootComponent.slot.length === 0;
+          Editor.guardLastIsParagraph(rootComponent.slot);
+          if (isEmpty && selection.firstRange) {
+            const position = selection.firstRange.findFirstPosition(rootComponent.slot);
+            selection.firstRange.setStart(position.fragment, position.index);
+            selection.firstRange.setEnd(position.fragment, position.index);
+          }
+          renderer.render(rootComponent, contentDocument.body);
+          selection.restore();
+        }),
 
-    const rootInjector = new ReflectiveInjector(new NullInjector(), [
-      ComponentInjectors,
-      Dialog,
-      Viewer,
-      ControlPanel,
-      ...staticProviders
-    ]);
-
-    this.viewer = rootInjector.get(Viewer);
-    this.onChange = this.viewer.onViewUpdated;
-
-    this.subs.push(
-      this.viewer.onReady.subscribe(injector => {
-        this.injector = injector;
-        this.tasks.forEach(fn => fn());
-        (options.ui || []).forEach(ui => {
-          ui.onReady?.(injector);
+        fromEvent(contentDocument, 'click').subscribe((ev: MouseEvent) => {
+          const sourceElement = ev.target as Node;
+          const focusNode = this.findFocusNode(sourceElement, renderer);
+          if (!focusNode || focusNode === sourceElement) {
+            return;
+          }
+          const position = renderer.getPositionByNode(focusNode);
+          if (position.endIndex - position.startIndex === 1) {
+            const content = position.fragment.getContentAtIndex(position.startIndex);
+            if (content instanceof LeafAbstractComponent) {
+              if (!selection.firstRange) {
+                const range = new TBRange(contentDocument.createRange(), renderer);
+                selection.addRange(range);
+              }
+              selection.firstRange.setStart(position.fragment, position.endIndex);
+              selection.firstRange.collapse();
+              selection.restore();
+            }
+          }
         })
-        setTimeout(() => {
-          loading.classList.add('textbus-loading-done');
-          wrapper.classList.add('textbus-dashboard-ready');
-          setTimeout(() => {
-            scroll.removeChild(loading);
-          }, 300);
-        }, 1000)
-        this.readyState = true;
+      )
 
-        this.readyEvent.next();
-      }),
-      this.stateController.onStateChange.pipe(map(s => s.readonly)).subscribe(b => {
-        if (b) {
-          this.elementRef.classList.add('textbus-readonly');
-        } else {
-          this.elementRef.classList.remove('textbus-readonly')
-        }
+      const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
+      rootComponent.slot.from(parser.parse(dom));
+      this.listen(layout.iframe, layout.viewer, contentDocument);
+
+      [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
+        injector.get(f).setup();
       })
-    );
 
-    docContainer.appendChild(rootInjector.get(Viewer).elementRef);
+      injector.get(Input);
+      injector.get(TBHistory).record();
 
-    (options.ui || []).forEach(ui => {
-      ui.setup(rootInjector);
-    })
-
-    if (options.theme) {
-      this.elementRef.classList.add('textbus-theme-' + options.theme);
-    }
-    this.container.appendChild(this.elementRef);
+      this.readyState = true;
+      this.readyEvent.next();
+    }))
+    this.container.appendChild(layout.container);
   }
 
   /**
@@ -263,7 +165,9 @@ export class Editor<T = any> {
   setContents(html: string) {
     return new Promise((resolve) => {
       this.run(() => {
-        this.viewer.updateContent(html + '');
+        const parser = this.injector.get(Parser);
+        const fragment = parser.parse(Parser.parserHTML(html));
+        this.injector.get(RootComponent).slot.from(fragment);
         resolve(true);
       })
     })
@@ -272,15 +176,36 @@ export class Editor<T = any> {
   /**
    * 获取 TextBus 的内容。
    */
-  getContents(): OutputContent<T> {
-    return this.viewer.getContents();
+  getContents(): OutputContent<string> {
+    const metadata = this.getOutputComponentMetadata()
+
+    const outputTranslator = this.injector.get(OutputTranslator as Type<OutputTranslator>);
+    const outputRenderer = this.injector.get(OutputRenderer);
+    const rootComponent = this.injector.get(RootComponent);
+
+    const content = outputTranslator.transform(outputRenderer.render(rootComponent));
+    return {
+      content,
+      links: metadata.links,
+      styleSheets: metadata.styles,
+      scripts: metadata.scripts
+    }
   }
 
   /**
    * 获取 TextBus 内容的 JSON 字面量。
    */
   getJSONLiteral(): OutputContent<VElementLiteral> {
-    return this.viewer.getJSONLiteral() as any as OutputContent<VElementLiteral>;
+    const outputRenderer = this.injector.get(OutputRenderer);
+    const rootComponent = this.injector.get(RootComponent);
+    const json = outputRenderer.render(rootComponent).toJSON();
+    const metadata = this.getOutputComponentMetadata()
+    return {
+      content: json,
+      links: metadata.links,
+      styleSheets: metadata.styles,
+      scripts: metadata.scripts
+    }
   }
 
   /**
@@ -302,13 +227,171 @@ export class Editor<T = any> {
     // ].forEach(c => {
     //   rootInjector.get(c as Type<{ destroy(): void }>).destroy();
     // })
-    this.container.removeChild(this.elementRef);
+    this.container.removeChild(this.layout.container);
   }
 
-  private fullScreen(is: boolean) {
-    is ?
-      this.elementRef.classList.add('textbus-container-full-screen') :
-      this.elementRef.classList.remove('textbus-container-full-screen')
+  private getOutputComponentMetadata() {
+    const classes = this.getReferencedComponents();
+
+    const styles: string[] = [...(this.options.styleSheets || '')];
+    const scripts: string[] = [];
+    const links: Array<{ [key: string]: string }> = [];
+
+    classes.forEach(c => {
+      const annotation = getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component;
+      if (annotation.styles) {
+        styles.push(...annotation.styles.filter(i => i));
+      }
+      if (annotation.scripts) {
+        scripts.push(...annotation.scripts.filter(i => i));
+      }
+      if (annotation.links) {
+        links.push(...annotation.links);
+      }
+    })
+    return {
+      links,
+      styles: Array.from(new Set(styles)).map(i => Editor.cssMin(i)),
+      scripts: Array.from(new Set(scripts))
+    }
+  }
+
+  private getReferencedComponents() {
+
+    function getComponentCollection(component: AbstractComponent) {
+      const collection: AbstractComponent[] = [component];
+      const fragments: Fragment[] = [];
+      if (component instanceof DivisionAbstractComponent) {
+        fragments.push(component.slot)
+      } else if (component instanceof BranchAbstractComponent) {
+        fragments.push(...component.slots);
+      } else if (component instanceof BackboneAbstractComponent) {
+        fragments.push(...Array.from(component));
+      }
+      fragments.forEach(fragment => {
+        fragment.sliceContents().forEach(i => {
+          if (i instanceof AbstractComponent) {
+            collection.push(...getComponentCollection(i));
+          }
+        })
+      })
+      return collection;
+    }
+
+    const instances = getComponentCollection(this.injector.get(RootComponent));
+
+    return Array.from(new Set(instances.map(i => i.constructor)))
+  }
+
+  private init(rootInjector: Injector, contentDocument: Document) {
+    const renderer = new Renderer();
+    const selection = new TBSelection(
+      contentDocument,
+      fromEvent(contentDocument, 'selectionchange'),
+      renderer);
+
+    this.componentAnnotations = [RootComponent, ...(this.options.components || []), BrComponent].map(c => {
+      return getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component
+    })
+
+    this.setup(this.componentAnnotations, contentDocument);
+
+    const parser = new Parser(this.componentAnnotations.map(c => c.loader), this.options.formatters);
+    const componentInjectors = new ComponentInjectors();
+    const editorInjector = new ReflectiveInjector(rootInjector, [
+      ...this.defaultPlugins,
+      Input,
+      TBHistory,
+      RootComponent, {
+        provide: EDITABLE_DOCUMENT,
+        useValue: contentDocument
+      }, {
+        provide: EDITOR_OPTIONS,
+        useValue: this.options
+      }, {
+        provide: Editor,
+        useValue: this
+      }, {
+        provide: OutputRenderer,
+        useValue: new OutputRenderer()
+      }, {
+        provide: OutputTranslator,
+        useValue: new HTMLOutputTranslator()
+      }, {
+        provide: Parser,
+        useValue: parser
+      }, {
+        provide: TBSelection,
+        useValue: selection
+      }, {
+        provide: Renderer,
+        useValue: renderer
+      }, {
+        provide: ComponentInjectors,
+        useValue: componentInjectors
+      }, {
+        provide: FileUploader,
+        useFactory: () => {
+          return {
+            upload: (type: string): Observable<string> => {
+              if (selection.rangeCount === 0) {
+                alert('请先选择插入资源位置！');
+                throw editorErrorFn('请先选择插入资源位置！');
+              }
+              if (typeof this.options.uploader === 'function') {
+
+                const result = this.options.uploader(type);
+                if (result instanceof Observable) {
+                  return result;
+                } else if (result instanceof Promise) {
+                  return from(result);
+                } else if (typeof result === 'string') {
+                  return of(result);
+                }
+              }
+              return of('');
+            }
+          }
+        }
+      }
+    ])
+
+    const customInjector: Injector = new ReflectiveInjector(editorInjector, [
+      ...(this.options.providers || []),
+      ...(this.options.plugins || []), {
+        provide: Injector,
+        useFactory() {
+          return customInjector
+        }
+      }
+    ]);
+    [RootComponent, ...(this.options.components || [])].forEach(c => {
+      const metadata = getAnnotations(c).getClassMetadata(Component);
+      const annotation = metadata.decoratorArguments[0] as Component;
+      componentInjectors.set(c, new ReflectiveInjector(customInjector, annotation.providers || []));
+    });
+    return customInjector;
+  }
+
+  private setup(componentAnnotations: Component[], contentDocument: Document) {
+    const links: Array<{ [key: string]: string }> = [];
+
+    const componentStyles = componentAnnotations.map(c => {
+      if (Array.isArray(c.links)) {
+        links.push(...c.links);
+      }
+      return [c.styles?.join('') || '', c.editModeStyles?.join('') || ''].join('')
+    }).join('')
+
+    links.forEach(link => {
+      const linkEle = contentDocument.createElement('link');
+      Object.assign(linkEle, link);
+      contentDocument.head.appendChild(linkEle);
+    })
+    const docStyles = Editor.cssMin([componentStyles, ...(this.options.styleSheets || [])].join(''));
+    const styleEl = contentDocument.createElement('style');
+    styleEl.innerHTML = Editor.cssMin([...docStyles, ...(this.options.editingStyleSheets || [])].join(''));
+    contentDocument.head.append(styleEl);
   }
 
   private run(fn: () => void) {
@@ -317,5 +400,62 @@ export class Editor<T = any> {
       return;
     }
     fn();
+  }
+
+  private listen(iframe: HTMLIFrameElement, container: HTMLElement, contentDocument: Document) {
+    if (!contentDocument?.body) {
+      return;
+    }
+    this.resizeObserver = new ResizeObserver(() => {
+      const childBody = contentDocument.body;
+      const lastChild = childBody.lastChild;
+      let height = 0;
+      if (lastChild) {
+        if (lastChild.nodeType === Node.ELEMENT_NODE) {
+          height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
+        } else {
+          const div = contentDocument.createElement('div');
+          childBody.appendChild(div);
+          height = div.getBoundingClientRect().bottom;
+          childBody.removeChild(div);
+        }
+      }
+      iframe.style.height = Math.max(height, container.offsetHeight) + 'px';
+    })
+    this.resizeObserver.observe(contentDocument.body);
+  }
+
+  private findFocusNode(node: Node, renderer: Renderer): Node {
+    const position = renderer.getPositionByNode(node);
+    if (!position) {
+      const parentNode = node.parentNode;
+      if (parentNode) {
+        return this.findFocusNode(parentNode, renderer);
+      }
+      return null;
+    }
+    return node;
+  }
+
+  private static cssMin(str: string) {
+    return str
+      .replace(/\s*(?=[>{}:;,[])/g, '')
+      .replace(/([>{}:;,])\s*/g, '$1')
+      .replace(/;}/g, '}').replace(/\s+/, ' ').trim();
+  }
+
+  private static guardLastIsParagraph(fragment: Fragment) {
+    const last = fragment.sliceContents(fragment.length - 1)[0];
+    if (last instanceof BlockComponent) {
+      if (last.tagName === 'p') {
+        if (last.slot.length === 0) {
+          last.slot.append(new BrComponent());
+        }
+        return;
+      }
+    }
+    const p = new BlockComponent('p');
+    p.slot.append(new BrComponent());
+    fragment.append(p);
   }
 }

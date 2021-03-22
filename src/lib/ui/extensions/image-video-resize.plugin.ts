@@ -1,8 +1,11 @@
-import { Injector } from '@tanbo/di';
+import { Inject, Injectable } from '@tanbo/di';
+import { Subscription } from 'rxjs';
 
-import { TBPlugin, Renderer, TBSelection, VElement } from '../core/_api';
-import { ImageComponent, VideoComponent } from '../components/_api';
-import { EDITABLE_DOCUMENT, UI_VIEWER_CONTAINER } from '../inject-tokens';
+import { Renderer, TBSelection, VElement } from '../../core/_api';
+import { ImageComponent, VideoComponent } from '../../components/_api';
+import { EDITABLE_DOCUMENT } from '../../inject-tokens';
+import { Layout } from '../layout';
+import { TBPlugin } from '../plugin';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);
@@ -18,6 +21,7 @@ function matchAngle(x: number, y: number, startAngle: number, endAngle: number) 
   return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0;
 }
 
+@Injectable()
 export class ImageVideoResizePlugin implements TBPlugin {
   private mask = document.createElement('div');
   private text = document.createElement('div');
@@ -25,13 +29,24 @@ export class ImageVideoResizePlugin implements TBPlugin {
 
   private currentComponent: ImageComponent | VideoComponent;
   private currentElement: HTMLImageElement | HTMLVideoElement;
-  private frameContainer: HTMLElement;
 
-  private renderer: Renderer;
-  private contentDocument: Document;
-  private selection: TBSelection;
+  private subs: Subscription[] = [];
 
-  constructor() {
+  constructor(@Inject(EDITABLE_DOCUMENT) private contentDocument: Document,
+              private layout: Layout,
+              private renderer: Renderer,
+              private selection: TBSelection) {
+    this.subs.push(
+      this.renderer.onViewUpdated.subscribe(() => {
+        this.onViewUpdated();
+      }),
+      this.selection.onChange.subscribe(() => {
+        this.onSelectionChange();
+      })
+    )
+  }
+
+  setup() {
     this.mask.className = 'textbus-image-video-resize-plugin-handler';
     for (let i = 0; i < 8; i++) {
       const button = document.createElement('button');
@@ -46,7 +61,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
         return;
       }
 
-      this.frameContainer.style.pointerEvents = 'none';
+      this.layout.docer.style.pointerEvents = 'none';
 
       const startRect = this.currentElement.getBoundingClientRect();
       this.currentComponent.width = startRect.width + 'px';
@@ -98,7 +113,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
       const mouseUpFn = () => {
         this.currentComponent.width = endWidth + 'px';
         this.currentComponent.height = endHeight + 'px';
-        this.frameContainer.style.pointerEvents = '';
+        this.layout.docer.style.pointerEvents = '';
         if (this.renderer) {
           const vEle = this.renderer.getVDomByNativeNode(this.currentElement) as VElement;
           vEle.styles.set('width', endWidth + 'px');
@@ -111,17 +126,14 @@ export class ImageVideoResizePlugin implements TBPlugin {
       document.addEventListener('mousemove', mouseMoveFn);
       document.addEventListener('mouseup', mouseUpFn);
     })
-  }
-
-  setup(injector: Injector) {
-    this.renderer = injector.get(Renderer);
-    this.contentDocument = injector.get(EDITABLE_DOCUMENT);
-    this.frameContainer = injector.get(UI_VIEWER_CONTAINER);
-    this.selection = injector.get(TBSelection);
     this.init();
   }
 
-  init() {
+  onDestroy() {
+    this.subs.forEach(i => i.unsubscribe());
+  }
+
+  private init() {
     const renderer = this.renderer;
     const contextDocument = this.contentDocument;
     contextDocument.addEventListener('click', ev => {
@@ -139,7 +151,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
         range.selectNode(srcElement);
         selection.addRange(range);
         this.updateStyle();
-        this.frameContainer.append(this.mask);
+        this.layout.docer.append(this.mask);
       } else {
         this.currentElement = null;
         this.currentComponent = null;
@@ -150,7 +162,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
     })
   }
 
-  onViewUpdated() {
+  private onViewUpdated() {
     if (this.currentElement?.parentNode) {
       this.updateStyle();
     } else {
@@ -159,7 +171,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
     }
   }
 
-  onSelectionChange() {
+  private onSelectionChange() {
     if (this.selection.collapsed) {
       this.currentElement = null;
       this.mask.parentNode?.removeChild(this.mask);

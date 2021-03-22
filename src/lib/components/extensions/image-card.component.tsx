@@ -5,7 +5,7 @@ import {
   BackboneAbstractComponent,
   Fragment, SlotRenderFn, BrComponent, Component, Interceptor, TBEvent, TBSelection, TBClipboard, SingleSlotRenderFn
 } from '../../core/_api';
-import { ComponentCreator } from '../../ui/extensions/component-stage';
+import { ComponentCreator } from '../../ui/extensions/component-stage.plugin';
 import { BlockComponent, ImageComponent } from '../_api';
 import { Injectable } from '@tanbo/di';
 

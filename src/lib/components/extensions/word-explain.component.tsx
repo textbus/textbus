@@ -7,7 +7,7 @@ import {
   VElement,
   ViewData
 } from '../../core/_api';
-import { ComponentCreator } from '../../ui/extensions/component-stage';
+import { ComponentCreator } from '../../ui/extensions/component-stage.plugin';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
 
 export interface WordExplainParams {

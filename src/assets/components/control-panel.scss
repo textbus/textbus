@@ -32,6 +32,7 @@
     font-size: 13px;
     border-radius: 5px 5px 0 0;
     margin-right: 4px;
+
     &:hover {
       background: #fff;
     }
@@ -55,28 +56,28 @@
   display: flex;
   flex-direction: column;
   z-index: 2;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  transition: width .15s cubic-bezier(.36, .66, .04, 1);
 
   &-container {
     overflow: hidden;
     width: 240px;
     height: 100%;
     background-color: #fff;
-    transition: transform .15s cubic-bezier(.36, .66, .04, 1);
     border-left: 1px solid $color-light;
   }
 
   &-show {
-    .textbus-control-panel-container {
-      transform: translateX(-100%);
-    }
+    width: 240px;
   }
 
   &-fixed {
     width: 240px;
-
-    .textbus-control-panel-container {
-      transform: translateX(0);
-      transition: none;
-    }
+    position: static;
+    transition: none;
   }
 }

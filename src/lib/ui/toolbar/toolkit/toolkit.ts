@@ -5,7 +5,7 @@ import { ActionSheetToolConfig, ActionSheetHandler } from './action-sheet.handle
 import { AdditionalToolConfig, AdditionalHandler } from './additional.handler';
 import { GroupConfig, GroupHandler } from './group.handler';
 import { FormToolConfig, FormHandler } from './form.handler';
-import { Dialog } from '../../_api';
+import { UIDialog } from '../../_api';
 import { FileUploader } from '../../uikit/forms/help';
 
 export enum ToolType {
@@ -66,7 +66,7 @@ export interface FormToolFactory {
   type: ToolType.Form,
   config: FormToolConfig,
 
-  factory(delegate: FileUploader, dialogManager: Dialog): FormHandler
+  factory(delegate: FileUploader, dialogManager: UIDialog): FormHandler
 }
 
 export interface GroupToolFactory {
@@ -75,7 +75,7 @@ export interface GroupToolFactory {
 
   factory(delegate: FileUploader,
           stickyElement: HTMLElement,
-          dialogManager: Dialog): GroupHandler
+          dialogManager: UIDialog): GroupHandler
 }
 
 export type ToolFactory =
@@ -136,7 +136,7 @@ export class Toolkit {
     const op: FormToolFactory = {
       type: ToolType.Form,
       config,
-      factory(delegate: FileUploader, dialogManager: Dialog): FormHandler {
+      factory(delegate: FileUploader, dialogManager: UIDialog): FormHandler {
         return new FormHandler(op.config, delegate, dialogManager);
       }
     }
@@ -160,7 +160,7 @@ export class Toolkit {
       config,
       factory(delegate: FileUploader,
               stickyElement: HTMLElement,
-              dialogManager: Dialog) {
+              dialogManager: UIDialog) {
         return new GroupHandler(op.config, delegate, stickyElement, dialogManager);
       }
     };

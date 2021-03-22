@@ -2,16 +2,16 @@ import { Injector } from '@tanbo/di';
 
 import { Matcher, SelectionMatchState } from './matcher';
 import { HighlightState } from '../help';
-import { HistoryManager } from '../../../history-manager';
+import { TBHistory } from '../../../history';
 
 export class HistoryMatcher implements Matcher {
-  private history: HistoryManager;
+  private history: TBHistory;
 
   constructor(private type: 'forward' | 'back') {
   }
 
   setup(injector: Injector) {
-    this.history = injector.get(HistoryManager);
+    this.history = injector.get(TBHistory);
   }
 
   queryState(): SelectionMatchState {

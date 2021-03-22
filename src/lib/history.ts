@@ -14,7 +14,7 @@ export interface Snapshot {
 }
 
 @Injectable()
-export class HistoryManager {
+export class TBHistory {
   onChange: Observable<void>;
   onUsed: Observable<void>;
 
@@ -36,7 +36,7 @@ export class HistoryManager {
   private historyChangeEvent = new Subject<void>();
   private historyUsedEvent = new Subject<void>();
 
-  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions<any>,
+  constructor(@Inject(forwardRef(() => EDITOR_OPTIONS)) private options: EditorOptions,
               @Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController,
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent) {
@@ -49,7 +49,7 @@ export class HistoryManager {
     if (this.canBack) {
       this.historyIndex--;
       this.historyIndex = Math.max(0, this.historyIndex);
-      const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
+      const snapshot = TBHistory.cloneHistoryData(this.historySequence[this.historyIndex]);
       this.rootComponent.slot.from(snapshot.component.slot);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();
@@ -60,7 +60,7 @@ export class HistoryManager {
   forward() {
     if (this.canForward) {
       this.historyIndex++;
-      const snapshot = HistoryManager.cloneHistoryData(this.historySequence[this.historyIndex]);
+      const snapshot = TBHistory.cloneHistoryData(this.historySequence[this.historyIndex]);
       this.rootComponent.slot.from(snapshot.component.slot);
       this.selection.usePaths(snapshot.paths, this.rootComponent.slot);
       this.listen();

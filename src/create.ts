@@ -77,10 +77,18 @@ import {
   ImageComponent,
   TableComponent
 } from './lib/components/_api';
-import { ComponentStage, Device, FullScreen } from './lib/ui/_api';
+import {
+  COMPONENT_CREATORS,
+  ComponentStagePlugin,
+  DevicePlugin,
+  DEVICE_OPTIONS,
+  FullScreenPlugin,
+  ImageVideoResizePlugin, LinkJumpPlugin, TableEditPlugin,
+  TOOLS
+} from './lib/ui/_api';
 import { Toolbar } from './lib/ui/toolbar/_api';
 
-export const defaultOptions: EditorOptions<string> = {
+export const defaultOptions: EditorOptions = {
   editingStyleSheets: [
     `[style*=color]:not([style*=background-color])
    a {color: inherit;}`,
@@ -125,8 +133,9 @@ export const defaultOptions: EditorOptions<string> = {
     dirFormatter,
     tdBorderColorFormatter,
   ],
-  ui: [
-    new Toolbar([
+  providers: [{
+    provide: TOOLS,
+    useValue: [
       [historyBackTool, historyForwardTool],
       [insertObjectTool],
       [headingTool],
@@ -142,9 +151,10 @@ export const defaultOptions: EditorOptions<string> = {
       [tableTool],
       [findTool],
       [cleanTool]
-    ]),
-    new FullScreen(),
-    new Device([{
+    ]
+  }, {
+    provide: DEVICE_OPTIONS,
+    useValue: [{
       label: 'PC',
       value: '100%',
       default: true,
@@ -166,8 +176,10 @@ export const defaultOptions: EditorOptions<string> = {
     }, {
       label: 'A4',
       value: '842px'
-    }]),
-    new ComponentStage([
+    }]
+  }, {
+    provide: COMPONENT_CREATORS,
+    useValue: [
       imageCardComponentExample,
       todoListComponentExample,
       baiduMapComponentExample,
@@ -177,13 +189,22 @@ export const defaultOptions: EditorOptions<string> = {
       progressComponentExample,
       stepsComponentExample,
       katexComponentExample,
-    ])
+    ]
+  }],
+  plugins: [
+    Toolbar,
+    FullScreenPlugin,
+    DevicePlugin,
+    ComponentStagePlugin,
+    ImageVideoResizePlugin,
+    LinkJumpPlugin,
+    TableEditPlugin
   ]
 };
 
-export function createEditor<T = string>(selector: string | HTMLElement, options: EditorOptions<T> = {}) {
-  return new Editor<T>(selector, {
-    ...defaultOptions as EditorOptions<any>,
-    ...options as EditorOptions<any>
+export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
+  return new Editor(selector, {
+    ...defaultOptions as EditorOptions,
+    ...options as EditorOptions
   });
 }

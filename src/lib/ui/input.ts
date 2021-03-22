@@ -14,13 +14,14 @@ import {
   TBSelection,
   KeymapAction, DynamicKeymap
 } from '../core/_api';
-import { EDITABLE_DOCUMENT, UI_DOCUMENT_CONTAINER, UI_SCROLL_CONTAINER } from '../inject-tokens';
+import { EDITABLE_DOCUMENT } from '../inject-tokens';
 import { RootComponent } from '../root-component';
-import { HistoryManager } from '../history-manager';
+import { TBHistory } from '../history';
 import { EditorController } from '../editor-controller';
-import { ControlPanel } from './control-panel';
+import { UIControlPanel } from './control-panel.plugin';
 import { createElement, createTextNode } from './uikit/uikit';
 import { ComponentInjectors } from '../component-injectors';
+import { Layout } from './layout';
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
@@ -79,18 +80,17 @@ export class Input {
   private prevComponent: AbstractComponent = null;
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
-              @Inject(UI_DOCUMENT_CONTAINER) private container: HTMLElement,
-              @Inject(UI_SCROLL_CONTAINER) private scrollContainer: HTMLElement,
-              private controlPanel: ControlPanel,
+              private layout: Layout,
+              private controlPanel: UIControlPanel,
               private editorController: EditorController,
               private componentInjectors: ComponentInjectors,
               private renderer: Renderer,
               private rootComponent: RootComponent,
               private parser: Parser,
               private selection: TBSelection,
-              private history: HistoryManager) {
+              private history: TBHistory) {
     this.contextmenu = new ContextMenu(this.history);
-    this.container.append(this.elementRef);
+    this.layout.docer.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
     this.inputWrap.classList.add('textbus-input-wrap');
@@ -188,7 +188,7 @@ export class Input {
     this.input.style.lineHeight = boxHeight + 'px';
     this.input.style.fontSize = fontSize;
     if (this.selection.collapsed && this.selection.rangeCount === 1) {
-      const limit = this.scrollContainer;
+      const limit = this.layout.scroller;
       const scrollTop = limit.scrollTop;
       const offsetHeight = limit.offsetHeight;
       const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0;
@@ -225,7 +225,7 @@ export class Input {
             }
           }
         })
-        const rect = this.container.getBoundingClientRect();
+        const rect = this.layout.docer.getBoundingClientRect();
         this.contextmenu.show([
           [{
             iconClasses: ['textbus-icon-copy'],
@@ -722,7 +722,7 @@ class ContextMenu {
 
   private subs: Subscription[] = [];
 
-  constructor(private history: HistoryManager) {
+  constructor(private history: TBHistory) {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu']
     })

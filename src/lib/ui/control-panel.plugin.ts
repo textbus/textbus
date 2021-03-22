@@ -4,10 +4,12 @@ import { Subscription } from 'rxjs';
 import { createElement } from './uikit/_api';
 import { ComponentControlPanelView } from '../core/_api';
 import { EditorController } from '../editor-controller';
-import { Tab, TabConfig } from './extensions/tab';
+import { Tab, TabConfig } from './tab';
+import { TBPlugin } from './plugin';
+import { Layout } from './layout';
 
 @Injectable()
-export class ControlPanel {
+export class UIControlPanel implements TBPlugin {
   elementRef: HTMLElement;
 
   private container: HTMLElement;
@@ -16,10 +18,12 @@ export class ControlPanel {
   private set fixed(b: boolean) {
     this._fixed = b;
     if (b) {
+      this.layout.right.append(this.elementRef)
       this.elementRef.classList.add('textbus-control-panel-fixed');
       this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
       this.fixedBtn.title = '取消固定';
     } else {
+      this.layout.viewer.append(this.elementRef);
       this.elementRef.classList.remove('textbus-control-panel-fixed');
       this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
       this.fixedBtn.title = '固定';
@@ -37,7 +41,11 @@ export class ControlPanel {
   private oldViews: ComponentControlPanelView[] = [];
   private tab = new Tab();
 
-  constructor(private editorController: EditorController) {
+  constructor(private editorController: EditorController,
+              private layout: Layout) {
+  }
+
+  setup() {
     this.elementRef = createElement('div', {
       classes: ['textbus-control-panel'],
       children: [
@@ -68,6 +76,7 @@ export class ControlPanel {
         this.fixed = false;
       }
     }))
+    this.fixed = false;
   }
 
   showPanels(views: ComponentControlPanelView[]) {
@@ -91,7 +100,7 @@ export class ControlPanel {
     this.tab.show(tabs);
   }
 
-  destroy() {
+  onDestroy() {
     this.subs.forEach(s => s.unsubscribe());
   }
 }

@@ -1,18 +1,18 @@
 import { Injector } from '@tanbo/di';
 
 import { Commander } from '../commander';
-import { HistoryManager } from '../../../history-manager';
+import { TBHistory } from '../../../history';
 
 export class HistoryCommander implements Commander<null> {
   recordHistory = false;
 
-  private history: HistoryManager;
+  private history: TBHistory;
 
   constructor(private action: 'forward' | 'back') {
   }
 
   setup(injector: Injector) {
-    this.history = injector.get(HistoryManager);
+    this.history = injector.get(TBHistory);
   }
 
   command() {

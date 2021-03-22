@@ -9,7 +9,7 @@ import {
   ViewData, SlotRenderFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn,
 } from '../../core/_api';
 import { BlockComponent, breakingLine } from '../_api';
-import { ComponentCreator } from '../../ui/extensions/component-stage';
+import { ComponentCreator } from '../../ui/extensions/component-stage.plugin';
 
 class TodoListFragment extends Fragment {
   constructor(public active: boolean, public disabled: boolean) {

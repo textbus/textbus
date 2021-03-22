@@ -11,7 +11,7 @@ import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
-import { Dialog } from '../../_api';
+import { UIDialog } from '../../_api';
 import { FormToolConfig } from './form.handler';
 import { FileUploader } from '../../uikit/forms/help';
 
@@ -85,7 +85,7 @@ export class GroupHandler implements Tool {
   constructor(private config: GroupConfig,
               private delegate: FileUploader,
               private stickyElement: HTMLElement,
-              private dialogManager: Dialog) {
+              private dialogManager: UIDialog) {
     this.dropdown = UIKit.menu({
       label: config.label,
       classes: config.classes,
