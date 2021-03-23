@@ -77,6 +77,7 @@ export class Editor {
   private resizeObserver: any;
 
   private subs: Subscription[] = [];
+  private changeEvent = new Subject<void>()
 
   constructor(public selector: string | HTMLElement, public options: EditorOptions) {
     if (typeof selector === 'string') {
@@ -88,6 +89,7 @@ export class Editor {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable();
+    this.onChange = this.changeEvent.asObservable();
     this.stateController = new EditorController({
       readonly: false,
     });
@@ -100,61 +102,8 @@ export class Editor {
     layout.setTheme(options.theme);
     this.layout = layout;
     this.subs.push(layout.onReady.subscribe(contentDocument => {
-      const injector = this.init(rootInjector, contentDocument);
-      this.injector = injector;
-      this.tasks.forEach(fn => fn());
-      const rootComponent = injector.get(RootComponent);
-      const selection = injector.get(TBSelection);
-      const renderer = injector.get(Renderer);
-      const parser = injector.get(Parser);
-      this.subs.push(
-        rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
-          const isEmpty = rootComponent.slot.length === 0;
-          Editor.guardLastIsParagraph(rootComponent.slot);
-          if (isEmpty && selection.firstRange) {
-            const position = selection.firstRange.findFirstPosition(rootComponent.slot);
-            selection.firstRange.setStart(position.fragment, position.index);
-            selection.firstRange.setEnd(position.fragment, position.index);
-          }
-          renderer.render(rootComponent, contentDocument.body);
-          selection.restore();
-        }),
-
-        fromEvent(contentDocument, 'click').subscribe((ev: MouseEvent) => {
-          const sourceElement = ev.target as Node;
-          const focusNode = this.findFocusNode(sourceElement, renderer);
-          if (!focusNode || focusNode === sourceElement) {
-            return;
-          }
-          const position = renderer.getPositionByNode(focusNode);
-          if (position.endIndex - position.startIndex === 1) {
-            const content = position.fragment.getContentAtIndex(position.startIndex);
-            if (content instanceof LeafAbstractComponent) {
-              if (!selection.firstRange) {
-                const range = new TBRange(contentDocument.createRange(), renderer);
-                selection.addRange(range);
-              }
-              selection.firstRange.setStart(position.fragment, position.endIndex);
-              selection.firstRange.collapse();
-              selection.restore();
-            }
-          }
-        })
-      )
-
-      const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
-      rootComponent.slot.from(parser.parse(dom));
-      this.listen(layout.iframe, layout.middle, contentDocument);
-
-      [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
-        injector.get(f).setup();
-      })
-
-      injector.get(Input);
-      injector.get(TBHistory).record();
-
-      this.readyState = true;
-      this.readyEvent.next();
+      const injector = this.bootstrap(rootInjector, contentDocument);
+      this.init(injector);
     }))
     this.container.appendChild(layout.container);
   }
@@ -164,12 +113,12 @@ export class Editor {
    * @param html
    */
   setContents(html: string) {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.run(() => {
         const parser = this.injector.get(Parser);
         const fragment = parser.parse(Parser.parserHTML(html));
         this.injector.get(RootComponent).slot.from(fragment);
-        resolve(true);
+        resolve();
       })
     })
   }
@@ -214,20 +163,12 @@ export class Editor {
    */
   destroy() {
     this.subs.forEach(s => s.unsubscribe());
-    // const rootInjector = this.rootInjector;
-    // [Toolbar,
-    //   Device,
-    //   Dialog,
-    //   FullScreen,
-    //   LibSwitch,
-    //   StatusBar,
-    //   Viewer,
-    //   ComponentStage,
-    //   ControlPanel,
-    //   Workbench,
-    // ].forEach(c => {
-    //   rootInjector.get(c as Type<{ destroy(): void }>).destroy();
-    // })
+    [Input, Layout].forEach(i => {
+      this.injector.get(i as Type<{ destroy(): void }>).destroy();
+    });
+    [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(p => {
+      this.injector.get(p).onDestroy?.();
+    })
     this.container.removeChild(this.layout.container);
   }
 
@@ -284,7 +225,68 @@ export class Editor {
     return Array.from(new Set(instances.map(i => i.constructor)))
   }
 
-  private init(rootInjector: Injector, contentDocument: Document) {
+  private init(injector: Injector) {
+    this.injector = injector;
+    const contentDocument = injector.get(EDITABLE_DOCUMENT);
+    const layout = injector.get(Layout);
+    const rootComponent = injector.get(RootComponent);
+    const selection = injector.get(TBSelection);
+    const renderer = injector.get(Renderer);
+    const parser = injector.get(Parser);
+    this.subs.push(
+      rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
+        const isEmpty = rootComponent.slot.length === 0;
+        Editor.guardLastIsParagraph(rootComponent.slot);
+        if (isEmpty && selection.firstRange) {
+          const position = selection.firstRange.findFirstPosition(rootComponent.slot);
+          selection.firstRange.setStart(position.fragment, position.index);
+          selection.firstRange.setEnd(position.fragment, position.index);
+        }
+        renderer.render(rootComponent, contentDocument.body);
+        selection.restore();
+      }),
+
+      fromEvent(contentDocument, 'click').subscribe((ev: MouseEvent) => {
+        const sourceElement = ev.target as Node;
+        const focusNode = this.findFocusNode(sourceElement, renderer);
+        if (!focusNode || focusNode === sourceElement) {
+          return;
+        }
+        const position = renderer.getPositionByNode(focusNode);
+        if (position.endIndex - position.startIndex === 1) {
+          const content = position.fragment.getContentAtIndex(position.startIndex);
+          if (content instanceof LeafAbstractComponent) {
+            if (!selection.firstRange) {
+              const range = new TBRange(contentDocument.createRange(), renderer);
+              selection.addRange(range);
+            }
+            selection.firstRange.setStart(position.fragment, position.endIndex);
+            selection.firstRange.collapse();
+            selection.restore();
+          }
+        }
+      }),
+      renderer.onViewUpdated.subscribe(() => {
+        this.changeEvent.next();
+      })
+    )
+
+    const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
+    rootComponent.slot.from(parser.parse(dom));
+    this.listen(layout.iframe, layout.middle, contentDocument);
+
+    [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
+      injector.get(f).setup();
+    })
+    injector.get(Input);
+    injector.get(TBHistory).record();
+
+    this.readyState = true;
+    this.readyEvent.next();
+    this.tasks.forEach(fn => fn());
+  }
+
+  private bootstrap(rootInjector: Injector, contentDocument: Document): Injector {
     const renderer = new Renderer();
     const selection = new TBSelection(
       contentDocument,
@@ -295,7 +297,7 @@ export class Editor {
       return getAnnotations(c).getClassMetadata(Component).decoratorArguments[0] as Component
     })
 
-    this.setup(this.componentAnnotations, contentDocument);
+    this.setDocStyle(this.componentAnnotations, contentDocument);
 
     const parser = new Parser(this.componentAnnotations.map(c => c.loader), this.options.formatters);
     const componentInjectors = new ComponentInjectors();
@@ -374,7 +376,7 @@ export class Editor {
     return customInjector;
   }
 
-  private setup(componentAnnotations: Component[], contentDocument: Document) {
+  private setDocStyle(componentAnnotations: Component[], contentDocument: Document) {
     const links: Array<{ [key: string]: string }> = [];
 
     const componentStyles = componentAnnotations.map(c => {

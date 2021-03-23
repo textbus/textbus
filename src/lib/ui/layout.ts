@@ -126,7 +126,7 @@ export class Layout {
     this.container.classList.add('textbus-theme-' + theme)
   }
 
-  onDestroy() {
+  destroy() {
     this.subs.forEach(i => i.unsubscribe());
   }
 
