@@ -6,6 +6,7 @@
   top: 0;
   pointer-events: none;
   transition: background-color .15s cubic-bezier(.36, .66, .04, 1);
+  z-index: 1;
 
   &-wrapper {
     position: absolute;
