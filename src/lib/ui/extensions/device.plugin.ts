@@ -78,13 +78,13 @@ export class DevicePlugin implements TBPlugin {
     })
     let isSelfClick = false;
 
-    this.set('PC');
+    this.setDeviceType('PC');
 
     this.subs.push(
       fromEvent(this.menus, 'click').subscribe((ev) => {
         const index = this.menuItems.indexOf(ev.target as HTMLElement);
         if (index > -1) {
-          this.set(this.options[index].label)
+          this.setDeviceType(this.options[index].label)
         }
       }),
       fromEvent(document, 'click').subscribe(() => {
@@ -105,7 +105,7 @@ export class DevicePlugin implements TBPlugin {
     this.subs.forEach(i => i.unsubscribe());
   }
 
-  private set(name: string) {
+  setDeviceType(name: string) {
     let flag = false;
     this.options.forEach((item, index) => {
       if (item.label === name) {

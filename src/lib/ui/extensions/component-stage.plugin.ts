@@ -74,7 +74,7 @@ export const COMPONENT_CREATORS = new InjectionToken<ComponentCreator[]>('COMPON
 
 @Injectable()
 export class ComponentStagePlugin implements TBPlugin {
-  private switch = new LibSwitch((b: boolean) => {
+  switch = new LibSwitch((b: boolean) => {
     this.expand = b;
   });
   private elementRef: HTMLElement;
