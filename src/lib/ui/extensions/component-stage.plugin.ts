@@ -40,8 +40,8 @@ export class LibSwitch {
   }) as HTMLButtonElement;
 
   set expand(b: boolean) {
-    this.callback(this.expand);
     this._expand = b;
+    this.callback(b);
     if (b) {
       this.elementRef.classList.add('textbus-status-bar-btn-active');
     } else {

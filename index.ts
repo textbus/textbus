@@ -12,6 +12,7 @@ import {
   videoToolConfig,
   defaultOptions, PreComponent, TBHistory, BlockBackgroundColorFormatter, Layout
 } from './src/public-api';
+import { ComponentStagePlugin } from './src/public-api';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   // deviceType: 'iPad',
@@ -41,6 +42,8 @@ window['editor'] = editor;
 
 editor.onReady.subscribe(() => {
   const history = editor.injector.get(Layout)
+  const s = editor.injector.get(ComponentStagePlugin)
+  s.switch.expand = true
   console.log(history)
 })
 //
