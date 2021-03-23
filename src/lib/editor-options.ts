@@ -22,7 +22,7 @@ export interface EditorOptions {
   editingStyleSheets?: string[];
   /** 设置初始化 TextBus 时的默认内容 */
   contents?: string;
-  /** 配置自定义服务，以替换 TextBus 默认类 */
+  /** 配置自定义服务 */
   providers?: Provider[];
   /** 插件配置 */
   plugins?: Type<TBPlugin>[];

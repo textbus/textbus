@@ -15,6 +15,7 @@ import {
 import { CommandContext, Commander } from '../commander';
 import { RootComponent } from '../../../root-component';
 import { PreComponent } from '../../../components/_api';
+import { Layout } from '../../layout';
 
 export interface FindAndReplaceRule {
   findValue: string;
@@ -73,6 +74,7 @@ export class FindCommander implements Commander<FindAndReplaceRule> {
     this.rootFragment = this.rootComponent.slot;
     this.selection = injector.get(TBSelection);
     const renderer = injector.get(Renderer);
+    this.scrollContainer = injector.get(Layout).scroller;
     this.subs.push(
       renderer.onRendingBefore.subscribe(() => this.onRenderingBefore()),
       renderer.onViewUpdated.subscribe(() => this.onViewUpdated())
