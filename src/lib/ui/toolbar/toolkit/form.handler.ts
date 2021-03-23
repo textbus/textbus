@@ -4,10 +4,8 @@ import { Tool } from './help';
 import { HighlightState } from '../help';
 import { SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../commander';
-import { UIButton, UIKit } from '../../uikit/uikit';
+import { UIButton, UIKit, FileUploader, UIDialog } from '../../_api';
 import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
-import { UIDialog } from '../../_api';
-import { FileUploader } from '../../uikit/forms/help';
 
 export interface FormViewer extends DropdownViewer {
   setFileUploader(fileUploader: FileUploader): void;

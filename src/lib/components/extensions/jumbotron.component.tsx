@@ -10,7 +10,7 @@ import {
 } from '../../core/_api';
 import { ComponentCreator, UIDialog } from '../../ui/_api';
 import { BlockComponent } from '../_api';
-import { FileUploader, Form, FormTextField } from '../../ui/uikit/_api';
+import { FileUploader, Form, FormTextField } from '../../ui/_api';
 
 export interface JumbotronOptions {
   minHeight: string;

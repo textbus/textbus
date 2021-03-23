@@ -16,7 +16,7 @@ import { Input, UIDialog } from '../_api';
 import { Commander } from './commander';
 import { TBSelection, Keymap, KeymapAction } from '../../core/_api';
 import { SelectionMatchState } from './matcher/matcher';
-import { createElement, createKeymapHTML, FileUploader } from '../uikit/_api';
+import { createElement, createKeymapHTML, FileUploader } from '../_api';
 import { EditorController } from '../../editor-controller';
 import { TBHistory } from '../../history';
 import { makeError } from '../../_utils/make-error';

@@ -1,9 +1,10 @@
 import { Observable, Subject } from 'rxjs';
 
-import { FormItem, FileUploader } from './help';
+import { FormItem } from './help';
 import { FormViewer } from '../../toolbar/toolkit/_api';
 import { FormatData, BranchAbstractComponent, LeafAbstractComponent } from '../../../core/_api';
 import { createElement, createTextNode } from '../uikit';
+import { FileUploader } from '../../file-uploader';
 
 export interface FormConfig {
   title?: string;

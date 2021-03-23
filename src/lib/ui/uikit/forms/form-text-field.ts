@@ -1,6 +1,7 @@
 import { Subscription } from 'rxjs';
 
-import { AttrState, FormTextFieldParams, FormItem, FileUploader } from './help';
+import { AttrState, FormTextFieldParams, FormItem } from './help';
+import { FileUploader } from '../../file-uploader';
 
 export class FormTextField implements FormItem<string> {
   elementRef = document.createElement('div');

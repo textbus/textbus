@@ -9,8 +9,8 @@ import {
   BrComponent
 } from '../../core/_api';
 import { UIDialog } from '../dialog.plugin';
-import { FileUploader } from '../uikit/forms/help';
 import { EditorController } from '../../editor-controller';
+import { FileUploader } from '../file-uploader';
 import { createElement, createTextNode } from '../uikit/uikit';
 import { Tab } from '../tab';
 import { TBPlugin } from '../plugin';

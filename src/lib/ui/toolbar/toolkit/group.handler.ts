@@ -11,9 +11,8 @@ import { SelectToolConfig } from './select.handler';
 import { ToolConfig } from './toolkit';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
-import { UIDialog } from '../../_api';
+import { UIDialog, FileUploader } from '../../_api';
 import { FormToolConfig } from './form.handler';
-import { FileUploader } from '../../uikit/forms/help';
 
 export enum MenuType {
   Action,

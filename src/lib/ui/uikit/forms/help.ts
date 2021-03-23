@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { FileUploader } from '../../file-uploader';
 
 export interface FormTextFieldParams {
   label: string;
@@ -82,8 +82,4 @@ export interface FormItem<T = any> {
   validate(): boolean;
 
   useUploader?(uploader: FileUploader): void;
-}
-
-export abstract class FileUploader {
-  abstract upload(uploadType: string): Observable<string>
 }

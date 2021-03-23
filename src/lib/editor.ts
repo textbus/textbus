@@ -15,19 +15,16 @@ import {
 } from './core/_api';
 import {
   UIControlPanel,
-  UIDialog, Input,
+  UIDialog, Input, Layout, FileUploader, TBPlugin
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
-import { FileUploader } from './ui/uikit/forms/help';
 import { makeError } from './_utils/make-error';
 import { ComponentInjectors } from './component-injectors';
 import { EditorOptions } from './editor-options';
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from './inject-tokens';
-import { Layout } from './ui/layout';
 import { RootComponent } from './root-component';
 import { TBHistory } from './history';
-import { TBPlugin } from './ui/plugin';
 import { BlockComponent } from './components/block.component';
 
 declare const ResizeObserver: any;
