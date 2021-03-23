@@ -1,6 +1,6 @@
 {
   "name": "@tanbo/textbus",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -22,7 +22,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.0.21",
     "@tanbo/css-themes": "^0.0.1",
-    "@tanbo/di": "0.0.24",
+    "@tanbo/di": "0.0.28",
     "katex": "^0.13.0",
     "prismjs": "^1.21.0",
     "reflect-metadata": "^0.1.13",

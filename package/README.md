@@ -35,7 +35,7 @@ const editor = createEditor('#editor', {
       return '/test'
     })
   },
-  content: `<p>欢迎你使用&nbsp;<strong>TextBus</strong> 富文本编辑器...<br></p>`
+  contents: `<p>欢迎你使用&nbsp;<strong>TextBus</strong> 富文本编辑器...<br></p>`
 });
 
 editor.onChange.subscribe(() => {
