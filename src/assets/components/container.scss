@@ -45,6 +45,7 @@
     border-right: 1px solid $color-light;
     overflow: hidden;
     z-index: 0;
+    background-color: #fff;
 
     &:first-child {
       border-top: 1px solid $color-light
@@ -76,6 +77,7 @@
     overflow: auto;
     height: 100%;
     z-index: 1;
+    background-color: #fff;
   }
 
   &-bottom {
