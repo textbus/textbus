@@ -19,6 +19,7 @@
       border-bottom-right-radius: inherit;
     }
   }
+
   &.textbus-container-full-screen {
     position: fixed;
     left: 0;
@@ -52,12 +53,18 @@
     }
   }
 
-  &-viewer {
+  &-dashboard {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
+    display: flex;
+  }
+
+  &-viewer {
+    flex: 1;
+    position: relative;
     display: flex;
   }
 
@@ -75,7 +82,11 @@
   &-scroll {
     flex: 1;
     overflow: auto;
-    position: relative;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 
     &.textbus-readonly {
       &::after {

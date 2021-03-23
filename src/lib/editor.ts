@@ -30,6 +30,7 @@ import { TBHistory } from './history';
 import { TBPlugin } from './ui/plugin';
 import { BlockComponent } from './components/block.component';
 
+declare const ResizeObserver: any;
 const editorErrorFn = makeError('Editor');
 
 export interface OutputContent<T = any> {
@@ -143,7 +144,7 @@ export class Editor {
 
       const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
       rootComponent.slot.from(parser.parse(dom));
-      this.listen(layout.iframe, layout.viewer, contentDocument);
+      this.listen(layout.iframe, layout.middle, contentDocument);
 
       [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
         injector.get(f).setup();

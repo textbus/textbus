@@ -41,7 +41,11 @@ export class DevicePlugin implements TBPlugin {
             createElement('span', {
               classes: ['textbus-icon-device']
             }),
-            this.label = createElement('span')
+            this.label = createElement('span', {
+              attrs: {
+                style: 'margin-left: 5px'
+              }
+            })
           ]
         }),
         this.menus = createElement('div', {
@@ -73,6 +77,8 @@ export class DevicePlugin implements TBPlugin {
       ]
     })
     let isSelfClick = false;
+
+    this.set('PC');
 
     this.subs.push(
       fromEvent(this.menus, 'click').subscribe((ev) => {

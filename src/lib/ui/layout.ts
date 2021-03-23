@@ -11,11 +11,13 @@ export class Layout {
   onReady: Observable<Document>;
   readonly container: HTMLElement;
 
-  readonly viewer: HTMLElement;
+  readonly middle: HTMLElement;
   readonly scroller: HTMLElement;
   readonly docer: HTMLElement;
   readonly right: HTMLElement;
   readonly wrapper: HTMLElement;
+  readonly dashboard: HTMLElement;
+  readonly viewer: HTMLElement;
 
   readonly iframe: HTMLIFrameElement;
 
@@ -68,31 +70,36 @@ export class Layout {
     this.container = createElement('div', {
       classes: ['textbus-container'],
       children: [
-        this.viewer = createElement('div', {
+        this.middle = createElement('div', {
           classes: ['textbus-ui-middle'],
           children: [
-            createElement('div', {
-              classes: ['textbus-ui-viewer'],
+            this.dashboard = createElement('div', {
+              classes: ['textbus-ui-dashboard'],
               children: [
-                this.scroller = createElement('div', {
-                  classes: ['textbus-ui-scroll'],
+                this.viewer = createElement('div', {
+                  classes: ['textbus-ui-viewer'],
                   children: [
-                    this.wrapper = createElement('div', {
-                      classes: ['textbus-ui-doc-wrapper'],
+                    this.scroller = createElement('div', {
+                      classes: ['textbus-ui-scroll'],
                       children: [
-                        this.docer = createElement('div', {
-                          classes: ['textbus-ui-doc'],
+                        this.wrapper = createElement('div', {
+                          classes: ['textbus-ui-doc-wrapper'],
                           children: [
-                            this.iframe
+                            this.docer = createElement('div', {
+                              classes: ['textbus-ui-doc'],
+                              children: [
+                                this.iframe
+                              ]
+                            })
                           ]
+                        }),
+                        this.loading = createElement('div', {
+                          classes: ['textbus-loading'],
+                          props: {
+                            innerHTML: 'TextBus'.split('').map(t => `<div>${t}</div>`).join('')
+                          }
                         })
                       ]
-                    }),
-                    this.loading = createElement('div', {
-                      classes: ['textbus-loading'],
-                      props: {
-                        innerHTML: 'TextBus'.split('').map(t => `<div>${t}</div>`).join('')
-                      }
                     })
                   ]
                 }),
