@@ -40,6 +40,7 @@ export class LibSwitch {
   }) as HTMLButtonElement;
 
   set expand(b: boolean) {
+    this.callback(this.expand);
     this._expand = b;
     if (b) {
       this.elementRef.classList.add('textbus-status-bar-btn-active');
@@ -60,7 +61,6 @@ export class LibSwitch {
     this.subs.push(
       fromEvent(this.elementRef, 'click').subscribe(() => {
         this.expand = !this.expand;
-        this.callback(this.expand);
       })
     )
   }
