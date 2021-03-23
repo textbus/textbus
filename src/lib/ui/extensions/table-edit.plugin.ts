@@ -174,7 +174,7 @@ export class TableEditPlugin implements TBPlugin {
   }
 
   private addMask() {
-    this.layout.docer.appendChild(this.mask);
+    this.layout.docContainer.appendChild(this.mask);
     this.insertMask = true;
   }
 

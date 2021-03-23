@@ -90,7 +90,7 @@ export class Input {
               private selection: TBSelection,
               private history: TBHistory) {
     this.contextmenu = new ContextMenu(this.history);
-    this.layout.docer.append(this.elementRef);
+    this.layout.docContainer.append(this.elementRef);
     this.elementRef.classList.add('textbus-selection');
     this.cursor.classList.add('textbus-cursor');
     this.inputWrap.classList.add('textbus-input-wrap');
@@ -225,7 +225,7 @@ export class Input {
             }
           }
         })
-        const rect = this.layout.docer.getBoundingClientRect();
+        const rect = this.layout.docContainer.getBoundingClientRect();
         this.contextmenu.show([
           [{
             iconClasses: ['textbus-icon-copy'],

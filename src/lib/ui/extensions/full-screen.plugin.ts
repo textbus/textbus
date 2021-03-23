@@ -37,7 +37,7 @@ export class FullScreenPlugin implements TBPlugin {
       })
     )
     this.full = false;
-    this.layout.bottom.appendChild(this.elementRef);
+    this.layout.bottomBar.appendChild(this.elementRef);
   }
 
   onDestroy() {

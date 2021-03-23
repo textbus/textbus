@@ -61,7 +61,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
         return;
       }
 
-      this.layout.docer.style.pointerEvents = 'none';
+      this.layout.docContainer.style.pointerEvents = 'none';
 
       const startRect = this.currentElement.getBoundingClientRect();
       this.currentComponent.width = startRect.width + 'px';
@@ -113,7 +113,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
       const mouseUpFn = () => {
         this.currentComponent.width = endWidth + 'px';
         this.currentComponent.height = endHeight + 'px';
-        this.layout.docer.style.pointerEvents = '';
+        this.layout.docContainer.style.pointerEvents = '';
         if (this.renderer) {
           const vEle = this.renderer.getVDomByNativeNode(this.currentElement) as VElement;
           vEle.styles.set('width', endWidth + 'px');
@@ -151,7 +151,7 @@ export class ImageVideoResizePlugin implements TBPlugin {
         range.selectNode(srcElement);
         selection.addRange(range);
         this.updateStyle();
-        this.layout.docer.append(this.mask);
+        this.layout.docContainer.append(this.mask);
       } else {
         this.currentElement = null;
         this.currentComponent = null;

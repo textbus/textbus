@@ -98,7 +98,7 @@ export class DevicePlugin implements TBPlugin {
         this.elementRef.classList.toggle('textbus-device-expand');
       })
     )
-    this.layout.bottom.appendChild(this.elementRef);
+    this.layout.bottomBar.appendChild(this.elementRef);
   }
 
   onDestroy() {
@@ -130,6 +130,6 @@ export class DevicePlugin implements TBPlugin {
       this.layout.scroller.style.padding = '20px';
       // this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
     }
-    this.layout.wrapper.style.width = width;
+    this.layout.pageContainer.style.width = width;
   }
 }

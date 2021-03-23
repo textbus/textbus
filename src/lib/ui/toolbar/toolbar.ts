@@ -69,8 +69,8 @@ export class Toolbar implements TBPlugin {
   constructor(@Inject(TOOLS) private config: (ToolFactory | ToolFactory[])[],
               @Inject(forwardRef(() => UIDialog))private dialogManager: UIDialog,
               @Inject(forwardRef(() => Input))private input: Input,
+              @Inject(forwardRef(() => FileUploader))private fileUploader: FileUploader,
               private editorController: EditorController,
-              private fileUploader: FileUploader,
               private selection: TBSelection,
               private history: TBHistory,
               private injector: Injector,
@@ -113,7 +113,7 @@ export class Toolbar implements TBPlugin {
     })
     this.createToolbar(this.config);
 
-    this.layout.top.appendChild(this.elementRef);
+    this.layout.topBar.appendChild(this.elementRef);
   }
 
 

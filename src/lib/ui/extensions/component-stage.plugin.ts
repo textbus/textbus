@@ -116,8 +116,8 @@ export class ComponentStagePlugin implements TBPlugin {
         tab.elementRef
       ]
     })
-    this.layout.right.appendChild(this.elementRef);
-    this.layout.bottom.appendChild(this.switch.elementRef);
+    this.layout.rightContainer.appendChild(this.elementRef);
+    this.layout.bottomBar.appendChild(this.switch.elementRef);
   }
 
   onDestroy() {

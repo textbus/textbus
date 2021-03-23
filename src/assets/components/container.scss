@@ -38,7 +38,7 @@
     z-index: 1;
   }
 
-  &-middle {
+  &-workbench {
     flex: 1;
     position: relative;
     border-left: 1px solid $color-light;
@@ -105,7 +105,7 @@
     }
   }
 
-  &-doc-wrapper {
+  &-page {
     padding: 8px 0;
     position: relative;
     box-shadow: 1px 2px 4px rgba(0, 0, 0, .2);
@@ -117,7 +117,7 @@
     transition: all 1.2s cubic-bezier(.36, .66, .04, 1);
     box-sizing: border-box;
 
-    &.textbus-dashboard-ready {
+    &.textbus-ui-page-ready {
       opacity: 1;
       transform: scale(1);
     }

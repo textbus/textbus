@@ -11,37 +11,37 @@ export class Layout {
   onReady: Observable<Document>;
   readonly container: HTMLElement;
 
-  readonly middle: HTMLElement;
+  readonly workbench: HTMLElement;
   readonly scroller: HTMLElement;
-  readonly docer: HTMLElement;
-  readonly right: HTMLElement;
-  readonly wrapper: HTMLElement;
+  readonly docContainer: HTMLElement;
+  readonly rightContainer: HTMLElement;
+  readonly pageContainer: HTMLElement;
   readonly dashboard: HTMLElement;
   readonly viewer: HTMLElement;
 
   readonly iframe: HTMLIFrameElement;
 
 
-  get top() {
+  get topBar() {
     if (!this.isAppendTop) {
-      this.container.prepend(this._top);
+      this.container.prepend(this._topBar);
       this.isAppendTop = true;
     }
-    return this._top;
+    return this._topBar;
   }
 
-  get bottom() {
+  get bottomBar() {
     if (!this.isAppendBottom) {
-      this.container.append(this._bottom);
+      this.container.append(this._bottomBar);
       this.isAppendBottom = true;
     }
-    return this._bottom;
+    return this._bottomBar;
   }
 
-  private _top: HTMLElement = createElement('div', {
+  private _topBar: HTMLElement = createElement('div', {
     classes: ['textbus-ui-top']
   })
-  private _bottom: HTMLElement = createElement('div', {
+  private _bottomBar: HTMLElement = createElement('div', {
     classes: ['textbus-ui-bottom', 'textbus-status-bar']
   })
 
@@ -70,8 +70,8 @@ export class Layout {
     this.container = createElement('div', {
       classes: ['textbus-container'],
       children: [
-        this.middle = createElement('div', {
-          classes: ['textbus-ui-middle'],
+        this.workbench = createElement('div', {
+          classes: ['textbus-ui-workbench'],
           children: [
             this.dashboard = createElement('div', {
               classes: ['textbus-ui-dashboard'],
@@ -82,10 +82,10 @@ export class Layout {
                     this.scroller = createElement('div', {
                       classes: ['textbus-ui-scroll'],
                       children: [
-                        this.wrapper = createElement('div', {
-                          classes: ['textbus-ui-doc-wrapper'],
+                        this.pageContainer = createElement('div', {
+                          classes: ['textbus-ui-page'],
                           children: [
-                            this.docer = createElement('div', {
+                            this.docContainer = createElement('div', {
                               classes: ['textbus-ui-doc'],
                               children: [
                                 this.iframe
@@ -103,7 +103,7 @@ export class Layout {
                     })
                   ]
                 }),
-                this.right = createElement('div', {
+                this.rightContainer = createElement('div', {
                   classes: ['textbus-ui-right']
                 })
               ]
@@ -132,7 +132,7 @@ export class Layout {
 
   private ready() {
     this.loading.classList.add('textbus-loading-done');
-    this.wrapper.classList.add('textbus-dashboard-ready');
+    this.pageContainer.classList.add('textbus-ui-page-ready');
     setTimeout(() => {
       this.scroller.removeChild(this.loading);
     }, 300);

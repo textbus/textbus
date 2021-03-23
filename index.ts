@@ -10,7 +10,7 @@ import {
   FormHidden, FormRadio, FormSwitch,
   FormTextField,
   videoToolConfig,
-  defaultOptions, PreComponent, TBHistory,BlockBackgroundColorFormatter
+  defaultOptions, PreComponent, TBHistory, BlockBackgroundColorFormatter, Layout
 } from './src/public-api';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
@@ -39,14 +39,14 @@ document.getElementById('btn').addEventListener('click', () => {
 
 window['editor'] = editor;
 
-// editor.onReady.subscribe(() => {
-//   const history = editor.injector.get(HistoryManager)
-//   console.log(history)
-// })
+editor.onReady.subscribe(() => {
+  const history = editor.injector.get(Layout)
+  console.log(history)
+})
 //
-// editor.onChange.subscribe(() => {
-//   console.log(editor.getContents().content)
-// })
+editor.onChange.subscribe(() => {
+  console.log(editor.getContents().content)
+})
 
 // document.addEventListener('selectionchange', () => {
 //   console.log(4343)

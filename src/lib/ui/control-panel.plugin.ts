@@ -18,7 +18,7 @@ export class UIControlPanel implements TBPlugin {
   private set fixed(b: boolean) {
     this._fixed = b;
     if (b) {
-      this.layout.dashboard.insertBefore(this.elementRef, this.layout.right);
+      this.layout.dashboard.insertBefore(this.elementRef, this.layout.rightContainer);
       this.elementRef.classList.add('textbus-control-panel-fixed');
       this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
       this.fixedBtn.title = '取消固定';

@@ -270,7 +270,7 @@ export class Editor {
 
     const dom = Parser.parserHTML(this.options.contents || '<p><br></p>');
     rootComponent.slot.from(parser.parse(dom));
-    this.listen(layout.iframe, layout.middle, contentDocument);
+    this.listen(layout.iframe, layout.workbench, contentDocument);
 
     [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
       injector.get(f).setup();
@@ -447,12 +447,7 @@ export class Editor {
   private static guardLastIsParagraph(fragment: Fragment) {
     const last = fragment.sliceContents(fragment.length - 1)[0];
     if (last instanceof BlockComponent) {
-      if (last.tagName === 'p') {
-        if (last.slot.length === 0) {
-          last.slot.append(new BrComponent());
-        }
-        return;
-      }
+      return;
     }
     const p = new BlockComponent('p');
     p.slot.append(new BrComponent());

@@ -85,7 +85,7 @@ export class LinkJumpPlugin implements TBPlugin {
             top: rect.top + 'px'
           })
           if (!this.link.parentNode) {
-            this.layout.docer.appendChild(this.link);
+            this.layout.docContainer.appendChild(this.link);
           }
           return;
         }

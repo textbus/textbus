@@ -22,7 +22,7 @@ export class UIDialog implements TBPlugin {
         })
       ]
     })
-    this.layout.middle.appendChild(this.elementRef);
+    this.layout.workbench.appendChild(this.elementRef);
   }
 
   dialog(element: HTMLElement) {
