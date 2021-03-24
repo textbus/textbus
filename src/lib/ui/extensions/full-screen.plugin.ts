@@ -3,11 +3,13 @@ import { Injectable } from '@tanbo/di';
 
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
+import { createElement } from '../uikit/uikit';
 
 @Injectable()
 export class FullScreenPlugin implements TBPlugin {
   set full(b: boolean) {
     this._full = b;
+    this.fullScreen(b);
     this.icon.className = b ? 'textbus-icon-shrink' : 'textbus-icon-enlarge';
   }
 
@@ -15,25 +17,36 @@ export class FullScreenPlugin implements TBPlugin {
     return this._full;
   }
 
-  private elementRef = document.createElement('button');
+  private elementRef: HTMLElement;
+  private btn: HTMLButtonElement;
+  private icon: HTMLElement;
 
   private _full = false;
-  private icon = document.createElement('span');
   private subs: Subscription[] = [];
 
   constructor(private layout: Layout) {
   }
 
   setup() {
-    this.elementRef.type = 'button';
-    this.elementRef.title = '切换全屏模式';
-    this.elementRef.className = 'textbus-status-bar-btn textbus-full-screen';
-    this.elementRef.appendChild(this.icon);
+    this.elementRef = createElement('div', {
+      classes: ['textbus-full-screen'],
+      children: [
+        this.btn = createElement('button', {
+          attrs: {
+            type: 'button',
+            title: '切换全屏模式'
+          },
+          classes: ['textbus-status-bar-btn'],
+          children: [
+            this.icon = createElement('span')
+          ]
+        }) as HTMLButtonElement
+      ]
+    })
 
     this.subs.push(
-      fromEvent(this.elementRef, 'click').subscribe(() => {
+      fromEvent(this.btn, 'click').subscribe(() => {
         this.full = !this.full;
-        this.fullScreen(this.full);
       })
     )
     this.full = false;

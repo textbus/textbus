@@ -25,19 +25,24 @@ export interface ComponentCreator {
 }
 
 export class LibSwitch {
-  elementRef = createElement('button', {
-    attrs: {
-      type: 'button',
-      title: '展开或收起组件库',
-    },
-    classes: ['textbus-status-bar-btn', 'textbus-lib-switch-btn'],
+  elementRef = createElement('div', {
+    classes: ['textbus-lib-switch'],
     children: [
-      createElement('span', {
-        classes: ['textbus-icon-components']
-      }),
-      createTextNode(' 组件库')
+      createElement('button', {
+        attrs: {
+          type: 'button',
+          title: '展开或收起组件库',
+        },
+        classes: ['textbus-status-bar-btn'],
+        children: [
+          createElement('span', {
+            classes: ['textbus-icon-components']
+          }),
+          createTextNode(' 组件库')
+        ]
+      })
     ]
-  }) as HTMLButtonElement;
+  });
 
   set expand(b: boolean) {
     this._expand = b;

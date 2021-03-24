@@ -12,11 +12,13 @@ import {
   ToolFactory,
   ToolType
 } from './toolkit/_api';
-import { Input, UIDialog } from '../_api';
+import { Input } from '../input';
+import { UIDialog } from '../dialog.plugin';
 import { Commander } from './commander';
 import { TBSelection, Keymap, KeymapAction } from '../../core/_api';
 import { SelectionMatchState } from './matcher/matcher';
-import { createElement, createKeymapHTML, FileUploader } from '../_api';
+import { createElement, createKeymapHTML } from '../uikit/_api';
+import { FileUploader } from '../file-uploader';
 import { EditorController } from '../../editor-controller';
 import { TBHistory } from '../../history';
 import { makeError } from '../../_utils/make-error';
