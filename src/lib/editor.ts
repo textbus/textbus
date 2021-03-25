@@ -161,7 +161,7 @@ export class Editor {
    */
   destroy() {
     this.subs.forEach(s => s.unsubscribe());
-    [Input, Layout].forEach(i => {
+    [Input, Layout, ComponentInjectors].forEach(i => {
       this.injector.get(i as Type<{ destroy(): void }>).destroy();
     });
     [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(p => {

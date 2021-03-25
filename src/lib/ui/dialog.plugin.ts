@@ -3,6 +3,8 @@ import { Injectable } from '@tanbo/di';
 import { createElement } from './uikit/uikit';
 import { TBPlugin } from './plugin';
 import { Layout } from './layout';
+import { EditorController } from '../editor-controller';
+import { Subscription } from 'rxjs';
 
 @Injectable()
 export class UIDialog implements TBPlugin {
@@ -10,7 +12,10 @@ export class UIDialog implements TBPlugin {
   private dialogWrapper: HTMLElement;
   private timer: any = null;
 
-  constructor(private layout: Layout) {
+  private subs: Subscription[] = [];
+
+  constructor(private layout: Layout,
+              private editorController: EditorController) {
   }
 
   setup() {
@@ -23,6 +28,11 @@ export class UIDialog implements TBPlugin {
       ]
     })
     this.layout.workbench.appendChild(this.elementRef);
+    this.subs.push(this.editorController.onStateChange.subscribe(status => {
+      if (status.readonly || status.sourcecodeMode) {
+        this.close();
+      }
+    }))
   }
 
   dialog(element: HTMLElement) {
@@ -44,5 +54,6 @@ export class UIDialog implements TBPlugin {
 
   onDestroy() {
     clearTimeout(this.timer);
+    this.subs.forEach(i => i.unsubscribe());
   }
 }
