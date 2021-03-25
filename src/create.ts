@@ -84,7 +84,7 @@ import {
   DEVICE_OPTIONS,
   FullScreenPlugin,
   ImageVideoResizePlugin, LinkJumpPlugin, TableEditPlugin,
-  TOOLS
+  TOOLS, SourcecodeModePlugin
 } from './lib/ui/_api';
 import { Toolbar } from './lib/ui/toolbar/_api';
 
@@ -198,7 +198,8 @@ export const defaultOptions: EditorOptions = {
     ComponentStagePlugin,
     ImageVideoResizePlugin,
     LinkJumpPlugin,
-    TableEditPlugin
+    TableEditPlugin,
+    SourcecodeModePlugin
   ]
 };
 

@@ -88,6 +88,8 @@ export class ComponentStagePlugin implements TBPlugin {
 
   private _expand = false;
 
+  private subs: Subscription[] = [];
+
   constructor(@Inject(COMPONENT_CREATORS) private creators: ComponentCreator[],
               private editorController: EditorController,
               private fileUploader: FileUploader,
@@ -118,9 +120,13 @@ export class ComponentStagePlugin implements TBPlugin {
     })
     this.layout.rightContainer.appendChild(this.elementRef);
     this.layout.bottomBar.appendChild(this.switch.elementRef);
+    this.subs.push(this.editorController.onStateChange.subscribe(state => {
+      this.switch.elementRef.disabled = state.readonly;
+    }))
   }
 
   onDestroy() {
+    this.subs.forEach(i => i.unsubscribe());
     this.switch.onDestroy();
   }
 

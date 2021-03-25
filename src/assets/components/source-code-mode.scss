@@ -1,0 +1,19 @@
+@import "~codemirror/lib/codemirror.css";
+@import "~codemirror/theme/idea.css";
+
+.textbus-sourcecode-mode-plugin-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: none;
+  font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+  .CodeMirror {
+    height: 100% !important;
+    font-family: inherit !important;
+  }
+  .CodeMirror-cursor {
+    border-left-width: 2px;
+  }
+}

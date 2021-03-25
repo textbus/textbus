@@ -4,6 +4,7 @@ import { Inject, Injectable, InjectionToken } from '@tanbo/di';
 import { createElement } from '../uikit/uikit';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
+import { EditorController } from '../../editor-controller';
 
 export interface DeviceOption {
   label: string;
@@ -17,13 +18,14 @@ export const DEVICE_OPTIONS = new InjectionToken<DeviceOption[]>('DEVICE_OPTIONS
 export class DevicePlugin implements TBPlugin {
   private elementRef: HTMLElement;
 
-  private button: HTMLElement;
+  private button: HTMLButtonElement;
   private label: HTMLElement;
   private menus: HTMLElement;
   private menuItems: HTMLElement[] = [];
   private subs: Subscription[] = [];
 
   constructor(@Inject(DEVICE_OPTIONS) private options: DeviceOption[],
+              private editorController: EditorController,
               private layout: Layout) {
   }
 
@@ -47,7 +49,7 @@ export class DevicePlugin implements TBPlugin {
               }
             })
           ]
-        }),
+        }) as HTMLButtonElement,
         this.menus = createElement('div', {
           classes: ['textbus-device-menus'],
           children: this.options.map(item => {
@@ -96,6 +98,9 @@ export class DevicePlugin implements TBPlugin {
       fromEvent(this.button, 'click').subscribe(() => {
         isSelfClick = true;
         this.elementRef.classList.toggle('textbus-device-expand');
+      }),
+      this.editorController.onStateChange.subscribe(status => {
+        this.button.disabled = status.readonly;
       })
     )
     this.layout.bottomBar.appendChild(this.elementRef);
