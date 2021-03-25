@@ -13,6 +13,7 @@ import {
   defaultOptions, PreComponent, TBHistory, BlockBackgroundColorFormatter, Layout
 } from './src/public-api';
 import { ComponentStagePlugin } from './src/public-api';
+import { EditorController } from './src/public-api';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   // deviceType: 'iPad',
@@ -41,15 +42,12 @@ document.getElementById('btn').addEventListener('click', () => {
 window['editor'] = editor;
 
 editor.onReady.subscribe(() => {
-  const history = editor.injector.get(Layout)
-  const s = editor.injector.get(ComponentStagePlugin)
-  s.switch.expand = true
-  console.log(history)
+  window['editorController'] = editor.injector.get(EditorController)
 })
 //
-editor.onChange.subscribe(() => {
-  console.log(editor.getContents().content)
-})
+// editor.onChange.subscribe(() => {
+//   console.log(editor.getContents().content)
+// })
 
 // document.addEventListener('selectionchange', () => {
 //   console.log(4343)

@@ -1,5 +1,6 @@
 import { Injectable } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import pretty from 'pretty';
 import codemirror from 'codemirror';
 import 'codemirror/mode/htmlmixed/htmlmixed';
@@ -12,41 +13,7 @@ import { createElement } from '../uikit/_api';
 
 @Injectable()
 export class SourcecodeModePlugin implements TBPlugin {
-  set switch(b: boolean) {
-    this._switch = b;
-    this.layout.dashboard.style.display = b ? 'none' : '';
-    this.container.style.display = b ? 'block' : 'none'
-    this.editorController.readonly = b;
-    if (b) {
-      this.btn.classList.add('textbus-status-bar-btn-active');
-      this.codeMirrorInstance = codemirror(this.container, {
-        lineNumbers: true,
-        mode: 'text/html',
-        theme: 'idea',
-        indentUnit: 2,
-        lineWrapping: true,
-        value: pretty(this.editor.getContents().content)
-      })
-
-    } else {
-      this.btn.classList.remove('textbus-status-bar-btn-active');
-      if (this.codeMirrorInstance) {
-        const value = this.codeMirrorInstance.getValue().split('\n').map(i => i.trim()).join('');
-        this.editor.setContents(value);
-        this.codeMirrorInstance = null;
-        this.container.innerHTML = '';
-      }
-    }
-  }
-
-  get switch() {
-    return this._switch;
-  }
-
-  private _switch = false
-
   private codeMirrorInstance: codemirror.Editor
-
   private subs: Subscription[] = [];
   private btn: HTMLButtonElement;
   private container = createElement('div', {
@@ -76,12 +43,50 @@ export class SourcecodeModePlugin implements TBPlugin {
     this.layout.bottomBar.appendChild(el);
     this.layout.workbench.appendChild(this.container);
 
-    this.subs.push(fromEvent(this.btn, 'click').subscribe(() => {
-      this.switch = !this.switch;
-    }))
+    this.subs.push(
+      fromEvent(this.btn, 'click').subscribe(() => {
+        this.editorController.sourceCodeMode = !this.editorController.sourceCodeMode;
+      }),
+      this.editorController.onStateChange.pipe(tap(status => {
+        this.btn.disabled = status.readonly;
+        if (this.codeMirrorInstance) {
+          this.codeMirrorInstance.setOption('readOnly', this.editorController.readonly ? 'nocursor' : false);
+        }
+      }), map(status => {
+        return status.sourcecodeMode
+      }), distinctUntilChanged()).subscribe(b => {
+        this.switch(b);
+      })
+    )
   }
 
   onDestroy() {
     this.subs.forEach(i => i.unsubscribe());
+  }
+
+  private switch(b: boolean) {
+    this.layout.dashboard.style.display = b ? 'none' : '';
+    this.container.style.display = b ? 'block' : 'none'
+    if (b) {
+      this.btn.classList.add('textbus-status-bar-btn-active');
+      this.codeMirrorInstance = codemirror(this.container, {
+        lineNumbers: true,
+        mode: 'text/html',
+        theme: 'idea',
+        indentUnit: 2,
+        lineWrapping: true,
+        value: pretty(this.editor.getContents().content)
+      })
+      this.codeMirrorInstance.setOption('readOnly', this.editorController.readonly ? 'nocursor' : false);
+
+    } else {
+      this.btn.classList.remove('textbus-status-bar-btn-active');
+      if (this.codeMirrorInstance) {
+        const value = this.codeMirrorInstance.getValue().split('\n').map(i => i.trim()).join('');
+        this.editor.setContents(value);
+        this.codeMirrorInstance = null;
+        this.container.innerHTML = '';
+      }
+    }
   }
 }

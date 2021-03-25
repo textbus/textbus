@@ -2,6 +2,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface GlobalStatus {
   readonly: boolean;
+  sourcecodeMode: boolean;
 }
 
 export class EditorController {
@@ -14,6 +15,14 @@ export class EditorController {
 
   get readonly() {
     return this.status.readonly;
+  }
+  set sourceCodeMode(b: boolean) {
+    this.status.sourcecodeMode = b;
+    this.dispatch();
+  }
+
+  get sourceCodeMode() {
+    return this.status.sourcecodeMode;
   }
   private stateChangeEvent = new BehaviorSubject(this.status);
 

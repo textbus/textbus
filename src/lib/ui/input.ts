@@ -213,7 +213,7 @@ export class Input {
         this.contextmenu.hide();
         this.selection.removeAllRanges(true);
       }),
-      fromEvent(this.context, 'contextmenu').subscribe((ev: MouseEvent) => {
+      fromEvent(this.context, 'contextmenu').pipe(filter(() => !this.readonly)).subscribe((ev: MouseEvent) => {
         const selection = this.context.getSelection();
         const focusNode = selection.focusNode;
         const offset = selection.focusOffset;
@@ -260,13 +260,13 @@ export class Input {
         ], ev.pageX + rect.x, ev.pageY + rect.y);
         ev.preventDefault();
       }),
-      fromEvent(this.input, 'compositionstart').subscribe(() => {
+      fromEvent(this.input, 'compositionstart').pipe(filter(() => !this.readonly)).subscribe(() => {
         isWriting = true;
       }),
-      fromEvent(this.input, 'compositionend').subscribe(() => {
+      fromEvent(this.input, 'compositionend').pipe(filter(() => !this.readonly)).subscribe(() => {
         isWriting = false;
       }),
-      fromEvent(this.input, 'keydown').pipe(filter(() => {
+      fromEvent(this.input, 'keydown').pipe(filter(() => !this.readonly)).pipe(filter(() => {
         // 处理输入法中间状态时，按回车或其它键时，不需要触发事件
         return !isWriting || !this.input.value;
       })).subscribe((ev: KeyboardEvent) => {
@@ -318,7 +318,7 @@ export class Input {
         this.flashing = true;
       }),
 
-      this.selection.onChange.subscribe(() => {
+      this.selection.onChange.pipe(filter(() => !this.readonly)).subscribe(() => {
         this.updateStateBySelection()
         this.dispatchComponentPresetEvent();
       })
@@ -349,13 +349,13 @@ export class Input {
       fromEvent(this.input, 'blur').subscribe(() => {
         this.hide();
       }),
-      fromEvent(this.input, 'focus').subscribe(() => {
+      fromEvent(this.input, 'focus').pipe(filter(() => !this.readonly)).subscribe(() => {
         this.dispatchInputReadyEvent();
       }),
-      fromEvent(this.input, 'input').subscribe(() => {
+      fromEvent(this.input, 'input').pipe(filter(() => !this.readonly)).subscribe(() => {
         this.dispatchInputEvent();
       }),
-      fromEvent(this.input, 'paste').subscribe((ev: ClipboardEvent) => {
+      fromEvent(this.input, 'paste').pipe(filter(() => !this.readonly)).subscribe((ev: ClipboardEvent) => {
         const text = ev.clipboardData.getData('Text');
         const div = document.createElement('div');
         div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px';
@@ -380,10 +380,10 @@ export class Input {
           this.history.record();
         });
       }),
-      fromEvent(this.input, 'copy').subscribe(() => {
+      fromEvent(this.input, 'copy').pipe(filter(() => !this.readonly)).subscribe(() => {
         this.copy();
       }),
-      fromEvent(this.input, 'cut').subscribe(() => {
+      fromEvent(this.input, 'cut').pipe(filter(() => !this.readonly)).subscribe(() => {
         this.cut();
         this.history.record();
       })

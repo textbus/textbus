@@ -195,7 +195,7 @@ export class Toolbar implements TBPlugin {
         this.additionalWorktableContent.innerHTML = '';
         this.additionalWorktable.classList.remove('textbus-toolbar-additional-worktable-show');
       }), this.editorController.onStateChange.pipe(map(s => {
-        return s.readonly;
+        return s.readonly || s.sourcecodeMode;
       }), distinctUntilChanged()).subscribe(b => {
         this.disabled = b;
       }),

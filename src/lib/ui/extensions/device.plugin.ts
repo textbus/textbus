@@ -100,7 +100,7 @@ export class DevicePlugin implements TBPlugin {
         this.elementRef.classList.toggle('textbus-device-expand');
       }),
       this.editorController.onStateChange.subscribe(status => {
-        this.button.disabled = status.readonly;
+        this.button.disabled = status.readonly || status.sourcecodeMode;
       })
     )
     this.layout.bottomBar.appendChild(this.elementRef);

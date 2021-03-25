@@ -89,6 +89,7 @@ export class Editor {
     this.onChange = this.changeEvent.asObservable();
     this.stateController = new EditorController({
       readonly: false,
+      sourcecodeMode: false
     });
 
     const rootInjector = new ReflectiveInjector(new NullInjector(), [Layout, {

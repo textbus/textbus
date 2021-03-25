@@ -25,22 +25,23 @@ export interface ComponentCreator {
 }
 
 export class LibSwitch {
+  btn = createElement('button', {
+    attrs: {
+      type: 'button',
+      title: '展开或收起组件库',
+    },
+    classes: ['textbus-status-bar-btn'],
+    children: [
+      createElement('span', {
+        classes: ['textbus-icon-components']
+      }),
+      createTextNode(' 组件库')
+    ]
+  }) as HTMLButtonElement;
   elementRef = createElement('div', {
     classes: ['textbus-lib-switch'],
     children: [
-      createElement('button', {
-        attrs: {
-          type: 'button',
-          title: '展开或收起组件库',
-        },
-        classes: ['textbus-status-bar-btn'],
-        children: [
-          createElement('span', {
-            classes: ['textbus-icon-components']
-          }),
-          createTextNode(' 组件库')
-        ]
-      })
+      this.btn
     ]
   });
 
@@ -126,7 +127,7 @@ export class ComponentStagePlugin implements TBPlugin {
     this.layout.rightContainer.appendChild(this.elementRef);
     this.layout.bottomBar.appendChild(this.switch.elementRef);
     this.subs.push(this.editorController.onStateChange.subscribe(state => {
-      this.switch.elementRef.disabled = state.readonly;
+      this.switch.btn.disabled = state.readonly || state.sourcecodeMode;
     }))
   }
 
@@ -205,6 +206,9 @@ export class ComponentStagePlugin implements TBPlugin {
   private addExample(example: ComponentCreator) {
     const {wrapper, card} = ComponentStagePlugin.createViewer(example.example, example.name);
     card.addEventListener('click', () => {
+      if (this.editorController.readonly || this.editorController.sourceCodeMode) {
+        return;
+      }
       const t = example.factory(this.dialogManager, this.fileUploader);
       if (t instanceof AbstractComponent) {
         this.insertComponent(t);
