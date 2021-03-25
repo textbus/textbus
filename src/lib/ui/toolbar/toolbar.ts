@@ -13,7 +13,7 @@ import {
   ToolType
 } from './toolkit/_api';
 import { Input } from '../input';
-import { UIDialog } from '../dialog.plugin';
+import { UIDialog } from '../plugins/dialog.plugin';
 import { Commander } from './commander';
 import { TBSelection, Keymap, KeymapAction } from '../../core/_api';
 import { SelectionMatchState } from './matcher/matcher';

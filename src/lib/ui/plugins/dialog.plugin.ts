@@ -1,9 +1,9 @@
 import { Injectable } from '@tanbo/di';
 
-import { createElement } from './uikit/uikit';
-import { TBPlugin } from './plugin';
-import { Layout } from './layout';
-import { EditorController } from '../editor-controller';
+import { createElement } from '../uikit/uikit';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
+import { EditorController } from '../../editor-controller';
 import { Subscription } from 'rxjs';
 
 @Injectable()

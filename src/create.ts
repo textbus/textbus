@@ -79,12 +79,15 @@ import {
 } from './lib/components/_api';
 import {
   COMPONENT_CREATORS,
+  TOOLS,
   ComponentStagePlugin,
   DevicePlugin,
   DEVICE_OPTIONS,
   FullScreenPlugin,
-  ImageVideoResizePlugin, LinkJumpPlugin, TableEditPlugin,
-  TOOLS, SourcecodeModePlugin
+  ImageVideoResizePlugin,
+  LinkJumpPlugin,
+  TableEditPlugin,
+  SourcecodeModePlugin
 } from './lib/ui/_api';
 import { Toolbar } from './lib/ui/toolbar/_api';
 

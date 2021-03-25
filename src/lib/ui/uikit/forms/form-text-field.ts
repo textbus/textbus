@@ -39,7 +39,7 @@ export class FormTextField implements FormItem<string> {
         if (this.sub) {
           this.sub.unsubscribe();
         }
-        this.sub = this.uploader.upload(this.config.uploadType).subscribe({
+        this.sub = this.uploader.upload(this.config.uploadType, this.input.value).subscribe({
           next: url => {
             this.update(url);
           },

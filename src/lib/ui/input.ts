@@ -18,13 +18,17 @@ import { EDITABLE_DOCUMENT } from '../inject-tokens';
 import { RootComponent } from '../root-component';
 import { TBHistory } from '../history';
 import { EditorController } from '../editor-controller';
-import { UIControlPanel } from './control-panel.plugin';
+import { UIControlPanel } from './plugins/control-panel.plugin';
 import { createElement, createTextNode } from './uikit/uikit';
 import { ComponentInjectors } from '../component-injectors';
 import { Layout } from './layout';
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
+
+export interface PastePreHandleMiddleware {
+  (previousDOMTree: HTMLElement): Promise<HTMLElement> | HTMLElement;
+}
 
 /**
  * 事件劫持类，用于分配用户鼠标和键盘操作后的逻辑
@@ -51,6 +55,8 @@ export class Input {
   }
 
   private _readonly = false;
+
+  private pasteMiddlewares: PastePreHandleMiddleware[] = [];
 
   private input = document.createElement('textarea');
   private keymaps: KeymapAction[] = [];
@@ -110,6 +116,10 @@ export class Input {
     this.subs.push(editorController.onStateChange.pipe(map(i => i.readonly)).subscribe(b => {
       this.readonly = b;
     }))
+  }
+
+  addPasteMiddleware(middleware: PastePreHandleMiddleware) {
+    this.pasteMiddlewares.push(middleware);
   }
 
   /**
@@ -629,28 +639,41 @@ export class Input {
   }
 
   private handlePaste(dom: HTMLElement, text: string) {
-    const fragment = (this.parser.parse(dom).getContentAtIndex(0) as DivisionAbstractComponent).slot;
-    if (!this.selection.collapsed) {
-      this.dispatchEvent((injector, instance) => {
-        const event = new TBEvent(instance);
-        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
-        if (interceptor) {
-          interceptor.onDeleteRange?.(event);
-        }
-        return !event.stopped;
-      })
+    const paste = (element: HTMLElement) => {
+      const fragment = (this.parser.parse(element).getContentAtIndex(0) as DivisionAbstractComponent).slot;
+      if (!this.selection.collapsed) {
+        this.dispatchEvent((injector, instance) => {
+          const event = new TBEvent(instance);
+          const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+          if (interceptor) {
+            interceptor.onDeleteRange?.(event);
+          }
+          return !event.stopped;
+        })
+      }
+      if (this.selection.collapsed) {
+        this.dispatchEvent((injector, instance) => {
+          const event = new TBEvent(instance, {fragment, text});
+          const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
+          if (interceptor) {
+            interceptor.onPaste?.(event);
+          }
+          return !event.stopped;
+        })
+      }
+      this.dispatchInputReadyEvent();
     }
-    if (this.selection.collapsed) {
-      this.dispatchEvent((injector, instance) => {
-        const event = new TBEvent(instance, {fragment, text});
-        const interceptor = injector.get(Interceptor as Type<Interceptor<any>>, null, InjectFlags.Self);
-        if (interceptor) {
-          interceptor.onPaste?.(event);
-        }
-        return !event.stopped;
-      })
+    if (!this.pasteMiddlewares.length) {
+      paste(dom);
+      return;
     }
-    this.dispatchInputReadyEvent();
+    this.pasteMiddlewares.reduce((prevPromise, nextMiddleware) => {
+      return prevPromise.then(newDOM => {
+        return nextMiddleware(newDOM);
+      })
+    }, Promise.resolve<HTMLElement>(dom)).then(result => {
+      paste(result);
+    })
   }
 
   private dispatchEvent(invokeFn: (injector: Injector, instance: AbstractComponent) => boolean) {

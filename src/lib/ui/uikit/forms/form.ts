@@ -11,6 +11,7 @@ export interface FormConfig {
   editProperty?: 'attrs' | 'styles',
   items: Array<FormItem>;
   mini?: boolean;
+  maxHeight?: string;
 }
 
 export class Form implements FormViewer {
@@ -40,13 +41,18 @@ export class Form implements FormViewer {
       }))
     }
     this.elementRef.appendChild(this.groups = createElement('div', {
+      attrs: {
+        novalidate: 'novalidate'
+      },
       classes: config.mini ? [] : ['textbus-form-body'],
       children: config.items.map(item => {
         return item.elementRef;
       })
     }));
 
-    this.elementRef.setAttribute('novalidate', 'novalidate');
+    if (this.config.maxHeight) {
+      this.groups.style.maxHeight = this.config.maxHeight
+    }
 
     const btns = config.mini ? [
       createElement('button', {

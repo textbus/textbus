@@ -15,7 +15,7 @@ import {
 } from './core/_api';
 import {
   UIControlPanel,
-  UIDialog, Input, Layout, FileUploader, TBPlugin
+  UIDialog, Input, Layout, FileUploader, TBPlugin, PasteHandlePlugin
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
@@ -63,7 +63,8 @@ export class Editor {
   private componentAnnotations: Component[];
   private defaultPlugins: Type<TBPlugin>[] = [
     UIDialog,
-    UIControlPanel
+    UIControlPanel,
+    PasteHandlePlugin
   ];
   private readyState = false;
   private tasks: Array<() => void> = [];

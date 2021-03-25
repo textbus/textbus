@@ -1,12 +1,12 @@
 import { Injectable } from '@tanbo/di';
 import { Subscription } from 'rxjs';
 
-import { createElement } from './uikit/_api';
-import { ComponentControlPanelView } from '../core/_api';
-import { EditorController } from '../editor-controller';
-import { Tab, TabConfig } from './tab';
-import { TBPlugin } from './plugin';
-import { Layout } from './layout';
+import { createElement } from '../uikit/_api';
+import { ComponentControlPanelView } from '../../core/_api';
+import { EditorController } from '../../editor-controller';
+import { Tab, TabConfig } from '../tab';
+import { TBPlugin } from '../plugin';
+import { Layout } from '../layout';
 
 @Injectable()
 export class UIControlPanel implements TBPlugin {

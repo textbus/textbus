@@ -146,6 +146,7 @@ export const imageToolConfig: FormToolConfig = {
   menuFactory() {
     return new Form({
       title: '图片设置',
+      maxHeight: '260px',
       items: [
         new FormTextField({
           label: '图片链接地址',

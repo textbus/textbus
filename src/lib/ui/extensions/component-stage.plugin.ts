@@ -8,7 +8,7 @@ import {
   TBSelection,
   BrComponent
 } from '../../core/_api';
-import { UIDialog } from '../dialog.plugin';
+import { UIDialog } from '../plugins/dialog.plugin';
 import { EditorController } from '../../editor-controller';
 import { FileUploader } from '../file-uploader';
 import { createElement, createTextNode } from '../uikit/uikit';

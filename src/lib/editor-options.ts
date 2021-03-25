@@ -28,5 +28,5 @@ export interface EditorOptions {
   plugins?: Type<TBPlugin>[];
 
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
-  uploader?(type: string): (string | Promise<string> | Observable<string>);
+  uploader?(type: string, currentValue?: string): (string | Promise<string> | Observable<string>);
 }
