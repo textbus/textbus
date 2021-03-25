@@ -29,7 +29,7 @@ export class PasteHandlePlugin implements TBPlugin {
           items: [
             ...images.map((img, index) => {
               return new FormTextField({
-                name: 'index' + index,
+                name: 'img' + index,
                 value: img.src,
                 label: `第 ${index + 1} 张图片`,
                 placeholder: '请输入图片地址',
@@ -40,7 +40,7 @@ export class PasteHandlePlugin implements TBPlugin {
             }),
             ...videos.map((video, index) => {
               return new FormTextField({
-                name: 'index' + index,
+                name: 'video' + index,
                 value: video.src,
                 label: `第 ${index + 1} 个视频`,
                 placeholder: '请输入视频地址',
@@ -51,7 +51,7 @@ export class PasteHandlePlugin implements TBPlugin {
             }),
             ...audios.map((audio, index) => {
               return new FormTextField({
-                name: 'index' + index,
+                name: 'audio' + index,
                 value: audio.src,
                 label: `第 ${index + 1} 个音频`,
                 placeholder: '请输入音频地址',
@@ -68,13 +68,13 @@ export class PasteHandlePlugin implements TBPlugin {
           sub.unsubscribe();
           if (result) {
             images.forEach((img, index) => {
-              img.src = result.get('index' + index);
+              img.src = result.get('img' + index);
             })
             videos.forEach((video, index) => {
-              video.src = result.get('index' + index);
+              video.src = result.get('video' + index);
             })
             audios.forEach((audio, index) => {
-              audio.src = result.get('index' + index);
+              audio.src = result.get('audio' + index);
             })
           }
           this.dialog.close();
