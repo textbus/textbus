@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'textbus';
   src:
-    url('fonts/textbus.ttf?b672n7') format('truetype'),
-    url('fonts/textbus.woff?b672n7') format('woff'),
-    url('fonts/textbus.svg?b672n7#textbus') format('svg');
+    url('fonts/textbus.ttf?anojok') format('truetype'),
+    url('fonts/textbus.woff?anojok') format('woff'),
+    url('fonts/textbus.svg?anojok#textbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,9 +24,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.textbus-icon-select:before {
-  content: "\e918";
-}
 .textbus-icon-arrow-right:before {
   content: "\e50f";
 }
@@ -102,8 +99,20 @@
 .textbus-icon-unlink:before {
   content: "\e917";
 }
+.textbus-icon-select:before {
+  content: "\e918";
+}
 .textbus-icon-insert-paragraph-after:before {
   content: "\e919";
+}
+.textbus-icon-copy:before {
+  content: "\e92c";
+}
+.textbus-icon-paste:before {
+  content: "\e92d";
+}
+.textbus-icon-pushpin:before {
+  content: "\e946";
 }
 .textbus-icon-upload:before {
   content: "\e961";
@@ -158,6 +167,9 @@
 }
 .textbus-icon-opt:before {
   content: "\ea51";
+}
+.textbus-icon-cut:before {
+  content: "\ea5a";
 }
 .textbus-icon-line-height:before {
   content: "\ea5f";
@@ -216,15 +228,6 @@
 .textbus-icon-terminal:before {
   content: "\ea81";
 }
-.textbus-icon-copy:before {
-  content: "\e92c";
-}
-.textbus-icon-paste:before {
-  content: "\e92d";
-}
-.textbus-icon-pushpin:before {
-  content: "\e946";
-}
-.textbus-icon-cut:before {
-  content: "\ea5a";
+.textbus-icon-tree:before {
+  content: "\e91a";
 }

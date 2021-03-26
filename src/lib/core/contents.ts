@@ -40,7 +40,7 @@ export class Contents {
    * @param startIndex
    * @param endIndex
    */
-  slice(startIndex: number, endIndex = this.length) {
+  slice(startIndex: number, endIndex = this.length): Array<string | AbstractComponent> {
     if (startIndex >= endIndex) {
       return [];
     }
@@ -131,7 +131,7 @@ export class Contents {
    * @param startIndex
    * @param endIndex
    */
-  cut(startIndex: number, endIndex: number) {
+  cut(startIndex: number, endIndex: number): Array<string | AbstractComponent> {
     if (endIndex <= startIndex) {
       return [];
     }

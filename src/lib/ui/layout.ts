@@ -14,6 +14,7 @@ export class Layout {
   readonly workbench: HTMLElement;
   readonly scroller: HTMLElement;
   readonly docContainer: HTMLElement;
+  readonly leftContainer: HTMLElement;
   readonly rightContainer: HTMLElement;
   readonly pageContainer: HTMLElement;
   readonly dashboard: HTMLElement;
@@ -76,6 +77,9 @@ export class Layout {
             this.dashboard = createElement('div', {
               classes: ['textbus-ui-dashboard'],
               children: [
+                this.leftContainer = createElement('div', {
+                  classes: ['textbus-ui-left']
+                }),
                 this.viewer = createElement('div', {
                   classes: ['textbus-ui-viewer'],
                   children: [

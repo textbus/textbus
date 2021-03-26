@@ -87,7 +87,8 @@ import {
   ImageVideoResizePlugin,
   LinkJumpPlugin,
   TableEditPlugin,
-  SourcecodeModePlugin
+  SourcecodeModePlugin,
+  HeadingNavPlugin
 } from './lib/ui/_api';
 import { Toolbar } from './lib/ui/toolbar/_api';
 
@@ -196,13 +197,14 @@ export const defaultOptions: EditorOptions = {
   }],
   plugins: [
     Toolbar,
+    HeadingNavPlugin,
     FullScreenPlugin,
     DevicePlugin,
     ComponentStagePlugin,
     ImageVideoResizePlugin,
     LinkJumpPlugin,
     TableEditPlugin,
-    SourcecodeModePlugin
+    SourcecodeModePlugin,
   ]
 };
 

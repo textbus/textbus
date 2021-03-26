@@ -6,18 +6,22 @@ $line-height: 1.4285714 !default;
 
 @import "./components/scroll";
 @import "./components/tool";
-@import "./components/component-stage";
 @import "./components/container";
 @import "./components/contextmenu";
-@import "./components/control-panel";
-@import "./components/dialog";
-@import "./components/forms";
 @import "./components/loading";
 @import "./components/selection";
-@import "./components/source-code-mode";
 @import "./components/status-bar";
-@import "./components/toolbar";
-@import "./components/toolbar-extention";
+
+@import "./plugins/component-stage";
+@import "./plugins/control-panel";
+@import "./plugins/device";
+@import "./plugins/dialog";
+@import "./plugins/forms";
+@import "./plugins/full-screen";
+@import "./plugins/heading-nav";
+@import "./plugins/source-code-mode";
+@import "./plugins/toolbar";
+@import "./plugins/toolbar-extention";
 
 @import "./theme/dark";
 @import "./theme/mac-os";
