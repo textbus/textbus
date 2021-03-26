@@ -26,6 +26,7 @@ export class HeadingNavPlugin implements TBPlugin {
     if (b) {
       this.btn.classList.add('textbus-status-bar-btn-active');
       this.navLinks.style.display = 'block';
+      this.navLinks.style.width = this.layout.dashboard.offsetWidth * 0.2 + 'px';
     } else {
       this.btn.classList.remove('textbus-status-bar-btn-active');
       this.navLinks.style.display = 'none';
