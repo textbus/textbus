@@ -224,6 +224,7 @@ export class StepComponent extends BranchAbstractComponent {
             } else {
               this.step = index;
             }
+            this.slots.forEach(i => i.markAsDirtied());
             this.markAsDirtied();
           }}>{index + 1}</div>
         </div>
