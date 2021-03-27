@@ -17,7 +17,7 @@ import { EditorController } from '../../editor-controller';
 import { sampleTime } from 'rxjs/operators';
 
 @Injectable()
-export class HeadingNavPlugin implements TBPlugin {
+export class OutlinesPlugin implements TBPlugin {
   static defaultExpand = false;
   private subs: Subscription[] = [];
 
@@ -25,11 +25,11 @@ export class HeadingNavPlugin implements TBPlugin {
     this._expand = b;
     if (b) {
       this.btn.classList.add('textbus-status-bar-btn-active');
-      this.navLinks.style.display = 'block';
-      this.navLinks.style.width = this.layout.dashboard.offsetWidth * 0.2 + 'px';
+      this.container.style.display = 'block';
+      this.container.style.width = this.layout.dashboard.offsetWidth * 0.2 + 'px';
     } else {
       this.btn.classList.remove('textbus-status-bar-btn-active');
-      this.navLinks.style.display = 'none';
+      this.container.style.display = 'none';
     }
   }
 
@@ -40,20 +40,36 @@ export class HeadingNavPlugin implements TBPlugin {
   private _expand = false;
   private btn: HTMLButtonElement;
   private btnWrapper: HTMLElement;
-  private navLinks = createElement('div', {
-    classes: ['textbus-heading-nav-plugin']
-  });
+  private container: HTMLElement;
+  private links: HTMLElement;
 
   constructor(private layout: Layout,
               private rootComponent: RootComponent,
               private editorController: EditorController,
               private renderer: Renderer) {
+    this.container = createElement('div', {
+      classes: ['textbus-outlines-plugin'],
+      children: [
+        createElement('h3', {
+          classes: ['textbus-outlines-plugin-title'],
+          children: [
+            createTextNode('概览')
+          ]
+        }),
+        this.links = createElement('div', {
+          classes: ['textbus-outlines-plugin-links']
+        })
+      ]
+    });
 
     this.btnWrapper = createElement('div', {
-      classes: ['textbus-heading-nav-plugin-btn-wrapper'],
+      classes: ['textbus-outlines-plugin-btn-wrapper'],
       children: [
         this.btn = createElement('button', {
           classes: ['textbus-status-bar-btn'],
+          attrs: {
+            title: '概览'
+          },
           children: [
             createElement('span', {
               classes: ['textbus-icon-tree']
@@ -71,26 +87,45 @@ export class HeadingNavPlugin implements TBPlugin {
         const headingNativeNodes = components.map(component => {
           return this.renderer.getComponentRootNativeNode(component)
         })
-        this.navLinks.innerHTML = '';
-        headingNativeNodes.forEach(h => {
-          const a = createElement('a', {
-            attrs: {
-              href: 'javascript:;'
-            },
-            children: [createTextNode(h.innerText)]
-          });
-          a.addEventListener('click', () => {
-            h.getBoundingClientRect()
-            this.layout.scroller.scrollTo({
-              top: this.getTopDistance(h)
-            })
-          })
-          const link = createElement('div', {
-            classes: ['textbus-heading-nav-plugin-' + h.tagName.toLowerCase()],
-            children: [a]
-          });
-          this.navLinks.appendChild(link);
-        })
+        const children = this.links.children;
+        const count = Math.max(headingNativeNodes.length, children.length);
+        for (let i = 0; i < count; i++) {
+          const child = children[i];
+          const h = headingNativeNodes[i];
+          if (!h && child) {
+            this.links.removeChild(child);
+            continue;
+          }
+          if (child && h) {
+            child.className = 'textbus-outlines-plugin-' + h.tagName.toLowerCase();
+            const a = child.querySelector('a');
+            a.onclick = () => {
+              h.getBoundingClientRect()
+              this.layout.scroller.scrollTo({
+                top: this.getTopDistance(h)
+              })
+            }
+            a.innerText = h.innerText;
+          } else {
+            const a = createElement('a', {
+              attrs: {
+                href: 'javascript:;'
+              },
+              children: [createTextNode(h.innerText)]
+            });
+            a.onclick = () => {
+              h.getBoundingClientRect()
+              this.layout.scroller.scrollTo({
+                top: this.getTopDistance(h)
+              })
+            }
+            const link = createElement('div', {
+              classes: ['textbus-outlines-plugin-' + h.tagName.toLowerCase()],
+              children: [a]
+            });
+            this.links.appendChild(link);
+          }
+        }
       }),
       fromEvent(this.btn, 'click').subscribe(() => {
         this.expand = !this.expand && !this.editorController.sourceCodeMode;
@@ -102,9 +137,9 @@ export class HeadingNavPlugin implements TBPlugin {
         }
       })
     )
-    this.layout.leftContainer.appendChild(this.navLinks);
+    this.layout.leftContainer.appendChild(this.container);
     this.layout.bottomBar.appendChild(this.btnWrapper);
-    this.expand = HeadingNavPlugin.defaultExpand;
+    this.expand = OutlinesPlugin.defaultExpand;
   }
 
   onDestroy() {
