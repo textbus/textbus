@@ -15,7 +15,7 @@ import {
 } from './core/_api';
 import {
   UIControlPanel,
-  UIDialog, Input, Layout, FileUploader, TBPlugin, PasteHandlePlugin
+  UIDialog, Input, Layout, FileUploader, TBPlugin, PasteHandlePlugin, UIMessage
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
@@ -64,6 +64,7 @@ export class Editor {
   private defaultPlugins: Type<TBPlugin>[] = [
     UIDialog,
     UIControlPanel,
+    UIMessage,
     PasteHandlePlugin
   ];
   private readyState = false;
@@ -333,12 +334,12 @@ export class Editor {
         useValue: componentInjectors
       }, {
         provide: FileUploader,
-        useFactory: () => {
+        useFactory: (message: UIMessage) => {
           return {
             upload: (type: string): Observable<string> => {
               if (selection.rangeCount === 0) {
-                alert('请先选择插入资源位置！');
-                throw editorErrorFn('请先选择插入资源位置！');
+                message.message('请先选择插入资源位置！');
+                return of('');
               }
               if (typeof this.options.uploader === 'function') {
 
@@ -354,7 +355,8 @@ export class Editor {
               return of('');
             }
           }
-        }
+        },
+        deps: [UIMessage]
       }
     ])
 
