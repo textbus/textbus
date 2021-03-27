@@ -15,6 +15,7 @@ import { createElement, createTextNode } from '../uikit/uikit';
 import { Tab } from '../tab';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
+import { I18n } from '../../i18n';
 
 export interface ComponentCreator {
   example: string | HTMLElement;
@@ -28,14 +29,14 @@ export class LibSwitch {
   btn = createElement('button', {
     attrs: {
       type: 'button',
-      title: '展开或收起组件库',
+      title: this.i18n.get('plugins.componentStage.expandOrNarrowLib'),
     },
     classes: ['textbus-status-bar-btn'],
     children: [
       createElement('span', {
         classes: ['textbus-icon-components']
       }),
-      createTextNode(' 组件库')
+      createTextNode(this.i18n.get('plugins.componentStage.switchText'))
     ]
   }) as HTMLButtonElement;
   elementRef = createElement('div', {
@@ -63,7 +64,7 @@ export class LibSwitch {
 
   private subs: Subscription[] = [];
 
-  constructor(private callback: (b: boolean) => void) {
+  constructor(private callback: (b: boolean) => void, private i18n: I18n) {
     this.subs.push(
       fromEvent(this.elementRef, 'click').subscribe(() => {
         this.expand = !this.expand;
@@ -82,7 +83,7 @@ export const COMPONENT_CREATORS = new InjectionToken<ComponentCreator[]>('COMPON
 export class ComponentStagePlugin implements TBPlugin {
   switch = new LibSwitch((b: boolean) => {
     this.expand = b;
-  });
+  }, this.i18n);
   private elementRef: HTMLElement;
 
   private set expand(b: boolean) {
@@ -97,6 +98,7 @@ export class ComponentStagePlugin implements TBPlugin {
   private subs: Subscription[] = [];
 
   constructor(@Inject(COMPONENT_CREATORS) private creators: ComponentCreator[],
+              private i18n: I18n,
               private editorController: EditorController,
               private fileUploader: FileUploader,
               private dialogManager: UIDialog,
@@ -139,7 +141,7 @@ export class ComponentStagePlugin implements TBPlugin {
   private classify(libs: ComponentCreator[]) {
     const categories = new Map<string, ComponentCreator[]>();
     libs.forEach(item => {
-      const categoryName = item.category || '默认';
+      const categoryName = item.category || this.i18n.get('plugins.componentStage.defaultCategoryName');
       if (!categories.has(categoryName)) {
         categories.set(categoryName, []);
       }

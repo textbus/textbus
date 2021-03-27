@@ -15,6 +15,7 @@ import { BlockComponent } from '../../components/block.component';
 import { createElement, createTextNode } from '../uikit/_api';
 import { EditorController } from '../../editor-controller';
 import { sampleTime } from 'rxjs/operators';
+import { I18n } from '../../i18n';
 
 @Injectable()
 export class OutlinesPlugin implements TBPlugin {
@@ -44,6 +45,7 @@ export class OutlinesPlugin implements TBPlugin {
   private links: HTMLElement;
 
   constructor(private layout: Layout,
+              private i18n: I18n,
               private rootComponent: RootComponent,
               private editorController: EditorController,
               private renderer: Renderer) {
@@ -53,7 +55,7 @@ export class OutlinesPlugin implements TBPlugin {
         createElement('h3', {
           classes: ['textbus-outlines-plugin-title'],
           children: [
-            createTextNode('概览')
+            createTextNode(this.i18n.get('plugins.outlines.title'))
           ]
         }),
         this.links = createElement('div', {
@@ -68,7 +70,7 @@ export class OutlinesPlugin implements TBPlugin {
         this.btn = createElement('button', {
           classes: ['textbus-status-bar-btn'],
           attrs: {
-            title: '概览'
+            title: this.i18n.get('plugins.outlines.switchText')
           },
           children: [
             createElement('span', {

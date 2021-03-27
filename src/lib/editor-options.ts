@@ -3,6 +3,7 @@ import { Provider, Type } from '@tanbo/di';
 
 import { AbstractComponent, Formatter } from './core/_api';
 import { TBPlugin } from './ui/plugin';
+import { I18NConfig } from './i18n';
 
 /**
  * TextBus 初始化时的配置参数
@@ -26,7 +27,8 @@ export interface EditorOptions {
   providers?: Provider[];
   /** 插件配置 */
   plugins?: Type<TBPlugin>[];
-
+  /** 国际化配置 */
+  i18n?: I18NConfig;
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string, currentValue?: string): (string | Promise<string> | Observable<string>);
 }

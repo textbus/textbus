@@ -17,6 +17,7 @@ module.exports = {
     "linebreak-style": 0,
     "no-console": 0,
     "no-debugger": 0,
+    "no-useless-escape": "off",
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-empty-interface": 0,
     "@typescript-eslint/no-this-alias": 0,

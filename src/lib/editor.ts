@@ -26,6 +26,8 @@ import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from './inject-tokens';
 import { RootComponent } from './root-component';
 import { TBHistory } from './history';
 import { BlockComponent } from './components/block.component';
+import { i18n_zh_CN } from './i18n/zh_CN';
+import { I18n } from './i18n';
 
 declare const ResizeObserver: any;
 const editorErrorFn = makeError('Editor');
@@ -94,9 +96,14 @@ export class Editor {
       sourcecodeMode: false
     });
 
+    const i18n = new I18n(i18n_zh_CN, options.i18n);
+
     const rootInjector = new ReflectiveInjector(new NullInjector(), [Layout, {
       provide: EditorController,
       useValue: this.stateController
+    }, {
+      provide: I18n,
+      useValue: i18n
     }]);
     const layout = rootInjector.get(Layout);
     layout.setTheme(options.theme);
@@ -334,11 +341,11 @@ export class Editor {
         useValue: componentInjectors
       }, {
         provide: FileUploader,
-        useFactory: (message: UIMessage) => {
+        useFactory: (message: UIMessage, i18n: I18n) => {
           return {
             upload: (type: string): Observable<string> => {
               if (selection.rangeCount === 0) {
-                message.message('请先选择插入资源位置！');
+                message.message(i18n.get('editor.noSelection'));
                 return of('');
               }
               if (typeof this.options.uploader === 'function') {
@@ -356,7 +363,7 @@ export class Editor {
             }
           }
         },
-        deps: [UIMessage]
+        deps: [UIMessage, I18n]
       }
     ])
 

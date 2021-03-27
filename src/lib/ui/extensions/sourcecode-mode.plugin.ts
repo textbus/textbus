@@ -10,6 +10,7 @@ import { EditorController } from '../../editor-controller';
 import { Editor, } from '../../editor';
 import { Layout } from '../layout';
 import { createElement } from '../uikit/_api';
+import { I18n } from '../../i18n';
 
 @Injectable()
 export class SourcecodeModePlugin implements TBPlugin {
@@ -22,6 +23,7 @@ export class SourcecodeModePlugin implements TBPlugin {
 
   constructor(private layout: Layout,
               private editor: Editor,
+              private i18n: I18n,
               private editorController: EditorController) {
   }
 
@@ -35,7 +37,7 @@ export class SourcecodeModePlugin implements TBPlugin {
             type: 'button'
           },
           props: {
-            innerHTML: '源代码'
+            innerHTML: this.i18n.get('plugins.sourcecodeMode.switchText')
           }
         }) as HTMLButtonElement
       ]

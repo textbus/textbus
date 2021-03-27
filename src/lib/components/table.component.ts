@@ -16,6 +16,7 @@ import {
   ContextMenuAction,
   BrComponent
 } from '../core/_api';
+import { I18n } from '../i18n';
 
 export interface TableCell {
   colspan: number;
@@ -125,68 +126,69 @@ class TableComponentLoader implements ComponentLoader {
 
 @Injectable()
 class TableComponentInterceptor implements Interceptor<TableComponent> {
-  constructor(private selection: TBSelection) {
+  constructor(private selection: TBSelection,
+              private i18n: I18n) {
   }
 
   onContextmenu(instance: TableComponent): ContextMenuAction[] {
     const selection = this.selection;
     return [{
       iconClasses: ['textbus-icon-table-add-column-left'],
-      label: '在左边添加列',
+      label: this.i18n.get('components.tableComponent.addColumnToLeft'),
       action() {
         instance.addColumnToLeft(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-column-right'],
-      label: '在右边添加列',
+      label: this.i18n.get('components.tableComponent.addColumnToRight'),
       action() {
         instance.addColumnToRight(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-row-top'],
-      label: '在上边添加行',
+      label: this.i18n.get('components.tableComponent.insertRowBefore'),
       action() {
         instance.addRowToTop(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-add-row-bottom'],
-      label: '在下边添加行',
+      label: this.i18n.get('components.tableComponent.insertRowAfter'),
       action() {
         instance.addRowToBottom(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-column-left'],
-      label: '删除左边列',
+      label: this.i18n.get('components.tableComponent.deleteLeftColumn'),
       action() {
         instance.deleteLeftColumn(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-column-right'],
-      label: '删除右边列',
+      label: this.i18n.get('components.tableComponent.deleteRightColumn'),
       action() {
         instance.deleteRightColumn(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-row-top'],
-      label: '删除上边行',
+      label: this.i18n.get('components.tableComponent.deletePrevRow'),
       action() {
         instance.deleteTopRow(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-delete-row-bottom'],
-      label: '删除下边行',
+      label: this.i18n.get('components.tableComponent.deleteNextRow'),
       action() {
         instance.deleteBottomRow(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table-split-columns'],
-      label: '合并单元格',
+      label: this.i18n.get('components.tableComponent.mergeCells'),
       action() {
         instance.mergeCells(selection);
       }
     }, {
       iconClasses: ['textbus-icon-table'],
-      label: '取消合并单元格',
+      label: this.i18n.get('components.tableComponent.splitCells'),
       action() {
         instance.splitCells(selection);
       }

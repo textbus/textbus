@@ -5,6 +5,7 @@ import { TBSelection } from '../../core/_api';
 import { EDITABLE_DOCUMENT } from '../../inject-tokens';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
+import { I18n } from '../../i18n';
 
 const styles = `
 .textbus-link-jump-plugin {
@@ -48,6 +49,7 @@ export class LinkJumpPlugin implements TBPlugin {
 
   constructor(private selection: TBSelection,
               private layout: Layout,
+              private i18n: I18n,
               @Inject(EDITABLE_DOCUMENT) private contentDocument: Document) {
     this.subs.push(
       this.selection.onChange.subscribe(() => {
@@ -57,7 +59,7 @@ export class LinkJumpPlugin implements TBPlugin {
   }
 
   setup() {
-    this.link.innerText = '跳转';
+    this.link.innerText = this.i18n.get('plugins.linkJump.accessLink');
     this.link.target = '_blank';
     this.link.className = 'textbus-link-jump-plugin';
     this.style.innerHTML = styles;

@@ -7,6 +7,7 @@ import { EditorController } from '../../editor-controller';
 import { Tab, TabConfig } from '../tab';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
+import { I18n } from '../../i18n';
 
 @Injectable()
 export class UIControlPanel implements TBPlugin {
@@ -21,12 +22,12 @@ export class UIControlPanel implements TBPlugin {
       this.layout.dashboard.insertBefore(this.elementRef, this.layout.rightContainer);
       this.elementRef.classList.add('textbus-control-panel-fixed');
       this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
-      this.fixedBtn.title = '取消固定';
+      this.fixedBtn.title = this.i18n.get('plugins.controlPanel.cancelFixed');
     } else {
       this.layout.viewer.append(this.elementRef);
       this.elementRef.classList.remove('textbus-control-panel-fixed');
       this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
-      this.fixedBtn.title = '固定';
+      this.fixedBtn.title = this.i18n.get('plugins.controlPanel.fixed');
     }
   }
 
@@ -42,6 +43,7 @@ export class UIControlPanel implements TBPlugin {
   private tab = new Tab();
 
   constructor(private editorController: EditorController,
+              private i18n: I18n,
               private layout: Layout) {
   }
 
@@ -60,7 +62,7 @@ export class UIControlPanel implements TBPlugin {
     this.fixedBtn = createElement('button', {
       attrs: {
         type: 'button',
-        title: '固定'
+        title: this.i18n.get('plugins.controlPanel.fixed')
       },
       classes: ['textbus-control-panel-fixed-btn'],
       children: [createElement('span', {

@@ -4,6 +4,7 @@ import { Injectable } from '@tanbo/di';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
 import { createElement } from '../uikit/uikit';
+import { I18n } from '../../i18n';
 
 @Injectable()
 export class FullScreenPlugin implements TBPlugin {
@@ -24,7 +25,8 @@ export class FullScreenPlugin implements TBPlugin {
   private _full = false;
   private subs: Subscription[] = [];
 
-  constructor(private layout: Layout) {
+  constructor(private layout: Layout,
+              private i18n: I18n) {
   }
 
   setup() {
@@ -34,7 +36,7 @@ export class FullScreenPlugin implements TBPlugin {
         this.btn = createElement('button', {
           attrs: {
             type: 'button',
-            title: '切换全屏模式'
+            title: this.i18n.get('plugins.fullScreen.switchFullScreen')
           },
           classes: ['textbus-status-bar-btn'],
           children: [

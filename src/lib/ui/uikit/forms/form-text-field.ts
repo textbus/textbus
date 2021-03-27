@@ -20,7 +20,7 @@ export class FormTextField implements FormItem<string> {
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
         <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="text" value="${config.value || ''}">${config.canUpload ?
-      `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || '上传'}">
+      `<button type="button" class="textbus-btn textbus-btn-dark" title="${config.uploadBtnText || ''}">
         <span class="textbus-icon-upload"></span>
        </button>`
       : ''

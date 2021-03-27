@@ -12,6 +12,8 @@ export interface FormConfig {
   items: Array<FormItem>;
   mini?: boolean;
   maxHeight?: string;
+  confirmBtnText?: string;
+  cancelBtnText?: string;
 }
 
 export class Form implements FormViewer {
@@ -60,7 +62,7 @@ export class Form implements FormViewer {
           type: 'submit'
         },
         classes: ['textbus-btn', 'textbus-btn-block', 'textbus-btn-primary'],
-        children: [createTextNode('确定')]
+        children: [createTextNode(this.config.confirmBtnText || '确定')]
       })
     ] : [
       createElement('button', {
@@ -68,7 +70,7 @@ export class Form implements FormViewer {
           type: 'submit'
         },
         classes: ['textbus-btn', 'textbus-btn-primary'],
-        children: [createTextNode('确定')]
+        children: [createTextNode(this.config.confirmBtnText || '确定')]
       }),
       (() => {
         const cancelBtn = createElement('button', {
@@ -76,7 +78,7 @@ export class Form implements FormViewer {
           attrs: {
             type: 'button'
           },
-          children: [createTextNode('取消')]
+          children: [createTextNode(this.config.cancelBtnText || '取消')]
         })
         cancelBtn.addEventListener('click', () => {
           this.closeEvent.next();

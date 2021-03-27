@@ -5,6 +5,7 @@ import { createElement } from '../uikit/uikit';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
 import { EditorController } from '../../editor-controller';
+import { I18n } from '../../i18n';
 
 export interface DeviceOption {
   label: string;
@@ -26,6 +27,7 @@ export class DevicePlugin implements TBPlugin {
 
   constructor(@Inject(DEVICE_OPTIONS) private options: DeviceOption[],
               private editorController: EditorController,
+              private i18n: I18n,
               private layout: Layout) {
   }
 
@@ -36,7 +38,7 @@ export class DevicePlugin implements TBPlugin {
         this.button = createElement('button', {
           attrs: {
             type: 'button',
-            title: '切换设备宽度'
+            title: this.i18n.get('plugins.device.title')
           },
           classes: ['textbus-status-bar-btn', 'textbus-device-btn'],
           children: [
@@ -123,18 +125,12 @@ export class DevicePlugin implements TBPlugin {
       }
     })
     if (!flag) {
-      this.label.innerText = '未知设备';
+      this.label.innerText = this.i18n.get('plugins.device.unknownDeviceText');
     }
   }
 
   private setTabletWidth(width: string) {
-    if (width === '100%') {
-      this.layout.scroller.style.padding = '';
-      // this.layout.docer.setMinHeight(this.editableArea.offsetHeight);
-    } else {
-      this.layout.scroller.style.padding = '20px';
-      // this.viewer.setMinHeight(this.editableArea.offsetHeight - 40);
-    }
+    this.layout.scroller.style.padding = (width === '100%' || !width) ? '' : '20px';
     this.layout.pageContainer.style.width = width;
   }
 }

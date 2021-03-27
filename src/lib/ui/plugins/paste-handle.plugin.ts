@@ -5,10 +5,12 @@ import { Input } from '../input';
 import { TBPlugin } from '../plugin';
 import { UIDialog } from './dialog.plugin';
 import { Form, FormTextField } from '../uikit/_api';
+import { I18n } from '../../i18n';
 
 @Injectable()
 export class PasteHandlePlugin implements TBPlugin {
   constructor(private input: Input,
+              private i18n: I18n,
               private dialog: UIDialog) {
   }
 
@@ -24,16 +26,18 @@ export class PasteHandlePlugin implements TBPlugin {
       }
       return new Promise(resolve => {
         const form = new Form({
-          title: '资源上传',
+          title: this.i18n.get('plugins.pasteHandle.title'),
           maxHeight: '260px',
+          confirmBtnText: this.i18n.get('plugins.pasteHandle.confirmBtnText'),
+          cancelBtnText: this.i18n.get('plugins.pasteHandle.cancelBtnText'),
           items: [
             ...images.map((img, index) => {
               return new FormTextField({
                 name: 'img' + index,
                 value: img.src,
-                label: `第 ${index + 1} 张图片`,
-                placeholder: '请输入图片地址',
-                uploadBtnText: '上传',
+                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.imageLabel'), index + 1),
+                placeholder: this.i18n.get('plugins.pasteHandle.imagePlaceholder'),
+                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
                 uploadType: img.tagName.toLowerCase(),
                 canUpload: true,
               })
@@ -42,9 +46,9 @@ export class PasteHandlePlugin implements TBPlugin {
               return new FormTextField({
                 name: 'video' + index,
                 value: video.src,
-                label: `第 ${index + 1} 个视频`,
-                placeholder: '请输入视频地址',
-                uploadBtnText: '上传',
+                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
+                placeholder: this.i18n.get('plugins.pasteHandle.videoPlaceholder'),
+                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
                 uploadType: video.tagName.toLowerCase(),
                 canUpload: true,
               })
@@ -53,9 +57,9 @@ export class PasteHandlePlugin implements TBPlugin {
               return new FormTextField({
                 name: 'audio' + index,
                 value: audio.src,
-                label: `第 ${index + 1} 个音频`,
-                placeholder: '请输入音频地址',
-                uploadBtnText: '上传',
+                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
+                placeholder: this.i18n.get('plugins.pasteHandle.audioPlaceholder'),
+                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
                 uploadType: audio.tagName.toLowerCase(),
                 canUpload: true,
               })

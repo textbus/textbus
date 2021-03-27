@@ -21,6 +21,7 @@ import {
 import { Input } from './ui/input';
 import { BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
+import { I18n } from './i18n';
 
 @Injectable()
 class RootComponentInterceptor implements Interceptor<RootComponent> {
@@ -30,6 +31,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   constructor(@Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
               @Inject(forwardRef(() => Input)) private input: Input,
+              @Inject(forwardRef(() => I18n)) private i18n: I18n,
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController) {
   }
@@ -37,13 +39,13 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
   onContextmenu(): ContextMenuAction[] {
     return [{
       iconClasses: ['textbus-icon-insert-paragraph-before'],
-      label: '在前面插入段落',
+      label: this.i18n.get('editor.insertParagraphBefore'),
       action: () => {
         this.insertParagraph(true)
       }
     }, {
       iconClasses: ['textbus-icon-insert-paragraph-after'],
-      label: '在后面插入段落',
+      label: this.i18n.get('editor.insertParagraphAfter'),
       action: () => {
         this.insertParagraph(false)
       }

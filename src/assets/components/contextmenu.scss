@@ -2,24 +2,25 @@
   position: fixed;
   z-index: 20000;
   user-select: none;
-  width: 180px;
-  padding-left: 35px;
+  min-width: 180px;
+  max-width: 260px;
   box-sizing: border-box;
   box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
   background-color: rgba(255, 255, 255, .98);
   overflow-y: auto;
-
   @include scroll();
+}
+.textbus-contextmenu-container {
+  display: flex;
   &:before {
     content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
     width: 35px;
     border-right: 1px solid $color-light;
     background-color: $color-lighter;
   }
+}
+.textbus-contextmenu-groups {
+  flex: 1;
 }
 
 .textbus-contextmenu-group {

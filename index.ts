@@ -14,10 +14,12 @@ import {
 } from './src/public-api';
 import { ComponentStagePlugin } from './src/public-api';
 import { EditorController } from './src/public-api';
+import { i18n_en_US } from './src/lib/i18n/en_US';
 // PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   // deviceType: 'iPad',
   theme: 'dark',
+  i18n: i18n_en_US,
   uploader(type: string): string | Promise<string> | Observable<string> {
     const fileInput = document.createElement('input');
     fileInput.setAttribute('type', 'file');

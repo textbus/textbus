@@ -22,6 +22,7 @@ import { UIControlPanel } from './plugins/control-panel.plugin';
 import { createElement, createTextNode } from './uikit/uikit';
 import { ComponentInjectors } from '../component-injectors';
 import { Layout } from './layout';
+import { I18n } from '../i18n';
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
@@ -88,6 +89,7 @@ export class Input {
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
               private layout: Layout,
               private controlPanel: UIControlPanel,
+              private i18n: I18n,
               private editorController: EditorController,
               private componentInjectors: ComponentInjectors,
               private renderer: Renderer,
@@ -239,21 +241,21 @@ export class Input {
         this.contextmenu.show([
           [{
             iconClasses: ['textbus-icon-copy'],
-            label: '复制',
+            label: this.i18n.get('editor.copy'),
             disabled: this.selection.collapsed,
             action: () => {
               this.copy();
             }
           }, {
             iconClasses: ['textbus-icon-paste'],
-            label: '粘贴',
+            label: this.i18n.get('editor.paste'),
             // disabled: true,
             action: () => {
               this.paste();
             }
           }, {
             iconClasses: ['textbus-icon-cut'],
-            label: '剪切',
+            label: this.i18n.get('editor.cut'),
             disabled: this.selection.collapsed,
             action: () => {
               this.cut();
@@ -261,7 +263,7 @@ export class Input {
             }
           }, {
             iconClasses: ['textbus-icon-select'],
-            label: '全选',
+            label: this.i18n.get('editor.selectAll'),
             action: () => {
               this.selection.selectAll();
             }
@@ -742,12 +744,23 @@ class ContextMenu {
   private elementRef: HTMLElement;
 
   private eventFromSelf = false;
+  private groups: HTMLElement;
 
   private subs: Subscription[] = [];
 
   constructor(private history: TBHistory) {
     this.elementRef = createElement('div', {
-      classes: ['textbus-contextmenu']
+      classes: ['textbus-contextmenu'],
+      children: [
+        createElement('div', {
+          classes: ['textbus-contextmenu-container'],
+          children: [
+            this.groups = createElement('div', {
+              classes: ['textbus-contextmenu-groups']
+            })
+          ]
+        })
+      ]
     })
     this.elementRef.addEventListener('click', () => {
       this.hide();
@@ -773,7 +786,7 @@ class ContextMenu {
         setPosition();
       })
     )
-    this.elementRef.innerHTML = '';
+    this.groups.innerHTML = '';
 
     const setPosition = () => {
       const clientWidth = document.documentElement.clientWidth;
@@ -802,7 +815,7 @@ class ContextMenu {
       if (actions.length === 0) {
         return;
       }
-      this.elementRef.appendChild(createElement('div', {
+      this.groups.appendChild(createElement('div', {
         classes: ['textbus-contextmenu-group'],
         children: actions.map(item => {
           const btn = createElement('button', {
