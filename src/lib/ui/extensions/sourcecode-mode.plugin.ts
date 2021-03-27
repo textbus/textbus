@@ -72,7 +72,7 @@ export class SourcecodeModePlugin implements TBPlugin {
       this.codeMirrorInstance = codemirror(this.container, {
         lineNumbers: true,
         mode: 'text/html',
-        theme: 'idea',
+        theme: 'textbus',
         indentUnit: 2,
         lineWrapping: true,
         value: pretty(this.editor.getContents().content)
