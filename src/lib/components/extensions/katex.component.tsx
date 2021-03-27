@@ -113,8 +113,7 @@ export class KatexComponent extends LeafAbstractComponent {
         macros: {'\\f': '#1f(#2)'}
       })
     } catch (e) {
-      console.log(e);
-      htmlString = '';
+      htmlString = `<span style="color: red">${e.stack.split('\n').join('<br>')}</span>`;
     }
     const dom = new DOMParser().parseFromString(htmlString, 'text/html').body.children[0] as HTMLElement;
     return new VElement('tb-katex', {
