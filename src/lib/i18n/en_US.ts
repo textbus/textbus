@@ -9,9 +9,7 @@ export const i18n_en_US: I18NConfig = {
     copy: 'copy',
     paste: 'paste',
     cut: 'cut',
-    selectAll: 'select all'
-  },
-  plugins: {
+    selectAll: 'select all',
     // core library dependency, no optional
     controlPanel: {
       cancelFixed: 'cancel fixed',
@@ -29,7 +27,9 @@ export const i18n_en_US: I18NConfig = {
       imagePlaceholder: 'please enter image URL',
       videoPlaceholder: 'please enter video URL',
       audioPlaceholder: 'please enter audio URL',
-    },
+    }
+  },
+  plugins: {
     componentStage: {
       switchText: 'component library',
       expandOrNarrowLib: 'expand or narrow component library',

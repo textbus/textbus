@@ -1,6 +1,7 @@
 import { Injectable } from '@tanbo/di';
 
 export interface I18NConfig {
+  editor: any; // core dependency
   [key: string]: any;
 }
 
@@ -32,6 +33,6 @@ export class I18n {
         return '';
       }
     }
-    return typeof value === 'string' ? value : '';
+    return value;
   }
 }

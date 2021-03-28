@@ -9,15 +9,11 @@ export const i18n_zh_CN: I18NConfig = {
     copy: '复制',
     paste: '粘贴',
     cut: '剪切',
-    selectAll: '全选'
-  },
-  plugins: {
-    // 核心库依赖，不可缺少
+    selectAll: '全选',
     controlPanel: {
       cancelFixed: '取消固定',
       fixed: '固定'
     },
-    // 核心库依赖，不可缺少
     pasteHandle: {
       title: '资源上传',
       confirmBtnText: '确定',
@@ -29,7 +25,9 @@ export const i18n_zh_CN: I18NConfig = {
       imagePlaceholder: '请输入图片地址',
       videoPlaceholder: '请输入视频地址',
       audioPlaceholder: '请输入音频地址',
-    },
+    }
+  },
+  plugins: {
     componentStage: {
       switchText: '组件库',
       expandOrNarrowLib: '展开或收起组件库',

@@ -26,18 +26,18 @@ export class PasteHandlePlugin implements TBPlugin {
       }
       return new Promise(resolve => {
         const form = new Form({
-          title: this.i18n.get('plugins.pasteHandle.title'),
+          title: this.i18n.get('editor.pasteHandle.title'),
           maxHeight: '260px',
-          confirmBtnText: this.i18n.get('plugins.pasteHandle.confirmBtnText'),
-          cancelBtnText: this.i18n.get('plugins.pasteHandle.cancelBtnText'),
+          confirmBtnText: this.i18n.get('editor.pasteHandle.confirmBtnText'),
+          cancelBtnText: this.i18n.get('editor.pasteHandle.cancelBtnText'),
           items: [
             ...images.map((img, index) => {
               return new FormTextField({
                 name: 'img' + index,
                 value: img.src,
-                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.imageLabel'), index + 1),
-                placeholder: this.i18n.get('plugins.pasteHandle.imagePlaceholder'),
-                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
+                label: this.i18n.joinTemplate(this.i18n.get('editor.pasteHandle.imageLabel'), index + 1),
+                placeholder: this.i18n.get('editor.pasteHandle.imagePlaceholder'),
+                uploadBtnText: this.i18n.get('editor.pasteHandle.uploadBtnText'),
                 uploadType: img.tagName.toLowerCase(),
                 canUpload: true,
               })
@@ -46,9 +46,9 @@ export class PasteHandlePlugin implements TBPlugin {
               return new FormTextField({
                 name: 'video' + index,
                 value: video.src,
-                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
-                placeholder: this.i18n.get('plugins.pasteHandle.videoPlaceholder'),
-                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
+                label: this.i18n.joinTemplate(this.i18n.get('editor.pasteHandle.videoLabel'), index + 1),
+                placeholder: this.i18n.get('editor.pasteHandle.videoPlaceholder'),
+                uploadBtnText: this.i18n.get('editor.pasteHandle.uploadBtnText'),
                 uploadType: video.tagName.toLowerCase(),
                 canUpload: true,
               })
@@ -57,9 +57,9 @@ export class PasteHandlePlugin implements TBPlugin {
               return new FormTextField({
                 name: 'audio' + index,
                 value: audio.src,
-                label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
-                placeholder: this.i18n.get('plugins.pasteHandle.audioPlaceholder'),
-                uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
+                label: this.i18n.joinTemplate(this.i18n.get('editor.pasteHandle.videoLabel'), index + 1),
+                placeholder: this.i18n.get('editor.pasteHandle.audioPlaceholder'),
+                uploadBtnText: this.i18n.get('editor.pasteHandle.uploadBtnText'),
                 uploadType: audio.tagName.toLowerCase(),
                 canUpload: true,
               })

@@ -22,12 +22,12 @@ export class UIControlPanel implements TBPlugin {
       this.layout.dashboard.insertBefore(this.elementRef, this.layout.rightContainer);
       this.elementRef.classList.add('textbus-control-panel-fixed');
       this.fixedBtn.classList.add('textbus-control-panel-fixed-btn-active');
-      this.fixedBtn.title = this.i18n.get('plugins.controlPanel.cancelFixed');
+      this.fixedBtn.title = this.i18n.get('editor.controlPanel.cancelFixed');
     } else {
       this.layout.viewer.append(this.elementRef);
       this.elementRef.classList.remove('textbus-control-panel-fixed');
       this.fixedBtn.classList.remove('textbus-control-panel-fixed-btn-active')
-      this.fixedBtn.title = this.i18n.get('plugins.controlPanel.fixed');
+      this.fixedBtn.title = this.i18n.get('editor.controlPanel.fixed');
     }
   }
 
@@ -62,7 +62,7 @@ export class UIControlPanel implements TBPlugin {
     this.fixedBtn = createElement('button', {
       attrs: {
         type: 'button',
-        title: this.i18n.get('plugins.controlPanel.fixed')
+        title: this.i18n.get('editor.controlPanel.fixed')
       },
       classes: ['textbus-control-panel-fixed-btn'],
       children: [createElement('span', {
