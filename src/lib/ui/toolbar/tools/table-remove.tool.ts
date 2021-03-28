@@ -1,4 +1,4 @@
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 import { TableRemoveCommander } from '../commands/table-remove.commander';
 
@@ -10,4 +10,4 @@ export const tableRemoveToolConfig: ButtonToolConfig = {
     return new TableRemoveCommander();
   }
 }
-export const tableRemoveTool = Toolkit.makeButtonTool(tableRemoveToolConfig);
+export const tableRemoveTool = new ButtonTool(tableRemoveToolConfig);

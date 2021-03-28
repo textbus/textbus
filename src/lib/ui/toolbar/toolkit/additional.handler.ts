@@ -1,15 +1,16 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { fromEvent, Observable, Subscription } from 'rxjs';
 
-import { Tool } from './help';
-import { Keymap, KeymapAction } from '../../../core/_api';
+import { Tool, ToolFactoryParams } from '../help';
+import { Keymap } from '../../../core/_api';
 import { Commander } from '../commander';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
-import { UIButton, UIKit } from '../../uikit/uikit';
-import { HighlightState } from '../help';
+import { createElement, UIKit } from '../../uikit/uikit';
+import { HighlightState, I18nString, ToolFactory } from '../help';
+import { I18n } from '../../../i18n';
 
-export interface AdditionalViewer<T = any> {
+export interface AdditionalViewer {
   elementRef: HTMLElement;
-  onAction: Observable<T>;
+  onAction: Observable<any>;
   onDestroy: Observable<void>;
 
   destroy(): void;
@@ -18,101 +19,116 @@ export interface AdditionalViewer<T = any> {
 /**
  * 按扭型工具的配置接口
  */
-export interface AdditionalToolConfig<T = any> {
+export interface AdditionalToolConfig {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
 
   /** 下拉控件展开后显示的内容 */
-  menuFactory(): AdditionalViewer<T>;
+  menuFactory(i18n: I18n): AdditionalViewer;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
   /** 设置按扭显示的文字 */
-  label?: string;
+  label?: I18nString;
   /** 给按扭控件添加一组 css class 类 */
   classes?: string[];
   /** 给按扭控件添加一组 icon css class 类 */
   iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
-  tooltip?: string;
+  tooltip?: I18nString;
   /** 当前按扭控件的快捷键配置 */
   keymap?: Keymap;
 }
 
-export class AdditionalHandler<T = any> implements Tool<T> {
-  readonly elementRef: HTMLButtonElement;
-  onApply: Observable<T>;
-  onShow: Observable<AdditionalViewer<T>>;
-  keymapAction: KeymapAction;
-  commander: Commander;
-  private eventSource = new Subject<T>();
-  private button: UIButton;
-  private showEvent = new Subject<AdditionalViewer>();
-
+export class AdditionalTool implements ToolFactory {
   private subs: Subscription[] = [];
 
   constructor(private config: AdditionalToolConfig) {
-    this.commander = config.commanderFactory();
+  }
 
-    this.onShow = this.showEvent.asObservable();
-    this.onApply = this.eventSource.asObservable();
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, limitElement} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
+    }
+    let contentWrapper: HTMLElement;
+    let closeBtn: HTMLButtonElement;
+    const elementRef = createElement('div', {
+      classes: ['textbus-toolbar-additional-worktable'],
+      children: [
+        contentWrapper = createElement('div', {
+          classes: ['textbus-toolbar-additional-worktable-content']
+        }),
+        createElement('div', {
+          classes: ['textbus-toolbar-additional-worktable-close'],
+          children: [
+            closeBtn = createElement('button', {
+              attrs: {
+                type: 'button'
+              },
+              props: {
+                innerHTML: '&times;'
+              }
+            }) as HTMLButtonElement
+          ]
+        })
+      ]
+    })
 
-    this.button = UIKit.button({
+    const content = config.menuFactory(i18n);
+    this.subs.push(
+      fromEvent(closeBtn, 'click').subscribe(() => {
+        content.destroy();
+        limitElement.removeChild(elementRef);
+      })
+    )
+
+    const button = UIKit.button({
       label: config.label,
       classes: config.classes,
       tooltip: config.tooltip,
       iconClasses: config.iconClasses,
-      onChecked: () => {
-        this.button.highlight = true;
-        this.show();
+      onChecked() {
+        button.highlight = true;
+        contentWrapper.appendChild(content.elementRef);
+        limitElement.appendChild(elementRef);
       }
     });
-    this.elementRef = this.button.elementRef;
-
-    if (config.keymap) {
-      this.keymapAction = {
+    addTool({
+      onAction: content.onAction,
+      keymaps: config.keymap ? [{
         keymap: config.keymap,
-        action: () => {
-          if (!this.button.disabled) {
-            this.button.highlight = true;
-            this.show();
-          }
+        action() {
+          button.highlight = true;
+          contentWrapper.appendChild(content.elementRef);
+          limitElement.appendChild(this.elementRef);
         }
-      };
-      this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
-    }
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    switch (selectionMatchState.state) {
-      case HighlightState.Highlight:
-        this.button.disabled = false;
-        this.button.highlight = true;
-        break;
-      case HighlightState.Normal:
-        this.button.disabled = false;
-        this.button.highlight = false;
-        break;
-      case HighlightState.Disabled:
-        this.button.disabled = true;
-        this.button.highlight = false;
-        break;
-    }
+      }] : [],
+      commander: config.commanderFactory(),
+      matcher: config.matcher,
+      refreshState(selectionMatchState: SelectionMatchState) {
+        switch (selectionMatchState.state) {
+          case HighlightState.Highlight:
+            button.disabled = false;
+            button.highlight = true;
+            break;
+          case HighlightState.Normal:
+            button.disabled = false;
+            button.highlight = false;
+            break;
+          case HighlightState.Disabled:
+            button.disabled = true;
+            button.highlight = false;
+            break;
+        }
+      }
+    })
+    return button.elementRef;
   }
 
   onDestroy() {
-    this.subs.forEach(s => s.unsubscribe());
-  }
-
-  private show() {
-    const viewer = this.config.menuFactory();
-    this.subs.push(viewer.onAction.subscribe(params => {
-        this.eventSource.next(params);
-      }),
-      viewer.onDestroy.subscribe(() => {
-        this.button.highlight = false;
-      })
-    );
-    this.showEvent.next(viewer);
+    this.subs.forEach(i => i.unsubscribe())
   }
 }

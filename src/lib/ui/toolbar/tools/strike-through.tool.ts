@@ -1,7 +1,7 @@
 import { strikeThroughFormatter } from '../../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const strikeThroughToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const strikeThroughToolConfig: ButtonToolConfig = {
     return new InlineCommander('del', strikeThroughFormatter);
   }
 };
-export const strikeThroughTool = Toolkit.makeButtonTool(strikeThroughToolConfig);
+export const strikeThroughTool = new ButtonTool(strikeThroughToolConfig);

@@ -2,7 +2,7 @@ import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_
 import { VideoComponent, PreComponent } from '../../../components/_api';
 import { VideoCommander } from '../commands/video.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
-import { FormToolConfig, Toolkit } from '../toolkit/_api';
+import { FormTool, FormToolConfig } from '../toolkit/_api';
 
 export const videoToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-video'],
@@ -54,4 +54,4 @@ export const videoToolConfig: FormToolConfig = {
     return new VideoCommander();
   }
 };
-export const videoTool = Toolkit.makeFormTool(videoToolConfig);
+export const videoTool = new FormTool(videoToolConfig);

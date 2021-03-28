@@ -1,6 +1,6 @@
 import { ListMatcher } from '../matcher/list.matcher';
 import { ListCommander } from '../commands/list.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const olToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const olToolConfig: ButtonToolConfig = {
     return new ListCommander('ol');
   }
 };
-export const olTool = Toolkit.makeButtonTool(olToolConfig);
+export const olTool = new ButtonTool(olToolConfig);

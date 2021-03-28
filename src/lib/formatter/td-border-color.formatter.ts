@@ -49,7 +49,7 @@ export class TdBorderColorFormatter extends BlockFormatter {
     });
   }
 
-  render(context: FormatRendingContext, existingElement?: VElement): null {
+  render(context: FormatRendingContext, existingElement?: VElement): VElement | void {
     if (existingElement) {
       context.formatData.styles.forEach((value, key) => {
         existingElement.styles.set(key, value);

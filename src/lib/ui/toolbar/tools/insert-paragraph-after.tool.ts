@@ -1,4 +1,4 @@
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { InsertParagraphCommander } from '../commands/insert-paragraph.commander';
 
 export const insertParagraphAfterToolConfig: ButtonToolConfig = {
@@ -12,4 +12,4 @@ export const insertParagraphAfterToolConfig: ButtonToolConfig = {
     key: 'p'
   }
 };
-export const insertParagraphAfterTool = Toolkit.makeButtonTool(insertParagraphAfterToolConfig);
+export const insertParagraphAfterTool = new ButtonTool(insertParagraphAfterToolConfig);

@@ -1,7 +1,7 @@
 import { BlockCommander } from '../commands/block.commander';
 import { BlockComponent } from '../../../components/block.component';
 import { BlockMatcher } from '../matcher/block.matcher';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const headingToolConfig: SelectToolConfig = {
@@ -77,4 +77,4 @@ export const headingToolConfig: SelectToolConfig = {
     }
   }]
 };
-export const headingTool = Toolkit.makeSelectTool(headingToolConfig);
+export const headingTool = new SelectTool(headingToolConfig);

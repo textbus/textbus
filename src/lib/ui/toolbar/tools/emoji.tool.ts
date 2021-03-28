@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 
 import { EmojiCommander } from '../commands/emoji.commander';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { DropdownViewer } from '../toolkit/dropdown.handler';
 
 class Emoji implements DropdownViewer {
@@ -53,4 +53,4 @@ export const emojiToolConfig: DropdownToolConfig = {
     return new Emoji();
   },
 };
-export const emojiTool = Toolkit.makeDropdownTool(emojiToolConfig);
+export const emojiTool = new DropdownTool(emojiToolConfig);

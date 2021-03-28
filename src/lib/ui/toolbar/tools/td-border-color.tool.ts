@@ -1,5 +1,5 @@
 import { Palette } from './utils/palette';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 import { TdBorderColorCommander } from '../commands/td-border-color.commander';
 
@@ -14,4 +14,4 @@ export const tdBorderColorToolConfig: DropdownToolConfig = {
     return new TdBorderColorCommander();
   }
 };
-export const tdBorderColorTool = Toolkit.makeDropdownTool(tdBorderColorToolConfig);
+export const tdBorderColorTool = new DropdownTool(tdBorderColorToolConfig);

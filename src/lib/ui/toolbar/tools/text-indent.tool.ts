@@ -2,7 +2,7 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { textIndentFormatter } from '../../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const textIndentToolConfig: SelectToolConfig = {
@@ -42,4 +42,4 @@ export const textIndentToolConfig: SelectToolConfig = {
     return new BlockStyleCommander('textIndent', textIndentFormatter);
   }
 };
-export const textIndentTool = Toolkit.makeSelectTool(textIndentToolConfig);
+export const textIndentTool = new SelectTool(textIndentToolConfig);

@@ -1,6 +1,6 @@
 import { FormatMatcher } from '../matcher/format.matcher';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 import { VerticalAlignCommander } from '../commands/vertical-align.commander';
 import { verticalAlignFormatter } from '../../../formatter/vertical-align.formatter';
@@ -49,4 +49,4 @@ export const verticalAlignToolConfig: SelectToolConfig = {
     return new VerticalAlignCommander(verticalAlignFormatter);
   }
 };
-export const verticalAlignTool = Toolkit.makeSelectTool(verticalAlignToolConfig);
+export const verticalAlignTool = new SelectTool(verticalAlignToolConfig);

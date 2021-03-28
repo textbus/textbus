@@ -1,6 +1,6 @@
 import { Form, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 import { TableCommander } from '../commands/table.commander';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 import { TableMatcher } from '../matcher/table.matcher';
 import { FormatData } from '../../../core/format-data';
@@ -91,4 +91,4 @@ export const tableAddToolConfig: DropdownToolConfig = {
     return new TableCommander();
   }
 }
-export const tableAddTool = Toolkit.makeDropdownTool(tableAddToolConfig);
+export const tableAddTool = new DropdownTool(tableAddToolConfig);

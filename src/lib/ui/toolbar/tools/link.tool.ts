@@ -2,7 +2,7 @@ import { LinkCommander } from '../commands/link.commander';
 import { Form, FormRadio, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { linkFormatter } from '../../../formatter/link.formatter';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const linkToolConfig: DropdownToolConfig = {
@@ -37,4 +37,4 @@ export const linkToolConfig: DropdownToolConfig = {
     return new LinkCommander(linkFormatter)
   }
 };
-export const linkTool = Toolkit.makeDropdownTool(linkToolConfig);
+export const linkTool = new DropdownTool(linkToolConfig);

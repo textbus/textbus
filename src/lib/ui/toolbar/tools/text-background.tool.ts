@@ -2,7 +2,7 @@ import { backgroundColorFormatter } from '../../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const textBackgroundToolConfig: DropdownToolConfig = {
@@ -16,4 +16,4 @@ export const textBackgroundToolConfig: DropdownToolConfig = {
     return new StyleCommander('backgroundColor', backgroundColorFormatter);
   }
 };
-export const textBackgroundTool = Toolkit.makeDropdownTool(textBackgroundToolConfig);
+export const textBackgroundTool = new DropdownTool(textBackgroundToolConfig);

@@ -1,7 +1,7 @@
 import { AudioComponent, PreComponent } from '../../../components/_api';
 import { AudioCommander } from '../commands/audio.commander';
 import { MediaMatcher } from '../matcher/media.matcher';
-import { FormToolConfig, Toolkit } from '../toolkit/_api';
+import { FormTool, FormToolConfig } from '../toolkit/_api';
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 
 export const audioToolConfig: FormToolConfig = {
@@ -42,4 +42,4 @@ export const audioToolConfig: FormToolConfig = {
     return new AudioCommander();
   }
 }
-export const audioTool = Toolkit.makeFormTool(audioToolConfig);
+export const audioTool = new FormTool(audioToolConfig);

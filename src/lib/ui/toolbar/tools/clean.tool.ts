@@ -1,6 +1,6 @@
 import { CleanCommander } from '../commands/clean.commander';
 import { LinkFormatter } from '../../../formatter/link.formatter';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 
 export const cleanToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-clear-formatting'],
@@ -15,4 +15,4 @@ export const cleanToolConfig: ButtonToolConfig = {
     return new CleanCommander([LinkFormatter]);
   }
 };
-export const cleanTool = Toolkit.makeButtonTool(cleanToolConfig);
+export const cleanTool = new ButtonTool(cleanToolConfig);

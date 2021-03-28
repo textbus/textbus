@@ -2,7 +2,7 @@ import { AttrState, createElement, createTextNode, Form, FormItem, FormRadio, Fo
 import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageComponent, PreComponent } from '../../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
-import { FormToolConfig, Toolkit } from '../toolkit/_api';
+import { FormTool, FormToolConfig } from '../toolkit/_api';
 
 class MarginSetter implements FormItem<string> {
   name = 'margin';
@@ -188,4 +188,4 @@ export const imageToolConfig: FormToolConfig = {
     return new ImageCommander();
   }
 };
-export const imageTool = Toolkit.makeFormTool(imageToolConfig);
+export const imageTool = new FormTool(imageToolConfig);

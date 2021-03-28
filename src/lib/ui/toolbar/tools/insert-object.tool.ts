@@ -1,4 +1,4 @@
-import { Toolkit, GroupConfig, MenuType } from '../toolkit/_api';
+import { GroupConfig, MenuType, GroupTool } from '../toolkit/_api';
 import { preToolConfig } from './pre.tool';
 import { subscriptToolConfig } from './subscript.tool';
 import { superscriptToolConfig } from './superscript.tool';
@@ -69,4 +69,4 @@ export const insertObjectToolConfig: GroupConfig = {
     label: '从右向左'
   }]
 }
-export const insertObjectTool = Toolkit.makeGroupTool(insertObjectToolConfig);
+export const insertObjectTool = new GroupTool(insertObjectToolConfig);

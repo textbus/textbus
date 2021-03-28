@@ -1,7 +1,7 @@
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
-import { AdditionalToolConfig, AdditionalViewer, Toolkit } from '../toolkit/_api';
+import { AdditionalTool, AdditionalToolConfig, AdditionalViewer } from '../toolkit/_api';
 import { FindCommander, FindAndReplaceRule } from '../commands/find.commander';
 
 class FindForm implements AdditionalViewer {
@@ -110,4 +110,4 @@ export const findToolConfig: AdditionalToolConfig = {
     return new FindCommander()
   },
 };
-export const findTool = Toolkit.makeAdditionalTool(findToolConfig);
+export const findTool = new AdditionalTool(findToolConfig);

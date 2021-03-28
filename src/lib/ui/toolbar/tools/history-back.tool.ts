@@ -1,6 +1,6 @@
 import { HistoryMatcher } from '../matcher/history.matcher';
 import { HistoryCommander } from '../commands/history.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 
 export const historyBackToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-history-back'],
@@ -14,4 +14,4 @@ export const historyBackToolConfig: ButtonToolConfig = {
     key: 'z'
   }
 };
-export const historyBackTool = Toolkit.makeButtonTool(historyBackToolConfig);
+export const historyBackTool = new ButtonTool(historyBackToolConfig);

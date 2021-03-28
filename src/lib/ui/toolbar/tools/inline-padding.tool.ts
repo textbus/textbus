@@ -1,6 +1,6 @@
 import { Form, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 import { inlinePaddingFormatter } from '../../../formatter/padding.formatter';
 import { InlinePaddingCommander } from '../commands/inline-padding.commander';
@@ -42,4 +42,4 @@ export const inlinePaddingToolConfig: DropdownToolConfig = {
     return new InlinePaddingCommander(inlinePaddingFormatter)
   }
 };
-export const inlinePaddingTool = Toolkit.makeDropdownTool(inlinePaddingToolConfig);
+export const inlinePaddingTool = new DropdownTool(inlinePaddingToolConfig);

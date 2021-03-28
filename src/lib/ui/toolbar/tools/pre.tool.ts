@@ -1,7 +1,7 @@
 import { PreCommander } from '../commands/pre.commander';
 import { PreComponent } from '../../../components/pre.component';
 import { CodeMatcher } from '../matcher/code.matcher';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 
 export const preToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-terminal'],
@@ -56,4 +56,4 @@ export const preToolConfig: SelectToolConfig = {
     return new PreCommander();
   }
 }
-export const preTool = Toolkit.makeSelectTool(preToolConfig);
+export const preTool = new SelectTool(preToolConfig);

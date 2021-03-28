@@ -1,11 +1,11 @@
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { Tool } from './help';
+import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { HighlightState } from '../help';
 import { Commander } from '../commander';
-import { Keymap, KeymapAction, FormatData, AbstractComponent } from '../../../core/_api';
+import { Keymap, FormatData, AbstractComponent } from '../../../core/_api';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
-import { UIDropdown, UIKit } from '../../uikit/uikit';
+import { UIKit } from '../../uikit/uikit';
 
 /**
  * Select 工具选项配置项
@@ -14,7 +14,7 @@ export interface SelectOptionConfig {
   /** 当前选项被选中后，要应用的值 */
   value: any;
   /** 当前选项显示的文字，如为空则显示 value */
-  label?: string;
+  label?: I18nString;
   /** 给当前选项添加一组 css class 类 */
   classes?: string[];
   /** 给当前选项添加 icon css class 类 */
@@ -44,73 +44,72 @@ export interface SelectToolConfig {
   /** 设置当前 Select 是否根据内容扩展宽度 */
   mini?: boolean;
   /** 当鼠标放在控件上的提示文字 */
-  tooltip?: string;
+  tooltip?: I18nString;
 }
 
-export class SelectHandler implements Tool {
-  readonly elementRef: HTMLElement;
-  onApply: Observable<any>;
-  keymapAction: KeymapAction[] = [];
-  commander: Commander;
-  private applyEventSource = new Subject<any>();
-  private value = '';
-  private dropdown: UIDropdown;
+export class SelectTool implements ToolFactory {
+  constructor(private config: SelectToolConfig) {
+  }
 
-  constructor(private config: SelectToolConfig,
-              private stickyElement: HTMLElement) {
-    this.commander = config.commanderFactory();
-    this.onApply = this.applyEventSource.asObservable();
-
-    this.dropdown = UIKit.select({
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, limitElement} = params;
+    const config = {
+      ...this.config,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip,
+      options: this.config.options.map(option => {
+        return {
+          ...option,
+          label: typeof option.label === 'function' ? option.label(i18n) : option.label
+        }
+      })
+    }
+    const subject = new Subject();
+    const obs = subject.asObservable();
+    const dropdown = UIKit.select({
       ...config,
-      stickyElement,
+      stickyElement: limitElement,
       onSelected: (value: any) => {
-        this.value = value;
-        this.applyEventSource.next(value);
+        subject.next(value);
       }
     })
-
-    this.config.options.forEach(option => {
-      if (option.keymap) {
-        this.keymapAction.push({
-          keymap: option.keymap,
-          action: () => {
-            if (!this.dropdown.disabled) {
-              this.value = option.value;
-              this.applyEventSource.next(option.value);
+    addTool({
+      commander: config.commanderFactory(),
+      onAction: obs,
+      keymaps: config.options.filter(i => i.keymap).map(i => {
+        return {
+          keymap: i.keymap,
+          action() {
+            if (!dropdown.disabled) {
+              subject.next(i.value);
             }
           }
-        })
+        }
+      }),
+      matcher: config.matcher,
+      refreshState(selectionMatchState: SelectionMatchState): void {
+        if (selectionMatchState.matchData) {
+          const option = config.matchOption?.(selectionMatchState.matchData);
+          if (option) {
+            dropdown.button.label.innerText = option.label || option.value;
+            dropdown.disabled = false;
+            dropdown.highlight = true;
+            return;
+          }
+        }
+        dropdown.highlight = false;
+        dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
+        let defaultOption: SelectOptionConfig;
+        for (const op of config.options) {
+          if (op.default) {
+            defaultOption = op;
+            break;
+          }
+        }
+        if (defaultOption) {
+          dropdown.button.label.innerText = defaultOption.label || defaultOption.value;
+        }
       }
     })
-    this.elementRef = this.dropdown.elementRef;
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    if (selectionMatchState.matchData) {
-      const option = this.config.matchOption?.(selectionMatchState.matchData);
-      if (option) {
-        this.dropdown.button.label.innerText = option.label || option.value;
-        this.dropdown.disabled = false;
-        this.dropdown.highlight = true;
-        return;
-      }
-    }
-    this.dropdown.highlight = false;
-    this.dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
-    let defaultOption: SelectOptionConfig;
-    for (const op of this.config.options) {
-      if (op.default) {
-        defaultOption = op;
-        break;
-      }
-    }
-    if (defaultOption) {
-      this.dropdown.button.label.innerText = defaultOption.label || defaultOption.value;
-    }
-  }
-
-  onDestroy() {
-    //
+    return dropdown.elementRef;
   }
 }

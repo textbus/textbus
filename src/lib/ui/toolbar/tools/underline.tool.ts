@@ -1,7 +1,7 @@
 import { underlineFormatter } from '../../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const underlineToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const underlineToolConfig: ButtonToolConfig = {
     return new InlineCommander('u', underlineFormatter);
   }
 };
-export const underlineTool = Toolkit.makeButtonTool(underlineToolConfig);
+export const underlineTool = new ButtonTool(underlineToolConfig);

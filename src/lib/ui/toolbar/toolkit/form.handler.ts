@@ -1,84 +1,71 @@
-import { Observable, Subscription } from 'rxjs';
-
-import { Tool } from './help';
-import { HighlightState } from '../help';
+import { Tool, ToolFactoryParams } from '../help';
+import { HighlightState, ToolFactory } from '../help';
 import { SelectionMatchState } from '../matcher/_api';
-import { Commander } from '../commander';
-import { UIButton, UIKit, FileUploader, UIDialog } from '../../_api';
+import { UIKit, FileUploader } from '../../_api';
 import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
+import { I18n } from '../../../i18n';
 
 export interface FormViewer extends DropdownViewer {
   setFileUploader(fileUploader: FileUploader): void;
 }
 
 export interface FormToolConfig extends DropdownToolConfig {
-  menuFactory(): FormViewer;
+  menuFactory(i18n: I18n): FormViewer;
 }
 
-export class FormHandler implements Tool {
-  elementRef: HTMLElement;
-  onApply: Observable<any>;
-  commander: Commander;
-  private button: UIButton;
-  private viewer: FormViewer;
+export class FormTool implements ToolFactory {
+  constructor(private config: FormToolConfig) {
+  }
 
-  private subs: Subscription[] = [];
-
-  constructor(private config: FormToolConfig,
-              private delegate: FileUploader,
-              private dialogManager: UIDialog) {
-    this.commander = config.commanderFactory();
-    const viewer = config.menuFactory();
-    this.viewer = viewer;
-
-    this.onApply = viewer.onComplete;
-
-    this.button = UIKit.button({
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, dialog, uploader} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
+    };
+    const viewer = config.menuFactory(i18n);
+    const button = UIKit.button({
       ...config,
       onChecked: () => {
-        dialogManager.dialog(viewer.elementRef);
+        dialog.dialog(viewer.elementRef);
         const s = viewer.onComplete.subscribe(() => {
-          dialogManager.close();
+          dialog.close();
           s.unsubscribe();
         })
         const b = viewer.onClose?.subscribe(() => {
-          dialogManager.close();
+          dialog.close();
           s.unsubscribe();
           b.unsubscribe();
         });
-        this.subs.push(s);
-        if (b) {
-          this.subs.push(b);
-        }
       }
     });
-
-    this.elementRef = this.button.elementRef;
-
     if (typeof viewer.setFileUploader === 'function') {
-      viewer.setFileUploader(delegate);
+      viewer.setFileUploader(uploader);
     }
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    this.viewer.update(selectionMatchState.matchData);
-    switch (selectionMatchState.state) {
-      case HighlightState.Highlight:
-        this.button.disabled = false;
-        this.button.highlight = true;
-        break;
-      case HighlightState.Normal:
-        this.button.disabled = false;
-        this.button.highlight = false;
-        break;
-      case HighlightState.Disabled:
-        this.button.disabled = true;
-        this.button.highlight = false;
-        break
-    }
-  }
-
-  onDestroy() {
-    this.subs.forEach(i => i.unsubscribe());
+    addTool({
+      keymaps: [],
+      onAction: viewer.onComplete,
+      commander: config.commanderFactory(),
+      matcher: config.matcher,
+      refreshState(selectionMatchState: SelectionMatchState): void {
+        viewer.update(selectionMatchState.matchData);
+        switch (selectionMatchState.state) {
+          case HighlightState.Highlight:
+            button.disabled = false;
+            button.highlight = true;
+            break;
+          case HighlightState.Normal:
+            button.disabled = false;
+            button.highlight = false;
+            break;
+          case HighlightState.Disabled:
+            button.disabled = true;
+            button.highlight = false;
+            break
+        }
+      }
+    })
+    return button.elementRef;
   }
 }

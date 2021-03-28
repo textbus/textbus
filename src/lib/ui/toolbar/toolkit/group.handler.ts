@@ -1,18 +1,16 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
-import { Tool } from './help';
-import { KeymapAction } from '../../../core/_api';
-import { Commander } from '../commander';
-import { UIDropdown, UIKit } from '../../uikit/uikit';
+import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
+import { UIDropdown, UIKit, UISelectOption } from '../../uikit/uikit';
 import { HighlightState } from '../help';
 import { ButtonToolConfig } from './button.handler';
 import { ActionSheetToolConfig } from './action-sheet.handler';
-import { SelectToolConfig } from './select.handler';
-import { ToolConfig } from './toolkit';
+import { SelectToolConfig, SelectOptionConfig } from './select.handler';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { DropdownToolConfig } from './dropdown.handler';
 import { UIDialog, FileUploader } from '../../_api';
 import { FormToolConfig } from './form.handler';
+import { I18n } from '../../../i18n';
 
 export enum MenuType {
   Action,
@@ -28,7 +26,7 @@ export interface ActionMenu extends ButtonToolConfig {
 
 export interface SelectMenu extends SelectToolConfig {
   type: MenuType.Select;
-  label: string;
+  label: I18nString;
 }
 
 export interface ActionSheetMenu extends ActionSheetToolConfig {
@@ -44,251 +42,292 @@ export interface FormMenu extends FormToolConfig {
 }
 
 export interface GroupConfig {
-  label?: string;
+  label?: I18nString;
   classes?: string[];
   iconClasses?: string[];
-  tooltip?: string;
+  tooltip?: I18nString;
   menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu | FormMenu>;
   matcher?: Matcher;
 }
 
-class MenuHandler implements Tool {
-  onApply: Observable<any>;
-
-  constructor(public elementRef: HTMLElement,
-              public commander: Commander,
-              private eventSource: Subject<any>,
-              private updateStateFn: (selectionMatchState: SelectionMatchState) => void) {
-    this.onApply = this.eventSource.asObservable();
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState) {
-    this.updateStateFn(selectionMatchState);
-  }
-
-  onDestroy() {
-    //
-  }
+interface ToolView {
+  tool: Tool;
+  viewer: HTMLElement;
 }
 
-export class GroupHandler implements Tool {
-  elementRef: HTMLElement;
-  onApply: Observable<any>;
-  commander: Commander;
-  tools: Array<{ config: ToolConfig, instance: Tool }> = [];
-  keymapAction: KeymapAction[] = [];
+export class GroupTool implements ToolFactory {
   private dropdown: UIDropdown;
-
   private subs: Subscription[] = [];
 
-  constructor(private config: GroupConfig,
-              private delegate: FileUploader,
-              private stickyElement: HTMLElement,
-              private dialogManager: UIDialog) {
-    this.dropdown = UIKit.menu({
+  constructor(private config: GroupConfig) {
+  }
+
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, uploader, dialog, limitElement} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
+    }
+    const subject = new Subject();
+    const obs = subject.asObservable();
+    const menus = config.menu.map(c => {
+      switch (c.type) {
+        case MenuType.Action:
+          return this.createButton(c, i18n);
+        case MenuType.Select:
+          return this.createSelect(c, i18n, limitElement);
+        case MenuType.ActionSheet:
+          return this.createActions(c, i18n, limitElement);
+        case MenuType.Dropdown:
+          return this.createDropdown(c, i18n, limitElement);
+        case MenuType.Form:
+          return this.createForm(c, i18n, dialog, uploader);
+      }
+    })
+    menus.forEach(i => {
+      addTool(i.tool);
+      this.subs.push(i.tool.onAction.subscribe(() => {
+        subject.next();
+      }))
+    })
+    const dropdown = UIKit.menu({
       label: config.label,
       classes: config.classes,
       iconClasses: config.iconClasses,
       tooltip: config.tooltip,
-      stickyElement,
-      menu: config.menu.map(c => {
-        switch (c.type) {
-          case MenuType.Action:
-            return this.createButton(c);
-          case MenuType.Select:
-            return this.createSelect(c);
-          case MenuType.ActionSheet:
-            return this.createActions(c);
-          case MenuType.Dropdown:
-            return this.createDropdown(c);
-          case MenuType.Form:
-            return this.createForm(c);
-        }
-      })
+      stickyElement: limitElement,
+      menu: menus.map(i => i.viewer)
     });
-    this.elementRef = this.dropdown.elementRef;
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState) {
-    this.dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
+    this.dropdown = dropdown;
+    addTool({
+      matcher: config.matcher,
+      commander: null,
+      keymaps: [],
+      onAction: obs,
+      refreshState(selectionMatchState: SelectionMatchState) {
+        dropdown.disabled = selectionMatchState.state === HighlightState.Disabled;
+      }
+    })
+    return dropdown.elementRef;
   }
 
   onDestroy() {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach(i => i.unsubscribe());
   }
 
-  private createButton(c: ActionMenu) {
-    const s = new Subject<any>();
+  private createButton(config: ActionMenu, i18n: I18n): ToolView {
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
     const item = UIKit.actionMenu({
-      label: c.label,
-      classes: c.classes,
-      iconClasses: c.iconClasses,
-      keymap: c.keymap,
+      label: typeof config.label === 'function' ? config.label(i18n) : config.label,
+      classes: config.classes,
+      iconClasses: config.iconClasses,
+      keymap: config.keymap,
       onChecked(): any {
-        s.next();
+        subject.next();
       }
     })
-    if (c.keymap) {
-      this.keymapAction.push({
-        keymap: c.keymap,
-        action() {
-          if (!item.disabled) {
-            s.next()
+    return {
+      viewer: item.elementRef,
+      tool: {
+        commander: config.commanderFactory(),
+        onAction: obs,
+        keymaps: config.keymap ? [{
+          keymap: config.keymap,
+          action() {
+            if (!item.disabled) {
+              subject.next()
+            }
+          }
+        }] : [],
+        matcher: config.matcher,
+        refreshState(selectionMatchState: SelectionMatchState) {
+          switch (selectionMatchState.state) {
+            case HighlightState.Highlight:
+              item.highlight = true;
+              break;
+            case HighlightState.Normal:
+              item.disabled = false;
+              item.highlight = false;
+              break;
+            case HighlightState.Disabled:
+              item.disabled = true;
+              break
           }
         }
-      })
-    }
-    const instance = new MenuHandler(item.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
-      switch (selectionMatchState.state) {
-        case HighlightState.Highlight:
-          item.highlight = true;
-          break;
-        case HighlightState.Normal:
-          item.disabled = false;
-          item.highlight = false;
-          break;
-        case HighlightState.Disabled:
-          item.disabled = true;
-          break
       }
-    });
-    this.tools.push({
-      config: c,
-      instance
-    });
-    return instance;
+    }
   }
 
-  private createSelect(c: SelectMenu) {
-    const s = new Subject<any>();
+  private createSelect(c: SelectMenu, i18n: I18n, stickyElement: HTMLElement): ToolView {
+    const config = {
+      ...c,
+      label: typeof c.label === 'function' ? c.label(i18n) : c.label
+    }
+    const map = new Map<SelectOptionConfig, UISelectOption>()
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
     const selectMenu = UIKit.selectMenu({
-      stickyElement: this.stickyElement,
-      classes: c.classes,
-      iconClasses: c.iconClasses,
-      options: c.options,
-      label: c.label,
+      stickyElement,
+      classes: config.classes,
+      iconClasses: config.iconClasses,
+      options: config.options.map(option => {
+        const uiSelectOption = {
+          ...option,
+          label: typeof option.label === 'function' ? option.label(i18n) : option.label
+        };
+        map.set(option, uiSelectOption);
+        return uiSelectOption;
+      }),
+      label: config.label,
       onSelected: (value: any) => {
-        s.next(value);
+        subject.next(value);
         this.dropdown.hide();
       }
     })
-    c.options.forEach(option => {
-      if (option.keymap) {
-        this.keymapAction.push({
-          keymap: option.keymap,
-          action() {
-            if (!selectMenu.disabled) {
-              s.next(option.value);
+    return {
+      viewer: selectMenu.elementRef,
+      tool: {
+        matcher: config.matcher,
+        commander: config.commanderFactory(),
+        keymaps: config.options.filter(i => i.keymap).map(option => {
+          return {
+            keymap: option.keymap,
+            action() {
+              if (!selectMenu.disabled) {
+                subject.next(option.value);
+              }
             }
           }
-        })
-      }
-    })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
-      if (selectionMatchState.matchData) {
-        const option = c.matchOption?.(selectionMatchState.matchData);
-        if (option) {
-          selectMenu.disabled = false;
-          selectMenu.highlight(option);
-          return;
+        }),
+        onAction: obs,
+        refreshState(selectionMatchState: SelectionMatchState) {
+          if (selectionMatchState.matchData) {
+            const option = config.matchOption?.(selectionMatchState.matchData);
+            if (option) {
+              selectMenu.disabled = false;
+              selectMenu.highlight(map.get(option));
+              return;
+            }
+          }
+          selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
+          selectMenu.highlight(null);
         }
       }
-      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
-      selectMenu.highlight(null);
-    });
-    this.tools.push({
-      config: c,
-      instance
-    });
-    return instance;
+    }
   }
 
-  private createActions(c: ActionSheetMenu) {
-    const s = new Subject<any>();
+  private createActions(c: ActionSheetMenu, i18n: I18n, stickyElement: HTMLElement): ToolView {
+    const config = {
+      ...c,
+      label: typeof c.label === 'function' ? c.label(i18n) : c.label,
+      tooltip: typeof c.tooltip === 'function' ? c.tooltip(i18n) : c.tooltip
+    };
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
     const selectMenu = UIKit.actionSheetMenu({
-      stickyElement: this.stickyElement,
-      classes: c.classes,
-      iconClasses: c.iconClasses,
-      actions: c.actions.map(c => {
+      stickyElement,
+      classes: config.classes,
+      iconClasses: config.iconClasses,
+      actions: config.actions.map(c => {
         return {
           ...c,
+          label: typeof c.label === 'function' ? c.label(i18n) : c.label,
           onChecked: () => {
-            s.next(c.value);
+            subject.next(c.value);
             this.dropdown.hide();
           }
         }
       }),
-      label: c.label
+      label: config.label
     })
-    c.actions.forEach(a => {
-      if (a.keymap) {
-        this.keymapAction.push({
-          keymap: a.keymap,
-          action() {
-            if (!selectMenu.disabled) {
-              s.next(a.value)
+    return {
+      viewer: selectMenu.elementRef,
+      tool: {
+        commander: config.commanderFactory(),
+        onAction: obs,
+        matcher: config.matcher,
+        keymaps: config.actions.filter(i => i.keymap).map(action => {
+          return {
+            keymap: action.keymap,
+            action() {
+              if (!selectMenu.disabled) {
+                subject.next(action.value)
+              }
             }
           }
-        })
+        }),
+        refreshState(selectionMatchState: SelectionMatchState) {
+          selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
+        }
       }
-    })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
-      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
-    });
-    this.tools.push({
-      config: c,
-      instance
-    });
-    return instance;
+    }
   }
 
-  private createDropdown(c: DropdownMenu) {
-    const s = new Subject<any>();
-    const menu = c.menuFactory();
+  private createDropdown(c: DropdownMenu, i18n: I18n, stickyElement: HTMLElement): ToolView {
+    const config = {
+      ...c,
+      label: typeof c.label === 'function' ? c.label(i18n) : c.label
+    }
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
+    const menu = config.menuFactory(i18n);
 
     const selectMenu = UIKit.dropdownMenu({
-      stickyElement: this.stickyElement,
-      classes: c.classes,
-      iconClasses: c.iconClasses,
+      stickyElement,
+      classes: config.classes,
+      iconClasses: config.iconClasses,
       menu: menu.elementRef,
-      label: c.label
+      label: config.label
     })
 
     this.subs.push(menu.onComplete.subscribe(value => {
-      s.next(value);
+      subject.next(value);
       this.dropdown.hide();
     }))
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
-      menu.update?.(selectionMatchState.matchData);
-      selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
-    });
-    this.tools.push({
-      config: c,
-      instance
-    });
-    return instance;
+
+    return {
+      viewer: selectMenu.elementRef,
+      tool: {
+        matcher: config.matcher,
+        commander: config.commanderFactory(),
+        keymaps: [],
+        onAction: obs,
+        refreshState(selectionMatchState: SelectionMatchState) {
+          menu.update?.(selectionMatchState.matchData);
+          selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
+        }
+      }
+    }
   }
 
-  private createForm(c: FormMenu) {
-    const s = new Subject<any>();
-    const menu = c.menuFactory();
+  private createForm(c: FormMenu, i18n: I18n, dialog: UIDialog, fileUploader: FileUploader): ToolView {
+    const config = {
+      ...c,
+      label: typeof c.label === 'function' ? c.label(i18n) : c.label,
+      tooltip: typeof c.tooltip === 'function' ? c.tooltip(i18n) : c.tooltip
+    }
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
+    const menu = c.menuFactory(i18n);
     if (typeof menu.setFileUploader === 'function') {
-      menu.setFileUploader(this.delegate);
+      menu.setFileUploader(fileUploader);
     }
     const selectMenu = UIKit.actionMenu({
-      ...c,
+      ...config,
       onChecked: () => {
-        this.dialogManager.dialog(menu.elementRef);
+        dialog.dialog(menu.elementRef);
         this.dropdown.hide();
         const subscription = menu.onComplete.subscribe(value => {
-          this.dialogManager.close();
-          s.next(value);
+          dialog.close();
+          subject.next(value);
           subscription.unsubscribe();
         })
         const b = menu.onClose?.subscribe(() => {
           b.unsubscribe();
           subscription.unsubscribe();
-          this.dialogManager.close();
+          dialog.close();
         })
         this.subs.push(subscription);
         if (b) {
@@ -296,27 +335,31 @@ export class GroupHandler implements Tool {
         }
       }
     })
-    const instance = new MenuHandler(selectMenu.elementRef, c.commanderFactory(), s, function (selectionMatchState) {
-      menu.update?.(selectionMatchState.matchData);
-      switch (selectionMatchState.state) {
-        case HighlightState.Highlight:
-          selectMenu.disabled = false;
-          selectMenu.highlight = true;
-          break;
-        case HighlightState.Normal:
-          selectMenu.disabled = false;
-          selectMenu.highlight = false;
-          break;
-        case HighlightState.Disabled:
-          selectMenu.disabled = true;
-          selectMenu.highlight = false;
-          break
+    return {
+      viewer: selectMenu.elementRef,
+      tool: {
+        matcher: config.matcher,
+        commander: config.commanderFactory(),
+        onAction: obs,
+        keymaps: [],
+        refreshState(selectionMatchState: SelectionMatchState) {
+          menu.update?.(selectionMatchState.matchData);
+          switch (selectionMatchState.state) {
+            case HighlightState.Highlight:
+              selectMenu.disabled = false;
+              selectMenu.highlight = true;
+              break;
+            case HighlightState.Normal:
+              selectMenu.disabled = false;
+              selectMenu.highlight = false;
+              break;
+            case HighlightState.Disabled:
+              selectMenu.disabled = true;
+              selectMenu.highlight = false;
+              break
+          }
+        }
       }
-    });
-    this.tools.push({
-      config: c,
-      instance
-    });
-    return instance;
+    }
   }
 }

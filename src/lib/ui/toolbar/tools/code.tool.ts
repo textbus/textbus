@@ -1,7 +1,7 @@
 import { codeFormatter } from '../../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const codeToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const codeToolConfig: ButtonToolConfig = {
     return new InlineCommander('code', codeFormatter);
   }
 };
-export const codeTool = Toolkit.makeButtonTool(codeToolConfig);
+export const codeTool = new ButtonTool(codeToolConfig);

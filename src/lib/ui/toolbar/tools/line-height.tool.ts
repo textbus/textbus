@@ -2,7 +2,7 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { lineHeightFormatter } from '../../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const lineHeightToolConfig: SelectToolConfig = {
@@ -61,4 +61,4 @@ export const lineHeightToolConfig: SelectToolConfig = {
     return new StyleCommander('lineHeight', lineHeightFormatter);
   }
 };
-export const lineHeightTool = Toolkit.makeSelectTool(lineHeightToolConfig);
+export const lineHeightTool = new SelectTool(lineHeightToolConfig);

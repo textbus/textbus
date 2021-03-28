@@ -2,7 +2,7 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { textAlignFormatter } from '../../../formatter/block-style.formatter';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const textAlignToolConfig: SelectToolConfig = {
@@ -55,4 +55,4 @@ export const textAlignToolConfig: SelectToolConfig = {
     return new BlockStyleCommander('textAlign', textAlignFormatter);
   }
 };
-export const textAlignTool = Toolkit.makeSelectTool(textAlignToolConfig);
+export const textAlignTool = new SelectTool(textAlignToolConfig);

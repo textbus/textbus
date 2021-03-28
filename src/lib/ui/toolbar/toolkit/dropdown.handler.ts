@@ -1,10 +1,11 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
-import { Tool } from './help';
+import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { HighlightState } from '../help';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../commander';
-import { UIDropdown, UIKit } from '../../uikit/uikit';
+import { UIKit } from '../../uikit/uikit';
+import { I18n } from '../../../i18n';
 
 export interface DropdownViewer<T = any> {
   elementRef: HTMLElement;
@@ -18,7 +19,7 @@ export interface DropdownViewer<T = any> {
 
 export interface DropdownToolConfig {
   /** 下拉控件展开后显示的内容 */
-  menuFactory(): DropdownViewer;
+  menuFactory(i18n: I18n): DropdownViewer;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
@@ -31,55 +32,62 @@ export interface DropdownToolConfig {
   /** 给当前控件添加一组 icon css class */
   iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
-  tooltip?: string;
+  tooltip?: I18nString;
   /** 设置控件显示的文字 */
-  label?: string;
+  label?: I18nString;
 }
 
-export class DropdownHandler implements Tool {
-  elementRef: HTMLElement;
-  onApply: Observable<any>;
-  commander: Commander;
-  private dropdown: UIDropdown;
-  private viewer: DropdownViewer;
+export class DropdownTool implements ToolFactory {
+  private subs: Subscription[] = [];
 
-  constructor(private config: DropdownToolConfig,
-              private stickyElement: HTMLElement) {
-    this.commander = config.commanderFactory();
-    const viewer = config.menuFactory();
-    this.viewer = viewer;
-    this.onApply = viewer.onComplete;
+  constructor(private config: DropdownToolConfig) {
+  }
 
-    this.dropdown = UIKit.dropdown({
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, limitElement} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
+    };
+    const viewer = config.menuFactory(i18n);
+    const dropdown = UIKit.dropdown({
       button: {
         ...config
       },
       menu: viewer.elementRef,
-      stickyElement
-    });
-
-    this.elementRef = this.dropdown.elementRef;
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    this.viewer.update(selectionMatchState.matchData);
-    switch (selectionMatchState.state) {
-      case HighlightState.Highlight:
-        this.dropdown.disabled = false;
-        this.dropdown.highlight = true;
-        break;
-      case HighlightState.Normal:
-        this.dropdown.disabled = false;
-        this.dropdown.highlight = false;
-        break;
-      case HighlightState.Disabled:
-        this.dropdown.disabled = true;
-        this.dropdown.highlight = false;
-        break
-    }
+      stickyElement: limitElement
+    })
+    this.subs.push(viewer.onComplete.subscribe(() => {
+      dropdown.hide();
+    }))
+    addTool({
+      keymaps: [],
+      onAction: viewer.onComplete,
+      commander: config.commanderFactory(),
+      matcher: config.matcher,
+      refreshState(selectionMatchState: SelectionMatchState): void {
+        viewer.update(selectionMatchState.matchData);
+        switch (selectionMatchState.state) {
+          case HighlightState.Highlight:
+            dropdown.disabled = false;
+            dropdown.highlight = true;
+            break;
+          case HighlightState.Normal:
+            dropdown.disabled = false;
+            dropdown.highlight = false;
+            break;
+          case HighlightState.Disabled:
+            dropdown.disabled = true;
+            dropdown.highlight = false;
+            break
+        }
+      }
+    })
+    return dropdown.elementRef;
   }
 
   onDestroy() {
-    //
+    this.subs.filter(i => i.unsubscribe())
   }
 }

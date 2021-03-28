@@ -2,7 +2,7 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { letterSpacingFormatter } from '../../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const letterSpacingToolConfig: SelectToolConfig = {
@@ -53,4 +53,4 @@ export const letterSpacingToolConfig: SelectToolConfig = {
     return new StyleCommander('letterSpacing', letterSpacingFormatter);
   }
 };
-export const letterSpacingTool = Toolkit.makeSelectTool(letterSpacingToolConfig);
+export const letterSpacingTool = new SelectTool(letterSpacingToolConfig);

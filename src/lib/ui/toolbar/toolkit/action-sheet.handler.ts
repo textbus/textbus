@@ -1,17 +1,18 @@
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { HighlightState } from '../help';
-import { Tool } from './help';
+import { HighlightState, Tool, ToolFactoryParams } from '../help';
+import { ToolFactory } from '../help';
 import { Commander } from '../commander';
-import { Keymap, KeymapAction } from '../../../core/_api';
+import { Keymap } from '../../../core/_api';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
-import { UIDropdown, UIKit } from '../../uikit/uikit';
+import { UIKit } from '../../uikit/uikit';
+import { I18nString } from '../help';
 
 export interface ActionConfig {
   /** 设置当前 action 的 value */
   value?: any;
   /** 设置当前 action 显示的文字 */
-  label?: string;
+  label?: I18nString;
   /** 给当前 action 添加一组 css class */
   classes?: string[];
   /** 给当前 action 添加一组 icon css class */
@@ -30,79 +31,78 @@ export interface ActionSheetToolConfig {
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
   /** 设置控件显示的文字 */
-  label?: string;
+  label?: I18nString;
   /** 给当前控件添加一组 css class */
   classes?: string[];
   /** 给控件添加一组 icon css class 类 */
   iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
-  tooltip?: string;
+  tooltip?: I18nString;
 }
 
-export class ActionSheetHandler implements Tool {
-  readonly elementRef: HTMLElement;
-  onMatched: Observable<ActionConfig>;
-  onApply: Observable<any>;
-  keymapAction: KeymapAction[] = [];
-  commander: Commander;
+export class ActionSheetTool implements ToolFactory {
+  constructor(private config: ActionSheetToolConfig) {
+  }
 
-  private matchedEvent = new Subject<ActionConfig>();
-  private eventSource = new Subject<any>();
-  private dropdown: UIDropdown;
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n, limitElement} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip,
+      actions: this.config.actions.map(action => {
+        return {
+          ...action,
+          label: typeof action.label === 'function' ? action.label(i18n) : action.label
+        }
+      })
+    }
 
-  constructor(private config: ActionSheetToolConfig,
-              private stickyElement: HTMLElement) {
-    this.onApply = this.eventSource.asObservable();
-    this.onMatched = this.matchedEvent.asObservable();
-
-    this.dropdown = UIKit.actions({
+    const subject = new Subject<any>();
+    const obs = subject.asObservable();
+    const viewer = UIKit.actions({
       ...config,
-      stickyElement,
+      stickyElement: limitElement,
       items: config.actions.map(v => {
         return {
           ...v,
           onChecked() {
-            this.eventSource.next(v.value);
+            subject.next(v.value);
           }
         }
       })
     })
-
-    this.commander = config.commanderFactory();
-
-    config.actions.forEach(action => {
-      if (action.keymap) {
-        this.keymapAction.push({
+    addTool({
+      commander: config.commanderFactory(),
+      matcher: config.matcher,
+      keymaps: config.actions.filter(i => i.keymap).map(action => {
+        return {
           keymap: action.keymap,
-          action: () => {
-            if (!this.dropdown.disabled) {
-              this.eventSource.next(action.value);
+          action() {
+            if (!viewer.disabled) {
+              subject.next(action.value)
             }
           }
-        })
+        }
+      }),
+      onAction: obs,
+      refreshState(selectionMatchState: SelectionMatchState): void {
+        switch (selectionMatchState.state) {
+          case HighlightState.Highlight:
+            viewer.disabled = false;
+            viewer.highlight = true;
+            break;
+          case HighlightState.Normal:
+            viewer.disabled = false;
+            viewer.highlight = false;
+            break;
+          case HighlightState.Disabled:
+            viewer.disabled = true;
+            viewer.highlight = false;
+            break
+        }
       }
-    })
-    this.elementRef = this.dropdown.elementRef;
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    switch (selectionMatchState.state) {
-      case HighlightState.Highlight:
-        this.dropdown.disabled = false;
-        this.dropdown.highlight = true;
-        break;
-      case HighlightState.Normal:
-        this.dropdown.disabled = false;
-        this.dropdown.highlight = false;
-        break;
-      case HighlightState.Disabled:
-        this.dropdown.disabled = true;
-        this.dropdown.highlight = false;
-        break
-    }
-  }
-
-  onDestroy() {
-    //
+    });
+    return viewer.elementRef
   }
 }

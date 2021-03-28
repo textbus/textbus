@@ -1,7 +1,7 @@
 import { subscriptFormatter } from '../../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const subscriptToolConfig: ButtonToolConfig = {
@@ -12,4 +12,4 @@ export const subscriptToolConfig: ButtonToolConfig = {
     return new InlineCommander('sub', subscriptFormatter);
   }
 }
-export const subscriptTool = Toolkit.makeButtonTool(subscriptToolConfig);
+export const subscriptTool = new ButtonTool(subscriptToolConfig);

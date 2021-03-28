@@ -87,7 +87,7 @@ export interface UIMenuParams {
   iconClasses?: string[];
   classes?: string[];
   tooltip?: string;
-  menu: Array<{ elementRef: HTMLElement }>;
+  menu: Array<HTMLElement>;
   stickyElement: HTMLElement;
 }
 
@@ -506,9 +506,7 @@ export class UIKit {
       },
       menu: createElement('div', {
         classes: ['textbus-toolbar-menu'],
-        children: params.menu.map(value => {
-          return value.elementRef;
-        })
+        children: params.menu
       }),
       stickyElement: params.stickyElement
     });

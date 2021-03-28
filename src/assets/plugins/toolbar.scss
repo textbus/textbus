@@ -18,6 +18,8 @@
   padding: 8px 15px 3px;
   min-height: 24px;
   border-radius: inherit;
+  position: relative;
+  z-index: 1;
 }
 
 .textbus-toolbar-group {
@@ -236,10 +238,10 @@
 }
 
 .textbus-toolbar-additional-worktable {
-  display: none;
+  display: flex;
   align-items: center;
   padding: 5px 20px;
-  border: 1px solid $color-gray-light;
+  border: 1px solid $color-light;
   border-top: 0;
   background-color: $color-lighter;
 

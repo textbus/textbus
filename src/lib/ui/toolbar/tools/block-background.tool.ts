@@ -1,6 +1,6 @@
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { BlockStyleCommander } from '../commands/block-style.commander';
 import { blockBackgroundColorFormatter } from '../../../formatter/block-style.formatter';
 import { PreComponent } from '../../../components/pre.component';
@@ -17,4 +17,4 @@ export const blockBackgroundToolConfig: DropdownToolConfig = {
   }
 }
 
-export const blockBackgroundTool = Toolkit.makeDropdownTool(blockBackgroundToolConfig);
+export const blockBackgroundTool = new DropdownTool(blockBackgroundToolConfig);

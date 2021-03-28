@@ -1,4 +1,4 @@
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { DirCommander } from '../commands/dir.commander';
 import { dirFormatter } from '../../../formatter/dir.formatter';
 import { Commander } from '../commander';
@@ -13,4 +13,4 @@ export const leftToRightToolConfig: ButtonToolConfig = {
     return new DirCommander(dirFormatter, 'ltr');
   }
 }
-export const leftToRightTool = Toolkit.makeButtonTool(leftToRightToolConfig);
+export const leftToRightTool = new ButtonTool(leftToRightToolConfig);

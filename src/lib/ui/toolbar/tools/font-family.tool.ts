@@ -2,7 +2,7 @@ import { FormatMatcher } from '../matcher/format.matcher';
 import { fontFamilyFormatter } from '../../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatData } from '../../../core/format-data';
-import { SelectToolConfig, Toolkit } from '../toolkit/_api';
+import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const fontFamilyToolConfig: SelectToolConfig = {
@@ -71,4 +71,4 @@ export const fontFamilyToolConfig: SelectToolConfig = {
     return new StyleCommander('fontFamily', fontFamilyFormatter)
   }
 };
-export const fontFamilyTool = Toolkit.makeSelectTool(fontFamilyToolConfig);
+export const fontFamilyTool = new SelectTool(fontFamilyToolConfig);

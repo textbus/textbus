@@ -1,4 +1,4 @@
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { linkFormatter } from '../../../formatter/link.formatter';
 import { PreComponent } from '../../../components/pre.component';
 import { UnlinkCommander } from '../commands/unlink.commander';
@@ -12,4 +12,4 @@ export const unlinkToolConfig: ButtonToolConfig = {
     return new UnlinkCommander();
   }
 };
-export const unlinkTool = Toolkit.makeButtonTool(unlinkToolConfig);
+export const unlinkTool = new ButtonTool(unlinkToolConfig);

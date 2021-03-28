@@ -2,7 +2,7 @@ import { colorFormatter } from '../../../formatter/style.formatter';
 import { StyleCommander } from '../commands/style.commander';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { Palette } from './utils/palette';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const colorToolConfig: DropdownToolConfig = {
@@ -16,4 +16,4 @@ export const colorToolConfig: DropdownToolConfig = {
     return new StyleCommander('color', colorFormatter);
   }
 };
-export const colorTool = Toolkit.makeDropdownTool(colorToolConfig);
+export const colorTool = new DropdownTool(colorToolConfig);

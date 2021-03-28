@@ -1,11 +1,11 @@
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
-import { HighlightState } from '../help';
-import { Tool } from './help';
-import { Keymap, KeymapAction } from '../../../core/_api';
+import { HighlightState, Tool, ToolFactory, ToolFactoryParams } from '../help';
+import { I18nString } from '../help';
+import { Keymap } from '../../../core/_api';
 import { Commander } from '../commander';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
-import { UIButton, UIKit } from '../../uikit/uikit';
+import { UIKit } from '../../uikit/uikit';
 
 /**
  * 按扭型工具的配置接口
@@ -13,68 +13,68 @@ import { UIButton, UIKit } from '../../uikit/uikit';
 export interface ButtonToolConfig {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
+
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
   /** 设置按扭显示的文字 */
-  label?: string;
+  label?: I18nString;
   /** 给按扭控件添加一组 css class 类 */
   classes?: string[];
   /** 给按扭控件添加一组 icon css class 类 */
   iconClasses?: string[];
   /** 当鼠标放在控件上的提示文字 */
-  tooltip?: string;
+  tooltip?: I18nString;
   /** 当前按扭控件的快捷键配置 */
   keymap?: Keymap;
 }
 
-export class ButtonHandler implements Tool {
-  readonly elementRef: HTMLButtonElement;
-  onApply: Observable<void>;
-  keymapAction: KeymapAction;
-  commander: Commander;
-  private eventSource = new Subject<void>();
-  private btn: UIButton;
-
+export class ButtonTool implements ToolFactory {
   constructor(private config: ButtonToolConfig) {
-    this.commander = config.commanderFactory();
-    this.onApply = this.eventSource.asObservable();
+  }
 
-    this.btn = UIKit.button({
+  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+    const {i18n} = params;
+    const config = {
+      ...this.config,
+      label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
+      tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
+    }
+    const subject = new Subject();
+    const obs = subject.asObservable();
+    const btn = UIKit.button({
       ...config,
       onChecked: () => {
-        this.eventSource.next();
+        subject.next()
       }
     })
-    this.elementRef = this.btn.elementRef;
-    if (config.keymap) {
-      this.keymapAction = {
+    btn.elementRef.dataset.keymap = JSON.stringify(config.keymap);
+    addTool({
+      commander: config.commanderFactory(),
+      keymaps: config.keymap ? [{
         keymap: config.keymap,
-        action: () => {
-          if (!this.btn.disabled) {
-            this.eventSource.next();
+        action() {
+          if (!btn.disabled) {
+            subject.next();
           }
         }
-      };
-      this.elementRef.dataset.keymap = JSON.stringify(config.keymap);
-    }
-  }
-
-  updateStatus(selectionMatchState: SelectionMatchState): void {
-    switch (selectionMatchState.state) {
-      case HighlightState.Highlight:
-        this.btn.highlight = true;
-        break;
-      case HighlightState.Normal:
-        this.btn.disabled = false;
-        this.btn.highlight = false;
-        break;
-      case HighlightState.Disabled:
-        this.btn.disabled = true;
-        break
-    }
-  }
-
-  onDestroy() {
-    //
+      }] : [],
+      onAction: obs,
+      matcher: config.matcher,
+      refreshState(selectionMatchState: SelectionMatchState) {
+        switch (selectionMatchState.state) {
+          case HighlightState.Highlight:
+            btn.highlight = true;
+            break;
+          case HighlightState.Normal:
+            btn.disabled = false;
+            btn.highlight = false;
+            break;
+          case HighlightState.Disabled:
+            btn.disabled = true;
+            break
+        }
+      }
+    })
+    return btn.elementRef;
   }
 }

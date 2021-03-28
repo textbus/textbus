@@ -1,7 +1,7 @@
 import { italicFormatter } from '../../../formatter/inline.formatter';
 import { FormatMatcher } from '../matcher/format.matcher';
 import { InlineCommander } from '../commands/inline.commander';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const italicToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const italicToolConfig: ButtonToolConfig = {
     return new InlineCommander('em', italicFormatter);
   }
 };
-export const italicTool = Toolkit.makeButtonTool(italicToolConfig);
+export const italicTool = new ButtonTool(italicToolConfig);

@@ -1,4 +1,4 @@
-import { Toolkit, GroupConfig, MenuType } from '../toolkit/_api';
+import { GroupConfig, MenuType, GroupTool } from '../toolkit/_api';
 import { tableAddToolConfig } from './table-add.tool';
 import { tableEditToolConfig } from './table-edit.tool';
 import { tableRemoveToolConfig } from './table-remove.tool';
@@ -28,4 +28,4 @@ export const tableToolConfig: GroupConfig = {
     label: '删除表格'
   }]
 }
-export const tableTool = Toolkit.makeGroupTool(tableToolConfig);
+export const tableTool = new GroupTool(tableToolConfig);

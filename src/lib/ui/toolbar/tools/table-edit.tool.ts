@@ -1,5 +1,5 @@
 import { TableEditActions, TableEditCommander } from '../commands/table-edit.commander';
-import { ActionSheetToolConfig, Toolkit } from '../toolkit/_api';
+import { ActionSheetTool, ActionSheetToolConfig } from '../toolkit/_api';
 import { TableEditMatcher } from '../matcher/table-edit.matcher';
 
 export const tableEditToolConfig: ActionSheetToolConfig = {
@@ -51,4 +51,4 @@ export const tableEditToolConfig: ActionSheetToolConfig = {
     iconClasses: ['textbus-icon-table']
   }]
 }
-export const tableEditTool = Toolkit.makeActionSheetTool(tableEditToolConfig);
+export const tableEditTool = new ActionSheetTool(tableEditToolConfig);

@@ -1,6 +1,6 @@
 import { Form, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 import { blockMarginFormatter } from '../../../formatter/margin.formatter';
 import { BlockMarginCommander } from '../commands/_api';
@@ -42,4 +42,4 @@ export const blockMarginToolConfig: DropdownToolConfig = {
     return new BlockMarginCommander(blockMarginFormatter)
   }
 };
-export const blockMarginTool = Toolkit.makeDropdownTool(blockMarginToolConfig);
+export const blockMarginTool = new DropdownTool(blockMarginToolConfig);

@@ -1,7 +1,7 @@
 import { BoldCommander } from '../commands/bold.commander';
 import { boldFormatter } from '../../../formatter/bold.formatter';
 import { BoldMatcher } from '../matcher/bold.matcher';
-import { ButtonToolConfig, Toolkit } from '../toolkit/_api';
+import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const boldToolConfig: ButtonToolConfig = {
@@ -16,4 +16,4 @@ export const boldToolConfig: ButtonToolConfig = {
     return new BoldCommander(boldFormatter);
   }
 };
-export const boldTool = Toolkit.makeButtonTool(boldToolConfig);
+export const boldTool = new ButtonTool(boldToolConfig);

@@ -1,6 +1,6 @@
 import { Form, FormTextField } from '../../uikit/forms/_api';
 import { FormatMatcher } from '../matcher/format.matcher';
-import { DropdownToolConfig, Toolkit } from '../toolkit/_api';
+import { DropdownTool, DropdownToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 import { blockPaddingFormatter } from '../../../formatter/padding.formatter';
 import { BlockPaddingCommander } from '../commands/_api';
@@ -42,4 +42,4 @@ export const blockPaddingToolConfig: DropdownToolConfig = {
     return new BlockPaddingCommander(blockPaddingFormatter)
   }
 };
-export const blockPaddingTool = Toolkit.makeDropdownTool(blockPaddingToolConfig);
+export const blockPaddingTool = new DropdownTool(blockPaddingToolConfig);
