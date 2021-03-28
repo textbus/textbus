@@ -10,12 +10,10 @@ export const i18n_en_US: I18NConfig = {
     paste: 'paste',
     cut: 'cut',
     selectAll: 'select all',
-    // core library dependency, no optional
     controlPanel: {
       cancelFixed: 'cancel fixed',
       fixed: 'fixed'
     },
-    // core library dependency, no optional
     pasteHandle: {
       title: 'source upload',
       confirmBtnText: 'confirm',
