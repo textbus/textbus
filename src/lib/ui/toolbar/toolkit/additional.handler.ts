@@ -80,6 +80,8 @@ export class AdditionalTool implements ToolFactory {
     const content = config.menuFactory(i18n);
     this.subs.push(
       fromEvent(closeBtn, 'click').subscribe(() => {
+        button.disabled = false;
+        button.highlight = false;
         content.destroy();
         limitElement.removeChild(elementRef);
       })
