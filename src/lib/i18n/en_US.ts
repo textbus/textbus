@@ -15,7 +15,7 @@ export const i18n_en_US: I18NConfig = {
     // core library dependency, no optional
     controlPanel: {
       cancelFixed: 'cancel fixed',
-      fixed: 'fixec'
+      fixed: 'fixed'
     },
     // core library dependency, no optional
     pasteHandle: {
