@@ -1,7 +1,7 @@
 import { I18NConfig } from '../i18n';
 
 export const i18n_en_US: I18NConfig = {
-  // core library dependency, no optional
+  /** core library dependency start, no optional */
   editor: {
     noSelection: 'please select the location to insert the resource first!',
     insertParagraphAfter: 'insert paragraph after',
@@ -27,6 +27,8 @@ export const i18n_en_US: I18NConfig = {
       audioPlaceholder: 'please enter audio URL',
     }
   },
+  /** core library dependency end */
+  /** optional config */
   plugins: {
     componentStage: {
       switchText: 'component library',

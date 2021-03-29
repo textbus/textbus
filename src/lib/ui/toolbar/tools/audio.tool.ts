@@ -6,27 +6,28 @@ import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_
 
 export const audioToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-music'],
-  tooltip: '音频',
-  viewFactory() {
+  tooltip: i18n => i18n.get('plugins.toolbar.audioTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.audioTool.view');
     return new Form({
-      title: '音频设置',
+      title: childI18n.get('title'),
       items: [
         new FormTextField({
-          label: '音频链接地址',
+          label: childI18n.get('addressLabel'),
           name: 'src',
-          placeholder: '请输入链接地址',
+          placeholder: childI18n.get('addressPlaceholder'),
           canUpload: true,
           uploadType: 'audio',
-          uploadBtnText: '上传新音频',
+          uploadBtnText: childI18n.get('uploadBtnText'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('errorMessage');
             }
             return null;
           }
         }),
         new FormSwitch({
-          label: '自动播放',
+          label: childI18n.get('switchLabel'),
           checked: false,
           name: 'autoplay'
         }),

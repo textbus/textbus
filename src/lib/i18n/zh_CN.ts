@@ -1,7 +1,7 @@
 import { I18NConfig } from '../i18n';
 
 export const i18n_zh_CN: I18NConfig = {
-  // 核心库依赖，不可缺少
+  /** 核心库依赖，不可缺少 */
   editor: {
     noSelection: '请先选择插入资源位置！',
     insertParagraphAfter: '在后面插入段落',
@@ -27,6 +27,8 @@ export const i18n_zh_CN: I18NConfig = {
       audioPlaceholder: '请输入音频地址',
     }
   },
+  /** 核心库依赖结束 */
+  /** 以下的其它配置，可根据自己的组件及插件配置添加或删除 */
   plugins: {
     componentStage: {
       switchText: '组件库',
@@ -50,7 +52,36 @@ export const i18n_zh_CN: I18NConfig = {
     sourcecodeMode: {
       switchText: '源代码'
     },
-    toolbar: {}
+    toolbar: {
+      audioTool: {
+        tooltip: '音频',
+        view: {
+          title: '音频设置',
+          addressLabel: '音频链接地址',
+          addressPlaceholder: '请输入链接地址',
+          uploadBtnText: '上传新音频',
+          errorMessage: '必填项不能为空',
+          switchLabel: '自动播放'
+        }
+      },
+      blockBackgroundColorTool: {
+        tooltip: '块背景颜色'
+      },
+      blockMarginTool: {
+        label: '块外边距',
+        tooltip: '块外边距',
+        view: {
+          topLabel: '上边距',
+          topPlaceholder: '请输入上边距',
+          rightLabel: '右边距',
+          rightPlaceholder: '请输入右边距',
+          bottomLabel: '下边距',
+          bottomPlaceholder: '请输入下边距',
+          leftLabel: '左边距',
+          leftPlaceholder: '请输入左边距'
+        }
+      }
+    }
   },
   components: {
     tableComponent: {

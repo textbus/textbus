@@ -6,33 +6,33 @@ import { blockMarginFormatter } from '../../../formatter/margin.formatter';
 import { BlockMarginCommander } from '../commands/_api';
 
 export const blockMarginToolConfig: DropdownToolConfig = {
-  // iconClasses: ['textbus-icon-link'],
-  label: '块外边距',
-  tooltip: '块外边距',
-  viewFactory() {
+  label: i18n => i18n.get('plugins.toolbar.blockMargin.label'),
+  tooltip: i18n => i18n.get('plugins.toolbar.blockMargin.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.blockMargin.view');
     return new Form({
       mini: true,
       editProperty: 'styles',
       items: [
         new FormTextField({
-          label: '上边距',
+          label: childI18n.get('topLabel'),
           name: 'marginTop',
-          placeholder: '请输入上边距'
+          placeholder: childI18n.get('topPlaceholder')
         }),
         new FormTextField({
-          label: '右边距',
+          label: childI18n.get('rightLabel'),
           name: 'marginRight',
-          placeholder: '请输入右边距'
+          placeholder: childI18n.get('rightPlaceholder')
         }),
         new FormTextField({
-          label: '下边距',
+          label: childI18n.get('bottomLabel'),
           name: 'marginBottom',
-          placeholder: '请输入下边距'
+          placeholder: childI18n.get('bottomPlaceholder')
         }),
         new FormTextField({
-          label: '左边距',
+          label: childI18n.get('leftLabel'),
           name: 'marginLeft',
-          placeholder: '请输入左边距'
+          placeholder: childI18n.get('leftPlaceholder')
         }),
       ]
     });

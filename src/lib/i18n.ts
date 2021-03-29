@@ -1,7 +1,9 @@
 import { Injectable } from '@tanbo/di';
 
 export interface I18NConfig {
-  editor: any; // core dependency
+  editor: { [key: string]: any }; // core dependency
+  plugins?: { [key: string]: any };
+  components?: { [key: string]: any };
   [key: string]: any;
 }
 
@@ -12,8 +14,16 @@ export class I18n {
   }
 
   get(path: string): string {
-    const tokens = path.split(/[.\[\]'"]+/g).map(i => i.trim()).filter(i => i);
-    return this.getLabelByTokens(this.customConfig, tokens) || this.getLabelByTokens(this.defaultConfig, tokens);
+    const tokens = this.parse(path);
+    const value = this.getLabelByTokens(this.customConfig, tokens) || this.getLabelByTokens(this.defaultConfig, tokens);
+    return typeof value === 'string' ? value : '';
+  }
+
+  getContext(path: string) {
+    const tokens = this.parse(path);
+    const customConfig = this.getLabelByTokens(this.customConfig, tokens) || {};
+    const defaultConfig = this.getLabelByTokens(this.defaultConfig, tokens) || {};
+    return new I18n(customConfig, defaultConfig);
   }
 
   joinTemplate(template: string, ...values: Array<string | number>) {
@@ -22,7 +32,11 @@ export class I18n {
     })
   }
 
-  private getLabelByTokens(config: I18NConfig, tokens: string[]): string {
+  private parse(path: string): string[] {
+    return path.split(/[.\[\]'"]+/g).map(i => i.trim()).filter(i => i);
+  }
+
+  private getLabelByTokens(config: I18NConfig, tokens: string[]): any {
     if (!config || tokens.length === 0) {
       return '';
     }
