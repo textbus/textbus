@@ -83,6 +83,9 @@ export class Toolbar implements TBPlugin {
         this.elementRef.dispatchEvent(event);
         this.updateHandlerState();
       }),
+      this.history.onChange.subscribe(() => {
+        this.updateHandlerState();
+      }),
       fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
         const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement);
         if (keymap) {

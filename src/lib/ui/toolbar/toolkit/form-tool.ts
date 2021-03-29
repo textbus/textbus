@@ -2,7 +2,7 @@ import { Tool, ToolFactoryParams } from '../help';
 import { HighlightState, ToolFactory } from '../help';
 import { SelectionMatchState } from '../matcher/_api';
 import { UIKit, FileUploader } from '../../_api';
-import { DropdownToolConfig, DropdownViewer } from './dropdown.handler';
+import { DropdownToolConfig, DropdownViewer } from './dropdown-tool';
 import { I18n } from '../../../i18n';
 
 export interface FormViewer extends DropdownViewer {

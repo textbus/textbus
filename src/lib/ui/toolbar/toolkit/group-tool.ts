@@ -3,13 +3,13 @@ import { Subject, Subscription } from 'rxjs';
 import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { UIDropdown, UIKit, UISelectOption } from '../../uikit/uikit';
 import { HighlightState } from '../help';
-import { ButtonToolConfig } from './button.handler';
-import { ActionSheetToolConfig } from './action-sheet.handler';
-import { SelectToolConfig, SelectOptionConfig } from './select.handler';
+import { ButtonToolConfig } from './button-tool';
+import { ActionSheetToolConfig } from './action-sheet-tool';
+import { SelectToolConfig, SelectOptionConfig } from './select-tool';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
-import { DropdownToolConfig } from './dropdown.handler';
+import { DropdownToolConfig } from './dropdown-tool';
 import { UIDialog, FileUploader } from '../../_api';
-import { FormToolConfig } from './form.handler';
+import { FormToolConfig } from './form-tool';
 import { I18n } from '../../../i18n';
 
 export enum MenuType {
