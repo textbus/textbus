@@ -103,7 +103,7 @@ export const findToolConfig: AdditionalToolConfig = {
     ctrlKey: true,
     key: 'f'
   },
-  menuFactory(): AdditionalViewer {
+  viewFactory(): AdditionalViewer {
     return new FindForm();
   },
   commanderFactory() {

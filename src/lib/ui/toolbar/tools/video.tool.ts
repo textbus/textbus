@@ -7,7 +7,7 @@ import { FormTool, FormToolConfig } from '../toolkit/_api';
 export const videoToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-video'],
   tooltip: '视频',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       title: '视频设置',
       items: [

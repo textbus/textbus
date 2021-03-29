@@ -19,7 +19,7 @@ export interface DropdownViewer<T = any> {
 
 export interface DropdownToolConfig {
   /** 下拉控件展开后显示的内容 */
-  menuFactory(i18n: I18n): DropdownViewer;
+  viewFactory(i18n: I18n): DropdownViewer;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
@@ -50,7 +50,7 @@ export class DropdownTool implements ToolFactory {
       label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
       tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
     };
-    const viewer = config.menuFactory(i18n);
+    const viewer = config.viewFactory(i18n);
     const dropdown = UIKit.dropdown({
       button: {
         ...config

@@ -9,7 +9,7 @@ export const blockPaddingToolConfig: DropdownToolConfig = {
   // iconClasses: ['textbus-icon-link'],
   label: '块内边距',
   tooltip: '块内边距',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       mini: true,
       editProperty: 'styles',

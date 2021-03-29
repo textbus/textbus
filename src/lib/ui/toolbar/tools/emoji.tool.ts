@@ -49,7 +49,7 @@ export const emojiToolConfig: DropdownToolConfig = {
   commanderFactory() {
     return new EmojiCommander()
   },
-  menuFactory() {
+  viewFactory() {
     return new Emoji();
   },
 };

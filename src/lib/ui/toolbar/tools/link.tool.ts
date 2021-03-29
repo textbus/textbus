@@ -8,7 +8,7 @@ import { PreComponent } from '../../../components/pre.component';
 export const linkToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-link'],
   tooltip: '链接',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       mini: true,
       items: [

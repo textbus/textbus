@@ -272,7 +272,7 @@ export class GroupTool implements ToolFactory {
     }
     const subject = new Subject<any>();
     const obs = subject.asObservable();
-    const menu = config.menuFactory(i18n);
+    const menu = config.viewFactory(i18n);
 
     const selectMenu = UIKit.dropdownMenu({
       stickyElement,
@@ -310,7 +310,7 @@ export class GroupTool implements ToolFactory {
     }
     const subject = new Subject<any>();
     const obs = subject.asObservable();
-    const menu = c.menuFactory(i18n);
+    const menu = c.viewFactory(i18n);
     if (typeof menu.setFileUploader === 'function') {
       menu.setFileUploader(fileUploader);
     }

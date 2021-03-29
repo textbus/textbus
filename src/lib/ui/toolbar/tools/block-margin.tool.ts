@@ -9,7 +9,7 @@ export const blockMarginToolConfig: DropdownToolConfig = {
   // iconClasses: ['textbus-icon-link'],
   label: '块外边距',
   tooltip: '块外边距',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       mini: true,
       editProperty: 'styles',

@@ -143,7 +143,7 @@ class SizeSetter implements FormItem<any> {
 export const imageToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-image'],
   tooltip: '图片',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       title: '图片设置',
       maxHeight: '260px',

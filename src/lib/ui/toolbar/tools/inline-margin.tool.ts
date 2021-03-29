@@ -9,7 +9,7 @@ export const inlineMarginToolConfig: DropdownToolConfig = {
   // iconClasses: ['textbus-icon-link'],
   label: '行内边距',
   tooltip: '行内边距',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       mini: true,
       editProperty: 'styles',

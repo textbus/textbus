@@ -24,7 +24,7 @@ export interface AdditionalToolConfig {
   commanderFactory(): Commander;
 
   /** 下拉控件展开后显示的内容 */
-  menuFactory(i18n: I18n): AdditionalViewer;
+  viewFactory(i18n: I18n): AdditionalViewer;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
@@ -77,7 +77,7 @@ export class AdditionalTool implements ToolFactory {
       ]
     })
 
-    const content = config.menuFactory(i18n);
+    const content = config.viewFactory(i18n);
     this.subs.push(
       fromEvent(closeBtn, 'click').subscribe(() => {
         button.disabled = false;

@@ -10,7 +10,7 @@ export interface FormViewer extends DropdownViewer {
 }
 
 export interface FormToolConfig extends DropdownToolConfig {
-  menuFactory(i18n: I18n): FormViewer;
+  viewFactory(i18n: I18n): FormViewer;
 }
 
 export class FormTool implements ToolFactory {
@@ -24,7 +24,7 @@ export class FormTool implements ToolFactory {
       label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
       tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
     };
-    const viewer = config.menuFactory(i18n);
+    const viewer = config.viewFactory(i18n);
     const button = UIKit.button({
       ...config,
       onChecked: () => {

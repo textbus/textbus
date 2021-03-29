@@ -8,7 +8,7 @@ import { PreComponent } from '../../../components/pre.component';
 export const blockBackgroundToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-paint-bucket'],
   tooltip: '元素背景颜色',
-  menuFactory() {
+  viewFactory() {
     return new Palette('backgroundColor');
   },
   matcher: new FormatMatcher(blockBackgroundColorFormatter, [PreComponent]),

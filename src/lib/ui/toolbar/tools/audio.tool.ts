@@ -7,7 +7,7 @@ import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_
 export const audioToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-music'],
   tooltip: '音频',
-  menuFactory() {
+  viewFactory() {
     return new Form({
       title: '音频设置',
       items: [

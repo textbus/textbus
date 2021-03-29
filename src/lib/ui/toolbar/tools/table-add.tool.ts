@@ -8,7 +8,7 @@ import { FormatData } from '../../../core/format-data';
 export const tableAddToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table'],
   tooltip: '表格',
-  menuFactory() {
+  viewFactory() {
     const form = new Form({
       mini: true,
       items: [
