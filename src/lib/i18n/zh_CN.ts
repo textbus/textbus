@@ -61,7 +61,9 @@ export const i18n_zh_CN: I18NConfig = {
           addressPlaceholder: '请输入链接地址',
           uploadBtnText: '上传新音频',
           errorMessage: '必填项不能为空',
-          switchLabel: '自动播放'
+          switchLabel: '自动播放',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
       blockBackgroundColorTool: {
@@ -81,7 +83,9 @@ export const i18n_zh_CN: I18NConfig = {
           bottomLabel: '下边距',
           bottomPlaceholder: '请输入下边距',
           leftLabel: '左边距',
-          leftPlaceholder: '请输入左边距'
+          leftPlaceholder: '请输入左边距',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
       blockPaddingTool: {
@@ -95,7 +99,9 @@ export const i18n_zh_CN: I18NConfig = {
           bottomLabel: '下边距',
           bottomPlaceholder: '请输入下边距',
           leftLabel: '左边距',
-          leftPlaceholder: '请输入左边距'
+          leftPlaceholder: '请输入左边距',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
       blockquoteTool: {
@@ -179,7 +185,9 @@ export const i18n_zh_CN: I18NConfig = {
             floatToLeftLabel: '到左边',
             floatToRightLabel: '到右边'
           },
-          marginLabel: '边距设置'
+          marginLabel: '边距设置',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
       inlineMarginTool: {
@@ -193,7 +201,9 @@ export const i18n_zh_CN: I18NConfig = {
           bottomLabel: '下边距',
           bottomPlaceholder: '请输入下边距',
           leftLabel: '左边距',
-          leftPlaceholder: '请输入左边距'
+          leftPlaceholder: '请输入左边距',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
       inlinePaddingTool: {
@@ -207,10 +217,11 @@ export const i18n_zh_CN: I18NConfig = {
           bottomLabel: '下边距',
           bottomPlaceholder: '请输入下边距',
           leftLabel: '左边距',
-          leftPlaceholder: '请输入左边距'
+          leftPlaceholder: '请输入左边距',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
         }
       },
-
     }
   },
   components: {

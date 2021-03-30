@@ -148,6 +148,8 @@ export const imageToolConfig: FormToolConfig = {
     return new Form({
       title: childI18n.get('title'),
       maxHeight: '260px',
+      cancelBtnText: childI18n.get('cancelBtnText'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
       items: [
         new FormTextField({
           label: childI18n.get('linkLabel'),

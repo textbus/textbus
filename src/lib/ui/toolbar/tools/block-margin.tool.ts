@@ -13,6 +13,8 @@ export const blockMarginToolConfig: DropdownToolConfig = {
     return new Form({
       mini: true,
       editProperty: 'styles',
+      cancelBtnText: childI18n.get('cancelBtnText'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
       items: [
         new FormTextField({
           label: childI18n.get('topLabel'),

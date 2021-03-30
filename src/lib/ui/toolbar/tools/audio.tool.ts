@@ -11,6 +11,8 @@ export const audioToolConfig: FormToolConfig = {
     const childI18n = i18n.getContext('plugins.toolbar.audioTool.view');
     return new Form({
       title: childI18n.get('title'),
+      cancelBtnText: childI18n.get('cancelBtnText'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
       items: [
         new FormTextField({
           label: childI18n.get('addressLabel'),
