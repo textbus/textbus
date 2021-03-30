@@ -6,33 +6,33 @@ import { blockPaddingFormatter } from '../../../formatter/padding.formatter';
 import { BlockPaddingCommander } from '../commands/_api';
 
 export const blockPaddingToolConfig: DropdownToolConfig = {
-  // iconClasses: ['textbus-icon-link'],
-  label: '块内边距',
-  tooltip: '块内边距',
-  viewFactory() {
+  label: i18n => i18n.get('plugins.toolbar.blockPaddingTool.label'),
+  tooltip: i18n => i18n.get('plugins.toolbar.blockPaddingTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.blockPaddingTool.view')
     return new Form({
       mini: true,
       editProperty: 'styles',
       items: [
         new FormTextField({
-          label: '上边距',
+          label: childI18n.get('topLabel'),
           name: 'paddingTop',
-          placeholder: '请输入上边距'
+          placeholder: childI18n.get('topPlaceholder')
         }),
         new FormTextField({
-          label: '右边距',
+          label: childI18n.get('rightLabel'),
           name: 'paddingRight',
-          placeholder: '请输入右边距'
+          placeholder: childI18n.get('rightPlaceholder')
         }),
         new FormTextField({
-          label: '下边距',
+          label: childI18n.get('bottomLabel'),
           name: 'paddingBottom',
-          placeholder: '请输入下边距'
+          placeholder: childI18n.get('bottomPlaceholder')
         }),
         new FormTextField({
-          label: '左边距',
+          label: childI18n.get('leftLabel'),
           name: 'paddingLeft',
-          placeholder: '请输入左边距'
+          placeholder: childI18n.get('leftPlaceholder')
         }),
       ]
     });

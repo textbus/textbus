@@ -3,6 +3,7 @@ import { MediaMatcher } from '../matcher/media.matcher';
 import { ImageComponent, PreComponent } from '../../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
 import { FormTool, FormToolConfig } from '../toolkit/_api';
+import { I18n } from '../../../i18n';
 
 class MarginSetter implements FormItem<string> {
   name = 'margin';
@@ -10,14 +11,14 @@ class MarginSetter implements FormItem<string> {
 
   private inputs: HTMLInputElement[] = [];
 
-  constructor() {
+  constructor(label: string) {
     this.elementRef = createElement('div', {
       classes: ['textbus-form-group'],
       children: [
         createElement('label', {
           classes: ['textbus-control-label'],
           children: [
-            createTextNode('边距设置')
+            createTextNode(label)
           ]
         }),
         createElement('div', {
@@ -76,20 +77,19 @@ interface Size {
   height?: string;
 }
 
-class SizeSetter implements FormItem<any> {
+class SizeSetter implements FormItem {
   elementRef: HTMLElement;
 
   private inputs: HTMLInputElement[] = [];
   constructor(public name: string,
-              private label: string,
-              private size: Size = {}) {
+              private i18n: I18n) {
     this.elementRef = createElement('div', {
       classes: ['textbus-form-group'],
       children: [
         createElement('label', {
           classes: ['textbus-control-label'],
           children: [
-            createTextNode(this.label)
+            createTextNode(i18n.get('label'))
           ]
         }),
         createElement('div', {
@@ -99,12 +99,12 @@ class SizeSetter implements FormItem<any> {
               classes: ['textbus-toolbar-image-size-setter'],
               children: [
                 createElement('input', {
-                  attrs: {type: 'text', placeholder: '宽度'},
+                  attrs: {type: 'text', placeholder: i18n.get('widthPlaceholder')},
                   classes: ['textbus-form-control']
                 }),
                 createTextNode(' * '),
                 createElement('input', {
-                  attrs: {type: 'text', placeholder: '高度'},
+                  attrs: {type: 'text', placeholder: i18n.get('heightPlaceholder')},
                   classes: ['textbus-form-control']
                 })
               ]
@@ -142,44 +142,45 @@ class SizeSetter implements FormItem<any> {
 
 export const imageToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-image'],
-  tooltip: '图片',
-  viewFactory() {
+  tooltip: i18n => i18n.get('plugins.toolbar.imageTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.imageTool.view');
     return new Form({
-      title: '图片设置',
+      title: childI18n.get('title'),
       maxHeight: '260px',
       items: [
         new FormTextField({
-          label: '图片链接地址',
+          label: childI18n.get('linkLabel'),
           name: 'src',
-          placeholder: '请输入链接地址',
+          placeholder: childI18n.get('linkInputPlaceholder'),
           canUpload: true,
           uploadType: 'image',
-          uploadBtnText: '上传新图片',
+          uploadBtnText: childI18n.get('uploadBtnText'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('validateErrorMessage');
             }
             return null;
           }
         }),
-        new SizeSetter('size', '宽高设置'),
-        new SizeSetter('maxSize', '最大尺寸'),
+        new SizeSetter('size', childI18n.getContext('sizeSetter')),
+        new SizeSetter('maxSize', childI18n.getContext('maxSizeSetter')),
         new FormRadio({
-          label: '浮动设置',
+          label: childI18n.get('float.label'),
           name: 'float',
           values: [{
-            label: '不浮动',
+            label: childI18n.get('float.noFloatLabel'),
             value: 'none',
             default: true
           }, {
-            label: '到左边',
+            label: childI18n.get('float.floatToLeftLabel'),
             value: 'left'
           }, {
-            label: '到右边',
+            label: childI18n.get('float.floatToRightLabel'),
             value: 'right'
           }]
         }),
-        new MarginSetter()
+        new MarginSetter(childI18n.get('marginLabel'))
       ]
     })
   },

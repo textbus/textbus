@@ -6,10 +6,10 @@ import { blockMarginFormatter } from '../../../formatter/margin.formatter';
 import { BlockMarginCommander } from '../commands/_api';
 
 export const blockMarginToolConfig: DropdownToolConfig = {
-  label: i18n => i18n.get('plugins.toolbar.blockMargin.label'),
-  tooltip: i18n => i18n.get('plugins.toolbar.blockMargin.tooltip'),
+  label: i18n => i18n.get('plugins.toolbar.blockMarginTool.label'),
+  tooltip: i18n => i18n.get('plugins.toolbar.blockMarginTool.tooltip'),
   viewFactory(i18n) {
-    const childI18n = i18n.getContext('plugins.toolbar.blockMargin.view');
+    const childI18n = i18n.getContext('plugins.toolbar.blockMarginTool.view');
     return new Form({
       mini: true,
       editProperty: 'styles',

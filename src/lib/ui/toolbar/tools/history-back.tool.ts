@@ -4,7 +4,7 @@ import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 
 export const historyBackToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-history-back'],
-  tooltip: '撤消',
+  tooltip: i18n => i18n.get('plugins.toolbar.historyBackTool.tooltip'),
   matcher: new HistoryMatcher('back'),
   commanderFactory() {
     return new HistoryCommander('back');

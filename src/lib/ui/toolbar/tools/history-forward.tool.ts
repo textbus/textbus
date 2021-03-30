@@ -4,7 +4,7 @@ import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 
 export const historyForwardToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-history-forward'],
-  tooltip: '重做',
+  tooltip: i18n => i18n.get('plugins.toolbar.historyForwardTool.tooltip'),
   matcher: new HistoryMatcher('forward'),
   commanderFactory() {
     return new HistoryCommander('forward');

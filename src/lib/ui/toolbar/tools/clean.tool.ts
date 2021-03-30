@@ -4,7 +4,7 @@ import { ButtonTool, ButtonToolConfig } from '../toolkit/_api';
 
 export const cleanToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-clear-formatting'],
-  tooltip: '清除格式',
+  tooltip: i18n => i18n.get('plugins.toolbar.cleanTool.tooltip'),
   keymap: {
     ctrlKey: true,
     shiftKey: true,

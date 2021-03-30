@@ -65,7 +65,10 @@ export const i18n_zh_CN: I18NConfig = {
         }
       },
       blockBackgroundColorTool: {
-        tooltip: '块背景颜色'
+        tooltip: '块背景颜色',
+        view: {
+          btnText: '确定'
+        }
       },
       blockMarginTool: {
         label: '块外边距',
@@ -80,7 +83,134 @@ export const i18n_zh_CN: I18NConfig = {
           leftLabel: '左边距',
           leftPlaceholder: '请输入左边距'
         }
-      }
+      },
+      blockPaddingTool: {
+        label: '块内边距',
+        tooltip: '块内边距',
+        view: {
+          topLabel: '上边距',
+          topPlaceholder: '请输入上边距',
+          rightLabel: '右边距',
+          rightPlaceholder: '请输入右边距',
+          bottomLabel: '下边距',
+          bottomPlaceholder: '请输入下边距',
+          leftLabel: '左边距',
+          leftPlaceholder: '请输入左边距'
+        }
+      },
+      blockquoteTool: {
+        tooltip: '引用'
+      },
+      boldTool: {
+        tooltip: '加粗'
+      },
+      cleanTool: {
+        tooltip: '清除格式'
+      },
+      codeTool: {
+        tooltip: '代码'
+      },
+      colorTool: {
+        tooltip: '文字颜色',
+        view: {
+          btnText: '确定'
+        }
+      },
+      emojiTool: {
+        tooltip: '表情'
+      },
+      findTool: {
+        tooltip: '查找与替换',
+        view: {
+          findLabel: '查找',
+          findPlaceholder: '请输入查找内容',
+          nextBtnText: '下一个',
+          replaceLabel: '替换',
+          replacePlaceholder: '替换成',
+          replaceBtnText: '替换',
+          replaceAllBtnText: '全部替换'
+        }
+      },
+      fontFamilyTool: {
+        tooltip: '字体',
+        defaultFamilyText: '默认字体'
+      },
+      fontSizeTool: {
+        tooltip: '字体大小',
+        defaultSizeText: '默认'
+      },
+      headingTool: {
+        tooltip: '段落与标题',
+        h1: '标题1',
+        h2: '标题2',
+        h3: '标题3',
+        h4: '标题4',
+        h5: '标题5',
+        h6: '标题6',
+        paragraph: '正文',
+      },
+      historyBackTool: {
+        tooltip: '撤销'
+      },
+      historyForwardTool: {
+        tooltip: '重做'
+      },
+      imageTool: {
+        tooltip: '图片',
+        view: {
+          title: '图片设置',
+          linkLabel: '图片链接地址',
+          linkInputPlaceholder: '请输入链接地址',
+          uploadBtnText: '上传新图片',
+          validateErrorMessage: '必填项不能为空',
+          sizeSetter: {
+            label: '宽高设置',
+            widthPlaceholder: '宽度',
+            heightPlaceholder: '高度'
+          },
+          maxSizeSetter: {
+            label: '最大尺寸',
+            widthPlaceholder: '宽度',
+            heightPlaceholder: '高度'
+          },
+          float: {
+            label: '浮动设置',
+            noFloatLabel: '不浮动',
+            floatToLeftLabel: '到左边',
+            floatToRightLabel: '到右边'
+          },
+          marginLabel: '边距设置'
+        }
+      },
+      inlineMarginTool: {
+        label: '外边距',
+        tooltip: '外边距',
+        view: {
+          topLabel: '上边距',
+          topPlaceholder: '请输入上边距',
+          rightLabel: '右边距',
+          rightPlaceholder: '请输入右边距',
+          bottomLabel: '下边距',
+          bottomPlaceholder: '请输入下边距',
+          leftLabel: '左边距',
+          leftPlaceholder: '请输入左边距'
+        }
+      },
+      inlinePaddingTool: {
+        label: '内边距',
+        tooltip: '内边距',
+        view: {
+          topLabel: '上边距',
+          topPlaceholder: '请输入上边距',
+          rightLabel: '右边距',
+          rightPlaceholder: '请输入右边距',
+          bottomLabel: '下边距',
+          bottomPlaceholder: '请输入下边距',
+          leftLabel: '左边距',
+          leftPlaceholder: '请输入左边距'
+        }
+      },
+
     }
   },
   components: {

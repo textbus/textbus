@@ -8,8 +8,8 @@ import { PreComponent } from '../../../components/pre.component';
 export const blockBackgroundToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-paint-bucket'],
   tooltip: i18n => i18n.get('plugins.toolbar.blockBackgroundColorTool.tooltip'),
-  viewFactory() {
-    return new Palette('backgroundColor');
+  viewFactory(i18n) {
+    return new Palette('backgroundColor', i18n.get('plugins.toolbar.blockBackgroundColorTool.view.btnText'));
   },
   matcher: new FormatMatcher(blockBackgroundColorFormatter, [PreComponent]),
   commanderFactory() {

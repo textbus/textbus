@@ -45,7 +45,7 @@ class Emoji implements DropdownViewer {
 
 export const emojiToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-emoji'],
-  tooltip: '表情',
+  tooltip: i18n => i18n.get('plugins.toolbar.emojiTool.tooltip'),
   commanderFactory() {
     return new EmojiCommander()
   },

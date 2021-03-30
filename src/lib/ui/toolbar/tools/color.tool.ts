@@ -7,9 +7,9 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const colorToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-color'],
-  tooltip: '文字颜色',
-  viewFactory() {
-    return new Palette('color');
+  tooltip: i18n => i18n.get('plugins.toolbar.colorTool.tooltip'),
+  viewFactory(i18n) {
+    return new Palette('color', i18n.get('plugins.toolbar.colorTool.view.btnText'));
   },
   matcher: new FormatMatcher(colorFormatter, [PreComponent]),
   commanderFactory() {

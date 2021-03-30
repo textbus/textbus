@@ -5,7 +5,7 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const headingToolConfig: SelectToolConfig = {
-  tooltip: '段落与标题',
+  tooltip: i18n => i18n.get('plugins.toolbar.headingTool.tooltip'),
   matcher: new BlockMatcher(BlockComponent, 'h1,h2,h3,h4,h5,h6,p'.split(','), [PreComponent]),
   matchOption(t) {
     if (t instanceof BlockComponent) {
@@ -20,7 +20,7 @@ export const headingToolConfig: SelectToolConfig = {
     return new BlockCommander();
   },
   options: [{
-    label: '标题1',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h1'),
     classes: ['textbus-toolbar-h1'],
     value: 'h1',
     keymap: {
@@ -28,7 +28,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '1'
     }
   }, {
-    label: '标题2',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h2'),
     classes: ['textbus-toolbar-h2'],
     value: 'h2',
     keymap: {
@@ -36,7 +36,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '2'
     }
   }, {
-    label: '标题3',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h3'),
     classes: ['textbus-toolbar-h3'],
     value: 'h3',
     keymap: {
@@ -44,7 +44,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '3'
     }
   }, {
-    label: '标题4',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h4'),
     classes: ['textbus-toolbar-h4'],
     value: 'h4',
     keymap: {
@@ -52,7 +52,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '4'
     }
   }, {
-    label: '标题5',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h5'),
     classes: ['textbus-toolbar-h5'],
     value: 'h5',
     keymap: {
@@ -60,7 +60,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '5'
     }
   }, {
-    label: '标题6',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.h6'),
     classes: ['textbus-toolbar-h6'],
     value: 'h6',
     keymap: {
@@ -68,7 +68,7 @@ export const headingToolConfig: SelectToolConfig = {
       key: '6'
     }
   }, {
-    label: '正文',
+    label: i18n => i18n.get('plugins.toolbar.headingTool.paragraph'),
     value: 'p',
     default: true,
     keymap: {

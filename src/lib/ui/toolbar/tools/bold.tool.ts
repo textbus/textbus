@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const boldToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-bold'],
-  tooltip: '加粗',
+  tooltip: i18n => i18n.get('plugins.toolbar.boldTool.tooltip'),
   keymap: {
     ctrlKey: true,
     key: 'b'

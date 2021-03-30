@@ -6,9 +6,9 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const fontFamilyToolConfig: SelectToolConfig = {
-  tooltip: '字体',
+  tooltip: i18n => i18n.get('plugins.toolbar.fontFamilyTool.tooltip'),
   options: [{
-    label: '默认字体',
+    label: i18n => i18n.get('plugins.toolbar.fontFamilyTool.defaultFamilyText'),
     classes: ['textbus-toolbar-font-family-inherit'],
     value: '',
     default: true

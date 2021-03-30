@@ -3,6 +3,7 @@ import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
 import { AdditionalTool, AdditionalToolConfig, AdditionalViewer } from '../toolkit/_api';
 import { FindCommander, FindAndReplaceRule } from '../commands/find.commander';
+import { I18n } from '../../../i18n';
 
 class FindForm implements AdditionalViewer {
   onAction: Observable<FindAndReplaceRule>;
@@ -11,30 +12,31 @@ class FindForm implements AdditionalViewer {
   private actionEvent = new Subject<FindAndReplaceRule>();
   private destroyEvent = new Subject<void>();
 
-  constructor() {
+  constructor(i18n: I18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.findTool.view')
     this.onAction = this.actionEvent.asObservable();
     this.onDestroy = this.destroyEvent.asObservable();
     this.elementRef.classList.add('textbus-form', 'textbus-form-inline');
     this.elementRef.innerHTML = `
 <div class="textbus-form-group">
-  <label class="textbus-control-label">查找</label>
+  <label class="textbus-control-label">${childI18n.get('findLabel')}</label>
   <div class="textbus-control-value">
-    <input type="text" class="textbus-form-control" placeholder="请输入查找内容">
+    <input type="text" class="textbus-form-control" placeholder="${childI18n.get('findPlaceholder')}">
   </div>
   <div>
-    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">下一个</button>   
+    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">${childI18n.get('nextBtnText')}</button>
   </div>
 </div>
 <div class="textbus-form-group">
-  <label class="textbus-control-label">替换</label>
+  <label class="textbus-control-label">${childI18n.get('replaceLabel')}</label>
   <div class="textbus-control-value">
     <div class="textbus-input-group">
-      <input type="text" class="textbus-form-control" placeholder="替换成">
-      <button class="textbus-btn textbus-btn-default" type="button">替换</button>
+      <input type="text" class="textbus-form-control" placeholder="${childI18n.get('replacePlaceholder')}">
+      <button class="textbus-btn textbus-btn-default" type="button">${childI18n.get('replaceBtnText')}</button>
     </div>
   </div>
   <div>
-    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">全部替换</button>
+    &nbsp;<button class="textbus-btn textbus-btn-default" type="button">${childI18n.get('replaceAllBtnText')}</button>
   </div>
 </div>
 `;
@@ -97,14 +99,14 @@ class FindForm implements AdditionalViewer {
 }
 
 export const findToolConfig: AdditionalToolConfig = {
-  tooltip: '查找与替换',
+  tooltip: i18n => i18n.get('plugins.toolbar.findTool.tooltip'),
   iconClasses: ['textbus-icon-search'],
   keymap: {
     ctrlKey: true,
     key: 'f'
   },
-  viewFactory(): AdditionalViewer {
-    return new FindForm();
+  viewFactory(i18n): AdditionalViewer {
+    return new FindForm(i18n);
   },
   commanderFactory() {
     return new FindCommander()

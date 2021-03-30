@@ -5,7 +5,7 @@ import { BlockComponent } from '../../../components/block.component';
 
 export const blockquoteToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-quotes-right'],
-  tooltip: '引用',
+  tooltip: i18n => i18n.get('plugins.toolbar.blockquoteTool.tooltip'),
   keymap: /win(dows|32|64)/i.test(navigator.userAgent) ? { // windows 下无法触发 ctrl + ' 号 keydown 事件，原因未知
     altKey: true,
     key: '\''

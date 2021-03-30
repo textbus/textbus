@@ -6,11 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const codeToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-code'],
-  tooltip: '代码',
-  // keymap: {
-  //   ctrlKey: true,
-  //   key: ''
-  // },
+  tooltip: i18n => i18n.get('plugins.toolbar.codeTool.tooltip'),
   matcher: new FormatMatcher(codeFormatter, [PreComponent]),
   commanderFactory() {
     return new InlineCommander('code', codeFormatter);
