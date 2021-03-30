@@ -28,7 +28,7 @@ export const i18n_zh_CN: I18NConfig = {
     }
   },
   /** 核心库依赖结束 */
-  /** 以下的其它配置，可根据自己的组件及插件配置添加或删除 */
+  /** 以下配置，可根据自己的组件及插件配置添加或删除 */
   plugins: {
     componentStage: {
       switchText: '组件库',
