@@ -6,11 +6,13 @@ import { TBPlugin } from '../plugin';
 import { UIDialog } from './dialog.plugin';
 import { Form, FormTextField } from '../uikit/_api';
 import { I18n } from '../../i18n';
+import { FileUploader } from '../file-uploader';
 
 @Injectable()
 export class PasteHandlePlugin implements TBPlugin {
   constructor(private input: Input,
               private i18n: I18n,
+              private fileUploader: FileUploader,
               private dialog: UIDialog) {
   }
 
@@ -66,6 +68,7 @@ export class PasteHandlePlugin implements TBPlugin {
             })
           ]
         })
+        form.setFileUploader(this.fileUploader);
         this.dialog.dialog(form.elementRef);
 
         const sub = race(form.onClose, form.onComplete).subscribe(result => {
