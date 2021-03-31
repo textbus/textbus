@@ -45,13 +45,13 @@ export class I18n {
 
   private getLabelByTokens(config: I18NConfig, tokens: string[]): any {
     if (!config || tokens.length === 0) {
-      return '';
+      return null;
     }
     let value: any = config;
     for (let i = 0; i < tokens.length; i++) {
       value = value[tokens[i]];
-      if (!value) {
-        return '';
+      if (typeof value === 'undefined') {
+        return null;
       }
     }
     return value;
