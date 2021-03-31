@@ -99,7 +99,7 @@ export abstract class AbstractComponent extends Marker {
   /**
    * 克隆自己，返回一个完全一样的副本。
    */
-  abstract clone(): AbstractComponent;
+  abstract clone(): AbstractComponent & ThisType<this>;
 }
 
 /**
