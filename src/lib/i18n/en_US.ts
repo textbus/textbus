@@ -147,12 +147,12 @@ export const i18n_en_US: I18NConfig = {
       },
       headingTool: {
         tooltip: 'paragraph and heading',
-        h1: 'h1',
-        h2: 'h2',
-        h3: 'h3',
-        h4: 'h4',
-        h5: 'h5',
-        h6: 'h6',
+        h1: 'heading 1',
+        h2: 'heading 2',
+        h3: 'heading 3',
+        h4: 'heading 4',
+        h5: 'heading 5',
+        h6: 'heading 6',
         paragraph: 'paragraph',
       },
       historyBackTool: {
@@ -297,9 +297,9 @@ export const i18n_en_US: I18NConfig = {
         view: {
           confirmBtnText: 'ok',
           rowLabel: 'row count',
-          rowPlaceholder: '',
+          rowPlaceholder: 'row count',
           columnLabel: 'column count',
-          columnPlaceholder: '',
+          columnPlaceholder: 'column count',
           useTextBusStyleLabel: 'use TextBus style'
         }
       },

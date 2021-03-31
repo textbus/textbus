@@ -4,8 +4,10 @@ export interface I18NConfig {
   editor: { [key: string]: any }; // core dependency
   plugins?: { [key: string]: any };
   components?: { [key: string]: any };
+
   [key: string]: any;
 }
+
 export type I18nString = string | ((i18n: I18n) => string);
 
 @Injectable()
@@ -16,7 +18,11 @@ export class I18n {
 
   get(path: string): string {
     const tokens = this.parse(path);
-    const value = this.getLabelByTokens(this.customConfig, tokens) || this.getLabelByTokens(this.defaultConfig, tokens);
+    const customValue = this.getLabelByTokens(this.customConfig, tokens);
+    if (typeof customValue === 'string') {
+      return customValue;
+    }
+    const value = this.getLabelByTokens(this.defaultConfig, tokens);
     return typeof value === 'string' ? value : '';
   }
 
