@@ -23,7 +23,7 @@ export class I18n {
     const tokens = this.parse(path);
     const customConfig = this.getLabelByTokens(this.customConfig, tokens) || {};
     const defaultConfig = this.getLabelByTokens(this.defaultConfig, tokens) || {};
-    return new I18n(customConfig, defaultConfig);
+    return new I18n(defaultConfig, customConfig);
   }
 
   joinTemplate(template: string, ...values: Array<string | number>) {

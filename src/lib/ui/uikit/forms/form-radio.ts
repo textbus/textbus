@@ -1,6 +1,6 @@
 import { FormRadioGroupParams, AttrState, FormItem } from './help';
 
-export class FormRadio implements FormItem<any> {
+export class FormRadio implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private readonly inputs: HTMLInputElement[];

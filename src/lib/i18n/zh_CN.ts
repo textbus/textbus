@@ -271,7 +271,8 @@ export const i18n_zh_CN: I18NConfig = {
         tooltip: '有序列表'
       },
       preTool: {
-        tooltip: '代码块'
+        tooltip: '代码块',
+        unknown: '无'
       },
       rightToLeftTool: {
         tooltip: '从右向左'

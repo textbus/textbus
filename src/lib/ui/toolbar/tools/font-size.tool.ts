@@ -6,11 +6,11 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const fontSizeToolConfig: SelectToolConfig = {
-  tooltip: i18n => i18n.get('plugins.toolbar.fontSize.tooltip'),
+  tooltip: i18n => i18n.get('plugins.toolbar.fontSizeTool.tooltip'),
   iconClasses: ['textbus-icon-font-size'],
   mini: true,
   options: [{
-    label: i18n => i18n.get('plugins.toolbar.fontSize.defaultSizeText'),
+    label: i18n => i18n.get('plugins.toolbar.fontSizeTool.defaultSizeText'),
     classes: ['textbus-toolbar-font-size-inherit'],
     value: '',
     default: true

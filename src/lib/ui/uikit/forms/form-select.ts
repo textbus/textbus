@@ -1,6 +1,6 @@
 import { AttrState, FormItem, FormSelectParams } from './help';
 
-export class FormSelect implements FormItem<any> {
+export class FormSelect implements FormItem {
   elementRef = document.createElement('div');
   name: string;
   private select: HTMLSelectElement;

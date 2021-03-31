@@ -39,7 +39,7 @@ export const preToolConfig: SelectToolConfig = {
     value: 'Stylus'
   }, {
     value: 'bash',
-    label: '无',
+    label: i18n => i18n.get('plugins.toolbar.preTool.unknown'),
     default: true
   }],
   matcher: new CodeMatcher(),

@@ -53,14 +53,17 @@ export class SelectTool implements ToolFactory {
 
   create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
     const {i18n, limitElement} = params;
+    const map = new Map<SelectOptionConfig, SelectOptionConfig>();
     const config = {
       ...this.config,
       tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip,
       options: this.config.options.map(option => {
-        return {
+        const o = {
           ...option,
           label: typeof option.label === 'function' ? option.label(i18n) : option.label
         }
+        map.set(option, o);
+        return o;
       })
     }
     const subject = new Subject();
@@ -90,7 +93,8 @@ export class SelectTool implements ToolFactory {
         if (selectionMatchState.matchData) {
           const option = config.matchOption?.(selectionMatchState.matchData);
           if (option) {
-            dropdown.button.label.innerText = option.label || option.value;
+            const o = map.get(option);
+            dropdown.button.label.innerText = o.label || o.value;
             dropdown.disabled = false;
             dropdown.highlight = true;
             return;
