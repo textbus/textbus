@@ -6,6 +6,7 @@ export interface I18NConfig {
   components?: { [key: string]: any };
   [key: string]: any;
 }
+export type I18nString = string | ((i18n: I18n) => string);
 
 @Injectable()
 export class I18n {

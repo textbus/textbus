@@ -1,11 +1,11 @@
 import { Observable, Subscription } from 'rxjs';
 
-import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
+import { Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { HighlightState } from '../help';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../commander';
 import { UIKit } from '../../uikit/uikit';
-import { I18n } from '../../../i18n';
+import { I18n, I18nString } from '../../../i18n';
 
 export interface DropdownViewer<T = any> {
   elementRef: HTMLElement;

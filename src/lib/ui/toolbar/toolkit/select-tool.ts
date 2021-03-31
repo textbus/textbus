@@ -1,11 +1,12 @@
 import { Subject } from 'rxjs';
 
-import { I18nString, Tool, ToolFactory, ToolFactoryParams } from '../help';
+import { Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { HighlightState } from '../help';
 import { Commander } from '../commander';
 import { Keymap, FormatData, AbstractComponent } from '../../../core/_api';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { UIKit } from '../../uikit/uikit';
+import { I18nString } from '../../../i18n';
 
 /**
  * Select 工具选项配置项

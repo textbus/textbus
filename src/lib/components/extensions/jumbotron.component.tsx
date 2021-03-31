@@ -11,6 +11,7 @@ import {
 import { ComponentCreator, UIDialog } from '../../ui/_api';
 import { BlockComponent } from '../_api';
 import { FileUploader, Form, FormTextField } from '../../ui/_api';
+import { I18n } from '../../i18n';
 
 export interface JumbotronOptions {
   minHeight: string;
@@ -21,30 +22,33 @@ export interface JumbotronOptions {
 
 @Injectable()
 class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
-  constructor(private uploader: FileUploader) {
+  constructor(private uploader: FileUploader,
+              private i18n: I18n) {
   }
 
   create(instance: JumbotronComponent): ComponentControlPanelView {
+    const childI18n = this.i18n.getContext('components.jumbotronComponent.setter');
     const form = new Form({
       mini: true,
+      confirmBtnText: childI18n.get('confirmBtnText'),
       items: [
         new FormTextField({
           name: 'minHeight',
           value: instance.options.minHeight,
-          placeholder: '请输入巨幕最小高度',
-          label: '巨幕最小高度'
+          placeholder: childI18n.get('minHeightInputPlaceholder'),
+          label: childI18n.get('minHeightLabel')
         }),
         new FormTextField({
-          label: '背景图片地址',
+          label: childI18n.get('backgroundImageLabel'),
           name: 'backgroundImage',
-          placeholder: '请输入背景图片地址',
+          placeholder: childI18n.get('backgroundImageInputPlaceholder'),
           canUpload: true,
           uploadType: 'image',
-          uploadBtnText: '上传新图片',
+          uploadBtnText: childI18n.get('uploadBtnText'),
           value: instance.options.backgroundImage,
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('validateErrorMessage');
             }
             return null;
           }
@@ -60,7 +64,7 @@ class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
       instance.markAsDirtied();
     });
     return {
-      title: '巨幕设置',
+      title: childI18n.get('title'),
       view: form.elementRef
     }
   }
@@ -136,30 +140,33 @@ export class JumbotronComponent extends DivisionAbstractComponent {
 }
 
 export const jumbotronComponentExample: ComponentCreator = {
-  name: '巨幕',
+  name: i18n => i18n.get('components.jumbotronComponent.creator.name'),
   category: 'TextBus',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#6ad1ec"/><stop offset="100%" stop-color="#fff"/></linearGradient></defs><g><rect fill="url(#bg)" height="100%" width="100%"/></g><path fill="#fff" opacity="0.3" d="M81.25 28.125c0 5.178-4.197 9.375-9.375 9.375s-9.375-4.197-9.375-9.375 4.197-9.375 9.375-9.375 9.375 4.197 9.375 9.375z"></path><path fill="#fff" opacity="0.3"  d="M87.5 81.25h-75v-12.5l21.875-37.5 25 31.25h6.25l21.875-18.75z"></path><text font-family="Helvetica, Arial, sans-serif" font-size="12" x="10" y="25" stroke-width="0.3" stroke="#000" fill="#000000">Hello, world!</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="40" stroke-width="0" stroke="#000" fill="#000000">我是 TextBus 富文本编辑器。</text><text font-family="Helvetica, Arial, sans-serif" font-size="6" x="10" y="50" stroke-width="0" stroke="#000" fill="#000000">别来无恙？</text></svg>')}">`,
-  factory(dialog: UIDialog, fileUploader: FileUploader) {
+  factory(dialog: UIDialog, fileUploader: FileUploader, i18n) {
+    const childI18n = i18n.getContext('components.jumbotronComponent.creator.form');
 
     const form = new Form({
-      title: '巨幕设置',
+      title: childI18n.get('title'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
+      cancelBtnText: childI18n.get('cancelBtnText'),
       items: [
         new FormTextField({
           name: 'minHeight',
           value: '200px',
-          placeholder: '请输入巨幕最小高度',
-          label: '巨幕最小高度'
+          placeholder: childI18n.get('minHeightInputPlaceholder'),
+          label: childI18n.get('minHeightLabel')
         }),
         new FormTextField({
-          label: '背景图片地址',
+          label: childI18n.get('backgroundImageLabel'),
           name: 'backgroundImage',
-          placeholder: '请输入背景图片地址',
+          placeholder: childI18n.get('backgroundImageInputPlaceholder'),
           canUpload: true,
           uploadType: 'image',
-          uploadBtnText: '上传新图片',
+          uploadBtnText: childI18n.get('uploadBtnText'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('validateErrorMessage');
             }
             return null;
           }

@@ -16,8 +16,6 @@ export enum HighlightState {
   Disabled = 'Disabled'
 }
 
-export type I18nString = string | ((i18n: I18n) => string);
-
 export interface Tool {
   onAction: Observable<any>;
   keymaps: KeymapAction[];

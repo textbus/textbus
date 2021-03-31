@@ -6,7 +6,7 @@ import { Commander } from '../commander';
 import { Keymap } from '../../../core/_api';
 import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { UIKit } from '../../uikit/uikit';
-import { I18nString } from '../help';
+import { I18nString } from '../../../i18n';
 
 export interface ActionConfig {
   /** 设置当前 action 的 value */

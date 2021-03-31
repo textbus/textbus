@@ -62,6 +62,9 @@
   font-size: 12px;
   line-height: 30px;
   margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .textbus-control-panel-fixed-btn {

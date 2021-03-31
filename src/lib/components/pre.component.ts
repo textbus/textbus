@@ -171,8 +171,7 @@ const languageList = [{
 }, {
   value: 'Stylus',
 }, {
-  value: 'bash',
-  label: '无',
+  value: 'Bash',
 }];
 
 @Injectable()

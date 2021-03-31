@@ -5,8 +5,8 @@ import { Keymap } from '../../../core/_api';
 import { Commander } from '../commander';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { createElement, UIKit } from '../../uikit/uikit';
-import { HighlightState, I18nString, ToolFactory } from '../help';
-import { I18n } from '../../../i18n';
+import { HighlightState, ToolFactory } from '../help';
+import { I18n, I18nString } from '../../../i18n';
 
 export interface AdditionalViewer {
   elementRef: HTMLElement;

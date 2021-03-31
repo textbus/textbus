@@ -15,14 +15,14 @@ import { createElement, createTextNode } from '../uikit/uikit';
 import { Tab } from '../tab';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
-import { I18n } from '../../i18n';
+import { I18n, I18nString } from '../../i18n';
 
 export interface ComponentCreator {
   example: string | HTMLElement;
-  name: string;
-  category?: string;
+  name: I18nString;
+  category?: I18nString;
 
-  factory(dialog: UIDialog, delegate: FileUploader): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
+  factory(dialog: UIDialog, delegate: FileUploader, i18n: I18n): AbstractComponent | Promise<AbstractComponent> | Observable<AbstractComponent>;
 }
 
 export class LibSwitch {
@@ -141,7 +141,8 @@ export class ComponentStagePlugin implements TBPlugin {
   private classify(libs: ComponentCreator[]) {
     const categories = new Map<string, ComponentCreator[]>();
     libs.forEach(item => {
-      const categoryName = item.category || this.i18n.get('plugins.componentStage.defaultCategoryName');
+      const category = typeof item.category === 'function' ? item.category(this.i18n) : item.category;
+      const categoryName = category || this.i18n.get('plugins.componentStage.defaultCategoryName');
       if (!categories.has(categoryName)) {
         categories.set(categoryName, []);
       }
@@ -206,12 +207,13 @@ export class ComponentStagePlugin implements TBPlugin {
   }
 
   private addExample(example: ComponentCreator) {
-    const {wrapper, card} = ComponentStagePlugin.createViewer(example.example, example.name);
+    const name = typeof example.name === 'function' ? example.name(this.i18n) : example.name
+    const {wrapper, card} = ComponentStagePlugin.createViewer(example.example, name);
     card.addEventListener('click', () => {
       if (this.editorController.readonly || this.editorController.sourceCodeMode) {
         return;
       }
-      const t = example.factory(this.dialogManager, this.fileUploader);
+      const t = example.factory(this.dialogManager, this.fileUploader, this.i18n);
       if (t instanceof AbstractComponent) {
         this.insertComponent(t);
       } else if (t instanceof Promise) {

@@ -272,7 +272,6 @@ export const i18n_zh_CN: I18NConfig = {
       },
       preTool: {
         tooltip: '代码块',
-        unknown: '无'
       },
       rightToLeftTool: {
         tooltip: '从右向左'
@@ -393,6 +392,114 @@ export const i18n_zh_CN: I18NConfig = {
       deleteNextRow: '删除后一行',
       mergeCells: '合并单元格',
       splitCells: '拆分单元格'
+    },
+    baiduMapComponent: {
+      creator: {
+        name: '百度地图',
+        form: {
+          placeholder: '请输入地址',
+          searchBtnText: '搜索',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
+        }
+      }
+    },
+    imageCardComponent: {
+      creator: {
+        name: '卡片'
+      }
+    },
+    jumbotronComponent: {
+      creator: {
+        name: '巨幕',
+        form: {
+          title: '巨幕设置',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消',
+          minHeightLabel: '巨幕最小高度',
+          minHeightInputPlaceholder: '请输入巨幕最小高度',
+          backgroundImageLabel: '背景图片地址',
+          backgroundImageInputPlaceholder: '请输入背景图片地址',
+          uploadBtnText: '上传新图片',
+          validateErrorMessage: '必填项不能为空'
+        }
+      },
+      setter: {
+        title: '巨幕设置',
+        confirmBtnText: '确定',
+        minHeightLabel: '巨幕最小高度',
+        minHeightInputPlaceholder: '请输入巨幕最小高度',
+        backgroundImageLabel: '背景图片地址',
+        backgroundImageInputPlaceholder: '请输入背景图片地址',
+        uploadBtnText: '上传新图片',
+        validateErrorMessage: '必填项不能为空'
+      }
+    },
+    katexComponent: {
+      creator: {
+        name: '数学公式',
+        form: {
+          title: '数学公式设置',
+          label: '源代码',
+          placeholder: '请输入代码',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消'
+        }
+      },
+      setter: {
+        title: '数学公式设置',
+        confirmBtnText: '确定',
+        placeholder: '请输入代码'
+      }
+    },
+    progressComponent: {
+      creator: {
+        name: '进度条',
+        form: {
+          title: '进度条',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消',
+          max: {
+            label: '最大值',
+            placeholder: '请输入最大值',
+            validateErrorMessage: '必填项不能为空'
+          },
+          min: {
+            label: '最小值',
+            placeholder: '请输入最小值',
+            validateErrorMessage: '必填项不能为空'
+          },
+          progress: {
+            label: '当前进度',
+            placeholder: '请输入当前进度',
+            validateErrorMessage: '必填项不能为空'
+          },
+          type: {
+            label: '进度条类型',
+            validateErrorMessage: '必选项不能为空'
+          }
+        }
+      }
+    },
+    stepsComponent: {
+      creator: {
+        name: '步骤条'
+      }
+    },
+    timelineComponent: {
+      creator: {
+        name: '时间轴'
+      }
+    },
+    todoListComponent: {
+      creator: {
+        name: '待办事项列表'
+      }
+    },
+    wordExplainComponent: {
+      creator: {
+        name: '名词释义'
+      }
     }
   }
 }

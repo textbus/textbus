@@ -1,11 +1,11 @@
 import { Subject } from 'rxjs';
 
 import { HighlightState, Tool, ToolFactory, ToolFactoryParams } from '../help';
-import { I18nString } from '../help';
 import { Keymap } from '../../../core/_api';
 import { Commander } from '../commander';
 import { Matcher, SelectionMatchState } from '../matcher/matcher';
 import { UIKit } from '../../uikit/uikit';
+import { I18nString } from '../../../i18n';
 
 /**
  * 按扭型工具的配置接口

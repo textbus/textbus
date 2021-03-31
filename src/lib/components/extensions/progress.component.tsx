@@ -143,45 +143,54 @@ export class ProgressComponent extends LeafAbstractComponent {
 }
 
 export const progressComponentExample: ComponentCreator = {
-  name: '进度条',
+  name: i18n => i18n.get('components.progressComponent.creator.name'),
   category: 'TextBus',
   example: `<img src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg"><g><rect fill="#fff" height="100%" width="100%"/></g><line x1="10" y1="40" x2="90" y2="40" stroke="#ddd" stroke-width="4" stroke-linecap="round"></line><line x1="10" y1="40" x2="50" y2="40" stroke="#1296db" stroke-width="4" stroke-linecap="round"></line><text font-family="Helvetica, Arial, sans-serif" font-size="10" x="42" y="35" stroke-width="0" stroke="#000" fill="#000000">50%</text></svg>')}">`,
-  factory(dialog: UIDialog) {
+  factory(dialog: UIDialog, _, i18n) {
+    const childI18n = i18n.getContext('components.progressComponent.creator.form');
     const form = new Form({
-      title: '进度条设置',
+      title: childI18n.get('title'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
+      cancelBtnText: childI18n.get('cancelBtnText'),
       items: [
         new FormTextField({
-          label: '最大值',
+          label: childI18n.get('max.label'),
           name: 'max',
           value: '100',
-          placeholder: '请输入最大值'
-        }),
-        new FormTextField({
-          label: '最小值',
-          name: 'min',
-          value: '0',
-          placeholder: '请输入最小值',
+          placeholder: childI18n.get('max.placeholder'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('max.validateErrorMessage');
             }
             return null;
           }
         }),
         new FormTextField({
-          label: '当前进度',
-          name: 'progress',
-          value: '50',
-          placeholder: '请输入当前进度',
+          label: childI18n.get('min.label'),
+          name: 'min',
+          value: '0',
+          placeholder: childI18n.get('min.placeholder'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('min.validateErrorMessage');
+            }
+            return null;
+          }
+        }),
+        new FormTextField({
+          label: childI18n.get('progress.label'),
+          name: 'progress',
+          value: '50',
+          placeholder: childI18n.get('progress.placeholder'),
+          validateFn(value: string): string | null {
+            if (!value) {
+              return childI18n.get('progress.validateErrorMessage');
             }
             return null;
           }
         }),
         new FormSelect({
-          label: '进度条类型',
+          label: childI18n.get('type.label'),
           name: 'type',
           options: [{
             label: 'Primary',
@@ -207,7 +216,7 @@ export const progressComponentExample: ComponentCreator = {
           }],
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('type.validateErrorMessage');
             }
             return null;
           }
