@@ -6,33 +6,32 @@ import { VerticalAlignCommander } from '../commands/vertical-align.commander';
 import { verticalAlignFormatter } from '../../../formatter/vertical-align.formatter';
 
 export const verticalAlignToolConfig: SelectToolConfig = {
-  tooltip: '垂直对齐方式',
-  // iconClasses: ['textbus-icon-font-size'],
+  tooltip: i18n => i18n.get('plugins.toolbar.verticalAlignTool.tooltip'),
   mini: true,
   options: [{
-    label: '基线对齐',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.baseline'),
     value: 'baseline',
     default: true
   }, {
-    label: '文本上标',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.super'),
     value: 'super'
   }, {
-    label: '文本下标',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.sub'),
     value: 'sub'
   }, {
-    label: '顶端对齐',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.top'),
     value: 'top'
   }, {
-    label: '居中',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.middle'),
     value: 'middle'
   }, {
-    label: '底端对齐',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.bottom'),
     value: 'bottom'
   }, {
-    label: '字体顶端对齐',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.textTop'),
     value: 'text-top'
   }, {
-    label: '字体底端对齐',
+    label: i18n => i18n.get('plugins.toolbar.verticalAlignTool.textBottom'),
     value: 'text-bottom'
   }],
   matcher: new FormatMatcher(verticalAlignFormatter, [PreComponent]),

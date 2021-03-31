@@ -6,21 +6,24 @@ import { FormTool, FormToolConfig } from '../toolkit/_api';
 
 export const videoToolConfig: FormToolConfig = {
   iconClasses: ['textbus-icon-video'],
-  tooltip: '视频',
-  viewFactory() {
+  tooltip: i18n => i18n.get('plugins.toolbar.videoTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.videoTool.view');
     return new Form({
-      title: '视频设置',
+      title: childI18n.get('title'),
+      confirmBtnText: childI18n.get('confirmBtnText'),
+      cancelBtnText: childI18n.get('cancelBtnText'),
       items: [
         new FormTextField({
-          label: '视频链接地址',
+          label: childI18n.get('linkLabel'),
           name: 'src',
-          placeholder: '请输入链接地址',
+          placeholder: childI18n.get('linkInputPlaceholder'),
           canUpload: true,
           uploadType: 'video',
-          uploadBtnText: '上传新视频',
+          uploadBtnText: childI18n.get('uploadBtnText'),
           validateFn(value: string): string | null {
             if (!value) {
-              return '必填项不能为空';
+              return childI18n.get('validateErrorMessage');
             }
             return null;
           }
@@ -30,19 +33,19 @@ export const videoToolConfig: FormToolConfig = {
           value: 'controls'
         }),
         new FormTextField({
-          label: '视频宽度',
+          label: childI18n.get('videoWidthLabel'),
           name: 'width',
-          placeholder: '支持任意 CSS 单位',
+          placeholder: childI18n.get('videoWidthInputPlaceholder'),
           value: '100%'
         }),
         new FormTextField({
-          label: '视频高度',
+          label: childI18n.get('videoHeightLabel'),
           name: 'height',
-          placeholder: '支持任意 CSS 单位',
+          placeholder: childI18n.get('videoHeightInputPlaceholder'),
           value: 'auto'
         }),
         new FormSwitch({
-          label: '自动播放',
+          label: childI18n.get('autoplayLabel'),
           checked: false,
           name: 'autoplay'
         })

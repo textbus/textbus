@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const italicToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-italic'],
-  tooltip: '斜体',
+  tooltip: i18n => i18n.get('plugins.toolbar.italicTool.tooltip'),
   keymap: {
     ctrlKey: true,
     key: 'i'

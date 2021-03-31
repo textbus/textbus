@@ -7,9 +7,9 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const textBackgroundToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-background-color'],
-  tooltip: '文字背景颜色',
-  viewFactory() {
-    return new Palette('backgroundColor')
+  tooltip: i18n => i18n.get('plugins.toolbar.textBackgroundColorTool.tooltip'),
+  viewFactory(i18n) {
+    return new Palette('backgroundColor', i18n.get('plugins.toolbar.textBackgroundColorTool.view.confirmBtnText'))
   },
   matcher: new FormatMatcher(backgroundColorFormatter, [PreComponent]),
   commanderFactory() {

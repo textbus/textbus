@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const underlineToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-underline'],
-  tooltip: '下划线',
+  tooltip: i18n => i18n.get('plugins.toolbar.underlineTool.tooltip'),
   keymap: {
     ctrlKey: true,
     key: 'u'

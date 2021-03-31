@@ -5,7 +5,7 @@ import { UnlinkCommander } from '../commands/unlink.commander';
 import { UnlinkMatcher } from '../matcher/unlink.matcher';
 
 export const unlinkToolConfig: ButtonToolConfig = {
-  tooltip: '取消链接',
+  tooltip: i18n => i18n.get('plugins.toolbar.unlinkTool.tooltip'),
   iconClasses: ['textbus-icon-unlink'],
   matcher: new UnlinkMatcher(linkFormatter, [PreComponent]),
   commanderFactory() {

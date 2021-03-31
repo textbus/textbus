@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const superscriptToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-superscript'],
-  tooltip: '上标',
+  tooltip: i18n => i18n.get('plugins.toolbar.superscript.tooltip'),
   matcher: new FormatMatcher(superscriptFormatter, [PreComponent]),
   commanderFactory() {
     return new InlineCommander('sup', superscriptFormatter);

@@ -6,11 +6,11 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const lineHeightToolConfig: SelectToolConfig = {
-  tooltip: '行高',
+  tooltip: i18n => i18n.get('plugins.toolbar.lineHeightTool.tooltip'),
   iconClasses: ['textbus-icon-line-height'],
   mini: true,
   options: [{
-    label: '默认',
+    label: i18n => i18n.get('plugins.toolbar.lineHeightTool.defaultValueLabel'),
     classes: ['textbus-toolbar-line-height-inherit'],
     value: '',
     default: true

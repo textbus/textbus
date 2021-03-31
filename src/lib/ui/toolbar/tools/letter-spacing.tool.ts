@@ -6,11 +6,11 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const letterSpacingToolConfig: SelectToolConfig = {
-  tooltip: '字间距',
+  tooltip: i18n => i18n.get('plugins.toolbar.letterSpacingTool.tooltip'),
   iconClasses: ['textbus-icon-letter-spacing'],
   mini: true,
   options: [{
-    label: '默认',
+    label: i18n => i18n.get('plugins.toolbar.letterSpacingTool.defaultValueLabel'),
     value: '',
     classes: ['textbus-toolbar-letter-spacing-inherit'],
     default: true

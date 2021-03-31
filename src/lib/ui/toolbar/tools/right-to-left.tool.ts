@@ -7,7 +7,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const rightToLeftToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-rtl'],
-  tooltip: '从右向左',
+  tooltip: i18n => i18n.get('plugins.toolbar.rightToLeftTool.tooltip'),
   matcher: new DirMatcher('rtl', [PreComponent]),
   commanderFactory(): Commander {
     return new DirCommander(dirFormatter, 'rtl');

@@ -7,25 +7,26 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const linkToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-link'],
-  tooltip: '链接',
-  viewFactory() {
+  tooltip: i18n => i18n.get('plugins.toolbar.linkTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.linkTool.view');
     return new Form({
       mini: true,
       items: [
         new FormTextField({
-          label: '跳转链接地址',
+          label: childI18n.get('linkLabel'),
           name: 'href',
-          placeholder: '请输入链接地址'
+          placeholder: childI18n.get('linkInputPlaceholder')
         }),
         new FormRadio({
-          label: '跳转方式',
+          label: childI18n.get('jumpLabel'),
           name: 'target',
           values: [{
-            label: '当前窗口',
+            label: childI18n.get('jumpSelfLabel'),
             value: '_self',
             default: true
           }, {
-            label: '新窗口',
+            label: childI18n.get('jumpBlankLabel'),
             value: '_blank'
           }]
         })

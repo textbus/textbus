@@ -4,7 +4,7 @@ import { TableRemoveCommander } from '../commands/table-remove.commander';
 
 export const tableRemoveToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-table-remove'],
-  tooltip: '删除表格',
+  tooltip: i18n => i18n.get('plugins.toolbar.tableRemoveTool.tooltip'),
   matcher: new TableEditMatcher(),
   commanderFactory() {
     return new TableRemoveCommander();

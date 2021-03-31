@@ -3,7 +3,7 @@ import { InsertParagraphCommander } from '../commands/insert-paragraph.commander
 
 export const insertParagraphBeforeToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-insert-paragraph-before'],
-  tooltip: '在前面插入段落',
+  tooltip: i18n => i18n.get('plugins.toolbar.insertParagraphBeforeTool.tooltip'),
   commanderFactory() {
     return new InsertParagraphCommander(true);
   },

@@ -5,7 +5,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const ulToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-list'],
-  tooltip: '无序列表',
+  tooltip: i18n => i18n.get('plugins.toolbar.ulTool.tooltip'),
   keymap: {
     shiftKey: true,
     ctrlKey: true,

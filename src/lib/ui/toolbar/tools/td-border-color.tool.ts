@@ -5,9 +5,9 @@ import { TdBorderColorCommander } from '../commands/td-border-color.commander';
 
 export const tdBorderColorToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table-border'],
-  tooltip: '表格边框颜色',
-  viewFactory() {
-    return new Palette('borderColor');
+  tooltip: i18n => i18n.get('plugins.toolbar.tdBorderColorTool.tooltip'),
+  viewFactory(i18n) {
+    return new Palette('borderColor', i18n.get('plugins.toolbar.tdBorderColorTool.view.confirmBtnText'));
   },
   matcher: new TableEditMatcher(),
   commanderFactory() {

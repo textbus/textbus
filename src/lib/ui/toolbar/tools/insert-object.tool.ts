@@ -18,55 +18,55 @@ export const insertObjectToolConfig: GroupConfig = {
   menu: [{
     ...preToolConfig,
     type: MenuType.Select,
-    label: '源代码'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.sourceCode')
   }, {
     ...lineHeightToolConfig,
     type: MenuType.Select,
-    label: '行高'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.lineHeight')
   }, {
     ...letterSpacingToolConfig,
     type: MenuType.Select,
-    label: '字间距'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.letterSpacing')
   }, {
     ...blockBackgroundToolConfig,
     type: MenuType.Dropdown,
-    label: '区块背景颜色'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.blockBackgroundColor')
   }, {
     ...emojiToolConfig,
     type: MenuType.Dropdown,
-    label: '表情'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.emoji')
   }, {
     ...audioToolConfig,
     type: MenuType.Form,
-    label: '音频...'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.audio')
   }, {
     ...videoToolConfig,
     type: MenuType.Form,
-    label: '视频...'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.video')
   }, {
     ...subscriptToolConfig,
     type: MenuType.Action,
-    label: '下标'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.subscript')
   }, {
     ...superscriptToolConfig,
     type: MenuType.Action,
-    label: '上标'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.superscript')
   }, {
     ...codeToolConfig,
     type: MenuType.Action,
-    label: 'Code'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.code')
   }, {
     ...blockquoteToolConfig,
     type: MenuType.Action,
-    label: '引用'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.blockquote')
   }, {
     ...leftToRightToolConfig,
     type: MenuType.Action,
-    label: '从左向右'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.leftToRight')
   }, {
     ...rightToLeftToolConfig,
     type: MenuType.Action,
-    label: '从右向左'
+    label: i18n => i18n.get('plugins.toolbar.insertObjectTool.rightToLeft')
   }]
 }
 export const insertObjectTool = new GroupTool(insertObjectToolConfig);

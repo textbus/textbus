@@ -6,9 +6,9 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const textAlignToolConfig: SelectToolConfig = {
-  tooltip: '对齐方式',
+  tooltip: i18n => i18n.get('plugins.toolbar.textAlignTool.tooltip'),
   options: [{
-    label: '左对齐',
+    label: i18n => i18n.get('plugins.toolbar.textAlignTool.left'),
     iconClasses: ['textbus-icon-paragraph-left'],
     value: 'left',
     keymap: {
@@ -17,7 +17,7 @@ export const textAlignToolConfig: SelectToolConfig = {
     },
     default: true
   }, {
-    label: '右对齐',
+    label: i18n => i18n.get('plugins.toolbar.textAlignTool.right'),
     iconClasses: ['textbus-icon-paragraph-right'],
     value: 'right',
     keymap: {
@@ -25,7 +25,7 @@ export const textAlignToolConfig: SelectToolConfig = {
       key: 'r'
     },
   }, {
-    label: '居中对齐',
+    label: i18n => i18n.get('plugins.toolbar.textAlignTool.center'),
     iconClasses: ['textbus-icon-paragraph-center'],
     value: 'center',
     keymap: {
@@ -33,7 +33,7 @@ export const textAlignToolConfig: SelectToolConfig = {
       key: 'e'
     },
   }, {
-    label: '分散对齐',
+    label: i18n => i18n.get('plugins.toolbar.textAlignTool.justify'),
     iconClasses: ['textbus-icon-paragraph-justify'],
     value: 'justify',
     keymap: {

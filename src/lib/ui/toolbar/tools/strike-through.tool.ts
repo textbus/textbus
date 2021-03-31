@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const strikeThroughToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-strikethrough'],
-  tooltip: '删除线',
+  tooltip: i18n => i18n.get('plugins.toolbar.strikeThrough.tooltip'),
   keymap: {
     ctrlKey: true,
     key: 'd'

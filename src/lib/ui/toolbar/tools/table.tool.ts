@@ -8,24 +8,24 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const tableToolConfig: GroupConfig = {
   iconClasses: ['textbus-icon-table'],
-  tooltip: '表格',
+  tooltip: i18n => i18n.get('plugins.toolbar.tableTool.tooltip'),
   matcher: new TableMatcher([PreComponent]),
   menu: [{
     type: MenuType.Dropdown,
     ...tableAddToolConfig,
-    label: '创建表格'
+    label: i18n => i18n.get('plugins.toolbar.tableTool.createTable')
   }, {
     type: MenuType.ActionSheet,
     ...tableEditToolConfig,
-    label: '编辑表格'
+    label: i18n => i18n.get('plugins.toolbar.tableTool.editTable')
   }, {
     type: MenuType.Dropdown,
     ...tdBorderColorToolConfig,
-    label: '设置单元格边框颜色'
+    label: i18n => i18n.get('plugins.toolbar.tableTool.cellBorderColor')
   }, {
     type: MenuType.Action,
     ...tableRemoveToolConfig,
-    label: '删除表格'
+    label: i18n => i18n.get('plugins.toolbar.tableTool.deleteTable')
   }]
 }
 export const tableTool = new GroupTool(tableToolConfig);

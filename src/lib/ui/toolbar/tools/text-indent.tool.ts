@@ -6,7 +6,7 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 import { PreComponent } from '../../../components/pre.component';
 
 export const textIndentToolConfig: SelectToolConfig = {
-  tooltip: '首行缩进',
+  tooltip: i18n => i18n.get('plugins.toolbar.textIndentTool.tooltip'),
   iconClasses: ['textbus-icon-text-indent'],
   mini: true,
   options: [{

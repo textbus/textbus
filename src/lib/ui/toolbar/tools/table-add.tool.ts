@@ -7,23 +7,25 @@ import { FormatData } from '../../../core/format-data';
 
 export const tableAddToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-table'],
-  tooltip: '表格',
-  viewFactory() {
+  tooltip: i18n => i18n.get('plugins.toolbar.tableAddTool.tooltip'),
+  viewFactory(i18n) {
+    const childI18n = i18n.getContext('plugins.toolbar.tableAddTool.view');
     const form = new Form({
       mini: true,
+      confirmBtnText: childI18n.get('confirmBtnText'),
       items: [
         new FormTextField({
           name: 'rows',
-          label: '表格行数',
-          placeholder: '请输入表格行数'
+          label: childI18n.get('rowLabel'),
+          placeholder: childI18n.get('rowPlaceholder')
         }),
         new FormTextField({
           name: 'cols',
-          label: '表格列数',
-          placeholder: '请输入表格列数'
+          label: childI18n.get('columnLabel'),
+          placeholder: childI18n.get('columnPlaceholder')
         }),
         new FormSwitch({
-          label: '使用 TextBus 样式',
+          label: childI18n.get('useTextBusStyleLabel'),
           name: 'useTextBusStyle',
           checked: true
         })

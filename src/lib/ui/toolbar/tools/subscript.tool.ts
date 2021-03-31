@@ -6,7 +6,7 @@ import { PreComponent } from '../../../components/pre.component';
 
 export const subscriptToolConfig: ButtonToolConfig = {
   iconClasses: ['textbus-icon-subscript'],
-  tooltip: '下标',
+  tooltip: i18n => i18n.get('plugins.tooltip.subscript.tooltip'),
   matcher: new FormatMatcher(subscriptFormatter, [PreComponent]),
   commanderFactory() {
     return new InlineCommander('sub', subscriptFormatter);

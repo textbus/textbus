@@ -5,7 +5,7 @@ import { SelectTool, SelectToolConfig } from '../toolkit/_api';
 
 export const preToolConfig: SelectToolConfig = {
   iconClasses: ['textbus-icon-terminal'],
-  tooltip: '代码',
+  tooltip: i18n => i18n.get('plugins.toolbar.preTool.tooltip'),
   mini: true,
   options: [{
     value: 'Javascript',
