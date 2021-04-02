@@ -1,7 +1,7 @@
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 import { VideoComponent, PreComponent } from '../../../components/_api';
 import { VideoCommander } from '../commands/video.commander';
-import { MediaMatcher } from '../matcher/media.matcher';
+import { LeafComponentMatcher } from '../matcher/leaf-component.matcher';
 import { FormTool, FormToolConfig } from '../toolkit/_api';
 
 export const videoToolConfig: FormToolConfig = {
@@ -52,7 +52,7 @@ export const videoToolConfig: FormToolConfig = {
       ]
     });
   },
-  matcher: new MediaMatcher(VideoComponent, 'video', [PreComponent]),
+  matcher: new LeafComponentMatcher(VideoComponent, 'video', [PreComponent]),
   commanderFactory() {
     return new VideoCommander();
   }

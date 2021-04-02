@@ -1,5 +1,5 @@
 import { AttrState, createElement, createTextNode, Form, FormItem, FormRadio, FormTextField } from '../../uikit/_api';
-import { MediaMatcher } from '../matcher/media.matcher';
+import { LeafComponentMatcher } from '../matcher/leaf-component.matcher';
 import { ImageComponent, PreComponent } from '../../../components/_api';
 import { ImageCommander } from '../commands/image.commander';
 import { FormTool, FormToolConfig } from '../toolkit/_api';
@@ -186,7 +186,7 @@ export const imageToolConfig: FormToolConfig = {
       ]
     })
   },
-  matcher: new MediaMatcher(ImageComponent, 'img', [PreComponent]),
+  matcher: new LeafComponentMatcher(ImageComponent, 'img', [PreComponent]),
   commanderFactory() {
     return new ImageCommander();
   }

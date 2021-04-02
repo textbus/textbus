@@ -6,7 +6,7 @@ export * from './format.matcher';
 export * from './history.matcher';
 export * from './list.matcher';
 export * from './matcher';
-export * from './media.matcher';
+export * from './leaf-component.matcher';
 export * from './table.matcher';
 export * from './table-edit.matcher';
 export * from './unlink.matcher';

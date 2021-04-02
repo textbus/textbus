@@ -5,13 +5,13 @@ import {
   BackboneAbstractComponent,
   BranchAbstractComponent,
   DivisionAbstractComponent,
-  LeafAbstractComponent,
+  LeafAbstractComponent, TBRange,
   TBSelection
 } from '../../../core/_api';
 import { HighlightState } from '../help';
 import { rangeContentInComponent } from './utils/range-content-in-component';
 
-export class MediaMatcher implements Matcher {
+export class LeafComponentMatcher implements Matcher {
   constructor(public componentConstructor: Type<LeafAbstractComponent>, public tagName: string,
               private excludeComponents: Array<Type<BranchAbstractComponent | BackboneAbstractComponent | DivisionAbstractComponent>> = []) {
   }
@@ -37,16 +37,20 @@ export class MediaMatcher implements Matcher {
     }
 
     const states: RangeMatchState<LeafAbstractComponent>[] = selection.ranges.map(range => {
-      if (range.startFragment === range.endFragment && range.endIndex - range.startIndex === 1) {
-        const content = range.startFragment.sliceContents(range.startIndex, range.endIndex);
-        if (content[0] instanceof this.componentConstructor && content[0].tagName === this.tagName) {
-          return {
-            srcData: content[0],
-            fromRange: range,
-            state: HighlightState.Highlight
-          };
+      if (range.startFragment === range.endFragment) {
+        if (range.collapsed && range.startIndex > 0) {
+          const state = this.match(range, range.startIndex - 1);
+          if (state) {
+            return state
+          }
+        } else if (range.endIndex - range.startIndex === 1) {
+          const state = this.match(range, range.startIndex);
+          if (state) {
+            return state
+          }
         }
       }
+
       return {
         state: HighlightState.Normal,
         fromRange: range,
@@ -67,5 +71,17 @@ export class MediaMatcher implements Matcher {
       srcStates: states,
       matchData: states[0]?.srcData
     }
+  }
+
+  private match(range: TBRange, startIndex: number): RangeMatchState<LeafAbstractComponent> {
+    const content = range.startFragment.getContentAtIndex(startIndex);
+    if (content[0] instanceof this.componentConstructor && content[0].tagName === this.tagName) {
+      return {
+        srcData: content[0],
+        fromRange: range,
+        state: HighlightState.Highlight
+      };
+    }
+    return null;
   }
 }

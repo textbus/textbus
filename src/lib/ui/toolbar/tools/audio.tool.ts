@@ -1,6 +1,6 @@
 import { AudioComponent, PreComponent } from '../../../components/_api';
 import { AudioCommander } from '../commands/audio.commander';
-import { MediaMatcher } from '../matcher/media.matcher';
+import { LeafComponentMatcher } from '../matcher/leaf-component.matcher';
 import { FormTool, FormToolConfig } from '../toolkit/_api';
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api';
 
@@ -40,7 +40,7 @@ export const audioToolConfig: FormToolConfig = {
       ]
     });
   },
-  matcher: new MediaMatcher(AudioComponent, 'audio', [PreComponent]),
+  matcher: new LeafComponentMatcher(AudioComponent, 'audio', [PreComponent]),
   commanderFactory() {
     return new AudioCommander();
   }
