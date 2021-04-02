@@ -75,9 +75,9 @@ export class LeafComponentMatcher implements Matcher {
 
   private match(range: TBRange, startIndex: number): RangeMatchState<LeafAbstractComponent> {
     const content = range.startFragment.getContentAtIndex(startIndex);
-    if (content[0] instanceof this.componentConstructor && content[0].tagName === this.tagName) {
+    if (content instanceof this.componentConstructor && content.tagName === this.tagName) {
       return {
-        srcData: content[0],
+        srcData: content,
         fromRange: range,
         state: HighlightState.Highlight
       };
