@@ -10,6 +10,9 @@ export const i18n_en_US: I18NConfig = {
     paste: 'paste',
     cut: 'cut',
     selectAll: 'select all',
+    input: {
+      noAccessClipboard: 'no access to the clipboard!'
+    },
     controlPanel: {
       cancelFixed: 'cancel fixed',
       fixed: 'fixed'

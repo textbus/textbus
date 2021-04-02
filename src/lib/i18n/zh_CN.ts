@@ -10,6 +10,9 @@ export const i18n_zh_CN: I18NConfig = {
     paste: '粘贴',
     cut: '剪切',
     selectAll: '全选',
+    input: {
+      noAccessClipboard: '无法访问剪切板！'
+    },
     controlPanel: {
       cancelFixed: '取消固定',
       fixed: '固定'

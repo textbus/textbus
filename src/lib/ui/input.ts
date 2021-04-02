@@ -23,6 +23,7 @@ import { createElement, createTextNode } from './uikit/uikit';
 import { ComponentInjectors } from '../component-injectors';
 import { Layout } from './layout';
 import { I18n } from '../i18n';
+import { UIMessage } from './plugins/message.plugin';
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent);
 export const isMac = /mac os/i.test(navigator.userAgent);
@@ -93,6 +94,7 @@ export class Input {
               private editorController: EditorController,
               private componentInjectors: ComponentInjectors,
               private renderer: Renderer,
+              private message: UIMessage,
               private rootComponent: RootComponent,
               private parser: Parser,
               private selection: TBSelection,
@@ -706,7 +708,7 @@ export class Input {
           })
         })
       } else {
-        alert('没有剪切板读取权限！')
+        this.message.danger(this.i18n.get('editor.input.noAccessClipboard'));
       }
     })
   }
