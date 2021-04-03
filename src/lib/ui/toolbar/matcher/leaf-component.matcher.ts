@@ -38,12 +38,7 @@ export class LeafComponentMatcher implements Matcher {
 
     const states: RangeMatchState<LeafAbstractComponent>[] = selection.ranges.map(range => {
       if (range.startFragment === range.endFragment) {
-        if (range.collapsed && range.startIndex > 0) {
-          const state = this.match(range, range.startIndex - 1);
-          if (state) {
-            return state
-          }
-        } else if (range.endIndex - range.startIndex === 1) {
+        if (range.endIndex - range.startIndex === 1) {
           const state = this.match(range, range.startIndex);
           if (state) {
             return state

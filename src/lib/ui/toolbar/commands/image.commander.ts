@@ -23,7 +23,7 @@ export class ImageCommander implements Commander<Map<string, any>> {
     context.selection.ranges.forEach(range => {
       if (range.collapsed) {
         if (context.overlap) {
-          const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex - 1);
+          const component = range.commonAncestorFragment.getContentAtIndex(range.startIndex);
           if (component instanceof ImageComponent) {
             fn(component);
           }

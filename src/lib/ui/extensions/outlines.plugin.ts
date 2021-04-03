@@ -70,6 +70,7 @@ export class OutlinesPlugin implements TBPlugin {
         this.btn = createElement('button', {
           classes: ['textbus-status-bar-btn'],
           attrs: {
+            type: 'button',
             title: this.i18n.get('plugins.outlines.switchText')
           },
           children: [
