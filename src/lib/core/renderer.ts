@@ -72,7 +72,13 @@ class NativeElementMappingTable {
 const rendererErrorFn = makeError('Renderer');
 
 export class Renderer {
+  /**
+   * 当渲染开始时调用
+   */
   onRendingBefore: Observable<void>;
+  /**
+   * 当渲染完成时调用
+   */
   onViewUpdated: Observable<void>;
   private rendingEvent = new Subject<void>();
   private viewUpdateEvent = new Subject<void>();
@@ -96,6 +102,11 @@ export class Renderer {
     this.onRendingBefore = this.rendingEvent.asObservable();
   }
 
+  /**
+   * 渲染一个组件到指定的 DOM 容器内
+   * @param component 要渲染的组件
+   * @param host 渲染内容的容器
+   */
   render<T extends AbstractComponent>(component: T, host: HTMLElement) {
     this.rendingEvent.next();
     if (component.changed) {
@@ -161,10 +172,18 @@ export class Renderer {
     return this.fragmentContentContainerMapping.get(fragment);
   }
 
+  /**
+   * 获取组件的虚拟 DOM 的根节点
+   * @param component
+   */
   getComponentRootVNode(component: AbstractComponent): VElement {
     return this.componentVDomCacheMap.get(component);
   }
 
+  /**
+   * 获取组件真实 DOM 的根节点
+   * @param component
+   */
   getComponentRootNativeNode(component: AbstractComponent): HTMLElement {
     return this.getNativeNodeByVDom(this.getComponentRootVNode(component)) as HTMLElement;
   }

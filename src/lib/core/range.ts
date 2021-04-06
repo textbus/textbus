@@ -1162,6 +1162,10 @@ export class TBRange {
     };
   }
 
+  /**
+   * 查找一个 fragment 下的最后一个可以放置光标的位置。
+   * @param fragment
+   */
   findLastPosition(fragment: Fragment): TBRangePosition {
     const last = fragment.getContentAtIndex(fragment.length - 1);
     if (last instanceof DivisionAbstractComponent) {

@@ -2,6 +2,9 @@ import { Injectable, InjectFlags, Injector, ReflectiveInjector, Type } from '@ta
 
 import { AbstractComponent, ComponentSetter, Interceptor } from './core/_api';
 
+/**
+ * 组件 Injector 缓存器
+ */
 @Injectable()
 export class ComponentInjectors {
   private injectors = new Map<Type<AbstractComponent>, Injector>();

@@ -47,9 +47,9 @@ export class Editor {
   readonly onReady: Observable<void>;
   /** 当 TextBus 内容发生变化时触发 */
   readonly onChange: Observable<void>;
-
-  readonly stateController: EditorController;
-
+  /** 组件状态控制器 */
+  readonly stateController: EditorController = null;
+  /** 编辑器注入器，在编辑准备完成时可用 */
   injector: Injector = null;
 
   set readonly(b: boolean) {

@@ -13,15 +13,20 @@ export interface Snapshot {
   paths: RangePath[];
 }
 
+/**
+ * TextBus 历史记录管理类
+ */
 @Injectable()
 export class TBHistory {
+  /** 当历史记录变化时触发 */
   onChange: Observable<void>;
+  /** 当历史记录快照被应用时触发 */
   onUsed: Observable<void>;
-
+  /** 是否可返回上一次历史记录 */
   get canBack() {
     return this.historySequence.length > 0 && this.historyIndex > 0;
   }
-
+  /** 是否可重做 */
   get canForward() {
     return this.historySequence.length > 0 && this.historyIndex < this.historySequence.length - 1;
   }
@@ -45,6 +50,9 @@ export class TBHistory {
     this.onUsed = this.historyUsedEvent.asObservable();
   }
 
+  /**
+   * 应用前一次历史记录
+   */
   back() {
     if (this.canBack) {
       this.historyIndex--;
@@ -57,6 +65,9 @@ export class TBHistory {
     }
   }
 
+  /**
+   * 重做
+   */
   forward() {
     if (this.canForward) {
       this.historyIndex++;
@@ -68,17 +79,26 @@ export class TBHistory {
     }
   }
 
+  /**
+   * 销毁当前历史记录
+   */
   destroy() {
     this.historySequence = null;
     this.stateChangeSubscription?.unsubscribe();
     this.stopListen();
   }
 
+  /**
+   * 清除历史记录
+   */
   clean() {
     this.historyIndex = 0;
     this.historySequence = [];
   }
 
+  /**
+   * 开始记录历史
+   */
   record() {
     this.recordSnapshot();
     this.listen();

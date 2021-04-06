@@ -122,6 +122,10 @@ export class Input {
     }))
   }
 
+  /**
+   * 添加粘贴预处理中间件
+   * @param middleware
+   */
   addPasteMiddleware(middleware: PastePreHandleMiddleware) {
     this.pasteMiddlewares.push(middleware);
   }

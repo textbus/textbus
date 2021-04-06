@@ -4,6 +4,9 @@ export abstract class OutputTranslator {
   abstract transform(vDom: VElement): any;
 }
 
+/**
+ * HTML 输出转换器
+ */
 export class HTMLOutputTranslator implements OutputTranslator {
   transform(vDom: VElement): string {
     return vDom.childNodes.map(child => {
