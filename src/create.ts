@@ -48,6 +48,7 @@ import {
   tableTool
 } from './lib/ui/toolbar/tools/_api';
 import {
+  alertComponentExample,
   imageCardComponentExample,
   todoListComponentExample,
   baiduMapComponentExample,
@@ -58,6 +59,7 @@ import {
   stepsComponentExample,
   katexComponentExample,
 
+  AlertComponent,
   StepComponent,
   ProgressComponent,
   TimelineComponent,
@@ -136,6 +138,7 @@ export const defaultDeviceOptions: DeviceOption[] = [{
 }];
 
 export const defaultComponentLibrary: ComponentCreator[] = [
+  alertComponentExample,
   imageCardComponentExample,
   todoListComponentExample,
   baiduMapComponentExample,
@@ -154,6 +157,7 @@ export const defaultOptions: EditorOptions = {
     `a {text-decoration: underline; color: #449fdb; cursor: text;}`
   ],
   components: [
+    AlertComponent,
     KatexComponent,
     StepComponent,
     ProgressComponent,
@@ -162,6 +166,7 @@ export const defaultOptions: EditorOptions = {
     JumbotronComponent,
     BaiduMapComponent,
     TodoListComponent,
+
     ImageCardComponent,
     ListComponent,
     BlockComponent,

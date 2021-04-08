@@ -396,6 +396,17 @@ export const i18n_zh_CN: I18NConfig = {
       mergeCells: '合并单元格',
       splitCells: '拆分单元格'
     },
+    alertComponent: {
+      creator: {
+        name: '警告框'
+      },
+      setter: {
+        title: '警告框设置',
+        typeLabel: '类型',
+        fillLabel: '是否填充',
+        confirmBtnText: '确定'
+      }
+    },
     baiduMapComponent: {
       creator: {
         name: '百度地图',

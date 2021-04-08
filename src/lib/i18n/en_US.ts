@@ -396,6 +396,17 @@ export const i18n_en_US: I18NConfig = {
       mergeCells: 'merge cells',
       splitCells: 'split cells'
     },
+    alertComponent: {
+      creator: {
+        name: 'Alert'
+      },
+      setter: {
+        title: 'Setting',
+        typeLabel: 'type',
+        fillLabel: 'fill',
+        confirmBtnText: 'ok'
+      }
+    },
     baiduMapComponent: {
       creator: {
         name: 'Baidu map',
