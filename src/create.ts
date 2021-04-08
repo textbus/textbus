@@ -138,16 +138,16 @@ export const defaultDeviceOptions: DeviceOption[] = [{
 }];
 
 export const defaultComponentLibrary: ComponentCreator[] = [
-  alertComponentExample,
   imageCardComponentExample,
   todoListComponentExample,
   baiduMapComponentExample,
   jumbotronComponentExample,
   wordExplainComponentExample,
-  timelineComponentExample,
-  progressComponentExample,
-  stepsComponentExample,
   katexComponentExample,
+  timelineComponentExample,
+  stepsComponentExample,
+  progressComponentExample,
+  alertComponentExample,
 ];
 
 export const defaultOptions: EditorOptions = {
