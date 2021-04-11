@@ -357,20 +357,19 @@ class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
     useClass: PreComponentDynamicKeymap
   }],
   styles: [
-    `
-   code, pre {background-color: #fefdfc;}
+    `<style>
+   code, pre {background-color: #fefefe;}
    pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
    pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
-   code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}`,
-    `
-   .tb-code-line-number-bg { background-color: #efefef; border-right: 1px solid #ddd; width: 3em; }
+   code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}
+
+   .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #ddd; width: 3em; }
    .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
    .tb-code-line { position: relative; }
-   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #999; }
+   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #aeaeae; }
    .tb-pre-lang { position: absolute; right: 0; top: 0; opacity: 0.5; pointer-events: none; font-size: 13px; padding: 4px 10px;}
-    `,
-    `
+
   .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
   .tb-hl-function { color: rgb(0, 134, 179); }
@@ -380,16 +379,16 @@ class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
   .tb-hl-boolean { color: #388138; font-weight: bold }
   .tb-hl-builtin { color: rgb(0, 134, 179); }
   .tb-hl-regex { color: #f60; }
-  .tb-hl-attr-name { color: rgb(0, 128, 128) }
+  .tb-hl-attr-name { color: rgb(0, 134, 179); }
   .tb-hl-attr-value { color: rgb(221, 17, 68) }
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
   .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
-  `,
-    `
+
   pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
-  pre[theme=dark] .tb-hl-tag {color: rgb(91 155 190)}
+  pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
+  pre[theme=dark] .tb-code-line::before { color: #848484}
   pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #1b1b1b; }
-  `
+  `.replace('<style>', '')
   ]
 })
 export class PreComponent extends BackboneAbstractComponent<CodeFragment> {

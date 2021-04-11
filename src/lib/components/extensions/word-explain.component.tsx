@@ -164,7 +164,7 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     switch (slot) {
       case this.title:
-        return slotRendererFn(slot, <h3 class="tb-word-explain-title"/>);
+        return slotRendererFn(slot, <div class="tb-word-explain-title"/>);
       case this.subtitle:
         return slotRendererFn(slot, <div class="tb-word-explain-subtitle"/>);
       case this.detail:
