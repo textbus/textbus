@@ -68,6 +68,13 @@ export const headingToolConfig: SelectToolConfig = {
       key: '6'
     }
   }, {
+    label: i18n => i18n.get('plugins.toolbar.headingTool.div'),
+    value: 'div',
+    keymap: {
+      ctrlKey: true,
+      key: '7'
+    }
+  }, {
     label: i18n => i18n.get('plugins.toolbar.headingTool.paragraph'),
     value: 'p',
     default: true,

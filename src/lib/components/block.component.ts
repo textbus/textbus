@@ -33,7 +33,7 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
   onEnter(event: TBEvent<BlockComponent>) {
     const parent = event.instance.parentFragment;
 
-    const component = new BlockComponent('p');
+    const component = new BlockComponent(event.instance.tagName === 'div' ? 'div' : 'p');
     const firstRange = this.selection.firstRange;
     const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
     component.slot.from(next);

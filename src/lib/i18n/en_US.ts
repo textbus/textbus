@@ -156,6 +156,7 @@ export const i18n_en_US: I18NConfig = {
         h4: 'heading 4',
         h5: 'heading 5',
         h6: 'heading 6',
+        div: 'div',
         paragraph: 'paragraph',
       },
       historyBackTool: {

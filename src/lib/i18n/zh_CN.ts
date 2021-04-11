@@ -156,6 +156,7 @@ export const i18n_zh_CN: I18NConfig = {
         h4: '标题4',
         h5: '标题5',
         h6: '标题6',
+        div: 'div',
         paragraph: '正文',
       },
       historyBackTool: {
