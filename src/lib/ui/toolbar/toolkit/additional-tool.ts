@@ -103,9 +103,11 @@ export class AdditionalTool implements ToolFactory {
       keymaps: config.keymap ? [{
         keymap: config.keymap,
         action() {
-          button.highlight = true;
-          contentWrapper.appendChild(content.elementRef);
-          limitElement.appendChild(this.elementRef);
+          if (!button.disabled) {
+            button.highlight = true;
+            contentWrapper.appendChild(content.elementRef);
+            limitElement.appendChild(elementRef);
+          }
         }
       }] : [],
       commander: config.commanderFactory(),
