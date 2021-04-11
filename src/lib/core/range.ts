@@ -29,6 +29,23 @@ export interface TBRangeScope {
   fragment: Fragment;
 }
 
+export interface CommonAncestorFragmentScope {
+  startIndex: number
+  startFragment: Fragment;
+  startChildComponent: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent;
+  endIndex: number
+  endFragment: Fragment;
+  endChildComponent: DivisionAbstractComponent | BranchAbstractComponent | BackboneAbstractComponent;
+  startChildFragment: Fragment;
+  endChildFragment: Fragment;
+}
+
+export interface SlotScope {
+  component: BackboneAbstractComponent | BranchAbstractComponent;
+  startIndex: number;
+  endIndex: number;
+}
+
 /**
  * TextBus 中的选区范围类，可操作基于 Fragment 和 Component 的范围，并提供了一系列的扩展方法供编辑富文本内容使用。
  */
@@ -138,11 +155,11 @@ export class TBRange {
   /**
    * 获取当前选区在公共 Fragment 中的范围。
    */
-  getCommonAncestorFragmentScope() {
+  getCommonAncestorFragmentScope(): CommonAncestorFragmentScope {
     let startFragment = this.startFragment;
     let endFragment = this.endFragment;
-    let startFirstFragment = this.startFragment;
-    let endFirstFragment = this.endFragment;
+    let startChildFragment = this.startFragment;
+    let endChildFragment = this.endFragment;
     let startIndex = this.startIndex;
     let endIndex = this.endIndex;
     const commonAncestorFragment = this.commonAncestorFragment;
@@ -154,7 +171,7 @@ export class TBRange {
     while (startFragment !== commonAncestorFragment) {
       startChildComponent = startFragment.parentComponent;
       if (startChildComponent === commonAncestorComponent) {
-        startFirstFragment = startFragment;
+        startChildFragment = startFragment;
       }
       startFragment = startChildComponent.parentFragment;
       startIndex = startFragment.indexOf(startChildComponent);
@@ -163,7 +180,7 @@ export class TBRange {
     while (endFragment !== commonAncestorFragment) {
       endChildComponent = endFragment.parentComponent;
       if (endChildComponent === commonAncestorComponent) {
-        endFirstFragment = endFragment;
+        endChildFragment = endFragment;
       }
       endFragment = endChildComponent.parentFragment;
       endIndex = endFragment.indexOf(endChildComponent);
@@ -176,8 +193,8 @@ export class TBRange {
       endIndex: endIndex + 1,
       endFragment,
       endChildComponent,
-      startFirstFragment,
-      endFirstFragment
+      startChildFragment,
+      endChildFragment
     }
   }
 
@@ -186,7 +203,7 @@ export class TBRange {
    * @param of 子类的构造 class。
    * @param filter 可选的过滤条件，可根据实例判断是否为想要找的 T 实例。
    */
-  getSlotRange<T extends BranchAbstractComponent | BackboneAbstractComponent>(of: Type<T>, filter?: (instance: T) => boolean): Array<{ component: T; startIndex: number; endIndex: number }> {
+  getSlotRange<T extends BranchAbstractComponent | BackboneAbstractComponent>(of: Type<T>, filter?: (instance: T) => boolean): SlotScope[] {
     const maps: Array<{ component: T, index: number }> = [];
     this.getSelectedScope().forEach(scope => {
       const context = scope.fragment.getContext(of, filter);
@@ -312,7 +329,7 @@ export class TBRange {
    *   endIndex: 5
    * }]
    */
-  getSuccessiveContents() {
+  getSuccessiveContents(): TBRangeScope[] {
     function fn(fragment: Fragment, startIndex: number, endIndex: number) {
       const scopes: TBRangeScope[] = [];
       if (startIndex >= endIndex) {

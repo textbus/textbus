@@ -65,14 +65,14 @@ export class ListCommander implements Commander<null> {
 
         if (commonAncestorComponent instanceof BranchAbstractComponent) {
           const parentFragment = commonAncestorComponent.parentFragment;
-          const endSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.endFirstFragment);
+          const endSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.endChildFragment);
           if (endSlotIndex < commonAncestorComponent.slots.length - 1) {
             const afterComponent = commonAncestorComponent.clone() as BranchAbstractComponent;
             afterComponent.slots.splice(0, endSlotIndex + 1);
             parentFragment.insertAfter(afterComponent, commonAncestorComponent);
             commonAncestorComponent.slots.length = endSlotIndex + 1;
           }
-          const startSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.startFirstFragment);
+          const startSlotIndex = commonAncestorComponent.slots.indexOf(commonScope.startChildFragment);
           const list = new ListComponent(this.tagName);
           list.slots.push(...commonAncestorComponent.slots.splice(startSlotIndex, endSlotIndex + 1));
           parentFragment.insertAfter(list, commonAncestorComponent);
