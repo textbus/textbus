@@ -130,11 +130,11 @@ tb-timeline {
   opacity: .76;
 }
 
-.tb-timeline-item:first-of-type .tb-timeline-line{
+.tb-timeline-item:first-of-type > .tb-timeline-line{
   top: 1em;
 }
 
-.tb-timeline-item:last-of-type .tb-timeline-line{
+.tb-timeline-item:last-of-type > .tb-timeline-line{
   bottom: calc(100% - 1em);
 }
 
@@ -198,6 +198,9 @@ tb-timeline {
 
 .tb-timeline-item:hover .tb-timeline-add {
   display: block;
+}
+.tb-timeline-content {
+  overflow: hidden;
 }
 `
   ]
