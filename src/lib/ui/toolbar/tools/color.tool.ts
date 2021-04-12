@@ -8,6 +8,11 @@ import { PreComponent } from '../../../components/pre.component';
 export const colorToolConfig: DropdownToolConfig = {
   iconClasses: ['textbus-icon-color'],
   tooltip: i18n => i18n.get('plugins.toolbar.colorTool.tooltip'),
+  keymap: {
+    ctrlKey: true,
+    shiftKey: true,
+    key: 'c'
+  },
   viewFactory(i18n) {
     return new Palette('color', i18n.get('plugins.toolbar.colorTool.view.btnText'));
   },

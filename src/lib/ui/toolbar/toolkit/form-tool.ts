@@ -1,3 +1,5 @@
+import { merge, Subject } from 'rxjs';
+
 import { Tool, ToolFactoryParams } from '../help';
 import { HighlightState, ToolFactory } from '../help';
 import { SelectionMatchState } from '../matcher/_api';
@@ -13,11 +15,11 @@ export interface FormToolConfig extends DropdownToolConfig {
   viewFactory(i18n: I18n): FormViewer;
 }
 
-export class FormTool implements ToolFactory {
+export class FormTool<T> implements ToolFactory<T> {
   constructor(private config: FormToolConfig) {
   }
 
-  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+  create(params: ToolFactoryParams, addTool: (tool: Tool<T>) => void): HTMLElement {
     const {i18n, dialog, uploader} = params;
     const config = {
       ...this.config,
@@ -25,11 +27,15 @@ export class FormTool implements ToolFactory {
       tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
     };
     const viewer = config.viewFactory(i18n);
+    let prevValue: T = null;
+    const subject = new Subject<T>();
+    const obs = subject.asObservable();
     const button = UIKit.button({
       ...config,
       onChecked: () => {
         dialog.dialog(viewer.elementRef);
-        const s = viewer.onComplete.subscribe(() => {
+        const s = viewer.onComplete.subscribe(value => {
+          prevValue = value;
           dialog.close();
           s.unsubscribe();
         })
@@ -44,8 +50,15 @@ export class FormTool implements ToolFactory {
       viewer.setFileUploader(uploader);
     }
     addTool({
-      keymaps: [],
-      onAction: viewer.onComplete,
+      keymaps: config.keymap ? [{
+        keymap: config.keymap,
+        action() {
+          if (!button.disabled) {
+            subject.next(prevValue);
+          }
+        }
+      }] : [],
+      onAction: merge(viewer.onComplete, obs),
       commander: config.commanderFactory(),
       matcher: config.matcher,
       refreshState(selectionMatchState: SelectionMatchState): void {
