@@ -1,4 +1,4 @@
-import { Observable, Subscription } from 'rxjs';
+import { merge, Observable, Subject, Subscription } from 'rxjs';
 
 import { Tool, ToolFactory, ToolFactoryParams } from '../help';
 import { HighlightState } from '../help';
@@ -6,26 +6,30 @@ import { Matcher, SelectionMatchState } from '../matcher/_api';
 import { Commander } from '../commander';
 import { UIKit } from '../../uikit/uikit';
 import { I18n, I18nString } from '../../../i18n';
+import { Keymap } from '../../../core/_api';
 
 export interface DropdownViewer<T = any> {
   elementRef: HTMLElement;
-  onComplete: Observable<any>;
+  onComplete: Observable<T>;
   onClose?: Observable<void>;
 
-  update?(value?: T): void;
+  update?(value?: any): void;
 
   reset?(): void;
 }
 
-export interface DropdownToolConfig {
+export interface DropdownToolConfig<T = any> {
   /** 下拉控件展开后显示的内容 */
-  viewFactory(i18n: I18n): DropdownViewer;
+  viewFactory(i18n: I18n): DropdownViewer<T>;
 
   /** 锚中节点的的匹配项配置 */
   matcher?: Matcher;
 
   /** 订阅下拉控件操作完成时调用的命令 */
   commanderFactory(): Commander;
+
+  /** 快捷键配置 */
+  keymap?: Keymap;
 
   /** 给当前控件添加一组 css class */
   classes?: string[];
@@ -37,13 +41,13 @@ export interface DropdownToolConfig {
   label?: I18nString;
 }
 
-export class DropdownTool implements ToolFactory {
+export class DropdownTool<T = any> implements ToolFactory<T> {
   private subs: Subscription[] = [];
 
-  constructor(private config: DropdownToolConfig) {
+  constructor(private config: DropdownToolConfig<T>) {
   }
 
-  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+  create(params: ToolFactoryParams, addTool: (tool: Tool<T>) => void): HTMLElement {
     const {i18n, limitElement} = params;
     const config = {
       ...this.config,
@@ -58,12 +62,24 @@ export class DropdownTool implements ToolFactory {
       menu: viewer.elementRef,
       stickyElement: limitElement
     })
-    this.subs.push(viewer.onComplete.subscribe(() => {
+    let prevValue: T = null;
+    this.subs.push(viewer.onComplete.subscribe(value => {
+      prevValue = value;
       dropdown.hide();
     }))
+    dropdown.button.elementRef.dataset.keymap = JSON.stringify(config.keymap);
+    const subject = new Subject<T>();
+    const obs = subject.asObservable();
     addTool({
-      keymaps: [],
-      onAction: viewer.onComplete,
+      keymaps: config.keymap ? [{
+        keymap: config.keymap,
+        action() {
+          if (!dropdown.disabled) {
+            subject.next(prevValue);
+          }
+        }
+      }] : [],
+      onAction: merge(viewer.onComplete, obs),
       commander: config.commanderFactory(),
       matcher: config.matcher,
       refreshState(selectionMatchState: SelectionMatchState): void {

@@ -22,7 +22,7 @@ export class Toolbar implements TBPlugin {
   private elementRef: HTMLElement;
   private toolWrapper: HTMLElement;
   private keymapPrompt: HTMLElement;
-  private toolInstances: Tool[] = [];
+  private toolInstances: Tool<any>[] = [];
   private factories: ToolFactory[] = [];
 
   private subs: Subscription[] = [];

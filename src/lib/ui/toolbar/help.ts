@@ -16,8 +16,8 @@ export enum HighlightState {
   Disabled = 'Disabled'
 }
 
-export interface Tool {
-  onAction: Observable<any>;
+export interface Tool<T = any> {
+  onAction: Observable<T>;
   keymaps: KeymapAction[];
   commander?: Commander,
   matcher?: Matcher;
@@ -31,8 +31,8 @@ export interface ToolFactoryParams {
   uploader: FileUploader
 }
 
-export interface ToolFactory {
-  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement;
+export interface ToolFactory<T = any> {
+  create(params: ToolFactoryParams, addTool: (tool: Tool<T>) => void): HTMLElement;
 
 
   onDestroy?(): void;

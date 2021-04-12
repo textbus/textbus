@@ -50,26 +50,26 @@ export interface GroupConfig {
   matcher?: Matcher;
 }
 
-interface ToolView {
-  tool: Tool;
+interface ToolView<T = any> {
+  tool: Tool<T>;
   viewer: HTMLElement;
 }
 
-export class GroupTool implements ToolFactory {
+export class GroupTool<T = any> implements ToolFactory<T> {
   private dropdown: UIDropdown;
   private subs: Subscription[] = [];
 
   constructor(private config: GroupConfig) {
   }
 
-  create(params: ToolFactoryParams, addTool: (tool: Tool) => void): HTMLElement {
+  create(params: ToolFactoryParams, addTool: (tool: Tool<T>) => void): HTMLElement {
     const {i18n, uploader, dialog, limitElement} = params;
     const config = {
       ...this.config,
       label: typeof this.config.label === 'function' ? this.config.label(i18n) : this.config.label,
       tooltip: typeof this.config.tooltip === 'function' ? this.config.tooltip(i18n) : this.config.tooltip
     }
-    const subject = new Subject();
+    const subject = new Subject<T>();
     const obs = subject.asObservable();
     const menus = config.menu.map(c => {
       switch (c.type) {
@@ -119,7 +119,7 @@ export class GroupTool implements ToolFactory {
   private createButton(config: ActionMenu, i18n: I18n): ToolView {
     const subject = new Subject<any>();
     const obs = subject.asObservable();
-    const item = UIKit.actionMenu({
+    const item = UIKit.formMenu({
       label: typeof config.label === 'function' ? config.label(i18n) : config.label,
       classes: config.classes,
       iconClasses: config.iconClasses,
@@ -272,31 +272,41 @@ export class GroupTool implements ToolFactory {
     }
     const subject = new Subject<any>();
     const obs = subject.asObservable();
+    let prevValue: any = null;
     const menu = config.viewFactory(i18n);
 
-    const selectMenu = UIKit.dropdownMenu({
+    const dropdownMenu = UIKit.dropdownMenu({
       stickyElement,
       classes: config.classes,
+      keymap: config.keymap,
       iconClasses: config.iconClasses,
       menu: menu.elementRef,
       label: config.label
     })
 
     this.subs.push(menu.onComplete.subscribe(value => {
+      prevValue = value;
       subject.next(value);
       this.dropdown.hide();
     }))
 
     return {
-      viewer: selectMenu.elementRef,
+      viewer: dropdownMenu.elementRef,
       tool: {
         matcher: config.matcher,
         commander: config.commanderFactory(),
-        keymaps: [],
+        keymaps: config.keymap ? [{
+          keymap: config.keymap,
+          action() {
+            if (!dropdownMenu.disabled) {
+              subject.next(prevValue);
+            }
+          }
+        }] : [],
         onAction: obs,
         refreshState(selectionMatchState: SelectionMatchState) {
           menu.update?.(selectionMatchState.matchData);
-          selectMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
+          dropdownMenu.disabled = selectionMatchState.state === HighlightState.Disabled;
         }
       }
     }
@@ -314,13 +324,16 @@ export class GroupTool implements ToolFactory {
     if (typeof menu.setFileUploader === 'function') {
       menu.setFileUploader(fileUploader);
     }
-    const selectMenu = UIKit.actionMenu({
+
+    let prevValue: any = null;
+    const formMenu = UIKit.formMenu({
       ...config,
       onChecked: () => {
         dialog.dialog(menu.elementRef);
         this.dropdown.hide();
         const subscription = menu.onComplete.subscribe(value => {
           dialog.close();
+          prevValue = value;
           subject.next(value);
           subscription.unsubscribe();
         })
@@ -336,26 +349,33 @@ export class GroupTool implements ToolFactory {
       }
     })
     return {
-      viewer: selectMenu.elementRef,
+      viewer: formMenu.elementRef,
       tool: {
         matcher: config.matcher,
         commander: config.commanderFactory(),
         onAction: obs,
-        keymaps: [],
+        keymaps: config.keymap ? [{
+          keymap: config.keymap,
+          action() {
+            if (!formMenu.disabled) {
+              subject.next(prevValue);
+            }
+          }
+        }] : [],
         refreshState(selectionMatchState: SelectionMatchState) {
           menu.update?.(selectionMatchState.matchData);
           switch (selectionMatchState.state) {
             case HighlightState.Highlight:
-              selectMenu.disabled = false;
-              selectMenu.highlight = true;
+              formMenu.disabled = false;
+              formMenu.highlight = true;
               break;
             case HighlightState.Normal:
-              selectMenu.disabled = false;
-              selectMenu.highlight = false;
+              formMenu.disabled = false;
+              formMenu.highlight = false;
               break;
             case HighlightState.Disabled:
-              selectMenu.disabled = true;
-              selectMenu.highlight = false;
+              formMenu.disabled = true;
+              formMenu.highlight = false;
               break
           }
         }

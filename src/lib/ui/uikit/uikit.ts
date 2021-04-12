@@ -135,6 +135,7 @@ export interface UIMenuDropdownParams {
   classes?: string[];
   label?: string;
   tooltip?: string;
+  keymap?: Keymap;
   menu?: HTMLElement;
 }
 
@@ -512,7 +513,7 @@ export class UIKit {
     });
   }
 
-  static actionMenu(params: UIMenuItemParams): UIMenuItem {
+  static formMenu(params: UIMenuItemParams): UIMenuItem {
     const children = [];
     if (params.iconClasses) {
       children.push(createElement('span', {
@@ -708,11 +709,19 @@ export class UIKit {
       }))
     }
 
-    const label = createElement('span', {
+    children.push(createElement('span', {
       classes: ['textbus-toolbar-menu-item-btn-label', ...(params.classes || [])],
       children: [createTextNode(params.label || '')]
-    })
-    children.push(label, createElement('span', {
+    }))
+
+    if (params.keymap) {
+      children.push(createElement('span', {
+        classes: ['textbus-toolbar-menu-item-btn-keymap'],
+        children: createKeymapHTML(params.keymap)
+      }))
+    }
+
+    children.push(createElement('span', {
       classes: ['textbus-toolbar-menu-item-btn-arrow']
     }))
 

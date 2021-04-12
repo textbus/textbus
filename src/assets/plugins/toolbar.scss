@@ -174,8 +174,7 @@
     font-size: 12px;
     line-height: 1;
     font-weight: normal;
-    margin-left: 1.2em;
-    margin-right: -.5em;
+    margin-right: 0.5em;
     opacity: .8;
     display: inline-flex;
     align-items: center;
@@ -196,6 +195,7 @@
 
   &-label {
     flex: 1;
+    margin-right: 2em;
 
     &:before {
       margin-right: .5em;
@@ -342,7 +342,6 @@
 
 .textbus-toolbar-menu-item-btn-arrow {
   margin-right: -.5em;
-  margin-left: 2em;
 
   &:after {
     content: "";
