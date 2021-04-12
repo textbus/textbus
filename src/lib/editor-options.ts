@@ -31,4 +31,6 @@ export interface EditorOptions {
   i18n?: I18NConfig;
   /** 当某些工具需要上传资源时的调用函数，调用时会传入上传资源的类型，如 image、video、audio等，该函数返回一个字符串，作为资源的 url 地址 */
   uploader?(type: string, currentValue?: string): (string | Promise<string> | Observable<string>);
+  /** 当用户保存时的回调，一般为 ctrl + s 快捷键 */
+  onSave?(): void;
 }

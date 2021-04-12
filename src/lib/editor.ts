@@ -285,7 +285,18 @@ export class Editor {
     [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
       injector.get(f).setup();
     })
-    injector.get(Input);
+    const input = injector.get(Input);
+    if (typeof this.options.onSave === 'function') {
+      input.addKeymap({
+        keymap: {
+          ctrlKey: true,
+          key: 's'
+        },
+        action: () => {
+          this.options.onSave();
+        }
+      })
+    }
     injector.get(TBHistory).record();
 
     this.readyState = true;
