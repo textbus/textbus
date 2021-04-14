@@ -91,15 +91,13 @@ export class OutlinesPlugin implements TBPlugin {
           return this.renderer.getComponentRootNativeNode(component)
         })
         const children = this.links.children;
-        const count = Math.max(headingNativeNodes.length, children.length);
-        for (let i = 0; i < count; i++) {
-          const child = children[i];
+        for (let i = headingNativeNodes.length; i < children.length; i++) {
+          this.links.removeChild(children[i])
+        }
+        for (let i = 0; i < headingNativeNodes.length; i++) {
           const h = headingNativeNodes[i];
-          if (!h && child) {
-            this.links.removeChild(child);
-            continue;
-          }
-          if (child && h) {
+          const child = children[i];
+          if (child) {
             child.className = 'textbus-outlines-plugin-' + h.tagName.toLowerCase();
             const a = child.querySelector('a');
             a.onclick = () => {

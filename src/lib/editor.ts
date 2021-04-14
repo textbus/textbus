@@ -125,7 +125,12 @@ export class Editor {
         const parser = this.injector.get(Parser);
         const fragment = parser.parse(Parser.parserHTML(html));
         this.injector.get(RootComponent).slot.from(fragment);
-        resolve();
+        setTimeout(() => {
+          const layout = this.injector.get(Layout);
+          layout.scroller.scrollTop = 0
+          this.updateDocHeight(layout.iframe, layout.workbench, this.injector.get(EDITABLE_DOCUMENT));
+          resolve();
+        }, 30)
       })
     })
   }
@@ -429,22 +434,26 @@ export class Editor {
       return;
     }
     this.resizeObserver = new ResizeObserver(() => {
-      const childBody = contentDocument.body;
-      const lastChild = childBody.lastChild;
-      let height = 0;
-      if (lastChild) {
-        if (lastChild.nodeType === Node.ELEMENT_NODE) {
-          height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
-        } else {
-          const div = contentDocument.createElement('div');
-          childBody.appendChild(div);
-          height = div.getBoundingClientRect().bottom;
-          childBody.removeChild(div);
-        }
-      }
-      iframe.style.height = Math.max(height, container.offsetHeight) + 'px';
+      this.updateDocHeight(iframe, container, contentDocument);
     })
     this.resizeObserver.observe(contentDocument.body);
+  }
+
+  private updateDocHeight(iframe: HTMLIFrameElement, container: HTMLElement, contentDocument: Document) {
+    const childBody = contentDocument.body;
+    const lastChild = childBody.lastChild;
+    let height = 0;
+    if (lastChild) {
+      if (lastChild.nodeType === Node.ELEMENT_NODE) {
+        height = (lastChild as HTMLElement).getBoundingClientRect().bottom;
+      } else {
+        const div = contentDocument.createElement('div');
+        childBody.appendChild(div);
+        height = div.getBoundingClientRect().bottom;
+        childBody.removeChild(div);
+      }
+    }
+    iframe.style.height = Math.max(height, container.offsetHeight) + 'px';
   }
 
   private findFocusNode(node: Node, renderer: Renderer): Node {
