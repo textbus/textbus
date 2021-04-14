@@ -514,6 +514,12 @@ export const i18n_en_US: I18NConfig = {
     wordExplainComponent: {
       creator: {
         name: 'Word explain'
+      },
+      setter: {
+        title: 'word explain setting',
+        confirmBtnText: 'ok',
+        widthInputPlaceholder: 'title box width',
+        widthLabel: 'width'
       }
     }
   }

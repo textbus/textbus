@@ -1,6 +1,8 @@
+import { Injectable } from '@tanbo/di';
+
 import {
-  BackboneAbstractComponent, Component,
-  ComponentLoader,
+  BackboneAbstractComponent, Component, ComponentControlPanelView,
+  ComponentLoader, ComponentSetter,
   FormatData,
   FormatEffect,
   Fragment, SingleSlotRenderFn, SlotRenderFn,
@@ -9,6 +11,8 @@ import {
 } from '../../core/_api';
 import { ComponentCreator } from '../../ui/extensions/component-stage.plugin';
 import { textAlignFormatter } from '../../formatter/block-style.formatter';
+import { Form, FormTextField } from '../../ui/uikit/_api';
+import { I18n } from '../../i18n';
 
 export interface WordExplainParams {
   title: Fragment;
@@ -22,7 +26,7 @@ class WordExplainComponentLoader implements ComponentLoader {
   }
 
   read(element: Element): ViewData {
-    const title = element.querySelector('.tb-word-explain-title');
+    const title = element.querySelector('.tb-word-explain-title') as HTMLElement;
     const subtitle = element.querySelector('.tb-word-explain-subtitle');
     const detail = element.querySelector('.tb-word-explain-detail');
 
@@ -35,6 +39,11 @@ class WordExplainComponentLoader implements ComponentLoader {
       subtitle: subtitleFragment,
       detail: detailFragment
     });
+
+    const width = title.style.width;
+    if (width) {
+      component.width = width;
+    }
     return {
       component,
       slotsMap: [{
@@ -51,8 +60,42 @@ class WordExplainComponentLoader implements ComponentLoader {
   }
 }
 
+@Injectable()
+export class WordExplainComponentSetter implements ComponentSetter<WordExplainComponent> {
+  constructor(private i18n: I18n) {
+  }
+  create(instance: WordExplainComponent): ComponentControlPanelView {
+    const childI18n = this.i18n.getContext('components.wordExplainComponent.setter');
+    const form = new Form({
+      mini: true,
+      confirmBtnText: childI18n.get('confirmBtnText'),
+      items: [
+        new FormTextField({
+          name: 'width',
+          value: instance.width,
+          placeholder: childI18n.get('widthInputPlaceholder'),
+          label: childI18n.get('widthLabel')
+        })
+      ]
+    })
+
+    form.onComplete.subscribe(map => {
+      instance.width = map.get('width');
+      instance.markAsDirtied();
+    });
+    return {
+      title: childI18n.get('title'),
+      view: form.elementRef
+    }
+  }
+}
+
 @Component({
   loader: new WordExplainComponentLoader(),
+  providers: [{
+    provide: ComponentSetter,
+    useClass: WordExplainComponentSetter
+  }],
   styles: [
     `
 tb-word-explain {
@@ -87,7 +130,7 @@ tb-word-explain {
     display: block;
   }
   .tb-word-explain-title-group {
-    width: auto;
+    width: auto !important;
     padding-right: 0;
     display: flex;
     align-items: baseline;
@@ -134,9 +177,12 @@ tb-word-explain:hover .tb-word-explain-close {
   ]
 })
 export class WordExplainComponent extends BackboneAbstractComponent {
+  width = '140px';
   private readonly title: Fragment;
   private readonly subtitle: Fragment;
   private readonly detail: Fragment;
+
+  private emptyFragments: Fragment[] = [];
 
   constructor(private params: WordExplainParams) {
     super('tb-word-explain');
@@ -149,8 +195,11 @@ export class WordExplainComponent extends BackboneAbstractComponent {
     this.push(this.title, this.subtitle, this.detail);
   }
 
-  canDelete(): boolean {
-    return false;
+  canDelete(slot: Fragment): boolean {
+    this.emptyFragments.push(slot);
+    return [this.title, this.subtitle, this.detail].every(item => {
+      return this.emptyFragments.includes(item);
+    })
   }
 
   clone(): WordExplainComponent {
@@ -162,6 +211,7 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   }
 
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
+    this.emptyFragments = [];
     switch (slot) {
       case this.title:
         return slotRendererFn(slot, <div class="tb-word-explain-title"/>);
@@ -173,9 +223,10 @@ export class WordExplainComponent extends BackboneAbstractComponent {
   }
 
   render(isOutputMode: boolean, slotRenderFn: SlotRenderFn): VElement {
+    this.emptyFragments = [];
     return (
       <tb-word-explain>
-        <div class="tb-word-explain-title-group">
+        <div class="tb-word-explain-title-group" style={{width: this.width}}>
           {slotRenderFn(this.title)}
           {slotRenderFn(this.subtitle)}
         </div>

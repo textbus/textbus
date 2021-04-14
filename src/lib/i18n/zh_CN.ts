@@ -514,6 +514,12 @@ export const i18n_zh_CN: I18NConfig = {
     wordExplainComponent: {
       creator: {
         name: '名词释义'
+      },
+      setter: {
+        title: '名词释义设置',
+        confirmBtnText: '确定',
+        widthInputPlaceholder: '请输入标题宽度',
+        widthLabel: '标题宽度'
       }
     }
   }

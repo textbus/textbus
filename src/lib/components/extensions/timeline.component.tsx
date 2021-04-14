@@ -38,7 +38,7 @@ function createTimelineItem(): TimelineFragment {
   title.slot.apply(fontSizeFormatter, {
     effect: FormatEffect.Valid,
     startIndex: 0,
-    endIndex: 5,
+    endIndex: 4,
     formatData: new FormatData({
       styles: {
         fontSize: '18px'
@@ -48,14 +48,14 @@ function createTimelineItem(): TimelineFragment {
   title.slot.apply(boldFormatter, {
     effect: FormatEffect.Valid,
     startIndex: 0,
-    endIndex: 5,
+    endIndex: 4,
     formatData: new FormatData({
       tag: 'strong'
     })
   })
   title.slot.apply(fontSizeFormatter, {
     effect: FormatEffect.Valid,
-    startIndex: 5,
+    startIndex: 4,
     endIndex: 18,
     formatData: new FormatData({
       styles: {
@@ -65,7 +65,7 @@ function createTimelineItem(): TimelineFragment {
   })
   title.slot.apply(colorFormatter, {
     effect: FormatEffect.Valid,
-    startIndex: 5,
+    startIndex: 4,
     endIndex: 18,
     formatData: new FormatData({
       styles: {
