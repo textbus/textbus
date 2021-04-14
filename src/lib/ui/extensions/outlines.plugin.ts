@@ -90,7 +90,7 @@ export class OutlinesPlugin implements TBPlugin {
         const headingNativeNodes = components.map(component => {
           return this.renderer.getComponentRootNativeNode(component)
         })
-        const children = this.links.children;
+        const children = Array.from(this.links.children);
         for (let i = headingNativeNodes.length; i < children.length; i++) {
           this.links.removeChild(children[i])
         }
