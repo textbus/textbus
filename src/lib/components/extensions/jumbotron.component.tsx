@@ -61,7 +61,7 @@ class JumbotronComponentSetter implements ComponentSetter<JumbotronComponent> {
     form.onComplete.subscribe(map => {
       instance.options.minHeight = map.get('minHeight');
       instance.options.backgroundImage = map.get('backgroundImage');
-      instance.markAsDirtied();
+      instance.slot.markAsDirtied();
     });
     return {
       title: childI18n.get('title'),

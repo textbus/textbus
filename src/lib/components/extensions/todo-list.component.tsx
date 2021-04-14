@@ -24,7 +24,7 @@ class TodoListComponentLoader implements ComponentLoader {
 
   read(element: HTMLElement): ViewData {
     const listConfig = Array.from(element.children).map(child => {
-      const stateElement = child.querySelector('span.tb-todo-list-state');
+      const stateElement = child.querySelector('.tb-todo-list-state');
       return {
         childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
         slot: new TodoListFragment(
