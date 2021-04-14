@@ -26,7 +26,7 @@ class WordExplainComponentLoader implements ComponentLoader {
   }
 
   read(element: Element): ViewData {
-    const title = element.querySelector('.tb-word-explain-title') as HTMLElement;
+    const title = element.querySelector('.tb-word-explain-title');
     const subtitle = element.querySelector('.tb-word-explain-subtitle');
     const detail = element.querySelector('.tb-word-explain-detail');
 
@@ -40,7 +40,7 @@ class WordExplainComponentLoader implements ComponentLoader {
       detail: detailFragment
     });
 
-    const width = title.style.width;
+    const width = (element.querySelector('.tb-word-explain-title-group') as HTMLElement).style.width;
     if (width) {
       component.width = width;
     }
