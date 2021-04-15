@@ -25,7 +25,7 @@ export class FormSwitch implements FormItem<boolean> {
   }
 
   update(value?: any): void {
-    this.input.checked = value;
+    this.input.checked = typeof value === 'boolean' ? value : this.config.checked;
   }
 
   getAttr(): AttrState<boolean> {

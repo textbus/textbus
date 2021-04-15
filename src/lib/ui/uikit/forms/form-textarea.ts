@@ -31,11 +31,7 @@ export class FormTextarea implements FormItem<string> {
 
   update(value?: any): void {
     this.uploaded();
-    if ([undefined, null].includes(value)) {
-      this.input.value = this.config.value || '';
-    } else {
-      this.input.value = value;
-    }
+    this.input.value = (value ?? this.config.value) || '';
   }
 
   getAttr(): AttrState<string> {

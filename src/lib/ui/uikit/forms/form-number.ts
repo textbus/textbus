@@ -26,11 +26,7 @@ export class FormNumber implements FormItem<number> {
   }
 
   update(value?: any): void {
-    if ([undefined, null].includes(value)) {
-      this.input.value = this.config.value as any;
-    } else {
-      this.input.value = value;
-    }
+    this.input.value = (value ?? this.config.value) || '';
   }
 
   getAttr(): AttrState<number> {
