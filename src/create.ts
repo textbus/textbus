@@ -45,9 +45,8 @@ import {
   unlinkTool,
   findTool,
   insertObjectTool,
-  tableTool
-} from './lib/ui/toolbar/tools/_api';
-import {
+  tableTool,
+
   alertComponentExample,
   imageCardComponentExample,
   todoListComponentExample,
@@ -68,18 +67,8 @@ import {
   BaiduMapComponent,
   TodoListComponent,
   ImageCardComponent,
-  KatexComponent
-} from './lib/components/extensions/_api';
-import {
-  ListComponent,
-  BlockComponent,
-  PreComponent,
-  AudioComponent,
-  VideoComponent,
-  ImageComponent,
-  TableComponent
-} from './lib/components/_api';
-import {
+  KatexComponent,
+
   COMPONENT_CREATORS,
   TOOLS,
   ComponentStagePlugin,
@@ -91,9 +80,18 @@ import {
   TableEditPlugin,
   SourcecodeModePlugin,
   OutlinesPlugin,
-  ToolFactory, DeviceOption, ComponentCreator
-} from './lib/ui/_api';
-import { Toolbar } from './lib/ui/toolbar/_api';
+  PasteHandlePlugin,
+  ToolFactory, DeviceOption, ComponentCreator, Toolbar
+} from './extensions/_api';
+import {
+  ListComponent,
+  BlockComponent,
+  PreComponent,
+  AudioComponent,
+  VideoComponent,
+  ImageComponent,
+  TableComponent
+} from './lib/components/_api';
 
 export const defaultTools: Array<ToolFactory | ToolFactory[]> = [
   [historyBackTool, historyForwardTool],
@@ -209,6 +207,7 @@ export const defaultOptions: EditorOptions = {
   }],
   plugins: [
     Toolbar,
+    PasteHandlePlugin,
     OutlinesPlugin,
     FullScreenPlugin,
     DevicePlugin,

@@ -15,7 +15,7 @@ import {
 } from './core/_api';
 import {
   UIControlPanel,
-  UIDialog, Input, Layout, FileUploader, TBPlugin, PasteHandlePlugin, UIMessage
+  UIDialog, Input, Layout, FileUploader, TBPlugin, UIMessage
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
@@ -66,8 +66,7 @@ export class Editor {
   private defaultPlugins: Type<TBPlugin>[] = [
     UIDialog,
     UIControlPanel,
-    UIMessage,
-    PasteHandlePlugin
+    UIMessage
   ];
   private readyState = false;
   private tasks: Array<() => void> = [];

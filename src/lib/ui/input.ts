@@ -19,7 +19,7 @@ import { RootComponent } from '../root-component';
 import { TBHistory } from '../history';
 import { EditorController } from '../editor-controller';
 import { UIControlPanel } from './plugins/control-panel.plugin';
-import { createElement, createTextNode } from './uikit/uikit';
+import { createElement, createTextNode } from './_utils/uikit';
 import { ComponentInjectors } from '../component-injectors';
 import { Layout } from './layout';
 import { I18n } from '../i18n';

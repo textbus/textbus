@@ -1,7 +1,7 @@
 import { Injectable } from '@tanbo/di';
 
 import { TBPlugin } from '../plugin';
-import { createElement, createTextNode } from '../uikit/_api';
+import { createElement, createTextNode } from '../_utils/_api';
 import { Layout } from '../layout';
 
 @Injectable()

@@ -1,0 +1,14 @@
+import { FormatMatcher } from './format.matcher';
+import { SelectionMatchState } from './matcher';
+import { TBSelection } from '../../../lib/core/_api';
+import { HighlightState } from '../help';
+
+export class UnlinkMatcher extends FormatMatcher {
+  queryState(selection: TBSelection): SelectionMatchState {
+    const r = super.queryState(selection);
+    if (r.state === HighlightState.Normal) {
+      r.state = HighlightState.Disabled;
+    }
+    return r;
+  }
+}

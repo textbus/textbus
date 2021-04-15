@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di';
 
-import { createElement } from '../uikit/uikit';
+import { createElement } from '../_utils/uikit';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
 import { EditorController } from '../../editor-controller';

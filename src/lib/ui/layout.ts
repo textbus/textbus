@@ -2,7 +2,7 @@ import { Injectable } from '@tanbo/di';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { createElement } from './uikit/_api';
+import { createElement } from './_utils/_api';
 import { iframeHTML } from './iframe-html';
 import { EditorController } from '../editor-controller';
 

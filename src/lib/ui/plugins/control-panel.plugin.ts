@@ -1,10 +1,10 @@
 import { Injectable } from '@tanbo/di';
 import { Subscription } from 'rxjs';
 
-import { createElement } from '../uikit/_api';
+import { createElement } from '../_utils/_api';
 import { ComponentControlPanelView } from '../../core/_api';
 import { EditorController } from '../../editor-controller';
-import { Tab, TabConfig } from '../tab';
+import { Tab, TabConfig } from '../../../extensions/_utils/tab';
 import { TBPlugin } from '../plugin';
 import { Layout } from '../layout';
 import { I18n } from '../../i18n';
