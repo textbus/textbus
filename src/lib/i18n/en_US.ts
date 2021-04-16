@@ -4,8 +4,6 @@ export const i18n_en_US: I18NConfig = {
   /** core library dependency start, no optional */
   editor: {
     noSelection: 'please select the location to insert the resource first!',
-    insertParagraphAfter: 'insert paragraph after',
-    insertParagraphBefore: 'insert paragraph before',
     copy: 'copy',
     paste: 'paste',
     cut: 'cut',
@@ -37,6 +35,10 @@ export const i18n_en_US: I18NConfig = {
       switchText: 'component library',
       expandOrNarrowLib: 'expand or narrow component library',
       defaultCategoryName: 'default'
+    },
+    contextmenu: {
+      insertParagraphAfter: 'insert paragraph after',
+      insertParagraphBefore: 'insert paragraph before',
     },
     device: {
       title: 'switch device width',

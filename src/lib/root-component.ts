@@ -14,12 +14,10 @@ import {
   BlockFormatter,
   FormatRange,
   BrComponent,
-  ContextMenuAction,
   ComponentLoader,
   ViewData, SlotRenderFn, SingleSlotRenderFn,
 } from './core/_api';
 import { Input } from './ui/input';
-import { BlockComponent } from './components/_api';
 import { EditorController } from './editor-controller';
 import { I18n } from './i18n';
 
@@ -34,22 +32,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
               @Inject(forwardRef(() => I18n)) private i18n: I18n,
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController) {
-  }
-
-  onContextmenu(): ContextMenuAction[] {
-    return [{
-      iconClasses: ['textbus-icon-insert-paragraph-before'],
-      label: this.i18n.get('editor.insertParagraphBefore'),
-      action: () => {
-        this.insertParagraph(true)
-      }
-    }, {
-      iconClasses: ['textbus-icon-insert-paragraph-after'],
-      label: this.i18n.get('editor.insertParagraphAfter'),
-      action: () => {
-        this.insertParagraph(false)
-      }
-    }]
   }
 
   onInputReady() {
@@ -216,33 +198,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
       }
     })
 
-  }
-
-  private insertParagraph(insertBefore: boolean) {
-    const selection = this.selection;
-    if (selection.rangeCount === 0) {
-      return;
-    }
-    const firstRange = selection.firstRange;
-    let component = selection.commonAncestorComponent;
-
-    if (component === this.rootComponent) {
-      const commonAncestorFragmentScope = firstRange.getCommonAncestorFragmentScope();
-      component = insertBefore ?
-        commonAncestorFragmentScope.startChildComponent :
-        commonAncestorFragmentScope.endChildComponent;
-    }
-
-    const parentFragment = component.parentFragment;
-    const p = new BlockComponent('p');
-    p.slot.append(new BrComponent());
-
-    insertBefore ? parentFragment.insertBefore(p, component) : parentFragment.insertAfter(p, component);
-
-    selection.removeAllRanges();
-    firstRange.setStart(p.slot, 0);
-    firstRange.collapse();
-    selection.addRange(firstRange);
   }
 
   private recordSnapshotFromEditingBefore() {

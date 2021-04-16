@@ -4,8 +4,6 @@ export const i18n_zh_CN: I18NConfig = {
   /** 核心库依赖，不可缺少 */
   editor: {
     noSelection: '请先选择插入资源位置！',
-    insertParagraphAfter: '在后面插入段落',
-    insertParagraphBefore: '在前面插入段落',
     copy: '复制',
     paste: '粘贴',
     cut: '剪切',
@@ -37,6 +35,10 @@ export const i18n_zh_CN: I18NConfig = {
       switchText: '组件库',
       expandOrNarrowLib: '展开或收起组件库',
       defaultCategoryName: '默认'
+    },
+    contextmenu: {
+      insertParagraphAfter: '在后面插入段落',
+      insertParagraphBefore: '在前面插入段落',
     },
     device: {
       title: '切换设备宽度',

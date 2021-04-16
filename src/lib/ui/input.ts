@@ -85,6 +85,8 @@ export class Input {
 
   private contextmenu: ContextMenu;
 
+  private customContextActions: ContextMenuAction[][] = [];
+
   private prevComponent: AbstractComponent = null;
 
   constructor(@Inject(EDITABLE_DOCUMENT) private context: Document,
@@ -128,6 +130,14 @@ export class Input {
    */
   addPasteMiddleware(middleware: PastePreHandleMiddleware) {
     this.pasteMiddlewares.push(middleware);
+  }
+
+  /**
+   * 增加上下文菜单
+   */
+
+  addContextMenus(actions: ContextMenuAction[]) {
+    this.customContextActions.push(actions);
   }
 
   /**
@@ -274,7 +284,8 @@ export class Input {
               this.selection.selectAll();
             }
           }],
-          ...this.makeContextmenu()
+          ...this.makeContextmenu(),
+          ...this.customContextActions
         ], ev.pageX + rect.x, ev.pageY + rect.y);
         ev.preventDefault();
       }),
