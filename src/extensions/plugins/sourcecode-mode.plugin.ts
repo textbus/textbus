@@ -5,7 +5,7 @@ import pretty from 'pretty';
 import codemirror from 'codemirror';
 import 'codemirror/mode/htmlmixed/htmlmixed';
 
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { EditorController } from '../../lib/editor-controller';
 import { Editor, } from '../../lib/editor';
 import { Layout } from '../../lib/ui/layout';

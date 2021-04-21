@@ -16,6 +16,7 @@ export * from './lib/history';
 export * from './lib/i18n';
 export * from './lib/inject-tokens';
 export * from './lib/output-translator';
+export * from './lib/plugin';
 export * from './lib/root-component';
 
 export * from './extensions/_api';

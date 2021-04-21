@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { I18n } from '../../lib/i18n';
 import { TBSelection } from '../../lib/core/_api';
 import { Input } from '../../lib/ui/input';

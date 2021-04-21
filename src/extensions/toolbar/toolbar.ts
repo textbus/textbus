@@ -2,7 +2,7 @@ import { Inject, Injectable, InjectionToken, Injector } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Layout } from '../../lib/ui/layout';
 import { HighlightState, Tool, ToolFactory } from './help';
 import { createKeymapHTML } from '../_utils/uikit';

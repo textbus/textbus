@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { TBSelection } from '../../lib/core/_api';
 import { EDITABLE_DOCUMENT } from '../../lib/inject-tokens';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Layout } from '../../lib/ui/layout';
 import { I18n } from '../../lib/i18n';
 

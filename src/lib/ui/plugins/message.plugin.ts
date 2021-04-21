@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di';
 
-import { TBPlugin } from '../plugin';
+import { TBPlugin } from '../../plugin';
 import { createElement, createTextNode } from '../_utils/_api';
 import { Layout } from '../layout';
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
 
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Layout } from '../../lib/ui/layout';
 import { RootComponent } from '../../lib/root-component';
 import {

@@ -6,7 +6,7 @@ import { Fragment, Renderer, TBRange, TBSelection, BrComponent } from '../../lib
 import { TableCellPosition, TableComponent } from '../../lib/components/_api';
 import { EDITABLE_DOCUMENT } from '../../lib/inject-tokens';
 import { Layout } from '../../lib/ui/layout';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 
 interface ElementPosition {
   left: number;

@@ -5,7 +5,7 @@ import { Renderer, TBSelection, VElement } from '../../lib/core/_api';
 import { ImageComponent, VideoComponent } from '../../lib/components/_api';
 import { EDITABLE_DOCUMENT } from '../../lib/inject-tokens';
 import { Layout } from '../../lib/ui/layout';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 
 function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
   let angle = Math.atan(x / y) / (Math.PI / 180);

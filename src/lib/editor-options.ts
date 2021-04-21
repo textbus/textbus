@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { Provider, Type } from '@tanbo/di';
 
 import { AbstractComponent, Formatter } from './core/_api';
-import { TBPlugin } from './ui/plugin';
+import { TBPlugin } from './plugin';
 import { I18NConfig } from './i18n';
 
 /**

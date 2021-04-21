@@ -13,7 +13,7 @@ import { EditorController } from '../../lib/editor-controller';
 import { FileUploader } from '../../lib/ui/file-uploader';
 import { createElement, createTextNode } from '../../lib/ui/_api';
 import { Tab } from '../_utils/tab';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Layout } from '../../lib/ui/layout';
 import { I18n, I18nString } from '../../lib/i18n';
 

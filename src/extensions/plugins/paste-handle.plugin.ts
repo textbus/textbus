@@ -2,7 +2,7 @@ import { Injectable } from '@tanbo/di';
 import { race } from 'rxjs';
 
 import { Input } from '../../lib/ui/input';
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { UIDialog } from '../../lib/ui/plugins/dialog.plugin';
 import { Form, FormTextField } from '../_utils/_api';
 import { I18n } from '../../lib/i18n';

@@ -15,7 +15,7 @@ import {
 } from './core/_api';
 import {
   UIControlPanel,
-  UIDialog, Input, Layout, FileUploader, TBPlugin, UIMessage
+  UIDialog, Input, Layout, FileUploader, UIMessage
 } from './ui/_api';
 import { HTMLOutputTranslator, OutputTranslator } from './output-translator';
 import { EditorController } from './editor-controller';
@@ -28,6 +28,7 @@ import { TBHistory } from './history';
 import { BlockComponent } from './components/block.component';
 import { i18n_zh_CN } from './i18n/zh_CN';
 import { I18n } from './i18n';
+import { TBPlugin } from './plugin';
 
 declare const ResizeObserver: any;
 const editorErrorFn = makeError('Editor');

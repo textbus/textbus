@@ -1,7 +1,7 @@
 import { fromEvent, Subscription } from 'rxjs';
 import { Inject, Injectable, InjectionToken } from '@tanbo/di';
 
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Layout } from '../../lib/ui/layout';
 import { EditorController } from '../../lib/editor-controller';
 import { I18n } from '../../lib/i18n';
