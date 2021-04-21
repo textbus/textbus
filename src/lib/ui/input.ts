@@ -135,7 +135,6 @@ export class Input {
   /**
    * 增加上下文菜单
    */
-
   addContextMenus(actions: ContextMenuAction[]) {
     this.customContextActions.push(actions);
   }

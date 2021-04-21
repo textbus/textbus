@@ -19,7 +19,6 @@ import {
 } from './core/_api';
 import { Input } from './ui/input';
 import { EditorController } from './editor-controller';
-import { I18n } from './i18n';
 
 @Injectable()
 class RootComponentInterceptor implements Interceptor<RootComponent> {
@@ -29,7 +28,6 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   constructor(@Inject(forwardRef(() => TBSelection)) private selection: TBSelection,
               @Inject(forwardRef(() => Input)) private input: Input,
-              @Inject(forwardRef(() => I18n)) private i18n: I18n,
               @Inject(forwardRef(() => RootComponent)) private rootComponent: RootComponent,
               @Inject(forwardRef(() => EditorController)) private editorController: EditorController) {
   }

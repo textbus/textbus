@@ -14,18 +14,6 @@ export const i18n_zh_CN: I18NConfig = {
     controlPanel: {
       cancelFixed: '取消固定',
       fixed: '固定'
-    },
-    pasteHandle: {
-      title: '资源上传',
-      confirmBtnText: '确定',
-      cancelBtnText: '完成',
-      uploadBtnText: '上传',
-      imageLabel: '第 {0} 张图片',
-      videoLabel: '第 {0} 个视频',
-      audioLabel: '第 {0} 个音频',
-      imagePlaceholder: '请输入图片地址',
-      videoPlaceholder: '请输入视频地址',
-      audioPlaceholder: '请输入音频地址',
     }
   },
   /** 核心库依赖结束 */
@@ -47,12 +35,28 @@ export const i18n_zh_CN: I18NConfig = {
     fullScreen: {
       switchFullScreen: '切换全屏模式'
     },
+    insertParagraph: {
+      insertParagraphAfter: '在后面插入段落',
+      insertParagraphBefore: '在前面插入段落',
+    },
     linkJump: {
       accessLink: '跳转'
     },
     outlines: {
       title: '概览',
       switchText: '概览'
+    },
+    pasteHandle: {
+      title: '资源上传',
+      confirmBtnText: '确定',
+      cancelBtnText: '完成',
+      uploadBtnText: '上传',
+      imageLabel: '第 {0} 张图片',
+      videoLabel: '第 {0} 个视频',
+      audioLabel: '第 {0} 个音频',
+      imagePlaceholder: '请输入图片地址',
+      videoPlaceholder: '请输入视频地址',
+      audioPlaceholder: '请输入音频地址',
     },
     sourcecodeMode: {
       switchText: '源代码'

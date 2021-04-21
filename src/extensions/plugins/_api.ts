@@ -3,6 +3,7 @@ export * from './contextmenu.plugin';
 export * from './device.plugin';
 export * from './full-screen.plugin';
 export * from './image-video-resize.plugin';
+export * from './insert-paragraph.plugin';
 export * from './link-jump.plugin';
 export * from './outlines.plugin';
 export * from './paste-handle.plugin';

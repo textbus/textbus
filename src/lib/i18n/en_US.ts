@@ -14,18 +14,6 @@ export const i18n_en_US: I18NConfig = {
     controlPanel: {
       cancelFixed: 'cancel fixed',
       fixed: 'fixed'
-    },
-    pasteHandle: {
-      title: 'source upload',
-      confirmBtnText: 'ok',
-      cancelBtnText: 'finish',
-      uploadBtnText: 'upload',
-      imageLabel: '{0} picture',
-      videoLabel: '{0} video',
-      audioLabel: '{0} audio',
-      imagePlaceholder: 'please enter image URL',
-      videoPlaceholder: 'please enter video URL',
-      audioPlaceholder: 'please enter audio URL',
     }
   },
   /** core library dependency end */
@@ -47,12 +35,28 @@ export const i18n_en_US: I18NConfig = {
     fullScreen: {
       switchFullScreen: 'switch full screen'
     },
+    insertParagraph: {
+      insertParagraphAfter: 'insert paragraph after',
+      insertParagraphBefore: 'insert paragraph before',
+    },
     linkJump: {
       accessLink: 'open'
     },
     outlines: {
       title: 'outline',
       switchText: 'outline'
+    },
+    pasteHandle: {
+      title: 'source upload',
+      confirmBtnText: 'ok',
+      cancelBtnText: 'finish',
+      uploadBtnText: 'upload',
+      imageLabel: '{0} picture',
+      videoLabel: '{0} video',
+      audioLabel: '{0} audio',
+      imagePlaceholder: 'please enter image URL',
+      videoPlaceholder: 'please enter video URL',
+      audioPlaceholder: 'please enter audio URL',
     },
     sourcecodeMode: {
       switchText: 'source code'
