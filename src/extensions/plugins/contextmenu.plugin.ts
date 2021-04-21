@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di';
 
-import { TBPlugin } from '../../lib/ui/plugin';
+import { TBPlugin } from '../../lib/plugin';
 import { Input } from '../../lib/ui/input';
 import { I18n } from '../../lib/i18n';
 import { RootComponent } from '../../lib/root-component';
