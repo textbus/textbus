@@ -35,10 +35,6 @@ export const i18n_en_US: I18NConfig = {
     fullScreen: {
       switchFullScreen: 'switch full screen'
     },
-    insertParagraph: {
-      insertParagraphAfter: 'insert paragraph after',
-      insertParagraphBefore: 'insert paragraph before',
-    },
     linkJump: {
       accessLink: 'open'
     },

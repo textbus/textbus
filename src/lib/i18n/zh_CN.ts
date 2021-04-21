@@ -35,10 +35,6 @@ export const i18n_zh_CN: I18NConfig = {
     fullScreen: {
       switchFullScreen: '切换全屏模式'
     },
-    insertParagraph: {
-      insertParagraphAfter: '在后面插入段落',
-      insertParagraphBefore: '在前面插入段落',
-    },
     linkJump: {
       accessLink: '跳转'
     },
