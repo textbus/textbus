@@ -16,7 +16,7 @@ export class InsertParagraphPlugin implements TBPlugin {
   }
 
   setup() {
-    this.input.addContextMenu([{
+    this.input.addContextMenus([{
       iconClasses: ['textbus-icon-insert-paragraph-before'],
       label: this.i18n.get('plugins.insertParagraph.insertParagraphBefore'),
       action: () => {

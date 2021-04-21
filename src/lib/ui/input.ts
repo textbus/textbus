@@ -85,7 +85,7 @@ export class Input {
 
   private contextmenu: ContextMenu;
 
-  private customContextActions: ContextMenuAction[][] = [];
+  private customContextmenuActions: ContextMenuAction[][] = [];
 
   private prevComponent: AbstractComponent = null;
 
@@ -136,7 +136,7 @@ export class Input {
    * 增加上下文菜单
    */
   addContextMenus(actions: ContextMenuAction[]) {
-    this.customContextActions.push(actions);
+    this.customContextmenuActions.push(actions);
   }
 
   /**
@@ -284,7 +284,7 @@ export class Input {
             }
           }],
           ...this.makeContextmenu(),
-          ...this.customContextActions
+          ...this.customContextmenuActions
         ], ev.pageX + rect.x, ev.pageY + rect.y);
         ev.preventDefault();
       }),
