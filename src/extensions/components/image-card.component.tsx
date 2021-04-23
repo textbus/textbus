@@ -106,6 +106,7 @@ tb-image-card > p {
   height: 24px;
   line-height: 24px;
   padding: 6px 20px;
+  box-sizing: content-box;
 }
 `
   ]
