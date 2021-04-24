@@ -104,7 +104,7 @@ class PreComponentLoader implements ComponentLoader {
       code = el.innerText;
     }
 
-    const component = new PreComponent(el.getAttribute('lang'), code, el.getAttribute('theme') as PreTheme);
+    const component = new PreComponent(el.getAttribute('lang'), code);
     return {
       component: component,
       slotsMap: []
@@ -386,6 +386,7 @@ class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
 
   pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
   pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
+  pre[theme=dark] .tb-hl-comment {color: #4c5156;}
   pre[theme=dark] .tb-code-line::before { color: #848484}
   pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #1b1b1b; }
   `.replace('<style>', '')
@@ -410,7 +411,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
 
   private _lang: string
 
-  constructor(lang: string, code: string, private theme?: PreTheme) {
+  constructor(lang: string, code: string) {
     super('pre');
     this.lang = lang;
     this.setSourceCode(code);
@@ -430,7 +431,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       f.from(slot.clone());
       return f;
     });
-    const component = new PreComponent(this.lang, '', this.theme);
+    const component = new PreComponent(this.lang, '');
     component.clean();
     component.push(...fragments);
     return component;
@@ -479,7 +480,7 @@ export class PreComponent extends BackboneAbstractComponent<CodeFragment> {
       }))
     }
     block.attrs.set('lang', this.lang);
-    block.attrs.set('theme', this.theme || PreComponent.theme);
+    block.attrs.set('theme', PreComponent.theme);
     return block;
   }
 
