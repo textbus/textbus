@@ -296,14 +296,26 @@ export class Editor {
     }
     injector.get(TBHistory).record();
 
-    [...(this.options.plugins || [])].forEach(f => {
-      setTimeout(() => {
-        injector.get(f).setup();
+    const customPlugins = this.options.plugins || [];
+    let i = 0
+
+    if (!customPlugins.length) {
+      this.readyState = true;
+      this.readyEvent.next();
+      this.tasks.forEach(fn => fn());
+    } else {
+      customPlugins.forEach(f => {
+        setTimeout(() => {
+          i++;
+          injector.get(f).setup();
+          if (i === customPlugins.length) {
+            this.readyState = true;
+            this.readyEvent.next();
+            this.tasks.forEach(fn => fn());
+          }
+        })
       })
-    })
-    this.readyState = true;
-    this.readyEvent.next();
-    this.tasks.forEach(fn => fn());
+    }
   }
 
   private bootstrap(rootInjector: Injector, contentDocument: Document): Injector {
