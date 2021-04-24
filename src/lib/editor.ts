@@ -25,7 +25,6 @@ import { EditorOptions } from './editor-options';
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from './inject-tokens';
 import { RootComponent } from './root-component';
 import { TBHistory } from './history';
-import { BlockComponent } from './components/block.component';
 import { i18n_zh_CN } from './i18n/zh_CN';
 import { I18n } from './i18n';
 import { TBPlugin } from './plugin';
@@ -80,7 +79,7 @@ export class Editor {
   private subs: Subscription[] = [];
   private changeEvent = new Subject<void>()
 
-  constructor(public selector: string | HTMLElement, public options: EditorOptions) {
+  constructor(public selector: string | HTMLElement, public options: EditorOptions = {}) {
     if (typeof selector === 'string') {
       this.container = document.querySelector(selector);
     } else {
@@ -247,13 +246,6 @@ export class Editor {
     const parser = injector.get(Parser);
     this.subs.push(
       rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
-        const isEmpty = rootComponent.slot.length === 0;
-        Editor.guardLastIsParagraph(rootComponent.slot);
-        if (isEmpty && selection.firstRange) {
-          const position = selection.firstRange.findFirstPosition(rootComponent.slot);
-          selection.firstRange.setStart(position.fragment, position.index);
-          selection.firstRange.setEnd(position.fragment, position.index);
-        }
         renderer.render(rootComponent, contentDocument.body);
         selection.restore();
       }),
@@ -473,15 +465,5 @@ export class Editor {
       .replace(/\s*(?=[>{}:;,[])/g, '')
       .replace(/([>{}:;,])\s*/g, '$1')
       .replace(/;}/g, '}').replace(/\s+/, ' ').trim();
-  }
-
-  private static guardLastIsParagraph(fragment: Fragment) {
-    const last = fragment.sliceContents(fragment.length - 1)[0];
-    if (last instanceof BlockComponent) {
-      return;
-    }
-    const p = new BlockComponent('p');
-    p.slot.append(new BrComponent());
-    fragment.append(p);
   }
 }

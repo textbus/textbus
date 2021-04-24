@@ -81,7 +81,7 @@ import {
   SourcecodeModePlugin,
   OutlinesPlugin,
   PasteHandlePlugin,
-  ToolFactory, DeviceOption, ComponentCreator, Toolbar, ContextmenuPlugin
+  ToolFactory, DeviceOption, ComponentCreator, Toolbar, ContextmenuPlugin, GuardLastIsParagraphPlugin
 } from './extensions/_api';
 import {
   ListComponent,
@@ -209,6 +209,7 @@ export const defaultOptions: EditorOptions = {
     Toolbar,
     ContextmenuPlugin,
     PasteHandlePlugin,
+    GuardLastIsParagraphPlugin,
     OutlinesPlugin,
     FullScreenPlugin,
     DevicePlugin,
