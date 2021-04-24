@@ -40,7 +40,7 @@ export class PasteHandlePlugin implements TBPlugin {
                 label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.imageLabel'), index + 1),
                 placeholder: this.i18n.get('plugins.pasteHandle.imagePlaceholder'),
                 uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
-                uploadType: img.tagName.toLowerCase(),
+                uploadType: 'image',
                 canUpload: true,
               })
             }),
@@ -51,7 +51,7 @@ export class PasteHandlePlugin implements TBPlugin {
                 label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
                 placeholder: this.i18n.get('plugins.pasteHandle.videoPlaceholder'),
                 uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
-                uploadType: video.tagName.toLowerCase(),
+                uploadType: 'video',
                 canUpload: true,
               })
             }),
@@ -62,7 +62,7 @@ export class PasteHandlePlugin implements TBPlugin {
                 label: this.i18n.joinTemplate(this.i18n.get('plugins.pasteHandle.videoLabel'), index + 1),
                 placeholder: this.i18n.get('plugins.pasteHandle.audioPlaceholder'),
                 uploadBtnText: this.i18n.get('plugins.pasteHandle.uploadBtnText'),
-                uploadType: audio.tagName.toLowerCase(),
+                uploadType: 'audio',
                 canUpload: true,
               })
             })
