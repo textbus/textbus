@@ -38,6 +38,12 @@ export const i18n_en_US: I18NConfig = {
     linkJump: {
       accessLink: 'open'
     },
+    localBackup: {
+      title: 'local backup',
+      confirmBtnText: 'yes',
+      cancelBtnText: 'no',
+      tooltip: 'local cache detected, do you want to apply?'
+    },
     outlines: {
       title: 'outline',
       switchText: 'outline'
