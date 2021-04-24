@@ -356,14 +356,14 @@ export class Editor {
         provide: FileUploader,
         useFactory: (message: UIMessage, i18n: I18n) => {
           return {
-            upload: (type: string): Observable<string> => {
+            upload: (type: string, currentValue: string): Observable<string> => {
               if (selection.rangeCount === 0) {
                 message.message(i18n.get('editor.noSelection'));
                 return of('');
               }
               if (typeof this.options.uploader === 'function') {
 
-                const result = this.options.uploader(type);
+                const result = this.options.uploader(type, currentValue);
                 if (result instanceof Observable) {
                   return result;
                 } else if (result instanceof Promise) {
