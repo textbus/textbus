@@ -3,6 +3,7 @@ export * from './form-hidden';
 export * from './form-number';
 export * from './form-radio';
 export * from './form-select';
+export * from './form-static';
 export * from './form-switch';
 export * from './form-text-field';
 export * from './form-textarea';

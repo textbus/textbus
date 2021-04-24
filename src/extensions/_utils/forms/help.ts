@@ -20,6 +20,7 @@ export interface FormTextareaParams {
 
   validateFn?(value: any): string
 }
+
 export interface FormNumberParams extends FormTextareaParams {
 }
 
@@ -48,6 +49,11 @@ export interface FormSwitchParams {
 export interface FormHiddenParams {
   name: string;
   value: string | number | boolean;
+}
+
+export interface FormStaticParams {
+  content: string | Node;
+  label?: string;
 }
 
 export interface FormSelectOptionParams {

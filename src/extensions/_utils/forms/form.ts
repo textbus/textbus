@@ -20,11 +20,11 @@ export class Form implements FormViewer {
   onComplete: Observable<Map<string, any>>;
   onClose: Observable<void>;
 
+  body: HTMLElement;
+  footer: HTMLElement;
   readonly elementRef: HTMLFormElement;
   private completeEvent = new Subject<Map<string, any>>();
   private closeEvent = new Subject<void>();
-  private footer: HTMLElement;
-  private groups: HTMLElement;
 
   constructor(private config: FormConfig) {
     this.onComplete = this.completeEvent.asObservable();
@@ -42,7 +42,7 @@ export class Form implements FormViewer {
         children: [createTextNode(config.title)]
       }))
     }
-    this.elementRef.appendChild(this.groups = createElement('div', {
+    this.elementRef.appendChild(this.body = createElement('div', {
       attrs: {
         novalidate: 'novalidate'
       },
@@ -53,7 +53,7 @@ export class Form implements FormViewer {
     }));
 
     if (this.config.maxHeight) {
-      this.groups.style.maxHeight = this.config.maxHeight
+      this.body.style.maxHeight = this.config.maxHeight
     }
 
     const btns = config.mini ? [
@@ -100,7 +100,9 @@ export class Form implements FormViewer {
           return;
         }
         const i = item.getAttr();
-        map.set(i.name, i.value);
+        if (i) {
+          map.set(i.name, i.value);
+        }
       }
       this.completeEvent.next(map);
     });
@@ -116,7 +118,7 @@ export class Form implements FormViewer {
       }
     }
     this.config.items.push(item);
-    this.groups.appendChild(item.elementRef);
+    this.body.appendChild(item.elementRef);
   }
 
   removeItem(item: FormItem) {

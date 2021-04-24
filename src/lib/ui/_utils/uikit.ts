@@ -23,7 +23,7 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
     })
   }
   if (options.children) {
-    options.children.forEach(item => {
+    options.children.filter(i => i).forEach(item => {
       el.appendChild(item);
     })
   }

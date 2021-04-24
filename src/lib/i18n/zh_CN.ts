@@ -38,6 +38,12 @@ export const i18n_zh_CN: I18NConfig = {
     linkJump: {
       accessLink: '跳转'
     },
+    localBackup: {
+      title: '本地缓存',
+      confirmBtnText: '确定',
+      cancelBtnText: '取消',
+      tooltip: '检测到有本地缓存，是否应用？'
+    },
     outlines: {
       title: '概览',
       switchText: '概览'

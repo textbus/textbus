@@ -81,7 +81,7 @@ import {
   SourcecodeModePlugin,
   OutlinesPlugin,
   PasteHandlePlugin,
-  ToolFactory, DeviceOption, ComponentCreator, Toolbar, ContextmenuPlugin, GuardLastIsParagraphPlugin
+  ToolFactory, DeviceOption, ComponentCreator, Toolbar, ContextmenuPlugin, GuardLastIsParagraphPlugin, LocalBackupPlugin
 } from './extensions/_api';
 import {
   ListComponent,
@@ -214,6 +214,7 @@ export const defaultOptions: EditorOptions = {
     FullScreenPlugin,
     DevicePlugin,
     ComponentStagePlugin,
+    LocalBackupPlugin,
     ImageVideoResizePlugin,
     LinkJumpPlugin,
     TableEditPlugin,

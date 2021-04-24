@@ -279,7 +279,7 @@ export class Editor {
     rootComponent.slot.from(parser.parse(dom));
     this.listen(layout.iframe, layout.workbench, contentDocument);
 
-    [...(this.defaultPlugins), ...(this.options.plugins || [])].forEach(f => {
+    this.defaultPlugins.forEach(f => {
       injector.get(f).setup();
     })
     const input = injector.get(Input);
@@ -296,6 +296,11 @@ export class Editor {
     }
     injector.get(TBHistory).record();
 
+    [...(this.options.plugins || [])].forEach(f => {
+      setTimeout(() => {
+        injector.get(f).setup();
+      })
+    })
     this.readyState = true;
     this.readyEvent.next();
     this.tasks.forEach(fn => fn());
