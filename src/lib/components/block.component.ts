@@ -1,12 +1,20 @@
 import { Injectable } from '@tanbo/di';
 
 import {
+  Component,
   ComponentLoader,
-  ViewData,
+  DivisionAbstractComponent,
+  FormatEffect,
+  Interceptor,
+  SingleSlotRenderFn,
+  SlotRenderFn,
+  TBEvent,
+  TBSelection,
   VElement,
-  DivisionAbstractComponent, SlotRenderFn, Component, Interceptor, TBEvent, TBSelection, SingleSlotRenderFn
+  ViewData
 } from '../core/_api';
 import { breakingLine } from './utils/breaking-line';
+import { boldFormatter } from '../formatter/bold.formatter';
 
 class BlockComponentLoader implements ComponentLoader {
   match(component: HTMLElement): boolean {
@@ -36,6 +44,17 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
     const component = new BlockComponent(event.instance.tagName === 'div' ? 'div' : 'p');
     const firstRange = this.selection.firstRange;
     const next = breakingLine(firstRange.startFragment, firstRange.startIndex);
+    if (/h[1-6]/i.test(event.instance.tagName)) {
+      const boldFormats = next.getFormatRanges(boldFormatter);
+      boldFormats.forEach(i => {
+        if (i.effect === FormatEffect.Inherit) {
+          next.apply(boldFormatter, {
+            ...i,
+            effect: FormatEffect.Invalid
+          })
+        }
+      })
+    }
     component.slot.from(next);
     parent.insertAfter(component, event.instance);
     const position = firstRange.findFirstPosition(component.slot);
@@ -55,7 +74,7 @@ class BlockComponentInterceptor implements Interceptor<BlockComponent> {
   ]
 })
 export class BlockComponent extends DivisionAbstractComponent {
-  static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,blockquote,nav,header,footer'.split(',');
+  static blockTags = 'div,p,h1,h2,h3,h4,h5,h6,blockquote,article,section,nav,header,footer'.split(',');
 
   constructor(tagName: string) {
     super(tagName);
