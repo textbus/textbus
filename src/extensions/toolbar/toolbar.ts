@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken, Injector } from '@tanbo/di';
+import { Inject, Injectable, InjectionToken, Injector, Optional } from '@tanbo/di';
 import { fromEvent, Subscription } from 'rxjs';
 import { auditTime, distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -28,7 +28,7 @@ export class Toolbar implements TBPlugin {
 
   private subs: Subscription[] = [];
 
-  constructor(@Inject(TOOLS) private tools: Array<ToolFactory | ToolFactory[]>,
+  constructor(@Optional() @Inject(TOOLS) private tools: Array<ToolFactory | ToolFactory[]>,
               private layout: Layout,
               private editorController: EditorController,
               private i18n: I18n,
@@ -38,6 +38,7 @@ export class Toolbar implements TBPlugin {
               private dialog: UIDialog,
               private selection: TBSelection,
               private fileUploader: FileUploader) {
+    this.tools = this.tools || [];
   }
 
   setup() {

@@ -74,7 +74,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
-    "@tanbo/di": "0.0.28",
+    "@tanbo/di": "0.0.31",
     "codemirror": "^5.60.0",
     "katex": "^0.13.0",
     "pretty": "^2.0.0",
