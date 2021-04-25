@@ -14,7 +14,7 @@ export class LinkCommander implements Commander<Map<string, string>> {
   }
 
   command(context: CommandContext, attrs: Map<string, string>): void {
-    this.recordHistory = !context.selection.collapsed;
+    this.recordHistory = context.overlap ? !!context.selection.rangeCount : !context.selection.collapsed;
     if (!this.recordHistory) {
       return;
     }
