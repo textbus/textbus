@@ -28,7 +28,11 @@ export class LinkCommander implements Commander<Map<string, string>> {
             }
             commonAncestorFragment.getFormatRanges(token).forEach(format => {
               if (range.startIndex > format.startIndex && range.endIndex <= format.endIndex) {
-                if (attrs.get('href')) {
+                const href = attrs.get('href');
+                const a = document.createElement('a')
+                a.href = href;
+                // xss filter
+                if (href && a.hostname) {
                   format.formatData.attrs.clear();
                   attrs.forEach((value, key) => {
                     format.formatData.attrs.set(key, value);
