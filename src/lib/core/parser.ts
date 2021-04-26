@@ -47,11 +47,10 @@ export class Parser {
       if (/^[\r\n]+$/.test(textContent)) {
         return;
       }
-      slot.append(textContent.replace(/&lt;|&gt;|&amp;|&nbsp;/g, str => {
+      slot.append(textContent.replace(/&lt;|&gt;|&nbsp;/g, str => {
         return {
           '&lt;': '<',
           '&gt;': '>',
-          '&amp;': '&',
           '&nbsp;': ' '
         }[str];
       }), false);
