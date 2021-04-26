@@ -384,7 +384,7 @@ class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
   .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
 
-  pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #1c2838 }
+  pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #353535 }
   pre[theme=dark] .tb-hl-keyword {color: rgb(0, 134, 179);}
   pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
   pre[theme=dark] .tb-hl-comment {color: #4c5156;}
@@ -393,7 +393,7 @@ class PreComponentDynamicKeymap implements DynamicKeymap<PreComponent> {
   pre[theme=dark] .tb-hl-regex {color: #af741d;}
   pre[theme=dark] .tb-hl-selector {color: #ce5a70; font-weight: normal}
   pre[theme=dark] .tb-code-line::before { color: #536171}
-  pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #1b1b1b; }
+  pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #292929; }
   `.replace('<style>', '')
   ]
 })
