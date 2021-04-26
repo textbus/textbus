@@ -129,12 +129,6 @@ export class ImageCardComponent extends BackboneAbstractComponent {
     return deletedSlot === this.imgFragment;
   }
 
-  componentContentChange() {
-    if (this.descFragment.length === 0) {
-      this.descFragment.append(new BrComponent());
-    }
-  }
-
   slotRender(slot: Fragment, isOutputMode: boolean, slotRendererFn: SingleSlotRenderFn): VElement {
     let imgContainer: VElement;
     let descContainer: VElement;
