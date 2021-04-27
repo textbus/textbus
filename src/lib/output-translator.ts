@@ -8,7 +8,7 @@ export abstract class OutputTranslator {
  * HTML 输出转换器
  */
 export class HTMLOutputTranslator implements OutputTranslator {
-  static singleTags = 'br|img|hr'.split('');
+  static singleTags = 'br,img,hr'.split(',');
 
   static simpleXSSFilter = {
     text(text: string) {
@@ -41,6 +41,7 @@ export class HTMLOutputTranslator implements OutputTranslator {
   }
 
   private singleTagTest = new RegExp(`^(${HTMLOutputTranslator.singleTags.join('|')})$`, 'i');
+
   transform(vDom: VElement): string {
     return vDom.childNodes.map(child => {
       return this.vDomToHTMLString(child);
