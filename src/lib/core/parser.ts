@@ -47,7 +47,7 @@ export class Parser {
       if (/^[\r\n]+$/.test(textContent)) {
         return;
       }
-      slot.append(textContent.replace(/&nbsp;/g, ' '), false);
+      slot.append(textContent, false);
     }
   }
 

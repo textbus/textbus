@@ -276,7 +276,8 @@ export const i18n_zh_CN: I18NConfig = {
           linkInputPlaceholder: '请输入链接地址',
           jumpLabel: '跳转方式',
           jumpSelfLabel: '当前窗口',
-          jumpBlankLabel: '新窗口'
+          jumpBlankLabel: '新窗口',
+          invalidMessage: '请输入正确的链接地址'
         }
       },
       olTool: {

@@ -276,7 +276,8 @@ export const i18n_en_US: I18NConfig = {
           linkInputPlaceholder: 'url address',
           jumpLabel: 'target',
           jumpSelfLabel: '_self',
-          jumpBlankLabel: '_blank'
+          jumpBlankLabel: '_blank',
+          invalidMessage: 'url is invalid'
         }
       },
       olTool: {

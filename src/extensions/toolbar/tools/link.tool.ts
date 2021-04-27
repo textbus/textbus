@@ -16,7 +16,15 @@ export const linkToolConfig: DropdownToolConfig = {
         new FormTextField({
           label: childI18n.get('linkLabel'),
           name: 'href',
-          placeholder: childI18n.get('linkInputPlaceholder')
+          placeholder: childI18n.get('linkInputPlaceholder'),
+          validateFn(value: any): string {
+            const a = document.createElement('a')
+            a.href = value
+            if (a.hostname) {
+              return null
+            }
+            return childI18n.get('invalidMessage')
+          }
         }),
         new FormRadio({
           label: childI18n.get('jumpLabel'),

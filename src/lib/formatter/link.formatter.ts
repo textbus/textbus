@@ -6,6 +6,8 @@ import {
 } from '../core/_api';
 
 export class LinkFormatter extends InlineFormatter {
+  private link = document.createElement('a');
+
   constructor() {
     super({
       tags: ['a']
@@ -28,7 +30,11 @@ export class LinkFormatter extends InlineFormatter {
     const target = context.formatData.attrs.get('target');
     const href = context.formatData.attrs.get('href') || context.formatData.attrs.get('data-href');
     target && el.attrs.set('target', target);
-    href && el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
+
+    this.link.href = href as string
+    if (href && this.link.hostname) {
+      el.attrs.set(context.isOutputMode ? 'href' : 'data-href', href);
+    }
     return el;
   }
 }
