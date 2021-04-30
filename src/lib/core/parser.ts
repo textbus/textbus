@@ -44,7 +44,7 @@ export class Parser {
       this.readFormats(el as HTMLElement, slot);
     } else if (el.nodeType === Node.TEXT_NODE) {
       const textContent = el.textContent;
-      if (/^[\r\n]+$/.test(textContent)) {
+      if (/\s*[\r\n]+\s*$/.test(textContent)) {
         return;
       }
       slot.append(textContent, false);
