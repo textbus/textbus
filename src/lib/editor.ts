@@ -247,7 +247,7 @@ export class Editor {
     this.subs.push(
       rootComponent.onChange.pipe(debounceTime(1)).subscribe(() => {
         renderer.render(rootComponent, contentDocument.body);
-        selection.restore();
+        Promise.resolve().then(() => selection.restore());
       }),
 
       fromEvent(contentDocument, 'click').subscribe((ev: MouseEvent) => {
