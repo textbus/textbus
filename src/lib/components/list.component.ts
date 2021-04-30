@@ -29,11 +29,11 @@ class ListComponentLoader implements ComponentLoader {
     const childNodes = Array.from(el.childNodes);
     while (childNodes.length) {
       const slot = new Fragment();
-      component.slots.push(slot);
       let first = childNodes.shift();
       let newLi: HTMLElement;
       while (first) {
         if (/^li$/i.test(first.nodeName)) {
+          component.slots.push(slot);
           childrenSlots.push({
             from: first as HTMLElement,
             toSlot: slot
@@ -41,12 +41,16 @@ class ListComponentLoader implements ComponentLoader {
           break;
         }
         if (!newLi) {
+          if (first.nodeType === Node.TEXT_NODE && (/^\s+$/.test(first.textContent) || first.textContent === '')) {
+            break;
+          }
           newLi = document.createElement('li');
         }
         newLi.appendChild(first);
         first = childNodes.shift();
       }
       if (newLi) {
+        component.slots.push(slot);
         childrenSlots.push({
           from: newLi,
           toSlot: slot
