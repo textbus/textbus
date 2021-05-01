@@ -730,7 +730,7 @@ export class Input {
   private cut() {
     this.context.execCommand('copy');
     this.selection.ranges.forEach(range => {
-      range.deleteContents();
+      range.deleteRange();
     });
 
     this.dispatchInputReadyEvent();

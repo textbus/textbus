@@ -161,7 +161,7 @@ class RootComponentInterceptor implements Interceptor<RootComponent> {
 
   onDeleteRange() {
     this.selection.ranges.forEach(range => {
-      range.deleteContents();
+      range.deleteRange();
     })
   }
 

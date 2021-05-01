@@ -382,7 +382,7 @@ export class TBRange {
 
   delete() {
     if (!this.collapsed) {
-      this.deleteContents();
+      this.deleteRange();
       return;
     }
     if (this.startIndex === 0) {
@@ -423,7 +423,7 @@ export class TBRange {
         if (scopes.length === 1 &&
           this.startFragment === this.commonAncestorFragment &&
           startContent instanceof BrComponent) {
-          this.deleteContents();
+          this.deleteRange();
           this.collapse(true);
           return;
         }
@@ -446,7 +446,7 @@ export class TBRange {
           this.startFragment === this.commonAncestorFragment &&
           this.startFragment.getContentAtIndex(this.startIndex - 1) instanceof LeafAbstractComponent) {
           this.startIndex--;
-          this.deleteContents();
+          this.deleteRange();
           this.collapse(true);
           return;
         }
@@ -528,7 +528,7 @@ export class TBRange {
        */
       if (prevPosition.fragment === this.startFragment && currentContent instanceof BrComponent) {
         this.endIndex++;
-        this.deleteContents();
+        this.deleteRange();
         this.collapse();
         return;
       }
@@ -552,7 +552,7 @@ export class TBRange {
         currentContent instanceof BrComponent) {
         const prevPosition = this.getPreviousPosition();
         this.endIndex++;
-        this.deleteContents();
+        this.deleteRange();
         this.setStart(prevPosition.fragment, prevPosition.index);
         this.collapse()
         return;
@@ -654,14 +654,14 @@ export class TBRange {
         return;
       }
       this.startIndex--;
-      this.deleteContents();
+      this.deleteRange();
     }
   }
 
   /**
    * 删除选区范围内容，并合并选区范围。
    */
-  deleteContents() {
+  deleteRange() {
     if (this.collapsed) {
       return;
     }
