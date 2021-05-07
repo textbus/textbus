@@ -41,12 +41,21 @@ export interface FormMenu extends FormToolConfig {
   type: MenuType.Form
 }
 
+/**
+ * 群组工具配置
+ */
 export interface GroupConfig {
+  /** 工具显示的文字 */
   label?: I18nString;
+  /** 工具按扭的 class */
   classes?: string[];
+  /** 工具按扭 icon class */
   iconClasses?: string[];
+  /** 鼠标放置在工具上时的提示文字 */
   tooltip?: I18nString;
+  /** 工具集合 */
   menu: Array<ActionMenu | SelectMenu | ActionSheetMenu | DropdownMenu | FormMenu>;
+  /** 状态查询器 */
   matcher?: Matcher;
 }
 

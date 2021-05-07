@@ -18,7 +18,7 @@ export interface AdditionalViewer {
 }
 
 /**
- * 按扭型工具的配置接口
+ * 附加视图工具的配置接口
  */
 export interface AdditionalToolConfig {
   /** 按扭控件点击后调用的命令 */
@@ -27,7 +27,7 @@ export interface AdditionalToolConfig {
   /** 下拉控件展开后显示的内容 */
   viewFactory(i18n: I18n): AdditionalViewer;
 
-  /** 锚中节点的的匹配项配置 */
+  /** 状态查询器 */
   matcher?: Matcher;
   /** 设置按扭显示的文字 */
   label?: I18nString;

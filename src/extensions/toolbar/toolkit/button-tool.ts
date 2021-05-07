@@ -14,7 +14,7 @@ export interface ButtonToolConfig {
   /** 按扭控件点击后调用的命令 */
   commanderFactory(): Commander;
 
-  /** 锚中节点的的匹配项配置 */
+  /** 状态查询器 */
   matcher?: Matcher;
   /** 设置按扭显示的文字 */
   label?: I18nString;

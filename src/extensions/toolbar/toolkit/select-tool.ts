@@ -26,6 +26,9 @@ export interface SelectOptionConfig {
   keymap?: Keymap;
 }
 
+/**
+ * 下拉选择工具配置项
+ */
 export interface SelectToolConfig {
   /** 当前 Select 某项点击后，应用的命令 */
   commanderFactory(): Commander;
@@ -36,7 +39,7 @@ export interface SelectToolConfig {
   /** 根据当前匹配的抽象数据，返回要高亮的选项 */
   matchOption?<T = FormatData | AbstractComponent>(data: T): SelectOptionConfig;
 
-  /** 锚中节点的的匹配项配置 */
+  /** 状态查询器 */
   matcher?: Matcher;
   /** 给 Select 控件添加一组 css class */
   classes?: string[];

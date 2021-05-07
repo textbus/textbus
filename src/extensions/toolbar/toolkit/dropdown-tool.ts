@@ -22,7 +22,7 @@ export interface DropdownToolConfig<T = any> {
   /** 下拉控件展开后显示的内容 */
   viewFactory(i18n: I18n): DropdownViewer<T>;
 
-  /** 锚中节点的的匹配项配置 */
+  /** 状态查询器 */
   matcher?: Matcher;
 
   /** 订阅下拉控件操作完成时调用的命令 */

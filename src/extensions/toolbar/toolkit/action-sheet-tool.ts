@@ -21,6 +21,9 @@ export interface ActionConfig {
   keymap?: Keymap;
 }
 
+/**
+ * 动作表工具配置
+ */
 export interface ActionSheetToolConfig {
   /** 当前控件可操作的选项 */
   actions: ActionConfig[];
@@ -28,7 +31,7 @@ export interface ActionSheetToolConfig {
   /** 当某一项被点击时调用的命令 */
   commanderFactory(): Commander;
 
-  /** 锚中节点的的匹配项配置 */
+  /** 状态查询器 */
   matcher?: Matcher;
   /** 设置控件显示的文字 */
   label?: I18nString;

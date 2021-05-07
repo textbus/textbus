@@ -21,8 +21,15 @@ export interface Commander<T = any> {
    */
   recordHistory: boolean;
 
+  /**
+   * 工具条初始化时调用
+   * @param injector 用于获取 TextBus 内部实例有注入器
+   */
   setup?(injector: Injector): void;
 
+  /**
+   * 当工具条销毁时调用
+   */
   onDestroy?(): void;
 
   /**
