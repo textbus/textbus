@@ -16,12 +16,12 @@
   "license": "GPL-3.0-only",
   "keywords": [
     "textbus",
+    "富文本编辑器",
     "wysiwyg",
     "wysiwyg editor",
     "rich text editor",
     "editor",
-    "wysiwyg html editor",
-    "component editor",
+    "html editor",
     "web editor",
     "typescript editor"
   ],
