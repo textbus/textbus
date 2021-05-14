@@ -1,12 +1,14 @@
 @import "~@tanbo/css-themes/themes/scss/default";
 $line-height: 1.4285714 !default;
 
-@import "~@textbus/core/bundles/scss/index";
-@import "~@textbus/uikit/bundles/scss/index";
-@import "~@textbus/toolbar/bundles/scss/index";
-@import "~@textbus/outlines-plugin/bundles/scss/index";
-@import "~@textbus/device-toggle-plugin/bundles/scss/index";
 @import "~@textbus/component-library-plugin/bundles/scss/index";
-@import "~@textbus/sourcecode-mode-plugin/bundles/scss/index";
+@import "~@textbus/core/bundles/scss/index";
+@import "~@textbus/device-toggle-plugin/bundles/scss/index";
 @import "~@textbus/full-screen-plugin/bundles/scss/index";
+@import "~@textbus/image-and-video-drag-resize-plugin/bundles/scss/index";
+@import "~@textbus/outlines-plugin/bundles/scss/index";
+@import "~@textbus/sourcecode-mode-plugin/bundles/scss/index";
+@import "~@textbus/table-edit-enhance-plugin/bundles/scss/index";
+@import "~@textbus/toolbar/bundles/scss/index";
+@import "~@textbus/uikit/bundles/scss/index";
 @import "./icons/style.css";
