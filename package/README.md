@@ -2,7 +2,7 @@
 
 通过 npm 安装 TextBus：
 ```bash
-npm install @tanbo/textbus
+npm install @textbus/textbus
 ```
 
 在 html 中准备一个空的元素
@@ -15,7 +15,7 @@ npm install @tanbo/textbus
 
 通过 css 选择器，或直接传入一个 DOM 元素初始化 TextBus。
 ```typescript
-import { createEditor } from '@tanbo/textbus';
+import { createEditor } from '@textbus/textbus';
 import { Observable } from 'rxjs';
 
 const editor = createEditor('#editor', {
