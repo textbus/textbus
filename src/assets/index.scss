@@ -1,32 +1,12 @@
 @import "~@tanbo/css-themes/themes/scss/default";
-@import "~@tanbo/color-picker/bundles/color-picker.min.css";
 $line-height: 1.4285714 !default;
 
+@import "~@textbus/core/bundles/scss/index";
+@import "~@textbus/uikit/bundles/scss/index";
+@import "~@textbus/toolbar/bundles/scss/index";
+@import "~@textbus/outlines-plugin/bundles/scss/index";
+@import "~@textbus/device-toggle-plugin/bundles/scss/index";
+@import "~@textbus/component-library-plugin/bundles/scss/index";
+@import "~@textbus/sourcecode-mode-plugin/bundles/scss/index";
+@import "~@textbus/full-screen-plugin/bundles/scss/index";
 @import "./icons/style.css";
-
-@import "./components/scroll";
-@import "./components/tool";
-@import "./components/container";
-@import "./components/contextmenu";
-@import "./components/loading";
-@import "./components/selection";
-@import "./components/status-bar";
-
-@import "./plugins/component-stage";
-@import "./plugins/control-panel";
-@import "./plugins/device";
-@import "./plugins/dialog";
-@import "./plugins/forms";
-@import "./plugins/full-screen";
-@import "./plugins/message";
-@import "./plugins/outlines";
-@import "./plugins/source-code-mode";
-@import "./plugins/toolbar";
-@import "./plugins/toolbar-extention";
-
-@import "./theme/dark";
-@import "./theme/mac-os";
-@import "./theme/mac-os-dark";
-//
-@import "./hooks/image-video-resize-plugin";
-@import "./hooks/table-edit-plugin";

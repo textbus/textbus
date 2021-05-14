@@ -1,26 +1,4 @@
-import { Editor } from './lib/editor';
-import { EditorOptions } from './lib/editor-options';
-import {
-  fontFamilyFormatter,
-  boldFormatter,
-  linkFormatter,
-  colorFormatter,
-  fontSizeFormatter,
-  italicFormatter,
-  letterSpacingFormatter,
-  lineHeightFormatter,
-  strikeThroughFormatter,
-  subscriptFormatter,
-  superscriptFormatter,
-  textAlignFormatter,
-  textIndentFormatter,
-  underlineFormatter,
-  blockBackgroundColorFormatter,
-  codeFormatter,
-  backgroundColorFormatter,
-  dirFormatter,
-  tdBorderColorFormatter,
-} from './lib/formatter/_api';
+import { Editor, EditorOptions } from '@textbus/core';
 import {
   boldTool,
   cleanTool,
@@ -47,42 +25,32 @@ import {
   insertObjectTool,
   tableTool,
 
-  alertComponentExample,
-  imageCardComponentExample,
-  todoListComponentExample,
-  baiduMapComponentExample,
-  jumbotronComponentExample,
-  wordExplainComponentExample,
-  timelineComponentExample,
-  progressComponentExample,
-  stepsComponentExample,
-  katexComponentExample,
-
-  AlertComponent,
-  StepComponent,
-  ProgressComponent,
-  TimelineComponent,
-  WordExplainComponent,
-  JumbotronComponent,
-  BaiduMapComponent,
-  TodoListComponent,
-  ImageCardComponent,
-  KatexComponent,
-
-  COMPONENT_CREATORS,
+  Toolbar,
   TOOLS,
-  ComponentStagePlugin,
-  DevicePlugin,
-  DEVICE_OPTIONS,
-  FullScreenPlugin,
-  ImageVideoResizePlugin,
-  LinkJumpPlugin,
-  TableEditPlugin,
-  SourcecodeModePlugin,
-  OutlinesPlugin,
-  PasteHandlePlugin,
-  ToolFactory, DeviceOption, ComponentCreator, Toolbar, ContextmenuPlugin, GuardLastIsParagraphPlugin
-} from './extensions/_api';
+  ToolFactory
+} from '@textbus/toolbar';
+import '@textbus/toolbar/bundles/i18n/zh_CN';
+import {
+  fontFamilyFormatter,
+  boldFormatter,
+  linkFormatter,
+  colorFormatter,
+  fontSizeFormatter,
+  italicFormatter,
+  letterSpacingFormatter,
+  lineHeightFormatter,
+  strikeThroughFormatter,
+  subscriptFormatter,
+  superscriptFormatter,
+  textAlignFormatter,
+  textIndentFormatter,
+  underlineFormatter,
+  blockBackgroundColorFormatter,
+  codeFormatter,
+  backgroundColorFormatter,
+  dirFormatter,
+  tdBorderColorFormatter,
+} from '@textbus/formatters';
 import {
   ListComponent,
   BlockComponent,
@@ -91,7 +59,33 @@ import {
   VideoComponent,
   ImageComponent,
   TableComponent
-} from './lib/components/_api';
+} from '@textbus/components';
+
+import { DEVICE_OPTIONS, DeviceOption, DeviceTogglePlugin } from '@textbus/device-toggle-plugin';
+import { i18n_zh_CN } from './i18n/_api'
+import {
+  AlertComponent,
+  alertComponentExample, BaiduMapComponent,
+  baiduMapComponentExample, COMPONENT_CREATORS,
+  ComponentCreator, ComponentLibraryPlugin, ImageCardComponent,
+  imageCardComponentExample, JumbotronComponent,
+  jumbotronComponentExample, KatexComponent,
+  katexComponentExample, ProgressComponent,
+  progressComponentExample, StepComponent,
+  stepsComponentExample, TimelineComponent,
+  timelineComponentExample, TodoListComponent,
+  todoListComponentExample, WordExplainComponent,
+  wordExplainComponentExample
+} from '@textbus/component-library-plugin';
+import { ContextmenuPlugin } from '@textbus/contextmenu-plugin';
+import { PasteUploadEmitterPlugin } from '@textbus/paste-upload-emitter-plugin';
+import { GuardEndBlockPlugin } from '@textbus/guard-end-block-plugin';
+import { OutlinesPlugin } from '@textbus/outlines-plugin';
+import { FullScreenPlugin } from '@textbus/full-screen-plugin';
+import { ImageAndVideoDragResizePlugin } from '@textbus/image-and-video-drag-resize-plugin';
+import { LinkJumpTipPlugin } from '@textbus/link-jump-tip-plugin';
+import { TableEditEnhancePlugin } from '@textbus/table-edit-enhance-plugin';
+import { SourcecodeModePlugin } from '@textbus/sourcecode-mode-plugin';
 
 export const defaultTools: Array<ToolFactory | ToolFactory[]> = [
   [historyBackTool, historyForwardTool],
@@ -154,6 +148,7 @@ export const defaultOptions: EditorOptions = {
    a {color: inherit;}`,
     `a {text-decoration: underline; color: #449fdb; cursor: text;}`
   ],
+  i18n: i18n_zh_CN,
   components: [
     AlertComponent,
     KatexComponent,
@@ -164,8 +159,8 @@ export const defaultOptions: EditorOptions = {
     JumbotronComponent,
     BaiduMapComponent,
     TodoListComponent,
-
     ImageCardComponent,
+
     ListComponent,
     BlockComponent,
     PreComponent,
@@ -207,19 +202,21 @@ export const defaultOptions: EditorOptions = {
   }],
   plugins: [
     Toolbar,
+    ComponentLibraryPlugin,
     ContextmenuPlugin,
-    PasteHandlePlugin,
-    GuardLastIsParagraphPlugin,
+    PasteUploadEmitterPlugin,
+    GuardEndBlockPlugin,
     OutlinesPlugin,
     FullScreenPlugin,
-    DevicePlugin,
-    ComponentStagePlugin,
-    ImageVideoResizePlugin,
-    LinkJumpPlugin,
-    TableEditPlugin,
+    DeviceTogglePlugin,
+    ImageAndVideoDragResizePlugin,
+    LinkJumpTipPlugin,
+    TableEditEnhancePlugin,
     SourcecodeModePlugin,
   ]
 };
+
+BlockComponent.cleanedFormatters.push(linkFormatter);
 
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   return new Editor(selector, {
