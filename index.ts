@@ -12,7 +12,23 @@ PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   theme: 'dark',
   // i18n: i18n_en_US,
-  // contents: '<p><br></p>'
+  contents: `<p>Warm-up &amp; Lesson introduction</p>
+
+        <ol>
+        <li><p>Briefly greet and welcome S to this brand-new module</p>
+        </li>
+        <li><p>Guide S to observe the photo and introduce the content of the unit&amp; lesson, i.e. My family &amp; Unit opener
+        Qs: What can you see? Where are they now? Did you ride on a Ferris wheel before?
+        As: e.g. Parents &amp; Children/ on a Ferris wheel </p>
+        </li>
+        <li><p>Guide S to read through the lesson objectives
+        Qs: What do you think you will learn today? For example, what’s an Idea Web?
+        (What does routine mean? What family activities do you know?)</p>
+        </li>
+        <li><p>Display the lesson plan (You may say we have 9 sections in all, and here are the 3 most important sections: Big Question, Sing Along and Idea Web)</p>
+        </li>
+        </ol>
+        <p>P.S. Use spotlight/highlighter to help S locate the key words/contents/information; and use text-board to list what S responds.</p>`
   // contents: document.getElementById('table').innerHTML
 });
 
