@@ -82,7 +82,7 @@
     "@textbus/paste-upload-emitter-plugin": "^1.0.0-beta.0",
     "@textbus/sourcecode-mode-plugin": "^1.0.0-beta.0",
     "@textbus/table-edit-enhance-plugin": "^1.0.0-beta.0",
-    "@textbus/toolbar": "^1.0.0-beta.0",
+    "@textbus/toolbar": "^1.0.0-beta.2",
     "@textbus/uikit": "^1.0.0-beta.0"
   },
   "repository": {

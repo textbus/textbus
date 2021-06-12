@@ -1,6 +1,6 @@
 {
   "name": "@textbus/textbus",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -33,7 +33,7 @@
     "@textbus/paste-upload-emitter-plugin": "^1.0.0-beta.0",
     "@textbus/sourcecode-mode-plugin": "^1.0.0-beta.0",
     "@textbus/table-edit-enhance-plugin": "^1.0.0-beta.0",
-    "@textbus/toolbar": "^1.0.0-beta.0",
+    "@textbus/toolbar": "^1.0.0-beta.2",
     "@textbus/uikit": "^1.0.0-beta.0"
   },
   "author": {
