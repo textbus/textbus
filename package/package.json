@@ -20,7 +20,7 @@
   "dependencies": {
     "@tanbo/css-themes": "^0.0.1",
     "@textbus/component-library-plugin": "^1.0.0-beta.0",
-    "@textbus/components": "^1.0.0-beta.1",
+    "@textbus/components": "^1.0.0-beta.2",
     "@textbus/contextmenu-plugin": "^1.0.0-beta.0",
     "@textbus/core": "^1.0.0-beta.10",
     "@textbus/device-toggle-plugin": "^1.0.0-beta.0",
