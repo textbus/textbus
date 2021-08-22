@@ -1,0 +1,13 @@
+.textbus-table-editor-plugin-mask {
+  position: absolute;
+  box-shadow: inset 0 0 0 2px #1296db;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.textbus-table-editor-plugin-first-cell {
+  position: absolute;
+  box-shadow: 0 0 0 9999px rgba(18, 150, 219, .1);
+  contain: style;
+}
+

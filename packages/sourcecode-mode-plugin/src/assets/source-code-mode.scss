@@ -1,0 +1,31 @@
+.textbus-sourcecode-mode-plugin-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: none;
+  font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;
+  .CodeMirror {
+    height: 100% !important;
+    font-family: inherit !important;
+  }
+  .CodeMirror-cursor {
+    border-left-width: 2px;
+  }
+}
+.cm-s-textbus {
+  font-size: 15px;
+  color: $color-darker;
+  .cm-tag { color: #0c6694; }
+  .cm-bracket { color: #83a3b3
+  }
+  .cm-string { color: #e12235; }
+  .cm-string-2 { color: #f60; }
+  .cm-qualifier { color: #0c6fd9; }
+  .cm-number { color: #108f75}
+  .cm-atom { color: #e12235;}
+  .cm-keyword { font-weight: bold; color: #0055aa}
+  .cm-variable { color: #0055aa}
+  .cm-comment { color: #9796aa}
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@textbus/textbus",
+  "version": "1.0.0-beta.12",
+  "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
+  "main": "./bundles/public-api.js",
+  "module": "./bundles/public-api.js",
+  "typings": "./bundles/public-api.d.ts",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "textbus",
+    "富文本编辑器",
+    "wysiwyg",
+    "wysiwyg editor",
+    "rich text editor",
+    "editor",
+    "html editor",
+    "web editor",
+    "typescript editor"
+  ],
+  "scripts": {
+    "start": "webpack-dev-server",
+    "test": "cross-env env=test jest",
+    "test-c": "cross-env env=test jest --coverage",
+    "build:lib": "rimraf bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-build.config.js",
+    "publish:lib": "npm run build:lib && cd package && npm publish --access=public"
+  },
+  "author": "tanbo",
+  "dependencies": {
+    "@tanbo/css-themes": "^0.0.1",
+    "@textbus/component-library-plugin": "^1.0.0-beta.12",
+    "@textbus/components": "^1.0.0-beta.12",
+    "@textbus/contextmenu-plugin": "^1.0.0-beta.12",
+    "@textbus/core": "^1.0.0-beta.12",
+    "@textbus/device-toggle-plugin": "^1.0.0-beta.12",
+    "@textbus/formatters": "^1.0.0-beta.12",
+    "@textbus/full-screen-plugin": "^1.0.0-beta.12",
+    "@textbus/guard-end-block-plugin": "^1.0.0-beta.12",
+    "@textbus/image-and-video-drag-resize-plugin": "^1.0.0-beta.12",
+    "@textbus/link-jump-tip-plugin": "^1.0.0-beta.12",
+    "@textbus/outlines-plugin": "^1.0.0-beta.12",
+    "@textbus/paste-upload-emitter-plugin": "^1.0.0-beta.12",
+    "@textbus/sourcecode-mode-plugin": "^1.0.0-beta.12",
+    "@textbus/table-edit-enhance-plugin": "^1.0.0-beta.12",
+    "@textbus/toolbar": "^1.0.0-beta.12",
+    "@textbus/uikit": "^1.0.0-beta.12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/textbus/textbus.git"
+  }
+}

@@ -1,0 +1,246 @@
+.textbus-form {
+  overflow: hidden;
+  background-color: $color-lighter;
+  font-size: 14px;
+
+  &-title {
+    background-color: $color-lighter;
+    border-bottom: 1px solid $color-light;
+    padding: 15px 20px;
+    margin: 0;
+    font-size: 18px;
+  }
+
+  &-body {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: auto;
+  }
+
+  &-footer {
+    border-top: 1px solid $color-light;
+    padding: 10px 20px;
+    background-color: #fff;
+    text-align: right;
+
+    button {
+      margin-left: .5em;
+    }
+  }
+
+  &.textbus-form-flow {
+    .textbus-form-group {
+      display: block;
+
+      > .textbus-control-label {
+        padding-bottom: 5px;
+        text-align: left;
+      }
+    }
+  }
+
+  &.textbus-form-inline {
+    .textbus-form-control, .textbus-btn {
+      padding: 3px 6px;
+      font-size: 13px;
+    }
+    .textbus-control-label {
+      width: auto;
+    }
+    .textbus-form-group {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 1em;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+.textbus-form-groups {
+  background-color: $color-lighter;
+  padding: 15px 0;
+}
+
+.textbus-form-group {
+  padding: 5px 20px;
+  display: flex;
+}
+
+.textbus-control-label {
+  display: block;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-sizing: border-box;
+  width: 100px;
+}
+
+.textbus-control-static {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.textbus-control-value, .textbus-control-static {
+  flex: 1;
+  margin: 0;
+
+  > .textbus-form-control {
+    width: 100%;
+  }
+}
+
+.textbus-form-control {
+  position: relative;
+  outline: none;
+  background-color: #fff;
+  box-sizing: border-box;
+  @include input-style($color-gray, $color-primary);
+  @include input-size(5px, 12px, 4px, 14px);
+}
+
+.textbus-input-block {
+  display: block;
+  width: 100%;
+}
+
+
+.textbus-input-addon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: $line-height;
+  padding-left: 8px;
+  padding-right: 8px;
+  min-width: 32px;
+  background-color: #fff;
+  @include input-addon-style($color-gray, $color-gray);
+
+  &:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+}
+
+
+
+.textbus-input-group {
+  position: relative;
+  display: inline-flex;
+  font-size: 14px;
+
+  > .textbus-form-control {
+    flex: 1;
+  }
+
+  > .textbus-form-control, > .textbus-input-addon, > .textbus-btn {
+    border-radius: 0;
+  }
+
+  > .textbus-form-control, > .textbus-input-addon {
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+
+  > .textbus-btn {
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+}
+
+.textbus-btn {
+  display: inline-block;
+  border: 1px solid $color-gray;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: $line-height;
+  text-align: center;
+  padding: 5px 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  user-select: none;
+  outline: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &[disabled], &[readonly] {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+
+  &[readonly] {
+    cursor: default;
+  }
+
+  &.textbus-btn-block {
+    width: 100%;
+    display: block;
+  }
+
+  &-loading {
+    @keyframes textbus-form-btn-loading {
+      0% {
+        transform: rotateZ(0deg);
+      }
+      50% {
+        transform: rotateZ(-180deg);
+      }
+      100% {
+        transform: rotateZ(-360deg);
+      }
+    }
+
+    > span {
+      display: inline-block;
+      animation: .8s textbus-form-btn-loading linear infinite;
+    }
+  }
+}
+
+
+@include btn-theme(default, $color-default, $color-lighter);
+@include btn-theme(dark, #fff, $color-dark);
+@include btn-theme(gray, #fff, $color-gray-dark);
+@include btn-theme(primary, #fff, $color-primary);
+@include btn-theme(success, #fff, $color-success);
+@include btn-theme(info, #fff, $color-info);
+@include btn-theme(danger, #fff, $color-danger);
+@include btn-theme(warning, #fff, $color-warning);
+
+
+.textbus-control-feedback-invalid {
+  color: $color-danger;
+  margin-top: .2em;
+  font-size: .9em;
+}

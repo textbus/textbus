@@ -1,0 +1,40 @@
+.textbus-status-bar {
+  border: 1px solid $color-light;
+  box-sizing: border-box;
+  height: 30px;
+  line-height: 20px;
+  padding: 5px 15px;
+  font-size: 12px;
+  background-color: lighten($color-lighter, 1);
+  user-select: none;
+  color: $color-default;
+  [class^="textbus-icon-"], [class*=" textbus-icon-"] {
+    font-size: 13px;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+.textbus-status-bar-btn {
+  background: none;
+  color: inherit;
+  border: none;
+  outline: none;
+  font-size: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &-active {
+    color: $color-primary;
+  }
+}

@@ -1,0 +1,273 @@
+
+.textbus-toolbar {
+  &-h1 {
+    font-size: 2em;
+    font-weight: bold;
+  }
+
+  &-h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  &-h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+  }
+
+  &-h4 {
+    font-size: 1em;
+    font-weight: bold;
+  }
+
+  &-h5 {
+    font-size: .83em;
+    font-weight: bold;
+  }
+
+  &-h6 {
+    font-size: .67em;
+    font-weight: bold;
+  }
+}
+
+.textbus-toolbar-font-family {
+  &-inherit {
+    font-family: sans-serif;
+    opacity: .7;
+  }
+
+  &-SimSun {
+    font-family: SimSun;
+  }
+
+  &-SimHei {
+    font-family: SimHei;
+  }
+
+  &-Microsoft-YaHei {
+    font-family: "Microsoft YaHei";
+  }
+
+  &-KaiTi {
+    font-family: KaiTi;
+  }
+
+  &-FangSong {
+    font-family: FangSong;
+  }
+
+  &-SimLi {
+    font-family: SimLi;
+  }
+
+  &-andale-mono {
+    font-family: "Andale Mono";
+  }
+
+  &-Arial {
+    font-family: Arial;
+  }
+
+  &-Helvetica {
+    font-family: Helvetica;
+  }
+
+  &-Impact {
+    font-family: Impact;
+  }
+
+  &-Times-New-Roman {
+    font-family: "Times New Roman";
+  }
+}
+
+.textbus-toolbar-text-align {
+  &-left {
+    text-align: left;
+  }
+
+  &-right {
+    text-align: right;
+  }
+
+  &-center {
+    text-align: center;
+  }
+
+  &-justify {
+    text-align: justify;
+  }
+}
+
+.textbus-toolbar-font-size-inherit {
+  opacity: .7;
+}
+
+@each $t in 12, 13, 14, 15, 16, 18, 20, 24, 36, 48 {
+  .textbus-toolbar-font-size-#{$t} {
+    line-height: 1.2;
+    font-size: #{$t}px;
+  }
+}
+
+.textbus-toolbar-line-height-inherit {
+  opacity: .7;
+}
+
+@each $t in 1, 1.2, 1.4, 1.6, 1.8, 2, 3, 4 {
+  .textbus-toolbar-line-height-#{str-replace($t + '', '.', '_')} {
+    &:before {
+      content: "";
+      margin-right: 10px;
+      margin-left: -10px;
+      line-height: $t + em;
+      width: 9px;
+      height: $t + em;
+      border-style: solid;
+      border-color: rgba(0, 0, 0, 0.3);
+      border-width: 1px 0;
+      display: inline-block;
+      vertical-align: middle;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0.3) 4px, rgba(0, 0, 0, .3) 5px, rgba(0, 0, 0, 0) 5px);
+    }
+  }
+}
+
+.textbus-toolbar-letter-spacing-inherit {
+  opacity: .7;
+}
+
+@each $t in 0, 1, 2, 3, 4, 5 {
+  .textbus-toolbar-letter-spacing-#{$t} {
+    font-variant-numeric: tabular-nums;
+
+    &:after {
+      line-height: 1;
+      display: inline-block;
+      background-color: rgba(0, 0, 0, .06);
+      border: 1px solid rgba(0, 0, 0, .1);
+      border-radius: 5px;
+      padding: 4px 10px;
+      margin-left: 10px;
+      content: 'xxxxxx';
+      letter-spacing: $t + px;
+    }
+  }
+}
+
+@each $t in 0, 1, 2, 4 {
+  .textbus-toolbar-text-indent-#{$t} {
+    font-variant-numeric: tabular-nums;
+
+    &:after {
+      line-height: 1;
+      display: inline-block;
+      background-color: rgba(0, 0, 0, .06);
+      border: 1px solid rgba(0, 0, 0, .1);
+      border-radius: 5px;
+      padding: 4px 10px;
+      word-break: break-all;
+      white-space: normal;
+      width: 100px;
+      text-indent: $t + em;
+      margin-left: 10px;
+      content: 'xxxxxxxxxxxxxxxxxxxxx';
+    }
+  }
+}
+
+
+.textbus-toolbar-emoji-menu {
+  width: 220px;
+  padding: 10px 5px;
+  box-sizing: border-box;
+
+  &-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-size: 20px;
+    padding: 4px 5px;
+    width: 30px;
+    line-height: 1.2;
+
+    &:hover {
+      background-color: $color-light;
+      border-radius: 3px;
+    }
+  }
+}
+
+.textbus-toolbar-table-quick-selector {
+  overflow: hidden;
+  padding-left: 1px;
+  padding-top: 1px;
+  width: 160px;
+  box-sizing: content-box;
+  cursor: pointer;
+  margin-bottom: 15px;
+
+  > div {
+    width: 15px;
+    height: 11px;
+    box-sizing: content-box;
+    border: 1px solid $color-gray;
+    background: #fff;
+    float: left;
+    margin-left: -1px;
+    margin-top: -1px;
+    position: relative;
+
+    &.textbus-toolbar-table-quick-selector-selected {
+      background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .2);
+      border-color: $color-primary;
+      z-index: 1;
+    }
+  }
+}
+
+.textbus-toolbar-image-margin-setter {
+  width: 40px;
+  height: 30px;
+  position: relative;
+  background-color: $color-gray;
+  margin-left: 55px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  > input {
+    position: absolute;
+    width: 50px;
+    padding: 3px 6px;
+    font-size: 13px;
+    text-align: center;
+
+    &:nth-child(1) {
+      left: -5px;
+      bottom: 35px;
+    }
+
+    &:nth-child(2) {
+      left: 45px;
+      top: 0;
+    }
+
+    &:nth-child(3) {
+      top: 35px;
+      left: -5px;
+    }
+
+    &:nth-child(4) {
+      right: 45px;
+      top: 0;
+    }
+  }
+}
+
+.textbus-toolbar-image-size-setter {
+  input {
+    width: 120px;
+  }
+}

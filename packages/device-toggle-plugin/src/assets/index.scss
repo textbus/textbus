@@ -1,0 +1,60 @@
+@import "~@tanbo/css-themes/themes/scss/default";
+
+.textbus-device {
+  float: left;
+  position: relative;
+
+  &-expand {
+    .textbus-device-menus {
+      transform: scaleY(1);
+    }
+  }
+
+  &-menus {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #fff;
+    transform-origin: 0 100%;
+    transition: transform .1s;
+    transform: scaleY(0);
+    background-color: rgba(252, 252, 251, .96);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+    border-radius: 4px;
+    min-width: 100%;
+    font-size: 13px;
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  &-option {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    padding: 3px 20px;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: inherit;
+    min-height: 25px;
+
+    small {
+      margin-left: 20px;
+      opacity: .8;
+    }
+
+    &-active {
+      background-color: $color-light;
+    }
+
+    &:hover {
+      color: #fff;
+      background-color: $color-primary;
+    }
+  }
+}

@@ -1,0 +1,45 @@
+.textbus-container.textbus-theme-dark {
+  .textbus-toolbar {
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
+  }
+
+  .textbus-toolbar-wrapper {
+    background-color: $color-darker;
+    border-color: $color-darker;
+  }
+
+  .textbus-toolbar-additional-worktable {
+    border-bottom: 0;
+  }
+
+  .textbus-toolbar-action {
+    color: $color-gray;
+
+    &-active {
+      color: $color-primary;
+    }
+
+    &:focus {
+      position: relative;
+      @include focus($color-primary);
+    }
+
+    &:active {
+      color: inherit;
+      background-color: $color-gray;
+    }
+  }
+
+  .textbus-toolbar-components-btn {
+    color: $color-gray;
+
+    &-active {
+      color: $color-primary;
+    }
+  }
+
+  .textbus-toolbar-dropdown.textbus-toolbar-dropdown-open > .textbus-toolbar-action {
+    background-color: $color-gray;
+    color: $color-darker;
+  }
+}

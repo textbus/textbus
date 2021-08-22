@@ -1,0 +1,67 @@
+.textbus-container.textbus-theme-mac-os {
+  .textbus-toolbar-group {
+    .textbus-toolbar-action {
+      background: linear-gradient(#fff 3px, #eee 17px, $color-gray-light);
+      border: 1px solid darken($color-gray-light, 3);
+      border-radius: 0;
+
+      &-active {
+        background: linear-gradient(
+                lighten($color-primary, 20) 1px,
+                lighten($color-primary, 0) 2px,
+                lighten($color-primary, 0) 21px,
+                darken($color-primary, 10) 26px
+        );
+        border-color: darken($color-primary, 8);
+        color: #fff;
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    > .textbus-toolbar-action {
+      &-active {
+        background: linear-gradient(
+                lighten($color-primary, 20) 1px,
+                lighten($color-primary, 0) 2px,
+                lighten($color-primary, 0) 21px,
+                darken($color-primary, 10) 26px
+        );
+        border-color: darken($color-primary, 8);
+        color: #fff;
+        position: relative;
+        z-index: 1;
+      }
+
+      &:not(:first-child) {
+        margin-left: -1px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+
+      &:first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+
+    .textbus-toolbar-dropdown {
+      &:not(:first-child) {
+        margin-left: -1px;
+      }
+
+      &:last-child .textbus-toolbar-action {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+
+      &:first-child .textbus-toolbar-action {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+  }
+}
