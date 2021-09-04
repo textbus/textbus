@@ -1,0 +1,11 @@
+.textbus-container.textbus-theme-dark {
+  .textbus-ui-workbench {
+    background-color: $color-lighter;
+  }
+
+  .textbus-status-bar {
+    background-color: lighten($color-darker, 8);
+    border-color: lighten($color-darker, 8);
+    color: $color-gray-dark;
+  }
+}

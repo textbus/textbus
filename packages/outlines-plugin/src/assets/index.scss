@@ -1,0 +1,63 @@
+@import "~@tanbo/css-themes/themes/scss/default";
+
+.textbus-outlines-plugin {
+  min-width: 200px;
+  max-width: 300px;
+  display: none;
+  border-right: 1px solid $color-light;
+  height: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  overflow: auto;
+  background-color: #fff;
+  &-show {
+    display: block;
+  }
+  &-title {
+    height: 36px;
+    line-height: 36px;
+    padding: 0 15px;
+    font-size: 15px;
+    font-weight: normal;
+    border-bottom: 1px solid $color-light;
+    background-color: $color-lighter;
+    margin: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  &-btn-wrapper {
+    float: left;
+  }
+  &-links {
+    padding: 10px 15px;
+    @each $t in 1,2,3,4,5,6 {
+      .textbus-outlines-plugin-h#{$t} {
+        line-height: 2;
+        padding-left: #{$t - 1}em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    a {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      position: relative;
+      &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 50%;
+        left: -1em;
+        width: 0.6em;
+        border-bottom: 1px dotted $color-gray;
+        border-left: 1px dotted $color-gray;
+      }
+      &:hover {
+        color: $color-primary;
+      }
+    }
+  }
+}

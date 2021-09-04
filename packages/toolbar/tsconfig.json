@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@textbus/toolbar": [
+        "src/public-api.ts"
+      ],
+      "@textbus/toolbar/*": [
+        "src/*"
+      ]
+    }
+  }
+}

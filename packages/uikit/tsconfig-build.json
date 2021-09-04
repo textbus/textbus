@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["es2018", "dom"],
+    "target": "es5",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "outDir": "bundles/",
+    "downlevelIteration": true
+  },
+  "include": [
+    "src/"
+  ]
+}

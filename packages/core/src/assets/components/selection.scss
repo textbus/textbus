@@ -1,0 +1,37 @@
+.textbus-selection {
+  position: absolute;
+  width: 2px;
+  height: 18px;
+  pointer-events: none;
+  top: -9999px;
+  left: -9999px;
+}
+
+.textbus-cursor {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: 0 0 3px rgba(255, 255, 255, .3);
+}
+
+.textbus-input-wrap {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+}
+
+.textbus-input {
+  width: 2000px;
+  height: 100%;
+  opacity: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+}

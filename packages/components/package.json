@@ -1,0 +1,43 @@
+{
+  "name": "@textbus/components",
+  "version": "1.0.0-beta.12",
+  "description": "TextBus component extensions.",
+  "main": "./bundles/public-api.js",
+  "module": "./bundles/public-api.js",
+  "typings": "./bundles/public-api.d.ts",
+  "scripts": {
+    "start": "webpack-dev-server",
+    "test": "cross-env env=test jest",
+    "test-c": "cross-env env=test jest --coverage",
+    "build:lib": "rimraf bundles && tsc -p tsconfig-build.json",
+    "publish:lib": "npm run build:lib && npm publish --access=public"
+  },
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "textbus",
+    "富文本编辑器",
+    "wysiwyg",
+    "wysiwyg editor",
+    "rich text editor",
+    "editor",
+    "html editor",
+    "web editor",
+    "typescript editor"
+  ],
+  "dependencies": {
+    "@textbus/core": "^1.0.0-beta.12",
+    "prismjs": "^1.23.0",
+    "rxjs": "^6.0.0"
+  },
+  "author": {
+    "name": "Tanbo",
+    "email": "tanbohb@qq.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/textbus/components.git"
+  },
+  "bugs": {
+    "url": "https://github.com/textbus/components.git/issues"
+  }
+}

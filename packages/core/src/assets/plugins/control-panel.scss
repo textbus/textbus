@@ -1,0 +1,83 @@
+.textbus-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+
+  &-head {
+    height: 36px;
+    box-sizing: border-box;
+    padding: 12px 10px 0;
+    border-bottom: 1px solid $color-light;
+    background-color: $color-lighter;
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  &-btn-wrapper {
+    height: 24px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  &-btn {
+    background-color: $color-lighter;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid $color-light;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 13px;
+    border-radius: 5px 5px 0 0;
+    margin-right: 4px;
+
+    &:hover {
+      background: #fff;
+    }
+
+    &-active {
+      background: #fff;
+      border-bottom-color: #fff;
+    }
+  }
+
+  &-view {
+    flex: 1;
+    position: relative;
+    z-index: 0;
+  }
+}
+
+
+.textbus-control-panel {
+  width: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  transition: width .15s cubic-bezier(.36, .66, .04, 1);
+
+  &-container {
+    overflow: hidden;
+    width: 240px;
+    height: 100%;
+    background-color: #fff;
+    border-left: 1px solid $color-light;
+  }
+
+  &-show {
+    width: 240px;
+  }
+
+  &-fixed {
+    width: 240px;
+    position: static;
+    transition: none;
+  }
+}
