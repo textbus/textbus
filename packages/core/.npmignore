@@ -6,6 +6,7 @@ test/
 .eslintrc.js
 .gitignore
 .npmignore
+babel.config.js
 disable-output-webpack-plugin.js
 gulpfile.js
 index.html

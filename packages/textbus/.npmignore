@@ -6,6 +6,11 @@ test/
 .gitignore
 .npmignore
 .eslintrc.js
+.editorconfig
+babel.config.js
+index.ts
+index.html
+webpack-build.config.js
 disable-output-webpack-plugin.js
 gulpfile.js
 package-lock.json
