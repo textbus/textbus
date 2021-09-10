@@ -1,6 +1,6 @@
 {
   "name": "@textbus/components",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TextBus component extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -39,5 +39,6 @@
   },
   "bugs": {
     "url": "https://github.com/textbus/components.git/issues"
-  }
+  },
+  "gitHead": "07356b30570734028be6d984259fd1e915d9d392"
 }
