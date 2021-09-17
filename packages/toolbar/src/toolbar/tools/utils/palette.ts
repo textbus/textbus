@@ -6,19 +6,19 @@ import { Observable, Subject } from 'rxjs';
 import { DropdownViewer } from '../../toolkit/dropdown-tool';
 
 export class Palette implements DropdownViewer {
-  static defaultColors: string[] = null;
+  static defaultColors: string[] = ['#f8f8f9','#e9eaec','#dddee1','#bbbec4','#80848f','#495060','#1c2838','#e74f5e','#ff9900','#15bd9a','#6ad1ec','#1296db'];
   elementRef = document.createElement('div');
   onComplete: Observable<string>;
 
   private picker: Picker;
   private completeEvent = new Subject<string>();
 
-  constructor(private styleName: string, btnText: string) {
+  constructor(private styleName: string, btnText: string, colors?: string[]) {
     this.elementRef.classList.add('textbus-toolbar-palette');
     this.onComplete = this.completeEvent.asObservable();
     this.picker = createPicker(this.elementRef, {
       btnText,
-      colors: Palette.defaultColors
+      colors: colors || (Palette.defaultColors?.length ? Palette.defaultColors : null)
     });
     this.picker.onSelected = (ev) => {
       if (!ev.rgba) {
