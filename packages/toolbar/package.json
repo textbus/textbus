@@ -1,6 +1,6 @@
 {
   "name": "@textbus/toolbar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TextBus tool extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
