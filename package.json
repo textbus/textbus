@@ -7,10 +7,7 @@
   "typings": "./bundles/public-api.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
-    "test": "cross-env env=test jest",
-    "test-c": "cross-env env=test jest --coverage",
-    "build:lib": "rimraf package/bundles && gulp && webpack --config webpack-sass.config.js && tsc -p tsconfig-build.json && webpack --config webpack-build.config.js",
-    "publish:lib": "npm run build:lib && cd package && npm publish --access=public"
+    "publish:lib": "lerna publish"
   },
   "author": "tanbo",
   "license": "GPL-3.0-only",

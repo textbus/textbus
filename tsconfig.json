@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@textbus/component-library-plugin": ["./packages/component-library-plugin/src/public-api.ts"],
+      "@textbus/components": ["./packages/components/src/public-api.ts"],
+      "@textbus/contextmenu-plugin": ["./packages/contextmenu-plugin/src/public-api.ts"],
+      "@textbus/core": ["./packages/core/src/public-api.ts"],
+      "@textbus/device-toggle-plugin": ["./packages/device-toggle-plugin/src/public-api.ts"],
+      "@textbus/formatters": ["./packages/formatters/src/public-api.ts"],
+      "@textbus/full-screen-plugin": ["./packages/full-screen-plugin/src/public-api.ts"],
+      "@textbus/guard-end-block-plugin": ["./packages/guard-end-block-plugin/src/public-api.ts"],
+      "@textbus/image-adn-video-drag-resize-plugin": ["./packages/image-adn-video-drag-resize-plugin/src/public-api.ts"],
+      "@textbus/link-jump-tip-plugin": ["./packages/link-jump-tip-plugin/src/public-api.ts"],
+      "@textbus/outlines-plugin": ["./packages/outlines-plugin/src/public-api.ts"],
+      "@textbus/paste-upload-emitter-plugin": ["./packages/paste-upload-emitter-plugin/src/public-api.ts"],
+      "@textbus/sourcecode-mode-plugin": ["./packages/sourcecode-mode-plugin/src/public-api.ts"],
+      "@textbus/table-edit-enhance-plugin": ["./packages/table-edit-enhance-plugin/src/public-api.ts"],
+      "@textbus/textbus": ["./packages/textbus/src/public-api.ts"],
+      "@textbus/toolbar": ["./packages/toolbar/src/public-api.ts"],
+      "@textbus/uikit": ["./packages/uikit/src/public-api.ts"]
+    },
+    "jsx": "react",
+    "jsxFactory": "VElement.createElement"
+  },
+  "exclude": ["packages"]
+}
