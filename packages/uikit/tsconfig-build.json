@@ -5,7 +5,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "lib": ["es2018", "dom"],
-    "target": "es5",
+    "target": "es6",
     "module": "es2020",
     "moduleResolution": "node",
     "sourceMap": true,
