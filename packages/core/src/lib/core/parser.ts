@@ -1,14 +1,25 @@
 import { Fragment } from './fragment';
 import { FormatEffect, Formatter } from './formatter';
-import { BranchAbstractComponent, DivisionAbstractComponent, ComponentLoader, BackboneAbstractComponent } from './component';
+import {
+  BranchAbstractComponent,
+  DivisionAbstractComponent,
+  ComponentLoader,
+  BackboneAbstractComponent
+} from './component';
 
 /**
  * Parser 类用于把一段 DOM 转换为组件（Component）和可编辑片段（Fragment）的抽象数据树
  */
 export class Parser {
-  static parserHTML(html: string) {
+  static parseHTML(html: string) {
     return new DOMParser().parseFromString(html, 'text/html').body;
   }
+
+  /** @deprecated */
+  static parserHTML(html: string) {
+    return Parser.parseHTML(html);
+  }
+
   constructor(private componentLoaders: ComponentLoader[] = [],
               private formatters: Formatter[] = []) {
   }
