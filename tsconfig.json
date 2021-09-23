@@ -21,7 +21,7 @@
       "@textbus/formatters": ["./packages/formatters/src/public-api.ts"],
       "@textbus/full-screen-plugin": ["./packages/full-screen-plugin/src/public-api.ts"],
       "@textbus/guard-end-block-plugin": ["./packages/guard-end-block-plugin/src/public-api.ts"],
-      "@textbus/image-adn-video-drag-resize-plugin": ["./packages/image-adn-video-drag-resize-plugin/src/public-api.ts"],
+      "@textbus/image-and-video-drag-resize-plugin": ["./packages/image-and-video-drag-resize-plugin/src/public-api.ts"],
       "@textbus/link-jump-tip-plugin": ["./packages/link-jump-tip-plugin/src/public-api.ts"],
       "@textbus/outlines-plugin": ["./packages/outlines-plugin/src/public-api.ts"],
       "@textbus/paste-upload-emitter-plugin": ["./packages/paste-upload-emitter-plugin/src/public-api.ts"],

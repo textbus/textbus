@@ -23,7 +23,7 @@ module.exports = {
       '@textbus/formatters': path.resolve(__dirname, './packages/formatters/src/public-api.ts'),
       '@textbus/full-screen-plugin': path.resolve(__dirname, './packages/full-screen-plugin/src/public-api.ts'),
       '@textbus/guard-end-block-plugin': path.resolve(__dirname, './packages/guard-end-block-plugin/src/public-api.ts'),
-      '@textbus/image-adn-video-drag-resize-plugin': path.resolve(__dirname, './packages/image-adn-video-drag-resize-plugin/src/public-api.ts'),
+      '@textbus/image-and-video-drag-resize-plugin': path.resolve(__dirname, './packages/image-and-video-drag-resize-plugin/src/public-api.ts'),
       '@textbus/link-jump-tip-plugin': path.resolve(__dirname, './packages/link-jump-tip-plugin/src/public-api.ts'),
       '@textbus/outlines-plugin': path.resolve(__dirname, './packages/outlines-plugin/src/public-api.ts'),
       '@textbus/paste-upload-emitter-plugin': path.resolve(__dirname, './packages/paste-upload-emitter-plugin/src/public-api.ts'),
