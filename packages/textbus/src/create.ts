@@ -29,7 +29,6 @@ import {
   TOOLS,
   ToolFactory
 } from '@textbus/toolbar';
-import '@textbus/toolbar/bundles/i18n/zh_CN';
 import {
   fontFamilyFormatter,
   boldFormatter,

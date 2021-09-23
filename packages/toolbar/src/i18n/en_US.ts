@@ -1,6 +1,4 @@
-import { i18n_en_US } from '@textbus/core';
-
-const i18n_en_US__toolbar = {
+export const i18n_en_US__toolbar = {
   audioTool: {
     tooltip: 'audio',
     view: {
@@ -328,10 +326,4 @@ const i18n_en_US__toolbar = {
       autoplayLabel: 'autoplay'
     }
   }
-}
-
-i18n_en_US.plugins.toolbar = i18n_en_US__toolbar;
-
-export {
-  i18n_en_US__toolbar
 }

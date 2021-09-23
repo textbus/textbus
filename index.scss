@@ -1,15 +1,1 @@
-@import "./node_modules/@tanbo/css-themes/themes/scss/default";
-$line-height: 1.4285714 !default;
-
-@import "./packages/component-library-plugin/src/assets/index";
-@import "./packages/core/src/assets/index";
-@import "./packages/device-toggle-plugin/src/assets/index";
-@import "./packages/full-screen-plugin/src/assets/index";
-@import "./packages/image-and-video-drag-resize-plugin/src/assets/index";
-@import "./packages/outlines-plugin/src/assets/index";
-@import "./packages/sourcecode-mode-plugin/src/assets/index";
-@import "./packages/table-edit-enhance-plugin/src/assets/index";
-@import "./packages/toolbar/src/assets/index";
-@import "./packages/uikit/src/assets/index";
-
-@import "./packages/textbus/src/assets/icons/style.css";
+@import "./packages/textbus/assets/index"

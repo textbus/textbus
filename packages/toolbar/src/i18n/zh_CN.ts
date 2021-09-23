@@ -1,6 +1,4 @@
-import { i18n_zh_CN } from '@textbus/core';
-
-const i18n_zh_CN__toolbar = {
+export const i18n_zh_CN__toolbar = {
   audioTool: {
     tooltip: '音频',
     view: {
@@ -328,10 +326,4 @@ const i18n_zh_CN__toolbar = {
       autoplayLabel: '自动播放'
     }
   }
-}
-
-i18n_zh_CN.plugins.toolbar = i18n_zh_CN__toolbar;
-
-export {
-  i18n_zh_CN__toolbar
 }

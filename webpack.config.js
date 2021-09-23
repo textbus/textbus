@@ -29,7 +29,7 @@ module.exports = {
       '@textbus/paste-upload-emitter-plugin': path.resolve(__dirname, './packages/paste-upload-emitter-plugin/src/public-api.ts'),
       '@textbus/sourcecode-mode-plugin': path.resolve(__dirname, './packages/sourcecode-mode-plugin/src/public-api.ts'),
       '@textbus/table-edit-enhance-plugin': path.resolve(__dirname, './packages/table-edit-enhance-plugin/src/public-api.ts'),
-      '@textbus/textbus': path.resolve(__dirname, './packages/textbus/public-api.ts'),
+      '@textbus/textbus': path.resolve(__dirname, './packages/textbus/src/public-api.ts'),
       '@textbus/toolbar': path.resolve(__dirname, './packages/toolbar/src/public-api.ts'),
       '@textbus/uikit': path.resolve(__dirname, './packages/uikit/src/public-api.ts')
     }
@@ -56,18 +56,6 @@ module.exports = {
           }
         }
       }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/assets/')]
-    }, {
-      test: /\.s?css$/,
-      use: ['to-string-loader', 'css-loader', {
-        loader: 'postcss-loader',
-        options: {
-          plugins() {
-            return [require('autoprefixer')];
-          }
-        }
-      }, 'sass-loader'],
-      include: [path.resolve(__dirname, 'src/lib/')]
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
       use: [{

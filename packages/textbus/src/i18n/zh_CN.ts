@@ -1,4 +1,5 @@
 import { I18NConfig } from '@textbus/core';
+import { i18n_zh_CN__toolbar } from '@textbus/toolbar'
 
 export const i18n_zh_CN: I18NConfig = {
   /** 核心库依赖，不可缺少 */
@@ -19,6 +20,7 @@ export const i18n_zh_CN: I18NConfig = {
   /** 核心库依赖结束 */
   /** 以下配置，可根据自己的组件及插件配置添加或删除 */
   plugins: {
+    toolbar: i18n_zh_CN__toolbar,
     componentStage: {
       switchText: '组件库',
       expandOrNarrowLib: '展开或收起组件库',

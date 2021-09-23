@@ -3,9 +3,9 @@ import './index.scss';
 
 import {
   createEditor,
+  EditorController,
+  PreComponent
 } from '@textbus/textbus';
-import { EditorController } from '@textbus/core';
-import { PreComponent } from '@textbus/components';
 PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   theme: 'dark',

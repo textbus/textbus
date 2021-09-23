@@ -1,4 +1,5 @@
 import { I18NConfig } from '@textbus/core';
+import { i18n_en_US__toolbar } from '@textbus/toolbar'
 
 export const i18n_en_US: I18NConfig = {
   /** core library dependency start, no optional */
@@ -19,6 +20,7 @@ export const i18n_en_US: I18NConfig = {
   /** core library dependency end */
   /** optional config */
   plugins: {
+    toolbar: i18n_en_US__toolbar,
     componentStage: {
       switchText: 'component library',
       expandOrNarrowLib: 'expand or narrow component library',
