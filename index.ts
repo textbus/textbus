@@ -10,6 +10,9 @@ PreComponent.theme = 'dark';
 const editor = createEditor('#editor', {
   theme: 'dark',
   // i18n: i18n_en_US,
+  uploader(type: string, currentValue?: string) {
+    return '/api/xxx'
+  },
   contents: `<p>Warm-up &amp; Lesson introduction</p>
 
         <ol>

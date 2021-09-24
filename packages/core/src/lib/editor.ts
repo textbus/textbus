@@ -381,12 +381,14 @@ export class Editor {
         useValue: componentInjectors
       }, {
         provide: FileUploader,
-        useFactory: (message: UIMessage, i18n: I18n) => {
+        useFactory: (message: UIMessage, i18n: I18n, selection: TBSelection, rootComponent: RootComponent) => {
           return {
             upload: (type: string, currentValue: string): Observable<string> => {
               if (selection.rangeCount === 0) {
-                message.message(i18n.get('editor.noSelection'));
-                return of('');
+                const range = selection.createRange()
+                const position = range.findLastPosition(rootComponent.slot)
+                range.setPosition(position.fragment, position.index)
+                selection.addRange(range)
               }
               if (typeof this.options.uploader === 'function') {
 
@@ -399,11 +401,12 @@ export class Editor {
                   return of(result);
                 }
               }
+              message.message(i18n.get('editor.noUploader'))
               return of('');
             }
           }
         },
-        deps: [UIMessage, I18n]
+        deps: [UIMessage, I18n, TBSelection, RootComponent]
       }
     ])
 
