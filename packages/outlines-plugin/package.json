@@ -1,6 +1,6 @@
 {
   "name": "@textbus/outlines-plugin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "TextBus outlines extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -26,8 +26,8 @@
   ],
   "dependencies": {
     "@tanbo/css-themes": "^0.0.1",
-    "@textbus/components": "^1.0.0",
-    "@textbus/core": "^1.0.0",
+    "@textbus/components": "^1.1.0",
+    "@textbus/core": "^1.1.0",
     "rxjs": "^6.0.0"
   },
   "author": {
