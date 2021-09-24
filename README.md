@@ -96,7 +96,7 @@ TextBus 的成长离不开社会的支持，如果 TextBus 为你带来了帮助
 
 对于一部分需要更详细了解 TextBus 原理，需要本地调试的开发者来说，可以通过以下方式在本地运行 TextBus。
 
-TextBus 采用 lerna 作为多仓库管理工具。如果你没有安装，请先安装 lerna。
+TextBus 采用 lerna 作为多模块管理工具。如果你没有安装，请先安装 lerna。
 
 ```
 npm install -g lerna
