@@ -1,6 +1,6 @@
 {
   "name": "@textbus/link-jump-tip-plugin",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "TextBus link jump extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -25,7 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@textbus/core": "^1.1.0",
+    "@textbus/core": "^1.1.1",
     "rxjs": "^6.0.0"
   },
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "@textbus/paste-upload-emitter-plugin",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "TextBus paste upload emitter extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -25,8 +25,8 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@textbus/core": "^1.1.0",
-    "@textbus/uikit": "^1.1.0",
+    "@textbus/core": "^1.1.1",
+    "@textbus/uikit": "^1.1.1",
     "rxjs": "^6.0.0"
   },
   "author": {
