@@ -547,8 +547,8 @@ export class TBRange {
       const currentContent = this.startFragment.getContentAtIndex(this.startIndex);
       const prevContent = this.startFragment.getContentAtIndex(this.startIndex - 1);
       if ((prevContent instanceof DivisionAbstractComponent ||
-        prevContent instanceof BranchAbstractComponent ||
-        prevContent instanceof BackboneAbstractComponent) &&
+          prevContent instanceof BranchAbstractComponent ||
+          prevContent instanceof BackboneAbstractComponent) &&
         currentContent instanceof BrComponent) {
         const prevPosition = this.getPreviousPosition();
         this.endIndex++;
@@ -1525,7 +1525,8 @@ export class TBRange {
     if (typeof current === 'string') {
       const prev = fragment.getContentAtIndex(offset - 1);
       return findFocusNativeTextNode(this.renderer, vElement, offset, typeof prev === 'string');
-    } else if (current instanceof AbstractComponent) {
+    }
+    if (current instanceof AbstractComponent) {
       const prev = fragment.getContentAtIndex(offset - 1);
       if (typeof prev === 'string') {
         return findFocusNativeTextNode(this.renderer, vElement, offset, true);
@@ -1593,7 +1594,8 @@ export class TBRange {
         fragment: position.fragment,
         index: position.startIndex + offset
       }
-    } else if (container.nodeType === Node.ELEMENT_NODE) {
+    }
+    if (container.nodeType === Node.ELEMENT_NODE) {
       const childNodes = container.childNodes;
       if (childNodes.length === 0) {
         return null;
