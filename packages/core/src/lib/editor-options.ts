@@ -11,8 +11,10 @@ import { I18NConfig } from './i18n/i18n';
 export interface EditorOptions {
   /** 设置主题 */
   theme?: string;
-  /** 设置最大历史栈 */
+  /** 设置最大历史栈, 默认值为50个 */
   historyStackSize?: number;
+  /** 设置记录历史的时间间隔，间隔期间内如有变化则会添加一次历史记录, 默认值为5000ms */
+  historySampleTime?: number;
   /** 声明组件集合 */
   components?: Array<Type<AbstractComponent>>;
   /** 设置格式转换器 */
