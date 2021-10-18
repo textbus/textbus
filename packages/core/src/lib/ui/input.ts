@@ -438,7 +438,15 @@ export class Input {
   }
 
   private makeContextmenu() {
-    let component = this.selection.commonAncestorComponent;
+    const firstRange = this.selection.firstRange;
+    let component = firstRange.startFragment.getContentAtIndex(firstRange.startIndex); //光标右边
+    // 当叶子组件在文档最后一行且后面没有其他内容时，就会是BrComponent
+    if(!component || typeof component === "string" || component instanceof BrComponent){
+      component = firstRange.startFragment.getContentAtIndex(firstRange.startIndex - 1); //光标左边
+    }
+    if(!component || typeof component === "string"){
+      component = this.selection.commonAncestorComponent;
+    }
     if (!component) {
       return [];
     }
