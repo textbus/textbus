@@ -32,7 +32,7 @@ export class HTMLOutputTranslator implements OutputTranslator {
       })
     },
     attrValue(text: string) {
-      return text.replace(/[><"'&/]/g, str => {
+      return text.replace(/["']/g, str => {
         return {
           '"': '&quot;',
           "'": '&#x27;'
