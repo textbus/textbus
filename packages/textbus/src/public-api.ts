@@ -10,6 +10,7 @@ export * from '@textbus/image-and-video-drag-resize-plugin';
 export * from '@textbus/link-jump-tip-plugin';
 export * from '@textbus/outlines-plugin';
 export * from '@textbus/paste-upload-emitter-plugin';
+export * from '@textbus/sourcecode-mode-plugin';
 export * from '@textbus/table-edit-enhance-plugin';
 export * from '@textbus/toolbar';
 export * from '@textbus/uikit';

@@ -21,20 +21,21 @@ export class HTMLOutputTranslator implements OutputTranslator {
       })
     },
     attrName(text: string) {
-      return this.symbolTransfer(text.replace(/=/g, ''));
-    },
-    attrValue(text: string) {
-      return this.symbolTransfer(text)
-    },
-    symbolTransfer(text: string) {
-      return text.replace(/[><"'&/]/g, str => {
+      return text.replace(/[><"'&]/g, str => {
         return {
           '<': '&lt;',
           '>': '&gt;',
           '"': '&quot;',
           "'": '&#x27;',
-          '&': '&amp;',
-          '/': '&#x2F;'
+          '&': '&amp;'
+        }[str];
+      })
+    },
+    attrValue(text: string) {
+      return text.replace(/[><"'&/]/g, str => {
+        return {
+          '"': '&quot;',
+          "'": '&#x27;'
         }[str];
       })
     }
