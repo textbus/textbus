@@ -134,7 +134,9 @@ export class TBHistory {
 
   private listen() {
     this.stopListen();
-    this.snapshotSubscription = this.rootComponent.onChange.pipe(sampleTime(5000)).subscribe(() => {
+    this.snapshotSubscription = this.rootComponent.onChange.pipe(
+        sampleTime(this.options.historySampleTime || 5000)
+      ).subscribe(() => {
       this.recordSnapshot();
     });
   }
