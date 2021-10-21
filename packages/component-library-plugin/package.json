@@ -1,6 +1,6 @@
 {
   "name": "@textbus/component-library-plugin",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "TextBus component library extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -26,10 +26,10 @@
   ],
   "dependencies": {
     "@tanbo/css-themes": "^0.0.1",
-    "@textbus/components": "^1.1.1",
-    "@textbus/core": "^1.1.1",
-    "@textbus/formatters": "^1.1.1",
-    "@textbus/uikit": "^1.1.1",
+    "@textbus/components": "^1.1.2",
+    "@textbus/core": "^1.1.2",
+    "@textbus/formatters": "^1.1.2",
+    "@textbus/uikit": "^1.1.2",
     "katex": "^0.13.0",
     "rxjs": "^6.0.0"
   },

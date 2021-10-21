@@ -1,6 +1,6 @@
 {
   "name": "@textbus/components",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "TextBus component extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -25,7 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@textbus/core": "^1.1.1",
+    "@textbus/core": "^1.1.2",
     "prismjs": "^1.23.0",
     "rxjs": "^6.0.0"
   },
