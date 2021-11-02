@@ -16,7 +16,8 @@ import {
   TBHistory,
   Input,
   EditorController,
-  createElement
+  createElement,
+  Editor,
 } from '@textbus/core';
 
 import { createKeymapHTML } from './_utils/uikit';
@@ -36,6 +37,7 @@ export class Toolbar implements TBPlugin {
   private subs: Subscription[] = [];
 
   constructor(@Optional() @Inject(TOOLS) private tools: Array<ToolFactory | ToolFactory[]>,
+              private editor: Editor,
               private layout: Layout,
               private editorController: EditorController,
               private i18n: I18n,
@@ -87,6 +89,7 @@ export class Toolbar implements TBPlugin {
         })
       }),
       this.selection.onChange.pipe(auditTime(100)).subscribe(() => {
+        if(this.editor.readonly) return;
         const event = document.createEvent('Event');
         event.initEvent('click', true, true);
         this.elementRef.dispatchEvent(event);
