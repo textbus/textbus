@@ -169,7 +169,7 @@ export class Toolbar implements TBPlugin {
   }
 
   private updateHandlerState() {
-    if (!this.selection.commonAncestorFragment) {
+    if (this.editorController.readonly || !this.selection.commonAncestorFragment) {
       return;
     }
     this.toolInstances.forEach(tool => {

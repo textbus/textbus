@@ -22,6 +22,7 @@ export class Layout {
 
   readonly iframe: HTMLIFrameElement;
 
+  readonlyCover?: HTMLElement;
 
   get topBar() {
     if (!this.isAppendTop) {
@@ -120,8 +121,18 @@ export class Layout {
     this.subs.push(this.editorController.onStateChange.pipe(map(s => s.readonly)).subscribe(b => {
       if (b) {
         this.container.classList.add('textbus-readonly');
+        if(!this.readonlyCover){
+          this.readonlyCover = createElement("div", {
+            classes: ["readonly-cover"]
+          });
+          this.pageContainer.appendChild(this.readonlyCover);
+        }
       } else {
         this.container.classList.remove('textbus-readonly')
+        if(this.readonlyCover){
+          this.pageContainer.removeChild(this.readonlyCover);
+          this.readonlyCover = undefined;
+        }
       }
     }))
   }
