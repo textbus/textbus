@@ -1,0 +1,29 @@
+.textbus-link-jump-plugin {
+  border-radius: 3px;
+  position: absolute;
+  line-height: 1em;
+  font-size: 12px;
+  padding: 6px 0;
+  width: 46px;
+  text-align: center;
+  margin-left: -23px;
+  margin-top: -30px;
+  background-color: #333;
+  color: #ddd;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-decoration: none;
+}
+.textbus-link-jump-plugin:hover {
+  color: #1296db;
+}
+.textbus-link-jump-plugin:after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border-width: 6px;
+  margin-left: -6px;
+  border-style: solid;
+  border-color: #333 transparent transparent;
+  pointer-events: none;
+}

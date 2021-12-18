@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext",
+    "strict": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "noImplicitOverride": true,
+    "baseUrl": "./",
+    "paths": {
+      "@textbus/browser": ["./packages/browser/src/public-api.ts"],
+      "@textbus/core": ["./packages/core/src/public-api.ts"],
+      "@textbus/editor": ["./packages/editor/src/public-api.ts"]
+    },
+    "jsx": "react",
+    "jsxFactory": "VElement.createElement"
+  },
+  "exclude": ["packages"]
+}

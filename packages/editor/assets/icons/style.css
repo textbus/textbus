@@ -1,0 +1,233 @@
+@font-face {
+  font-family: 'textbus';
+  src:
+    url('fonts/textbus.ttf?anojok') format('truetype'),
+    url('fonts/textbus.woff?anojok') format('woff'),
+    url('fonts/textbus.svg?anojok#textbus') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="textbus-icon-"], [class*=" textbus-icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'textbus' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.textbus-icon-arrow-right:before {
+  content: "\e50f";
+}
+.textbus-icon-components:before {
+  content: "\e900";
+}
+.textbus-icon-insert-paragraph-before:before {
+  content: "\e901";
+}
+.textbus-icon-table-border:before {
+  content: "\e902";
+}
+.textbus-icon-table-remove:before {
+  content: "\e903";
+}
+.textbus-icon-device:before {
+  content: "\e904";
+}
+.textbus-icon-paint-bucket:before {
+  content: "\e905";
+}
+.textbus-icon-background-color:before {
+  content: "\e906";
+}
+.textbus-icon-color:before {
+  content: "\e907";
+}
+.textbus-icon-brush:before {
+  content: "\e908";
+}
+.textbus-icon-table-edit:before {
+  content: "\e909";
+}
+.textbus-icon-table-split-columns:before {
+  content: "\e90a";
+}
+.textbus-icon-table-delete-row-top:before {
+  content: "\e90b";
+}
+.textbus-icon-table-delete-row-bottom:before {
+  content: "\e90c";
+}
+.textbus-icon-table-delete-column-right:before {
+  content: "\e90d";
+}
+.textbus-icon-table-delete-column-left:before {
+  content: "\e90e";
+}
+.textbus-icon-table-add-row-top:before {
+  content: "\e90f";
+}
+.textbus-icon-table-add-row-bottom:before {
+  content: "\e910";
+}
+.textbus-icon-table-add-column-right:before {
+  content: "\e911";
+}
+.textbus-icon-table-add-column-left:before {
+  content: "\e912";
+}
+.textbus-icon-image:before {
+  content: "\e913";
+}
+.textbus-icon-text-indent:before {
+  content: "\e914";
+}
+.textbus-icon-music:before {
+  content: "\e915";
+}
+.textbus-icon-video:before {
+  content: "\e916";
+}
+.textbus-icon-unlink:before {
+  content: "\e917";
+}
+.textbus-icon-select:before {
+  content: "\e918";
+}
+.textbus-icon-insert-paragraph-after:before {
+  content: "\e919";
+}
+.textbus-icon-copy:before {
+  content: "\e92c";
+}
+.textbus-icon-paste:before {
+  content: "\e92d";
+}
+.textbus-icon-pushpin:before {
+  content: "\e946";
+}
+.textbus-icon-upload:before {
+  content: "\e961";
+}
+.textbus-icon-history-back:before {
+  content: "\e967";
+}
+.textbus-icon-history-forward:before {
+  content: "\e968";
+}
+.textbus-icon-quotes-right:before {
+  content: "\e978";
+}
+.textbus-icon-loading:before {
+  content: "\e97f";
+}
+.textbus-icon-search:before {
+  content: "\e986";
+}
+.textbus-icon-enlarge:before {
+  content: "\e989";
+}
+.textbus-icon-shrink:before {
+  content: "\e98a";
+}
+.textbus-icon-bin:before {
+  content: "\e9ac";
+}
+.textbus-icon-list-numbered:before {
+  content: "\e9b9";
+}
+.textbus-icon-list:before {
+  content: "\e9bb";
+}
+.textbus-icon-link:before {
+  content: "\e9cb";
+}
+.textbus-icon-emoji:before {
+  content: "\e9e2";
+}
+.textbus-icon-plus:before {
+  content: "\ea0a";
+}
+.textbus-icon-command:before {
+  content: "\ea4e";
+}
+.textbus-icon-shift:before {
+  content: "\ea4f";
+}
+.textbus-icon-ctrl:before {
+  content: "\ea50";
+}
+.textbus-icon-opt:before {
+  content: "\ea51";
+}
+.textbus-icon-cut:before {
+  content: "\ea5a";
+}
+.textbus-icon-line-height:before {
+  content: "\ea5f";
+}
+.textbus-icon-letter-spacing:before {
+  content: "\ea60";
+}
+.textbus-icon-font-size:before {
+  content: "\ea61";
+}
+.textbus-icon-bold:before {
+  content: "\ea62";
+}
+.textbus-icon-underline:before {
+  content: "\ea63";
+}
+.textbus-icon-italic:before {
+  content: "\ea64";
+}
+.textbus-icon-strikethrough:before {
+  content: "\ea65";
+}
+.textbus-icon-superscript:before {
+  content: "\ea69";
+}
+.textbus-icon-subscript:before {
+  content: "\ea6a";
+}
+.textbus-icon-clear-formatting:before {
+  content: "\ea6f";
+}
+.textbus-icon-table:before {
+  content: "\ea71";
+}
+.textbus-icon-ltr:before {
+  content: "\ea74";
+}
+.textbus-icon-rtl:before {
+  content: "\ea75";
+}
+.textbus-icon-paragraph-left:before {
+  content: "\ea77";
+}
+.textbus-icon-paragraph-center:before {
+  content: "\ea78";
+}
+.textbus-icon-paragraph-right:before {
+  content: "\ea79";
+}
+.textbus-icon-paragraph-justify:before {
+  content: "\ea7b";
+}
+.textbus-icon-code:before {
+  content: "\ea80";
+}
+.textbus-icon-terminal:before {
+  content: "\ea81";
+}
+.textbus-icon-tree:before {
+  content: "\e91a";
+}
