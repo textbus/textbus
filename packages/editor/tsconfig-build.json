@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["esnext", "dom"],
+    "target": "es6",
+    "strict": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "outDir": "bundles/",
+    "downlevelIteration": true,
+    "jsx": "react",
+    "jsxFactory": "VElement.createElement"
+  },
+  "include": [
+    "src/"
+  ]
+}

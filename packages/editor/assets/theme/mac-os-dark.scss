@@ -1,0 +1,69 @@
+.textbus-container.textbus-theme-mac-os-dark {
+  .textbus-toolbar {
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
+  }
+
+  .textbus-toolbar-wrapper {
+    background-color: $color-darker;
+    border-color: $color-darker;
+  }
+
+  .textbus-toolbar-additional-worktable {
+    border-bottom: 0;
+  }
+
+  .textbus-toolbar-group {
+    .textbus-toolbar-action {
+      background: linear-gradient(#404344 3px, #424149 17px, #222);
+      border: 1px solid darken(#222, 3);
+      border-radius: 0;
+      color: #9796aa;
+
+      &-active {
+        color: #ddd;
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    > .textbus-toolbar-action {
+      color: #9796aa;
+
+      &-active {
+        color: #ddd;
+        position: relative;
+        z-index: 1;
+      }
+
+      &:not(:first-child) {
+        margin-left: -1px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+
+      &:first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+
+    .textbus-toolbar-dropdown {
+      &:not(:first-child) {
+        margin-left: -1px;
+      }
+
+      &:last-child .textbus-toolbar-action {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+
+      &:first-child .textbus-toolbar-action {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+  }
+}
