@@ -2,7 +2,6 @@ import { Observable, Subject } from '@tanbo/stream'
 import { createElement, createTextNode } from '@textbus/browser'
 
 import { FormItem } from './help'
-import { FileUploader } from '../file-uploader'
 import { ViewController } from '../types'
 
 export interface FormConfig {
@@ -131,14 +130,6 @@ export class Form implements ViewController<Record<string, any>>{
   reset(): void {
     this.config.items.forEach(item => {
       item.reset()
-    })
-  }
-
-  setFileUploader(fileUploader: FileUploader): void {
-    this.config.items.forEach(item => {
-      if (typeof item.useUploader === 'function') {
-        item.useUploader(fileUploader)
-      }
     })
   }
 

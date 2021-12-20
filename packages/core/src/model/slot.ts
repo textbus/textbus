@@ -222,7 +222,7 @@ export class Slot<T = any> {
       }, {})
       this.content.slice(startIndex, endIndex).forEach(content => {
         const offset = index + content.length
-        if (typeof content === 'string') {
+        if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
           const deletedFormat = this.format.extract(index, offset)
           this.applyFormats(formats, index, offset)
           applyActions.push({

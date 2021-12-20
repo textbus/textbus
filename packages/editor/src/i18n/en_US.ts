@@ -14,7 +14,8 @@ export const i18n_en_US: I18NConfig = {
     controlPanel: {
       cancelFixed: 'cancel fixed',
       fixed: 'fixed'
-    }
+    },
+    noUploader: 'please add upload function to editor options!'
   },
   /** core library dependency end */
   /** optional config */

@@ -1,6 +1,6 @@
 import { Injector, Provider, Type } from '@tanbo/di'
-import { Observable, Subject } from '@tanbo/stream'
-import { makeError } from '@textbus/core'
+import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
+import { makeError, TBSelection } from '@textbus/core'
 import { CoreEditor } from '@textbus/browser'
 
 import { EditorOptions } from './types'
@@ -12,6 +12,7 @@ import { ContextMenu } from './context-menu'
 import { Dialog } from './dialog'
 import { EditorController } from './editor-controller'
 import { Message } from './message'
+import { FileUploader, UploadConfig } from './file-uploader'
 
 const editorErrorFn = makeError('Editor')
 
@@ -53,6 +54,36 @@ export class Editor extends CoreEditor {
         readonly: false,
         supportMarkdown: false
       })
+    }, {
+      provide: FileUploader,
+      useFactory(selection: TBSelection, message: Message, i18n: I18n) {
+        return {
+          upload: (config: UploadConfig): Observable<string | string[]> => {
+            if (!selection.isSelected) {
+              selection.usePaths({
+                start: [0, 0],
+                end: [0, 0]
+              })
+              selection.restore()
+            }
+            if (typeof options.uploader === 'function') {
+              const result = options.uploader(config)
+              if (result instanceof Observable) {
+                return result
+              } else if (result instanceof Promise) {
+                return fromPromise(result)
+              } else if (typeof result === 'string') {
+                return of(result)
+              } else if (Array.isArray(result)) {
+                return of(result)
+              }
+            }
+            message.message(i18n.get('editor.noUploader'))
+            return of('')
+          }
+        }
+      },
+      deps: [TBSelection, Message, I18n]
     },
       ContextMenu,
       Dialog,
