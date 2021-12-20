@@ -326,11 +326,42 @@ export const tableComponent = defineComponent({
         if (!startPosition || !endPosition) {
           return
         }
+        this.insertRow(endPosition.rowIndex + 1)
+      },
+      addRowToTop() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertRow(startPosition.rowIndex)
+      },
+      addColumnToRight() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertColumn(endPosition.columnIndex + 1)
+      },
+      addColumnToLeft() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertColumn(startPosition.columnIndex)
+      },
+      insertRow(index: number) {
         const serializedCells = serialize(tableCells)
-        const index = endPosition.rowIndex
+        const tr: TableCellSlot[] = []
+        if (index === 0 || index === serializedCells.length) {
+          for (let i = 0; i < tableInfo.columnSize; i++) {
+            tr.push(new TableCellSlot())
+          }
+          if (index === 0) {
+            slots.insertByIndex(tr, 0)
+          } else {
+            slots.insertByIndex(tr, slots.length)
+          }
+          return
+        }
 
         const row = serializedCells[index]
-        const tr: TableCellSlot[] = []
 
         stateController.update({
           rowSize: tableInfo.rowSize + 1,
@@ -349,57 +380,18 @@ export const tableComponent = defineComponent({
             tr.push(new TableCellSlot())
           }
         })
-        // tableCells.splice(tableCells.indexOf(row.cells) + 1, 0, tr)
-        const last = row.cells[row.cells.length - 1]
-        slots.insertAfter(tr, last)
-      },
-      addRowToTop() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        const serializedCells = serialize(tableCells)
-        const index = startPosition.rowIndex
+        tableCells.splice(tableCells.indexOf(row.cells), 0, tr)
 
-        stateController.update({
-          rowSize: tableInfo.rowSize + 1,
-          columnSize: tableInfo.columnSize
+        const result = Array.from(new Set(tableCells.flat()))
+
+        result.forEach((newCell, index) => {
+          const cell = slots.get(index)
+
+          if (cell === newCell) {
+            return
+          }
+          slots.insertByIndex(newCell, index)
         })
-
-        const row = serializedCells[index]
-        const tr: TableCellSlot[] = []
-        if (index === 0) {
-          serializedCells[0].cells.forEach(() => {
-            tr.push(new TableCellSlot())
-          })
-        } else {
-          row.cellsPosition.forEach(cell => {
-            if (cell.offsetRow > 0) {
-              if (cell.offsetColumn === 0) {
-                cell.cell.setState({
-                  colspan: cell.cell.state!.colspan,
-                  rowspan: cell.cell.state!.rowspan + 1
-                })
-              }
-            } else {
-              tr.push(new TableCellSlot())
-            }
-          })
-        }
-        // tableCells.splice(tableCells.indexOf(row.cells), 0, tr)
-        const first = row.cells[0]
-        slots.insertBefore(tr, first)
-      },
-      addColumnToRight() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertColumn(endPosition.columnIndex + 1)
-      },
-      addColumnToLeft() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertColumn(startPosition.columnIndex)
       },
       insertColumn(index: number) {
         if (index < 0) {
