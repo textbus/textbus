@@ -14,7 +14,8 @@ export const i18n_zh_CN: I18NConfig = {
     controlPanel: {
       cancelFixed: '取消固定',
       fixed: '固定'
-    }
+    },
+    noUploader: '你没有在编辑器的配置项中添加 uploader 方法！'
   },
   /** 核心库依赖结束 */
   /** 以下配置，可根据自己的组件及插件配置添加或删除 */

@@ -1,4 +1,4 @@
-import { FileUploader } from '../file-uploader'
+import { FileUploader } from '../../file-uploader'
 
 export interface FormTextFieldParams {
   label: string;
@@ -8,8 +8,11 @@ export interface FormTextFieldParams {
   canUpload?: boolean;
   uploadType?: string;
   uploadBtnText?: string;
+  fileUploader?: FileUploader
+  uploadMultiple?: boolean
 
   validateFn?(value: any): string | false
+
 }
 
 export interface FormTextareaParams {

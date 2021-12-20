@@ -1,7 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 
 import { AttrState, FormTextFieldParams, FormItem } from './help'
-import { FileUploader } from '../file-uploader'
 
 export class FormTextField implements FormItem<string> {
   elementRef = document.createElement('div');
@@ -10,7 +9,6 @@ export class FormTextField implements FormItem<string> {
   private sub?: Subscription;
   private readonly btn?: HTMLButtonElement;
   private readonly feedbackEle: HTMLElement;
-  private uploader?: FileUploader;
 
   constructor(private config: FormTextFieldParams) {
     this.name = config.name
@@ -39,7 +37,11 @@ export class FormTextField implements FormItem<string> {
         if (this.sub) {
           this.sub.unsubscribe()
         }
-        this.sub = this.uploader!.upload(this.config.uploadType!, this.input.value).subscribe({
+        this.sub = this.config.fileUploader?.upload({
+          uploadType: this.config.uploadType!,
+          currentValue: this.input.value,
+          multiple: !!this.config.uploadMultiple
+        }).subscribe({
           next: url => {
             this.update(url)
           },
@@ -52,10 +54,6 @@ export class FormTextField implements FormItem<string> {
         })
       })
     }
-  }
-
-  useUploader(uploader: FileUploader) {
-    this.uploader = uploader
   }
 
   reset() {

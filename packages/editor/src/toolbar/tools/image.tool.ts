@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di'
+import { Injector, Type } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
 import { createElement, createTextNode } from '@textbus/browser'
 
@@ -6,6 +6,7 @@ import { DialogTool, DialogToolConfig } from '../toolkit/_api'
 import { I18n } from '../../i18n'
 import { AttrState, Form, FormItem, FormRadio, FormTextField } from '../../uikit/_api'
 import { imageComponent, ImageComponentLiteral } from '../../components/image.component'
+import { FileUploader } from '../../file-uploader'
 
 class MarginSetter implements FormItem<string> {
   name = 'margin'
@@ -147,6 +148,7 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
+  const fileUploader = injector.get(FileUploader as Type<FileUploader>)
 
   const childI18n = i18n.getContext('plugins.toolbar.imageTool.view')
   const form = new Form({
@@ -162,6 +164,8 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
         canUpload: true,
         uploadType: 'image',
         uploadBtnText: childI18n.get('uploadBtnText'),
+        uploadMultiple: true,
+        fileUploader,
         validateFn(value: string) {
           if (!value) {
             return childI18n.get('validateErrorMessage')
