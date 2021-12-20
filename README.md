@@ -1,5 +1,7 @@
-TextBus 富文本编辑器 2.0
+TextBus 富文本编辑器 2.0 内测版
 ================================
+
+> 如果你还在使用 1.0 版本，请访问 [TextBus 1.*](https://github.com/textbus/textbus/tree/1.0-dev)
 
 我们一直致力于让富文本开发也能像普通前端框架一样，通过简明易懂的 api 和少量的约定，即可编写出健壮的，可预期的行为。在 TextBus 1.0 的时，我们为此做了非常多的探索和努力，取得了不错的成果，但也因为如此，1.0 的设计在某些方面还留下一些遗憾。
 
@@ -13,7 +15,7 @@ TextBus 富文本编辑器 2.0
 ## 安装
 
 ```
-# 还未发布
+npm install @textbus/editor @textbus/core @textbus/browser
 ```
 
 ## 使用
