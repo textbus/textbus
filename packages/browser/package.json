@@ -27,8 +27,8 @@
   "dependencies": {
     "@tanbo/di": "^1.0.4",
     "@tanbo/stream": "^0.0.9",
-    "reflect-metadata": "^0.1.13",
-    "@textbus/core": "^2.0.0-alpha.0"
+    "@textbus/core": "^2.0.0-alpha.0",
+    "reflect-metadata": "^0.1.13"
   },
   "author": {
     "name": "Tanbo",
