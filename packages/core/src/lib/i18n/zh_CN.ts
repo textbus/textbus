@@ -1,6 +1,6 @@
 import { I18NConfig } from './i18n';
 
-export const i18n_zh_CN: I18NConfig = {
+export const i18n_zh_CN_core: I18NConfig = {
   /** 核心库依赖，不可缺少 */
   editor: {
     noUploader: '请在初始化时配置 uploader 方法！',

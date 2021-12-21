@@ -28,7 +28,7 @@ import { EditorOptions } from './editor-options';
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from './inject-tokens';
 import { RootComponent } from './root-component';
 import { TBHistory } from './history';
-import { I18n, i18n_zh_CN } from './i18n/_api';
+import { I18n, i18n_zh_CN_core } from './i18n/_api';
 import { TBPlugin } from './plugin';
 import { HackInput } from './_es-hack';
 
@@ -107,7 +107,7 @@ export class Editor {
       supportMarkdown: true
     });
 
-    const i18n = new I18n(i18n_zh_CN, options.i18n);
+    const i18n = new I18n(i18n_zh_CN_core, options.i18n);
 
     const rootInjector = new ReflectiveInjector(new NullInjector(), [Layout, {
       provide: EditorController,

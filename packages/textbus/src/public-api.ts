@@ -15,4 +15,5 @@ export * from '@textbus/table-edit-enhance-plugin';
 export * from '@textbus/toolbar';
 export * from '@textbus/uikit';
 
+export * from './i18n/_api'
 export * from './create';
