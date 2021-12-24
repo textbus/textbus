@@ -3,7 +3,7 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 import {
   ComponentInstance,
   ContentType,
-  defineComponent, onContextMenu,
+  defineComponent, onContextMenu, onSlotRemove,
   Slot,
   SlotLiteral,
   SlotRender, TBSelection,
@@ -88,6 +88,10 @@ export const tableComponent = defineComponent({
     useTableMultipleRange(slots, stateController, tableInfo, tableRange => {
       startPosition = tableRange.startPosition
       endPosition = tableRange.endPosition
+    })
+
+    onSlotRemove(ev => {
+      ev.preventDefault()
     })
 
     onContextMenu(() => {

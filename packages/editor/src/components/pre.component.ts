@@ -5,7 +5,6 @@ import {
   defineComponent, Formats,
   Formatter,
   FormatType, FormatValue, onContextMenu,
-  onDelete,
   onEnter, onPaste,
   Slot, SlotLiteral,
   SlotRender,
@@ -240,7 +239,7 @@ function reformat(slots: Slots<CodeSlotSlotLiteral, CodeSlot>, startSlot: CodeSl
 }
 
 export interface CodeSlotSlotLiteral extends SlotLiteral {
-  blockCommentEnt: boolean
+  blockCommentEnd: boolean
   blockCommentStart: boolean
 }
 
@@ -267,7 +266,7 @@ export class CodeSlot extends Slot {
   override toJSON(): CodeSlotSlotLiteral {
     return {
       ...super.toJSON(),
-      blockCommentEnt: this.blockCommentEnd,
+      blockCommentEnd: this.blockCommentEnd,
       blockCommentStart: this.blockCommentStart
     }
   }
@@ -304,7 +303,8 @@ export const preComponent = defineComponent({
     const slotList = formatCodeLines(data.code.split('\n'), false, blockCommentStartString, languageGrammar)
     const slots = useSlots<CodeSlot, CodeSlotSlotLiteral>(slotList, state => {
       const s = new CodeSlot()
-      s.blockCommentEnd = state.blockCommentEnt
+      s.blockCommentEnd = state.blockCommentEnd
+      s.blockCommentStart = state.blockCommentStart
       return s
     })
 
@@ -325,13 +325,6 @@ export const preComponent = defineComponent({
       slots.insertAfter(nextSlot, ev.target as CodeSlot)
       selection.setLocation(nextSlot, 0)
       ev.preventDefault()
-    })
-
-    onDelete(ev => {
-      if (!ev.data.isStart && ev.data.index === ev.target.length && ev.data.count === ev.target.length) {
-        slots.remove(ev.target as CodeSlot)
-        return
-      }
     })
 
     onContextMenu(() => {

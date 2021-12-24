@@ -2,7 +2,6 @@ import { Injector } from '@tanbo/di'
 import {
   ComponentInstance, ComponentMethods,
   ContentType, defineComponent,
-  onDelete,
   onEnter,
   Slot, SlotLiteral,
   SlotRender, TBSelection, Translator, useContext,
@@ -67,15 +66,6 @@ export const listComponent = defineComponent({
       slots.insertAfter(nextLi, ev.target)
       selection.setLocation(nextLi, 0)
       ev.preventDefault()
-    })
-
-    onDelete(ev => {
-      if (ev.data.isMove) {
-        return
-      }
-      if (!ev.data.isStart && ev.data.index === ev.target.length && ev.data.count === ev.target.length) {
-        slots.remove(ev.target)
-      }
     })
 
     return {

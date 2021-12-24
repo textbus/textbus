@@ -1,10 +1,10 @@
 import { AttrState, FormItem, FormSelectParams } from './help'
 
 export class FormSelect implements FormItem {
-  elementRef = document.createElement('div');
-  name: string;
-  private select: HTMLSelectElement;
-  private readonly feedbackEle: HTMLElement;
+  elementRef = document.createElement('div')
+  name: string
+  private select: HTMLSelectElement
+  private readonly feedbackEle: HTMLElement
 
   constructor(private config: FormSelectParams) {
     this.name = config.name

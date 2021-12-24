@@ -4,7 +4,7 @@ import { NativeNode, NativeRenderer } from '@textbus/core'
 import { EDITABLE_DOCUMENT } from './injection-tokens'
 
 @Injectable()
-export class NodeFactory implements NativeRenderer {
+export class DomRenderer implements NativeRenderer {
   constructor(@Inject(EDITABLE_DOCUMENT) private document: Document) {
   }
 
@@ -17,7 +17,7 @@ export class NodeFactory implements NativeRenderer {
   }
 
   createTextNode(textContent: string): NativeNode {
-    return this.document.createTextNode(NodeFactory.replaceEmpty(textContent, '\u00a0'))
+    return this.document.createTextNode(DomRenderer.replaceEmpty(textContent, '\u00a0'))
   }
 
   createElement(name: string): NativeNode {

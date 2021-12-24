@@ -22,7 +22,7 @@ import {
   EDITOR_OPTIONS,
   INIT_CONTENT,
   ROOT_COMPONENT_FACTORY,
-  NodeFactory,
+  DomRenderer,
   SelectionBridge, TBPlugin, SCROLL_CONTAINER
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
@@ -108,7 +108,7 @@ export class CoreEditor {
         useValue: this.rootComponentFactory
       }, {
         provide: NativeRenderer,
-        useClass: NodeFactory
+        useClass: DomRenderer
       }, {
         provide: NativeSelectionBridge,
         useClass: SelectionBridge
@@ -144,7 +144,7 @@ export class CoreEditor {
         Translator,
         LifeCycle,
 
-        NodeFactory,
+        DomRenderer,
         Parser,
         Input,
         SelectionBridge,

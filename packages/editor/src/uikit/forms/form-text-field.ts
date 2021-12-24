@@ -3,12 +3,12 @@ import { Subscription } from '@tanbo/stream'
 import { AttrState, FormTextFieldParams, FormItem } from './help'
 
 export class FormTextField implements FormItem<string> {
-  elementRef = document.createElement('div');
-  name: string;
-  private input: HTMLInputElement;
-  private sub?: Subscription;
-  private readonly btn?: HTMLButtonElement;
-  private readonly feedbackEle: HTMLElement;
+  elementRef = document.createElement('div')
+  name: string
+  private input: HTMLInputElement
+  private sub?: Subscription
+  private readonly btn?: HTMLButtonElement
+  private readonly feedbackEle: HTMLElement
 
   constructor(private config: FormTextFieldParams) {
     this.name = config.name

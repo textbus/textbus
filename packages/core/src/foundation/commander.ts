@@ -3,7 +3,13 @@ import { Injectable } from '@tanbo/di'
 import { SelectionLocation, TBSelection } from './selection'
 import { ComponentInstance, Formatter, FormatType, FormatValue, placeholder, Slot } from '../model/_api'
 import { NativeRenderer } from './_injection-tokens'
-import { DeleteEventData, EnterEventData, InsertEventData, invokeListener, TBEvent } from '../define-component'
+import {
+  DeleteEventData,
+  EnterEventData,
+  InsertEventData,
+  invokeListener,
+  TBEvent
+} from '../define-component'
 
 interface DeleteTreeState extends SelectionLocation {
   success: boolean
@@ -211,6 +217,16 @@ export class Commander {
             slot.retain(scope.endIndex)
             slot.delete(scope.endIndex - scope.startIndex)
             return false
+          }
+        } else {
+          let isPreventDefault = true
+          const event = new TBEvent<null>(slot, null, () => {
+            isPreventDefault = false
+          })
+          invokeListener(parentComponent, 'onSlotRemove', event)
+
+          if (!isPreventDefault) {
+            parentComponent.slots.remove(slot)
           }
         }
       }
@@ -493,7 +509,14 @@ export class Commander {
         const parentComponent = parentSlot.parent!
         if (parentComponent.slots.length > 1) {
           const index = parentComponent.slots.indexOf(parentSlot)
-          parentComponent.slots.remove(parentSlot)
+          let isPreventDefault = true
+          const event = new TBEvent<null>(parentSlot, null, () => {
+            isPreventDefault = false
+          })
+          invokeListener(parentComponent, 'onSlotRemove', event)
+          if (!isPreventDefault) {
+            parentComponent.slots.remove(parentSlot)
+          }
           if (index === 0) {
             const p = parentComponent.parent!
             return {

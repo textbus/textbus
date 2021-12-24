@@ -56,7 +56,7 @@ export class Slot<T = any> {
 
   setState(newState: T) {
     if (typeof newState === 'object') {
-      Object.assign(newState as any)
+      Object.freeze(newState as any)
     }
     const oldState = this.state
     this.state = newState

@@ -3,8 +3,8 @@ import { createElement, createTextNode } from '@textbus/browser'
 import { FormStaticParams, AttrState, FormItem } from './help'
 
 export class FormStatic implements FormItem {
-  readonly elementRef: HTMLElement;
-  readonly name!: string;
+  readonly elementRef: HTMLElement
+  readonly name!: string
 
   constructor(private config: FormStaticParams) {
     this.elementRef = createElement('div', {
