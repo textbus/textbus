@@ -8,7 +8,7 @@ export interface EditorState {
 
 @Injectable()
 export class EditorController {
-  onStateChange: Observable<EditorState>;
+  onStateChange: Observable<EditorState>
 
   set supportMarkdown(b: boolean) {
     this.status.supportMarkdown = b
@@ -28,7 +28,7 @@ export class EditorController {
     return this.status.readonly
   }
 
-  private stateChangeEvent = new BehaviorSubject(this.status);
+  private stateChangeEvent = new BehaviorSubject(this.status)
 
   constructor(private status: EditorState) {
     this.onStateChange = this.stateChangeEvent.asObservable()

@@ -30,8 +30,8 @@ export class Layout {
     classes: ['textbus-ui-bottom']
   })
 
-  private isAppendTop = false;
-  private isAppendBottom = false;
+  private isAppendTop = false
+  private isAppendBottom = false
 
   constructor() {
     this.container = createElement('div', {

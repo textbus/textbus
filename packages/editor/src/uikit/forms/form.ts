@@ -15,14 +15,14 @@ export interface FormConfig {
 }
 
 export class Form implements ViewController<Record<string, any>>{
-  onComplete: Observable<Record<string, any>>;
-  onCancel: Observable<void>;
+  onComplete: Observable<Record<string, any>>
+  onCancel: Observable<void>
 
-  body: HTMLElement;
-  footer: HTMLElement;
-  readonly elementRef: HTMLFormElement;
-  private completeEvent = new Subject<Map<string, any>>();
-  private cancelEvent = new Subject<void>();
+  body: HTMLElement
+  footer: HTMLElement
+  readonly elementRef: HTMLFormElement
+  private completeEvent = new Subject<Map<string, any>>()
+  private cancelEvent = new Subject<void>()
 
   constructor(private config: FormConfig) {
     this.onComplete = this.completeEvent.asObservable()

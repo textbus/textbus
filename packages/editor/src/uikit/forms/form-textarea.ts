@@ -3,12 +3,12 @@ import { Subscription } from '@tanbo/stream'
 import { AttrState, FormTextareaParams, FormItem } from './help'
 
 export class FormTextarea implements FormItem<string> {
-  elementRef = document.createElement('div');
-  name: string;
-  private input: HTMLTextAreaElement;
-  private sub?: Subscription;
-  private readonly btn?: HTMLButtonElement;
-  private readonly feedbackEle: HTMLElement;
+  elementRef = document.createElement('div')
+  name: string
+  private input: HTMLTextAreaElement
+  private sub?: Subscription
+  private readonly btn?: HTMLButtonElement
+  private readonly feedbackEle: HTMLElement
 
   constructor(private config: FormTextareaParams) {
     this.name = config.name

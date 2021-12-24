@@ -4,7 +4,6 @@ import {
   Commander,
   ComponentInstance,
   ContentType,
-  ContextMenuEventData,
   ContextMenuItem,
   invokeListener,
   Renderer,
@@ -147,9 +146,7 @@ export class ContextMenu {
       invokeListener(
         component as ComponentInstance,
         'onContextMenu',
-        new TBEvent<ContextMenuEventData>(startSlot, {
-          index: this.selection.startOffset!,
-        }, (...menus: ContextMenuItem[][]) => {
+        new TBEvent<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
           menuItems.push(...menus)
         }))
       component = component.parent?.parent || null

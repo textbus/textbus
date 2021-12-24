@@ -1,9 +1,9 @@
 import { FormHiddenParams, AttrState, FormItem } from './help'
 
 export class FormHidden implements FormItem {
-  readonly elementRef = document.createElement('input');
-  readonly name: string;
-  private readonly value: string | boolean | number;
+  readonly elementRef = document.createElement('input')
+  readonly name: string
+  private readonly value: string | boolean | number
 
   constructor(private config: FormHiddenParams) {
     this.name = config.name

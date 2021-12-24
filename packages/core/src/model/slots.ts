@@ -101,7 +101,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
     return [...this.slots]
   }
 
-  clear() {
+  clean() {
     this.retain(this.length)
     this.delete(this.length)
   }

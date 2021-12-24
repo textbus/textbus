@@ -1,10 +1,10 @@
 import { AttrState, FormItem, FormNumberParams } from './help'
 
 export class FormNumber implements FormItem<number> {
-  elementRef = document.createElement('div');
-  name: string;
-  private input: HTMLInputElement;
-  private readonly feedbackEle: HTMLElement;
+  elementRef = document.createElement('div')
+  name: string
+  private input: HTMLInputElement
+  private readonly feedbackEle: HTMLElement
 
   constructor(private config: FormNumberParams) {
     this.name = config.name

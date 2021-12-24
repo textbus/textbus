@@ -5,7 +5,7 @@ import { Layout } from './layout'
 
 @Injectable()
 export class Message {
-  private messageBox: HTMLElement;
+  private messageBox: HTMLElement
 
   constructor(private layout: Layout) {
     this.messageBox = createElement('div', {

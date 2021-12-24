@@ -1,10 +1,10 @@
 import { FormSwitchParams, AttrState, FormItem } from './help'
 
 export class FormSwitch implements FormItem<boolean> {
-  elementRef = document.createElement('div');
-  name: string;
-  private input: HTMLInputElement;
-  private readonly feedbackEle: HTMLElement;
+  elementRef = document.createElement('div')
+  name: string
+  private input: HTMLInputElement
+  private readonly feedbackEle: HTMLElement
 
   constructor(private config: FormSwitchParams) {
     this.name = config.name
