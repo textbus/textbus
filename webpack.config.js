@@ -1,8 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
 const path = require('path');
 const EslintWebpackPlugin = require('eslint-webpack-plugin')
-const ip = require('ip');
 
 module.exports = {
   mode: 'development',
@@ -11,7 +9,7 @@ module.exports = {
     index: path.resolve(__dirname, 'index.ts')
   },
   output: {
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
@@ -26,7 +24,9 @@ module.exports = {
   },
   devServer: {
     host: 'localhost',
-    contentBase: path.join(__dirname, 'dist'),
+    static: {
+      directory: path.join(__dirname, 'dist')
+    },
     compress: true,
     port: 8888,
     hot: true,
@@ -41,36 +41,27 @@ module.exports = {
       use: ['style-loader', 'css-loader', {
         loader: 'postcss-loader',
         options: {
-          plugins() {
-            return [require('autoprefixer')];
+          postcssOptions: {
+            plugins: [
+              [
+                "postcss-preset-env",
+                {
+                  // Options
+                },
+              ],
+              [
+                "autoprefixer"
+              ]
+            ],
           }
         }
       }, 'sass-loader'],
-    }, {
-      test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-      use: [{
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: path.posix.join('static/', `img/[name][hash].[ext]`)
-        }
-      }],
-    }, {
-      test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-      use: [{
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: path.posix.join('static/', `fonts/[name][hash].[ext]`)
-        }
-      }],
     }]
   },
   plugins: [
     new EslintWebpackPlugin({
       extensions: ['.ts', '.tsx']
     }),
-    new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       template: 'index.html'
     })
