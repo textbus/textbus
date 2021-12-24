@@ -30,15 +30,15 @@ import {
   textAlignFormatLoader, textIndentFormatLoader, verticalAlignFormatLoader, dirFormatLoader
 } from './formatters/_api'
 import { Editor } from './editor'
-import { Toolbar } from './toolbar/_api'
 import {
+  Toolbar,
   boldTool, cleanTool, colorTool, defaultGroupTool, fontFamilyTool, fontSizeTool, headingTool,
   historyBackTool,
   historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
   italicTool, linkTool, olTool,
   strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
   underlineTool, unlinkTool
-} from './toolbar/tools/_api'
+} from './toolbar/_api'
 import { LinkJumpTipPlugin } from './plugins/_api'
 
 export const defaultOptions: EditorOptions = {
