@@ -1,6 +1,6 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const DisableOutputWebpackPlugin = require('./disable-output-webpack-plugin');
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const DisableOutputWebpackPlugin = require('./disable-output-webpack-plugin')
 
 module.exports = {
   mode: 'production',
@@ -13,25 +13,30 @@ module.exports = {
   module: {
     rules: [{
       test: /\.ts$/,
-      loader: ['ts-loader']
+      use: ['ts-loader']
     }, {
       test: /\.s?css$/,
-      loader: [MiniCssExtractPlugin.loader, 'css-loader', {
+      use: [MiniCssExtractPlugin.loader, 'css-loader', {
         loader: 'postcss-loader',
         options: {
-          plugins() {
-            return [require('autoprefixer')];
+          postcssOptions: {
+            plugins: [
+              [
+                "postcss-preset-env",
+                {
+                  // Options
+                },
+              ],
+              [
+                "autoprefixer"
+              ]
+            ],
           }
         }
       }, 'sass-loader']
     }, {
       test: /\.(woff2?|eot|ttf|otf|svg)(\?.*)?$/,
-      use: [{
-        loader: 'url-loader',
-        options: {
-          limit: 100000
-        }
-      }],
+      type: 'asset/inline'
     }]
   },
   plugins: [
@@ -40,4 +45,4 @@ module.exports = {
     }),
     new DisableOutputWebpackPlugin(/textbus/)
   ]
-};
+}

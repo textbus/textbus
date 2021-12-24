@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import "./index.scss"
 import { createEditor } from '@textbus/editor'
 /*import { Renderer, RootComponentRef } from '@textbus/core';
