@@ -185,6 +185,7 @@ export class Editor {
    * 销毁 TextBus 实例。
    */
   destroy() {
+    this.resizeObserver?.disconnect()
     this.subs.forEach(s => s.unsubscribe());
     [Input, Layout, ComponentInjectors].forEach(i => {
       this.injector.get(i as Type<{ destroy(): void }>).destroy();
