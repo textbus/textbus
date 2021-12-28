@@ -1,6 +1,6 @@
 {
   "name": "@textbus/formatters",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "TextBus formatter extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@tanbo/color": "^0.0.3",
-    "@textbus/core": "^1.1.5"
+    "@textbus/core": "^1.1.6"
   },
   "author": {
     "name": "Tanbo",
