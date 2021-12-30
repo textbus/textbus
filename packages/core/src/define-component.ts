@@ -1,4 +1,4 @@
-import { Observable, Subject } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
 
 import { Translator } from './foundation/_api'
@@ -12,6 +12,9 @@ import {
   SlotRestore,
   Slots
 } from './model/_api'
+import { makeError } from './_utils/make-error'
+
+const componentErrorFn = makeError('DefineComponent')
 
 export interface ComponentOptions<Methods extends ComponentMethods<State>, State, InitData> {
   name: string
@@ -127,16 +130,22 @@ export function defineComponent<Methods extends ComponentMethods,
       componentInstance.slots = context.slots
       let state = context.initState
 
-      context.slots.onChange.subscribe(ops => {
-        marker.markAsDirtied(ops)
-      })
+      const subscriptions: Subscription[] = [
+        context.slots.onChange.subscribe(ops => {
+          marker.markAsDirtied(ops)
+        }),
 
-      context.slots.onChildComponentRemoved.subscribe(instance => {
-        marker.recordComponentRemoved(instance)
-      })
+        context.slots.onChildComponentRemoved.subscribe(instance => {
+          marker.recordComponentRemoved(instance)
+        }),
 
-      context.slots.onChildSlotChange.subscribe(d => {
-        marker.markAsChanged(d.operation)
+        context.slots.onChildSlotChange.subscribe(d => {
+          marker.markAsChanged(d.operation)
+        })
+      ]
+
+      onDestroy(() => {
+        subscriptions.forEach(i => i.unsubscribe())
       })
 
       context = null
@@ -148,21 +157,21 @@ export function defineComponent<Methods extends ComponentMethods,
 
 export function useContext(): Injector {
   if (!context) {
-    throw new Error('不能在组件外部调用！')
+    throw componentErrorFn('cannot be called outside the component!')
   }
   return context.contextInjector
 }
 
 export function useSelf<Methods extends ComponentMethods<State> = ComponentMethods, State = any>(): ComponentInstance<Methods, State> {
   if (!context) {
-    throw new Error('不能在组件外部调用！')
+    throw componentErrorFn('cannot be called outside the component!')
   }
   return context.componentInstance as ComponentInstance<Methods, State>
 }
 
 export function useSlots<T extends Slot, State extends SlotLiteral>(slots: T[], slotRestore: SlotRestore<T, State>): Slots<State, T> {
   if (!context) {
-    throw new Error('不能在组件外部调用！')
+    throw componentErrorFn('cannot be called outside the component!')
   }
   const s = new Slots(context.componentInstance, slotRestore, slots)
   context.slots = s
@@ -171,10 +180,10 @@ export function useSlots<T extends Slot, State extends SlotLiteral>(slots: T[], 
 
 export function useState<T>(initState: T) {
   if (!context) {
-    throw new Error('不能在组件外部调用！')
+    throw componentErrorFn('cannot be called outside the component!')
   }
   if (Reflect.has(context, 'initState')) {
-    throw new Error('组件只允许有一个唯的状态')
+    throw componentErrorFn('only one unique state is allowed for a component!')
   }
   if (typeof initState === 'object') {
     Object.freeze(initState)
