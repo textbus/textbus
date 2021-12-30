@@ -27,6 +27,14 @@ export interface ObjectChanges {
   add: [string, any][]
 }
 
+function setEditable(vElement: VElement, is: boolean | null) {
+  if (is === null) {
+    vElement.attrs.delete('textbus-editable')
+    return
+  }
+  vElement.attrs.set('textbus-editable', is ? 'on' : 'off')
+}
+
 export function formatSort(formats: FormatItem[]) {
   formats.sort((a, b) => {
     return a.formatter.type - b.formatter.type
@@ -524,9 +532,16 @@ export class Renderer {
       Promise.resolve().then(() => {
         invokeListener(component, 'onViewChecked')
       })
+      let slotVNode!: VElement
       const node = component.methods.render(false, (slot, factory) => {
-        return this.slotRender(slot, factory)
+        slotVNode = this.slotRender(slot, factory)
+        return slotVNode
       })
+      if (component.slots.length === 1 && slotVNode === node) {
+        setEditable(node, null)
+      } else {
+        setEditable(node, false)
+      }
       component.changeMarker.rendered()
       this.componentVNode.set(component, node)
       return node
@@ -543,6 +558,11 @@ export class Renderer {
       if (dirty) {
         if (oldComponentVNode === oldVNode) {
           this.componentVNode.set(component, vNode)
+          if (component.slots.length === 1) {
+            setEditable(vNode, null)
+          } else {
+            setEditable(vNode, false)
+          }
         }
         (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
         const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
@@ -564,7 +584,7 @@ export class Renderer {
       const root = slotRenderFactory()
       root.attrs.set(this.slotIdAttrKey, slot.id)
       let host = root
-      // host.attrs.set('textbus-editable', 'on')
+      setEditable(host, true)
       const formatTree = slot.createFormatTree()
       if (formatTree.formats) {
         host = this.createVDomByOverlapFormats(formatSort(formatTree.formats), root, slot)
