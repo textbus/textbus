@@ -364,7 +364,7 @@ export class Slot<T = any> {
     deletedData.forEach(i => {
       slot.insert(i)
     })
-    slot.format = deletedFormat
+    slot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
     this.retain(endIndex)
     this.delete(endIndex - startIndex)
 
