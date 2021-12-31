@@ -144,7 +144,7 @@ export class Format {
    * @param startIndex
    * @param endIndex
    */
-  extract(startIndex: number, endIndex: number) {
+  extract(startIndex: number, endIndex: number): Format {
     const format = new Format(this.slot)
     this.map.forEach((ranges, key) => {
       const extractRanges = this.extractFormatRangesByFormatter(startIndex, endIndex, key)
