@@ -62,7 +62,7 @@ export class OutputTranslator {
       return xssFilter.attrValue(`${k}:${vDom.styles.get(key)}`)
     }).join(';')
 
-    const attrs = Array.from(vDom.attrs.keys()).filter(key => vDom.attrs.get(key) !== false).map(k => {
+    const attrs = Array.from(vDom.attrs.keys()).filter(key => key !== 'ref' && vDom.attrs.get(key) !== false).map(k => {
       const key = xssFilter.attrName(k)
       const value = vDom.attrs.get(k)
       return (value === true ? `${key}` : `${key}="${xssFilter.attrValue(`${value}`)}"`)
