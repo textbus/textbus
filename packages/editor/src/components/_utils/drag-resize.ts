@@ -1,4 +1,4 @@
-import { onDestroy, onViewInit, Ref, Renderer, TBSelection, useContext, useSelf } from '@textbus/core'
+import { onDestroy, onViewChecked, onViewInit, Ref, TBSelection, useContext, useSelf } from '@textbus/core'
 import { createElement, EDITABLE_DOCUMENT, EDITOR_CONTAINER } from '@textbus/browser'
 import { fromEvent, Subscription } from '@tanbo/stream'
 
@@ -39,30 +39,31 @@ export interface DragRect {
   height: string
 }
 
+let currentRef: Ref<HTMLElement> | null = null
+
 export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) => void) {
   const context = useContext()
   const componentInstance = useSelf()
   const selection = context.get(TBSelection)
   const docContainer = context.get(EDITOR_CONTAINER)
   const editorDocument = context.get(EDITABLE_DOCUMENT)
-  const renderer = context.get(Renderer)
 
   let isFocus = false
 
   const subs: Subscription[] = []
 
+  onViewChecked(() => {
+    if (isFocus && currentRef) {
+      updateStyle(currentRef.current!)
+    }
+  })
   subs.push(
     fromEvent(editorDocument, 'click').subscribe(() => {
       isFocus = false
       mask.parentNode?.removeChild(mask)
     }),
-    renderer.onViewChecked.subscribe(() => {
-      if (isFocus) {
-        updateStyle(ref.current!)
-      }
-    }),
     fromEvent<MouseEvent>(mask, 'mousedown').subscribe(ev => {
-      if (!ref.current) {
+      if (currentRef !== ref || !currentRef?.current) {
         return
       }
 
@@ -108,9 +109,9 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
         } else if ([3, 7].includes(index)) {
           endWidth = Math.round(startWidth + (index === 3 ? offsetX : -offsetX))
         }
-        ref.current!.style.width = endWidth + 'px'
-        ref.current!.style.height = endHeight + 'px'
-        updateStyle(ref.current!)
+        currentRef!.current!.style.width = endWidth + 'px'
+        currentRef!.current!.style.height = endHeight + 'px'
+        updateStyle(currentRef!.current!)
       })
 
       const unUp = fromEvent(document, 'mouseup').subscribe(() => {
@@ -127,6 +128,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
 
   onViewInit(() => {
     subs.push(fromEvent(ref.current!, 'click').subscribe((ev) => {
+      currentRef = ref
       isFocus = true
       selection.selectComponent(componentInstance, true)
       updateStyle(ref.current!)
