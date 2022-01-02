@@ -138,6 +138,8 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
   })
 
   onDestroy(() => {
+    isFocus = false
+    mask.parentNode?.removeChild(mask)
     subs.forEach(i => i.unsubscribe())
   })
 }
