@@ -73,7 +73,14 @@ export class Commander {
     if (isPreventDefault) {
       return false
     }
-    return this.insert('\n')
+    const startOffset = this.selection.startOffset!
+    const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
+    const content = isToEnd ? '\n\n' : '\n'
+    const isInserted = this.insert(content)
+    if (isInserted && isToEnd) {
+      this.selection.setLocation(startSlot, startOffset + 1)
+    }
+    return true
   }
 
   delete(deleteBefore = true): boolean {
