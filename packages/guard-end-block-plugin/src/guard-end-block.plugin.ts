@@ -31,7 +31,7 @@ export class GuardEndBlockPlugin implements TBPlugin {
 
   private guardLastIsParagraph(fragment: Fragment) {
     const last = fragment.sliceContents(fragment.length - 1)[0];
-    if (last instanceof BlockComponent) {
+    if (last instanceof BlockComponent && /^(h[1-6]|div|p)$/i.test(last.tagName)) {
       return;
     }
     const p = new BlockComponent('p');
