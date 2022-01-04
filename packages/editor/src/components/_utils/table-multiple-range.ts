@@ -197,10 +197,6 @@ export function slotsToTable(slots: TableCellSlot[], columnSize: number): TableC
 
   for (let index = 0; index < slots.length; index++) {
     const slot = slots[index]
-    if (columnIndex === columnSize - 1) {
-      columnIndex = 0
-      rowIndex++
-    }
     const state = slot.state!
     const row = table[rowIndex]
     if (row) {
@@ -230,6 +226,10 @@ export function slotsToTable(slots: TableCellSlot[], columnSize: number): TableC
       }
     }
     columnIndex = state.colspan + columnIndex - 1
+    if (columnIndex === columnSize - 1) {
+      columnIndex = 0
+      rowIndex++
+    }
   }
   const recordCells: TableCellSlot[] = []
   return table.map(tr => {
