@@ -1,6 +1,6 @@
 {
   "name": "@textbus/textbus",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -34,7 +34,7 @@
     "@textbus/device-toggle-plugin": "^1.1.6",
     "@textbus/formatters": "^1.1.6",
     "@textbus/full-screen-plugin": "^1.1.6",
-    "@textbus/guard-end-block-plugin": "^1.1.6",
+    "@textbus/guard-end-block-plugin": "^1.1.7",
     "@textbus/image-and-video-drag-resize-plugin": "^1.1.6",
     "@textbus/link-jump-tip-plugin": "^1.1.6",
     "@textbus/outlines-plugin": "^1.1.6",

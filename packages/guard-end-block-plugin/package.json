@@ -1,6 +1,6 @@
 {
   "name": "@textbus/guard-end-block-plugin",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "TextBus guard end block extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
