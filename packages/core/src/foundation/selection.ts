@@ -479,7 +479,7 @@ export class TBSelection {
       return scopes
     }
 
-    const scopes = this.getExpandedScope()
+    const scopes = this.getExpandedScopes()
 
     scopes.forEach(i => {
       blocks.push(...fn(i.slot, i.startIndex, i.endIndex, this.renderer))
@@ -534,7 +534,7 @@ export class TBSelection {
     return null
   }
 
-  getExpandedScope(): SelectedScope[] {
+  getExpandedScopes(): SelectedScope[] {
     if (!this.isSelected) {
       return []
     }

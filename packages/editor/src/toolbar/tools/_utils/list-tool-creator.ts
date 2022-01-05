@@ -33,7 +33,6 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
     },
     onClick() {
       const queryState = instance.queryState()
-
       if (queryState.state === QueryStateType.Normal) {
         instance.toList()
       } else {
@@ -42,31 +41,40 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
     },
     toParagraph(component: ComponentInstance<ListComponentInstance>) {
       const range = selection.getSlotRange()!
-      const startSlot = selection.startSlot!
-      const endSlot = selection.endSlot!
-      const startOffset = selection.startOffset!
-      const endOffset = selection.endOffset!
+      const parent = component.parent!
+      const index = parent.indexOf(component)
       const segment = component.methods.split!(range.startIndex, range.endIndex)
+      const components: ComponentInstance[] = []
       if (segment.before.length) {
-        commander.insertBefore(listComponent.createInstance(injector, {
+        components.push(listComponent.createInstance(injector, {
           type,
           slots: segment.before
-        }), component)
+        }))
       }
 
-      segment.middle.forEach(slot => {
-        commander.insertBefore(paragraphComponent.createInstance(injector, slot), component)
+      const transformed = commander.extractSlots([
+        ContentType.Text,
+        ContentType.InlineComponent
+      ], true)
+
+      transformed.slots.forEach(slot => {
+        components.push(paragraphComponent.createInstance(injector, slot))
+        if (slot === transformed.range.startSlot) {
+          selection.setStart(slot, transformed.range.startOffset!)
+        }
+        if (slot === transformed.range.endSlot) {
+          selection.setEnd(slot, transformed.range.endOffset!)
+        }
       })
       if (segment.after.length) {
-        commander.insertBefore(listComponent.createInstance(injector, {
+        components.push(listComponent.createInstance(injector, {
           type,
           slots: segment.after
         }), component)
       }
+      parent.retain(index)
+      components.forEach(c => parent.insert(c))
       commander.remove(component)
-
-      selection.setStart(startSlot, startOffset)
-      selection.setEnd(endSlot, endOffset)
     },
     toList() {
       let startSlot!: Slot

@@ -1,7 +1,7 @@
 import { Injectable } from '@tanbo/di'
 
-import { SelectionLocation, TBSelection } from './selection'
-import { ComponentInstance, Formatter, FormatType, FormatValue, placeholder, Slot } from '../model/_api'
+import { SelectionLocation, TBRange, TBSelection } from './selection'
+import { ComponentInstance, ContentType, Formatter, FormatType, FormatValue, placeholder, Slot } from '../model/_api'
 import { NativeRenderer } from './_injection-tokens'
 import {
   DeleteEventData,
@@ -15,10 +15,82 @@ interface DeleteTreeState extends SelectionLocation {
   success: boolean
 }
 
+export type Nullable<T> = {
+  [P in keyof T]: T[P] | null
+}
+
 @Injectable()
 export class Commander {
   constructor(private selection: TBSelection,
               private nativeRenderer: NativeRenderer) {
+  }
+
+  extractSlots(schema: ContentType[], greedy = false) {
+
+    const range: Nullable<TBRange> = {
+      startSlot: null,
+      startOffset: null,
+      endSlot: null,
+      endOffset: null
+    }
+
+    if (!this.selection.isSelected) {
+      return {
+        range,
+        slots: []
+      }
+    }
+
+    const scopes = greedy ? this.selection.getExpandedScopes() : this.selection.getSelectedScopes()
+    const slots: Slot[] = []
+
+    for (const scope of scopes) {
+      const childSlots = scope.slot.splitBySchema(schema, scope.startIndex, scope.endIndex)
+      if (scope.slot === this.selection.startSlot) {
+        let offset = this.selection.startOffset!
+        for (const slot of childSlots) {
+          if (offset > slot.length) {
+            offset -= slot.length
+          } else {
+            range.startSlot = slot
+            range.startOffset = offset
+          }
+        }
+      }
+      if (scope.slot === this.selection.endSlot) {
+        let offset = this.selection.endOffset!
+        for (const slot of childSlots) {
+          if (offset > slot.length) {
+            offset -= slot.length
+          } else {
+            range.endSlot = slot
+            range.endOffset = offset
+          }
+        }
+      }
+      slots.push(...childSlots)
+    }
+
+    if (greedy) {
+      const firstScope = scopes[0]
+      const lastScope = scopes[scopes.length - 1]
+      const {startSlot, startOffset, endSlot, endOffset} = this.selection
+
+      this.selection.setStart(firstScope.slot, 0)
+      this.selection.setEnd(lastScope.slot, lastScope.slot.length)
+
+      const is = this.delete()
+      if (!is) {
+        this.selection.setStart(startSlot!, startOffset!)
+        this.selection.setEnd(endSlot!, endOffset!)
+      } else {
+        this.delete()
+      }
+    }
+    return {
+      slots,
+      range
+    }
   }
 
   insert(content: string | ComponentInstance): boolean {
@@ -118,9 +190,6 @@ export class Commander {
       const event = new TBEvent<DeleteEventData>(slot, {
         count: selection.endOffset! - selection.startOffset!,
         index: selection.endOffset!,
-        isMove: false,
-        isStart: true,
-        isEnd: true
       }, () => {
         isPreventDefault = false
         slot.retain(selection.endOffset!)
@@ -139,9 +208,6 @@ export class Commander {
     const endSlot = selection.endSlot!
     if (!endSlot.isEmpty) {
       const event = new TBEvent<DeleteEventData>(endSlot, {
-        isEnd: true,
-        isStart: false,
-        isMove: true,
         index: endSlot.length,
         count: endSlot.length - selection.endOffset!
       }, () => {
@@ -151,30 +217,14 @@ export class Commander {
     }
 
     // 删除选中的区域
-    const scopes = selection.getSelectedScopes().map(i => {
-      return {
-        ...i,
-        isStart: false,
-        isEnd: false
-      }
-    })
-    const firstScope = scopes[0]
-    const lastScope = scopes[scopes.length - 1]
-    if (firstScope && firstScope.slot === selection.startSlot) {
-      firstScope.isStart = true
-    }
+    const scopes = selection.getSelectedScopes()
+
     if (selection.endOffset === 0) {
       scopes.push({
         slot: endSlot,
         startIndex: 0,
         endIndex: endSlot.length,
-        isStart: false,
-        isEnd: true
       })
-    } else {
-      if (lastScope) {
-        lastScope.isEnd = true
-      }
     }
 
     const commonAncestorSlotRef = selection.commonAncestorSlot!
@@ -188,9 +238,6 @@ export class Commander {
       const event = new TBEvent<DeleteEventData>(slot, {
         count: scope.endIndex - scope.startIndex,
         index: scope.endIndex,
-        isMove: false,
-        isStart: scope.isStart,
-        isEnd: scope.isEnd,
       }, () => {
         isPreventDefault = false
       })
@@ -206,7 +253,7 @@ export class Commander {
       } else {
         slot.retain(scope.endIndex)
         slot.delete(scope.endIndex - scope.startIndex)
-        if (scope.isStart) {
+        if (scopes.length === 0) {
           break
         }
 
@@ -496,9 +543,6 @@ export class Commander {
       const event = new TBEvent<DeleteEventData>(parentSlot, {
         count: 1,
         index: index + 1,
-        isStart: false,
-        isEnd: true,
-        isMove: false
       }, () => {
         isPreventDefault = false
       })

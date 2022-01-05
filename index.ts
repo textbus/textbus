@@ -17,6 +17,6 @@ const editor = createEditor(document.getElementById('box')!, {
 
 editor.onChange.subscribe(() => {
   const contents = editor.getContents()
-  console.log(contents.content)
-  console.log(editor.getJSON().content)
+  // console.log(contents.content)
+  // console.log(editor.getJSON().content)
 })

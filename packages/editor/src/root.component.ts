@@ -1,7 +1,7 @@
 import {
   ContentType,
   defineComponent,
-  onInsert,
+  onInsert, onSlotRemove,
   Slot,
   SlotLiteral,
   SlotRender,
@@ -48,6 +48,10 @@ export const rootComponent = defineComponent({
         selection.setLocation(slot, slot.index)
         ev.preventDefault()
       }
+    })
+
+    onSlotRemove(ev => {
+      ev.preventDefault()
     })
 
     return {
