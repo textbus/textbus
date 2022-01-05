@@ -379,6 +379,51 @@ export class Slot<T = any> {
     return this.content.getContentAtIndex(index)
   }
 
+  slice(startIndex = 0, endIndex = this.length) {
+    const slot = new Slot([...this.schema])
+
+    this.sliceContent(startIndex, endIndex).forEach(c => slot.insert(c))
+    slot.format = this.format.createFormatByRange(slot, startIndex, endIndex)
+    return slot
+  }
+
+  splitBySchema(schema: ContentType[], startIndex = 0, endIndex = this.length): Slot[] {
+    if (schema.length === 0) {
+      return []
+    }
+    const slot = this.slice(startIndex, endIndex)
+    const content = slot.sliceContent()
+    const slotList: Slot[] = []
+    let i = 0
+    let n = 0
+    for (const item of content) {
+      let contentType: ContentType
+      if (typeof item === 'string') {
+        contentType = ContentType.Text
+      } else {
+        contentType = item.type
+      }
+      if (!schema.includes(contentType)) {
+        if (n > i) {
+          slotList.push(slot.slice(i, n))
+          i = n
+        }
+        if (typeof item !== 'string') {
+          item.slots.toArray().forEach(slot => {
+            slotList.push(...slot.splitBySchema(schema))
+          })
+          i++
+        }
+      }
+      n += item.length
+    }
+    if (n > i) {
+      slotList.push(slot.slice(i, n))
+    }
+    slotList.forEach(i => i.schema = schema)
+    return slotList
+  }
+
   sliceContent(startIndex = 0, endIndex = this.length) {
     return this.content.slice(startIndex, endIndex)
   }

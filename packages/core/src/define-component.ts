@@ -231,9 +231,6 @@ export interface EnterEventData {
 export interface DeleteEventData {
   index: number
   count: number
-  isMove: boolean
-  isStart: boolean
-  isEnd: boolean
 }
 
 export interface PasteEventData {
