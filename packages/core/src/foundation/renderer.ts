@@ -315,15 +315,17 @@ export class Renderer {
         if (newFirstVNode.tagName !== oldFirstVNode.tagName) {
           break
         }
-        const {attrChanges, styleChanges, classesChanges} = getNodeChanges(newFirstVNode, oldFirstVNode)
+        const {attrChanges, styleChanges, classesChanges, listenerChanges} = getNodeChanges(newFirstVNode, oldFirstVNode)
         const isChanged = [
           attrChanges.set.length,
           attrChanges.remove.length,
           styleChanges.set.length,
           styleChanges.remove.length,
           classesChanges.add.length,
-          classesChanges.remove.length
-        ].join('') !== '000000'
+          classesChanges.remove.length,
+          listenerChanges.add.length,
+          listenerChanges.remove.length
+        ].join('') !== '00000000'
 
         if (isChanged) {
           break
@@ -361,15 +363,17 @@ export class Renderer {
         if (newLastVNode.tagName !== oldLastVNode.tagName) {
           break
         }
-        const {attrChanges, styleChanges, classesChanges} = getNodeChanges(newLastVNode, oldLastVNode)
+        const {attrChanges, styleChanges, classesChanges, listenerChanges} = getNodeChanges(newLastVNode, oldLastVNode)
         const isChanged = [
           attrChanges.set.length,
           attrChanges.remove.length,
           styleChanges.set.length,
           styleChanges.remove.length,
           classesChanges.add.length,
-          classesChanges.remove.length
-        ].join('') !== '000000'
+          classesChanges.remove.length,
+          listenerChanges.add.length,
+          listenerChanges.remove.length
+        ].join('') !== '00000000'
 
         if (isChanged) {
           break

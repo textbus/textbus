@@ -22,7 +22,7 @@ export function leftToRightToolConfigFactory(injector: Injector): ButtonToolConf
     onClick() {
       const state = query.queryFormat(dirFormatter)
       const b = state.value === 'ltr'
-      b ? commander.unApplyFormat(dirFormatter) : commander.applyFormat(dirFormatter, true)
+      b ? commander.unApplyFormat(dirFormatter) : commander.applyFormat(dirFormatter, 'ltr')
     }
   }
 }
