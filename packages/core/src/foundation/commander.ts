@@ -25,8 +25,61 @@ export class Commander {
               private nativeRenderer: NativeRenderer) {
   }
 
-  extractSlots(schema: ContentType[], greedy = false) {
+  extractContentBySchema(source: Slot, schema: ContentType[], startIndex = 0, endIndex = source.length): Slot[] {
+    if (schema.length === 0) {
+      return []
+    }
 
+    let isPreventDefault = true
+
+    const event = new TBEvent<DeleteEventData>(source, {
+      count: endIndex - startIndex,
+      index: endIndex
+    }, () => {
+      isPreventDefault = false
+    })
+
+    invokeListener(source.parent!, 'onDelete', event)
+
+    if (isPreventDefault) {
+      return []
+    }
+
+    const slot = source.cut(startIndex, endIndex)
+    const content = slot.sliceContent()
+    const slotList: Slot[] = []
+    let len = slot.length
+    let i = len
+
+    while (content.length) {
+      const item = content.pop()!
+      let contentType: ContentType
+      if (typeof item === 'string') {
+        contentType = ContentType.Text
+      } else {
+        contentType = item.type
+      }
+      if (!schema.includes(contentType)) {
+        if (len > i) {
+          slotList.unshift(slot.cutTo(new Slot(schema), i, len))
+          i = len
+        }
+        if (typeof item !== 'string') {
+          item.slots.toArray().forEach(slot => {
+            slotList.unshift(...this.extractContentBySchema(slot, schema))
+          })
+          i--
+        }
+      }
+      len -= item.length
+    }
+    if (i > 0) {
+      slotList.unshift(slot.cutTo(new Slot(schema), 0, i))
+    }
+    return slotList
+  }
+
+  extractSlots(schema: ContentType[], greedy = false) {
     const range: Nullable<TBRange> = {
       startSlot: null,
       startOffset: null,
@@ -45,7 +98,7 @@ export class Commander {
     const slots: Slot[] = []
 
     for (const scope of scopes) {
-      const childSlots = scope.slot.splitBySchema(schema, scope.startIndex, scope.endIndex)
+      const childSlots = this.extractContentBySchema(scope.slot, schema, scope.startIndex, scope.endIndex)
       if (scope.slot === this.selection.startSlot) {
         let offset = this.selection.startOffset!
         for (const slot of childSlots) {
@@ -229,6 +282,8 @@ export class Commander {
 
     const commonAncestorSlotRef = selection.commonAncestorSlot!
 
+    const dumpStartSlot = selection.startSlot
+
     while (scopes.length) {
       const scope = scopes.pop()!
       let stoppedSlot = scope.slot
@@ -253,7 +308,7 @@ export class Commander {
       } else {
         slot.retain(scope.endIndex)
         slot.delete(scope.endIndex - scope.startIndex)
-        if (scopes.length === 0) {
+        if (slot === dumpStartSlot) {
           break
         }
 

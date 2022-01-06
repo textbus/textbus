@@ -1,4 +1,4 @@
-import { BlockFormatter, FormatType, VElement } from '@textbus/core'
+import { BlockFormatter, FormatType, FormatValue, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
@@ -19,27 +19,28 @@ export class BlockAttrFormatLoader extends Matcher {
   read(node: HTMLElement) {
     return this.extractFormatData(node, {
       attrs: [this.attrName]
-    }).attrs as Record<string, string>
+    }).attrs?.[this.attrName] as FormatValue
   }
 }
 
 export class BlockAttrFormatter implements BlockFormatter {
   type: FormatType.Block = FormatType.Block
 
-  constructor(public name: string) {
+  constructor(public name: string, public attrName: string) {
   }
 
-  render(node: VElement | null, formatValue: Record<string, string>): VElement | void {
+  render(node: VElement | null, formatValue: FormatValue): VElement | void {
     if (node) {
-      Object.keys(formatValue).forEach(i => {
-        node.attrs.set(i, formatValue[i])
-      })
+      node.attrs.set(this.attrName, formatValue)
+      return node
     }
-    return new VElement('div', formatValue)
+    return new VElement('div', {
+      [this.attrName]: formatValue
+    })
   }
 }
 
-export const dirFormatter = new BlockAttrFormatter('dir')
+export const dirFormatter = new BlockAttrFormatter('dir', 'dir')
 
 // 块级属性
 export const dirFormatLoader = new BlockAttrFormatLoader('dir', dirFormatter, {
