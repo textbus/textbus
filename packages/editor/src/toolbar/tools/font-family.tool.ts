@@ -24,10 +24,6 @@ export function fontFamilyToolConfigFactory(injector: Injector): SelectToolConfi
       classes: ['textbus-toolbar-font-family-SimHei'],
       value: 'SimHei'
     }, {
-      label: '微软雅黑',
-      classes: ['textbus-toolbar-font-family-Microsoft-YaHei'],
-      value: 'Microsoft YaHei'
-    }, {
       label: '楷体',
       classes: ['textbus-toolbar-font-family-KaiTi'],
       value: 'KaiTi'
