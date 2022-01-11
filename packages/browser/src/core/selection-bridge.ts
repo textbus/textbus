@@ -149,10 +149,10 @@ export class SelectionBridge implements NativeSelectionBridge {
           offset: lastChild.textContent!.length
         }
       }
-      return {
-        node: container,
-        offset: container.childNodes.length
-      }
+      // return {
+      //   node: container,
+      //   offset: container.childNodes.length
+      // }
     }
 
     const current = slot.getContentAtIndex(offset)
@@ -192,7 +192,13 @@ export class SelectionBridge implements NativeSelectionBridge {
         offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode)
       }
     }
-    return this.deepFindNativeNodeByOffset(slot, vElement, offset)
+    const vNode = this.renderer.getVNodeByComponent(prev)!
+    const nativeNode = this.renderer.getNativeNodeByVNode(vNode)!
+    return {
+      node: nativeNode.parentNode,
+      offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode) + 1
+    }
+    // return this.deepFindNativeNodeByOffset(slot, vElement, offset)
   }
 
   private findFocusNativeTextNode(vElement: VElement,
