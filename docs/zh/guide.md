@@ -39,8 +39,29 @@ TextBus 目前有三个模块，它们分别是：
 + **History 历史记录** 用于记录用户操作，并提供前进，后退操作；
 + **Translator 数据转换器** 用于把 JSON 数据转换为 TextBus 数据结构的工具类。
 
+可以把 TextBus 简单理解为：**组件提供了你在富文本内创建布局、用户交互和受控渲染的能力，插槽提供了让用户编辑的能力。**
 
-## 创建第一个编辑器
+
+## 安装
+
+```
+npm install @textbus/editor @textbus/core @textbus/browser
+```
+
+## 使用默认配置
+
+```ts
+import { createEditor } from '@textbus/editor'
+
+const editor = createEditor(document.getElementById('editor'))
+
+editor.onChange.subscribe(() => {
+  const content = editor.getContent()
+  console.log(content)
+})
+```
+
+## 创建自定义编辑器
 
 在 html 中准备好一个容器。
 
@@ -317,4 +338,294 @@ editor.onReady.subscribe(() => {
 
 ## 数据交互
 
+本章节主要介绍在**组件 setup 函数**内可以调用的一些勾子函数。
 
+### useContext
+
+返回当前编辑器的注入器，通过注入器，可以获取到编辑器内部各个类的实例
+
+```ts
+import { useContext, Commander, defineComponent } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    // 获取注入器
+    const injector = useContext()
+    // 获取编辑器内部类实例
+    const commander = injector.get(Commander)
+  }
+})
+```
+
+### useSelf
+
+返回当前组件实例
+
+```ts
+import { useSelf } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    const componentInstance = useSelf()
+  }
+})
+```
+
+### useSlots
+
+把一组插槽挂载到文档，一个组件只允许调用一次。
+
+```tsx
+import { ContentType, useSlots } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    const slots = useSLots([
+      new Slot([
+        ContentType.Text
+      ])
+    ], () => {
+      // 当内容恢复时，插槽还原的工厂函数
+      return new Slot([
+        ContentType.Text
+      ])
+    })
+    return {
+      render(isOutputMode, slotRenderFn) {
+        return (
+          <div>
+            {
+              slotRenderFn(slots.get(0), () => {
+                return <p/>
+              })
+            }
+          </div>
+        )
+      }
+    }
+  }
+})
+```
+
+### useState
+
+当前组件的自定义状态，一个组件只能调用一次。
+
+```tsx
+import { useState } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    let state = {
+      width: '100px'
+    }
+    const stateController = useState(state)
+    
+    state.onChange.subscribe(newState => {
+      state = newState
+    })
+    return {
+      render() {
+        return (
+          <div>
+            <img src="./example.jpg" width={state.width}/>
+          </div>
+        )
+      }
+    }
+  }
+})
+```
+
+
+### useRef
+
+用于获取 DOM 实例
+
+```tsx
+import { useRef, onViewInit } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    const domRef = useRef()
+    onViewInit(() => {
+      console.log(domRef.current)
+    })
+    return {
+      render() {
+        return (
+          <div>
+            <p ref={domRef}>我的组件</p>
+          </div>
+        )
+      }
+    }
+  }
+})
+```
+
+## 生命周期
+
+### onPaste
+
+当组件插槽发生粘贴事件时调用
+
+```tsx
+import { onPaste } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onPaste(ev => {
+      //
+    })
+  }
+})
+```
+
+### onContextMenu
+
+当用户在组件内点击鼠标右键时调用
+
+```tsx
+import { onContextMenu } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onContextMenu(() => {
+      return [{
+        label: '自定义上下文菜单',
+        onClick() {
+          //
+        }
+      }]
+    })
+  }
+})
+```
+
+### onViewChecked
+
+当组件每次视图更新完成后调用
+
+```tsx
+import { onViewChecked } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onViewChecked(() => {
+      //
+    })
+  }
+})
+```
+
+### onViewInit
+
+当组件第一次视图渲染完成时调用
+
+```tsx
+import { onViewInit } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onViewInit(() => {
+      //
+    })
+  }
+})
+```
+
+### onSlotRemove
+
+当用户触发组件插槽删除前调用
+
+```tsx
+import { onSlotRemove } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onSlotRemove(ev => {
+      //
+    })
+  }
+})
+```
+
+### onDelete
+
+当用户删除组件插槽内内容时调用
+```tsx
+import { onDelete } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onDelete(ev => {
+      //
+    })
+  }
+})
+```
+
+### onEnter
+
+当用户在组件插槽内按回车键时调用
+
+```tsx
+import { onEnter } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onEnter(ev => {
+      //
+    })
+  }
+})
+```
+
+### onInsert
+
+当用户在组件插槽内输入时调用
+
+```tsx
+import { onInsert } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onInsert(ev => {
+      //
+    })
+  }
+})
+```
+
+### onInserted
+
+当用户在组件插槽内输入完成时调用
+
+```tsx
+import { onInserted } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onInserted(ev => {
+      //
+    })
+  }
+})
+```
+
+### onDestroy
+
+当组件销毁时调用
+
+```tsx
+import { onDestroy } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    onDestroy(() => {
+      //
+    })
+  }
+})
+```
