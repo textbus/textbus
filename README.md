@@ -12,140 +12,42 @@ TextBus 富文本编辑器 2.0 内测版
 + 核心架构脱离了具体平台，让 TextBus 的能力不仅限于在 PC 端，通过编写特定的中间层，可以方便的在移动端，甚至小程序上实现丰富的富文本能力
 + 重写了渲染层，现在 TextBus 2.0 大多数情况下更新视图仅需要 1ms 时间，比 1.0 性能更好
 
-## 安装
+
+## 使用文档
+
+[TextBus 中文指南](./docs/zh/guide.md)
+
+## 本地开发
+
+TextBus 采用 lerna 作为多模块管理，全局安装 lerna。
 
 ```
-npm install @textbus/editor @textbus/core @textbus/browser
+npm install lerna -g
 ```
 
-## 使用
+克隆 TextBus 仓库，并安装依赖。
 
-```ts
-import { createEditor } from '@textbus/editor'
-
-const editor = createEditor('#editor')
-
-editor.onChange.subscribe(() => {
-  const content = editor.getContent()
-  console.log(content)
-})
+```
+git clone git@github.com:textbus/textbus.git
+cd textbus
+lerna bootstrap --hoist
 ```
 
+启动开发环境。
 
-## 组件
-
-和前端框架一样，组件是指带有特定交互行为或结构的一个单独功能模块。要创建一个组件，只需要调用 `defineComponent` 函数，并编写特定的配置项即可。
-
-```tsx
-import { defineComponent, ContentType, useSlots } from '@textbus/core'
-
-export const myComponent = defineComponent({
-  type: ContentType.BlockComponent, // 设置组件类型
-  name: 'MyComponent',              // 组件的名字，不可重复
-  transform(translator, state) {    // 将当前组件 json 数据转换为实例
-    return translator.createSlot(state)
-  },
-  setup(slot) {
-    // 组件的具体逻辑
-    const slots = useSlots(slot)
-    
-    return {
-      render(isOutputMode, slotRender) {
-        return (
-          <my-component>
-            {
-              slotRender(slots.get(0), () => {
-                return <div/>
-              })
-            }
-          </my-component>
-        )
-      },
-      toJSON() {
-        slots.get(0).toJSON()
-      }
-    }
-  }
-})
+```
+npm start
 ```
 
-上面示例是一个最简单的组件，但它基本包含了 TextBus 组件的基本形态，更复杂的组件，无非是在这个基础上增加更多的逻辑而已。
+## 官网地址
+[TextBus 官网](https://textbus.tanboui.com) _2.0 文档正在编辑中，官网目前仅为 1.0 文档_
 
-## 组件加载器
+如果在官网还不能找到你想了解的问题，你可以加入 TextBus 的官方 QQ 群：786923770。你也可以直接扫码加入：
 
-组件加载器用于从文档中识别并读取出组件的必要信息，从而生成 TextBus 的组件实例的工具类，由于 TextBus 是跨平台的，所以不同平台的加载器也可能是不同的，我们以 PC 平台为例。
+![](./_source/qq-group.jpg)
 
-```ts
-import { Slot, ContentType } from '@textbus/core'
+## 赞助
 
-export const myComponentLoader = {
-  match(element) {
-    // 匹配一个 DOM 元素，返回 true 即表示为当前组件
-    return element.tagName.toLowerCase() === 'my-component'
-  },
-  read(element, injector, slotParser) {
-    // 读取当前 DOM 元素下组件指定的结构，并返回组件实例
-    const slot = slotParser(new Slot([
-      ContentType.Text,
-      ContentType.InlineComponent
-    ]), element.children[0])
-    return paragraphComponent.createInstance(injector, slot)
-  },
-  component: myComponent
-}
-```
+TextBus 的成长离不开社会的支持，如果 TextBus 为你带来了帮助，并且你也认同为知识付费，同时鼓励我们做的更好，欢迎通过下面的二维码表达你的支持
 
-## 格式
-
-格式是指对文档中，插槽内（可编辑片段）的文本进行美化或增强的附加信息，如加粗、对齐方式等。
-
-```ts
-import { FormatType, VElement } from '@textbus/core'
-
-export const boldFormatter = {
-  type: FormatType.InlineTag,
-  name: 'bold',
-  render() {
-    return new VElement('strong')
-  }
-}
-```
-
-## 格式加载器
-
-格式加载器用于从文档中识别并读取出格式信息，由于 TextBus 是跨平台的，所以不同平台的加载器也可能是不同的，我们以 PC 平台为例。
-
-```ts
-export const boldFormatLoader = {
-  match(element) {
-    return ['strong', 'b'].includes(element.tagName.toLowerCase()) || 
-      ['bold', '500', '600', '700', '800', '900'].includes(element.style.fontWeight)
-  },
-  read() {
-    return true
-  },
-  formatter: boldFormatter
-}
-```
-
-## 创建自定义编辑器
-
-把我们定义好的组件和格式添加到编辑器中。
-
-```ts
-import { createEditor } from '@textbus/editor'
-
-import { myComponentLoader } from './my-component'
-import { boldFormatLoader } from './bold-formatter'
-
-const editor = createEditor('#editor', {
-  componentLoaders: [
-    myComponentLoader
-  ],
-  formatLoaders: [
-    boldFormatLoader
-  ]
-})
-```
-
-至此，我们就扩展了自己的组件和格式，我们可以按照此方法，继续编写出任意你想要的组件和格式。
+![](./_source/wx.jpg) ![](./_source/alipay.jpg)
