@@ -1,7 +1,9 @@
-import { createElement, Keymap } from '@textbus/browser'
+import { createElement } from '@textbus/browser'
+import { fromEvent } from '@tanbo/stream'
+import { Keymap } from '@textbus/core'
+
 import { createDropdown } from './_create-dropdown'
 import { createOption } from './_create-option'
-import { fromEvent } from '@tanbo/stream'
 
 export interface UISelectConfig {
   stickyElement: HTMLElement

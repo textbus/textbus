@@ -315,7 +315,12 @@ export class Renderer {
         if (newFirstVNode.tagName !== oldFirstVNode.tagName) {
           break
         }
-        const {attrChanges, styleChanges, classesChanges, listenerChanges} = getNodeChanges(newFirstVNode, oldFirstVNode)
+        const {
+          attrChanges,
+          styleChanges,
+          classesChanges,
+          listenerChanges
+        } = getNodeChanges(newFirstVNode, oldFirstVNode)
         const isChanged = [
           attrChanges.set.length,
           attrChanges.remove.length,
@@ -638,57 +643,6 @@ export class Renderer {
     return this.slotVNodeCaches.get(slot)!
   }
 
-  // private componentRender(component: Component): VElement {
-  //   if (component.marker.dirty) {
-  //     Promise.resolve().then(() => {
-  //       invokeListener(component, 'onViewChecked')
-  //     })
-  //     const node = component.instance.render(false, (slot, factory) => {
-  //       return this.slotRender(slot, factory)
-  //     })
-  //     component.marker.rendered()
-  //     this.componentVNode.set(component, node)
-  //     return node
-  //   }
-  //   component.slots.toArray().forEach(slot => {
-  //     if (slot.marker.changed) {
-  //       slot.sliceContent().filter((i): i is Component => {
-  //         return typeof i !== 'string'
-  //       }).forEach(component => {
-  //         this.componentRender(component)
-  //       })
-  //     }
-  //   })
-  //   component.marker.rendered()
-  //   return this.componentVNode.get(component)!
-  // }
-  //
-  // private slotRender(slot: Slot, hostFactory: () => VElement): VElement {
-  //   const root = hostFactory()
-  //   root.attrs.set(this.slotIdAttrKey, slot.id)
-  //   let host = root
-  //   // host.attrs.set('textbus-editable', 'on')
-  //   const formatTree = slot.createFormatTree()
-  //   if (formatTree.formats) {
-  //     host = this.createVDomByOverlapFormats(Renderer.formatSort(formatTree.formats), root, slot)
-  //   }
-  //   if (formatTree.children) {
-  //     const children = this.createVDomByFormatTree(slot, formatTree.children)
-  //     host.appendChild(...children)
-  //   } else {
-  //     host.appendChild(...this.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex))
-  //   }
-  //
-  //   this.vNodeMetadata.set(root, {
-  //     slot,
-  //     startIndex: 0,
-  //     endIndex: slot.length
-  //   })
-  //   slot.marker.rendered()
-  //   this.slotRefVNode.set(slot, root)
-  //   return root
-  // }
-
   private createVDomByFormatTree(slot: Slot, formats: FormatTree[]) {
     const children: Array<VElement | VTextNode> = []
     formats.map(child => {
@@ -792,7 +746,9 @@ export class Renderer {
         return
       }
       if (key === 'ref') {
-        if (value) {
+        if (Array.isArray(value)) {
+          value.push(el)
+        } else if (value) {
           (value as Ref<any>).current = el
         }
         return

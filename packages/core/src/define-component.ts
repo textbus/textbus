@@ -10,7 +10,7 @@ import {
   Slot,
   SlotLiteral,
   SlotRestore,
-  Slots
+  Slots, Shortcut
 } from './model/_api'
 import { makeError } from './_utils/make-error'
 
@@ -48,7 +48,8 @@ interface ComponentContext<T> {
   initState?: T
   changeController: ChangeController<T>
   contextInjector: Injector
-  componentInstance: ComponentInstance
+  componentInstance: ComponentInstance,
+  dynamicShortcut: Shortcut[]
 }
 
 let context: ComponentContext<any> | null = null
@@ -97,6 +98,7 @@ export function defineComponent<Methods extends ComponentMethods,
         type: options.type,
         slots: null as any,
         methods: null as any,
+        shortcutList: null as any,
         useState(newState: State) {
           const oldState = state
           state = newState
@@ -124,10 +126,12 @@ export function defineComponent<Methods extends ComponentMethods,
         contextInjector,
         changeController,
         slots: new Slots(componentInstance, () => new Slot([])),
-        componentInstance: componentInstance
+        componentInstance: componentInstance,
+        dynamicShortcut: []
       }
       componentInstance.methods = options.setup(initData)
       componentInstance.slots = context.slots
+      componentInstance.shortcutList = context.dynamicShortcut
       let state = context.initState
 
       const subscriptions: Subscription[] = [
@@ -200,6 +204,13 @@ export function useRef<T>() {
 
 export function useRefs<T>() {
   return [] as T[]
+}
+
+export function useDynamicShortcut(config: Shortcut) {
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  context.dynamicShortcut.push(config)
 }
 
 let eventHandleFn: null | ((...args: any[]) => void) = null
@@ -282,19 +293,19 @@ class EventCache<T, K extends keyof T = keyof T> {
   }
 }
 
-const eventCaches = new WeakMap<ComponentInstance, EventCache<EventTypes>>()
+const eventCacheMap = new WeakMap<ComponentInstance, EventCache<EventTypes>>()
 
-let rendererContext: EventCache<EventTypes> | null = null
+let eventCache: EventCache<EventTypes> | null = null
 
 function recordContextListener() {
-  rendererContext = new EventCache()
+  eventCache = new EventCache()
 }
 
 function recordContextListenerEnd(component: ComponentInstance) {
-  if (rendererContext) {
-    eventCaches.set(component, rendererContext)
+  if (eventCache) {
+    eventCacheMap.set(component, eventCache)
   }
-  rendererContext = null
+  eventCache = null
 }
 
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
@@ -308,7 +319,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContextM
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: TBEvent<PasteEventData>): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (...args: infer U) => any ? U : never>(target: ComponentInstance, eventType: K, data?: D) {
-  const cache = eventCaches.get(target)
+  const cache = eventCacheMap.get(target)
   if (cache) {
     const callbacks = cache.get(eventType)
     const values = callbacks.map(fn => {
@@ -330,61 +341,61 @@ export function invokeListener<K extends keyof EventTypes,
 }
 
 export function onPaste(listener: EventTypes['onPaste']) {
-  if (rendererContext) {
-    rendererContext.add('onPaste', listener)
+  if (eventCache) {
+    eventCache.add('onPaste', listener)
   }
 }
 
 export function onContextMenu(listener: EventTypes['onContextMenu']) {
-  if (rendererContext) {
-    rendererContext.add('onContextMenu', listener)
+  if (eventCache) {
+    eventCache.add('onContextMenu', listener)
   }
 }
 
 export function onViewChecked(listener: EventTypes['onViewChecked']) {
-  if (rendererContext) {
-    rendererContext.add('onViewChecked', listener)
+  if (eventCache) {
+    eventCache.add('onViewChecked', listener)
   }
 }
 
 export function onViewInit(listener: EventTypes['onViewInit']) {
-  if (rendererContext) {
-    rendererContext.add('onViewInit', listener)
+  if (eventCache) {
+    eventCache.add('onViewInit', listener)
   }
 }
 
 export function onSlotRemove(listener: EventTypes['onSlotRemove']) {
-  if (rendererContext) {
-    rendererContext.add('onSlotRemove', listener)
+  if (eventCache) {
+    eventCache.add('onSlotRemove', listener)
   }
 }
 
 export function onDelete(listener: EventTypes['onDelete']) {
-  if (rendererContext) {
-    rendererContext.add('onDelete', listener)
+  if (eventCache) {
+    eventCache.add('onDelete', listener)
   }
 }
 
 export function onEnter(listener: EventTypes['onEnter']) {
-  if (rendererContext) {
-    rendererContext.add('onEnter', listener)
+  if (eventCache) {
+    eventCache.add('onEnter', listener)
   }
 }
 
 export function onInsert(listener: EventTypes['onInsert']) {
-  if (rendererContext) {
-    rendererContext.add('onInsert', listener)
+  if (eventCache) {
+    eventCache.add('onInsert', listener)
   }
 }
 
 export function onInserted(listener: EventTypes['onInserted']) {
-  if (rendererContext) {
-    rendererContext.add('onInserted', listener)
+  if (eventCache) {
+    eventCache.add('onInserted', listener)
   }
 }
 
 export function onDestroy(listener: EventTypes['onDestroy']) {
-  if (rendererContext) {
-    rendererContext.add('onDestroy', listener)
+  if (eventCache) {
+    eventCache.add('onDestroy', listener)
   }
 }

@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
-import { QueryState, QueryStateType } from '@textbus/core'
-import { Input, Keymap } from '@textbus/browser'
+import { Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Input } from '@textbus/browser'
 
 import { Tool } from '../types'
 import { createSelect, UISelect } from './_utils/_api'

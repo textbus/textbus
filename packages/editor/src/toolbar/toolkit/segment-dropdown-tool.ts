@@ -1,7 +1,7 @@
 import { Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { QueryState, QueryStateType } from '@textbus/core'
-import { Input, Keymap } from '@textbus/browser'
+import { Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Input } from '@textbus/browser'
 
 import { UISegmentDropdown } from './_utils/_api'
 import { Tool } from '../types'
