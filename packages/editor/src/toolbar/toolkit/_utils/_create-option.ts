@@ -1,4 +1,6 @@
-import { createElement, createTextNode, Keymap } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/browser'
+import { Keymap } from '@textbus/core'
+
 import { createKeymap } from './_create-keymap'
 
 export interface OptionConfig {

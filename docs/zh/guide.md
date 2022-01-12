@@ -464,6 +464,54 @@ const myCommponent = defineComponent({
 })
 ```
 
+### useRefs
+
+用于获取一组 DOM 实例，常用在循环中
+
+```tsx
+import { useRefs, onViewInit } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    const domRefs = useRefs()
+    onViewInit(() => {
+      console.log(domRefs)
+    })
+    return {
+      render() {
+        return (
+          <div>
+            <p ref={domRefs}>我的组件</p>
+            <p ref={domRefs}>我的组件</p>
+          </div>
+        )
+      }
+    }
+  }
+})
+```
+
+### useDynamicShortcut
+
+组件内部快捷键，用于只在组件内生效的快捷键
+
+```tsx
+import { useDynamicShortcut } from '@textbus/core';
+
+const myCommponent = defineComponent({
+  setup() {
+    useDynamicShortcut({
+      keymap: {
+        key: 'Tab'
+      },
+      action() {
+        console.log('Tab 快捷键触发了！')
+      }
+    })
+  }
+})
+```
+
 ## 生命周期
 
 ### onPaste

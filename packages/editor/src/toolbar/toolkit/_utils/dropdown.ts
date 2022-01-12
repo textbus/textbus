@@ -1,4 +1,5 @@
-import { createElement, Keymap } from '@textbus/browser'
+import { createElement } from '@textbus/browser'
+import { Keymap } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'
 
 import { createDropdown as _createDropdown } from './_create-dropdown'

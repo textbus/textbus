@@ -1,6 +1,6 @@
-import { createElement, createTextNode, Input, Keymap } from '@textbus/browser'
+import { createElement, createTextNode, Input } from '@textbus/browser'
 import { Injector } from '@tanbo/di'
-import { QueryStateType } from '@textbus/core'
+import { Keymap, QueryStateType } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'
 
 import { Tool } from '../types'

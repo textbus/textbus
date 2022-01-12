@@ -34,6 +34,19 @@ export interface ComponentMethods<State = any> {
   split?(startIndex: number, endIndex: number): SegmentedSlots
 }
 
+export interface Keymap {
+  ctrlKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+  key: string | string[];
+}
+
+export interface Shortcut {
+  keymap: Keymap
+
+  action(key: string): void
+}
+
 export interface ComponentInstance<Methods extends ComponentMethods<State> = ComponentMethods, State = any> {
   parent: Slot | null
   changeMarker: ChangeMarker
@@ -42,6 +55,7 @@ export interface ComponentInstance<Methods extends ComponentMethods<State> = Com
   type: ContentType
   slots: Slots
   methods: Methods
+  shortcutList: Shortcut[]
 
   useState(state: State): void
 

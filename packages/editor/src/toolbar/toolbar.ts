@@ -1,7 +1,7 @@
 import { auditTime, fromEvent, merge, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { createElement, Keymap, TBPlugin } from '@textbus/browser'
-import { Renderer, TBSelection } from '@textbus/core'
+import { createElement, EDITABLE_DOCUMENT, TBPlugin } from '@textbus/browser'
+import { Keymap, Renderer, TBSelection } from '@textbus/core'
 
 import { Tool } from './types'
 import { Layout } from '../layout'
@@ -21,6 +21,7 @@ export class Toolbar implements TBPlugin {
     const layout = injector.get(Layout)
     const selection = injector.get(TBSelection)
     const renderer = injector.get(Renderer)
+    const editableDocument = injector.get(EDITABLE_DOCUMENT)
     this.elementRef = createElement('div', {
       classes: ['textbus-toolbar'],
       children: [
@@ -47,7 +48,11 @@ export class Toolbar implements TBPlugin {
     })
     const tools = this.tools.flat()
     this.subs.push(
-      merge(selection.onChange, renderer.onViewChecked).pipe(auditTime(100)).subscribe(() => {
+      merge(
+        selection.onChange,
+        renderer.onViewChecked,
+        fromEvent(editableDocument, 'click')
+      ).pipe(auditTime(100)).subscribe(() => {
         const event = document.createEvent('Event')
         event.initEvent('click', true, true)
         this.elementRef.dispatchEvent(event)

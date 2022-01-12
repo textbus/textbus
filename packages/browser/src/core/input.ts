@@ -1,6 +1,6 @@
 import { filter, fromEvent, map, merge, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { Commander, ContentType, Slot } from '@textbus/core'
+import { Commander, ContentType, Shortcut, Slot, TBSelection } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { SelectionBridge } from './selection-bridge'
@@ -8,19 +8,6 @@ import { Parser } from '../dom-support/parser'
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
 export const isMac = /mac os/i.test(navigator.userAgent)
-
-export interface Keymap {
-  ctrlKey?: boolean;
-  shiftKey?: boolean;
-  altKey?: boolean;
-  key: string | string[];
-}
-
-export interface Shortcut {
-  keymap: Keymap
-
-  action(key: string): void
-}
 
 @Injectable()
 export class Input {
@@ -40,6 +27,7 @@ export class Input {
 
   constructor(private parser: Parser,
               private commander: Commander,
+              private selection: TBSelection,
               private selectionBridge: SelectionBridge) {
     const textarea = this.textarea
 
@@ -160,21 +148,34 @@ export class Input {
       })).subscribe(ev => {
         const key = ev.key
         const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\\])/g, '\\$1')}]$`, 'i')
-        for (const config of this.shortcutList) {
-          const test = Array.isArray(config.keymap.key) ?
-            config.keymap.key.map(k => reg.test(k)).includes(true) :
-            reg.test(config.keymap.key)
-          if (test &&
-            !!config.keymap.altKey === ev.altKey &&
-            !!config.keymap.shiftKey === ev.shiftKey &&
-            !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
-            ev.preventDefault()
-            config.action(key)
-            break
+
+        const commonAncestorComponent = this.selection.commonAncestorComponent
+        if (commonAncestorComponent) {
+          const is = this.execShortcut(reg, ev, key, commonAncestorComponent.shortcutList)
+          if (is) {
+            return
           }
         }
+        this.execShortcut(reg, ev, key, this.shortcutList)
       })
     )
+  }
+
+  private execShortcut(reg: RegExp, ev: KeyboardEvent, key: string, shortcutList: Shortcut[]) {
+    for (const config of shortcutList) {
+      const test = Array.isArray(config.keymap.key) ?
+        config.keymap.key.map(k => reg.test(k)).includes(true) :
+        reg.test(config.keymap.key)
+      if (test &&
+        !!config.keymap.altKey === ev.altKey &&
+        !!config.keymap.shiftKey === ev.shiftKey &&
+        !!config.keymap.ctrlKey === (isMac ? ev.metaKey : ev.ctrlKey)) {
+        ev.preventDefault()
+        config.action(key)
+        return true
+      }
+    }
+    return false
   }
 
   private handleInput() {
