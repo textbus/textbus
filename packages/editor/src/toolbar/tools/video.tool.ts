@@ -1,15 +1,17 @@
-import { Injector } from '@tanbo/di'
+import { Injector, Type } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
 
 import { DialogTool, DialogToolConfig } from '../toolkit/dialog-tool'
 import { I18n } from '../../i18n'
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api'
 import { videoComponent, VideoState } from '../../components/video.component'
+import { FileUploader } from '../../file-uploader'
 
 export function videoToolConfigFactory(injector: Injector): DialogToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
+  const uploader = injector.get(FileUploader as Type<FileUploader>)
 
   const childI18n = i18n.getContext('plugins.toolbar.videoTool.view')
   const form = new Form({
@@ -23,6 +25,7 @@ export function videoToolConfigFactory(injector: Injector): DialogToolConfig {
         placeholder: childI18n.get('linkInputPlaceholder'),
         canUpload: true,
         uploadType: 'video',
+        fileUploader: uploader,
         uploadBtnText: childI18n.get('uploadBtnText'),
         validateFn(value: string): string | false {
           if (!value) {
