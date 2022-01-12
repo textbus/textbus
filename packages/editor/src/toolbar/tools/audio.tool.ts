@@ -1,15 +1,17 @@
-import { Injector } from '@tanbo/di'
+import { Injector, Type } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
 
 import { DialogTool, DialogToolConfig } from '../toolkit/dialog-tool'
 import { I18n } from '../../i18n'
 import { Form, FormHidden, FormSwitch, FormTextField } from '../../uikit/forms/_api'
 import { audioComponent, AudioState } from '../../components/audio.component'
+import { FileUploader } from '../../file-uploader'
 
 export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
+  const uploader = injector.get(FileUploader as Type<FileUploader>)
 
   const childI18n = i18n.getContext('plugins.toolbar.audioTool.view')
 
@@ -25,6 +27,7 @@ export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
         canUpload: true,
         uploadType: 'audio',
         uploadBtnText: childI18n.get('uploadBtnText'),
+        fileUploader: uploader,
         validateFn(value: string): string | false {
           if (!value) {
             return childI18n.get('errorMessage')

@@ -13,6 +13,9 @@ const editor = createEditor(document.getElementById('box')!, {
   // content: '',
   placeholder: '欢迎你使用 TextBus 富文本编辑器...',
   // plugins: []
+  uploader() {
+    return '/xxx'
+  }
 })
 
 editor.onChange.subscribe(() => {
