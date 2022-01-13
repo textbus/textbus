@@ -290,13 +290,21 @@ export const preComponent = defineComponent({
     stateController.onChange.subscribe(newLang => {
       data.lang = newLang
       languageGrammar = getLanguageGrammar(newLang)
+
       blockCommentStartString = getLanguageBlockCommentStart(newLang)[0]
       isStop = true
       slots.toArray().forEach(i => {
         i.blockCommentStart = false
         i.blockCommentEnd = false
       })
-      reformat(slots, slots.get(0)!, languageGrammar!, blockCommentStartString, true)
+      if (!languageGrammar) {
+        slots.toArray().forEach(i => {
+          i.retain(0)
+          i.retain(i.length, codeStyleFormatter, null)
+        })
+      } else {
+        reformat(slots, slots.get(0)!, languageGrammar!, blockCommentStartString, true)
+      }
       isStop = false
     })
 
@@ -357,17 +365,17 @@ export const preComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         const block = new VElement('pre', null, [
-          new VElement('div', {
+          new VElement('span', {
             class: 'tb-code-line-number-bg',
             style: {
               width: Math.max(String(slots.length).length, 2) + 'em'
             }
           }),
-          new VElement('div', {
+          new VElement('span', {
             class: 'tb-code-content'
           }, slots.toArray().map(item => {
             return slotRender(item, () => {
-              return new VElement('div', {
+              return new VElement('span', {
                 class: 'tb-code-line'
               })
             })
@@ -380,7 +388,7 @@ export const preComponent = defineComponent({
           }
         })
         if (lang) {
-          block.appendChild(new VElement('div', {
+          block.appendChild(new VElement('span', {
             class: 'tb-pre-lang'
           }, [new VTextNode(lang)]))
         }
@@ -410,7 +418,7 @@ export const preComponentLoader: ComponentLoader = {
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}
    .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #ddd; width: 3em; }
    .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
-   .tb-code-line { position: relative; }
+   .tb-code-line { position: relative; display: block}
    .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #aeaeae; }
    .tb-pre-lang { position: absolute; right: 0; top: 0; opacity: 0.5; pointer-events: none; font-size: 13px; padding: 4px 10px;}
   .tb-hl-keyword { font-weight: bold; }
