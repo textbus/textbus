@@ -1,19 +1,22 @@
-# docs
+TextBus 文档编辑服务
+===========================
 
-## Project setup
+本项目用于编写 TextBus 文档的本地服务，开启服务后，会读取 pages 文件夹下的 HTML 文件，并在浏览器生成列表，可以点击任意文件编辑后保存，再提交到 git 即可
+
+## 安装依赖
+
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+启动文件读写服务
+
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+启动编辑器
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```
+npm start
+```
