@@ -1,0 +1,399 @@
+<h1>TextBus 中文指南</h1>
+<p>本文介绍了 TextBus 设计理念及各种概念，以及它们之间的关联关系，以帮助你能快的对 TextBus 有一个整体的了解，可以更轻松的使用 TextBus 的各种功能。</p>
+<h2>简介</h2>
+<p>
+  TextBus 并不是一个一体化的编辑器，而是提供了成套的技术方案，旨在解决富文本开发中容易掉入各种样式、标签及光标计算的陷阱。使用 TextBus，你基本无需再关心标签如何嵌套，光标位置保持的问题，也不必关心编辑内容生成的代码质量问题。</p>
+<p>
+  TextBus 通过抽象的组件（Component）、内容（Content）和格式（formatter）组成基本数据结构，你完全掌控这些数据的变化，你也完全可以预期这些数据的渲染结果。同时，得益于 TextBus 高效的渲染器（Renderer），对于超长文档，或者复杂组件，你总是能得到几乎 1ms 内的视图更新效率，同时生成最干净的富文本内容。你也可以像平常使用前端开发框架一样，在组件内添加事件监听，并做出优秀交互效果。还可以根据不同的渲染上下文，在编辑时和输出时，生成不一样的富文本内容。甚至，你可以生成 Vue 或 Angular 的模板代码，作为低代码平台的源数据。</p>
+<p>总之，限制你的是你的想象力！</p>
+<p>TextBus 目前有三个模块，它们分别是：</p>
+<ul>
+  <li>core 核心模块，提供了 TextBus 文档的基本数据模型、操作、渲染，以及状态查询、选区、数据转换、历史记录等；</li>
+  <li>browser 浏览器支持模块，提供了 PC 端编辑器的视图层，如选区、HTML 解析、光标及文本输入等；</li>
+  <li>editor TextBus 官方实现的 PC 端富文本编辑器，提供了大多数富文本所需的功能。</li>
+</ul>
+<h2>基本概念</h2>
+<p>数据结构：</p>
+<ul>
+  <li>Component 组件 和前端框架一样，组件是由特定的结构和交互的代码块，组件内也可以有零到多个 slot（插槽），组件也可以有自己的方法，来完成自身的数据交互；</li>
+  <li>Slot 插槽 表示组件内可以动态插入内容的位置，在 TextBus 中，表示这一块的内容是可以编辑的，用户可以通过操作来修改里面的内容；</li>
+  <li>Formatter 格式 表示对文本的修饰，如加粗、字体颜色等；</li>
+  <li>ContentType 内容类型 分别为：BlockComponent（块组件）、InlineComponent（行内组件）、Text（文本）；</li>
+  <li>VElement 虚拟无素节点 TextBus 渲染组件或格式时，虚拟 DOM 树元素节点；</li>
+  <li>VTextNode 虚拟文本节点 TextBus 渲染文本时，虚拟 DOM 树文本节点。</li>
+</ul>
+<p>数据操作：</p>
+<ul>
+  <li>Commander 命令 对文档进行修改操作的简洁方法；</li>
+  <li>TBSelection 选区 当前选择的区域（大多数情况为用户拖蓝的区域）；</li>
+  <li>Query 查询 根据组件或格式查询在文档选区的中状态；</li>
+  <li>Renderer 渲染器 用于渲染文档的核心类，可通过渲染器获取到直实 ；DOM 节点，虚拟 DOM 节点，以及数据之间的映射关系；</li>
+  <li>History 历史记录 用于记录用户操作，并提供前进，后退操作；</li>
+  <li>Translator 数据转换器 用于把 JSON 数据转换为 TextBus 数据结构的工具类。</li>
+</ul>
+<p>可以把 TextBus 简单理解为：组件提供了你在富文本内创建布局、用户交互和受控渲染的能力，插槽提供了让用户编辑的能力。</p>
+<h2>安装</h2>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">npm install @textbus/editor @textbus/core @textbus/browser</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h2>使用默认配置</h2>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { createEditor } from '@textbus/editor'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const editor = createEditor(document.getElementById('editor'))</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">editor.onChange.subscribe(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;const content = editor.getContent()</div><div class="tb-code-line">&nbsp;&nbsp;console.log(content)</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h2>创建自定义编辑器</h2>
+<p>在 html 中准备好一个容器。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">&lt;divid="editor"&gt;&lt;/div&gt;</div><div class="tb-code-line"><br></div></div></pre>
+<p>导入 Editor 类，并实例化。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Editor } from '@textbus/editor'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const editor = new Editor('#editor')</div><div class="tb-code-line"><br></div></div></pre>
+<p>至此，我们就创建了一个只有少量功能的基础的编辑器。</p>
+<blockquote>
+  <p>之所以说有少量功能，是因为 Editor 默认包含了根组件，根组件内有引用段落组件，从而让你有最基本的文字及段落编辑能力，这是 @textbus/editor 这个包中封装好的能力。</p>
+  <p>如果你想完全自定义编辑器的行为，则可以引用 @textbus/browser 中的 CoreEditor 类来创建编辑器。或者在实例化 Editor 时，在配置项中传入根组件。</p>
+</blockquote>
+<h3>添加格式支持</h3>
+<p>在上面创建的编辑器内，我们只有简单的文字编辑功能。如果我们想要加粗一段文字，则需要创建 Formatter。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { FormatType, VElement } from '@textbus/core'</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const boldFormatter = {</div><div class="tb-code-line">&nbsp;&nbsp;// 设置 boldFormatter 是一个行内标签样式</div><div
+        class="tb-code-line">&nbsp;&nbsp;type: FormatType.InlineTag,</div><div class="tb-code-line">&nbsp;&nbsp;// 设置 Formatter 名字为 `bold`</div><div
+        class="tb-code-line">&nbsp;&nbsp;name: 'bold',</div><div class="tb-code-line">&nbsp;&nbsp;// 当 boldFormatter 渲染时，我们返回一个 strong 标签的虚拟 DOM 节点</div><div
+        class="tb-code-line">&nbsp;&nbsp;render() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return new VElement('strong')</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">}</div><div
+        class="tb-code-line"><br></div></div></pre>
+<p>我们还需要创建一个 loader，让 TextBus 能在 HTML 中识别出加粗的格式。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">export const boldFormatLoader = {</div><div class="tb-code-line">&nbsp;&nbsp;// 当匹配到一个 DOM 元素的标签为 `strong`、`b` 或者当前元素的样式的 fontWeight 为 500 ~ 900 或者 bold 时，返回 true</div><div
+        class="tb-code-line">&nbsp;&nbsp;match(element) {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return ['strong', 'b'].includes(element.tagName.toLowerCase()) ||</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;['bold', '500', '600', '700', '800', '900'].includes(element.style.fontWeight)</div><div
+        class="tb-code-line">&nbsp;&nbsp;},</div><div class="tb-code-line">&nbsp;&nbsp;// 当元素匹配成功时，会调用 read 方法获取样式的值，由于加粗只有生效和不生效两种，所以，我们可以用一个 boolean 值来表示，这里可以返回 true 即可</div><div
+        class="tb-code-line">&nbsp;&nbsp;read() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return true</div><div class="tb-code-line">&nbsp;&nbsp;},</div><div
+        class="tb-code-line">&nbsp;&nbsp;formatter: boldFormatter</div><div class="tb-code-line">}</div><div
+        class="tb-code-line"><br></div></div></pre>
+<p>现在，我们可以把我们创建好的 Formatter 添加到编辑器中了。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Editor } from '@textbus/editor'</div><div class="tb-code-line">import { boldFormatLoader } from './bold-formatter'</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const editor = new Editor('#editor', {</div><div
+        class="tb-code-line">&nbsp;&nbsp;formatLoaders: [</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;boldFormatLoader</div><div
+        class="tb-code-line">&nbsp;&nbsp;]</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<p>至此，我们的编辑器就可以支持加粗文字的功能了。</p>
+<p>等等，我们虽然添加了 boldFormatter，但并没有一个工具去触发，让它在编辑器内动态添加上去。让我们在页面添加一个按钮，当用户点击的时候，就让编辑器内的文字加粗。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">&lt;divclass="toolbar"&gt;</div><div class="tb-code-line">&nbsp;&nbsp;&lt;buttontype="button"id="bold-btn"&gt;加粗&lt;/button&gt;</div><div
+        class="tb-code-line">&lt;/div&gt;</div><div class="tb-code-line">&lt;divid="editor"&gt;&lt;/div&gt;</div><div
+        class="tb-code-line"><br></div></div></pre>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Commander } from '@textbus/core'</div><div class="tb-code-line">import { boldFormatLoader } from './bold-formatter'</div><div
+        class="tb-code-line">import { boldFormatter } from './inline-tag.formatter'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const boldBtn = document.getElementById('bold-btn')</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">// 当编辑器准备好时，我们再添加功能</div><div class="tb-code-line">editor.onReady.subscribe(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;const injector = editor.injector</div><div class="tb-code-line">&nbsp;&nbsp;const commander = injector.get(Commander)</div><div
+        class="tb-code-line">&nbsp;&nbsp;boldBtn.addEventListener('click', () =&gt; {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;commander.applyFormat(boldFormatter, true)</div><div
+        class="tb-code-line">&nbsp;&nbsp;})</div><div class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<p>现在，我们框选一段文字并点击加粗按钮时，你就会看到文字已经加粗了，如果，光标是闭合的，TextBus 也会智能加粗后面输入的文字。</p>
+<p>在实际的应用中，仅仅文字加粗是不满足需求的，我们更希望如果已经加粗了，则取消加粗。这时，则需要状态查询来帮助我们完成相应的功能。让我们继续完善上面的功能。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Commander, Query, QueryStateType } from '@textbus/core'</div><div
+        class="tb-code-line">import { boldFormatLoader } from './bold-formatter'</div><div class="tb-code-line">import { boldFormatter } from './inline-tag.formatter'</div><div
+        class="tb-code-line"><br></div><div
+        class="tb-code-line">const boldBtn = document.getElementById('bold-btn')</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">// 当编辑器准备好时，我们再添加功能</div><div class="tb-code-line">editor.onReady.subscribe(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;const injector = editor.injector</div><div class="tb-code-line">&nbsp;&nbsp;const commander = injector.get(Commander)</div><div
+        class="tb-code-line">&nbsp;&nbsp;const query = injector.get(Query)</div><div class="tb-code-line">&nbsp;&nbsp;boldBtn.addEventListener('click', () =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 通过 Query，查询当前光标所在范围是否已加粗</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const queryState = query.queryFormat(boldFormatter)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const isBold = queryState.state === QueryStateType.Enabled</div><div
+        class="tb-code-line"><br></div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 如果已加粗，我们则取消应用加粗效果，否则就加粗</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;if (isBold) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;commander.unApplyFormat(boldFormatter)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;} else {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;commander.applyFormat(boldFormatter, true)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;})</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<p>现在我们可以根据查询状态，分别设置应用或取消应用样式了，我们还需要实时监听编辑器内容的变化，让按钮呈现高亮的效果，给用户更好的反馈。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Commander, Query, QueryStateType, Renderer } from '@textbus/core'</div><div
+        class="tb-code-line">import { boldFormatLoader } from './bold-formatter'</div><div class="tb-code-line">import { boldFormatter } from './inline-tag.formatter'</div><div
+        class="tb-code-line"><br></div><div
+        class="tb-code-line">const boldBtn = document.getElementById('bold-btn')</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">// 当编辑器准备好时，我们再添加功能</div><div class="tb-code-line">editor.onReady.subscribe(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;const injector = editor.injector</div><div class="tb-code-line">&nbsp;&nbsp;const commander = injector.get(Commander)</div><div
+        class="tb-code-line">&nbsp;&nbsp;const query = injector.get(Query)</div><div class="tb-code-line">&nbsp;&nbsp;const renderer = injector.get(Renderer)</div><div
+        class="tb-code-line"><br></div><div
+        class="tb-code-line">&nbsp;&nbsp;renderer.onViewChecked.subscribe(() =&gt; {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const queryState = query.queryFormat(boldFormatter)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const isBold = queryState.state === QueryStateType.Enabled</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 根据编辑器实时状态，高亮显示按钮</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;if (isBold) {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;boldBtn.classList.add('active')</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;} else {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;boldBtn.classList.remove('active')</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;boldBtn.addEventListener('click', () =&gt; {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 通过 Query，查询当前光标所在范围是否已加粗</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const queryState = query.queryFormat(boldFormatter)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const isBold = queryState.state === QueryStateType.Enabled</div><div
+        class="tb-code-line"><br></div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 如果已加粗，我们则取消应用加粗效果，否则就加粗</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;if (isBold) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;commander.unApplyFormat(boldFormatter)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;} else {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;commander.applyFormat(boldFormatter, true)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;})</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<p>至此，我们的加粗工具，就基本完成了。</p>
+<h3>添加组件</h3>
+<p>和前端框架一样，组件是指带有特定交互行为或结构的一个单独功能模块。要创建一个组件，只需要调用 defineComponent 函数，并编写特定的配置项即可。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { defineComponent, ContentType, useSlots, Slot } from '@textbus/core'</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">export const myComponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;type: ContentType.BlockComponent, // 设置组件类型</div><div class="tb-code-line">&nbsp;&nbsp;name: 'MyComponent', &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 组件的名字，不可重复</div><div
+        class="tb-code-line">&nbsp;&nbsp;transform(translator, state) { &nbsp;&nbsp;&nbsp;// 将当前组件 json 数据转换为实例</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return translator.createSlot(state)</div><div class="tb-code-line">&nbsp;&nbsp;},</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup(slot) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 组件的具体逻辑</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const slots = useSlots(slot || new Slot([</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ContentType.Text</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;]))</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;render(isOutputMode, slotRender) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;my-component&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slotRender(slots.get(0), () =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &lt;div/&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/my-component&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toJSON() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slots.get(0).toJSON()</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<p>上面示例是一个最简单的组件，但它基本包含了 TextBus 组件的基本形态，更复杂的组件，无非是在这个基础上增加更多的逻辑而已。</p>
+<p>
+  为了让 TextBus 能从 HTML 中识别出组件，我们还需要创建组件加载器。加载器用于从文档中识别并读取出组件的必要信息，从而生成 TextBus 的组件实例的工具类，由于 TextBus 是跨平台的，所以不同平台的加载器也可能是不同的，我们以 PC 平台为例。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Slot, ContentType } from '@textbus/core'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">export const myComponentLoader = {</div><div class="tb-code-line">&nbsp;&nbsp;// 设置组件的根元素为块级样式</div><div
+        class="tb-code-line">&nbsp;&nbsp;reources: {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;styles: ['my-component{display:block}']</div><div
+        class="tb-code-line">&nbsp;&nbsp;},</div><div class="tb-code-line">&nbsp;&nbsp;match(element) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 匹配一个 DOM 元素，返回 true 即表示为当前组件</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return element.tagName.toLowerCase() === 'my-component'</div><div
+        class="tb-code-line">&nbsp;&nbsp;},</div><div class="tb-code-line">&nbsp;&nbsp;read(element, injector, slotParser) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 读取当前 DOM 元素下组件指定的结构，并返回组件实例</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const slot = slotParser(new Slot([</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ContentType.Text</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;]), element.children[0])</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return paragraphComponent.createInstance(injector, slot)</div><div
+        class="tb-code-line">&nbsp;&nbsp;},</div><div class="tb-code-line">&nbsp;&nbsp;component: myComponent</div><div
+        class="tb-code-line">}</div><div class="tb-code-line"><br></div></div></pre>
+<p>现在我们在编辑器中添加我们刚创建的组件。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">const editor = new Editor('#editor', {</div><div class="tb-code-line">&nbsp;&nbsp;componentLoaders: [</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;myComponentLoader</div><div
+        class="tb-code-line">&nbsp;&nbsp;]</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<p>我们也可以继续添加一个按钮，点击按钮可以往文档中插入 MyComponent 组件。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">&lt;divclass="toolbar"&gt;</div><div class="tb-code-line">&nbsp;&nbsp;&lt;buttontype="button"id="bold-btn"&gt;加粗&lt;/button&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&lt;buttontype="button"id="insert-my-component"&gt;插入MyComponent&lt;/button&gt;</div><div
+        class="tb-code-line">&lt;/div&gt;</div><div class="tb-code-line">&lt;divid="editor"&gt;&lt;/div&gt;</div><div
+        class="tb-code-line"><br></div></div></pre>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { Commander, ContentType } from '@textbus/core'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">import { myComponent } from './my-component'</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const insertBtn = document.getElementById('insert-my-component')</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">editor.onReady.subscribe(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;const injector = editor.injector</div><div class="tb-code-line">&nbsp;&nbsp;const commander = injector.get(Commander)</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">&nbsp;&nbsp;insertBtn.addEventListener('click', () =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const componentInstance = myComponent.createInstance()</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;commander.insert(componentInstance)</div><div class="tb-code-line">&nbsp;&nbsp;})</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h2>数据交互</h2>
+<p>本章节主要介绍在组件 setup 函数内可以调用的一些勾子函数。</p>
+<h3>useContext</h3>
+<p>返回当前编辑器的注入器，通过注入器，可以获取到编辑器内部各个类的实例</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useContext, Commander, defineComponent } from '@textbus/core';</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 获取注入器</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const injector = useContext()</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;// 获取编辑器内部类实例</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const commander = injector.get(Commander)</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>useSelf</h3>
+<p>返回当前组件实例</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useSelf } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const componentInstance = useSelf()</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>useSlots</h3>
+<p>把一组插槽挂载到文档，一个组件只允许调用一次。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { ContentType, useSlots } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const slots = useSLots([</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new Slot([</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ContentType.Text</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;])</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;], () =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 当内容恢复时，插槽还原的工厂函数</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Slot([</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ContentType.Text</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;])</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;render(isOutputMode, slotRenderFn) {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slotRenderFn(slots.get(0), () =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &lt;p/&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;}</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h3>useState</h3>
+<p>当前组件的自定义状态，一个组件只能调用一次。</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useState } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;let state = {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: '100px'</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const stateController = useState(state)</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;state.onChange.subscribe(newState =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state = newState</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;render() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;imgsrc="./example.jpg"width={state.width}/&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;}</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h3>useRef</h3>
+<p>用于获取 DOM 实例</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useRef, onViewInit } from '@textbus/core';</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const domRef = useRef()</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onViewInit(() =&gt; {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(domRef.current)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;render() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;pref={domRef}&gt;我的组件&lt;/p&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;}</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h3>useRefs</h3>
+<p>用于获取一组 DOM 实例，常用在循环中</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useRefs, onViewInit } from '@textbus/core';</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;const domRefs = useRefs()</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onViewInit(() =&gt; {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(domRefs)</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;return {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;render() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;pref={domRefs}&gt;我的组件&lt;/p&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;pref={domRefs}&gt;我的组件&lt;/p&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;}</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h3>useDynamicShortcut</h3>
+<p>组件内部快捷键，用于只在组件内生效的快捷键</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { useDynamicShortcut } from '@textbus/core';</div><div
+        class="tb-code-line"><br></div><div class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;useDynamicShortcut({</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keymap: {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key: 'Tab'</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action() {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log('Tab 快捷键触发了！')</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h2>生命周期</h2>
+<h3>onPaste</h3>
+<p>当组件插槽发生粘贴事件时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onPaste } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onPaste(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onContextMenu</h3>
+<p>当用户在组件内点击鼠标右键时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onContextMenu } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onContextMenu(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [{</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label: '自定义上下文菜单',</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onClick() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div class="tb-code-line">&nbsp;&nbsp;}</div><div
+        class="tb-code-line">})</div><div class="tb-code-line"><br></div></div></pre>
+<h3>onViewChecked</h3>
+<p>当组件每次视图更新完成后调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onViewChecked } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onViewChecked(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onViewInit</h3>
+<p>当组件第一次视图渲染完成时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onViewInit } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onViewInit(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onSlotRemove</h3>
+<p>当用户触发组件插槽删除前调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onSlotRemove } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onSlotRemove(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onDelete</h3>
+<p>当用户删除组件插槽内内容时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onDelete } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onDelete(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onEnter</h3>
+<p>当用户在组件插槽内按回车键时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onEnter } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onEnter(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onInsert</h3>
+<p>当用户在组件插槽内输入时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onInsert } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onInsert(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onInserted</h3>
+<p>当用户在组件插槽内输入完成时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onInserted } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onInserted(ev =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div><div
+        class="tb-code-line"><br></div></div></pre>
+<h3>onDestroy</h3>
+<p>当组件销毁时调用</p>
+<pre lang=""><div style="width:2em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div
+        class="tb-code-line">import { onDestroy } from '@textbus/core';</div><div class="tb-code-line"><br></div><div
+        class="tb-code-line">const myCommponent = defineComponent({</div><div
+        class="tb-code-line">&nbsp;&nbsp;setup() {</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;onDestroy(() =&gt; {</div><div
+        class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;})</div><div
+        class="tb-code-line">&nbsp;&nbsp;}</div><div class="tb-code-line">})</div></div></pre>
