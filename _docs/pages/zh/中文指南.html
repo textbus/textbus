@@ -6,28 +6,28 @@
 <p>总之，限制你的是你的想象力！</p>
 <p>TextBus 目前有三个模块，它们分别是：</p>
 <ul>
-  <li>core 核心模块，提供了 TextBus 文档的基本数据模型、操作、渲染，以及状态查询、选区、数据转换、历史记录等；</li>
-  <li>browser 浏览器支持模块，提供了 PC 端编辑器的视图层，如选区、HTML 解析、光标及文本输入等；</li>
-  <li>editor TextBus 官方实现的 PC 端富文本编辑器，提供了大多数富文本所需的功能。</li>
+  <li><strong>core</strong>&nbsp;<span style="color:#1296db">核心模块</span>，提供了 TextBus 文档的基本数据模型、操作、渲染，以及状态查询、选区、数据转换、历史记录等；</li>
+  <li><strong>browser</strong>&nbsp;<span style="color:#1296db">浏览器支持模块</span>，提供了 PC 端编辑器的视图层，如选区、HTML 解析、光标及文本输入等；</li>
+  <li><strong>editor</strong>&nbsp;TextBus 官方实现的 PC 端富文本编辑器，提供了大多数富文本所需的功能。</li>
 </ul>
 <h2>基本概念</h2>
 <p>数据结构：</p>
 <ul>
-  <li>Component 组件 和前端框架一样，组件是由特定的结构和交互的代码块，组件内也可以有零到多个 slot（插槽），组件也可以有自己的方法，来完成自身的数据交互；</li>
-  <li>Slot 插槽 表示组件内可以动态插入内容的位置，在 TextBus 中，表示这一块的内容是可以编辑的，用户可以通过操作来修改里面的内容；</li>
-  <li>Formatter 格式 表示对文本的修饰，如加粗、字体颜色等；</li>
-  <li>ContentType 内容类型 分别为：BlockComponent（块组件）、InlineComponent（行内组件）、Text（文本）；</li>
-  <li>VElement 虚拟无素节点 TextBus 渲染组件或格式时，虚拟 DOM 树元素节点；</li>
-  <li>VTextNode 虚拟文本节点 TextBus 渲染文本时，虚拟 DOM 树文本节点。</li>
+  <li><strong>Component</strong>&nbsp;<span style="color:#1296db">组件</span>&nbsp;和前端框架一样，组件是由特定的结构和交互的代码块，组件内也可以有零到多个 slot（插槽），组件也可以有自己的方法，来完成自身的数据交互；</li>
+  <li><strong>Slot</strong>&nbsp;<span style="color:#1296db">插槽</span>&nbsp;表示组件内可以动态插入内容的位置，在 TextBus 中，表示这一块的内容是可以编辑的，用户可以通过操作来修改里面的内容；</li>
+  <li><strong>Formatter</strong>&nbsp;<span style="color:#1296db">格式</span>&nbsp;表示对文本的修饰，如加粗、字体颜色等；</li>
+  <li><strong>ContentType</strong>&nbsp;<span style="color:#1296db">内容类型</span>&nbsp;分别为：BlockComponent（块组件）、InlineComponent（行内组件）、Text（文本）；</li>
+  <li><strong>VElement</strong>&nbsp;<span style="color:#1296db">虚拟无素节点</span>&nbsp;TextBus 渲染组件或格式时，虚拟 DOM 树元素节点；</li>
+  <li><strong>VTextNode</strong>&nbsp;<span style="color:#1296db">虚拟文本节点</span>&nbsp;TextBus 渲染文本时，虚拟 DOM 树文本节点。</li>
 </ul>
 <p>数据操作：</p>
 <ul>
-  <li>Commander 命令 对文档进行修改操作的简洁方法；</li>
-  <li>TBSelection 选区 当前选择的区域（大多数情况为用户拖蓝的区域）；</li>
-  <li>Query 查询 根据组件或格式查询在文档选区的中状态；</li>
-  <li>Renderer 渲染器 用于渲染文档的核心类，可通过渲染器获取到直实 ；DOM 节点，虚拟 DOM 节点，以及数据之间的映射关系；</li>
-  <li>History 历史记录 用于记录用户操作，并提供前进，后退操作；</li>
-  <li>Translator 数据转换器 用于把 JSON 数据转换为 TextBus 数据结构的工具类。</li>
+  <li><strong>Commander</strong>&nbsp;<span style="color:#1296db">命令</span>&nbsp;对文档进行修改操作的简洁方法；</li>
+  <li><strong>TBSelection</strong>&nbsp;<span style="color:#1296db">选区</span>&nbsp;当前选择的区域（大多数情况为用户拖蓝的区域）；</li>
+  <li><strong>Query</strong>&nbsp;<span style="color:#1296db">查询</span>&nbsp;根据组件或格式查询在文档选区的中状态；</li>
+  <li><strong>Renderer</strong>&nbsp;<span style="color:#1296db">渲染器</span>&nbsp;用于渲染文档的核心类，可通过渲染器获取到直实 ；DOM 节点，虚拟 DOM 节点，以及数据之间的映射关系；</li>
+  <li><strong>Hist​ory</strong>&nbsp;<span style="color:#1296db">历史记录</span>&nbsp;用于记录用户操作，并提供前进，后退操作；</li>
+  <li><strong>Translator</strong>&nbsp;<span style="color:#1296db">数据转换器</span>&nbsp;用于把 JSON 数据转换为 TextBus 数据结构的工具类。</li>
 </ul>
 <p>可以把 TextBus 简单理解为：组件提供了你在富文本内创建布局、用户交互和受控渲染的能力，插槽提供了让用户编辑的能力。</p>
 <h2>安装</h2><pre lang=""><span style="width:2em" class="tb-code-line-number-bg"></span><span class="tb-code-content"><span class="tb-code-line">npm install @textbus/editor @textbus/core @textbus/browser</span></span></pre>
