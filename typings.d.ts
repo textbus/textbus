@@ -6,8 +6,3 @@ declare namespace JSX {
     [elemName: string]: Element
   }
 }
-/* eslint-enable */
-declare module 'katex' {
-  const Katex: any
-  export = Katex
-}

@@ -3,9 +3,6 @@ import { createEditor } from '@textbus/editor'
 /*import { Renderer, RootComponentRef } from '@textbus/core';
 import { Type } from '@tanbo/di';*/
 
-const json = require('./content.json')
-// console.log(json)
-
 const editor = createEditor(document.getElementById('box')!, {
   // theme: 'dark',
   // content: json,

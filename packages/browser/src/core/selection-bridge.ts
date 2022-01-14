@@ -257,7 +257,14 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private listen(connector: NativeSelectionConnector) {
     const selection = this.nativeSelection
+    let isFocusin = false
     this.subs.push(
+      fromEvent(this.document, 'focusin').subscribe(() => {
+        isFocusin = true
+      }),
+      fromEvent(this.document, 'focusout').subscribe(() => {
+        isFocusin = false
+      }),
       fromEvent<MouseEvent>(this.document, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
           return
@@ -265,7 +272,7 @@ export class SelectionBridge implements NativeSelectionBridge {
         selection.removeAllRanges()
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
-        if (selection.rangeCount === 0) {
+        if (selection.rangeCount === 0 || isFocusin) {
           connector.setSelection(null)
           return
         }

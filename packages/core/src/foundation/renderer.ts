@@ -63,7 +63,7 @@ function getObjectChanges(target: Record<string, any>, source: Record<string, an
   })
 
   Object.keys(source).forEach(key => {
-    if (!target.has(key)) {
+    if (!Reflect.has(target, key)) {
       changes.remove.push([key, source[key]])
     }
   })
