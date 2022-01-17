@@ -29,6 +29,7 @@ import 'prismjs/components/prism-c'
 import 'prismjs/components/prism-cpp'
 import 'prismjs/components/prism-csharp'
 import 'prismjs/components/prism-go'
+import { paragraphComponent } from './paragraph.component'
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -329,6 +330,24 @@ export const preComponent = defineComponent({
     })
 
     onEnter(ev => {
+      if (ev.target.isEmpty && ev.target === slots.last) {
+        const prevSlot = slots.get(slots.length - 2)
+        if (prevSlot?.isEmpty) {
+          const paragraph = paragraphComponent.createInstance(injector)
+          const parentComponent = selection.commonAncestorComponent!
+          const parentSlot = parentComponent.parent!
+          const index = parentSlot.indexOf(parentComponent)
+          parentSlot.retain(index + 1)
+          slots.remove(slots.last)
+          if (slots.length > 1) {
+            slots.remove(prevSlot)
+          }
+          parentSlot.insert(paragraph)
+          selection.setLocation(paragraph.slots.get(0)!, 0)
+          ev.preventDefault()
+          return
+        }
+      }
       const nextSlot = ev.target.cutTo(new CodeSlot, ev.data.index)
       slots.insertAfter(nextSlot, ev.target as CodeSlot)
       selection.setLocation(nextSlot, 0)

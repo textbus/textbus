@@ -1,6 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Keymap, QueryState, QueryStateType } from '@textbus/core'
-import { Input } from '@textbus/browser'
+import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { createSelect, UISelect } from './_utils/_api'
@@ -56,7 +55,7 @@ export class SelectTool implements Tool {
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
     this.config = config
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
     const dropdown = createSelect({
       ...config,
       stickyElement: limitElement,
@@ -65,7 +64,7 @@ export class SelectTool implements Tool {
       }
     })
     config.options.filter(i => i.keymap).map(i => {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: i.keymap!,
         action: () => {
           if (!dropdown.disabled) {

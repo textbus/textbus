@@ -1,7 +1,6 @@
 import { Injector } from '@tanbo/di'
 import { Subscription } from '@tanbo/stream'
-import { Input } from '@textbus/browser'
-import { Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { createDropdown, UIDropdown } from './_utils/dropdown'
@@ -40,7 +39,7 @@ export class DropdownTool implements Tool {
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
     this.config = config
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
     const initValue: any = {}
     let prevValue: any = initValue
 
@@ -58,7 +57,7 @@ export class DropdownTool implements Tool {
       menuView: config.viewController.elementRef
     })
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!form.disabled && prevValue !== initValue) {

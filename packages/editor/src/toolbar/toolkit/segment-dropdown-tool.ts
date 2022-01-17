@@ -1,7 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { Keymap, QueryState, QueryStateType } from '@textbus/core'
-import { Input } from '@textbus/browser'
+import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { UISegmentDropdown } from './_utils/_api'
 import { Tool } from '../types'
@@ -44,7 +43,7 @@ export class SegmentDropdownTool implements Tool {
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
     this.config = config
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
 
     const view = config.viewController.elementRef
     const dropdown = createSegmentDropdown({
@@ -67,7 +66,7 @@ export class SegmentDropdownTool implements Tool {
     // dropdown.button.elementRef.dataset.keymap = JSON.stringify(config.keymap)
 
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!dropdown.disabled && prevValue !== initValue) {
