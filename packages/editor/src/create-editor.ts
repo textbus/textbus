@@ -47,6 +47,9 @@ export const defaultOptions: EditorOptions = {
    a {color: inherit;}`,
     `a {text-decoration: underline; color: #449fdb; cursor: text;}`
   ],
+  styleSheets: [
+    `body {line-height: 1.5em}`
+  ],
   componentLoaders: [
     audioComponentLoader,
     blockComponentLoader,

@@ -1,6 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Input } from '@textbus/browser'
-import { QueryState, QueryStateType, Keymap } from '@textbus/core'
+import { QueryState, QueryStateType, Keymap, Keyboard } from '@textbus/core'
 
 import { createButton, UIButton } from './_utils/_api'
 import { Tool } from '../types'
@@ -33,7 +32,7 @@ export class ButtonTool implements Tool {
 
   setup(injector: Injector): HTMLElement {
     this.config = this.factory(injector)
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
     const viewer = createButton({
       ...this.config,
       onClick: () => {
@@ -41,7 +40,7 @@ export class ButtonTool implements Tool {
       }
     })
     if (this.config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: this.config.keymap,
         action: () => {
           this.config.onClick()

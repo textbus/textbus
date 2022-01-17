@@ -1,7 +1,6 @@
 import { Injector } from '@tanbo/di'
 import { Subscription } from '@tanbo/stream'
-import { Input } from '@textbus/browser'
-import { Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { ViewController } from '../../uikit/types'
@@ -41,7 +40,7 @@ export class DialogTool implements Tool {
   setup(injector: Injector): HTMLElement {
     const config = this.factory(injector)
     this.config = config
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
     const dialog = injector.get(Dialog)
     const initValue: any = {}
     let prevValue: any = initValue
@@ -67,7 +66,7 @@ export class DialogTool implements Tool {
       })
     )
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!button.disabled && prevValue !== initValue) {

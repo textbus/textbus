@@ -8,7 +8,7 @@ import {
   Query,
   Renderer, RootComponentRef,
   TBSelection,
-  Translator, LifeCycle, makeError, OutputRenderer
+  Translator, LifeCycle, makeError, OutputRenderer, Keyboard
 } from '@textbus/core'
 
 import { Parser, ComponentRef, OutputTranslator, ComponentResources } from './dom-support/_api'
@@ -136,6 +136,7 @@ export class CoreEditor {
         Commander,
         ComponentList,
         FormatterList,
+        Keyboard,
         History,
         Query,
         OutputRenderer,

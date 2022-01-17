@@ -1,6 +1,6 @@
-import { createElement, createTextNode, Input } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/browser'
 import { Injector } from '@tanbo/di'
-import { Keymap, QueryStateType } from '@textbus/core'
+import { Keyboard, Keymap, QueryStateType } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'
 
 import { Tool } from '../types'
@@ -78,19 +78,19 @@ export class GroupTool implements Tool {
 
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
-    const input = injector.get(Input)
+    const keyboard = injector.get(Keyboard)
     const dialog = injector.get(Dialog)
     this.config = config
     const menus = config.items.map(i => {
       switch (i.type) {
         case ToolType.Button:
-          return this.createButton(i, input)
+          return this.createButton(i, keyboard)
         case ToolType.Select:
-          return this.createSelect(i, input)
+          return this.createSelect(i, keyboard)
         case ToolType.Dropdown:
-          return this.createDropdown(i, input)
+          return this.createDropdown(i, keyboard)
         case ToolType.Dialog:
-          return this.createDialog(i, input, dialog)
+          return this.createDialog(i, keyboard, dialog)
       }
     }) as ToolItem[]
     this.menus = menus
@@ -115,7 +115,7 @@ export class GroupTool implements Tool {
     //
   }
 
-  private createDialog(config: DialogToolConfig, input: Input, dialog: Dialog) {
+  private createDialog(config: DialogToolConfig, keyboard: Keyboard, dialog: Dialog) {
     const item = this._createItem({
       ...config,
       label: config.label || '',
@@ -139,7 +139,7 @@ export class GroupTool implements Tool {
       dialog.hide()
     })
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!item.disabled && prevValue !== defaultValue) {
@@ -179,7 +179,7 @@ export class GroupTool implements Tool {
     }
   }
 
-  private createDropdown(config: DropdownToolConfig, input: Input) {
+  private createDropdown(config: DropdownToolConfig, keyboard: Keyboard) {
     const item = this._createItem({
       ...config,
       label: config.label || '',
@@ -203,7 +203,7 @@ export class GroupTool implements Tool {
     })
 
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!item.disabled && prevValue !== defaultValue) {
@@ -246,7 +246,7 @@ export class GroupTool implements Tool {
     }
   }
 
-  private createSelect(config: SelectToolMenu, input: Input): ToolItem {
+  private createSelect(config: SelectToolMenu, keyboard: Keyboard): ToolItem {
     const item = this._createItem({
       ...config,
       isDropdown: true
@@ -268,7 +268,7 @@ export class GroupTool implements Tool {
             })
             map.set(option, el)
             if (option.keymap) {
-              input.addShortcut({
+              keyboard.addShortcut({
                 keymap: option.keymap,
                 action() {
                   if (!item.disabled) {
@@ -319,7 +319,7 @@ export class GroupTool implements Tool {
     }
   }
 
-  private createButton(config: ButtonToolMenu, input: Input): ToolItem {
+  private createButton(config: ButtonToolMenu, keyboard: Keyboard): ToolItem {
     const item = this._createItem({
       ...config,
       label: config.label || '',
@@ -331,7 +331,7 @@ export class GroupTool implements Tool {
     })
 
     if (config.keymap) {
-      input.addShortcut({
+      keyboard.addShortcut({
         keymap: config.keymap,
         action() {
           if (!item.disabled) {

@@ -1,19 +1,18 @@
 import { Injectable } from '@tanbo/di'
-import { Commander, History, TBSelection } from '@textbus/core'
-
-import { Input, TBPlugin } from '../core/_api'
+import { Commander, History, Keyboard, TBSelection } from '@textbus/core'
+import { TBPlugin } from '../core/_api'
 
 @Injectable()
 export class DefaultShortcut implements TBPlugin {
   constructor(private selection: TBSelection,
               private history: History,
               private commander: Commander,
-              private input: Input) {
+              private keyboard: Keyboard) {
   }
 
   setup() {
-    const input = this.input
-    input.addShortcut({
+    const keyboard = this.keyboard
+    keyboard.addShortcut({
       keymap: {
         key: 'Enter'
       },
@@ -21,7 +20,7 @@ export class DefaultShortcut implements TBPlugin {
         this.commander.enter()
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'Enter',
         shiftKey: true
@@ -37,7 +36,7 @@ export class DefaultShortcut implements TBPlugin {
         }
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: ['Delete', 'Backspace']
       },
@@ -45,7 +44,7 @@ export class DefaultShortcut implements TBPlugin {
         this.commander.delete(key === 'Backspace')
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       },
@@ -67,7 +66,7 @@ export class DefaultShortcut implements TBPlugin {
       }
     })
 
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'a',
         ctrlKey: true
@@ -76,7 +75,7 @@ export class DefaultShortcut implements TBPlugin {
         this.selection.selectAll()
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'c',
         ctrlKey: true
@@ -85,7 +84,7 @@ export class DefaultShortcut implements TBPlugin {
         this.commander.copy()
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'x',
         ctrlKey: true
@@ -94,7 +93,7 @@ export class DefaultShortcut implements TBPlugin {
         this.commander.cut()
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'z',
         ctrlKey: true
@@ -103,7 +102,7 @@ export class DefaultShortcut implements TBPlugin {
         this.history.back()
       }
     })
-    input.addShortcut({
+    keyboard.addShortcut({
       keymap: {
         key: 'z',
         ctrlKey: true,
