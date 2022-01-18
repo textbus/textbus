@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Injectable } from '@tanbo/di'
 import { Observable, Subject } from '@tanbo/stream'
 
 import {
@@ -10,7 +10,7 @@ import {
   Slot,
 } from '../model/_api'
 import { invokeListener, Ref } from '../define-component'
-import { HOST_NATIVE_NODE, NativeNode, NativeRenderer } from './_injection-tokens'
+import { NativeNode, NativeRenderer, RootComponentRef } from './_injection-tokens'
 
 export interface MapChanges {
   remove: string[]
@@ -192,13 +192,14 @@ export class Renderer {
 
   private slotIdAttrKey = '__textbus-slot-id__'
 
-  constructor(@Inject(HOST_NATIVE_NODE) private host: NativeNode,
+  constructor(private rootComponentRef: RootComponentRef,
               private nativeRenderer: NativeRenderer) {
     this.onViewChecked = this.viewCheckedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
   }
 
-  render(component: ComponentInstance) {
+  render() {
+    const component = this.rootComponentRef.component
     this.viewUpdateBeforeEvent.next()
     if (component.changeMarker.changed) {
       const dirty = component.changeMarker.dirty
@@ -215,7 +216,7 @@ export class Renderer {
           }
         } else {
           const el = this.patch(root)
-          this.nativeRenderer.appendChild(this.host, el)
+          this.nativeRenderer.appendChild(this.rootComponentRef.host, el)
         }
         this.oldVDom = root
       }

@@ -1,17 +1,13 @@
-import { Injector, NullInjector, Provider, ReflectiveInjector, Type } from '@tanbo/di'
+import { Injector, Provider, Type } from '@tanbo/di'
 import {
-  Commander, COMPONENT_LIST,
-  Component, ComponentList, FORMATTER_LIST, FormatterList,
-  History, HOST_NATIVE_NODE,
+  Component,
   NativeRenderer,
   NativeSelectionBridge,
-  Query,
   Renderer, RootComponentRef,
-  TBSelection,
-  Translator, LifeCycle, makeError, OutputRenderer, Keyboard
+  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType
 } from '@textbus/core'
 
-import { Parser, ComponentRef, OutputTranslator, ComponentResources } from './dom-support/_api'
+import { Parser, OutputTranslator, ComponentResources } from './dom-support/_api'
 import { createElement } from './_utils/uikit'
 import {
   getIframeHTML,
@@ -20,8 +16,6 @@ import {
   EDITABLE_DOCUMENT,
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
-  INIT_CONTENT,
-  ROOT_COMPONENT_FACTORY,
   DomRenderer,
   SelectionBridge, TBPlugin, SCROLL_CONTAINER
 } from './core/_api'
@@ -88,74 +82,75 @@ export class CoreEditor {
     this.options = options
     this.plugins = options.plugins || []
     return this.createLayout().then(layout => {
-      const staticProviders: Provider[] = [{
-        provide: EDITABLE_DOCUMENT,
-        useValue: layout.document
-      }, {
-        provide: EDITOR_OPTIONS,
-        useValue: options
-      }, {
-        provide: EDITOR_CONTAINER,
-        useValue: layout.workbench
-      }, {
-        provide: SCROLL_CONTAINER,
-        useValue: this.scroller
-      }, {
-        provide: INIT_CONTENT,
-        useValue: options.content || ''
-      }, {
-        provide: ROOT_COMPONENT_FACTORY,
-        useValue: this.rootComponentFactory
-      }, {
-        provide: NativeRenderer,
-        useClass: DomRenderer
-      }, {
-        provide: NativeSelectionBridge,
-        useClass: SelectionBridge
-      }, {
-        provide: HOST_NATIVE_NODE,
-        useValue: layout.document.body
-      }, {
-        provide: RootComponentRef,
-        useClass: ComponentRef
-      }, {
-        provide: COMPONENT_LIST,
-        useValue: (options.componentLoaders || []).map(i => i.component)
-      }, {
-        provide: FORMATTER_LIST,
-        useValue: (options.formatLoaders || []).map(i => i.formatter)
-      }, {
-        provide: Injector,
-        useFactory() {
-          return rootInjector
+      return bootstrap({
+        components: (options.componentLoaders || []).map(i => i.component),
+        formatters: (options.formatLoaders || []).map(i => i.formatter),
+      }).loadPlatformProviders(() => {
+        const staticProviders: Provider[] = [{
+          provide: EDITABLE_DOCUMENT,
+          useValue: layout.document
+        }, {
+          provide: EDITOR_OPTIONS,
+          useValue: options
+        }, {
+          provide: EDITOR_CONTAINER,
+          useValue: layout.workbench
+        }, {
+          provide: SCROLL_CONTAINER,
+          useValue: this.scroller
+        }, {
+          provide: NativeRenderer,
+          useClass: DomRenderer
+        }, {
+          provide: NativeSelectionBridge,
+          useClass: SelectionBridge
+        }]
+
+        return [
+          ...staticProviders,
+          ...this.defaultPlugins,
+          ...(options.providers || []),
+          DomRenderer,
+          Parser,
+          Input,
+          SelectionBridge,
+          OutputTranslator,
+        ]
+      }).then(starter => {
+        const parser = starter.get(Parser)
+        const translator = starter.get(Translator)
+
+        const slot = new Slot([
+          ContentType.BlockComponent
+        ])
+        const component = this.rootComponentFactory.createInstance(starter, slot)
+        if (typeof options.content === 'string') {
+          parser.parse(options.content || '', slot)
+        } else if (options.content) {
+          translator.fillSlot(options.content, slot)
         }
-      }]
+        starter.mount(component, layout.document.body)
+        const doc = starter.get(EDITABLE_DOCUMENT)
+        const renderer = starter.get(Renderer)
 
-      const rootInjector = new ReflectiveInjector(new NullInjector(), [
-        ...staticProviders,
-        Commander,
-        ComponentList,
-        FormatterList,
-        Keyboard,
-        History,
-        Query,
-        OutputRenderer,
-        Renderer,
-        TBSelection,
-        Translator,
-        LifeCycle,
+        this.initDocStyleSheets(doc, options)
+        this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
 
-        DomRenderer,
-        Parser,
-        Input,
-        SelectionBridge,
-        ComponentRef,
-        OutputTranslator,
-        ...this.defaultPlugins,
-        ...(options.providers || [])
-      ])
-
-      return this.bootstrap(rootInjector)
+        const resizeObserver = new ResizeObserver((e) => {
+          this.docContainer.style.height = e[0].borderBoxSize[0].blockSize + 'px'
+        })
+        resizeObserver.observe(doc.body as any)
+        if (this.destroyed) {
+          return starter
+        }
+        this.subs.push(renderer.onViewChecked.subscribe(() => {
+          this.changeEvent.next()
+        }))
+        starter.get(Input)
+        this.isReady = true
+        this.injector = starter
+        return starter
+      })
     })
   }
 
@@ -209,8 +204,6 @@ export class CoreEditor {
       if (this.injector) {
         const types = [
           Input,
-          History,
-          LifeCycle
         ]
         types.forEach(i => {
           this.injector!.get(i as Type<{ destroy(): void }>).destroy()
@@ -221,35 +214,6 @@ export class CoreEditor {
       })
       this.scroller.parentNode?.removeChild(this.scroller)
     }
-  }
-
-  private bootstrap(rootInjector: ReflectiveInjector) {
-    const doc = rootInjector.get(EDITABLE_DOCUMENT)
-    const options = rootInjector.get(EDITOR_OPTIONS)
-    const rootComponentRef = rootInjector.get(ComponentRef)
-    const renderer = rootInjector.get(Renderer)
-
-    this.initDocStyleSheets(doc, options)
-    this.defaultPlugins.forEach(i => rootInjector.get(i).setup(rootInjector))
-
-    const resizeObserver = new ResizeObserver((e) => {
-      this.docContainer.style.height = e[0].borderBoxSize[0].blockSize + 'px'
-    })
-    resizeObserver.observe(doc.body as any)
-    return rootComponentRef.init().then(() => {
-      if (this.destroyed) {
-        return rootInjector
-      }
-      rootInjector.get(Input)
-      rootInjector.get(History).listen()
-      rootInjector.get(LifeCycle).init()
-      this.subs.push(renderer.onViewChecked.subscribe(() => {
-        this.changeEvent.next()
-      }))
-      this.isReady = true
-      this.injector = rootInjector
-      return rootInjector
-    })
   }
 
   private initDocStyleSheets(doc: Document, options: BaseEditorOptions) {

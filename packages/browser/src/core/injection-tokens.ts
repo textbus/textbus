@@ -1,5 +1,5 @@
 import { InjectionToken } from '@tanbo/di'
-import { Component, SlotLiteral } from '@textbus/core'
+import { Component } from '@textbus/core'
 
 import { BaseEditorOptions } from './types'
 
@@ -17,5 +17,3 @@ export const EDITOR_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_CONTAINE
 export const SCROLL_CONTAINER = new InjectionToken<HTMLElement>('SCROLL_CONTAINER')
 
 export const ROOT_COMPONENT_FACTORY = new InjectionToken<Component>('ROOT_COMPONENT_FACTORY')
-
-export const INIT_CONTENT = new InjectionToken<string | SlotLiteral>('INIT_CONTENT')

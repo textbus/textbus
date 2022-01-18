@@ -42,7 +42,7 @@ export class History {
   }
 
   listen() {
-    this.renderer.render(this.root.component)
+    this.renderer.render()
     this.record()
   }
 
@@ -85,7 +85,7 @@ export class History {
       }),
       debounceTime(1)
     ).subscribe(() => {
-      this.renderer.render(this.root.component)
+      this.renderer.render()
       this.selection.restore()
       this.historySequence.length = this.index
       this.index++
@@ -188,6 +188,6 @@ export class History {
       }
     })
 
-    this.renderer.render(this.root.component)
+    this.renderer.render()
   }
 }
