@@ -40,8 +40,8 @@ export abstract class NativeRenderer {
 
 export abstract class RootComponentRef {
   abstract component: ComponentInstance
+  abstract host: NativeNode
 }
 
-export const HOST_NATIVE_NODE = new InjectionToken<NativeNode>('HOST_NATIVE_NODE')
 export const COMPONENT_LIST = new InjectionToken<Component[]>('COMPONENT_LIST')
 export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
