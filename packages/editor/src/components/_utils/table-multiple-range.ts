@@ -146,9 +146,9 @@ export function autoComplete(table: TableCellSlot[][]) {
         }
       }
 
-      td.setState({
-        rowspan: td.state!.rowspan,
-        colspan: maxColspan
+      td.updateState(draft => {
+        draft.rowspan = td.state!.rowspan
+        draft.colspan = maxColspan
       })
 
       for (let i = rowIndex, len = td.state!.rowspan + rowIndex; i < len; i++) {

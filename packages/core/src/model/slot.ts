@@ -1,4 +1,5 @@
 import { Subscription } from '@tanbo/stream'
+import { Draft, Patch, produce } from 'immer'
 
 import { ComponentInstance, ComponentLiteral } from './component'
 import { Action } from './operation'
@@ -49,29 +50,30 @@ export class Slot<T = any> {
   protected content = new Content()
   protected format = new Format(this)
 
-  constructor(public schema: ContentType[], public state: T | null = null) {
-    Object.freeze(state)
+  constructor(public schema: ContentType[], public state?: T) {
     this.content.append(Slot.placeholder)
   }
 
-  setState(newState: T) {
-    if (typeof newState === 'object') {
-      Object.freeze(newState as any)
-    }
-    const oldState = this.state
+  updateState(fn: (draft: Draft<T>) => void): T {
+    let changes!: Patch[]
+    let inverseChanges!: Patch[]
+    const newState = produce(this.state, fn, (p, ip) => {
+      changes = p
+      inverseChanges = ip
+    })
     this.state = newState
     this.changeMarker.markAsDirtied({
       path: [],
       apply: [{
         type: 'apply',
-        state: newState
+        patches: changes
       }],
       unApply: [{
         type: 'apply',
-        state: oldState
+        patches: inverseChanges
       }]
     })
-    return true
+    return newState!
   }
 
   write(content: string | ComponentInstance) {
@@ -400,7 +402,7 @@ export class Slot<T = any> {
       schema: this.schema,
       content: this.content.toJSON(),
       formats: this.format.toJSON(),
-      state: this.state
+      state: this.state!
     }
   }
 

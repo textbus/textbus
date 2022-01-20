@@ -283,16 +283,18 @@ export const preComponent = defineComponent({
     let languageGrammar = getLanguageGrammar(data.lang)
     let [blockCommentStartString] = getLanguageBlockCommentStart(data.lang)
 
-    const stateController = useState(data.lang)
+    const stateController = useState({
+      lang: data.lang
+    })
     const injector = useContext()
 
     const selection = injector.get(TBSelection)
 
     stateController.onChange.subscribe(newLang => {
-      data.lang = newLang
-      languageGrammar = getLanguageGrammar(newLang)
+      data.lang = newLang.lang
+      languageGrammar = getLanguageGrammar(newLang.lang)
 
-      blockCommentStartString = getLanguageBlockCommentStart(newLang)[0]
+      blockCommentStartString = getLanguageBlockCommentStart(newLang.lang)[0]
       isStop = true
       slots.toArray().forEach(i => {
         i.blockCommentStart = false
@@ -360,7 +362,10 @@ export const preComponent = defineComponent({
           label: i.label,
           onClick() {
             if (i.value !== data.lang) {
-              stateController.update(i.value)
+              data.lang = i.value
+              stateController.update(draft => {
+                draft.lang = i.value
+              })
             }
           }
         }

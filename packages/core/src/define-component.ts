@@ -1,3 +1,4 @@
+import { Draft, produce, Patch } from 'immer'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
 
@@ -34,9 +35,9 @@ export interface Component<ComponentInstance = any, State = any, InitData = any>
 }
 
 export interface ChangeController<T> {
-  update(newState: T): void
-
   onChange: Observable<T>
+
+  update(fn: (draft: Draft<T>) => void): T
 }
 
 export interface Ref<T> {
@@ -67,25 +68,28 @@ export function defineComponent<Methods extends ComponentMethods,
       const stateChangeSubject = new Subject<any>()
       recordContextListener()
 
-      const changeController: ChangeController<any> = {
-        update(newState: any) {
-          if (typeof newState === 'object') {
-            Object.freeze(newState)
-          }
-          stateChangeSubject.next(newState)
-          const oldState = state
+      const changeController: ChangeController<unknown> = {
+        update(fn) {
+          let changes!: Patch[]
+          let inverseChanges!: Patch[]
+          const newState = produce(state, fn, (p, ip) => {
+            changes = p
+            inverseChanges = ip
+          })
           state = newState
+          stateChangeSubject.next(newState)
           marker.markAsDirtied({
             path: [],
             apply: [{
               type: 'apply',
-              state
+              patches: changes!
             }],
             unApply: [{
               type: 'apply',
-              state: oldState
+              patches: inverseChanges!
             }]
           })
+          return newState
         },
         onChange: stateChangeSubject.asObservable()
       }
@@ -99,19 +103,25 @@ export function defineComponent<Methods extends ComponentMethods,
         slots: null as any,
         methods: null as any,
         shortcutList: null as any,
-        useState(newState: State) {
-          const oldState = state
+        updateState(fn) {
+          let changes!: Patch[]
+          let inverseChanges!: Patch[]
+          const newState = produce(state, fn, (p, ip) => {
+            changes = p
+            inverseChanges = ip
+          })
+
           state = newState
           stateChangeSubject.next(newState)
           marker.markAsDirtied({
             path: [],
             apply: [{
               type: 'apply',
-              state: newState
+              patches: changes
             }],
             unApply: [{
               type: 'apply',
-              state: oldState
+              patches: inverseChanges
             }]
           })
         },
@@ -188,9 +198,6 @@ export function useState<T>(initState: T) {
   }
   if (Reflect.has(context, 'initState')) {
     throw componentErrorFn('only one unique state is allowed for a component!')
-  }
-  if (typeof initState === 'object') {
-    Object.freeze(initState)
   }
   context.initState = initState
   return context.changeController as ChangeController<T>

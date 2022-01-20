@@ -22,8 +22,16 @@ export interface ListComponentState {
   slots: Slot[]
 }
 
+export interface SegmentedSlots<T extends Slot = Slot> {
+  before: T[]
+  middle: T[]
+  after: T[]
+}
+
 export interface ListComponentInstance extends ComponentMethods<ListComponentLiteral> {
-  type: 'ul' | 'ol'
+  type: 'ul' | 'ol',
+
+  split?(startIndex: number, endIndex: number): SegmentedSlots
 }
 
 export const listComponent = defineComponent({

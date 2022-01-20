@@ -37,9 +37,8 @@ export const imageComponent = defineComponent({
     const ref = useRef<HTMLImageElement>()
 
     useDragResize(ref, rect => {
-      changeController.update({
-        ...state,
-        ...rect
+      changeController.update(draft => {
+        Object.assign(draft, rect)
       })
     })
 

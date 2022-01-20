@@ -41,9 +41,8 @@ export const audioComponent = defineComponent({
         }
       },
       mergeProps(props: Partial<AudioState>) {
-        controller.update({
-          ...state!,
-          ...props
+        state = controller.update(draft => {
+          Object.assign(draft, props)
         })
       }
     }
