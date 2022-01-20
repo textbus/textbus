@@ -231,7 +231,9 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
       }
       const state = query.queryWrappedComponent(imageComponent)
       if (state.state === QueryStateType.Enabled) {
-        state.value!.useState(value)
+        state.value!.updateState(draft => {
+          Object.assign(draft, value)
+        })
       } else if (value?.src) {
         commander.insert(imageComponent.createInstance(injector, value))
       }

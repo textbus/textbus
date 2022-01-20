@@ -7,6 +7,7 @@ import { Renderer } from './renderer'
 import { SelectionPaths, TBSelection } from './selection'
 import { FormatterList } from './formatter-list'
 import { RootComponentRef } from './_injection-tokens'
+import { applyPatches } from 'immer'
 
 export interface HistoryItem {
   beforePaths: SelectionPaths
@@ -140,7 +141,9 @@ export class History {
             return
           }
           if (action.type === 'apply') {
-            slot.setState(action.state)
+            slot.updateState(draft => {
+              applyPatches(draft, action.patches)
+            })
             return
           }
           if (action.type === 'insert') {
@@ -181,7 +184,9 @@ export class History {
             component.slots.insert(slot)
           }
           if (action.type === 'apply') {
-            component.useState(action.state)
+            component.updateState(draft => {
+              applyPatches(draft, action.patches)
+            })
             return
           }
         })

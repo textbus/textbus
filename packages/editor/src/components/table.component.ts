@@ -165,9 +165,9 @@ export const tableComponent = defineComponent({
             return p.concat(n)
           })
         const newNode = selectedCells.shift()
-        newNode!.cell.setState({
-          rowspan: maxRow - minRow,
-          colspan: maxColumn - minColumn
+        newNode!.cell.updateState(draft => {
+          draft.rowspan = maxRow - minRow
+          draft.colspan = maxColumn - minColumn
         })
 
         selectedCells.forEach(cell => {
@@ -203,9 +203,9 @@ export const tableComponent = defineComponent({
             if (td.offsetRow === 0 && td.offsetColumn === 0) {
               const state = td.cell.state!
               if (state.rowspan > 1 || state.colspan > 1) {
-                td.cell.setState({
-                  rowspan: 1,
-                  colspan: 1
+                td.cell.updateState(draft => {
+                  draft.rowspan = 1
+                  draft.colspan = 1
                 })
               }
               return td.cell
@@ -233,9 +233,8 @@ export const tableComponent = defineComponent({
         const startIndex = startPosition.columnIndex
         const endIndex = endPosition.columnIndex
 
-        stateController.update({
-          columnSize: tableInfo.columnSize - (endIndex - startIndex + 1),
-          rowSize: tableInfo.rowSize
+        stateController.update(draft => {
+          draft.columnSize = tableInfo.columnSize - (endIndex - startIndex + 1)
         })
 
         serializedCells.forEach(tr => {
@@ -244,21 +243,18 @@ export const tableComponent = defineComponent({
             const startColumnIndex = td.columnIndex - td.offsetColumn
             if (startColumnIndex < startIndex) {
               if (startColumnIndex + td.cell.state!.colspan > endIndex) {
-                td.cell.setState({
-                  colspan: td.cell.state!.colspan - (endIndex - startIndex + 1),
-                  rowspan: td.cell.state!.rowspan
+                td.cell.updateState(draft => {
+                  draft.colspan = td.cell.state!.colspan - (endIndex - startIndex + 1)
                 })
               } else {
-                td.cell.setState({
-                  colspan: startIndex - td.columnIndex,
-                  rowspan: td.cell.state!.rowspan
+                td.cell.updateState(draft => {
+                  draft.colspan = startIndex - td.columnIndex
                 })
               }
             } else {
               if (startColumnIndex + td.cell.state!.colspan - 1 > endIndex) {
-                td.cell.setState({
-                  colspan: td.cell.state!.colspan - (endIndex - startIndex + 1),
-                  rowspan: td.cell.state!.rowspan
+                td.cell.updateState(draft => {
+                  draft.colspan = td.cell.state!.colspan - (endIndex - startIndex + 1)
                 })
                 td.cell.cut()
               } else {
@@ -283,9 +279,8 @@ export const tableComponent = defineComponent({
         const startIndex = startPosition.rowIndex
         const endIndex = endPosition.rowIndex
 
-        stateController.update({
-          rowSize: tableInfo.rowSize - (endIndex - startIndex + 1),
-          columnSize: tableInfo.columnSize
+        stateController.update(draft => {
+          draft.rowSize = tableInfo.rowSize - (endIndex - startIndex + 1)
         })
 
         for (let i = startIndex; i <= endIndex; i++) {
@@ -294,21 +289,18 @@ export const tableComponent = defineComponent({
             const startRowIndex = td.rowIndex - td.offsetRow
             if (startRowIndex < startIndex) {
               if (startRowIndex + td.cell.state!.rowspan > endIndex) {
-                td.cell.setState({
-                  rowspan: td.cell.state!.rowspan - (endIndex - startIndex + 1),
-                  colspan: td.cell.state!.colspan
+                td.cell.updateState(draft => {
+                  draft.rowspan = td.cell.state!.rowspan - (endIndex - startIndex + 1)
                 })
               } else {
-                td.cell.setState({
-                  rowspan: startIndex - td.rowIndex,
-                  colspan: td.cell.state!.colspan
+                td.cell.updateState(draft => {
+                  draft.rowspan = startIndex - td.rowIndex
                 })
               }
             } else {
               if (startRowIndex + td.cell.state!.rowspan - 1 > endIndex) {
-                td.cell.setState({
-                  rowspan: td.cell.state!.rowspan - (endIndex - startIndex + 1),
-                  colspan: td.cell.state!.colspan
+                td.cell.updateState(draft => {
+                  draft.rowspan = td.cell.state!.rowspan - (endIndex - startIndex + 1)
                 })
                 td.cell.cut()
                 const nextTr = serializedCells[i + 1]
@@ -367,17 +359,15 @@ export const tableComponent = defineComponent({
 
         const row = serializedCells[index]
 
-        stateController.update({
-          rowSize: tableInfo.rowSize + 1,
-          columnSize: tableInfo.columnSize
+        stateController.update(draft => {
+          draft.rowSize = tableInfo.rowSize + 1
         })
 
         row.cellsPosition.forEach(cell => {
           if (cell.offsetRow < cell.cell.state!.rowspan - 1) {
             if (cell.offsetColumn === 0) {
-              cell.cell.setState({
-                colspan: cell.cell.state!.colspan,
-                rowspan: cell.cell.state!.rowspan + 1
+              cell.cell.updateState(draft => {
+                draft.rowspan = cell.cell.state!.rowspan + 1
               })
             }
           } else {
@@ -424,9 +414,8 @@ export const tableComponent = defineComponent({
               if (recordCells.includes(cell.cell)) {
                 return
               }
-              cell.cell.setState({
-                colspan: cell.cell.state!.colspan + 1,
-                rowspan: cell.cell.state!.rowspan
+              cell.cell.updateState(draft => {
+                draft.colspan = cell.cell.state!.colspan + 1
               })
               recordCells.push(cell.cell)
             } else {
@@ -447,9 +436,8 @@ export const tableComponent = defineComponent({
           slots.insertByIndex(newCell, index)
         })
 
-        stateController.update({
-          columnSize: tableInfo.columnSize + 1,
-          rowSize: tableInfo.rowSize
+        stateController.update(draft => {
+          draft.columnSize = tableInfo.columnSize + 1
         })
       },
       render(isOutputMode: boolean, slotRender: SlotRender) {

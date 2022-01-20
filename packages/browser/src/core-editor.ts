@@ -82,31 +82,29 @@ export class CoreEditor {
     this.options = options
     this.plugins = options.plugins || []
     return this.createLayout().then(layout => {
+      const staticProviders: Provider[] = [{
+        provide: EDITABLE_DOCUMENT,
+        useValue: layout.document
+      }, {
+        provide: EDITOR_OPTIONS,
+        useValue: options
+      }, {
+        provide: EDITOR_CONTAINER,
+        useValue: layout.workbench
+      }, {
+        provide: SCROLL_CONTAINER,
+        useValue: this.scroller
+      }, {
+        provide: NativeRenderer,
+        useClass: DomRenderer
+      }, {
+        provide: NativeSelectionBridge,
+        useClass: SelectionBridge
+      }]
       return bootstrap({
         components: (options.componentLoaders || []).map(i => i.component),
         formatters: (options.formatLoaders || []).map(i => i.formatter),
-      }).loadPlatformProviders(() => {
-        const staticProviders: Provider[] = [{
-          provide: EDITABLE_DOCUMENT,
-          useValue: layout.document
-        }, {
-          provide: EDITOR_OPTIONS,
-          useValue: options
-        }, {
-          provide: EDITOR_CONTAINER,
-          useValue: layout.workbench
-        }, {
-          provide: SCROLL_CONTAINER,
-          useValue: this.scroller
-        }, {
-          provide: NativeRenderer,
-          useClass: DomRenderer
-        }, {
-          provide: NativeSelectionBridge,
-          useClass: SelectionBridge
-        }]
-
-        return [
+        platformProviders: [
           ...staticProviders,
           ...this.defaultPlugins,
           ...(options.providers || []),

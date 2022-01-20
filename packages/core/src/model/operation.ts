@@ -1,3 +1,4 @@
+import { Patch } from 'immer'
 import { ComponentLiteral } from './component'
 import { SlotLiteral } from './slot'
 
@@ -20,7 +21,7 @@ export interface DeleteAction {
 
 export interface ApplyAction {
   type: 'apply'
-  state: any
+  patches: Patch[]
 }
 
 export interface InsertSlotAction {

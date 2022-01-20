@@ -36,9 +36,8 @@ export const videoComponent = defineComponent({
     const ref = useRef<HTMLVideoElement>()
 
     useDragResize(ref, rect => {
-      controller.update({
-        ...state!,
-        ...rect
+      state = controller.update(draft => {
+        Object.assign(draft, rect)
       })
     })
 
@@ -62,9 +61,8 @@ export const videoComponent = defineComponent({
         }
       },
       mergeProps(props: Partial<VideoState>) {
-        controller.update({
-          ...state!,
-          ...props
+        state = controller.update(draft => {
+          Object.assign(draft, props)
         })
       }
     }

@@ -16,9 +16,10 @@ import { Starter } from './starter'
 export interface TextBusConfig {
   components: Component[]
   formatters: Formatter[]
+  platformProviders: Provider[]
 }
 
-export function bootstrap(config: TextBusConfig) {
+export function bootstrap(config: TextBusConfig): Promise<Starter> {
   const staticProviders: Provider[] = [{
     provide: COMPONENT_LIST,
     useValue: config.components
@@ -41,25 +42,18 @@ export function bootstrap(config: TextBusConfig) {
     Renderer,
     TBSelection,
     Translator,
-    ...staticProviders
+    ...staticProviders,
+    ...config.platformProviders
   ]
 
-  function loadPlatformProviders(provideFn: () => Provider[]): Promise<Starter> {
-    const platformProviders = provideFn()
-    const rootInjector = new Starter([
-      ...providers,
-      ...platformProviders,
-      {
-        provide: Injector,
-        useFactory() {
-          return rootInjector
-        }
+  const rootInjector = new Starter([
+    ...providers,
+    {
+      provide: Injector,
+      useFactory() {
+        return rootInjector
       }
-    ])
-    return Promise.resolve(rootInjector)
-  }
-
-  return {
-    loadPlatformProviders
-  }
+    }
+  ])
+  return Promise.resolve(rootInjector)
 }

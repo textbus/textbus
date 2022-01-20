@@ -71,7 +71,9 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
     onChecked(value: any) {
       const state = query.queryComponent(preComponent)
       if (state.state === QueryStateType.Enabled) {
-        state.value!.useState(value)
+        state.value!.updateState(draft => {
+          draft.lang = value
+        })
       } else {
         const component = preComponent.createInstance(injector, {
           lang: value,
