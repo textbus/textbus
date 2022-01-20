@@ -51,7 +51,7 @@ export interface ComponentInstance<Methods extends ComponentMethods<State> = Com
   methods: Methods
   shortcutList: Shortcut[]
 
-  updateState(fn: (draft: Draft<State>) => void): void
+  updateState(fn: (draft: Draft<State>) => void): State
 
   toJSON(): ComponentLiteral<State>
 }
