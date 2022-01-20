@@ -68,28 +68,9 @@ export function defineComponent<Methods extends ComponentMethods,
       const stateChangeSubject = new Subject<any>()
       recordContextListener()
 
-      const changeController: ChangeController<unknown> = {
+      const changeController: ChangeController<State> = {
         update(fn) {
-          let changes!: Patch[]
-          let inverseChanges!: Patch[]
-          const newState = produce(state, fn, (p, ip) => {
-            changes = p
-            inverseChanges = ip
-          })
-          state = newState
-          stateChangeSubject.next(newState)
-          marker.markAsDirtied({
-            path: [],
-            apply: [{
-              type: 'apply',
-              patches: changes!
-            }],
-            unApply: [{
-              type: 'apply',
-              patches: inverseChanges!
-            }]
-          })
-          return newState
+          return componentInstance.updateState(fn)
         },
         onChange: stateChangeSubject.asObservable()
       }
@@ -110,20 +91,20 @@ export function defineComponent<Methods extends ComponentMethods,
             changes = p
             inverseChanges = ip
           })
-
           state = newState
           stateChangeSubject.next(newState)
           marker.markAsDirtied({
             path: [],
             apply: [{
               type: 'apply',
-              patches: changes
+              patches: changes!
             }],
             unApply: [{
               type: 'apply',
-              patches: inverseChanges
+              patches: inverseChanges!
             }]
           })
+          return newState
         },
         toJSON() {
           return {
