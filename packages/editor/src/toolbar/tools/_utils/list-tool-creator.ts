@@ -40,7 +40,7 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
       }
     },
     toParagraph(component: ComponentInstance<ListComponentInstance>) {
-      const range = selection.getSlotRange()!
+      const range = selection.getSlotRangeInCommonAncestorComponent()!
       const parent = component.parent!
       const index = parent.indexOf(component)
       const segment = component.methods.split!(range.startIndex, range.endIndex)

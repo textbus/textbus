@@ -3,6 +3,9 @@ import { makeError } from '../_utils/make-error'
 const vElementErrorFn = makeError('VElement')
 const parentNode = Symbol('parentNode')
 
+/**
+ * TextBus 虚拟 DOM 文本节点
+ */
 export class VTextNode {
   get parentNode() {
     return this[parentNode]
@@ -28,6 +31,9 @@ export interface VElementListeners {
   [listenKey: string]: <T extends Event>(ev: T) => any;
 }
 
+/**
+ * TextBus 虚拟 DOM 元素节点
+ */
 export class VElement {
   static createElement(tagName: string | VElementRenderFn,
                        attrs: VElementOptions,

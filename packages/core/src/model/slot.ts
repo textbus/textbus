@@ -25,24 +25,33 @@ export interface SlotLiteral<T = any> {
 
 export const placeholder = '\u200b'
 
+/**
+ * TextBus 插槽类，用于管理组件、文本及格式的增删改查
+ */
 export class Slot<T = any> {
+  /** 插槽所属的组件 */
   parent: ComponentInstance | null = null
+  /** 插槽变更标记器 */
   changeMarker = new ChangeMarker()
 
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
 
+  /** 插槽内容长度 */
   get length() {
     return this.content.length
   }
 
+  /** 插槽内容是否为空 */
   get isEmpty() {
     return this.length === 1 && this.getContentAtIndex(0) === Slot.placeholder
   }
 
+  /** 插槽当前下标位置 */
   get index() {
     return this.isEmpty ? 0 : this._index
   }
 
+  /** 插槽的 id，用于优化 diff 算法 */
   readonly id = Math.random()
 
   protected _index = 0
@@ -54,6 +63,10 @@ export class Slot<T = any> {
     this.content.append(Slot.placeholder)
   }
 
+  /**
+   * 更新插槽状态的方法
+   * @param fn
+   */
   updateState(fn: (draft: Draft<T>) => void): T {
     let changes!: Patch[]
     let inverseChanges!: Patch[]
@@ -76,6 +89,10 @@ export class Slot<T = any> {
     return newState!
   }
 
+  /**
+   * 向插槽内写入内容，并根据当前位置的格式，自动扩展
+   * @param content
+   */
   write(content: string | ComponentInstance) {
     const isString = typeof content === 'string'
     const contentType = isString ? ContentType.Text : content.type
@@ -97,6 +114,10 @@ export class Slot<T = any> {
     return this.insert(content)
   }
 
+  /**
+   * 向插槽内写入内容，并可同时应用格式
+   * @param content
+   */
   insert(content: string | ComponentInstance): boolean
   insert(content: string, formats: Formats): boolean
   insert(content: string, formatter: Formatter, value: FormatValue): boolean
@@ -184,6 +205,10 @@ export class Slot<T = any> {
     return true
   }
 
+  /**
+   * 把当前插槽的修改位置移动到指定位置，如果新位置大于当前位置，且传入了新的格式，则会同时在当前位置和新位置应用传入的格式
+   * @param index
+   */
   retain(index: number): boolean
   retain(index: number, formats: Formats): boolean
   retain(index: number, formatter: Formatter, value: FormatValue | null): boolean
@@ -264,6 +289,10 @@ export class Slot<T = any> {
     return true
   }
 
+  /**
+   * 从当前位置向前删除指定长度的内容
+   * @param count
+   */
   delete(count: number): boolean {
     if (count > this._index) {
       count = this._index
@@ -316,6 +345,11 @@ export class Slot<T = any> {
     return true
   }
 
+  /**
+   * 给插槽应用新的格式，如果为块级样式，则应用到整个插槽，否则根据参数配置的范围应用
+   * @param formatter
+   * @param data
+   */
   applyFormat(formatter: BlockFormatter, data: FormatValue): void
   applyFormat(formatter: InlineFormatter | AttributeFormatter, data: FormatRange): void
   applyFormat(formatter: Formatter, data: FormatValue | FormatRange): void {
@@ -327,6 +361,10 @@ export class Slot<T = any> {
     }
   }
 
+  /**
+   * 在当前插槽内删除指定的组件
+   * @param component
+   */
   removeComponent(component: ComponentInstance) {
     const index = this.indexOf(component)
     if (index > -1) {
@@ -336,10 +374,21 @@ export class Slot<T = any> {
     return false
   }
 
+  /**
+   * 剪切插槽内指定范围的内容
+   * @param startIndex
+   * @param endIndex
+   */
   cut(startIndex = 0, endIndex = this.length): Slot {
     return this.cutTo(new Slot(this.schema, this.state), startIndex, endIndex)
   }
 
+  /**
+   * 把当前插槽内指定范围的内容剪切到新插槽
+   * @param slot 新插槽
+   * @param startIndex
+   * @param endIndex
+   */
   cutTo<T extends Slot>(slot: T, startIndex = 0, endIndex = this.length): T {
     if (startIndex < 0) {
       startIndex = 0
@@ -373,30 +422,58 @@ export class Slot<T = any> {
     return slot
   }
 
+  /**
+   * 查找组件在插槽内的索引
+   * @param component
+   */
   indexOf(component: ComponentInstance) {
     return this.content.indexOf(component)
   }
 
+  /**
+   * 查找指定下标位置的内容
+   * @param index
+   */
   getContentAtIndex(index: number) {
     return this.content.getContentAtIndex(index)
   }
 
+  /**
+   * 切分出插槽内指定范围的内容
+   * @param startIndex
+   * @param endIndex
+   */
   sliceContent(startIndex = 0, endIndex = this.length) {
     return this.content.slice(startIndex, endIndex)
   }
 
+  /**
+   * 根据插槽的格式数据，生成格式树
+   */
   createFormatTree() {
     return this.format.toTree(0, this.length)
   }
 
+  /**
+   * 获取传入格式在插槽指定内范围的集合
+   * @param formatter 指定的格式
+   * @param startIndex
+   * @param endIndex
+   */
   getFormatRangesByFormatter(formatter: Formatter, startIndex: number, endIndex: number) {
     return this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
   }
 
+  /**
+   * 获取插槽格式的数组集合
+   */
   getFormats() {
     return this.format.toArray()
   }
 
+  /**
+   * 把插槽内容转换为 JSON
+   */
   toJSON(): SlotLiteral<T> {
     return {
       schema: this.schema,

@@ -1,5 +1,8 @@
 import { ComponentInstance, ComponentLiteral } from './component'
 
+/**
+ * TextBus 内容管理类
+ */
 export class Content {
   private data: Array<string | ComponentInstance> = []
 

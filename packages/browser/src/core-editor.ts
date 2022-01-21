@@ -166,9 +166,8 @@ export class CoreEditor {
 
     const outputRenderer = injector.get(OutputRenderer)
     const outputTranslator = injector.get(OutputTranslator)
-    const rootComponentRef = injector.get(RootComponentRef as Type<RootComponentRef>)
 
-    const vDom = outputRenderer.render(rootComponentRef.component)
+    const vDom = outputRenderer.render()
     const html = outputTranslator.transform(vDom)
 
     return {

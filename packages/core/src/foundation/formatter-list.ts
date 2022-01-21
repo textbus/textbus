@@ -3,6 +3,9 @@ import { Inject, Injectable } from '@tanbo/di'
 import { Formatter } from '../model/formatter'
 import { FORMATTER_LIST } from './_injection-tokens'
 
+/**
+ * 格式列表缓存
+ */
 @Injectable()
 export class FormatterList {
   private formatMap = new Map<string, Formatter>()
@@ -13,6 +16,10 @@ export class FormatterList {
     })
   }
 
+  /**
+   * 根据格式名获取格式
+   * @param key 格式名
+   */
   get(key: string) {
     return this.formatMap.get(key)
   }

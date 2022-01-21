@@ -10,6 +10,9 @@ import {
 import { FormatterList } from './formatter-list'
 import { ComponentList } from './component-list'
 
+/**
+ * TextBus 数据转组件和插槽的类
+ */
 @Injectable()
 export class Translator {
   constructor(private contextInjector: Injector,
@@ -17,11 +20,19 @@ export class Translator {
               private formatterMap: FormatterList) {
   }
 
+  /**
+   * 根据插槽数据生成插槽实例
+   * @param slotLiteral
+   */
   createSlot(slotLiteral: SlotLiteral): Slot {
     const slot = new Slot(slotLiteral.schema)
     return this.loadSlot(slot, slotLiteral)
   }
 
+  /**
+   * 根据组件数据生成组件实例
+   * @param componentLiteral
+   */
   createComponent(componentLiteral: ComponentLiteral): ComponentInstance | null {
     const factory = this.componentMap.get(componentLiteral.name)
     if (factory) {
@@ -31,6 +42,11 @@ export class Translator {
     return null
   }
 
+  /**
+   * 将插槽数据填充到指定的插槽
+   * @param source
+   * @param target
+   */
   fillSlot<T extends SlotLiteral, U extends Slot>(source: T, target: U): U {
     return this.loadSlot(target, source)
   }

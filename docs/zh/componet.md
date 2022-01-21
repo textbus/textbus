@@ -155,7 +155,7 @@ import { ContentType, useSlots } from '@textbus/core';
 
 const myCommponent = defineComponent({
   setup() {
-    const slots = useSLots([
+    const slots = useSlots([
       new Slot([
         ContentType.Text
       ])
@@ -195,8 +195,8 @@ const myCommponent = defineComponent({
       width: '100px'
     }
     const stateController = useState(state)
-    
-    state.onChange.subscribe(newState => {
+
+    stateController.onChange.subscribe(newState => {
       state = newState
     })
     return {
@@ -374,15 +374,15 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onDelete
+#### onContentDelete
 
 当用户删除组件插槽内内容时调用
 ```tsx
-import { onDelete } from '@textbus/core';
+import { onContentDelete } from '@textbus/core';
 
 const myCommponent = defineComponent({
   setup() {
-    onDelete(ev => {
+    onContentDelete(ev => {
       //
     })
   }
@@ -410,11 +410,11 @@ const myCommponent = defineComponent({
 当用户在组件插槽内输入时调用
 
 ```tsx
-import { onInsert } from '@textbus/core';
+import { onContentInsert } from '@textbus/core';
 
 const myCommponent = defineComponent({
   setup() {
-    onInsert(ev => {
+    onContentInsert(ev => {
       //
     })
   }
@@ -426,11 +426,11 @@ const myCommponent = defineComponent({
 当用户在组件插槽内输入完成时调用
 
 ```tsx
-import { onInserted } from '@textbus/core';
+import { onContentInserted } from '@textbus/core';
 
 const myCommponent = defineComponent({
   setup() {
-    onInserted(ev => {
+    onContentInserted(ev => {
       //
     })
   }

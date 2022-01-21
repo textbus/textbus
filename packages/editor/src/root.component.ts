@@ -1,7 +1,7 @@
 import {
   ContentType,
   defineComponent,
-  onInsert, onSlotRemove,
+  onContentInsert, onSlotRemove,
   Slot,
   SlotLiteral,
   SlotRender,
@@ -39,7 +39,7 @@ export const rootComponent = defineComponent({
       ])
     })
 
-    onInsert(ev => {
+    onContentInsert(ev => {
       if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
         const p = paragraphComponent.createInstance(injector)
         const slot = p.slots.get(0)!

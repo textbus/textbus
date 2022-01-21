@@ -15,14 +15,26 @@ export interface HistoryItem {
   operations: Operation[]
 }
 
+/**
+ * TextBus 历史记录管理类
+ */
 @Injectable()
 export class History {
+  /**
+   * 当历史记录变化时触发
+   */
   onChange: Observable<void>
 
+  /**
+   * 历史记录是否可回退
+   */
   get canBack() {
     return this.historySequence.length > 0 && this.index > 0
   }
 
+  /**
+   * 历史记录是否可重做
+   */
   get canForward() {
     return this.historySequence.length > 0 && this.index < this.historySequence.length
   }
@@ -42,11 +54,16 @@ export class History {
     this.onChange = this.changeEvent.asObservable()
   }
 
+  /**
+   * 监听数据变化，并记录操作历史
+   */
   listen() {
-    this.renderer.render()
     this.record()
   }
 
+  /**
+   * 重做历史记录
+   */
   forward() {
     if (this.canForward) {
       this.stop()
@@ -60,6 +77,9 @@ export class History {
     }
   }
 
+  /**
+   * 撤消操作
+   */
   back() {
     if (this.canBack) {
       this.stop()
@@ -73,7 +93,11 @@ export class History {
     }
   }
 
+  /**
+   * 销毁历史记录实例
+   */
   destroy() {
+    this.historySequence = []
     this.stop()
   }
 
