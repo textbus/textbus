@@ -17,7 +17,7 @@ import {
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, TBPlugin, SCROLL_CONTAINER
+  SelectionBridge, Plugin, SCROLL_CONTAINER
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
@@ -47,7 +47,7 @@ export class CoreEditor {
   isReady = false
   options: BaseEditorOptions = {}
 
-  protected plugins: TBPlugin[] = []
+  protected plugins: Plugin[] = []
 
   protected docContainer = createElement('div', {
     styles: {
@@ -62,7 +62,7 @@ export class CoreEditor {
     }
   })
 
-  protected defaultPlugins: Type<TBPlugin>[] = [
+  protected defaultPlugins: Type<Plugin>[] = [
     DefaultShortcut,
   ]
 
@@ -100,6 +100,9 @@ export class CoreEditor {
       }, {
         provide: NativeSelectionBridge,
         useClass: SelectionBridge
+      }, {
+        provide: CoreEditor,
+        useValue: this
       }]
       return bootstrap({
         components: (options.componentLoaders || []).map(i => i.component),

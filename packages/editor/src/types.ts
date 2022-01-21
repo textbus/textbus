@@ -6,7 +6,7 @@ import { UploadConfig } from './file-uploader'
 
 export interface EditorOptions extends BaseEditorOptions {
   theme?: string
-  customRootComponent?: Component
+  rootComponent?: Component
   /** 国际化配置 */
   i18n?: I18NConfig
   placeholder?: string

@@ -6,14 +6,14 @@ import {
   QueryState,
   QueryStateType,
   Slot,
-  TBSelection,
+  Selection,
   Translator
 } from '@textbus/core'
 
 import { listComponent, ListComponentInstance, paragraphComponent } from '../../../components/_api'
 
 export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const translator = injector.get(Translator)
   const commander = injector.get(Commander)
   const instance = {

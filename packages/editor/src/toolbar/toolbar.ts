@@ -1,13 +1,13 @@
 import { auditTime, fromEvent, merge, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { createElement, EDITABLE_DOCUMENT, TBPlugin } from '@textbus/browser'
-import { Keymap, Renderer, TBSelection } from '@textbus/core'
+import { createElement, EDITABLE_DOCUMENT, Plugin } from '@textbus/browser'
+import { Keymap, Renderer, Selection } from '@textbus/core'
 
 import { Tool } from './types'
 import { Layout } from '../layout'
 import { createKeymap } from './toolkit/_utils/_create-keymap'
 
-export class Toolbar implements TBPlugin {
+export class Toolbar implements Plugin {
   private elementRef!: HTMLElement
   private toolWrapper!: HTMLElement
   private keymapPrompt!: HTMLElement
@@ -19,7 +19,7 @@ export class Toolbar implements TBPlugin {
 
   setup(injector: Injector) {
     const layout = injector.get(Layout)
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
     const renderer = injector.get(Renderer)
     const editableDocument = injector.get(EDITABLE_DOCUMENT)
     this.elementRef = createElement('div', {

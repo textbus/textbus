@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Commander, Query, QueryState, TBSelection } from '@textbus/core'
+import { Commander, Query, QueryState, Selection } from '@textbus/core'
 
 import { Form, FormRadio, FormTextField } from '../../uikit/forms/_api'
 import { linkFormatter } from '../../formatters/_api'
@@ -11,7 +11,7 @@ export function linkToolConfigFactory(injector: Injector): DropdownToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const childI18n = i18n.getContext('plugins.toolbar.linkTool.view')
   const form = new Form({
     mini: true,

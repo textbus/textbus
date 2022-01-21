@@ -9,7 +9,7 @@ import {
   OutputRenderer,
   Query,
   Renderer, RootComponentRef,
-  TBSelection, Translator
+  Selection, Translator
 } from './foundation/_api'
 import { Starter } from './starter'
 
@@ -40,7 +40,7 @@ export function bootstrap(config: TextBusConfig): Promise<Starter> {
     OutputRenderer,
     Query,
     Renderer,
-    TBSelection,
+    Selection,
     Translator,
     ...staticProviders,
     ...config.platformProviders

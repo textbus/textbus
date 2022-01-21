@@ -5,7 +5,7 @@ import { ComponentInstance, ContentType, Slot } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 
-export interface TBRange {
+export interface Range {
   startSlot: Slot
   endSlot: Slot
   startOffset: number
@@ -25,7 +25,7 @@ export interface SelectedSlotRange {
 }
 
 export interface NativeSelectionConnector {
-  setSelection(range: TBRange | null): void
+  setSelection(range: Range | null): void
 }
 
 export interface SelectionLocation {
@@ -44,7 +44,7 @@ export interface CommonAncestorSlotScope {
   endChildSlot: Slot
 }
 
-export interface TBRangePosition {
+export interface RangePosition {
   left: number
   top: number
 }
@@ -52,9 +52,9 @@ export interface TBRangePosition {
 export abstract class NativeSelectionBridge {
   abstract connect(connector: NativeSelectionConnector): void
 
-  abstract restore(range: TBRange | null): void
+  abstract restore(range: Range | null): void
 
-  abstract getRect(location: SelectionLocation): TBRangePosition | null
+  abstract getRect(location: SelectionLocation): RangePosition | null
 }
 
 export interface SelectionPaths {
@@ -62,13 +62,13 @@ export interface SelectionPaths {
   end: number[]
 }
 
-export interface TBSelectionMiddleware {
+export interface SelectionMiddleware {
   getSelectedScopes(currentSelectedScope: SelectedScope[]): SelectedScope[]
 }
 
 @Injectable()
-export class TBSelection {
-  onChange: Observable<TBRange | null>
+export class Selection {
+  onChange: Observable<Range | null>
 
   get isSelected() {
     return ![this.startSlot, this.startOffset, this.endSlot, this.endOffset].includes(null)
@@ -177,12 +177,12 @@ export class TBSelection {
   private _endSlot: Slot | null = null
   private _startOffset: number | null = null
   private _endOffset: number | null = null
-  private changeEvent = new Subject<TBRange | null>()
+  private changeEvent = new Subject<Range | null>()
 
   private cacheCaretPositionTimer!: any
-  private oldCaretPosition!: TBRangePosition | null
+  private oldCaretPosition!: RangePosition | null
 
-  private middlewares: TBSelectionMiddleware[] = []
+  private middlewares: SelectionMiddleware[] = []
 
   constructor(private bridge: NativeSelectionBridge,
               private root: RootComponentRef,
@@ -197,7 +197,7 @@ export class TBSelection {
       return previous === current
     }))
     bridge.connect({
-      setSelection: (range: TBRange | null) => {
+      setSelection: (range: Range | null) => {
         if (range === null) {
           if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
             return
@@ -259,7 +259,7 @@ export class TBSelection {
       }]
     }
     const scopes = this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
-    return this.middlewares.reduce((currentScopes: SelectedScope[], middleware: TBSelectionMiddleware) => {
+    return this.middlewares.reduce((currentScopes: SelectedScope[], middleware: SelectionMiddleware) => {
       return middleware.getSelectedScopes(currentScopes)
     }, scopes.filter(item => {
       return item.startIndex < item.endIndex
@@ -367,9 +367,9 @@ export class TBSelection {
         end: []
       }
     }
-    const start = TBSelection.getPathsBySlot(this.startSlot!)
+    const start = Selection.getPathsBySlot(this.startSlot!)
     start.push(this.startOffset!)
-    const end = TBSelection.getPathsBySlot(this.endSlot!)
+    const end = Selection.getPathsBySlot(this.endSlot!)
     end.push(this.endOffset!)
     return {
       start,
@@ -401,7 +401,7 @@ export class TBSelection {
     this.restore()
   }
 
-  addMiddleware(middleware: TBSelectionMiddleware) {
+  addMiddleware(middleware: SelectionMiddleware) {
     this.middlewares.push(middleware)
   }
 
@@ -426,7 +426,7 @@ export class TBSelection {
   }
 
   findSlotByPaths(paths: number[]): Slot | null {
-    const result = TBSelection.findTreeNode(paths, this.root.component)
+    const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
       return result
     }
@@ -434,7 +434,7 @@ export class TBSelection {
   }
 
   findComponentByPath(paths: number[]): ComponentInstance | null {
-    const result = TBSelection.findTreeNode(paths, this.root.component)
+    const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
       return null
     }
@@ -540,8 +540,8 @@ export class TBSelection {
     }
     return this.getScopes(this.startSlot!,
       this.endSlot!,
-      TBSelection.findExpandedStartIndex(this.startSlot!, this.startOffset!),
-      TBSelection.findExpandedEndIndex(this.endSlot!, this.endOffset!))
+      Selection.findExpandedStartIndex(this.startSlot!, this.startOffset!),
+      Selection.findExpandedEndIndex(this.endSlot!, this.endOffset!))
   }
 
   findFirstLocation(slot: Slot): SelectionLocation {
@@ -982,7 +982,7 @@ export class TBSelection {
     if (paths.length === 0) {
       return component || null
     }
-    return TBSelection.findTreeNode(paths, component)
+    return Selection.findTreeNode(paths, component)
   }
 
   private static getPathsBySlot(slot: Slot) {

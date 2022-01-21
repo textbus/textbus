@@ -1,6 +1,6 @@
 import { Injector, Provider, Type } from '@tanbo/di'
 import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
-import { makeError, TBSelection } from '@textbus/core'
+import { makeError, Selection } from '@textbus/core'
 import { CoreEditor } from '@textbus/browser'
 
 import { EditorOptions } from './types'
@@ -26,7 +26,7 @@ export class Editor extends CoreEditor {
 
   constructor(public selector: string | HTMLElement,
               options: EditorOptions = {}) {
-    super(options.customRootComponent || rootComponent)
+    super(options.rootComponent || rootComponent)
     if (typeof selector === 'string') {
       this.host = document.querySelector(selector)!
     } else {
@@ -55,8 +55,11 @@ export class Editor extends CoreEditor {
         supportMarkdown: false
       })
     }, {
+      provide: Editor,
+      useValue: this
+    }, {
       provide: FileUploader,
-      useFactory(selection: TBSelection, message: Message, i18n: I18n) {
+      useFactory(selection: Selection, message: Message, i18n: I18n) {
         return {
           upload: (config: UploadConfig): Observable<string | string[]> => {
             if (!selection.isSelected) {
@@ -83,7 +86,7 @@ export class Editor extends CoreEditor {
           }
         }
       },
-      deps: [TBSelection, Message, I18n]
+      deps: [Selection, Message, I18n]
     },
       ContextMenu,
       Dialog,

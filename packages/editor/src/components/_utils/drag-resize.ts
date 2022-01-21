@@ -1,4 +1,4 @@
-import { onDestroy, onViewChecked, onViewInit, Ref, TBSelection, useContext, useSelf } from '@textbus/core'
+import { onDestroy, onViewChecked, onViewInit, Ref, Selection, useContext, useSelf } from '@textbus/core'
 import { createElement, EDITABLE_DOCUMENT, EDITOR_CONTAINER } from '@textbus/browser'
 import { fromEvent, Subscription } from '@tanbo/stream'
 
@@ -44,7 +44,7 @@ let currentRef: Ref<HTMLElement> | null = null
 export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) => void) {
   const context = useContext()
   const componentInstance = useSelf()
-  const selection = context.get(TBSelection)
+  const selection = context.get(Selection)
   const docContainer = context.get(EDITOR_CONTAINER)
   const editorDocument = context.get(EDITABLE_DOCUMENT)
 

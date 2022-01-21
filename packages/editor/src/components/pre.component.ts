@@ -8,7 +8,7 @@ import {
   onEnter, onPaste,
   Slot, SlotLiteral,
   SlotRender,
-  Slots, TBSelection,
+  Slots, Selection,
   Translator, useContext,
   useSlots, useState,
   VElement,
@@ -288,7 +288,7 @@ export const preComponent = defineComponent({
     })
     const injector = useContext()
 
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
 
     stateController.onChange.subscribe(newLang => {
       data.lang = newLang.lang
