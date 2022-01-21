@@ -1,4 +1,4 @@
-import { Commander, QueryState, QueryStateType, TBSelection } from '@textbus/core'
+import { Commander, QueryState, QueryStateType, Selection } from '@textbus/core'
 import { Injector } from '@tanbo/di'
 
 import { DropdownTool, DropdownToolConfig } from '../toolkit/_api'
@@ -9,7 +9,7 @@ import { TableCellSlot, tableComponent } from '../../components/table.component'
 export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfig {
   const i18n = injector.get(I18n)
   const commander = injector.get(Commander)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const childI18n = i18n.getContext('plugins.toolbar.tableAddTool.view')
   const form = new Form({
     mini: true,

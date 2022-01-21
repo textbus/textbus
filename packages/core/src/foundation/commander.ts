@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di'
 
-import { SelectionLocation, TBRange, TBSelection } from './selection'
+import { SelectionLocation, Range, Selection } from './selection'
 import { ComponentInstance, ContentType, Formatter, FormatType, FormatValue, placeholder, Slot } from '../model/_api'
 import { NativeRenderer } from './_injection-tokens'
 import {
@@ -8,7 +8,7 @@ import {
   EnterEventData,
   InsertEventData,
   invokeListener,
-  TBEvent
+  Event
 } from '../define-component'
 
 interface DeleteTreeState extends SelectionLocation {
@@ -21,7 +21,7 @@ export type Nullable<T> = {
 
 @Injectable()
 export class Commander {
-  constructor(private selection: TBSelection,
+  constructor(private selection: Selection,
               private nativeRenderer: NativeRenderer) {
   }
 
@@ -32,7 +32,7 @@ export class Commander {
 
     let isPreventDefault = true
 
-    const event = new TBEvent<DeleteEventData>(source, {
+    const event = new Event<DeleteEventData>(source, {
       count: endIndex - startIndex,
       index: endIndex
     }, () => {
@@ -80,7 +80,7 @@ export class Commander {
   }
 
   extractSlots(schema: ContentType[], greedy = false) {
-    const range: Nullable<TBRange> = {
+    const range: Nullable<Range> = {
       startSlot: null,
       startOffset: null,
       endSlot: null,
@@ -164,7 +164,7 @@ export class Commander {
 
     if (result) {
       selection.setLocation(result, result.index)
-      invokeListener(result.parent!, 'onInserted', new TBEvent<InsertEventData>(result, {
+      invokeListener(result.parent!, 'onInserted', new Event<InsertEventData>(result, {
         index: result.index,
         content
       }, () => {
@@ -189,7 +189,7 @@ export class Commander {
     }
     const startSlot = this.selection.startSlot!
     let isPreventDefault = true
-    const event = new TBEvent<EnterEventData>(startSlot, {
+    const event = new Event<EnterEventData>(startSlot, {
       index: this.selection.startOffset!
     }, () => {
       isPreventDefault = false
@@ -240,7 +240,7 @@ export class Commander {
     if (selection.startSlot === selection.endSlot) {
       const slot = selection.startSlot!
       let isPreventDefault = true
-      const event = new TBEvent<DeleteEventData>(slot, {
+      const event = new Event<DeleteEventData>(slot, {
         count: selection.endOffset! - selection.startOffset!,
         index: selection.endOffset!,
       }, () => {
@@ -260,7 +260,7 @@ export class Commander {
     let deletedSlot: Slot | null = null
     const endSlot = selection.endSlot!
     if (!endSlot.isEmpty) {
-      const event = new TBEvent<DeleteEventData>(endSlot, {
+      const event = new Event<DeleteEventData>(endSlot, {
         index: endSlot.length,
         count: endSlot.length - selection.endOffset!
       }, () => {
@@ -290,7 +290,7 @@ export class Commander {
       const slot = scope.slot
 
       let isPreventDefault = true
-      const event = new TBEvent<DeleteEventData>(slot, {
+      const event = new Event<DeleteEventData>(slot, {
         count: scope.endIndex - scope.startIndex,
         index: scope.endIndex,
       }, () => {
@@ -329,7 +329,7 @@ export class Commander {
           }
         } else {
           let isPreventDefault = true
-          const event = new TBEvent<null>(slot, null, () => {
+          const event = new Event<null>(slot, null, () => {
             isPreventDefault = false
           })
           invokeListener(parentComponent, 'onSlotRemove', event)
@@ -374,7 +374,7 @@ export class Commander {
     const component = this.selection.commonAncestorComponent!
     const slot = this.selection.commonAncestorSlot!
     let isPreventDefault = true
-    invokeListener(component, 'onPaste', new TBEvent(slot, {
+    invokeListener(component, 'onPaste', new Event(slot, {
       index: this.selection.startOffset!,
       data: pasteSlot,
       text
@@ -557,7 +557,7 @@ export class Commander {
 
   private _insert(target: Slot, index: number, content: string | ComponentInstance, expand: boolean): false | Slot {
     let isPreventDefault = true
-    const event = new TBEvent<InsertEventData>(target, {
+    const event = new Event<InsertEventData>(target, {
       index: this.selection.startOffset!,
       content
     }, () => {
@@ -595,7 +595,7 @@ export class Commander {
       const index = parentSlot.indexOf(component)
 
       let isPreventDefault = true
-      const event = new TBEvent<DeleteEventData>(parentSlot, {
+      const event = new Event<DeleteEventData>(parentSlot, {
         count: 1,
         index: index + 1,
       }, () => {
@@ -616,7 +616,7 @@ export class Commander {
         if (parentComponent.slots.length > 1) {
           const index = parentComponent.slots.indexOf(parentSlot)
           let isPreventDefault = true
-          const event = new TBEvent<null>(parentSlot, null, () => {
+          const event = new Event<null>(parentSlot, null, () => {
             isPreventDefault = false
           })
           invokeListener(parentComponent, 'onSlotRemove', event)

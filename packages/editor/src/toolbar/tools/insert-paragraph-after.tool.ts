@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Commander, QueryState, QueryStateType, TBSelection } from '@textbus/core'
+import { Commander, QueryState, QueryStateType, Selection } from '@textbus/core'
 
 import { ButtonTool, ButtonToolConfig } from '../toolkit/_api'
 import { I18n } from '../../i18n'
@@ -8,7 +8,7 @@ import { paragraphComponent } from '../../components/paragraph.component'
 export function insertParagraphAfterToolConfigFactory(injector: Injector): ButtonToolConfig {
   const i18n = injector.get(I18n)
   const commander = injector.get(Commander)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   return {
     iconClasses: ['textbus-icon-insert-paragraph-after'],
     tooltip: i18n.get('plugins.toolbar.insertParagraphAfterTool.tooltip'),

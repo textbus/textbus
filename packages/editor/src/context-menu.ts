@@ -8,8 +8,8 @@ import {
   invokeListener,
   Renderer,
   Slot,
-  TBEvent,
-  TBSelection
+  Event,
+  Selection
 } from '@textbus/core'
 import { createElement, createTextNode, EDITABLE_DOCUMENT, EDITOR_CONTAINER, Parser } from '@textbus/browser'
 import { I18n } from './i18n'
@@ -31,7 +31,7 @@ export class ContextMenu {
               private message: Message,
               private renderer: Renderer,
               private commander: Commander,
-              private selection: TBSelection) {
+              private selection: Selection) {
     this.elementRef = createElement('div', {
       classes: ['textbus-contextmenu'],
       children: [
@@ -146,7 +146,7 @@ export class ContextMenu {
       invokeListener(
         component as ComponentInstance,
         'onContextMenu',
-        new TBEvent<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
+        new Event<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
           menuItems.push(...menus)
         }))
       component = component.parent?.parent || null

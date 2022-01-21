@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di'
 
-import { TBSelection } from './selection'
+import { Selection } from './selection'
 import { ComponentInstance, ComponentMethods, Formatter, FormatValue, Slot } from '../model/_api'
 import { Component } from '../define-component'
 
@@ -17,7 +17,7 @@ export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.
 
 @Injectable()
 export class Query {
-  constructor(private selection: TBSelection) {
+  constructor(private selection: Selection) {
   }
 
   queryFormat(formatter: Formatter): QueryState<FormatValue> {

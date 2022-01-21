@@ -8,7 +8,7 @@ import {
   Slot,
   SlotLiteral,
   Slots,
-  TBSelection,
+  Selection,
   useContext,
   useSelf
 } from '@textbus/core'
@@ -348,7 +348,7 @@ export function useTableMultipleRange(
   const injector = useContext()
   const nativeSelectionBridge = injector.get(SelectionBridge)
   const renderer = injector.get(Renderer)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const editorContainer = injector.get(EDITOR_CONTAINER)
   const animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1)
 

@@ -1,12 +1,12 @@
 import { Injector } from '@tanbo/di'
-import { Commander, QueryState, QueryStateType, TBSelection } from '@textbus/core'
+import { Commander, QueryState, QueryStateType, Selection } from '@textbus/core'
 
 import { ButtonTool, ButtonToolConfig } from '../toolkit/_api'
 import { linkFormatter } from '../../formatters/_api'
 import { I18n } from '../../i18n'
 
 export function cleanToolConfigFactory(injector: Injector): ButtonToolConfig<any> {
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const commander = injector.get(Commander)
   const i18n = injector.get(I18n)
   return {

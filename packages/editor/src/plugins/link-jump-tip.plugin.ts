@@ -1,15 +1,15 @@
 import { Subscription } from '@tanbo/stream'
-import { NativeSelectionBridge, TBSelection } from '@textbus/core'
+import { NativeSelectionBridge, Selection } from '@textbus/core'
 import { Injector, Type } from '@tanbo/di'
-import { EDITABLE_DOCUMENT, EDITOR_CONTAINER, TBPlugin } from '@textbus/browser'
+import { EDITABLE_DOCUMENT, EDITOR_CONTAINER, Plugin } from '@textbus/browser'
 import { I18n } from '../i18n'
 
-export class LinkJumpTipPlugin implements TBPlugin {
+export class LinkJumpTipPlugin implements Plugin {
   private link = document.createElement('a')
   private subs: Subscription[] = []
 
   setup(injector: Injector) {
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
     const nativeSelectionBridge = injector.get(NativeSelectionBridge as Type<NativeSelectionBridge>)
     const container = injector.get(EDITOR_CONTAINER)
     const i18n = injector.get(I18n)
@@ -28,7 +28,7 @@ export class LinkJumpTipPlugin implements TBPlugin {
     this.subs.forEach(i => i.unsubscribe())
   }
 
-  private onSelectionChange(contentDocument: Document, selection: TBSelection, bridge: NativeSelectionBridge, container: HTMLElement) {
+  private onSelectionChange(contentDocument: Document, selection: Selection, bridge: NativeSelectionBridge, container: HTMLElement) {
     const nativeSelection = contentDocument.getSelection()!
     const firstNativeRange = nativeSelection.rangeCount ? nativeSelection.getRangeAt(0) : null
     if (firstNativeRange) {

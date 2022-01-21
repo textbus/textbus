@@ -1,10 +1,10 @@
 import { Injectable } from '@tanbo/di'
-import { Commander, History, Keyboard, TBSelection } from '@textbus/core'
-import { TBPlugin } from '../core/_api'
+import { Commander, History, Keyboard, Selection } from '@textbus/core'
+import { Plugin } from '../core/_api'
 
 @Injectable()
-export class DefaultShortcut implements TBPlugin {
-  constructor(private selection: TBSelection,
+export class DefaultShortcut implements Plugin {
+  constructor(private selection: Selection,
               private history: History,
               private commander: Commander,
               private keyboard: Keyboard) {

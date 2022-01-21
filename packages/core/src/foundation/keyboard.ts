@@ -1,7 +1,7 @@
 import { Injectable } from '@tanbo/di'
 import { Shortcut } from '../model/_api'
 import { Commander } from './commander'
-import { TBSelection } from './selection'
+import { Selection } from './selection'
 
 export interface KeymapState {
   ctrlKey: boolean
@@ -15,7 +15,7 @@ export class Keyboard {
   private shortcutList: Shortcut[] = []
 
   constructor(private commander: Commander,
-              private selection: TBSelection) {
+              private selection: Selection) {
   }
 
   execShortcut(keymapState: KeymapState): boolean {

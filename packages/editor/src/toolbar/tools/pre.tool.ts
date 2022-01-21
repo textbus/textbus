@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Commander, Query, QueryState, QueryStateType, TBSelection } from '@textbus/core'
+import { Commander, Query, QueryState, QueryStateType, Selection } from '@textbus/core'
 
 import { SelectTool, SelectToolConfig } from '../toolkit/_api'
 import { preComponent } from '../../components/pre.component'
@@ -9,7 +9,7 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   return {
     iconClasses: ['textbus-icon-terminal'],
     tooltip: i18n.get('plugins.toolbar.preTool.tooltip'),

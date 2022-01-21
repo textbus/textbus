@@ -6,7 +6,7 @@ import {
   NativeSelectionConnector,
   Renderer, SelectionLocation,
   Slot,
-  TBRange,
+  Range as TBRange,
   VElement,
   VNodeLocation,
   VTextNode

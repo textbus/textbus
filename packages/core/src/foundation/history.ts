@@ -4,7 +4,7 @@ import { debounceTime, Observable, Subject, Subscription, tap } from '@tanbo/str
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
 import { Renderer } from './renderer'
-import { SelectionPaths, TBSelection } from './selection'
+import { SelectionPaths, Selection } from './selection'
 import { FormatterList } from './formatter-list'
 import { RootComponentRef } from './_injection-tokens'
 import { applyPatches } from 'immer'
@@ -35,7 +35,7 @@ export class History {
   private subscription: Subscription | null = null
 
   constructor(private root: RootComponentRef,
-              private selection: TBSelection,
+              private selection: Selection,
               private translator: Translator,
               private renderer: Renderer,
               private formatMap: FormatterList) {

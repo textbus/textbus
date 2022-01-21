@@ -205,7 +205,7 @@ let eventHandleFn: null | ((...args: any[]) => void) = null
 let isPreventDefault = false
 
 
-export class TBEvent<T, S extends Slot = Slot> {
+export class Event<T, S extends Slot = Slot> {
   constructor(public target: S,
               public data: T,
               eventHandle: (...args: any[]) => void
@@ -248,13 +248,13 @@ export interface ContextMenuItem {
 
 
 export interface EventTypes {
-  onPaste: (event: TBEvent<PasteEventData>) => void
-  onInserted: (event: TBEvent<InsertEventData>) => void
-  onInsert: (event: TBEvent<InsertEventData>) => void
-  onEnter: (event: TBEvent<EnterEventData>) => void
-  onDelete: (event: TBEvent<DeleteEventData>) => void
-  onSlotRemove: (event: TBEvent<null>) => void
-  onContextMenu: (event: TBEvent<null>) => ContextMenuItem[]
+  onPaste: (event: Event<PasteEventData>) => void
+  onInserted: (event: Event<InsertEventData>) => void
+  onInsert: (event: Event<InsertEventData>) => void
+  onEnter: (event: Event<EnterEventData>) => void
+  onDelete: (event: Event<DeleteEventData>) => void
+  onSlotRemove: (event: Event<null>) => void
+  onContextMenu: (event: Event<null>) => ContextMenuItem[]
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
@@ -298,13 +298,13 @@ function recordContextListenerEnd(component: ComponentInstance) {
 
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onDelete', data: TBEvent<DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: TBEvent<null>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: TBEvent<EnterEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onInsert', data: TBEvent<InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onInserted', data: TBEvent<InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: TBEvent<null>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: TBEvent<PasteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onDelete', data: Event<DeleteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<EnterEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onInsert', data: Event<InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onInserted', data: Event<InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (...args: infer U) => any ? U : never>(target: ComponentInstance, eventType: K, data?: D) {
   const cache = eventCacheMap.get(target)

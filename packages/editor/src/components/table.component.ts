@@ -6,7 +6,7 @@ import {
   defineComponent, onContextMenu, onSlotRemove,
   Slot,
   SlotLiteral,
-  SlotRender, TBSelection,
+  SlotRender, Selection,
   Translator, useContext, useSelf,
   useSlots, useState,
   VElement
@@ -65,7 +65,7 @@ export const tableComponent = defineComponent({
     let tableCells = autoComplete(config.cells)
     const injector = useContext()
     const i18n = injector.get(I18n)
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
 
     let tableInfo: TableInfo = {
       columnSize: tableCells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),

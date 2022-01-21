@@ -4,7 +4,7 @@ import {
   ContentType, defineComponent,
   onEnter,
   Slot, SlotLiteral,
-  SlotRender, TBSelection, Translator, useContext,
+  SlotRender, Selection, Translator, useContext,
   useSlots,
   VElement
 } from '@textbus/core'
@@ -45,7 +45,7 @@ export const listComponent = defineComponent({
   },
   setup(data: ListComponentState): ListComponentInstance {
     const injector = useContext()
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
 
     const slots = useSlots(data.slots || [new Slot([
       ContentType.Text,

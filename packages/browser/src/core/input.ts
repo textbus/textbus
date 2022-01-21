@@ -1,6 +1,6 @@
 import { filter, fromEvent, map, merge, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { Commander, ContentType, Keyboard, Slot, TBSelection } from '@textbus/core'
+import { Commander, ContentType, Keyboard, Slot, Selection } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { SelectionBridge } from './selection-bridge'
@@ -27,7 +27,7 @@ export class Input {
   constructor(private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
-              private selection: TBSelection,
+              private selection: Selection,
               private selectionBridge: SelectionBridge) {
     const textarea = this.textarea
 

@@ -6,7 +6,7 @@ import {
   QueryState,
   Query,
   QueryStateType,
-  TBSelection,
+  Selection,
   Translator
 } from '@textbus/core'
 import { blockComponent, headingComponent, paragraphComponent } from '../../components/_api'
@@ -17,7 +17,7 @@ import { I18n } from '../../i18n'
 export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
-  const selection = injector.get(TBSelection)
+  const selection = injector.get(Selection)
   const translator = injector.get(Translator)
   const commander = injector.get(Commander)
   return {

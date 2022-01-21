@@ -5,7 +5,7 @@ import {
   Slot,
   SlotLiteral,
   SlotRender,
-  TBSelection,
+  Selection,
   Translator,
   useContext,
   useSlots,
@@ -24,7 +24,7 @@ export const rootComponent = defineComponent({
   },
   setup(slot?: Slot) {
     const injector = useContext()
-    const selection = injector.get(TBSelection)
+    const selection = injector.get(Selection)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
 
     const slots = useSlots([slot || new Slot([
