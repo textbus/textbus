@@ -10,6 +10,9 @@ export interface KeymapState {
   key: string
 }
 
+/**
+ * TextBus 键盘管理
+ */
 @Injectable()
 export class Keyboard {
   private shortcutList: Shortcut[] = []
@@ -18,6 +21,10 @@ export class Keyboard {
               private selection: Selection) {
   }
 
+  /**
+   * 调用快捷键
+   * @param keymapState 快捷键配置
+   */
   execShortcut(keymapState: KeymapState): boolean {
     const key = keymapState.key
     const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\\])/g, '\\$1')}]$`, 'i')
@@ -32,6 +39,10 @@ export class Keyboard {
     return this.handleShortcut(reg, keymapState, this.shortcutList)
   }
 
+  /**
+   * 注册快捷键
+   * @param shortcut 快捷键配置
+   */
   addShortcut(shortcut: Shortcut) {
     this.shortcutList.unshift(shortcut)
   }

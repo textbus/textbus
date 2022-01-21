@@ -12,17 +12,17 @@ import {
 import { invokeListener, Ref } from '../define-component'
 import { NativeNode, NativeRenderer, RootComponentRef } from './_injection-tokens'
 
-export interface MapChanges {
+interface MapChanges {
   remove: string[]
   set: [string, any][]
 }
 
-export interface ArrayChanges {
+interface ArrayChanges {
   remove: string[]
   add: string[]
 }
 
-export interface ObjectChanges {
+interface ObjectChanges {
   remove: [string, any][]
   add: [string, any][]
 }
@@ -163,15 +163,27 @@ class NativeElementMappingTable {
   }
 }
 
+/**
+ * 虚拟 DOM 节点在数据内的范围
+ */
 export interface VNodeLocation {
   startIndex: number
   endIndex: number
   slot: Slot
 }
 
+/**
+ * TextBus 编辑渲染器，负责组件的渲染，生成 DOM，并根据数据变化，更新 DOM
+ */
 @Injectable()
 export class Renderer {
+  /**
+   * 视图更新前触发
+   */
   onViewUpdateBefore: Observable<void>
+  /**
+   * 视图更新后触发
+   */
   onViewChecked: Observable<void>
 
   private componentVNode = new WeakMap<ComponentInstance, VElement>()
@@ -198,6 +210,9 @@ export class Renderer {
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
   }
 
+  /**
+   * 以编辑模式渲染当前文档
+   */
   render() {
     const component = this.rootComponentRef.component
     this.viewUpdateBeforeEvent.next()
@@ -225,18 +240,34 @@ export class Renderer {
     this.viewCheckedEvent.next()
   }
 
+  /**
+   * 获取组件对应的虚拟 DOM 节点
+   * @param component
+   */
   getVNodeByComponent(component: ComponentInstance) {
     return this.componentVNode.get(component)
   }
 
+  /**
+   * 获取插件对应的虚拟 DOM 节点
+   * @param slot
+   */
   getVNodeBySlot(slot: Slot) {
     return this.slotVNodeCaches.get(slot)
   }
 
+  /**
+   * 获取原生节点对应的虚拟 DOM 节点
+   * @param vNode
+   */
   getNativeNodeByVNode(vNode: VElement | VTextNode): any {
     return this.nativeNodeCaches.get(vNode)
   }
 
+  /**
+   * 获取虚拟 DOM 节点的原始数据在文档中的位置
+   * @param node
+   */
   getLocationByVNode(node: VElement | VTextNode | Slot) {
     if (node instanceof Slot) {
       node = this.slotVNodeCaches.get(node)!
@@ -244,6 +275,10 @@ export class Renderer {
     return this.vNodeLocation.get(node)
   }
 
+  /**
+   * 获取原生节点的原始数据在文档中的位置
+   * @param node
+   */
   getLocationByNativeNode(node: NativeNode) {
     const vNode = this.nativeNodeCaches.get(node)
     return this.vNodeLocation.get(vNode) || null

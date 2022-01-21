@@ -1,7 +1,7 @@
 import { NullInjector, Provider, ReflectiveInjector, Type } from '@tanbo/di'
 
 import { ComponentInstance } from './model/component'
-import { NativeNode, History, RootComponentRef, LifeCycle } from './foundation/_api'
+import { NativeNode, History, RootComponentRef, LifeCycle, Renderer } from './foundation/_api'
 
 export class Starter extends ReflectiveInjector {
   constructor(private providers: Provider[] = []) {
@@ -10,10 +10,12 @@ export class Starter extends ReflectiveInjector {
 
   mount(rootComponent: ComponentInstance, host: NativeNode) {
     const rootComponentRef = this.get(RootComponentRef as Type<RootComponentRef>)
+
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host
     this.get(History).listen()
     this.get(LifeCycle).init()
+    this.get(Renderer).render()
   }
 
   destroy() {

@@ -24,7 +24,14 @@ export interface SelectedSlotRange {
   component: ComponentInstance
 }
 
+/**
+ * 原生选区连接器
+ */
 export interface NativeSelectionConnector {
+  /**
+   * 当原生选区变化时，生成对应的 TextBus 选区，并传入 TextBus 选区
+   * @param range 对应原生选区在 TextBus 中的选区
+   */
   setSelection(range: Range | null): void
 }
 
@@ -49,11 +56,26 @@ export interface RangePosition {
   top: number
 }
 
+/**
+ * 用于跨平台实现的原生选区抽象类
+ */
 export abstract class NativeSelectionBridge {
+  /**
+   * 连接方法，TextBus 选区初始化时调用，并传入连接器
+   * @param connector
+   */
   abstract connect(connector: NativeSelectionConnector): void
 
+  /**
+   * TextBus 选区变化时调用，同时传入选区位置，用于原生选区实现具体平台的拖蓝效果
+   * @param range
+   */
   abstract restore(range: Range | null): void
 
+  /**
+   * 获取原生选区的坐标位置，用于 TextBus 计算光标移动相关功能
+   * @param location
+   */
   abstract getRect(location: SelectionLocation): RangePosition | null
 }
 
@@ -62,38 +84,47 @@ export interface SelectionPaths {
   end: number[]
 }
 
-export interface SelectionMiddleware {
-  getSelectedScopes(currentSelectedScope: SelectedScope[]): SelectedScope[]
-}
-
+/**
+ * TextBus 选区实现类，用于选择 TextBus 文档内的内容
+ */
 @Injectable()
 export class Selection {
+  /** 当选区变化时触发 */
   onChange: Observable<Range | null>
 
+  /** 当前是否有选区 */
   get isSelected() {
     return ![this.startSlot, this.startOffset, this.endSlot, this.endOffset].includes(null)
   }
 
+  /** 当前选区是否闭合 */
   get isCollapsed() {
     return this.isSelected && this.startSlot === this.endSlot && this.startOffset === this.endOffset
   }
 
+  /** 选区开始插槽 */
   get startSlot() {
     return this._startSlot
   }
 
+  /** 选区开始位置在开始插槽中的索引 */
   get startOffset() {
     return this._startOffset
   }
 
+  /** 选区结束插槽 */
   get endSlot() {
     return this._endSlot
   }
 
+  /** 选区结束位置在线束插槽中的索引 */
   get endOffset() {
     return this._endOffset
   }
 
+  /**
+   * 选区的公共父插槽
+   */
   get commonAncestorSlot(): Slot | null {
     let startSlot = this.startSlot
     let endSlot = this.endSlot
@@ -134,6 +165,9 @@ export class Selection {
     return f
   }
 
+  /**
+   * 选区的公共父组件
+   */
   get commonAncestorComponent(): ComponentInstance | null {
     let startComponent = this.startSlot?.parent
     let endComponent = this.endSlot?.parent
@@ -182,8 +216,6 @@ export class Selection {
   private cacheCaretPositionTimer!: any
   private oldCaretPosition!: RangePosition | null
 
-  private middlewares: SelectionMiddleware[] = []
-
   constructor(private bridge: NativeSelectionBridge,
               private root: RootComponentRef,
               private renderer: Renderer) {
@@ -217,24 +249,44 @@ export class Selection {
     })
   }
 
+  /**
+   * 设置选区的开始位置
+   * @param slot 开始位置的插槽
+   * @param offset 开始位置索引
+   */
   setStart(slot: Slot, offset: number) {
     this._startSlot = slot
     this._startOffset = offset
     slot.retain(offset)
   }
 
+  /**
+   * 设置选区结束位置
+   * @param slot 结束位置的插槽
+   * @param offset 结束位置的索引
+   */
   setEnd(slot: Slot, offset: number) {
     this._endSlot = slot
     this._endOffset = offset
     slot.retain(offset)
   }
 
+  /**
+   * 设置选区位置
+   * @param slot 选区所以插槽
+   * @param offset 选区位置索引
+   */
   setLocation(slot: Slot, offset: number) {
     this._startSlot = this._endSlot = slot
     this._startOffset = this._endOffset = offset
     slot.retain(offset)
   }
 
+  /**
+   * 设置选区选择一个组件
+   * @param componentInstance 要选择的组件
+   * @param isRestore 是否同步触发原生选区，默认为 `false`
+   */
   selectComponent(componentInstance: ComponentInstance, isRestore = false) {
     const parent = componentInstance.parent
     if (parent) {
@@ -247,6 +299,9 @@ export class Selection {
     }
   }
 
+  /**
+   * 获取选区所选择的块的集合
+   */
   getSelectedScopes(): SelectedScope[] {
     if (!this.isSelected) {
       return []
@@ -258,14 +313,12 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    const scopes = this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
-    return this.middlewares.reduce((currentScopes: SelectedScope[], middleware: SelectionMiddleware) => {
-      return middleware.getSelectedScopes(currentScopes)
-    }, scopes.filter(item => {
-      return item.startIndex < item.endIndex
-    }))
+    return this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
   }
 
+  /**
+   * 把光标移动到前一个位置
+   */
   toPrevious() {
     const position = this.getPreviousLocation()
     if (position) {
@@ -275,6 +328,9 @@ export class Selection {
     }
   }
 
+  /**
+   * 把光标移动到后一个位置
+   */
   toNext() {
     const position = this.getNextLocation()
     if (position) {
@@ -284,6 +340,9 @@ export class Selection {
     }
   }
 
+  /**
+   * 把光标移动到上一行
+   */
   toPreviousLine() {
     clearTimeout(this.cacheCaretPositionTimer)
     if (!this.isSelected) {
@@ -307,6 +366,9 @@ export class Selection {
     this.restore()
   }
 
+  /**
+   * 把光标移动到下一行
+   */
   toNextLine() {
     clearTimeout(this.cacheCaretPositionTimer)
     if (!this.isSelected) {
@@ -330,6 +392,10 @@ export class Selection {
     this.restore()
   }
 
+  /**
+   * 闭合选区
+   * @param toEnd 是否闭合到结束位置
+   */
   collapse(toEnd = false) {
     if (toEnd) {
       this._startSlot = this._endSlot
@@ -340,6 +406,9 @@ export class Selection {
     }
   }
 
+  /**
+   * 立即同步 TextBus 选区到原生选区
+   */
   restore() {
     const startSlot = this.startSlot!
     const startOffset = this.startOffset!
@@ -360,6 +429,9 @@ export class Selection {
     this.broadcastChanged()
   }
 
+  /**
+   * 获取当前选区在文档中的路径
+   */
   getPaths(): SelectionPaths {
     if (!this.commonAncestorSlot) {
       return {
@@ -377,6 +449,10 @@ export class Selection {
     }
   }
 
+  /**
+   * 把选区设置为指定的路径
+   * @param paths
+   */
   usePaths(paths: SelectionPaths) {
     const start = this.findLocationByPath(paths.start)
     const end = this.findLocationByPath(paths.end)
@@ -390,19 +466,21 @@ export class Selection {
     }
   }
 
+  /**
+   * 取消选区
+   */
   unSelect() {
     this._startSlot = this._endSlot = this._startOffset = this._endOffset = null
   }
 
+  /**
+   * 选择整个文档
+   */
   selectAll() {
     const slot = this.root.component.slots.get(0)!
     this.setStart(slot, 0)
     this.setEnd(slot, slot.length)
     this.restore()
-  }
-
-  addMiddleware(middleware: SelectionMiddleware) {
-    this.middlewares.push(middleware)
   }
 
   /**
@@ -425,6 +503,10 @@ export class Selection {
     return this.getPreviousLocationByLocation(this.startSlot!, this.startOffset!)
   }
 
+  /**
+   * 根据路径获取对应的插槽
+   * @param paths
+   */
   findSlotByPaths(paths: number[]): Slot | null {
     const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
@@ -433,6 +515,10 @@ export class Selection {
     return null
   }
 
+  /**
+   * 根据路径获取对应的组件
+   * @param paths
+   */
   findComponentByPath(paths: number[]): ComponentInstance | null {
     const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
@@ -441,6 +527,9 @@ export class Selection {
     return result
   }
 
+  /**
+   * 获取选区内所有的块集合
+   */
   getBlocks(): SelectedScope[] {
     const blocks: SelectedScope[] = []
     if (!this.isSelected) {
@@ -479,7 +568,7 @@ export class Selection {
       return scopes
     }
 
-    const scopes = this.getExpandedScopes()
+    const scopes = this.getGreedyScopes()
 
     scopes.forEach(i => {
       blocks.push(...fn(i.slot, i.startIndex, i.endIndex, this.renderer))
@@ -487,7 +576,10 @@ export class Selection {
     return blocks
   }
 
-  getSlotRange(): SelectedSlotRange | null {
+  /**
+   * 获取开始插槽和结束插槽在公共组件内的下标范围
+   */
+  getSlotRangeInCommonAncestorComponent(): SelectedSlotRange | null {
     const ancestorComponent = this.commonAncestorComponent!
     if (!ancestorComponent) {
       return null
@@ -534,7 +626,10 @@ export class Selection {
     return null
   }
 
-  getExpandedScopes(): SelectedScope[] {
+  /**
+   * 获取当前选区在开始和结束位置均扩展到最大行内内容位置是的块
+   */
+  getGreedyScopes(): SelectedScope[] {
     if (!this.isSelected) {
       return []
     }
@@ -544,6 +639,10 @@ export class Selection {
       Selection.findExpandedEndIndex(this.endSlot!, this.endOffset!))
   }
 
+  /**
+   * 查找插槽内最深的第一个光标位置
+   * @param slot
+   */
   findFirstLocation(slot: Slot): SelectionLocation {
     const first = slot.getContentAtIndex(0)
     if (first && typeof first !== 'string') {
@@ -558,6 +657,10 @@ export class Selection {
     }
   }
 
+  /**
+   * 查的插槽内最深的最后一个光标位置
+   * @param slot
+   */
   findLastLocation(slot: Slot): SelectionLocation {
     const last = slot.getContentAtIndex(slot.length - 1)
     if (last && typeof last !== 'string') {
@@ -574,6 +677,9 @@ export class Selection {
     }
   }
 
+  /**
+   * 获取当前选区在公共插槽的位置
+   */
   getCommonAncestorSlotScope(): CommonAncestorSlotScope | null {
     if (!this.isSelected) {
       return null

@@ -19,12 +19,22 @@ export type Nullable<T> = {
   [P in keyof T]: T[P] | null
 }
 
+/**
+ * TextBus 数据操作类，提供一系列的方法，完成文档数据的增删改查的操作
+ */
 @Injectable()
 export class Commander {
   constructor(private selection: Selection,
               private nativeRenderer: NativeRenderer) {
   }
 
+  /**
+   * 从源插槽内提取符合 schema 的一组数据，并返回一组插槽，同时删除源插槽在开始到结束位置的内容
+   * @param source 源插槽
+   * @param schema 新插槽的 schema
+   * @param startIndex 提取开始位置
+   * @param endIndex 提取结束位置
+   */
   extractContentBySchema(source: Slot, schema: ContentType[], startIndex = 0, endIndex = source.length): Slot[] {
     if (schema.length === 0) {
       return []
@@ -39,7 +49,7 @@ export class Commander {
       isPreventDefault = false
     })
 
-    invokeListener(source.parent!, 'onDelete', event)
+    invokeListener(source.parent!, 'onContentDelete', event)
 
     if (isPreventDefault) {
       return []
@@ -79,6 +89,11 @@ export class Commander {
     return slotList
   }
 
+  /**
+   * 在当前选区内，根据 schema 提取出一组新的插槽和选区位置，并删除选区内的内容。
+   * @param schema 新插槽的 schema
+   * @param greedy 是否扩展选区，默认为 `false`。当值为 `true` 时，选区会向前后的行内内容扩展，主要用于转换块级内容。
+   */
   extractSlots(schema: ContentType[], greedy = false) {
     const range: Nullable<Range> = {
       startSlot: null,
@@ -94,7 +109,7 @@ export class Commander {
       }
     }
 
-    const scopes = greedy ? this.selection.getExpandedScopes() : this.selection.getSelectedScopes()
+    const scopes = greedy ? this.selection.getGreedyScopes() : this.selection.getSelectedScopes()
     const slots: Slot[] = []
 
     for (const scope of scopes) {
@@ -146,6 +161,10 @@ export class Commander {
     }
   }
 
+  /**
+   * 在当前选区插入新内容，当选区未闭合时，会先删除选区内容，再插入新的内容
+   * @param content 新插入的内容
+   */
   insert(content: string | ComponentInstance): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
@@ -164,7 +183,7 @@ export class Commander {
 
     if (result) {
       selection.setLocation(result, result.index)
-      invokeListener(result.parent!, 'onInserted', new Event<InsertEventData>(result, {
+      invokeListener(result.parent!, 'onContentInserted', new Event<InsertEventData>(result, {
         index: result.index,
         content
       }, () => {
@@ -175,6 +194,9 @@ export class Commander {
     return false
   }
 
+  /**
+   * 在当前选区内触发换行操作，如果选区未闭合，则先删除选区内容，再触发回车操作
+   */
   enter(): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
@@ -208,6 +230,10 @@ export class Commander {
     return true
   }
 
+  /**
+   * 触发删除操作，如当前选区未闭合，则删除选区内容。否则触发默认删除操作
+   * @param deleteBefore 默认为 `true`，当值为 `true` 时，则向前删除，否则向后删除
+   */
   delete(deleteBefore = true): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
@@ -249,7 +275,7 @@ export class Commander {
         slot.delete(selection.endOffset! - selection.startOffset!)
         selection.collapse()
       })
-      invokeListener(selection.startSlot!.parent!, 'onDelete', event)
+      invokeListener(selection.startSlot!.parent!, 'onContentDelete', event)
       if (isPreventDefault) {
         selection.setLocation(startSlotRefCache, startOffset)
         return false
@@ -266,7 +292,7 @@ export class Commander {
       }, () => {
         deletedSlot = endSlot.cut(selection.endOffset!, endSlot.length)
       })
-      invokeListener(endSlot.parent!, 'onDelete', event)
+      invokeListener(endSlot.parent!, 'onContentDelete', event)
     }
 
     // 删除选中的区域
@@ -297,7 +323,7 @@ export class Commander {
         isPreventDefault = false
       })
       const parentComponent = scope.slot.parent!
-      invokeListener(parentComponent, 'onDelete', event)
+      invokeListener(parentComponent, 'onContentDelete', event)
       if (isPreventDefault) {
         const index = stoppedSlot.index
         if (deletedSlot) {
@@ -352,10 +378,16 @@ export class Commander {
     return true
   }
 
+  /**
+   * 复制当前选区内容
+   */
   copy() {
     this.nativeRenderer.copy()
   }
 
+  /**
+   * 剪切当前选区内容
+   */
   cut() {
     if (this.selection.isCollapsed) {
       return
@@ -364,6 +396,11 @@ export class Commander {
     this.delete()
   }
 
+  /**
+   * 在当前选区粘贴新内容，当选区未闭合时，会先删除选区内容，再粘贴新内容
+   * @param pasteSlot 要粘贴的数据
+   * @param text 要粘贴的文本
+   */
   paste(pasteSlot: Slot, text: string) {
     if (!this.selection.isSelected) {
       return
@@ -391,6 +428,10 @@ export class Commander {
     })
   }
 
+  /**
+   * 清除当前选区的所有格式
+   * @param ignoreFormatters 在清除格式时，忽略的格式
+   */
   cleanFormats(ignoreFormatters: Formatter[] = []) {
     const selection = this.selection
     selection.getBlocks().forEach(scope => {
@@ -425,6 +466,11 @@ export class Commander {
     })
   }
 
+  /**
+   * 给当前选区应用新的格式
+   * @param formatter 要应用的格式
+   * @param value 当前格式要应用的值
+   */
   applyFormat(formatter: Formatter, value: FormatValue) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
@@ -445,6 +491,10 @@ export class Commander {
     })
   }
 
+  /**
+   * 清除当前选区特定的格式
+   * @param formatter 要清除的格式
+   */
   unApplyFormat(formatter: Formatter) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
@@ -471,6 +521,11 @@ export class Commander {
     })
   }
 
+  /**
+   * 在指定组件前插入新的组件
+   * @param component 要插入的组件
+   * @param ref 新组件插入组件位置的引用
+   */
   insertBefore(component: ComponentInstance, ref: ComponentInstance) {
     const parentSlot = ref?.parent
 
@@ -480,7 +535,11 @@ export class Commander {
       parentSlot.insert(component)
     }
   }
-
+  /**
+   * 在指定组件后插入新的组件
+   * @param component 要插入的组件
+   * @param ref 新组件插入组件位置的引用
+   */
   insertAfter(component: ComponentInstance, ref: ComponentInstance) {
     const parentSlot = ref?.parent
 
@@ -491,11 +550,20 @@ export class Commander {
     }
   }
 
+  /**
+   * 用新组件替换旧组件
+   * @param source 要删除的组件
+   * @param target 新插入的组件
+   */
   replace(source: ComponentInstance, target: ComponentInstance) {
     this.insertBefore(target, source)
     this.remove(source)
   }
 
+  /**
+   * 删除指定组件
+   * @param component
+   */
   remove(component: ComponentInstance) {
     const parentSlot = component?.parent
 
@@ -563,7 +631,7 @@ export class Commander {
     }, () => {
       isPreventDefault = false
     })
-    invokeListener(target.parent!, 'onInsert', event)
+    invokeListener(target.parent!, 'onContentInsert', event)
     if (isPreventDefault) {
       return false
     }
@@ -601,7 +669,7 @@ export class Commander {
       }, () => {
         isPreventDefault = false
       })
-      invokeListener(parentSlot.parent!, 'onDelete', event)
+      invokeListener(parentSlot.parent!, 'onContentDelete', event)
       if (!isPreventDefault) {
         parentSlot.retain(index + 1)
         parentSlot.delete(1)

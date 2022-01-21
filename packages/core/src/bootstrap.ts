@@ -13,12 +13,22 @@ import {
 } from './foundation/_api'
 import { Starter } from './starter'
 
+/**
+ * TextBus 核心配置
+ */
 export interface TextBusConfig {
+  /** 组件列表 */
   components: Component[]
+  /** 格式列表 */
   formatters: Formatter[]
+  /** 跨平台实现的提供者 */
   platformProviders: Provider[]
 }
 
+/**
+ * TextBus 核心启动函数
+ * @param config
+ */
 export function bootstrap(config: TextBusConfig): Promise<Starter> {
   const staticProviders: Provider[] = [{
     provide: COMPONENT_LIST,

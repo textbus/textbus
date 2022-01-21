@@ -27,6 +27,9 @@ export interface FormatTree {
   formats?: FormatItem[]
 }
 
+/**
+ * TextBus 格式管理类
+ */
 export class Format {
   private map = new Map<Formatter, FormatRange[]>()
 

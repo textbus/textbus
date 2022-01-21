@@ -25,4 +25,7 @@ export interface AttributeFormatter {
   render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
 }
 
+/**
+ * TextBus 扩展格式要实现的接口
+ */
 export type Formatter = BlockFormatter | InlineFormatter | AttributeFormatter

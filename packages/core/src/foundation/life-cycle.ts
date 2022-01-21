@@ -6,6 +6,9 @@ import { ComponentInstance } from '../model/component'
 import { invokeListener } from '../define-component'
 import { Subscription } from '@tanbo/stream'
 
+/**
+ * 组件销毁生合周期管理
+ */
 @Injectable()
 export class LifeCycle {
   private instanceList = new Set<ComponentInstance>()

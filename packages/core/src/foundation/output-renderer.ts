@@ -9,7 +9,11 @@ import {
   Slot,
 } from '../model/_api'
 import { formatSort } from './renderer'
+import { RootComponentRef } from './_injection-tokens'
 
+/**
+ * TextBus 输出渲染器
+ */
 @Injectable()
 export class OutputRenderer {
   private componentVNode = new WeakMap<ComponentInstance, VElement>()
@@ -18,8 +22,14 @@ export class OutputRenderer {
 
   private slotRenderFactory = new WeakMap<Slot, () => VElement>()
 
-  render(component: ComponentInstance) {
-    const root = this.componentRender(component)
+  constructor(private rootComponentRef: RootComponentRef) {
+  }
+
+  /**
+   * 以输出模式渲染当前文档
+   */
+  render() {
+    const root = this.componentRender(this.rootComponentRef.component)
     new VElement('body', null, [root])
     return root
   }
