@@ -405,7 +405,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onInsert
+#### onContentInsert
 
 当用户在组件插槽内输入时调用
 
@@ -421,7 +421,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onInserted
+#### onContentInserted
 
 当用户在组件插槽内输入完成时调用
 
