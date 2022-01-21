@@ -15,7 +15,7 @@ TextBus 富文本编辑器 2.0 内测版
 
 ## 使用文档
 
-[TextBus 中文指南](./docs/zh/guide.md)
+[TextBus 中文指南](./docs/zh/start.md)
 
 ## 本地开发
 
