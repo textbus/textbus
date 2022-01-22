@@ -4,7 +4,7 @@ import {
   NativeRenderer,
   NativeSelectionBridge,
   Renderer, RootComponentRef,
-  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType
+  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType, Starter
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources } from './dom-support/_api'
@@ -30,8 +30,13 @@ export interface OutputContents<T = any> {
 
 const editorError = makeError('CoreEditor')
 
+/**
+ * TextBus PC 端编辑器
+ */
 export class CoreEditor {
+  /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
+  /** 编辑器可滚动容器 */
   scroller = createElement('div', {
     styles: {
       overflow: 'auto',
@@ -41,10 +46,14 @@ export class CoreEditor {
     }
   })
 
-  injector: Injector | null = null
+  /** 访问编辑器内部实例有 IoC 容器 */
+  injector: Starter | null = null
 
+  /** 编辑器是否已销毁 */
   destroyed = false
+  /** 编辑器是否已准备好 */
   isReady = false
+  /** 编辑器的默认配置项*/
   options: BaseEditorOptions = {}
 
   protected plugins: Plugin[] = []
@@ -75,6 +84,10 @@ export class CoreEditor {
     this.scroller.appendChild(this.docContainer)
   }
 
+  /**
+   * 初始化编辑器
+   * @param options 编辑器的配置项
+   */
   init(options: BaseEditorOptions): Promise<Injector> {
     if (this.destroyed) {
       return Promise.reject(editorError('the editor instance is destroyed!'))
@@ -155,6 +168,9 @@ export class CoreEditor {
     })
   }
 
+  /**
+   * 获取 content 为 HTML 格式的内容
+   */
   getContents(): OutputContents<string> {
     if (this.destroyed) {
       throw editorError('the editor instance is destroyed!')
@@ -177,6 +193,9 @@ export class CoreEditor {
     }
   }
 
+  /**
+   * 获取 content 为 JSON 格式的内容
+   */
   getJSON(): OutputContents {
     if (this.destroyed) {
       throw editorError('the editor instance is destroyed!')
@@ -195,12 +214,18 @@ export class CoreEditor {
     }
   }
 
+  /**
+   * 销毁编辑器
+   */
   destroy() {
     if (this.destroyed) {
       return
     } else {
       this.destroyed = true
       this.subs.forEach(i => i.unsubscribe())
+      this.plugins.forEach(i => {
+        i.onDestroy?.()
+      })
       if (this.injector) {
         const types = [
           Input,
@@ -208,10 +233,8 @@ export class CoreEditor {
         types.forEach(i => {
           this.injector!.get(i as Type<{ destroy(): void }>).destroy()
         })
+        this.injector.destroy()
       }
-      this.plugins.forEach(i => {
-        i.onDestroy?.()
-      })
       this.scroller.parentNode?.removeChild(this.scroller)
     }
   }

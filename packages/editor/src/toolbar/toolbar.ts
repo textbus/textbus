@@ -7,6 +7,9 @@ import { Tool } from './types'
 import { Layout } from '../layout'
 import { createKeymap } from './toolkit/_utils/_create-keymap'
 
+/**
+ * 编辑器工具条
+ */
 export class Toolbar implements Plugin {
   private elementRef!: HTMLElement
   private toolWrapper!: HTMLElement
