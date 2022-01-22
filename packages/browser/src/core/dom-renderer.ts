@@ -3,6 +3,9 @@ import { NativeNode, NativeRenderer } from '@textbus/core'
 
 import { EDITABLE_DOCUMENT } from './injection-tokens'
 
+/**
+ * TextBus PC 端浏览器渲染能力实现
+ */
 @Injectable()
 export class DomRenderer implements NativeRenderer {
   constructor(@Inject(EDITABLE_DOCUMENT) private document: Document) {

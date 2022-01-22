@@ -9,6 +9,9 @@ import { Parser } from '../dom-support/parser'
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
 export const isMac = /mac os/i.test(navigator.userAgent)
 
+/**
+ * TextBus PC 端输入实现
+ */
 @Injectable()
 export class Input {
   private container = createElement('span', {

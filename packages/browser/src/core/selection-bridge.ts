@@ -16,6 +16,9 @@ import { Caret, getLayoutRectByRange } from './caret'
 import { EDITABLE_DOCUMENT, EDITOR_CONTAINER, SCROLL_CONTAINER } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
 
+/**
+ * TextBus PC 端选区桥接实现
+ */
 @Injectable()
 export class SelectionBridge implements NativeSelectionBridge {
   onSelectionChange: Observable<Range | null>
