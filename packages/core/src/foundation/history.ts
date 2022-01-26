@@ -1,5 +1,6 @@
 import { Injectable } from '@tanbo/di'
 import { debounceTime, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
@@ -7,7 +8,6 @@ import { Renderer } from './renderer'
 import { SelectionPaths, Selection } from './selection'
 import { FormatterList } from './formatter-list'
 import { RootComponentRef } from './_injection-tokens'
-import { applyPatches } from 'immer'
 
 export interface HistoryItem {
   beforePaths: SelectionPaths

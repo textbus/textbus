@@ -389,7 +389,7 @@ export class Slot<T = any> {
    * @param startIndex
    * @param endIndex
    */
-  cutTo<T extends Slot>(slot: T, startIndex = 0, endIndex = this.length): T {
+  cutTo<U extends Slot>(slot: U, startIndex = 0, endIndex = this.length): U {
     if (startIndex < 0) {
       startIndex = 0
     }

@@ -51,7 +51,7 @@ export const codeStyles = {
   'template-punctuation': 'string',
 }
 
-const languageList: Array<{ label: string, value: string }> = [{
+export const languageList: Array<{ label: string, value: string }> = [{
   label: 'JavaScript',
   value: 'JavaScript',
 }, {
@@ -94,8 +94,8 @@ const languageList: Array<{ label: string, value: string }> = [{
   label: 'Stylus',
   value: 'Stylus',
 }, {
-  label: 'Bash',
-  value: 'Bash',
+  label: 'Shell',
+  value: '',
 }]
 
 export interface PreComponentState {
@@ -350,8 +350,15 @@ export const preComponent = defineComponent({
           return
         }
       }
-      const nextSlot = ev.target.cutTo(new CodeSlot, ev.data.index)
+      const nextSlot = ev.target.cutTo(new CodeSlot(), ev.data.index)
       slots.insertAfter(nextSlot, ev.target as CodeSlot)
+      if (languageGrammar && !isStop) {
+        isStop = true
+        const index = nextSlot.index
+        reformat(slots, nextSlot, languageGrammar, blockCommentStartString)
+        nextSlot.retain(index)
+        isStop = false
+      }
       selection.setLocation(nextSlot, 0)
       ev.preventDefault()
     })

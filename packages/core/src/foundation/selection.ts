@@ -313,7 +313,10 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    return this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
+    const scopes = this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
+    return scopes.filter(item => {
+      return item.startIndex < item.endIndex
+    })
   }
 
   /**
