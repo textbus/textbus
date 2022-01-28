@@ -20,20 +20,6 @@ const mask = createElement('div', {
   ]
 })
 
-function matchAngle(x: number, y: number, startAngle: number, endAngle: number) {
-  let angle = Math.atan(x / y) / (Math.PI / 180)
-  if (x <= 0 && y >= 0 || x >= 0 && y >= 0) {
-    angle = 180 + angle
-  }
-  if (x >= 0 && y <= 0) {
-    angle = 360 + angle
-  }
-  if (startAngle <= endAngle) {
-    return angle >= startAngle && angle <= endAngle
-  }
-  return angle >= startAngle && angle <= 360 || angle <= endAngle && angle <= 0
-}
-
 export interface DragRect {
   width: string
   height: string
@@ -89,25 +75,53 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
         const offsetX = moveX - startX
         const offsetY = moveY - startY
 
-        if ([0, 2, 4, 6].includes(index)) {
+        let gainHypotenuse: number
+        let proportion: number
+        let sideX: number
+        let sideY: number
 
-          const gainHypotenuse = Math.sqrt(offsetX * offsetX + offsetY * offsetY)
-          let proportion = gainHypotenuse / startHypotenuse
-
-          if (!(index === 0 && matchAngle(offsetX, offsetY, 315, 135) ||
-            index === 2 && matchAngle(offsetX, offsetY, 225, 45) ||
-            index === 4 && matchAngle(offsetX, offsetY, 135, 315) ||
-            index === 6 && matchAngle(offsetX, offsetY, 45, 225))) {
-            proportion = -proportion
-          }
-
-          endWidth = Math.round(startWidth + startWidth * proportion)
-          endHeight = Math.round(startHeight + startHeight * proportion)
-
-        } else if ([1, 5].includes(index)) {
-          endHeight = Math.round(startHeight + (index === 1 ? -offsetY : offsetY))
-        } else if ([3, 7].includes(index)) {
-          endWidth = Math.round(startWidth + (index === 3 ? offsetX : -offsetX))
+        switch (index) {
+          case 0:
+          case 4:
+            sideX = startWidth + offsetX
+            sideY = startHeight + offsetY
+            gainHypotenuse = Math.sqrt(sideX * sideX + sideY * sideY)
+            proportion = gainHypotenuse / startHypotenuse
+            if (index === 0) {
+              proportion = 1 - (proportion - 1)
+            }
+            endWidth = startWidth * proportion
+            endHeight = startHeight * proportion
+            break
+          case 2:
+            sideX = startWidth + offsetX
+            sideY = startHeight - offsetY
+            gainHypotenuse = Math.sqrt(sideX * sideX + sideY * sideY)
+            proportion = gainHypotenuse / startHypotenuse
+            endWidth = startWidth * proportion
+            endHeight = startHeight * proportion
+            break
+          case 6:
+            sideX = startWidth - offsetX
+            sideY = startHeight + offsetY
+            gainHypotenuse = Math.sqrt(sideX * sideX + sideY * sideY)
+            gainHypotenuse = Math.sqrt(sideX * sideX + sideY * sideY)
+            proportion = gainHypotenuse / startHypotenuse
+            endWidth = startWidth * proportion
+            endHeight = startHeight * proportion
+            break
+          case 1:
+            endHeight = startHeight - offsetY
+            break
+          case 5:
+            endHeight = startHeight + offsetY
+            break
+          case 3:
+            endWidth = startWidth + offsetX
+            break
+          case 7:
+            endWidth = startWidth - offsetX
+            break
         }
         currentRef!.current!.style.width = endWidth + 'px'
         currentRef!.current!.style.height = endHeight + 'px'
