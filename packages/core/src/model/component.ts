@@ -48,8 +48,18 @@ export interface Shortcut {
  * 组件实例对象
  */
 export interface ComponentInstance<Methods extends ComponentMethods<State> = ComponentMethods, State = any> {
-  /** 组件所在的插槽 */
+  /**
+   * 组件所在的插槽
+   * @readonly
+   * @internal
+   */
   parent: Slot | null
+  /**
+   * 父组件
+   * @readonly
+   * @internal
+   */
+  parentComponent: ComponentInstance | null
   /** 组件变化标识器 */
   changeMarker: ChangeMarker
   /** 组件名 */

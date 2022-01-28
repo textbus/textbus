@@ -36,6 +36,10 @@ export class Slot<T = any> {
 
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
 
+  get parentSlot() {
+    return this.parent?.parent || null
+  }
+
   /** 插槽内容长度 */
   get length() {
     return this.content.length

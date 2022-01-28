@@ -118,6 +118,9 @@ export function defineComponent<Methods extends ComponentMethods,
       const componentInstance: ComponentInstance<Methods, State> = {
         changeMarker: marker,
         parent: null,
+        get parentComponent() {
+          return componentInstance.parent?.parent || null
+        },
         name: options.name,
         length: 1,
         type: options.type,
