@@ -1,7 +1,7 @@
 自定义组件
 =========================
 
-### 什么是 TextBus 的组件？
+## 什么是 TextBus 的组件？
 
 我们应当都使用过现代前端框架，如 React、Vue、Angular 等，TextBus 的组件可以看成是前端框架的组件之上额外添加了可编辑插槽功能的模块。和前端框架一样，TextBus 的组件也带有数据模型、生命周期、DOM 模板及样式表。
 
@@ -111,11 +111,11 @@ editor.onReady.subscribe(() => {
 })
 ```
 
-### 数据交互
+## 数据交互
 
 本章节主要介绍在**组件 setup 函数**内可以调用的一些勾子函数。
 
-#### useContext
+### useContext
 
 返回当前编辑器的注入器，通过注入器，可以获取到编辑器内部各个类的实例
 
@@ -132,7 +132,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### useSelf
+### useSelf
 
 返回当前组件实例
 
@@ -146,7 +146,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### useSlots
+### useSlots
 
 把一组插槽挂载到文档，一个组件只允许调用一次。
 
@@ -182,7 +182,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### useState
+### useState
 
 当前组件的自定义状态，一个组件只能调用一次。
 
@@ -213,7 +213,7 @@ const myCommponent = defineComponent({
 ```
 
 
-#### useRef
+### useRef
 
 用于获取 DOM 实例
 
@@ -239,7 +239,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### useRefs
+### useRefs
 
 用于获取一组 DOM 实例，常用在循环中
 
@@ -266,7 +266,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### useDynamicShortcut
+### useDynamicShortcut
 
 组件内部快捷键，用于只在组件内生效的快捷键
 
@@ -287,9 +287,9 @@ const myCommponent = defineComponent({
 })
 ```
 
-### 生命周期
+## 生命周期
 
-#### onPaste
+### onPaste
 
 当组件插槽发生粘贴事件时调用
 
@@ -305,7 +305,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onContextMenu
+### onContextMenu
 
 当用户在组件内点击鼠标右键时调用
 
@@ -326,9 +326,9 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onViewChecked
+### onViewChecked
 
-当组件每次视图更新完成后调用
+当组件或子组件每次视图更新完成后调用
 
 ```tsx
 import { onViewChecked } from '@textbus/core';
@@ -342,7 +342,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onViewInit
+### onViewInit
 
 当组件第一次视图渲染完成时调用
 
@@ -358,7 +358,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onSlotRemove
+### onSlotRemove
 
 当用户触发组件插槽删除前调用
 
@@ -374,7 +374,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onContentDelete
+### onContentDelete
 
 当用户删除组件插槽内内容时调用
 ```tsx
@@ -389,7 +389,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onEnter
+### onEnter
 
 当用户在组件插槽内按回车键时调用
 
@@ -405,7 +405,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onContentInsert
+### onContentInsert
 
 当用户在组件插槽内输入时调用
 
@@ -421,7 +421,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onContentInserted
+### onContentInserted
 
 当用户在组件插槽内输入完成时调用
 
@@ -437,7 +437,7 @@ const myCommponent = defineComponent({
 })
 ```
 
-#### onDestroy
+### onDestroy
 
 当组件销毁时调用
 

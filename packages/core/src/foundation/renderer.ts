@@ -111,11 +111,25 @@ function getSetChanges(left: Set<string>, right: Set<string>) {
 }
 
 function getNodeChanges(newVDom: VElement, oldVDom: VElement) {
+  const styleChanges = getMapChanges(newVDom.styles, oldVDom.styles)
+  const attrChanges = getMapChanges(newVDom.attrs, oldVDom.attrs)
+  const classesChanges = getSetChanges(newVDom.classes, oldVDom.classes)
+  const listenerChanges = getObjectChanges(newVDom.listeners, oldVDom.listeners)
   return {
-    styleChanges: getMapChanges(newVDom.styles, oldVDom.styles),
-    attrChanges: getMapChanges(newVDom.attrs, oldVDom.attrs),
-    classesChanges: getSetChanges(newVDom.classes, oldVDom.classes),
-    listenerChanges: getObjectChanges(newVDom.listeners, oldVDom.listeners)
+    styleChanges,
+    attrChanges,
+    classesChanges,
+    listenerChanges,
+    isChanged: [
+      attrChanges.set.length,
+      attrChanges.remove.length,
+      styleChanges.set.length,
+      styleChanges.remove.length,
+      classesChanges.add.length,
+      classesChanges.remove.length,
+      listenerChanges.add.length,
+      listenerChanges.remove.length
+    ].join('') !== '0'.repeat(8)
   }
 }
 
@@ -351,22 +365,7 @@ export class Renderer {
         if (newFirstVNode.tagName !== oldFirstVNode.tagName) {
           break
         }
-        const {
-          attrChanges,
-          styleChanges,
-          classesChanges,
-          listenerChanges
-        } = getNodeChanges(newFirstVNode, oldFirstVNode)
-        const isChanged = [
-          attrChanges.set.length,
-          attrChanges.remove.length,
-          styleChanges.set.length,
-          styleChanges.remove.length,
-          classesChanges.add.length,
-          classesChanges.remove.length,
-          listenerChanges.add.length,
-          listenerChanges.remove.length
-        ].join('') !== '00000000'
+        const {isChanged} = getNodeChanges(newFirstVNode, oldFirstVNode)
 
         if (isChanged) {
           break
@@ -404,17 +403,7 @@ export class Renderer {
         if (newLastVNode.tagName !== oldLastVNode.tagName) {
           break
         }
-        const {attrChanges, styleChanges, classesChanges, listenerChanges} = getNodeChanges(newLastVNode, oldLastVNode)
-        const isChanged = [
-          attrChanges.set.length,
-          attrChanges.remove.length,
-          styleChanges.set.length,
-          styleChanges.remove.length,
-          classesChanges.add.length,
-          classesChanges.remove.length,
-          listenerChanges.add.length,
-          listenerChanges.remove.length
-        ].join('') !== '00000000'
+        const {isChanged} = getNodeChanges(newLastVNode, oldLastVNode)
 
         if (isChanged) {
           break
@@ -443,7 +432,6 @@ export class Renderer {
     while (newChildren.length && oldChildren.length) {
       const newFirstVNode = newChildren[0]
       const oldFirstVNode = oldChildren[0]
-
 
       if (newFirstVNode instanceof VElement) {
         if (this.renderedVNode.has(newFirstVNode)) {
@@ -485,7 +473,6 @@ export class Renderer {
     while (newChildren.length && oldChildren.length) {
       const newLastVNode = newChildren[newChildren.length - 1]
       const oldLastVNode = oldChildren[oldChildren.length - 1]
-
 
       if (newLastVNode instanceof VElement) {
         if (this.renderedVNode.has(newLastVNode)) {
@@ -574,9 +561,6 @@ export class Renderer {
 
   private componentRender(component: ComponentInstance): VElement {
     if (component.changeMarker.dirty) {
-      Promise.resolve().then(() => {
-        invokeListener(component, 'onViewChecked')
-      })
       let slotVNode!: VElement
       const node = component.methods.render(false, (slot, factory) => {
         slotVNode = this.slotRender(slot, factory)
@@ -587,8 +571,8 @@ export class Renderer {
       } else {
         setEditable(node, false)
       }
-      component.changeMarker.rendered()
       this.componentVNode.set(component, node)
+      this.triggerComponentViewChecked(component)
       return node
     }
     const oldComponentVNode = this.componentVNode.get(component)
@@ -619,7 +603,7 @@ export class Renderer {
         }
       }
     })
-    component.changeMarker.rendered()
+    this.triggerComponentViewChecked(component)
     return this.componentVNode.get(component)!
   }
 
@@ -669,7 +653,6 @@ export class Renderer {
         (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
         const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
         const newNativeNode = this.diffAndUpdate(vNode, oldVNode)
-        // this.componentRefVNode.set(componentRef, vNode)
         if (oldNativeNode !== newNativeNode) {
           this.nativeRenderer.replace(newNativeNode, oldNativeNode)
         }
@@ -771,6 +754,13 @@ export class Renderer {
       })
       startIndex += length
       return vNode
+    })
+  }
+
+  private triggerComponentViewChecked(component: ComponentInstance) {
+    component.changeMarker.rendered()
+    Promise.resolve().then(() => {
+      invokeListener(component, 'onViewChecked')
     })
   }
 

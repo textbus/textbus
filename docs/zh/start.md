@@ -2,15 +2,15 @@
 =======================
 
 
-### TextBus 是什么
+## TextBus 是什么
 
 TextBus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，TextBus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见 API，且提供了更高的抽象层，使 TextBus 不仅易于上手，同时还能驱动复杂的富文本应用。
 
-### 安装
+## 安装
 
 TextBus 可能通过两种方式引入到你的项目中。
 
-#### 通过 npm 安装
+### 通过 npm 安装
 ```
 npm install @textbus/core @textbus/browser @textbus/editor
 ```
@@ -30,7 +30,7 @@ const editor = createEditor(document.getElementById('editor'))
 ```
 
 
-#### 通过 script 标签引入
+### 通过 script 标签引入
 
 ```html
 <!DOCTYPE html>
@@ -49,9 +49,9 @@ const editor = createEditor(document.getElementById('editor'))
 </html>
 ```
 
-### 常用方法
+## 常用方法
 
-#### 编辑器准备
+### 编辑器准备
 
 ```ts
 editor.onReady.subscribe(() => {
@@ -59,7 +59,7 @@ editor.onReady.subscribe(() => {
 })
 ```
 
-#### 获取编辑结果
+### 获取编辑结果
 
 需要编辑器准备好后方可调用
 
@@ -71,7 +71,7 @@ const contents = editor.getContents()
 + resourcesList 为组件的资源，其中有样式表，脚本等
 + styleSheets 为默认的样式表
 
-#### 监听编辑器变化
+### 监听编辑器变化
 
 当编辑器准备好后才会触发
 ```ts
@@ -80,13 +80,13 @@ editor.onChange.subscribe(() => {
 })
 ```
 
-#### 销毁编辑器
+### 销毁编辑器
 
 ```ts
 editor.destroy()
 ```
 
-### 配置项
+## 配置项
 
 通过配置，你可以定制编辑器的行为、功能、插件、格式等。自定义配置的方式如下
 
@@ -101,7 +101,7 @@ const editor = createEditor(document.getElementById('editor'), options)
 ```
 通过 createEditor 函数创建编辑器时，你配置的字段会覆盖默认的配置，如你配置了 placeholder，则会覆盖掉默认的 placeholder，但其它的配置项还会使用默认值。
 
-#### 组件 componentLoaders
+### 组件 componentLoaders
 
 componentLoaders 为一个数组，可以配置编辑器支持的组件。TextBus 开发了常见的组件，如果你有自定义组件，你应该把你的组件和 TextBus 的组件一起放在这里。你也可以不配置 TextBus 默认的组件，则编辑器只会支持你自定义的组件。
 
@@ -114,7 +114,7 @@ const options = {
 ```
 查看[组件开发](./componet.md)文档
 
-#### 格式 formatLoaders
+### 格式 formatLoaders
 
 formatLoaders 为一个数组，可以配置编辑器支持的格式。TextBus 已开发了常见的格式，如果你有自定义格式，你应该把你的格式和 TextBus 的格式一起放在这里。
 你也可以不配置 TextBus 默认的格式，则编辑器只会支持你自定义的格式。
@@ -127,7 +127,7 @@ const options = {
 ```
 查看[格式开发](./formatter.md)文档
 
-#### 默认内容 content
+### 默认内容 content
 
 在创建编辑器时，你可以设置编辑器的默认内容。内容可以为一个 HTML 字符串，或 TextBus 指定的 JSON 数据。
 
@@ -137,7 +137,7 @@ const options = {
 }
 ```
 
-#### 样式表 styleSheets
+### 样式表 styleSheets
 
 styleSheets 为一组 css 样式表，可以配置编辑器内文档的默认样式。在调用 getContents 方法时，这里的样式表会返回在结果中。
 
@@ -149,7 +149,7 @@ const options = {
 }
 ```
 
-#### 编辑时样式表 editingStyleSheets
+### 编辑时样式表 editingStyleSheets
 
 editingStyleSheets 为一组 css 样式表，可以配置编辑器内文档的在编辑时的默认样式。在调用 getContents 方法时，这里的样式表不会返回在结果中。
 
@@ -161,7 +161,7 @@ const options = {
 }
 ```
 
-#### 插件 plugins
+### 插件 plugins
 
 plugins 为一个数组，可以配置编辑器的插件。如果你有自定义的插件，你应该把你的插件和 TextBus 的插件一起放在这里。你也可以不配置 TextBus 默认的插件，则编辑器只会支持你自定义的插件。
 
@@ -175,11 +175,11 @@ const options = {
 
 查看[插件开发](./plugin.md)文档
 
-#### 提供者 providers
+### 提供者 providers
 
 providers 为一个数组，专为高级开发提供的配置入口，providers 里面的类，可以使用 TextBus 内核中的依赖注入能力。方便扩展高级应用，一般使用者可以忽略。
 
-#### 主题 theme
+### 主题 theme
 
 配置主题，可以配置 TextBus 的用户界面。
 
@@ -189,7 +189,7 @@ const options = {
 }
 ```
 
-#### 国际化 i18n
+### 国际化 i18n
 
 i18n 为一个 JSON 对象，可以配置 TextBus 中的文案文本。TextBus 默认为中文，同时提供了英语配置。你也可以根据自己的需要，改为其它语言。
 
@@ -201,7 +201,7 @@ const options = {
 }
 ```
 
-#### 提示文字 placeholder
+### 提示文字 placeholder
 
 配置编辑器内容为空时的提示文字。
 ```ts
@@ -210,7 +210,7 @@ const options = {
 }
 ```
 
-#### 文件上传 uploader
+### 文件上传 uploader
 
 uploader 为一个函数，TextBus 未实现任何与 ajax 相关的功能。如果你需要资源上传，则必须配置此项，当需要文件上传时，TextBus 会调用此函数，并根据返回值做相应处理。
 
