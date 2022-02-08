@@ -1,4 +1,4 @@
-import { Injector, Type } from '@tanbo/di'
+import { Injector } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
 import { createElement, createTextNode } from '@textbus/browser'
 
@@ -148,7 +148,7 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
-  const fileUploader = injector.get(FileUploader as Type<FileUploader>)
+  const fileUploader = injector.get(FileUploader)
 
   const childI18n = i18n.getContext('plugins.toolbar.imageTool.view')
   const form = new Form({

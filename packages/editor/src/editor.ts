@@ -47,7 +47,7 @@ export class Editor extends CoreEditor {
       useValue: this.layout
     }, {
       provide: I18n,
-      useValue: new I18n(options.i18n as any, i18n_zh_CN)
+      useValue: new I18n(i18n_zh_CN, options.i18n as any)
     }, {
       provide: EditorController,
       useValue: new EditorController({

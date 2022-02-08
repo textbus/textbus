@@ -1,4 +1,4 @@
-import { Injector, Type } from '@tanbo/di'
+import { Injector } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
 
 import { DialogTool, DialogToolConfig } from '../toolkit/dialog-tool'
@@ -11,7 +11,7 @@ export function videoToolConfigFactory(injector: Injector): DialogToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
-  const uploader = injector.get(FileUploader as Type<FileUploader>)
+  const uploader = injector.get(FileUploader)
 
   const childI18n = i18n.getContext('plugins.toolbar.videoTool.view')
   const form = new Form({

@@ -17,7 +17,7 @@ export class Starter extends ReflectiveInjector {
    * @param host 原生节点
    */
   mount(rootComponent: ComponentInstance, host: NativeNode) {
-    const rootComponentRef = this.get(RootComponentRef as Type<RootComponentRef>)
+    const rootComponentRef = this.get(RootComponentRef)
 
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host

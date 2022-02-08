@@ -1,6 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 import { NativeSelectionBridge, Selection } from '@textbus/core'
-import { Injector, Type } from '@tanbo/di'
+import { Injector } from '@tanbo/di'
 import { EDITABLE_DOCUMENT, EDITOR_CONTAINER, Plugin } from '@textbus/browser'
 import { I18n } from '../i18n'
 
@@ -10,7 +10,7 @@ export class LinkJumpTipPlugin implements Plugin {
 
   setup(injector: Injector) {
     const selection = injector.get(Selection)
-    const nativeSelectionBridge = injector.get(NativeSelectionBridge as Type<NativeSelectionBridge>)
+    const nativeSelectionBridge = injector.get(NativeSelectionBridge)
     const container = injector.get(EDITOR_CONTAINER)
     const i18n = injector.get(I18n)
     const contentDocument = injector.get(EDITABLE_DOCUMENT)

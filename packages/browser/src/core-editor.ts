@@ -205,7 +205,7 @@ export class CoreEditor {
     }
     const injector = this.injector!
 
-    const rootComponentRef = injector.get(RootComponentRef as Type<RootComponentRef>)
+    const rootComponentRef = injector.get(RootComponentRef)
 
     return {
       content: rootComponentRef.component.toJSON(),

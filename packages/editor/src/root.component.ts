@@ -59,7 +59,6 @@ export const rootComponent = defineComponent({
     const docContainer = useRef<HTMLElement>()
 
     const sub = fromEvent<MouseEvent>(editableDocument, 'click').subscribe(ev => {
-      console.log(ev, docContainer.current!.getBoundingClientRect().height)
       if (ev.clientY > docContainer.current!.getBoundingClientRect().height) {
         const slot = slots.get(0)!
         const lastContent = slot.getContentAtIndex(slot.length - 1)
