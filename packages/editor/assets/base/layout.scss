@@ -53,6 +53,14 @@
     bottom: 0;
   }
 
+  &-scroller {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 8px 0;
+  }
+
   &-bottom {
     position: relative;
     z-index: 0;

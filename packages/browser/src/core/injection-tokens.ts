@@ -15,8 +15,3 @@ export const EDITABLE_DOCUMENT = new InjectionToken<Document>('EDITABLE_DOCUMENT
  * 编辑器容器依赖注入 token
  */
 export const EDITOR_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_CONTAINER')
-
-/**
- * 编辑器可滚动容器依赖注入 token
- */
-export const SCROLL_CONTAINER = new InjectionToken<HTMLElement>('SCROLL_CONTAINER')

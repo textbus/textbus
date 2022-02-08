@@ -10,7 +10,7 @@ import {
   Translator,
   useContext,
   useSlots,
-  VElement, onDestroy, useRef
+  VElement, onDestroy, useRef, onEnter
 } from '@textbus/core'
 import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from '@textbus/browser'
 
@@ -50,6 +50,14 @@ export const rootComponent = defineComponent({
         selection.setLocation(slot, slot.index)
         ev.preventDefault()
       }
+    })
+
+    onEnter((ev) => {
+      const p = paragraphComponent.createInstance(injector)
+      const slot = slots.get(0)!
+      slot.insert(p)
+      selection.setLocation(p.slots.get(0)!, 0)
+      ev.preventDefault()
     })
 
     onSlotRemove(ev => {

@@ -1,7 +1,7 @@
 import { Injector, Provider, Type } from '@tanbo/di'
 import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection } from '@textbus/core'
-import { CoreEditor } from '@textbus/browser'
+import { CoreEditor, SelectionBridge } from '@textbus/browser'
 
 import { EditorOptions } from './types'
 import { rootComponent } from './root.component'
@@ -26,7 +26,7 @@ export class Editor extends CoreEditor {
 
   constructor(public selector: string | HTMLElement,
               options: EditorOptions = {}) {
-    super(options.rootComponent || rootComponent)
+    super()
     if (typeof selector === 'string') {
       this.host = document.querySelector(selector)!
     } else {
@@ -36,7 +36,6 @@ export class Editor extends CoreEditor {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable()
-    this.layout.workbench.append(this.scroller)
     if (options.theme) {
       this.layout.setTheme(options.theme)
     }
@@ -97,7 +96,7 @@ export class Editor extends CoreEditor {
 
     options.editingStyleSheets = options.editingStyleSheets || []
     options.editingStyleSheets.push(`body{padding-bottom:50px}[textbus-document=true]{overflow:hidden}[textbus-document=true]::before {content: attr(data-placeholder); position: absolute; opacity: 0.6; z-index: -1;}`)
-    this.init(options).then(rootInjector => {
+    this.init(this.layout.scroller, options.rootComponent || rootComponent, options).then(rootInjector => {
       rootInjector.get(ContextMenu)
       setTimeout(() => {
         if (this.destroyed) {
@@ -106,6 +105,7 @@ export class Editor extends CoreEditor {
         options.plugins?.forEach(plugin => {
           plugin.setup(rootInjector)
         })
+        this.layout.listenCaretChange(rootInjector.get(SelectionBridge))
         this.readyEvent.next(rootInjector)
       })
     })
@@ -125,6 +125,7 @@ export class Editor extends CoreEditor {
         this.injector!.get(i as Type<{ destroy(): void }>).destroy()
       })
     }
+    this.layout.destroy()
     this.layout.container.parentNode?.removeChild(this.layout.container)
     super.destroy()
   }

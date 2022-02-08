@@ -1,4 +1,4 @@
-import { fromEvent, Subscription } from '@tanbo/stream'
+import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 
 import { createElement } from '../_utils/uikit'
 
@@ -29,7 +29,14 @@ export function getLayoutRectByRange(range: Range) {
   return range.getBoundingClientRect()
 }
 
+export interface CaretPosition {
+  left: number
+  top: number
+  height: number
+}
+
 export class Caret {
+  onPositionChange: Observable<CaretPosition>
   elementRef: HTMLElement
   private timer: any = null
   private caret: HTMLElement
@@ -48,9 +55,11 @@ export class Caret {
 
   private subs: Subscription[] = []
 
+  private positionChangeEvent = new Subject<CaretPosition>()
+
   constructor(private document: Document,
-              private editorContainer: HTMLElement,
-              private scrollContainer: HTMLElement) {
+              private editorContainer: HTMLElement) {
+    this.onPositionChange = this.positionChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
         position: 'absolute',
@@ -142,19 +151,10 @@ export class Caret {
 
     this.caret.style.backgroundColor = color
     if (nativeRange.collapsed) {
-      setTimeout(() => {
-        const limit = this.scrollContainer
-        const scrollTop = limit.scrollTop
-        const offsetHeight = limit.offsetHeight
-        const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0
-
-        const cursorTop = top + boxHeight + paddingTop + 10
-        const viewTop = scrollTop + offsetHeight
-        if (cursorTop > viewTop) {
-          limit.scrollTop = cursorTop - offsetHeight
-        } else if (top < scrollTop) {
-          limit.scrollTop = top
-        }
+      this.positionChangeEvent.next({
+        left: rect.left,
+        top,
+        height: boxHeight
       })
     }
   }

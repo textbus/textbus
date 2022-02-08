@@ -1,10 +1,9 @@
 import { Injector, Provider, Type } from '@tanbo/di'
 import {
-  Component,
   NativeRenderer,
   NativeSelectionBridge,
   Renderer, RootComponentRef,
-  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType, Starter
+  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType, Starter, Component
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources } from './dom-support/_api'
@@ -17,7 +16,7 @@ import {
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, Plugin, SCROLL_CONTAINER
+  SelectionBridge, Plugin
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
@@ -36,15 +35,6 @@ const editorError = makeError('CoreEditor')
 export class CoreEditor {
   /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
-  /** 编辑器可滚动容器 */
-  scroller = createElement('div', {
-    styles: {
-      overflow: 'auto',
-      width: '100%',
-      height: '100%',
-      boxSizing: 'border-box'
-    }
-  })
 
   /** 访问编辑器内部实例有 IoC 容器 */
   injector: Starter | null = null
@@ -54,22 +44,9 @@ export class CoreEditor {
   /** 编辑器是否已准备好 */
   isReady = false
   /** 编辑器的默认配置项*/
-  options: BaseEditorOptions = {}
+  options: BaseEditorOptions | null = null
 
   protected plugins: Plugin[] = []
-
-  protected docContainer = createElement('div', {
-    styles: {
-      padding: '8px 0',
-      position: 'relative',
-      boxShadow: '1px 2px 4px rgb(0,0,0,0.2)',
-      backgroundColor: '#fff',
-      minHeight: '100%',
-      margin: '0 auto',
-      transition: 'width 1.2s cubic-bezier(.36,.66,.04,1)',
-      boxSizing: 'border-box'
-    }
-  })
 
   protected defaultPlugins: Type<Plugin>[] = [
     DefaultShortcut,
@@ -79,22 +56,26 @@ export class CoreEditor {
 
   protected subs: Subscription[] = []
 
-  constructor(public rootComponentFactory: Component) {
+  private workbench!: HTMLElement
+
+  constructor() {
     this.onChange = this.changeEvent.asObservable()
-    this.scroller.appendChild(this.docContainer)
   }
 
   /**
    * 初始化编辑器
+   * @param host 编辑器容器
+   * @param rootComponent 根组件
    * @param options 编辑器的配置项
    */
-  init(options: BaseEditorOptions): Promise<Injector> {
+  init(host: HTMLElement, rootComponent: Component, options: BaseEditorOptions = {}): Promise<Injector> {
     if (this.destroyed) {
       return Promise.reject(editorError('the editor instance is destroyed!'))
     }
     this.options = options
     this.plugins = options.plugins || []
-    return this.createLayout().then(layout => {
+    return this.createLayout(host).then(layout => {
+      this.workbench = layout.workbench
       const staticProviders: Provider[] = [{
         provide: EDITABLE_DOCUMENT,
         useValue: layout.document
@@ -104,9 +85,6 @@ export class CoreEditor {
       }, {
         provide: EDITOR_CONTAINER,
         useValue: layout.workbench
-      }, {
-        provide: SCROLL_CONTAINER,
-        useValue: this.scroller
       }, {
         provide: NativeRenderer,
         useClass: DomRenderer
@@ -137,7 +115,7 @@ export class CoreEditor {
         const slot = new Slot([
           ContentType.BlockComponent
         ])
-        const component = this.rootComponentFactory.createInstance(starter, slot)
+        const component = rootComponent.createInstance(starter, slot)
         if (typeof options.content === 'string') {
           parser.parse(options.content || '', slot)
         } else if (options.content) {
@@ -151,7 +129,7 @@ export class CoreEditor {
         this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
 
         const resizeObserver = new ResizeObserver((e) => {
-          this.docContainer.style.height = e[0].borderBoxSize[0].blockSize + 'px'
+          this.workbench.style.height = e[0].borderBoxSize[0].blockSize + 'px'
         })
         resizeObserver.observe(doc.body as any)
         if (this.destroyed) {
@@ -235,7 +213,7 @@ export class CoreEditor {
         })
         this.injector.destroy()
       }
-      this.scroller.parentNode?.removeChild(this.scroller)
+      this.workbench.parentNode?.removeChild(this.workbench)
     }
   }
 
@@ -262,7 +240,7 @@ export class CoreEditor {
 
   private getAllComponentResources() {
     const resources: Array<{ componentName: string, resources: ComponentResources }> = []
-    this.options.componentLoaders?.forEach(i => {
+    this.options!.componentLoaders?.forEach(i => {
       if (i.resources) {
         resources.push({
           componentName: i.component.name,
@@ -274,7 +252,7 @@ export class CoreEditor {
     return resources
   }
 
-  private createLayout() {
+  private createLayout(host: HTMLElement) {
     const workbench = createElement('div', {
       styles: {
         width: '100%',
@@ -306,7 +284,7 @@ export class CoreEditor {
           document: doc
         })
       }
-      this.docContainer.appendChild(workbench)
+      host.appendChild(workbench)
     })
   }
 
