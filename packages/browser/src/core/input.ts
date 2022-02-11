@@ -100,7 +100,7 @@ export class Input {
         }
 
         const div = document.createElement('div')
-        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px'
+        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px; top: -9999px; opacity:0'
         div.contentEditable = 'true'
         document.body.appendChild(div)
         div.focus()
