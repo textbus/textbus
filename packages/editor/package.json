@@ -1,6 +1,6 @@
 {
   "name": "@textbus/editor",
-  "version": "2.0.0-alpha.20",
+  "version": "2.0.0-alpha.21",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -30,8 +30,8 @@
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/stream": "^0.0.9",
-    "@textbus/browser": "^2.0.0-alpha.20",
-    "@textbus/core": "^2.0.0-alpha.20",
+    "@textbus/browser": "^2.0.0-alpha.21",
+    "@textbus/core": "^2.0.0-alpha.21",
     "prismjs": "^1.23.0"
   },
   "author": {
