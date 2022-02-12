@@ -1,12 +1,19 @@
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Injector, Provider, Type } from '@tanbo/di'
 import {
   NativeRenderer,
   NativeSelectionBridge,
-  Renderer, RootComponentRef,
-  Translator, makeError, OutputRenderer, bootstrap, Slot, ContentType, Starter, Component
+  Renderer,
+  RootComponentRef,
+  Translator,
+  makeError,
+  OutputRenderer,
+  bootstrap,
+  Starter,
+  ComponentInstance,
 } from '@textbus/core'
 
-import { Parser, OutputTranslator, ComponentResources } from './dom-support/_api'
+import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
 import { createElement } from './_utils/uikit'
 import {
   getIframeHTML,
@@ -19,7 +26,6 @@ import {
   SelectionBridge, Plugin
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
-import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 export interface OutputContents<T = any> {
   content: T
@@ -65,10 +71,10 @@ export class CoreEditor {
   /**
    * 初始化编辑器
    * @param host 编辑器容器
-   * @param rootComponent 根组件
+   * @param rootComponentLoader 根组件加载器
    * @param options 编辑器的配置项
    */
-  init(host: HTMLElement, rootComponent: Component, options: BaseEditorOptions = {}): Promise<Injector> {
+  init(host: HTMLElement, rootComponentLoader: ComponentLoader, options: BaseEditorOptions = {}): Promise<Injector> {
     if (this.destroyed) {
       return Promise.reject(editorError('the editor instance is destroyed!'))
     }
@@ -112,15 +118,19 @@ export class CoreEditor {
         const parser = starter.get(Parser)
         const translator = starter.get(Translator)
 
-        const slot = new Slot([
-          ContentType.BlockComponent
-        ])
-        const component = rootComponent.createInstance(starter, slot)
-        if (typeof options.content === 'string') {
-          parser.parse(options.content || '', slot)
-        } else if (options.content) {
-          translator.fillSlot(options.content, slot)
+        let component: ComponentInstance
+        const content = options.content
+        if (content) {
+          if (typeof content === 'string') {
+            component = parser.parseDoc(content, rootComponentLoader)
+          } else {
+            const data = rootComponentLoader.component.transform(translator, content.state)
+            component = rootComponentLoader.component.createInstance(starter, data)
+          }
+        } else {
+          component = rootComponentLoader.component.createInstance(starter)
         }
+
         starter.mount(component, layout.document.body)
         const doc = starter.get(EDITABLE_DOCUMENT)
         const renderer = starter.get(Renderer)

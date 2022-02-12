@@ -1,4 +1,4 @@
-import { SlotLiteral } from '@textbus/core'
+import { ComponentLiteral } from '@textbus/core'
 import { Injector, Provider } from '@tanbo/di'
 
 import { FormatLoader, ComponentLoader } from '../dom-support/parser'
@@ -28,7 +28,7 @@ export interface BaseEditorOptions {
   /** 格式加载器 */
   formatLoaders?: FormatLoader[]
   /** 默认内容 */
-  content?: string | SlotLiteral
+  content?: string | ComponentLiteral
   /** 文档默认样式表 */
   styleSheets?: string[]
   /** 配置文档编辑状态下用到的样式 */

@@ -1,14 +1,87 @@
-import { NullInjector, Provider, ReflectiveInjector, Type } from '@tanbo/di'
+import { Injector, NullInjector, Provider, ReflectiveInjector, Type } from '@tanbo/di'
 
-import { ComponentInstance } from './model/component'
-import { NativeNode, History, RootComponentRef, LifeCycle, Renderer } from './foundation/_api'
+import { ComponentInstance, Formatter } from './model/_api'
+import {
+  NativeNode,
+  History,
+  RootComponentRef,
+  LifeCycle,
+  Renderer,
+  COMPONENT_LIST,
+  FORMATTER_LIST,
+  Commander,
+  ComponentList,
+  FormatterList,
+  Keyboard,
+  OutputRenderer,
+  Query,
+  Selection,
+  Translator,
+  NativeSelectionBridge,
+  NativeRenderer
+} from './foundation/_api'
+import { Component } from './define-component'
+import { makeError } from './_utils/make-error'
+
+const starterErrorFn = makeError('Starter')
+
+/**
+ * TextBus 核心配置
+ */
+export interface TextBusConfig {
+  /** 组件列表 */
+  components: Component[]
+  /** 格式列表 */
+  formatters: Formatter[]
+  /** 跨平台实现的提供者 */
+  platformProviders: Provider[]
+}
 
 /**
  * TextBus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
-  constructor(private providers: Provider[] = []) {
-    super(new NullInjector(), providers)
+  constructor(public config: TextBusConfig) {
+    super(new NullInjector(), [
+      ...config.platformProviders,
+      {
+        provide: COMPONENT_LIST,
+        useValue: config.components
+      }, {
+        provide: FORMATTER_LIST,
+        useValue: config.formatters
+      }, {
+        provide: RootComponentRef,
+        useValue: {}
+      },
+      Commander,
+      ComponentList,
+      FormatterList,
+      History,
+      Keyboard,
+      LifeCycle,
+      OutputRenderer,
+      Query,
+      Renderer,
+      Selection,
+      Translator,
+      {
+        provide: Injector,
+        useFactory: () => {
+          return this
+        }
+      }, {
+        provide: NativeSelectionBridge,
+        useFactory() {
+          throw starterErrorFn('You must implement the `NativeSelectionBridge` interface to start TextBus!')
+        }
+      }, {
+        provide: NativeRenderer,
+        useFactory() {
+          throw starterErrorFn('You must implement the `NativeRenderer` interface to start TextBus!')
+        }
+      }
+    ])
   }
 
   /**

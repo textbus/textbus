@@ -1,8 +1,10 @@
 import { fromEvent } from '@tanbo/stream'
+import { Injector } from '@tanbo/di'
 import {
   ContentType,
   defineComponent,
-  onContentInsert, onSlotRemove,
+  onContentInsert,
+  onSlotRemove,
   Slot,
   SlotLiteral,
   SlotRender,
@@ -10,9 +12,9 @@ import {
   Translator,
   useContext,
   useSlots,
-  VElement, onDestroy, useRef, onEnter
+  VElement, onDestroy, useRef, onEnter, ComponentInstance
 } from '@textbus/core'
-import { EDITABLE_DOCUMENT, EDITOR_OPTIONS } from '@textbus/browser'
+import { ComponentLoader, EDITABLE_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
 import { paragraphComponent } from './components/paragraph.component'
 import { EditorOptions } from './types'
@@ -101,3 +103,19 @@ export const rootComponent = defineComponent({
     }
   }
 })
+
+export const rootComponentLoader: ComponentLoader = {
+  component: rootComponent,
+  match(): boolean {
+    return true
+  },
+  read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance {
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.BlockComponent,
+      ContentType.InlineComponent
+    ])
+    slotParser(slot, element)
+    return rootComponent.createInstance(context, slot)
+  }
+}

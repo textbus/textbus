@@ -56,6 +56,13 @@ export class Parser {
     this.formatters = options.formatLoaders || []
   }
 
+  parseDoc(html: string, rootComponentLoader: ComponentLoader) {
+    const element = Parser.parseHTML(html)
+    return rootComponentLoader.read(element, this.injector, (childSlot, childElement) => {
+      return this.readSlot(childSlot, childElement)
+    })
+  }
+
   parse(html: string, rootSlot: Slot) {
     const element = Parser.parseHTML(html)
     const formatItems: FormatItem[] = []
@@ -73,10 +80,7 @@ export class Parser {
       for (const t of this.loaders) {
         if (t.match(el as HTMLElement)) {
           const componentInstance = t.read(el as HTMLElement, this.injector, (childSlot, childElement) => {
-            const childFormatItems: FormatItem[] = []
-            this.readFormats(childElement, childSlot, childFormatItems)
-            this.applyFormats(childSlot, childFormatItems)
-            return childSlot
+            return this.readSlot(childSlot, childElement)
           })
           slot.insert(componentInstance)
           return
@@ -114,6 +118,13 @@ export class Parser {
         endIndex
       }
     }))
+  }
+
+  private readSlot<T extends Slot>(childSlot: T, childElement: HTMLElement): T {
+    const childFormatItems: FormatItem[] = []
+    this.readFormats(childElement, childSlot, childFormatItems)
+    this.applyFormats(childSlot, childFormatItems)
+    return childSlot
   }
 
   private applyFormats(slot: Slot, formatItems: FormatItem[]) {

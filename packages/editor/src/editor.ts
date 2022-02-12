@@ -4,7 +4,7 @@ import { makeError, Selection } from '@textbus/core'
 import { CoreEditor, SelectionBridge } from '@textbus/browser'
 
 import { EditorOptions } from './types'
-import { rootComponent } from './root.component'
+import { rootComponentLoader } from './root.component'
 import { Layout } from './layout'
 import { I18n } from './i18n'
 import { i18n_zh_CN } from './i18n/zh_CN'
@@ -96,7 +96,7 @@ export class Editor extends CoreEditor {
 
     options.editingStyleSheets = options.editingStyleSheets || []
     options.editingStyleSheets.push(`body{padding-bottom:50px}[textbus-document=true]{overflow:hidden}[textbus-document=true]::before {content: attr(data-placeholder); position: absolute; opacity: 0.6; z-index: -1;}`)
-    this.init(this.layout.scroller, options.rootComponent || rootComponent, options).then(rootInjector => {
+    this.init(this.layout.scroller, options.rootComponentLoader || rootComponentLoader, options).then(rootInjector => {
       rootInjector.get(ContextMenu)
       setTimeout(() => {
         if (this.destroyed) {
