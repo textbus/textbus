@@ -82,31 +82,31 @@ export const defaultOptions: EditorOptions = {
     textIndentFormatLoader,
     verticalAlignFormatLoader,
     dirFormatLoader
-  ],
-  plugins: [
-    new Toolbar([
-      [historyBackTool, historyForwardTool],
-      [defaultGroupTool],
-      [headingTool],
-      [boldTool, italicTool, strikeThroughTool, underlineTool],
-      [olTool, ulTool],
-      [fontSizeTool, textIndentTool],
-      [colorTool, textBackgroundTool],
-      [insertParagraphBeforeTool, insertParagraphAfterTool],
-      [fontFamilyTool],
-      [linkTool, unlinkTool],
-      [imageTool],
-      [textAlignTool],
-      [tableAddTool, tableRemoveTool],
-      [cleanTool]
-    ]),
-    new LinkJumpTipPlugin()
   ]
 }
 
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   return new Editor(selector, {
     ...defaultOptions,
+    plugins: [
+      new Toolbar([
+        [historyBackTool, historyForwardTool],
+        [defaultGroupTool],
+        [headingTool],
+        [boldTool, italicTool, strikeThroughTool, underlineTool],
+        [olTool, ulTool],
+        [fontSizeTool, textIndentTool],
+        [colorTool, textBackgroundTool],
+        [insertParagraphBeforeTool, insertParagraphAfterTool],
+        [fontFamilyTool],
+        [linkTool, unlinkTool],
+        [imageTool],
+        [textAlignTool],
+        [tableAddTool, tableRemoveTool],
+        [cleanTool]
+      ]),
+      new LinkJumpTipPlugin()
+    ],
     ...options
   })
 }
