@@ -16,7 +16,7 @@ import { audioToolConfigFactory } from './audio.tool'
 import { videoToolConfigFactory } from './video.tool'
 import { blockquoteToolConfigFactory } from './blockquote.tool'
 
-export function insertObjectToolConfigFactory(injector: Injector): GroupToolConfig {
+export function defaultGroupToolFactory(injector: Injector): GroupToolConfig {
   const i18n = injector.get(I18n)
   return {
     iconClasses: ['textbus-icon-plus'],
@@ -72,4 +72,4 @@ export function insertObjectToolConfigFactory(injector: Injector): GroupToolConf
   }
 }
 
-export const defaultGroupTool = new GroupTool(insertObjectToolConfigFactory)
+export const defaultGroupTool = new GroupTool(defaultGroupToolFactory)
