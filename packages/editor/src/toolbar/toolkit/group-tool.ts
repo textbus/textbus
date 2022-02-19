@@ -314,6 +314,9 @@ export class GroupTool implements Tool {
           case QueryStateType.Normal:
             viewer.disabled = false
             viewer.highlight = false
+            map.forEach((el) => {
+              el.classList.remove('textbus-toolbar-option-active')
+            })
         }
       }
     }

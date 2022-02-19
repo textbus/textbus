@@ -30,6 +30,7 @@ import 'prismjs/components/prism-cpp'
 import 'prismjs/components/prism-csharp'
 import 'prismjs/components/prism-go'
 import { paragraphComponent } from './paragraph.component'
+import { I18n } from '../i18n'
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -94,7 +95,7 @@ export const languageList: Array<{ label: string, value: string }> = [{
   label: 'Stylus',
   value: 'Stylus',
 }, {
-  label: 'Shell',
+  label: '',
   value: '',
 }]
 
@@ -288,6 +289,8 @@ export const preComponent = defineComponent({
     })
     const injector = useContext()
 
+    const i18n = injector.get(I18n)
+
     const selection = injector.get(Selection)
 
     stateController.onChange.subscribe(newLang => {
@@ -366,7 +369,7 @@ export const preComponent = defineComponent({
     onContextMenu(() => {
       return languageList.map(i => {
         return {
-          label: i.label,
+          label: i.label || i18n.get('components.preComponent.defaultLang'),
           onClick() {
             if (i.value !== data.lang) {
               data.lang = i.value
