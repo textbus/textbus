@@ -230,7 +230,8 @@ export class CoreEditor {
   private initDocStyleSheets(doc: Document, options: BaseEditorOptions) {
     const links: Array<{ [key: string]: string }> = []
 
-    const componentStyles = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!).map(metadata => {
+    const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)
+    const componentStyles = resources.map(metadata => {
       if (Array.isArray(metadata.links)) {
         links.push(...metadata.links)
       }
@@ -246,6 +247,14 @@ export class CoreEditor {
     const styleEl = doc.createElement('style')
     styleEl.innerHTML = CoreEditor.cssMin([...docStyles, ...(options.editingStyleSheets || [])].join(''))
     doc.head.append(styleEl)
+
+    resources.filter(i => i.scripts?.length).map(i => i.scripts).flat().forEach(src => {
+      if (src) {
+        const script = doc.createElement('script')
+        script.src = src
+        doc.head.appendChild(script)
+      }
+    })
   }
 
   private getAllComponentResources() {
