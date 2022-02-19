@@ -56,4 +56,6 @@ export function letterSpacingToolConfigFactory(injector: Injector): SelectToolCo
   }
 }
 
-export const letterSpacingTool = new SelectTool(letterSpacingToolConfigFactory)
+export function letterSpacingTool() {
+  return new SelectTool(letterSpacingToolConfigFactory)
+}

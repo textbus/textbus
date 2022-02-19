@@ -76,4 +76,6 @@ export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
   }
 }
 
-export const audioTool = new DialogTool(audioToolConfigFactory)
+export function audioTool() {
+  return new DialogTool(audioToolConfigFactory)
+}

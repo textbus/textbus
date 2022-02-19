@@ -23,4 +23,6 @@ export function subscriptToolConfigFactory(injector: Injector): ButtonToolConfig
   }
 }
 
-export const subscriptTool = new ButtonTool(subscriptToolConfigFactory)
+export function subscriptTool() {
+  return new ButtonTool(subscriptToolConfigFactory)
+}

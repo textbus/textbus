@@ -157,4 +157,6 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
   }
 }
 
-export const headingTool = new SelectTool(headingToolConfigFactory)
+export function headingTool() {
+  return new SelectTool(headingToolConfigFactory)
+}

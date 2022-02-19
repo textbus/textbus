@@ -30,4 +30,6 @@ export function cleanToolConfigFactory(injector: Injector): ButtonToolConfig<any
   }
 }
 
-export const cleanTool = new ButtonTool(cleanToolConfigFactory)
+export function cleanTool() {
+  return new ButtonTool(cleanToolConfigFactory)
+}

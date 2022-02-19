@@ -18,4 +18,6 @@ export function olToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const olTool = new ButtonTool(olToolConfigFactory)
+export function olTool() {
+  return new ButtonTool(olToolConfigFactory)
+}

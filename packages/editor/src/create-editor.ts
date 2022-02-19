@@ -32,14 +32,12 @@ import {
 import { Editor } from './editor'
 import {
   Toolbar,
-  // boldTool, cleanTool, colorTool,
-  defaultGroupTool,
-  // fontFamilyTool, fontSizeTool, headingTool,
-  // historyBackTool,
-  // historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
-  // italicTool, linkTool, olTool,
-  // strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
-  // underlineTool, unlinkTool
+  boldTool, cleanTool, colorTool, defaultGroupTool, fontFamilyTool, fontSizeTool, headingTool,
+  historyBackTool,
+  historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
+  italicTool, linkTool, olTool,
+  strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
+  underlineTool, unlinkTool
 } from './toolbar/_api'
 import { LinkJumpTipPlugin } from './plugins/_api'
 
@@ -92,20 +90,20 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
     ...defaultOptions,
     plugins: [
       new Toolbar([
-        // [historyBackTool, historyForwardTool],
+        [historyBackTool, historyForwardTool],
         [defaultGroupTool],
-        // [headingTool],
-        // [boldTool, italicTool, strikeThroughTool, underlineTool],
-        // [olTool, ulTool],
-        // [fontSizeTool, textIndentTool],
-        // [colorTool, textBackgroundTool],
-        // [insertParagraphBeforeTool, insertParagraphAfterTool],
-        // [fontFamilyTool],
-        // [linkTool, unlinkTool],
-        // [imageTool],
-        // [textAlignTool],
-        // [tableAddTool, tableRemoveTool],
-        // [cleanTool]
+        [headingTool],
+        [boldTool, italicTool, strikeThroughTool, underlineTool],
+        [olTool, ulTool],
+        [fontSizeTool, textIndentTool],
+        [colorTool, textBackgroundTool],
+        [insertParagraphBeforeTool, insertParagraphAfterTool],
+        [fontFamilyTool],
+        [linkTool, unlinkTool],
+        [imageTool],
+        [textAlignTool],
+        [tableAddTool, tableRemoveTool],
+        [cleanTool]
       ]),
       new LinkJumpTipPlugin()
     ],

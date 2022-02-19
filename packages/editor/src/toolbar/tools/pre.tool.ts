@@ -86,4 +86,6 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
   }
 }
 
-export const preTool = new SelectTool(preToolConfigFactory)
+export function preTool() {
+  return new SelectTool(preToolConfigFactory)
+}

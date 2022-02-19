@@ -23,4 +23,6 @@ export function superscriptToolConfigFactory(injector: Injector): ButtonToolConf
   }
 }
 
-export const superscriptTool = new ButtonTool(superscriptToolConfigFactory)
+export function superscriptTool() {
+  return new ButtonTool(superscriptToolConfigFactory)
+}

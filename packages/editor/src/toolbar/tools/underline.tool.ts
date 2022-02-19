@@ -27,4 +27,6 @@ export function underlineToolConfigFactory(injector: Injector): ButtonToolConfig
   }
 }
 
-export const underlineTool = new ButtonTool(underlineToolConfigFactory)
+export function underlineTool() {
+  return new ButtonTool(underlineToolConfigFactory)
+}

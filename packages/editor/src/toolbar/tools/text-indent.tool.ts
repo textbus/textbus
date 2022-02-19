@@ -45,4 +45,6 @@ export function textIndentToolConfigFactory(injector: Injector): SelectToolConfi
   }
 }
 
-export const textIndentTool = new SelectTool(textIndentToolConfigFactory)
+export function textIndentTool() {
+  return new SelectTool(textIndentToolConfigFactory)
+}

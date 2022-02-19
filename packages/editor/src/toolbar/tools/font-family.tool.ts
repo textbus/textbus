@@ -65,4 +65,6 @@ export function fontFamilyToolConfigFactory(injector: Injector): SelectToolConfi
   }
 }
 
-export const fontFamilyTool = new SelectTool(fontFamilyToolConfigFactory)
+export function fontFamilyTool() {
+  return new SelectTool(fontFamilyToolConfigFactory)
+}

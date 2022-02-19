@@ -27,4 +27,6 @@ export function codeToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const codeTool = new ButtonTool(codeToolConfigFactory)
+export function codeTool() {
+  return new ButtonTool(codeToolConfigFactory)
+}

@@ -38,4 +38,6 @@ export function insertParagraphAfterToolConfigFactory(injector: Injector): Butto
   }
 }
 
-export const insertParagraphAfterTool = new ButtonTool(insertParagraphAfterToolConfigFactory)
+export function insertParagraphAfterTool() {
+  return new ButtonTool(insertParagraphAfterToolConfigFactory)
+}

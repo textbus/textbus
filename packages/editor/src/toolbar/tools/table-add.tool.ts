@@ -118,4 +118,6 @@ export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfi
   }
 }
 
-export const tableAddTool = new DropdownTool(tableAddToolConfigFactory)
+export function tableAddTool() {
+  return new DropdownTool(tableAddToolConfigFactory)
+}

@@ -27,4 +27,6 @@ export function italicToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const italicTool = new ButtonTool(italicToolConfigFactory)
+export function italicTool() {
+  return new ButtonTool(italicToolConfigFactory)
+}

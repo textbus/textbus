@@ -54,4 +54,6 @@ export function textAlignToolConfigFactory(injector: Injector): SelectToolConfig
   }
 }
 
-export const textAlignTool = new SelectTool(textAlignToolConfigFactory)
+export function textAlignTool() {
+  return new SelectTool(textAlignToolConfigFactory)
+}

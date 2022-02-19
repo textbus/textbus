@@ -27,4 +27,6 @@ export function strikeThroughToolConfigFactory(injector: Injector): ButtonToolCo
   }
 }
 
-export const strikeThroughTool = new ButtonTool(strikeThroughToolConfigFactory)
+export function strikeThroughTool() {
+  return new ButtonTool(strikeThroughToolConfigFactory)
+}

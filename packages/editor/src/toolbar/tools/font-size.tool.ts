@@ -73,4 +73,6 @@ export function fontSizeToolConfigFactory(injector: Injector): SelectToolConfig 
   }
 }
 
-export const fontSizeTool = new SelectTool(fontSizeToolConfigFactory)
+export function fontSizeTool() {
+  return new SelectTool(fontSizeToolConfigFactory)
+}

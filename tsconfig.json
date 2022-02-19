@@ -22,5 +22,5 @@
     "jsx": "react",
     "jsxFactory": "VElement.createElement"
   },
-  "exclude": ["packages"]
+  "exclude": ["packages", "_docs"]
 }

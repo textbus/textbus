@@ -27,4 +27,6 @@ export function rightToLeftToolConfigFactory(injector: Injector): ButtonToolConf
   }
 }
 
-export const rightToLeftTool = new ButtonTool(rightToLeftToolConfigFactory)
+export function rightToLeftTool() {
+  return new ButtonTool(rightToLeftToolConfigFactory)
+}

@@ -7,6 +7,10 @@ import { Tool } from './types'
 import { Layout } from '../layout'
 import { createKeymap } from './toolkit/_utils/_create-keymap'
 
+export interface ToolFactory {
+  (): Tool
+}
+
 /**
  * 编辑器工具条
  */
@@ -17,7 +21,12 @@ export class Toolbar implements Plugin {
 
   private subs: Subscription[] = []
 
-  constructor(private tools: Array<Tool | Tool[]> = []) {
+  private tools: Array<Tool | Tool[]> = []
+
+  constructor(private toolFactories: Array<ToolFactory | ToolFactory[]> = []) {
+    this.tools = toolFactories.map(i => {
+      return Array.isArray(i) ? i.map(j => j()) : i()
+    })
   }
 
   setup(injector: Injector) {

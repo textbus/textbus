@@ -65,4 +65,6 @@ export function linkToolConfigFactory(injector: Injector): DropdownToolConfig {
   }
 }
 
-export const linkTool = new DropdownTool(linkToolConfigFactory)
+export function linkTool() {
+  return new DropdownTool(linkToolConfigFactory)
+}

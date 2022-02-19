@@ -36,4 +36,6 @@ export function unlinkToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const unlinkTool = new ButtonTool(unlinkToolConfigFactory)
+export function unlinkTool() {
+  return new ButtonTool(unlinkToolConfigFactory)
+}

@@ -18,4 +18,6 @@ export function ulToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const ulTool = new ButtonTool(ulToolConfigFactory)
+export function ulTool() {
+  return new ButtonTool(ulToolConfigFactory)
+}

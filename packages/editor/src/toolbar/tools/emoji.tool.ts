@@ -70,4 +70,6 @@ export function emojiToolConfigFactory(injector: Injector): DropdownToolConfig {
   }
 }
 
-export const emojiTool = new DropdownTool(emojiToolConfigFactory)
+export function emojiTool() {
+  return new DropdownTool(emojiToolConfigFactory)
+}

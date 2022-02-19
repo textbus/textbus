@@ -27,4 +27,6 @@ export function historyForwardToolConfigFactory(injector: Injector): ButtonToolC
   }
 }
 
-export const historyForwardTool = new ButtonTool(historyForwardToolConfigFactory)
+export function historyForwardTool() {
+  return new ButtonTool(historyForwardToolConfigFactory)
+}

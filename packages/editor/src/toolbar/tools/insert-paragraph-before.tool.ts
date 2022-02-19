@@ -39,4 +39,6 @@ export function insertParagraphBeforeToolConfigFactory(injector: Injector): Butt
   }
 }
 
-export const insertParagraphBeforeTool = new ButtonTool(insertParagraphBeforeToolConfigFactory)
+export function insertParagraphBeforeTool() {
+  return new ButtonTool(insertParagraphBeforeToolConfigFactory)
+}

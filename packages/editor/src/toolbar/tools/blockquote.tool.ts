@@ -62,4 +62,6 @@ export function blockquoteToolConfigFactory(injector: Injector): ButtonToolConfi
   }
 }
 
-export const blockquoteTool = new ButtonTool(blockquoteToolConfigFactory)
+export function blockquoteTool() {
+  return new ButtonTool(blockquoteToolConfigFactory)
+}

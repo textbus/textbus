@@ -22,4 +22,6 @@ export function colorToolConfigFactory(injector: Injector): SegmentDropdownToolC
   }
 }
 
-export const colorTool = new SegmentDropdownTool(colorToolConfigFactory)
+export function colorTool() {
+  return new SegmentDropdownTool(colorToolConfigFactory)
+}

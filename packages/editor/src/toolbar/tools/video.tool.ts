@@ -87,4 +87,6 @@ export function videoToolConfigFactory(injector: Injector): DialogToolConfig {
   }
 }
 
-export const videoTool = new DialogTool(videoToolConfigFactory)
+export function videoTool() {
+  return new DialogTool(videoToolConfigFactory)
+}

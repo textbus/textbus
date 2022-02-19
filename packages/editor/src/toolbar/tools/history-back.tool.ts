@@ -26,4 +26,6 @@ export function historyBackToolConfigFactory(injector: Injector): ButtonToolConf
   }
 }
 
-export const historyBackTool = new ButtonTool(historyBackToolConfigFactory)
+export function historyBackTool() {
+  return new ButtonTool(historyBackToolConfigFactory)
+}

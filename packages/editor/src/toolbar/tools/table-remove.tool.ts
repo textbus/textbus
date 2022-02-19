@@ -30,4 +30,6 @@ export function tableRemoveToolConfigFactory(injector: Injector): ButtonToolConf
   }
 }
 
-export const tableRemoveTool = new ButtonTool(tableRemoveToolConfigFactory)
+export function tableRemoveTool() {
+  return new ButtonTool(tableRemoveToolConfigFactory)
+}

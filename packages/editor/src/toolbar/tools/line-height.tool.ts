@@ -63,4 +63,6 @@ export function lineHeightToolConfigFactory(injector: Injector): SelectToolConfi
     }
   }
 }
-export const lineHeightTool = new SelectTool(lineHeightToolConfigFactory)
+export function lineHeightTool() {
+  return new SelectTool(lineHeightToolConfigFactory)
+}

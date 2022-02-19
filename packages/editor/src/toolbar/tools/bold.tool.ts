@@ -27,4 +27,6 @@ export function boldToolConfigFactory(injector: Injector): ButtonToolConfig {
   }
 }
 
-export const boldTool = new ButtonTool(boldToolConfigFactory)
+export function boldTool() {
+  return new ButtonTool(boldToolConfigFactory)
+}

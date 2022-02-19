@@ -16,4 +16,6 @@ export function textBackgroundToolConfigFactory(injector: Injector): SegmentDrop
   }
 }
 
-export const textBackgroundTool = new SegmentDropdownTool(textBackgroundToolConfigFactory)
+export function textBackgroundTool() {
+  return new SegmentDropdownTool(textBackgroundToolConfigFactory)
+}

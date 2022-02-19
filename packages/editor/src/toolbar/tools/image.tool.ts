@@ -241,4 +241,6 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
   }
 }
 
-export const imageTool = new DialogTool(imageToolConfigFactory)
+export function imageTool() {
+  return new DialogTool(imageToolConfigFactory)
+}
