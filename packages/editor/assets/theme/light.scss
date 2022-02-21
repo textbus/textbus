@@ -1,0 +1,17 @@
+.textbus-container.textbus-theme-light {
+  .textbus-ui-bottom {
+    background-color: #fefefe;
+    border: 1px solid $color-lighter;
+    color: $color-gray-dark;
+  }
+
+}
+
+.textbus-toolbar.textbus-toolbar-light {
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
+
+  .textbus-toolbar-wrapper {
+    background-color: #fff;
+    border: 1px solid $color-light;
+  }
+}

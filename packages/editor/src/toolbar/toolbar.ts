@@ -1,11 +1,14 @@
 import { auditTime, fromEvent, merge, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { createElement, EDITABLE_DOCUMENT, Plugin } from '@textbus/browser'
-import { Keymap, Renderer, Selection } from '@textbus/core'
+import { createElement, EDITABLE_DOCUMENT, EDITOR_OPTIONS, Plugin } from '@textbus/browser'
+import { Keymap, makeError, Renderer, Selection } from '@textbus/core'
 
 import { Tool } from './types'
 import { Layout } from '../layout'
 import { createKeymap } from './toolkit/_utils/_create-keymap'
+import { EditorOptions } from '../types'
+
+const toolbarErrorFn = makeError('Toolbar')
 
 export interface ToolFactory {
   (): Tool
@@ -23,7 +26,7 @@ export class Toolbar implements Plugin {
 
   private tools: Array<Tool | Tool[]> = []
 
-  constructor(private toolFactories: Array<ToolFactory | ToolFactory[]> = []) {
+  constructor(private toolFactories: Array<ToolFactory | ToolFactory[]> = [], private host?: HTMLElement | string) {
     this.tools = toolFactories.map(i => {
       return Array.isArray(i) ? i.map(j => j()) : i()
     })
@@ -34,6 +37,7 @@ export class Toolbar implements Plugin {
     const selection = injector.get(Selection)
     const renderer = injector.get(Renderer)
     const editableDocument = injector.get(EDITABLE_DOCUMENT)
+    const options = injector.get(EDITOR_OPTIONS) as EditorOptions
     this.elementRef = createElement('div', {
       classes: ['textbus-toolbar'],
       children: [
@@ -45,7 +49,24 @@ export class Toolbar implements Plugin {
         })
       ]
     })
-    layout.top.append(this.elementRef)
+    if (options.theme) {
+      this.elementRef.classList.add('textbus-toolbar-' + options.theme)
+    }
+    const selector = this.host
+    if (selector) {
+      let host: HTMLElement
+      if (typeof selector === 'string') {
+        host = document.querySelector(selector)!
+      } else {
+        host = selector
+      }
+      if (!host || !(host instanceof HTMLElement)) {
+        throw toolbarErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
+      }
+      host.append(this.elementRef)
+    } else {
+      layout.top.append(this.elementRef)
+    }
     this.tools.forEach(tool => {
       const group = document.createElement('div')
       group.classList.add('textbus-toolbar-group')

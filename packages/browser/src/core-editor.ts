@@ -42,7 +42,7 @@ export class CoreEditor {
   /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
 
-  /** 访问编辑器内部实例有 IoC 容器 */
+  /** 访问编辑器内部实例的 IoC 容器 */
   injector: Starter | null = null
 
   /** 编辑器是否已销毁 */

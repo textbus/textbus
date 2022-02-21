@@ -1,6 +1,7 @@
 @import "~@tanbo/css-themes/themes/scss/default";
 @import "~@tanbo/color-picker/bundles/scss/index";
 $line-height: 1.4285714 !default;
+$color-darker: #222;
 
 @import "./base/mixins";
 @import "./base/scroll";
@@ -18,3 +19,5 @@ $line-height: 1.4285714 !default;
 @import "./plugins/toolbar-extention";
 
 @import "./theme/dark";
+@import "./theme/darkline";
+@import "./theme/light";
