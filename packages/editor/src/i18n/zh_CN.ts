@@ -242,7 +242,7 @@ export const i18n_zh_CN: I18NConfig = {
       },
       preTool: {
         tooltip: '代码块',
-        defaultLang: '源代码'
+        defaultLang: '其它'
       },
       rightToLeftTool: {
         tooltip: '从右向左'

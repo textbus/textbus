@@ -135,7 +135,7 @@ export class CoreEditor {
         const doc = starter.get(EDITABLE_DOCUMENT)
         const renderer = starter.get(Renderer)
 
-        this.initDocStyleSheets(doc, options)
+        this.initDocStyleSheetsAndScripts(doc, options)
         this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
 
         const resizeObserver = new ResizeObserver((e) => {
@@ -227,7 +227,7 @@ export class CoreEditor {
     }
   }
 
-  private initDocStyleSheets(doc: Document, options: BaseEditorOptions) {
+  private initDocStyleSheetsAndScripts(doc: Document, options: BaseEditorOptions) {
     const links: Array<{ [key: string]: string }> = []
 
     const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)

@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@tanbo/di": "^1.0.5",
-    "@tanbo/stream": "^0.0.9",
+    "@tanbo/stream": "^0.0.11",
     "@textbus/core": "^2.0.0-alpha.22",
     "reflect-metadata": "^0.1.13"
   },
