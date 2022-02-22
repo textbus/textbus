@@ -1,6 +1,6 @@
 {
   "name": "@textbus/image-and-video-drag-resize-plugin",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "description": "TextBus image and video drag resize plugin extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -25,8 +25,8 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@textbus/components": "^1.1.6",
-    "@textbus/core": "^1.1.6",
+    "@textbus/components": "^1.1.8",
+    "@textbus/core": "^1.1.8",
     "rxjs": "^6.0.0"
   },
   "author": {

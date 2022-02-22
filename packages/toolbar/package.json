@@ -1,6 +1,6 @@
 {
   "name": "@textbus/toolbar",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "description": "TextBus tool extensions.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -28,10 +28,10 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
-    "@textbus/components": "^1.1.6",
-    "@textbus/core": "^1.1.6",
-    "@textbus/formatters": "^1.1.6",
-    "@textbus/uikit": "^1.1.6",
+    "@textbus/components": "^1.1.8",
+    "@textbus/core": "^1.1.8",
+    "@textbus/formatters": "^1.1.8",
+    "@textbus/uikit": "^1.1.8",
     "rxjs": "^6.0.0"
   },
   "author": {

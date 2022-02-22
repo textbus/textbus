@@ -1,6 +1,6 @@
 {
   "name": "@textbus/core",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
