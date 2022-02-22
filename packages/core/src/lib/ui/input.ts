@@ -439,6 +439,9 @@ export class Input {
 
   private makeContextmenu() {
     const firstRange = this.selection.firstRange;
+    if (!firstRange) {
+      return []
+    }
     let component = firstRange.startFragment.getContentAtIndex(firstRange.startIndex); //光标右边
     // 当叶子组件在文档最后一行且后面没有其他内容时，就会是BrComponent
     if (!component || typeof component === 'string' || component instanceof BrComponent) {
