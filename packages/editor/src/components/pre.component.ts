@@ -430,26 +430,32 @@ export const preComponent = defineComponent({
         target.insert(firstCode)
       }
       const index = slots.indexOf(target)
-      slots.retain(index + 1)
-      const slotList = formatCodeLines(codeList, !target.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
-      slots.insert(...slotList)
+      if (codeList.length) {
+        slots.retain(index + 1)
+        const slotList = formatCodeLines(codeList, !target.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
+        const last = slotList[slotList.length - 1]
+        slots.insert(...slotList)
+        selection.setLocation(last, last.index)
+      } else {
+        selection.setLocation(target, target.index)
+      }
       ev.preventDefault()
     })
 
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         const block = new VElement('pre', null, [
-          new VElement('span', {
+          new VElement('div', {
             class: 'tb-code-line-number-bg',
             style: {
               width: Math.max(String(slots.length).length, 2) + 'em'
             }
           }),
-          new VElement('span', {
+          new VElement('div', {
             class: 'tb-code-content'
           }, slots.toArray().map(item => {
             return slotRender(item, () => {
-              return new VElement('span', {
+              return new VElement('div', {
                 class: 'tb-code-line'
               })
             })

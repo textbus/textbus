@@ -133,7 +133,10 @@ export class ContextMenu {
   }
 
   private makeContextmenu() {
-    const startSlot = this.selection.startSlot!
+    const startSlot = this.selection.startSlot
+    if (!startSlot) {
+      return []
+    }
     let component: ComponentInstance | null = startSlot.getContentAtIndex(this.selection.startOffset! - 1) as ComponentInstance
     if (!component || typeof component === 'string') {
       component = this.selection.commonAncestorComponent!
