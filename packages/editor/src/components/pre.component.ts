@@ -145,7 +145,6 @@ function getLanguageBlockCommentStart(lang: string): [string, string] {
 }
 
 function getLanguageGrammar(lang: string): Grammar | null {
-  console.log(languages, lang)
   return {
     HTML: languages.html,
     JavaScript: languages.javascript,

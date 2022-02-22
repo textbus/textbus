@@ -80,214 +80,6 @@ export interface Ref<T> {
   current: T | null
 }
 
-interface ComponentContext<T> {
-  slots: Slots<any>
-  initState?: T
-  changeController: ChangeController<T>
-  contextInjector: Injector
-  componentInstance: ComponentInstance,
-  dynamicShortcut: Shortcut[]
-}
-
-let context: ComponentContext<any> | null = null
-
-/**
- * TextBus 扩展组件方法
- * @param options
- */
-export function defineComponent<Methods extends ComponentMethods,
-  State = any,
-  InitData = any>(options: ComponentOptions<Methods, State, InitData>): Component<ComponentInstance<Methods, State>, State, InitData> {
-  return {
-    name: options.name,
-    transform(translator: Translator, state: State): InitData {
-      return options.transform(translator, state)
-    },
-    createInstance(contextInjector: Injector, initData: InitData) {
-      const marker = new ChangeMarker()
-      const stateChangeSubject = new Subject<any>()
-      recordContextListener()
-
-      const changeController: ChangeController<State> = {
-        update(fn) {
-          return componentInstance.updateState(fn)
-        },
-        onChange: stateChangeSubject.asObservable()
-      }
-
-      const componentInstance: ComponentInstance<Methods, State> = {
-        changeMarker: marker,
-        parent: null,
-        get parentComponent() {
-          return componentInstance.parent?.parent || null
-        },
-        name: options.name,
-        length: 1,
-        type: options.type,
-        slots: null as any,
-        methods: null as any,
-        shortcutList: null as any,
-        updateState(fn) {
-          let changes!: Patch[]
-          let inverseChanges!: Patch[]
-          const newState = produce(state, fn, (p, ip) => {
-            changes = p
-            inverseChanges = ip
-          })
-          state = newState
-          stateChangeSubject.next(newState)
-          marker.markAsDirtied({
-            path: [],
-            apply: [{
-              type: 'apply',
-              patches: changes!
-            }],
-            unApply: [{
-              type: 'apply',
-              patches: inverseChanges!
-            }]
-          })
-          return newState
-        },
-        toJSON() {
-          return {
-            name: options.name,
-            state: componentInstance.methods.toJSON()
-          }
-        }
-      }
-      context = {
-        contextInjector,
-        changeController,
-        slots: new Slots(componentInstance, () => new Slot([])),
-        componentInstance: componentInstance,
-        dynamicShortcut: []
-      }
-      componentInstance.methods = options.setup(initData)
-      componentInstance.slots = context.slots
-      componentInstance.shortcutList = context.dynamicShortcut
-      let state = context.initState
-
-      const subscriptions: Subscription[] = [
-        context.slots.onChange.subscribe(ops => {
-          marker.markAsDirtied(ops)
-        }),
-
-        context.slots.onChildComponentRemoved.subscribe(instance => {
-          marker.recordComponentRemoved(instance)
-        }),
-
-        context.slots.onChildSlotChange.subscribe(d => {
-          marker.markAsChanged(d.operation)
-        })
-      ]
-
-      onDestroy(() => {
-        subscriptions.forEach(i => i.unsubscribe())
-      })
-
-      context = null
-      recordContextListenerEnd(componentInstance)
-      return componentInstance
-    }
-  }
-}
-
-/**
- * 组件 setup 方法内获取编辑器 IoC 容器的勾子
- */
-export function useContext(): Injector {
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
-  return context.contextInjector
-}
-
-/**
- * 组件 setup 方法内获取组件实例的勾子
- */
-export function useSelf<Methods extends ComponentMethods<State> = ComponentMethods, State = any>(): ComponentInstance<Methods, State> {
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
-  return context.componentInstance as ComponentInstance<Methods, State>
-}
-
-/**
- * 组件使用子插槽的方法
- * @param slots 子插槽数组
- * @param slotRestore 当组件被恢复时，还原实例的工厂函数
- */
-export function useSlots<T extends Slot, State extends SlotLiteral>(slots: T[], slotRestore: SlotRestore<T, State>): Slots<State, T> {
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
-  const s = new Slots(context.componentInstance, slotRestore, slots)
-  context.slots = s
-  return s
-}
-
-/**
- * 组件注册状态管理器的勾子
- * @param initState
- */
-export function useState<T>(initState: T) {
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
-  if (Reflect.has(context, 'initState')) {
-    throw componentErrorFn('only one unique state is allowed for a component!')
-  }
-  context.initState = initState
-  return context.changeController as ChangeController<T>
-}
-
-/**
- * 组件单元素引用勾子
- */
-export function useRef<T>() {
-  return {
-    current: null
-  } as Ref<T>
-}
-
-/**
- * 组件多元素引用勾子
- */
-export function useRefs<T>() {
-  return [] as T[]
-}
-
-/**
- * 组件注册动态快捷键的勾子
- * @param config
- */
-export function useDynamicShortcut(config: Shortcut) {
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
-  context.dynamicShortcut.push(config)
-}
-
-let eventHandleFn: null | ((...args: any[]) => void) = null
-let isPreventDefault = false
-
-/**
- * TextBus 事件对象
- */
-export class Event<T, S extends Slot = Slot> {
-  constructor(public target: S,
-              public data: T,
-              eventHandle: (...args: any[]) => void
-  ) {
-    eventHandleFn = eventHandle
-  }
-
-  preventDefault() {
-    isPreventDefault = true
-  }
-}
-
 export interface InsertEventData {
   index: number
   content: string | ComponentInstance
@@ -351,20 +143,226 @@ class EventCache<T, K extends keyof T = keyof T> {
   }
 }
 
+interface ComponentContext<T> {
+  slots: Slots<any>
+  initState?: T
+  changeController: ChangeController<T>
+  contextInjector: Injector
+  componentInstance: ComponentInstance
+  dynamicShortcut: Shortcut[]
+  eventCache: EventCache<EventTypes>
+}
+
 const eventCacheMap = new WeakMap<ComponentInstance, EventCache<EventTypes>>()
+const contextStack: ComponentContext<any>[] = []
 
-let eventCache: EventCache<EventTypes> | null = null
-
-function recordContextListener() {
-  eventCache = new EventCache()
+function getCurrentContext() {
+  return contextStack[contextStack.length - 1] || null
 }
 
-function recordContextListenerEnd(component: ComponentInstance) {
-  if (eventCache) {
-    eventCacheMap.set(component, eventCache)
+/**
+ * TextBus 扩展组件方法
+ * @param options
+ */
+export function defineComponent<Methods extends ComponentMethods,
+  State = any,
+  InitData = any>(options: ComponentOptions<Methods, State, InitData>): Component<ComponentInstance<Methods, State>, State, InitData> {
+  return {
+    name: options.name,
+    transform(translator: Translator, state: State): InitData {
+      return options.transform(translator, state)
+    },
+    createInstance(contextInjector: Injector, initData: InitData) {
+      const marker = new ChangeMarker()
+      const stateChangeSubject = new Subject<any>()
+
+      const changeController: ChangeController<State> = {
+        update(fn) {
+          return componentInstance.updateState(fn)
+        },
+        onChange: stateChangeSubject.asObservable()
+      }
+
+      const componentInstance: ComponentInstance<Methods, State> = {
+        changeMarker: marker,
+        parent: null,
+        get parentComponent() {
+          return componentInstance.parent?.parent || null
+        },
+        name: options.name,
+        length: 1,
+        type: options.type,
+        slots: null as any,
+        methods: null as any,
+        shortcutList: null as any,
+        updateState(fn) {
+          let changes!: Patch[]
+          let inverseChanges!: Patch[]
+          const newState = produce(state, fn, (p, ip) => {
+            changes = p
+            inverseChanges = ip
+          }) as State
+          state = newState
+          stateChangeSubject.next(newState)
+          marker.markAsDirtied({
+            path: [],
+            apply: [{
+              type: 'apply',
+              patches: changes!
+            }],
+            unApply: [{
+              type: 'apply',
+              patches: inverseChanges!
+            }]
+          })
+          return newState
+        },
+        toJSON() {
+          return {
+            name: options.name,
+            state: componentInstance.methods.toJSON()
+          }
+        }
+      }
+      const context: ComponentContext<State> = {
+        contextInjector,
+        changeController,
+        slots: new Slots(componentInstance, () => new Slot([])),
+        componentInstance: componentInstance,
+        dynamicShortcut: [],
+        eventCache: new EventCache<EventTypes>()
+      }
+      contextStack.push(context)
+      componentInstance.methods = options.setup(initData)
+      onDestroy(() => {
+        eventCacheMap.delete(componentInstance)
+        subscriptions.forEach(i => i.unsubscribe())
+      })
+      eventCacheMap.set(componentInstance, context.eventCache)
+      contextStack.pop()
+      componentInstance.slots = context.slots
+      componentInstance.shortcutList = context.dynamicShortcut
+      let state = context.initState
+
+      const subscriptions: Subscription[] = [
+        context.slots.onChange.subscribe(ops => {
+          marker.markAsDirtied(ops)
+        }),
+
+        context.slots.onChildComponentRemoved.subscribe(instance => {
+          marker.recordComponentRemoved(instance)
+        }),
+
+        context.slots.onChildSlotChange.subscribe(d => {
+          marker.markAsChanged(d.operation)
+        })
+      ]
+
+      return componentInstance
+    }
   }
-  eventCache = null
 }
+
+/**
+ * 组件 setup 方法内获取编辑器 IoC 容器的勾子
+ */
+export function useContext(): Injector {
+  const context = getCurrentContext()
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  return context.contextInjector
+}
+
+/**
+ * 组件 setup 方法内获取组件实例的勾子
+ */
+export function useSelf<Methods extends ComponentMethods<State> = ComponentMethods, State = any>(): ComponentInstance<Methods, State> {
+  const context = getCurrentContext()
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  return context.componentInstance as ComponentInstance<Methods, State>
+}
+
+/**
+ * 组件使用子插槽的方法
+ * @param slots 子插槽数组
+ * @param slotRestore 当组件被恢复时，还原实例的工厂函数
+ */
+export function useSlots<T extends Slot, State extends SlotLiteral>(slots: T[], slotRestore: SlotRestore<T, State>): Slots<State, T> {
+  const context = getCurrentContext()
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  const s = new Slots(context.componentInstance, slotRestore, slots)
+  context.slots = s
+  return s
+}
+
+/**
+ * 组件注册状态管理器的勾子
+ * @param initState
+ */
+export function useState<T>(initState: T) {
+  const context = getCurrentContext()
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  if (Reflect.has(context, 'initState')) {
+    throw componentErrorFn('only one unique state is allowed for a component!')
+  }
+  context.initState = initState
+  return context.changeController as ChangeController<T>
+}
+
+/**
+ * 组件单元素引用勾子
+ */
+export function useRef<T>() {
+  return {
+    current: null
+  } as Ref<T>
+}
+
+/**
+ * 组件多元素引用勾子
+ */
+export function useRefs<T>() {
+  return [] as T[]
+}
+
+/**
+ * 组件注册动态快捷键的勾子
+ * @param config
+ */
+export function useDynamicShortcut(config: Shortcut) {
+  const context = getCurrentContext()
+  if (!context) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  context.dynamicShortcut.push(config)
+}
+
+let eventHandleFn: null | ((...args: any[]) => void) = null
+let isPreventDefault = false
+
+/**
+ * TextBus 事件对象
+ */
+export class Event<T, S extends Slot = Slot> {
+  constructor(public target: S,
+              public data: T,
+              eventHandle: (...args: any[]) => void
+  ) {
+    eventHandleFn = eventHandle
+  }
+
+  preventDefault() {
+    isPreventDefault = true
+  }
+}
+
 
 /**
  * 触发组件事件的方法
@@ -404,102 +402,61 @@ export function invokeListener<K extends keyof EventTypes,
   }
 }
 
-/**
- * 组件内粘贴事件勾子
- * @param listener
- */
-export function onPaste(listener: EventTypes['onPaste']) {
-  if (eventCache) {
-    eventCache.add('onPaste', listener)
+function makeEventHook<T extends keyof EventTypes>(type: T) {
+  return function (listener: EventTypes[T]) {
+    const context = getCurrentContext()
+    if (context) {
+      context.eventCache.add(type, listener)
+    }
   }
 }
+
+/**
+ * 组件内粘贴事件勾子
+ */
+export const onPaste = makeEventHook('onPaste')
 
 /**
  * 组件右键菜单事件勾子
- * @param listener
  */
-export function onContextMenu(listener: EventTypes['onContextMenu']) {
-  if (eventCache) {
-    eventCache.add('onContextMenu', listener)
-  }
-}
+export const onContextMenu = makeEventHook('onContextMenu')
 
 /**
  * 组件视图更新后的勾子
- * @param listener
  */
-export function onViewChecked(listener: EventTypes['onViewChecked']) {
-  if (eventCache) {
-    eventCache.add('onViewChecked', listener)
-  }
-}
+export const onViewChecked = makeEventHook('onViewChecked')
 
 /**
  * 组件第一次渲染后的勾子
- * @param listener
  */
-export function onViewInit(listener: EventTypes['onViewInit']) {
-  if (eventCache) {
-    eventCache.add('onViewInit', listener)
-  }
-}
+export const onViewInit = makeEventHook('onViewInit')
 
 /**
  * 组件子插槽删除时的勾子
- * @param listener
  */
-export function onSlotRemove(listener: EventTypes['onSlotRemove']) {
-  if (eventCache) {
-    eventCache.add('onSlotRemove', listener)
-  }
-}
+export const onSlotRemove = makeEventHook('onSlotRemove')
 
 /**
  * 组件子插槽内容删除时的勾子
- * @param listener
  */
-export function onContentDelete(listener: EventTypes['onContentDelete']) {
-  if (eventCache) {
-    eventCache.add('onContentDelete', listener)
-  }
-}
+export const onContentDelete = makeEventHook('onContentDelete')
 
 /**
  * 组件子插槽换行时的勾子
- * @param listener
  */
-export function onEnter(listener: EventTypes['onEnter']) {
-  if (eventCache) {
-    eventCache.add('onEnter', listener)
-  }
-}
+export const onEnter = makeEventHook('onEnter')
 
 /**
  * 组件子插槽插入内容时的勾子
- * @param listener
  */
-export function onContentInsert(listener: EventTypes['onContentInsert']) {
-  if (eventCache) {
-    eventCache.add('onContentInsert', listener)
-  }
-}
+export const onContentInsert = makeEventHook('onContentInsert')
 
 /**
  * 组件子插槽插入内容后时的勾子
- * @param listener
  */
-export function onContentInserted(listener: EventTypes['onContentInserted']) {
-  if (eventCache) {
-    eventCache.add('onContentInserted', listener)
-  }
-}
+export const onContentInserted = makeEventHook('onContentInserted')
 
 /**
  * 组件销毁时的勾子
- * @param listener
  */
-export function onDestroy(listener: EventTypes['onDestroy']) {
-  if (eventCache) {
-    eventCache.add('onDestroy', listener)
-  }
-}
+export const onDestroy = makeEventHook('onDestroy')
