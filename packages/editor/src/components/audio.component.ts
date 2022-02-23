@@ -37,7 +37,7 @@ export const audioComponent = defineComponent({
       },
       toJSON() {
         return {
-          ...state
+          ...state!
         }
       },
       mergeProps(props: Partial<AudioState>) {

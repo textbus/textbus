@@ -5,7 +5,7 @@ import { createElement, createTextNode } from '@textbus/browser'
 import { DialogTool, DialogToolConfig } from '../toolkit/_api'
 import { I18n } from '../../i18n'
 import { AttrState, Form, FormItem, FormRadio, FormTextField } from '../../uikit/_api'
-import { imageComponent, ImageComponentLiteral } from '../../components/image.component'
+import { imageComponent } from '../../components/image.component'
 import { FileUploader } from '../../file-uploader'
 
 class MarginSetter implements FormItem<string> {
@@ -199,7 +199,7 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
     viewController: form,
     queryState(): QueryState<any> {
       const state = query.queryWrappedComponent(imageComponent)
-      const value = state.value?.toJSON().state as any as ImageComponentLiteral
+      const value = state.value?.toJSON().data
       return {
         state: state.state,
         value: value ? {

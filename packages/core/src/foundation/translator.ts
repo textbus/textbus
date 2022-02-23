@@ -36,7 +36,7 @@ export class Translator {
   createComponent(componentLiteral: ComponentLiteral): ComponentInstance | null {
     const factory = this.componentMap.get(componentLiteral.name)
     if (factory) {
-      const state = factory.transform(this, componentLiteral.state)
+      const state = factory.transform(this, componentLiteral.data)
       return factory.createInstance(this.contextInjector, state)
     }
     return null

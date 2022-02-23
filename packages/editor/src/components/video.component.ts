@@ -57,7 +57,7 @@ export const videoComponent = defineComponent({
       },
       toJSON() {
         return {
-          ...state
+          ...state!
         }
       },
       mergeProps(props: Partial<VideoState>) {

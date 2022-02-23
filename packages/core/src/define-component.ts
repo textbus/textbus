@@ -57,9 +57,9 @@ export interface Component<ComponentInstance = any, State = any, InitData = any>
   /**
    * 组件创建实例的方法
    * @param context
-   * @param state
+   * @param data
    */
-  createInstance(context: Injector, state?: InitData): ComponentInstance
+  createInstance(context: Injector, data?: InitData): ComponentInstance
 }
 
 /**
@@ -164,9 +164,9 @@ function getCurrentContext() {
  * TextBus 扩展组件方法
  * @param options
  */
-export function defineComponent<Methods extends ComponentMethods,
+export function defineComponent<Methods extends ComponentMethods<State>,
   State = any,
-  InitData = any>(options: ComponentOptions<Methods, State, InitData>): Component<ComponentInstance<Methods, State>, State, InitData> {
+  InitData = any>(options: ComponentOptions<Methods, State, InitData>): Component<ComponentInstance<Methods, State, InitData>, State, InitData> {
   return {
     name: options.name,
     transform(translator: Translator, state: State): InitData {
@@ -220,7 +220,7 @@ export function defineComponent<Methods extends ComponentMethods,
         toJSON() {
           return {
             name: options.name,
-            state: componentInstance.methods.toJSON()
+            data: componentInstance.methods.toJSON()
           }
         }
       }

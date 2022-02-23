@@ -5,9 +5,9 @@ import { ContentType, Slot } from './slot'
 import { Slots } from './slots'
 import { ChangeMarker } from './change-marker'
 
-export interface ComponentLiteral<State = any> {
+export interface ComponentLiteral<Data = any> {
   name: string
-  state: State
+  data: Data
 }
 
 export interface SlotRenderFactory {
@@ -47,7 +47,7 @@ export interface Shortcut {
 /**
  * 组件实例对象
  */
-export interface ComponentInstance<Methods extends ComponentMethods<State> = ComponentMethods, State = any> {
+export interface ComponentInstance<Methods extends ComponentMethods<State> = ComponentMethods, State = any, Data = any> {
   /**
    * 组件所在的插槽
    * @readonly
@@ -84,5 +84,5 @@ export interface ComponentInstance<Methods extends ComponentMethods<State> = Com
   /**
    * 组件转为 JSON 数据的方法
    */
-  toJSON(): ComponentLiteral<State>
+  toJSON(): ComponentLiteral<Data>
 }

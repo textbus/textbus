@@ -51,16 +51,16 @@ export class Query {
 
   /**
    * 查询组件在选区内的状态
-   * @param comp 要查询的组件
+   * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Instance extends ComponentMethods>(
-    comp: Component<ComponentInstance<Instance>>,
-    filter?: (instance: ComponentInstance<Instance>) => boolean): QueryState<ComponentInstance<Instance>> {
+  queryComponent<Instance extends ComponentMethods, T, U>(
+    component: Component<ComponentInstance<Instance, T, U>>,
+    filter?: (instance: ComponentInstance<Instance, T, U>) => boolean): QueryState<ComponentInstance<Instance, T, U>> {
     let parent = this.selection.commonAncestorComponent
 
     while (parent) {
-      if (parent.name === comp.name) {
+      if (parent.name === component.name) {
         if (!filter || filter(parent as ComponentInstance<Instance>)) {
           return {
             state: QueryStateType.Enabled,
@@ -78,9 +78,9 @@ export class Query {
 
   /**
    * 查询当前选区是否包含在组件内
-   * @param comp 要查询的组件
+   * @param component 要查询的组件
    */
-  queryWrappedComponent<Instance extends ComponentMethods>(comp: Component<ComponentInstance<Instance>>): QueryState<ComponentInstance<Instance>> {
+  queryWrappedComponent<Instance extends ComponentMethods, T, U>(component: Component<ComponentInstance<Instance, T, U>>): QueryState<ComponentInstance<Instance, T, U>> {
     const selection = this.selection
     if (!selection.isSelected ||
       selection.isCollapsed ||
@@ -91,11 +91,11 @@ export class Query {
         value: null
       }
     }
-    const component = selection.startSlot!.getContentAtIndex(selection.startOffset!)
-    if (typeof component !== 'string' && component.name === comp.name) {
+    const instance = selection.startSlot!.getContentAtIndex(selection.startOffset!)
+    if (typeof instance !== 'string' && instance.name === component.name) {
       return {
         state: QueryStateType.Enabled,
-        value: component as ComponentInstance<Instance>
+        value: instance as ComponentInstance<Instance>
       }
     }
     return {

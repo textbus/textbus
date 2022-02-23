@@ -124,7 +124,7 @@ export class CoreEditor {
           if (typeof content === 'string') {
             component = parser.parseDoc(content, rootComponentLoader)
           } else {
-            const data = rootComponentLoader.component.transform(translator, content.state)
+            const data = rootComponentLoader.component.transform(translator, content.data)
             component = rootComponentLoader.component.createInstance(starter, data)
           }
         } else {
