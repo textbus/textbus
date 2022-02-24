@@ -5,7 +5,7 @@ TextBus 是一套用于构建富交互的富文本编辑框架。和大多数富
 
 ### 文档
 
-更多文档请参考：[中文文档](https://github.com/textbus/textbus)
+更多文档请参考：[中文文档](https://textbus.io)
 
 ### 安装
 

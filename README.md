@@ -1,7 +1,7 @@
 TextBus 富文本编辑器 2.0 内测版
 ================================
 
-> 如果你还在使用 1.0 版本，请访问 [TextBus 1.*](https://github.com/textbus/textbus/tree/1.0-dev)
+> 如果你还在使用 1.0 版本，源代码请访问 [TextBus 1.*](https://github.com/textbus/textbus/tree/1.0-dev)
 
 我们一直致力于让富文本开发也能像普通前端框架一样，通过简明易懂的 api 和少量的约定，即可编写出健壮的，可预期的行为。在 TextBus 1.0 的时，我们为此做了非常多的探索和努力，取得了不错的成果，但也因为如此，1.0 的设计在某些方面还留下一些遗憾。
 
@@ -10,12 +10,57 @@ TextBus 富文本编辑器 2.0 内测版
 + 重新设计了组件系统，去掉了大家难以理解的装饰器，改为用类似 vue 的 setup 形式开发组件，并提供了一系列的 hooks 供大家定制交互行为
 + 重新设计了数据模型，可根据用户的操作生成特定的底层原子命令，这让细粒度的历史记录和文档协同成为可能
 + 核心架构脱离了具体平台，让 TextBus 的能力不仅限于在 PC 端，通过编写特定的中间层，可以方便的在移动端，甚至小程序上实现丰富的富文本能力
-+ 重写了渲染层，现在 TextBus 2.0 大多数情况下更新视图仅需要 1ms 时间，比 1.0 性能更好
++ 重写了渲染层，现在 TextBus 2.0 大多数情况下更新视图仅需要 0.2ms 时间，比 1.0 性能更好
+
+![](./_source/demo.png)
+
+## 安装
+
+TextBus 可能通过两种方式引入到你的项目中。
+
+### 通过 npm 安装
+```
+npm install @textbus/core @textbus/browser @textbus/editor
+```
+在 DOM 中准备好一个空的标签
+```html
+<div id="editor"></div>
+```
+
+创建编辑器实例
+
+```ts
+import '@textbus/editor/bundles/textbus.min.css';
+import { createEditor } from '@textbus/editor';
+
+const editor = createEditor(document.getElementById('editor'))
+
+```
 
 
-## 使用文档
+### 通过 script 标签引入
 
-[TextBus 中文指南](./docs/zh/start.md)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/path/textbus.min.css">
+  <script src="/path/textbus.min.js"></script>
+  <title>TextBus 示例</title>
+</head>
+<body>
+<div id="editor"></div>
+<script>
+  var editor = textbus.createEditor(document.getElementById('editor'))
+</script>
+</body>
+</html>
+```
+## 官方文档
+
+[TextBus2.0 官方文档](https://textbus.io)
+
+[TextBus1.0 官网](https://textbus.tanboui.com) 将于4月中旬废弃，相应文档现已可在 2.0 官网查阅。
 
 ## 本地开发
 
