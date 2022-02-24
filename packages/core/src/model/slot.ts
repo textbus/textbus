@@ -65,6 +65,7 @@ export class Slot<T = any> {
 
   constructor(public schema: ContentType[], public state?: T) {
     this.content.append(Slot.placeholder)
+    this._index = 0
   }
 
   /**
@@ -177,11 +178,12 @@ export class Slot<T = any> {
     this.content.insert(startIndex, content)
     this.applyFormats(formats, startIndex, endIndex)
 
-    if (isEmpty) {
+    if (isEmpty && this._index === 0) {
       this.content.cut(this.length - 1)
     }
 
     this._index = startIndex + length
+
     this.changeMarker.markAsDirtied({
       path: [],
       apply: [{
