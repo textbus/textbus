@@ -10,7 +10,8 @@ import {
   OutputRenderer,
   bootstrap,
   Starter,
-  ComponentInstance,
+  Selection,
+  ComponentInstance, ComponentLiteral, invokeListener,
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
@@ -62,6 +63,8 @@ export class CoreEditor {
 
   protected subs: Subscription[] = []
 
+  private rootComponentLoader: ComponentLoader | null = null
+
   private workbench!: HTMLElement
 
   constructor() {
@@ -78,6 +81,7 @@ export class CoreEditor {
     if (this.destroyed) {
       return Promise.reject(editorError('the editor instance is destroyed!'))
     }
+    this.rootComponentLoader = rootComponentLoader
     this.options = options
     this.plugins = options.plugins || []
     return this.createLayout(host).then(layout => {
@@ -225,6 +229,35 @@ export class CoreEditor {
       }
       this.workbench.parentNode?.removeChild(this.workbench)
     }
+  }
+
+  /**
+   * 替换编辑的内容
+   * @param content
+   */
+  replaceContent(content: string | ComponentLiteral) {
+    if (this.destroyed) {
+      throw editorError('the editor instance is destroyed!')
+    }
+    if (!this.isReady) {
+      throw editorError('please wait for the editor to initialize before getting the content!')
+    }
+    const parser = this.injector!.get(Parser)
+    const translator = this.injector!.get(Translator)
+    const rootComponentRef = this.injector!.get(RootComponentRef)
+    const selection = this.injector!.get(Selection)
+    const rootComponentLoader = this.rootComponentLoader!
+    let component: ComponentInstance
+    if (typeof content === 'string') {
+      component = parser.parseDoc(content, rootComponentLoader)
+    } else {
+      const data = rootComponentLoader.component.transform(translator, content.data)
+      component = rootComponentLoader.component.createInstance(this.injector!, data)
+    }
+    selection.unSelect()
+    rootComponentRef.component.slots.clean()
+    rootComponentRef.component.slots.push(...component.slots.toArray())
+    invokeListener(component, 'onDestroy')
   }
 
   private initDocStyleSheetsAndScripts(doc: Document, options: BaseEditorOptions) {

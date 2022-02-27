@@ -8,7 +8,7 @@ const editor = createEditor(document.getElementById('box')!, {
   content: document.getElementById('template')?.innerHTML
 })
 
-const slot = new Slot([ContentType.Text])
-slot.insert('\n')
-slot.insert('\n')
-console.log(slot)
+const btn = document.getElementById('btn')!
+btn.addEventListener('click', () => {
+  editor.replaceContent(document.getElementById('template1')?.innerHTML!)
+})

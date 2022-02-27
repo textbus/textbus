@@ -124,6 +124,32 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
   }
 
   /**
+   * 删除最后一个插槽并返回
+   */
+  pop() {
+    if (this.length > 0) {
+      const last = this.last
+      this.retain(this.length)
+      this.delete(1)
+      return last
+    }
+    return null
+  }
+
+  /**
+   * 删除第一个插槽并返回
+   */
+  shift() {
+    if (this.length > 0) {
+      const first = this.first
+      this.retain(1)
+      this.delete(1)
+      return first
+    }
+    return null
+  }
+
+  /**
    * 把新插槽添加到最前
    * @param slots
    */
@@ -138,6 +164,20 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    */
   get(index: number): T | null {
     return this.slots[index] || null
+  }
+
+  /**
+   * 替换插槽
+   * @param oldSlot 被替换的插槽
+   * @param newSlot 新的插槽
+   */
+  replace(oldSlot: T, newSlot: T) {
+    const index = this.indexOf(oldSlot)
+    if (index > 0) {
+      this.retain(index + 1)
+      this.delete(1)
+      this.insert(newSlot)
+    }
   }
 
   /**
