@@ -87,7 +87,6 @@ export const defaultOptions: EditorOptions = {
 
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   return new Editor(selector, {
-    ...defaultOptions,
     plugins: [
       new Toolbar([
         [historyBackTool, historyForwardTool],
@@ -107,6 +106,7 @@ export function createEditor(selector: string | HTMLElement, options: EditorOpti
       ]),
       new LinkJumpTipPlugin()
     ],
+    ...defaultOptions,
     ...options
   })
 }

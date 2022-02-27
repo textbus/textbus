@@ -1,4 +1,4 @@
-import { createElement } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/browser'
 import { Keymap } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'
 
@@ -32,7 +32,8 @@ export interface UIDropdown {
 
 export function createDropdown(config: UIDropdownConfig): UIDropdown {
   const label = createElement('span', {
-    classes: ['textbus-toolbar-dropdown-label']
+    classes: ['textbus-toolbar-dropdown-label'],
+    children: [config.label ? createTextNode(config.label) : null]
   })
   let isSelfClick = false
   const button = createElement('button', {

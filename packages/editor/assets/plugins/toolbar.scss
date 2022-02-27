@@ -20,13 +20,14 @@
   border-radius: inherit;
   position: relative;
   z-index: 1;
+  @include clearfix;
 }
 
 .textbus-toolbar-group {
+  float: left;
   margin-left: 4px;
   margin-right: 4px;
   margin-bottom: 5px;
-  display: inline-block;
   border-radius: 5px;
 
   &:last-child {
@@ -36,7 +37,7 @@
 
 .textbus-toolbar-item {
   position: relative;
-  display: inline;
+  display: inline-block;
   border-radius: 4px;
   font-size: 0;
 }
@@ -53,6 +54,7 @@
   height: 28px;
   align-items: center;
   border-radius: inherit;
+  line-height: 1;
 
   &:hover {
     background-color: rgba(0, 0, 0, .05);
@@ -78,6 +80,11 @@
     cursor: not-allowed;
     color: inherit;
   }
+}
+
+.textbus-toolbar-label {
+  display: inline-block;
+  overflow: hidden;
 }
 
 .textbus-toolbar-dropdown-menu {
