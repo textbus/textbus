@@ -42,10 +42,12 @@ export class LinkJumpTipPlugin implements Plugin {
             slot: selection.startSlot!,
             offset: selection.startOffset!
           })!
+
+          const offsetRect = container.getBoundingClientRect()
           if (nativeSelection.isCollapsed) {
             Object.assign(this.link.style, {
-              left: rect.left + 'px',
-              top: rect.top + 'px'
+              left: rect.left - offsetRect.left + 'px',
+              top: rect.top - offsetRect.top + 'px'
             })
           } else {
             const rect2 = bridge.getRect({
@@ -53,8 +55,8 @@ export class LinkJumpTipPlugin implements Plugin {
               offset: selection.endOffset!
             })!
             Object.assign(this.link.style, {
-              left: (rect.left + rect2.left) / 2 + 'px',
-              top: rect.top + 'px'
+              left: (rect.left + rect2.left) / 2 - offsetRect.left + 'px',
+              top: rect.top - offsetRect.top + 'px'
             })
           }
 

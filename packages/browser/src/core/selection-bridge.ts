@@ -1,4 +1,4 @@
-import { fromEvent, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
 import {
   ComponentInstance,
@@ -9,11 +9,11 @@ import {
   Range as TBRange,
   VElement,
   VNodeLocation,
-  VTextNode
+  VTextNode, RootComponentRef
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
-import { EDITABLE_DOCUMENT, EDITOR_CONTAINER } from './injection-tokens'
+import { DOC_CONTAINER, EDITABLE_DOCUMENT, EDITOR_MASK, RESIZE_OBSERVER } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
 
 /**
@@ -24,37 +24,40 @@ export class SelectionBridge implements NativeSelectionBridge {
   onSelectionChange: Observable<Range | null>
   nativeSelection = this.document.getSelection()!
 
-  caret = new Caret(this.document, this.container)
+  caret = new Caret(this.subject, this.document, this.maskContainer)
 
-  private hideMaskStyleElement = createElement('style', {
-    props: {
-      innerText: '::selection { background: transparent; }'
-    }
-  })
+  private selectionMaskElement = createElement('style')
 
   private selectionChangeEvent = new Subject<Range | null>()
 
   private subs: Subscription[] = []
+  private sub: Subscription
   private connector!: NativeSelectionConnector
 
-  constructor(@Inject(EDITABLE_DOCUMENT) private document: Document,
-              @Inject(EDITOR_CONTAINER) private container: HTMLElement,
+  constructor(@Inject(RESIZE_OBSERVER) private subject: BehaviorSubject<DOMRect>,
+              @Inject(EDITABLE_DOCUMENT) private document: Document,
+              @Inject(DOC_CONTAINER) private docContainer: HTMLElement,
+              @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
+              private rootComponentRef: RootComponentRef,
               private renderer: Renderer) {
-    this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(tap((r) => {
+    this.onSelectionChange = this.selectionChangeEvent.asObservable()
+    this.showNativeMask()
+    this.document.head.appendChild(this.selectionMaskElement)
+    this.sub = this.onSelectionChange.subscribe((r) => {
       if (r?.collapsed) {
         this.caret.show(r)
       } else {
         this.caret.hide()
       }
-    }))
+    })
   }
 
   showNativeMask() {
-    this.hideMaskStyleElement.parentNode?.removeChild(this.hideMaskStyleElement)
+    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: rgba(18, 150, 219, .2)}`
   }
 
   hideNativeMask() {
-    this.document.head.appendChild(this.hideMaskStyleElement)
+    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: transparent}`
   }
 
   connect(connector: NativeSelectionConnector) {
@@ -120,6 +123,7 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   destroy() {
     this.caret.destroy()
+    this.sub.unsubscribe()
   }
 
   getPositionByRange(range: TBRange) {
@@ -260,11 +264,12 @@ export class SelectionBridge implements NativeSelectionBridge {
     const selection = this.nativeSelection
     let isFocusin = false
     this.subs.push(
-      fromEvent(this.document, 'focusin').subscribe(() => {
-        isFocusin = true
-      }),
-      fromEvent(this.document, 'focusout').subscribe(() => {
-        isFocusin = false
+      fromEvent(this.document, 'selectstart').subscribe((ev) => {
+        const nodes = ev.composedPath()
+        isFocusin = nodes.includes(this.docContainer)
+        if (!isFocusin) {
+          connector.setSelection(null)
+        }
       }),
       fromEvent<MouseEvent>(this.document, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
@@ -292,11 +297,18 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
-        if (selection.rangeCount === 0 || isFocusin) {
-          connector.setSelection(null)
+        if (!isFocusin || selection.rangeCount === 0) {
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
+        if (!this.docContainer.contains(nativeRange.startContainer)) {
+          return
+        }
+        if (!this.docContainer.contains(nativeRange.endContainer)) {
+          const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.get(0)!)!
+          const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+          nativeRange.setEndAfter(nativeNode.lastChild!)
+        }
         const startFocusNode = this.findFocusNode(nativeRange.startContainer)
         const endFocusNode = this.findFocusNode(nativeRange.endContainer)
         if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {

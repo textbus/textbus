@@ -40,13 +40,15 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
 
   onViewChecked(() => {
     if (isFocus && currentRef) {
-      updateStyle(currentRef.current!)
+      updateStyle(currentRef.current!, docContainer.getBoundingClientRect())
+    } else {
+      mask.parentNode?.removeChild(mask)
     }
   })
   subs.push(
     fromEvent(editorDocument, 'click').subscribe(() => {
       isFocus = false
-      mask.parentNode?.removeChild(mask)
+      // mask.parentNode?.removeChild(mask)
     }),
     fromEvent<MouseEvent>(mask, 'mousedown').subscribe(ev => {
       if (currentRef !== ref || !currentRef?.current) {
@@ -125,7 +127,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
         }
         currentRef!.current!.style.width = endWidth + 'px'
         currentRef!.current!.style.height = endHeight + 'px'
-        updateStyle(currentRef!.current!)
+        updateStyle(currentRef!.current!, docContainer.getBoundingClientRect())
       })
 
       const unUp = fromEvent(document, 'mouseup').subscribe(() => {
@@ -145,7 +147,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
       currentRef = ref
       isFocus = true
       selection.selectComponent(componentInstance, true)
-      updateStyle(ref.current!)
+      updateStyle(ref.current!, docContainer.getBoundingClientRect())
       docContainer.appendChild(mask)
       ev.stopPropagation()
     }))
@@ -158,8 +160,8 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
   })
 }
 
-function updateStyle(nativeElement: HTMLElement) {
+function updateStyle(nativeElement: HTMLElement, offsetRect: DOMRect) {
   const rect = nativeElement.getBoundingClientRect()
-  mask.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`
+  mask.style.cssText = `left: ${rect.left - offsetRect.left}px; top: ${rect.top - offsetRect.top}px; width: ${rect.width}px; height: ${rect.height}px;`
   text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`
 }

@@ -1,6 +1,6 @@
 import { auditTime, fromEvent, merge, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { createElement, EDITABLE_DOCUMENT, EDITOR_OPTIONS, Plugin } from '@textbus/browser'
+import { createElement, EDITOR_OPTIONS, Plugin } from '@textbus/browser'
 import {
   Keymap,
   makeError,
@@ -41,7 +41,6 @@ export class Toolbar implements Plugin {
     const layout = injector.get(Layout)
     const selection = injector.get(Selection)
     const renderer = injector.get(Renderer)
-    const editableDocument = injector.get(EDITABLE_DOCUMENT)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
     this.elementRef = createElement('div', {
       classes: ['textbus-toolbar'],
@@ -93,11 +92,6 @@ export class Toolbar implements Plugin {
         tools.forEach(tool => {
           tool.refreshState()
         })
-      }),
-      fromEvent(editableDocument, 'click').subscribe(() => {
-        const event = document.createEvent('Event')
-        event.initEvent('click', true, true)
-        this.elementRef.dispatchEvent(event)
       }),
       fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
         const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement)

@@ -383,15 +383,8 @@ export function useTableMultipleRange(
     return null
   }
 
-  const firstMask = createElement('div', {
-    classes: ['textbus-table-editor-first-cell']
-  })
-
   const mask = createElement('div', {
     classes: ['textbus-table-editor-mask'],
-    children: [
-      firstMask
-    ]
   })
 
   let insertMask = false
@@ -407,7 +400,7 @@ export function useTableMultipleRange(
     mask.parentNode?.removeChild(mask)
   }
 
-  function animate(start: ElementPosition, target: ElementPosition, firstCellPosition: ElementPosition) {
+  function animate(start: ElementPosition, target: ElementPosition) {
     cancelAnimationFrame(animateId)
 
     function toInt(n: number) {
@@ -429,8 +422,6 @@ export function useTableMultipleRange(
       mask.style.width = width + 'px'
       mask.style.height = height + 'px'
 
-      firstMask.style.left = target.left - left + firstCellPosition.left + 'px'
-      firstMask.style.top = target.top - top + firstCellPosition.top + 'px'
       if (step < maxStep) {
         animateId = requestAnimationFrame(animateFn)
       }
@@ -449,7 +440,7 @@ export function useTableMultipleRange(
     return selectCellsByRange(minRow, minColumn, maxRow, maxColumn, serializedCells)
   }
 
-  function setSelectedCellsAndUpdateMaskStyle(startSlot: TableCellSlot, endSlot: TableCellSlot) {
+  function setSelectedCellsAndUpdateMaskStyle(startSlot: TableCellSlot, endSlot: TableCellSlot, offsetRect: DOMRect) {
     const tableRange = selectCells(startSlot, endSlot)
 
     callback(tableRange)
@@ -471,43 +462,40 @@ export function useTableMultipleRange(
       return oldGetSelectedScope.call(selection)
     }
 
-    // TODO 这里的焦点单元格后面需要更换为第一个选中的单元格
-    const firstCellRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startSlot)!) as HTMLElement).getBoundingClientRect()
     const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()
     const endRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement).getBoundingClientRect()
 
-    firstMask.style.width = firstCellRect.width + 'px'
-    firstMask.style.height = firstCellRect.height + 'px'
+    const maskRect = mask.getBoundingClientRect()
+
+    if (startSlot === endSlot) {
+      mask.style.background = 'none'
+    } else {
+      mask.style.background = ''
+    }
+
     if (insertMask) {
       animate({
-        left: mask.offsetLeft,
-        top: mask.offsetTop,
-        width: mask.offsetWidth,
-        height: mask.offsetHeight
+        left: maskRect.left - offsetRect.left,
+        top: maskRect.top - offsetRect.top,
+        width: maskRect.width,
+        height: maskRect.height
       }, {
-        left: startRect.left,
-        top: startRect.top,
+        left: startRect.left - offsetRect.left,
+        top: startRect.top - offsetRect.top,
         width: endRect.right - startRect.left,
         height: endRect.bottom - startRect.top
-      }, {
-        left: firstCellRect.left - startRect.left,
-        top: firstCellRect.top - startRect.top,
-        width: firstCellRect.width,
-        height: firstCellRect.height
       })
     } else {
       addMask()
-      mask.style.left = startRect.left + 'px'
-      mask.style.top = startRect.top + 'px'
+      mask.style.left = startRect.left - offsetRect.left + 'px'
+      mask.style.top = startRect.top - offsetRect.top + 'px'
       mask.style.width = endRect.right - startRect.left + 'px'
       mask.style.height = endRect.bottom - startRect.top + 'px'
-
-      firstMask.style.left = firstCellRect.left - startRect.left + 'px'
-      firstMask.style.top = firstCellRect.top - startRect.top + 'px'
     }
   }
 
   function updateMaskEffect() {
+    const containerRect = editorContainer.getBoundingClientRect()
     if (selection.commonAncestorComponent === self) {
       const startCell = findFocusCell(selection.startSlot!)
       const endCell = findFocusCell(selection.endSlot!)
@@ -517,7 +505,7 @@ export function useTableMultipleRange(
         nativeSelectionBridge.hideNativeMask()
       }
       if (startCell && endCell) {
-        setSelectedCellsAndUpdateMaskStyle(startCell, endCell)
+        setSelectedCellsAndUpdateMaskStyle(startCell, endCell, containerRect)
       } else {
         selection.getSelectedScopes = oldGetSelectedScope
       }

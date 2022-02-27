@@ -1,4 +1,4 @@
-import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 
 import { createElement } from '../_utils/uikit'
 
@@ -57,8 +57,12 @@ export class Caret {
 
   private positionChangeEvent = new Subject<CaretPosition>()
 
-  constructor(private document: Document,
-              private editorContainer: HTMLElement) {
+  private containerRect!: DOMRect
+
+  constructor(
+    private resizeSubject: BehaviorSubject<DOMRect>,
+    private document: Document,
+    private editorContainer: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -80,6 +84,9 @@ export class Caret {
     })
 
     this.subs.push(
+      resizeSubject.subscribe(rect => {
+        this.containerRect = rect
+      }),
       fromEvent(document, 'mousedown').subscribe(() => {
         this.flashing = false
       }),
@@ -141,9 +148,11 @@ export class Caret {
       top -= (height - rect.height) / 2
     }
 
+    const containerRect = this.editorContainer.getBoundingClientRect()
+
     Object.assign(this.elementRef.style, {
-      left: rect.left + 'px',
-      top: top + 'px',
+      left: rect.left - containerRect.left + 'px',
+      top: top - containerRect.top + 'px',
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
       fontSize: fontSize
@@ -152,8 +161,8 @@ export class Caret {
     this.caret.style.backgroundColor = color
     if (nativeRange.collapsed) {
       this.positionChangeEvent.next({
-        left: rect.left,
-        top,
+        left: rect.left - containerRect.left,
+        top: top - containerRect.top,
         height: boxHeight
       })
     }

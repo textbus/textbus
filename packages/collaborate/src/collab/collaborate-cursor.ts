@@ -63,8 +63,7 @@ export class CollaborateCursor {
               @Inject(EDITABLE_DOCUMENT) private document: Document,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
-    container.appendChild(this.canvas)
-    container.appendChild(this.tooltips)
+    container.prepend(this.canvas, this.tooltips)
     this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
         this.context.fillStyle = rect.color
@@ -77,11 +76,13 @@ export class CollaborateCursor {
   }
 
   draw(paths: RemoteSelection[]) {
-    this.canvas.width = this.container.offsetWidth
-    this.canvas.height = this.container.offsetHeight
+    const containerRect = this.container.getBoundingClientRect()
+    this.canvas.width = containerRect.width
+    this.canvas.height = containerRect.height
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const users: SelectionRect[] = []
+
 
     paths.filter(i => {
       return i.paths.start.length && i.paths.end.length
@@ -110,8 +111,8 @@ export class CollaborateCursor {
             selectionRects.push({
               color: item.color,
               username: item.username,
-              x: rect.x,
-              y: rect.y,
+              x: rect.x - containerRect.x,
+              y: rect.y - containerRect.y,
               width: rect.width,
               height: rect.height,
             })
@@ -126,8 +127,8 @@ export class CollaborateCursor {
           users.push({
             username: item.username,
             color: item.color,
-            x: cursorRect.x,
-            y: cursorRect.y,
+            x: cursorRect.x - containerRect.x,
+            y: cursorRect.y - containerRect.y,
             width: 2,
             height: cursorRect.height
           })
