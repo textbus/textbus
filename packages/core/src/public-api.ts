@@ -1,7 +1,4 @@
 import 'reflect-metadata'
-import { enablePatches} from 'immer'
-
-enablePatches()
 
 export * from './_utils/make-error'
 export * from './foundation/_api'

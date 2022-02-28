@@ -3,6 +3,7 @@ import { onEnter, Slots, Selection, useSelf } from '@textbus/core'
 
 import { paragraphComponent } from '../paragraph.component'
 import { blockquoteComponent } from '../blockquote.component'
+import { linkFormatter } from '../../formatters/link.formatter'
 
 /**
  * 本换行方法只为段落、标题和块组件设计，主要作用是在实现换行功能同时，可以跳出两层组件。
@@ -20,6 +21,13 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
     parentSlot.retain(index + 1)
     const currentSlot = slots.get(0)!
     const nextSlot = currentSlot.cut(ev.data.index)
+    if(nextSlot.isEmpty) {
+      nextSlot.applyFormat(linkFormatter, {
+        startIndex: 0,
+        endIndex: 1,
+        value: null
+      })
+    }
     const component = paragraphComponent.createInstance(injector, nextSlot)
     selection.setLocation(component.slots.get(0)!, 0)
     const beforeComponent = parentSlot.getContentAtIndex(index - 1)

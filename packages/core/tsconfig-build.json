@@ -15,7 +15,10 @@
     "outDir": "bundles/",
     "downlevelIteration": true,
     "jsx": "react",
-    "jsxFactory": "VElement.createElement"
+    "jsxFactory": "VElement.createElement",
+    "paths": {
+      "@textbus/core": ["./src/public-api.ts"],
+    }
   },
   "include": [
     "src/"

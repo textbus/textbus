@@ -1,4 +1,4 @@
-import { Draft, produce, Patch } from 'immer'
+import { Draft, produce, Patch, enablePatches } from 'immer'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
 
@@ -14,6 +14,8 @@ import {
   Slots, Shortcut
 } from './model/_api'
 import { makeError } from './_utils/make-error'
+
+enablePatches()
 
 const componentErrorFn = makeError('DefineComponent')
 

@@ -1,7 +1,7 @@
 import { AttributeFormatter, BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { Slot } from './slot'
 
-export type FormatValue = string | number | boolean | Record<string, string | number | boolean>
+export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
 
 export interface FormatRange {
   startIndex: number
@@ -351,8 +351,8 @@ export class Format {
       return true
     }
     if (typeof left === 'object' && typeof right === 'object') {
-      const leftKeys = Object.keys(left)
-      const rightKeys = Object.keys(right)
+      const leftKeys = Object.keys(left!)
+      const rightKeys = Object.keys(right!)
       if (leftKeys.length === rightKeys.length) {
         return leftKeys.every(key => {
           return rightKeys.includes(key) && right![key] === left![key]
