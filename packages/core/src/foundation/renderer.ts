@@ -1,4 +1,4 @@
-import { Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { Observable, Subject } from '@tanbo/stream'
 
 import {
@@ -10,7 +10,7 @@ import {
   Slot,
 } from '../model/_api'
 import { invokeListener, Ref } from '../define-component'
-import { NativeNode, NativeRenderer, RootComponentRef } from './_injection-tokens'
+import { NativeNode, NativeRenderer, RootComponentRef, USE_CONTENT_EDITABLE } from './_injection-tokens'
 
 interface MapChanges {
   remove: string[]
@@ -27,7 +27,15 @@ interface ObjectChanges {
   add: [string, any][]
 }
 
-function setEditable(vElement: VElement, is: boolean | null) {
+function setEditable(vElement: VElement, useContentEditable: boolean, is: boolean | null) {
+  if (useContentEditable) {
+    if (is === null) {
+      vElement.attrs.delete('contenteditable')
+      return
+    }
+    vElement.attrs.set('contenteditable', is ? 'true' : 'false')
+    return
+  }
   if (is === null) {
     vElement.attrs.delete('textbus-editable')
     return
@@ -218,7 +226,8 @@ export class Renderer {
 
   private slotIdAttrKey = '__textbus-slot-id__'
 
-  constructor(private rootComponentRef: RootComponentRef,
+  constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
+              private rootComponentRef: RootComponentRef,
               private nativeRenderer: NativeRenderer) {
     this.onViewChecked = this.viewCheckedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
@@ -567,9 +576,9 @@ export class Renderer {
         return slotVNode
       })
       if (component.slots.length === 1 && slotVNode === node) {
-        setEditable(node, null)
+        setEditable(node, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
       } else {
-        setEditable(node, false)
+        setEditable(node, this.useContentEditable, false)
       }
       this.componentVNode.set(component, node)
       this.triggerComponentViewChecked(component)
@@ -588,9 +597,9 @@ export class Renderer {
         if (oldComponentVNode === oldVNode) {
           this.componentVNode.set(component, vNode)
           if (component.slots.length === 1) {
-            setEditable(vNode, null)
+            setEditable(vNode, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
           } else {
-            setEditable(vNode, false)
+            setEditable(vNode, this.useContentEditable, false)
           }
         }
         (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
@@ -613,7 +622,7 @@ export class Renderer {
       const root = slotRenderFactory()
       root.attrs.set(this.slotIdAttrKey, slot.id)
       let host = root
-      setEditable(host, true)
+      setEditable(host, this.useContentEditable, true)
       const formatTree = slot.createFormatTree()
       if (formatTree.formats) {
         host = this.createVDomByOverlapFormats(formatSort(formatTree.formats), root, slot)

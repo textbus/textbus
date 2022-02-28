@@ -18,7 +18,7 @@ import {
   Selection,
   Translator,
   NativeSelectionBridge,
-  NativeRenderer
+  NativeRenderer, USE_CONTENT_EDITABLE
 } from './foundation/_api'
 import { Component } from './define-component'
 import { makeError } from './_utils/make-error'
@@ -35,6 +35,8 @@ export interface TextBusConfig {
   formatters: Formatter[]
   /** 跨平台实现的提供者 */
   platformProviders: Provider[]
+  /** 使用 contentEditable 作为编辑器控制可编辑范围 */
+  useContentEditable?: boolean
 }
 
 /**
@@ -53,6 +55,10 @@ export class Starter extends ReflectiveInjector {
       }, {
         provide: RootComponentRef,
         useValue: {}
+      },
+      {
+        provide: USE_CONTENT_EDITABLE,
+        useValue: config.useContentEditable
       },
       Commander,
       ComponentList,

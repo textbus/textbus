@@ -60,3 +60,8 @@ export const COMPONENT_LIST = new InjectionToken<Component[]>('COMPONENT_LIST')
  * @internal TextBus 格式列表注入 token
  */
 export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
+
+/**
+ * 使用 contentEditable 作为可编辑范围控制
+ */
+export const USE_CONTENT_EDITABLE = new InjectionToken<boolean>('USE_CONTENT_EDITABLE')
