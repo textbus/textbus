@@ -1,6 +1,6 @@
 {
   "name": "@textbus/core",
-  "version": "2.0.0-alpha.27",
+  "version": "2.0.0-alpha.28",
   "description": "TextBus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -39,5 +39,6 @@
   },
   "bugs": {
     "url": "https://github.com/textbus/textbus.git/issues"
-  }
+  },
+  "gitHead": "536327fc2609d3f2bbf3b0720738d3ed918d612c"
 }
