@@ -272,6 +272,21 @@ export class SelectionBridge implements NativeSelectionBridge {
           return
         }
         selection.removeAllRanges()
+        const path = ev.composedPath()
+        while (path.length) {
+          const first = path.shift() as HTMLElement
+          if (first.nodeType === Node.ELEMENT_NODE) {
+            const location = this.renderer.getLocationByNativeNode(first)
+            if (location) {
+              if (first.getAttribute('textbus-editable') === 'off') {
+                const parentNode = first.parentNode!
+                const index = Array.from(parentNode.childNodes).indexOf(first)
+                selection.setPosition(parentNode, index + 1)
+                return
+              }
+            }
+          }
+        }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
         if (selection.rangeCount === 0 || isFocusin) {
