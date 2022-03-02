@@ -1,9 +1,12 @@
 import { Injector } from '@tanbo/di'
 import {
+  ComponentData,
   ComponentInstance,
-  ContentType, defineComponent,
-  Slot, SlotLiteral,
-  SlotRender, Translator, useContext,
+  ContentType,
+  defineComponent,
+  Slot,
+  SlotRender,
+  useContext,
   useSlots,
   VElement
 } from '@textbus/core'
@@ -11,47 +14,23 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 
 import { useEnterBreaking } from './_utils/single-block-enter'
 
-export interface HeadingComponentLiteral {
-  type: string
-  slot: SlotLiteral
-}
-
-export interface HeadingComponentState {
-  type: string
-  slot?: Slot
-}
-
 export const headingComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'HeadingComponent',
-  transform(translator: Translator, state: HeadingComponentLiteral): HeadingComponentState {
-    return {
-      type: state.type,
-      slot: translator.createSlot(state.slot)
-    }
-  },
-  setup(state: HeadingComponentState) {
+  setup(data: ComponentData<string>) {
     const injector = useContext()
-    const slots = useSlots([state?.slot || new Slot([
+    const slots = useSlots(data.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent
-    ])], state => {
-      return new Slot(state.schema)
-    })
+    ])])
     useEnterBreaking(injector, slots)
 
     return {
-      type: state.type,
+      type: data.state,
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return new VElement(state.type)
+          return new VElement(data.state!)
         })
-      },
-      toJSON() {
-        return {
-          type: state.type,
-          slot: slots.get(0)!.toJSON()
-        }
       }
     }
   }
@@ -67,8 +46,8 @@ export const headingComponentLoader: ComponentLoader = {
       ContentType.Text
     ]), element)
     return headingComponent.createInstance(injector, {
-      slot,
-      type: element.tagName.toLowerCase()
+      slots: [slot],
+      state: element.tagName.toLowerCase()
     })
   },
   component: headingComponent

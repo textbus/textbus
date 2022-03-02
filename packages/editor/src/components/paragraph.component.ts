@@ -1,9 +1,12 @@
 import { Injector } from '@tanbo/di'
 import {
+  ComponentData,
   ComponentInstance,
-  ContentType, defineComponent,
-  Slot, SlotLiteral,
-  SlotRender, Translator, useContext,
+  ContentType,
+  defineComponent,
+  Slot,
+  SlotRender,
+  useContext,
   useSlots,
   VElement
 } from '@textbus/core'
@@ -13,26 +16,18 @@ import { useEnterBreaking } from './_utils/single-block-enter'
 export const paragraphComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ParagraphComponent',
-  transform(translator: Translator, state: SlotLiteral): Slot {
-    return translator.createSlot(state)
-  },
-  setup(slot?: Slot) {
+  setup(data: ComponentData) {
     const injector = useContext()
-    const slots = useSlots([slot || new Slot([
+    const slots = useSlots(data.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent
-    ])], state => {
-      return new Slot(state.schema)
-    })
+    ])])
     useEnterBreaking(injector, slots)
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
           return new VElement('p')
         })
-      },
-      toJSON() {
-        return slots.get(0)!.toJSON()
       }
     }
   }
@@ -47,7 +42,9 @@ export const paragraphComponentLoader: ComponentLoader = {
       ContentType.Text,
       ContentType.InlineComponent
     ]), element)
-    return paragraphComponent.createInstance(injector, slot)
+    return paragraphComponent.createInstance(injector, {
+      slots: [slot]
+    })
   },
   component: paragraphComponent
 }

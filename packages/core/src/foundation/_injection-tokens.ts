@@ -1,7 +1,6 @@
 import { InjectionToken } from '@tanbo/di'
 
-import { ComponentInstance, Formatter } from '../model/_api'
-import { Component } from '../define-component'
+import { ComponentInstance, Formatter, Component } from '../model/_api'
 
 /**
  * 原生元素节点抽象类型

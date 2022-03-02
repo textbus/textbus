@@ -47,7 +47,7 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
       const components: ComponentInstance[] = []
       if (segment.before.length) {
         components.push(listComponent.createInstance(injector, {
-          type,
+          state: type,
           slots: segment.before
         }))
       }
@@ -68,7 +68,7 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
       })
       if (segment.after.length) {
         components.push(listComponent.createInstance(injector, {
-          type,
+          state: type,
           slots: segment.after
         }), component)
       }
@@ -105,7 +105,7 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
 
       commander.delete()
       const component = listComponent.createInstance(injector, {
-        type,
+        state: type,
         slots
       })
       if (selection.commonAncestorSlot!.isEmpty && selection.commonAncestorComponent!.slots.length === 1) {

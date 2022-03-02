@@ -1,6 +1,6 @@
-import { Injector, Provider, Type } from '@tanbo/di'
+import { Provider, Type } from '@tanbo/di'
 import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
-import { makeError, Selection } from '@textbus/core'
+import { makeError, Selection, Starter } from '@textbus/core'
 import { CoreEditor, SelectionBridge } from '@textbus/browser'
 
 import { EditorOptions } from './types'
@@ -21,13 +21,13 @@ const editorErrorFn = makeError('Editor')
  */
 export class Editor extends CoreEditor {
   /** 编辑器是否初始化完成可观察对象 */
-  onReady: Observable<Injector>
+  onReady: Observable<Starter>
   /** 编辑器 UI 布局相关的 DOM 对象管理类 */
   layout = new Layout()
 
   private host: HTMLElement
 
-  private readyEvent = new Subject<Injector>()
+  private readyEvent = new Subject<Starter>()
 
   constructor(public selector: string | HTMLElement,
               options: EditorOptions = {}) {

@@ -69,7 +69,9 @@ export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
         if (state.state === QueryStateType.Enabled) {
           state.value!.methods.mergeProps(value)
         } else {
-          commander.insert(audioComponent.createInstance(injector, value))
+          commander.insert(audioComponent.createInstance(injector, {
+            state: value
+          }))
         }
       }
     }

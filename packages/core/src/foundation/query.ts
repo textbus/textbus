@@ -1,8 +1,7 @@
 import { Injectable } from '@tanbo/di'
 
 import { Selection } from './selection'
-import { ComponentInstance, ComponentMethods, Formatter, FormatValue, Slot } from '../model/_api'
-import { Component } from '../define-component'
+import { ComponentInstance, ComponentMethods, Formatter, FormatValue, Slot, Component } from '../model/_api'
 
 /**
  * TextBus 状态查询状态枚举
@@ -54,9 +53,9 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Instance extends ComponentMethods, T, U>(
-    component: Component<ComponentInstance<Instance, T, U>>,
-    filter?: (instance: ComponentInstance<Instance, T, U>) => boolean): QueryState<ComponentInstance<Instance, T, U>> {
+  queryComponent<Instance extends ComponentMethods, T>(
+    component: Component<ComponentInstance<Instance, T>>,
+    filter?: (instance: ComponentInstance<Instance, T>) => boolean): QueryState<ComponentInstance<Instance, T>> {
     let parent = this.selection.commonAncestorComponent
 
     while (parent) {
@@ -80,7 +79,7 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Instance extends ComponentMethods, T, U>(component: Component<ComponentInstance<Instance, T, U>>): QueryState<ComponentInstance<Instance, T, U>> {
+  queryWrappedComponent<Instance extends ComponentMethods, T>(component: Component<ComponentInstance<Instance, T>>): QueryState<ComponentInstance<Instance, T>> {
     const selection = this.selection
     if (!selection.isSelected ||
       selection.isCollapsed ||

@@ -1,26 +1,21 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentInstance, ComponentMethods,
-  ContentType, defineComponent,
+  ComponentInstance,
+  ComponentMethods,
+  ContentType,
+  defineComponent,
   onEnter,
-  Slot, SlotLiteral,
-  SlotRender, Selection, Translator, useContext,
+  Slot,
+  SlotRender,
+  Selection,
+  useContext,
   useSlots,
-  VElement
+  VElement,
+  ComponentData
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 
 import { paragraphComponent } from './paragraph.component'
-
-export interface ListComponentLiteral {
-  type: 'ul' | 'ol'
-  slots: SlotLiteral[]
-}
-
-export interface ListComponentState {
-  type: 'ul' | 'ol'
-  slots: Slot[]
-}
 
 export interface SegmentedSlots<T extends Slot = Slot> {
   before: T[]
@@ -28,7 +23,7 @@ export interface SegmentedSlots<T extends Slot = Slot> {
   after: T[]
 }
 
-export interface ListComponentInstance extends ComponentMethods<ListComponentLiteral> {
+export interface ListComponentInstance extends ComponentMethods {
   type: 'ul' | 'ol',
 
   split?(startIndex: number, endIndex: number): SegmentedSlots
@@ -37,13 +32,7 @@ export interface ListComponentInstance extends ComponentMethods<ListComponentLit
 export const listComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ListComponent',
-  transform(translator: Translator, state: ListComponentLiteral): ListComponentState {
-    return {
-      type: state.type,
-      slots: state.slots.map(i => translator.createSlot(i))
-    }
-  },
-  setup(data: ListComponentState): ListComponentInstance {
+  setup(data: ComponentData<'ul' | 'ol'>): ListComponentInstance {
     const injector = useContext()
     const selection = injector.get(Selection)
 
@@ -51,9 +40,7 @@ export const listComponent = defineComponent({
       ContentType.Text,
       ContentType.InlineComponent,
       ContentType.BlockComponent
-    ])], state => {
-      return new Slot(state.schema)
-    })
+    ])])
 
     onEnter(ev => {
       if (ev.target.isEmpty && ev.target === slots.last) {
@@ -77,19 +64,13 @@ export const listComponent = defineComponent({
     })
 
     return {
-      type: data.type,
+      type: data.state!,
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return new VElement(data.type, null, slots.toArray().map(i => {
+        return new VElement(data.state!, null, slots.toArray().map(i => {
           return slotRender(i, () => {
             return new VElement('li')
           })
         }))
-      },
-      toJSON() {
-        return {
-          type: data.type,
-          slots: slots.toJSON()
-        }
       },
       split(startIndex: number, endIndex: number) {
         return {
@@ -141,7 +122,7 @@ export const listComponentLoader: ComponentLoader = {
     }
     return listComponent.createInstance(injector, {
       slots,
-      type: element.tagName.toLowerCase() as any
+      state: element.tagName.toLowerCase() as any
     })
   },
   component: listComponent

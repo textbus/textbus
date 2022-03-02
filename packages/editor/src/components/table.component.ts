@@ -1,68 +1,46 @@
 import { Injector } from '@tanbo/di'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 import {
+  ComponentData,
   ComponentInstance,
   ContentType,
-  defineComponent, onContextMenu, onSlotRemove,
+  defineComponent,
+  onContextMenu,
+  onSlotRemove,
+  Selection,
   Slot,
-  SlotLiteral,
-  SlotRender, Selection,
-  Translator, useContext, useSelf,
-  useSlots, useState,
+  SlotRender,
+  useContext,
+  useSelf,
+  useSlots,
+  useState,
   VElement
 } from '@textbus/core'
 
 import { I18n } from '../i18n'
 import {
-  TableCellPosition,
-  useTableMultipleRange,
+  autoComplete, createCell,
   serialize,
-  autoComplete,
-  slotsToTable, TableInfo
+  slotsToTable,
+  TableCellPosition,
+  TableInfo,
+  useTableMultipleRange
 } from './_utils/table-multiple-range'
 
-export interface TableCellLiteral {
-  colspan: number
-  rowspan: number
-}
-
 export interface TableConfig {
-  useTextBusStyle: boolean
-  cells: TableCellSlot[][]
+  useTextBusStyle: boolean,
+  columnCount: number
 }
 
-export interface TableLiteral {
-  useTextBusStyle: boolean
-  cells: SlotLiteral<TableCellLiteral>[][]
-}
-
-export class TableCellSlot extends Slot<TableCellLiteral> {
-  constructor(colspan = 1, rowspan = 1) {
-    super([
-      ContentType.Text
-    ], {
-      colspan,
-      rowspan
-    })
-  }
+export {
+  createCell
 }
 
 export const tableComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TableComponent',
-  transform(translator: Translator, state: TableLiteral): TableConfig {
-    return {
-      cells: state.cells.map<TableCellSlot[]>(i => {
-        return i.map<TableCellSlot>(j => {
-          const slot = new TableCellSlot(j.state!.colspan, j.state!.rowspan)
-          return translator.fillSlot(j, slot)
-        })
-      }),
-      useTextBusStyle: state.useTextBusStyle
-    }
-  },
-  setup(config: TableConfig) {
-    let tableCells = autoComplete(config.cells)
+  setup(data: ComponentData<TableConfig>) {
+    let tableCells = slotsToTable(data.slots!, data.state!.columnCount)
     const injector = useContext()
     const i18n = injector.get(I18n)
     const selection = injector.get(Selection)
@@ -79,9 +57,7 @@ export const tableComponent = defineComponent({
     })
 
     const self = useSelf()
-    const slots = useSlots<TableCellSlot, SlotLiteral<TableCellLiteral>>(tableCells.flat(), state => {
-      return new TableCellSlot(state.state!.colspan, state.state!.rowspan)
-    })
+    const slots = useSlots(tableCells.flat())
 
     let startPosition: TableCellPosition
     let endPosition: TableCellPosition
@@ -210,7 +186,7 @@ export const tableComponent = defineComponent({
               }
               return td.cell
             }
-            return new TableCellSlot()
+            return createCell()
           })
         })
 
@@ -344,10 +320,10 @@ export const tableComponent = defineComponent({
       },
       insertRow(index: number) {
         const serializedCells = serialize(tableCells)
-        const tr: TableCellSlot[] = []
+        const tr: Slot[] = []
         if (index === 0 || index === serializedCells.length) {
           for (let i = 0; i < tableInfo.columnSize; i++) {
-            tr.push(new TableCellSlot())
+            tr.push(createCell())
           }
           if (index === 0) {
             slots.insertByIndex(tr, 0)
@@ -371,7 +347,7 @@ export const tableComponent = defineComponent({
               })
             }
           } else {
-            tr.push(new TableCellSlot())
+            tr.push(createCell())
           }
         })
         tableCells.splice(tableCells.indexOf(row.cells), 0, tr)
@@ -396,18 +372,18 @@ export const tableComponent = defineComponent({
         }
         const serializedCells = serialize(tableCells)
 
-        const table: TableCellSlot[][] = serializedCells.map(tr => {
+        const table: Slot[][] = serializedCells.map(tr => {
           return tr.cellsPosition.map(td => {
             return td.cell
           })
         })
 
-        const recordCells: TableCellSlot[] = []
+        const recordCells: Slot[] = []
         serializedCells.forEach((row, rowIndex) => {
           if (index === 0) {
-            table[rowIndex].unshift(new TableCellSlot())
+            table[rowIndex].unshift(createCell())
           } else if (index === tableInfo.columnSize) {
-            table[rowIndex].push(new TableCellSlot())
+            table[rowIndex].push(createCell())
           } else {
             const cell = row.cellsPosition[index]
             if (cell.offsetColumn > 0) {
@@ -419,7 +395,7 @@ export const tableComponent = defineComponent({
               })
               recordCells.push(cell.cell)
             } else {
-              table[rowIndex].splice(index, 0, new TableCellSlot())
+              table[rowIndex].splice(index, 0, createCell())
             }
           }
         })
@@ -443,7 +419,7 @@ export const tableComponent = defineComponent({
       render(isOutputMode: boolean, slotRender: SlotRender) {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnSize)
         const table = new VElement('table')
-        if (config.useTextBusStyle) {
+        if (data.state!.useTextBusStyle) {
           table.classes.add('tb-table')
         }
         if (tableCells.length) {
@@ -467,16 +443,6 @@ export const tableComponent = defineComponent({
           }
         }
         return table
-      },
-      toJSON(): TableLiteral {
-        return {
-          useTextBusStyle: config.useTextBusStyle,
-          cells: tableCells.map(i => {
-            return i.map(j => {
-              return j.toJSON()
-            })
-          })
-        }
       }
     }
     return instance
@@ -495,14 +461,14 @@ export const tableComponentLoader: ComponentLoader = {
   },
   read(element: HTMLTableElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const {tHead, tBodies, tFoot} = element
-    const headers: TableCellSlot[][] = []
-    const bodies: TableCellSlot[][] = []
+    const headers: Slot[][] = []
+    const bodies: Slot[][] = []
     if (tHead) {
       Array.from(tHead.rows).forEach(row => {
-        const arr: TableCellSlot[] = []
+        const arr: Slot[] = []
         headers.push(arr)
         Array.from(row.cells).forEach(cell => {
-          const slot = new TableCellSlot(cell.colSpan, cell.rowSpan)
+          const slot = createCell(cell.colSpan, cell.rowSpan)
           arr.push(slot)
           slotParser(slot, cell)
         })
@@ -513,19 +479,23 @@ export const tableComponentLoader: ComponentLoader = {
       Array.of(...Array.from(tBodies), tFoot || {rows: []}).reduce((value, next) => {
         return value.concat(Array.from(next.rows))
       }, [] as HTMLTableRowElement[]).forEach((row: HTMLTableRowElement) => {
-        const arr: TableCellSlot[] = []
+        const arr: Slot[] = []
         bodies.push(arr)
         Array.from(row.cells).forEach(cell => {
-          const slot = new TableCellSlot(cell.colSpan, cell.rowSpan)
+          const slot = createCell(cell.colSpan, cell.rowSpan)
           arr.push(slot)
           slotParser(slot, cell)
         })
       })
     }
     bodies.unshift(...headers)
+    const cells = autoComplete(bodies)
     return tableComponent.createInstance(injector, {
-      cells: bodies,
-      useTextBusStyle: element.classList.contains('tb-table')
+      slots: bodies.flat(),
+      state: {
+        useTextBusStyle: element.classList.contains('tb-table'),
+        columnCount: cells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0)
+      }
     })
   },
   component: tableComponent

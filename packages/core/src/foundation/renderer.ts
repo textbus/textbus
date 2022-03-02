@@ -8,8 +8,9 @@ import {
   FormatTree,
   ComponentInstance,
   Slot,
+  invokeListener,
+  Ref
 } from '../model/_api'
-import { invokeListener, Ref } from '../define-component'
 import { NativeNode, NativeRenderer, RootComponentRef, USE_CONTENT_EDITABLE } from './_injection-tokens'
 
 interface MapChanges {

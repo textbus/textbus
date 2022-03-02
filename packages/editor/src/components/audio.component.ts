@@ -1,5 +1,12 @@
 import { Injector } from '@tanbo/di'
-import { ComponentInstance, ContentType, defineComponent, Translator, useState, VElement } from '@textbus/core'
+import {
+  ComponentData,
+  ComponentInstance,
+  ContentType,
+  defineComponent,
+  useState,
+  VElement
+} from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 
 export interface AudioState {
@@ -11,11 +18,8 @@ export interface AudioState {
 export const audioComponent = defineComponent({
   name: 'AudioComponent',
   type: ContentType.InlineComponent,
-  transform(translator: Translator, state: AudioState): AudioState {
-    return state
-  },
-  setup(state?: AudioState) {
-    state = state || {
+  setup(data: ComponentData<AudioState>) {
+    let state = data.state || {
       src: '',
       autoplay: false,
       controls: true,
@@ -55,9 +59,11 @@ export const audioComponentLoader: ComponentLoader = {
   },
   read(element: HTMLVideoElement, context: Injector): ComponentInstance {
     return audioComponent.createInstance(context, {
-      src: element.src,
-      autoplay: element.autoplay,
-      controls: element.controls
+      state: {
+        src: element.src,
+        autoplay: element.autoplay,
+        controls: element.controls
+      }
     })
   },
   component: audioComponent

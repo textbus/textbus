@@ -1,5 +1,5 @@
 import { Observable, Subject, Subscription } from '@tanbo/stream'
-import { Injector, Provider, Type } from '@tanbo/di'
+import { Provider, Type } from '@tanbo/di'
 import {
   NativeRenderer,
   NativeSelectionBridge,
@@ -77,7 +77,7 @@ export class CoreEditor {
    * @param rootComponentLoader 根组件加载器
    * @param options 编辑器的配置项
    */
-  init(host: HTMLElement, rootComponentLoader: ComponentLoader, options: BaseEditorOptions = {}): Promise<Injector> {
+  init(host: HTMLElement, rootComponentLoader: ComponentLoader, options: BaseEditorOptions = {}): Promise<Starter> {
     if (this.destroyed) {
       return Promise.reject(editorError('the editor instance is destroyed!'))
     }
@@ -108,7 +108,7 @@ export class CoreEditor {
       return bootstrap({
         components: (options.componentLoaders || []).map(i => i.component),
         formatters: (options.formatLoaders || []).map(i => i.formatter),
-        platformProviders: [
+        providers: [
           ...staticProviders,
           ...this.defaultPlugins,
           ...(options.providers || []),
@@ -117,7 +117,10 @@ export class CoreEditor {
           Input,
           SelectionBridge,
           OutputTranslator,
-        ]
+        ],
+        setup(stater) {
+          options.setup?.(stater)
+        }
       }).then(starter => {
         const parser = starter.get(Parser)
         const translator = starter.get(Translator)
@@ -128,8 +131,7 @@ export class CoreEditor {
           if (typeof content === 'string') {
             component = parser.parseDoc(content, rootComponentLoader)
           } else {
-            const data = rootComponentLoader.component.transform(translator, content.data)
-            component = rootComponentLoader.component.createInstance(starter, data)
+            component = translator.createComponentByFactory(content, rootComponentLoader.component)
           }
         } else {
           component = rootComponentLoader.component.createInstance(starter)
@@ -251,8 +253,7 @@ export class CoreEditor {
     if (typeof content === 'string') {
       component = parser.parseDoc(content, rootComponentLoader)
     } else {
-      const data = rootComponentLoader.component.transform(translator, content.data)
-      component = rootComponentLoader.component.createInstance(this.injector!, data)
+      component = translator.createComponentByFactory(content, rootComponentLoader.component)
     }
     selection.unSelect()
     rootComponentRef.component.slots.clean()

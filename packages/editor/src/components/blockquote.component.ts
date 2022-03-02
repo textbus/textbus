@@ -1,12 +1,11 @@
 import { Injector } from '@tanbo/di'
 import {
+  ComponentData,
   ComponentInstance,
   ContentType,
   defineComponent,
   Slot,
-  SlotLiteral,
   SlotRender,
-  Translator,
   useSlots,
   VElement
 } from '@textbus/core'
@@ -15,25 +14,17 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 export const blockquoteComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'BlockquoteComponent',
-  transform(translator: Translator, state: SlotLiteral): Slot {
-    return translator.createSlot(state)
-  },
-  setup(slot?: Slot) {
-    const slots = useSlots([slot || new Slot([
+  setup(data: ComponentData) {
+    const slots = useSlots(data.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
       ContentType.BlockComponent
-    ])], state => {
-      return new Slot(state.schema)
-    })
+    ])])
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
           return new VElement('blockquote')
         })
-      },
-      toJSON() {
-        return slots.get(0)!.toJSON()
       }
     }
   }
@@ -52,7 +43,9 @@ export const blockquoteComponentLoader: ComponentLoader = {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ]), element)
-    return blockquoteComponent.createInstance(injector, slot)
+    return blockquoteComponent.createInstance(injector, {
+      slots: [slot]
+    })
   },
   component: blockquoteComponent
 }

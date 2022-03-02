@@ -1,10 +1,9 @@
 import { Injectable } from '@tanbo/di'
+import { Subscription } from '@tanbo/stream'
 
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
-import { ComponentInstance } from '../model/component'
-import { invokeListener } from '../define-component'
-import { Subscription } from '@tanbo/stream'
+import { ComponentInstance, invokeListener } from '../model/component'
 
 /**
  * 组件销毁生合周期管理

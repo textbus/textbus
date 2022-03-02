@@ -1,6 +1,6 @@
 export * from './change-marker'
-export * from './component'
 export * from './content'
+export * from './component'
 export * from './element'
 export * from './format'
 export * from './formatter'

@@ -84,7 +84,7 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
       if (headingState.state === QueryStateType.Enabled) {
         return {
           state: QueryStateType.Enabled,
-          value: headingState.value!.methods.type
+          value: headingState.value!.methods.type!
         }
       }
       const paragraphState = query.queryComponent(paragraphComponent)
@@ -115,8 +115,8 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
         let component: ComponentInstance
         if (/h[1-6]/.test(value)) {
           component = headingComponent.createInstance(injector, {
-            type: value,
-            slot
+            state: value,
+            slots: [slot]
           })
         } else if (value === 'p') {
           component = paragraphComponent.createInstance(injector, slot)

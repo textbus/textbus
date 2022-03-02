@@ -1,6 +1,6 @@
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { Slot, SlotLiteral } from './slot'
+import { Slot } from './slot'
 import { Action, Operation } from './operation'
 import { ComponentInstance } from './component'
 
@@ -9,16 +9,12 @@ export interface SlotChangeData<T extends Slot> {
   operation: Operation
 }
 
-export interface SlotRestore<T extends Slot, State extends SlotLiteral> {
-  (state: State): T
-}
-
 /**
  * TextBus 管理组件内部插槽增删改查的类
  */
-export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot = Slot> {
+export class Slots {
   readonly onChange: Observable<Operation>
-  readonly onChildSlotChange: Observable<SlotChangeData<T>>
+  readonly onChildSlotChange: Observable<SlotChangeData<Slot>>
   readonly onChildComponentRemoved: Observable<ComponentInstance>
 
   /** 子插槽的个数 */
@@ -36,17 +32,16 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
     return this.slots[0] || null
   }
 
-  private slots: T[] = []
+  private slots: Slot[] = []
   private index = 0
   private changeEvent = new Subject<Operation>()
-  private childSlotChangeEvent = new Subject<SlotChangeData<T>>()
+  private childSlotChangeEvent = new Subject<SlotChangeData<Slot>>()
   private childComponentRemovedEvent = new Subject<ComponentInstance>()
 
-  private changeListeners = new WeakMap<T, Subscription>()
+  private changeListeners = new WeakMap<Slot, Subscription>()
 
   constructor(public host: ComponentInstance,
-              public slotRestore: SlotRestore<T, SlotState>,
-              slots: T[] = []) {
+              slots: Slot[] = []) {
     this.onChange = this.changeEvent.asObservable()
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
@@ -57,7 +52,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 获取子插槽的下标位置
    * @param slot
    */
-  indexOf(slot: T) {
+  indexOf(slot: Slot) {
     return this.slots.indexOf(slot)
   }
 
@@ -65,7 +60,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 删除指定插槽
    * @param slot
    */
-  remove(slot: T) {
+  remove(slot: Slot) {
     const index = this.slots.indexOf(slot)
     if (index > -1) {
       this.retain(index + 1)
@@ -78,7 +73,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * @param slots
    * @param ref
    */
-  insertAfter(slots: T | T[], ref: T) {
+  insertAfter(slots: Slot | Slot[], ref: Slot) {
     const index = this.slots.indexOf(ref)
     if (index > -1) {
       this.insertByIndex(slots, index + 1)
@@ -90,7 +85,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * @param slots
    * @param ref
    */
-  insertBefore(slots: T | T[], ref: T) {
+  insertBefore(slots: Slot | Slot[], ref: Slot) {
     const index = this.slots.indexOf(ref)
     if (index > -1) {
       this.insertByIndex(slots, index)
@@ -102,7 +97,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * @param slots
    * @param index
    */
-  insertByIndex(slots: T | T[], index: number) {
+  insertByIndex(slots: Slot | Slot[], index: number) {
     if (index < 0) {
       index = 0
     }
@@ -118,7 +113,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 把新插槽添加到最后
    * @param slots
    */
-  push(...slots: T[]) {
+  push(...slots: Slot[]) {
     this.retain(this.length)
     this.insert(...slots)
   }
@@ -153,7 +148,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 把新插槽添加到最前
    * @param slots
    */
-  unshift(...slots: T[]) {
+  unshift(...slots: Slot[]) {
     this.retain(0)
     this.insert(...slots)
   }
@@ -162,7 +157,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 获取指定下标位置的插槽
    * @param index
    */
-  get(index: number): T | null {
+  get(index: number): Slot | null {
     return this.slots[index] || null
   }
 
@@ -171,7 +166,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * @param oldSlot 被替换的插槽
    * @param newSlot 新的插槽
    */
-  replace(oldSlot: T, newSlot: T) {
+  replace(oldSlot: Slot, newSlot: Slot) {
     const index = this.indexOf(oldSlot)
     if (index > 0) {
       this.retain(index + 1)
@@ -190,7 +185,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
   /**
    * 把当前插槽集合转换为数组
    */
-  toArray(): T[] {
+  toArray(): Slot[] {
     return [...this.slots]
   }
 
@@ -206,7 +201,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 插入新的子插槽
    * @param slots
    */
-  insert(...slots: T[]) {
+  insert(...slots: Slot[]) {
     if (slots.length === 0) {
       return
     }
@@ -319,7 +314,7 @@ export class Slots<SlotState extends SlotLiteral = SlotLiteral, T extends Slot =
    * 当前集合是否包含指定插槽
    * @param slot
    */
-  has(slot: T) {
+  has(slot: Slot) {
     return this.indexOf(slot) > -1
   }
 }

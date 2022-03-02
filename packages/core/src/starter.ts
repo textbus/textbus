@@ -1,6 +1,7 @@
 import { Injector, NullInjector, Provider, ReflectiveInjector, Type } from '@tanbo/di'
+import { Observable, Subject } from '@tanbo/stream'
 
-import { ComponentInstance, Formatter } from './model/_api'
+import { ComponentInstance, Formatter, Component } from './model/_api'
 import {
   NativeNode,
   History,
@@ -20,7 +21,6 @@ import {
   NativeSelectionBridge,
   NativeRenderer, USE_CONTENT_EDITABLE
 } from './foundation/_api'
-import { Component } from './define-component'
 import { makeError } from './_utils/make-error'
 
 const starterErrorFn = makeError('Starter')
@@ -33,19 +33,24 @@ export interface TextBusConfig {
   components: Component[]
   /** 格式列表 */
   formatters: Formatter[]
-  /** 跨平台实现的提供者 */
-  platformProviders: Provider[]
+  /** 跨平台及基础扩展实现的提供者 */
+  providers: Provider[]
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
+
+  setup?(starter: Starter): void
 }
 
 /**
  * TextBus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
+  onReady: Observable<void>
+  private readyEvent = new Subject<void>()
+
   constructor(public config: TextBusConfig) {
     super(new NullInjector(), [
-      ...config.platformProviders,
+      ...config.providers,
       {
         provide: COMPONENT_LIST,
         useValue: config.components
@@ -72,6 +77,10 @@ export class Starter extends ReflectiveInjector {
       Selection,
       Translator,
       {
+        provide: Starter,
+        useFactory: () => this
+      },
+      {
         provide: Injector,
         useFactory: () => {
           return this
@@ -88,6 +97,8 @@ export class Starter extends ReflectiveInjector {
         }
       }
     ])
+    this.onReady = this.readyEvent.asObservable()
+    config.setup?.(this)
   }
 
   /**
@@ -103,6 +114,8 @@ export class Starter extends ReflectiveInjector {
     this.get(History).listen()
     this.get(LifeCycle).init()
     this.get(Renderer).render()
+    this.readyEvent.next()
+    return this
   }
 
   /**

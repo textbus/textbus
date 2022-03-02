@@ -6,13 +6,11 @@ import {
   onContentInsert,
   onSlotRemove,
   Slot,
-  SlotLiteral,
   SlotRender,
   Selection,
-  Translator,
   useContext,
   useSlots,
-  VElement, onDestroy, useRef, onEnter, ComponentInstance
+  VElement, onDestroy, useRef, onEnter, ComponentInstance, ComponentData
 } from '@textbus/core'
 import { ComponentLoader, EDITABLE_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
@@ -22,26 +20,17 @@ import { EditorOptions } from './types'
 export const rootComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'RootComponent',
-  transform(translator: Translator, stateLiteral: SlotLiteral): Slot {
-    return translator.createSlot(stateLiteral)
-  },
-  setup(slot?: Slot) {
+  setup(data?: ComponentData<any>) {
     const injector = useContext()
     const selection = injector.get(Selection)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
     const editableDocument = injector.get(EDITABLE_DOCUMENT)
 
-    const slots = useSlots([slot || new Slot([
+    const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
       ContentType.InlineComponent
-    ])], () => {
-      return new Slot([
-        ContentType.Text,
-        ContentType.BlockComponent,
-        ContentType.InlineComponent
-      ])
-    })
+    ])])
 
     onContentInsert(ev => {
       if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
@@ -96,9 +85,6 @@ export const rootComponent = defineComponent({
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
           })
         })
-      },
-      toJSON() {
-        return slots.get(0)!.toJSON()
       }
     }
   }
@@ -116,6 +102,9 @@ export const rootComponentLoader: ComponentLoader = {
       ContentType.InlineComponent
     ])
     slotParser(slot, element)
-    return rootComponent.createInstance(context, slot)
+    return rootComponent.createInstance(context, {
+      state: null,
+      slots: [slot]
+    })
   }
 }

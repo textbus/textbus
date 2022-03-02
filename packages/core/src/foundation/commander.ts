@@ -1,15 +1,21 @@
 import { Injectable } from '@tanbo/di'
 
 import { SelectionLocation, Range, Selection } from './selection'
-import { ComponentInstance, ContentType, Formatter, FormatType, FormatValue, placeholder, Slot } from '../model/_api'
-import { NativeRenderer } from './_injection-tokens'
 import {
+  ComponentInstance,
+  ContentType,
   DeleteEventData,
-  EnterEventData,
-  InsertEventData,
+  Formatter,
+  FormatType,
+  FormatValue,
   invokeListener,
-  Event
-} from '../define-component'
+  placeholder,
+  Slot,
+  Event,
+  InsertEventData,
+  EnterEventData
+} from '../model/_api'
+import { NativeRenderer } from './_injection-tokens'
 
 interface DeleteTreeState extends SelectionLocation {
   success: boolean

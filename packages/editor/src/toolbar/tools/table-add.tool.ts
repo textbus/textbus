@@ -1,10 +1,10 @@
-import { Commander, QueryState, QueryStateType, Selection } from '@textbus/core'
+import { Commander, QueryState, QueryStateType, Selection, Slot } from '@textbus/core'
 import { Injector } from '@tanbo/di'
 
 import { DropdownTool, DropdownToolConfig } from '../toolkit/_api'
 import { I18n } from '../../i18n'
 import { Form, FormNumber, FormSwitch } from '../../uikit/forms/_api'
-import { TableCellSlot, tableComponent } from '../../components/table.component'
+import { createCell, tableComponent } from '../../components/table.component'
 
 export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfig {
   const i18n = injector.get(I18n)
@@ -95,21 +95,20 @@ export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfi
     },
     useValue(value: any) {
       function create(rows: number, columns: number) {
-        const result: TableCellSlot[][] = []
-        for (let i = 0; i < rows; i++) {
-          const row: TableCellSlot[] = []
-          result.push(row)
-          for (let j = 0; j < columns; j++) {
-            const slot = new TableCellSlot()
-            row.push(slot)
-          }
+        const result: Slot[] = []
+        const size = rows * columns
+        for (let i = 0; i < size; i++) {
+          result.push(createCell())
         }
         return result
       }
 
       const component = tableComponent.createInstance(injector, {
-        useTextBusStyle: value.useTextBusStyle,
-        cells: create(value.rows || 4, value.cols || 6)
+        slots: create(value.rows || 4, value.cols || 6),
+        state: {
+          useTextBusStyle: value.useTextBusStyle,
+          columnCount: value.cols || 6
+        }
       })
 
       commander.insert(component)

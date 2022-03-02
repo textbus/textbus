@@ -199,7 +199,7 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
     viewController: form,
     queryState(): QueryState<any> {
       const state = query.queryWrappedComponent(imageComponent)
-      const value = state.value?.toJSON().data
+      const value = state.value?.toJSON().state
       return {
         state: state.state,
         value: value ? {

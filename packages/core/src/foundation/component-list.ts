@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@tanbo/di'
-import { Component } from '../define-component'
+import { Component } from '../model/component'
 import { COMPONENT_LIST } from './_injection-tokens'
 
 /**

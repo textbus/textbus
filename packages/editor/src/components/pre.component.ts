@@ -1,16 +1,22 @@
 import { Injector } from '@tanbo/di'
 import {
+  ComponentData,
   ComponentInstance,
   ContentType,
-  defineComponent, Formats,
+  defineComponent,
   Formatter,
-  FormatType, FormatValue, onContextMenu,
-  onEnter, onPaste,
-  Slot, SlotLiteral,
+  FormatType,
+  onContextMenu,
+  onEnter,
+  onPaste,
+  Selection,
+  Slot,
+  SlotLiteral,
   SlotRender,
-  Slots, Selection,
-  Translator, useContext,
-  useSlots, useState,
+  Slots,
+  useContext,
+  useSlots,
+  useState,
   VElement,
   VTextNode
 } from '@textbus/core'
@@ -187,16 +193,16 @@ function formatCodeLines(
   blockCommentEndString: string,
   languageGrammar: Grammar | null) {
   return lines.map(i => {
-    const slot = new CodeSlot()
-    slot.blockCommentStart = startBlock
-    if (slot.blockCommentStart) {
+    const slot = createCodeSlot()
+    slot.state.blockCommentStart = startBlock
+    if (slot.state.blockCommentStart) {
       i = blockCommentStartString + i
     }
     slot.insert(i)
     if (languageGrammar) {
       const tokens = tokenize(i, languageGrammar)
       format(tokens, slot, 0)
-      if (slot.blockCommentStart) {
+      if (slot.state.blockCommentStart) {
         slot.retain(2)
         slot.delete(2)
       }
@@ -206,8 +212,8 @@ function formatCodeLines(
         lastToken.type === 'comment' &&
         (lastToken.content as string).indexOf(blockCommentStartString) === 0) {
         const regString = blockCommentEndString.replace(new RegExp(`[${blockCommentEndString}]`, 'g'), i => '\\' + i)
-        slot.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
-        startBlock = !slot.blockCommentEnd
+        slot.state.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+        startBlock = !slot.state.blockCommentEnd
       } else {
         startBlock = false
       }
@@ -217,15 +223,15 @@ function formatCodeLines(
       //   (lastToken.content as string).indexOf(blockCommentStartString) === 0
       // slot.blockCommentEnd = !startBlock
     } else {
-      slot.blockCommentEnd = true
+      slot.state.blockCommentEnd = true
     }
     return slot
   })
 }
 
 function reformat(
-  slots: Slots<CodeSlotSlotLiteral, CodeSlot>,
-  startSlot: CodeSlot,
+  slots: Slots,
+  startSlot: Slot,
   languageGrammar: Grammar,
   blockCommentStartString: string,
   blockCommentEndString: string,
@@ -238,7 +244,7 @@ function reformat(
   for (; i < list.length; i++) {
     const slot = list[i]
     let code = slot.sliceContent()[0] as string
-    if (slot.blockCommentStart) {
+    if (slot.state.blockCommentStart) {
       code = blockCommentStartString + code
     }
 
@@ -246,7 +252,7 @@ function reformat(
     shadow.insert(code)
     const tokens = tokenize(code, languageGrammar)
     format(tokens, shadow, 0)
-    if (slot.blockCommentStart) {
+    if (slot.state.blockCommentStart) {
       shadow.retain(2)
       shadow.delete(2)
     }
@@ -264,17 +270,17 @@ function reformat(
       lastToken.type === 'comment' &&
       (lastToken.content as string).indexOf(blockCommentStartString) === 0) {
       const regString = blockCommentEndString.replace(new RegExp(`[${blockCommentEndString}]`, 'g'), i => '\\' + i)
-      slot.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+      slot.state.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
     } else {
-      slot.blockCommentEnd = true
+      slot.state.blockCommentEnd = true
     }
 
     const next = list[i + 1]
     if (next) {
-      if (!forceFormat && next.blockCommentStart === !slot.blockCommentEnd) {
+      if (!forceFormat && next.state.blockCommentStart === !slot.state.blockCommentEnd) {
         break
       }
-      next.blockCommentStart = !slot.blockCommentEnd
+      next.state.blockCommentStart = !slot.state.blockCommentEnd
     }
   }
 }
@@ -284,47 +290,37 @@ export interface CodeSlotSlotLiteral extends SlotLiteral {
   blockCommentStart: boolean
 }
 
-export class CodeSlot extends Slot {
-  blockCommentEnd = true
-  blockCommentStart = false
+function createCodeSlot() {
+  const slot = new Slot([
+    ContentType.Text
+  ], {
+    blockCommentEnd: true,
+    blockCommentStart: false
+  })
+  return overrideSlot(slot)
+}
 
-  constructor() {
-    super([
-      ContentType.Text
-    ])
-  }
+function overrideSlot(slot: Slot) {
+  const retain = slot.retain
 
-  override retain(index: number): boolean
-  override retain(index: number, formats: Formats): boolean
-  override retain(index: number, formatter: Formatter, value: FormatValue | null): boolean
-  override retain(index: number, formatter?: any, value?: any): boolean {
+  slot.retain = function (index: number, formatter: any, value: any) {
     if (formatter && formatter !== codeStyleFormatter) {
       return true
     }
-    return super.retain(index, formatter, value)
-  }
-
-  override toJSON(): CodeSlotSlotLiteral {
-    return {
-      ...super.toJSON(),
-      blockCommentEnd: this.blockCommentEnd,
-      blockCommentStart: this.blockCommentStart
-    }
-  }
+    return retain.call(slot, index, formatter, value)
+  } as any
+  return slot
 }
 
 export const preComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'PreComponent',
-  transform(translator: Translator, state: PreComponentState): PreComponentState {
-    return state
-  },
-  setup(data: PreComponentState) {
-    let languageGrammar = getLanguageGrammar(data.lang)
-    let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.lang)
+  setup(data: ComponentData<PreComponentState>) {
+    let languageGrammar = getLanguageGrammar(data.state!.lang)
+    let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.state!.lang)
 
     const stateController = useState({
-      lang: data.lang
+      lang: data.state!.lang
     })
     const injector = useContext()
 
@@ -333,14 +329,14 @@ export const preComponent = defineComponent({
     const selection = injector.get(Selection)
 
     stateController.onChange.subscribe(newLang => {
-      data.lang = newLang.lang
+      data.state!.lang = newLang.lang
       languageGrammar = getLanguageGrammar(newLang.lang);
 
       [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(newLang.lang)
       isStop = true
       slots.toArray().forEach(i => {
-        i.blockCommentStart = false
-        i.blockCommentEnd = false
+        i.state.blockCommentStart = false
+        i.state.blockCommentEnd = false
       })
       if (!languageGrammar) {
         slots.toArray().forEach(i => {
@@ -353,13 +349,8 @@ export const preComponent = defineComponent({
       isStop = false
     })
 
-    const slotList = formatCodeLines(data.code.split('\n'), false, blockCommentStartString, blockCommentEndString, languageGrammar)
-    const slots = useSlots<CodeSlot, CodeSlotSlotLiteral>(slotList, state => {
-      const s = new CodeSlot()
-      s.blockCommentEnd = state.blockCommentEnd
-      s.blockCommentStart = state.blockCommentStart
-      return s
-    })
+    const slotList = formatCodeLines(data.state!.code.split('\n'), false, blockCommentStartString, blockCommentEndString, languageGrammar)
+    const slots = useSlots(slotList)
 
     let isStop = false
 
@@ -392,8 +383,8 @@ export const preComponent = defineComponent({
           return
         }
       }
-      const nextSlot = ev.target.cutTo(new CodeSlot(), ev.data.index)
-      slots.insertAfter(nextSlot, ev.target as CodeSlot)
+      const nextSlot = ev.target.cutTo(createCodeSlot(), ev.data.index)
+      slots.insertAfter(nextSlot, ev.target as Slot)
       if (languageGrammar && !isStop) {
         isStop = true
         const index = nextSlot.index
@@ -410,8 +401,8 @@ export const preComponent = defineComponent({
         return {
           label: i.label || i18n.get('components.preComponent.defaultLang'),
           onClick() {
-            if (i.value !== data.lang) {
-              data.lang = i.value
+            if (i.value !== data.state!.lang) {
+              data.state!.lang = i.value
               stateController.update(draft => {
                 draft.lang = i.value
               })
@@ -424,14 +415,14 @@ export const preComponent = defineComponent({
     onPaste(ev => {
       const codeList = ev.data.text.split('\n')
       const firstCode = codeList.shift()
-      const target = ev.target as CodeSlot
+      const target = ev.target
       if (firstCode) {
         target.insert(firstCode)
       }
       const index = slots.indexOf(target)
       if (codeList.length) {
         slots.retain(index + 1)
-        const slotList = formatCodeLines(codeList, !target.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
+        const slotList = formatCodeLines(codeList, !target.state.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
         const last = slotList[slotList.length - 1]
         slots.insert(...slotList)
         selection.setLocation(last, last.index)
@@ -462,7 +453,7 @@ export const preComponent = defineComponent({
         ])
         let lang = ''
         languageList.forEach(i => {
-          if (i.value === data.lang) {
+          if (i.value === data.state!.lang) {
             lang = i.label
           }
         })
@@ -471,17 +462,9 @@ export const preComponent = defineComponent({
             class: 'tb-pre-lang'
           }, [new VTextNode(lang)]))
         }
-        block.attrs.set('lang', data.lang)
+        block.attrs.set('lang', data.state!.lang)
         // block.attrs.set('theme', PreComponent.theme)
         return block
-      },
-      toJSON(): PreComponentState {
-        return {
-          lang: data.lang,
-          code: slots.toArray().map(i => {
-            return i.isEmpty ? '' : i.sliceContent().join('')
-          }).join('\n')
-        }
       }
     }
   }
@@ -540,8 +523,10 @@ export const preComponentLoader: ComponentLoader = {
     }
 
     return preComponent.createInstance(injector, {
-      lang: el.getAttribute('lang') || '',
-      code
+      state: {
+        lang: el.getAttribute('lang') || '',
+        code
+      }
     })
   },
   component: preComponent

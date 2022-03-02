@@ -1,5 +1,5 @@
-import { ComponentLiteral } from '@textbus/core'
-import { Injector, Provider } from '@tanbo/di'
+import { ComponentLiteral, TextBusConfig } from '@textbus/core'
+import { Injector } from '@tanbo/di'
 
 import { FormatLoader, ComponentLoader } from '../dom-support/parser'
 
@@ -32,9 +32,11 @@ export interface BaseEditorOptions {
   /** 文档默认样式表 */
   styleSheets?: string[]
   /** 配置文档编辑状态下用到的样式 */
-  editingStyleSheets?: string[];
+  editingStyleSheets?: string[]
   /** 插件 */
   plugins?: Plugin[]
   /** 提供者集合，数组内配置的类，可以使用 TextBus 中的依赖注入能力 */
-  providers?: Provider[]
+  providers?: TextBusConfig['providers'],
+
+  setup?: TextBusConfig['setup']
 }

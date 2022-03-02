@@ -71,7 +71,7 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
       const state = query.queryComponent(preComponent)
       return {
         state: state.state,
-        value: state.value ? state.value.methods.toJSON().lang : null
+        value: state.value ? state.value.toJSON().state.lang : null
       }
     },
     onChecked(value: any) {
@@ -82,8 +82,10 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
         })
       } else {
         const component = preComponent.createInstance(injector, {
-          lang: value,
-          code: ''
+          state: {
+            lang: value,
+            code: ''
+          }
         })
         commander.insert(component)
         selection.setLocation(component.slots.get(0)!, 0)

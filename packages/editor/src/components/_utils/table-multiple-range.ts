@@ -6,18 +6,17 @@ import {
   Renderer,
   SelectedScope,
   Slot,
-  SlotLiteral,
   Slots,
   Selection,
   useContext,
-  useSelf
+  useSelf, ContentType
 } from '@textbus/core'
 import { CubicBezier } from '@tanbo/bezier'
 
-import {
-  TableCellLiteral,
-  TableCellSlot,
-} from '../table.component'
+export type TableCellSlot = Slot<{
+  rowspan: number
+  colspan: number
+}>
 
 interface ElementPosition {
   left: number
@@ -55,6 +54,15 @@ export interface TableCellRect {
   maxRow: number;
   minColumn: number;
   maxColumn: number;
+}
+
+export function createCell(colspan = 1, rowspan = 1) {
+  return new Slot([
+    ContentType.Text
+  ], {
+    rowspan,
+    colspan
+  })
 }
 
 function findCellPosition(cell: TableCellSlot, cellMatrix: TableRowPosition[]): TableCellRect {
@@ -170,7 +178,7 @@ export function autoComplete(table: TableCellSlot[][]) {
   newTable.forEach(tr => {
     for (let i = 0; i < maxColumns; i++) {
       if (!tr[i]) {
-        tr[i] = new TableCellSlot()
+        tr[i] = createCell()
       }
     }
   })
@@ -341,7 +349,7 @@ export interface TableInfo {
 }
 
 export function useTableMultipleRange(
-  slots: Slots<SlotLiteral<TableCellLiteral>, TableCellSlot>,
+  slots: Slots,
   stateController: ChangeController<TableInfo>,
   config: TableInfo,
   callback: (tableRange: TableRange) => void) {

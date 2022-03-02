@@ -1,9 +1,9 @@
 import { Injector } from '@tanbo/di'
 import {
+  ComponentData,
   ComponentInstance,
   ContentType,
   defineComponent,
-  Translator,
   useRef,
   useState,
   VElement
@@ -24,10 +24,8 @@ export interface ImageComponentLiteral {
 export const imageComponent = defineComponent({
   type: ContentType.InlineComponent,
   name: 'ImgComponent',
-  transform(translator: Translator, state: ImageComponentLiteral): ImageComponentLiteral {
-    return state
-  },
-  setup(state: ImageComponentLiteral) {
+  setup(data: ComponentData<ImageComponentLiteral>) {
+    let state = data.state!
     const changeController = useState(state)
 
     changeController.onChange.subscribe(v => {
@@ -56,11 +54,6 @@ export const imageComponent = defineComponent({
             float: state.float
           }
         })
-      },
-      toJSON() {
-        return {
-          ...state
-        }
       }
     }
   }
@@ -76,13 +69,15 @@ export const imageComponentLoader: ComponentLoader = {
   read(element: HTMLElement, injector: Injector): ComponentInstance {
     const style = element.style
     return imageComponent.createInstance(injector, {
-      src: element.getAttribute('src') || '',
-      width: style.width,
-      height: style.height,
-      margin: style.margin,
-      float: style.float,
-      maxWidth: style.maxWidth,
-      maxHeight: style.maxHeight
+      state: {
+        src: element.getAttribute('src') || '',
+        width: style.width,
+        height: style.height,
+        margin: style.margin,
+        float: style.float,
+        maxWidth: style.maxWidth,
+        maxHeight: style.maxHeight
+      }
     })
   },
   component: imageComponent

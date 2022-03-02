@@ -5,5 +5,4 @@ export * from './foundation/_api'
 export * from './model/_api'
 
 export * from './bootstrap'
-export * from './define-component'
 export * from './starter'

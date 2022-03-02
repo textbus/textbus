@@ -202,7 +202,7 @@ export class History {
             return
           }
           if (action.type === 'insertSlot') {
-            const source = component.slots.slotRestore(action.slot)
+            const source = this.translator.createSlot(action.slot)
             source.cut()
             const slot = this.translator.fillSlot(action.slot, source)
             component.slots.insert(slot)
