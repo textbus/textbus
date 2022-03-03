@@ -15,6 +15,7 @@ export interface SlotChangeData<T extends Slot> {
 export class Slots {
   readonly onChange: Observable<Operation>
   readonly onChildSlotChange: Observable<SlotChangeData<Slot>>
+  readonly onChildSlotForceChange: Observable<void>
   readonly onChildComponentRemoved: Observable<ComponentInstance>
 
   /** 子插槽的个数 */
@@ -36,6 +37,7 @@ export class Slots {
   private index = 0
   private changeEvent = new Subject<Operation>()
   private childSlotChangeEvent = new Subject<SlotChangeData<Slot>>()
+  private childSlotForceChangeEvent = new Subject<void>()
   private childComponentRemovedEvent = new Subject<ComponentInstance>()
 
   private changeListeners = new WeakMap<Slot, Subscription>()
@@ -44,6 +46,7 @@ export class Slots {
               slots: Slot[] = []) {
     this.onChange = this.changeEvent.asObservable()
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
+    this.onChildSlotForceChange = this.childSlotForceChangeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.insert(...slots)
   }
@@ -223,6 +226,9 @@ export class Slots {
       })
       sub.add(i.changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.childComponentRemovedEvent.next(instance)
+      }))
+      sub.add(i.changeMarker.onForceChange.subscribe(() => {
+        this.childSlotForceChangeEvent.next()
       }))
       this.changeListeners.set(i, sub)
     })

@@ -45,6 +45,7 @@ export class History {
   private changeEvent = new Subject<void>()
 
   private subscription: Subscription | null = null
+  private forceChangeSubscription: Subscription | null = null
 
   constructor(private root: RootComponentRef,
               private selection: Selection,
@@ -59,6 +60,9 @@ export class History {
    */
   listen() {
     this.record()
+    this.forceChangeSubscription = this.root.component.changeMarker.onForceChange.pipe(debounceTime(1)).subscribe(() => {
+      this.renderer.render()
+    })
   }
 
   /**
@@ -98,6 +102,7 @@ export class History {
    */
   destroy() {
     this.historySequence = []
+    this.forceChangeSubscription?.unsubscribe()
     this.stop()
   }
 

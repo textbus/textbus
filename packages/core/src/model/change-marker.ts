@@ -8,7 +8,7 @@ import { ComponentInstance } from './component'
  */
 export class ChangeMarker {
   onChange: Observable<Operation>
-
+  onForceChange: Observable<void>
   onChildComponentRemoved: Observable<ComponentInstance>
 
   get dirty() {
@@ -33,10 +33,22 @@ export class ChangeMarker {
   private _outputChanged = true
   private changeEvent = new Subject<Operation>()
   private childComponentRemovedEvent = new Subject<ComponentInstance>()
+  private forceChangeEvent = new Subject<void>()
 
   constructor() {
     this.onChange = this.changeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
+    this.onForceChange = this.forceChangeEvent.asObservable()
+  }
+
+  forceMarkDirtied() {
+    this._dirty = true
+    this.forceMarkChanged()
+  }
+
+  forceMarkChanged() {
+    this._changed = true
+    this.forceChangeEvent.next()
   }
 
   markAsDirtied(operation: Operation) {
