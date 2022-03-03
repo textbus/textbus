@@ -278,7 +278,11 @@ export class SelectionBridge implements NativeSelectionBridge {
           if (first.nodeType === Node.ELEMENT_NODE) {
             const location = this.renderer.getLocationByNativeNode(first)
             if (location) {
-              if (first.getAttribute('textbus-editable') === 'off') {
+              const editableState = first.getAttribute('textbus-editable')
+              if (editableState === 'on') {
+                return
+              }
+              if (editableState === 'off') {
                 const parentNode = first.parentNode!
                 const index = Array.from(parentNode.childNodes).indexOf(first)
                 selection.setPosition(parentNode, index + 1)
