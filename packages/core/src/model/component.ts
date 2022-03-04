@@ -118,7 +118,7 @@ export interface ComponentOptions<Methods extends ComponentMethods, State> {
    * 组件初始化实现
    * @param initData
    */
-  setup(initData: ComponentData<State>): Methods
+  setup(initData?: ComponentData<State>): Methods
 }
 
 /**
@@ -242,7 +242,7 @@ export function defineComponent<Methods extends ComponentMethods,
   State = any>(options: ComponentOptions<Methods, State>): Component<ComponentInstance<Methods, State>, ComponentData<State>> {
   return {
     name: options.name,
-    createInstance(contextInjector: Injector, initData: ComponentData<State> = {slots: []}) {
+    createInstance(contextInjector: Injector, initData?: ComponentData<State>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
 
@@ -313,7 +313,7 @@ export function defineComponent<Methods extends ComponentMethods,
       contextStack.pop()
       componentInstance.slots = context.slots
       componentInstance.shortcutList = context.dynamicShortcut
-      let state = Reflect.has(context, 'initState') ? context.initState : initData.state
+      let state = Reflect.has(context, 'initState') ? context.initState : initData?.state
 
       const subscriptions: Subscription[] = [
         context.slots.onChange.subscribe(ops => {

@@ -14,7 +14,7 @@ import {
   SlotLiteral,
   SlotRender,
   Slots,
-  useContext,
+  useContext, useSelf,
   useSlots,
   useState,
   VElement,
@@ -318,6 +318,21 @@ export const preComponent = defineComponent({
   setup(data: ComponentData<PreComponentState>) {
     let languageGrammar = getLanguageGrammar(data.state!.lang)
     let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.state!.lang)
+
+    const self = useSelf()
+
+    self.toJSON = function () {
+      return {
+        name: self.name,
+        state: {
+          lang: data.state?.lang,
+          code: slots.toArray().map(i => {
+            return i.isEmpty ? '' : i.sliceContent().join('')
+          }).join('\n')
+        },
+        slots: []
+      }
+    }
 
     const stateController = useState({
       lang: data.state!.lang

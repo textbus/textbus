@@ -26,7 +26,7 @@ export class Translator {
    * @param slotLiteral
    */
   createSlot(slotLiteral: SlotLiteral): Slot {
-    const slot = new Slot(slotLiteral.schema)
+    const slot = new Slot(slotLiteral.schema, slotLiteral.state)
     return this.loadSlot(slot, slotLiteral)
   }
 
