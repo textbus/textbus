@@ -294,7 +294,7 @@ export function defineComponent<Methods extends ComponentMethods,
         slots: new Slots(componentInstance),
         componentInstance: componentInstance,
         dynamicShortcut: [],
-        eventCache: new EventCache<EventTypes>()
+        eventCache: new EventCache<EventTypes>(),
       }
       contextStack.push(context)
       componentInstance.methods = options.setup(initData)
@@ -306,7 +306,7 @@ export function defineComponent<Methods extends ComponentMethods,
       contextStack.pop()
       componentInstance.slots = context.slots
       componentInstance.shortcutList = context.dynamicShortcut
-      let state = context.initState
+      let state = Reflect.has(context, 'initState') ? context.initState : initData.state
 
       const subscriptions: Subscription[] = [
         context.slots.onChange.subscribe(ops => {
