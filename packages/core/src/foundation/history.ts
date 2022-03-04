@@ -25,6 +25,10 @@ export class History {
    */
   onChange: Observable<void>
 
+  onBack: Observable<void>
+  onForward: Observable<void>
+  onPush: Observable<void>
+
   /**
    * 历史记录是否可回退
    */
@@ -43,6 +47,9 @@ export class History {
   private historySequence: HistoryItem[] = []
 
   private changeEvent = new Subject<void>()
+  private backEvent = new Subject<void>()
+  private forwardEvent = new Subject<void>()
+  private pushEvent = new Subject<void>()
 
   private subscription: Subscription | null = null
   private forceChangeSubscription: Subscription | null = null
@@ -53,6 +60,9 @@ export class History {
               private renderer: Renderer,
               private formatMap: FormatterList) {
     this.onChange = this.changeEvent.asObservable()
+    this.onBack = this.backEvent.asObservable()
+    this.onForward = this.forwardEvent.asObservable()
+    this.onPush = this.pushEvent.asObservable()
   }
 
   /**
@@ -77,6 +87,7 @@ export class History {
       this.selection.restore()
       this.index++
       this.record()
+      this.forwardEvent.next()
       this.changeEvent.next()
     }
   }
@@ -93,6 +104,7 @@ export class History {
       this.selection.restore()
       this.index--
       this.record()
+      this.backEvent.next()
       this.changeEvent.next()
     }
   }
@@ -127,6 +139,7 @@ export class History {
       })
       beforePaths = afterPaths
       operations = []
+      this.pushEvent.next()
       this.changeEvent.next()
     })
   }
