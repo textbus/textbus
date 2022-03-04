@@ -58,7 +58,9 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
       ], true)
 
       transformed.slots.forEach(slot => {
-        components.push(paragraphComponent.createInstance(injector, slot))
+        components.push(paragraphComponent.createInstance(injector, {
+          slots: [slot]
+        }))
         if (slot === transformed.range.startSlot) {
           selection.setStart(slot, transformed.range.startOffset!)
         }

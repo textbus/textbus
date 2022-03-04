@@ -12,10 +12,17 @@ enablePatches()
 
 const componentErrorFn = makeError('DefineComponent')
 
-export interface ComponentData<State = unknown> {
-  slots?: Slot[]
-  state?: State | null
+export interface SlotsComponentData<State> {
+  slots: Slot[]
+  state?: State
 }
+
+export interface StateComponentData<State> {
+  slots?: Slot[]
+  state: State
+}
+
+export type ComponentData<State = unknown> = SlotsComponentData<State> | StateComponentData<State>
 
 export interface ComponentLiteral<State = any> {
   name: string
@@ -235,7 +242,7 @@ export function defineComponent<Methods extends ComponentMethods,
   State = any>(options: ComponentOptions<Methods, State>): Component<ComponentInstance<Methods, State>, ComponentData<State>> {
   return {
     name: options.name,
-    createInstance(contextInjector: Injector, initData: ComponentData<State> = {}) {
+    createInstance(contextInjector: Injector, initData: ComponentData<State> = {slots: []}) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
 

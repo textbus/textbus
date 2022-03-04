@@ -235,7 +235,9 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
           Object.assign(draft, value)
         })
       } else if (value?.src) {
-        commander.insert(imageComponent.createInstance(injector, value))
+        commander.insert(imageComponent.createInstance(injector, {
+          state: value
+        }))
       }
     }
   }

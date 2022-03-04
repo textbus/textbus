@@ -119,9 +119,13 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
             slots: [slot]
           })
         } else if (value === 'p') {
-          component = paragraphComponent.createInstance(injector, slot)
+          component = paragraphComponent.createInstance(injector, {
+            slots: [slot]
+          })
         } else {
-          component = blockComponent.createInstance(injector, slot)
+          component = blockComponent.createInstance(injector, {
+            slots: [slot]
+          })
         }
 
         const length = currentSlot.length

@@ -28,7 +28,9 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
         value: null
       })
     }
-    const component = paragraphComponent.createInstance(injector, nextSlot)
+    const component = paragraphComponent.createInstance(injector, {
+      slots: [nextSlot]
+    })
     selection.setLocation(component.slots.get(0)!, 0)
     const beforeComponent = parentSlot.getContentAtIndex(index - 1)
     if (index === parentSlot.length - 1 &&
