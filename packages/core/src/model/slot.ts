@@ -306,14 +306,14 @@ export class Slot<T = any> {
    * @param count
    */
   delete(count: number): boolean {
-    if (count > this._index) {
-      count = this._index
-    }
     if (count <= 0) {
       return false
     }
-    const startIndex = this._index - count
-    const endIndex = this._index
+    const startIndex = this._index
+    let endIndex = this._index + count
+    if (endIndex > this.length) {
+      endIndex = this.length
+    }
     const deletedData = this.content.cut(startIndex, endIndex)
     const deletedFormat = this.format.extract(startIndex, endIndex)
 
@@ -324,12 +324,11 @@ export class Slot<T = any> {
       this.format = deletedFormat.extract(0, 1)
     }
 
-    this._index = startIndex
     this.changeMarker.markAsDirtied({
       path: [],
       apply: [{
         type: 'retain',
-        index: endIndex
+        index: startIndex
       }, {
         type: 'delete',
         count
@@ -380,7 +379,7 @@ export class Slot<T = any> {
   removeComponent(component: ComponentInstance) {
     const index = this.indexOf(component)
     if (index > -1) {
-      this.retain(index + 1)
+      this.retain(index)
       return this.delete(1)
     }
     return false
@@ -428,7 +427,7 @@ export class Slot<T = any> {
       slot.insert(i)
     })
     slot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
-    this.retain(endIndex)
+    this.retain(startIndex)
     this.delete(endIndex - startIndex)
 
     return slot

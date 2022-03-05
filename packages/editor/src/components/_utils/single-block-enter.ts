@@ -45,6 +45,7 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
       const host = parentSlot.parentSlot
       if (host) {
         const index2 = host.indexOf(self.parentComponent!)
+        parentSlot.retain(parentSlot.index - 2)
         parentSlot.delete(2)
         host.retain(index2 + 1)
         host.insert(component)

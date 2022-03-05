@@ -134,7 +134,7 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
             if (isSingleBlock) {
               commander.replace(parent, component)
             } else {
-              currentSlot.retain(length)
+              currentSlot.retain(0)
               currentSlot.delete(length)
               currentSlot.insert(component)
             }
@@ -146,7 +146,7 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
             }
           }
         } else if (isBlockContainer) {
-          currentSlot.retain(block.endIndex)
+          currentSlot.retain(block.startIndex)
           currentSlot.delete(block.endIndex - block.startIndex)
           currentSlot.insert(component)
           if (block.slot === selection.startSlot && block.startIndex <= selection.startOffset!) {

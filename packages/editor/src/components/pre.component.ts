@@ -203,7 +203,7 @@ function formatCodeLines(
       const tokens = tokenize(i, languageGrammar)
       format(tokens, slot, 0)
       if (slot.state.blockCommentStart) {
-        slot.retain(2)
+        slot.retain(0)
         slot.delete(2)
       }
       const lastToken = tokens.pop()
@@ -253,7 +253,7 @@ function reformat(
     const tokens = tokenize(code, languageGrammar)
     format(tokens, shadow, 0)
     if (slot.state.blockCommentStart) {
-      shadow.retain(2)
+      shadow.retain(0)
       shadow.delete(2)
     }
 

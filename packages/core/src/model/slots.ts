@@ -70,7 +70,7 @@ export class Slots {
   remove(slot: Slot) {
     const index = this.slots.indexOf(slot)
     if (index > -1) {
-      this.retain(index + 1)
+      this.retain(index)
       this.delete(1)
     }
   }
@@ -131,7 +131,7 @@ export class Slots {
   pop() {
     if (this.length > 0) {
       const last = this.last
-      this.retain(this.length)
+      this.retain(this.length - 1)
       this.delete(1)
       return last
     }
@@ -144,7 +144,7 @@ export class Slots {
   shift() {
     if (this.length > 0) {
       const first = this.first
-      this.retain(1)
+      this.retain(0)
       this.delete(1)
       return first
     }
@@ -176,7 +176,7 @@ export class Slots {
   replace(oldSlot: Slot, newSlot: Slot) {
     const index = this.indexOf(oldSlot)
     if (index > 0) {
-      this.retain(index + 1)
+      this.retain(index)
       this.delete(1)
       this.insert(newSlot)
     }
@@ -200,7 +200,7 @@ export class Slots {
    * 清空子插槽
    */
   clean() {
-    this.retain(this.length)
+    this.retain(0)
     this.delete(this.length)
   }
 
@@ -278,8 +278,8 @@ export class Slots {
    * @param count
    */
   delete(count: number) {
-    const startIndex = this._index - count
-    const endIndex = this._index
+    const startIndex = this._index
+    const endIndex = this._index + count
     const deletedSlots = this.slots.slice(startIndex, endIndex)
 
     deletedSlots.forEach(i => {
@@ -288,12 +288,11 @@ export class Slots {
     })
 
     this.slots.splice(startIndex, count)
-    this._index -= count
     this.changeEvent.next({
       path: [],
       apply: [{
         type: 'retain',
-        index: endIndex
+        index: startIndex
       }, {
         type: 'delete',
         count

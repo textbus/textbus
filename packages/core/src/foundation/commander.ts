@@ -50,7 +50,7 @@ export class Commander {
 
     const event = new Event<DeleteEventData>(source, {
       count: endIndex - startIndex,
-      index: endIndex
+      index: startIndex
     }, () => {
       isPreventDefault = false
     })
@@ -274,10 +274,10 @@ export class Commander {
       let isPreventDefault = true
       const event = new Event<DeleteEventData>(slot, {
         count: selection.endOffset! - selection.startOffset!,
-        index: selection.endOffset!,
+        index: selection.startOffset!,
       }, () => {
         isPreventDefault = false
-        slot.retain(selection.endOffset!)
+        slot.retain(selection.startOffset!)
         slot.delete(selection.endOffset! - selection.startOffset!)
         selection.collapse()
       })
@@ -293,7 +293,7 @@ export class Commander {
     const endSlot = selection.endSlot!
     if (!endSlot.isEmpty) {
       const event = new Event<DeleteEventData>(endSlot, {
-        index: endSlot.length,
+        index: selection.endOffset!,
         count: endSlot.length - selection.endOffset!
       }, () => {
         deletedSlot = endSlot.cut(selection.endOffset!, endSlot.length)
@@ -324,7 +324,7 @@ export class Commander {
       let isPreventDefault = true
       const event = new Event<DeleteEventData>(slot, {
         count: scope.endIndex - scope.startIndex,
-        index: scope.endIndex,
+        index: scope.startIndex,
       }, () => {
         isPreventDefault = false
       })
@@ -338,7 +338,7 @@ export class Commander {
         selection.setEnd(stoppedSlot, index)
         return false
       } else {
-        slot.retain(scope.endIndex)
+        slot.retain(scope.startIndex)
         slot.delete(scope.endIndex - scope.startIndex)
         if (slot === dumpStartSlot) {
           break
@@ -355,7 +355,7 @@ export class Commander {
             }
             selection.setEnd(stoppedSlot, state.offset)
 
-            slot.retain(scope.endIndex)
+            slot.retain(scope.startIndex)
             slot.delete(scope.endIndex - scope.startIndex)
             return false
           }
@@ -575,7 +575,7 @@ export class Commander {
 
     if (parentSlot) {
       const index = parentSlot.indexOf(component)
-      parentSlot.retain(index + 1)
+      parentSlot.retain(index)
       parentSlot.delete(1)
     }
   }
@@ -671,13 +671,13 @@ export class Commander {
       let isPreventDefault = true
       const event = new Event<DeleteEventData>(parentSlot, {
         count: 1,
-        index: index + 1,
+        index: index,
       }, () => {
         isPreventDefault = false
       })
       invokeListener(parentSlot.parent!, 'onContentDelete', event)
       if (!isPreventDefault) {
-        parentSlot.retain(index + 1)
+        parentSlot.retain(index)
         parentSlot.delete(1)
         if (parentSlot === stopSlot || !parentSlot.isEmpty) {
           return {
