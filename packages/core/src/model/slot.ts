@@ -75,7 +75,8 @@ export class Slot<T = any> {
   updateState(fn: (draft: Draft<T>) => void): T {
     let changes!: Patch[]
     let inverseChanges!: Patch[]
-    const newState = produce(this.state, fn, (p, ip) => {
+    const oldState = this.state
+    const newState = produce(oldState, fn, (p, ip) => {
       changes = p
       inverseChanges = ip
     })
@@ -84,11 +85,13 @@ export class Slot<T = any> {
       path: [],
       apply: [{
         type: 'apply',
-        patches: changes
+        patches: changes,
+        value: newState
       }],
       unApply: [{
         type: 'apply',
-        patches: inverseChanges
+        patches: inverseChanges,
+        value: oldState
       }]
     })
     return newState!
@@ -486,7 +489,7 @@ export class Slot<T = any> {
   toJSON(): SlotLiteral<T> {
     return {
       schema: this.schema,
-      content: this.content.toJSON(),
+      content: this.isEmpty ? [] : this.content.toJSON(),
       formats: this.format.toJSON(),
       state: this.state!
     }

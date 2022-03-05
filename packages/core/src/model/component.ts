@@ -268,7 +268,8 @@ export function defineComponent<Methods extends ComponentMethods,
         updateState(fn) {
           let changes!: Patch[]
           let inverseChanges!: Patch[]
-          const newState = produce(state, fn, (p, ip) => {
+          const oldState = state
+          const newState = produce(oldState, fn, (p, ip) => {
             changes = p
             inverseChanges = ip
           }) as State
@@ -278,11 +279,13 @@ export function defineComponent<Methods extends ComponentMethods,
             path: [],
             apply: [{
               type: 'apply',
-              patches: changes!
+              patches: changes!,
+              value: newState
             }],
             unApply: [{
               type: 'apply',
-              patches: inverseChanges!
+              patches: inverseChanges!,
+              value: oldState
             }]
           })
           return newState

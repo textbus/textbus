@@ -33,8 +33,12 @@ export class Slots {
     return this.slots[0] || null
   }
 
+  get index() {
+    return this._index
+  }
+
   private slots: Slot[] = []
-  private index = 0
+  private _index = 0
   private changeEvent = new Subject<Operation>()
   private childSlotChangeEvent = new Subject<SlotChangeData<Slot>>()
   private childSlotForceChangeEvent = new Subject<void>()
@@ -208,7 +212,7 @@ export class Slots {
     if (slots.length === 0) {
       return
     }
-    const index = this.index
+    const index = this._index
     this.slots.splice(index, 0, ...slots)
 
     slots.forEach(i => {
@@ -233,7 +237,7 @@ export class Slots {
       this.changeListeners.set(i, sub)
     })
 
-    this.index += slots.length
+    this._index += slots.length
     this.changeEvent.next({
       path: [],
       apply: [{
@@ -261,11 +265,11 @@ export class Slots {
    */
   retain(index: number) {
     if (index < 0) {
-      this.index = 0
+      this._index = 0
     } else if (index > this.length) {
-      this.index = this.length
+      this._index = this.length
     } else {
-      this.index = index
+      this._index = index
     }
   }
 
@@ -274,8 +278,8 @@ export class Slots {
    * @param count
    */
   delete(count: number) {
-    const startIndex = this.index - count
-    const endIndex = this.index
+    const startIndex = this._index - count
+    const endIndex = this._index
     const deletedSlots = this.slots.slice(startIndex, endIndex)
 
     deletedSlots.forEach(i => {
@@ -284,7 +288,7 @@ export class Slots {
     })
 
     this.slots.splice(startIndex, count)
-    this.index -= count
+    this._index -= count
     this.changeEvent.next({
       path: [],
       apply: [{

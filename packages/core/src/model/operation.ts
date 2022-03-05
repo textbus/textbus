@@ -21,7 +21,8 @@ export interface DeleteAction {
 
 export interface ApplyAction {
   type: 'apply'
-  patches: Patch[]
+  patches: Patch[],
+  value: any
 }
 
 export interface InsertSlotAction {

@@ -67,7 +67,7 @@ export class Format {
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(ranges, value as FormatRange)
+    const newRanges = Format.normalizeFormatRange(ranges, value as FormatRange)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -104,9 +104,9 @@ export class Format {
   split(index: number, distance: number) {
     const expandedValues = Array.from<string>({length: distance})
     this.map.forEach((formatRanges, key) => {
-      const values = this.tileRanges(formatRanges)
+      const values = Format.tileRanges(formatRanges)
       values.splice(index, 0, ...expandedValues)
-      const newRanges = this.toRanges(values)
+      const newRanges = Format.toRanges(values)
       this.map.set(key, newRanges)
     })
     return this
@@ -132,7 +132,7 @@ export class Format {
     })
     Array.from(this.map.keys()).forEach(key => {
       const oldRanges = this.map.get(key)!
-      const newRanges = this.normalizeFormatRange(oldRanges)
+      const newRanges = Format.normalizeFormatRange(oldRanges)
       if (newRanges.length) {
         this.map.set(key, newRanges)
       } else {
@@ -215,7 +215,7 @@ export class Format {
   discard(formatter: Formatter, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
-      this.normalizeFormatRange(oldRanges, {
+      Format.normalizeFormatRange(oldRanges, {
         startIndex,
         endIndex,
         value: null as any
@@ -266,7 +266,7 @@ export class Format {
 
     if (copyFormat.map.size) {
       tree.children = []
-      if(startIndex < nextStartIndex) {
+      if (startIndex < nextStartIndex) {
         tree.children.push({
           startIndex,
           endIndex: nextStartIndex
@@ -304,16 +304,16 @@ export class Format {
     return list
   }
 
-  private normalizeFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
+  static normalizeFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
     if (newRange) {
       oldRanges = [...oldRanges, newRange]
     }
-    const formatValues: Array<FormatValue> = this.tileRanges(oldRanges)
+    const formatValues: Array<FormatValue> = Format.tileRanges(oldRanges)
 
-    return this.toRanges(formatValues)
+    return Format.toRanges(formatValues)
   }
 
-  private tileRanges(ranges: FormatRange[]) {
+  private static tileRanges(ranges: FormatRange[]) {
     const formatValues: Array<FormatValue> = []
     ranges.forEach(range => {
       formatValues.length = Math.max(formatValues.length, range.endIndex)
@@ -322,7 +322,7 @@ export class Format {
     return formatValues
   }
 
-  private toRanges(values: Array<FormatValue>) {
+  private static toRanges(values: Array<FormatValue>) {
     const newRanges: FormatRange[] = []
     let range: FormatRange = null as any
     for (let i = 0; i < values.length; i++) {
@@ -331,7 +331,7 @@ export class Format {
         range = null as any
         continue
       }
-      if (this.equal(range?.value, item)) {
+      if (Format.equal(range?.value, item)) {
         range.endIndex = i + 1
         continue
       }
@@ -346,7 +346,7 @@ export class Format {
     return newRanges
   }
 
-  private equal(left: FormatValue, right: FormatValue): boolean {
+  private static equal(left: FormatValue, right: FormatValue): boolean {
     if (left === right) {
       return true
     }

@@ -166,7 +166,7 @@ export class History {
           if (action.type === 'retain') {
             if (action.formats) {
               const formats: Formats = []
-              Object.keys(action.formats).map(i => {
+              Object.keys(action.formats).forEach(i => {
                 const formatter = this.formatMap.get(i)
                 if (formatter) {
                   formats.push([formatter, action.formats![i]])
@@ -192,7 +192,7 @@ export class History {
             if (typeof action.content === 'string') {
               if (action.formats) {
                 const formats: Formats = []
-                Object.keys(action.formats).map(i => {
+                Object.keys(action.formats).forEach(i => {
                   const formatter = this.formatMap.get(i)
                   if (formatter) {
                     formats.push([formatter, action.formats![i]])
