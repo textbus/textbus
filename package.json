@@ -73,7 +73,9 @@
     "@tanbo/stream": "^0.0.9",
     "immer": "^9.0.12",
     "reflect-metadata": "^0.1.13",
-    "prismjs": "^1.23.0"
+    "prismjs": "^1.23.0",
+    "yjs": "^13.5.27",
+    "y-webrtc": "^10.2.2"
   },
   "repository": {
     "type": "git",

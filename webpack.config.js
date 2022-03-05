@@ -20,6 +20,8 @@ module.exports = {
       '@textbus/browser/*': path.resolve(__dirname, './packages/browser/'),
       '@textbus/editor': path.resolve(__dirname, './packages/editor/src/public-api.ts'),
       '@textbus/editor/*': path.resolve(__dirname, './packages/editor/'),
+      '@textbus/collaborate': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
+      '@textbus/collaborate/*': path.resolve(__dirname, './packages/collaborate/'),
     }
   },
   devServer: {
