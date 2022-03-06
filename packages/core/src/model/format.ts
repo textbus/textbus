@@ -313,7 +313,7 @@ export class Format {
     return Format.toRanges(formatValues)
   }
 
-  private static tileRanges(ranges: FormatRange[]) {
+  static tileRanges(ranges: FormatRange[]) {
     const formatValues: Array<FormatValue> = []
     ranges.forEach(range => {
       formatValues.length = Math.max(formatValues.length, range.endIndex)
@@ -322,7 +322,7 @@ export class Format {
     return formatValues
   }
 
-  private static toRanges(values: Array<FormatValue>) {
+  static toRanges(values: Array<FormatValue>) {
     const newRanges: FormatRange[] = []
     let range: FormatRange = null as any
     for (let i = 0; i < values.length; i++) {

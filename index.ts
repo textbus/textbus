@@ -10,5 +10,5 @@ const editor = createEditor(document.getElementById('box')!, {
 
 editor.onChange.subscribe(() => {
   const root = editor.injector!.get(RootComponentRef)
-  console.log(root.component.toJSON())
+  // console.log(root.component.toJSON())
 })

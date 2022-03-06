@@ -137,6 +137,7 @@ export class Slot<T = any> {
 
     const prevContent = this.getContentAtIndex(this.index - 1)
     if (prevContent === placeholder) {
+      this.retain(this.index - 1)
       this.delete(1)
     }
 
@@ -208,7 +209,7 @@ export class Slot<T = any> {
       }],
       unApply: [{
         type: 'retain',
-        index: endIndex
+        index: startIndex
       }, {
         type: 'delete',
         count: length
