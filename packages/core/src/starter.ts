@@ -19,7 +19,9 @@ import {
   Selection,
   Translator,
   NativeSelectionBridge,
-  NativeRenderer, USE_CONTENT_EDITABLE
+  NativeRenderer,
+  USE_CONTENT_EDITABLE,
+  CoreHistory
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -65,10 +67,13 @@ export class Starter extends ReflectiveInjector {
         provide: USE_CONTENT_EDITABLE,
         useValue: config.useContentEditable
       },
+      {
+        provide: History,
+        useClass: CoreHistory
+      },
       Commander,
       ComponentList,
       FormatterList,
-      History,
       Keyboard,
       LifeCycle,
       OutputRenderer,

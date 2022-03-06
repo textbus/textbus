@@ -15,11 +15,28 @@ export interface HistoryItem {
   operations: Operation[]
 }
 
+export abstract class History {
+  abstract onChange: Observable<void>
+  abstract onBack: Observable<void>
+  abstract onForward: Observable<void>
+  abstract onPush: Observable<void>
+  abstract canBack: boolean
+  abstract canForward: boolean
+
+  abstract listen(): void
+
+  abstract back(): void
+
+  abstract forward(): void
+
+  abstract destroy(): void
+}
+
 /**
  * TextBus 历史记录管理类
  */
 @Injectable()
-export class History {
+export class CoreHistory extends History {
   /**
    * 当历史记录变化时触发
    */
@@ -59,6 +76,7 @@ export class History {
               private translator: Translator,
               private renderer: Renderer,
               private formatMap: FormatterList) {
+    super()
     this.onChange = this.changeEvent.asObservable()
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()

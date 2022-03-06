@@ -8,8 +8,10 @@ import {
   FormatterList
 } from '@textbus/core'
 import { Doc as YDoc } from 'yjs'
-import { localToRemote } from './local-to-remote'
-import { remoteToLocal } from './remote-to-local'
+import { Awareness } from 'y-protocols/awareness'
+import { localToRemote } from './collab/local-to-remote'
+import { remoteToLocal } from './collab/remote-to-local'
+import { CollaborateHistory } from './collab/_api'
 
 // const collaborateErrorFn = makeError('Collaborate')
 
@@ -23,15 +25,25 @@ export class Collaborate {
   constructor(private rootComponentRef: RootComponentRef,
               private translator: Translator,
               private formatterList: FormatterList,
+              private collaborateHistory: CollaborateHistory,
               private starter: Starter) {
   }
 
-  setup() {
+  setup(awareness: Awareness) {
     this.subscriptions.push(
       this.starter.onReady.subscribe(() => {
         this.listen()
       })
     )
+    awareness.on('update', () => {
+      const users: any[] = []
+      awareness.getStates().forEach(state => {
+        if (state.user) {
+          users.push(state.user)
+        }
+      })
+      console.log(users)
+    })
   }
 
   destroy() {
@@ -41,6 +53,7 @@ export class Collaborate {
   private listen() {
     const root = this.yDoc.getArray('content')
     const slot = this.rootComponentRef.component.slots.get(0)!
+    this.collaborateHistory.init(root)
     root.observeDeep((events, transaction) => {
       if (transaction.origin === this.yDoc) {
         return
