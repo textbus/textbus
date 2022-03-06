@@ -343,15 +343,16 @@ export function serialize(bodies: TableCellSlot[][]): TableRowPosition[] {
   return rows
 }
 
-export interface TableInfo {
-  columnSize: number
-  rowSize: number
+export interface TableConfig {
+  useTextBusStyle: boolean,
+  columnCount: number
+  rowCount: number
 }
 
 export function useTableMultipleRange(
   slots: Slots,
-  stateController: ChangeController<TableInfo>,
-  config: TableInfo,
+  stateController: ChangeController<TableConfig>,
+  config: TableConfig,
   callback: (tableRange: TableRange) => void) {
   const injector = useContext()
   const nativeSelectionBridge = injector.get(SelectionBridge)
@@ -435,7 +436,7 @@ export function useTableMultipleRange(
   }
 
   function selectCells(startCell: TableCellSlot, endCell: TableCellSlot) {
-    const serializedCells = serialize(slotsToTable(slots.toArray(), config.columnSize))
+    const serializedCells = serialize(slotsToTable(slots.toArray(), config.columnCount))
     const p1 = findCellPosition(startCell, serializedCells)
     const p2 = findCellPosition(endCell, serializedCells)
     const minRow = Math.min(p1.minRow, p2.minRow)

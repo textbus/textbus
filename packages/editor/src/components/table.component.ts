@@ -23,14 +23,9 @@ import {
   serialize,
   slotsToTable,
   TableCellPosition,
-  TableInfo,
+  TableConfig,
   useTableMultipleRange
 } from './_utils/table-multiple-range'
-
-export interface TableConfig {
-  useTextBusStyle: boolean,
-  columnCount: number
-}
 
 export {
   createCell
@@ -45,9 +40,10 @@ export const tableComponent = defineComponent({
     const i18n = injector.get(I18n)
     const selection = injector.get(Selection)
 
-    let tableInfo: TableInfo = {
-      columnSize: tableCells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
-      rowSize: tableCells.length
+    let tableInfo: TableConfig = {
+      columnCount: tableCells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
+      useTextBusStyle: data.state?.useTextBusStyle || false,
+      rowCount: tableCells.length
     }
 
     const stateController = useState(tableInfo)
@@ -210,7 +206,7 @@ export const tableComponent = defineComponent({
         const endIndex = endPosition.columnIndex
 
         stateController.update(draft => {
-          draft.columnSize = tableInfo.columnSize - (endIndex - startIndex + 1)
+          draft.columnCount = tableInfo.columnCount - (endIndex - startIndex + 1)
         })
 
         serializedCells.forEach(tr => {
@@ -256,7 +252,7 @@ export const tableComponent = defineComponent({
         const endIndex = endPosition.rowIndex
 
         stateController.update(draft => {
-          draft.rowSize = tableInfo.rowSize - (endIndex - startIndex + 1)
+          draft.rowCount = tableInfo.rowCount - (endIndex - startIndex + 1)
         })
 
         for (let i = startIndex; i <= endIndex; i++) {
@@ -322,7 +318,7 @@ export const tableComponent = defineComponent({
         const serializedCells = serialize(tableCells)
         const tr: Slot[] = []
         if (index === 0 || index === serializedCells.length) {
-          for (let i = 0; i < tableInfo.columnSize; i++) {
+          for (let i = 0; i < tableInfo.columnCount; i++) {
             tr.push(createCell())
           }
           if (index === 0) {
@@ -336,7 +332,7 @@ export const tableComponent = defineComponent({
         const row = serializedCells[index]
 
         stateController.update(draft => {
-          draft.rowSize = tableInfo.rowSize + 1
+          draft.rowCount = tableInfo.rowCount+ 1
         })
 
         row.cellsPosition.forEach(cell => {
@@ -367,8 +363,8 @@ export const tableComponent = defineComponent({
         if (index < 0) {
           index = 0
         }
-        if (index > tableInfo.columnSize) {
-          index = tableInfo.columnSize
+        if (index > tableInfo.columnCount) {
+          index = tableInfo.columnCount
         }
         const serializedCells = serialize(tableCells)
 
@@ -382,7 +378,7 @@ export const tableComponent = defineComponent({
         serializedCells.forEach((row, rowIndex) => {
           if (index === 0) {
             table[rowIndex].unshift(createCell())
-          } else if (index === tableInfo.columnSize) {
+          } else if (index === tableInfo.columnCount) {
             table[rowIndex].push(createCell())
           } else {
             const cell = row.cellsPosition[index]
@@ -413,11 +409,11 @@ export const tableComponent = defineComponent({
         })
 
         stateController.update(draft => {
-          draft.columnSize = tableInfo.columnSize + 1
+          draft.columnCount = tableInfo.columnCount + 1
         })
       },
       render(isOutputMode: boolean, slotRender: SlotRender) {
-        tableCells = slotsToTable(slots.toArray(), tableInfo.columnSize)
+        tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
         const table = new VElement('table')
         if (data.state!.useTextBusStyle) {
           table.classes.add('tb-table')
@@ -494,7 +490,8 @@ export const tableComponentLoader: ComponentLoader = {
       slots: bodies.flat(),
       state: {
         useTextBusStyle: element.classList.contains('tb-table'),
-        columnCount: cells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0)
+        columnCount: cells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
+        rowCount: cells.length
       }
     })
   },

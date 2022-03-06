@@ -107,7 +107,8 @@ export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfi
         slots: create(value.rows || 4, value.cols || 6),
         state: {
           useTextBusStyle: value.useTextBusStyle,
-          columnCount: value.cols || 6
+          columnCount: value.cols || 6,
+          rowCount: value.rows || 4
         }
       })
 
