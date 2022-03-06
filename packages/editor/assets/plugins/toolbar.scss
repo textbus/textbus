@@ -24,7 +24,7 @@
 }
 
 .textbus-toolbar-group {
-  float: left;
+  display: inline-block;
   margin-left: 4px;
   margin-right: 4px;
   margin-bottom: 5px;
@@ -68,6 +68,10 @@
     position: relative;
     z-index: 1;
     @include focus($color-primary)
+  }
+  &-icon {
+    display: inline-block;
+    min-height: 1em;
   }
 
   &-active {

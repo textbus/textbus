@@ -5,7 +5,9 @@ export interface UIButtonConfig {
   iconClasses?: string[]
   label?: string
   tooltip?: string
+
   onClick(): void
+
   keymap?: Keymap
 }
 
@@ -25,7 +27,7 @@ export function createButton(config: UIButtonConfig): UIButton {
     },
     children: [
       createElement('span', {
-        classes: config.iconClasses
+        classes: config.iconClasses ? [...config.iconClasses, 'textbus-toolbar-button-icon'] : ['textbus-toolbar-button-icon']
       }),
       createElement('span', {
         classes: ['textbus-toolbar-label'],
