@@ -1,7 +1,7 @@
-TextBus 富文本编辑器
+Textbus 富文本编辑器
 =====================
 
-TextBus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，TextBus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见 API，且提供了更高的抽象层，使 TextBus 不仅易于上手，同时还能驱动复杂的富文本应用。
+Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见 API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时还能驱动复杂的富文本应用。
 
 ### 文档
 
@@ -9,7 +9,7 @@ TextBus 是一套用于构建富交互的富文本编辑框架。和大多数富
 
 ### 安装
 
-TextBus 可能通过两种方式引入到你的项目中。
+Textbus 可能通过两种方式引入到你的项目中。
 
 #### 通过 npm 安装
 ```
@@ -39,12 +39,12 @@ const editor = createEditor(document.getElementById('editor'))
 <head>
   <link rel="stylesheet" href="/path/textbus.min.css">
   <script src="/path/textbus.min.js"></script>
-  <title>TextBus 示例</title>
+  <title>Textbus 示例</title>
 </head>
 <body>
 <div id="editor"></div>
 <script>
-  var editor = textbus.createEditor(document.getElementById('editor'))
+  var editor = textbus.editor.createEditor(document.getElementById('editor'))
 </script>
 </body>
 </html>
