@@ -1,9 +1,9 @@
 import { Map as YMap, YArrayEvent, YEvent, YMapEvent } from 'yjs'
-import { ComponentInstance, FormatterList, FormatType, Slot, Translator } from '@textbus/core'
+import { ComponentInstance, FormatType, Registry, Slot, Translator } from '@textbus/core'
 
 type YPath = [number, string][]
 
-export function remoteToLocal(events: YEvent[], slot: Slot, translator: Translator, formatterList: FormatterList) {
+export function remoteToLocal(events: YEvent[], slot: Slot, translator: Translator, registry: Registry) {
   events.forEach(ev => {
     const path: YPath = []
 
@@ -14,7 +14,7 @@ export function remoteToLocal(events: YEvent[], slot: Slot, translator: Translat
     if (path.length) {
       const componentIndex = path.shift()![0] as number
       const component = slot.getContentAtIndex(componentIndex) as ComponentInstance
-      applySharedComponentToComponent(ev, path, component, translator, formatterList)
+      applySharedComponentToComponent(ev, path, component, translator, registry)
       return
     }
 
@@ -22,11 +22,11 @@ export function remoteToLocal(events: YEvent[], slot: Slot, translator: Translat
   })
 }
 
-function applySharedComponentToComponent(ev: YEvent, path: YPath, component: ComponentInstance, translator: Translator, formatterList: FormatterList,) {
+function applySharedComponentToComponent(ev: YEvent, path: YPath, component: ComponentInstance, translator: Translator, registry: Registry,) {
   if (path.length) {
     const childPath = path.shift()!
     const slot = component.slots.get(childPath[0])!
-    applySharedSlotToSlot(ev, path, slot, translator, formatterList, childPath[1] === 'formats')
+    applySharedSlotToSlot(ev, path, slot, translator, registry, childPath[1] === 'formats')
     return
   }
   if (ev instanceof YMapEvent) {
@@ -55,11 +55,11 @@ function applySharedComponentToComponent(ev: YEvent, path: YPath, component: Com
   }
 }
 
-function applySharedSlotToSlot(ev: YEvent, path: YPath, slot: Slot, translator: Translator, formatterList: FormatterList, isUpdateFormats: boolean) {
+function applySharedSlotToSlot(ev: YEvent, path: YPath, slot: Slot, translator: Translator, registry: Registry, isUpdateFormats: boolean) {
   if (path.length) {
     const componentIndex = path.shift()![0]
     const component = slot.getContentAtIndex(componentIndex) as ComponentInstance
-    applySharedComponentToComponent(ev, path, component, translator, formatterList)
+    applySharedComponentToComponent(ev, path, component, translator, registry)
     return
   }
 
@@ -85,7 +85,7 @@ function applySharedSlotToSlot(ev: YEvent, path: YPath, slot: Slot, translator: 
       const json = ev.target.toJSON()
       ev.keysChanged.forEach(key => {
         const formats = json[key]
-        const formatter = formatterList.get(key)!
+        const formatter = registry.getFormatter(key)!
         if (formatter.type !== FormatType.Block) {
           slot.applyFormat(formatter, {
             startIndex: 0,

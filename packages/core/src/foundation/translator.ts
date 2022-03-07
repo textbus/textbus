@@ -8,8 +8,7 @@ import {
   Slot,
   SlotLiteral
 } from '../model/_api'
-import { FormatterList } from './formatter-list'
-import { ComponentList } from './component-list'
+import { Registry } from './registry'
 
 /**
  * TextBus 数据转组件和插槽的类
@@ -17,8 +16,7 @@ import { ComponentList } from './component-list'
 @Injectable()
 export class Translator {
   constructor(private contextInjector: Injector,
-              private componentMap: ComponentList,
-              private formatterMap: FormatterList) {
+              private registry: Registry) {
   }
 
   /**
@@ -35,7 +33,7 @@ export class Translator {
    * @param componentLiteral
    */
   createComponent(componentLiteral: ComponentLiteral): ComponentInstance | null {
-    const factory = this.componentMap.get(componentLiteral.name)
+    const factory = this.registry.getComponent(componentLiteral.name)
     if (factory) {
       return this.createComponentByFactory(componentLiteral, factory)
     }
@@ -77,7 +75,7 @@ export class Translator {
     })
 
     Object.keys(slotLiteral.formats).forEach(key => {
-      const formatter = this.formatterMap.get(key)
+      const formatter = this.registry.getFormatter(key)
       if (formatter) {
         if (formatter.type === FormatType.Block) {
           slotLiteral.formats[key].forEach(i => {

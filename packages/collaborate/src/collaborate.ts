@@ -5,7 +5,7 @@ import {
   Starter,
   Operation,
   Translator,
-  FormatterList
+  Registry
 } from '@textbus/core'
 import { Doc as YDoc } from 'yjs'
 import { Awareness } from 'y-protocols/awareness'
@@ -24,7 +24,7 @@ export class Collaborate {
 
   constructor(private rootComponentRef: RootComponentRef,
               private translator: Translator,
-              private formatterList: FormatterList,
+              private registry: Registry,
               private collaborateHistory: CollaborateHistory,
               private starter: Starter) {
   }
@@ -60,7 +60,7 @@ export class Collaborate {
       }
       this.updateFromSelf = false
 
-      remoteToLocal(events, slot, this.translator, this.formatterList)
+      remoteToLocal(events, slot, this.translator, this.registry)
 
       this.updateFromSelf = true
     })

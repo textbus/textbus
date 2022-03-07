@@ -6,7 +6,7 @@ import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
 import { Renderer } from './renderer'
 import { SelectionPaths, Selection } from './selection'
-import { FormatterList } from './formatter-list'
+import { Registry } from './registry'
 import { RootComponentRef } from './_injection-tokens'
 
 export interface HistoryItem {
@@ -75,7 +75,7 @@ export class CoreHistory extends History {
               private selection: Selection,
               private translator: Translator,
               private renderer: Renderer,
-              private formatMap: FormatterList) {
+              private registry: Registry) {
     super()
     this.onChange = this.changeEvent.asObservable()
     this.onBack = this.backEvent.asObservable()
@@ -185,7 +185,7 @@ export class CoreHistory extends History {
             if (action.formats) {
               const formats: Formats = []
               Object.keys(action.formats).forEach(i => {
-                const formatter = this.formatMap.get(i)
+                const formatter = this.registry.getFormatter(i)
                 if (formatter) {
                   formats.push([formatter, action.formats![i]])
                 }
@@ -211,7 +211,7 @@ export class CoreHistory extends History {
               if (action.formats) {
                 const formats: Formats = []
                 Object.keys(action.formats).forEach(i => {
-                  const formatter = this.formatMap.get(i)
+                  const formatter = this.registry.getFormatter(i)
                   if (formatter) {
                     formats.push([formatter, action.formats![i]])
                   }
