@@ -129,8 +129,8 @@ function apply(ev: YEvent, slot: Slot, translator: Translator) {
             slot.insert(component)
           }
         })
-      } else if (action.retain) {
-        slot.retain(action.retain)
+      } else if (Reflect.has(action, 'retain')) {
+        slot.retain(action.retain!)
       } else if (action.delete) {
         slot.retain(slot.index)
         slot.delete(action.delete)

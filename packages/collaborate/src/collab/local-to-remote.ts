@@ -159,6 +159,10 @@ function makeSharedSlotBySlotLiteral(slotLiteral: SlotLiteral): YMap<any> {
     index += size
   })
   const formats = new YMap()
+  Object.keys(slotLiteral.formats).forEach(key => {
+    formats.set(key, slotLiteral.formats[key])
+  })
+
   const sharedSlot = new YMap()
   sharedSlot.set('state', slotLiteral.state)
   sharedSlot.set('content', content)
