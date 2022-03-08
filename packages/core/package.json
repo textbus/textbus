@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@tanbo/di": "^1.0.5",
-    "@tanbo/stream": "^0.0.11",
+    "@tanbo/stream": "^0.0.12",
     "immer": "^9.0.12"
   },
   "author": {

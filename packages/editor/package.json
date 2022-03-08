@@ -29,7 +29,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
-    "@tanbo/stream": "^0.0.11",
+    "@tanbo/stream": "^0.0.12",
     "@textbus/browser": "^2.0.0-alpha.37",
     "@textbus/core": "^2.0.0-alpha.37",
     "prismjs": "^1.23.0"

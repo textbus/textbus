@@ -221,12 +221,12 @@ export class Selection {
               private renderer: Renderer) {
     this.onChange = this.changeEvent.asObservable().pipe(distinctUntilChanged((previous, current) => {
       if (previous && current) {
-        return previous.startOffset === current.startOffset &&
+        return !(previous.startOffset === current.startOffset &&
           previous.endOffset === current.endOffset &&
           previous.startSlot === current.startSlot &&
-          previous.endSlot === current.endSlot
+          previous.endSlot === current.endSlot)
       }
-      return previous === current
+      return previous !== current
     }))
     bridge.connect({
       setSelection: (range: Range | null) => {
@@ -1079,7 +1079,11 @@ export class Selection {
   }
 
   private static findTreeNode(paths: number[], component: ComponentInstance): Slot | ComponentInstance | null {
+    if (typeof component !== 'object') {
+      return null
+    }
     const firstSlotRefIndex = paths.shift()!
+
     const slot = component.slots.get(firstSlotRefIndex)!
     if (paths.length === 0) {
       return slot || null

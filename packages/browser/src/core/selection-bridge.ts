@@ -119,7 +119,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.caret.destroy()
   }
 
-  private getPositionByRange(range: TBRange) {
+  getPositionByRange(range: TBRange) {
     let start!: { node: Node, offset: number } | null
     let end!: { node: Node, offset: number } | null
     try {

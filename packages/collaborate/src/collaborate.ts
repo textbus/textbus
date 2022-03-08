@@ -1,49 +1,53 @@
 import { Injectable } from '@tanbo/di'
-import { debounceTime, filter, Subscription, tap } from '@tanbo/stream'
+import { debounceTime, filter, Observable, Subject, Subscription, tap } from '@tanbo/stream'
 import {
   RootComponentRef,
   Starter,
   Operation,
   Translator,
-  Registry
+  Registry,
+  Selection,
+  SelectionPaths
 } from '@textbus/core'
 import { Doc as YDoc } from 'yjs'
-import { Awareness } from 'y-protocols/awareness'
 import { localToRemote } from './collab/local-to-remote'
 import { remoteToLocal } from './collab/remote-to-local'
-import { CollaborateHistory } from './collab/_api'
-
-// const collaborateErrorFn = makeError('Collaborate')
+import { CollaborateHistory, CollaborateCursor, RemoteSelection } from './collab/_api'
 
 @Injectable()
 export class Collaborate {
+  onSelectionChange: Observable<SelectionPaths>
   yDoc = new YDoc()
 
   private subscriptions: Subscription[] = []
   private updateFromSelf = true
 
+  private selectionChangeEvent = new Subject<SelectionPaths>()
+
   constructor(private rootComponentRef: RootComponentRef,
+              private collaborateCursor: CollaborateCursor,
               private translator: Translator,
               private registry: Registry,
+              private selection: Selection,
               private collaborateHistory: CollaborateHistory,
               private starter: Starter) {
+    this.onSelectionChange = this.selectionChangeEvent.asObservable()
   }
 
-  setup(awareness: Awareness) {
+  setup() {
     this.subscriptions.push(
       this.starter.onReady.subscribe(() => {
         this.listen()
+      }),
+      this.selection.onChange.subscribe(() => {
+        const paths = this.selection.getPaths()
+        this.selectionChangeEvent.next(paths)
       })
     )
-    awareness.on('update', () => {
-      const users: any[] = []
-      awareness.getStates().forEach(state => {
-        if (state.user) {
-          users.push(state.user)
-        }
-      })
-      console.log(users)
-    })
+  }
+
+  updateRemoteSelection(paths: RemoteSelection[]) {
+    this.collaborateCursor.draw(paths)
   }
 
   destroy() {

@@ -26,8 +26,9 @@
   ],
   "dependencies": {
     "@tanbo/di": "^1.0.5",
-    "@tanbo/stream": "^0.0.11",
-    "@textbus/core": "^2.0.0-alpha.37",
+    "@tanbo/stream": "^0.0.12",
+    "@textbus/browser": "^2.0.0-alpha.36",
+    "@textbus/core": "^2.0.0-alpha.36",
     "reflect-metadata": "^0.1.13",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.27"
