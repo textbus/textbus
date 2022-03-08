@@ -2,14 +2,15 @@ import { Subscription } from '@tanbo/stream'
 import { createElement, EDITOR_CONTAINER, SelectionBridge } from '@textbus/browser'
 import {
   ChangeController,
+  ContentType,
   onDestroy,
   Renderer,
   SelectedScope,
+  Selection,
   Slot,
   Slots,
-  Selection,
   useContext,
-  useSelf, ContentType
+  useSelf
 } from '@textbus/core'
 import { CubicBezier } from '@tanbo/bezier'
 
@@ -58,6 +59,8 @@ export interface TableCellRect {
 
 export function createCell(colspan = 1, rowspan = 1) {
   return new Slot([
+    ContentType.BlockComponent,
+    ContentType.InlineComponent,
     ContentType.Text
   ], {
     rowspan,
