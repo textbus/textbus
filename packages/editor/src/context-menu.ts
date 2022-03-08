@@ -9,7 +9,8 @@ import {
   Renderer,
   Slot,
   Event,
-  Selection
+  Selection,
+  ContextMenuConfig, ContextMenuGroup
 } from '@textbus/core'
 import { createElement, createTextNode, EDITABLE_DOCUMENT, EDITOR_CONTAINER, Parser } from '@textbus/browser'
 import { I18n } from './i18n'
@@ -17,12 +18,14 @@ import { Message } from './message'
 
 @Injectable()
 export class ContextMenu {
-  private elementRef: HTMLElement
-
   private eventFromSelf = false
-  private groups: HTMLElement
-
   private subs: Subscription[] = []
+
+  private menuSubscriptions: Subscription[] = []
+  private submenuSubscriptions: Subscription[] = []
+
+  private menu!: HTMLElement
+  private submenu!: HTMLElement
 
   constructor(@Inject(EDITABLE_DOCUMENT) private editorDocument: Document,
               @Inject(EDITOR_CONTAINER) private container: HTMLElement,
@@ -32,23 +35,8 @@ export class ContextMenu {
               private renderer: Renderer,
               private commander: Commander,
               private selection: Selection) {
-    this.elementRef = createElement('div', {
-      classes: ['textbus-contextmenu'],
-      children: [
-        createElement('div', {
-          classes: ['textbus-contextmenu-container'],
-          children: [
-            this.groups = createElement('div', {
-              classes: ['textbus-contextmenu-groups']
-            })
-          ]
-        })
-      ]
-    })
+
     this.subs.push(
-      fromEvent(this.elementRef, 'contextmenu').subscribe(ev => {
-        ev.preventDefault()
-      }),
       fromEvent(editorDocument, 'mousedown').subscribe(() => {
         this.hide()
       }),
@@ -66,7 +54,7 @@ export class ContextMenu {
         })
         const rect = this.container.getBoundingClientRect()
         const menus = this.makeContextmenu()
-        const defaultMenus: ContextMenuItem[] = [{
+        const defaultMenus: ContextMenuConfig[] = [{
           iconClasses: ['textbus-icon-copy'],
           label: this.i18n.get('editor.copy'),
           disabled: this.selection.isCollapsed,
@@ -116,10 +104,11 @@ export class ContextMenu {
           }
         }]
 
-        this.show([
-          defaultMenus,
-          ...menus
-        ], ev.pageX + rect.x, ev.pageY + rect.y
+        this.menu = this.show([
+            ...menus,
+            defaultMenus,
+          ], ev.pageX + rect.x, ev.pageY + rect.y,
+          this.menuSubscriptions
         )
         ev.preventDefault()
       })
@@ -138,7 +127,7 @@ export class ContextMenu {
       return []
     }
     let component: ComponentInstance | null = startSlot.getContentAtIndex(this.selection.startOffset! - 1) as ComponentInstance
-    if (!component || typeof component === 'string') {
+    if (typeof component === 'string' || !component) {
       component = this.selection.commonAncestorComponent!
     }
     if (!component) {
@@ -158,11 +147,31 @@ export class ContextMenu {
   }
 
   private hide() {
-    this.elementRef.parentNode?.removeChild(this.elementRef)
+    this.menuSubscriptions.forEach(i => i.unsubscribe())
+    this.menuSubscriptions = []
+    this.menu?.parentNode?.removeChild(this.menu)
+    this.submenu?.parentNode?.removeChild(this.submenu)
   }
 
-  private show(menus: ContextMenuItem[][], x: number, y: number) {
-    this.subs.push(
+  private show(menus: ContextMenuConfig[][], x: number, y: number, subs: Subscription[]) {
+    let groups: HTMLElement
+    const container = createElement('div', {
+      classes: ['textbus-contextmenu'],
+      children: [
+        createElement('div', {
+          classes: ['textbus-contextmenu-container'],
+          children: [
+            groups = createElement('div', {
+              classes: ['textbus-contextmenu-groups']
+            })
+          ]
+        })
+      ]
+    })
+    subs.push(
+      fromEvent(container, 'contextmenu').subscribe(ev => {
+        ev.preventDefault()
+      }),
       fromEvent(document, 'mousedown').subscribe(() => {
         if (!this.eventFromSelf) {
           this.hide()
@@ -172,7 +181,6 @@ export class ContextMenu {
         setPosition()
       })
     )
-    this.groups.innerHTML = ''
 
     const setPosition = () => {
       const clientWidth = document.documentElement.clientWidth
@@ -187,57 +195,73 @@ export class ContextMenu {
       if (y < 20) {
         y = 20
       }
-      Object.assign(this.elementRef.style, {
+      Object.assign(container.style, {
         left: x + 'px',
         top: y + 'px'
       })
-      this.elementRef.style.maxHeight = clientHeight - y - 20 + 'px'
+      container.style.maxHeight = clientHeight - y - 20 + 'px'
     }
 
 
     let itemCount = 0
+
+    const wrappers: HTMLElement[] = []
+
     menus.forEach(actions => {
       itemCount += actions.length
       if (actions.length === 0) {
         return
       }
-      this.groups.appendChild(createElement('div', {
+      groups.appendChild(createElement('div', {
         classes: ['textbus-contextmenu-group'],
         children: actions.map(item => {
-          const btn = createElement('button', {
-            attrs: {
-              type: 'button'
-            },
-            props: {
-              disabled: item.disabled
-            },
-            classes: ['textbus-contextmenu-item'],
-            children: [
-              createElement('span', {
-                classes: ['textbus-contextmenu-item-icon'],
-                children: [
-                  createElement('span', {
-                    classes: item.iconClasses || []
-                  })
-                ]
-              }),
-              createElement('span', {
-                classes: ['textbus-contextmenu-item-label'],
-                children: [createTextNode(item.label)]
-              })
-            ]
-          })
-          if (!item.disabled) {
+          if (Array.isArray((item as ContextMenuGroup).submenu)) {
+            return {
+              ...this.createMenuView(item, true),
+              item
+            }
+          }
+          return {
+            ...this.createMenuView(item),
+            item
+          }
+        }).map(i => {
+          const {wrapper, btn, item} = i
+          wrappers.push(wrapper)
+          subs.push(
+            fromEvent(btn, 'mouseenter').subscribe(() => {
+              if (item.disabled) {
+                return
+              }
+              if (subs === this.menuSubscriptions) {
+                if (this.submenu) {
+                  this.submenu.parentNode?.removeChild(this.submenu)
+                  this.submenuSubscriptions.forEach(i => i.unsubscribe())
+                  this.submenuSubscriptions = []
+                }
+                wrappers.forEach(i => i.classList.remove('textbus-contextmenu-item-active'))
+                if (Array.isArray((item as ContextMenuGroup).submenu)) {
+                  const rect = wrapper.getBoundingClientRect()
+                  const submenu = this.show([(item as ContextMenuGroup).submenu], rect.x + rect.width, rect.y, this.submenuSubscriptions)
+                  wrapper.classList.add('textbus-contextmenu-item-active')
+                  this.submenu = submenu
+                }
+              }
+            })
+          )
+
+          if (!item.disabled && typeof (item as ContextMenuItem).onClick === 'function') {
             btn.addEventListener('mousedown', () => {
               this.eventFromSelf = true
             })
             btn.addEventListener('click', () => {
-              this.hide()
-              item.onClick()
+              this.hide();
+              (item as ContextMenuItem).onClick()
               this.eventFromSelf = false
             })
           }
-          return btn
+
+          return i.wrapper
         })
       }))
     })
@@ -247,6 +271,47 @@ export class ContextMenu {
 
     setPosition()
 
-    document.body.appendChild(this.elementRef)
+    document.body.appendChild(container)
+    return container
+  }
+
+  private createMenuView(item: ContextMenuConfig, isHostNode = false) {
+    const btn = createElement('button', {
+      attrs: {
+        type: 'button'
+      },
+      classes: ['textbus-contextmenu-item-btn'],
+      props: {
+        disabled: item.disabled
+      },
+      children: [
+        createElement('span', {
+          classes: ['textbus-contextmenu-item-icon'],
+          children: [
+            createElement('span', {
+              classes: item.iconClasses || []
+            })
+          ]
+        }),
+        createElement('span', {
+          classes: ['textbus-contextmenu-item-label'],
+          children: [createTextNode(item.label)]
+        }),
+        isHostNode ? createElement('span', {
+          classes: ['textbus-contextmenu-item-arrow']
+        }) : null
+      ]
+    })
+
+    const wrapper = createElement('div', {
+      classes: item.disabled ? ['textbus-contextmenu-item', 'textbus-contextmenu-item-disabled'] : ['textbus-contextmenu-item'],
+      children: [
+        btn
+      ]
+    })
+    return {
+      wrapper,
+      btn
+    }
   }
 }

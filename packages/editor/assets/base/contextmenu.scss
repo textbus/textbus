@@ -11,8 +11,10 @@
   border-radius: 3px;
   @include scroll();
 }
+
 .textbus-contextmenu-container {
   display: flex;
+
   &:before {
     content: "";
     width: 35px;
@@ -20,6 +22,7 @@
     background-color: $color-lighter;
   }
 }
+
 .textbus-contextmenu-groups {
   flex: 1;
 }
@@ -46,6 +49,23 @@
   position: relative;
   padding: 0;
   line-height: 26px;
+  height: 26px;
+
+  &-btn {
+    display: flex;
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    text-align: left;
+    cursor: inherit;
+    position: relative;
+    padding: 0;
+    line-height: 26px;
+    color: inherit;
+    opacity: inherit;
+  }
 
   &:hover {
     background-color: $color-primary;
@@ -57,7 +77,17 @@
     }
   }
 
-  &:disabled {
+  &-active {
+    background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .1);
+    color: inherit;
+
+    .textbus-contextmenu-item-icon {
+      background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .1);
+      color: inherit;
+    }
+  }
+
+  &.textbus-contextmenu-item-disabled {
     background: none;
     color: inherit;
     opacity: .5;
@@ -71,7 +101,7 @@
 }
 
 .textbus-contextmenu-item-label {
-  display: block;
+  flex: 1;
   white-space: nowrap;
   padding: 0 15px;
   height: 26px;
@@ -86,4 +116,20 @@
   bottom: 0;
   text-align: center;
   opacity: .8;
+}
+
+.textbus-contextmenu-item-arrow {
+  margin-right: 12px;
+
+  &:after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px solid transparent;
+    border-left: 4px dashed;
+    border-bottom: 4px solid transparent;
+    transition: 0.15s ease;
+  }
 }

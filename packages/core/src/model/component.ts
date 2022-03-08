@@ -182,6 +182,14 @@ export interface ContextMenuItem {
   onClick(): void
 }
 
+export interface ContextMenuGroup {
+  iconClasses?: string[]
+  label: string
+  disabled?: boolean
+  submenu: ContextMenuItem[]
+}
+
+export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
 export interface EventTypes {
   onPaste: (event: Event<PasteEventData>) => void
@@ -190,7 +198,7 @@ export interface EventTypes {
   onEnter: (event: Event<EnterEventData>) => void
   onContentDelete: (event: Event<DeleteEventData>) => void
   onSlotRemove: (event: Event<null>) => void
-  onContextMenu: (event: Event<null>) => ContextMenuItem[]
+  onContextMenu: (event: Event<null>) => (ContextMenuConfig)[]
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void

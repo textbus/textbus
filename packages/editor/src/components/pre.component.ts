@@ -412,19 +412,23 @@ export const preComponent = defineComponent({
     })
 
     onContextMenu(() => {
-      return languageList.map(i => {
-        return {
-          label: i.label || i18n.get('components.preComponent.defaultLang'),
-          onClick() {
-            if (i.value !== data.state!.lang) {
-              data.state!.lang = i.value
-              stateController.update(draft => {
-                draft.lang = i.value
-              })
+      return [{
+        iconClasses: ['textbus-icon-terminal'],
+        label: i18n.get('components.preComponent.contextMenuLabel'),
+        submenu: languageList.map(i => {
+          return {
+            label: i.label || i18n.get('components.preComponent.defaultLang'),
+            onClick() {
+              if (i.value !== data.state!.lang) {
+                data.state!.lang = i.value
+                stateController.update(draft => {
+                  draft.lang = i.value
+                })
+              }
             }
           }
-        }
-      })
+        })
+      }]
     })
 
     onPaste(ev => {

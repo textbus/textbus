@@ -68,53 +68,57 @@ export const tableComponent = defineComponent({
 
     onContextMenu(() => {
       return [{
-        iconClasses: ['textbus-icon-table-add-column-left'],
-        label: i18n.get('components.tableComponent.addColumnToLeft'),
-        onClick() {
-          instance.addColumnToLeft()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-add-column-right'],
-        label: i18n.get('components.tableComponent.addColumnToRight'),
-        onClick() {
-          instance.addColumnToRight()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-add-row-top'],
-        label: i18n.get('components.tableComponent.insertRowBefore'),
-        onClick() {
-          instance.addRowToTop()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-add-row-bottom'],
-        label: i18n.get('components.tableComponent.insertRowAfter'),
-        onClick() {
-          instance.addRowToBottom()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-delete-column-left'],
-        label: i18n.get('components.tableComponent.deleteColumns'),
-        onClick() {
-          instance.deleteColumns()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-delete-row-top'],
-        label: i18n.get('components.tableComponent.deleteRows'),
-        onClick() {
-          instance.deleteRows()
-        }
-      }, {
-        iconClasses: ['textbus-icon-table-split-columns'],
-        label: i18n.get('components.tableComponent.mergeCells'),
-        onClick() {
-          instance.mergeCells()
-        }
-      }, {
         iconClasses: ['textbus-icon-table'],
-        label: i18n.get('components.tableComponent.splitCells'),
-        onClick() {
-          instance.splitCells()
-        }
+        label: i18n.get('components.tableComponent.contextMenuLabel'),
+        submenu: [{
+          iconClasses: ['textbus-icon-table-add-column-left'],
+          label: i18n.get('components.tableComponent.addColumnToLeft'),
+          onClick() {
+            instance.addColumnToLeft()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-add-column-right'],
+          label: i18n.get('components.tableComponent.addColumnToRight'),
+          onClick() {
+            instance.addColumnToRight()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-add-row-top'],
+          label: i18n.get('components.tableComponent.insertRowBefore'),
+          onClick() {
+            instance.addRowToTop()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-add-row-bottom'],
+          label: i18n.get('components.tableComponent.insertRowAfter'),
+          onClick() {
+            instance.addRowToBottom()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-delete-column-left'],
+          label: i18n.get('components.tableComponent.deleteColumns'),
+          onClick() {
+            instance.deleteColumns()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-delete-row-top'],
+          label: i18n.get('components.tableComponent.deleteRows'),
+          onClick() {
+            instance.deleteRows()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table-split-columns'],
+          label: i18n.get('components.tableComponent.mergeCells'),
+          onClick() {
+            instance.mergeCells()
+          }
+        }, {
+          iconClasses: ['textbus-icon-table'],
+          label: i18n.get('components.tableComponent.splitCells'),
+          onClick() {
+            instance.splitCells()
+          }
+        }]
       }]
     })
 
