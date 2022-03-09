@@ -242,7 +242,7 @@ export class Slots {
       path: [],
       apply: [{
         type: 'retain',
-        index
+        offset: index
       }, ...slots.map<Action>(i => {
         return {
           type: 'insertSlot',
@@ -251,7 +251,7 @@ export class Slots {
       })],
       unApply: [{
         type: 'retain',
-        index: index + slots.length
+        offset: index
       }, {
         type: 'delete',
         count: slots.length
@@ -292,7 +292,7 @@ export class Slots {
       path: [],
       apply: [{
         type: 'retain',
-        index: startIndex
+        offset: startIndex
       }, {
         type: 'delete',
         count
@@ -301,7 +301,7 @@ export class Slots {
         slot.parent = null
         return [{
           type: 'retain',
-          index: startIndex + i
+          offset: startIndex + i
         }, {
           type: 'insertSlot',
           slot: slot.toJSON()

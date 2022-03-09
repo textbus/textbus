@@ -86,7 +86,7 @@ export class Translator {
         }
         slotLiteral.formats[key].forEach(i => {
           slot.retain(i.startIndex)
-          slot.retain(i.endIndex, formatter, i.value)
+          slot.retain(i.endIndex - i.startIndex, formatter, i.value)
         })
       }
     })

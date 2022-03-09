@@ -190,9 +190,9 @@ export class CoreHistory extends History {
                   formats.push([formatter, action.formats![i]])
                 }
               })
-              slot.retain(action.index, formats)
+              slot.retain(action.offset, formats)
             } else {
-              slot.retain(action.index)
+              slot.retain(action.offset)
             }
             return
           }
@@ -230,7 +230,7 @@ export class CoreHistory extends History {
         const component = this.selection.findComponentByPath(path)!
         actions.forEach(action => {
           if (action.type === 'retain') {
-            component.slots.retain(action.index)
+            component.slots.retain(action.offset)
             return
           }
           if (action.type === 'delete') {

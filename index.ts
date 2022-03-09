@@ -1,7 +1,7 @@
 import "./index.scss"
 import { createEditor } from '@textbus/editor';
-import { RootComponentRef } from '@textbus/core';
-import { Collaborate, CollaborateCursor, CollaborateHistory, RemoteSelection } from '@textbus/collaborate';
+import { RootComponentRef, History } from '@textbus/core';
+import { Collaborate, CollaborateCursor, RemoteSelection } from '@textbus/collaborate';
 import { WebrtcProvider } from 'y-webrtc'
 
 const header = document.getElementById('header')!
@@ -17,11 +17,10 @@ const editor = createEditor(document.getElementById('box')!, {
   content: document.getElementById('template')?.innerHTML,
   providers: [
     Collaborate,
-    CollaborateHistory,
     CollaborateCursor,
     {
       provide: History,
-      useClass: CollaborateHistory
+      useClass: Collaborate
     }
   ],
   setup(starter) {

@@ -5,6 +5,7 @@
     "strict": true,
     "moduleResolution": "node",
     "sourceMap": true,
+    "useDefineForClassFields": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": ["esnext", "dom"],

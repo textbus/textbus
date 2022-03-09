@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "useDefineForClassFields": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -10,6 +11,7 @@
     "module": "es2020",
     "moduleResolution": "node",
     "sourceMap": true,
+    "inlineSources": true,
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",

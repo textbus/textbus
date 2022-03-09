@@ -467,7 +467,7 @@ export class Commander {
           return
         }
         slot.retain(scope.startIndex)
-        slot.retain(scope.endIndex, i.formatter, null)
+        slot.retain(scope.endIndex - scope.startIndex, i.formatter, null)
       })
     })
   }
@@ -487,13 +487,13 @@ export class Commander {
         this.insert(placeholder)
         const startOffset = this.selection.startOffset!
         slot.retain(startOffset - 1)
-        slot.retain(startOffset, formatter, value)
+        slot.retain(1, formatter, value)
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
-      i.slot.retain(i.endIndex, formatter, value)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, value)
     })
   }
 
@@ -512,18 +512,18 @@ export class Commander {
         const prevContent = slot.getContentAtIndex(startOffset - 1)
         if (prevContent === placeholder) {
           slot.retain(startOffset - 1)
-          slot.retain(startOffset, formatter, null)
+          slot.retain(1, formatter, null)
         } else {
           this.insert(placeholder)
           slot.retain(startOffset)
-          slot.retain(startOffset + 1, formatter, null)
+          slot.retain(1, formatter, null)
         }
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
-      i.slot.retain(i.endIndex, formatter, null)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, null)
     })
   }
 
@@ -618,7 +618,7 @@ export class Commander {
         source.cut(0, firstContent.length).getFormats().forEach(i => {
           if (i.formatter.type !== FormatType.Block) {
             targetSlot.retain(startIndex + i.startIndex)
-            targetSlot.retain(startIndex + i.endIndex, i.formatter, i.value)
+            targetSlot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
           }
         })
         targetSlot.retain(index)

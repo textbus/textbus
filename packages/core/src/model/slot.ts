@@ -181,9 +181,8 @@ export class Slot<T = any> {
     }
     this.format.split(startIndex, length)
 
-    const endIndex = startIndex + length
     this.content.insert(startIndex, content)
-    this.applyFormats(formats, startIndex, endIndex)
+    this.applyFormats(formats, startIndex, length)
 
     if (isEmpty && this._index === 0) {
       this.content.cut(this.length - 1)
@@ -195,7 +194,7 @@ export class Slot<T = any> {
       path: [],
       apply: [{
         type: 'retain',
-        index: startIndex
+        offset: startIndex
       }, formats.length ? {
         type: 'insert',
         content: actionData,
@@ -209,7 +208,7 @@ export class Slot<T = any> {
       }],
       unApply: [{
         type: 'retain',
-        index: startIndex
+        offset: startIndex
       }, {
         type: 'delete',
         count: length
@@ -220,26 +219,13 @@ export class Slot<T = any> {
 
   /**
    * 把当前插槽的修改位置移动到指定位置，如果新位置大于当前位置，且传入了新的格式，则会同时在当前位置和新位置应用传入的格式
-   * @param index
+   * @param offset
    */
-  retain(index: number): boolean
-  retain(index: number, formats: Formats): boolean
-  retain(index: number, formatter: Formatter, value: FormatValue | null): boolean
-  retain(index: number, formatter?: Formatter | Formats, value?: FormatValue | null): boolean {
-    if (index < 0) {
-      index = 0
-    }
-    const len = this.length
-    if (index > len) {
-      index = len
-    }
-    if (index === this._index) {
-      return false
-    }
+  retain(offset: number): boolean
+  retain(offset: number, formats: Formats): boolean
+  retain(offset: number, formatter: Formatter, value: FormatValue | null): boolean
+  retain(offset: number, formatter?: Formatter | Formats, value?: FormatValue | null): boolean {
     let formats: Formats = []
-    const startIndex = this._index
-    const endIndex = index
-    this._index = index
     if (formatter) {
       if (Array.isArray(formatter)) {
         formats = formatter
@@ -247,57 +233,73 @@ export class Slot<T = any> {
         formats.push([formatter, value as FormatValue])
       }
     }
-    if (formats.length) {
-      let index = startIndex
+    const len = this.length
+    if (formats.length === 0) {
+      if (offset < 0) {
+        offset = 0
+      }
+      if (offset > len) {
+        offset = len
+      }
+      this._index = offset
+      return true
+    }
 
-      const applyActions: Action[] = []
-      const unApplyActions: Action[] = []
-      const formatsObj = formats.reduce((opt: Record<string, any>, next) => {
-        opt[next[0].name] = next[1]
-        return opt
-      }, {})
-      const resetFormatObj = formats.reduce((opt: Record<string, any>, next) => {
-        opt[next[0].name] = null
-        return opt
-      }, {})
-      this.content.slice(startIndex, endIndex).forEach(content => {
-        const offset = index + content.length
-        if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
-          const deletedFormat = this.format.extract(index, offset)
-          this.applyFormats(formats, index, offset)
-          applyActions.push({
-            type: 'retain',
-            index: index
-          }, {
-            type: 'retain',
-            index: offset,
-            formats: {
-              ...formatsObj
-            }
-          })
-          unApplyActions.push({
-            type: 'retain',
-            index: index
-          }, {
-            type: 'retain',
-            index: offset,
-            formats: resetFormatObj
-          }, ...Slot.createActionByFormat(deletedFormat))
-        } else {
-          content.slots.toArray().forEach(slot => {
-            slot.retain(0)
-            slot.retain(slot.length, formats)
-          })
-        }
-        index = offset
-      })
-      if (applyActions.length || unApplyActions.length) {
-        this.changeMarker.markAsDirtied({
-          path: [],
-          apply: applyActions,
-          unApply: unApplyActions
+    const startIndex = this._index
+    let endIndex = startIndex + offset
+    if (endIndex > len) {
+      endIndex = len
+    }
+
+    let index = startIndex
+
+    const applyActions: Action[] = []
+    const unApplyActions: Action[] = []
+    const formatsObj = formats.reduce((opt: Record<string, any>, next) => {
+      opt[next[0].name] = next[1]
+      return opt
+    }, {})
+    const resetFormatObj = formats.reduce((opt: Record<string, any>, next) => {
+      opt[next[0].name] = null
+      return opt
+    }, {})
+    this.content.slice(startIndex, endIndex).forEach(content => {
+      const offset = content.length
+      if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
+        const deletedFormat = this.format.extract(index, index + offset)
+        this.applyFormats(formats, index, offset)
+        applyActions.push({
+          type: 'retain',
+          offset: index
+        }, {
+          type: 'retain',
+          offset: offset,
+          formats: {
+            ...formatsObj
+          }
+        })
+        unApplyActions.push({
+          type: 'retain',
+          offset: index
+        }, {
+          type: 'retain',
+          offset: offset,
+          formats: resetFormatObj
+        }, ...Slot.createActionByFormat(deletedFormat))
+      } else {
+        content.slots.toArray().forEach(slot => {
+          slot.retain(0)
+          slot.retain(slot.length, formats)
         })
       }
+      index = offset
+    })
+    if (applyActions.length || unApplyActions.length) {
+      this.changeMarker.markAsDirtied({
+        path: [],
+        apply: applyActions,
+        unApply: unApplyActions
+      })
     }
     return true
   }
@@ -329,14 +331,14 @@ export class Slot<T = any> {
       path: [],
       apply: [{
         type: 'retain',
-        index: startIndex
+        offset: startIndex
       }, {
         type: 'delete',
         count
       }],
       unApply: [{
         type: 'retain',
-        index: startIndex
+        offset: startIndex
       }, ...deletedData.map<Action>(item => {
         if (typeof item === 'string') {
           return {
@@ -369,7 +371,7 @@ export class Slot<T = any> {
       this.format.merge(formatter, data as FormatValue)
     } else {
       this.retain((data as FormatRange).startIndex)
-      this.retain((data as FormatRange).endIndex, formatter, (data as FormatRange).value)
+      this.retain((data as FormatRange).endIndex - (data as FormatRange).startIndex, formatter, (data as FormatRange).value)
     }
   }
 
@@ -495,7 +497,7 @@ export class Slot<T = any> {
     }
   }
 
-  private applyFormats(formats: Formats, startIndex: number, endIndex: number) {
+  private applyFormats(formats: Formats, startIndex: number, offset: number) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
@@ -505,7 +507,7 @@ export class Slot<T = any> {
       } else {
         this.format.merge(key, {
           startIndex,
-          endIndex,
+          endIndex: startIndex + offset,
           value
         })
       }
@@ -516,10 +518,10 @@ export class Slot<T = any> {
     return format.toArray().map<Action[]>(item => {
       return [{
         type: 'retain',
-        index: item.startIndex
+        offset: item.startIndex
       }, {
         type: 'retain',
-        index: item.endIndex,
+        offset: item.endIndex - item.startIndex,
         formats: {
           [item.formatter.name]: item.value
         }

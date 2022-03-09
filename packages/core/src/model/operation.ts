@@ -10,7 +10,7 @@ export interface InsertAction {
 
 export interface RetainAction {
   type: 'retain'
-  index: number
+  offset: number
   formats?: Record<string, any>
 }
 

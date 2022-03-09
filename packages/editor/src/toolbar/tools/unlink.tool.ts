@@ -27,7 +27,7 @@ export function unlinkToolConfigFactory(injector: Injector): ButtonToolConfig {
           return f.startIndex < selection.startOffset! && f.endIndex >= selection.endOffset!
         }).forEach(f => {
           slot.retain(f.startIndex)
-          slot.retain(f.endIndex, linkFormatter, null)
+          slot.retain(f.endIndex - f.startIndex, linkFormatter, null)
         })
       } else {
         commander.unApplyFormat(linkFormatter)

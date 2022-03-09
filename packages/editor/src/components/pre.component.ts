@@ -177,7 +177,7 @@ function format(tokens: Array<string | Token>, slot: Slot, index: number) {
     if (token instanceof Token) {
       const styleName = codeStyles[token.type]
       slot.retain(index)
-      slot.retain(index + token.length, codeStyleFormatter, styleName || null)
+      slot.retain(token.length, codeStyleFormatter, styleName || null)
       if (Array.isArray(token.content)) {
         format(token.content, slot, index)
       }
@@ -262,7 +262,7 @@ function reformat(
 
     shadow.getFormats().forEach(i => {
       slot.retain(i.startIndex)
-      slot.retain(i.endIndex, i.formatter, i.value)
+      slot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
     })
 
     const lastToken = tokens.pop()

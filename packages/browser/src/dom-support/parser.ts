@@ -130,7 +130,7 @@ export class Parser {
   private applyFormats(slot: Slot, formatItems: FormatItem[]) {
     formatItems.forEach(i => {
       slot.retain(i.startIndex)
-      slot.retain(i.endIndex, i.formatter, i.value)
+      slot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
     })
   }
 }

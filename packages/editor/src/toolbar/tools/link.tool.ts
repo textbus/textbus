@@ -57,7 +57,7 @@ export function linkToolConfigFactory(injector: Injector): DropdownToolConfig {
           return f.startIndex < selection.startOffset! && f.endIndex >= selection.endOffset!
         }).forEach(f => {
           slot.retain(f.startIndex)
-          slot.retain(f.endIndex, linkFormatter, value)
+          slot.retain(f.endIndex - f.startIndex, linkFormatter, value)
         })
       }
       commander.applyFormat(linkFormatter, value)
