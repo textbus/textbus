@@ -34,7 +34,14 @@ export {
 export const tableComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TableComponent',
-  setup(data: ComponentData<TableConfig>) {
+  setup(data: ComponentData<TableConfig> = {
+    slots: Array.from({length: 9}).fill(null).map(() => createCell()),
+    state: {
+      columnCount: 3,
+      rowCount: 3,
+      useTextBusStyle: false
+    }
+  }) {
     let tableCells = slotsToTable(data.slots!, data.state!.columnCount)
     const injector = useContext()
     const i18n = injector.get(I18n)

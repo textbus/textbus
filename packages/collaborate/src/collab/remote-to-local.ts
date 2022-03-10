@@ -10,7 +10,6 @@ export class RemoteToLocal {
 
   transform(events: YEvent[], slot: Slot) {
     events.forEach(ev => {
-      console.log(ev)
       const path: YPath = []
 
       for (let i = 0; i < ev.path.length; i += 2) {

@@ -11,7 +11,6 @@ import {
   onPaste,
   Selection,
   Slot,
-  SlotLiteral,
   SlotRender,
   Slots,
   useContext, useSelf,
@@ -285,11 +284,6 @@ function reformat(
   }
 }
 
-export interface CodeSlotSlotLiteral extends SlotLiteral {
-  blockCommentEnd: boolean
-  blockCommentStart: boolean
-}
-
 function createCodeSlot() {
   const slot = new Slot([
     ContentType.Text
@@ -315,7 +309,13 @@ function overrideSlot(slot: Slot) {
 export const preComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'PreComponent',
-  setup(data: ComponentData<PreComponentState>) {
+  setup(data: ComponentData<PreComponentState> = {
+    slots: [],
+    state: {
+      lang: '',
+      code: ''
+    }
+  }) {
     let languageGrammar = getLanguageGrammar(data.state!.lang)
     let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.state!.lang)
 

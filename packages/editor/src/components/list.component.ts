@@ -32,11 +32,11 @@ export interface ListComponentInstance extends ComponentMethods {
 export const listComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ListComponent',
-  setup(data: ComponentData<'ul' | 'ol'>): ListComponentInstance {
+  setup(data?: ComponentData<'ul' | 'ol'>): ListComponentInstance {
     const injector = useContext()
     const selection = injector.get(Selection)
 
-    const slots = useSlots(data.slots || [new Slot([
+    const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
       ContentType.BlockComponent
@@ -64,9 +64,9 @@ export const listComponent = defineComponent({
     })
 
     return {
-      type: data.state!,
+      type: data?.state || 'ul',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return new VElement(data.state!, null, slots.toArray().map(i => {
+        return new VElement(data?.state || 'ul', null, slots.toArray().map(i => {
           return slotRender(i, () => {
             return new VElement('li')
           })

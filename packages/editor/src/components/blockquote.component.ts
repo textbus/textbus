@@ -14,8 +14,8 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 export const blockquoteComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'BlockquoteComponent',
-  setup(data: ComponentData) {
-    const slots = useSlots(data.slots || [new Slot([
+  setup(data?: ComponentData) {
+    const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
       ContentType.BlockComponent

@@ -16,9 +16,9 @@ import { useEnterBreaking } from './_utils/single-block-enter'
 export const blockComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'BlockComponent',
-  setup(data: ComponentData) {
+  setup(data?: ComponentData) {
     const injector = useContext()
-    const slots = useSlots(data.slots || [new Slot([
+    const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
       ContentType.BlockComponent

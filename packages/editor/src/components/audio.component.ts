@@ -18,8 +18,8 @@ export interface AudioState {
 export const audioComponent = defineComponent({
   name: 'AudioComponent',
   type: ContentType.InlineComponent,
-  setup(data: ComponentData<AudioState>) {
-    let state = data.state || {
+  setup(data?: ComponentData<AudioState>) {
+    let state = data?.state || {
       src: '',
       autoplay: false,
       controls: true,

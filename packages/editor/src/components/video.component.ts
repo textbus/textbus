@@ -23,8 +23,8 @@ export interface VideoState {
 export const videoComponent = defineComponent({
   name: 'VideoComponent',
   type: ContentType.InlineComponent,
-  setup(data: ComponentData<VideoState>) {
-    let state = data.state || {
+  setup(data?: ComponentData<VideoState>) {
+    let state = data?.state || {
       src: '',
       autoplay: false,
       controls: true,

@@ -17,19 +17,19 @@ import { useEnterBreaking } from './_utils/single-block-enter'
 export const headingComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'HeadingComponent',
-  setup(data: ComponentData<string>) {
+  setup(data?: ComponentData<string>) {
     const injector = useContext()
-    const slots = useSlots(data.slots || [new Slot([
+    const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent
     ])])
     useEnterBreaking(injector, slots)
 
     return {
-      type: data.state,
+      type: data?.state || 'h1',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return new VElement(data.state!)
+          return new VElement(data?.state || 'h1')
         })
       }
     }

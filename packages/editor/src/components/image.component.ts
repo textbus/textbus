@@ -24,8 +24,10 @@ export interface ImageComponentLiteral {
 export const imageComponent = defineComponent({
   type: ContentType.InlineComponent,
   name: 'ImgComponent',
-  setup(data: ComponentData<ImageComponentLiteral>) {
-    let state = data.state!
+  setup(data?: ComponentData<ImageComponentLiteral>) {
+    let state = data?.state || {
+      src: ''
+    }
     const changeController = useState(state)
 
     changeController.onChange.subscribe(v => {
