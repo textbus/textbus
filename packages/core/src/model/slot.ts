@@ -491,7 +491,7 @@ export class Slot<T = any> {
   toJSON(): SlotLiteral<T> {
     return {
       schema: this.schema,
-      content: this.isEmpty ? [] : this.content.toJSON(),
+      content: this.content.toJSON(),
       formats: this.format.toJSON(),
       state: this.state!
     }

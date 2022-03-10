@@ -1,184 +1,158 @@
-import { Action, Operation, SlotLiteral, ComponentLiteral, Format, FormatRange, FormatValue } from '@textbus/core'
-import { Array as YArray, Map as YMap } from 'yjs'
+import { Action, Operation, SlotLiteral, ComponentLiteral } from '@textbus/core'
+import { Array as YArray, Map as YMap, Text as YText } from 'yjs'
 
-export function localToRemote(operation: Operation, root: YArray<any>) {
-  const path = [...operation.path]
-  path.shift()
-  if (path.length) {
-    const componentIndex = path.shift()!
-    applyComponentOperationToSharedComponent(path, operation.apply, root.get(componentIndex))
-    return
-  }
-  insertContent(root, operation.apply)
-}
-
-function applyComponentOperationToSharedComponent(path: number[], actions: Action[], componentYMap: YMap<any>) {
-  const sharedSlots = componentYMap.get('slots') as YArray<any>
-  if (path.length) {
-    const slotIndex = path.shift()!
-    const sharedSlot = sharedSlots.get(slotIndex)
-    applySlotOperationToSharedSlot(path, actions, sharedSlot)
-    return
-  }
-  let index: number
-  actions.forEach(action => {
-    switch (action.type) {
-      case 'retain':
-        index = action.index
-        break
-      case 'insertSlot':
-        sharedSlots.insert(index, [makeSharedSlotBySlotLiteral(action.slot)])
-        break
-      case 'apply':
-        componentYMap.set('state', action.value)
-        break
-      case 'delete':
-        sharedSlots.delete(index, action.count)
-        break
+export class LocalToRemote {
+  transform(operation: Operation, root: YText) {
+    const path = [...operation.path]
+    path.shift()
+    if (path.length) {
+      const componentIndex = path.shift()!
+      const sharedComponent = this.getSharedComponentByIndex(root, componentIndex)
+      if (sharedComponent) {
+        this.applyComponentOperationToSharedComponent(path, operation.apply, sharedComponent)
+      }
+      return
     }
-  })
-}
-
-function applySlotOperationToSharedSlot(path: number[], actions: Action[], slotYMap: YMap<any>) {
-  if (path.length) {
-    const componentIndex = path.shift()!
-    const sharedContent = slotYMap.get('content') as YArray<any>
-    const sharedComponent = sharedContent.get(componentIndex)
-    applyComponentOperationToSharedComponent(path, actions, sharedComponent)
-    return
+    this.mergeActionsToSharedSlot(root, operation.apply)
   }
-  const content = slotYMap.get('content') as YArray<any>
 
-  let index: number
-  let len: number
-  actions.forEach(action => {
-    switch (action.type) {
-      case 'retain':
-        if (action.formats) {
-          mergeSharedFormats(index, action.index, action.formats, slotYMap)
-        }
-        index = action.index
-        break
-      case 'insert':
-        if (typeof action.content === 'string') {
-          len = action.content.length
-          content.insert(index, action.content.split(''))
-        } else {
-          len = 1
-          content.insert(index, [makeSharedComponentByComponentLiteral(action.content)])
-        }
-        if (action.formats) {
-          insertSharedFormats(index, len, action.formats, slotYMap)
-        }
-        break
-      case 'delete':
-        if (content.length === 0) {
-          // 当内容为空时，slot 实例内容为 ['\n']，触发删除会导致长度溢出
-          return
-        }
-        content.delete(index, action.count)
-        break
-      case 'apply':
-        slotYMap.set('state', action.value)
-        break
+  private applyComponentOperationToSharedComponent(path: number[], actions: Action[], componentYMap: YMap<any>) {
+    const sharedSlots = componentYMap.get('slots') as YArray<any>
+    if (path.length) {
+      const slotIndex = path.shift()!
+      const sharedSlot = sharedSlots.get(slotIndex)
+      this.applySlotOperationToSharedSlot(path, actions, sharedSlot)
+      return
     }
-  })
-}
-
-function insertSharedFormats(index: number, distance: number, formats: Record<string, FormatValue>, sharedSlots: YMap<any>) {
-  const sharedFormats = sharedSlots.get('formats') as YMap<FormatRange[]>
-  const keys = Array.from(sharedFormats.keys())
-  const expandedValues = Array.from<string>({length: distance})
-  keys.forEach(key => {
-    const formatRanges = sharedFormats.get(key)!
-    const values = Format.tileRanges(formatRanges)
-    values.splice(index, 0, ...expandedValues)
-    const newRanges = Format.toRanges(values)
-    sharedFormats.set(key, newRanges)
-  })
-  mergeSharedFormats(index, index + distance, formats, sharedSlots)
-}
-
-function mergeSharedFormats(startIndex: number, endIndex: number, formats: Record<string, FormatValue>, sharedSlots: YMap<any>) {
-  const sharedFormats = sharedSlots.get('formats') as YMap<FormatRange[]>
-  Object.keys(formats).forEach(key => {
-    if (!sharedFormats.has(key)) {
-      sharedFormats.set(key, [{
-        startIndex,
-        endIndex,
-        value: formats[key]
-      }])
-    }
-
-    const oldFormatRanges = sharedFormats.get(key)!
-    const formatRanges = Format.normalizeFormatRange(oldFormatRanges, {
-      startIndex,
-      endIndex,
-      value: formats[key]
+    let index: number
+    actions.forEach(action => {
+      switch (action.type) {
+        case 'retain':
+          index = action.offset
+          break
+        case 'insertSlot':
+          sharedSlots.insert(index, [this.makeSharedSlotBySlotLiteral(action.slot)])
+          index++
+          break
+        case 'apply':
+          componentYMap.set('state', action.value)
+          break
+        case 'delete':
+          sharedSlots.delete(index, action.count)
+          break
+      }
     })
-    sharedFormats.set(key, formatRanges)
-  })
-}
+  }
 
-function insertContent(content: YArray<any>, actions: Action[]) {
-  let index: number
-  actions.forEach(action => {
-    switch (action.type) {
-      case 'retain':
-        index = action.index
-        break
-      case 'insert':
-        content.insert(index!, [
-          typeof action.content === 'string' ?
-            action.content :
-            makeSharedComponentByComponentLiteral(action.content)
-        ])
+  private applySlotOperationToSharedSlot(path: number[], actions: Action[], slotYMap: YMap<any>) {
+    if (path.length) {
+      const componentIndex = path.shift()!
+      const sharedContent = slotYMap.get('content') as YText
+      const sharedComponent = this.getSharedComponentByIndex(sharedContent, componentIndex)!
+      this.applyComponentOperationToSharedComponent(path, actions, sharedComponent)
+      return
+    }
+    const content = slotYMap.get('content') as YText
+
+    this.mergeActionsToSharedSlot(content, actions)
+  }
+
+  private mergeActionsToSharedSlot(content: YText, actions: Action[]) {
+    let index: number
+    let length: number
+
+    actions.forEach(action => {
+      if (action.type === 'retain') {
         if (action.formats) {
-          // TODO 根节点样式
+          content.format(index, action.offset, action.formats)
+        } else {
+          index = action.offset
         }
-        break
-      case 'delete':
+      } else if (action.type === 'insert') {
+        const delta = content.toDelta()
+        const isEmpty = delta.length === 1 && delta[0].insert === '\n'
+
+        if (typeof action.content === 'string') {
+          length = action.content.length
+          content.insert(index, action.content)
+        } else {
+          length = 1
+          content.insertEmbed(index, this.makeSharedComponentByComponentLiteral(action.content))
+        }
+        if (action.formats) {
+          content.format(index, length, action.formats)
+        }
+        if (isEmpty && index === 0) {
+          content.delete(content.length - 1, 1)
+        }
+        index += length
+      } else if (action.type === 'delete') {
+        const delta = content.toDelta()
         content.delete(index, action.count)
-        break
+        if (content.length === 0) {
+          content.insert(0, '\n', delta[0]?.attributes)
+        }
+      } else if (action.type === 'apply') {
+        content.setAttribute('state', action.value)
+      }
+    })
+  }
+
+  private makeSharedSlotBySlotLiteral(slotLiteral: SlotLiteral): YMap<any> {
+    const content = new YText()
+    let index = 0
+    slotLiteral.content.forEach(i => {
+      let size: number
+      if (typeof i === 'string') {
+        size = i.length
+        content.insert(index, i)
+      } else {
+        size = 1
+        content.insertEmbed(index, this.makeSharedComponentByComponentLiteral(i))
+      }
+      index += size
+    })
+    const formats = slotLiteral.formats
+    Object.keys(formats).forEach(key => {
+      const formatRanges = formats[key]
+      formatRanges.forEach(formatRange => {
+        content.format(formatRange.startIndex, formatRange.endIndex - formatRange.startIndex, {
+          [key]: formatRange.value
+        })
+      })
+    })
+
+    const sharedSlot = new YMap()
+    sharedSlot.set('content', content)
+    sharedSlot.set('schema', slotLiteral.schema)
+    return sharedSlot
+  }
+
+  private makeSharedComponentByComponentLiteral(componentLiteral: ComponentLiteral): YMap<any> {
+    const slots = new YArray()
+    componentLiteral.slots.forEach(item => {
+      slots.push([this.makeSharedSlotBySlotLiteral(item)])
+    })
+    const sharedComponent = new YMap()
+    sharedComponent.set('name', componentLiteral.name)
+    sharedComponent.set('slots', slots)
+    sharedComponent.set('state', componentLiteral.state)
+    return sharedComponent
+  }
+
+  private getSharedComponentByIndex(host: YText, index: number): YMap<any> | null {
+    const delta = host.toDelta()
+    let i = 0
+    for (const action of delta) {
+      if (action.insert) {
+        if (i === index) {
+          return action.insert instanceof YMap ? action.insert : null
+        }
+        i += action.insert instanceof YMap ? 1 : action.insert.length
+      } else {
+        throw new Error('xxx')
+      }
     }
-  })
-}
-
-function makeSharedSlotBySlotLiteral(slotLiteral: SlotLiteral): YMap<any> {
-  const content = new YArray()
-  let index = 0
-  slotLiteral.content.forEach(i => {
-    let size: number
-    if (typeof i === 'string') {
-      size = i.length
-      content.insert(index, [i])
-    } else {
-      size = 1
-      content.insert(index, [makeSharedComponentByComponentLiteral(i)])
-    }
-    index += size
-  })
-  const formats = new YMap()
-  Object.keys(slotLiteral.formats).forEach(key => {
-    formats.set(key, slotLiteral.formats[key])
-  })
-
-  const sharedSlot = new YMap()
-  sharedSlot.set('state', slotLiteral.state)
-  sharedSlot.set('content', content)
-  sharedSlot.set('schema', slotLiteral.schema)
-  sharedSlot.set('formats', formats)
-  return sharedSlot
-}
-
-function makeSharedComponentByComponentLiteral(componentLiteral: ComponentLiteral): YMap<any> {
-  const slots = new YArray()
-  componentLiteral.slots.forEach(item => {
-    slots.push([makeSharedSlotBySlotLiteral(item)])
-  })
-  const sharedComponent = new YMap()
-  sharedComponent.set('name', componentLiteral.name)
-  sharedComponent.set('slots', slots)
-  sharedComponent.set('state', componentLiteral.state)
-  return sharedComponent
+    return null
+  }
 }

@@ -11,8 +11,8 @@ import {
   History, Renderer
 } from '@textbus/core'
 import { Doc as YDoc, UndoManager } from 'yjs'
-import { localToRemote } from './collab/local-to-remote'
-import { remoteToLocal } from './collab/remote-to-local'
+import { LocalToRemote } from './collab/local-to-remote'
+import { RemoteToLocal } from './collab/remote-to-local'
 import { CollaborateCursor, RemoteSelection } from './collab/_api'
 
 @Injectable()
@@ -31,6 +31,9 @@ export class Collaborate implements History {
   get canForward() {
     return this.manager?.canRedo()
   }
+
+  private localToRemote = new LocalToRemote()
+  private remoteToLocal = new RemoteToLocal(this.translator, this.registry)
 
   private backEvent = new Subject<void>()
   private forwardEvent = new Subject<void>()
@@ -95,7 +98,7 @@ export class Collaborate implements History {
   }
 
   private listen2() {
-    const root = this.yDoc.getArray('content')
+    const root = this.yDoc.getText('content')
     const slot = this.rootComponentRef.component.slots.get(0)!
     this.manager = new UndoManager(root)
     root.observeDeep((events, transaction) => {
@@ -104,7 +107,7 @@ export class Collaborate implements History {
       }
       this.updateFromSelf = false
 
-      remoteToLocal(events, slot, this.translator, this.registry)
+      this.remoteToLocal.transform(events, slot)
       this.renderer.render()
       this.selection.restore()
       this.updateFromSelf = true
@@ -122,7 +125,7 @@ export class Collaborate implements History {
       ).subscribe(() => {
         this.yDoc.transact(() => {
           operations.forEach(operation => {
-            localToRemote(operation, root)
+            this.localToRemote.transform(operation, root)
           })
           operations.length = 0
         }, this.yDoc)
