@@ -22,6 +22,7 @@ export interface User {
 }
 
 const editor = createEditor(document.getElementById('box')!, {
+  autoFocus: true,
   theme: 'light',
   placeholder: '请输入内容……',
   content: document.getElementById('template')?.innerHTML,

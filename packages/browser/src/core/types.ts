@@ -23,6 +23,8 @@ export interface Plugin {
  * TextBus PC 端配置接口
  */
 export interface BaseEditorOptions {
+  /** 自动获取焦点 */
+  autoFocus?: boolean
   /** 组件加载器 */
   componentLoaders?: ComponentLoader[]
   /** 格式加载器 */

@@ -11,7 +11,9 @@ import {
   bootstrap,
   Starter,
   Selection,
-  ComponentInstance, ComponentLiteral, invokeListener,
+  ComponentInstance,
+  ComponentLiteral,
+  invokeListener,
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
@@ -157,21 +159,49 @@ export class CoreEditor {
         starter.get(Input)
         this.isReady = true
         this.injector = starter
+
+        if (options.autoFocus) {
+          this.focus()
+        }
         return starter
       })
     })
   }
 
   /**
+   * 获取焦点
+   */
+  focus() {
+    this.guardReady()
+    const injector = this.injector!
+    const selection = injector.get(Selection)
+    const rootComponentRef = injector.get(RootComponentRef)
+    if (selection.commonAncestorSlot) {
+      selection.restore()
+      return
+    }
+    const location = selection.findFirstLocation(rootComponentRef.component.slots.get(0)!)
+    selection.setLocation(location.slot, location.offset)
+    selection.restore()
+  }
+
+  /**
+   * 取消编辑器焦点
+   */
+  blur() {
+    if (this.isReady) {
+      const injector = this.injector!
+      const selection = injector.get(Selection)
+      selection.unSelect()
+      selection.restore()
+    }
+  }
+
+  /**
    * 获取 content 为 HTML 格式的内容
    */
   getContents(): OutputContents<string> {
-    if (this.destroyed) {
-      throw editorError('the editor instance is destroyed!')
-    }
-    if (!this.isReady) {
-      throw editorError('please wait for the editor to initialize before getting the content!')
-    }
+    this.guardReady()
     const injector = this.injector!
 
     const outputRenderer = injector.get(OutputRenderer)
@@ -191,12 +221,7 @@ export class CoreEditor {
    * 获取 content 为 JSON 格式的内容
    */
   getJSON(): OutputContents {
-    if (this.destroyed) {
-      throw editorError('the editor instance is destroyed!')
-    }
-    if (!this.isReady) {
-      throw editorError('please wait for the editor to initialize before getting the content!')
-    }
+    this.guardReady()
     const injector = this.injector!
 
     const rootComponentRef = injector.get(RootComponentRef)
@@ -238,12 +263,7 @@ export class CoreEditor {
    * @param content
    */
   replaceContent(content: string | ComponentLiteral) {
-    if (this.destroyed) {
-      throw editorError('the editor instance is destroyed!')
-    }
-    if (!this.isReady) {
-      throw editorError('please wait for the editor to initialize before getting the content!')
-    }
+    this.guardReady()
     const parser = this.injector!.get(Parser)
     const translator = this.injector!.get(Translator)
     const rootComponentRef = this.injector!.get(RootComponentRef)
@@ -259,6 +279,15 @@ export class CoreEditor {
     rootComponentRef.component.slots.clean()
     rootComponentRef.component.slots.push(...component.slots.toArray())
     invokeListener(component, 'onDestroy')
+  }
+
+  protected guardReady() {
+    if (this.destroyed) {
+      throw editorError('the editor instance is destroyed!')
+    }
+    if (!this.isReady) {
+      throw editorError('please wait for the editor to initialize before getting the content!')
+    }
   }
 
   private initDocStyleSheetsAndScripts(doc: Document, options: BaseEditorOptions) {
