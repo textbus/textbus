@@ -1,5 +1,7 @@
-import { Action, Operation, SlotLiteral, ComponentLiteral } from '@textbus/core'
+import { Action, Operation, SlotLiteral, ComponentLiteral, makeError } from '@textbus/core'
 import { Array as YArray, Map as YMap, Text as YText } from 'yjs'
+
+const collaborateErrorFn = makeError('Collaborate')
 
 export class LocalToRemote {
   transform(operation: Operation, root: YText) {
@@ -54,10 +56,10 @@ export class LocalToRemote {
     }
     const content = slotYMap.get('content') as YText
 
-    this.mergeActionsToSharedSlot(content, actions)
+    this.mergeActionsToSharedSlot(content, actions, slotYMap)
   }
 
-  private mergeActionsToSharedSlot(content: YText, actions: Action[]) {
+  private mergeActionsToSharedSlot(content: YText, actions: Action[], slotYMap?: YMap<any>) {
     let index: number
     let length: number
 
@@ -93,7 +95,7 @@ export class LocalToRemote {
           content.insert(0, '\n', delta[0]?.attributes)
         }
       } else if (action.type === 'apply') {
-        content.setAttribute('state', action.value)
+        slotYMap?.set('state', action.value)
       }
     })
   }
@@ -125,6 +127,7 @@ export class LocalToRemote {
     const sharedSlot = new YMap()
     sharedSlot.set('content', content)
     sharedSlot.set('schema', slotLiteral.schema)
+    sharedSlot.set('state', slotLiteral.state)
     return sharedSlot
   }
 
@@ -150,7 +153,7 @@ export class LocalToRemote {
         }
         i += action.insert instanceof YMap ? 1 : action.insert.length
       } else {
-        throw new Error('xxx')
+        throw collaborateErrorFn('Unexpected delta action.')
       }
     }
     return null

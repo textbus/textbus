@@ -1,7 +1,8 @@
 import { Map as YMap, YArrayEvent, YEvent, YMapEvent, Text as YText, YTextEvent, Array as YArray } from 'yjs'
-import { ComponentInstance, ComponentLiteral, Registry, Slot, Translator } from '@textbus/core'
+import { ComponentInstance, ComponentLiteral, makeError, Registry, Slot, Translator } from '@textbus/core'
 
 type YPath = [number, string][]
+const collaborateErrorFn = makeError('Collaborate')
 
 export class RemoteToLocal {
   constructor(private translator: Translator,
@@ -49,8 +50,8 @@ export class RemoteToLocal {
         if (Reflect.has(action, 'retain')) {
           slots.retain(action.retain!)
         } else if (action.insert) {
-          (action.insert as Array<any>).forEach(item => {
-            slots.insert(this.translator.createSlot(item.toJSON())!)
+          (action.insert as Array<YMap<any>>).forEach(item => {
+            slots.insert(this.createSlotBySharedSlot(item))
           })
         } else if (action.delete) {
           slots.retain(slots.index)
@@ -105,8 +106,15 @@ export class RemoteToLocal {
           })
         }
       })
-    } else {
-      throw new Error('xxx')
+    } else if (ev instanceof YMapEvent) {
+      ev.keysChanged.forEach(key => {
+        if (key === 'state') {
+          const state = (ev.target as YMap<any>).get('state')
+          slot.updateState(draft => {
+            Object.assign(draft, state)
+          })
+        }
+      })
     }
   }
 
@@ -143,7 +151,7 @@ export class RemoteToLocal {
           slot.insert(this.createComponentBySharedComponent(action.insert))
         }
       } else {
-        throw new Error('xxx')
+        throw collaborateErrorFn('Unexpected delta action.')
       }
     }
     return slot

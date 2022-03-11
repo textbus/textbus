@@ -274,7 +274,7 @@ export class Slots {
   }
 
   /**
-   * 从下标位置向前删除指定数量的子插槽
+   * 从下标位置向后删除指定数量的子插槽
    * @param count
    */
   delete(count: number) {

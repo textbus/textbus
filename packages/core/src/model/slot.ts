@@ -218,7 +218,7 @@ export class Slot<T = any> {
   }
 
   /**
-   * 把当前插槽的修改位置移动到指定位置，如果新位置大于当前位置，且传入了新的格式，则会同时在当前位置和新位置应用传入的格式
+   * 把当前插槽的修改位置移动到指定位置，如果传入了新的格式，则会同时在当前位置和传入的偏移量之间应用传入的格式
    * @param offset
    */
   retain(offset: number): boolean
@@ -305,7 +305,7 @@ export class Slot<T = any> {
   }
 
   /**
-   * 从当前位置向前删除指定长度的内容
+   * 从当前位置向后删除指定长度的内容
    * @param count
    */
   delete(count: number): boolean {
