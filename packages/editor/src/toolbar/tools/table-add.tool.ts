@@ -113,7 +113,7 @@ export function tableAddToolConfigFactory(injector: Injector): DropdownToolConfi
       })
 
       commander.insert(component)
-      selection.setLocation(component.slots.get(0)!, 0)
+      selection.setPosition(component.slots.get(0)!, 0)
     }
   }
 }

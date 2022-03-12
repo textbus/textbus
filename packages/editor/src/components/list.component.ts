@@ -53,13 +53,13 @@ export const listComponent = defineComponent({
           slots.remove(slots.last)
         }
         parentSlot.insert(paragraph)
-        selection.setLocation(paragraph.slots.get(0)!, 0)
+        selection.setPosition(paragraph.slots.get(0)!, 0)
         ev.preventDefault()
         return
       }
       const nextLi = ev.target.cut(ev.data.index)
       slots.insertAfter(nextLi, ev.target)
-      selection.setLocation(nextLi, 0)
+      selection.setPosition(nextLi, 0)
       ev.preventDefault()
     })
 

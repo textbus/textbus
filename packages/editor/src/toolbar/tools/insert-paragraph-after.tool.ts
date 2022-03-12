@@ -33,7 +33,7 @@ export function insertParagraphAfterToolConfigFactory(injector: Injector): Butto
     onClick() {
       const p = paragraphComponent.createInstance(injector)
       commander.insertAfter(p, selection.commonAncestorComponent!)
-      selection.setLocation(p.slots.get(0)!, 0)
+      selection.setPosition(p.slots.get(0)!, 0)
     }
   }
 }

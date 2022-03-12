@@ -393,7 +393,7 @@ export const preComponent = defineComponent({
             slots.remove(prevSlot)
           }
           parentSlot.insert(paragraph)
-          selection.setLocation(paragraph.slots.get(0)!, 0)
+          selection.setPosition(paragraph.slots.get(0)!, 0)
           ev.preventDefault()
           return
         }
@@ -407,7 +407,7 @@ export const preComponent = defineComponent({
         nextSlot.retain(index)
         isStop = false
       }
-      selection.setLocation(nextSlot, 0)
+      selection.setPosition(nextSlot, 0)
       ev.preventDefault()
     })
 
@@ -444,9 +444,9 @@ export const preComponent = defineComponent({
         const slotList = formatCodeLines(codeList, !target.state.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
         const last = slotList[slotList.length - 1]
         slots.insert(...slotList)
-        selection.setLocation(last, last.index)
+        selection.setPosition(last, last.index)
       } else {
-        selection.setLocation(target, target.index)
+        selection.setPosition(target, target.index)
       }
       ev.preventDefault()
     })

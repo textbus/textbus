@@ -38,7 +38,7 @@ export const rootComponent = defineComponent({
         const slot = p.slots.get(0)!
         slot.insert(ev.data.content)
         ev.target.insert(p)
-        selection.setLocation(slot, slot.index)
+        selection.setPosition(slot, slot.index)
         ev.preventDefault()
       }
     })
@@ -47,7 +47,7 @@ export const rootComponent = defineComponent({
       const p = paragraphComponent.createInstance(injector)
       const slot = slots.get(0)!
       slot.insert(p)
-      selection.setLocation(p.slots.get(0)!, 0)
+      selection.setPosition(p.slots.get(0)!, 0)
       ev.preventDefault()
     })
 
@@ -67,7 +67,7 @@ export const rootComponent = defineComponent({
           const p = paragraphComponent.createInstance(injector)
           slot.insert(p)
           slot.retain(index)
-          selection.setLocation(p.slots.get(0)!, 0)
+          selection.setPosition(p.slots.get(0)!, 0)
         }
       }
     })

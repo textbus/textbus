@@ -180,8 +180,8 @@ export class CoreEditor {
       selection.restore()
       return
     }
-    const location = selection.findFirstLocation(rootComponentRef.component.slots.get(0)!)
-    selection.setLocation(location.slot, location.offset)
+    const location = selection.findFirstPosition(rootComponentRef.component.slots.get(0)!)
+    selection.setPosition(location.slot, location.offset)
     selection.restore()
   }
 

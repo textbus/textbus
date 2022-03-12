@@ -1,6 +1,6 @@
-import { Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { Commander, History, Keyboard, Selection } from '@textbus/core'
-import { Plugin } from '../core/_api'
+import { EDITABLE_DOCUMENT, Plugin, SelectionBridge } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
@@ -8,6 +8,8 @@ import { Plugin } from '../core/_api'
 @Injectable()
 export class DefaultShortcut implements Plugin {
   constructor(private selection: Selection,
+              @Inject(EDITABLE_DOCUMENT) private document: Document,
+              private selectionBridge: SelectionBridge,
               private history: History,
               private commander: Commander,
               private keyboard: Keyboard) {
@@ -35,7 +37,7 @@ export class DefaultShortcut implements Plugin {
         const content = isToEnd ? '\n\n' : '\n'
         const isInserted = this.commander.insert(content)
         if (isInserted && isToEnd) {
-          this.selection.setLocation(startSlot, startOffset + 1)
+          this.selection.setPosition(startSlot, startOffset + 1)
         }
       }
     })
@@ -64,6 +66,28 @@ export class DefaultShortcut implements Plugin {
             break
           case 'ArrowDown':
             this.selection.toNextLine()
+            break
+        }
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+        shiftKey: true
+      },
+      action: (key) => {
+        switch (key) {
+          case 'ArrowLeft':
+            this.selection.wrapToLeft()
+            break
+          case 'ArrowRight':
+            this.selection.wrapToRight()
+            break
+          case 'ArrowUp':
+            this.selection.wrapToTop()
+            break
+          case 'ArrowDown':
+            this.selection.wrapToBottom()
             break
         }
       }

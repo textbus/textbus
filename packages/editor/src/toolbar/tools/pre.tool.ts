@@ -88,7 +88,7 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
           }
         })
         commander.insert(component)
-        selection.setLocation(component.slots.get(0)!, 0)
+        selection.setPosition(component.slots.get(0)!, 0)
       }
     }
   }

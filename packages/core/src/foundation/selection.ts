@@ -31,11 +31,13 @@ export interface NativeSelectionConnector {
   /**
    * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
    * @param range 对应原生选区在 Textbus 中的选区
+   * @param focusSlot 焦点插槽
+   * @param focusOffset 焦点偏移量
    */
-  setSelection(range: Range | null): void
+  setSelection(range: Range | null, focusSlot: Slot | null, focusOffset: number | null): void
 }
 
-export interface SelectionLocation {
+export interface SelectionPosition {
   slot: Slot
   offset: number
 }
@@ -74,9 +76,9 @@ export abstract class NativeSelectionBridge {
 
   /**
    * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
-   * @param location
+   * @param position
    */
-  abstract getRect(location: SelectionLocation): RangePosition | null
+  abstract getRect(position: SelectionPosition): RangePosition | null
 }
 
 export interface SelectionPaths {
@@ -120,6 +122,35 @@ export class Selection {
   /** 选区结束位置在线束插槽中的索引 */
   get endOffset() {
     return this._endOffset
+  }
+
+  /** 锚点插槽 */
+  get anchorSlot() {
+    return this.focusSlot === this.startSlot ? this.endSlot : this.startSlot
+  }
+
+  /** 锚点插槽偏移量 */
+  get anchorOffset() {
+    if (this.focusSlot === this.startSlot && this._focusOffset === this.startOffset) {
+      return this.endOffset
+    }
+    return this.startOffset
+  }
+
+  /** 焦点插槽 */
+  get focusSlot() {
+    if (this._focusSlot === this.startSlot) {
+      return this.startSlot
+    }
+    return this.endSlot
+  }
+
+  /** 焦点插槽偏移量 */
+  get focusOffset() {
+    if (this.focusSlot === this.startSlot && this._focusOffset === this.startOffset) {
+      return this.startOffset
+    }
+    return this.endOffset
   }
 
   /**
@@ -211,6 +242,8 @@ export class Selection {
   private _endSlot: Slot | null = null
   private _startOffset: number | null = null
   private _endOffset: number | null = null
+  private _focusSlot: Slot | null = null
+  private _focusOffset: number | null = null
   private changeEvent = new Subject<Range | null>()
 
   private cacheCaretPositionTimer!: any
@@ -229,7 +262,7 @@ export class Selection {
       return previous !== current
     }))
     bridge.connect({
-      setSelection: (range: Range | null) => {
+      setSelection: (range: Range | null, focusSlot: Slot | null, focusOffset: number | null) => {
         if (range === null) {
           if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
             return
@@ -244,6 +277,16 @@ export class Selection {
         }
         this.setStart(startSlot, startOffset)
         this.setEnd(endSlot, endOffset)
+        this._focusSlot = focusSlot || this.endSlot
+        if (typeof focusOffset === 'number') {
+          this._focusOffset = focusOffset
+        } else {
+          if (this._focusSlot === this.endSlot) {
+            this._focusOffset = this.endOffset
+          } else {
+            this._focusOffset = this.startOffset
+          }
+        }
         this.broadcastChanged()
       }
     })
@@ -276,7 +319,7 @@ export class Selection {
    * @param slot 选区所以插槽
    * @param offset 选区位置索引
    */
-  setLocation(slot: Slot, offset: number) {
+  setPosition(slot: Slot, offset: number) {
     this._startSlot = this._endSlot = slot
     this._startOffset = this._endOffset = offset
     slot.retain(offset)
@@ -323,9 +366,9 @@ export class Selection {
    * 把光标移动到前一个位置
    */
   toPrevious() {
-    const position = this.getPreviousLocation()
+    const position = this.getPreviousPosition()
     if (position) {
-      this.setLocation(position.slot, position.offset)
+      this.setPosition(position.slot, position.offset)
       this.restore()
       this.broadcastChanged()
     }
@@ -335,9 +378,9 @@ export class Selection {
    * 把光标移动到后一个位置
    */
   toNext() {
-    const position = this.getNextLocation()
+    const position = this.getNextPosition()
     if (position) {
-      this.setLocation(position.slot, position.offset)
+      this.setPosition(position.slot, position.offset)
       this.restore()
       this.broadcastChanged()
     }
@@ -347,52 +390,50 @@ export class Selection {
    * 把光标移动到上一行
    */
   toPreviousLine() {
-    clearTimeout(this.cacheCaretPositionTimer)
-    if (!this.isSelected) {
-      return
+    const p = this.getLinePosition(false)
+    if (p) {
+      this.setPosition(p.slot, p.offset)
+      this.restore()
     }
-    let p: SelectionLocation
-    if (this.oldCaretPosition) {
-      p = this.getPreviousLinePosition(this.oldCaretPosition.left)
-    } else {
-      const rect = this.bridge.getRect({
-        slot: this.startSlot!,
-        offset: this.startOffset!
-      })!
-      this.oldCaretPosition = rect
-      p = this.getPreviousLinePosition(rect.left)
-    }
-    this.cacheCaretPositionTimer = setTimeout(() => {
-      this.oldCaretPosition = null
-    }, 3000)
-    this.setLocation(p.slot, p.offset)
-    this.restore()
   }
 
   /**
    * 把光标移动到下一行
    */
   toNextLine() {
-    clearTimeout(this.cacheCaretPositionTimer)
-    if (!this.isSelected) {
-      return
+    const p = this.getLinePosition(true)
+    if (p) {
+      this.setPosition(p.slot, p.offset)
+      this.restore()
     }
-    let p: SelectionLocation
-    if (this.oldCaretPosition) {
-      p = this.getNextLinePosition(this.oldCaretPosition.left)
-    } else {
-      const rect = this.bridge.getRect({
-        slot: this.endSlot!,
-        offset: this.endOffset!
-      })!
-      this.oldCaretPosition = rect
-      p = this.getNextLinePosition(rect.left)
-    }
-    this.cacheCaretPositionTimer = setTimeout(() => {
-      this.oldCaretPosition = null
-    }, 3000)
-    this.setLocation(p.slot, p.offset)
-    this.restore()
+  }
+
+  /**
+   * 向右框选
+   */
+  wrapToRight() {
+    this.wrapTo(false)
+  }
+
+  /**
+   * 向左框选
+   */
+  wrapToLeft() {
+    this.wrapTo(true)
+  }
+
+  /**
+   * 向上一行框选
+   */
+  wrapToTop() {
+    this.wrapLineTo(false)
+  }
+
+  /**
+   * 向下一行框选
+   */
+  wrapToBottom() {
+    this.wrapLineTo(true)
   }
 
   /**
@@ -457,8 +498,8 @@ export class Selection {
    * @param paths
    */
   usePaths(paths: SelectionPaths) {
-    const start = this.findLocationByPath(paths.start)
-    const end = this.findLocationByPath(paths.end)
+    const start = this.findPositionByPath(paths.start)
+    const end = this.findPositionByPath(paths.end)
     if (start) {
       this._startSlot = start.slot
       this._startOffset = start.offset
@@ -489,21 +530,21 @@ export class Selection {
   /**
    * 获取下一个选区位置。
    */
-  getNextLocation(): SelectionLocation | null {
+  getNextPosition(): SelectionPosition | null {
     if (!this.isSelected) {
       return null
     }
-    return this.getNextLocationByLocation(this.endSlot!, this.endOffset!)
+    return this.getNextPositionByPosition(this.endSlot!, this.endOffset!)
   }
 
   /**
    * 获取上一个选区位置。
    */
-  getPreviousLocation(): SelectionLocation | null {
+  getPreviousPosition(): SelectionPosition | null {
     if (!this.isSelected) {
       return null
     }
-    return this.getPreviousLocationByLocation(this.startSlot!, this.startOffset!)
+    return this.getPreviousPositionByPosition(this.startSlot!, this.startOffset!)
   }
 
   /**
@@ -646,12 +687,12 @@ export class Selection {
    * 查找插槽内最深的第一个光标位置
    * @param slot
    */
-  findFirstLocation(slot: Slot): SelectionLocation {
+  findFirstPosition(slot: Slot): SelectionPosition {
     const first = slot.getContentAtIndex(0)
     if (first && typeof first !== 'string') {
       const firstChildSlot = first.slots.first
       if (firstChildSlot) {
-        return this.findFirstLocation(firstChildSlot)
+        return this.findFirstPosition(firstChildSlot)
       }
     }
     return {
@@ -664,12 +705,12 @@ export class Selection {
    * 查的插槽内最深的最后一个光标位置
    * @param slot
    */
-  findLastLocation(slot: Slot): SelectionLocation {
+  findLastPosition(slot: Slot): SelectionPosition {
     const last = slot.getContentAtIndex(slot.length - 1)
     if (last && typeof last !== 'string') {
       const lastChildSlot = last.slots.last
       if (lastChildSlot) {
-        return this.findLastLocation(lastChildSlot)
+        return this.findLastPosition(lastChildSlot)
       }
     }
     return {
@@ -729,12 +770,84 @@ export class Selection {
     }
   }
 
+  private wrapTo(toLeft: boolean) {
+    if (!this.isSelected) {
+      return
+    }
+    const isFocusEnd = this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
+    const position = toLeft ?
+      this.getPreviousPositionByPosition(this.focusSlot!, this.focusOffset!) :
+      this.getNextPositionByPosition(this.focusSlot!, this.focusOffset!)
+    this.normalizedSelection(position, isFocusEnd)
+  }
+
+  private wrapLineTo(toBottom: boolean) {
+    const isFocusEnd = this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
+    const position = this.getLinePosition(toBottom)
+    if (position) {
+      this.normalizedSelection(position, isFocusEnd)
+    }
+  }
+
+  private normalizedSelection(position: SelectionPosition, isFocusEnd: boolean) {
+    if (isFocusEnd) {
+      this.setEnd(position.slot, position.offset)
+    } else {
+      this.setStart(position.slot, position.offset)
+    }
+    this.restore()
+    this.broadcastChanged()
+    this._focusSlot = isFocusEnd ? this.endSlot : this.startSlot
+    this._focusOffset = isFocusEnd ? this.endOffset : this.startOffset
+
+    const {start, end} = this.getPaths()
+    while (true) {
+      const startFirstPath = start.shift()
+      const endFirstPath = end.shift()
+
+      if (typeof startFirstPath === 'undefined' || typeof endFirstPath === 'undefined') {
+        break
+      }
+
+      if (startFirstPath > endFirstPath) {
+        const {startOffset, startSlot, endOffset, endSlot} = this
+        this.setStart(endSlot!, endOffset!)
+        this.setEnd(startSlot!, startOffset!)
+      }
+    }
+  }
+
+  private getLinePosition(toNext: boolean): SelectionPosition | null {
+    clearTimeout(this.cacheCaretPositionTimer)
+    if (!this.isSelected) {
+      return null
+    }
+    let p: SelectionPosition
+    if (this.oldCaretPosition) {
+      p = toNext ?
+        this.getNextLinePositionByOffset(this.oldCaretPosition.left) :
+        this.getPreviousLinePositionByOffset(this.oldCaretPosition.left)
+    } else {
+      this.oldCaretPosition = this.bridge.getRect({
+        slot: this.focusSlot!,
+        offset: this.focusOffset!
+      })!
+      p = toNext ?
+        this.getNextLinePositionByOffset(this.oldCaretPosition.left) :
+        this.getPreviousLinePositionByOffset(this.oldCaretPosition.left)
+    }
+    this.cacheCaretPositionTimer = setTimeout(() => {
+      this.oldCaretPosition = null
+    }, 3000)
+    return p
+  }
+
   /**
    * 获取选区向上移动一行的位置。
    * @param startLeft 参考位置。
    */
-  private getPreviousLinePosition(startLeft: number): SelectionLocation {
-    this.getPreviousLocation()
+  private getPreviousLinePositionByOffset(startLeft: number): SelectionPosition {
+    this.getPreviousPosition()
     let isToPrevLine = false
     let loopCount = 0
     let minLeft = startLeft
@@ -745,12 +858,12 @@ export class Selection {
       offset: startOffset
     })!.top
 
-    let position: SelectionLocation
-    let oldPosition!: SelectionLocation
+    let position: SelectionPosition
+    let oldPosition!: SelectionPosition
     let oldLeft = 0
     while (true) {
       loopCount++
-      position = this.getPreviousLocationByLocation(startSlot, startOffset)
+      position = this.getPreviousPositionByPosition(startSlot, startOffset)
       startSlot = position.slot
       startOffset = position.offset
       const rect2 = this.bridge.getRect(position)!
@@ -789,7 +902,7 @@ export class Selection {
    * 获取选区向下移动一行的位置。
    * @param startLeft 参考位置。
    */
-  private getNextLinePosition(startLeft: number): SelectionLocation {
+  private getNextLinePositionByOffset(startLeft: number): SelectionPosition {
     let isToNextLine = false
     let loopCount = 0
     let maxRight = startLeft
@@ -799,11 +912,11 @@ export class Selection {
       slot: endSlot,
       offset: endOffset
     })!.top
-    let oldPosition!: SelectionLocation
+    let oldPosition!: SelectionPosition
     let oldLeft = 0
     while (true) {
       loopCount++
-      const position = this.getNextLocationByLocation(endSlot, endOffset)
+      const position = this.getNextPositionByPosition(endSlot, endOffset)
       endSlot = position.slot
       endOffset = position.offset
       const rect2 = this.bridge.getRect(position)!
@@ -839,7 +952,7 @@ export class Selection {
     }
   }
 
-  private getNextLocationByLocation(slot: Slot, offset: number) {
+  private getNextPositionByPosition(slot: Slot, offset: number) {
     if (offset === slot.length - 1) {
       const current = slot.getContentAtIndex(offset)
       if (current === '\n') {
@@ -855,7 +968,7 @@ export class Selection {
       if (current && typeof current !== 'string') {
         const firstChildSlot = current.slots.get(0)
         if (firstChildSlot) {
-          return this.findFirstLocation(firstChildSlot)
+          return this.findFirstPosition(firstChildSlot)
         }
       }
       return {
@@ -872,7 +985,7 @@ export class Selection {
       const parentComponent = slot.parent!
       const slotIndex = parentComponent.slots.indexOf(slot)
       if (slotIndex < parentComponent.slots.length - 1) {
-        return this.findFirstLocation(parentComponent.slots.get(slotIndex + 1)!)
+        return this.findFirstPosition(parentComponent.slots.get(slotIndex + 1)!)
       }
       const parentSlot = parentComponent.parent
       if (!parentSlot) {
@@ -889,7 +1002,7 @@ export class Selection {
         if (typeof nextContent !== 'string') {
           const nextFirstSlot = nextContent.slots.first
           if (nextFirstSlot) {
-            return this.findFirstLocation(nextFirstSlot)
+            return this.findFirstPosition(nextFirstSlot)
           }
         }
         return {
@@ -906,13 +1019,13 @@ export class Selection {
     }
   }
 
-  private getPreviousLocationByLocation(slot: Slot, offset: number) {
+  private getPreviousPositionByPosition(slot: Slot, offset: number) {
     if (offset > 0) {
       const prev = slot.getContentAtIndex(offset - 1)!
       if (prev && typeof prev !== 'string') {
         const lastChildSlot = prev.slots.last
         if (lastChildSlot) {
-          return this.findLastLocation(lastChildSlot)
+          return this.findLastPosition(lastChildSlot)
         }
       }
       return {
@@ -929,7 +1042,7 @@ export class Selection {
       const slots = parentComponent.slots
       const slotIndex = slots.indexOf(slot)
       if (slotIndex > 0) {
-        return this.findLastLocation(slots.get(slotIndex - 1)!)
+        return this.findLastPosition(slots.get(slotIndex - 1)!)
       }
 
       const parentSlot = parentComponent.parent
@@ -945,7 +1058,7 @@ export class Selection {
         if (prevContent && typeof prevContent !== 'string') {
           const lastChildSlot = prevContent.slots.last
           if (lastChildSlot) {
-            return this.findLastLocation(lastChildSlot)
+            return this.findLastPosition(lastChildSlot)
           }
         }
         return {
@@ -962,7 +1075,7 @@ export class Selection {
     }
   }
 
-  private findLocationByPath(paths: number[]) {
+  private findPositionByPath(paths: number[]) {
     const startPaths = [...paths]
     const offset = startPaths.pop()!
     const slot = this.findSlotByPaths(startPaths)!

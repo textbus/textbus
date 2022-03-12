@@ -1,6 +1,6 @@
 import { Injectable } from '@tanbo/di'
 
-import { SelectionLocation, Range, Selection } from './selection'
+import { SelectionPosition, Range, Selection } from './selection'
 import {
   ComponentInstance,
   ContentType,
@@ -17,7 +17,7 @@ import {
 } from '../model/_api'
 import { NativeRenderer } from './_injection-tokens'
 
-interface DeleteTreeState extends SelectionLocation {
+interface DeleteTreeState extends SelectionPosition {
   success: boolean
 }
 
@@ -188,7 +188,7 @@ export class Commander {
     const result = this._insert(startSlotRef, selection.startOffset!, content, true)
 
     if (result) {
-      selection.setLocation(result, result.index)
+      selection.setPosition(result, result.index)
       invokeListener(result.parent!, 'onContentInserted', new Event<InsertEventData>(result, {
         index: result.index,
         content
@@ -231,7 +231,7 @@ export class Commander {
     const content = isToEnd ? '\n\n' : '\n'
     const isInserted = this.insert(content)
     if (isInserted && isToEnd) {
-      this.selection.setLocation(startSlot, startOffset + 1)
+      this.selection.setPosition(startSlot, startOffset + 1)
     }
     return true
   }
@@ -249,10 +249,10 @@ export class Commander {
     const startSlotRefCache = selection.startSlot!
     if (selection.isCollapsed) {
       if (deleteBefore) {
-        const prevPosition = selection.getPreviousLocation()!
+        const prevPosition = selection.getPreviousPosition()!
         selection.setStart(prevPosition.slot, prevPosition.offset)
       } else {
-        const nextPosition = selection.getNextLocation()!
+        const nextPosition = selection.getNextPosition()!
         selection.setEnd(nextPosition.slot, nextPosition.offset)
       }
     }
@@ -283,7 +283,7 @@ export class Commander {
       })
       invokeListener(selection.startSlot!.parent!, 'onContentDelete', event)
       if (isPreventDefault) {
-        selection.setLocation(startSlotRefCache, startOffset)
+        selection.setPosition(startSlotRefCache, startOffset)
         return false
       }
       return true
@@ -595,7 +595,7 @@ export class Commander {
         }
       } else {
         slot.cut()
-        this.selection.setLocation(slot, 0)
+        this.selection.setPosition(slot, 0)
         return true
       }
       slot = parentSlot
@@ -706,7 +706,7 @@ export class Commander {
             }
           }
           const prevSlotRef = parentComponent.slots.get(index - 1)!
-          const position = this.selection.findLastLocation(prevSlotRef)
+          const position = this.selection.findLastPosition(prevSlotRef)
           return {
             success: true,
             slot: position.slot,

@@ -4,7 +4,7 @@ import {
   ComponentInstance,
   NativeSelectionBridge,
   NativeSelectionConnector,
-  Renderer, SelectionLocation,
+  Renderer, SelectionPosition,
   Slot,
   Range as TBRange,
   VElement,
@@ -62,7 +62,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.listen(connector)
   }
 
-  getRect(location: SelectionLocation) {
+  getRect(location: SelectionPosition) {
     const position = this.getPositionByRange({
       startOffset: location.offset,
       endOffset: location.offset,
@@ -112,7 +112,10 @@ export class SelectionBridge implements NativeSelectionBridge {
       nativeRange.setStart(position.end!.node, position.end!.offset)
     }
     this.selectionChangeEvent.next(nativeRange)
-    this.listen(this.connector)
+    setTimeout(() => {
+      // hack 浏览器会触发上面选区更改事件
+      this.listen(this.connector)
+    })
   }
 
   destroy() {
@@ -151,10 +154,6 @@ export class SelectionBridge implements NativeSelectionBridge {
           offset: lastChild.textContent!.length
         }
       }
-      // return {
-      //   node: container,
-      //   offset: container.childNodes.length
-      // }
     }
 
     const current = slot.getContentAtIndex(offset)
@@ -294,16 +293,18 @@ export class SelectionBridge implements NativeSelectionBridge {
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
         if (selection.rangeCount === 0 || isFocusin) {
-          connector.setSelection(null)
+          connector.setSelection(null, null, null)
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
         const startFocusNode = this.findFocusNode(nativeRange.startContainer)
         const endFocusNode = this.findFocusNode(nativeRange.endContainer)
         if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
-          connector.setSelection(null)
+          connector.setSelection(null, null, null)
           return
         }
+
+        const isFocusEnd = selection.focusNode === nativeRange.endContainer
 
         if (startFocusNode !== nativeRange.startContainer) {
           const startNextSibling = startFocusNode.nextSibling
@@ -336,12 +337,12 @@ export class SelectionBridge implements NativeSelectionBridge {
               startOffset: start.index,
               endSlot: end.slot,
               endOffset: end.index
-            })
+            }, isFocusEnd ? end.slot : start.slot, isFocusEnd ? end.index : start.index)
             this.selectionChangeEvent.next(nativeRange)
             return
           }
         }
-        connector.setSelection(null)
+        connector.setSelection(null, null, null)
       })
     )
   }

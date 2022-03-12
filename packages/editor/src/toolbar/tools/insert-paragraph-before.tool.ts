@@ -34,7 +34,7 @@ export function insertParagraphBeforeToolConfigFactory(injector: Injector): Butt
     onClick() {
       const p = paragraphComponent.createInstance(injector)
       commander.insertBefore(p, selection.commonAncestorComponent!)
-      selection.setLocation(p.slots.get(0)!, 0)
+      selection.setPosition(p.slots.get(0)!, 0)
     }
   }
 }
