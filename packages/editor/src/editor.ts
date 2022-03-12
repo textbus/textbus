@@ -23,7 +23,7 @@ export class Editor extends CoreEditor {
   /** 编辑器是否初始化完成可观察对象 */
   onReady: Observable<Starter>
   /** 编辑器 UI 布局相关的 DOM 对象管理类 */
-  layout = new Layout()
+  layout: Layout
 
   private host: HTMLElement
 
@@ -41,6 +41,7 @@ export class Editor extends CoreEditor {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable()
+    this.layout = new Layout(options.autoHeight, options.minHeight)
     if (options.theme) {
       this.layout.setTheme(options.theme)
     }

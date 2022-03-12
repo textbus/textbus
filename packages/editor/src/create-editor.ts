@@ -37,9 +37,45 @@ import {
   historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
   italicTool, linkTool, olTool,
   strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
-  underlineTool, unlinkTool
+  underlineTool, unlinkTool, ToolFactory
 } from './toolbar/_api'
 import { LinkJumpTipPlugin } from './plugins/_api'
+import { ComponentLoader, FormatLoader } from '@textbus/browser'
+
+export const defaultComponentLoaders: ComponentLoader[] = [
+  audioComponentLoader,
+  blockComponentLoader,
+  blockquoteComponentLoader,
+  headingComponentLoader,
+  imageComponentLoader,
+  listComponentLoader,
+  paragraphComponentLoader,
+  preComponentLoader,
+  tableComponentLoader,
+  videoComponentLoader
+]
+
+export const defaultFormatLoaders: FormatLoader[] = [
+  boldFormatLoader,
+  italicFormatLoader,
+  colorFormatLoader,
+  fontFamilyFormatLoader,
+  fontSizeFormatLoader,
+  letterSpacingFormatLoader,
+  lineHeightFormatLoader,
+  strikeThroughFormatLoader,
+  subscriptFormatLoader,
+  superscriptFormatLoader,
+  underlineFormatLoader,
+  codeFormatLoader,
+  blockBackgroundColorFormatLoader,
+  linkFormatLoader,
+  textBackgroundColorFormatLoader,
+  textAlignFormatLoader,
+  textIndentFormatLoader,
+  verticalAlignFormatLoader,
+  dirFormatLoader
+]
 
 export const defaultOptions: EditorOptions = {
   editingStyleSheets: [
@@ -50,60 +86,31 @@ export const defaultOptions: EditorOptions = {
   styleSheets: [
     `body {line-height: 1.5em}`
   ],
-  componentLoaders: [
-    audioComponentLoader,
-    blockComponentLoader,
-    blockquoteComponentLoader,
-    headingComponentLoader,
-    imageComponentLoader,
-    listComponentLoader,
-    paragraphComponentLoader,
-    preComponentLoader,
-    tableComponentLoader,
-    videoComponentLoader
-  ],
-  formatLoaders: [
-    boldFormatLoader,
-    italicFormatLoader,
-    colorFormatLoader,
-    fontFamilyFormatLoader,
-    fontSizeFormatLoader,
-    letterSpacingFormatLoader,
-    lineHeightFormatLoader,
-    strikeThroughFormatLoader,
-    subscriptFormatLoader,
-    superscriptFormatLoader,
-    underlineFormatLoader,
-    codeFormatLoader,
-    blockBackgroundColorFormatLoader,
-    linkFormatLoader,
-    textBackgroundColorFormatLoader,
-    textAlignFormatLoader,
-    textIndentFormatLoader,
-    verticalAlignFormatLoader,
-    dirFormatLoader
-  ]
+  componentLoaders: defaultComponentLoaders,
+  formatLoaders: defaultFormatLoaders
 }
+
+export const defaultTools: ToolFactory[][] = [
+  [historyBackTool, historyForwardTool],
+  [defaultGroupTool],
+  [headingTool],
+  [boldTool, italicTool, strikeThroughTool, underlineTool],
+  [olTool, ulTool],
+  [fontSizeTool, textIndentTool],
+  [colorTool, textBackgroundTool],
+  [insertParagraphBeforeTool, insertParagraphAfterTool],
+  [fontFamilyTool],
+  [linkTool, unlinkTool],
+  [imageTool],
+  [textAlignTool],
+  [tableAddTool, tableRemoveTool],
+  [cleanTool]
+]
 
 export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
   return new Editor(selector, {
     plugins: [
-      new Toolbar([
-        [historyBackTool, historyForwardTool],
-        [defaultGroupTool],
-        [headingTool],
-        [boldTool, italicTool, strikeThroughTool, underlineTool],
-        [olTool, ulTool],
-        [fontSizeTool, textIndentTool],
-        [colorTool, textBackgroundTool],
-        [insertParagraphBeforeTool, insertParagraphAfterTool],
-        [fontFamilyTool],
-        [linkTool, unlinkTool],
-        [imageTool],
-        [textAlignTool],
-        [tableAddTool, tableRemoveTool],
-        [cleanTool]
-      ]),
+      new Toolbar(defaultTools),
       new LinkJumpTipPlugin()
     ],
     ...defaultOptions,

@@ -50,15 +50,21 @@ export class Input {
 
     this.container.appendChild(textarea)
     selectionBridge.caret.elementRef.append(this.container)
+    let isFocus = false
     this.subscriptions.push(
       selectionBridge.onSelectionChange.subscribe((range) => {
         if (range) {
-          this.textarea.focus()
+          if (!isFocus) {
+            this.textarea.focus()
+          }
+          isFocus = true
         } else {
           this.textarea.blur()
+          isFocus = false
         }
       }),
       fromEvent(textarea, 'blur').subscribe(() => {
+        isFocus = false
         selectionBridge.caret.hide()
       })
     )
