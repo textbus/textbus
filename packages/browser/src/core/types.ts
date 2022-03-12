@@ -1,15 +1,15 @@
-import { ComponentLiteral, TextBusConfig } from '@textbus/core'
+import { ComponentLiteral, TextbusConfig } from '@textbus/core'
 import { Injector } from '@tanbo/di'
 
 import { FormatLoader, ComponentLoader } from '../dom-support/parser'
 
 /**
- * TextBus PC 端插件接口
+ * Textbus PC 端插件接口
  */
 export interface Plugin {
   /**
    * 编辑器初始化时调用的勾子
-   * @param injector 访问 TextBus 内部实例的 IoC 容器
+   * @param injector 访问 Textbus 内部实例的 IoC 容器
    */
   setup(injector: Injector): void
 
@@ -20,7 +20,7 @@ export interface Plugin {
 }
 
 /**
- * TextBus PC 端配置接口
+ * Textbus PC 端配置接口
  */
 export interface BaseEditorOptions {
   /** 自动获取焦点 */
@@ -37,8 +37,8 @@ export interface BaseEditorOptions {
   editingStyleSheets?: string[]
   /** 插件 */
   plugins?: Plugin[]
-  /** 提供者集合，数组内配置的类，可以使用 TextBus 中的依赖注入能力 */
-  providers?: TextBusConfig['providers'],
+  /** 提供者集合，数组内配置的类，可以使用 Textbus 中的依赖注入能力 */
+  providers?: TextbusConfig['providers'],
 
-  setup?: TextBusConfig['setup']
+  setup?: TextbusConfig['setup']
 }

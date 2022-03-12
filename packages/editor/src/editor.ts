@@ -17,7 +17,7 @@ import { FileUploader, UploadConfig } from './file-uploader'
 const editorErrorFn = makeError('Editor')
 
 /**
- * 基于 TextBus 内核和 PC 浏览器中间层的富文本实现
+ * 基于 Textbus 内核和 PC 浏览器中间层的富文本实现
  */
 export class Editor extends CoreEditor {
   /** 编辑器是否初始化完成可观察对象 */

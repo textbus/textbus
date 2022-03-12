@@ -11,7 +11,7 @@ export interface KeymapState {
 }
 
 /**
- * TextBus 键盘管理
+ * Textbus 键盘管理
  */
 @Injectable()
 export class Keyboard {

@@ -11,7 +11,7 @@ export interface I18NConfig {
 export type I18nString = string | ((i18n: I18n) => string);
 
 /**
- * TextBus 国际化方案类
+ * Textbus 国际化方案类
  */
 @Injectable()
 export class I18n {

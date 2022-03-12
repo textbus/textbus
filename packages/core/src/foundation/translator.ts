@@ -11,7 +11,7 @@ import {
 import { Registry } from './registry'
 
 /**
- * TextBus 数据转组件和插槽的类
+ * Textbus 数据转组件和插槽的类
  */
 @Injectable()
 export class Translator {

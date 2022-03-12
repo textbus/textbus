@@ -196,7 +196,7 @@ export interface VNodeLocation {
 }
 
 /**
- * TextBus 编辑渲染器，负责组件的渲染，生成 DOM，并根据数据变化，更新 DOM
+ * Textbus 编辑渲染器，负责组件的渲染，生成 DOM，并根据数据变化，更新 DOM
  */
 @Injectable()
 export class Renderer {

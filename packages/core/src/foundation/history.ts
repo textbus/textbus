@@ -33,7 +33,7 @@ export abstract class History {
 }
 
 /**
- * TextBus 历史记录管理类
+ * Textbus 历史记录管理类
  */
 @Injectable()
 export class CoreHistory extends History {

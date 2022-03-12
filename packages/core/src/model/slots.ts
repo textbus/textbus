@@ -10,7 +10,7 @@ export interface SlotChangeData<T extends Slot> {
 }
 
 /**
- * TextBus 管理组件内部插槽增删改查的类
+ * Textbus 管理组件内部插槽增删改查的类
  */
 export class Slots {
   readonly onChange: Observable<Operation>

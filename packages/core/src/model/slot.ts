@@ -26,7 +26,7 @@ export interface SlotLiteral<T = any> {
 export const placeholder = '\u200b'
 
 /**
- * TextBus 插槽类，用于管理组件、文本及格式的增删改查
+ * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
 export class Slot<T = any> {
   /** 插槽所属的组件 */

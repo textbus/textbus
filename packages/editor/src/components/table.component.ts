@@ -39,7 +39,7 @@ export const tableComponent = defineComponent({
     state: {
       columnCount: 3,
       rowCount: 3,
-      useTextBusStyle: false
+      useTextbusStyle: false
     }
   }) {
     let tableCells = slotsToTable(data.slots!, data.state!.columnCount)
@@ -49,7 +49,7 @@ export const tableComponent = defineComponent({
 
     let tableInfo: TableConfig = {
       columnCount: tableCells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
-      useTextBusStyle: data.state?.useTextBusStyle || false,
+      useTextbusStyle: data.state?.useTextbusStyle || false,
       rowCount: tableCells.length
     }
 
@@ -426,7 +426,7 @@ export const tableComponent = defineComponent({
       render(isOutputMode: boolean, slotRender: SlotRender) {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
         const table = new VElement('table')
-        if (data.state!.useTextBusStyle) {
+        if (data.state!.useTextbusStyle) {
           table.classes.add('tb-table')
         }
         if (tableCells.length) {
@@ -500,7 +500,7 @@ export const tableComponentLoader: ComponentLoader = {
     return tableComponent.createInstance(injector, {
       slots: bodies.flat(),
       state: {
-        useTextBusStyle: element.classList.contains('tb-table'),
+        useTextbusStyle: element.classList.contains('tb-table'),
         columnCount: cells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
         rowCount: cells.length
       }

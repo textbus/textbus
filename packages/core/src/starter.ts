@@ -27,9 +27,9 @@ import { makeError } from './_utils/make-error'
 const starterErrorFn = makeError('Starter')
 
 /**
- * TextBus 核心配置
+ * Textbus 核心配置
  */
-export interface TextBusConfig {
+export interface TextbusConfig {
   /** 组件列表 */
   components: Component[]
   /** 格式列表 */
@@ -43,13 +43,13 @@ export interface TextBusConfig {
 }
 
 /**
- * TextBus 内核启动器
+ * Textbus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
   onReady: Observable<void>
   private readyEvent = new Subject<void>()
 
-  constructor(public config: TextBusConfig) {
+  constructor(public config: TextbusConfig) {
     super(new NullInjector(), [
       ...config.providers,
       {
@@ -91,12 +91,12 @@ export class Starter extends ReflectiveInjector {
       }, {
         provide: NativeSelectionBridge,
         useFactory() {
-          throw starterErrorFn('You must implement the `NativeSelectionBridge` interface to start TextBus!')
+          throw starterErrorFn('You must implement the `NativeSelectionBridge` interface to start Textbus!')
         }
       }, {
         provide: NativeRenderer,
         useFactory() {
-          throw starterErrorFn('You must implement the `NativeRenderer` interface to start TextBus!')
+          throw starterErrorFn('You must implement the `NativeRenderer` interface to start Textbus!')
         }
       }
     ])
@@ -105,7 +105,7 @@ export class Starter extends ReflectiveInjector {
   }
 
   /**
-   * 启动一个 TextBus 实例，并将根组件渲染到原生节点
+   * 启动一个 Textbus 实例，并将根组件渲染到原生节点
    * @param rootComponent 根组件
    * @param host 原生节点
    */
@@ -122,7 +122,7 @@ export class Starter extends ReflectiveInjector {
   }
 
   /**
-   * 销毁 TextBus 实例
+   * 销毁 Textbus 实例
    */
   destroy() {
     [History, LifeCycle].forEach(i => {

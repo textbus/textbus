@@ -26,7 +26,7 @@ export type Nullable<T> = {
 }
 
 /**
- * TextBus 数据操作类，提供一系列的方法，完成文档数据的增删改查的操作
+ * Textbus 数据操作类，提供一系列的方法，完成文档数据的增删改查的操作
  */
 @Injectable()
 export class Commander {

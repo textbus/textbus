@@ -52,11 +52,11 @@ export abstract class RootComponentRef {
 }
 
 /**
- * @internal TextBus 组件列表注入 token
+ * @internal Textbus 组件列表注入 token
  */
 export const COMPONENT_LIST = new InjectionToken<Component[]>('COMPONENT_LIST')
 /**
- * @internal TextBus 格式列表注入 token
+ * @internal Textbus 格式列表注入 token
  */
 export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
 

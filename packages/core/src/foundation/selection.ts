@@ -29,8 +29,8 @@ export interface SelectedSlotRange {
  */
 export interface NativeSelectionConnector {
   /**
-   * 当原生选区变化时，生成对应的 TextBus 选区，并传入 TextBus 选区
-   * @param range 对应原生选区在 TextBus 中的选区
+   * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
+   * @param range 对应原生选区在 Textbus 中的选区
    */
   setSelection(range: Range | null): void
 }
@@ -61,19 +61,19 @@ export interface RangePosition {
  */
 export abstract class NativeSelectionBridge {
   /**
-   * 连接方法，TextBus 选区初始化时调用，并传入连接器
+   * 连接方法，Textbus 选区初始化时调用，并传入连接器
    * @param connector
    */
   abstract connect(connector: NativeSelectionConnector): void
 
   /**
-   * TextBus 选区变化时调用，同时传入选区位置，用于原生选区实现具体平台的拖蓝效果
+   * Textbus 选区变化时调用，同时传入选区位置，用于原生选区实现具体平台的拖蓝效果
    * @param range
    */
   abstract restore(range: Range | null): void
 
   /**
-   * 获取原生选区的坐标位置，用于 TextBus 计算光标移动相关功能
+   * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
    * @param location
    */
   abstract getRect(location: SelectionLocation): RangePosition | null
@@ -85,7 +85,7 @@ export interface SelectionPaths {
 }
 
 /**
- * TextBus 选区实现类，用于选择 TextBus 文档内的内容
+ * Textbus 选区实现类，用于选择 Textbus 文档内的内容
  */
 @Injectable()
 export class Selection {
@@ -410,7 +410,7 @@ export class Selection {
   }
 
   /**
-   * 立即同步 TextBus 选区到原生选区
+   * 立即同步 Textbus 选区到原生选区
    */
   restore() {
     const startSlot = this.startSlot!

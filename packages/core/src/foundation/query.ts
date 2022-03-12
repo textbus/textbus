@@ -4,7 +4,7 @@ import { Selection } from './selection'
 import { ComponentInstance, ComponentMethods, Formatter, FormatValue, Slot, Component } from '../model/_api'
 
 /**
- * TextBus 状态查询状态枚举
+ * Textbus 状态查询状态枚举
  */
 export enum QueryStateType {
   /** 正常 */
@@ -16,7 +16,7 @@ export enum QueryStateType {
 }
 
 /**
- * TextBus 状态查询结果，当状态为禁用时，`value` 为 null
+ * Textbus 状态查询结果，当状态为禁用时，`value` 为 null
  */
 export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.Enabled ? V : null> {
   state: S
@@ -24,7 +24,7 @@ export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.
 }
 
 /**
- * TextBus 状态查询类，用于查询组件或格式在当前选区的状态
+ * Textbus 状态查询类，用于查询组件或格式在当前选区的状态
  */
 @Injectable()
 export class Query {

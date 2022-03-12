@@ -39,7 +39,7 @@ export interface OutputContents<T = any> {
 const editorError = makeError('CoreEditor')
 
 /**
- * TextBus PC 端编辑器
+ * Textbus PC 端编辑器
  */
 export class CoreEditor {
   /** 当编辑器内容变化时触发 */

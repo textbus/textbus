@@ -271,7 +271,7 @@ export const i18n_zh_CN: I18NConfig = {
           rowPlaceholder: '请输入表格行数',
           columnLabel: '表格列数',
           columnPlaceholder: '请输入表格列数',
-          useTextBusStyleLabel: '使用 TextBus 样式'
+          useTextbusStyleLabel: '使用 Textbus 样式'
         }
       },
       tableEditTool: {

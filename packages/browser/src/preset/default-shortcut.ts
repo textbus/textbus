@@ -3,7 +3,7 @@ import { Commander, History, Keyboard, Selection } from '@textbus/core'
 import { Plugin } from '../core/_api'
 
 /**
- * TextBus PC 端默认按键绑定
+ * Textbus PC 端默认按键绑定
  */
 @Injectable()
 export class DefaultShortcut implements Plugin {

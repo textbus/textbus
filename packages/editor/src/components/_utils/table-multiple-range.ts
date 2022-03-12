@@ -347,7 +347,7 @@ export function serialize(bodies: TableCellSlot[][]): TableRowPosition[] {
 }
 
 export interface TableConfig {
-  useTextBusStyle: boolean,
+  useTextbusStyle: boolean,
   columnCount: number
   rowCount: number
 }

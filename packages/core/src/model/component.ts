@@ -106,7 +106,7 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
 }
 
 /**
- * TextBus 扩展组件接口
+ * Textbus 扩展组件接口
  */
 export interface ComponentOptions<Methods extends ComponentMethods, State> {
   /** 组件名 */
@@ -122,7 +122,7 @@ export interface ComponentOptions<Methods extends ComponentMethods, State> {
 }
 
 /**
- * TextBus 组件
+ * Textbus 组件
  */
 export interface Component<ComponentInstance = any, Data = any> {
   /** 组件名 */
@@ -243,7 +243,7 @@ function getCurrentContext() {
 }
 
 /**
- * TextBus 扩展组件方法
+ * Textbus 扩展组件方法
  * @param options
  */
 export function defineComponent<Methods extends ComponentMethods,
@@ -433,7 +433,7 @@ let eventHandleFn: null | ((...args: any[]) => void) = null
 let isPreventDefault = false
 
 /**
- * TextBus 事件对象
+ * Textbus 事件对象
  */
 export class Event<T, S extends Slot = Slot> {
   constructor(public target: S,

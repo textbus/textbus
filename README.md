@@ -48,7 +48,7 @@ const editor = createEditor(document.getElementById('editor'))
 <head>
   <link rel="stylesheet" href="/path/textbus.min.css">
   <script src="/path/textbus.min.js"></script>
-  <title>TextBus 示例</title>
+  <title>Textbus 示例</title>
 </head>
 <body>
 <div id="editor"></div>

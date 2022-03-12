@@ -12,7 +12,7 @@ import { formatSort } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 
 /**
- * TextBus 输出渲染器
+ * Textbus 输出渲染器
  */
 @Injectable()
 export class OutputRenderer {

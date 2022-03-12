@@ -271,7 +271,7 @@ export const i18n_en_US: I18NConfig = {
           rowPlaceholder: 'row count',
           columnLabel: 'column count',
           columnPlaceholder: 'column count',
-          useTextBusStyleLabel: 'use TextBus style'
+          useTextbusStyleLabel: 'use Textbus style'
         }
       },
       tableEditTool: {
