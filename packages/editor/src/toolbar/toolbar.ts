@@ -4,8 +4,8 @@ import { createElement, EDITABLE_DOCUMENT, EDITOR_OPTIONS, Plugin } from '@textb
 import {
   Keymap,
   makeError,
-  // Renderer,
-  // Selection
+  Renderer,
+  Selection
 } from '@textbus/core'
 
 import { Tool } from './types'
@@ -39,8 +39,8 @@ export class Toolbar implements Plugin {
 
   setup(injector: Injector) {
     const layout = injector.get(Layout)
-    // const selection = injector.get(Selection)
-    // const renderer = injector.get(Renderer)
+    const selection = injector.get(Selection)
+    const renderer = injector.get(Renderer)
     const editableDocument = injector.get(EDITABLE_DOCUMENT)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
     this.elementRef = createElement('div', {
@@ -87,16 +87,17 @@ export class Toolbar implements Plugin {
     const tools = this.tools.flat()
     this.subs.push(
       merge(
-        // selection.onChange,
-        // renderer.onViewChecked,
-        fromEvent(editableDocument, 'click')
+        selection.onChange,
+        renderer.onViewChecked,
       ).pipe(auditTime(100)).subscribe(() => {
-        const event = document.createEvent('Event')
-        event.initEvent('click', true, true)
-        this.elementRef.dispatchEvent(event)
         tools.forEach(tool => {
           tool.refreshState()
         })
+      }),
+      fromEvent(editableDocument, 'click').subscribe(() => {
+        const event = document.createEvent('Event')
+        event.initEvent('click', true, true)
+        this.elementRef.dispatchEvent(event)
       }),
       fromEvent(this.elementRef, 'mouseover').subscribe(ev => {
         const keymap = this.findNeedShowKeymapHandler(ev.target as HTMLElement)
