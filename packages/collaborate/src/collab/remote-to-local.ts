@@ -9,12 +9,18 @@ export class RemoteToLocal {
               private registry: Registry) {
   }
 
-  transform(events: YEvent[], slot: Slot) {
+  transform(events: YEvent[], rootComponent: ComponentInstance) {
     events.forEach(ev => {
       const path: YPath = []
 
       for (let i = 0; i < ev.path.length; i += 2) {
         path.push(ev.path.slice(i, i + 2) as [number, string])
+      }
+
+      const slot = rootComponent.slots.get(0)
+
+      if (!slot) {
+        throw collaborateErrorFn('cannot find child slot in root component!')
       }
 
       if (path.length) {
