@@ -220,7 +220,7 @@ export class CoreEditor {
   /**
    * 获取 content 为 JSON 格式的内容
    */
-  getJSON(): OutputContents {
+  getJSON(): OutputContents<ComponentLiteral> {
     this.guardReady()
     const injector = this.injector!
 

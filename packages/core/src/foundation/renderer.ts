@@ -257,8 +257,8 @@ export class Renderer {
           const el = this.patch(root)
           this.nativeRenderer.appendChild(this.rootComponentRef.host, el)
         }
-        this.oldVDom = root
       }
+      this.oldVDom = root
     }
 
     this.viewCheckedEvent.next()
