@@ -224,6 +224,19 @@ export class Format {
     return this
   }
 
+  toGrid() {
+    const splitPoints = new Set<number>()
+    splitPoints.add(0)
+    splitPoints.add(this.slot.length)
+    this.map.forEach(ranges => {
+      ranges.forEach(item => {
+        splitPoints.add(item.startIndex)
+        splitPoints.add(item.endIndex)
+      })
+    })
+    return [...splitPoints].sort((a, b) => a - b)
+  }
+
   toJSON() {
     const json: FormatLiteral = {}
     this.map.forEach((value, formatter) => {

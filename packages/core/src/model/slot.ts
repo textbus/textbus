@@ -23,6 +23,13 @@ export interface SlotLiteral<T = any> {
   state: T | null
 }
 
+export interface DeltaInsert {
+  insert: string | ComponentInstance
+  formats: Formats
+}
+
+export type DeltaLite = DeltaInsert[]
+
 export const placeholder = '\u200b'
 
 /**
@@ -495,6 +502,55 @@ export class Slot<T = any> {
       formats: this.format.toJSON(),
       state: this.state!
     }
+  }
+
+  /**
+   * 将插槽数据转换为 delta 表示
+   */
+  toDelta(): DeltaLite {
+    if (this.length === 0) {
+      return []
+    }
+    const formatGrid = this.format.toGrid()
+    const contentGrid = this.content.toGrid()
+
+    const gridSet = new Set<number>([...formatGrid, ...contentGrid])
+
+    const grid = [...gridSet].sort((a, b) => a - b)
+
+    const deltaList: DeltaLite = []
+
+    let startIndex = grid.shift()!
+    while (grid.length) {
+      const endIndex = grid.shift()!
+      deltaList.push({
+        insert: this.content.slice(startIndex, endIndex)[0]!,
+        formats: this.format.extract(startIndex, endIndex).toArray().map(i => {
+          return [i.formatter, i.value]
+        })
+      })
+      startIndex = endIndex
+    }
+
+    return deltaList
+  }
+
+  /**
+   * 根据 delta 插入内容
+   * @param delta
+   */
+  insertDelta(delta: DeltaLite): DeltaLite {
+    while (delta.length) {
+      const first = delta[0]!
+      // TODO 这里插入的还有组件，要修复类型
+      const is = this.insert(first.insert as string, first.formats)
+      if (is) {
+        delta.shift()
+      } else {
+        break
+      }
+    }
+    return delta
   }
 
   private applyFormats(formats: Formats, startIndex: number, offset: number) {

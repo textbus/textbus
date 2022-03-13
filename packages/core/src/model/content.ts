@@ -118,4 +118,15 @@ export class Content {
   getContentAtIndex(index: number) {
     return this.slice(index, index + 1)[0]
   }
+
+  toGrid() {
+    const splitPoints = new Set<number>()
+    let index = 0
+    splitPoints.add(index)
+    this.data.forEach(i => {
+      index += i.length
+      splitPoints.add(index)
+    })
+    return [...splitPoints].sort((a, b) => a - b)
+  }
 }
