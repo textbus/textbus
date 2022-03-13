@@ -16,14 +16,15 @@
     box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
     border-top: 0;
     left: 50%;
-    top: -100%;
-    transform: translateX(-50%);
-    transition: top .15s cubic-bezier(.36, .66, .04, 1);
+    top: 0;
+    transform: translateX(-50%) scale(1, 0);
+    transition: transform .15s cubic-bezier(.36, .66, .04, 1);
     pointer-events: auto;
+    transform-origin: 0 0;
     //max-height: calc(100% - 20px);
 
     &-active {
-      top: 0;
+      transform: translateX(-50%) scale(1, 1);
     }
   }
 

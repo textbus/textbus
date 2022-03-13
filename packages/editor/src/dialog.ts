@@ -23,7 +23,7 @@ export class Dialog {
         })
       ]
     })
-    this.layout.workbench.appendChild(this.elementRef)
+    this.layout.middle.appendChild(this.elementRef)
     this.subs.push(this.editorController.onStateChange.subscribe(status => {
       if (status.readonly) {
         this.hide()
