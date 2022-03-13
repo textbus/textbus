@@ -95,6 +95,15 @@ export class DefaultShortcut implements Plugin {
 
     keyboard.addShortcut({
       keymap: {
+        key: 'Tab'
+      },
+      action: () => {
+        this.commander.insert('    ')
+      }
+    })
+
+    keyboard.addShortcut({
+      keymap: {
         key: 'a',
         ctrlKey: true
       },
