@@ -36,7 +36,7 @@ export interface VElementListeners {
  */
 export class VElement {
   static createElement(tagName: string | VElementRenderFn,
-                       attrs: VElementOptions,
+                       attrs: VElementOptions | null,
                        ...children: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
     if (typeof tagName === 'function') {
       return tagName({

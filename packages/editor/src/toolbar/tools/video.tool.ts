@@ -75,6 +75,7 @@ export function videoToolConfigFactory(injector: Injector): DialogToolConfig {
       }
     },
     useValue(value: VideoState) {
+      value
       if (value) {
         const state = query.queryComponent(videoComponent)
         if (state.state === QueryStateType.Enabled) {

@@ -48,7 +48,9 @@ export const videoComponent = defineComponent({
 
     return {
       render() {
-        const el = new VElement('video')
+        const el = new VElement('video', {
+          ref
+        })
         el.attrs.set('src', state!.src)
         el.attrs.set('autoplay', state!.autoplay)
         el.attrs.set('controls', state!.controls)
