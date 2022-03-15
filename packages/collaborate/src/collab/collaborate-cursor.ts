@@ -20,6 +20,7 @@ export interface SelectionInfo {
   color: string
   username: string
   rects: SelectionRect[]
+  focusEnd: boolean
 }
 
 export interface RemoteSelectionCursor {
@@ -127,7 +128,8 @@ export class CollaborateCursor {
           }
           const info: SelectionInfo = {
             ...item,
-            rects: selectionRects
+            rects: selectionRects,
+            focusEnd: item.paths.focusEnd
           }
           this.onRectsChange.next(info)
 
@@ -141,17 +143,16 @@ export class CollaborateCursor {
   private drawUserCursor(users: SelectionInfo[]) {
     for (let i = 0; i < users.length; i++) {
       const user = users[i]
-      const last = user.rects[user.rects.length - 1]
-
+      const child = user.rects[user.focusEnd ? user.rects.length - 1 : 0]
       const {cursor, userTip, anchor} = this.getUserCursor(i)
-      if (!last) {
+      if (!child) {
         cursor.style.display = 'none'
       } else {
         Object.assign(cursor.style, {
-          left: last.x + last.width + 'px',
-          top: last.y + 'px',
+          left: child.x + (user.focusEnd ? child.width : 0) + 'px',
+          top: child.y + 'px',
           width: '2px',
-          height: last.height + 'px',
+          height: child.height + 'px',
           background: user.color,
           display: 'block'
         })

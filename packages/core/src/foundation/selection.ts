@@ -31,10 +31,9 @@ export interface NativeSelectionConnector {
   /**
    * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
    * @param range 对应原生选区在 Textbus 中的选区
-   * @param focusSlot 焦点插槽
-   * @param focusOffset 焦点偏移量
+   * @param isFocusEnd 线束插槽是否为焦点插槽
    */
-  setSelection(range: Range | null, focusSlot: Slot | null, focusOffset: number | null): void
+  setSelection(range: Range | null, isFocusEnd?: boolean): void
 }
 
 export interface SelectionPosition {
@@ -84,6 +83,7 @@ export abstract class NativeSelectionBridge {
 export interface SelectionPaths {
   start: number[]
   end: number[]
+  focusEnd: boolean
 }
 
 /**
@@ -262,7 +262,7 @@ export class Selection {
       return previous !== current
     }))
     bridge.connect({
-      setSelection: (range: Range | null, focusSlot: Slot | null, focusOffset: number | null) => {
+      setSelection: (range: Range | null, isFocusEnd = true) => {
         if (range === null) {
           if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
             return
@@ -277,15 +277,12 @@ export class Selection {
         }
         this.setStart(startSlot, startOffset)
         this.setEnd(endSlot, endOffset)
-        this._focusSlot = focusSlot || this.endSlot
-        if (typeof focusOffset === 'number') {
-          this._focusOffset = focusOffset
+        if (isFocusEnd) {
+          this._focusSlot = this.endSlot
+          this._focusOffset = this.endOffset
         } else {
-          if (this._focusSlot === this.endSlot) {
-            this._focusOffset = this.endOffset
-          } else {
-            this._focusOffset = this.startOffset
-          }
+          this._focusSlot = this.startSlot
+          this._focusOffset = this.startOffset
         }
         this.broadcastChanged()
       }
@@ -480,7 +477,8 @@ export class Selection {
     if (!this.commonAncestorSlot) {
       return {
         start: [],
-        end: []
+        end: [],
+        focusEnd: true
       }
     }
     const start = Selection.getPathsBySlot(this.startSlot!)
@@ -489,7 +487,8 @@ export class Selection {
     end.push(this.endOffset!)
     return {
       start,
-      end
+      end,
+      focusEnd: this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
     }
   }
 
@@ -503,10 +502,18 @@ export class Selection {
     if (start) {
       this._startSlot = start.slot
       this._startOffset = start.offset
+      if (!paths.focusEnd) {
+        this._focusSlot = start.slot
+        this._focusOffset = start.offset
+      }
     }
     if (end) {
       this._endSlot = end.slot
       this._endOffset = end.offset
+      if (paths.focusEnd) {
+        this._focusSlot = end.slot
+        this._focusOffset = end.offset
+      }
     }
   }
 

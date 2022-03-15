@@ -293,18 +293,18 @@ export class SelectionBridge implements NativeSelectionBridge {
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
         if (selection.rangeCount === 0 || isFocusin) {
-          connector.setSelection(null, null, null)
+          connector.setSelection(null)
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
         const startFocusNode = this.findFocusNode(nativeRange.startContainer)
         const endFocusNode = this.findFocusNode(nativeRange.endContainer)
         if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
-          connector.setSelection(null, null, null)
+          connector.setSelection(null)
           return
         }
 
-        const isFocusEnd = selection.focusNode === nativeRange.endContainer
+        const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
 
         if (startFocusNode !== nativeRange.startContainer) {
           const startNextSibling = startFocusNode.nextSibling
@@ -337,12 +337,12 @@ export class SelectionBridge implements NativeSelectionBridge {
               startOffset: start.index,
               endSlot: end.slot,
               endOffset: end.index
-            }, isFocusEnd ? end.slot : start.slot, isFocusEnd ? end.index : start.index)
+            }, isFocusEnd)
             this.selectionChangeEvent.next(nativeRange)
             return
           }
         }
-        connector.setSelection(null, null, null)
+        connector.setSelection(null)
       })
     )
   }

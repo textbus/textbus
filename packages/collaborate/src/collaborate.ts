@@ -33,7 +33,7 @@ export class Collaborate implements History {
   }
 
   private localToRemote = new LocalToRemote()
-  private remoteToLocal = new RemoteToLocal(this.translator, this.registry)
+  private remoteToLocal = new RemoteToLocal(this.yDoc, this.translator, this.selection, this.registry)
 
   private backEvent = new Subject<void>()
   private forwardEvent = new Subject<void>()

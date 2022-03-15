@@ -70,7 +70,8 @@ export class Editor extends CoreEditor {
             if (!selection.isSelected) {
               selection.usePaths({
                 start: [0, 0],
-                end: [0, 0]
+                end: [0, 0],
+                focusEnd: true
               })
               selection.restore()
             }
