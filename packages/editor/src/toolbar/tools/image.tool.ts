@@ -153,7 +153,6 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
   const childI18n = i18n.getContext('plugins.toolbar.imageTool.view')
   const form = new Form({
     title: childI18n.get('title'),
-    maxHeight: '260px',
     cancelBtnText: childI18n.get('cancelBtnText'),
     confirmBtnText: childI18n.get('confirmBtnText'),
     items: [

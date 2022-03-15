@@ -9,7 +9,6 @@ export interface FormConfig {
   editProperty?: 'attrs' | 'styles',
   items: Array<FormItem>;
   mini?: boolean;
-  maxHeight?: string;
   confirmBtnText?: string;
   cancelBtnText?: string;
 }
@@ -49,10 +48,6 @@ export class Form implements ViewController<Record<string, any>>{
         return item.elementRef
       })
     }))
-
-    if (this.config.maxHeight) {
-      this.body.style.maxHeight = this.config.maxHeight
-    }
 
     const btns = config.mini ? [
       createElement('button', {

@@ -2,7 +2,6 @@ import { Injectable } from '@tanbo/di'
 import { createElement } from '@textbus/browser'
 import { Subscription } from '@tanbo/stream'
 
-import { Layout } from './layout'
 import { EditorController } from './editor-controller'
 
 @Injectable()
@@ -13,8 +12,7 @@ export class Dialog {
 
   private subs: Subscription[] = []
 
-  constructor(private layout: Layout,
-              private editorController: EditorController) {
+  constructor(private editorController: EditorController) {
     this.elementRef = createElement('div', {
       classes: ['textbus-dialog'],
       children: [
@@ -23,7 +21,7 @@ export class Dialog {
         })
       ]
     })
-    this.layout.middle.appendChild(this.elementRef)
+    document.body.appendChild(this.elementRef)
     this.subs.push(this.editorController.onStateChange.subscribe(status => {
       if (status.readonly) {
         this.hide()
@@ -51,5 +49,6 @@ export class Dialog {
   destroy() {
     clearTimeout(this.timer)
     this.subs.forEach(i => i.unsubscribe())
+    this.elementRef.parentNode?.removeChild(this.elementRef)
   }
 }
