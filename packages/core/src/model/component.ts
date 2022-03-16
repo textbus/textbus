@@ -103,6 +103,11 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
    * 组件转为 JSON 数据的方法
    */
   toJSON(): ComponentLiteral<State>
+
+  /**
+   * 将组件转换为 string
+   */
+  toString(): string
 }
 
 /**
@@ -304,6 +309,9 @@ export function defineComponent<Methods extends ComponentMethods,
             state: state!,
             slots: componentInstance.slots.toJSON()
           }
+        },
+        toString() {
+          return componentInstance.slots.toString()
         }
       }
       const context: ComponentContext<State> = {

@@ -129,4 +129,13 @@ export class Content {
     })
     return [...splitPoints].sort((a, b) => a - b)
   }
+
+  toString() {
+    return this.data.map(i => {
+      if (typeof i === 'string') {
+        return i
+      }
+      return i.toString()
+    }).join('')
+  }
 }

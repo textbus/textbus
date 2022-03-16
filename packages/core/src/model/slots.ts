@@ -326,4 +326,10 @@ export class Slots {
   has(slot: Slot) {
     return this.indexOf(slot) > -1
   }
+
+  toString() {
+    return this.slots.map(i => {
+      return i.toString()
+    }).join('')
+  }
 }

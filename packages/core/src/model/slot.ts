@@ -504,6 +504,10 @@ export class Slot<T = any> {
     }
   }
 
+  toString() {
+    return this.content.toString()
+  }
+
   /**
    * 将插槽数据转换为 delta 表示
    */
