@@ -419,13 +419,6 @@ export function useRef<T>() {
 }
 
 /**
- * 组件多元素引用勾子
- */
-export function useRefs<T>() {
-  return [] as T[]
-}
-
-/**
  * 组件注册动态快捷键的勾子
  * @param config
  */

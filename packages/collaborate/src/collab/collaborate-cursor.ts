@@ -1,5 +1,11 @@
 import { Inject, Injectable } from '@tanbo/di'
-import { createElement, EDITABLE_DOCUMENT, EDITOR_CONTAINER, SelectionBridge } from '@textbus/browser'
+import {
+  createElement,
+  EDITABLE_DOCUMENT,
+  EDITOR_CONTAINER,
+  getLayoutRectByRange,
+  SelectionBridge
+} from '@textbus/browser'
 import { Selection, SelectionPaths } from '@textbus/core'
 import { Subject } from '@tanbo/stream'
 
@@ -10,17 +16,12 @@ export interface RemoteSelection {
 }
 
 export interface SelectionRect {
+  color: string
+  username: string
   x: number
   y: number
   width: number
   height: number
-}
-
-export interface SelectionInfo {
-  color: string
-  username: string
-  rects: SelectionRect[]
-  focusEnd: boolean
 }
 
 export interface RemoteSelectionCursor {
@@ -51,11 +52,12 @@ export class CollaborateCursor {
       width: '100%',
       height: '100%',
       pointerEvents: 'none',
-      fontSize: '12px'
+      fontSize: '12px',
+      zIndex: 10
     }
   })
 
-  private onRectsChange = new Subject<SelectionInfo>()
+  private onRectsChange = new Subject<SelectionRect[]>()
 
   constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
               @Inject(EDITABLE_DOCUMENT) private document: Document,
@@ -63,11 +65,9 @@ export class CollaborateCursor {
               private selection: Selection) {
     container.appendChild(this.canvas)
     container.appendChild(this.tooltips)
-    this.onRectsChange.subscribe(info => {
-      const color = info.color
-      const rects = info.rects
+    this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
-        this.context.fillStyle = color
+        this.context.fillStyle = rect.color
         this.context.beginPath()
         this.context.rect(rect.x, rect.y, rect.width, rect.height)
         this.context.fill()
@@ -81,7 +81,7 @@ export class CollaborateCursor {
     this.canvas.height = this.container.offsetHeight
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-    const users: SelectionInfo[] = []
+    const users: SelectionRect[] = []
 
     paths.filter(i => {
       return i.paths.start.length && i.paths.end.length
@@ -108,61 +108,53 @@ export class CollaborateCursor {
           for (let i = rects.length - 1; i >= 0; i--) {
             const rect = rects[i]
             selectionRects.push({
+              color: item.color,
+              username: item.username,
               x: rect.x,
               y: rect.y,
               width: rect.width,
               height: rect.height,
             })
           }
+          this.onRectsChange.next(selectionRects)
 
-          if (rects.length === 0) {
-            const rect = nativeRange.getBoundingClientRect()
-            if (rect.x !== 0 || rect.y !== 0 || rect.width !== 0 || rect.height !== 0) {
-              selectionRects.push({
-                x: rect.x,
-                y: rect.y,
-                width: 1,
-                height: rect.height,
-              })
-            }
-          }
-          const info: SelectionInfo = {
-            ...item,
-            rects: selectionRects,
-            focusEnd: item.paths.focusEnd
-          }
-          this.onRectsChange.next(info)
+          const cursorRange = nativeRange.cloneRange()
+          cursorRange.collapse(!item.paths.focusEnd)
 
-          users.push(info)
+          const cursorRect = getLayoutRectByRange(cursorRange)
+
+          users.push({
+            username: item.username,
+            color: item.color,
+            x: cursorRect.x,
+            y: cursorRect.y,
+            width: 2,
+            height: cursorRect.height
+          })
         }
       }
     })
     this.drawUserCursor(users)
   }
 
-  private drawUserCursor(users: SelectionInfo[]) {
-    for (let i = 0; i < users.length; i++) {
-      const user = users[i]
-      const child = user.rects[user.focusEnd ? user.rects.length - 1 : 0]
+  private drawUserCursor(rects: SelectionRect[]) {
+    for (let i = 0; i < rects.length; i++) {
+      const rect = rects[i]
       const {cursor, userTip, anchor} = this.getUserCursor(i)
-      if (!child) {
-        cursor.style.display = 'none'
-      } else {
-        Object.assign(cursor.style, {
-          left: child.x + (user.focusEnd ? child.width : 0) + 'px',
-          top: child.y + 'px',
-          width: '2px',
-          height: child.height + 'px',
-          background: user.color,
-          display: 'block'
-        })
-        anchor.style.background = user.color
-        userTip.innerText = user.username
-        userTip.style.background = user.color
-      }
+      Object.assign(cursor.style, {
+        left: rect.x + 'px',
+        top: rect.y + 'px',
+        width: rect.width + 'px',
+        height: rect.height + 'px',
+        background: rect.color,
+        display: 'block'
+      })
+      anchor.style.background = rect.color
+      userTip.innerText = rect.username
+      userTip.style.background = rect.color
     }
 
-    for (let i = users.length; i < this.tooltips.children.length; i++) {
+    for (let i = rects.length; i < this.tooltips.children.length; i++) {
       this.tooltips.removeChild(this.tooltips.children[i])
     }
   }
@@ -207,12 +199,10 @@ export class CollaborateCursor {
       children: [userTip],
       on: {
         mouseenter() {
-          anchor.style.transform = 'scale(1.2)'
           userTip.style.display = 'block'
         },
         mouseleave() {
           userTip.style.display = 'none'
-          anchor.style.transform = ''
         }
       }
     })

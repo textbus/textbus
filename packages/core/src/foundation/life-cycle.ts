@@ -35,7 +35,7 @@ export class LifeCycle {
             }
           }
           if (comp !== this.root.component) {
-            invokeListener(instance, 'onDestroy')
+            this.invokeChildComponentDestroyHook(comp)
           }
         })
         this.instanceList.clear()
@@ -45,5 +45,16 @@ export class LifeCycle {
 
   destroy() {
     this.subs.forEach(i => i.unsubscribe())
+  }
+
+  private invokeChildComponentDestroyHook(parent: ComponentInstance) {
+    parent.slots.toArray().forEach(slot => {
+      slot.sliceContent().forEach(i => {
+        if (typeof i !== 'string') {
+          this.invokeChildComponentDestroyHook(i)
+        }
+      })
+    })
+    invokeListener(parent, 'onDestroy')
   }
 }

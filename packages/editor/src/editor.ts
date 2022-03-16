@@ -47,6 +47,10 @@ export class Editor extends CoreEditor {
     }
     this.host.append(this.layout.container)
 
+    if (options.autoHeight) {
+      this.layout.scroller.style.overflow = 'visible'
+    }
+
     const editorProviders: Provider[] = [{
       provide: Layout,
       useValue: this.layout

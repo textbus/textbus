@@ -102,7 +102,7 @@ const editor = createEditor(document.getElementById('box')!, {
 
 editor.onChange.subscribe(() => {
   const root = editor.injector!.get(RootComponentRef)
-  console.log(root.component.toString())
+  // console.log(root.component.toString())
 })
 
 // const yDoc = new YDoc()
