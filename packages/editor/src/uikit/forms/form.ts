@@ -13,14 +13,14 @@ export interface FormConfig {
   cancelBtnText?: string;
 }
 
-export class Form implements ViewController<Record<string, any>>{
+export class Form implements ViewController<Record<string, any>> {
   onComplete: Observable<Record<string, any>>
   onCancel: Observable<void>
 
   body: HTMLElement
   footer: HTMLElement
   readonly elementRef: HTMLFormElement
-  private completeEvent = new Subject<Map<string, any>>()
+  private completeEvent = new Subject<Record<string, any>>()
   private cancelEvent = new Subject<void>()
 
   constructor(private config: FormConfig) {
@@ -87,17 +87,17 @@ export class Form implements ViewController<Record<string, any>>{
     this.elementRef.addEventListener('submit', (ev: Event) => {
       ev.preventDefault()
 
-      const map = new Map<string, any>()
+      const values: Record<string, any> = {}
       for (const item of config.items) {
         if (!item.validate()) {
           return
         }
         const i = item.getAttr()
         if (i) {
-          map.set(i.name, i.value)
+          values[i.name] = i.value
         }
       }
-      this.completeEvent.next(map)
+      this.completeEvent.next(values)
     })
   }
 

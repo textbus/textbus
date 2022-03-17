@@ -43,11 +43,8 @@ export class DropdownTool implements Tool {
     const initValue: any = {}
     let prevValue: any = initValue
 
-    this.subs.push(config.viewController.onComplete.subscribe(map => {
-      prevValue = {}
-      map.forEach((value, key) => {
-        prevValue[key] = value
-      })
+    this.subs.push(config.viewController.onComplete.subscribe(value => {
+      prevValue = value
       form.hide()
       config.useValue(prevValue)
     }))

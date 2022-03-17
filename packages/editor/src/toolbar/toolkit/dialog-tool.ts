@@ -53,11 +53,8 @@ export class DialogTool implements Tool {
     })
 
     this.subs.push(
-      config.viewController.onComplete.subscribe(map => {
-        prevValue = {}
-        map.forEach((value, key) => {
-          prevValue[key] = value
-        })
+      config.viewController.onComplete.subscribe(value => {
+        prevValue = value
         dialog.hide()
         config.useValue(prevValue)
       }),

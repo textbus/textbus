@@ -130,12 +130,9 @@ export class GroupTool implements Tool {
     const defaultValue: any = {}
     let prevValue = defaultValue
 
-    config.viewController.onComplete.subscribe(map => {
-      prevValue = {}
-      map.forEach((value, key) => {
-        prevValue[key] = value
-      })
-      config.useValue(prevValue)
+    config.viewController.onComplete.subscribe(value => {
+      prevValue = value
+      config.useValue(value)
       dialog.hide()
     })
     config.viewController.onCancel.subscribe(() => {
@@ -200,12 +197,10 @@ export class GroupTool implements Tool {
 
     let prevValue = defaultValue
 
-    config.viewController.onComplete.subscribe(map => {
-      prevValue = {}
-      map.forEach((value, key) => {
-        prevValue[key] = value
-      })
-      config.useValue(prevValue)
+    config.viewController.onComplete.subscribe(v => {
+      prevValue = v
+      config.useValue(v)
+      this.controller.hide()
     })
 
     if (config.keymap) {
@@ -268,8 +263,9 @@ export class GroupTool implements Tool {
           children: config.options.map(option => {
             const el = createOption({
               ...option,
-              onClick() {
+              onClick: () => {
                 config.onChecked(option.value)
+                this.controller.hide()
               }
             })
             map.set(option, el)
@@ -337,6 +333,7 @@ export class GroupTool implements Tool {
 
     fromEvent(item.elementRef, 'click').subscribe(() => {
       config.onClick()
+      this.controller.hide()
     })
 
     if (config.keymap) {
