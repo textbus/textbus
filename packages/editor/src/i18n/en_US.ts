@@ -405,11 +405,13 @@ export const i18n_en_US: I18NConfig = {
       deleteRows: 'delete rows',
       mergeCells: 'merge cells',
       splitCells: 'split cells',
-      contextMenuLabel: 'table'
+      contextMenuLabel: 'table',
+      contextMenuRemoveTable: 'remove table'
     },
     preComponent: {
       defaultLang: 'other',
-      contextMenuLabel: 'switch language'
+      contextMenuLabel: 'switch language',
+      changeTheme: 'change theme'
     }
   }
 }

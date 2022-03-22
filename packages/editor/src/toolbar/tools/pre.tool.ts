@@ -2,7 +2,7 @@ import { Injector } from '@tanbo/di'
 import { Commander, Query, QueryState, QueryStateType, Selection } from '@textbus/core'
 
 import { SelectTool, SelectToolConfig } from '../toolkit/_api'
-import { preComponent } from '../../components/pre.component'
+import { createCodeSlot, preComponent } from '../../components/pre.component'
 import { I18n } from '../../i18n'
 
 export function preToolConfigFactory(injector: Injector): SelectToolConfig {
@@ -84,8 +84,9 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
         const component = preComponent.createInstance(injector, {
           state: {
             lang: value,
-            code: ''
-          }
+            theme: 'light'
+          },
+          slots: [createCodeSlot()]
         })
         commander.insert(component)
         selection.setPosition(component.slots.get(0)!, 0)

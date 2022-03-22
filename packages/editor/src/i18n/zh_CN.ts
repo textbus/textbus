@@ -405,11 +405,13 @@ export const i18n_zh_CN: I18NConfig = {
       deleteRows: '删除行',
       mergeCells: '合并单元格',
       splitCells: '拆分单元格',
-      contextMenuLabel: '表格'
+      contextMenuLabel: '表格',
+      contextMenuRemoveTable: '删除表格'
     },
     preComponent: {
       defaultLang: '其它',
-      contextMenuLabel: '切换代码块语言'
+      contextMenuLabel: '切换代码块语言',
+      changeTheme: '切换代码块主题'
     }
   }
 }

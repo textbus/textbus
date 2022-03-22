@@ -1,6 +1,7 @@
 import { Injector } from '@tanbo/di'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 import {
+  Commander,
   ComponentData,
   ComponentInstance,
   ContentType,
@@ -46,6 +47,7 @@ export const tableComponent = defineComponent({
     const injector = useContext()
     const i18n = injector.get(I18n)
     const selection = injector.get(Selection)
+    const commander = injector.get(Commander)
 
     let tableInfo: TableConfig = {
       columnCount: tableCells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
@@ -126,6 +128,12 @@ export const tableComponent = defineComponent({
             instance.splitCells()
           }
         }]
+      }, {
+        iconClasses: ['textbus-icon-table-remove'],
+        label: i18n.get('components.tableComponent.contextMenuRemoveTable'),
+        onClick() {
+          commander.remove(self)
+        }
       }]
     })
 
@@ -343,7 +351,7 @@ export const tableComponent = defineComponent({
         const row = serializedCells[index]
 
         stateController.update(draft => {
-          draft.rowCount = tableInfo.rowCount+ 1
+          draft.rowCount = tableInfo.rowCount + 1
         })
 
         row.cellsPosition.forEach(cell => {
