@@ -4,7 +4,7 @@ import { Injector } from '@tanbo/di'
 
 import { makeError } from '../_utils/make-error'
 import { VElement } from './element'
-import { ContentType, Slot, SlotLiteral } from './slot'
+import { ContentType, Formats, Slot, SlotLiteral } from './slot'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
 
@@ -161,7 +161,8 @@ export interface Ref<T> {
 
 export interface InsertEventData {
   index: number
-  content: string | ComponentInstance
+  content: string | ComponentInstance,
+  formats: Formats
 }
 
 export interface EnterEventData {

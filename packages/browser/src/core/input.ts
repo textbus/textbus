@@ -184,7 +184,7 @@ export class Input {
         }))
       ).subscribe(text => {
         if (text) {
-          this.commander.insert(text)
+          this.commander.write(text)
         }
       })
     )

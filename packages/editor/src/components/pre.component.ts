@@ -296,6 +296,15 @@ export function createCodeSlot() {
 }
 
 function overrideSlot(slot: Slot) {
+  const retain = slot.retain
+
+  slot.retain = function (index: number, formatter: any, value: any) {
+    if (formatter && formatter !== codeStyleFormatter) {
+      return true
+    }
+    return retain.call(slot, index, formatter, value)
+  } as any
+
   slot.changeMarker.onChange = slot.changeMarker.onChange.pipe(map(operation => {
     const apply = operation.apply.filter(action => {
       return !(action.type === 'retain' && action.formats)

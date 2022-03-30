@@ -13,7 +13,8 @@ import {
   Slot,
   Event,
   InsertEventData,
-  EnterEventData
+  EnterEventData,
+  Formats
 } from '../model/_api'
 import { NativeRenderer } from './_injection-tokens'
 
@@ -169,32 +170,34 @@ export class Commander {
 
   /**
    * 在当前选区插入新内容，当选区未闭合时，会先删除选区内容，再插入新的内容
+   * 在插入新内容时，write 方法还会把相邻的样式应用到新内容上
    * @param content 新插入的内容
+   * @param formats 新的格式
    */
-  insert(content: string | ComponentInstance): boolean {
-    const selection = this.selection
-    if (!selection.isSelected) {
-      return false
+  write(content: string | ComponentInstance, formats?: Formats): boolean
+  write(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
+  write(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+    const slot = this._insert(content, true, formatter, value)
+    if (slot) {
+      const startSlot = this.selection.startSlot!
+      this.selection.setPosition(startSlot, startSlot.index)
+      return true
     }
+    return false
+  }
 
-    if (!selection.isCollapsed) {
-      const isCollapsed = this.delete(false)
-      if (!isCollapsed) {
-        return false
-      }
-    }
-    const startSlotRef = selection.startSlot!
-
-    const result = this._insert(startSlotRef, selection.startOffset!, content, true)
-
-    if (result) {
-      selection.setPosition(result, result.index)
-      invokeListener(result.parent!, 'onContentInserted', new Event<InsertEventData>(result, {
-        index: result.index,
-        content
-      }, () => {
-        //
-      }))
+  /**
+   * 在当前选区插入新内容，当选区未闭合时，会先删除选区内容，再插入新的内容
+   * @param content 新插入的内容
+   * @param formats 新的格式
+   */
+  insert(content: string | ComponentInstance, formats?: Formats): boolean
+  insert(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
+  insert(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+    const slot = this._insert(content, false, formatter, value)
+    if (slot) {
+      const startSlot = this.selection.startSlot!
+      this.selection.setPosition(startSlot, startSlot.index)
       return true
     }
     return false
@@ -229,7 +232,7 @@ export class Commander {
     const startOffset = this.selection.startOffset!
     const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
     const content = isToEnd ? '\n\n' : '\n'
-    const isInserted = this.insert(content)
+    const isInserted = this.write(content)
     if (isInserted && isToEnd) {
       this.selection.setPosition(startSlot, startOffset + 1)
     }
@@ -262,12 +265,6 @@ export class Commander {
         return this.tryCleanDoc()
       }
       return false
-      // if (!deleteBefore) {
-      //   return false
-      // }
-      //
-      // const firstSlotRef = this.rootComponentRef.childSlotRefs[0]
-      // selection.setStart(firstSlotRef, 0)
     }
     if (selection.startSlot === selection.endSlot) {
       const slot = selection.startSlot!
@@ -427,10 +424,9 @@ export class Commander {
     if (isPreventDefault) {
       return
     }
-    const contents = pasteSlot.sliceContent()
-
-    contents.forEach(i => {
-      this.insert(i)
+    const delta = pasteSlot.toDelta()
+    delta.forEach(action => {
+      this.insert(action.insert, action.formats)
     })
   }
 
@@ -484,7 +480,7 @@ export class Commander {
         slot.retain(0)
         slot.retain(slot.length, formatter, value)
       } else {
-        this.insert(placeholder)
+        this.write(placeholder)
         const startOffset = this.selection.startOffset!
         slot.retain(startOffset - 1)
         slot.retain(1, formatter, value)
@@ -514,7 +510,7 @@ export class Commander {
           slot.retain(startOffset - 1)
           slot.retain(1, formatter, null)
         } else {
-          this.insert(placeholder)
+          this.write(placeholder)
           slot.retain(startOffset)
           slot.retain(1, formatter, null)
         }
@@ -541,6 +537,7 @@ export class Commander {
       parentSlot.insert(component)
     }
   }
+
   /**
    * 在指定组件后插入新的组件
    * @param component 要插入的组件
@@ -607,60 +604,81 @@ export class Commander {
     if (source.isEmpty && !targetSlot.isEmpty) {
       return true
     }
-    const deletedContent = source.sliceContent()
-    while (deletedContent.length) {
-      const firstContent = deletedContent.shift()!
-      const isInsert = this._insert(targetSlot, targetSlot.index, firstContent, false)
-      if (isInsert) {
-        targetSlot = isInsert
-        const index = targetSlot.index
-        const startIndex = index - firstContent.length
-        source.cut(0, firstContent.length).getFormats().forEach(i => {
-          if (i.formatter.type !== FormatType.Block) {
-            targetSlot.retain(startIndex + i.startIndex)
-            targetSlot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
-          }
-        })
-        targetSlot.retain(index)
-      } else {
+    const delta = source.toDelta()
+    source.cut()
+
+    this.selection.setPosition(targetSlot, targetSlot.index)
+
+    for (const action of delta) {
+      const b = this.insert(action.insert, action.formats)
+      if (!b) {
         return false
       }
     }
     return true
   }
 
-  private _insert(target: Slot, index: number, content: string | ComponentInstance, expand: boolean): false | Slot {
+  private _insert(content: string | ComponentInstance,
+                  expand: boolean,
+                  formatter?: Formatter | Formats,
+                  value?: FormatValue): false | Slot {
+    const selection = this.selection
+    if (!selection.isSelected) {
+      return false
+    }
+
+    if (!selection.isCollapsed) {
+      const isCollapsed = this.delete(false)
+      if (!isCollapsed) {
+        return false
+      }
+    }
+    let formats: Formats = []
+    if (formatter) {
+      if (Array.isArray(formatter)) {
+        formats = formatter
+      } else {
+        formats.push([formatter, value as FormatValue])
+      }
+    }
+    const startSlot = selection.startSlot!
+
     let isPreventDefault = true
-    const event = new Event<InsertEventData>(target, {
+    const event = new Event<InsertEventData>(startSlot, {
       index: this.selection.startOffset!,
-      content
+      content,
+      formats: [...formats]
     }, () => {
       isPreventDefault = false
     })
-    invokeListener(target.parent!, 'onContentInsert', event)
+    invokeListener(startSlot.parent!, 'onContentInsert', event)
     if (isPreventDefault) {
       return false
     }
 
-    target.retain(index)
-    const isInserted = expand ? target.write(content) : target.insert(content)
+    startSlot.retain(selection.startOffset!)
+    const isInserted = expand ? startSlot.write(content, formats) : startSlot.insert(content, formats)
     if (!isInserted) {
-      const parentComponent = target.parent!
-
-      const slotRefIndex = parentComponent.slots.indexOf(target)
-      const nextSlotRef = parentComponent.slots.get(slotRefIndex + 1)
-      // 这里有 bug，如果相邻的下一个插件无法插入，不应递归再向后
-      if (nextSlotRef) {
-        return this._insert(nextSlotRef, 0, content, expand)
-      }
+      const parentComponent = startSlot.parent!
       const parentSlot = parentComponent.parent
       if (!parentSlot) {
         return false
       }
-      return this._insert(parentSlot, parentSlot.indexOf(parentComponent) + 1, content, expand)
+      selection.setPosition(parentSlot, parentSlot.indexOf(parentComponent) + 1)
+      return this._insert(content, expand, formats)
     }
-
-    return target
+    isPreventDefault = true
+    invokeListener(selection.commonAncestorComponent!, 'onContentInserted', new Event<InsertEventData>(selection.commonAncestorSlot!, {
+      index: selection.startOffset!,
+      content,
+      formats
+    }, () => {
+      isPreventDefault = false
+    }))
+    if (isPreventDefault) {
+      return false
+    }
+    return selection.startSlot!
   }
 
   private _deleteTree(component: ComponentInstance, currentSlot: Slot, stopSlot: Slot): DeleteTreeState {

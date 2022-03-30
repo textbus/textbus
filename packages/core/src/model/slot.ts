@@ -107,35 +107,37 @@ export class Slot<T = any> {
   /**
    * 向插槽内写入内容，并根据当前位置的格式，自动扩展
    * @param content
+   * @param formats
    */
-  write(content: string | ComponentInstance) {
-    const isString = typeof content === 'string'
-    const contentType = isString ? ContentType.Text : content.type
-    if (!this.schema.includes(contentType)) {
-      return false
-    }
-    if (isString) {
-      const index = this.index
-      const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
+  write(content: string | ComponentInstance, formats?: Formats): boolean
+  write(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
+  write(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+    const index = this.index
+    const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
 
-      const formats: Formats = expandFormat.toArray().map(i => {
-        return [
-          i.formatter,
-          i.value
-        ]
-      })
-      return this.insert(content, formats)
+    const formats: Formats = expandFormat.toArray().map(i => {
+      return [
+        i.formatter,
+        i.value
+      ]
+    })
+    if (formatter) {
+      if (Array.isArray(formatter)) {
+        formats.push(...formatter)
+      } else {
+        formats.push([formatter, value as FormatValue])
+      }
     }
-    return this.insert(content)
+    return this.insert(content, formats)
   }
 
   /**
    * 向插槽内写入内容，并可同时应用格式
    * @param content
+   * @param formats
    */
-  insert(content: string | ComponentInstance): boolean
-  insert(content: string, formats: Formats): boolean
-  insert(content: string, formatter: Formatter, value: FormatValue): boolean
+  insert(content: string | ComponentInstance, formats?: Formats): boolean
+  insert(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
   insert(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
@@ -152,18 +154,10 @@ export class Slot<T = any> {
     let actionData: string | ComponentLiteral
     let length: number
     const startIndex = this.index
-    let formats: Formats = []
 
     if (typeof content === 'string') {
       if (content.length === 0) {
         return true
-      }
-      if (formatter) {
-        if (Array.isArray(formatter)) {
-          formats = formatter
-        } else {
-          formats.push([formatter, value as FormatValue])
-        }
       }
       actionData = content
       length = content.length
@@ -185,6 +179,19 @@ export class Slot<T = any> {
         this.changeMarker.forceMarkChanged()
       }))
       this.componentChangeListeners.set(content, sub)
+    }
+    let formats: Formats = []
+    if (formatter) {
+      if (Array.isArray(formatter)) {
+        formats = formatter
+      } else {
+        formats.push([formatter, value as FormatValue])
+      }
+    }
+    if (isEmpty) {
+      formats = formats.filter(i => {
+        return i[0].type !== FormatType.Block
+      })
     }
     this.format.split(startIndex, length)
 
