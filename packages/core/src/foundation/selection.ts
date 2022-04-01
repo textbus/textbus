@@ -1205,14 +1205,14 @@ export class Selection {
     const firstSlotRefIndex = paths.shift()!
 
     const slot = component.slots.get(firstSlotRefIndex)!
-    if (paths.length === 0) {
+    if (paths.length === 0 || !slot) {
       return slot || null
     }
     const position = paths.shift()!
 
     component = slot.getContentAtIndex(position) as ComponentInstance
 
-    if (paths.length === 0) {
+    if (paths.length === 0 || !component) {
       return component || null
     }
     return Selection.findTreeNode(paths, component)
