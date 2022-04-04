@@ -273,7 +273,7 @@ export class Renderer {
   }
 
   /**
-   * 获取插件对应的虚拟 DOM 节点
+   * 获取插槽 对应的虚拟 DOM 节点
    * @param slot
    */
   getVNodeBySlot(slot: Slot) {

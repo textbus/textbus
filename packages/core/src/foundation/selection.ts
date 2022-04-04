@@ -199,7 +199,7 @@ export class Selection {
   /**
    * 选区的公共父组件
    */
-  get commonAncestorComponent(): ComponentInstance | null {
+    get commonAncestorComponent(): ComponentInstance | null {
     let startComponent = this.startSlot?.parent
     let endComponent = this.endSlot?.parent
     if (startComponent === endComponent) {
@@ -408,14 +408,14 @@ export class Selection {
   /**
    * 向右框选
    */
-  wrapToRight() {
+  wrapToAfter() {
     this.wrapTo(false)
   }
 
   /**
    * 向左框选
    */
-  wrapToLeft() {
+  wrapToBefore() {
     this.wrapTo(true)
   }
 
@@ -570,7 +570,7 @@ export class Selection {
    * 根据路径获取对应的组件
    * @param paths
    */
-  findComponentByPath(paths: number[]): ComponentInstance | null {
+  findComponentByPaths(paths: number[]): ComponentInstance | null {
     const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
       return null

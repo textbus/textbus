@@ -227,7 +227,7 @@ export class CoreHistory extends History {
           }
         })
       } else {
-        const component = this.selection.findComponentByPath(path)!
+        const component = this.selection.findComponentByPaths(path)!
         actions.forEach(action => {
           if (action.type === 'retain') {
             component.slots.retain(action.offset)

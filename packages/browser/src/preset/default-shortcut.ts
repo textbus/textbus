@@ -78,10 +78,10 @@ export class DefaultShortcut implements Plugin {
       action: (key) => {
         switch (key) {
           case 'ArrowLeft':
-            this.selection.wrapToLeft()
+            this.selection.wrapToBefore()
             break
           case 'ArrowRight':
-            this.selection.wrapToRight()
+            this.selection.wrapToAfter()
             break
           case 'ArrowUp':
             this.selection.wrapToTop()
