@@ -38,7 +38,11 @@ export interface TextbusConfig {
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
 
-  setup?(starter: Starter): void
+  /**
+   * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
+   * @param starter
+   */
+  setup?(starter: Starter): (() => unknown) | void
 }
 
 /**
@@ -50,6 +54,8 @@ export class Starter extends ReflectiveInjector {
 
   private instanceList = new Set<ComponentInstance>()
   private subs: Subscription[] = []
+
+  private beforeDestroy: (() => unknown) | void
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [
@@ -102,7 +108,7 @@ export class Starter extends ReflectiveInjector {
       }
     ])
     this.onReady = this.readyEvent.asObservable()
-    config.setup?.(this)
+    this.beforeDestroy = config.setup?.(this)
   }
 
   /**
@@ -148,6 +154,10 @@ export class Starter extends ReflectiveInjector {
    * 销毁 Textbus 实例
    */
   destroy() {
+    const beforeDestroy = this.beforeDestroy
+    if (typeof beforeDestroy === 'function') {
+      beforeDestroy()
+    }
     [History].forEach(i => {
       this.get(i).destroy()
     })

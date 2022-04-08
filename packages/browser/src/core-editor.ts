@@ -69,6 +69,8 @@ export class CoreEditor {
 
   private workbench!: HTMLElement
 
+  private initBeforeListener: Promise<unknown>[] = []
+
   constructor() {
     this.onChange = this.changeEvent.asObservable()
   }
@@ -153,17 +155,21 @@ export class CoreEditor {
         if (this.destroyed) {
           return starter
         }
-        this.subs.push(renderer.onViewChecked.subscribe(() => {
-          this.changeEvent.next()
-        }))
-        starter.get(Input)
-        this.isReady = true
-        this.injector = starter
+        return this.initBeforeListener.reduce((p1, p2) => {
+          return p1.then(() => p2)
+        }, Promise.resolve()).then(() => {
+          this.subs.push(renderer.onViewChecked.subscribe(() => {
+            this.changeEvent.next()
+          }))
+          starter.get(Input)
+          this.isReady = true
+          this.injector = starter
 
-        if (options.autoFocus) {
-          this.focus()
-        }
-        return starter
+          if (options.autoFocus) {
+            this.focus()
+          }
+          return starter
+        })
       })
     })
   }
@@ -279,6 +285,10 @@ export class CoreEditor {
     rootComponentRef.component.slots.clean()
     rootComponentRef.component.slots.push(...component.slots.toArray())
     invokeListener(component, 'onDestroy')
+  }
+
+  addInitBeforeListener(promise: Promise<unknown>) {
+    this.initBeforeListener.push(promise)
   }
 
   protected guardReady() {

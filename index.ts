@@ -69,7 +69,7 @@ const editor = createEditor(document.getElementById('box')!, {
 
     collaborate.setup()
 
-    collaborate.onSelectionChange.subscribe(paths => {
+    const sub = collaborate.onSelectionChange.subscribe(paths => {
       const localSelection: RemoteSelection = {
         username: user.name,
         color: user.color,
@@ -97,6 +97,9 @@ const editor = createEditor(document.getElementById('box')!, {
         return `<span style="color: ${i.color}">${i.name}</span>`
       }).join('')
     })
+    return () => {
+      sub.unsubscribe()
+    }
   },
 })
 
