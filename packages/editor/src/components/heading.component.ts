@@ -23,6 +23,12 @@ export const headingComponent = defineComponent({
       ContentType.Text,
       ContentType.InlineComponent
     ])])
+    if (!slots.length) {
+      slots.push(new Slot([
+        ContentType.Text,
+        ContentType.InlineComponent
+      ]))
+    }
     useEnterBreaking(injector, slots)
 
     return {

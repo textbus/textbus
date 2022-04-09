@@ -23,6 +23,13 @@ export const blockComponent = defineComponent({
       ContentType.InlineComponent,
       ContentType.BlockComponent
     ])])
+    if (!slots.length) {
+      slots.push(new Slot([
+        ContentType.Text,
+        ContentType.InlineComponent,
+        ContentType.BlockComponent
+      ]))
+    }
     useEnterBreaking(injector, slots)
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {

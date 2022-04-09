@@ -20,6 +20,13 @@ export const blockquoteComponent = defineComponent({
       ContentType.InlineComponent,
       ContentType.BlockComponent
     ])])
+    if (!slots.length) {
+      slots.push(new Slot([
+        ContentType.Text,
+        ContentType.InlineComponent,
+        ContentType.BlockComponent
+      ]))
+    }
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {

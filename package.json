@@ -72,10 +72,11 @@
     "@tanbo/di": "^1.0.7",
     "@tanbo/stream": "^0.0.12",
     "immer": "^9.0.12",
-    "reflect-metadata": "^0.1.13",
     "prismjs": "^1.23.0",
-    "yjs": "^13.5.27",
-    "y-webrtc": "^10.2.2"
+    "reflect-metadata": "^0.1.13",
+    "y-webrtc": "^10.2.2",
+    "y-websocket": "^1.4.0",
+    "yjs": "^13.5.27"
   },
   "repository": {
     "type": "git",
