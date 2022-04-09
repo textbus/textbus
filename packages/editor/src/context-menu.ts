@@ -256,8 +256,9 @@ export class ContextMenu {
           )
 
           if (!item.disabled && typeof (item as ContextMenuItem).onClick === 'function') {
-            btn.addEventListener('mousedown', () => {
+            btn.addEventListener('mousedown', ev => {
               this.eventFromSelf = true
+              ev.stopPropagation()
             })
             btn.addEventListener('click', () => {
               this.hide();
