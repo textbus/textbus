@@ -79,12 +79,10 @@ export const defaultFormatLoaders: FormatLoader[] = [
 
 export const defaultOptions: EditorOptions = {
   editingStyleSheets: [
-    `[style*=color]:not([style*=background-color])
-   a {color: inherit;}`,
-    `a {text-decoration: underline; color: #449fdb; cursor: text;}`
-  ],
-  styleSheets: [
-    `body {line-height: 1.5em}`
+    `[textbus-document=true] [style*=color]:not([style*=background-color])
+     [textbus-document=true] a {color: inherit;}
+     [textbus-document=true] a {text-decoration: underline; color: #449fdb; cursor: text;}
+     [textbus-document=true] {line-height: 1.5em}`
   ],
   componentLoaders: defaultComponentLoaders,
   formatLoaders: defaultFormatLoaders
