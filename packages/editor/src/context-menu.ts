@@ -58,7 +58,6 @@ export class ContextMenu {
             }
           }
         })
-        const rect = this.container.getBoundingClientRect()
         const menus = this.makeContextmenu()
         const defaultMenus: ContextMenuConfig[] = [{
           iconClasses: ['textbus-icon-copy'],
@@ -113,7 +112,7 @@ export class ContextMenu {
         this.menu = this.show([
             ...menus,
             defaultMenus,
-          ], ev.pageX + rect.x, ev.pageY + rect.y,
+          ], ev.pageX, ev.pageY,
           this.menuSubscriptions
         )
         ev.preventDefault()
