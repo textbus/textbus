@@ -41,7 +41,7 @@ export class Editor extends CoreEditor {
       throw editorErrorFn('selector is not an HTMLElement, or the CSS selector cannot find a DOM element in the document.')
     }
     this.onReady = this.readyEvent.asObservable()
-    this.layout = new Layout(options.autoHeight, options.minHeight)
+    this.layout = new Layout(options.autoHeight)
     if (options.theme) {
       this.layout.setTheme(options.theme)
     }

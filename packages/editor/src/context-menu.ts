@@ -15,8 +15,8 @@ import {
 import {
   createElement,
   createTextNode,
-  DOC_CONTAINER,
   EDITABLE_DOCUMENT,
+  EDITOR_CONTAINER,
   Parser
 } from '@textbus/browser'
 import { I18n } from './i18n'
@@ -34,7 +34,7 @@ export class ContextMenu {
   private submenu!: HTMLElement
 
   constructor(@Inject(EDITABLE_DOCUMENT) private editorDocument: Document,
-              @Inject(DOC_CONTAINER) private container: HTMLElement,
+              @Inject(EDITOR_CONTAINER) private container: HTMLElement,
               private i18n: I18n,
               private parser: Parser,
               private message: Message,
@@ -112,7 +112,7 @@ export class ContextMenu {
         this.menu = this.show([
             ...menus,
             defaultMenus,
-          ], ev.pageX, ev.pageY,
+          ], ev.clientX, ev.clientY,
           this.menuSubscriptions
         )
         ev.preventDefault()

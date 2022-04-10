@@ -362,14 +362,9 @@ export class CoreEditor {
     const id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
     const doc = createElement('div', {
       styles: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        zIndex: 0,
         cursor: 'text',
-        padding: '8px'
+        padding: '8px',
+        minHeight,
       },
       props: {
         id
@@ -391,7 +386,6 @@ export class CoreEditor {
         width: '100%',
         height: '100%',
         position: 'relative',
-        minHeight,
         background: '#fff',
       },
       children: [doc, mask]

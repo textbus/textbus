@@ -37,7 +37,7 @@ export class Layout {
 
   private sub: Subscription | null = null
 
-  constructor(autoHeight = false, minHeight = '1em') {
+  constructor(autoHeight = false) {
     this.container = createElement('div', {
       classes: ['textbus-container'],
       children: [
@@ -60,7 +60,6 @@ export class Layout {
     if (autoHeight) {
       this.container.style.height = 'auto'
       this.scroller.style.overflow = 'visible'
-      this.scroller.style.minHeight = minHeight
       this.workbench.style.position = 'static'
     }
   }
