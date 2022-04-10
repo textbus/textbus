@@ -25,6 +25,8 @@ export interface Plugin {
 export interface BaseEditorOptions {
   /** 自动获取焦点 */
   autoFocus?: boolean
+  /** 编译框最小高度 */
+  minHeight?: string
   /** 组件加载器 */
   componentLoaders?: ComponentLoader[]
   /** 格式加载器 */

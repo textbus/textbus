@@ -9,8 +9,6 @@ import { UploadConfig } from './file-uploader'
 export interface EditorOptions extends BaseEditorOptions {
   /** 编辑区域自动高度 */
   autoHeight?: boolean
-  /** 编译器最小高度 */
-  minHeight?: string
   /** 主题配置，目前只支持 dark */
   theme?: string
   /** 自定义根组件加载器，否则使用默认根组件加载器 */

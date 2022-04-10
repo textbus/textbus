@@ -87,7 +87,7 @@ export class CoreEditor {
     this.rootComponentLoader = rootComponentLoader
     this.options = options
     this.plugins = options.plugins || []
-    const {doc, mask, wrapper} = CoreEditor.createLayout()
+    const {doc, mask, wrapper} = CoreEditor.createLayout(options.minHeight)
     host.appendChild(wrapper)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
@@ -145,12 +145,6 @@ export class CoreEditor {
         options.setup?.(stater)
       }
     }).then(starter => {
-      return this.initBeforeListener.reduce((p1, p2) => {
-        return p1.then(() => p2)
-      }, Promise.resolve()).then(() => {
-        return starter
-      })
-    }).then(starter => {
       const parser = starter.get(Parser)
       const translator = starter.get(Translator)
 
@@ -167,13 +161,19 @@ export class CoreEditor {
       }
 
       starter.mount(component, doc)
-      const renderer = starter.get(Renderer)
 
       this.initDocStyleSheetsAndScripts(options)
       this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
       if (this.destroyed) {
         return starter
       }
+      return this.initBeforeListener.reduce((p1, p2) => {
+        return p1.then(() => p2)
+      }, Promise.resolve()).then(() => {
+        return starter
+      })
+    }).then(starter => {
+      const renderer = starter.get(Renderer)
       this.subs.push(renderer.onViewChecked.subscribe(() => {
         this.changeEvent.next()
       }))
@@ -358,7 +358,7 @@ export class CoreEditor {
     return resources
   }
 
-  private static createLayout() {
+  private static createLayout(minHeight = '100%') {
     const id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
     const doc = createElement('div', {
       styles: {
@@ -391,7 +391,7 @@ export class CoreEditor {
         width: '100%',
         height: '100%',
         position: 'relative',
-        minHeight: '100%',
+        minHeight,
         background: '#fff',
       },
       children: [doc, mask]
