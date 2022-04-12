@@ -1,5 +1,5 @@
-import { onDestroy, onViewChecked, onViewInit, Ref, Selection, useContext, useSelf } from '@textbus/core'
-import { createElement, EDITABLE_DOCUMENT, EDITOR_CONTAINER } from '@textbus/browser'
+import { onDestroy, onViewInit, Ref, Selection, Renderer, useContext, useSelf } from '@textbus/core'
+import { createElement, EDITOR_CONTAINER } from '@textbus/browser'
 import { fromEvent, Subscription } from '@tanbo/stream'
 
 const text = document.createElement('div')
@@ -32,23 +32,25 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
   const componentInstance = useSelf()
   const selection = context.get(Selection)
   const docContainer = context.get(EDITOR_CONTAINER)
-  const editorDocument = context.get(EDITABLE_DOCUMENT)
+  const renderer = context.get(Renderer)
 
+  const self = useSelf()
   let isFocus = false
 
   const subs: Subscription[] = []
 
-  onViewChecked(() => {
-    if (isFocus && currentRef) {
-      updateStyle(currentRef.current!, docContainer.getBoundingClientRect())
-    } else {
-      mask.parentNode?.removeChild(mask)
-    }
-  })
   subs.push(
-    fromEvent(editorDocument, 'click').subscribe(() => {
-      isFocus = false
-      // mask.parentNode?.removeChild(mask)
+    renderer.onViewChecked.subscribe(() => {
+      if (isFocus && currentRef) {
+        updateStyle(currentRef.current!, docContainer.getBoundingClientRect())
+      }
+    }),
+    selection.onChange.subscribe(() => {
+      const index = self.parent?.indexOf(self)
+      if (selection.startSlot !== self.parent || selection.endSlot !== self.parent || selection.startOffset !== index || selection.endOffset !== index + 1) {
+        isFocus = false
+        mask.parentNode?.removeChild(mask)
+      }
     }),
     fromEvent<MouseEvent>(mask, 'mousedown').subscribe(ev => {
       if (currentRef !== ref || !currentRef?.current) {

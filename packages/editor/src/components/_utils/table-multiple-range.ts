@@ -511,6 +511,7 @@ export function useTableMultipleRange(
       }
     } else {
       removeMask()
+      selection.getSelectedScopes = oldGetSelectedScope
       if (selection.commonAncestorComponent?.name !== self.name) {
         nativeSelectionBridge.showNativeMask()
       }

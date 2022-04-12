@@ -10,7 +10,7 @@
     "strict": true,
     "module": "es2020",
     "moduleResolution": "node",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "inlineSources": true,
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,

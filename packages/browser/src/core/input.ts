@@ -17,6 +17,7 @@ export class Input {
   private container = Input.createEditableFrame()
 
   private subscriptions: Subscription[] = []
+  private doc!: Document
 
   constructor(private parser: Parser,
               private keyboard: Keyboard,
@@ -31,6 +32,7 @@ export class Input {
     this.subscriptions.push(
       fromEvent(this.container, 'load').subscribe(() => {
         const doc = this.container.contentDocument!
+        this.doc = doc
         const contentBody = doc.body
         const t = doc.createElement('textarea')
         contentBody.appendChild(t)
@@ -105,10 +107,10 @@ export class Input {
           return
         }
 
-        const div = document.createElement('div')
+        const div = this.doc.createElement('div')
         div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px; top: -9999px; opacity:0'
         div.contentEditable = 'true'
-        document.body.appendChild(div)
+        this.doc.body.appendChild(div)
         div.focus()
         setTimeout(() => {
           let html = div.innerHTML
@@ -123,7 +125,7 @@ export class Input {
           }
           this.handlePaste(html, text)
 
-          document.body.removeChild(div)
+          this.doc.body.removeChild(div)
         })
       })
     )
