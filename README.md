@@ -60,9 +60,7 @@ const editor = createEditor(document.getElementById('editor'))
 ```
 ## 官方文档
 
-[Textbus2.0 官方文档](https://Textbus.io)
-
-[Textbus1.0 官网](https://Textbus.tanboui.com) 将于4月中旬废弃，相应文档现已可在 2.0 官网查阅。
+[Textbus 官方文档](https://Textbus.io)
 
 ## 本地开发
 
