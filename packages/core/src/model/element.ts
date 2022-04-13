@@ -48,7 +48,9 @@ export class VElement {
     children.flat().forEach(i => {
       if (i instanceof VElement) {
         vNode.appendChild(i)
-      } else if (i !== false) {
+      } else if (typeof i === 'string' && i.length > 0) {
+        vNode.appendChild(new VTextNode(i))
+      } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
         vNode.appendChild(new VTextNode(String(i)))
       }
     })
@@ -74,7 +76,7 @@ export class VElement {
 
   constructor(public tagName: string,
               attrs: VElementOptions | null = null,
-              children: Array<VElement | VTextNode> = []) {
+              children: Array<VElement | VTextNode | string> = []) {
     attrs = attrs || {}
     const className = (attrs.class || '').trim()
     this.classes = new Set<string>(className ? className.split(/\s+/g) : [])
@@ -109,7 +111,12 @@ export class VElement {
       }
     })
 
-    this.appendChild(...children)
+    this.appendChild(...children.filter(i => i).map(i => {
+      if (typeof i === 'string') {
+        return new VTextNode(i)
+      }
+      return i
+    }))
   }
 
   /**

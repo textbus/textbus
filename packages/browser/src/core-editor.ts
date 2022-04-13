@@ -364,6 +364,7 @@ export class CoreEditor {
       styles: {
         cursor: 'text',
         padding: '8px',
+        wordBreak: 'break-all',
         minHeight,
       },
       props: {

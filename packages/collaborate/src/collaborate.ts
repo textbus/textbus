@@ -1,9 +1,8 @@
 import { Injectable } from '@tanbo/di'
-import { debounceTime, filter, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+import { filter, microTask, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   RootComponentRef,
   Starter,
-  Operation,
   Translator,
   Registry,
   Selection,
@@ -114,22 +113,18 @@ export class Collaborate implements History {
       this.selection.restore()
       this.updateFromSelf = true
     })
-    const operations: Operation[] = []
     this.subscriptions.push(
       this.rootComponentRef.component.changeMarker.onChange.pipe(
         filter(() => {
           return this.updateFromSelf
         }),
-        tap(op => {
-          operations.push(op)
-        }),
-        debounceTime(1)
-      ).subscribe(() => {
+        microTask()
+      ).subscribe((operations) => {
+        console.log(operations)
         this.yDoc.transact(() => {
           operations.forEach(operation => {
             this.localToRemote.transform(operation, root)
           })
-          operations.length = 0
         }, this.yDoc)
         this.renderer.render()
         this.selection.restore()

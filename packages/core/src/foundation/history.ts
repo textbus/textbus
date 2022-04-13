@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { debounceTime, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+import { microTask, Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
@@ -88,7 +88,7 @@ export class CoreHistory extends History {
    */
   listen() {
     this.record()
-    this.forceChangeSubscription = this.root.component.changeMarker.onForceChange.pipe(debounceTime(1)).subscribe(() => {
+    this.forceChangeSubscription = this.root.component.changeMarker.onForceChange.pipe(microTask()).subscribe(() => {
       this.renderer.render()
     })
   }
@@ -137,14 +137,10 @@ export class CoreHistory extends History {
   }
 
   private record() {
-    let operations: Operation [] = []
     let beforePaths = this.selection.getPaths()
     this.subscription = this.root.component.changeMarker.onChange.pipe(
-      tap(op => {
-        operations.push(op)
-      }),
-      debounceTime(1)
-    ).subscribe(() => {
+      microTask()
+    ).subscribe((operations) => {
       this.renderer.render()
       this.selection.restore()
       this.historySequence.length = this.index
@@ -156,7 +152,6 @@ export class CoreHistory extends History {
         afterPaths
       })
       beforePaths = afterPaths
-      operations = []
       this.pushEvent.next()
       this.changeEvent.next()
     })
