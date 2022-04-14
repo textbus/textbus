@@ -26,7 +26,7 @@ import {
   TableCellPosition,
   TableConfig,
   useTableMultipleRange
-} from './_utils/table-multiple-range'
+} from './hooks/table-multiple-range'
 
 export {
   createCell

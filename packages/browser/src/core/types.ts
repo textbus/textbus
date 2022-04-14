@@ -40,7 +40,10 @@ export interface BaseEditorOptions {
   /** 插件 */
   plugins?: Plugin[]
   /** 提供者集合，数组内配置的类，可以使用 Textbus 中的依赖注入能力 */
-  providers?: TextbusConfig['providers'],
-
+  providers?: TextbusConfig['providers']
+  /** 编辑器启动前调用 */
   setup?: TextbusConfig['setup']
+
+  /** 当用户按 Ctrl + S 时调用 */
+  onSave?(): void
 }

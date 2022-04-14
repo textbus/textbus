@@ -10,7 +10,7 @@ import {
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 
-import { useDragResize } from './_utils/drag-resize'
+import { useDragResize } from './hooks/drag-resize'
 
 export interface VideoState {
   src: string

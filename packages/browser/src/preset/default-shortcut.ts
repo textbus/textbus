@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@tanbo/di'
 import { Commander, History, Keyboard, Selection } from '@textbus/core'
-import { EDITABLE_DOCUMENT, Plugin, SelectionBridge } from '../core/_api'
+import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, Plugin, SelectionBridge, BaseEditorOptions } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
@@ -9,6 +9,7 @@ import { EDITABLE_DOCUMENT, Plugin, SelectionBridge } from '../core/_api'
 export class DefaultShortcut implements Plugin {
   constructor(private selection: Selection,
               @Inject(EDITABLE_DOCUMENT) private document: Document,
+              @Inject(EDITOR_OPTIONS) private options: BaseEditorOptions,
               private selectionBridge: SelectionBridge,
               private history: History,
               private commander: Commander,
@@ -146,6 +147,15 @@ export class DefaultShortcut implements Plugin {
       },
       action: () => {
         this.history.forward()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'x',
+        ctrlKey: true
+      },
+      action: () => {
+        this.options.onSave?.()
       }
     })
   }

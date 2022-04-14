@@ -1,3 +1,5 @@
+export * from './hooks/_api'
+
 export * from './audio.component'
 export * from './block.component'
 export * from './blockquote.component'

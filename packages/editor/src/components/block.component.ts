@@ -11,7 +11,7 @@ import {
   VElement
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
-import { useEnterBreaking } from './_utils/single-block-enter'
+import { useEnterBreaking } from './hooks/single-block-enter'
 
 export const blockComponent = defineComponent({
   type: ContentType.BlockComponent,

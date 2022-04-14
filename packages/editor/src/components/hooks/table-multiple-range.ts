@@ -509,10 +509,10 @@ export function useTableMultipleRange(
       } else {
         selection.getSelectedScopes = oldGetSelectedScopes
       }
-    } else if (selection.commonAncestorComponent?.name !== self.name) {
+    } else {
       removeMask()
-      selection.getSelectedScopes = oldGetSelectedScopes
       if (selection.commonAncestorComponent?.name !== self.name) {
+        selection.getSelectedScopes = oldGetSelectedScopes
         nativeSelectionBridge.showNativeMask()
       }
     }
