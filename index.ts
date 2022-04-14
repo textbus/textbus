@@ -1,6 +1,6 @@
 import "./index.scss"
 import { createEditor } from '@textbus/editor';
-import { RootComponentRef, History } from '@textbus/core';
+import { RootComponentRef, History, Commander } from '@textbus/core';
 import { Collaborate, CollaborateCursor, RemoteSelection } from '@textbus/collaborate';
 import { WebsocketProvider } from 'y-websocket'
 import {
@@ -15,6 +15,17 @@ import {
 } from 'yjs'
 
 const header = document.getElementById('header')!
+const insertBtn = document.getElementById('insert-btn')!
+const insertSpan = document.getElementById('insert-span')!
+
+insertBtn.addEventListener('click', () => {
+  const commander = editor.injector!.get(Commander)
+  commander.insert('xxx')
+})
+insertSpan.addEventListener('click', () => {
+  const commander = editor.injector!.get(Commander)
+  commander.insert('vvv')
+})
 
 export interface User {
   color: string
@@ -108,46 +119,3 @@ editor.onChange.subscribe(() => {
   const root = editor.injector!.get(RootComponentRef)
   // console.log(root.component.toString())
 })
-
-// const yDoc = new YDoc()
-//
-// const root = yDoc.getText('content')
-//
-// root.observeDeep(events => {
-//   events.forEach(ev => {
-//     if (ev.path.length === 5) {
-//       console.log((ev.target.parent as YText).toDelta())
-//       console.log(ev, ev.path, content.toDelta())
-//     }
-//   })
-// })
-//
-// const p = new YMap()
-// const slots = new YArray()
-// const slot = new YMap()
-// const content = new YText()
-// slot.set('content', content)
-// slots.insert(0, [slot])
-// p.set('slots', slots)
-// root.insertEmbed(0, p)
-//
-// content.insert(0, '1')
-// content.insert(1, '2')
-// content.insert(2, '3')
-//
-//
-// const img = new YMap()
-//
-// img.set('state', {
-//   width: '200px',
-//   height: '200px'
-// })
-//
-// content.insertEmbed(3, img)
-// content.insert(3, '4')
-// content.insert(4, '5')
-// content.insert(5, '6')
-// img.set('state', {
-//   width: '300px',
-//   height: '300px'
-// })

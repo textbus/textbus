@@ -262,16 +262,16 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private listen(connector: NativeSelectionConnector) {
     const selection = this.nativeSelection
-    let isFocusin = false
+    // let isFocusin = false
     this.subs.push(
-      fromEvent(this.document, 'selectstart').subscribe((ev) => {
-        const nodes = ev.composedPath()
-        isFocusin = nodes.includes(this.docContainer)
-        if (!isFocusin) {
-          connector.setSelection(null)
-        }
-      }),
-      fromEvent<MouseEvent>(this.document, 'mousedown').subscribe(ev => {
+      // fromEvent(this.document, 'selectstart').subscribe((ev) => {
+      //   const nodes = ev.composedPath()
+      //   isFocusin = nodes.includes(this.docContainer)
+      //   if (!isFocusin) {
+      //     connector.setSelection(null)
+      //   }
+      // }),
+      fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
           return
         }
@@ -297,17 +297,24 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
-        if (!isFocusin || selection.rangeCount === 0) {
+        // if (!isFocusin || selection.rangeCount === 0) {
+        //   return
+        // }
+        if (selection.rangeCount === 0 || !this.docContainer.contains(selection.anchorNode)) {
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
-        if (!this.docContainer.contains(nativeRange.startContainer)) {
-          return
-        }
-        if (!this.docContainer.contains(nativeRange.endContainer)) {
-          const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.get(0)!)!
-          const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
-          nativeRange.setEndAfter(nativeNode.lastChild!)
+        const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
+        if (!this.docContainer.contains(selection.focusNode)) {
+          if (isFocusEnd) {
+            const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)!
+            const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+            nativeRange.setEndAfter(nativeNode.lastChild!)
+          } else {
+            const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.last!)!
+            const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+            nativeRange.setStartBefore(nativeNode.firstChild!)
+          }
         }
         const startFocusNode = this.findFocusNode(nativeRange.startContainer)
         const endFocusNode = this.findFocusNode(nativeRange.endContainer)
@@ -315,8 +322,6 @@ export class SelectionBridge implements NativeSelectionBridge {
           connector.setSelection(null)
           return
         }
-
-        const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
 
         if (startFocusNode !== nativeRange.startContainer) {
           const startNextSibling = startFocusNode.nextSibling
