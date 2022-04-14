@@ -120,7 +120,6 @@ export class Collaborate implements History {
         }),
         microTask()
       ).subscribe((operations) => {
-        console.log(operations)
         this.yDoc.transact(() => {
           operations.forEach(operation => {
             this.localToRemote.transform(operation, root)

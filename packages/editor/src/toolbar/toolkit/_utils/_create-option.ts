@@ -7,19 +7,22 @@ export interface OptionConfig {
   label?: string
   iconClasses?: string[]
   classes?: string[]
+
   onClick(): void
+
   keymap?: Keymap
+  disabled?: boolean
 }
 
 export function createOption(config: OptionConfig) {
   return createElement('button', {
-    classes: ['textbus-toolbar-option'],
+    classes: ['textbus-toolbar-option', ...(config.disabled ? ['textbus-toolbar-option-disabled'] : [])],
     children: [
       config.iconClasses ? createElement('span', {
         classes: ['textbus-toolbar-option-icon', ...(config.iconClasses || [])]
       }) : null,
       createElement('span', {
-        classes: ['textbus-toolbar-option-label', ...(config.classes ||[])],
+        classes: ['textbus-toolbar-option-label', ...(config.classes || [])],
         children: config.label ? [createTextNode(config.label)] : []
       }),
       config.keymap ? createElement('span', {
@@ -27,7 +30,7 @@ export function createOption(config: OptionConfig) {
         children: createKeymap(config.keymap)
       }) : null
     ],
-    on: {
+    on: config.disabled ? {} : {
       click() {
         config.onClick()
       }

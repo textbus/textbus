@@ -20,6 +20,8 @@ export interface SelectOptionConfig<T = any> {
   default?: boolean;
   /** 当前选项应用的快捷键 */
   keymap?: Keymap;
+  /** 是否禁用 */
+  disabled?: boolean
 }
 
 /**

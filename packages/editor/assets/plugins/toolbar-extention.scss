@@ -38,19 +38,31 @@
   }
 
   &-SimSun {
-    font-family: SimSun;
+    font-family: SimSun, STSong;
   }
 
   &-SimHei {
-    font-family: SimHei;
+    font-family: SimHei, STHeiti;
   }
 
   &-KaiTi {
-    font-family: KaiTi;
+    font-family: KaiTi, STKaiti;
+  }
+
+  &-Microsoft-YaHei {
+    font-family: "Microsoft YaHei";
   }
 
   &-FangSong {
-    font-family: FangSong;
+    font-family: FangSong, STFangsong;
+  }
+
+  &-DongQingHei {
+    font-family: "Hiragino Sans GB", 冬青黑简体中文;
+  }
+
+  &-PingFang {
+    font-family: "PingFang SC", 苹方;
   }
 
   &-SimLi {
@@ -265,6 +277,7 @@
 
 .textbus-toolbar-image-size-setter {
   white-space: nowrap;
+
   input {
     width: 120px;
   }
