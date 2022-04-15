@@ -1,0 +1,135 @@
+.textbus-contextmenu {
+  position: fixed;
+  z-index: 20000;
+  user-select: none;
+  min-width: 180px;
+  max-width: 260px;
+  box-sizing: border-box;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+  background-color: rgba(255, 255, 255, .98);
+  overflow-y: auto;
+  border-radius: 3px;
+  @include scroll();
+}
+
+.textbus-contextmenu-container {
+  display: flex;
+
+  &:before {
+    content: "";
+    width: 35px;
+    border-right: 1px solid $color-light;
+    background-color: $color-lighter;
+  }
+}
+
+.textbus-contextmenu-groups {
+  flex: 1;
+}
+
+.textbus-contextmenu-group {
+  padding: 5px 0;
+  border-bottom: 1px solid $color-light;
+  position: relative;
+  z-index: 2;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.textbus-contextmenu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  line-height: 26px;
+  height: 26px;
+
+  &-btn {
+    display: flex;
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    text-align: left;
+    cursor: inherit;
+    position: relative;
+    padding: 0;
+    line-height: 26px;
+    color: inherit;
+    opacity: inherit;
+  }
+
+  &:hover {
+    background-color: $color-primary;
+    color: #fff;
+
+    .textbus-contextmenu-item-icon {
+      background-color: $color-primary;
+      color: #fff;
+    }
+  }
+
+  &-active {
+    background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .1);
+    color: inherit;
+
+    .textbus-contextmenu-item-icon {
+      background-color: rgba(red($color-primary), green($color-primary), blue($color-primary), .1);
+      color: inherit;
+    }
+  }
+
+  &.textbus-contextmenu-item-disabled {
+    background: none;
+    color: inherit;
+    opacity: .5;
+    cursor: not-allowed;
+
+    .textbus-contextmenu-item-icon {
+      background: none;
+      color: inherit;
+    }
+  }
+}
+
+.textbus-contextmenu-item-label {
+  flex: 1;
+  white-space: nowrap;
+  padding: 0 15px;
+  height: 26px;
+}
+
+.textbus-contextmenu-item-icon {
+  position: absolute;
+  height: 26px;
+  width: 30px;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  text-align: center;
+  opacity: .8;
+}
+
+.textbus-contextmenu-item-arrow {
+  margin-right: 12px;
+
+  &:after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px solid transparent;
+    border-left: 4px dashed;
+    border-bottom: 4px solid transparent;
+    transition: 0.15s ease;
+  }
+}

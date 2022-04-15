@@ -1,0 +1,47 @@
+.textbus-message {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  z-index: 2;
+  font-size: 13px;
+}
+
+.textbus-message-item {
+  width: 240px;
+  padding: 5px 15px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  border: 1px solid $color-light;
+  background-color: #fff;
+  transform-origin: 0;
+  animation: textbus-message .3s cubic-bezier(.36, .66, .04, 1);
+  margin: 10px;
+
+  &-info {
+    color: $color-info;
+  }
+
+  &-success {
+    color: $color-success;
+  }
+
+  &-warning {
+    color: $color-warning;
+  }
+
+  &-danger {
+    color: $color-danger;
+  }
+}
+
+@keyframes textbus-message {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}

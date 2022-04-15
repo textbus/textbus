@@ -1,0 +1,38 @@
+.textbus-dialog {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  pointer-events: none;
+  transition: background-color .15s cubic-bezier(.36, .66, .04, 1);
+  z-index: 100;
+
+  &-wrapper {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+    border-top: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: all .15s cubic-bezier(.36, .66, .04, 1);
+    pointer-events: auto;
+    margin-top: -100px;
+    opacity: 0;
+    transform-origin: 0 0;
+    //max-height: calc(100% - 20px);
+
+    &-active {
+      opacity: 1;
+      margin-top: -70px;
+    }
+  }
+
+  &-active {
+    background-color: rgba(0, 0, 0, .3);
+    pointer-events: auto;
+  }
+}
