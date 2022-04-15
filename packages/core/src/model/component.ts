@@ -62,6 +62,16 @@ export interface Shortcut {
   action(key: string): void
 }
 
+export interface MarkdownGrammarInterceptor<Data = any> {
+  /** 匹配字符 */
+  match: RegExp | ((content: string) => boolean)
+  /** 触发键 */
+  key: string | string[]
+
+  /** 触发执行的方法 */
+  generateInitData(content: string): Data
+}
+
 /**
  * 组件实例对象
  */
@@ -119,6 +129,9 @@ export interface ComponentOptions<Methods extends ComponentMethods, State> {
   /** 组件类型 */
   type: ContentType
 
+  /** markdown 支持 */
+  markdownSupport?: MarkdownGrammarInterceptor<ComponentData<State>>
+
   /**
    * 组件初始化实现
    * @param initData
@@ -129,16 +142,18 @@ export interface ComponentOptions<Methods extends ComponentMethods, State> {
 /**
  * Textbus 组件
  */
-export interface Component<ComponentInstance = any, Data = any> {
+export interface Component<Instance extends ComponentInstance = ComponentInstance, State = any> {
   /** 组件名 */
   name: string
+
+  markdownSupport?: MarkdownGrammarInterceptor<State>
 
   /**
    * 组件创建实例的方法
    * @param context
    * @param data
    */
-  createInstance(context: Injector, data?: Data): ComponentInstance
+  createInstance(context: Injector, data?: State): Instance
 }
 
 /**
@@ -256,6 +271,7 @@ export function defineComponent<Methods extends ComponentMethods,
   State = any>(options: ComponentOptions<Methods, State>): Component<ComponentInstance<Methods, State>, ComponentData<State>> {
   return {
     name: options.name,
+    markdownSupport: options.markdownSupport,
     createInstance(contextInjector: Injector, initData?: ComponentData<State>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()

@@ -17,6 +17,17 @@ import { useEnterBreaking } from './hooks/single-block-enter'
 export const headingComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'HeadingComponent',
+  markdownSupport: {
+    key: ' ',
+    match(content: string) {
+      return /^#{1,6}$/.test(content)
+    },
+    generateInitData(content) {
+      return {
+        state: 'h' + content.length
+      }
+    }
+  },
   setup(data?: ComponentData<string>) {
     const injector = useContext()
     const slots = useSlots(data?.slots || [new Slot([

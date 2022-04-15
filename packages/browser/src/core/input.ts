@@ -25,7 +25,6 @@ export class Input {
               private selection: Selection,
               private selectionBridge: SelectionBridge) {
 
-    selectionBridge.caret.elementRef.append(this.container)
     let isFocus = false
     let textarea: HTMLTextAreaElement | null = null
 

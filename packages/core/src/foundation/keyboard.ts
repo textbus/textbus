@@ -1,7 +1,8 @@
-import { Injectable } from '@tanbo/di'
-import { Shortcut } from '../model/_api'
+import { Inject, Injectable, Injector } from '@tanbo/di'
+import { Component, MarkdownGrammarInterceptor, Shortcut } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
+import { COMPONENT_LIST } from './_injection-tokens'
 
 export interface KeymapState {
   ctrlKey: boolean
@@ -16,9 +17,20 @@ export interface KeymapState {
 @Injectable()
 export class Keyboard {
   private shortcutList: Shortcut[] = []
+  private markdownMatchers: Array<{ component: Component, markdownInterceptor: MarkdownGrammarInterceptor }> = []
 
-  constructor(private commander: Commander,
+  constructor(@Inject(COMPONENT_LIST) private components: Component[],
+              private commander: Commander,
+              private injector: Injector,
               private selection: Selection) {
+    components.forEach(i => {
+      if (i.markdownSupport) {
+        this.markdownMatchers.push({
+          markdownInterceptor: i.markdownSupport,
+          component: i
+        })
+      }
+    })
   }
 
   /**
@@ -29,6 +41,64 @@ export class Keyboard {
     const key = keymapState.key
     const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\\])/g, '\\$1')}]$`, 'i')
 
+    const commonAncestorSlot = this.selection.commonAncestorSlot!
+    if (!keymapState.ctrlKey && !keymapState.shiftKey && !keymapState.altKey && commonAncestorSlot === this.selection.startSlot && commonAncestorSlot === this.selection.endSlot) {
+      for (const item of this.markdownMatchers) {
+        const markdownConfig = item.markdownInterceptor
+        const matchKey = Array.isArray(markdownConfig.key) ?
+          markdownConfig.key.some(k => reg.test(k)) :
+          reg.test(markdownConfig.key)
+        if (matchKey) {
+          const activeSlotContents = commonAncestorSlot.sliceContent()
+          let content = activeSlotContents[0]
+          if (activeSlotContents.length > 1 || typeof content !== 'string') {
+            continue
+          }
+
+          content = content.replace(/\n$/, '')
+
+          let matchContent = false
+          if (markdownConfig.match instanceof RegExp) {
+            matchContent = markdownConfig.match.test(content)
+          } else if (typeof markdownConfig.match === 'function') {
+            matchContent = markdownConfig.match(content)
+          }
+          if (matchContent) {
+            const initData = markdownConfig.generateInitData(content)
+            const newInstance = item.component.createInstance(this.injector, initData)
+            if (commonAncestorSlot.schema.includes(newInstance.type)) {
+              this.selection.setStart(commonAncestorSlot, 0)
+              this.selection.setEnd(commonAncestorSlot, commonAncestorSlot.length)
+              this.commander.delete()
+              this.commander.insert(newInstance)
+            } else {
+              const parentComponent = commonAncestorSlot.parent
+              if (parentComponent && parentComponent.slots.length > 1) {
+                break
+              }
+              const parentSlot = parentComponent?.parent
+              if (!parentSlot) {
+                break
+              }
+              const index = parentSlot.indexOf(parentComponent)
+              this.selection.setStart(parentSlot, index)
+              this.selection.setEnd(parentSlot, index + 1)
+              this.commander.delete()
+              this.commander.insert(newInstance)
+            }
+            const newSlot = newInstance.slots.first
+            if (newSlot) {
+              this.selection.setPosition(newSlot, 0)
+              return true
+            } else if (newInstance.parent) {
+              const index = newInstance.parent.indexOf(newInstance)
+              this.selection.setPosition(newInstance.parent, index + 1)
+              return true
+            }
+          }
+        }
+      }
+    }
     const commonAncestorComponent = this.selection.commonAncestorComponent
     if (commonAncestorComponent) {
       const is = this.handleShortcut(reg, keymapState, commonAncestorComponent.shortcutList)

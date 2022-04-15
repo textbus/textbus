@@ -13,7 +13,7 @@ import {
   Slot,
   SlotRender,
   Slots,
-  useContext, useSelf,
+  useContext, useDynamicShortcut, useSelf,
   useSlots,
   useState,
   VElement,
@@ -324,6 +324,54 @@ function overrideSlot(slot: Slot) {
 export const preComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'PreComponent',
+  markdownSupport: {
+    key: 'Enter',
+    match(c: string) {
+      const matchString = languageList.map(i => i.label || i.value).concat('js', 'ts').join('|').replace(/\+/, '\\+')
+      const reg = new RegExp(`^\`\`\`(${matchString})$`, 'i')
+      return reg.test(c)
+    },
+    generateInitData(content) {
+      const matchString = content.replace(/`/g, '').replace(/\+/, '\\+')
+      for (const item of languageList) {
+        const reg = new RegExp(`^${matchString}$`, 'i')
+        if (reg.test(item.label || item.value)) {
+          return {
+            state: {
+              lang: item.value,
+              theme: ''
+            },
+            slots: [createCodeSlot()]
+          }
+        }
+      }
+      if (/^js$/i.test(matchString)) {
+        return {
+          state: {
+            lang: 'JavaScript',
+            theme: ''
+          },
+          slots: [createCodeSlot()]
+        }
+      }
+      if (/^ts$/i.test(matchString)) {
+        return {
+          state: {
+            lang: 'TypeScript',
+            theme: ''
+          },
+          slots: [createCodeSlot()]
+        }
+      }
+      return {
+        state: {
+          lang: '',
+          theme: ''
+        },
+        slots: [createCodeSlot()]
+      }
+    }
+  },
   setup(data: ComponentData<PreComponentState> = {
     slots: [],
     state: {
@@ -376,7 +424,7 @@ export const preComponent = defineComponent({
       isStop = false
     })
 
-    const slotList = formatCodeLines((data.slots || []).map(i => i.toString()), false, blockCommentStartString, blockCommentEndString, languageGrammar)
+    const slotList = formatCodeLines((data.slots || [createCodeSlot()]).map(i => i.toString()), false, blockCommentStartString, blockCommentEndString, languageGrammar)
     const slots = useSlots(slotList)
 
     let isStop = false
@@ -388,6 +436,54 @@ export const preComponent = defineComponent({
         reformat(slots, data.source, languageGrammar, blockCommentStartString, blockCommentEndString)
         data.source.retain(index)
         isStop = false
+      }
+    })
+
+    useDynamicShortcut({
+      keymap: {
+        key: '/',
+        ctrlKey: true
+      },
+      action: () => {
+        const startIndex = slots.indexOf(selection.startSlot!)
+        const endIndex = slots.indexOf(selection.endSlot!)
+
+        const selectedSlots = slots.slice(startIndex, endIndex + 1)
+        const isAllComment = selectedSlots.every(f => {
+          return /^\s*\/\//.test(f.toString())
+        })
+        if (isAllComment) {
+          selectedSlots.forEach(f => {
+            const code = f.toString()
+            const index = code.indexOf('// ')
+            const index2 = code.indexOf('//')
+
+            if (index >= 0) {
+              f.cut(index, index + 3)
+              if (f === selection.startSlot) {
+                selection.setStart(f, selection.startOffset! - 3)
+              }
+              if (f === selection.endSlot) {
+                selection.setEnd(f, selection.endOffset! - 3)
+              }
+            } else {
+              f.cut(index2, index2 + 2)
+              if (f === selection.startSlot) {
+                selection.setStart(f, selection.startOffset! - 2)
+              }
+              if (f === selection.endSlot) {
+                selection.setEnd(f, selection.endOffset! - 2)
+              }
+            }
+          })
+        } else {
+          selectedSlots.forEach(f => {
+            f.retain(0)
+            f.insert('// ')
+          })
+          selection.setStart(selection.startSlot!, selection.startOffset! + 3)
+          selection.setEnd(selection.endSlot!, selection.endOffset! + 3)
+        }
       }
     })
 

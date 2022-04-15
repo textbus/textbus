@@ -32,6 +32,15 @@ export interface ListComponentInstance extends ComponentMethods {
 export const listComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ListComponent',
+  markdownSupport: {
+    key: ' ',
+    match: /^(1\.|[-+*])$/,
+    generateInitData(content: string) {
+      return {
+        state: /[-+*]/.test(content) ? 'ul' : 'ol'
+      }
+    }
+  },
   setup(data?: ComponentData<'ul' | 'ol'>): ListComponentInstance {
     const injector = useContext()
     const selection = injector.get(Selection)
