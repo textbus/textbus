@@ -266,15 +266,14 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private listen(connector: NativeSelectionConnector) {
     const selection = this.nativeSelection
-    // let isFocusin = false
+    let isFocusin = false
     this.subs.push(
-      // fromEvent(this.document, 'selectstart').subscribe((ev) => {
-      //   const nodes = ev.composedPath()
-      //   isFocusin = nodes.includes(this.docContainer)
-      //   if (!isFocusin) {
-      //     connector.setSelection(null)
-      //   }
-      // }),
+      fromEvent(this.docContainer, 'focusin').subscribe(() => {
+        isFocusin = true
+      }),
+      fromEvent(this.docContainer, 'focusout').subscribe(() => {
+        isFocusin = false
+      }),
       fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
           return
@@ -301,10 +300,16 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
-        // if (!isFocusin || selection.rangeCount === 0) {
-        //   return
-        // }
-        if (selection.rangeCount === 0 || !this.docContainer.contains(selection.anchorNode)) {
+        if (isFocusin) {
+          connector.setSelection(null)
+          return
+        }
+        const rootVNode = this.renderer.getVNodeByComponent(this.rootComponentRef.component)!
+        const rootComponentNativeNode = this.renderer.getNativeNodeByVNode(rootVNode)
+
+        if (selection.rangeCount === 0 ||
+          !this.docContainer.contains(selection.anchorNode) ||
+          rootComponentNativeNode === selection.anchorNode) {
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
@@ -328,6 +333,10 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
 
         if (startFocusNode !== nativeRange.startContainer) {
+          if (nativeRange.collapsed) {
+            connector.setSelection(null)
+            return
+          }
           const startNextSibling = startFocusNode.nextSibling
           if (startNextSibling && startNextSibling.nodeType === Node.TEXT_NODE) {
             nativeRange.setStart(startNextSibling, 0)
@@ -337,6 +346,10 @@ export class SelectionBridge implements NativeSelectionBridge {
           }
         }
         if (endFocusNode !== nativeRange.endContainer) {
+          if (nativeRange.collapsed) {
+            connector.setSelection(null)
+            return
+          }
           const endNextSibling = endFocusNode.nextSibling
           if (endNextSibling && endNextSibling.nodeType === Node.TEXT_NODE) {
             nativeRange.setEnd(endNextSibling, 0)
