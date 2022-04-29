@@ -1,8 +1,8 @@
-import { Subscription } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Draft, Patch, produce } from 'immer'
 
 import { ComponentInstance, ComponentLiteral } from './component'
-import { Action } from './operation'
+import { Action, ApplyAction } from './operation'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue } from './format'
 import { AttributeFormatter, BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
@@ -40,6 +40,9 @@ export class Slot<T = any> {
   /** 插槽变更标记器 */
   changeMarker = new ChangeMarker()
 
+  onContentChange: Observable<Action[]>
+  onStateChange: Observable<Action[]>
+
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
 
   get parentSlot() {
@@ -69,7 +72,12 @@ export class Slot<T = any> {
   protected content = new Content()
   protected format = new Format(this)
 
+  protected contentChangeEvent = new Subject<Action[]>()
+  protected stateChangeEvent = new Subject<Action[]>()
+
   constructor(public schema: ContentType[], public state?: T) {
+    this.onContentChange = this.contentChangeEvent.asObservable()
+    this.onStateChange = this.stateChangeEvent.asObservable()
     this.content.append(Slot.emptyPlaceholder)
     this._index = 0
   }
@@ -87,19 +95,21 @@ export class Slot<T = any> {
       inverseChanges = ip
     })
     this.state = newState
+    const applyAction: ApplyAction = {
+      type: 'apply',
+      patches: changes,
+      value: newState
+    }
     this.changeMarker.markAsDirtied({
       path: [],
-      apply: [{
-        type: 'apply',
-        patches: changes,
-        value: newState
-      }],
+      apply: [applyAction],
       unApply: [{
         type: 'apply',
         patches: inverseChanges,
         value: oldState
       }]
     })
+    this.stateChangeEvent.next([applyAction])
     return newState!
   }
 
@@ -203,22 +213,24 @@ export class Slot<T = any> {
 
     this._index = startIndex + length
 
+    const applyActions: Action[] = [{
+      type: 'retain',
+      offset: startIndex
+    }, formats.length ? {
+      type: 'insert',
+      content: actionData,
+      formats: formats.reduce((opt: Record<string, any>, next) => {
+        opt[next[0].name] = next[1]
+        return opt
+      }, {})
+    } : {
+      type: 'insert',
+      content: actionData
+    }]
+
     this.changeMarker.markAsDirtied({
       path: [],
-      apply: [{
-        type: 'retain',
-        offset: startIndex
-      }, formats.length ? {
-        type: 'insert',
-        content: actionData,
-        formats: formats.reduce((opt: Record<string, any>, next) => {
-          opt[next[0].name] = next[1]
-          return opt
-        }, {})
-      } : {
-        type: 'insert',
-        content: actionData
-      }],
+      apply: applyActions,
       unApply: [{
         type: 'retain',
         offset: startIndex
@@ -227,6 +239,7 @@ export class Slot<T = any> {
         count: length
       }]
     })
+    this.contentChangeEvent.next(applyActions)
     return true
   }
 
@@ -313,6 +326,9 @@ export class Slot<T = any> {
         apply: applyActions,
         unApply: unApplyActions
       })
+      if (applyActions.length) {
+        this.contentChangeEvent.next(applyActions)
+      }
     }
     return true
   }
@@ -340,15 +356,16 @@ export class Slot<T = any> {
       this.format = deletedFormat.extract(0, 1)
     }
 
+    const applyActions: Action[] = [{
+      type: 'retain',
+      offset: startIndex
+    }, {
+      type: 'delete',
+      count
+    }]
     this.changeMarker.markAsDirtied({
       path: [],
-      apply: [{
-        type: 'retain',
-        offset: startIndex
-      }, {
-        type: 'delete',
-        count
-      }],
+      apply: applyActions,
       unApply: [{
         type: 'retain',
         offset: startIndex
@@ -369,6 +386,7 @@ export class Slot<T = any> {
         }
       }), ...Slot.createActionByFormat(deletedFormat)]
     })
+    this.contentChangeEvent.next(applyActions)
     return true
   }
 

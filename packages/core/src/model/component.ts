@@ -102,6 +102,8 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
   methods: Methods
   /** 组件动态上下文菜单注册表 */
   shortcutList: Shortcut[]
+  /** 当状态变更时触发 */
+  onStateChange: Observable<State>
 
   /**
    * 更新组件状态的方法
@@ -276,11 +278,13 @@ export function defineComponent<Methods extends ComponentMethods,
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
 
+      const onStateChange = stateChangeSubject.asObservable()
+
       const changeController: ChangeController<State> = {
         update(fn) {
           return componentInstance.updateState(fn)
         },
-        onChange: stateChangeSubject.asObservable()
+        onChange: onStateChange
       }
 
       const componentInstance: ComponentInstance<Methods, State> = {
@@ -291,6 +295,7 @@ export function defineComponent<Methods extends ComponentMethods,
         },
         name: options.name,
         length: 1,
+        onStateChange,
         type: options.type,
         slots: null as any,
         methods: null as any,
