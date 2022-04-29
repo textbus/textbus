@@ -113,9 +113,6 @@ export class Editor extends CoreEditor {
         if (this.destroyed) {
           return
         }
-        options.plugins?.forEach(plugin => {
-          plugin.setup(rootInjector)
-        })
         this.layout.listenCaretChange(rootInjector.get(SelectionBridge))
         this.readyEvent.next(rootInjector)
       })

@@ -30,12 +30,11 @@ export interface DeltaInsert {
 
 export type DeltaLite = DeltaInsert[]
 
-export const placeholder = '\u200b'
-
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
 export class Slot<T = any> {
+  static placeholder = '\u200b'
   /** 插槽所属的组件 */
   parent: ComponentInstance | null = null
   /** 插槽变更标记器 */
@@ -54,7 +53,7 @@ export class Slot<T = any> {
 
   /** 插槽内容是否为空 */
   get isEmpty() {
-    return this.length === 1 && this.getContentAtIndex(0) === Slot.placeholder
+    return this.length === 1 && this.getContentAtIndex(0) === Slot.emptyPlaceholder
   }
 
   /** 插槽当前下标位置 */
@@ -71,7 +70,7 @@ export class Slot<T = any> {
   protected format = new Format(this)
 
   constructor(public schema: ContentType[], public state?: T) {
-    this.content.append(Slot.placeholder)
+    this.content.append(Slot.emptyPlaceholder)
     this._index = 0
   }
 
@@ -145,7 +144,7 @@ export class Slot<T = any> {
     }
 
     const prevContent = this.getContentAtIndex(this.index - 1)
-    if (prevContent === placeholder) {
+    if (prevContent === Slot.placeholder) {
       this.retain(this.index - 1)
       this.delete(1)
     }
@@ -337,7 +336,7 @@ export class Slot<T = any> {
     this.format.shrink(endIndex, count)
 
     if (this.length === 0) {
-      this.content.append(Slot.placeholder)
+      this.content.append(Slot.emptyPlaceholder)
       this.format = deletedFormat.extract(0, 1)
     }
 
@@ -612,7 +611,7 @@ export class Slot<T = any> {
     }).flat()
   }
 
-  private static get placeholder() {
+  private static get emptyPlaceholder() {
     // return this.schema.includes(ContentType.BlockComponent) ? '\n' : '\u200b'
     return '\n'
   }

@@ -9,7 +9,6 @@ import {
   FormatType,
   FormatValue,
   invokeListener,
-  placeholder,
   Slot,
   Event,
   InsertEventData,
@@ -474,7 +473,7 @@ export class Commander {
         slot.retain(0)
         slot.retain(slot.length, formatter, value)
       } else {
-        this.write(placeholder)
+        this.write(Slot.placeholder)
         const startOffset = this.selection.startOffset!
         slot.retain(startOffset - 1)
         slot.retain(1, formatter, value)
@@ -500,11 +499,11 @@ export class Commander {
       } else {
         const startOffset = this.selection.startOffset!
         const prevContent = slot.getContentAtIndex(startOffset - 1)
-        if (prevContent === placeholder) {
+        if (prevContent === Slot.placeholder) {
           slot.retain(startOffset - 1)
           slot.retain(1, formatter, null)
         } else {
-          this.write(placeholder)
+          this.write(Slot.placeholder)
           slot.retain(startOffset)
           slot.retain(1, formatter, null)
         }

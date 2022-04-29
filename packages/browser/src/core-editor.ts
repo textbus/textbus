@@ -148,6 +148,9 @@ export class CoreEditor {
         options.setup?.(stater)
       }
     }).then(starter => {
+      if (this.destroyed) {
+        return starter
+      }
       const parser = starter.get(Parser)
       const translator = starter.get(Translator)
 
@@ -167,9 +170,8 @@ export class CoreEditor {
 
       this.initDocStyleSheetsAndScripts(options)
       this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
-      if (this.destroyed) {
-        return starter
-      }
+      options.plugins?.forEach(p => p.setup(starter))
+
       return this.initBeforeListener.reduce((p1, p2) => {
         return p1.then(() => p2)
       }, Promise.resolve()).then(() => {

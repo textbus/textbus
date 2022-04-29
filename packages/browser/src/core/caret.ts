@@ -8,7 +8,7 @@ export function getLayoutRectByRange(range: Range) {
     const offsetNode = startContainer.childNodes[startOffset]
     let isInsertBefore = false
     if (offsetNode) {
-      if (offsetNode.nodeType === Node.ELEMENT_NODE) {
+      if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
         return (offsetNode as HTMLElement).getBoundingClientRect()
       } else {
         isInsertBefore = true
