@@ -304,12 +304,9 @@ export class SelectionBridge implements NativeSelectionBridge {
           connector.setSelection(null)
           return
         }
-        const rootVNode = this.renderer.getVNodeByComponent(this.rootComponentRef.component)!
-        const rootComponentNativeNode = this.renderer.getNativeNodeByVNode(rootVNode)
 
         if (selection.rangeCount === 0 ||
-          !this.docContainer.contains(selection.anchorNode) ||
-          rootComponentNativeNode === selection.anchorNode) {
+          !this.docContainer.contains(selection.anchorNode)) {
           return
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()

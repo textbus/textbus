@@ -105,6 +105,9 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
   /** 当状态变更时触发 */
   onStateChange: Observable<State>
 
+  /** 组件状态 */
+  get state(): State
+
   /**
    * 更新组件状态的方法
    * @param fn
@@ -292,6 +295,9 @@ export function defineComponent<Methods extends ComponentMethods,
         parent: null,
         get parentComponent() {
           return componentInstance.parent?.parent || null
+        },
+        get state() {
+          return state!
         },
         name: options.name,
         length: 1,

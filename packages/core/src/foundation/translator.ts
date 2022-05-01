@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@tanbo/di'
 
 import {
-  Component,
+  Component, ComponentData,
   ComponentInstance,
   ComponentLiteral,
   FormatType,
@@ -19,23 +19,35 @@ export class Translator {
               private registry: Registry) {
   }
 
+  createComponentByData(name: string, data: ComponentData) {
+    const factory = this.registry.getComponent(name)
+    if (factory) {
+      return factory.createInstance(this.contextInjector, data)
+    }
+    return null
+  }
+
   /**
    * 根据插槽数据生成插槽实例
    * @param slotLiteral
+   * @param customComponentCreator
    */
-  createSlot(slotLiteral: SlotLiteral): Slot {
+  createSlot(slotLiteral: SlotLiteral,
+             customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): Slot {
     const slot = new Slot(slotLiteral.schema, slotLiteral.state)
-    return this.loadSlot(slot, slotLiteral)
+    return this.loadSlot(slot, slotLiteral, customComponentCreator)
   }
 
   /**
    * 根据组件数据生成组件实例
    * @param componentLiteral
+   * @param customSlotCreator
    */
-  createComponent(componentLiteral: ComponentLiteral): ComponentInstance | null {
+  createComponent(componentLiteral: ComponentLiteral,
+                  customSlotCreator?: (slotLiteral: SlotLiteral, index: number) => Slot): ComponentInstance | null {
     const factory = this.registry.getComponent(componentLiteral.name)
     if (factory) {
-      return this.createComponentByFactory(componentLiteral, factory)
+      return this.createComponentByFactory(componentLiteral, factory, customSlotCreator)
     }
     return null
   }
@@ -44,9 +56,12 @@ export class Translator {
    * 指定组件创建实例
    * @param componentLiteral
    * @param factory
+   * @param customSlotCreator
    */
-  createComponentByFactory(componentLiteral: ComponentLiteral, factory: Component) {
-    const slots = componentLiteral.slots.map(i => this.createSlot(i))
+  createComponentByFactory(componentLiteral: ComponentLiteral,
+                           factory: Component,
+                           customSlotCreator?: (slotLiteral: SlotLiteral, index: number) => Slot) {
+    const slots = componentLiteral.slots.map(customSlotCreator || ((i) => this.createSlot(i)))
     return factory.createInstance(this.contextInjector, {
       state: componentLiteral.state,
       slots
@@ -62,16 +77,18 @@ export class Translator {
     return this.loadSlot(target, source)
   }
 
-  private loadSlot<T extends SlotLiteral, U extends Slot>(slot: U, slotLiteral: T): U {
-    slotLiteral.content.forEach(i => {
-      if (typeof i !== 'string') {
-        const component = this.createComponent(i)
+  private loadSlot<T extends SlotLiteral, U extends Slot>(slot: U,
+                                                          slotLiteral: T,
+                                                          customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): U {
+    slotLiteral.content.forEach((item, index) => {
+      if (typeof item !== 'string') {
+        const component = customComponentCreator ? customComponentCreator(item, index) : this.createComponent(item)
         if (component) {
           slot.insert(component)
         }
         return
       }
-      slot.insert(i)
+      slot.insert(item)
     })
 
     Object.keys(slotLiteral.formats).forEach(key => {

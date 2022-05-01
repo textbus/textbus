@@ -35,13 +35,17 @@ export type DeltaLite = DeltaInsert[]
  */
 export class Slot<T = any> {
   static placeholder = '\u200b'
+  static get emptyPlaceholder() {
+    // return this.schema.includes(ContentType.BlockComponent) ? '\n' : '\u200b'
+    return '\n'
+  }
   /** 插槽所属的组件 */
   parent: ComponentInstance | null = null
   /** 插槽变更标记器 */
   changeMarker = new ChangeMarker()
 
   onContentChange: Observable<Action[]>
-  onStateChange: Observable<Action[]>
+  onStateChange: Observable<ApplyAction[]>
 
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
 
@@ -73,7 +77,7 @@ export class Slot<T = any> {
   protected format = new Format(this)
 
   protected contentChangeEvent = new Subject<Action[]>()
-  protected stateChangeEvent = new Subject<Action[]>()
+  protected stateChangeEvent = new Subject<ApplyAction[]>()
 
   constructor(public schema: ContentType[], public state?: T) {
     this.onContentChange = this.contentChangeEvent.asObservable()
@@ -627,10 +631,5 @@ export class Slot<T = any> {
         }
       }]
     }).flat()
-  }
-
-  private static get emptyPlaceholder() {
-    // return this.schema.includes(ContentType.BlockComponent) ? '\n' : '\u200b'
-    return '\n'
   }
 }
