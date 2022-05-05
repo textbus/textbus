@@ -12,17 +12,19 @@ enablePatches()
 
 const componentErrorFn = makeError('DefineComponent')
 
-export interface SlotsComponentData<State> {
-  slots: Slot[]
+export interface SlotsComponentData<State, SlotState> {
+  slots: Slot<SlotState>[]
   state?: State
 }
 
-export interface StateComponentData<State> {
-  slots?: Slot[]
+export interface StateComponentData<State, SlotState> {
+  slots?: Slot<SlotState>[]
   state: State
 }
 
-export type ComponentData<State = unknown> = SlotsComponentData<State> | StateComponentData<State>
+export type ComponentData<State = unknown, SlotState = unknown> =
+  SlotsComponentData<State, SlotState>
+  | StateComponentData<State, SlotState>
 
 export interface ComponentLiteral<State = any> {
   name: string

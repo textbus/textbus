@@ -10,18 +10,21 @@ export enum FormatType {
 export interface BlockFormatter {
   type: FormatType.Block
   name: string
+
   render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
 }
 
 export interface InlineFormatter {
   type: FormatType.InlineTag
   name: string
+
   render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
 }
 
 export interface AttributeFormatter {
   type: FormatType.Attribute
   name: string
+
   render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
 }
 

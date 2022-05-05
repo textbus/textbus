@@ -102,7 +102,7 @@ export class OutputRenderer {
 
   private createVDomByFormatTree(slot: Slot, formats: FormatTree[]) {
     const children: Array<VElement | VTextNode> = []
-    formats.map(child => {
+    formats.forEach(child => {
       if (child.formats) {
         const elements: VElement[] = []
         const formats = formatSort(child.formats)

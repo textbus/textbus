@@ -369,7 +369,7 @@ export class Collaborate implements History {
   private createComponentBySharedComponent(yMap: YMap<any>): ComponentInstance {
     const sharedSlots = yMap.get('slots') as YArray<YMap<any>>
     const slots: Slot[] = []
-    sharedSlots.map(sharedSlot => {
+    sharedSlots.forEach(sharedSlot => {
       const slot = this.createSlotBySharedSlot(sharedSlot)
       slots.push(slot)
     })

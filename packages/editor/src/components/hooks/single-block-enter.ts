@@ -21,7 +21,7 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
     parentSlot.retain(index + 1)
     const currentSlot = slots.get(0)!
     const nextSlot = currentSlot.cut(ev.data.index)
-    if(nextSlot.isEmpty) {
+    if (nextSlot.isEmpty) {
       nextSlot.applyFormat(linkFormatter, {
         startIndex: 0,
         endIndex: 1,

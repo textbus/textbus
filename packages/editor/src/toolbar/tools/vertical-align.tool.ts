@@ -46,6 +46,7 @@ export function verticalAlignToolConfigFactory(injector: Injector): SelectToolCo
     }
   }
 }
+
 export function verticalAlignTool() {
   return new SelectTool(verticalAlignToolConfigFactory)
 }

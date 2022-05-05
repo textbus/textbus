@@ -24,6 +24,7 @@ import {
   serialize,
   slotsToTable,
   TableCellPosition,
+  TableCellSlot,
   TableConfig,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
@@ -43,7 +44,7 @@ export const tableComponent = defineComponent({
       useTextbusStyle: false
     }
   }) {
-    let tableCells = slotsToTable(data.slots!, data.state!.columnCount)
+    let tableCells = slotsToTable(data.slots! as TableCellSlot[], data.state!.columnCount)
     const injector = useContext()
     const i18n = injector.get(I18n)
     const selection = injector.get(Selection)

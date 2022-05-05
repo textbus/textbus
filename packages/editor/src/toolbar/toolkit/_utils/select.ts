@@ -37,7 +37,7 @@ export interface UISelect {
 
 export function createSelect(config: UISelectConfig): UISelect {
   const label = createElement('span', {
-    classes: ['textbus-toolbar-select-label'].concat(config.mini ? ['textbus-toolbar-select-label-mini']: [])
+    classes: ['textbus-toolbar-select-label'].concat(config.mini ? ['textbus-toolbar-select-label-mini'] : [])
   })
   let isSelfClick = false
   const button = createElement('button', {

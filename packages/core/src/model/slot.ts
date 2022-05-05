@@ -35,10 +35,12 @@ export type DeltaLite = DeltaInsert[]
  */
 export class Slot<T = any> {
   static placeholder = '\u200b'
+
   static get emptyPlaceholder() {
     // return this.schema.includes(ContentType.BlockComponent) ? '\n' : '\u200b'
     return '\n'
   }
+
   /** 插槽所属的组件 */
   parent: ComponentInstance | null = null
   /** 插槽变更标记器 */
@@ -201,11 +203,11 @@ export class Slot<T = any> {
         formats.push([formatter, value as FormatValue])
       }
     }
-    if (isEmpty) {
-      formats = formats.filter(i => {
-        return i[0].type !== FormatType.Block
-      })
-    }
+    // if (isEmpty) {
+    //   formats = formats.filter(i => {
+    //     return i[0].type !== FormatType.Block
+    //   })
+    // }
     this.format.split(startIndex, length)
 
     this.content.insert(startIndex, content)
@@ -403,7 +405,8 @@ export class Slot<T = any> {
   applyFormat(formatter: InlineFormatter | AttributeFormatter, data: FormatRange): void
   applyFormat(formatter: Formatter, data: FormatValue | FormatRange): void {
     if (formatter.type === FormatType.Block) {
-      this.format.merge(formatter, data as FormatValue)
+      this.retain(0)
+      this.retain(this.length, formatter, data as FormatValue)
     } else {
       this.retain((data as FormatRange).startIndex)
       this.retain((data as FormatRange).endIndex - (data as FormatRange).startIndex, formatter, (data as FormatRange).value)

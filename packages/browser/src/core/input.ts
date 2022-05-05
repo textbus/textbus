@@ -63,11 +63,9 @@ export class Input {
             textarea?.focus()
           }
           isFocus = true
-          textarea?.focus()
         } else {
           textarea?.blur()
           isFocus = false
-          textarea?.blur()
         }
       })
     )

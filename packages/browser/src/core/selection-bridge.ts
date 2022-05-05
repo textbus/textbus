@@ -279,25 +279,25 @@ export class SelectionBridge implements NativeSelectionBridge {
           return
         }
         selection.removeAllRanges()
-        const path = ev.composedPath()
-        while (path.length) {
-          const first = path.shift() as HTMLElement
-          if (first.nodeType === Node.ELEMENT_NODE) {
-            const location = this.renderer.getLocationByNativeNode(first)
-            if (location) {
-              const editableState = first.getAttribute('textbus-editable')
-              if (editableState === 'on') {
-                return
-              }
-              if (editableState === 'off') {
-                const parentNode = first.parentNode!
-                const index = Array.from(parentNode.childNodes).indexOf(first)
-                selection.setPosition(parentNode, index + 1)
-                return
-              }
-            }
-          }
-        }
+        // const path = ev.composedPath()
+        // while (path.length) {
+        //   const first = path.shift() as HTMLElement
+        //   if (first.nodeType === Node.ELEMENT_NODE) {
+        //     const location = this.renderer.getLocationByNativeNode(first)
+        //     if (location) {
+        //       const editableState = first.getAttribute('textbus-editable')
+        //       if (editableState === 'on') {
+        //         return
+        //       }
+        //       if (editableState === 'off') {
+        //         const parentNode = first.parentNode!
+        //         const index = Array.from(parentNode.childNodes).indexOf(first)
+        //         selection.setPosition(parentNode, index + 1)
+        //         return
+        //       }
+        //     }
+        //   }
+        // }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
         if (isFocusin) {
@@ -322,37 +322,31 @@ export class SelectionBridge implements NativeSelectionBridge {
             nativeRange.setStartBefore(nativeNode.firstChild!)
           }
         }
-        const startFocusNode = this.findFocusNode(nativeRange.startContainer)
-        const endFocusNode = this.findFocusNode(nativeRange.endContainer)
+        const startFocusNode = this.findFocusNode(nativeRange.startContainer, !isFocusEnd)
+        const endFocusNode = this.findFocusNode(nativeRange.endContainer, !isFocusEnd)
         if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
           connector.setSelection(null)
           return
         }
 
         if (startFocusNode !== nativeRange.startContainer) {
-          if (nativeRange.collapsed) {
-            connector.setSelection(null)
-            return
-          }
-          const startNextSibling = startFocusNode.nextSibling
-          if (startNextSibling && startNextSibling.nodeType === Node.TEXT_NODE) {
-            nativeRange.setStart(startNextSibling, 0)
+          if (startFocusNode.nodeType === Node.TEXT_NODE) {
+            nativeRange.setStart(startFocusNode, 0)
           } else {
-            nativeRange.setStart(startFocusNode.parentNode,
-              Array.from(startFocusNode.parentNode.childNodes).indexOf(startFocusNode as ChildNode) + 1)
+            const parentNode = startFocusNode.parentNode
+            const offset = startFocusNode.nodeName.toLowerCase() === 'br' && startFocusNode === parentNode.lastChild ? 0 : 1
+            nativeRange.setStart(parentNode,
+              Array.from(parentNode.childNodes).indexOf(startFocusNode as ChildNode) + offset)
           }
         }
         if (endFocusNode !== nativeRange.endContainer) {
-          if (nativeRange.collapsed) {
-            connector.setSelection(null)
-            return
-          }
-          const endNextSibling = endFocusNode.nextSibling
-          if (endNextSibling && endNextSibling.nodeType === Node.TEXT_NODE) {
-            nativeRange.setEnd(endNextSibling, 0)
+          if (endFocusNode.nodeType === Node.TEXT_NODE) {
+            nativeRange.setEnd(endFocusNode, 0)
           } else {
-            nativeRange.setEnd(endFocusNode.parentNode,
-              Array.from(endFocusNode.parentNode.childNodes).indexOf(endFocusNode as ChildNode) + 1)
+            const parentNode = endFocusNode.parentNode
+            const offset = startFocusNode.nodeName.toLowerCase() === 'br' && startFocusNode === parentNode.lastChild ? 0 : 1
+            nativeRange.setEnd(parentNode,
+              Array.from(parentNode.childNodes).indexOf(endFocusNode as ChildNode) + offset)
           }
         }
 
@@ -378,14 +372,33 @@ export class SelectionBridge implements NativeSelectionBridge {
     )
   }
 
-  private findFocusNode(node: Node): Node | null {
-    const position = this.renderer.getLocationByNativeNode(node as any)
-    if (!position) {
-      const parentNode = node.parentNode
-      if (parentNode) {
-        return this.findFocusNode(parentNode)
+  private findFocusNode(node: Node, toAfter = false, excludeNodes: Node[] = []): Node | null {
+    if (excludeNodes.includes(node)) {
+      const next = (toAfter ? node.nextSibling : node.previousSibling) || node.parentNode
+      if (next) {
+        return this.findFocusNode(next, toAfter, excludeNodes)
       }
       return null
+    }
+    excludeNodes.push(node)
+    const position = this.renderer.getLocationByNativeNode(node as any)
+    if (!position) {
+      const firstChild = toAfter ? node.firstChild : node.lastChild
+      if (firstChild) {
+        return this.findFocusNode(firstChild, toAfter, excludeNodes)
+      }
+      const nextSibling = toAfter ? node.nextSibling : node.previousSibling
+      if (nextSibling) {
+        return this.findFocusNode(nextSibling, toAfter, excludeNodes)
+      }
+      const parentNode = node.parentNode
+      if (parentNode) {
+        return this.findFocusNode(parentNode, toAfter, excludeNodes)
+      }
+      return null
+    }
+    if (this.renderer.getVNodeBySlot(position.slot) === this.renderer.getVNodeByNativeNode(node)) {
+      return toAfter ? node.firstChild : node.lastChild
     }
     return node
   }

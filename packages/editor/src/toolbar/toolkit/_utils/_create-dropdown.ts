@@ -34,6 +34,7 @@ export function createDropdown(button: HTMLElement, menu: HTMLElement, stickyEle
 
     fixPosition(element, menuWrapper, stickyElement)
   }
+
   const unListen = fromEvent(window, 'resize').subscribe(() => {
     updatePosition()
   })

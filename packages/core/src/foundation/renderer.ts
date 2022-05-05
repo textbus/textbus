@@ -281,11 +281,19 @@ export class Renderer {
   }
 
   /**
-   * 获取原生节点对应的虚拟 DOM 节点
+   * 通过虚拟 DOM 节点获取对应的原生节点
    * @param vNode
    */
-  getNativeNodeByVNode(vNode: VElement | VTextNode): any {
+  getNativeNodeByVNode(vNode: VElement | VTextNode): NativeNode {
     return this.nativeNodeCaches.get(vNode)
+  }
+
+  /**
+   * 获取原生节点对应的虚拟 DOM 节点
+   * @param nativeNode
+   */
+  getVNodeByNativeNode(nativeNode: NativeNode) {
+    return this.nativeNodeCaches.get(nativeNode)
   }
 
   /**
@@ -674,7 +682,7 @@ export class Renderer {
 
   private createVDomByFormatTree(slot: Slot, formats: FormatTree[]) {
     const children: Array<VElement | VTextNode> = []
-    formats.map(child => {
+    formats.forEach(child => {
       if (child.formats) {
         const elements: VElement[] = []
         const formats = formatSort(child.formats)
