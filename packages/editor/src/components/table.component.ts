@@ -434,9 +434,11 @@ export const tableComponent = defineComponent({
       },
       render(isOutputMode: boolean, slotRender: SlotRender) {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
-        const table = new VElement('table')
+        const table = new VElement('table', {
+          class: 'tb-table'
+        })
         if (data.state!.useTextbusStyle) {
-          table.classes.add('tb-table')
+          table.classes.add('tb-table-textbus')
         }
         if (tableCells.length) {
           const body = new VElement('tbody')
@@ -468,9 +470,9 @@ export const tableComponent = defineComponent({
 export const tableComponentLoader: ComponentLoader = {
   resources: {
     styles: [`
-    td,th{border-width: 1px; border-style: solid;}
-   table {border-spacing: 0; border-collapse: collapse; width: 100%; }
-   .tb-table td, th {border-color: #aaa;}`]
+    .tb-table td,.tb-table th{border-width: 1px; border-style: solid;}
+   .tb-table {border-spacing: 0; border-collapse: collapse; width: 100%; }
+   .tb-table-textbus td, th {border-color: #aaa;}`]
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'TABLE'
@@ -509,7 +511,7 @@ export const tableComponentLoader: ComponentLoader = {
     return tableComponent.createInstance(injector, {
       slots: bodies.flat(),
       state: {
-        useTextbusStyle: element.classList.contains('tb-table'),
+        useTextbusStyle: element.classList.contains('tb-table-textbus'),
         columnCount: cells[0].map(i => i.state!.colspan).reduce((v, n) => v + n, 0),
         rowCount: cells.length
       }

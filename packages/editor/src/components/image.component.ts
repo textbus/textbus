@@ -47,6 +47,7 @@ export const imageComponent = defineComponent({
         return new VElement('img', {
           ref,
           src: state.src,
+          class: 'tb-img',
           style: {
             width: state.width,
             height: state.height,
@@ -63,7 +64,7 @@ export const imageComponent = defineComponent({
 
 export const imageComponentLoader: ComponentLoader = {
   resources: {
-    styles: ['img{max-width: 100%}']
+    styles: ['.tb-img{max-width: 100%}']
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'IMG'

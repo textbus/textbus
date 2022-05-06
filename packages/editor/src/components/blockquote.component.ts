@@ -43,7 +43,9 @@ export const blockquoteComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return new VElement('blockquote')
+          return new VElement('blockquote', {
+            class: 'tb-blockquote'
+          })
         })
       }
     }
@@ -52,7 +54,7 @@ export const blockquoteComponent = defineComponent({
 
 export const blockquoteComponentLoader: ComponentLoader = {
   resources: {
-    styles: [`blockquote {padding: 10px 15px; border-left: 10px solid #dddee1; background-color: #f8f8f9; margin: 1em 0; border-radius: 4px;} blockquote>*:first-child{margin-top:0}blockquote>*:last-child{margin-bottom:0}`]
+    styles: [`.tb-blockquote {padding: 10px 15px; border-left: 10px solid #dddee1; background-color: #f8f8f9; margin: 1em 0; border-radius: 4px;} .tb-blockquote>*:first-child{margin-top:0}blockquote>*:last-child{margin-bottom:0}`]
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'BLOCKQUOTE'

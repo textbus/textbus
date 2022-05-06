@@ -580,6 +580,7 @@ export const preComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         const block = new VElement('pre', {
+          class: 'tb-pre',
           theme: data.state!.theme || null
         }, [
           new VElement('div', {
@@ -620,10 +621,10 @@ export const preComponent = defineComponent({
 export const preComponentLoader: ComponentLoader = {
   resources: {
     styles: [`
-    code, pre {background-color: #fefefe;}
-   pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
+    code, .tb-pre {background-color: #fefefe;}
+   .tb-pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
+   .tb-pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}
    .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #ddd; width: 3em; }
    .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
@@ -643,16 +644,16 @@ export const preComponentLoader: ComponentLoader = {
   .tb-hl-attr-value { color: rgb(221, 17, 68) }
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
   .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
-  pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #353535 }
-  pre[theme=dark] .tb-hl-keyword {color: rgb(0, 134, 179);}
-  pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
-  pre[theme=dark] .tb-hl-comment {color: #4c5156;}
-  pre[theme=dark] .tb-hl-string {color: #ce5a70;}
-  pre[theme=dark] .tb-hl-attr-value {color: #ce5a70;}
-  pre[theme=dark] .tb-hl-regex {color: #af741d;}
-  pre[theme=dark] .tb-hl-selector {color: #ce5a70; font-weight: normal}
-  pre[theme=dark] .tb-code-line::before { color: #536171}
-  pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #292929; }`]
+  .tb-pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #353535 }
+  .tb-pre[theme=dark] .tb-hl-keyword {color: rgb(0, 134, 179);}
+  .tb-pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
+  .tb-pre[theme=dark] .tb-hl-comment {color: #4c5156;}
+  .tb-pre[theme=dark] .tb-hl-string {color: #ce5a70;}
+  .tb-pre[theme=dark] .tb-hl-attr-value {color: #ce5a70;}
+  .tb-pre[theme=dark] .tb-hl-regex {color: #af741d;}
+  .tb-pre[theme=dark] .tb-hl-selector {color: #ce5a70; font-weight: normal}
+  .tb-pre[theme=dark] .tb-code-line::before { color: #536171}
+  .tb-pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #292929; }`]
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'PRE'
