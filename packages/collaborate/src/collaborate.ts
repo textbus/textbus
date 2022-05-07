@@ -7,7 +7,7 @@ import {
   Registry,
   Selection,
   SelectionPaths,
-  History, Renderer, Slot, ComponentInstance, makeError, Slots, Formats
+  History, Renderer, Slot, ComponentInstance, makeError, Formats
 } from '@textbus/core'
 import {
   Doc as YDoc,
@@ -48,6 +48,11 @@ export class Collaborate implements History {
 
   private subscriptions: Subscription[] = []
   private updateFromRemote = false
+
+  private contentSyncCaches = new WeakMap<Slot, () => void>()
+  private slotStateSyncCaches = new WeakMap<Slot, () => void>()
+  private slotsSyncCaches = new WeakMap<ComponentInstance, () => void>()
+  private componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
 
   private selectionChangeEvent = new Subject<SelectionPaths>()
 
@@ -123,30 +128,26 @@ export class Collaborate implements History {
   }
 
   private syncContent(content: YText, slot: Slot) {
-    content.observe((ev, tr) => {
+    const fn = this.contentSyncCaches.get(slot)
+    if (fn) {
+      fn()
+    }
+    const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         slot.retain(0)
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
-            if (action.attributes) {
-              slot.retain(action.retain!, Object.keys(action.attributes).map(key => {
-                return [this.registry.getFormatter(key)!, action.attributes![key]]
-              }))
-            }
-            slot.retain(action.retain!)
+            slot.retain(action.retain!, makeFormats(this.registry, action.attributes))
           } else if (action.insert) {
             const index = slot.index
             let length = 1
             if (typeof action.insert === 'string') {
               length = action.insert.length
-              const attrs: Formats = action.attributes ? Object.keys(action.attributes).map(key => {
-                return [this.registry.getFormatter(key)!, action.attributes![key]]
-              }) : []
-              slot.insert(action.insert, attrs)
+              slot.insert(action.insert, makeFormats(this.registry, action.attributes))
             } else {
               const sharedComponent = action.insert as YMap<any>
               const component = this.createComponentBySharedComponent(sharedComponent)
-              this.syncSlots(sharedComponent.get('slots'), component.slots)
+              this.syncSlots(sharedComponent.get('slots'), component)
               this.syncComponent(sharedComponent, component)
               slot.insert(component)
             }
@@ -177,9 +178,10 @@ export class Collaborate implements History {
           }
         })
       })
-    })
+    }
+    content.observe(syncRemote)
 
-    slot.onContentChange.subscribe(actions => {
+    const sub = slot.onContentChange.subscribe(actions => {
       this.runLocalUpdate(() => {
         let offset = 0
         let length = 0
@@ -219,10 +221,18 @@ export class Collaborate implements History {
         }
       })
     })
+    this.contentSyncCaches.set(slot, () => {
+      content.unobserve(syncRemote)
+      sub.unsubscribe()
+    })
   }
 
   private syncSlot(remoteSlot: YMap<any>, slot: Slot) {
-    remoteSlot.observe((ev, tr) => {
+    const fn = this.slotStateSyncCaches.get(slot)
+    if (fn) {
+      fn()
+    }
+    const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
           if (key === 'state') {
@@ -233,19 +243,29 @@ export class Collaborate implements History {
           }
         })
       })
-    })
+    }
+    remoteSlot.observe(syncRemote)
 
-    slot.onStateChange.subscribe(actions => {
+    const sub = slot.onStateChange.subscribe(actions => {
       this.runLocalUpdate(() => {
         actions.forEach(action => {
           remoteSlot.set('state', action.value)
         })
       })
     })
+    this.slotStateSyncCaches.set(slot, () => {
+      remoteSlot.unobserve(syncRemote)
+      sub.unsubscribe()
+    })
   }
 
-  private syncSlots(remoteSlots: YArray<any>, slots: Slots) {
-    remoteSlots.observe((ev, tr) => {
+  private syncSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
+    const slots = component.slots
+    const fn = this.slotsSyncCaches.get(component)
+    if (fn) {
+      fn()
+    }
+    const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
@@ -263,9 +283,10 @@ export class Collaborate implements History {
           }
         })
       })
-    })
+    }
+    remoteSlots.observe(syncRemote)
 
-    slots.onChange.subscribe(operations => {
+    const sub = slots.onChange.subscribe(operations => {
       this.runLocalUpdate(() => {
         const applyActions = operations.apply
         let index: number
@@ -283,10 +304,19 @@ export class Collaborate implements History {
         })
       })
     })
+
+    this.slotsSyncCaches.set(component, () => {
+      remoteSlots.unobserve(syncRemote)
+      sub.unsubscribe()
+    })
   }
 
   private syncComponent(remoteComponent: YMap<any>, component: ComponentInstance) {
-    remoteComponent.observe((ev, tr) => {
+    const fn = this.componentStateSyncCaches.get(component)
+    if (fn) {
+      fn()
+    }
+    const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
           if (key === 'state') {
@@ -297,12 +327,17 @@ export class Collaborate implements History {
           }
         })
       })
-    })
+    }
+    remoteComponent.observe(syncRemote)
 
-    component.onStateChange.subscribe(newState => {
+    const sub = component.onStateChange.subscribe(newState => {
       this.runLocalUpdate(() => {
         remoteComponent.set('state', newState)
       })
+    })
+    this.componentStateSyncCaches.set(component, () => {
+      remoteComponent.unobserve(syncRemote)
+      sub.unsubscribe()
     })
   }
 
@@ -332,7 +367,7 @@ export class Collaborate implements History {
       const sharedSlot = this.createSharedSlotBySlot(slot)
       sharedSlots.push([sharedSlot])
     })
-    this.syncSlots(sharedSlots, component.slots)
+    this.syncSlots(sharedSlots, component)
     this.syncComponent(sharedComponent, component)
     return sharedComponent
   }
@@ -403,14 +438,12 @@ export class Collaborate implements History {
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
-          slot.insert(action.insert, action.attributes ? Object.keys(action.attributes).map(key => {
-            return [this.registry.getFormatter(key)!, action.attributes![key]]
-          }) : [])
+          slot.insert(action.insert, makeFormats(this.registry, action.attributes))
         } else {
           const sharedComponent = action.insert as YMap<any>
           const component = this.createComponentBySharedComponent(sharedComponent)
           slot.insert(component)
-          this.syncSlots(sharedComponent.get('slots'), component.slots)
+          this.syncSlots(sharedComponent.get('slots'), component)
           this.syncComponent(sharedComponent, component)
         }
       } else {
@@ -419,4 +452,17 @@ export class Collaborate implements History {
     }
     return slot
   }
+}
+
+function makeFormats(registry: Registry, attrs?: any) {
+  const formats: Formats = []
+  if (attrs) {
+    Object.keys(attrs).map(key => {
+      const formatter = registry.getFormatter(key)
+      if (formatter) {
+        formats.push([formatter, attrs[key]])
+      }
+    })
+  }
+  return formats
 }
