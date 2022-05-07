@@ -273,12 +273,12 @@ export class Slot<T = any> {
       if (offset > len) {
         offset = len
       }
-      this._index = offset
+      this._index = this.content.fixIndex(offset)
       return true
     }
 
     const startIndex = this._index
-    let endIndex = startIndex + offset
+    let endIndex = this.content.fixIndex(startIndex + offset)
     if (endIndex > len) {
       endIndex = len
     }

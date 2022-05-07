@@ -413,7 +413,7 @@ export function useSelf<Methods extends ComponentMethods = ComponentMethods, Sta
  * 组件使用子插槽的方法
  * @param slots 子插槽数组
  */
-export function useSlots<T>(slots: Slot<T>[]): Slots {
+export function useSlots<T>(slots: Slot<T>[]): Slots<T> {
   const context = getCurrentContext()
   if (!context) {
     throw componentErrorFn('cannot be called outside the component!')

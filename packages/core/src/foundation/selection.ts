@@ -316,8 +316,8 @@ export class Selection {
    */
   setStart(slot: Slot, offset: number) {
     this._startSlot = slot
-    this._startOffset = offset
     slot.retain(offset)
+    this._startOffset = slot.index
   }
 
   /**
@@ -327,8 +327,8 @@ export class Selection {
    */
   setEnd(slot: Slot, offset: number) {
     this._endSlot = slot
-    this._endOffset = offset
     slot.retain(offset)
+    this._endOffset = slot.index
   }
 
   /**
@@ -338,8 +338,8 @@ export class Selection {
    */
   setPosition(slot: Slot, offset: number) {
     this._startSlot = this._endSlot = slot
-    this._startOffset = this._endOffset = offset
     slot.retain(offset)
+    this._startOffset = this._endOffset = slot.index
   }
 
   /**
@@ -397,7 +397,16 @@ export class Selection {
   toNext() {
     const position = this.getNextPosition()
     if (position) {
-      this.setPosition(position.slot, position.offset)
+      let offset = position.offset
+      const slot = position.slot
+      while (offset <= slot.length) {
+        this.setPosition(slot, offset)
+        if (slot.index < offset) {
+          offset++
+        } else {
+          break
+        }
+      }
       this.restore()
       this.broadcastChanged()
     }

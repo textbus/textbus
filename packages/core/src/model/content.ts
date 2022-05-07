@@ -10,6 +10,19 @@ export class Content {
     return this.data.reduce((p, n) => p + n.length, 0)
   }
 
+  fixIndex(index: number) {
+    if (index === 0 || index === this.length) {
+      return index
+    }
+    const c = this.slice(index - 1, index + 1)[0]
+    if (typeof c === 'string') {
+      if (c.length === 2 && [...c].length === 1) {
+        return index - 1
+      }
+    }
+    return index
+  }
+
   insert(index: number, content: string | ComponentInstance) {
     if (index >= this.length) {
       this.append(content)
