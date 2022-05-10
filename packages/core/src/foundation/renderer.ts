@@ -12,6 +12,9 @@ import {
   Ref
 } from '../model/_api'
 import { NativeNode, NativeRenderer, RootComponentRef, USE_CONTENT_EDITABLE } from './_injection-tokens'
+import { makeError } from '../_utils/make-error'
+
+const rendererErrorFn = makeError('Renderer')
 
 interface MapChanges {
   remove: string[]
@@ -581,8 +584,11 @@ export class Renderer {
     if (component.changeMarker.dirty) {
       let slotVNode!: VElement
       const node = component.methods.render(false, (slot, factory) => {
-        slotVNode = this.slotRender(slot, factory)
-        return slotVNode
+        if (slot instanceof Slot) {
+          slotVNode = this.slotRender(slot, factory)
+          return slotVNode
+        }
+        throw rendererErrorFn(`${slot} is not a Slot instance.`)
       })
       if (component.slots.length === 1 && slotVNode === node) {
         setEditable(node, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
