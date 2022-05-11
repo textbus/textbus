@@ -8,7 +8,6 @@ import {
   Translator,
   makeError,
   OutputRenderer,
-  bootstrap,
   Starter,
   Selection,
   ComponentInstance,
@@ -45,16 +44,12 @@ export class CoreEditor {
   onChange: Observable<void>
 
   /** 访问编辑器内部实例的 IoC 容器 */
-  injector: Starter | null = null
+  injector: Starter
 
   /** 编辑器是否已销毁 */
   destroyed = false
   /** 编辑器是否已准备好 */
   isReady = false
-  /** 编辑器的默认配置项*/
-  options: BaseEditorOptions | null = null
-
-  protected plugins: Plugin[] = []
 
   protected defaultPlugins: Type<Plugin>[] = [
     DefaultShortcut,
@@ -64,33 +59,16 @@ export class CoreEditor {
 
   protected subs: Subscription[] = []
 
-  private rootComponentLoader: ComponentLoader | null = null
-
   private workbench!: HTMLElement
 
   private initBeforeListener: Promise<unknown>[] = []
 
   private resourceNodes: HTMLElement[] = []
 
-  constructor() {
+  constructor(private rootComponentLoader: ComponentLoader,
+              private options: BaseEditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
-  }
-
-  /**
-   * 初始化编辑器
-   * @param host 编辑器容器
-   * @param rootComponentLoader 根组件加载器
-   * @param options 编辑器的配置项
-   */
-  init(host: HTMLElement, rootComponentLoader: ComponentLoader, options: BaseEditorOptions = {}): Promise<Starter> {
-    if (this.destroyed) {
-      return Promise.reject(editorError('the editor instance is destroyed!'))
-    }
-    this.rootComponentLoader = rootComponentLoader
-    this.options = options
-    this.plugins = options.plugins || []
     const {doc, mask, wrapper} = CoreEditor.createLayout(options.minHeight)
-    host.appendChild(wrapper)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
@@ -130,7 +108,7 @@ export class CoreEditor {
       provide: CoreEditor,
       useValue: this
     }]
-    return bootstrap({
+    this.injector = new Starter({
       markdownDetect: options.markdownDetect,
       components: (options.componentLoaders || []).map(i => i.component),
       formatters: (options.formatLoaders || []).map(i => i.formatter),
@@ -148,30 +126,43 @@ export class CoreEditor {
       setup(stater) {
         options.setup?.(stater)
       }
-    }).then(starter => {
+    })
+  }
+
+  /**
+   * 初始化编辑器
+   * @param host 编辑器容器
+   */
+  mount(host: HTMLElement,): Promise<Starter> {
+    if (this.destroyed) {
+      return Promise.reject(editorError('the editor instance is destroyed!'))
+    }
+    return Promise.resolve().then(() => {
+      const starter = this.injector
       if (this.destroyed) {
         return starter
       }
       const parser = starter.get(Parser)
       const translator = starter.get(Translator)
+      const doc = starter.get(DOC_CONTAINER)
 
       let component: ComponentInstance
-      const content = options.content
+      const content = this.options.content
       if (content) {
         if (typeof content === 'string') {
-          component = parser.parseDoc(content, rootComponentLoader)
+          component = parser.parseDoc(content, this.rootComponentLoader)
         } else {
-          component = translator.createComponentByFactory(content, rootComponentLoader.component)
+          component = translator.createComponentByFactory(content, this.rootComponentLoader.component)
         }
       } else {
-        component = rootComponentLoader.component.createInstance(starter)
+        component = this.rootComponentLoader.component.createInstance(starter)
       }
 
       starter.mount(component, doc)
 
-      this.initDocStyleSheetsAndScripts(options)
+      this.initDocStyleSheetsAndScripts(this.options)
       this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
-      options.plugins?.forEach(p => p.setup(starter))
+      this.options.plugins?.forEach(p => p.setup(starter))
 
       return this.initBeforeListener.reduce((p1, p2) => {
         return p1.then(() => p2)
@@ -179,6 +170,7 @@ export class CoreEditor {
         return starter
       })
     }).then(starter => {
+      host.appendChild(this.workbench)
       const renderer = starter.get(Renderer)
       this.subs.push(renderer.onViewChecked.subscribe(() => {
         this.changeEvent.next()
@@ -187,7 +179,7 @@ export class CoreEditor {
       this.isReady = true
       this.injector = starter
 
-      if (options.autoFocus) {
+      if (this.options.autoFocus) {
         this.focus()
       }
       return starter
@@ -268,7 +260,7 @@ export class CoreEditor {
     } else {
       this.destroyed = true
       this.subs.forEach(i => i.unsubscribe())
-      this.plugins.forEach(i => {
+      this.options.plugins?.forEach(i => {
         i.onDestroy?.()
       })
       if (this.injector) {

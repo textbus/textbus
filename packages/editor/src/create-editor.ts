@@ -105,8 +105,8 @@ export const defaultTools: ToolFactory[][] = [
   [cleanTool]
 ]
 
-export function createEditor(selector: string | HTMLElement, options: EditorOptions = {}) {
-  return new Editor(selector, {
+export function createEditor(options: EditorOptions = {}) {
+  return new Editor({
     plugins: [
       new Toolbar(defaultTools),
       new LinkJumpTipPlugin()

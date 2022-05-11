@@ -10,7 +10,7 @@ const insertBtn = document.getElementById('insert-btn')!
 const insertSpan = document.getElementById('insert-span')!
 
 insertBtn.addEventListener('click', () => {
-  const commander = editor.injector!.get(Commander)
+  const commander = editor.injector.get(Commander)
   commander.insert('xxx')
 })
 insertSpan.addEventListener('click', () => {
@@ -23,7 +23,7 @@ export interface User {
   name: string
 }
 
-const editor = createEditor(document.getElementById('box')!, {
+const editor = createEditor({
   autoFocus: true,
   // autoHeight: true,
   minHeight: '300px',
@@ -41,8 +41,8 @@ const editor = createEditor(document.getElementById('box')!, {
   setup(starter) {
     const collaborate = starter.get(Collaborate)
 
-    // const provide = new WebrtcProvider('textbus', collaborate.yDoc)
-    const provide = new WebsocketProvider('wss://textbus.io/api', 'collab', collaborate.yDoc)
+    const provide = new WebrtcProvider('textbus', collaborate.yDoc)
+    // const provide = new WebsocketProvider('wss://textbus.io/api', 'collab', collaborate.yDoc)
     const users: User[] = [{
       color: '#f00',
       name: '张三'
@@ -105,6 +105,7 @@ const editor = createEditor(document.getElementById('box')!, {
     }
   },
 })
+editor.mount(document.getElementById('box')!)
 
 editor.onChange.subscribe(() => {
   const root = editor.injector!.get(RootComponentRef)
