@@ -56,6 +56,8 @@ export class Collaborate implements History {
 
   private selectionChangeEvent = new Subject<SelectionPaths>()
 
+  private updateRemoteActions: Array<() => void> = []
+
   constructor(private rootComponentRef: RootComponentRef,
               private collaborateCursor: CollaborateCursor,
               private translator: Translator,
@@ -121,6 +123,12 @@ export class Collaborate implements History {
       ).pipe(
         microTask()
       ).subscribe(() => {
+        this.yDoc.transact(() => {
+          this.updateRemoteActions.forEach(fn => {
+            fn()
+          })
+          this.updateRemoteActions = []
+        }, this.yDoc)
         this.renderer.render()
         this.selection.restore()
       })
@@ -128,10 +136,6 @@ export class Collaborate implements History {
   }
 
   private syncContent(content: YText, slot: Slot) {
-    const fn = this.contentSyncCaches.get(slot)
-    if (fn) {
-      fn()
-    }
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         slot.retain(0)
@@ -228,10 +232,6 @@ export class Collaborate implements History {
   }
 
   private syncSlot(remoteSlot: YMap<any>, slot: Slot) {
-    const fn = this.slotStateSyncCaches.get(slot)
-    if (fn) {
-      fn()
-    }
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -261,10 +261,6 @@ export class Collaborate implements History {
 
   private syncSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
     const slots = component.slots
-    const fn = this.slotsSyncCaches.get(component)
-    if (fn) {
-      fn()
-    }
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.delta.forEach(action => {
@@ -299,6 +295,9 @@ export class Collaborate implements History {
             remoteSlots.insert(index, [sharedSlot])
             index++
           } else if (action.type === 'delete') {
+            slots.slice(index, index + action.count).forEach(slot => {
+              this.cleanSubscriptionsBySlot(slot)
+            })
             remoteSlots.delete(index, action.count)
           }
         })
@@ -312,10 +311,6 @@ export class Collaborate implements History {
   }
 
   private syncComponent(remoteComponent: YMap<any>, component: ComponentInstance) {
-    const fn = this.componentStateSyncCaches.get(component)
-    if (fn) {
-      fn()
-    }
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -345,11 +340,11 @@ export class Collaborate implements History {
     if (this.updateFromRemote) {
       return
     }
-    fn()
+    this.updateRemoteActions.push(fn)
   }
 
   private runRemoteUpdate(tr: Transaction, fn: () => void) {
-    if (!tr.origin) {
+    if (tr.origin === this.yDoc) {
       return
     }
     this.updateFromRemote = true
@@ -451,6 +446,30 @@ export class Collaborate implements History {
       }
     }
     return slot
+  }
+
+  private cleanSubscriptionsBySlot(slot: Slot) {
+    [this.contentSyncCaches.get(slot), this.slotStateSyncCaches.get(slot)].forEach(fn => {
+      if (fn) {
+        fn()
+      }
+    })
+    slot.sliceContent().forEach(i => {
+      if (typeof i !== 'string') {
+        this.cleanSubscriptionsByComponent(i)
+      }
+    })
+  }
+
+  private cleanSubscriptionsByComponent(component: ComponentInstance) {
+    [this.slotsSyncCaches.get(component), this.componentStateSyncCaches.get(component)].forEach(fn => {
+      if (fn) {
+        fn()
+      }
+    })
+    component.slots.toArray().forEach(slot => {
+      this.cleanSubscriptionsBySlot(slot)
+    })
   }
 }
 
