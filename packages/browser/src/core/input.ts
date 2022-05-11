@@ -1,10 +1,10 @@
 import { filter, fromEvent, map, merge, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { Commander, ContentType, Keyboard, Slot, Selection } from '@textbus/core'
+import { Commander, ContentType, Keyboard, Slot } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
-import { SelectionBridge } from './selection-bridge'
 import { Parser } from '../dom-support/parser'
+import { Caret } from './caret'
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
 export const isMac = /mac os/i.test(navigator.userAgent)
@@ -19,23 +19,22 @@ export class Input {
   private subscriptions: Subscription[] = []
   private doc!: Document
 
+  private textarea: HTMLTextAreaElement | null = null
+
+  private isFocus = false
+
   constructor(private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
-              private selection: Selection,
-              private selectionBridge: SelectionBridge) {
-
-    let isFocus = false
-    let textarea: HTMLTextAreaElement | null = null
-
+              private caret: Caret) {
     this.subscriptions.push(
       fromEvent(this.container, 'load').subscribe(() => {
         const doc = this.container.contentDocument!
         this.doc = doc
         const contentBody = doc.body
-        const t = doc.createElement('textarea')
-        contentBody.appendChild(t)
-        textarea = t
+        const textarea = doc.createElement('textarea')
+        contentBody.appendChild(textarea)
+        this.textarea = textarea
         Object.assign(textarea.style, {
           width: '2000px',
           height: '100%',
@@ -50,27 +49,27 @@ export class Input {
           top: isWindows ? '16px' : 0
         })
         fromEvent(textarea, 'blur').subscribe(() => {
-          isFocus = false
-          selectionBridge.caret.hide()
+          this.isFocus = false
+          caret.hide()
         })
         this.handleInput(textarea)
         this.handleShortcut(textarea)
         this.handleDefaultActions(textarea)
-      }),
-      selectionBridge.onSelectionChange.subscribe((range) => {
-        if (range) {
-          if (!isFocus) {
-            textarea?.focus()
-          }
-          isFocus = true
-        } else {
-          textarea?.blur()
-          isFocus = false
-        }
       })
     )
+    caret.elementRef.append(this.container)
+  }
 
-    selectionBridge.caret.elementRef.append(this.container)
+  focus() {
+    if (!this.isFocus) {
+      this.textarea?.focus()
+    }
+    this.isFocus = true
+  }
+
+  blur() {
+    this.textarea?.blur()
+    this.isFocus = false
   }
 
   destroy() {

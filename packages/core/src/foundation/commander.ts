@@ -1,4 +1,4 @@
-import { Injectable } from '@tanbo/di'
+import { Injectable, Prop } from '@tanbo/di'
 
 import { SelectionPosition, Range, Selection } from './selection'
 import {
@@ -30,8 +30,10 @@ export type Nullable<T> = {
  */
 @Injectable()
 export class Commander {
-  constructor(private selection: Selection,
-              private nativeRenderer: NativeRenderer) {
+  @Prop()
+  private nativeRenderer!: NativeRenderer
+
+  constructor(private selection: Selection) {
   }
 
   /**

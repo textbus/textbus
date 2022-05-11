@@ -29,7 +29,7 @@
     "@tanbo/color": "^0.0.3",
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
-    "@tanbo/di": "^1.0.7",
+    "@tanbo/di": "^1.1.0",
     "@tanbo/stream": "^1.0.0",
     "@textbus/browser": "^2.0.0-alpha.79",
     "@textbus/core": "^2.0.0-alpha.79",

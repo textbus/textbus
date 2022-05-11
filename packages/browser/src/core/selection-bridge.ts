@@ -1,4 +1,4 @@
-import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
 import {
   ComponentInstance,
@@ -13,8 +13,9 @@ import {
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
-import { DOC_CONTAINER, EDITABLE_DOCUMENT, EDITOR_MASK, RESIZE_OBSERVER } from './injection-tokens'
+import { DOC_CONTAINER, EDITABLE_DOCUMENT, EDITOR_MASK } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
+import { Input } from './input'
 
 /**
  * Textbus PC 端选区桥接实现
@@ -24,8 +25,6 @@ export class SelectionBridge implements NativeSelectionBridge {
   onSelectionChange: Observable<Range | null>
   nativeSelection = this.document.getSelection()!
 
-  caret = new Caret(this.subject, this.document, this.maskContainer)
-
   private selectionMaskElement = createElement('style')
 
   private selectionChangeEvent = new Subject<Range | null>()
@@ -34,20 +33,26 @@ export class SelectionBridge implements NativeSelectionBridge {
   private sub: Subscription
   private connector!: NativeSelectionConnector
 
-  constructor(@Inject(RESIZE_OBSERVER) private subject: BehaviorSubject<DOMRect>,
-              @Inject(EDITABLE_DOCUMENT) private document: Document,
+  constructor(@Inject(EDITABLE_DOCUMENT) private document: Document,
               @Inject(DOC_CONTAINER) private docContainer: HTMLElement,
               @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
+              public caret: Caret,
               private rootComponentRef: RootComponentRef,
+              private input: Input,
               private renderer: Renderer) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable()
     this.showNativeMask()
     this.document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {
-      if (r?.collapsed) {
+      if (r) {
         this.caret.show(r)
       } else {
         this.caret.hide()
+      }
+      if (r) {
+        input.focus()
+      } else {
+        input.blur()
       }
     })
   }

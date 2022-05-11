@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Prop } from '@tanbo/di'
 import { Observable, Subject } from '@tanbo/stream'
 
 import {
@@ -212,6 +212,9 @@ export class Renderer {
    */
   onViewChecked: Observable<void>
 
+  @Prop()
+  private nativeRenderer!: NativeRenderer
+
   private componentVNode = new WeakMap<ComponentInstance, VElement>()
 
   private slotVNodeCaches = new WeakMap<Slot, VElement>()
@@ -231,8 +234,7 @@ export class Renderer {
   private slotIdAttrKey = '__textbus-slot-id__'
 
   constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
-              private rootComponentRef: RootComponentRef,
-              private nativeRenderer: NativeRenderer) {
+              private rootComponentRef: RootComponentRef) {
     this.onViewChecked = this.viewCheckedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
   }

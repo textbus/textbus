@@ -25,7 +25,7 @@ import {
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, Plugin, EDITOR_MASK, RESIZE_OBSERVER, DOC_CONTAINER
+  SelectionBridge, Plugin, EDITOR_MASK, RESIZE_OBSERVER, DOC_CONTAINER, Caret
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 
@@ -141,6 +141,7 @@ export class CoreEditor {
         DomRenderer,
         Parser,
         Input,
+        Caret,
         SelectionBridge,
         OutputTranslator,
       ],

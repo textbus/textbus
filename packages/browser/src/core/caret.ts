@@ -1,6 +1,8 @@
-import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { Inject, Injectable } from '@tanbo/di'
 
 import { createElement } from '../_utils/uikit'
+import { EDITOR_CONTAINER } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
   const {startContainer, startOffset} = range
@@ -35,6 +37,7 @@ export interface CaretPosition {
   height: number
 }
 
+@Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition>
   elementRef: HTMLElement
@@ -57,12 +60,8 @@ export class Caret {
 
   private positionChangeEvent = new Subject<CaretPosition>()
 
-  private containerRect!: DOMRect
-
   constructor(
-    private resizeSubject: BehaviorSubject<DOMRect>,
-    private document: Document,
-    private editorContainer: HTMLElement) {
+    @Inject(EDITOR_CONTAINER) private editorContainer: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -84,9 +83,6 @@ export class Caret {
     })
 
     this.subs.push(
-      resizeSubject.subscribe(rect => {
-        this.containerRect = rect
-      }),
       fromEvent(document, 'mousedown').subscribe(() => {
         this.flashing = false
       }),
@@ -100,13 +96,17 @@ export class Caret {
 
   show(range: Range) {
     this.updateCursorPosition(range)
-    this.display = true
     clearTimeout(this.timer)
-    const toggleShowHide = () => {
-      this.display = !this.display || !this.flashing
+    if (range.collapsed) {
+      this.display = true
+      const toggleShowHide = () => {
+        this.display = !this.display || !this.flashing
+        this.timer = setTimeout(toggleShowHide, 400)
+      }
       this.timer = setTimeout(toggleShowHide, 400)
+    } else {
+      this.display = false
     }
-    this.timer = setTimeout(toggleShowHide, 400)
   }
 
   hide() {
@@ -159,12 +159,10 @@ export class Caret {
     })
 
     this.caret.style.backgroundColor = color
-    if (nativeRange.collapsed) {
-      this.positionChangeEvent.next({
-        left: rect.left - containerRect.left,
-        top: top - containerRect.top,
-        height: boxHeight
-      })
-    }
+    this.positionChangeEvent.next({
+      left: rect.left - containerRect.left,
+      top: top - containerRect.top,
+      height: boxHeight
+    })
   }
 }

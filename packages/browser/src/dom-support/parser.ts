@@ -29,7 +29,7 @@ export interface ComponentLoader {
 
   read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance
 
-  component: Component<ComponentInstance>
+  component: Component
 }
 
 export interface FormatLoader {

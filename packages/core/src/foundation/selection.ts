@@ -1,4 +1,4 @@
-import { Injectable } from '@tanbo/di'
+import { Injectable, Prop } from '@tanbo/di'
 import { distinctUntilChanged, Observable, Subject } from '@tanbo/stream'
 
 import { ComponentInstance, ContentType, Slot } from '../model/_api'
@@ -96,6 +96,8 @@ export interface SelectionPaths {
  */
 @Injectable()
 export class Selection {
+  @Prop()
+  private bridge!: NativeSelectionBridge
   /** 当选区变化时触发 */
   onChange: Observable<Range | null>
 
@@ -294,8 +296,7 @@ export class Selection {
   private cacheCaretPositionTimer!: any
   private oldCaretPosition!: RangePosition | null
 
-  constructor(private bridge: NativeSelectionBridge,
-              private root: RootComponentRef,
+  constructor(private root: RootComponentRef,
               private renderer: Renderer) {
     this.onChange = this.changeEvent.asObservable().pipe(distinctUntilChanged((previous, current) => {
       if (previous && current) {
@@ -306,7 +307,7 @@ export class Selection {
       }
       return previous !== current
     }))
-    this.nativeSelectionDelegate = true
+    Promise.resolve().then(() => this.nativeSelectionDelegate = true)
   }
 
   /**
