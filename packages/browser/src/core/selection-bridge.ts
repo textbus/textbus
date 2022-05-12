@@ -316,6 +316,7 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
         const nativeRange = selection.getRangeAt(0).cloneRange()
         const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
+        const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
         if (!this.docContainer.contains(selection.focusNode)) {
           if (isFocusEnd) {
             const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)!
@@ -327,8 +328,8 @@ export class SelectionBridge implements NativeSelectionBridge {
             nativeRange.setStartBefore(nativeNode.firstChild!)
           }
         }
-        const startFocusNode = this.findFocusNode(nativeRange.startContainer, !isFocusEnd)
-        const endFocusNode = this.findFocusNode(nativeRange.endContainer, !isFocusEnd)
+        const startFocusNode = this.findFocusNode(nativeRange.startContainer, isFocusStart)
+        const endFocusNode = this.findFocusNode(nativeRange.endContainer, isFocusStart)
         if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
           connector.setSelection(null)
           return

@@ -220,6 +220,8 @@ export interface ContextMenuGroup {
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
 export interface EventTypes {
+  onFocus: (event: Event<null>) => void
+  onBlur: (event: Event<null>) => void
   onPaste: (event: Event<PasteEventData>) => void
   onContentInserted: (event: Event<InsertEventData>) => void
   onContentInsert: (event: Event<InsertEventData>) => void
@@ -493,6 +495,8 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContentI
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
 export function invokeListener<K extends keyof EventTypes,
@@ -526,6 +530,16 @@ function makeEventHook<T extends keyof EventTypes>(type: T) {
     }
   }
 }
+
+/**
+ * 组件获取焦点事件的勾子
+ */
+export const onFocus = makeEventHook('onFocus')
+
+/**
+ * 组件失去焦点事件的勾子
+ */
+export const onBlur = makeEventHook('onBlur')
 
 /**
  * 组件内粘贴事件勾子

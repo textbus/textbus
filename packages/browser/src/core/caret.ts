@@ -41,6 +41,27 @@ export interface CaretPosition {
 export class Caret {
   onPositionChange: Observable<CaretPosition>
   elementRef: HTMLElement
+
+  set offsetX(x: string) {
+    this._offsetX = x
+    this.elementRef.style.transform = `translate(${x}, ${this.offsetY})`
+  }
+
+  get offsetX() {
+    return this._offsetX
+  }
+
+  set offsetY(y: string) {
+    this._offsetY = y
+    this.elementRef.style.transform = `translate(${this.offsetX}, ${y})`
+  }
+
+  get offsetY() {
+    return this._offsetY
+  }
+
+  private _offsetX = '0'
+  private _offsetY = '0'
   private timer: any = null
   private caret: HTMLElement
 
@@ -59,6 +80,7 @@ export class Caret {
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition>()
+  private oldRange: Range | null = null
 
   constructor(
     @Inject(EDITOR_CONTAINER) private editorContainer: HTMLElement) {
@@ -95,6 +117,10 @@ export class Caret {
   }
 
   show(range: Range) {
+    const oldRange = this.oldRange
+    if (oldRange && range.startOffset === oldRange.startOffset && range.startContainer === oldRange.startContainer) {
+      return
+    }
     this.updateCursorPosition(range)
     clearTimeout(this.timer)
     if (range.collapsed) {
@@ -107,9 +133,11 @@ export class Caret {
     } else {
       this.display = false
     }
+    this.oldRange = range.cloneRange()
   }
 
   hide() {
+    this.oldRange = null
     this.display = false
     clearTimeout(this.timer)
   }

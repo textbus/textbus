@@ -39,7 +39,7 @@ const editorError = makeError('CoreEditor')
 /**
  * Textbus PC 端编辑器
  */
-export class CoreEditor {
+export class Viewer {
   /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
 
@@ -68,7 +68,7 @@ export class CoreEditor {
   constructor(private rootComponentLoader: ComponentLoader,
               private options: BaseEditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
-    const {doc, mask, wrapper} = CoreEditor.createLayout(options.minHeight)
+    const {doc, mask, wrapper} = Viewer.createLayout(options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
       provide: EDITABLE_DOCUMENT,
@@ -105,7 +105,7 @@ export class CoreEditor {
       provide: NativeSelectionBridge,
       useClass: SelectionBridge
     }, {
-      provide: CoreEditor,
+      provide: Viewer,
       useValue: this
     }]
     this.injector = new Starter({
@@ -158,6 +158,7 @@ export class CoreEditor {
         component = this.rootComponentLoader.component.createInstance(starter)
       }
 
+      host.appendChild(this.workbench)
       starter.mount(component, doc)
 
       this.initDocStyleSheetsAndScripts(this.options)
@@ -170,7 +171,6 @@ export class CoreEditor {
         return starter
       })
     }).then(starter => {
-      host.appendChild(this.workbench)
       const renderer = starter.get(Renderer)
       this.subs.push(renderer.onViewChecked.subscribe(() => {
         this.changeEvent.next()
@@ -332,9 +332,9 @@ export class CoreEditor {
       this.resourceNodes.push(linkEle)
       document.head.appendChild(linkEle)
     })
-    const docStyles = CoreEditor.cssMin([componentStyles, ...(options.styleSheets || [])].join(''))
+    const docStyles = Viewer.cssMin([componentStyles, ...(options.styleSheets || [])].join(''))
     const styleEl = document.createElement('style')
-    styleEl.innerHTML = CoreEditor.cssMin([...docStyles, ...(options.editingStyleSheets || [])].join(''))
+    styleEl.innerHTML = Viewer.cssMin([...docStyles, ...(options.editingStyleSheets || [])].join(''))
     this.resourceNodes.push(styleEl)
     document.head.append(styleEl)
 

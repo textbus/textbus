@@ -1,7 +1,7 @@
 import { Injectable, Prop } from '@tanbo/di'
-import { distinctUntilChanged, Observable, Subject } from '@tanbo/stream'
+import { distinctUntilChanged, map, Observable, Subject } from '@tanbo/stream'
 
-import { ComponentInstance, ContentType, Slot } from '../model/_api'
+import { ComponentInstance, ContentType, invokeListener, Slot } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 
@@ -298,6 +298,7 @@ export class Selection {
 
   constructor(private root: RootComponentRef,
               private renderer: Renderer) {
+    let prevFocusComponent: ComponentInstance | null
     this.onChange = this.changeEvent.asObservable().pipe(distinctUntilChanged((previous, current) => {
       if (previous && current) {
         return !(previous.startOffset === current.startOffset &&
@@ -307,6 +308,23 @@ export class Selection {
       }
       return previous !== current
     }))
+    this.onChange.pipe(
+      map<any, ComponentInstance | null>(() => {
+        if (this.startSlot?.parent === this.endSlot?.parent) {
+          return this.startSlot?.parent || null
+        }
+        return null
+      }),
+      distinctUntilChanged()
+    ).subscribe(component => {
+      if (prevFocusComponent) {
+        invokeListener(prevFocusComponent, 'onBlur')
+      }
+      if (component) {
+        invokeListener(component, 'onFocus')
+      }
+      prevFocusComponent = component
+    })
     Promise.resolve().then(() => this.nativeSelectionDelegate = true)
   }
 
@@ -384,9 +402,14 @@ export class Selection {
    * 把光标移动到前一个位置
    */
   toPrevious() {
+    const {startSlot, startOffset} = this
     const position = this.getPreviousPosition()
     if (position) {
       this.setPosition(position.slot, position.offset)
+      if (startSlot === this.startSlot && startOffset === this.startOffset) {
+        const first = this.root.component.slots.first!
+        this.setPosition(first, 0)
+      }
       this.restore()
       this.broadcastChanged()
     }
@@ -396,6 +419,7 @@ export class Selection {
    * 把光标移动到后一个位置
    */
   toNext() {
+    const {endSlot, endOffset} = this
     const position = this.getNextPosition()
     if (position) {
       let offset = position.offset
@@ -407,6 +431,10 @@ export class Selection {
         } else {
           break
         }
+      }
+      if (endSlot === this.endSlot && endOffset === this.endOffset) {
+        const last = this.root.component.slots.last!
+        this.setPosition(last, last.length)
       }
       this.restore()
       this.broadcastChanged()
@@ -481,24 +509,23 @@ export class Selection {
    * 立即同步 Textbus 选区到原生选区
    */
   restore() {
-    if (!this.nativeSelectionDelegate) {
-      return
-    }
-    const startSlot = this.startSlot!
-    const startOffset = this.startOffset!
-    const endSlot = this.endSlot!
-    const endOffset = this.endOffset!
-    if (startSlot && endSlot) {
-      startSlot.retain(startOffset)
-      endSlot.retain(endOffset)
-      this.bridge.restore({
-        startOffset: this.startOffset!,
-        startSlot: this.startSlot!,
-        endOffset: this.endOffset!,
-        endSlot: this.endSlot!
-      })
-    } else {
-      this.bridge.restore(null)
+    if (this.nativeSelectionDelegate) {
+      const startSlot = this.startSlot!
+      const startOffset = this.startOffset!
+      const endSlot = this.endSlot!
+      const endOffset = this.endOffset!
+      if (startSlot && endSlot) {
+        startSlot.retain(startOffset)
+        endSlot.retain(endOffset)
+        this.bridge.restore({
+          startOffset: this.startOffset!,
+          startSlot: this.startSlot!,
+          endOffset: this.endOffset!,
+          endSlot: this.endSlot!
+        })
+      } else {
+        this.bridge.restore(null)
+      }
     }
     this.broadcastChanged()
   }
@@ -555,7 +582,7 @@ export class Selection {
    */
   unSelect() {
     this._startSlot = this._endSlot = this._startOffset = this._endOffset = null
-    this.broadcastChanged()
+    this.restore()
   }
 
   /**

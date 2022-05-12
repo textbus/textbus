@@ -1,7 +1,7 @@
 import { Provider, Type } from '@tanbo/di'
 import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection, Starter } from '@textbus/core'
-import { CoreEditor, SelectionBridge } from '@textbus/browser'
+import { Viewer, SelectionBridge } from '@textbus/browser'
 
 import { EditorOptions } from './types'
 import { rootComponentLoader } from './root.component'
@@ -19,7 +19,7 @@ const editorErrorFn = makeError('Editor')
 /**
  * 基于 Textbus 内核和 PC 浏览器中间层的富文本实现
  */
-export class Editor extends CoreEditor {
+export class Editor extends Viewer {
   /** 编辑器是否初始化完成可观察对象 */
   onReady: Observable<Starter>
   /** 编辑器 UI 布局相关的 DOM 对象管理类 */
