@@ -220,6 +220,9 @@ export interface ContextMenuGroup {
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
 export interface EventTypes {
+  onSelected: () => void
+  onSelectionFromFront: (event: Event<null>) => void
+  onSelectionFromEnd: (event: Event<null>) => void
   onFocus: (event: Event<null>) => void
   onBlur: (event: Event<null>) => void
   onPaste: (event: Event<PasteEventData>) => void
@@ -488,6 +491,8 @@ export class Event<T, S extends Slot = Slot> {
  * @param eventType 事件名
  * @param data 事件对象
  */
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<EnterEventData>): void
@@ -495,6 +500,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContentI
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
@@ -530,6 +536,21 @@ function makeEventHook<T extends keyof EventTypes>(type: T) {
     }
   }
 }
+
+/**
+ * 当选区刚好选中一个组件
+ */
+export const onSelected = makeEventHook('onSelected')
+
+/**
+ * 当光标从前面进入组件
+ */
+export const onSelectionFromFront = makeEventHook('onSelectionFromFront')
+
+/**
+ * 当光标从后面进入组件
+ */
+export const onSelectionFromEnd = makeEventHook('onSelectionFromEnd')
 
 /**
  * 组件获取焦点事件的勾子

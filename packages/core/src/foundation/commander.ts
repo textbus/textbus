@@ -277,7 +277,7 @@ export class Commander {
         isPreventDefault = false
         slot.retain(selection.startOffset!)
         slot.delete(selection.endOffset! - selection.startOffset!)
-        selection.collapse()
+        selection.collapse(true)
       })
       invokeListener(selection.startSlot!.parent!, 'onContentDelete', event)
       if (isPreventDefault) {
@@ -378,7 +378,7 @@ export class Commander {
       selection.setStart(startSlotRef, startOffset)
     }
 
-    selection.collapse()
+    selection.collapse(true)
     return true
   }
 

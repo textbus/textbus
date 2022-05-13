@@ -118,7 +118,10 @@ export class Caret {
 
   show(range: Range) {
     const oldRange = this.oldRange
-    if (oldRange && range.startOffset === oldRange.startOffset && range.startContainer === oldRange.startContainer) {
+    if (oldRange && range.startOffset === oldRange.startOffset &&
+      range.startContainer === oldRange.startContainer &&
+      range.endOffset === oldRange.endOffset &&
+      range.endContainer === oldRange.endContainer) {
       return
     }
     this.updateCursorPosition(range)

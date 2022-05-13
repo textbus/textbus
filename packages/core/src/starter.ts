@@ -163,8 +163,8 @@ export class Starter extends ReflectiveInjector {
     if (typeof beforeDestroy === 'function') {
       beforeDestroy()
     }
-    [History].forEach(i => {
-      this.get(i).destroy()
+    [this.get(History), this.get(Selection)].forEach(i => {
+      i.destroy()
     })
     this.subs.forEach(i => i.unsubscribe())
   }

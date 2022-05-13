@@ -1,7 +1,7 @@
 import { Injectable, Prop } from '@tanbo/di'
-import { distinctUntilChanged, map, Observable, Subject } from '@tanbo/stream'
+import { distinctUntilChanged, map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { ComponentInstance, ContentType, invokeListener, Slot } from '../model/_api'
+import { ComponentInstance, ContentType, invokeListener, Slot, Event } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 
@@ -296,6 +296,8 @@ export class Selection {
   private cacheCaretPositionTimer!: any
   private oldCaretPosition!: RangePosition | null
 
+  private subscriptions: Subscription[] = []
+
   constructor(private root: RootComponentRef,
               private renderer: Renderer) {
     let prevFocusComponent: ComponentInstance | null
@@ -308,24 +310,50 @@ export class Selection {
       }
       return previous !== current
     }))
-    this.onChange.pipe(
-      map<any, ComponentInstance | null>(() => {
-        if (this.startSlot?.parent === this.endSlot?.parent) {
-          return this.startSlot?.parent || null
+    this.subscriptions.push(
+      this.onChange.pipe(
+        map<any, ComponentInstance | null>(() => {
+          if (this.startSlot?.parent === this.endSlot?.parent) {
+            return this.startSlot?.parent || null
+          }
+          return null
+        }),
+        distinctUntilChanged()
+      ).subscribe(component => {
+        if (prevFocusComponent) {
+          invokeListener(prevFocusComponent, 'onBlur')
         }
-        return null
+        if (component) {
+          invokeListener(component, 'onFocus')
+        }
+        prevFocusComponent = component
       }),
-      distinctUntilChanged()
-    ).subscribe(component => {
-      if (prevFocusComponent) {
-        invokeListener(prevFocusComponent, 'onBlur')
-      }
-      if (component) {
-        invokeListener(component, 'onFocus')
-      }
-      prevFocusComponent = component
-    })
+      this.onChange.pipe(
+        map(() => {
+          if (!this.isSelected) {
+            return null
+          }
+          if (this.startSlot === this.endSlot && this.endOffset! - this.startOffset! === 1) {
+            const content = this.startSlot!.getContentAtIndex(this.startOffset!)
+            if (typeof content !== 'string') {
+              return content
+            }
+          }
+          return null
+        }),
+        distinctUntilChanged()
+      ).subscribe(component => {
+        if (component) {
+          invokeListener(component, 'onSelected')
+        }
+      })
+    )
     Promise.resolve().then(() => this.nativeSelectionDelegate = true)
+  }
+
+  destroy() {
+    this.subscriptions.forEach(i => i.unsubscribe())
+    this.subscriptions = []
   }
 
   /**
@@ -402,13 +430,34 @@ export class Selection {
    * 把光标移动到前一个位置
    */
   toPrevious() {
+    if (!this.isCollapsed) {
+      this.collapse(true)
+      this.restore()
+      this.broadcastChanged()
+      return
+    }
     const {startSlot, startOffset} = this
     const position = this.getPreviousPosition()
     if (position) {
       this.setPosition(position.slot, position.offset)
-      if (startSlot === this.startSlot && startOffset === this.startOffset) {
-        const first = this.root.component.slots.first!
-        this.setPosition(first, 0)
+      if (startSlot === this.startSlot) {
+        if (startOffset === this.startOffset) {
+          const first = this.root.component.slots.first!
+          this.setPosition(first, 0)
+        } else if (startOffset! - this.startOffset! === 1) {
+          const content = startSlot!.getContentAtIndex(this.startOffset!)
+          if (typeof content !== 'string') {
+            let isPreventDefault = true
+            invokeListener(content, 'onSelectionFromEnd', new Event(startSlot!, null, () => {
+              isPreventDefault = false
+            }))
+            if (!isPreventDefault) {
+              this.selectComponent(content)
+            } else {
+              this.setPosition(startSlot!, startOffset!)
+            }
+          }
+        }
       }
       this.restore()
       this.broadcastChanged()
@@ -419,6 +468,12 @@ export class Selection {
    * 把光标移动到后一个位置
    */
   toNext() {
+    if (!this.isCollapsed) {
+      this.collapse()
+      this.restore()
+      this.broadcastChanged()
+      return
+    }
     const {endSlot, endOffset} = this
     const position = this.getNextPosition()
     if (position) {
@@ -432,9 +487,24 @@ export class Selection {
           break
         }
       }
-      if (endSlot === this.endSlot && endOffset === this.endOffset) {
-        const last = this.root.component.slots.last!
-        this.setPosition(last, last.length)
+      if (endSlot === this.endSlot) {
+        if (endOffset === this.endOffset) {
+          const last = this.root.component.slots.last!
+          this.setPosition(last, last.length)
+        } else if (this.endOffset! - endOffset! === 1) {
+          const content = endSlot!.getContentAtIndex(endOffset!)
+          if (typeof content !== 'string') {
+            let isPreventDefault = true
+            invokeListener(content, 'onSelectionFromFront', new Event(endSlot!, null, () => {
+              isPreventDefault = false
+            }))
+            if (!isPreventDefault) {
+              this.selectComponent(content)
+            } else {
+              this.setPosition(endSlot!, endOffset!)
+            }
+          }
+        }
       }
       this.restore()
       this.broadcastChanged()
@@ -493,15 +563,15 @@ export class Selection {
 
   /**
    * 闭合选区
-   * @param toEnd 是否闭合到结束位置
+   * @param toStart 是否闭合到结束位置
    */
-  collapse(toEnd = false) {
-    if (toEnd) {
-      this._startSlot = this._endSlot
-      this._startOffset = this._endOffset
-    } else {
+  collapse(toStart = false) {
+    if (toStart) {
       this._endSlot = this._startSlot
       this._endOffset = this._startOffset
+    } else {
+      this._startSlot = this._endSlot
+      this._startOffset = this._endOffset
     }
   }
 
