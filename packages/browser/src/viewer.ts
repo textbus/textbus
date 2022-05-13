@@ -65,6 +65,8 @@ export class Viewer {
 
   private resourceNodes: HTMLElement[] = []
 
+  private setupCallback: (() => void) | null = null
+
   constructor(private rootComponentLoader: ComponentLoader,
               private options: BaseEditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
@@ -123,8 +125,8 @@ export class Viewer {
         SelectionBridge,
         OutputTranslator,
       ],
-      setup(stater) {
-        options.setup?.(stater)
+      setup: stater => {
+        this.setupCallback = options.setup?.(stater) || null
       }
     })
   }
@@ -259,6 +261,7 @@ export class Viewer {
       return
     } else {
       this.destroyed = true
+      this.setupCallback?.()
       this.subs.forEach(i => i.unsubscribe())
       this.options.plugins?.forEach(i => {
         i.onDestroy?.()

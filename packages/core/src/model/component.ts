@@ -506,7 +506,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): 
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
 export function invokeListener<K extends keyof EventTypes,
-  D = EventTypes[K] extends (...args: infer U) => any ? U : never>(target: ComponentInstance, eventType: K, data?: D) {
+  D = EventTypes[K] extends (args: infer U) => any ? U : never>(target: ComponentInstance, eventType: K, data?: D) {
   const cache = eventCacheMap.get(target)
   if (cache) {
     const callbacks = cache.get(eventType)
