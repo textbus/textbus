@@ -31,7 +31,7 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private subs: Subscription[] = []
   private sub: Subscription
-  private connector!: NativeSelectionConnector
+  private connector: NativeSelectionConnector | null = null
 
   constructor(@Inject(EDITABLE_DOCUMENT) private document: Document,
               @Inject(DOC_CONTAINER) private docContainer: HTMLElement,
@@ -71,6 +71,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   disConnect() {
+    this.connector = null
     this.unListen()
   }
 
@@ -94,6 +95,9 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   restore(range: TBRange | null) {
     this.unListen()
+    if (!this.connector) {
+      return
+    }
     if (!range) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
@@ -126,7 +130,9 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.selectionChangeEvent.next(nativeRange)
     setTimeout(() => {
       // hack 浏览器会触发上面选区更改事件
-      this.listen(this.connector)
+      if (this.connector) {
+        this.listen(this.connector)
+      }
     })
   }
 

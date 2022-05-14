@@ -440,23 +440,29 @@ export class Selection {
     const position = this.getPreviousPosition()
     if (position) {
       this.setPosition(position.slot, position.offset)
+
+      let content: ComponentInstance | string | null = null
       if (startSlot === this.startSlot) {
         if (startOffset === this.startOffset) {
           const first = this.root.component.slots.first!
           this.setPosition(first, 0)
         } else if (startOffset! - this.startOffset! === 1) {
-          const content = startSlot!.getContentAtIndex(this.startOffset!)
-          if (typeof content !== 'string') {
-            let isPreventDefault = true
-            invokeListener(content, 'onSelectionFromEnd', new Event(startSlot!, null, () => {
-              isPreventDefault = false
-            }))
-            if (!isPreventDefault) {
-              this.selectComponent(content)
-            } else {
-              this.setPosition(startSlot!, startOffset!)
-            }
+          content = startSlot!.getContentAtIndex(this.startOffset!)
+        }
+      } else if (startSlot?.parent !== this.startSlot?.parent) {
+        content = this.endSlot?.parent || null
+      }
+      if (content && typeof content !== 'string') {
+        let isPreventDefault = true
+        invokeListener(content, 'onSelectionFromEnd', new Event(startSlot!, null, () => {
+          isPreventDefault = false
+        }))
+        if (!isPreventDefault) {
+          if (content.slots.length === 0) {
+            this.selectComponent(content)
           }
+        } else {
+          this.setPosition(startSlot!, startOffset!)
         }
       }
       this.restore()
@@ -487,23 +493,28 @@ export class Selection {
           break
         }
       }
+      let content: ComponentInstance | string | null = null
       if (endSlot === this.endSlot) {
         if (endOffset === this.endOffset) {
           const last = this.root.component.slots.last!
           this.setPosition(last, last.length)
         } else if (this.endOffset! - endOffset! === 1) {
-          const content = endSlot!.getContentAtIndex(endOffset!)
-          if (typeof content !== 'string') {
-            let isPreventDefault = true
-            invokeListener(content, 'onSelectionFromFront', new Event(endSlot!, null, () => {
-              isPreventDefault = false
-            }))
-            if (!isPreventDefault) {
-              this.selectComponent(content)
-            } else {
-              this.setPosition(endSlot!, endOffset!)
-            }
+          content = endSlot!.getContentAtIndex(endOffset!)
+        }
+      } else if (endSlot?.parent !== this.endSlot?.parent) {
+        content = this.endSlot?.parent || null
+      }
+      if (content && typeof content !== 'string') {
+        let isPreventDefault = true
+        invokeListener(content, 'onSelectionFromFront', new Event(endSlot!, null, () => {
+          isPreventDefault = false
+        }))
+        if (!isPreventDefault) {
+          if (content.slots.length === 0) {
+            this.selectComponent(content)
           }
+        } else {
+          this.setPosition(endSlot!, endOffset!)
         }
       }
       this.restore()
