@@ -12,7 +12,7 @@ import {
   useSlots,
   VElement, onDestroy, useRef, onEnter, ComponentInstance, ComponentData
 } from '@textbus/core'
-import { ComponentLoader, EDITOR_CONTAINER, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
+import { ComponentLoader, DOC_CONTAINER, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
 import { paragraphComponent } from './components/paragraph.component'
 import { EditorOptions } from './types'
@@ -24,7 +24,7 @@ export const rootComponent = defineComponent({
     const injector = useContext()
     const selection = injector.get(Selection)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
-    const editorContainer = injector.get(EDITOR_CONTAINER)
+    const docContainer = injector.get(DOC_CONTAINER)
 
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
@@ -55,10 +55,10 @@ export const rootComponent = defineComponent({
       ev.preventDefault()
     })
 
-    const docContainer = useRef<HTMLElement>()
+    const rootNode = useRef<HTMLElement>()
 
-    const sub = fromEvent<MouseEvent>(editorContainer, 'click').subscribe(ev => {
-      if (ev.clientY > docContainer.current!.getBoundingClientRect().height) {
+    const sub = fromEvent<MouseEvent>(docContainer, 'click').subscribe(ev => {
+      if (ev.clientY > rootNode.current!.getBoundingClientRect().bottom) {
         const slot = slots.get(0)!
         const lastContent = slot.getContentAtIndex(slot.length - 1)
         if (!slot.isEmpty && typeof lastContent !== 'string' && lastContent.name !== paragraphComponent.name) {
@@ -81,7 +81,7 @@ export const rootComponent = defineComponent({
         return slotRender(slots.get(0)!, () => {
           return new VElement('div', {
             'textbus-document': 'true',
-            'ref': docContainer,
+            'ref': rootNode,
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
           })
         })

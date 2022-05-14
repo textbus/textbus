@@ -372,6 +372,7 @@ export class Viewer {
         cursor: 'text',
         padding: '8px',
         wordBreak: 'break-all',
+        boxSizing: 'border-box',
         minHeight,
       },
       props: {
