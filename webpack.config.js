@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const EslintWebpackPlugin = require('eslint-webpack-plugin')
+const ip = require('ip')
 
 module.exports = {
   mode: 'development',
@@ -25,7 +26,7 @@ module.exports = {
     }
   },
   devServer: {
-    host: 'localhost',
+    host: ip.address(),
     static: {
       directory: path.join(__dirname, 'dist')
     },

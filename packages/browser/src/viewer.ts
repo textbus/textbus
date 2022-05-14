@@ -182,7 +182,9 @@ export class Viewer {
       this.injector = starter
 
       if (this.options.autoFocus) {
-        this.focus()
+        starter.get(Input).onReady.then(() => {
+          this.focus()
+        })
       }
       return starter
     })

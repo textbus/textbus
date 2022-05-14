@@ -1,4 +1,4 @@
-import { filter, fromEvent, map, merge, Subscription } from '@tanbo/stream'
+import { filter, fromEvent, map, merge, Observable, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
 import { Commander, ContentType, Keyboard, Slot } from '@textbus/core'
 
@@ -8,12 +8,14 @@ import { Caret } from './caret'
 
 export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
 export const isMac = /mac os/i.test(navigator.userAgent)
+const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
 
 /**
  * Textbus PC 端输入实现
  */
 @Injectable()
 export class Input {
+  onReady: Promise<void>
   private container = Input.createEditableFrame()
 
   private subscriptions: Subscription[] = []
@@ -23,40 +25,47 @@ export class Input {
 
   private isFocus = false
 
+
   constructor(private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
               private caret: Caret) {
-    this.subscriptions.push(
-      fromEvent(this.container, 'load').subscribe(() => {
-        const doc = this.container.contentDocument!
-        this.doc = doc
-        const contentBody = doc.body
-        const textarea = doc.createElement('textarea')
-        contentBody.appendChild(textarea)
-        this.textarea = textarea
-        Object.assign(textarea.style, {
-          width: '2000px',
-          height: '100%',
-          opacity: 0,
-          padding: 0,
-          border: 'none',
-          outline: 'none',
-          position: 'absolute',
-          fontSize: 'inherit',
-          lineHeight: 1,
-          left: 0,
-          top: isWindows ? '16px' : 0
+    this.onReady = new Promise<void>(resolve => {
+      this.subscriptions.push(
+        fromEvent(this.container, 'load').subscribe(() => {
+          const doc = this.container.contentDocument!
+          this.doc = doc
+          const contentBody = doc.body
+          const textarea = doc.createElement('textarea')
+          contentBody.appendChild(textarea)
+          this.textarea = textarea
+          Object.assign(textarea.style, {
+            width: '2000px',
+            height: '100%',
+            opacity: 0,
+            padding: 0,
+            border: 'none',
+            outline: 'none',
+            position: 'absolute',
+            fontSize: 'inherit',
+            lineHeight: 1,
+            left: 0,
+            top: isWindows ? '16px' : 0
+          })
+          this.subscriptions.push(
+            fromEvent(textarea, 'blur').subscribe(() => {
+              this.isFocus = false
+              caret.hide()
+            })
+          )
+          this.handleInput(textarea)
+          this.handleShortcut(textarea)
+          this.handleDefaultActions(textarea)
+          resolve()
         })
-        fromEvent(textarea, 'blur').subscribe(() => {
-          this.isFocus = false
-          caret.hide()
-        })
-        this.handleInput(textarea)
-        this.handleShortcut(textarea)
-        this.handleDefaultActions(textarea)
-      })
-    )
+      )
+    })
+
     caret.elementRef.append(this.container)
   }
 
@@ -139,6 +148,7 @@ export class Input {
 
   private handleShortcut(textarea: HTMLTextAreaElement) {
     let isWriting = false
+    let isIgnore = false
     this.subscriptions.push(
       fromEvent(textarea, 'compositionstart').subscribe(() => {
         isWriting = true
@@ -146,7 +156,18 @@ export class Input {
       fromEvent(textarea, 'compositionend').subscribe(() => {
         isWriting = false
       }),
+      fromEvent<InputEvent>(textarea, 'beforeinput').subscribe(ev => {
+        if (isSafari) {
+          if (ev.inputType === 'insertFromComposition') {
+            isIgnore = true
+          }
+        }
+      }),
       fromEvent<KeyboardEvent>(textarea, 'keydown').pipe(filter(() => {
+        if (isSafari && isIgnore) {
+          isIgnore = false
+          return false
+        }
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
         const is = this.keyboard.execShortcut({
@@ -168,13 +189,16 @@ export class Input {
         fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
           filter(ev => {
             ev.preventDefault()
+            if (isSafari) {
+              return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
+            }
             return !ev.isComposing && !!ev.data
           }),
           map(ev => {
             return ev.data as string
           })
         ),
-        fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(map(ev => {
+        isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(map(ev => {
           ev.preventDefault()
           textarea.value = ''
           return ev.data
