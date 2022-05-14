@@ -260,6 +260,9 @@ export class Slot<T = any> {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
+        if (formatter.length === 0) {
+          return true
+        }
         formats = formatter
       } else {
         formats.push([formatter, value as FormatValue])

@@ -120,7 +120,7 @@ export interface PreComponentState {
 
 export const codeStyleFormatter: Formatter = {
   type: FormatType.Attribute,
-  name: 'code',
+  name: 'code' + Math.random(),
   render(node: VElement | null, formatValue: string) {
     return new VElement('span', {
       class: 'tb-hl-' + formatValue

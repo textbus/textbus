@@ -37,6 +37,13 @@ export interface CaretPosition {
   height: number
 }
 
+interface CachedRange {
+  startContainer: Node
+  startOffset: number
+  endContainer: Node
+  endOffset: number
+}
+
 @Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition>
@@ -80,7 +87,7 @@ export class Caret {
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition>()
-  private oldRange: Range | null = null
+  private oldRange: CachedRange | null = null
 
   constructor(
     @Inject(EDITOR_CONTAINER) private editorContainer: HTMLElement) {
@@ -136,7 +143,12 @@ export class Caret {
     } else {
       this.display = false
     }
-    this.oldRange = range.cloneRange()
+    this.oldRange = {
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset
+    }
   }
 
   hide() {
@@ -146,6 +158,7 @@ export class Caret {
   }
 
   destroy() {
+    this.oldRange = null
     clearTimeout(this.timer)
     this.subs.forEach(i => i.unsubscribe())
   }

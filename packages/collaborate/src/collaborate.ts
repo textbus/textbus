@@ -141,7 +141,14 @@ export class Collaborate implements History {
         slot.retain(0)
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
-            slot.retain(action.retain!, makeFormats(this.registry, action.attributes))
+            if (action.attributes) {
+              const formats = makeFormats(this.registry, action.attributes)
+              if (formats.length) {
+                slot.retain(action.retain!, formats)
+              }
+            } else {
+              slot.retain(action.retain)
+            }
           } else if (action.insert) {
             const index = slot.index
             let length = 1
@@ -191,8 +198,19 @@ export class Collaborate implements History {
         let length = 0
         for (const action of actions) {
           if (action.type === 'retain') {
-            if (action.formats) {
-              content.format(offset, action.offset, action.formats)
+            const formats = action.formats
+            if (formats) {
+              const keys = Object.keys(formats)
+              let length = keys.length
+              keys.forEach(key => {
+                if (!this.registry.getFormatter(key)) {
+                  length--
+                  Reflect.deleteProperty(formats, key)
+                }
+              })
+              if (length) {
+                content.format(offset, action.offset, formats)
+              }
             } else {
               offset = action.offset
             }
