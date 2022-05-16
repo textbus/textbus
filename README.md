@@ -7,7 +7,7 @@ Textbus 是一个组件化、跨平台、数据驱动的富文本框架，并坚
 
 我们一直致力于让富文本开发也能像普通前端框架一样，通过简明易懂的 api 和少量的约定，即可扩展出健壮的、符合预期的富文本编辑器。在 Textbus 1.0 的时，我们为此做了非常多的探索和努力，取得了不错的成果，但也因为如此，1.0 的设计在某些方面还留下一些遗憾。
 
-幸运的是，Textbus 2.0 即将面世，我们在 1.0 的成果之上，重新设计了整个架构，致力于更简洁的 api，更友好的开发接入方式。
+幸运的是，Textbus 2.0 已经到来，我们在 1.0 的成果之上，重新设计了整个架构，致力于更简洁的 api，更友好的开发接入方式。
 
 + 重新设计了组件系统，去掉了大家难以理解的装饰器，改为用类似 vue 的 setup 形式开发组件，并提供了一系列的 hooks 供大家定制交互行为
 + 重新设计了数据模型，可根据用户的操作生成特定的底层原子命令，这让细粒度的历史记录和文档协同成为可能
@@ -35,8 +35,8 @@ npm install @textbus/core @textbus/browser @textbus/editor
 import '@textbus/editor/bundles/textbus.min.css';
 import { createEditor } from '@textbus/editor';
 
-const editor = createEditor(document.getElementById('editor'))
-
+const editor = createEditor()
+editor.mount(document.getElementById('editor'))
 ```
 
 
@@ -53,7 +53,8 @@ const editor = createEditor(document.getElementById('editor'))
 <body>
 <div id="editor"></div>
 <script>
-  var editor = textbus.editor.createEditor(document.getElementById('editor'))
+  var editor = textbus.editor.createEditor()
+  editor.mount(document.getElementById('editor'))
 </script>
 </body>
 </html>

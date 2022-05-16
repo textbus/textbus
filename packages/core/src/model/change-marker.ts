@@ -42,11 +42,17 @@ export class ChangeMarker {
   }
 
   forceMarkDirtied() {
+    if (this._dirty) {
+      return
+    }
     this._dirty = true
     this.forceMarkChanged()
   }
 
   forceMarkChanged() {
+    if (this._changed) {
+      return
+    }
     this._changed = true
     this.forceChangeEvent.next()
   }

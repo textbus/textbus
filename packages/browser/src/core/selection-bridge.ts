@@ -105,8 +105,8 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    const position = this.getPositionByRange(range)
-    if (!position.start || !position.end) {
+    const {start, end} = this.getPositionByRange(range)
+    if (!start || !end) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
@@ -120,12 +120,16 @@ export class SelectionBridge implements NativeSelectionBridge {
       nativeRange = this.document.createRange()
       this.nativeSelection.addRange(nativeRange)
     }
-    nativeRange.setStart(position.start!.node, position.start!.offset)
-    nativeRange.setEnd(position.end!.node, position.end!.offset)
+    if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
+      nativeRange.setStart(start.node, start.offset)
+    }
+    if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
+      nativeRange.setEnd(end.node, end.offset)
+    }
     if (nativeRange.collapsed) {
       // 防止结束位置在起始位置前
-      nativeRange.setEnd(position.start!.node, position.start!.offset)
-      nativeRange.setStart(position.end!.node, position.end!.offset)
+      nativeRange.setEnd(start.node, start.offset)
+      nativeRange.setStart(end.node, end.offset)
     }
     this.selectionChangeEvent.next(nativeRange)
     setTimeout(() => {

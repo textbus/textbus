@@ -26,7 +26,8 @@ npm install @textbus/core @textbus/browser @textbus/editor
 import '@textbus/editor/bundles/textbus.min.css';
 import { createEditor } from '@textbus/editor';
 
-const editor = createEditor(document.getElementById('editor'))
+const editor = createEditor()
+editor.mount(document.getElementById('editor'))
 
 ```
 
@@ -44,7 +45,8 @@ const editor = createEditor(document.getElementById('editor'))
 <body>
 <div id="editor"></div>
 <script>
-  var editor = textbus.editor.createEditor(document.getElementById('editor'))
+  var editor = textbus.editor.createEditor()
+  editor.mount(document.getElementById('editor'))
 </script>
 </body>
 </html>

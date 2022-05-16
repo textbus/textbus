@@ -65,8 +65,6 @@ export class Viewer {
 
   private resourceNodes: HTMLElement[] = []
 
-  private setupCallback: (() => void) | null = null
-
   constructor(private rootComponentLoader: ComponentLoader,
               private options: BaseEditorOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
@@ -125,9 +123,7 @@ export class Viewer {
         SelectionBridge,
         OutputTranslator,
       ],
-      setup: stater => {
-        this.setupCallback = options.setup?.(stater) || null
-      }
+      setup: options.setup
     })
   }
 
@@ -261,27 +257,25 @@ export class Viewer {
   destroy() {
     if (this.destroyed) {
       return
-    } else {
-      this.destroyed = true
-      this.setupCallback?.()
-      this.subs.forEach(i => i.unsubscribe())
-      this.options.plugins?.forEach(i => {
-        i.onDestroy?.()
-      })
-      if (this.injector) {
-        const types = [
-          Input,
-        ]
-        types.forEach(i => {
-          this.injector!.get(i as Type<{ destroy(): void }>).destroy()
-        })
-        this.injector.destroy()
-      }
-      this.workbench.parentNode?.removeChild(this.workbench)
-      this.resourceNodes.forEach(node => {
-        node.parentNode?.removeChild(node)
-      })
     }
+    this.destroyed = true
+    this.subs.forEach(i => i.unsubscribe())
+    this.options.plugins?.forEach(i => {
+      i.onDestroy?.()
+    })
+    if (this.injector) {
+      const types = [
+        Input,
+      ]
+      types.forEach(i => {
+        this.injector!.get(i as Type<{ destroy(): void }>).destroy()
+      })
+      this.injector.destroy()
+    }
+    this.workbench.parentNode?.removeChild(this.workbench)
+    this.resourceNodes.forEach(node => {
+      node.parentNode?.removeChild(node)
+    })
   }
 
   /**

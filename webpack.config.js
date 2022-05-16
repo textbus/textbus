@@ -1,5 +1,5 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require('path')
 const EslintWebpackPlugin = require('eslint-webpack-plugin')
 const ip = require('ip')
 
@@ -69,4 +69,4 @@ module.exports = {
       template: 'index.html'
     })
   ]
-};
+}
