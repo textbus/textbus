@@ -37,13 +37,6 @@ export interface CaretPosition {
   height: number
 }
 
-interface CachedRange {
-  startContainer: Node
-  startOffset: number
-  endContainer: Node
-  endOffset: number
-}
-
 @Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition>
@@ -87,7 +80,6 @@ export class Caret {
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition>()
-  private oldRange: CachedRange | null = null
 
   constructor(
     @Inject(EDITOR_CONTAINER) private editorContainer: HTMLElement) {
@@ -124,13 +116,6 @@ export class Caret {
   }
 
   show(range: Range) {
-    const oldRange = this.oldRange
-    if (oldRange && range.startOffset === oldRange.startOffset &&
-      range.startContainer === oldRange.startContainer &&
-      range.endOffset === oldRange.endOffset &&
-      range.endContainer === oldRange.endContainer) {
-      return
-    }
     this.updateCursorPosition(range)
     clearTimeout(this.timer)
     if (range.collapsed) {
@@ -143,22 +128,14 @@ export class Caret {
     } else {
       this.display = false
     }
-    this.oldRange = {
-      startContainer: range.startContainer,
-      startOffset: range.startOffset,
-      endContainer: range.endContainer,
-      endOffset: range.endOffset
-    }
   }
 
   hide() {
-    this.oldRange = null
     this.display = false
     clearTimeout(this.timer)
   }
 
   destroy() {
-    this.oldRange = null
     clearTimeout(this.timer)
     this.subs.forEach(i => i.unsubscribe())
   }

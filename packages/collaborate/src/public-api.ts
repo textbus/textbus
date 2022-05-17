@@ -1,2 +1,2 @@
-export * from './collab/_api'
 export * from './collaborate'
+export * from './collaborate-cursor'

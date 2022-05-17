@@ -18,7 +18,7 @@ import {
   Transaction
 } from 'yjs'
 
-import { CollaborateCursor, RemoteSelection } from './collab/_api'
+import { CollaborateCursor, RemoteSelection } from './collaborate-cursor'
 
 const collaborateErrorFn = makeError('Collaborate')
 

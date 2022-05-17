@@ -294,25 +294,6 @@ export class SelectionBridge implements NativeSelectionBridge {
           return
         }
         selection.removeAllRanges()
-        // const path = ev.composedPath()
-        // while (path.length) {
-        //   const first = path.shift() as HTMLElement
-        //   if (first.nodeType === Node.ELEMENT_NODE) {
-        //     const location = this.renderer.getLocationByNativeNode(first)
-        //     if (location) {
-        //       const editableState = first.getAttribute('textbus-editable')
-        //       if (editableState === 'on') {
-        //         return
-        //       }
-        //       if (editableState === 'off') {
-        //         const parentNode = first.parentNode!
-        //         const index = Array.from(parentNode.childNodes).indexOf(first)
-        //         selection.setPosition(parentNode, index + 1)
-        //         return
-        //       }
-        //     }
-        //   }
-        // }
       }),
       fromEvent(this.document, 'selectionchange').subscribe(() => {
         if (isFocusin) {
@@ -412,6 +393,9 @@ export class SelectionBridge implements NativeSelectionBridge {
         return this.findFocusNode(parentNode, toAfter, excludeNodes)
       }
       return null
+    }
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      return node
     }
     if (this.renderer.getVNodeBySlot(position.slot) === this.renderer.getVNodeByNativeNode(node)) {
       return toAfter ? node.firstChild : node.lastChild
