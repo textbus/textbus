@@ -34,7 +34,7 @@ export interface RemoteSelectionCursor {
 }
 
 export abstract class CollaborateCursorAwarenessDelegate {
-  abstract getRects(range: TBRange, nativeRange: Range): null | Rect[]
+  abstract getRects(range: TBRange, nativeRange: Range): false | Rect[]
 }
 
 @Injectable()
@@ -116,14 +116,17 @@ export class CollaborateCursor {
       nativeRange.setStart(start.node, start.offset)
       nativeRange.setEnd(end.node, end.offset)
 
-      const rects = this.awarenessDelegate ? this.awarenessDelegate.getRects({
-        startOffset,
-        endOffset,
-        startSlot,
-        endSlot
-      }, nativeRange) : nativeRange.getClientRects()
+      let rects: Rect[] | DOMRectList | false = false
+      if (this.awarenessDelegate) {
+        rects = this.awarenessDelegate.getRects({
+          startOffset,
+          endOffset,
+          startSlot,
+          endSlot
+        }, nativeRange)
+      }
       if (!rects) {
-        return
+        rects = nativeRange.getClientRects()
       }
       const selectionRects: SelectionRect[] = []
       for (let i = rects.length - 1; i >= 0; i--) {

@@ -29,7 +29,7 @@ import {
   TableConfig,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
-import { CollaborateCursorAwarenessDelegate, Rect } from '@textbus/collaborate'
+import { CollaborateCursorAwarenessDelegate } from '@textbus/collaborate'
 
 export {
   createCell
@@ -41,10 +41,10 @@ export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwar
     super()
   }
 
-  override getRects(range: Range): Rect[] | null {
+  override getRects(range: Range) {
     const commonAncestorComponent = Selection.getCommonAncestorComponent(range.startSlot, range.endSlot)
     if (commonAncestorComponent?.name !== tableComponent.name) {
-      return null
+      return false
     }
     const startFocusSlot = findFocusCell(commonAncestorComponent, range.startSlot)
     const endFocusSlot = findFocusCell(commonAncestorComponent, range.endSlot)
