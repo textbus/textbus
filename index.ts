@@ -42,8 +42,8 @@ const editor = createEditor({
   setup(starter) {
     const collaborate = starter.get(Collaborate)
 
-    const provide = new WebrtcProvider('textbus', collaborate.yDoc)
-    // const provide = new WebsocketProvider('wss://textbus.io/api', 'collab', collaborate.yDoc)
+    // const provide = new WebrtcProvider('textbus', collaborate.yDoc)
+    const provide = new WebsocketProvider('wss://textbus.io/api', 'collab', collaborate.yDoc)
     const users: User[] = [{
       color: '#f00',
       name: '张三'

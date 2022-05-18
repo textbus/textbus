@@ -428,7 +428,11 @@ export class Collaborate implements History {
     })
     if (instance) {
       instance.slots.toArray().forEach((slot, index) => {
-        const sharedSlot = sharedSlots.get(index)
+        let sharedSlot = sharedSlots.get(index)
+        if (!sharedSlot) {
+          sharedSlot = this.createSharedSlotBySlot(slot)
+          sharedSlots.push([sharedSlot])
+        }
         this.syncSlot(sharedSlot, slot)
         this.syncContent(sharedSlot.get('content'), slot)
       })

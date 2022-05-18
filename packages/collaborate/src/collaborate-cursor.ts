@@ -91,49 +91,51 @@ export class CollaborateCursor {
       const startSlot = this.selection.findSlotByPaths(item.paths.start)
       const endOffset = item.paths.end.pop()!
       const endSlot = this.selection.findSlotByPaths(item.paths.end)
-
-      if (startSlot && endSlot) {
-        const position = this.nativeSelection.getPositionByRange({
-          startOffset,
-          endOffset,
-          startSlot,
-          endSlot
-        })
-        if (position.start && position.end) {
-          const nativeRange = this.document.createRange()
-          nativeRange.setStart(position.start.node, position.start.offset)
-          nativeRange.setEnd(position.end.node, position.end.offset)
-
-          const rects = nativeRange.getClientRects()
-          const selectionRects: SelectionRect[] = []
-          for (let i = rects.length - 1; i >= 0; i--) {
-            const rect = rects[i]
-            selectionRects.push({
-              color: item.color,
-              username: item.username,
-              x: rect.x - containerRect.x,
-              y: rect.y - containerRect.y,
-              width: rect.width,
-              height: rect.height,
-            })
-          }
-          this.onRectsChange.next(selectionRects)
-
-          const cursorRange = nativeRange.cloneRange()
-          cursorRange.collapse(!item.paths.focusEnd)
-
-          const cursorRect = getLayoutRectByRange(cursorRange)
-
-          users.push({
-            username: item.username,
-            color: item.color,
-            x: cursorRect.x - containerRect.x,
-            y: cursorRect.y - containerRect.y,
-            width: 2,
-            height: cursorRect.height
-          })
-        }
+      if (!startSlot || !endSlot) {
+        return
       }
+
+      const {start, end} = this.nativeSelection.getPositionByRange({
+        startOffset,
+        endOffset,
+        startSlot,
+        endSlot
+      })
+      if (!start || !end) {
+        return
+      }
+      const nativeRange = this.document.createRange()
+      nativeRange.setStart(start.node, start.offset)
+      nativeRange.setEnd(end.node, end.offset)
+
+      const rects = nativeRange.getClientRects()
+      const selectionRects: SelectionRect[] = []
+      for (let i = rects.length - 1; i >= 0; i--) {
+        const rect = rects[i]
+        selectionRects.push({
+          color: item.color,
+          username: item.username,
+          x: rect.x - containerRect.x,
+          y: rect.y - containerRect.y,
+          width: rect.width,
+          height: rect.height,
+        })
+      }
+      this.onRectsChange.next(selectionRects)
+
+      const cursorRange = nativeRange.cloneRange()
+      cursorRange.collapse(!item.paths.focusEnd)
+
+      const cursorRect = getLayoutRectByRange(cursorRange)
+
+      users.push({
+        username: item.username,
+        color: item.color,
+        x: cursorRect.x - containerRect.x,
+        y: cursorRect.y - containerRect.y,
+        width: 2,
+        height: cursorRect.height
+      })
     })
     this.drawUserCursor(users)
   }
