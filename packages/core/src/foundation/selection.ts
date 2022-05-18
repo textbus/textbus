@@ -164,85 +164,14 @@ export class Selection {
    * 选区的公共父插槽
    */
   get commonAncestorSlot(): Slot | null {
-    let startSlot = this.startSlot
-    let endSlot = this.endSlot
-    if (startSlot === endSlot) {
-      return startSlot
-    }
-
-    const startPaths: Slot[] = []
-    const endPaths: Slot[] = []
-
-    while (startSlot) {
-      startPaths.push(startSlot)
-      const parentComponent = startSlot.parent
-      if (!parentComponent) {
-        break
-      }
-      startSlot = parentComponent.parent
-    }
-
-    while (endSlot) {
-      endPaths.push(endSlot)
-      const parentComponent = endSlot.parent
-      if (!parentComponent) {
-        break
-      }
-      endSlot = parentComponent.parent
-    }
-    let f: Slot | null = null
-    while (startPaths.length && endPaths.length) {
-      const s = startPaths.pop()!
-      const e = endPaths.pop()!
-      if (s === e) {
-        f = s
-      } else {
-        break
-      }
-    }
-    return f
+    return Selection.getCommonAncestorSlot(this.startSlot, this.endSlot)
   }
 
   /**
    * 选区的公共父组件
    */
   get commonAncestorComponent(): ComponentInstance | null {
-    let startComponent = this.startSlot?.parent
-    let endComponent = this.endSlot?.parent
-    if (startComponent === endComponent) {
-      return startComponent || null
-    }
-    const startPaths: ComponentInstance[] = []
-    const endPaths: ComponentInstance[] = []
-
-    while (startComponent) {
-      startPaths.push(startComponent)
-      const parentSlot = startComponent.parent
-      if (!parentSlot) {
-        break
-      }
-      startComponent = parentSlot.parent
-    }
-
-    while (endComponent) {
-      endPaths.push(endComponent)
-      const parentSlot = endComponent.parent
-      if (!parentSlot) {
-        break
-      }
-      endComponent = parentSlot.parent
-    }
-    let f: ComponentInstance | null = null
-    while (startPaths.length && endPaths.length) {
-      const s = startPaths.pop()!
-      const e = endPaths.pop()!
-      if (s === e) {
-        f = s
-      } else {
-        break
-      }
-    }
-    return f
+    return Selection.getCommonAncestorComponent(this.startSlot, this.endSlot)
   }
 
   get nativeSelectionDelegate() {
@@ -1010,6 +939,83 @@ export class Selection {
     result.push(...end.reverse())
 
     return result
+  }
+
+  static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
+    let startComponent = startSlot?.parent
+    let endComponent = endSlot?.parent
+    if (startComponent === endComponent) {
+      return startComponent || null
+    }
+    const startPaths: ComponentInstance[] = []
+    const endPaths: ComponentInstance[] = []
+
+    while (startComponent) {
+      startPaths.push(startComponent)
+      const parentSlot = startComponent.parent
+      if (!parentSlot) {
+        break
+      }
+      startComponent = parentSlot.parent
+    }
+
+    while (endComponent) {
+      endPaths.push(endComponent)
+      const parentSlot = endComponent.parent
+      if (!parentSlot) {
+        break
+      }
+      endComponent = parentSlot.parent
+    }
+    let f: ComponentInstance | null = null
+    while (startPaths.length && endPaths.length) {
+      const s = startPaths.pop()!
+      const e = endPaths.pop()!
+      if (s === e) {
+        f = s
+      } else {
+        break
+      }
+    }
+    return f
+  }
+
+  static getCommonAncestorSlot(startSlot: Slot | null, endSlot: Slot | null) {
+    if (startSlot === endSlot) {
+      return startSlot
+    }
+
+    const startPaths: Slot[] = []
+    const endPaths: Slot[] = []
+
+    while (startSlot) {
+      startPaths.push(startSlot)
+      const parentComponent = startSlot.parent
+      if (!parentComponent) {
+        break
+      }
+      startSlot = parentComponent.parent
+    }
+
+    while (endSlot) {
+      endPaths.push(endSlot)
+      const parentComponent = endSlot.parent
+      if (!parentComponent) {
+        break
+      }
+      endSlot = parentComponent.parent
+    }
+    let f: Slot | null = null
+    while (startPaths.length && endPaths.length) {
+      const s = startPaths.pop()!
+      const e = endPaths.pop()!
+      if (s === e) {
+        f = s
+      } else {
+        break
+      }
+    }
+    return f
   }
 
   private wrapTo(toLeft: boolean) {

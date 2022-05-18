@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Optional } from '@tanbo/di'
 import {
   createElement,
   EDITABLE_DOCUMENT,
@@ -6,7 +6,7 @@ import {
   getLayoutRectByRange,
   SelectionBridge
 } from '@textbus/browser'
-import { Selection, SelectionPaths } from '@textbus/core'
+import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
 import { Subject } from '@tanbo/stream'
 
 export interface RemoteSelection {
@@ -15,19 +15,26 @@ export interface RemoteSelection {
   paths: SelectionPaths
 }
 
-export interface SelectionRect {
-  color: string
-  username: string
+export interface Rect {
   x: number
   y: number
   width: number
   height: number
 }
 
+export interface SelectionRect extends Rect {
+  color: string
+  username: string
+}
+
 export interface RemoteSelectionCursor {
   cursor: HTMLElement
   anchor: HTMLElement
   userTip: HTMLElement
+}
+
+export abstract class CollaborateCursorAwarenessDelegate {
+  abstract getRects(range: TBRange, nativeRange: Range): null | Rect[]
 }
 
 @Injectable()
@@ -61,6 +68,7 @@ export class CollaborateCursor {
 
   constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
               @Inject(EDITABLE_DOCUMENT) private document: Document,
+              @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
     container.prepend(this.canvas, this.tooltips)
@@ -108,7 +116,15 @@ export class CollaborateCursor {
       nativeRange.setStart(start.node, start.offset)
       nativeRange.setEnd(end.node, end.offset)
 
-      const rects = nativeRange.getClientRects()
+      const rects = this.awarenessDelegate ? this.awarenessDelegate.getRects({
+        startOffset,
+        endOffset,
+        startSlot,
+        endSlot
+      }, nativeRange) : nativeRange.getClientRects()
+      if (!rects) {
+        return
+      }
       const selectionRects: SelectionRect[] = []
       for (let i = rects.length - 1; i >= 0; i--) {
         const rect = rects[i]

@@ -1,7 +1,12 @@
 import "./index.scss"
-import { createEditor } from '@textbus/editor';
+import { createEditor, TableComponentCursorAwarenessDelegate } from '@textbus/editor';
 import { RootComponentRef, History, Commander } from '@textbus/core';
-import { Collaborate, CollaborateCursor, RemoteSelection } from '@textbus/collaborate';
+import {
+  Collaborate,
+  CollaborateCursor,
+  CollaborateCursorAwarenessDelegate,
+  RemoteSelection
+} from '@textbus/collaborate';
 import { WebsocketProvider } from 'y-websocket'
 import { WebrtcProvider } from 'y-webrtc'
 
@@ -37,6 +42,10 @@ const editor = createEditor({
     {
       provide: History,
       useClass: Collaborate
+    },
+    {
+      provide: CollaborateCursorAwarenessDelegate,
+      useClass: TableComponentCursorAwarenessDelegate
     }
   ],
   setup(starter) {

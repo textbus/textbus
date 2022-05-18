@@ -1,7 +1,7 @@
 import { debounceTime, Subscription } from '@tanbo/stream'
 import { createElement, EDITOR_CONTAINER, SelectionBridge } from '@textbus/browser'
 import {
-  ChangeController,
+  ChangeController, ComponentInstance,
   ContentType,
   onDestroy,
   Renderer,
@@ -352,6 +352,27 @@ export interface TableConfig {
   rowCount: number
 }
 
+export function findFocusCell(componentInstance: ComponentInstance, slot: TableCellSlot): TableCellSlot | null {
+  while (slot) {
+    if (componentInstance.slots.has(slot)) {
+      return slot
+    }
+    slot = slot.parent?.parent as Slot
+  }
+  return null
+}
+
+export function selectCells(startCell: TableCellSlot, endCell: TableCellSlot, componentInstance: ComponentInstance, columnCount: number) {
+  const serializedCells = serialize(slotsToTable(componentInstance.slots.toArray(), columnCount))
+  const p1 = findCellPosition(startCell, serializedCells)
+  const p2 = findCellPosition(endCell, serializedCells)
+  const minRow = Math.min(p1.minRow, p2.minRow)
+  const minColumn = Math.min(p1.minColumn, p2.minColumn)
+  const maxRow = Math.max(p1.maxRow, p2.maxRow)
+  const maxColumn = Math.max(p1.maxColumn, p2.maxColumn)
+  return selectCellsByRange(minRow, minColumn, maxRow, maxColumn, serializedCells)
+}
+
 export function useTableMultipleRange(
   slots: Slots,
   stateController: ChangeController<TableConfig>,
@@ -372,16 +393,6 @@ export function useTableMultipleRange(
       config = s
     })
   ]
-
-  function findFocusCell(slot: TableCellSlot): TableCellSlot | null {
-    while (slot) {
-      if (slots.has(slot)) {
-        return slot
-      }
-      slot = slot.parent?.parent as Slot
-    }
-    return null
-  }
 
   const mask = createElement('div', {
     classes: ['textbus-table-editor-mask'],
@@ -429,19 +440,8 @@ export function useTableMultipleRange(
     animateId = requestAnimationFrame(animateFn)
   }
 
-  function selectCells(startCell: TableCellSlot, endCell: TableCellSlot) {
-    const serializedCells = serialize(slotsToTable(slots.toArray(), config.columnCount))
-    const p1 = findCellPosition(startCell, serializedCells)
-    const p2 = findCellPosition(endCell, serializedCells)
-    const minRow = Math.min(p1.minRow, p2.minRow)
-    const minColumn = Math.min(p1.minColumn, p2.minColumn)
-    const maxRow = Math.max(p1.maxRow, p2.maxRow)
-    const maxColumn = Math.max(p1.maxColumn, p2.maxColumn)
-    return selectCellsByRange(minRow, minColumn, maxRow, maxColumn, serializedCells)
-  }
-
   function setSelectedCellsAndUpdateMaskStyle(startSlot: TableCellSlot, endSlot: TableCellSlot, offsetRect: DOMRect) {
-    const tableRange = selectCells(startSlot, endSlot)
+    const tableRange = selectCells(startSlot, endSlot, self, config.columnCount)
 
     callback(tableRange)
 
@@ -498,8 +498,8 @@ export function useTableMultipleRange(
     const commonAncestorComponent = selection.commonAncestorComponent
     if (commonAncestorComponent === self) {
       const containerRect = editorContainer.getBoundingClientRect()
-      const startCell = findFocusCell(selection.startSlot!)
-      const endCell = findFocusCell(selection.endSlot!)
+      const startCell = findFocusCell(self, selection.startSlot!)
+      const endCell = findFocusCell(self, selection.endSlot!)
       if (startCell === endCell) {
         nativeSelectionBridge.showNativeMask()
       } else {

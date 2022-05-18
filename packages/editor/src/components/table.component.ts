@@ -1,4 +1,4 @@
-import { Injector } from '@tanbo/di'
+import { Injectable, Injector } from '@tanbo/di'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 import {
   Commander,
@@ -15,12 +15,13 @@ import {
   useSelf,
   useSlots,
   useState,
-  VElement
+  VElement,
+  Range, Renderer
 } from '@textbus/core'
 
 import { I18n } from '../i18n'
 import {
-  autoComplete, createCell,
+  autoComplete, createCell, findFocusCell, selectCells,
   serialize,
   slotsToTable,
   TableCellPosition,
@@ -28,9 +29,44 @@ import {
   TableConfig,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
+import { CollaborateCursorAwarenessDelegate, Rect } from '@textbus/collaborate'
 
 export {
   createCell
+}
+
+@Injectable()
+export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwarenessDelegate {
+  constructor(private renderer: Renderer) {
+    super()
+  }
+
+  override getRects(range: Range): Rect[] | null {
+    const commonAncestorComponent = Selection.getCommonAncestorComponent(range.startSlot, range.endSlot)
+    if (commonAncestorComponent?.name !== tableComponent.name) {
+      return null
+    }
+    const startFocusSlot = findFocusCell(commonAncestorComponent, range.startSlot)
+    const endFocusSlot = findFocusCell(commonAncestorComponent, range.endSlot)
+
+    const state = commonAncestorComponent.state as TableConfig
+
+    const {
+      startPosition,
+      endPosition
+    } = selectCells(startFocusSlot as TableCellSlot, endFocusSlot as TableCellSlot, commonAncestorComponent, state.columnCount)
+
+    const renderer = this.renderer
+    const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()
+    const endRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement).getBoundingClientRect()
+
+    return [{
+      x: startRect.left,
+      y: startRect.top,
+      width: endRect.right - startRect.left,
+      height: endRect.bottom - startRect.top
+    }]
+  }
 }
 
 export const tableComponent = defineComponent({
