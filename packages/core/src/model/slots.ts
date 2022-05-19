@@ -13,6 +13,7 @@ export interface SlotChangeData<T extends Slot> {
  * Textbus 管理组件内部插槽增删改查的类
  */
 export class Slots<T = any> {
+  readonly onChildSlotRemove: Observable<Slot<T>[]>
   readonly onChange: Observable<Operation>
   readonly onChildSlotChange: Observable<SlotChangeData<Slot<T>>>
   readonly onChildSlotForceChange: Observable<void>
@@ -43,6 +44,7 @@ export class Slots<T = any> {
   private childSlotChangeEvent = new Subject<SlotChangeData<Slot<T>>>()
   private childSlotForceChangeEvent = new Subject<void>()
   private childComponentRemovedEvent = new Subject<ComponentInstance>()
+  private childSlotRemoveEvent = new Subject<Slot<T>[]>()
 
   private changeListeners = new WeakMap<Slot, Subscription>()
 
@@ -52,6 +54,7 @@ export class Slots<T = any> {
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
     this.onChildSlotForceChange = this.childSlotForceChangeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
+    this.onChildSlotRemove = this.childSlotRemoveEvent.asObservable()
     this.insert(...slots)
   }
 
@@ -279,15 +282,13 @@ export class Slots<T = any> {
    */
   delete(count: number) {
     const startIndex = this._index
-    const endIndex = this._index + count
-    const deletedSlots = this.slots.slice(startIndex, endIndex)
+    const deletedSlots = this.slots.splice(startIndex, count)
 
     deletedSlots.forEach(i => {
       this.changeListeners.get(i)?.unsubscribe()
       this.changeListeners.delete(i)
     })
 
-    this.slots.splice(startIndex, count)
     this.changeEvent.next({
       path: [],
       apply: [{
@@ -308,6 +309,7 @@ export class Slots<T = any> {
         }]
       }).flat()
     })
+    this.childSlotRemoveEvent.next(deletedSlots)
   }
 
   /**

@@ -48,8 +48,10 @@ export class Slot<T = any> {
 
   onContentChange: Observable<Action[]>
   onStateChange: Observable<ApplyAction[]>
+  onChildComponentRemove: Observable<ComponentInstance[]>
 
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
+  private childComponentRemoveEvent = new Subject<ComponentInstance[]>()
 
   get parentSlot() {
     return this.parent?.parent || null
@@ -84,6 +86,7 @@ export class Slot<T = any> {
   constructor(public schema: ContentType[], public state?: T) {
     this.onContentChange = this.contentChangeEvent.asObservable()
     this.onStateChange = this.stateChangeEvent.asObservable()
+    this.onChildComponentRemove = this.childComponentRemoveEvent.asObservable()
     this.content.append(Slot.emptyPlaceholder)
     this._index = 0
   }
@@ -372,6 +375,7 @@ export class Slot<T = any> {
       type: 'delete',
       count
     }]
+    const deletedComponents: ComponentInstance[] = []
     this.changeMarker.markAsDirtied({
       path: [],
       apply: applyActions,
@@ -385,6 +389,7 @@ export class Slot<T = any> {
             content: item
           }
         }
+        deletedComponents.push(item)
         this.changeMarker.recordComponentRemoved(item)
         this.componentChangeListeners.get(item)?.unsubscribe()
         this.componentChangeListeners.delete(item)
@@ -396,6 +401,9 @@ export class Slot<T = any> {
       }), ...Slot.createActionByFormat(deletedFormat)]
     })
     this.contentChangeEvent.next(applyActions)
+    if (deletedComponents.length) {
+      this.childComponentRemoveEvent.next(deletedComponents)
+    }
     return true
   }
 
