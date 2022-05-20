@@ -4,12 +4,13 @@ import {
   ComponentInstance,
   NativeSelectionBridge,
   NativeSelectionConnector,
-  Renderer, SelectionPosition,
+  Renderer,
+  SelectionPosition,
   Slot,
   Range as TBRange,
   VElement,
-  VNodeLocation,
-  VTextNode, RootComponentRef
+  VTextNode,
+  RootComponentRef
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
@@ -319,124 +320,133 @@ export class SelectionBridge implements NativeSelectionBridge {
             nativeRange.setStartBefore(nativeNode.firstChild!)
           }
         }
-        const startFocusNode = this.findFocusNode(nativeRange.startContainer, isFocusStart)
-        const endFocusNode = this.findFocusNode(nativeRange.endContainer, isFocusStart)
-        if (!startFocusNode || !endFocusNode || !startFocusNode.parentNode || !endFocusNode.parentNode) {
-          connector.setSelection(null)
-          return
-        }
 
-        if (startFocusNode !== nativeRange.startContainer) {
-          if (startFocusNode.nodeType === Node.TEXT_NODE) {
-            nativeRange.setStart(startFocusNode, 0)
-          } else {
-            const parentNode = startFocusNode.parentNode
-            const offset = startFocusNode.nodeName.toLowerCase() === 'br' && startFocusNode === parentNode.lastChild ? 0 : 1
-            nativeRange.setStart(parentNode,
-              Array.from(parentNode.childNodes).indexOf(startFocusNode as ChildNode) + offset)
-          }
-        }
-        if (endFocusNode !== nativeRange.endContainer) {
-          if (endFocusNode.nodeType === Node.TEXT_NODE) {
-            nativeRange.setEnd(endFocusNode, 0)
-          } else {
-            const parentNode = endFocusNode.parentNode
-            const offset = startFocusNode.nodeName.toLowerCase() === 'br' && startFocusNode === parentNode.lastChild ? 0 : 1
-            nativeRange.setEnd(parentNode,
-              Array.from(parentNode.childNodes).indexOf(endFocusNode as ChildNode) + offset)
-          }
-        }
-
-        const startPosition = this.renderer.getLocationByNativeNode(nativeRange.startContainer as any)
-        const endPosition = this.renderer.getLocationByNativeNode(nativeRange.endContainer as any)
+        const startPosition = this.getCorrectedPosition(nativeRange.startContainer, nativeRange.startOffset, isFocusStart)
+        const endPosition = nativeRange.collapsed ? startPosition : this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
         if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
           startPosition && endPosition) {
-          const start = this.findPosition(nativeRange.startContainer, nativeRange.startOffset, startPosition)
-          const end = this.findPosition(nativeRange.endContainer, nativeRange.endOffset, endPosition)
-          if (start && end) {
-            connector.setSelection({
-              startSlot: start.slot,
-              startOffset: start.index,
-              endSlot: end.slot,
-              endOffset: end.index
-            }, isFocusEnd)
-            this.selectionChangeEvent.next(nativeRange)
-            return
+          const range = {
+            startSlot: startPosition.slot,
+            startOffset: startPosition.offset,
+            endSlot: endPosition.slot,
+            endOffset: endPosition.offset
           }
+          const {start, end} = this.getPositionByRange(range)
+
+          if (start && end) {
+            if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
+              nativeRange.setStart(start.node, start.offset)
+            }
+            if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
+              nativeRange.setEnd(end.node, end.offset)
+            }
+            connector.setSelection(range, isFocusEnd)
+            this.selectionChangeEvent.next(nativeRange)
+          } else {
+            connector.setSelection(null)
+          }
+          return
         }
         connector.setSelection(null)
       })
     )
   }
 
-  private findFocusNode(node: Node, toAfter = false, excludeNodes: Node[] = []): Node | null {
+  private getCorrectedPosition(node: Node, offset: number, toAfter: boolean, excludeNodes: Node[] = []): SelectionPosition | null {
+    excludeNodes.push(node)
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const containerPosition = this.renderer.getLocationByNativeNode(node)
+      const childNode = node.childNodes[offset]
+      if (childNode) {
+        const childPosition = this.renderer.getLocationByNativeNode(childNode)
+        if (childPosition) {
+          if (containerPosition) {
+            return {
+              slot: childPosition.slot,
+              offset: childPosition.startIndex
+            }
+          }
+          return this.findFocusNode(childNode, toAfter, excludeNodes)
+        }
+        return this.findFocusNode(childNode, toAfter, excludeNodes)
+      }
+      const prevNode = node.childNodes[offset - 1]
+      if (prevNode) {
+        const prevPosition = this.renderer.getLocationByNativeNode(prevNode)
+        if (prevPosition && containerPosition) {
+          return {
+            slot: prevPosition.slot,
+            offset: prevPosition.endIndex
+          }
+        }
+      }
+      if (containerPosition) {
+        return {
+          slot: containerPosition.slot,
+          offset: containerPosition.endIndex
+        }
+      }
+      const nextNode = toAfter ? node.nextSibling : node.previousSibling
+      if (nextNode) {
+        return this.findFocusNode(nextNode, toAfter, excludeNodes)
+      }
+      return this.findFocusNodeByParent(node, toAfter, excludeNodes)
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      const containerPosition = this.renderer.getLocationByNativeNode(node)
+      if (containerPosition) {
+        return {
+          slot: containerPosition.slot,
+          offset: containerPosition.startIndex + offset
+        }
+      }
+      const nextNode = toAfter ? node.nextSibling : node.previousSibling
+      if (nextNode) {
+        return this.findFocusNode(nextNode, toAfter, excludeNodes)
+      }
+      return this.findFocusNodeByParent(node, toAfter, excludeNodes)
+    }
+    return null
+  }
+
+  private findFocusNode(node: Node, toAfter = false, excludeNodes: Node[] = []): SelectionPosition | null {
     if (excludeNodes.includes(node)) {
-      const next = (toAfter ? node.nextSibling : node.previousSibling) || node.parentNode
+      const next = toAfter ? node.nextSibling : node.previousSibling
       if (next) {
         return this.findFocusNode(next, toAfter, excludeNodes)
       }
-      return null
+      return this.findFocusNodeByParent(node, toAfter, excludeNodes)
     }
     excludeNodes.push(node)
     const position = this.renderer.getLocationByNativeNode(node as any)
-    if (!position) {
-      const firstChild = toAfter ? node.firstChild : node.lastChild
-      if (firstChild) {
-        return this.findFocusNode(firstChild, toAfter, excludeNodes)
-      }
-      const nextSibling = toAfter ? node.nextSibling : node.previousSibling
-      if (nextSibling) {
-        return this.findFocusNode(nextSibling, toAfter, excludeNodes)
-      }
-      const parentNode = node.parentNode
-      if (parentNode) {
-        return this.findFocusNode(parentNode, toAfter, excludeNodes)
-      }
-      return null
-    }
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      return node
-    }
-    if (this.renderer.getVNodeBySlot(position.slot) === this.renderer.getVNodeByNativeNode(node)) {
-      return toAfter ? node.firstChild : node.lastChild
-    }
-    return node
-  }
-
-  private findPosition(container: Node,
-                       offset: number,
-                       position: VNodeLocation): { slot: Slot, index: number } | null {
-    if (container.nodeType === Node.TEXT_NODE) {
+    if (position) {
       return {
         slot: position.slot,
-        index: position.startIndex + offset
+        offset: toAfter ? position.startIndex : position.endIndex
       }
-    } else if (container.nodeType === Node.ELEMENT_NODE) {
-      const childNodes = container.childNodes
-      if (childNodes.length === 0) {
-        return null
-      }
-      if (childNodes.length === offset) {
-        const child = childNodes[childNodes.length - 1]
-        const childPosition = this.renderer.getLocationByNativeNode(child as any)
-        if (!childPosition) {
-          return null
-        }
+    }
+    const firstChild = toAfter ? node.firstChild : node.lastChild
+    if (firstChild) {
+      return this.findFocusNode(firstChild, toAfter, excludeNodes)
+    }
+    const nextSibling = toAfter ? node.nextSibling : node.previousSibling
+    if (nextSibling) {
+      return this.findFocusNode(nextSibling, toAfter, excludeNodes)
+    }
+    return this.findFocusNodeByParent(node, toAfter, excludeNodes)
+  }
+
+  private findFocusNodeByParent(node: Node, toAfter: boolean, excludeNodes: Node[]) {
+    const parentNode = node.parentNode
+    if (parentNode) {
+      const parentPosition = this.renderer.getLocationByNativeNode(parentNode)
+      if (parentPosition) {
         return {
-          slot: childPosition.slot,
-          index: childPosition.endIndex
-        }
-      } else {
-        const child = childNodes[offset]
-        const childPosition = this.renderer.getLocationByNativeNode(child as any)
-        if (!childPosition) {
-          return null
-        }
-        return {
-          slot: childPosition.slot,
-          index: childPosition.startIndex
+          slot: parentPosition.slot,
+          offset: toAfter ? parentPosition.endIndex : parentPosition.startIndex
         }
       }
+      excludeNodes.push(node)
+      return this.findFocusNode(parentNode, toAfter, excludeNodes)
     }
     return null
   }
