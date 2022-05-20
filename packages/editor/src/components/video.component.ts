@@ -4,9 +4,9 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
+  jsx,
   useRef,
   useState,
-  VElement
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 
@@ -48,7 +48,7 @@ export const videoComponent = defineComponent({
 
     return {
       render() {
-        const el = new VElement('video', {
+        const el = jsx('video', {
           ref
         })
         el.attrs.set('src', state!.src)

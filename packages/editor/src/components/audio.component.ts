@@ -4,8 +4,8 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
+  jsx,
   useState,
-  VElement
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 
@@ -33,7 +33,7 @@ export const audioComponent = defineComponent({
 
     return {
       render() {
-        const el = new VElement('audio')
+        const el = jsx('audio')
         el.attrs.set('src', state!.src)
         el.attrs.set('autoplay', state!.autoplay)
         el.attrs.set('controls', state!.controls)

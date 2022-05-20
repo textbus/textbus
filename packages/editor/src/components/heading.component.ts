@@ -4,6 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
+  jsx,
   Slot,
   SlotRender,
   useContext,
@@ -46,7 +47,7 @@ export const headingComponent = defineComponent({
       type: data?.state || 'h1',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return new VElement(data?.state || 'h1')
+          return jsx(data?.state || 'h1')
         })
       }
     }

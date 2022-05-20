@@ -4,9 +4,9 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
+  jsx,
   useRef,
   useState,
-  VElement
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 import { useDragResize } from './hooks/drag-resize'
@@ -44,7 +44,7 @@ export const imageComponent = defineComponent({
 
     return {
       render() {
-        return new VElement('img', {
+        return jsx('img', {
           ref,
           src: state.src,
           class: 'tb-img',

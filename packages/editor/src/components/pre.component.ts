@@ -6,6 +6,7 @@ import {
   defineComponent,
   Formatter,
   FormatType,
+  jsx,
   onContextMenu,
   onEnter,
   onPaste,
@@ -13,11 +14,12 @@ import {
   Slot,
   SlotRender,
   Slots,
-  useContext, useDynamicShortcut, useSelf,
+  useContext,
+  useDynamicShortcut,
+  useSelf,
   useSlots,
   useState,
   VElement,
-  VTextNode
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 import { Grammar, languages, Token, tokenize } from 'prismjs'
@@ -579,21 +581,21 @@ export const preComponent = defineComponent({
 
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        const block = new VElement('pre', {
+        const block = jsx('pre', {
           class: 'tb-pre',
           theme: data.state!.theme || null
         }, [
-          new VElement('div', {
+          jsx('div', {
             class: 'tb-code-line-number-bg',
             style: {
               width: Math.max(String(slots.length).length, 2) + 'em'
             }
           }),
-          new VElement('div', {
+          jsx('div', {
             class: 'tb-code-content'
           }, slots.toArray().map(item => {
             return slotRender(item, () => {
-              return new VElement('div', {
+              return jsx('div', {
                 class: 'tb-code-line'
               })
             })
@@ -606,9 +608,9 @@ export const preComponent = defineComponent({
           }
         })
         if (lang) {
-          block.appendChild(new VElement('span', {
+          block.appendChild(jsx('span', {
             class: 'tb-pre-lang'
-          }, [new VTextNode(lang)]))
+          }, lang))
         }
         block.attrs.set('lang', data.state!.lang)
         // block.attrs.set('theme', PreComponent.theme)

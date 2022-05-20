@@ -11,7 +11,8 @@ import {
   useContext,
   useSlots,
   VElement,
-  ComponentData
+  ComponentData,
+  jsx
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 
@@ -75,9 +76,9 @@ export const listComponent = defineComponent({
     return {
       type: data?.state || 'ul',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return new VElement(data?.state || 'ul', null, slots.toArray().map(i => {
+        return jsx(data?.state || 'ul', null, slots.toArray().map(i => {
           return slotRender(i, () => {
-            return new VElement('li')
+            return jsx('li')
           })
         }))
       },

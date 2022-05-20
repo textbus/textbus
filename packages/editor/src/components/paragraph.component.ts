@@ -4,6 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
+  jsx,
   Slot,
   SlotRender,
   useContext,
@@ -32,7 +33,7 @@ export const paragraphComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return new VElement('p')
+          return jsx('p')
         })
       }
     }

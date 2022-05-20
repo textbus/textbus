@@ -31,31 +31,33 @@ export interface VElementListeners {
   [listenKey: string]: <T extends Event>(ev: T) => any;
 }
 
+export function jsx(tagName: string | VElementRenderFn,
+                    attrs: VElementOptions | null = null,
+                    ...children: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
+  if (typeof tagName === 'function') {
+    return tagName({
+      ...attrs,
+      children
+    })
+  }
+  const vNode = new VElement(tagName, attrs)
+  children.flat().forEach(i => {
+    if (i instanceof VElement) {
+      vNode.appendChild(i)
+    } else if (typeof i === 'string' && i.length > 0) {
+      vNode.appendChild(new VTextNode(i))
+    } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
+      vNode.appendChild(new VTextNode(String(i)))
+    }
+  })
+  return vNode
+}
+
 /**
  * Textbus 虚拟 DOM 元素节点
  */
 export class VElement {
-  static createElement(tagName: string | VElementRenderFn,
-                       attrs: VElementOptions | null = null,
-                       ...children: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
-    if (typeof tagName === 'function') {
-      return tagName({
-        ...attrs,
-        children
-      })
-    }
-    const vNode = new VElement(tagName, attrs)
-    children.flat().forEach(i => {
-      if (i instanceof VElement) {
-        vNode.appendChild(i)
-      } else if (typeof i === 'string' && i.length > 0) {
-        vNode.appendChild(new VTextNode(i))
-      } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
-        vNode.appendChild(new VTextNode(String(i)))
-      }
-    })
-    return vNode
-  }
+  static createElement = jsx
 
   get parentNode() {
     return this[parentNode]

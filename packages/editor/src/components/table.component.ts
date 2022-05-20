@@ -15,8 +15,9 @@ import {
   useSelf,
   useSlots,
   useState,
-  VElement,
-  Range, Renderer
+  Range,
+  Renderer,
+  jsx
 } from '@textbus/core'
 
 import { I18n } from '../i18n'
@@ -470,21 +471,21 @@ export const tableComponent = defineComponent({
       },
       render(isOutputMode: boolean, slotRender: SlotRender) {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
-        const table = new VElement('table', {
+        const table = jsx('table', {
           class: 'tb-table'
         })
         if (data.state!.useTextbusStyle) {
           table.classes.add('tb-table-textbus')
         }
         if (tableCells.length) {
-          const body = new VElement('tbody')
+          const body = jsx('tbody')
           table.appendChild(body)
           for (const row of tableCells) {
-            const tr = new VElement('tr')
+            const tr = jsx('tr')
             body.appendChild(tr)
             for (const col of row) {
               tr.appendChild(slotRender(col, () => {
-                const td = new VElement('td')
+                const td = jsx('td')
                 if (col.state!.colspan > 1) {
                   td.attrs.set('colspan', col.state?.colspan)
                 }
