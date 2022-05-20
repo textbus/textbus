@@ -1,7 +1,7 @@
 import { Injector, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { Observable, Subject } from '@tanbo/stream'
 
-import { ComponentInstance, Formatter, Component, invokeListener } from './model/_api'
+import { ComponentInstance, Formatter, Component } from './model/_api'
 import {
   NativeNode,
   History,
@@ -19,7 +19,7 @@ import {
   NativeSelectionBridge,
   NativeRenderer,
   USE_CONTENT_EDITABLE,
-  CoreHistory, MARKDOWN_DETECT
+  CoreHistory, MARKDOWN_DETECT, Scheduler
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -54,10 +54,7 @@ export class Starter extends ReflectiveInjector {
   onReady: Observable<void>
   private readyEvent = new Subject<void>()
 
-  private instanceList = new Set<ComponentInstance>()
-  private subs: Subscription[] = []
-
-  private beforeDestroy: (() => unknown) | void
+  private readonly beforeDestroy: (() => unknown) | void
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [
@@ -83,6 +80,7 @@ export class Starter extends ReflectiveInjector {
         provide: History,
         useClass: CoreHistory
       },
+      Scheduler,
       Commander,
       Registry,
       Keyboard,
@@ -123,34 +121,14 @@ export class Starter extends ReflectiveInjector {
    */
   mount(rootComponent: ComponentInstance, host: NativeNode) {
     const rootComponentRef = this.get(RootComponentRef)
-
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host
-    const renderer = this.get(Renderer)
-    this.get(History).listen()
-    this.subs.push(
-      rootComponent.changeMarker.onChildComponentRemoved.subscribe(instance => {
-        this.instanceList.add(instance)
-      }),
-      renderer.onViewChecked.subscribe(() => {
-        this.instanceList.forEach(instance => {
-          let comp = instance
-          while (comp) {
-            const parent = comp.parent
-            if (parent) {
-              comp = parent.parent as ComponentInstance
-            } else {
-              break
-            }
-          }
-          if (comp !== rootComponent) {
-            Starter.invokeChildComponentDestroyHook(comp)
-          }
-        })
-        this.instanceList.clear()
-      })
-    )
-    renderer.render()
+    const scheduler = this.get(Scheduler)
+    const history = this.get(History)
+
+    scheduler.run()
+    history.listen()
+
     this.readyEvent.next()
     return this
   }
@@ -163,20 +141,8 @@ export class Starter extends ReflectiveInjector {
     if (typeof beforeDestroy === 'function') {
       beforeDestroy()
     }
-    [this.get(History), this.get(Selection)].forEach(i => {
+    [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
       i.destroy()
     })
-    this.subs.forEach(i => i.unsubscribe())
-  }
-
-  private static invokeChildComponentDestroyHook(parent: ComponentInstance) {
-    parent.slots.toArray().forEach(slot => {
-      slot.sliceContent().forEach(i => {
-        if (typeof i !== 'string') {
-          Starter.invokeChildComponentDestroyHook(i)
-        }
-      })
-    })
-    invokeListener(parent, 'onDestroy')
   }
 }

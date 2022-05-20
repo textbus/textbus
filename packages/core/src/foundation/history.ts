@@ -1,13 +1,13 @@
 import { Injectable } from '@tanbo/di'
-import { microTask, Observable, Subject, Subscription } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
-import { Renderer } from './renderer'
 import { SelectionPaths, Selection } from './selection'
 import { Registry } from './registry'
 import { RootComponentRef } from './_injection-tokens'
+import { Scheduler } from './scheduler'
 
 export interface HistoryItem {
   beforePaths: SelectionPaths
@@ -72,9 +72,9 @@ export class CoreHistory extends History {
   private forceChangeSubscription: Subscription | null = null
 
   constructor(private root: RootComponentRef,
+              private scheduler: Scheduler,
               private selection: Selection,
               private translator: Translator,
-              private renderer: Renderer,
               private registry: Registry) {
     super()
     this.onChange = this.changeEvent.asObservable()
@@ -88,9 +88,6 @@ export class CoreHistory extends History {
    */
   listen() {
     this.record()
-    this.forceChangeSubscription = this.root.component.changeMarker.onForceChange.pipe(microTask()).subscribe(() => {
-      this.renderer.render()
-    })
   }
 
   /**
@@ -98,13 +95,12 @@ export class CoreHistory extends History {
    */
   forward() {
     if (this.canForward) {
-      this.stop()
+      this.scheduler.ignoreChanges = true
       const item = this.historySequence[this.index]
       this.apply(item, false)
       this.selection.usePaths(item.afterPaths)
-      this.selection.restore()
+      this.scheduler.ignoreChanges = false
       this.index++
-      this.record()
       this.forwardEvent.next()
       this.changeEvent.next()
     }
@@ -115,11 +111,11 @@ export class CoreHistory extends History {
    */
   back() {
     if (this.canBack) {
-      this.stop()
+      this.scheduler.ignoreChanges = true
       const item = this.historySequence[this.index - 1]
       this.apply(item, true)
       this.selection.usePaths(item.beforePaths)
-      this.selection.restore()
+      this.scheduler.ignoreChanges = false
       this.index--
       this.record()
       this.backEvent.next()
@@ -133,16 +129,14 @@ export class CoreHistory extends History {
   destroy() {
     this.historySequence = []
     this.forceChangeSubscription?.unsubscribe()
-    this.stop()
+    if (this.subscription) {
+      this.subscription.unsubscribe()
+    }
   }
 
   private record() {
     let beforePaths = this.selection.getPaths()
-    this.subscription = this.root.component.changeMarker.onChange.pipe(
-      microTask()
-    ).subscribe((operations) => {
-      this.renderer.render()
-      this.selection.restore()
+    this.scheduler.onDocChange.subscribe((operations) => {
       this.historySequence.length = this.index
       this.index++
       const afterPaths = this.selection.getPaths()
@@ -155,12 +149,6 @@ export class CoreHistory extends History {
       this.pushEvent.next()
       this.changeEvent.next()
     })
-  }
-
-  private stop() {
-    if (this.subscription) {
-      this.subscription.unsubscribe()
-    }
   }
 
   private apply(historyItem: HistoryItem, back: boolean) {
@@ -245,7 +233,5 @@ export class CoreHistory extends History {
         })
       }
     })
-
-    this.renderer.render()
   }
 }

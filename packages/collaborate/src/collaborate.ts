@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { microTask, Observable, Subject, Subscription } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   ComponentInstance,
   ContentType,
@@ -7,8 +7,8 @@ import {
   History,
   makeError,
   Registry,
-  Renderer,
   RootComponentRef,
+  Scheduler,
   Selection,
   SelectionPaths,
   Slot,
@@ -60,8 +60,8 @@ export class Collaborate implements History {
 
   constructor(private rootComponentRef: RootComponentRef,
               private collaborateCursor: CollaborateCursor,
+              private scheduler: Scheduler,
               private translator: Translator,
-              private renderer: Renderer,
               private registry: Registry,
               private selection: Selection,
               private starter: Starter) {
@@ -94,13 +94,17 @@ export class Collaborate implements History {
 
   back() {
     if (this.canBack) {
+      this.scheduler.ignoreChanges = true
       this.manager.undo()
+      this.scheduler.ignoreChanges = false
     }
   }
 
   forward() {
     if (this.canForward) {
+      this.scheduler.ignoreChanges = true
       this.manager.redo()
+      this.scheduler.ignoreChanges = false
     }
   }
 
@@ -117,22 +121,13 @@ export class Collaborate implements History {
     this.syncContent(root, rootComponent.slots.get(0)!)
 
     this.subscriptions.push(
-      rootComponent.changeMarker.onForceChange.pipe(
-        microTask()
-      ).subscribe(() => {
-        this.renderer.render()
-      }),
-      rootComponent.changeMarker.onChange.pipe(
-        microTask()
-      ).subscribe(() => {
+      this.scheduler.onDocChange.subscribe(() => {
         this.yDoc.transact(() => {
           this.updateRemoteActions.forEach(fn => {
             fn()
           })
           this.updateRemoteActions = []
         }, this.yDoc)
-        this.renderer.render()
-        this.selection.restore()
       })
     )
   }

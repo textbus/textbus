@@ -70,7 +70,7 @@
     "@tanbo/color-picker": "^0.1.2",
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.0",
-    "@tanbo/stream": "^1.0.0",
+    "@tanbo/stream": "^1.0.1",
     "immer": "^9.0.12",
     "prismjs": "^1.23.0",
     "reflect-metadata": "^0.1.13",
