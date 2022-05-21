@@ -1,10 +1,9 @@
 import "./index.scss"
 import { createEditor, TableComponentCursorAwarenessDelegate } from '@textbus/editor';
-import { RootComponentRef, History, Commander } from '@textbus/core';
+import { RootComponentRef, Commander } from '@textbus/core';
 import {
   Collaborate,
-  CollaborateCursor,
-  CollaborateCursorAwarenessDelegate,
+  CollaborateCursorAwarenessDelegate, collaborateModule,
   RemoteSelection
 } from '@textbus/collaborate';
 import { WebsocketProvider } from 'y-websocket'
@@ -36,13 +35,10 @@ const editor = createEditor({
   theme: 'light',
   placeholder: '请输入内容……',
   content: document.getElementById('template')?.innerHTML,
+  imports: [
+    collaborateModule
+  ],
   providers: [
-    Collaborate,
-    CollaborateCursor,
-    {
-      provide: History,
-      useClass: Collaborate
-    },
     {
       provide: CollaborateCursorAwarenessDelegate,
       useClass: TableComponentCursorAwarenessDelegate

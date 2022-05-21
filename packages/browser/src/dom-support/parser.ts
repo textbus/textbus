@@ -52,8 +52,18 @@ export class Parser {
 
   constructor(@Inject(EDITOR_OPTIONS) private options: BaseEditorOptions,
               private injector: Injector) {
-    this.loaders = options.componentLoaders || []
-    this.formatters = options.formatLoaders || []
+    const componentLoaders = [
+      ...(options.componentLoaders || [])
+    ]
+    const formatLoaders = [
+      ...(options.formatLoaders || [])
+    ]
+    options.imports?.forEach(i => {
+      componentLoaders.push(...(i.componentLoaders || []))
+      formatLoaders.push(...(i.formatLoaders || []))
+    })
+    this.loaders = componentLoaders
+    this.formatters = formatLoaders
   }
 
   parseDoc(html: string, rootComponentLoader: ComponentLoader) {

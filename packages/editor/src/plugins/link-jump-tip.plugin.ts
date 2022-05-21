@@ -1,7 +1,7 @@
 import { Subscription } from '@tanbo/stream'
-import { NativeSelectionBridge, Selection } from '@textbus/core'
+import { NativeSelectionBridge, Selection, Plugin } from '@textbus/core'
 import { Injector } from '@tanbo/di'
-import { EDITABLE_DOCUMENT, EDITOR_CONTAINER, Plugin } from '@textbus/browser'
+import { EDITABLE_DOCUMENT, EDITOR_CONTAINER } from '@textbus/browser'
 import { I18n } from '../i18n'
 
 export class LinkJumpTipPlugin implements Plugin {

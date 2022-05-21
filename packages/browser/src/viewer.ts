@@ -13,6 +13,7 @@ import {
   ComponentInstance,
   ComponentLiteral,
   invokeListener,
+  Plugin
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
@@ -24,7 +25,7 @@ import {
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, Plugin, EDITOR_MASK, RESIZE_OBSERVER, DOC_CONTAINER, Caret
+  SelectionBridge, EDITOR_MASK, RESIZE_OBSERVER, DOC_CONTAINER, Caret
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 
@@ -109,6 +110,8 @@ export class Viewer {
       useValue: this
     }]
     this.injector = new Starter({
+      imports: options.imports,
+      plugins: options.plugins,
       markdownDetect: options.markdownDetect,
       components: (options.componentLoaders || []).map(i => i.component),
       formatters: (options.formatLoaders || []).map(i => i.formatter),
@@ -156,12 +159,11 @@ export class Viewer {
         component = this.rootComponentLoader.component.createInstance(starter)
       }
 
+      this.initDocStyleSheetsAndScripts(this.options)
       host.appendChild(this.workbench)
       starter.mount(component, doc)
 
-      this.initDocStyleSheetsAndScripts(this.options)
       this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
-      this.options.plugins?.forEach(p => p.setup(starter))
 
       return this.initBeforeListener.reduce((p1, p2) => {
         return p1.then(() => p2)
@@ -260,15 +262,15 @@ export class Viewer {
     }
     this.destroyed = true
     this.subs.forEach(i => i.unsubscribe())
-    this.options.plugins?.forEach(i => {
-      i.onDestroy?.()
-    })
     if (this.injector) {
+      this.defaultPlugins.forEach(i => {
+        this.injector.get(i).onDestroy?.()
+      })
       const types = [
         Input,
       ]
       types.forEach(i => {
-        this.injector!.get(i as Type<{ destroy(): void }>).destroy()
+        this.injector.get(i as Type<{ destroy(): void }>).destroy()
       })
       this.injector.destroy()
     }

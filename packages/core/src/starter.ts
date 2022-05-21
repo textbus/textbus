@@ -1,4 +1,4 @@
-import { Injector, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
+import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
 import { Observable, Subject } from '@tanbo/stream'
 
 import { ComponentInstance, Formatter, Component } from './model/_api'
@@ -26,15 +26,38 @@ import { makeError } from './_utils/make-error'
 const starterErrorFn = makeError('Starter')
 
 /**
+ * Textbus 插件接口
+ */
+export interface Plugin {
+  /**
+   * 编辑器初始化时调用的勾子
+   * @param injector 访问 Textbus 内部实例的 IoC 容器
+   */
+  setup(injector: Injector): void
+
+  /**
+   * 当编辑器销毁时调用
+   */
+  onDestroy?(): void
+}
+
+export interface Module {
+  /** 组件列表 */
+  components?: Component[]
+  /** 格式列表 */
+  formatters?: Formatter[]
+  /** 跨平台及基础扩展实现的提供者 */
+  providers?: Provider[]
+  /** 插件集合 */
+  plugins?: Plugin[]
+}
+
+/**
  * Textbus 核心配置
  */
-export interface TextbusConfig {
-  /** 组件列表 */
-  components: Component[]
-  /** 格式列表 */
-  formatters: Formatter[]
-  /** 跨平台及基础扩展实现的提供者 */
-  providers: Provider[]
+export interface TextbusConfig extends Module {
+  /** 导入第三方包 */
+  imports?: Module[]
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
   /** 开启 markdown 支持 */
@@ -56,15 +79,79 @@ export class Starter extends ReflectiveInjector {
 
   private readonly beforeDestroy: (() => unknown) | void
 
+  private plugins: Plugin[]
+
   constructor(public config: TextbusConfig) {
-    super(new NullInjector(), [
-      ...config.providers,
+    super(new NullInjector(), [])
+    const {plugins, providers} = this.mergeModules(config)
+    this.plugins = plugins
+    this.staticProviders = providers
+    this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
+    this.onReady = this.readyEvent.asObservable()
+    this.beforeDestroy = config.setup?.(this)
+  }
+
+  /**
+   * 启动一个 Textbus 实例，并将根组件渲染到原生节点
+   * @param rootComponent 根组件
+   * @param host 原生节点
+   */
+  mount(rootComponent: ComponentInstance, host: NativeNode) {
+    const rootComponentRef = this.get(RootComponentRef)
+    rootComponentRef.component = rootComponent
+    rootComponentRef.host = host
+    const scheduler = this.get(Scheduler)
+    const history = this.get(History)
+
+    scheduler.run()
+    history.listen()
+
+    this.plugins.forEach(i => i.setup(this))
+    this.readyEvent.next()
+    return this
+  }
+
+  /**
+   * 销毁 Textbus 实例
+   */
+  destroy() {
+    const beforeDestroy = this.beforeDestroy
+    this.plugins.forEach(i => i.onDestroy?.())
+    if (typeof beforeDestroy === 'function') {
+      beforeDestroy()
+    }
+    [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
+      i.destroy()
+    })
+  }
+
+  private mergeModules(config: TextbusConfig) {
+    const customProviders = [
+      ...(config.providers || []),
+    ]
+    const components = [
+      ...(config.components || [])
+    ]
+    const formatters = [
+      ...(config.formatters || [])
+    ]
+    const plugins = [
+      ...(config.plugins || [])
+    ]
+    config.imports?.forEach(module => {
+      customProviders.push(...(module.providers || []))
+      components.push(...(module.components || []))
+      formatters.push(...(module.formatters || []))
+      plugins.push(...(module.plugins || []))
+    })
+    const providers: Provider[] = [
+      ...customProviders,
       {
         provide: COMPONENT_LIST,
-        useValue: config.components
+        useValue: components
       }, {
         provide: FORMATTER_LIST,
-        useValue: config.formatters
+        useValue: formatters
       }, {
         provide: MARKDOWN_DETECT,
         useValue: config.markdownDetect
@@ -109,40 +196,10 @@ export class Starter extends ReflectiveInjector {
           throw starterErrorFn('You must implement the `NativeRenderer` interface to start Textbus!')
         }
       }
-    ])
-    this.onReady = this.readyEvent.asObservable()
-    this.beforeDestroy = config.setup?.(this)
-  }
-
-  /**
-   * 启动一个 Textbus 实例，并将根组件渲染到原生节点
-   * @param rootComponent 根组件
-   * @param host 原生节点
-   */
-  mount(rootComponent: ComponentInstance, host: NativeNode) {
-    const rootComponentRef = this.get(RootComponentRef)
-    rootComponentRef.component = rootComponent
-    rootComponentRef.host = host
-    const scheduler = this.get(Scheduler)
-    const history = this.get(History)
-
-    scheduler.run()
-    history.listen()
-
-    this.readyEvent.next()
-    return this
-  }
-
-  /**
-   * 销毁 Textbus 实例
-   */
-  destroy() {
-    const beforeDestroy = this.beforeDestroy
-    if (typeof beforeDestroy === 'function') {
-      beforeDestroy()
+    ]
+    return {
+      providers,
+      plugins
     }
-    [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
-      i.destroy()
-    })
   }
 }

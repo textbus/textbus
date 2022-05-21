@@ -9,10 +9,10 @@ export class Registry {
 
   constructor(@Inject(COMPONENT_LIST) private components: Component[],
               @Inject(FORMATTER_LIST) private formatters: Formatter[]) {
-    components.forEach(f => {
+    components.reverse().forEach(f => {
       this.componentMap.set(f.name, f)
     })
-    formatters.forEach(f => {
+    formatters.reverse().forEach(f => {
       this.formatMap.set(f.name, f)
     })
   }

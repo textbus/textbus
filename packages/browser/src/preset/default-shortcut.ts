@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@tanbo/di'
-import { Commander, History, Keyboard, Selection } from '@textbus/core'
-import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, Plugin, SelectionBridge, BaseEditorOptions } from '../core/_api'
+import { Commander, History, Keyboard, Selection, Plugin } from '@textbus/core'
+import { EDITABLE_DOCUMENT, EDITOR_OPTIONS, SelectionBridge, BaseEditorOptions } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
