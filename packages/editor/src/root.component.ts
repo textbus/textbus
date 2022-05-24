@@ -82,6 +82,9 @@ export const rootComponent = defineComponent({
           return new VElement('div', {
             'textbus-document': 'true',
             'ref': rootNode,
+            style: {
+              padding: '8px'
+            },
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
           })
         })

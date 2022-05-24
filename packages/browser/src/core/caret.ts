@@ -2,7 +2,7 @@ import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
 
 import { createElement } from '../_utils/uikit'
-import { EDITOR_CONTAINER } from './injection-tokens'
+import { EDITOR_MASK } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
   const {startContainer, startOffset} = range
@@ -41,27 +41,6 @@ export interface CaretPosition {
 export class Caret {
   onPositionChange: Observable<CaretPosition>
   elementRef: HTMLElement
-
-  set offsetX(x: string) {
-    this._offsetX = x
-    this.elementRef.style.transform = `translate(${x}, ${this.offsetY})`
-  }
-
-  get offsetX() {
-    return this._offsetX
-  }
-
-  set offsetY(y: string) {
-    this._offsetY = y
-    this.elementRef.style.transform = `translate(${this.offsetX}, ${y})`
-  }
-
-  get offsetY() {
-    return this._offsetY
-  }
-
-  private _offsetX = '0'
-  private _offsetY = '0'
   private timer: any = null
   private caret: HTMLElement
 
@@ -80,9 +59,10 @@ export class Caret {
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition>()
+  private oldRange: Range | null = null
 
   constructor(
-    @Inject(EDITOR_CONTAINER) private editorContainer: HTMLElement) {
+    @Inject(EDITOR_MASK) private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -112,10 +92,17 @@ export class Caret {
       })
     )
 
-    editorContainer.appendChild(this.elementRef)
+    editorMask.appendChild(this.elementRef)
+  }
+
+  refresh() {
+    if (this.oldRange) {
+      this.show(this.oldRange)
+    }
   }
 
   show(range: Range) {
+    this.oldRange = range
     this.updateCursorPosition(range)
     clearTimeout(this.timer)
     if (range.collapsed) {
@@ -169,7 +156,7 @@ export class Caret {
       top -= (height - rect.height) / 2
     }
 
-    const containerRect = this.editorContainer.getBoundingClientRect()
+    const containerRect = this.editorMask.getBoundingClientRect()
 
     Object.assign(this.elementRef.style, {
       left: rect.left - containerRect.left + 'px',

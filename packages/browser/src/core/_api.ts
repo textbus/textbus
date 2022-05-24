@@ -1,6 +1,5 @@
 export * from './caret'
 export * from './dom-renderer'
-export * from './iframe-html'
 export * from './injection-tokens'
 export * from './input'
 export * from './selection-bridge'

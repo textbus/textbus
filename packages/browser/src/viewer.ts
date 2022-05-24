@@ -368,7 +368,6 @@ export class Viewer {
     const doc = createElement('div', {
       styles: {
         cursor: 'text',
-        padding: '8px',
         wordBreak: 'break-all',
         boxSizing: 'border-box',
         minHeight,
@@ -385,7 +384,8 @@ export class Viewer {
         top: 0,
         bottom: 0,
         zIndex: 1,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        overflow: 'hidden'
       }
     })
     const wrapper = createElement('div', {
