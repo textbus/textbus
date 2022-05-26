@@ -586,11 +586,8 @@ export class Renderer {
     if (component.changeMarker.dirty) {
       let slotVNode!: VElement
       const node = component.methods.render(false, (slot, factory) => {
-        if (slot instanceof Slot) {
-          slotVNode = this.slotRender(slot, factory)
-          return slotVNode
-        }
-        throw rendererErrorFn(`${slot} is not a Slot instance.`)
+        slotVNode = this.slotRender(component, slot, factory)
+        return slotVNode
       })
       if (component.slots.length === 1 && slotVNode === node) {
         setEditable(node, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
@@ -601,42 +598,53 @@ export class Renderer {
       this.triggerComponentViewChecked(component)
       return node
     }
-    const oldComponentVNode = this.componentVNode.get(component)
-    component.slots.toArray().forEach(slot => {
-      if (!slot.changeMarker.changed) {
-        return
-      }
-      const dirty = slot.changeMarker.dirty
-      const oldVNode = this.slotVNodeCaches.get(slot)!
-      const factory = this.slotRenderFactory.get(slot)!
-      const vNode = this.slotRender(slot, factory)
-      if (dirty) {
-        if (oldComponentVNode === oldVNode) {
-          this.componentVNode.set(component, vNode)
-          if (component.slots.length === 1) {
-            setEditable(vNode, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
-          } else {
-            setEditable(vNode, this.useContentEditable, false)
+    if (component.changeMarker.changed) {
+      const oldComponentVNode = this.componentVNode.get(component)
+      component.slots.toArray().forEach(slot => {
+        if (!slot.changeMarker.changed) {
+          return
+        }
+        const dirty = slot.changeMarker.dirty
+        const oldVNode = this.slotVNodeCaches.get(slot)!
+        const factory = this.slotRenderFactory.get(slot)!
+        const vNode = this.slotRender(component, slot, factory)
+        if (dirty) {
+          if (oldComponentVNode === oldVNode) {
+            this.componentVNode.set(component, vNode)
+            if (component.slots.length === 1) {
+              setEditable(vNode, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
+            } else {
+              setEditable(vNode, this.useContentEditable, false)
+            }
+          }
+          (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
+          const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
+          const newNativeNode = this.diffAndUpdate(vNode, oldVNode)
+          this.nativeNodeCaches.set(newNativeNode, vNode)
+          this.slotVNodeCaches.set(slot, vNode)
+          if (oldNativeNode !== newNativeNode) {
+            this.nativeRenderer.replace(newNativeNode, oldNativeNode)
           }
         }
-        (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
-        const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
-        const newNativeNode = this.diffAndUpdate(vNode, oldVNode)
-        this.nativeNodeCaches.set(newNativeNode, vNode)
-        this.slotVNodeCaches.set(slot, vNode)
-        if (oldNativeNode !== newNativeNode) {
-          this.nativeRenderer.replace(newNativeNode, oldNativeNode)
-        }
-      }
-    })
-    this.triggerComponentViewChecked(component)
+      })
+      this.triggerComponentViewChecked(component)
+    }
     return this.componentVNode.get(component)!
   }
 
-  private slotRender(slot: Slot, slotRenderFactory: () => VElement): VElement {
+  private slotRender(component: ComponentInstance, slot: Slot, slotRenderFactory: () => VElement): VElement {
+    if (!(slot instanceof Slot)) {
+      throw rendererErrorFn(`${slot} of the component \`${component.name}\` is not a Slot instance.`)
+    }
+    if (typeof slotRenderFactory !== 'function') {
+      throw rendererErrorFn(`component \`${component.name}\` slot render is not a function.`)
+    }
     if (slot.changeMarker.dirty) {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const root = slotRenderFactory()
+      if (!(root instanceof VElement)) {
+        throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
+      }
       root.attrs.set(this.slotIdAttrKey, slot.id)
       let host = root
       setEditable(host, this.useContentEditable, true)

@@ -49,9 +49,9 @@ export class Scheduler {
         this.instanceList.forEach(instance => {
           let comp = instance
           while (comp) {
-            const parent = comp.parent
+            const parent = comp.parentComponent
             if (parent) {
-              comp = parent.parent as ComponentInstance
+              comp = parent
             } else {
               break
             }

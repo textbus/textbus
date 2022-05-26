@@ -75,7 +75,7 @@ export class Collaborate implements History {
   setup() {
     this.subscriptions.push(
       this.starter.onReady.subscribe(() => {
-        this.listen2()
+        this.syncRootComponent()
       }),
       this.selection.onChange.subscribe(() => {
         const paths = this.selection.getPaths()
@@ -112,7 +112,7 @@ export class Collaborate implements History {
     this.subscriptions.forEach(i => i.unsubscribe())
   }
 
-  private listen2() {
+  private syncRootComponent() {
     const root = this.yDoc.getText('content')
     const rootComponent = this.rootComponentRef.component!
     this.manager = new UndoManager(root, {
