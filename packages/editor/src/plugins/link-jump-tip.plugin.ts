@@ -1,7 +1,7 @@
 import { Subscription } from '@tanbo/stream'
 import { NativeSelectionBridge, Selection, Plugin } from '@textbus/core'
 import { Injector } from '@tanbo/di'
-import { EDITABLE_DOCUMENT, EDITOR_CONTAINER } from '@textbus/browser'
+import { EDITOR_CONTAINER } from '@textbus/browser'
 import { I18n } from '../i18n'
 
 export class LinkJumpTipPlugin implements Plugin {
@@ -13,13 +13,12 @@ export class LinkJumpTipPlugin implements Plugin {
     const nativeSelectionBridge = injector.get(NativeSelectionBridge)
     const container = injector.get(EDITOR_CONTAINER)
     const i18n = injector.get(I18n)
-    const contentDocument = injector.get(EDITABLE_DOCUMENT)
     this.link.innerText = i18n.get('plugins.linkJump.accessLink') || '跳转'
     this.link.target = '_blank'
     this.link.className = 'textbus-link-jump-plugin'
     this.subs.push(
       selection.onChange.subscribe(() => {
-        this.onSelectionChange(contentDocument, selection, nativeSelectionBridge, container)
+        this.onSelectionChange(document, selection, nativeSelectionBridge, container)
       })
     )
   }

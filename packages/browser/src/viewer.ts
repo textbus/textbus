@@ -21,7 +21,6 @@ import { createElement } from './_utils/uikit'
 import {
   BaseEditorOptions,
   Input,
-  EDITABLE_DOCUMENT,
   EDITOR_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
@@ -72,9 +71,6 @@ export class Viewer {
     const {doc, mask, wrapper} = Viewer.createLayout(options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
-      provide: EDITABLE_DOCUMENT,
-      useValue: document
-    }, {
       provide: EDITOR_OPTIONS,
       useValue: options
     }, {

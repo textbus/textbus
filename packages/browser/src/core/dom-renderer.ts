@@ -1,16 +1,11 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Injectable } from '@tanbo/di'
 import { NativeNode, NativeRenderer } from '@textbus/core'
-
-import { EDITABLE_DOCUMENT } from './injection-tokens'
 
 /**
  * Textbus PC 端浏览器渲染能力实现
  */
 @Injectable()
 export class DomRenderer implements NativeRenderer {
-  constructor(@Inject(EDITABLE_DOCUMENT) private document: Document) {
-  }
-
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
     node.addEventListener(type, callback)
   }
@@ -20,11 +15,11 @@ export class DomRenderer implements NativeRenderer {
   }
 
   createTextNode(textContent: string): NativeNode {
-    return this.document.createTextNode(DomRenderer.replaceEmpty(textContent, '\u00a0'))
+    return document.createTextNode(DomRenderer.replaceEmpty(textContent, '\u00a0'))
   }
 
   createElement(name: string): NativeNode {
-    return this.document.createElement(name)
+    return document.createElement(name)
   }
 
   appendChild(parent: NativeNode, newChild: NativeNode) {
@@ -68,7 +63,7 @@ export class DomRenderer implements NativeRenderer {
   }
 
   copy() {
-    this.document.execCommand('copy')
+    document.execCommand('copy')
   }
 
   static replaceEmpty(s: string, target: string) {

@@ -15,7 +15,6 @@ import {
 import {
   createElement,
   createTextNode,
-  EDITABLE_DOCUMENT,
   EDITOR_CONTAINER,
   Parser
 } from '@textbus/browser'
@@ -33,8 +32,7 @@ export class ContextMenu {
   private menu!: HTMLElement
   private submenu!: HTMLElement
 
-  constructor(@Inject(EDITABLE_DOCUMENT) private editorDocument: Document,
-              @Inject(EDITOR_CONTAINER) private container: HTMLElement,
+  constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
               private i18n: I18n,
               private parser: Parser,
               private message: Message,
@@ -43,11 +41,11 @@ export class ContextMenu {
               private selection: Selection) {
 
     this.subs.push(
-      fromEvent(editorDocument, 'mousedown').subscribe(() => {
+      fromEvent(document, 'mousedown').subscribe(() => {
         this.hide()
       }),
       fromEvent<MouseEvent>(container, 'contextmenu').subscribe((ev) => {
-        const nativeSelection = editorDocument.getSelection()!
+        const nativeSelection = document.getSelection()!
         const focusNode = nativeSelection.focusNode
         const offset = nativeSelection.focusOffset
         const isCollapsed = nativeSelection.isCollapsed

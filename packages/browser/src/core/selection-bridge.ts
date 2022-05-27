@@ -14,7 +14,7 @@ import {
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
-import { DOC_CONTAINER, EDITABLE_DOCUMENT, EDITOR_MASK } from './injection-tokens'
+import { DOC_CONTAINER, EDITOR_MASK } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
 import { Input } from './input'
 
@@ -24,7 +24,7 @@ import { Input } from './input'
 @Injectable()
 export class SelectionBridge implements NativeSelectionBridge {
   onSelectionChange: Observable<Range | null>
-  nativeSelection = this.document.getSelection()!
+  nativeSelection = document.getSelection()!
 
   private selectionMaskElement = createElement('style')
 
@@ -34,8 +34,9 @@ export class SelectionBridge implements NativeSelectionBridge {
   private sub: Subscription
   private connector: NativeSelectionConnector | null = null
 
-  constructor(@Inject(EDITABLE_DOCUMENT) private document: Document,
-              @Inject(DOC_CONTAINER) private docContainer: HTMLElement,
+  private isFocusIn = false
+
+  constructor(@Inject(DOC_CONTAINER) private docContainer: HTMLElement,
               @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
               public caret: Caret,
               private rootComponentRef: RootComponentRef,
@@ -43,7 +44,7 @@ export class SelectionBridge implements NativeSelectionBridge {
               private renderer: Renderer) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable()
     this.showNativeMask()
-    this.document.head.appendChild(this.selectionMaskElement)
+    document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {
       if (r) {
         this.caret.show(r)
@@ -88,7 +89,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
     const node = position.start.node
     const offset = position.start.offset
-    const nativeRange = this.document.createRange()
+    const nativeRange = document.createRange()
     nativeRange.setStart(node, offset)
     nativeRange.collapse()
     return getLayoutRectByRange(nativeRange)
@@ -100,7 +101,10 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
     if (!range) {
-      this.nativeSelection.removeAllRanges()
+      if (!this.isFocusIn) {
+        this.nativeSelection.removeAllRanges()
+      }
+      this.isFocusIn = false
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
       return
@@ -118,7 +122,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     if (this.nativeSelection.rangeCount) {
       nativeRange = this.nativeSelection.getRangeAt(0)
     } else {
-      nativeRange = this.document.createRange()
+      nativeRange = document.createRange()
       this.nativeSelection.addRange(nativeRange)
     }
     if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
@@ -282,13 +286,13 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private listen(connector: NativeSelectionConnector) {
     const selection = this.nativeSelection
-    let isFocusin = false
+    this.isFocusIn = false
     this.subs.push(
-      fromEvent(this.docContainer, 'focusin').subscribe(() => {
-        isFocusin = true
+      fromEvent(document, 'focusin').subscribe(() => {
+        this.isFocusIn = true
       }),
-      fromEvent(this.docContainer, 'focusout').subscribe(() => {
-        isFocusin = false
+      fromEvent(document, 'focusout').subscribe(() => {
+        this.isFocusIn = false
       }),
       fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
@@ -296,8 +300,9 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
         selection.removeAllRanges()
       }),
-      fromEvent(this.document, 'selectionchange').subscribe(() => {
-        if (isFocusin) {
+      fromEvent(document, 'selectionchange').subscribe(() => {
+        if (this.isFocusIn) {
+          this.isFocusIn = false
           connector.setSelection(null)
           return
         }

@@ -1,7 +1,6 @@
 import { Inject, Injectable, Optional } from '@tanbo/di'
 import {
   createElement,
-  EDITABLE_DOCUMENT,
   EDITOR_CONTAINER,
   getLayoutRectByRange,
   SelectionBridge
@@ -67,7 +66,6 @@ export class CollaborateCursor {
   private onRectsChange = new Subject<SelectionRect[]>()
 
   constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
-              @Inject(EDITABLE_DOCUMENT) private document: Document,
               @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
@@ -112,7 +110,7 @@ export class CollaborateCursor {
       if (!start || !end) {
         return
       }
-      const nativeRange = this.document.createRange()
+      const nativeRange = document.createRange()
       nativeRange.setStart(start.node, start.offset)
       nativeRange.setEnd(end.node, end.offset)
 
