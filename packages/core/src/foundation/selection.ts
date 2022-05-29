@@ -1011,7 +1011,32 @@ export class Selection {
     return result
   }
 
-  private static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
+  getPathsBySlot(slot: Slot) {
+    const paths: number[] = []
+
+    while (true) {
+      const parentComponent = slot.parent
+      if (!parentComponent) {
+        break
+      }
+      const slotIndex = parentComponent.slots.indexOf(slot)
+      paths.push(slotIndex)
+
+      const parentSlotRef = parentComponent.parent
+      if (!parentSlotRef) {
+        if (parentComponent !== this.root.component) {
+          paths.length = 0
+        }
+        break
+      }
+      const componentIndex = parentSlotRef.indexOf(parentComponent)
+      paths.push(componentIndex)
+      slot = parentSlotRef
+    }
+    return paths.reverse()
+  }
+
+  static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
     let startComponent = startSlot?.parent
     let endComponent = endSlot?.parent
     if (startComponent === endComponent) {
@@ -1088,6 +1113,32 @@ export class Selection {
     return f
   }
 
+  static compareSelectionPaths(minPaths: number[], maxPaths: number[]): boolean {
+    let minIsStart = true
+    let i = 0
+    while (true) {
+      if (i < maxPaths.length) {
+        if (i < minPaths.length) {
+          const min = minPaths[i]
+          const max = maxPaths[i]
+          if (min === max) {
+            i++
+            continue
+          }
+          minIsStart = min < max
+          break
+        } else {
+          minIsStart = true
+          break
+        }
+      } else {
+        minIsStart = false
+        break
+      }
+    }
+    return minIsStart
+  }
+
   private resetStartAndEndPosition() {
     let focusPaths: number[] = []
     let anchorPaths: number[] = []
@@ -1100,28 +1151,7 @@ export class Selection {
       anchorPaths.push(this.anchorOffset!)
     }
 
-    let i = 0
-    let anchorSlotIsStart = true
-    while (true) {
-      if (i < focusPaths.length) {
-        if (i < anchorPaths.length) {
-          const focusPath = focusPaths[i]
-          const anchorPath = anchorPaths[i]
-          if (focusPath === anchorPath) {
-            i++
-            continue
-          }
-          anchorSlotIsStart = anchorPath < focusPath
-          break
-        } else {
-          anchorSlotIsStart = true
-          break
-        }
-      } else {
-        anchorSlotIsStart = false
-        break
-      }
-    }
+    const anchorSlotIsStart = Selection.compareSelectionPaths(anchorPaths, focusPaths)
     if (anchorSlotIsStart) {
       this._startSlot = this.anchorSlot
       this._startOffset = this.anchorOffset
@@ -1452,31 +1482,6 @@ export class Selection {
       return component || null
     }
     return Selection.findTreeNode(paths, component)
-  }
-
-  private getPathsBySlot(slot: Slot) {
-    const paths: number[] = []
-
-    while (true) {
-      const parentComponent = slot.parent
-      if (!parentComponent) {
-        break
-      }
-      const slotIndex = parentComponent.slots.indexOf(slot)
-      paths.push(slotIndex)
-
-      const parentSlotRef = parentComponent.parent
-      if (!parentSlotRef) {
-        if (parentComponent !== this.root.component) {
-          paths.length = 0
-        }
-        break
-      }
-      const componentIndex = parentSlotRef.indexOf(parentComponent)
-      paths.push(componentIndex)
-      slot = parentSlotRef
-    }
-    return paths.reverse()
   }
 
   private static findExpandedStartIndex(slot: Slot, index: number) {

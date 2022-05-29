@@ -10,6 +10,7 @@ import {
   onSlotRemove,
   Selection,
   Slot,
+  Range,
   SlotRender,
   useContext,
   useSelf,
@@ -37,17 +38,32 @@ export {
 
 @Injectable()
 export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwarenessDelegate {
-  constructor(private renderer: Renderer) {
+  constructor(private renderer: Renderer,
+              private selection: Selection) {
     super()
   }
 
-  override getRects(selection: Selection) {
-    const commonAncestorComponent = selection.commonAncestorComponent
+  override getRects(range: Range) {
+    const {focusSlot, anchorSlot} = range
+    const focusPaths = this.selection.getPathsBySlot(focusSlot)
+    const anchorPaths = this.selection.getPathsBySlot(anchorSlot)
+    const focusIsStart = Selection.compareSelectionPaths(focusPaths, anchorPaths)
+    let startSlot: Slot
+    let endSlot: Slot
+    if (focusIsStart) {
+      startSlot = focusSlot
+      endSlot = anchorSlot
+    } else {
+      startSlot = anchorSlot
+      endSlot = focusSlot
+    }
+    const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
     if (commonAncestorComponent?.name !== tableComponent.name) {
       return false
     }
-    const startFocusSlot = findFocusCell(commonAncestorComponent, selection.focusSlot!)
-    const endFocusSlot = findFocusCell(commonAncestorComponent, selection.anchorSlot!)
+
+    const startFocusSlot = findFocusCell(commonAncestorComponent, startSlot!)
+    const endFocusSlot = findFocusCell(commonAncestorComponent, endSlot!)
 
     const state = commonAncestorComponent.state as TableConfig
 

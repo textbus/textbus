@@ -99,7 +99,17 @@ const editor = createEditor({
         }
       })
 
-      const selections = remoteSelections.filter(i => i.username !== user.name)
+      const selections = remoteSelections.filter(i => i.username !== user.name).map(i => {
+        return {
+          ...i,
+          paths: {
+            start: i.paths['start'] || i.paths.anchor,
+            end: i.paths['end'] || i.paths.focus,
+            focus: i.paths.focus || i.paths['end'],
+            anchor: i.paths.anchor || i.paths['start']
+          }
+        }
+      })
 
       collaborate.updateRemoteSelection(selections)
       header.innerHTML = users.map(i => {

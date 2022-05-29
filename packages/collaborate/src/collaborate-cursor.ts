@@ -5,7 +5,7 @@ import {
   getLayoutRectByRange,
   SelectionBridge
 } from '@textbus/browser'
-import { Selection, SelectionPaths } from '@textbus/core'
+import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
 import { Subject } from '@tanbo/stream'
 
 export interface RemoteSelection {
@@ -33,7 +33,7 @@ export interface RemoteSelectionCursor {
 }
 
 export abstract class CollaborateCursorAwarenessDelegate {
-  abstract getRects(selection: Selection, nativeRange: Range): false | Rect[]
+  abstract getRects(range: TBRange, nativeRange: Range): false | Rect[]
 }
 
 @Injectable()
@@ -120,7 +120,12 @@ export class CollaborateCursor {
 
       let rects: Rect[] | DOMRectList | false = false
       if (this.awarenessDelegate) {
-        rects = this.awarenessDelegate.getRects(this.selection, nativeRange)
+        rects = this.awarenessDelegate.getRects({
+          focusOffset,
+          anchorOffset,
+          focusSlot,
+          anchorSlot
+        }, nativeRange)
       }
       if (!rects) {
         rects = nativeRange.getClientRects()
