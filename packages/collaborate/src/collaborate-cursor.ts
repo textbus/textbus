@@ -5,7 +5,7 @@ import {
   getLayoutRectByRange,
   SelectionBridge
 } from '@textbus/browser'
-import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
+import { Selection, SelectionPaths } from '@textbus/core'
 import { Subject } from '@tanbo/stream'
 
 export interface RemoteSelection {
@@ -33,7 +33,7 @@ export interface RemoteSelectionCursor {
 }
 
 export abstract class CollaborateCursorAwarenessDelegate {
-  abstract getRects(range: TBRange, nativeRange: Range): false | Rect[]
+  abstract getRects(selection: Selection, nativeRange: Range): false | Rect[]
 }
 
 @Injectable()
@@ -91,37 +91,36 @@ export class CollaborateCursor {
 
 
     paths.filter(i => {
-      return i.paths.start.length && i.paths.end.length
+      return i.paths.anchor.length && i.paths.focus.length
     }).forEach(item => {
-      const startOffset = item.paths.start.pop()!
-      const startSlot = this.selection.findSlotByPaths(item.paths.start)
-      const endOffset = item.paths.end.pop()!
-      const endSlot = this.selection.findSlotByPaths(item.paths.end)
-      if (!startSlot || !endSlot) {
+      const anchorOffset = item.paths.anchor.pop()!
+      const anchorSlot = this.selection.findSlotByPaths(item.paths.anchor)
+      const focusOffset = item.paths.focus.pop()!
+      const focusSlot = this.selection.findSlotByPaths(item.paths.focus)
+      if (!anchorSlot || !focusSlot) {
         return
       }
 
-      const {start, end} = this.nativeSelection.getPositionByRange({
-        startOffset,
-        endOffset,
-        startSlot,
-        endSlot
+      const {focus, anchor} = this.nativeSelection.getPositionByRange({
+        focusOffset,
+        anchorOffset,
+        focusSlot,
+        anchorSlot
       })
-      if (!start || !end) {
+      if (!focus || !anchor) {
         return
       }
       const nativeRange = document.createRange()
-      nativeRange.setStart(start.node, start.offset)
-      nativeRange.setEnd(end.node, end.offset)
+      nativeRange.setStart(anchor.node, anchor.offset)
+      nativeRange.setEnd(focus.node, focus.offset)
+      if ((anchor.node !== focus.node || anchor.offset !== focus.offset) && nativeRange.collapsed) {
+        nativeRange.setStart(focus.node, focus.offset)
+        nativeRange.setEnd(anchor.node, anchor.offset)
+      }
 
       let rects: Rect[] | DOMRectList | false = false
       if (this.awarenessDelegate) {
-        rects = this.awarenessDelegate.getRects({
-          startOffset,
-          endOffset,
-          startSlot,
-          endSlot
-        }, nativeRange)
+        rects = this.awarenessDelegate.getRects(this.selection, nativeRange)
       }
       if (!rects) {
         rects = nativeRange.getClientRects()
@@ -141,7 +140,8 @@ export class CollaborateCursor {
       this.onRectsChange.next(selectionRects)
 
       const cursorRange = nativeRange.cloneRange()
-      cursorRange.collapse(!item.paths.focusEnd)
+      cursorRange.setStart(focus.node, focus.offset)
+      cursorRange.collapse(true)
 
       const cursorRect = getLayoutRectByRange(cursorRange)
 

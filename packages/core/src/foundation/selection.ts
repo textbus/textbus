@@ -1,15 +1,15 @@
 import { Injectable, Prop } from '@tanbo/di'
-import { distinctUntilChanged, map, Observable, Subject, Subscription } from '@tanbo/stream'
+import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
 import { ComponentInstance, ContentType, invokeListener, Slot, Event } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 
 export interface Range {
-  startSlot: Slot
-  endSlot: Slot
-  startOffset: number
-  endOffset: number
+  focusSlot: Slot
+  anchorSlot: Slot
+  focusOffset: number
+  anchorOffset: number
 }
 
 export interface SelectedScope {
@@ -31,9 +31,8 @@ export interface NativeSelectionConnector {
   /**
    * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
    * @param range 对应原生选区在 Textbus 中的选区
-   * @param isFocusEnd 线束插槽是否为焦点插槽
    */
-  setSelection(range: Range | null, isFocusEnd?: boolean): void
+  setSelection(range: Range | null): void
 }
 
 export interface SelectionPosition {
@@ -86,9 +85,8 @@ export abstract class NativeSelectionBridge {
 }
 
 export interface SelectionPaths {
-  start: number[]
-  end: number[]
-  focusEnd: boolean
+  anchor: number[]
+  focus: number[]
 }
 
 /**
@@ -133,31 +131,22 @@ export class Selection {
 
   /** 锚点插槽 */
   get anchorSlot() {
-    return this.focusSlot === this.startSlot ? this.endSlot : this.startSlot
+    return this._anchorSlot
   }
 
   /** 锚点插槽偏移量 */
   get anchorOffset() {
-    if (this.focusSlot === this.startSlot && this._focusOffset === this.startOffset) {
-      return this.endOffset
-    }
-    return this.startOffset
+    return this._anchorOffset
   }
 
   /** 焦点插槽 */
   get focusSlot() {
-    if (this._focusSlot === this.startSlot) {
-      return this.startSlot
-    }
-    return this.endSlot
+    return this._focusSlot
   }
 
   /** 焦点插槽偏移量 */
   get focusOffset() {
-    if (this.focusSlot === this.startSlot && this._focusOffset === this.startOffset) {
-      return this.startOffset
-    }
-    return this.endOffset
+    return this._focusOffset
   }
 
   /**
@@ -182,7 +171,7 @@ export class Selection {
     this._nativeSelectionDelegate = v
     if (v) {
       this.bridge.connect({
-        setSelection: (range: Range | null, isFocusEnd = true) => {
+        setSelection: (range: Range | null) => {
           if (range === null) {
             if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
               return
@@ -190,19 +179,11 @@ export class Selection {
             this.unSelect()
             return
           }
-          const {startOffset, startSlot, endOffset, endSlot} = range
-          if (startSlot === this.startSlot && endSlot === this.endSlot && startOffset === this.startOffset && endOffset === this.endOffset) {
+          const {focusOffset, focusSlot, anchorOffset, anchorSlot} = range
+          if (focusSlot === this.focusSlot && anchorSlot === this.anchorSlot && focusOffset === this.focusOffset && anchorOffset === this.anchorOffset) {
             return
           }
-          this.setStart(startSlot, startOffset)
-          this.setEnd(endSlot, endOffset)
-          if (isFocusEnd) {
-            this._focusSlot = this.endSlot
-            this._focusOffset = this.endOffset
-          } else {
-            this._focusSlot = this.startSlot
-            this._focusOffset = this.startOffset
-          }
+          this.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
           this.broadcastChanged()
         }
       })
@@ -216,6 +197,8 @@ export class Selection {
   private _endSlot: Slot | null = null
   private _startOffset: number | null = null
   private _endOffset: number | null = null
+  private _anchorSlot: Slot | null = null
+  private _anchorOffset: number | null = null
   private _focusSlot: Slot | null = null
   private _focusOffset: number | null = null
   private changeEvent = new Subject<Range | null>()
@@ -230,15 +213,18 @@ export class Selection {
   constructor(private root: RootComponentRef,
               private renderer: Renderer) {
     let prevFocusComponent: ComponentInstance | null
-    this.onChange = this.changeEvent.asObservable().pipe(distinctUntilChanged((previous, current) => {
-      if (previous && current) {
-        return !(previous.startOffset === current.startOffset &&
-          previous.endOffset === current.endOffset &&
-          previous.startSlot === current.startSlot &&
-          previous.endSlot === current.endSlot)
-      }
-      return previous !== current
-    }))
+    this.onChange = this.changeEvent.asObservable().pipe(
+      distinctUntilChanged((previous, current) => {
+        if (previous && current) {
+          return !(previous.focusOffset === current.focusOffset &&
+            previous.anchorOffset === current.anchorOffset &&
+            previous.focusSlot === current.focusSlot &&
+            previous.anchorSlot === current.anchorSlot)
+        }
+        return previous !== current
+      }),
+      share()
+    )
     this.subscriptions.push(
       this.onChange.pipe(
         map<any, ComponentInstance | null>(() => {
@@ -285,26 +271,34 @@ export class Selection {
     this.subscriptions = []
   }
 
-  /**
-   * 设置选区的开始位置
-   * @param slot 开始位置的插槽
-   * @param offset 开始位置索引
-   */
-  setStart(slot: Slot, offset: number) {
-    this._startSlot = slot
-    slot.retain(offset)
-    this._startOffset = slot.index
+  setBaseAndExtent(anchorSlot: Slot, anchorOffset: number, focusSlot: Slot, focusOffset: number) {
+    this.setAnchor(anchorSlot, anchorOffset)
+    this.setFocus(focusSlot, focusOffset)
+    this.resetStartAndEndPosition()
   }
 
   /**
-   * 设置选区结束位置
-   * @param slot 结束位置的插槽
-   * @param offset 结束位置的索引
+   * 设置选区的锚点位置
+   * @param slot 锚点位置的插槽
+   * @param offset 锚点位置索引
    */
-  setEnd(slot: Slot, offset: number) {
-    this._endSlot = slot
+  setAnchor(slot: Slot, offset: number) {
+    this._anchorSlot = slot
     slot.retain(offset)
-    this._endOffset = slot.index
+    this._anchorOffset = slot.index
+    this.resetStartAndEndPosition()
+  }
+
+  /**
+   * 设置选区焦点位置
+   * @param slot 焦点位置的插槽
+   * @param offset 焦点位置的索引
+   */
+  setFocus(slot: Slot, offset: number) {
+    this._focusSlot = slot
+    slot.retain(offset)
+    this._focusOffset = slot.index
+    this.resetStartAndEndPosition()
   }
 
   /**
@@ -313,9 +307,105 @@ export class Selection {
    * @param offset 选区位置索引
    */
   setPosition(slot: Slot, offset: number) {
-    this._startSlot = this._endSlot = slot
+    this._focusSlot = this._anchorSlot = slot
     slot.retain(offset)
-    this._startOffset = this._endOffset = slot.index
+    this._focusOffset = this._anchorOffset = slot.index
+    this.resetStartAndEndPosition()
+  }
+
+  /**
+   * 设置选区选择插槽的全部内容
+   * @param slot
+   */
+  selectSlot(slot: Slot) {
+    this.setBaseAndExtent(slot, 0, slot, slot.length)
+  }
+
+  /**
+   * 设置选区为组件的第一个位置
+   * @param componentInstance
+   * @param isRestore
+   */
+  selectFirstPosition(componentInstance: ComponentInstance, isRestore = false) {
+    const slots = componentInstance.slots
+    if (slots.length) {
+      const first = slots.first!
+      const {slot, offset} = this.findFirstPosition(first, false)
+      this.setBaseAndExtent(slot, offset, slot, offset)
+    } else {
+      this.selectComponentFront(componentInstance)
+    }
+    if (isRestore) {
+      this.restore()
+    }
+  }
+
+  /**
+   * 设置选区为组件的最后一个位置
+   * @param componentInstance
+   * @param isRestore
+   */
+  selectLastPosition(componentInstance: ComponentInstance, isRestore = false) {
+    const slots = componentInstance.slots
+    if (slots.length) {
+      const last = slots.last!
+      const {slot, offset} = this.findLastPosition(last, false)
+      this.setBaseAndExtent(slot, offset, slot, offset)
+    } else {
+      this.selectComponentEnd(componentInstance)
+    }
+    if (isRestore) {
+      this.restore()
+    }
+  }
+
+  /**
+   * 把选区设置在组件之前
+   * @param componentInstance
+   * @param isRestore
+   */
+  selectComponentFront(componentInstance: ComponentInstance, isRestore = false) {
+    const parent = componentInstance.parent
+    if (parent) {
+      const index = parent.indexOf(componentInstance)
+      this.setBaseAndExtent(parent, index, parent, index)
+    } else {
+      this.unSelect()
+    }
+    if (isRestore) {
+      this.restore()
+    }
+  }
+
+  /**
+   * 把选区设置在组件之后
+   * @param componentInstance
+   * @param isRestore
+   */
+  selectComponentEnd(componentInstance: ComponentInstance, isRestore = false) {
+    const parent = componentInstance.parent
+    if (parent) {
+      const index = parent.indexOf(componentInstance)
+      this.setBaseAndExtent(parent, index + 1, parent, index + 1)
+    } else {
+      this.unSelect()
+    }
+    if (isRestore) {
+      this.restore()
+    }
+  }
+
+  /**
+   * 选中组件所有的子插槽
+   * @param componentInstance
+   * @param isRestore
+   */
+  selectChildSlots(componentInstance: ComponentInstance, isRestore = false) {
+    this.selectFirstPosition(componentInstance)
+    this.selectLastPosition(componentInstance)
+    if (isRestore) {
+      this.restore()
+    }
   }
 
   /**
@@ -327,8 +417,7 @@ export class Selection {
     const parent = componentInstance.parent
     if (parent) {
       const index = parent.indexOf(componentInstance)
-      this.setStart(parent, index)
-      this.setEnd(parent, index + 1)
+      this.setBaseAndExtent(parent, index, parent, index + 1)
       if (isRestore) {
         this.restore()
       }
@@ -362,7 +451,6 @@ export class Selection {
     if (!this.isCollapsed) {
       this.collapse(true)
       this.restore()
-      this.broadcastChanged()
       return
     }
     const {startSlot, startOffset} = this
@@ -395,7 +483,6 @@ export class Selection {
         }
       }
       this.restore()
-      this.broadcastChanged()
     }
   }
 
@@ -406,7 +493,6 @@ export class Selection {
     if (!this.isCollapsed) {
       this.collapse()
       this.restore()
-      this.broadcastChanged()
       return
     }
     const {endSlot, endOffset} = this
@@ -447,7 +533,6 @@ export class Selection {
         }
       }
       this.restore()
-      this.broadcastChanged()
     }
   }
 
@@ -507,11 +592,9 @@ export class Selection {
    */
   collapse(toStart = false) {
     if (toStart) {
-      this._endSlot = this._startSlot
-      this._endOffset = this._startOffset
+      this.setPosition(this.startSlot!, this.startOffset!)
     } else {
-      this._startSlot = this._endSlot
-      this._startOffset = this._endOffset
+      this.setPosition(this.endSlot!, this.endOffset!)
     }
   }
 
@@ -520,18 +603,18 @@ export class Selection {
    */
   restore() {
     if (this.nativeSelectionDelegate) {
-      const startSlot = this.startSlot!
-      const startOffset = this.startOffset!
-      const endSlot = this.endSlot!
-      const endOffset = this.endOffset!
-      if (startSlot && endSlot) {
-        startSlot.retain(startOffset)
-        endSlot.retain(endOffset)
+      const focusSlot = this.focusSlot!
+      const focusOffset = this.focusOffset!
+      const anchorSlot = this.anchorSlot!
+      const anchorOffset = this.anchorOffset!
+      if (focusSlot && anchorSlot) {
+        focusSlot.retain(focusOffset)
+        anchorSlot.retain(anchorOffset)
         this.bridge.restore({
-          startOffset: this.startOffset!,
-          startSlot: this.startSlot!,
-          endOffset: this.endOffset!,
-          endSlot: this.endSlot!
+          focusOffset: focusOffset,
+          focusSlot: focusSlot,
+          anchorOffset: anchorOffset,
+          anchorSlot: anchorSlot
         })
       } else {
         this.bridge.restore(null)
@@ -546,19 +629,17 @@ export class Selection {
   getPaths(): SelectionPaths {
     if (!this.commonAncestorSlot) {
       return {
-        start: [],
-        end: [],
-        focusEnd: true
+        anchor: [],
+        focus: [],
       }
     }
-    const start = Selection.getPathsBySlot(this.startSlot!)
-    start.push(this.startOffset!)
-    const end = Selection.getPathsBySlot(this.endSlot!)
-    end.push(this.endOffset!)
+    const anchor = this.getPathsBySlot(this.anchorSlot!)
+    anchor.push(this.anchorOffset!)
+    const focus = this.getPathsBySlot(this.focusSlot!)
+    focus.push(this.focusOffset!)
     return {
-      start,
-      end,
-      focusEnd: this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
+      anchor,
+      focus,
     }
   }
 
@@ -567,23 +648,10 @@ export class Selection {
    * @param paths
    */
   usePaths(paths: SelectionPaths) {
-    const start = this.findPositionByPath(paths.start)
-    const end = this.findPositionByPath(paths.end)
-    if (start) {
-      this._startSlot = start.slot
-      this._startOffset = start.offset
-      if (!paths.focusEnd) {
-        this._focusSlot = start.slot
-        this._focusOffset = start.offset
-      }
-    }
-    if (end) {
-      this._endSlot = end.slot
-      this._endOffset = end.offset
-      if (paths.focusEnd) {
-        this._focusSlot = end.slot
-        this._focusOffset = end.offset
-      }
+    const anchorPosition = this.findPositionByPath(paths.anchor)
+    const focusPosition = this.findPositionByPath(paths.focus)
+    if (anchorPosition && focusPosition) {
+      this.setBaseAndExtent(anchorPosition.slot, anchorPosition.offset, focusPosition.slot, focusPosition.offset)
     }
   }
 
@@ -591,7 +659,8 @@ export class Selection {
    * 取消选区
    */
   unSelect() {
-    this._startSlot = this._endSlot = this._startOffset = this._endOffset = null
+    this._anchorSlot = this._focusSlot = this._anchorOffset = this._focusOffset = null
+    this.resetStartAndEndPosition()
     this.restore()
   }
 
@@ -600,8 +669,7 @@ export class Selection {
    */
   selectAll() {
     const slot = this.root.component.slots.get(0)!
-    this.setStart(slot, 0)
-    this.setEnd(slot, slot.length)
+    this.setBaseAndExtent(slot, 0, slot, slot.length)
     this.restore()
   }
 
@@ -612,7 +680,7 @@ export class Selection {
     if (!this.isSelected) {
       return null
     }
-    return this.getNextPositionByPosition(this.endSlot!, this.endOffset!)
+    return this.getNextPositionByPosition(this.focusSlot!, this.focusOffset!)
   }
 
   /**
@@ -622,7 +690,7 @@ export class Selection {
     if (!this.isSelected) {
       return null
     }
-    return this.getPreviousPositionByPosition(this.startSlot!, this.startOffset!)
+    return this.getPreviousPositionByPosition(this.focusSlot!, this.focusOffset!)
   }
 
   /**
@@ -764,10 +832,11 @@ export class Selection {
   /**
    * 查找插槽内最深的第一个光标位置
    * @param slot
+   * @param toChild
    */
-  findFirstPosition(slot: Slot): SelectionPosition {
+  findFirstPosition(slot: Slot, toChild = true): SelectionPosition {
     const first = slot.getContentAtIndex(0)
-    if (first && typeof first !== 'string') {
+    if (toChild && first && typeof first !== 'string') {
       const firstChildSlot = first.slots.first
       if (firstChildSlot) {
         return this.findFirstPosition(firstChildSlot)
@@ -782,10 +851,11 @@ export class Selection {
   /**
    * 查的插槽内最深的最后一个光标位置
    * @param slot
+   * @param toChild
    */
-  findLastPosition(slot: Slot): SelectionPosition {
+  findLastPosition(slot: Slot, toChild = true): SelectionPosition {
     const last = slot.getContentAtIndex(slot.length - 1)
-    if (last && typeof last !== 'string') {
+    if (toChild && last && typeof last !== 'string') {
       const lastChildSlot = last.slots.last
       if (lastChildSlot) {
         return this.findLastPosition(lastChildSlot)
@@ -941,7 +1011,7 @@ export class Selection {
     return result
   }
 
-  static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
+  private static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
     let startComponent = startSlot?.parent
     let endComponent = endSlot?.parent
     if (startComponent === endComponent) {
@@ -1018,50 +1088,69 @@ export class Selection {
     return f
   }
 
+  private resetStartAndEndPosition() {
+    let focusPaths: number[] = []
+    let anchorPaths: number[] = []
+    if (this.focusSlot) {
+      focusPaths = this.getPathsBySlot(this.focusSlot)
+      focusPaths.push(this.focusOffset!)
+    }
+    if (this.anchorSlot) {
+      anchorPaths = this.getPathsBySlot(this.anchorSlot)
+      anchorPaths.push(this.anchorOffset!)
+    }
+
+    let i = 0
+    let anchorSlotIsStart = true
+    while (true) {
+      if (i < focusPaths.length) {
+        if (i < anchorPaths.length) {
+          const focusPath = focusPaths[i]
+          const anchorPath = anchorPaths[i]
+          if (focusPath === anchorPath) {
+            i++
+            continue
+          }
+          anchorSlotIsStart = anchorPath < focusPath
+          break
+        } else {
+          anchorSlotIsStart = true
+          break
+        }
+      } else {
+        anchorSlotIsStart = false
+        break
+      }
+    }
+    if (anchorSlotIsStart) {
+      this._startSlot = this.anchorSlot
+      this._startOffset = this.anchorOffset
+      this._endSlot = this.focusSlot
+      this._endOffset = this.focusOffset
+    } else {
+      this._endSlot = this.anchorSlot
+      this._endOffset = this.anchorOffset
+      this._startSlot = this.focusSlot
+      this._startOffset = this.focusOffset
+    }
+  }
+
   private wrapTo(toLeft: boolean) {
     if (!this.isSelected) {
       return
     }
-    const isFocusEnd = this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
     const position = toLeft ?
       this.getPreviousPositionByPosition(this.focusSlot!, this.focusOffset!) :
       this.getNextPositionByPosition(this.focusSlot!, this.focusOffset!)
-    this.normalizedSelection(position, isFocusEnd)
+    this.setBaseAndExtent(this.anchorSlot!, this.anchorOffset!, position.slot, position.offset)
+    this.restore()
   }
 
   private wrapLineTo(toBottom: boolean) {
-    const isFocusEnd = this.focusSlot === this.endSlot && this.focusOffset === this.endOffset
     const position = this.getLinePosition(toBottom)
     if (position) {
-      this.normalizedSelection(position, isFocusEnd)
-    }
-  }
-
-  private normalizedSelection(position: SelectionPosition, isFocusEnd: boolean) {
-    if (isFocusEnd) {
-      this.setEnd(position.slot, position.offset)
-    } else {
-      this.setStart(position.slot, position.offset)
-    }
-    this.restore()
-    this.broadcastChanged()
-    this._focusSlot = isFocusEnd ? this.endSlot : this.startSlot
-    this._focusOffset = isFocusEnd ? this.endOffset : this.startOffset
-
-    const {start, end} = this.getPaths()
-    while (true) {
-      const startFirstPath = start.shift()
-      const endFirstPath = end.shift()
-
-      if (typeof startFirstPath === 'undefined' || typeof endFirstPath === 'undefined') {
-        break
-      }
-
-      if (startFirstPath > endFirstPath) {
-        const {startOffset, startSlot, endOffset, endSlot} = this
-        this.setStart(endSlot!, endOffset!)
-        this.setEnd(startSlot!, startOffset!)
-      }
+      this.setBaseAndExtent(this.anchorSlot!, this.anchorOffset!, position.slot, position.offset)
+      this.restore()
     }
   }
 
@@ -1099,11 +1188,11 @@ export class Selection {
     let isToPrevLine = false
     let loopCount = 0
     let minLeft = startLeft
-    let startSlot = this.startSlot!
-    let startOffset = this.startOffset!
+    let focusSlot = this.focusSlot!
+    let focusOffset = this.focusOffset!
     let minTop = this.bridge.getRect({
-      slot: startSlot,
-      offset: startOffset
+      slot: focusSlot,
+      offset: focusOffset
     })!.top
 
     let position: SelectionPosition
@@ -1111,9 +1200,9 @@ export class Selection {
     let oldLeft = 0
     while (true) {
       loopCount++
-      position = this.getPreviousPositionByPosition(startSlot, startOffset)
-      startSlot = position.slot
-      startOffset = position.offset
+      position = this.getPreviousPositionByPosition(focusSlot, focusOffset)
+      focusSlot = position.slot
+      focusOffset = position.offset
       const rect2 = this.bridge.getRect(position)!
       if (!isToPrevLine) {
         if (rect2.left > minLeft || rect2.top < minTop) {
@@ -1154,19 +1243,19 @@ export class Selection {
     let isToNextLine = false
     let loopCount = 0
     let maxRight = startLeft
-    let endSlot = this.endSlot!
-    let endOffset = this.endOffset!
+    let focusSlot = this.focusSlot!
+    let focusOffset = this.focusOffset!
     let minTop = this.bridge.getRect({
-      slot: endSlot,
-      offset: endOffset
+      slot: focusSlot,
+      offset: focusOffset
     })!.top
     let oldPosition!: SelectionPosition
     let oldLeft = 0
     while (true) {
       loopCount++
-      const position = this.getNextPositionByPosition(endSlot, endOffset)
-      endSlot = position.slot
-      endOffset = position.offset
+      const position = this.getNextPositionByPosition(focusSlot, focusOffset)
+      focusSlot = position.slot
+      focusOffset = position.offset
       const rect2 = this.bridge.getRect(position)!
       if (!isToNextLine) {
         if (rect2.left < maxRight || rect2.top > minTop) {
@@ -1195,8 +1284,8 @@ export class Selection {
       }
     }
     return oldPosition || {
-      offset: endSlot.length,
-      slot: endSlot
+      offset: focusSlot.length,
+      slot: focusSlot
     }
   }
 
@@ -1338,10 +1427,10 @@ export class Selection {
 
   private broadcastChanged() {
     this.changeEvent.next(this.isSelected ? {
-      startSlot: this.startSlot!,
-      endSlot: this.endSlot!,
-      startOffset: this.startOffset!,
-      endOffset: this.endOffset!
+      focusSlot: this.focusSlot!,
+      anchorSlot: this.anchorSlot!,
+      focusOffset: this.focusOffset!,
+      anchorOffset: this.anchorOffset!
     } : null)
   }
 
@@ -1365,7 +1454,7 @@ export class Selection {
     return Selection.findTreeNode(paths, component)
   }
 
-  private static getPathsBySlot(slot: Slot) {
+  private getPathsBySlot(slot: Slot) {
     const paths: number[] = []
 
     while (true) {
@@ -1378,6 +1467,9 @@ export class Selection {
 
       const parentSlotRef = parentComponent.parent
       if (!parentSlotRef) {
+        if (parentComponent !== this.root.component) {
+          paths.length = 0
+        }
         break
       }
       const componentIndex = parentSlotRef.indexOf(parentComponent)

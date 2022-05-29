@@ -74,9 +74,6 @@ export class Collaborate implements History {
 
   setup() {
     this.subscriptions.push(
-      this.starter.onReady.subscribe(() => {
-        this.syncRootComponent()
-      }),
       this.selection.onChange.subscribe(() => {
         const paths = this.selection.getPaths()
         this.selectionChangeEvent.next(paths)
@@ -89,7 +86,7 @@ export class Collaborate implements History {
   }
 
   listen() {
-    //
+    this.syncRootComponent()
   }
 
   back() {
@@ -161,11 +158,11 @@ export class Collaborate implements History {
               slot.insert(component)
             }
             if (this.selection.isSelected) {
-              if (slot === this.selection.startSlot && this.selection.startOffset! >= index) {
-                this.selection.setStart(slot, this.selection.startOffset! + length)
+              if (slot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
+                this.selection.setAnchor(slot, this.selection.anchorOffset! + length)
               }
-              if (slot === this.selection.endSlot && this.selection.endOffset! >= index) {
-                this.selection.setEnd(slot, this.selection.endOffset! + length)
+              if (slot === this.selection.focusSlot && this.selection.focusOffset! > index) {
+                this.selection.setFocus(slot, this.selection.focusOffset! + length)
               }
             }
           } else if (action.delete) {
@@ -173,11 +170,11 @@ export class Collaborate implements History {
             slot.retain(slot.index)
             slot.delete(action.delete)
             if (this.selection.isSelected) {
-              if (slot === this.selection.startSlot && this.selection.startOffset! >= index) {
-                this.selection.setStart(slot, this.selection.startOffset! - action.delete)
+              if (slot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
+                this.selection.setAnchor(slot, this.selection.startOffset! - action.delete)
               }
-              if (slot === this.selection.endSlot && this.selection.endOffset! >= index) {
-                this.selection.setEnd(slot, this.selection.endOffset! - action.delete)
+              if (slot === this.selection.focusSlot && this.selection.focusOffset! >= index) {
+                this.selection.setFocus(slot, this.selection.focusOffset! - action.delete)
               }
             }
           } else if (action.attributes) {
@@ -217,16 +214,14 @@ export class Collaborate implements History {
             const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
             if (typeof action.content === 'string') {
               length = action.content.length
-              content.insert(offset, action.content)
+              content.insert(offset, action.content, action.formats || {})
             } else {
               length = 1
               const component = slot.getContentAtIndex(offset) as ComponentInstance
               const sharedComponent = this.createSharedComponentByComponent(component)
               content.insertEmbed(offset, sharedComponent)
             }
-            if (action.formats) {
-              content.format(offset, length, action.formats)
-            }
+
             if (isEmpty && offset === 0) {
               content.delete(content.length - 1, 1)
             }

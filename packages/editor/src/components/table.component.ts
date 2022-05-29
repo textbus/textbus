@@ -15,7 +15,6 @@ import {
   useSelf,
   useSlots,
   useState,
-  Range,
   Renderer,
   jsx
 } from '@textbus/core'
@@ -42,13 +41,13 @@ export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwar
     super()
   }
 
-  override getRects(range: Range) {
-    const commonAncestorComponent = Selection.getCommonAncestorComponent(range.startSlot, range.endSlot)
+  override getRects(selection: Selection) {
+    const commonAncestorComponent = selection.commonAncestorComponent
     if (commonAncestorComponent?.name !== tableComponent.name) {
       return false
     }
-    const startFocusSlot = findFocusCell(commonAncestorComponent, range.startSlot)
-    const endFocusSlot = findFocusCell(commonAncestorComponent, range.endSlot)
+    const startFocusSlot = findFocusCell(commonAncestorComponent, selection.focusSlot!)
+    const endFocusSlot = findFocusCell(commonAncestorComponent, selection.anchorSlot!)
 
     const state = commonAncestorComponent.state as TableConfig
 
@@ -204,10 +203,10 @@ export const tableComponent = defineComponent({
         })
 
         if (selection.startSlot !== newNode!.cell) {
-          selection.setStart(newNode!.cell, 0)
+          selection.setAnchor(newNode!.cell, 0)
         }
         if (selection.endSlot !== newNode!.cell) {
-          selection.setEnd(newNode!.cell, newNode!.cell.length)
+          selection.setFocus(newNode!.cell, newNode!.cell.length)
         }
       },
       splitCells() {

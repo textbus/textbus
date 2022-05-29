@@ -104,10 +104,10 @@ export class Commander {
    */
   extractSlots(schema: ContentType[], greedy = false) {
     const range: Nullable<Range> = {
-      startSlot: null,
-      startOffset: null,
-      endSlot: null,
-      endOffset: null
+      focusSlot: null,
+      focusOffset: null,
+      anchorSlot: null,
+      anchorOffset: null
     }
 
     if (!this.selection.isSelected) {
@@ -122,25 +122,25 @@ export class Commander {
 
     for (const scope of scopes) {
       const childSlots = this.extractContentBySchema(scope.slot, schema, scope.startIndex, scope.endIndex)
-      if (scope.slot === this.selection.startSlot) {
-        let offset = this.selection.startOffset!
+      if (scope.slot === this.selection.focusSlot) {
+        let offset = this.selection.focusOffset!
         for (const slot of childSlots) {
           if (offset > slot.length) {
             offset -= slot.length
           } else {
-            range.startSlot = slot
-            range.startOffset = offset
+            range.focusSlot = slot
+            range.focusOffset = offset
           }
         }
       }
-      if (scope.slot === this.selection.endSlot) {
-        let offset = this.selection.endOffset!
+      if (scope.slot === this.selection.anchorSlot) {
+        let offset = this.selection.anchorOffset!
         for (const slot of childSlots) {
           if (offset > slot.length) {
             offset -= slot.length
           } else {
-            range.endSlot = slot
-            range.endOffset = offset
+            range.anchorSlot = slot
+            range.anchorOffset = offset
           }
         }
       }
@@ -152,13 +152,13 @@ export class Commander {
       const lastScope = scopes[scopes.length - 1]
       const {startSlot, startOffset, endSlot, endOffset} = this.selection
 
-      this.selection.setStart(firstScope.slot, 0)
-      this.selection.setEnd(lastScope.slot, lastScope.slot.length)
+      this.selection.setAnchor(firstScope.slot, 0)
+      this.selection.setFocus(lastScope.slot, lastScope.slot.length)
 
       const is = this.delete()
       if (!is) {
-        this.selection.setStart(startSlot!, startOffset!)
-        this.selection.setEnd(endSlot!, endOffset!)
+        this.selection.setAnchor(startSlot!, startOffset!)
+        this.selection.setFocus(endSlot!, endOffset!)
       } else {
         this.delete()
       }
@@ -254,10 +254,10 @@ export class Commander {
     if (selection.isCollapsed) {
       if (deleteBefore) {
         const prevPosition = selection.getPreviousPosition()!
-        selection.setStart(prevPosition.slot, prevPosition.offset)
+        selection.setAnchor(prevPosition.slot, prevPosition.offset)
       } else {
         const nextPosition = selection.getNextPosition()!
-        selection.setEnd(nextPosition.slot, nextPosition.offset)
+        selection.setFocus(nextPosition.slot, nextPosition.offset)
       }
     }
 
@@ -333,7 +333,7 @@ export class Commander {
         if (deletedSlot) {
           this._addContent(deletedSlot, stoppedSlot)
         }
-        selection.setEnd(stoppedSlot, index)
+        selection.setFocus(stoppedSlot, index)
         return false
       } else {
         slot.retain(scope.startIndex)
@@ -351,7 +351,7 @@ export class Commander {
             if (deletedSlot) {
               this._addContent(deletedSlot, stoppedSlot)
             }
-            selection.setEnd(stoppedSlot, state.offset)
+            selection.setFocus(stoppedSlot, state.offset)
 
             slot.retain(scope.startIndex)
             slot.delete(scope.endIndex - scope.startIndex)
@@ -375,7 +375,7 @@ export class Commander {
       const startSlotRef = selection.startSlot!
       const startOffset = selection.startOffset!
       this._addContent(deletedSlot, startSlotRef)
-      selection.setStart(startSlotRef, startOffset)
+      selection.setAnchor(startSlotRef, startOffset)
     }
 
     selection.collapse(true)

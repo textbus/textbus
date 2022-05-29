@@ -57,9 +57,8 @@ export class Editor extends Viewer {
             upload: (config: UploadConfig): Observable<string | string[]> => {
               if (!selection.isSelected) {
                 selection.usePaths({
-                  start: [0, 0],
-                  end: [0, 0],
-                  focusEnd: true
+                  anchor: [0, 0],
+                  focus: [0, 0],
                 })
                 selection.restore()
               }

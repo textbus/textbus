@@ -462,19 +462,19 @@ export const preComponent = defineComponent({
 
             if (index >= 0) {
               f.cut(index, index + 3)
-              if (f === selection.startSlot) {
-                selection.setStart(f, selection.startOffset! - 3)
+              if (f === selection.anchorSlot) {
+                selection.setAnchor(f, selection.startOffset! - 3)
               }
-              if (f === selection.endSlot) {
-                selection.setEnd(f, selection.endOffset! - 3)
+              if (f === selection.focusSlot) {
+                selection.setFocus(f, selection.endOffset! - 3)
               }
             } else {
               f.cut(index2, index2 + 2)
-              if (f === selection.startSlot) {
-                selection.setStart(f, selection.startOffset! - 2)
+              if (f === selection.anchorSlot) {
+                selection.setAnchor(f, selection.startOffset! - 2)
               }
-              if (f === selection.endSlot) {
-                selection.setEnd(f, selection.endOffset! - 2)
+              if (f === selection.focusSlot) {
+                selection.setFocus(f, selection.endOffset! - 2)
               }
             }
           })
@@ -483,8 +483,7 @@ export const preComponent = defineComponent({
             f.retain(0)
             f.insert('// ')
           })
-          selection.setStart(selection.startSlot!, selection.startOffset! + 3)
-          selection.setEnd(selection.endSlot!, selection.endOffset! + 3)
+          selection.setBaseAndExtent(selection.startSlot!, selection.startOffset! + 3, selection.endSlot!, selection.endOffset! + 3)
         }
       }
     })

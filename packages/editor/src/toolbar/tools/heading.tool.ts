@@ -138,22 +138,22 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
               currentSlot.delete(length)
               currentSlot.insert(component)
             }
-            if (block.slot === selection.startSlot) {
-              selection.setStart(slot, selection.startOffset!)
+            if (block.slot === selection.anchorSlot) {
+              selection.setAnchor(slot, selection.startOffset!)
             }
-            if (block.slot === selection.endSlot) {
-              selection.setEnd(slot, selection.endOffset!)
+            if (block.slot === selection.focusSlot) {
+              selection.setFocus(slot, selection.endOffset!)
             }
           }
         } else if (isBlockContainer) {
           currentSlot.retain(block.startIndex)
           currentSlot.delete(block.endIndex - block.startIndex)
           currentSlot.insert(component)
-          if (block.slot === selection.startSlot && block.startIndex <= selection.startOffset!) {
-            selection.setStart(slot, selection.startOffset! - block.startIndex)
+          if (block.slot === selection.anchorSlot && block.startIndex <= selection.startOffset!) {
+            selection.setAnchor(slot, selection.startOffset! - block.startIndex)
           }
-          if (block.slot === selection.endSlot && block.endIndex >= selection.endOffset!) {
-            selection.setEnd(slot, selection.endOffset! - block.startIndex)
+          if (block.slot === selection.focusSlot && block.endIndex >= selection.endOffset!) {
+            selection.setFocus(slot, selection.endOffset! - block.startIndex)
           }
         }
       })

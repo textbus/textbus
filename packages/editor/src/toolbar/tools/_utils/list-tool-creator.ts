@@ -61,11 +61,11 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
         components.push(paragraphComponent.createInstance(injector, {
           slots: [slot]
         }))
-        if (slot === transformed.range.startSlot) {
-          selection.setStart(slot, transformed.range.startOffset!)
+        if (slot === transformed.range.focusSlot) {
+          selection.setAnchor(slot, transformed.range.focusOffset!)
         }
-        if (slot === transformed.range.endSlot) {
-          selection.setEnd(slot, transformed.range.endOffset!)
+        if (slot === transformed.range.anchorSlot) {
+          selection.setFocus(slot, transformed.range.anchorOffset!)
         }
       })
       if (segment.after.length) {
@@ -94,12 +94,12 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
         if (i.slot === selection.startSlot && i.startIndex <= selection.startOffset!) {
           startSlot = slot
           startOffset = selection.startOffset! - i.startIndex
-          selection.setStart(i.slot, i.startIndex)
+          selection.setAnchor(i.slot, i.startIndex)
         }
         if (i.slot === selection.endSlot && i.endIndex >= selection.endOffset!) {
           endSlot = slot
           endOffset = selection.endOffset! - i.startIndex
-          selection.setEnd(i.slot, i.endIndex)
+          selection.setFocus(i.slot, i.endIndex)
         }
 
         return slot
@@ -116,8 +116,8 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
         commander.insert(component)
       }
 
-      selection.setStart(startSlot, startOffset)
-      selection.setEnd(endSlot, endOffset)
+      selection.setAnchor(startSlot, startOffset)
+      selection.setFocus(endSlot, endOffset)
     }
   }
   return instance

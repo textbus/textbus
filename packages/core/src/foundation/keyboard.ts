@@ -68,8 +68,7 @@ export class Keyboard {
             const initData = markdownConfig.generateInitData(content)
             const newInstance = item.component.createInstance(this.injector, initData)
             if (commonAncestorSlot.schema.includes(newInstance.type)) {
-              this.selection.setStart(commonAncestorSlot, 0)
-              this.selection.setEnd(commonAncestorSlot, commonAncestorSlot.length)
+              this.selection.selectSlot(commonAncestorSlot)
               this.commander.delete()
               this.commander.insert(newInstance)
             } else {
@@ -81,9 +80,7 @@ export class Keyboard {
               if (!parentSlot) {
                 break
               }
-              const index = parentSlot.indexOf(parentComponent)
-              this.selection.setStart(parentSlot, index)
-              this.selection.setEnd(parentSlot, index + 1)
+              this.selection.selectComponent(parentComponent)
               this.commander.delete()
               this.commander.insert(newInstance)
             }

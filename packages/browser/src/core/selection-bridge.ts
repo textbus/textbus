@@ -78,19 +78,17 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getRect(location: SelectionPosition) {
-    const position = this.getPositionByRange({
-      startOffset: location.offset,
-      endOffset: location.offset,
-      startSlot: location.slot,
-      endSlot: location.slot
+    const {focus, anchor} = this.getPositionByRange({
+      focusOffset: location.offset,
+      anchorOffset: location.offset,
+      focusSlot: location.slot,
+      anchorSlot: location.slot
     })
-    if (!position.start || !position.end) {
+    if (!focus || !anchor) {
       return null
     }
-    const node = position.start.node
-    const offset = position.start.offset
     const nativeRange = document.createRange()
-    nativeRange.setStart(node, offset)
+    nativeRange.setStart(focus.node, focus.offset)
     nativeRange.collapse()
     return getLayoutRectByRange(nativeRange)
   }
@@ -110,32 +108,16 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    const {start, end} = this.getPositionByRange(range)
-    if (!start || !end) {
+    const {focus, anchor} = this.getPositionByRange(range)
+    if (!focus || !anchor) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
       return
     }
 
-    let nativeRange: Range
-    if (this.nativeSelection.rangeCount) {
-      nativeRange = this.nativeSelection.getRangeAt(0)
-    } else {
-      nativeRange = document.createRange()
-      this.nativeSelection.addRange(nativeRange)
-    }
-    if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
-      nativeRange.setStart(start.node, start.offset)
-    }
-    if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
-      nativeRange.setEnd(end.node, end.offset)
-    }
-    if (nativeRange.collapsed) {
-      // 防止结束位置在起始位置前
-      nativeRange.setEnd(start.node, start.offset)
-      nativeRange.setStart(end.node, end.offset)
-    }
+    this.nativeSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset)
+    const nativeRange = this.nativeSelection.getRangeAt(0)
     this.selectionChangeEvent.next(nativeRange)
     setTimeout(() => {
       // hack 浏览器会触发上面选区更改事件
@@ -151,27 +133,27 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getPositionByRange(range: TBRange) {
-    let start!: { node: Node, offset: number } | null
-    let end!: { node: Node, offset: number } | null
+    let focus!: { node: Node, offset: number } | null
+    let anchor!: { node: Node, offset: number } | null
     try {
-      start = this.findFocusNodeAndOffset(range.startSlot!, range.startOffset!)
-      end = start
-      if (range.endSlot !== range.startSlot || range.endOffset !== range.startOffset) {
-        end = this.findFocusNodeAndOffset(range.endSlot!, range.endOffset!)
+      focus = this.findSelectedNodeAndOffset(range.focusSlot!, range.focusOffset!)
+      anchor = focus
+      if (range.anchorSlot !== range.focusSlot || range.anchorOffset !== range.focusOffset) {
+        anchor = this.findSelectedNodeAndOffset(range.anchorSlot!, range.anchorOffset!)
       }
       return {
-        start,
-        end
+        focus,
+        anchor
       }
     } catch (e) {
       return {
-        start: null,
-        end: null
+        focus: null,
+        anchor: null
       }
     }
   }
 
-  private findFocusNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
+  private findSelectedNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
     const vElement = this.renderer.getVNodeBySlot(slot)!
     if (offset >= slot.length) {
       const container = this.renderer.getNativeNodeByVNode(vElement) as Element
@@ -306,7 +288,6 @@ export class SelectionBridge implements NativeSelectionBridge {
           connector.setSelection(null)
           return
         }
-
         if (selection.rangeCount === 0 ||
           !this.docContainer.contains(selection.anchorNode)) {
           return
@@ -330,22 +311,33 @@ export class SelectionBridge implements NativeSelectionBridge {
         const endPosition = nativeRange.collapsed ? startPosition : this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
         if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
           startPosition && endPosition) {
-          const range = {
-            startSlot: startPosition.slot,
-            startOffset: startPosition.offset,
-            endSlot: endPosition.slot,
-            endOffset: endPosition.offset
+          const range: TBRange = isFocusEnd ? {
+            anchorSlot: startPosition.slot,
+            anchorOffset: startPosition.offset,
+            focusSlot: endPosition.slot,
+            focusOffset: endPosition.offset
+          } : {
+            focusSlot: startPosition.slot,
+            focusOffset: startPosition.offset,
+            anchorSlot: endPosition.slot,
+            anchorOffset: endPosition.offset
           }
-          const {start, end} = this.getPositionByRange(range)
+          const {focus, anchor} = this.getPositionByRange(range)
 
-          if (start && end) {
+          if (focus && anchor) {
+            let start = anchor
+            let end = focus
+            if (isFocusStart) {
+              start = focus
+              end = anchor
+            }
             if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
               nativeRange.setStart(start.node, start.offset)
             }
             if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
               nativeRange.setEnd(end.node, end.offset)
             }
-            connector.setSelection(range, isFocusEnd)
+            connector.setSelection(range)
             this.selectionChangeEvent.next(nativeRange)
           } else {
             connector.setSelection(null)
