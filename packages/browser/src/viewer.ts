@@ -367,6 +367,7 @@ export class Viewer {
         wordBreak: 'break-all',
         boxSizing: 'border-box',
         minHeight,
+        flex: 1
       },
       props: {
         id
@@ -386,8 +387,8 @@ export class Viewer {
     })
     const wrapper = createElement('div', {
       styles: {
-        width: '100%',
-        height: '100%',
+        display: 'flex',
+        minHeight: '100%',
         position: 'relative',
       },
       children: [doc, mask]

@@ -12,6 +12,8 @@ export interface ViewModule extends Omit<Module, 'components' | 'formatters'> {
  */
 export interface BaseEditorOptions {
   imports?: ViewModule[]
+  /** 编辑区域自动高度 */
+  autoHeight?: boolean
   /** 自动获取焦点 */
   autoFocus?: boolean
   /** 编译框最小高度 */

@@ -29,9 +29,9 @@ export interface User {
 
 const editor = createEditor({
   autoFocus: true,
-  autoHeight: true,
+  // autoHeight: true,
   markdownDetect: true,
-  // minHeight: '300px',
+  minHeight: '300px',
   theme: 'light',
   placeholder: '请输入内容……',
   content: document.getElementById('template')?.innerHTML,
