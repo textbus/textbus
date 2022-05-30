@@ -34,7 +34,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   private sub: Subscription
   private connector: NativeSelectionConnector | null = null
 
-  private isFocusIn = false
+  private ignoreSelectionChange = false
 
   constructor(@Inject(DOC_CONTAINER) private docContainer: HTMLElement,
               @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
@@ -57,6 +57,19 @@ export class SelectionBridge implements NativeSelectionBridge {
         input.blur()
       }
     })
+    this.sub.add(
+      fromEvent(document, 'focusin').subscribe(ev => {
+        const target = ev.target as HTMLElement
+        if (/^(input|textarea|select)$/i.test(target.nodeName) || target.contentEditable) {
+          this.ignoreSelectionChange = true
+        }
+      })
+    )
+    this.sub.add(
+      fromEvent(document, 'focusout').subscribe(() => {
+        this.ignoreSelectionChange = false
+      })
+    )
   }
 
   showNativeMask() {
@@ -94,15 +107,11 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   restore(range: TBRange | null) {
-    this.unListen()
-    if (!this.connector) {
+    if (this.ignoreSelectionChange || !this.connector) {
       return
     }
+    this.unListen()
     if (!range) {
-      if (!this.isFocusIn) {
-        this.nativeSelection.removeAllRanges()
-      }
-      this.isFocusIn = false
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
       return
@@ -268,14 +277,7 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private listen(connector: NativeSelectionConnector) {
     const selection = this.nativeSelection
-    this.isFocusIn = false
     this.subs.push(
-      fromEvent(document, 'focusin').subscribe(() => {
-        this.isFocusIn = true
-      }),
-      fromEvent(document, 'focusout').subscribe(() => {
-        this.isFocusIn = false
-      }),
       fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
         if (ev.button === 2) {
           return
@@ -283,12 +285,8 @@ export class SelectionBridge implements NativeSelectionBridge {
         selection.removeAllRanges()
       }),
       fromEvent(document, 'selectionchange').subscribe(() => {
-        if (this.isFocusIn) {
-          this.isFocusIn = false
-          connector.setSelection(null)
-          return
-        }
-        if (selection.rangeCount === 0 ||
+        if (this.ignoreSelectionChange ||
+          selection.rangeCount === 0 ||
           !this.docContainer.contains(selection.anchorNode)) {
           return
         }
