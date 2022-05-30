@@ -60,7 +60,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.sub.add(
       fromEvent(document, 'focusin').subscribe(ev => {
         const target = ev.target as HTMLElement
-        if (/^(input|textarea|select)$/i.test(target.nodeName) || target.contentEditable) {
+        if (/^(input|textarea|select)$/i.test(target.nodeName) || target.contentEditable === 'true') {
           this.ignoreSelectionChange = true
         }
       })
