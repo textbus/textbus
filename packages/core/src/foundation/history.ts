@@ -95,11 +95,11 @@ export class CoreHistory extends History {
    */
   forward() {
     if (this.canForward) {
-      this.scheduler.ignoreChanges = true
+      this.scheduler.stopBroadcastChanges = true
       const item = this.historySequence[this.index]
       this.apply(item, false)
       this.selection.usePaths(item.afterPaths)
-      this.scheduler.ignoreChanges = false
+      this.scheduler.stopBroadcastChanges = false
       this.index++
       this.forwardEvent.next()
       this.changeEvent.next()
@@ -111,11 +111,11 @@ export class CoreHistory extends History {
    */
   back() {
     if (this.canBack) {
-      this.scheduler.ignoreChanges = true
+      this.scheduler.stopBroadcastChanges = true
       const item = this.historySequence[this.index - 1]
       this.apply(item, true)
       this.selection.usePaths(item.beforePaths)
-      this.scheduler.ignoreChanges = false
+      this.scheduler.stopBroadcastChanges = false
       this.index--
       this.record()
       this.backEvent.next()

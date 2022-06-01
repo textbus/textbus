@@ -1,5 +1,6 @@
 import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
+import { Scheduler } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { EDITOR_MASK } from './injection-tokens'
@@ -62,6 +63,7 @@ export class Caret {
   private oldRange: Range | null = null
 
   constructor(
+    private scheduler: Scheduler,
     @Inject(EDITOR_MASK) private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable()
     this.elementRef = createElement('div', {
@@ -97,21 +99,25 @@ export class Caret {
 
   refresh() {
     if (this.oldRange) {
-      this.show(this.oldRange)
+      this.show(this.oldRange, false)
     }
   }
 
-  show(range: Range) {
+  show(range: Range, restart: boolean) {
     this.oldRange = range
     this.updateCursorPosition(range)
-    clearTimeout(this.timer)
+    if (restart || this.scheduler.hasLocalUpdate) {
+      clearTimeout(this.timer)
+    }
     if (range.collapsed) {
-      this.display = true
-      const toggleShowHide = () => {
-        this.display = !this.display || !this.flashing
+      if (restart || this.scheduler.hasLocalUpdate) {
+        this.display = true
+        const toggleShowHide = () => {
+          this.display = !this.display || !this.flashing
+          this.timer = setTimeout(toggleShowHide, 400)
+        }
         this.timer = setTimeout(toggleShowHide, 400)
       }
-      this.timer = setTimeout(toggleShowHide, 400)
     } else {
       this.display = false
     }

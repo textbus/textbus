@@ -1,5 +1,6 @@
 import { Injectable } from '@tanbo/di'
-import { map, microTask, Observable, Subject, Subscription } from '@tanbo/stream'
+import { map, microTask, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+
 import { ComponentInstance, invokeListener, Operation } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Renderer } from './renderer'
@@ -7,9 +8,14 @@ import { Selection } from './selection'
 
 @Injectable()
 export class Scheduler {
-  ignoreChanges = false
+  stopBroadcastChanges = false
   onDocChange: Observable<Operation[]>
 
+  get hasLocalUpdate() {
+    return this._hasLocalUpdate
+  }
+
+  private _hasLocalUpdate = false
   private instanceList = new Set<ComponentInstance>()
 
   private docChangeEvent = new Subject<Operation[]>()
@@ -21,6 +27,15 @@ export class Scheduler {
     this.onDocChange = this.docChangeEvent.asObservable()
   }
 
+  remoteUpdateTransact(task: () => void) {
+    if (!this.hasLocalUpdate) {
+      task()
+      this._hasLocalUpdate = false
+    } else {
+      task()
+    }
+  }
+
   run() {
     const rootComponent = this.rootComponentRef.component
     const changeMarker = rootComponent.changeMarker
@@ -30,13 +45,17 @@ export class Scheduler {
         this.renderer.render()
       }),
       changeMarker.onChange.pipe(
+        tap(() => {
+          this._hasLocalUpdate = true
+        }),
         map(op => {
-          return this.ignoreChanges ? null : op
+          return this.stopBroadcastChanges ? null : op
         }),
         microTask()
       ).subscribe(ops => {
         this.renderer.render()
         this.selection.restore()
+        this._hasLocalUpdate = false
         const operations = ops.filter(i => i)
         if (operations.length) {
           this.docChangeEvent.next(ops as Operation[])

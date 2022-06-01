@@ -91,17 +91,17 @@ export class Collaborate implements History {
 
   back() {
     if (this.canBack) {
-      this.scheduler.ignoreChanges = true
+      this.scheduler.stopBroadcastChanges = true
       this.manager.undo()
-      this.scheduler.ignoreChanges = false
+      this.scheduler.stopBroadcastChanges = false
     }
   }
 
   forward() {
     if (this.canForward) {
-      this.scheduler.ignoreChanges = true
+      this.scheduler.stopBroadcastChanges = true
       this.manager.redo()
-      this.scheduler.ignoreChanges = false
+      this.scheduler.stopBroadcastChanges = false
     }
   }
 
@@ -283,8 +283,8 @@ export class Collaborate implements History {
         let index = 0
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
-            slots.retain(action.retain!)
             index += action.retain
+            slots.retain(index)
           } else if (action.insert) {
             (action.insert as Array<YMap<any>>).forEach(item => {
               const slot = this.createSlotBySharedSlot(item)
@@ -371,7 +371,7 @@ export class Collaborate implements History {
       return
     }
     this.updateFromRemote = true
-    fn()
+    this.scheduler.remoteUpdateTransact(fn)
     this.updateFromRemote = false
   }
 

@@ -36,6 +36,8 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private ignoreSelectionChange = false
 
+  private changeFromUser = false
+
   constructor(@Inject(DOC_CONTAINER) private docContainer: HTMLElement,
               @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
               public caret: Caret,
@@ -47,7 +49,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {
       if (r) {
-        this.caret.show(r)
+        this.caret.show(r, this.changeFromUser)
       } else {
         this.caret.hide()
       }
@@ -107,6 +109,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   restore(range: TBRange | null) {
+    this.changeFromUser = false
     if (this.ignoreSelectionChange || !this.connector) {
       return
     }
@@ -285,6 +288,7 @@ export class SelectionBridge implements NativeSelectionBridge {
         selection.removeAllRanges()
       }),
       fromEvent(document, 'selectionchange').subscribe(() => {
+        this.changeFromUser = true
         if (this.ignoreSelectionChange ||
           selection.rangeCount === 0 ||
           !this.docContainer.contains(selection.anchorNode)) {
