@@ -38,9 +38,16 @@ export interface CaretPosition {
   height: number
 }
 
+export interface CaretStyle {
+  height: string
+  lineHeight: string
+  fontSize: string
+}
+
 @Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition>
+  onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
   private timer: any = null
   private caret: HTMLElement
@@ -60,12 +67,14 @@ export class Caret {
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition>()
+  private styleChangeEvent = new Subject<CaretStyle>()
   private oldRange: Range | null = null
 
   constructor(
     private scheduler: Scheduler,
     @Inject(EDITOR_MASK) private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable()
+    this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
         position: 'absolute',
@@ -169,10 +178,15 @@ export class Caret {
       top: top - containerRect.top + 'px',
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
-      fontSize: fontSize
+      fontSize
     })
 
     this.caret.style.backgroundColor = color
+    this.styleChangeEvent.next({
+      height: boxHeight + 'px',
+      lineHeight: boxHeight + 'px',
+      fontSize
+    })
     this.positionChangeEvent.next({
       left: rect.left - containerRect.left,
       top: top - containerRect.top,

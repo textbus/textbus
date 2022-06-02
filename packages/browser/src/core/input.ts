@@ -10,6 +10,26 @@ export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
 export const isMac = /mac os/i.test(navigator.userAgent)
 const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
 
+const iframeHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Textbus</title>
+  <style>
+    html {position: fixed; left:0; overflow: hidden}
+    html, body{height: 100%;width:100%}
+    body{margin:0; overflow: hidden}
+    textarea{width: 2000px;height: 100%;opacity: 0; padding: 0; outline: none; border: none; position: absolute; left:0; top:0;}
+  </style>
+</head>
+<body>
+</body>
+</html>
+`
+
 /**
  * Textbus PC 端输入实现
  */
@@ -18,7 +38,7 @@ export class Input {
   onReady: Promise<void>
   private container = Input.createEditableFrame()
 
-  private subscriptions: Subscription[] = []
+  private subscription = new Subscription()
   private doc!: Document
 
   private textarea: HTMLTextAreaElement | null = null
@@ -31,31 +51,24 @@ export class Input {
               private commander: Commander,
               private caret: Caret) {
     this.onReady = new Promise<void>(resolve => {
-      this.subscriptions.push(
+      this.subscription.add(
         fromEvent(this.container, 'load').subscribe(() => {
           const doc = this.container.contentDocument!
+          doc.open()
+          doc.write(iframeHTML)
+          doc.close()
           this.doc = doc
           const contentBody = doc.body
           const textarea = doc.createElement('textarea')
           contentBody.appendChild(textarea)
           this.textarea = textarea
-          Object.assign(textarea.style, {
-            width: '2000px',
-            height: '100%',
-            opacity: 0,
-            padding: 0,
-            border: 'none',
-            outline: 'none',
-            position: 'absolute',
-            fontSize: 'inherit',
-            lineHeight: 1,
-            left: 0,
-            top: isWindows ? '16px' : 0
-          })
-          this.subscriptions.push(
+          this.subscription.add(
             fromEvent(textarea, 'blur').subscribe(() => {
               this.isFocus = false
               caret.hide()
+            }),
+            caret.onStyleChange.subscribe(style => {
+              Object.assign(textarea.style, style)
             })
           )
           this.handleInput(textarea)
@@ -82,11 +95,11 @@ export class Input {
   }
 
   destroy() {
-    this.subscriptions.forEach(i => i.unsubscribe())
+    this.subscription.unsubscribe()
   }
 
   private handleDefaultActions(textarea) {
-    this.subscriptions.push(
+    this.subscription.add(
       fromEvent<ClipboardEvent>(textarea, 'paste').subscribe(ev => {
         const text = ev.clipboardData!.getData('Text')
 
@@ -149,7 +162,7 @@ export class Input {
   private handleShortcut(textarea: HTMLTextAreaElement) {
     let isWriting = false
     let isIgnore = false
-    this.subscriptions.push(
+    this.subscription.add(
       fromEvent(textarea, 'compositionstart').subscribe(() => {
         isWriting = true
       }),
@@ -184,7 +197,7 @@ export class Input {
   }
 
   private handleInput(textarea: HTMLTextAreaElement) {
-    this.subscriptions.push(
+    this.subscription.add(
       merge(
         fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
           filter(ev => {
