@@ -1,4 +1,4 @@
-import { Ref, NativeNode, VElement } from '@textbus/core'
+import { Ref, NativeNode, VElement, jsx } from '@textbus/core'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -14,4 +14,8 @@ declare global {
       ref: Ref<NativeNode>
     }
   }
+}
+
+export {
+  jsx
 }

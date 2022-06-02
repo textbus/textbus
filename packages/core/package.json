@@ -5,6 +5,14 @@
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
   "typings": "./bundles/public-api.d.ts",
+  "exports": {
+    ".": {
+      "import": "./bundles/public-api.js"
+    },
+    "./jsx-runtime": {
+      "import": "./bundles/jsx.js"
+    }
+  },
   "scripts": {
     "start": "webpack-dev-server",
     "test": "cross-env env=test jest",
