@@ -379,11 +379,11 @@ export function defineComponent<Methods extends ComponentMethods,
         }),
 
         context.slots.onChildSlotChange.subscribe(d => {
-          marker.markAsChanged(d.operation)
+          marker.markAsDirtied(d.operation)
         }),
 
         context.slots.onChildSlotForceChange.subscribe(() => {
-          marker.forceMarkChanged()
+          marker.forceMarkDirtied()
         })
       ]
 
