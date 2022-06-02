@@ -1,5 +1,5 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
-import { Observable, Subject } from '@tanbo/stream'
+import { Subject } from '@tanbo/stream'
 
 import { ComponentInstance, Formatter, Component } from './model/_api'
 import {
@@ -67,17 +67,16 @@ export interface TextbusConfig extends Module {
    * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
    * @param starter
    */
-  setup?(starter: Starter): (() => unknown) | void
+  setup?(starter: Starter): Promise<(() => unknown) | void> | (() => unknown) | void
 }
 
 /**
  * Textbus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
-  onReady: Observable<void>
   private readyEvent = new Subject<void>()
 
-  private readonly beforeDestroy: (() => unknown) | void
+  private beforeDestroy: (() => unknown) | null = null
 
   private plugins: Plugin[]
 
@@ -87,8 +86,6 @@ export class Starter extends ReflectiveInjector {
     this.plugins = plugins
     this.staticProviders = providers
     this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
-    this.onReady = this.readyEvent.asObservable()
-    this.beforeDestroy = config.setup?.(this)
   }
 
   /**
@@ -96,10 +93,19 @@ export class Starter extends ReflectiveInjector {
    * @param rootComponent 根组件
    * @param host 原生节点
    */
-  mount(rootComponent: ComponentInstance, host: NativeNode) {
+  async mount(rootComponent: ComponentInstance, host: NativeNode) {
     const rootComponentRef = this.get(RootComponentRef)
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host
+
+    const callback = this.config.setup?.(this)
+    if (callback instanceof Promise) {
+      await callback.then(fn => {
+        this.beforeDestroy = fn || null
+      })
+    } else {
+      this.beforeDestroy = callback || null
+    }
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
 

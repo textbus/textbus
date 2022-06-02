@@ -61,8 +61,6 @@ export class Viewer {
 
   private workbench!: HTMLElement
 
-  private initBeforeListener: Promise<unknown>[] = []
-
   private resourceNodes: HTMLElement[] = []
 
   constructor(private rootComponentLoader: ComponentLoader,
@@ -130,58 +128,48 @@ export class Viewer {
    * 初始化编辑器
    * @param host 编辑器容器
    */
-  mount(host: HTMLElement,): Promise<Starter> {
+  async mount(host: HTMLElement): Promise<Starter> {
     if (this.destroyed) {
-      return Promise.reject(editorError('the editor instance is destroyed!'))
+      throw editorError('the editor instance is destroyed!')
     }
-    return Promise.resolve().then(() => {
-      const starter = this.injector
-      if (this.destroyed) {
-        return starter
-      }
-      const parser = starter.get(Parser)
-      const translator = starter.get(Translator)
-      const doc = starter.get(DOC_CONTAINER)
-
-      let component: ComponentInstance
-      const content = this.options.content
-      if (content) {
-        if (typeof content === 'string') {
-          component = parser.parseDoc(content, this.rootComponentLoader)
-        } else {
-          component = translator.createComponentByFactory(content, this.rootComponentLoader.component)
-        }
-      } else {
-        component = this.rootComponentLoader.component.createInstance(starter)
-      }
-
-      this.initDocStyleSheetsAndScripts(this.options)
-      host.appendChild(this.workbench)
-      starter.mount(component, doc)
-
-      this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
-
-      return this.initBeforeListener.reduce((p1, p2) => {
-        return p1.then(() => p2)
-      }, Promise.resolve()).then(() => {
-        return starter
-      })
-    }).then(starter => {
-      const renderer = starter.get(Renderer)
-      this.subs.push(renderer.onViewChecked.subscribe(() => {
-        this.changeEvent.next()
-      }))
-      starter.get(Input)
-      this.isReady = true
-      this.injector = starter
-
-      if (this.options.autoFocus) {
-        starter.get(Input).onReady.then(() => {
-          this.focus()
-        })
-      }
+    const starter = this.injector
+    if (this.destroyed) {
       return starter
-    })
+    }
+    const parser = starter.get(Parser)
+    const translator = starter.get(Translator)
+    const doc = starter.get(DOC_CONTAINER)
+
+    let component: ComponentInstance
+    const content = this.options.content
+    if (content) {
+      if (typeof content === 'string') {
+        component = parser.parseDoc(content, this.rootComponentLoader)
+      } else {
+        component = translator.createComponentByFactory(content, this.rootComponentLoader.component)
+      }
+    } else {
+      component = this.rootComponentLoader.component.createInstance(starter)
+    }
+
+    this.initDocStyleSheetsAndScripts(this.options)
+    host.appendChild(this.workbench)
+    await starter.mount(component, doc)
+    this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
+    const renderer = starter.get(Renderer)
+    this.subs.push(renderer.onViewChecked.subscribe(() => {
+      this.changeEvent.next()
+    }))
+    starter.get(Input)
+    this.isReady = true
+    this.injector = starter
+
+    if (this.options.autoFocus) {
+      starter.get(Input).onReady.then(() => {
+        this.focus()
+      })
+    }
+    return starter
   }
 
   /**
@@ -297,10 +285,6 @@ export class Viewer {
     rootComponentRef.component.slots.clean()
     rootComponentRef.component.slots.push(...component.slots.toArray())
     invokeListener(component, 'onDestroy')
-  }
-
-  addInitBeforeListener(promise: Promise<unknown>) {
-    this.initBeforeListener.push(promise)
   }
 
   protected guardReady() {
