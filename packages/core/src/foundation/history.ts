@@ -117,7 +117,6 @@ export class CoreHistory extends History {
       this.selection.usePaths(item.beforePaths)
       this.scheduler.stopBroadcastChanges = false
       this.index--
-      this.record()
       this.backEvent.next()
       this.changeEvent.next()
     }

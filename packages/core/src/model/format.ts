@@ -103,7 +103,13 @@ export class Format {
    */
   split(index: number, distance: number) {
     const expandedValues = Array.from<string>({length: distance})
-    this.map.forEach((formatRanges, key) => {
+    Array.from(this.map).forEach(([key, formatRanges]) => {
+      if (key.type === FormatType.Block) {
+        formatRanges.forEach(i => {
+          i.endIndex += distance
+        })
+        return
+      }
       const values = Format.tileRanges(formatRanges)
       values.splice(index, 0, ...expandedValues)
       const newRanges = Format.toRanges(values)

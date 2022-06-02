@@ -15,7 +15,7 @@ export class Scheduler {
     return this._hasLocalUpdate
   }
 
-  private _hasLocalUpdate = false
+  private _hasLocalUpdate = true
   private instanceList = new Set<ComponentInstance>()
 
   private docChangeEvent = new Subject<Operation[]>()
