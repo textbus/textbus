@@ -1,7 +1,7 @@
 import { Injector } from '@tanbo/di'
 import {
   ComponentInstance,
-  ComponentMethods,
+  ComponentExtends,
   ContentType,
   defineComponent,
   onEnter,
@@ -24,7 +24,7 @@ export interface SegmentedSlots<T extends Slot = Slot> {
   after: T[]
 }
 
-export interface ListComponentInstance extends ComponentMethods {
+export interface ListComponentExtends extends ComponentExtends {
   type: 'ul' | 'ol',
 
   split?(startIndex: number, endIndex: number): SegmentedSlots
@@ -42,7 +42,7 @@ export const listComponent = defineComponent({
       }
     }
   },
-  setup(data?: ComponentData<'ul' | 'ol'>): ListComponentInstance {
+  setup(data?: ComponentData<'ul' | 'ol'>): ListComponentExtends {
     const injector = useContext()
     const selection = injector.get(Selection)
 

@@ -55,7 +55,7 @@ export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
       if (state.state === QueryStateType.Enabled) {
         return {
           state: QueryStateType.Enabled,
-          value: state.value!.methods.toJSON() as AudioState
+          value: state.value!.extends.toJSON() as AudioState
         }
       }
       return {
@@ -67,7 +67,7 @@ export function audioToolConfigFactory(injector: Injector): DialogToolConfig {
       if (value) {
         const state = query.queryComponent(audioComponent)
         if (state.state === QueryStateType.Enabled) {
-          state.value!.methods.mergeProps(value)
+          state.value!.extends.mergeProps(value)
         } else {
           commander.insert(audioComponent.createInstance(injector, {
             state: value

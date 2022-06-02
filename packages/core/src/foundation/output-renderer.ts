@@ -36,7 +36,7 @@ export class OutputRenderer {
 
   private componentRender(component: ComponentInstance): VElement {
     if (component.changeMarker.outputDirty) {
-      const node = component.methods.render(true, (slot, factory) => {
+      const node = component.extends.render(true, (slot, factory) => {
         return this.slotRender(slot, factory)
       })
       component.changeMarker.outputRendered()

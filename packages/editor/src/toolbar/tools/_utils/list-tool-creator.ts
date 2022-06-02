@@ -10,19 +10,19 @@ import {
   Translator
 } from '@textbus/core'
 
-import { listComponent, ListComponentInstance, paragraphComponent } from '../../../components/_api'
+import { listComponent, ListComponentExtends, paragraphComponent } from '../../../components/_api'
 
 export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
   const selection = injector.get(Selection)
   const translator = injector.get(Translator)
   const commander = injector.get(Commander)
   const instance = {
-    queryState(): QueryState<ComponentInstance<ListComponentInstance>> {
+    queryState(): QueryState<ComponentInstance<ListComponentExtends>> {
       const component = selection.commonAncestorComponent
-      if (component?.name === listComponent.name && (component.methods as ListComponentInstance).type === type) {
+      if (component?.name === listComponent.name && (component.extends as ListComponentExtends).type === type) {
         return {
           state: QueryStateType.Enabled,
-          value: component as ComponentInstance<ListComponentInstance>
+          value: component as ComponentInstance<ListComponentExtends>
         }
       }
 
@@ -39,11 +39,11 @@ export function listToolCreator(injector: Injector, type: 'ul' | 'ol') {
         instance.toParagraph(queryState.value!)
       }
     },
-    toParagraph(component: ComponentInstance<ListComponentInstance>) {
+    toParagraph(component: ComponentInstance<ListComponentExtends>) {
       const range = selection.getSlotRangeInCommonAncestorComponent()!
       const parent = component.parent!
       const index = parent.indexOf(component)
-      const segment = component.methods.split!(range.startIndex, range.endIndex)
+      const segment = component.extends.split!(range.startIndex, range.endIndex)
       const components: ComponentInstance[] = []
       if (segment.before.length) {
         components.push(listComponent.createInstance(injector, {

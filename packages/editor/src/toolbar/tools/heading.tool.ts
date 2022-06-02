@@ -84,7 +84,7 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
       if (headingState.state === QueryStateType.Enabled) {
         return {
           state: QueryStateType.Enabled,
-          value: headingState.value!.methods.type!
+          value: headingState.value!.extends.type!
         }
       }
       const paragraphState = query.queryComponent(paragraphComponent)

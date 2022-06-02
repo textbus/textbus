@@ -585,7 +585,7 @@ export class Renderer {
   private componentRender(component: ComponentInstance): VElement {
     if (component.changeMarker.dirty) {
       let slotVNode!: VElement
-      const node = component.methods.render(false, (slot, factory) => {
+      const node = component.extends.render(false, (slot, factory) => {
         slotVNode = this.slotRender(component, slot, factory)
         return slotVNode
       })

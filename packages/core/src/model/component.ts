@@ -47,7 +47,7 @@ export interface ComponentRender {
 /**
  * 组件 setup 函数返回值必须要实现的接口
  */
-export interface ComponentMethods {
+export interface ComponentExtends {
   render: ComponentRender
 }
 
@@ -77,7 +77,7 @@ export interface MarkdownGrammarInterceptor<Data = any> {
 /**
  * 组件实例对象
  */
-export interface ComponentInstance<Methods extends ComponentMethods = ComponentMethods, State = any> {
+export interface ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = any> {
   /**
    * 组件所在的插槽
    * @readonly
@@ -101,7 +101,7 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
   /** 组件的子插槽集合 */
   slots: Slots
   /** 组件内部实现的方法 */
-  methods: Methods
+  extends: Extends
   /** 组件动态上下文菜单注册表 */
   shortcutList: Shortcut[]
   /** 当状态变更时触发 */
@@ -130,7 +130,7 @@ export interface ComponentInstance<Methods extends ComponentMethods = ComponentM
 /**
  * Textbus 扩展组件接口
  */
-export interface ComponentOptions<Methods extends ComponentMethods, State> {
+export interface ComponentOptions<Extends extends ComponentExtends, State> {
   /** 组件名 */
   name: string
   /** 组件类型 */
@@ -143,7 +143,7 @@ export interface ComponentOptions<Methods extends ComponentMethods, State> {
    * 组件初始化实现
    * @param initData
    */
-  setup(initData?: ComponentData<State>): Methods
+  setup(initData?: ComponentData<State>): Extends
 }
 
 /**
@@ -275,12 +275,16 @@ function getCurrentContext() {
   return contextStack[contextStack.length - 1] || null
 }
 
+export type ExtractComponentInstanceType<T> = T extends Component<infer S> ? S : never
+export type ExtractComponentInstanceExtendsType<T> = T extends Component<ComponentInstance<infer S>> ? S : never
+export type ExtractComponentStateType<T> = T extends Component<ComponentInstance<any, infer S>> ? S : never
+
 /**
  * Textbus 扩展组件方法
  * @param options
  */
-export function defineComponent<Methods extends ComponentMethods,
-  State = any>(options: ComponentOptions<Methods, State>): Component<ComponentInstance<Methods, State>, ComponentData<State>> {
+export function defineComponent<Extends extends ComponentExtends,
+  State = any>(options: ComponentOptions<Extends, State>): Component<ComponentInstance<Extends, State>, ComponentData<State>> {
   return {
     name: options.name,
     markdownSupport: options.markdownSupport,
@@ -297,7 +301,7 @@ export function defineComponent<Methods extends ComponentMethods,
         onChange: onStateChange
       }
 
-      const componentInstance: ComponentInstance<Methods, State> = {
+      const componentInstance: ComponentInstance<Extends, State> = {
         changeMarker: marker,
         parent: null,
         get parentComponent() {
@@ -311,7 +315,7 @@ export function defineComponent<Methods extends ComponentMethods,
         onStateChange,
         type: options.type,
         slots: null as any,
-        methods: null as any,
+        extends: null as any,
         shortcutList: null as any,
         updateState(fn) {
           let changes!: Patch[]
@@ -358,7 +362,7 @@ export function defineComponent<Methods extends ComponentMethods,
         eventCache: new EventCache<EventTypes>(),
       }
       contextStack.push(context)
-      componentInstance.methods = options.setup(initData)
+      componentInstance.extends = options.setup(initData)
       onDestroy(() => {
         eventCacheMap.delete(componentInstance)
         subscriptions.forEach(i => i.unsubscribe())
@@ -406,7 +410,7 @@ export function useContext(): Injector {
 /**
  * 组件 setup 方法内获取组件实例的勾子
  */
-export function useSelf<Methods extends ComponentMethods = ComponentMethods, State = any>(): ComponentInstance<Methods, State> {
+export function useSelf<Methods extends ComponentExtends = ComponentExtends, State = any>(): ComponentInstance<Methods, State> {
   const context = getCurrentContext()
   if (!context) {
     throw componentErrorFn('cannot be called outside the component!')

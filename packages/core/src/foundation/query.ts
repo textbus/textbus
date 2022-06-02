@@ -1,7 +1,7 @@
 import { Injectable } from '@tanbo/di'
 
 import { Selection } from './selection'
-import { ComponentInstance, ComponentMethods, Formatter, FormatValue, Slot, Component } from '../model/_api'
+import { ComponentInstance, ComponentExtends, Formatter, FormatValue, Slot, Component } from '../model/_api'
 
 /**
  * Textbus 状态查询状态枚举
@@ -53,17 +53,17 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Instance extends ComponentMethods, T>(
-    component: Component<ComponentInstance<Instance, T>>,
-    filter?: (instance: ComponentInstance<Instance, T>) => boolean): QueryState<ComponentInstance<Instance, T>> {
+  queryComponent<Extends extends ComponentExtends, T>(
+    component: Component<ComponentInstance<Extends, T>>,
+    filter?: (instance: ComponentInstance<Extends, T>) => boolean): QueryState<ComponentInstance<Extends, T>> {
     let parent = this.selection.commonAncestorComponent
 
     while (parent) {
       if (parent.name === component.name) {
-        if (!filter || filter(parent as ComponentInstance<Instance>)) {
+        if (!filter || filter(parent as ComponentInstance<Extends>)) {
           return {
             state: QueryStateType.Enabled,
-            value: parent as ComponentInstance<Instance>
+            value: parent as ComponentInstance<Extends>
           }
         }
       }
@@ -79,7 +79,7 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Instance extends ComponentMethods, T>(component: Component<ComponentInstance<Instance, T>>): QueryState<ComponentInstance<Instance, T>> {
+  queryWrappedComponent<Extends extends ComponentExtends, T>(component: Component<ComponentInstance<Extends, T>>): QueryState<ComponentInstance<Extends, T>> {
     const selection = this.selection
     if (!selection.isSelected ||
       selection.isCollapsed ||
@@ -94,7 +94,7 @@ export class Query {
     if (typeof instance !== 'string' && instance.name === component.name) {
       return {
         state: QueryStateType.Enabled,
-        value: instance as ComponentInstance<Instance>
+        value: instance as ComponentInstance<Extends>
       }
     }
     return {
