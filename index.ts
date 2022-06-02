@@ -32,7 +32,7 @@ const editor = createEditor({
   // autoHeight: true,
   markdownDetect: true,
   minHeight: '300px',
-  theme: 'light',
+  theme: 'darkline',
   placeholder: '请输入内容……',
   content: document.getElementById('template')?.innerHTML,
   imports: [
