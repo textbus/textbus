@@ -304,7 +304,7 @@ function overrideSlot(slot: Slot) {
     if (formatter && formatter !== codeStyleFormatter) {
       return true
     }
-    return retain.call(slot, index, formatter, value)
+    return Reflect.apply(retain, slot, [index, formatter, value])
   } as any
 
   slot.changeMarker.onChange = slot.changeMarker.onChange.pipe(map(operation => {

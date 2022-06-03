@@ -335,40 +335,40 @@ export class Commander {
         }
         selection.setFocus(stoppedSlot, index)
         return false
-      } else {
-        slot.retain(scope.startIndex)
-        slot.delete(scope.endIndex - scope.startIndex)
-        if (slot === dumpStartSlot) {
-          break
+      }
+      slot.retain(scope.startIndex)
+      slot.delete(scope.endIndex - scope.startIndex)
+      if (slot === dumpStartSlot) {
+        break
+      }
+
+      if (parentComponent.slots.length === 0 ||
+        parentComponent.slots.length === 1 && slot.isEmpty && parentComponent.slots.has(scope.slot)) {
+        const state = this._deleteTree(parentComponent, scope.slot, commonAncestorSlotRef)
+        if (!state.success) {
+          stoppedSlot = state.slot
+          stoppedSlot.retain(state.offset)
+          if (deletedSlot) {
+            this._addContent(deletedSlot, stoppedSlot)
+          }
+          selection.setFocus(stoppedSlot, state.offset)
+
+          slot.retain(scope.startIndex)
+          slot.delete(scope.endIndex - scope.startIndex)
+          return false
         }
+      } else {
+        let isPreventDefault = true
+        const event = new Event<null>(slot, null, () => {
+          isPreventDefault = false
+        })
+        invokeListener(parentComponent, 'onSlotRemove', event)
 
-        if (parentComponent.slots.length === 0 ||
-          parentComponent.slots.length === 1 && slot.isEmpty && parentComponent.slots.has(scope.slot)) {
-          const state = this._deleteTree(parentComponent, scope.slot, commonAncestorSlotRef)
-          if (!state.success) {
-            stoppedSlot = state.slot
-            stoppedSlot.retain(state.offset)
-            if (deletedSlot) {
-              this._addContent(deletedSlot, stoppedSlot)
-            }
-            selection.setFocus(stoppedSlot, state.offset)
-
-            slot.retain(scope.startIndex)
-            slot.delete(scope.endIndex - scope.startIndex)
-            return false
-          }
-        } else {
-          let isPreventDefault = true
-          const event = new Event<null>(slot, null, () => {
-            isPreventDefault = false
-          })
-          invokeListener(parentComponent, 'onSlotRemove', event)
-
-          if (!isPreventDefault) {
-            parentComponent.slots.remove(slot)
-          }
+        if (!isPreventDefault) {
+          parentComponent.slots.remove(slot)
         }
       }
+
     }
 
     if (deletedSlot) {

@@ -99,7 +99,7 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
         headingComponent.name,
       ]
 
-      selection.getBlocks().reverse().map(block => {
+      selection.getBlocks().reverse().forEach(block => {
         const parent = block.slot.parent!
 
         const currentSlot = block.slot

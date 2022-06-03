@@ -741,17 +741,15 @@ export class Selection {
           c.slots.toArray().forEach(s => {
             scopes.push(...fn(s, 0, s.length, renderer))
           })
-        } else {
-          if (!newScope) {
-            newScope = {
-              startIndex: startIndex + i,
-              endIndex: startIndex + i + c.length,
-              slot: slot
-            }
-            scopes.push(newScope)
-          } else {
-            newScope.endIndex = startIndex + i + c.length
+        } else if (!newScope) {
+          newScope = {
+            startIndex: startIndex + i,
+            endIndex: startIndex + i + c.length,
+            slot: slot
           }
+          scopes.push(newScope)
+        } else {
+          newScope.endIndex = startIndex + i + c.length
         }
         i += c.length
       })
@@ -1376,9 +1374,8 @@ export class Selection {
           slot: parentSlot,
           offset: componentIndex + 1
         }
-      } else {
-        slot = parentSlot
       }
+      slot = parentSlot
     }
     return {
       slot: cacheSlot,
@@ -1432,9 +1429,8 @@ export class Selection {
           slot: parentSlot,
           offset: prevContent === '\n' ? componentIndex - 1 : componentIndex
         }
-      } else {
-        slot = parentSlot
       }
+      slot = parentSlot
     }
     return {
       slot: cacheSlot,

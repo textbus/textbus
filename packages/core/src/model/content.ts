@@ -27,7 +27,7 @@ export class Content {
     if (index >= this.length) {
       this.append(content)
     } else {
-      let i = 0  // 当前内容下标
+      let i = 0 // 当前内容下标
       let ii = 0 // 当前数组元素下标
       for (const el of this.data) {
         if (index >= i) {
@@ -45,12 +45,10 @@ export class Content {
             const prev = this.data[ii - 1]
             if (typeof prev === 'string' && typeof content === 'string') {
               this.data[ii - 1] = prev + content
+            } else if (i === 0) {
+              this.data.unshift(content)
             } else {
-              if (i === 0) {
-                this.data.unshift(content)
-              } else {
-                this.data.splice(ii, 0, content)
-              }
+              this.data.splice(ii, 0, content)
             }
             break
           }

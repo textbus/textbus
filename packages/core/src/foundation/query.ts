@@ -131,12 +131,12 @@ export class Query {
               state: QueryStateType.Normal,
               value: null
             }
-          } else {
-            states.push({
-              state: QueryStateType.Enabled,
-              value: f.value
-            })
           }
+          states.push({
+            state: QueryStateType.Enabled,
+            value: f.value
+          })
+
           s = f.endIndex
         }
 

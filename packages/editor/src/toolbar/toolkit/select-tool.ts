@@ -65,7 +65,7 @@ export class SelectTool implements Tool {
         config.onChecked(value)
       }
     })
-    config.options.filter(i => i.keymap).map(i => {
+    config.options.filter(i => i.keymap).forEach(i => {
       keyboard.addShortcut({
         keymap: i.keymap!,
         action: () => {

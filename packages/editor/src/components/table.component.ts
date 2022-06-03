@@ -295,19 +295,17 @@ export const tableComponent = defineComponent({
                   draft.colspan = startIndex - td.columnIndex
                 })
               }
+            } else if (startColumnIndex + td.cell.state!.colspan - 1 > endIndex) {
+              td.cell.updateState(draft => {
+                draft.colspan = td.cell.state!.colspan - (endIndex - startIndex + 1)
+              })
+              td.cell.cut()
             } else {
-              if (startColumnIndex + td.cell.state!.colspan - 1 > endIndex) {
-                td.cell.updateState(draft => {
-                  draft.colspan = td.cell.state!.colspan - (endIndex - startIndex + 1)
-                })
-                td.cell.cut()
-              } else {
-                const index = td.row.indexOf(td.cell)
-                if (index > -1) {
-                  td.row.splice(index, 1)
-                }
-                slots.remove(td.cell)
+              const index = td.row.indexOf(td.cell)
+              if (index > -1) {
+                td.row.splice(index, 1)
               }
+              slots.remove(td.cell)
             }
           }
         })
@@ -341,18 +339,16 @@ export const tableComponent = defineComponent({
                   draft.rowspan = startIndex - td.rowIndex
                 })
               }
+            } else if (startRowIndex + td.cell.state!.rowspan - 1 > endIndex) {
+              td.cell.updateState(draft => {
+                draft.rowspan = td.cell.state!.rowspan - (endIndex - startIndex + 1)
+              })
+              td.cell.cut()
+              const nextTr = serializedCells[i + 1]
+              const afterTd = nextTr.cellsPosition.find(td2 => td2.cell === td.cell)!
+              afterTd.row.splice(afterTd.row.indexOf(afterTd.cell), 0, td.cell)
             } else {
-              if (startRowIndex + td.cell.state!.rowspan - 1 > endIndex) {
-                td.cell.updateState(draft => {
-                  draft.rowspan = td.cell.state!.rowspan - (endIndex - startIndex + 1)
-                })
-                td.cell.cut()
-                const nextTr = serializedCells[i + 1]
-                const afterTd = nextTr.cellsPosition.find(td2 => td2.cell === td.cell)!
-                afterTd.row.splice(afterTd.row.indexOf(afterTd.cell), 0, td.cell)
-              } else {
-                slots.remove(td.cell)
-              }
+              slots.remove(td.cell)
             }
           })
 

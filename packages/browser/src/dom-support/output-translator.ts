@@ -24,7 +24,7 @@ export class OutputTranslator {
           '<': '&lt;',
           '>': '&gt;',
           '"': '&quot;',
-          "'": '&#x27;',
+          '\'': '&#x27;',
           '&': '&amp;'
         }[str] as string
       })
@@ -33,7 +33,7 @@ export class OutputTranslator {
       return text.replace(/["']/g, str => {
         return {
           '"': '&quot;',
-          "'": '&#x27;'
+          '\'': '&#x27;'
         }[str] as string
       })
     }

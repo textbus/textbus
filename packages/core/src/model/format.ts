@@ -272,13 +272,11 @@ export class Format {
             ...range
           })
           copyFormat.map.delete(formatter)
-        } else {
-          if (range.startIndex < nextStartIndex) {
-            nextStartIndex = range.startIndex
-            nextEndIndex = range.endIndex
-          } else if (range.startIndex === nextStartIndex) {
-            nextEndIndex = Math.max(nextEndIndex, range.endIndex)
-          }
+        } else if (range.startIndex < nextStartIndex) {
+          nextStartIndex = range.startIndex
+          nextEndIndex = range.endIndex
+        } else if (range.startIndex === nextStartIndex) {
+          nextEndIndex = Math.max(nextEndIndex, range.endIndex)
         }
       })
     })

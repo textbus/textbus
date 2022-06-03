@@ -13,9 +13,8 @@ export function getLayoutRectByRange(range: Range) {
     if (offsetNode) {
       if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
         return (offsetNode as HTMLElement).getBoundingClientRect()
-      } else {
-        isInsertBefore = true
       }
+      isInsertBefore = true
     }
     const span = startContainer.ownerDocument!.createElement('span')
     span.innerText = '\u200b'

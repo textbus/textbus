@@ -459,7 +459,7 @@ export function useTableMultipleRange(
           }
         })
       }
-      return oldGetScopes.call(selection, startSlot, endSlot, startIndex, endIndex)
+      return Reflect.apply(oldGetScopes, selection, [startSlot, endSlot, startIndex, endIndex])
     }
 
     const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()

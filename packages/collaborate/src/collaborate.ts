@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { delay, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   ComponentInstance,
   ContentType,
@@ -65,7 +65,7 @@ export class Collaborate implements History {
               private registry: Registry,
               private selection: Selection,
               private starter: Starter) {
-    this.onSelectionChange = this.selectionChangeEvent.asObservable()
+    this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(delay())
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
     this.onChange = this.changeEvent.asObservable()
@@ -504,7 +504,7 @@ export class Collaborate implements History {
 function makeFormats(registry: Registry, attrs?: any) {
   const formats: Formats = []
   if (attrs) {
-    Object.keys(attrs).map(key => {
+    Object.keys(attrs).forEach(key => {
       const formatter = registry.getFormatter(key)
       if (formatter) {
         formats.push([formatter, attrs[key]])

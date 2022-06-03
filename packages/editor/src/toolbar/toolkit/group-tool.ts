@@ -81,6 +81,7 @@ export class GroupTool implements Tool {
     const keyboard = injector.get(Keyboard)
     const dialog = injector.get(Dialog)
     this.config = config
+    // eslint-disable-next-line array-callback-return
     const menus = config.items.map(i => {
       switch (i.type) {
         case ToolType.Button:

@@ -25,7 +25,14 @@
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
     "no-constant-condition": ["error", {"checkLoops": false }],
-    "semi": [1, "never"]
+    "semi": [1, "never"],
+    "no-else-return": 1,
+    "no-lonely-if": 1,
+    "no-multi-spaces": 1,
+    "no-multiple-empty-lines": 1,
+    "no-trailing-spaces": 1,
+    "quotes": [1, "single"],
+    "array-callback-return": 1
   },
   "ignorePatterns": ["index.ts"]
 }
