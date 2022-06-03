@@ -79,6 +79,7 @@ export class Collaborate implements History {
         this.selectionChangeEvent.next(paths)
       })
     )
+    this.syncRootComponent()
   }
 
   updateRemoteSelection(paths: RemoteSelection[]) {
@@ -86,7 +87,7 @@ export class Collaborate implements History {
   }
 
   listen() {
-    this.syncRootComponent()
+    //
   }
 
   back() {
