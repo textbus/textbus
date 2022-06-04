@@ -376,18 +376,6 @@ export function defineComponent<Extends extends ComponentExtends,
       const subscriptions: Subscription[] = [
         context.slots.onChange.subscribe(ops => {
           marker.markAsDirtied(ops)
-        }),
-
-        context.slots.onChildComponentRemoved.subscribe(instance => {
-          marker.recordComponentRemoved(instance)
-        }),
-
-        context.slots.onChildSlotChange.subscribe(d => {
-          marker.markAsDirtied(d.operation)
-        }),
-
-        context.slots.onChildSlotForceChange.subscribe(() => {
-          marker.forceMarkDirtied()
         })
       ]
 

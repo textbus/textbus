@@ -4,20 +4,13 @@ import { Slot } from './slot'
 import { Action, Operation } from './operation'
 import { ComponentInstance } from './component'
 
-export interface SlotChangeData<T extends Slot> {
-  source: T
-  operation: Operation
-}
-
 /**
  * Textbus 管理组件内部插槽增删改查的类
  */
 export class Slots<T = any> {
   readonly onChildSlotRemove: Observable<Slot<T>[]>
   readonly onChange: Observable<Operation>
-  readonly onChildSlotChange: Observable<SlotChangeData<Slot<T>>>
-  readonly onChildSlotForceChange: Observable<void>
-  readonly onChildComponentRemoved: Observable<ComponentInstance>
+  readonly onChildSlotChange: Observable<Slot<T>>
 
   /** 子插槽的个数 */
   get length() {
@@ -41,9 +34,7 @@ export class Slots<T = any> {
   private slots: Slot<T>[] = []
   private _index = 0
   private changeEvent = new Subject<Operation>()
-  private childSlotChangeEvent = new Subject<SlotChangeData<Slot<T>>>()
-  private childSlotForceChangeEvent = new Subject<void>()
-  private childComponentRemovedEvent = new Subject<ComponentInstance>()
+  private childSlotChangeEvent = new Subject<Slot<T>>()
   private childSlotRemoveEvent = new Subject<Slot<T>[]>()
 
   private changeListeners = new WeakMap<Slot, Subscription>()
@@ -52,8 +43,6 @@ export class Slots<T = any> {
               slots: Slot<T>[] = []) {
     this.onChange = this.changeEvent.asObservable()
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
-    this.onChildSlotForceChange = this.childSlotForceChangeEvent.asObservable()
-    this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onChildSlotRemove = this.childSlotRemoveEvent.asObservable()
     this.insert(...slots)
   }
@@ -226,16 +215,22 @@ export class Slots<T = any> {
       i.parent = this.host
       const sub = i.changeMarker.onChange.subscribe(operation => {
         operation.path.unshift(this.indexOf(i))
-        this.childSlotChangeEvent.next({
-          source: i,
-          operation
-        })
+        if (i.changeMarker.dirty) {
+          this.host.changeMarker.markAsDirtied(operation)
+        } else {
+          this.host.changeMarker.markAsChanged(operation)
+        }
+        this.childSlotChangeEvent.next(i)
       })
       sub.add(i.changeMarker.onChildComponentRemoved.subscribe(instance => {
-        this.childComponentRemovedEvent.next(instance)
+        this.host.changeMarker.recordComponentRemoved(instance)
       }))
       sub.add(i.changeMarker.onForceChange.subscribe(() => {
-        this.childSlotForceChangeEvent.next()
+        if (i.changeMarker.dirty) {
+          this.host.changeMarker.forceMarkDirtied()
+        } else {
+          this.host.changeMarker.forceMarkChanged()
+        }
       }))
       this.changeListeners.set(i, sub)
     })

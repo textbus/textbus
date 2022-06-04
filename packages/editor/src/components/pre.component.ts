@@ -431,12 +431,12 @@ export const preComponent = defineComponent({
 
     let isStop = false
 
-    slots.onChildSlotChange.subscribe(data => {
+    slots.onChildSlotChange.subscribe(slot => {
       if (languageGrammar && !isStop) {
         isStop = true
-        const index = data.source.index
-        reformat(slots, data.source, languageGrammar, blockCommentStartString, blockCommentEndString)
-        data.source.retain(index)
+        const index = slot.index
+        reformat(slots, slot, languageGrammar, blockCommentStartString, blockCommentEndString)
+        slot.retain(index)
         isStop = false
       }
     })
