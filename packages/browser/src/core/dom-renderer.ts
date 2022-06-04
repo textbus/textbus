@@ -6,6 +6,74 @@ import { NativeNode, NativeRenderer } from '@textbus/core'
  */
 @Injectable()
 export class DomRenderer implements NativeRenderer {
+  isSVG = new RegExp(`^(${
+    [
+      // 'a',
+      'animate',
+      'animateMotion',
+      'animateTransform',
+      'circle',
+      'clipPath',
+      'defs',
+      'desc',
+      'ellipse',
+      'feBlend',
+      'feColorMatrix',
+      'feComponentTransfer',
+      'feComposite',
+      'feConvolveMatrix',
+      'feDiffuseLighting',
+      'feDisplacementMap',
+      'feDistantLight',
+      'feDropShadow',
+      'feFlood',
+      'feFuncA',
+      'feFuncB',
+      'feFuncG',
+      'feFuncR',
+      'feGaussianBlur',
+      'feImage',
+      'feMerge',
+      'feMergeNode',
+      'feMorphology',
+      'feOffset',
+      'fePointLight',
+      'feSpecularLighting',
+      'feSpotLight',
+      'feTile',
+      'feTurbulence',
+      'filter',
+      'foreignObject',
+      'g',
+      'image',
+      'line',
+      'linearGradient',
+      'marker',
+      'mask',
+      'metadata',
+      'mpath',
+      'path',
+      'pattern',
+      'polygon',
+      'polyline',
+      'radialGradient',
+      'rect',
+      // 'script',
+      'set',
+      'stop',
+      // 'style',
+      'svg',
+      'switch',
+      'symbol',
+      'text',
+      'textPath',
+      'title',
+      'tspan',
+      'use',
+      'view'
+    ].join('|')
+  })$`, 'i')
+
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
     node.addEventListener(type, callback)
   }
@@ -19,10 +87,17 @@ export class DomRenderer implements NativeRenderer {
   }
 
   createElement(name: string): NativeNode {
+    if (this.isSVG.test(name)) {
+      return document.createElementNS('http://www.w3.org/2000/svg', name)
+    }
     return document.createElement(name)
   }
 
   appendChild(parent: NativeNode, newChild: NativeNode) {
+    // if (/^text$/i.test(parent.nodeName) && typeof parent.ownerSVGElement !== 'undefined' && newChild.nodeType === Node.TEXT_NODE) {
+    //   parent.textContent = newChild.textContent
+    //   return
+    // }
     parent.appendChild(newChild)
   }
 
