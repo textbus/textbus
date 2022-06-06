@@ -108,8 +108,8 @@ export const defaultTools: ToolFactory[][] = [
 export function createEditor(options: EditorOptions = {}) {
   return new Editor({
     plugins: [
-      new Toolbar(defaultTools),
-      new LinkJumpTipPlugin()
+      () => new Toolbar(defaultTools),
+      () => new LinkJumpTipPlugin()
     ],
     ...defaultOptions,
     ...options

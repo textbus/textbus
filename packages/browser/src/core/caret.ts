@@ -1,4 +1,4 @@
-import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
 import { Scheduler } from '@textbus/core'
 
@@ -72,7 +72,7 @@ export class Caret {
   constructor(
     private scheduler: Scheduler,
     @Inject(EDITOR_MASK) private editorMask: HTMLElement) {
-    this.onPositionChange = this.positionChangeEvent.asObservable()
+    this.onPositionChange = this.positionChangeEvent.asObservable().pipe(distinctUntilChanged())
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -113,11 +113,11 @@ export class Caret {
 
   show(range: Range, restart: boolean) {
     this.oldRange = range
-    this.updateCursorPosition(range)
     if (restart || this.scheduler.hasLocalUpdate) {
       clearTimeout(this.timer)
     }
     if (range.collapsed) {
+      this.updateCursorPosition(range)
       if (restart || this.scheduler.hasLocalUpdate) {
         this.display = true
         const toggleShowHide = () => {
@@ -128,6 +128,7 @@ export class Caret {
       }
     } else {
       this.display = false
+      this.positionChangeEvent.next(null)
     }
   }
 
@@ -147,6 +148,7 @@ export class Caret {
 
     const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement
     if (node?.nodeType !== Node.ELEMENT_NODE) {
+      this.positionChangeEvent.next(null)
       return
     }
     const rect = getLayoutRectByRange(nativeRange)
