@@ -70,6 +70,9 @@ export class Layout {
 
   listenCaretChange(bridge: SelectionBridge) {
     this.sub = bridge.caret.onPositionChange.subscribe(position => {
+      if (!position) {
+        return
+      }
       setTimeout(() => {
         const limit = this.scroller
         const scrollTop = limit.scrollTop

@@ -129,8 +129,12 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
 
     this.nativeSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset)
-    const nativeRange = this.nativeSelection.getRangeAt(0)
-    this.selectionChangeEvent.next(nativeRange)
+    if (this.nativeSelection.rangeCount) {
+      const nativeRange = this.nativeSelection.getRangeAt(0)
+      this.selectionChangeEvent.next(nativeRange)
+    } else {
+      this.selectionChangeEvent.next(null)
+    }
     setTimeout(() => {
       // hack 浏览器会触发上面选区更改事件
       if (this.connector) {

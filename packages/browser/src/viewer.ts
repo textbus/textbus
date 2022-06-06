@@ -374,6 +374,7 @@ export class Viewer {
         display: 'flex',
         minHeight: '100%',
         position: 'relative',
+        flexDirection: 'column'
       },
       children: [doc, mask]
     })

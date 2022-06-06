@@ -45,7 +45,7 @@ export interface CaretStyle {
 
 @Injectable()
 export class Caret {
-  onPositionChange: Observable<CaretPosition>
+  onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
   private timer: any = null
@@ -65,7 +65,7 @@ export class Caret {
 
   private subs: Subscription[] = []
 
-  private positionChangeEvent = new Subject<CaretPosition>()
+  private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
   private oldRange: Range | null = null
 
@@ -134,6 +134,7 @@ export class Caret {
   hide() {
     this.display = false
     clearTimeout(this.timer)
+    this.positionChangeEvent.next(null)
   }
 
   destroy() {
