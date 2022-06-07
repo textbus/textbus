@@ -1,5 +1,4 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
-import { Subject } from '@tanbo/stream'
 
 import { ComponentInstance, Formatter, Component } from './model/_api'
 import {
@@ -74,8 +73,6 @@ export interface TextbusConfig extends Module {
  * Textbus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
-  private readyEvent = new Subject<void>()
-
   private beforeDestroy: (() => unknown) | null = null
 
   private plugins: Plugin[]
@@ -113,7 +110,6 @@ export class Starter extends ReflectiveInjector {
     history.listen()
 
     this.plugins.forEach(i => i.setup(this))
-    this.readyEvent.next()
     return this
   }
 
