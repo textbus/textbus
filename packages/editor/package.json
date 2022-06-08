@@ -34,6 +34,7 @@
     "@textbus/browser": "^2.0.0-beta.26",
     "@textbus/collaborate": "^2.0.0-beta.26",
     "@textbus/core": "^2.0.0-beta.26",
+    "katex": "^0.16.0",
     "prismjs": "^1.23.0"
   },
   "author": {

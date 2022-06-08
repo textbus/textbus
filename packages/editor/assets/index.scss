@@ -1,5 +1,6 @@
 @import "~@tanbo/css-themes/themes/scss/default";
 @import "~@tanbo/color-picker/bundles/scss/index";
+@import "~katex/dist/katex.min.css";
 $line-height: 1.4285714 !default;
 $color-darker: #222;
 
@@ -11,11 +12,12 @@ $color-darker: #222;
 @import "./base/layout";
 @import "./base/message";
 
-@import "components/image-and-video-drag-resize";
-@import "components/table-edit-enhance";
+@import "./components/image-and-video-drag-resize";
+@import "./components/table-edit-enhance";
 
 @import "./plugins/link-jump-tip-plugin";
 @import "./plugins/toolbar";
+@import "./plugins/toolbar-components";
 @import "./plugins/toolbar-extention";
 
 @import "./theme/dark";

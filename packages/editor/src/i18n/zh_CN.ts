@@ -412,6 +412,89 @@ export const i18n_zh_CN: I18NConfig = {
       defaultLang: '其它',
       contextMenuLabel: '切换代码块语言',
       changeTheme: '切换代码块主题'
+    },
+    alertComponent: {
+      creator: {
+        name: '警告框'
+      },
+      contextMenu: {
+        fill: '填充警告框',
+        noFill: '取消填充警告框',
+        type: '警告框风格',
+      }
+    },
+    imageCardComponent: {
+      creator: {
+        name: '卡片'
+      },
+      setting: {
+        title: '卡片设置',
+        srcLabel: '图片地址',
+        srcPlaceholder: '请输入图片地址',
+        heightLabel: '图片高度',
+        heightPlaceholder: '请输入图片高度',
+        confirmBtnText: '确定',
+        cancelBtnText: '取消',
+      }
+    },
+    jumbotronComponent: {
+      settingBtn: '设置',
+      creator: {
+        name: '巨幕'
+      },
+      setter: {
+        name: '巨幕',
+        form: {
+          title: '巨幕设置',
+          confirmBtnText: '确定',
+          cancelBtnText: '取消',
+          minHeightLabel: '巨幕最小高度',
+          minHeightInputPlaceholder: '请输入巨幕最小高度',
+          backgroundImageLabel: '背景图片地址',
+          backgroundImageInputPlaceholder: '请输入背景图片地址',
+          uploadBtnText: '上传新图片',
+          validateErrorMessage: '必填项不能为空'
+        }
+      }
+    },
+    katexComponent: {
+      creator: {
+        name: '数学公式'
+      },
+      setter: {
+        title: '数学公式设置',
+        label: '源代码',
+        placeholder: '请输入代码',
+        confirmBtnText: '确定',
+        cancelBtnText: '取消'
+      }
+    },
+    stepsComponent: {
+      creator: {
+        name: '步骤条'
+      }
+    },
+    timelineComponent: {
+      creator: {
+        name: '时间轴'
+      }
+    },
+    todoListComponent: {
+      creator: {
+        name: '待办事项列表'
+      }
+    },
+    wordExplainComponent: {
+      creator: {
+        name: '名词释义'
+      },
+      setter: {
+        title: '名词释义设置',
+        confirmBtnText: '确定',
+        cancelBtnText: '取消',
+        widthInputPlaceholder: '请输入标题宽度',
+        widthLabel: '标题宽度'
+      }
     }
   }
 }

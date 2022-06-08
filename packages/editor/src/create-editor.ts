@@ -10,6 +10,11 @@ import {
   tableComponentLoader,
   audioComponentLoader,
   videoComponentLoader,
+  imageCardComponentLoader,
+  todolistComponentLoader,
+  katexComponentLoader,
+  wordExplainComponentLoader,
+  timelineComponentLoader, stepComponentLoader, alertComponentLoader, jumbotronComponentLoader,
 } from './components/_api'
 import {
   boldFormatLoader,
@@ -37,7 +42,7 @@ import {
   historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
   italicTool, linkTool, olTool,
   strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
-  underlineTool, unlinkTool, ToolFactory
+  underlineTool, unlinkTool, ToolFactory, componentsTool
 } from './toolbar/_api'
 import { LinkJumpTipPlugin } from './plugins/_api'
 import { ComponentLoader, FormatLoader } from '@textbus/browser'
@@ -52,7 +57,15 @@ export const defaultComponentLoaders: ComponentLoader[] = [
   paragraphComponentLoader,
   preComponentLoader,
   tableComponentLoader,
-  videoComponentLoader
+  videoComponentLoader,
+  imageCardComponentLoader,
+  todolistComponentLoader,
+  katexComponentLoader,
+  wordExplainComponentLoader,
+  timelineComponentLoader,
+  stepComponentLoader,
+  alertComponentLoader,
+  jumbotronComponentLoader
 ]
 
 export const defaultFormatLoaders: FormatLoader[] = [
@@ -102,6 +115,7 @@ export const defaultTools: ToolFactory[][] = [
   [imageTool],
   [textAlignTool],
   [tableAddTool, tableRemoveTool],
+  [componentsTool],
   [cleanTool]
 ]
 

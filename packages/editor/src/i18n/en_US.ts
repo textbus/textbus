@@ -412,6 +412,89 @@ export const i18n_en_US: I18NConfig = {
       defaultLang: 'other',
       contextMenuLabel: 'switch language',
       changeTheme: 'change theme'
+    },
+    alertComponent: {
+      creator: {
+        name: 'Alert'
+      },
+      contextMenu: {
+        fill: 'fill alert',
+        noFill: 'cancel fill alert',
+        type: 'select alert style',
+      }
+    },
+    imageCardComponent: {
+      creator: {
+        name: 'Card'
+      },
+      setting: {
+        title: 'card setting',
+        srcLabel: 'url',
+        srcPlaceholder: 'please enter the picture url',
+        heightLabel: 'image height',
+        heightPlaceholder: 'please enter the picture height',
+        confirmBtnText: 'ok',
+        cancelBtnText: 'cancel',
+      }
+    },
+    jumbotronComponent: {
+      settingBtn: 'setting',
+      creator: {
+        name: 'Jumbotron'
+      },
+      setting: {
+        name: 'Jumbotron',
+        form: {
+          title: 'jumbotron setting',
+          confirmBtnText: 'ok',
+          cancelBtnText: 'cancel',
+          minHeightLabel: 'min height',
+          minHeightInputPlaceholder: 'min height',
+          backgroundImageLabel: 'background image',
+          backgroundImageInputPlaceholder: 'background image url',
+          uploadBtnText: 'upload',
+          validateErrorMessage: 'fields is required.'
+        }
+      }
+    },
+    katexComponent: {
+      creator: {
+        name: 'Mathematical formula'
+      },
+      setter: {
+        title: 'mathematical formula setting',
+        label: 'source code',
+        placeholder: 'please...',
+        confirmBtnText: 'ok',
+        cancelBtnText: 'cancel'
+      }
+    },
+    stepsComponent: {
+      creator: {
+        name: 'Steps'
+      }
+    },
+    timelineComponent: {
+      creator: {
+        name: 'Timeline'
+      }
+    },
+    todoListComponent: {
+      creator: {
+        name: 'Todolist'
+      }
+    },
+    wordExplainComponent: {
+      creator: {
+        name: 'Word explain'
+      },
+      setter: {
+        title: 'word explain setting',
+        confirmBtnText: 'ok',
+        cancelBtnText: 'cancel',
+        widthInputPlaceholder: 'title box width',
+        widthLabel: 'width'
+      }
     }
   }
 }

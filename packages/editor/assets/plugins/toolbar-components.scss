@@ -1,0 +1,60 @@
+.textbus-component-stage {
+  &-list {
+    box-sizing: content-box;
+    padding: 15px 10px;
+    width: 360px;
+    overflow: hidden;
+  }
+
+  &-expand {
+    display: block;
+  }
+}
+
+.textbus-component-example-item {
+  width: 100px;
+  height: 100px;
+  margin: 5px 10px;
+  float: left;
+  position: relative;
+  user-select: none;
+}
+
+.textbus-component-example {
+  position: relative;
+  height: 70px;
+  background-color: #fff;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .2);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: transform .15s;
+  cursor: pointer;
+
+  &-content {
+    position: relative;
+    z-index: 0;
+  }
+
+  &-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+
+  &:hover {
+    transform: scale(1.12);
+  }
+}
+
+.textbus-component-example-name {
+  text-align: center;
+  font-size: 12px;
+  line-height: 30px;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

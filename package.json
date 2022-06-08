@@ -72,6 +72,7 @@
     "@tanbo/di": "^1.1.1",
     "@tanbo/stream": "^1.0.2",
     "immer": "^9.0.12",
+    "katex": "^0.16.0",
     "prismjs": "^1.23.0",
     "reflect-metadata": "^0.1.13",
     "y-webrtc": "^10.2.2",

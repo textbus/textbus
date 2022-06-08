@@ -20,11 +20,13 @@ export interface FormTextareaParams {
   name: string;
   placeholder: string;
   value?: string;
+  width?: string;
+  height?: string;
 
   validateFn?(value: any): string
 }
 
-export interface FormNumberParams extends FormTextareaParams {
+export interface FormNumberParams extends Omit<FormTextareaParams, 'width' | 'height'> {
 }
 
 export interface FormRadioParams {
