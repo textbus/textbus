@@ -30,7 +30,7 @@ export class Toolbar implements Plugin {
 
   private subs: Subscription[] = []
 
-  private tools: Array<Tool | Tool[]> = []
+  public tools: Array<Tool | Tool[]>
 
   constructor(private toolFactories: Array<ToolFactory | ToolFactory[]> = [], private host?: HTMLElement | string) {
     this.tools = toolFactories.map(i => {

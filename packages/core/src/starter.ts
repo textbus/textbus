@@ -49,6 +49,12 @@ export interface Module {
   providers?: Provider[]
   /** 插件集合 */
   plugins?: Array<() => Plugin>
+
+  /**
+   * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
+   * @param starter
+   */
+  setup?(starter: Starter): Promise<(() => void) | void> | (() => void) | void
 }
 
 /**
@@ -61,21 +67,17 @@ export interface TextbusConfig extends Module {
   useContentEditable?: boolean
   /** 开启 markdown 支持 */
   markdownDetect?: boolean
-
-  /**
-   * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
-   * @param starter
-   */
-  setup?(starter: Starter): Promise<(() => unknown) | void> | (() => unknown) | void
 }
 
 /**
  * Textbus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
-  private beforeDestroy: (() => unknown) | null = null
+  private beforeDestroyCallbacks: Array<() => void> = []
 
   private plugins: Plugin[]
+
+  private isDestroyed = false
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [])
@@ -95,14 +97,27 @@ export class Starter extends ReflectiveInjector {
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host
 
-    const callback = this.config.setup?.(this)
-    if (callback instanceof Promise) {
-      await callback.then(fn => {
-        this.beforeDestroy = fn || null
-      })
-    } else {
-      this.beforeDestroy = callback || null
+    const callbacks: Array<(() => void) | Promise<(() => void) | void> | null> = []
+
+    this.config.imports?.forEach(i => {
+      if (typeof i.setup === 'function') {
+        const callback = i.setup(this)
+        callbacks.push(callback || null)
+      }
+    })
+    callbacks.push(this.config.setup?.(this) || null)
+    const fns = await Promise.all(callbacks)
+
+    if (this.isDestroyed) {
+      return this
     }
+
+    fns.forEach(i => {
+      if (i) {
+        this.beforeDestroyCallbacks.push(i)
+      }
+    })
+
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
 
@@ -117,11 +132,11 @@ export class Starter extends ReflectiveInjector {
    * 销毁 Textbus 实例
    */
   destroy() {
-    const beforeDestroy = this.beforeDestroy
+    this.isDestroyed = true
     this.plugins.forEach(i => i.onDestroy?.())
-    if (typeof beforeDestroy === 'function') {
-      beforeDestroy()
-    }
+    this.beforeDestroyCallbacks.forEach(i => {
+      i()
+    });
     [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
       i.destroy()
     })
