@@ -16,7 +16,6 @@ import {
   Slots,
   useContext,
   useDynamicShortcut,
-  useSelf,
   useSlots,
   useState,
   VElement,
@@ -40,7 +39,6 @@ import 'prismjs/components/prism-jsx'
 import 'prismjs/components/prism-tsx'
 import { paragraphComponent } from './paragraph.component'
 import { I18n } from '../i18n'
-import { map } from '@tanbo/stream'
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -196,15 +194,15 @@ function formatCodeLines(
   languageGrammar: Grammar | null) {
   return lines.map(i => {
     const slot = createCodeSlot()
-    slot.state.blockCommentStart = startBlock
-    if (slot.state.blockCommentStart) {
+    slot.state!.blockCommentStart = startBlock
+    if (slot.state!.blockCommentStart) {
       i = blockCommentStartString + i
     }
     slot.insert(i)
     if (languageGrammar) {
       const tokens = tokenize(i, languageGrammar)
       format(tokens, slot, 0)
-      if (slot.state.blockCommentStart) {
+      if (slot.state!.blockCommentStart) {
         slot.retain(0)
         slot.delete(2)
       }
@@ -214,8 +212,8 @@ function formatCodeLines(
         lastToken.type === 'comment' &&
         (lastToken.content as string).indexOf(blockCommentStartString) === 0) {
         const regString = blockCommentEndString.replace(new RegExp(`[${blockCommentEndString}]`, 'g'), i => '\\' + i)
-        slot.state.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
-        startBlock = !slot.state.blockCommentEnd
+        slot.state!.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+        startBlock = !slot.state!.blockCommentEnd
       } else {
         startBlock = false
       }
@@ -225,7 +223,7 @@ function formatCodeLines(
       //   (lastToken.content as string).indexOf(blockCommentStartString) === 0
       // slot.blockCommentEnd = !startBlock
     } else {
-      slot.state.blockCommentEnd = true
+      slot.state!.blockCommentEnd = true
     }
     return slot
   })
@@ -288,39 +286,12 @@ function reformat(
 }
 
 export function createCodeSlot() {
-  const slot = new Slot([
+  return new Slot([
     ContentType.Text
   ], {
     blockCommentEnd: true,
     blockCommentStart: false
   })
-  return overrideSlot(slot)
-}
-
-function overrideSlot(slot: Slot) {
-  const retain = slot.retain
-
-  slot.retain = function (index: number, formatter: any, value: any) {
-    if (formatter && formatter !== codeStyleFormatter) {
-      return true
-    }
-    return Reflect.apply(retain, slot, [index, formatter, value])
-  } as any
-
-  slot.changeMarker.onChange = slot.changeMarker.onChange.pipe(map(operation => {
-    const apply = operation.apply.filter(action => {
-      return !(action.type === 'retain' && action.formats)
-    })
-    const unApply = operation.unApply.filter(action => {
-      return !(action.type === 'retain' && action.formats)
-    })
-    return {
-      path: operation.path,
-      apply,
-      unApply
-    }
-  }))
-  return slot
 }
 
 export const preComponent = defineComponent({
@@ -384,16 +355,6 @@ export const preComponent = defineComponent({
     let languageGrammar = getLanguageGrammar(data.state!.lang)
     let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.state!.lang)
 
-    const self = useSelf()
-
-    self.toJSON = function () {
-      return {
-        name: self.name,
-        state: data.state,
-        slots: slots.toJSON()
-      }
-    }
-
     const stateController = useState({
       lang: data.state!.lang,
       theme: data.state!.theme
@@ -412,8 +373,8 @@ export const preComponent = defineComponent({
       [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(newState.lang)
       isStop = true
       slots.toArray().forEach(i => {
-        i.state.blockCommentStart = false
-        i.state.blockCommentEnd = false
+        i.state!.blockCommentStart = false
+        i.state!.blockCommentEnd = false
       })
       if (!languageGrammar) {
         slots.toArray().forEach(i => {
