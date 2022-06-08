@@ -314,7 +314,9 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
 
         const startPosition = this.getCorrectedPosition(nativeRange.startContainer, nativeRange.startOffset, isFocusStart)
-        const endPosition = nativeRange.collapsed ? startPosition : this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
+        const endPosition = nativeRange.collapsed ?
+          startPosition :
+          this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
         if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
           startPosition && endPosition) {
           const range: TBRange = isFocusEnd ? {

@@ -47,7 +47,10 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
     }),
     selection.onChange.subscribe(() => {
       const index = self.parent?.indexOf(self)
-      if (selection.startSlot !== self.parent || selection.endSlot !== self.parent || selection.startOffset !== index || selection.endOffset !== index + 1) {
+      if (selection.startSlot !== self.parent ||
+        selection.endSlot !== self.parent ||
+        selection.startOffset !== index ||
+        selection.endOffset !== index + 1) {
         isFocus = false
         mask.parentNode?.removeChild(mask)
       }
@@ -164,6 +167,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
 
 function updateStyle(nativeElement: HTMLElement, offsetRect: DOMRect) {
   const rect = nativeElement.getBoundingClientRect()
+  // eslint-disable-next-line max-len
   mask.style.cssText = `left: ${rect.left - offsetRect.left}px; top: ${rect.top - offsetRect.top}px; width: ${rect.width}px; height: ${rect.height}px;`
   text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`
 }

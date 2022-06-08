@@ -89,7 +89,9 @@ export class Editor extends Viewer {
       options.providers.push(...editorProviders)
 
       options.editingStyleSheets = options.editingStyleSheets || []
-      options.editingStyleSheets.push('[textbus-document=true]::before {content: attr(data-placeholder); position: absolute; opacity: 0.6;}')
+      options.editingStyleSheets.push(
+        '[textbus-document=true]::before {content: attr(data-placeholder); position: absolute; opacity: 0.6;}'
+      )
       return options
     })())
     this.onReady = this.readyEvent.asObservable()

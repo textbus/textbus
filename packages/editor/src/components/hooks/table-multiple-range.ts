@@ -101,7 +101,13 @@ function findCellPosition(cell: TableCellSlot, cellMatrix: TableRowPosition[]): 
   }
 }
 
-function selectCellsByRange(minRow: number, minColumn: number, maxRow: number, maxColumn: number, cellMatrix: TableRowPosition[]): TableRange {
+function selectCellsByRange(
+  minRow: number,
+  minColumn: number,
+  maxRow: number,
+  maxColumn: number,
+  cellMatrix: TableRowPosition[]
+): TableRange {
   const x1 = -Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => row.cellsPosition[minColumn].offsetColumn))
   const x2 = Math.max(...cellMatrix.slice(minRow, maxRow + 1).map(row => {
     return row.cellsPosition[maxColumn].cell.state!.colspan - (row.cellsPosition[maxColumn].offsetColumn + 1)

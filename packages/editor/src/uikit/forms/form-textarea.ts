@@ -17,7 +17,9 @@ export class FormTextarea implements FormItem<string> {
     <div class="textbus-control-label">${config.label}</div>
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
-        <textarea name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}">${config.value || ''}</textarea>
+        <textarea name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${
+      config.placeholder || ''
+    }">${config.value || ''}</textarea>
      </div>
      <div class="textbus-control-feedback-invalid"></div>
    </div>`

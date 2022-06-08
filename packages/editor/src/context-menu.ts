@@ -245,7 +245,10 @@ export class ContextMenu {
                 wrappers.forEach(i => i.classList.remove('textbus-contextmenu-item-active'))
                 if (Array.isArray((item as ContextMenuGroup).submenu)) {
                   const rect = wrapper.getBoundingClientRect()
-                  const submenu = this.show([(item as ContextMenuGroup).submenu], rect.x + rect.width, rect.y, this.submenuSubscriptions)
+                  const submenu = this.show(
+                    [(item as ContextMenuGroup).submenu as any],
+                    rect.x + rect.width, rect.y, this.submenuSubscriptions
+                  )
                   wrapper.classList.add('textbus-contextmenu-item-active')
                   this.submenu = submenu
                 }

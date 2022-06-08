@@ -210,11 +210,21 @@ export interface ContextMenuItem {
   onClick(): void
 }
 
+export interface ContextMenuCustomItem<T = unknown> {
+  type: string
+  value?: T
+  disabled?: boolean
+
+  validate?(value: T): true | 'string'
+
+  onComplete(value: T): void
+}
+
 export interface ContextMenuGroup {
   iconClasses?: string[]
   label: string
   disabled?: boolean
-  submenu: ContextMenuItem[]
+  submenu: Array<ContextMenuItem | ContextMenuCustomItem>
 }
 
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem

@@ -3,7 +3,19 @@ import { ColorHSL, ColorRGB, ColorRGBA, hsl2Hex, parseCss, rgb2Hex } from '@tanb
 import { Observable, Subject } from '@tanbo/stream'
 
 export class Palette {
-  static defaultColors: string[] = ['#f8f8f9', '#e9eaec', '#dddee1', '#bbbec4', '#80848f', '#495060', '#1c2838', '#e74f5e', '#ff9900', '#15bd9a', '#6ad1ec', '#1296db']
+  static defaultColors: string[] = [
+    '#f8f8f9',
+    '#e9eaec',
+    '#dddee1',
+    '#bbbec4',
+    '#80848f',
+    '#495060',
+    '#1c2838',
+    '#e74f5e',
+    '#ff9900',
+    '#15bd9a',
+    '#6ad1ec',
+    '#1296db']
   elementRef = document.createElement('div')
   onComplete: Observable<string | null>
 

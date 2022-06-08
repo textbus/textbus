@@ -77,9 +77,10 @@ export class Translator {
     return this.loadSlot(target, source)
   }
 
-  private loadSlot<T extends SlotLiteral, U extends Slot>(slot: U,
-                                                          slotLiteral: T,
-                                                          customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): U {
+  private loadSlot<T extends SlotLiteral, U extends Slot>(
+    slot: U,
+    slotLiteral: T,
+    customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): U {
     slotLiteral.content.forEach((item, index) => {
       if (typeof item !== 'string') {
         const component = customComponentCreator ? customComponentCreator(item, index) : this.createComponent(item)

@@ -13,7 +13,9 @@ export class FormNumber implements FormItem<number> {
     <div class="textbus-control-label">${config.label}</div>
     <div class="textbus-control-value">
       <div class="textbus-input-group textbus-input-block">
-        <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${config.placeholder || ''}" type="number" value="${config.value || ''}">
+        <input name="${config.name}" class="textbus-form-control textbus-input-block" placeholder="${
+      config.placeholder || ''
+    }" type="number" value="${config.value || ''}">
      </div>
      <div class="textbus-control-feedback-invalid"></div>
    </div>`

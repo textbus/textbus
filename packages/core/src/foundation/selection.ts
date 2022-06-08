@@ -180,7 +180,10 @@ export class Selection {
             return
           }
           const {focusOffset, focusSlot, anchorOffset, anchorSlot} = range
-          if (focusSlot === this.focusSlot && anchorSlot === this.anchorSlot && focusOffset === this.focusOffset && anchorOffset === this.anchorOffset) {
+          if (focusSlot === this.focusSlot &&
+            anchorSlot === this.anchorSlot &&
+            focusOffset === this.focusOffset &&
+            anchorOffset === this.anchorOffset) {
             return
           }
           this.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)

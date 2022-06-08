@@ -43,7 +43,12 @@ export class Keyboard {
     const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\\])/g, '\\$1')}]$`, 'i')
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
-    if (this.markdownDetect && !keymapState.ctrlKey && !keymapState.shiftKey && !keymapState.altKey && commonAncestorSlot === this.selection.startSlot && commonAncestorSlot === this.selection.endSlot) {
+    if (this.markdownDetect &&
+      !keymapState.ctrlKey &&
+      !keymapState.shiftKey &&
+      !keymapState.altKey &&
+      commonAncestorSlot === this.selection.startSlot &&
+      commonAncestorSlot === this.selection.endSlot) {
       for (const item of this.markdownMatchers) {
         const markdownConfig = item.markdownInterceptor
         const matchKey = Array.isArray(markdownConfig.key) ?

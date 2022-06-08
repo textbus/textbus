@@ -426,7 +426,13 @@ export const preComponent = defineComponent({
       isStop = false
     })
 
-    const slotList = formatCodeLines((data.slots || [createCodeSlot()]).map(i => i.toString()), false, blockCommentStartString, blockCommentEndString, languageGrammar)
+    const slotList = formatCodeLines(
+      (data.slots || [createCodeSlot()]).map(i => i.toString()),
+      false,
+      blockCommentStartString,
+      blockCommentEndString,
+      languageGrammar
+    )
     const slots = useSlots(slotList)
 
     let isStop = false
@@ -568,7 +574,13 @@ export const preComponent = defineComponent({
       const index = slots.indexOf(target)
       if (codeList.length) {
         slots.retain(index + 1)
-        const slotList = formatCodeLines(codeList, !target.state.blockCommentEnd, blockCommentStartString, blockCommentEndString, languageGrammar)
+        const slotList = formatCodeLines(
+          codeList,
+          !target.state.blockCommentEnd,
+          blockCommentStartString,
+          blockCommentEndString,
+          languageGrammar
+        )
         const last = slotList[slotList.length - 1]
         slots.insert(...slotList)
         selection.setPosition(last, last.index)
@@ -621,7 +633,9 @@ export const preComponent = defineComponent({
 
 export const preComponentLoader: ComponentLoader = {
   resources: {
-    styles: [`
+    styles: [
+      /* eslint-disable */
+      `
     code, .tb-pre {background-color: #fefefe;}
    .tb-pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}

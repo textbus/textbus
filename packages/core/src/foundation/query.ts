@@ -79,7 +79,9 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Extends extends ComponentExtends, T>(component: Component<ComponentInstance<Extends, T>>): QueryState<ComponentInstance<Extends, T>> {
+  queryWrappedComponent<Extends extends ComponentExtends, T>(
+    component: Component<ComponentInstance<Extends, T>>
+  ): QueryState<ComponentInstance<Extends, T>> {
     const selection = this.selection
     if (!selection.isSelected ||
       selection.isCollapsed ||
@@ -106,7 +108,9 @@ export class Query {
   private getStatesByRange(slot: Slot, formatter: Formatter, startIndex: number, endIndex: number): QueryState<FormatValue> | null {
 
     if (startIndex === endIndex) {
-      const format = startIndex === 0 ? slot.getFormatRangesByFormatter(formatter, 0, 1).shift() : slot.getFormatRangesByFormatter(formatter, startIndex - 1, endIndex).shift()
+      const format = startIndex === 0 ?
+        slot.getFormatRangesByFormatter(formatter, 0, 1).shift() :
+        slot.getFormatRangesByFormatter(formatter, startIndex - 1, endIndex).shift()
       if (format) {
         return {
           state: QueryStateType.Enabled,
