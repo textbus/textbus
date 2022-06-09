@@ -110,9 +110,9 @@ export class Viewer {
       components: (options.componentLoaders || []).map(i => i.component),
       formatters: (options.formatLoaders || []).map(i => i.formatter),
       providers: [
+        ...(options.providers || []),
         ...staticProviders,
         ...this.defaultPlugins,
-        ...(options.providers || []),
         DomRenderer,
         Parser,
         Input,
