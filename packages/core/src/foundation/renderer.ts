@@ -806,26 +806,17 @@ export class Renderer {
         return
       }
       if (key === 'ref') {
-        if (Array.isArray(value)) {
-          value.push(el)
-        } else if (value) {
-          (value as Ref<any>).current = el
+        if (value instanceof Ref) {
+          value.current = el
         }
         return
       }
-      if (value === false) {
-        return
-      }
-      if (value === true) {
-        el[key] = true
-        return
-      }
-      el.setAttribute(key, value + '')
+      this.nativeRenderer.setAttribute(el, key, value)
     })
     vDom.styles.forEach((value, key) => {
-      el.style[key] = value
+      this.nativeRenderer.setStyle(el, key, value)
     })
-    vDom.classes.forEach(k => el.classList.add(k))
+    vDom.classes.forEach(k => this.nativeRenderer.addClass(el, k))
 
     Object.keys(vDom.listeners).forEach(type => {
       this.nativeRenderer.listen(el, type, vDom.listeners[type])

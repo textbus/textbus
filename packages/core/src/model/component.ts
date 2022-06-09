@@ -177,8 +177,8 @@ export interface ChangeController<T> {
   update(fn: (draft: Draft<T>) => void): T
 }
 
-export interface Ref<T> {
-  current: T | null
+export class Ref<T> {
+  current: T | null = null
 }
 
 export interface InsertEventData {
@@ -450,9 +450,7 @@ export function useState<T>(initState: T) {
  * 组件单元素引用勾子
  */
 export function useRef<T>() {
-  return {
-    current: null
-  } as Ref<T>
+  return new Ref<T>()
 }
 
 /**
