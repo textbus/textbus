@@ -61,9 +61,17 @@ export class SelectionBridge implements NativeSelectionBridge {
     })
     this.sub.add(
       fromEvent(document, 'focusin').subscribe(ev => {
-        const target = ev.target as HTMLElement
-        if (/^(input|textarea|select)$/i.test(target.nodeName) || target.contentEditable === 'true') {
+        let target = ev.target as HTMLElement
+        if (/^(input|textarea|select)$/i.test(target.nodeName)) {
           this.ignoreSelectionChange = true
+          return
+        }
+        while (target) {
+          if (target.contentEditable === 'true') {
+            this.ignoreSelectionChange = true
+            return
+          }
+          target = target.parentNode as HTMLElement
         }
       })
     )
@@ -286,7 +294,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     const selection = this.nativeSelection
     this.subs.push(
       fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
-        if (ev.button === 2) {
+        if (this.ignoreSelectionChange || ev.button === 2) {
           return
         }
         selection.removeAllRanges()
