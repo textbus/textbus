@@ -116,8 +116,8 @@ export class SelectionBridge implements NativeSelectionBridge {
     return getLayoutRectByRange(nativeRange)
   }
 
-  restore(range: TBRange | null) {
-    this.changeFromUser = false
+  restore(range: TBRange | null, formLocal: boolean) {
+    this.changeFromUser = formLocal
     if (this.ignoreSelectionChange || !this.connector) {
       return
     }

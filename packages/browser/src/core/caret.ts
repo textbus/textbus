@@ -128,6 +128,7 @@ export class Caret {
       }
     } else {
       this.display = false
+      clearTimeout(this.timer)
       this.positionChangeEvent.next(null)
     }
   }

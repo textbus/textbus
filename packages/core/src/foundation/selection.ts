@@ -74,8 +74,9 @@ export abstract class NativeSelectionBridge {
   /**
    * Textbus 选区变化时调用，同时传入选区位置，用于原生选区实现具体平台的拖蓝效果
    * @param range
+   * @param changeFromLocal 是否是本地引起的变化
    */
-  abstract restore(range: Range | null): void
+  abstract restore(range: Range | null, changeFromLocal: boolean): void
 
   /**
    * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
@@ -604,7 +605,7 @@ export class Selection {
   /**
    * 立即同步 Textbus 选区到原生选区
    */
-  restore() {
+  restore(fromLocal = true) {
     if (this.nativeSelectionDelegate) {
       const focusSlot = this.focusSlot!
       const focusOffset = this.focusOffset!
@@ -618,9 +619,9 @@ export class Selection {
           focusSlot: focusSlot,
           anchorOffset: anchorOffset,
           anchorSlot: anchorSlot
-        })
+        }, fromLocal)
       } else {
-        this.bridge.restore(null)
+        this.bridge.restore(null, fromLocal)
       }
     }
     this.broadcastChanged()

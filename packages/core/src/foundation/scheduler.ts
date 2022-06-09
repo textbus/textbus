@@ -54,7 +54,7 @@ export class Scheduler {
         microTask()
       ).subscribe(ops => {
         this.renderer.render()
-        this.selection.restore()
+        this.selection.restore(this.hasLocalUpdate)
         this._hasLocalUpdate = false
         const operations = ops.filter(i => i)
         if (operations.length) {
