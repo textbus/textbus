@@ -1,6 +1,16 @@
 import { filter, fromEvent, map, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { AttributeFormatter, Commander, ContentType, FormatType, jsx, Keyboard, Selection, Slot } from '@textbus/core'
+import {
+  AttributeFormatter,
+  Commander,
+  ContentType,
+  Formats,
+  FormatType,
+  jsx,
+  Keyboard,
+  Selection,
+  Slot
+} from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { Parser } from '../dom-support/parser'
@@ -214,6 +224,7 @@ export class Input {
   private handleInput(textarea: HTMLTextAreaElement) {
     let index: number
     let offset = 0
+    let formats: Formats = []
     this.subscription.add(
       fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
         filter(ev => {
@@ -233,26 +244,23 @@ export class Input {
         }
       }),
       fromEvent(textarea, 'compositionstart').subscribe(() => {
+        const startSlot = this.selection.startSlot!
+        formats = startSlot.extractFormatsByIndex(this.selection.startOffset!)
         this.commander.write('')
         index = this.selection.startOffset!
       }),
       fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe((ev) => {
+        const text = ev.data
         const startSlot = this.selection.startSlot!
         this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-        this.commander.write(ev.data, this.inputFormatter, true)
-        offset = ev.data.length
+        this.commander.insert(text, formats)
+        offset = text.length
       }),
       fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe((ev) => {
-        ev.preventDefault()
         textarea.value = ''
         const startSlot = this.selection.startSlot!
-        startSlot.applyFormat(this.inputFormatter, {
-          startIndex: 0,
-          endIndex: startSlot.length,
-          value: null
-        })
         this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-        this.commander.write(ev.data)
+        this.commander.insert(ev.data, formats.filter(i => i[0] !== this.inputFormatter))
         offset = 0
       })
     )

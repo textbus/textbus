@@ -3,6 +3,8 @@ import { Slot } from './slot'
 
 export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
 
+export type Formats = [formatter: Formatter, value: FormatValue][]
+
 export interface FormatRange {
   startIndex: number
   endIndex: number
@@ -228,6 +230,34 @@ export class Format {
       })
     }
     return this
+  }
+
+  extractFormatsByIndex(index: number) {
+    const formats: Formats = []
+    if (index === 0) {
+      this.map.forEach((ranges, formatter) => {
+        ranges.forEach(i => {
+          if (i.startIndex === 0) {
+            formats.push([
+              formatter,
+              i.value
+            ])
+          }
+        })
+      })
+    } else {
+      this.map.forEach((ranges, formatter) => {
+        ranges.forEach(i => {
+          if (i.startIndex < index && i.endIndex >= index) {
+            formats.push([
+              formatter,
+              i.value
+            ])
+          }
+        })
+      })
+    }
+    return formats
   }
 
   toGrid() {

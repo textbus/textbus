@@ -4,7 +4,7 @@ import { Draft, Patch, produce } from 'immer'
 import { ComponentInstance, ComponentLiteral } from './component'
 import { Action, ApplyAction } from './operation'
 import { Content } from './content'
-import { Format, FormatLiteral, FormatRange, FormatValue } from './format'
+import { Format, FormatLiteral, FormatRange, FormatValue, Formats } from './format'
 import { AttributeFormatter, BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { ChangeMarker } from './change-marker'
 
@@ -13,8 +13,6 @@ export enum ContentType {
   InlineComponent,
   BlockComponent
 }
-
-export type Formats = [formatter: Formatter, value: FormatValue][]
 
 export interface SlotLiteral<T = any> {
   schema: ContentType[]
@@ -532,6 +530,10 @@ export class Slot<T = any> {
    */
   getFormats() {
     return this.format.toArray()
+  }
+
+  extractFormatsByIndex(index: number) {
+    return this.format.extractFormatsByIndex(index)
   }
 
   /**

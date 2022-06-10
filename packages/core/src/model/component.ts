@@ -4,7 +4,8 @@ import { Injector } from '@tanbo/di'
 
 import { makeError } from '../_utils/make-error'
 import { VElement } from './element'
-import { ContentType, Formats, Slot, SlotLiteral } from './slot'
+import { ContentType, Slot, SlotLiteral } from './slot'
+import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
 
