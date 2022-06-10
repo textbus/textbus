@@ -1,4 +1,3 @@
-import { BehaviorSubject } from '@tanbo/stream'
 import { InjectionToken } from '@tanbo/di'
 
 import { BaseEditorOptions } from './types'
@@ -11,16 +10,14 @@ export const EDITOR_OPTIONS = new InjectionToken<BaseEditorOptions>('EDITOR_OPTI
 /**
  * 编辑器容器依赖注入 token
  */
-export const EDITOR_CONTAINER = new InjectionToken<HTMLElement>('EDITOR_CONTAINER')
+export const VIEW_CONTAINER = new InjectionToken<HTMLElement>('VIEW_CONTAINER')
 
 /**
  * 编辑器容器依赖注入 token
  */
-export const DOC_CONTAINER = new InjectionToken<HTMLElement>('DOC_CONTAINER')
+export const VIEW_DOCUMENT = new InjectionToken<HTMLElement>('VIEW_DOCUMENT')
 
 /**
  * 编辑器容器遮罩层 token
  */
-export const EDITOR_MASK = new InjectionToken<HTMLElement>('EDITOR_MASK')
-
-export const RESIZE_OBSERVER = new InjectionToken<BehaviorSubject<DOMRect>>('RESIZE_OBSERVER')
+export const VIEW_MASK = new InjectionToken<HTMLElement>('VIEW_MASK')

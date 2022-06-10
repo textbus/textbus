@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@tanbo/di'
 import { Scheduler } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
-import { EDITOR_MASK } from './injection-tokens'
+import { VIEW_MASK } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
   const {startContainer, startOffset} = range
@@ -71,7 +71,7 @@ export class Caret {
 
   constructor(
     private scheduler: Scheduler,
-    @Inject(EDITOR_MASK) private editorMask: HTMLElement) {
+    @Inject(VIEW_MASK) private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.asObservable().pipe(distinctUntilChanged())
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {

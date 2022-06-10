@@ -15,7 +15,7 @@ import {
 import {
   createElement,
   createTextNode,
-  EDITOR_CONTAINER,
+  VIEW_CONTAINER,
   Parser
 } from '@textbus/browser'
 import { I18n } from './i18n'
@@ -32,7 +32,7 @@ export class ContextMenu {
   private menu!: HTMLElement
   private submenu!: HTMLElement
 
-  constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
+  constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
               private i18n: I18n,
               private parser: Parser,
               private message: Message,

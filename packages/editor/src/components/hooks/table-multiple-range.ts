@@ -1,5 +1,5 @@
 import { debounceTime, Subscription } from '@tanbo/stream'
-import { createElement, EDITOR_CONTAINER, SelectionBridge } from '@textbus/browser'
+import { createElement, VIEW_CONTAINER, SelectionBridge } from '@textbus/browser'
 import {
   ChangeController, ComponentInstance,
   ContentType,
@@ -388,7 +388,7 @@ export function useTableMultipleRange(
   const nativeSelectionBridge = injector.get(SelectionBridge)
   const renderer = injector.get(Renderer)
   const selection = injector.get(Selection)
-  const editorContainer = injector.get(EDITOR_CONTAINER)
+  const editorContainer = injector.get(VIEW_CONTAINER)
   const animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1)
 
   const oldGetScopes = selection.getScopes

@@ -14,7 +14,7 @@ import {
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
-import { DOC_CONTAINER, EDITOR_MASK } from './injection-tokens'
+import { VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
 import { Input } from './input'
 
@@ -38,8 +38,8 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private changeFromUser = false
 
-  constructor(@Inject(DOC_CONTAINER) private docContainer: HTMLElement,
-              @Inject(EDITOR_MASK) private maskContainer: HTMLElement,
+  constructor(@Inject(VIEW_DOCUMENT) private docContainer: HTMLElement,
+              @Inject(VIEW_MASK) private maskContainer: HTMLElement,
               public caret: Caret,
               private rootComponentRef: RootComponentRef,
               private input: Input,

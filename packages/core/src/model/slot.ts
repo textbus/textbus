@@ -532,6 +532,10 @@ export class Slot<T = any> {
     return this.format.toArray()
   }
 
+  /**
+   * 提取 index 下标位置的格式
+   * @param index
+   */
   extractFormatsByIndex(index: number) {
     return this.format.extractFormatsByIndex(index)
   }

@@ -108,6 +108,7 @@ export class Collaborate implements History {
 
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
+    this.collaborateCursor.destroy()
   }
 
   private syncRootComponent() {

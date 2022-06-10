@@ -1,13 +1,14 @@
 import "./index.scss"
-import { createEditor, TableComponentCursorAwarenessDelegate } from '@textbus/editor';
+import { createEditor, Layout, TableComponentCursorAwarenessDelegate } from '@textbus/editor';
 import { RootComponentRef, Commander } from '@textbus/core';
 import {
-  Collaborate,
+  Collaborate, CollaborateCursor,
   CollaborateCursorAwarenessDelegate, collaborateModule,
   RemoteSelection
 } from '@textbus/collaborate';
 import { WebsocketProvider } from 'y-websocket'
 import { WebrtcProvider } from 'y-webrtc'
+import { fromEvent, merge } from '@tanbo/stream';
 
 const header = document.getElementById('header')!
 const insertBtn = document.getElementById('insert-btn')!
@@ -47,6 +48,8 @@ const editor = createEditor({
   setup(starter) {
     console.log('start...')
     const collaborate = starter.get(Collaborate)
+    const collaborateCursor = starter.get(CollaborateCursor)
+    const layout = starter.get(Layout)
 
     // const provide = new WebrtcProvider('textbus', collaborate.yDoc)
     const provide = new WebsocketProvider('wss://textbus.io/api', 'collab', collaborate.yDoc)
@@ -115,17 +118,20 @@ const editor = createEditor({
         return `<span style="color: ${i.color}">${i.name}</span>`
       }).join('')
     })
-    // return new Promise<() => void>((resolve) => {
-    //   provide.on('sync', (is: boolean) => {
-    //     if (is) {
-    //       console.log(collaborate.yDoc.toJSON())
-    //       resolve(() => {
-    //         provide.disconnect()
-    //         sub.unsubscribe()
-    //       })
-    //     }
-    //   })
-    // })
+    merge(fromEvent(layout.scroller, 'scroll'), fromEvent(document, 'scroll')).subscribe(() => {
+      collaborateCursor.refresh()
+    })
+    return new Promise<() => void>((resolve) => {
+      provide.on('sync', (is: boolean) => {
+        if (is) {
+          console.log(collaborate.yDoc.toJSON())
+          resolve(() => {
+            provide.disconnect()
+            sub.unsubscribe()
+          })
+        }
+      })
+    })
   }
 })
 console.log('start before')

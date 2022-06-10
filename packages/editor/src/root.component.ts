@@ -12,7 +12,7 @@ import {
   useSlots,
   VElement, onDestroy, useRef, onEnter, ComponentInstance, ComponentData
 } from '@textbus/core'
-import { ComponentLoader, DOC_CONTAINER, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
+import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
 import { paragraphComponent } from './components/paragraph.component'
 import { EditorOptions } from './types'
@@ -24,7 +24,7 @@ export const rootComponent = defineComponent({
     const injector = useContext()
     const selection = injector.get(Selection)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions
-    const docContainer = injector.get(DOC_CONTAINER)
+    const docContainer = injector.get(VIEW_DOCUMENT)
 
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,

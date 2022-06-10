@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Subject, Subscription } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Provider, Type } from '@tanbo/di'
 import {
   NativeRenderer,
@@ -21,10 +21,10 @@ import { createElement } from './_utils/uikit'
 import {
   BaseEditorOptions,
   Input,
-  EDITOR_CONTAINER,
+  VIEW_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, EDITOR_MASK, RESIZE_OBSERVER, DOC_CONTAINER, Caret
+  SelectionBridge, VIEW_MASK, VIEW_DOCUMENT, Caret
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 
@@ -72,26 +72,13 @@ export class Viewer {
       provide: EDITOR_OPTIONS,
       useValue: options
     }, {
-      provide: EDITOR_CONTAINER,
+      provide: VIEW_CONTAINER,
       useValue: wrapper
     }, {
-      provide: DOC_CONTAINER,
+      provide: VIEW_DOCUMENT,
       useValue: doc
     }, {
-      provide: RESIZE_OBSERVER,
-      useFactory: () => {
-        const subject = new BehaviorSubject<DOMRect>(wrapper.getBoundingClientRect())
-        const resizeObserver = new ResizeObserver(() => {
-          subject.next(wrapper.getBoundingClientRect())
-        })
-        resizeObserver.observe(wrapper)
-        this.subs.push(new Subscription(() => {
-          resizeObserver.disconnect()
-        }))
-        return subject
-      }
-    }, {
-      provide: EDITOR_MASK,
+      provide: VIEW_MASK,
       useValue: mask
     }, {
       provide: NativeRenderer,
@@ -138,7 +125,7 @@ export class Viewer {
     }
     const parser = starter.get(Parser)
     const translator = starter.get(Translator)
-    const doc = starter.get(DOC_CONTAINER)
+    const doc = starter.get(VIEW_DOCUMENT)
 
     let component: ComponentInstance
     const content = this.options.content
@@ -353,11 +340,17 @@ export class Viewer {
         minHeight,
         flex: 1
       },
+      attrs: {
+        'data-textbus-view': VIEW_DOCUMENT,
+      },
       props: {
         id
       }
     })
     const mask = createElement('div', {
+      attrs: {
+        'data-textbus-view': VIEW_MASK,
+      },
       styles: {
         position: 'absolute',
         left: 0,
@@ -370,6 +363,9 @@ export class Viewer {
       }
     })
     const wrapper = createElement('div', {
+      attrs: {
+        'data-textbus-view': VIEW_CONTAINER,
+      },
       styles: {
         display: 'flex',
         minHeight: '100%',

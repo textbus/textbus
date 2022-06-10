@@ -1,12 +1,12 @@
 import { Inject, Injectable, Optional } from '@tanbo/di'
 import {
   createElement,
-  EDITOR_CONTAINER,
+  VIEW_CONTAINER,
   getLayoutRectByRange,
   SelectionBridge
 } from '@textbus/browser'
 import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
-import { Subject } from '@tanbo/stream'
+import { Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
   color: string
@@ -40,7 +40,7 @@ export abstract class CollaborateCursorAwarenessDelegate {
 export class CollaborateCursor {
   private canvas = createElement('canvas', {
     styles: {
-      position: 'absolute',
+      position: 'fixed',
       opacity: 0.5,
       left: 0,
       top: 0,
@@ -65,12 +65,15 @@ export class CollaborateCursor {
 
   private onRectsChange = new Subject<SelectionRect[]>()
 
-  constructor(@Inject(EDITOR_CONTAINER) private container: HTMLElement,
+  private subscription = new Subscription()
+  private currentRemoteSelection: RemoteSelection[] = []
+
+  constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
               @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
     container.prepend(this.canvas, this.tooltips)
-    this.onRectsChange.subscribe(rects => {
+    this.subscription.add(this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
         this.context.fillStyle = rect.color
         this.context.beginPath()
@@ -78,25 +81,35 @@ export class CollaborateCursor {
         this.context.fill()
         this.context.closePath()
       }
-    })
+    }))
+  }
+
+  refresh() {
+    this.draw(this.currentRemoteSelection)
+  }
+
+  destroy() {
+    this.subscription.unsubscribe()
   }
 
   draw(paths: RemoteSelection[]) {
+    this.currentRemoteSelection = paths
     const containerRect = this.container.getBoundingClientRect()
-    this.canvas.width = containerRect.width
-    this.canvas.height = containerRect.height
+    this.canvas.width = this.canvas.offsetWidth
+    this.canvas.height = this.canvas.offsetHeight
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const users: SelectionRect[] = []
 
-
     paths.filter(i => {
       return i.paths.anchor.length && i.paths.focus.length
     }).forEach(item => {
-      const anchorOffset = item.paths.anchor.pop()!
-      const anchorSlot = this.selection.findSlotByPaths(item.paths.anchor)
-      const focusOffset = item.paths.focus.pop()!
-      const focusSlot = this.selection.findSlotByPaths(item.paths.focus)
+      const anchorPaths = [...item.paths.anchor]
+      const focusPaths = [...item.paths.focus]
+      const anchorOffset = anchorPaths.pop()!
+      const anchorSlot = this.selection.findSlotByPaths(anchorPaths)
+      const focusOffset = focusPaths.pop()!
+      const focusSlot = this.selection.findSlotByPaths(focusPaths)
       if (!anchorSlot || !focusSlot) {
         return
       }
@@ -136,8 +149,8 @@ export class CollaborateCursor {
         selectionRects.push({
           color: item.color,
           username: item.username,
-          x: rect.x - containerRect.x,
-          y: rect.y - containerRect.y,
+          x: rect.x,
+          y: rect.y,
           width: rect.width,
           height: rect.height,
         })
