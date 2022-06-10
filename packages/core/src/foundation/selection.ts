@@ -229,6 +229,7 @@ export class Selection {
       }),
       share()
     )
+    let selectedComponent: ComponentInstance | null = null
     this.subscriptions.push(
       this.onChange.pipe(
         map<any, ComponentInstance | null>(() => {
@@ -249,6 +250,16 @@ export class Selection {
       }),
       this.onChange.pipe(
         map(() => {
+          if (selectedComponent) {
+            let p = selectedComponent.parentComponent
+            while (p) {
+              if (p === root.component) {
+                invokeListener(selectedComponent, 'onUnselect')
+              }
+              p = p.parentComponent
+            }
+            selectedComponent = null
+          }
           if (!this.isSelected) {
             return null
           }
@@ -264,6 +275,7 @@ export class Selection {
       ).subscribe(component => {
         if (component) {
           invokeListener(component, 'onSelected')
+          selectedComponent = component
         }
       })
     )

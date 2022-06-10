@@ -237,6 +237,7 @@ export interface ContextMenuGroup {
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
 export interface EventTypes {
+  onUnselect: () => void
   onSelected: () => void
   onSelectionFromFront: (event: Event<null>) => void
   onSelectionFromEnd: (event: Event<null>) => void
@@ -519,6 +520,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContentI
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
@@ -554,6 +556,11 @@ function makeEventHook<T extends keyof EventTypes>(type: T) {
     }
   }
 }
+
+/**
+ * 当已选中组件未选中或选区不只选中已选中组件时触发
+ */
+export const onUnselect = makeEventHook('onUnselect')
 
 /**
  * 当选区刚好选中一个组件
