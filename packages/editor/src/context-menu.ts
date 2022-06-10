@@ -8,9 +8,10 @@ import {
   invokeListener,
   Renderer,
   Slot,
-  Event,
   Selection,
-  ContextMenuConfig, ContextMenuGroup
+  ContextMenuConfig,
+  ContextMenuGroup,
+  ContextMenuEvent
 } from '@textbus/core'
 import {
   createElement,
@@ -138,12 +139,17 @@ export class ContextMenu {
     }
     const menuItems: ContextMenuItem[][] = []
     while (component) {
+      const event = new ContextMenuEvent<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
+        menuItems.push(...menus)
+      })
       invokeListener(
         component as ComponentInstance,
         'onContextMenu',
-        new Event<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
-          menuItems.push(...menus)
-        }))
+        event
+      )
+      if (event.stopped) {
+        break
+      }
       component = component.parent?.parent || null
     }
     return menuItems

@@ -250,7 +250,7 @@ export interface EventTypes {
   onEnter: (event: Event<EnterEventData>) => void
   onContentDelete: (event: Event<DeleteEventData>) => void
   onSlotRemove: (event: Event<null>) => void
-  onContextMenu: (event: Event<null>) => ContextMenuConfig[]
+  onContextMenu: (event: ContextMenuEvent<null>) => ContextMenuConfig[]
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
@@ -505,6 +505,18 @@ export class Event<T, S extends Slot = Slot> {
   }
 }
 
+export class ContextMenuEvent<T, S extends Slot = Slot> extends Event<T, S> {
+  get stopped() {
+    return this.isStopped
+  }
+
+  private isStopped = false
+
+  stopPropagation() {
+    this.isStopped = true
+  }
+}
+
 /**
  * 触发组件事件的方法
  * @param target 目标组件
@@ -518,7 +530,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemo
 export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<EnterEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
