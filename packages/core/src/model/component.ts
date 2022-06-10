@@ -93,6 +93,8 @@ export interface ComponentInstance<Extends extends ComponentExtends = ComponentE
   parentComponent: ComponentInstance | null
   /** 组件变化标识器 */
   changeMarker: ChangeMarker
+  /** 组件是否可拆分 */
+  separable: boolean
   /** 组件名 */
   name: string
   /** 组件长度，固定为 1 */
@@ -136,6 +138,8 @@ export interface ComponentOptions<Extends extends ComponentExtends, State> {
   name: string
   /** 组件类型 */
   type: ContentType
+  /** 组件是否可拆分 */
+  separable?: boolean
 
   /** markdown 支持 */
   markdownSupport?: MarkdownGrammarInterceptor<ComponentData<State>>
@@ -153,6 +157,8 @@ export interface ComponentOptions<Extends extends ComponentExtends, State> {
 export interface Component<Instance extends ComponentInstance = ComponentInstance, State = any> {
   /** 组件名 */
   name: string
+  /** 组件是否可拆分 */
+  separable: boolean
 
   markdownSupport?: MarkdownGrammarInterceptor<State>
 
@@ -286,8 +292,17 @@ function getCurrentContext() {
   return contextStack[contextStack.length - 1] || null
 }
 
+/**
+ * 提取组件的实例类型
+ */
 export type ExtractComponentInstanceType<T> = T extends Component<infer S> ? S : never
+/**
+ * 提取组件扩展类型
+ */
 export type ExtractComponentInstanceExtendsType<T> = T extends Component<ComponentInstance<infer S>> ? S : never
+/**
+ * 提取组件状态类型
+ */
 export type ExtractComponentStateType<T> = T extends Component<ComponentInstance<any, infer S>> ? S : never
 
 /**
@@ -296,8 +311,10 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
  */
 export function defineComponent<Extends extends ComponentExtends,
   State = any>(options: ComponentOptions<Extends, State>): Component<ComponentInstance<Extends, State>, ComponentData<State>> {
+  const separable = Reflect.has(options, 'separable') ? !!options.separable : true
   return {
     name: options.name,
+    separable,
     markdownSupport: options.markdownSupport,
     createInstance(contextInjector: Injector, initData?: ComponentData<State>) {
       const marker = new ChangeMarker()
@@ -315,6 +332,7 @@ export function defineComponent<Extends extends ComponentExtends,
       const componentInstance: ComponentInstance<Extends, State> = {
         changeMarker: marker,
         parent: null,
+        separable,
         get parentComponent() {
           return componentInstance.parent?.parent || null
         },
@@ -484,7 +502,6 @@ export class Event<T, S extends Slot = Slot> {
     isPreventDefault = true
   }
 }
-
 
 /**
  * 触发组件事件的方法

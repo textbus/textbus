@@ -88,6 +88,7 @@ export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwar
 export const tableComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TableComponent',
+  separable: false,
   setup(data: ComponentData<TableConfig> = {
     slots: Array.from({length: 9}).fill(null).map(() => createCell()),
     state: {

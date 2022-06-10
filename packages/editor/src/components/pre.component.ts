@@ -297,6 +297,7 @@ export function createCodeSlot() {
 export const preComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'PreComponent',
+  separable: false,
   markdownSupport: {
     key: 'Enter',
     match(c: string) {
