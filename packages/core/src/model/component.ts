@@ -185,7 +185,8 @@ export interface ChangeController<T> {
 }
 
 export class Ref<T> {
-  current: T | null = null
+  constructor(public current: T | null = null) {
+  }
 }
 
 export interface InsertEventData {
@@ -222,7 +223,7 @@ export interface ContextMenuCustomItem<T = unknown> {
   value?: T
   disabled?: boolean
 
-  validate?(value: T): true | 'string'
+  validate?(value: T): true | string
 
   onComplete(value: T): void
 }
@@ -249,7 +250,7 @@ export interface EventTypes {
   onEnter: (event: Event<EnterEventData>) => void
   onContentDelete: (event: Event<DeleteEventData>) => void
   onSlotRemove: (event: Event<null>) => void
-  onContextMenu: (event: Event<null>) => (ContextMenuConfig)[]
+  onContextMenu: (event: Event<null>) => ContextMenuConfig[]
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
@@ -469,8 +470,8 @@ export function useState<T>(initState: T) {
 /**
  * 组件单元素引用勾子
  */
-export function useRef<T>() {
-  return new Ref<T>()
+export function useRef<T>(initValue: T | null = null) {
+  return new Ref<T>(initValue)
 }
 
 /**

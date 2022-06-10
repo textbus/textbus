@@ -355,8 +355,10 @@ export class Renderer {
 
 
     oldChildren.forEach(i => {
-      const native = this.nativeNodeCaches.get(i)!
-      this.nativeRenderer.remove(native)
+      const native = this.nativeNodeCaches.get(i)
+      if (native) {
+        this.nativeRenderer.remove(native)
+      }
     })
 
     return [
