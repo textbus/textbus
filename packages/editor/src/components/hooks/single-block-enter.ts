@@ -2,7 +2,6 @@ import { Injector } from '@tanbo/di'
 import { onEnter, Slots, Selection, useSelf } from '@textbus/core'
 
 import { paragraphComponent } from '../paragraph.component'
-import { blockquoteComponent } from '../blockquote.component'
 import { linkFormatter } from '../../formatters/link.formatter'
 
 /**
@@ -39,8 +38,7 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
       ['BlockComponent', 'ParagraphComponent', 'HeadingComponent'].includes(beforeComponent.name) &&
       beforeComponent.slots.get(0)?.isEmpty &&
       currentSlot.isEmpty &&
-      nextSlot.isEmpty &&
-      parentSlot.parent?.name === blockquoteComponent.name) {
+      nextSlot.isEmpty) {
       // 当当前插槽为空，且新换行的插槽和前一个组件的插槽都为空，则删除当前组件和前一个组件，同时跳出上层组件，并且把新的段落插入在上层组件之后。
       const host = parentSlot.parentSlot
       if (host) {

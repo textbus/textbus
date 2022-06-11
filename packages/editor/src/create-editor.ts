@@ -104,6 +104,7 @@ export const defaultOptions: EditorOptions = {
 export const defaultTools: ToolFactory[][] = [
   [historyBackTool, historyForwardTool],
   [defaultGroupTool],
+  [componentsTool],
   [headingTool],
   [boldTool, italicTool, strikeThroughTool, underlineTool],
   [olTool, ulTool],
@@ -115,7 +116,6 @@ export const defaultTools: ToolFactory[][] = [
   [imageTool],
   [textAlignTool],
   [tableAddTool, tableRemoveTool],
-  [componentsTool],
   [cleanTool]
 ]
 

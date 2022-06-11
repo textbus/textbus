@@ -1,10 +1,15 @@
 import {
+  Commander,
   ComponentData,
   ComponentInstance,
   ContentType,
   defineComponent,
   onDestroy,
-  Slot, useContext,
+  onEnter,
+  Selection,
+  Slot,
+  useContext,
+  useSelf,
   useSlots,
   useState,
   VElement
@@ -15,6 +20,7 @@ import { Dialog } from '../dialog'
 import { Form, FormTextField } from '../uikit/forms/_api'
 import { FileUploader } from '../file-uploader'
 import { I18n } from '../i18n'
+import { paragraphComponent } from './paragraph.component'
 
 export interface ImageCardComponentState {
   src: string
@@ -36,6 +42,8 @@ export const imageCardComponent = defineComponent({
     const stateController = useState(state)
     const injector = useContext()
     const dialog = injector.get(Dialog)
+    const commander = injector.get(Commander)
+    const selection = injector.get(Selection)
     const i18n = injector.get(I18n)
     const fileUploader = injector.get(FileUploader)
     const slots = useSlots(initData?.slots || [])
@@ -56,6 +64,20 @@ export const imageCardComponent = defineComponent({
       sub.unsubscribe()
     })
 
+    const self = useSelf()
+    onEnter(ev => {
+      const slot = ev.target.cutTo(new Slot([
+        ContentType.InlineComponent,
+        ContentType.Text
+      ]), ev.data.index)
+      const component = paragraphComponent.createInstance(injector, {
+        slots: [slot]
+      })
+      commander.insertAfter(component, self)
+      ev.preventDefault()
+      selection.selectFirstPosition(component)
+    })
+
     const childI18n = i18n.getContext('components.imageCardComponent.setting')
 
     function showForm() {
@@ -69,7 +91,7 @@ export const imageCardComponent = defineComponent({
             uploadType: 'image',
             canUpload: true,
             value: state.src,
-            name: 'image',
+            name: 'src',
             placeholder: childI18n.get('srcPlaceholder'),
             fileUploader
           }),

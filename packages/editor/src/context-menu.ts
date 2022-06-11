@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Injector } from '@tanbo/di'
 import { fromEvent, Subscription } from '@tanbo/stream'
 import {
   Commander,
@@ -11,7 +11,7 @@ import {
   Selection,
   ContextMenuConfig,
   ContextMenuGroup,
-  ContextMenuEvent
+  ContextMenuEvent, RootComponentRef
 } from '@textbus/core'
 import {
   createElement,
@@ -21,6 +21,7 @@ import {
 } from '@textbus/browser'
 import { I18n } from './i18n'
 import { Message } from './message'
+import { paragraphComponent } from './components/paragraph.component'
 
 @Injectable()
 export class ContextMenu {
@@ -34,6 +35,8 @@ export class ContextMenu {
   private submenu!: HTMLElement
 
   constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
+              private injector: Injector,
+              private rootComponentRef: RootComponentRef,
               private i18n: I18n,
               private parser: Parser,
               private message: Message,
@@ -111,7 +114,34 @@ export class ContextMenu {
         this.menu = this.show([
             ...menus,
             defaultMenus,
-          ], ev.clientX, ev.clientY,
+            [{
+              label: this.i18n.get('editor.insertParagraphBefore'),
+              iconClasses: ['textbus-icon-insert-paragraph-before'],
+              disabled: this.selection.commonAncestorComponent === this.rootComponentRef.component,
+              onClick: () => {
+                const component = paragraphComponent.createInstance(this.injector)
+                const ref = this.selection.commonAncestorComponent
+                if (ref) {
+                  this.commander.insertBefore(component, ref)
+                  this.selection.selectFirstPosition(component)
+                }
+              }
+            }, {
+              label: this.i18n.get('editor.insertParagraphAfter'),
+              iconClasses: ['textbus-icon-insert-paragraph-after'],
+              disabled: this.selection.commonAncestorComponent === this.rootComponentRef.component,
+              onClick: () => {
+                const component = paragraphComponent.createInstance(this.injector)
+                const ref = this.selection.commonAncestorComponent
+                if (ref) {
+                  this.commander.insertAfter(component, ref)
+                  this.selection.selectFirstPosition(component)
+                }
+              }
+            }]
+          ],
+          ev.clientX,
+          ev.clientY,
           this.menuSubscriptions
         )
         ev.preventDefault()

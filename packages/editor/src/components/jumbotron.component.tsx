@@ -88,6 +88,7 @@ export const jumbotronComponent = defineComponent({
           new FormTextField({
             label: childI18n.get('backgroundImageLabel'),
             name: 'backgroundImage',
+            value: state.backgroundImage,
             placeholder: childI18n.get('backgroundImageInputPlaceholder'),
             canUpload: true,
             uploadType: 'image',
@@ -162,7 +163,7 @@ tb-jumbotron {
     ],
     editModeStyles: [
       // eslint-disable-next-line max-len
-      '.tb-jumbotron-setting { font-size: 14px;position: absolute; right: 10px; top: 10px; background: #eee; box-shadow: 1px 2px 3px rgba(0,0,0,.1); color: #333; border: 0; outline: none; cursor: pointer;}.tb-jumbotron-setting:hover{color: #1296db}'
+      '.tb-jumbotron-setting { border-radius: 4px; font-size: 14px;position: absolute; right: 10px; top: 10px; background: #eee; box-shadow: 1px 2px 3px rgba(0,0,0,.1); color: #333; border: 0; outline: none; cursor: pointer;}.tb-jumbotron-setting:hover{color: #1296db}'
     ]
   },
   match(element: HTMLElement): boolean {

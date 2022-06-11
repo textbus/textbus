@@ -155,7 +155,7 @@ tb-word-explain {
 .tb-word-explain-detail {
   flex: 1;
   padding-left: 20px;
-  border-left: 1px dashed #ddd;
+  border-left: 1px solid #ddd;
 }
 @media screen and (max-width: 767px) {
   tb-word-explain {
@@ -168,7 +168,6 @@ tb-word-explain {
     align-items: baseline;
     padding-bottom: 0.5em;
     margin-bottom: 0.5em;
-    border-bottom: 1px dashed #ddd;
   }
   .tb-word-explain-subtitle {
     margin-left: 0.5em;

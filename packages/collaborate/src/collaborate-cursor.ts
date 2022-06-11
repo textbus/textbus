@@ -38,6 +38,27 @@ export abstract class CollaborateCursorAwarenessDelegate {
 
 @Injectable()
 export class CollaborateCursor {
+  private host = createElement('div', {
+    styles: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: 1
+    }
+  })
+  private canvasContainer = createElement('div', {
+    styles: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden'
+    }
+  })
   private canvas = createElement('canvas', {
     styles: {
       position: 'absolute',
@@ -47,7 +68,6 @@ export class CollaborateCursor {
       width: '100%',
       height: document.documentElement.clientHeight + 'px',
       pointerEvents: 'none',
-      zIndex: 1
     }
   }) as HTMLCanvasElement
   private context = this.canvas.getContext('2d')!
@@ -73,7 +93,9 @@ export class CollaborateCursor {
               @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
-    container.prepend(this.canvas, this.tooltips)
+    this.canvasContainer.append(this.canvas)
+    this.host.append(this.canvasContainer, this.tooltips)
+    container.prepend(this.host)
     this.subscription.add(this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
         this.context.fillStyle = rect.color

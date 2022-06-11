@@ -8,14 +8,12 @@ export const i18n_en_US: I18NConfig = {
     paste: 'paste',
     cut: 'cut',
     selectAll: 'select all',
+    insertParagraphAfter: 'insert paragraph to after',
+    insertParagraphBefore: 'insert paragraph to before',
     input: {
       canNotAccessClipboard: 'can not access to the clipboard!'
     },
-    controlPanel: {
-      cancelFixed: 'cancel fixed',
-      fixed: 'fixed'
-    },
-    noUploader: 'please add upload function to editor options!'
+    noUploader: 'please add upload function to editor options!',
   },
   /** core library dependency end */
   /** optional config */
