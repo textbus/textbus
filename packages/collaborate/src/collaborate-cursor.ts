@@ -84,8 +84,12 @@ export class CollaborateCursor {
       }
     }), fromEvent(window, 'resize').subscribe(() => {
       this.canvas.style.height = document.documentElement.clientHeight + 'px'
-      this.draw(this.currentSelection)
+      this.refresh()
     }))
+  }
+
+  refresh() {
+    this.draw(this.currentSelection)
   }
 
   destroy() {
