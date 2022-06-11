@@ -6,7 +6,7 @@ import {
   SelectionBridge
 } from '@textbus/browser'
 import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
-import { Subject, Subscription } from '@tanbo/stream'
+import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
   color: string
@@ -40,13 +40,14 @@ export abstract class CollaborateCursorAwarenessDelegate {
 export class CollaborateCursor {
   private canvas = createElement('canvas', {
     styles: {
-      position: 'fixed',
+      position: 'absolute',
       opacity: 0.5,
       left: 0,
       top: 0,
       width: '100%',
-      height: '100%',
-      pointerEvents: 'none'
+      height: document.documentElement.clientHeight + 'px',
+      pointerEvents: 'none',
+      zIndex: 1
     }
   }) as HTMLCanvasElement
   private context = this.canvas.getContext('2d')!
@@ -66,7 +67,7 @@ export class CollaborateCursor {
   private onRectsChange = new Subject<SelectionRect[]>()
 
   private subscription = new Subscription()
-  private currentRemoteSelection: RemoteSelection[] = []
+  private currentSelection: RemoteSelection[] = []
 
   constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
               @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
@@ -81,11 +82,10 @@ export class CollaborateCursor {
         this.context.fill()
         this.context.closePath()
       }
+    }), fromEvent(window, 'resize').subscribe(() => {
+      this.canvas.style.height = document.documentElement.clientHeight + 'px'
+      this.draw(this.currentSelection)
     }))
-  }
-
-  refresh() {
-    this.draw(this.currentRemoteSelection)
   }
 
   destroy() {
@@ -93,8 +93,9 @@ export class CollaborateCursor {
   }
 
   draw(paths: RemoteSelection[]) {
-    this.currentRemoteSelection = paths
+    this.currentSelection = paths
     const containerRect = this.container.getBoundingClientRect()
+    this.canvas.style.top = containerRect.y * -1 + 'px'
     this.canvas.width = this.canvas.offsetWidth
     this.canvas.height = this.canvas.offsetHeight
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -149,7 +150,7 @@ export class CollaborateCursor {
         selectionRects.push({
           color: item.color,
           username: item.username,
-          x: rect.x,
+          x: rect.x - containerRect.x,
           y: rect.y,
           width: rect.width,
           height: rect.height,

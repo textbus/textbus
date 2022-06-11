@@ -118,9 +118,9 @@ const editor = createEditor({
         return `<span style="color: ${i.color}">${i.name}</span>`
       }).join('')
     })
-    merge(fromEvent(layout.scroller, 'scroll'), fromEvent(document, 'scroll')).subscribe(() => {
-      collaborateCursor.refresh()
-    })
+    // merge(fromEvent(layout.scroller, 'scroll'), fromEvent(document, 'scroll')).subscribe(() => {
+    //   collaborateCursor.refresh()
+    // })
     return new Promise<() => void>((resolve) => {
       provide.on('sync', (is: boolean) => {
         if (is) {
