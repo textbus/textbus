@@ -348,36 +348,13 @@ export const i18n_zh_CN: I18NConfig = {
           videoHeightInputPlaceholder: '支持任意 CSS 单位',
           autoplayLabel: '自动播放'
         }
-      }
-    },
-    componentStage: {
-      switchText: '组件库',
-      expandOrNarrowLib: '展开或收起组件库',
-      defaultCategoryName: '默认'
-    },
-    contextmenu: {
-      insertParagraphAfter: '在后面插入段落',
-      insertParagraphBefore: '在前面插入段落',
-    },
-    device: {
-      title: '切换设备宽度',
-      unknownDeviceText: '未知设备'
-    },
-    fullScreen: {
-      switchFullScreen: '切换全屏模式'
+      },
+      componentsTool: {
+        tooltip: '组件库',
+      },
     },
     linkJump: {
       accessLink: '跳转'
-    },
-    localBackup: {
-      title: '本地缓存',
-      confirmBtnText: '确定',
-      cancelBtnText: '取消',
-      tooltip: '检测到有本地缓存，是否应用？'
-    },
-    outlines: {
-      title: '概览',
-      switchText: '概览'
     },
     pasteHandle: {
       title: '资源上传',
@@ -390,10 +367,7 @@ export const i18n_zh_CN: I18NConfig = {
       imagePlaceholder: '请输入图片地址',
       videoPlaceholder: '请输入视频地址',
       audioPlaceholder: '请输入音频地址',
-    },
-    sourcecodeMode: {
-      switchText: '源代码'
-    },
+    }
   },
   components: {
     tableComponent: {

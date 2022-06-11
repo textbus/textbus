@@ -9,33 +9,34 @@ export function verticalAlignToolConfigFactory(injector: Injector): SelectToolCo
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
   const commander = injector.get(Commander)
+  const childI18n = i18n.getContext('plugins.toolbar.verticalAlignTool')
   return {
-    tooltip: i18n.get('plugins.toolbar.verticalAlignTool.tooltip'),
+    tooltip: childI18n.get('tooltip'),
     mini: true,
     options: [{
-      label: i18n.get('plugins.toolbar.verticalAlignTool.baseline'),
+      label: childI18n.get('baseline'),
       value: 'baseline',
       default: true
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.super'),
+      label: childI18n.get('super'),
       value: 'super'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.sub'),
+      label: childI18n.get('sub'),
       value: 'sub'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.top'),
+      label: childI18n.get('top'),
       value: 'top'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.middle'),
+      label: childI18n.get('middle'),
       value: 'middle'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.bottom'),
+      label: childI18n.get('bottom'),
       value: 'bottom'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.textTop'),
+      label: childI18n.get('textTop'),
       value: 'text-top'
     }, {
-      label: i18n.get('plugins.toolbar.verticalAlignTool.textBottom'),
+      label: childI18n.get('textBottom'),
       value: 'text-bottom'
     }],
     queryState(): QueryState<FormatValue> {

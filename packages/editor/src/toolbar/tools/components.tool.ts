@@ -175,7 +175,7 @@ export function componentsToolConfigFactory(injector: Injector): DropdownToolCon
 
   return {
     iconClasses: ['textbus-icon-components'],
-    tooltip: i18n.get('plugins.toolbar.components.tooltip'),
+    tooltip: i18n.get('plugins.toolbar.componentsTool.tooltip'),
     viewController: {
       elementRef,
       onComplete,

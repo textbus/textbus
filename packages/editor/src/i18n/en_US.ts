@@ -348,36 +348,13 @@ export const i18n_en_US: I18NConfig = {
           videoHeightInputPlaceholder: 'support CSS unit',
           autoplayLabel: 'autoplay'
         }
-      }
-    },
-    componentStage: {
-      switchText: 'component library',
-      expandOrNarrowLib: 'expand or narrow component library',
-      defaultCategoryName: 'default'
-    },
-    contextmenu: {
-      insertParagraphAfter: 'insert paragraph after',
-      insertParagraphBefore: 'insert paragraph before',
-    },
-    device: {
-      title: 'switch device width',
-      unknownDeviceText: 'unknown device'
-    },
-    fullScreen: {
-      switchFullScreen: 'switch full screen'
+      },
+      componentsTool: {
+        tooltip: 'component library',
+      },
     },
     linkJump: {
       accessLink: 'open'
-    },
-    localBackup: {
-      title: 'local backup',
-      confirmBtnText: 'yes',
-      cancelBtnText: 'no',
-      tooltip: 'local cache detected, do you want to apply?'
-    },
-    outlines: {
-      title: 'outline',
-      switchText: 'outline'
     },
     pasteHandle: {
       title: 'source upload',
@@ -390,10 +367,7 @@ export const i18n_en_US: I18NConfig = {
       imagePlaceholder: 'please enter image URL',
       videoPlaceholder: 'please enter video URL',
       audioPlaceholder: 'please enter audio URL',
-    },
-    sourcecodeMode: {
-      switchText: 'source code'
-    },
+    }
   },
   components: {
     tableComponent: {
