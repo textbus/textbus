@@ -34,7 +34,7 @@ export const listComponent = defineComponent({
   name: 'ListComponent',
   markdownSupport: {
     key: ' ',
-    match: /^(1\.|[-+*])$/,
+    match: /^(1\.|[+*])$/,
     generateInitData(content: string) {
       return {
         state: /[-+*]/.test(content) ? 'ul' : 'ol'

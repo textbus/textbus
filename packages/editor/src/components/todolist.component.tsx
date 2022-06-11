@@ -6,7 +6,9 @@ import {
   defineComponent,
   onEnter,
   Selection,
-  Slot, useContext, useSelf,
+  Slot,
+  useContext,
+  useSelf,
   useSlots,
   VElement
 } from '@textbus/core'
@@ -23,6 +25,24 @@ export interface TodoListSlotState {
 export const todolistComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TodolistComponent',
+  markdownSupport: {
+    match: /^-\s\[(x|\s)?\]$/,
+    key: ' ',
+    generateInitData(content: string): ComponentData<void, TodoListSlotState> {
+      const isChecked = content.charAt(3) === 'x'
+      return {
+        slots: [
+          new Slot<TodoListSlotState>([
+            ContentType.Text,
+            ContentType.InlineComponent
+          ], {
+            active: isChecked,
+            disabled: false
+          })
+        ]
+      }
+    }
+  },
   setup(initData: ComponentData<void, TodoListSlotState>) {
     const {Text, InlineComponent} = ContentType
     const slots = useSlots<TodoListSlotState>(initData.slots || [
@@ -147,12 +167,14 @@ tb-todolist {
   border-radius: 3px;
   cursor: pointer;
   position: relative;
+  box-sizing: content-box;
 }
 .tb-todolist-state:after {
   content: "";
   position: absolute;
   border-right: 2px solid #fff;
   border-bottom: 2px solid #fff;
+  box-sizing: content-box;
   left: 3px;
   top: 1px;
   width: 4px;

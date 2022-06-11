@@ -442,7 +442,7 @@ export const i18n_zh_CN: I18NConfig = {
       creator: {
         name: '巨幕'
       },
-      setter: {
+      setting: {
         name: '巨幕',
         form: {
           title: '巨幕设置',
