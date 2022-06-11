@@ -17,7 +17,7 @@ import {
   useSlots,
   useState,
   Renderer,
-  jsx
+  VElement
 } from '@textbus/core'
 
 import { I18n } from '../i18n'
@@ -27,7 +27,7 @@ import {
   slotsToTable,
   TableCellPosition,
   TableCellSlot,
-  TableConfig,
+  TableConfig, TableSlotState,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
 import { CollaborateCursorAwarenessDelegate } from '@textbus/collaborate'
@@ -89,7 +89,7 @@ export const tableComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TableComponent',
   separable: false,
-  setup(data: ComponentData<TableConfig> = {
+  setup(data: ComponentData<TableConfig, TableSlotState> = {
     slots: Array.from({length: 9}).fill(null).map(() => createCell()),
     state: {
       columnCount: 3,
@@ -97,7 +97,7 @@ export const tableComponent = defineComponent({
       useTextbusStyle: false
     }
   }) {
-    let tableCells = slotsToTable(data.slots! as TableCellSlot[], data.state!.columnCount)
+    let tableCells = slotsToTable(data.slots || [], data.state!.columnCount)
     const injector = useContext()
     const i18n = injector.get(I18n)
     const selection = injector.get(Selection)
@@ -481,35 +481,29 @@ export const tableComponent = defineComponent({
           draft.columnCount = tableInfo.columnCount + 1
         })
       },
-      render(isOutputMode: boolean, slotRender: SlotRender) {
+      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
-        const table = jsx('table', {
-          class: 'tb-table'
-        })
-        if (data.state!.useTextbusStyle) {
-          table.classes.add('tb-table-textbus')
-        }
-        if (tableCells.length) {
-          const body = jsx('tbody')
-          table.appendChild(body)
-          for (const row of tableCells) {
-            const tr = jsx('tr')
-            body.appendChild(tr)
-            for (const col of row) {
-              tr.appendChild(slotRender(col, () => {
-                const td = jsx('td')
-                if (col.state!.colspan > 1) {
-                  td.attrs.set('colspan', col.state?.colspan)
-                }
-                if (col.state!.rowspan > 1) {
-                  td.attrs.set('rowspan', col.state?.rowspan)
-                }
-                return td
-              }))
+        return (
+          <table class={'tb-table' + (data.state!.useTextbusStyle ? ' tb-table-textbus' : '')}>
+            <tbody>
+            {
+              tableCells.map(row => {
+                return (
+                  <tr>
+                    {
+                      row.map(col => {
+                        return slotRender(col, () => {
+                          return <td colSpan={col.state?.colspan} rowSpan={col.state?.rowspan}/>
+                        })
+                      })
+                    }
+                  </tr>
+                )
+              })
             }
-          }
-        }
-        return table
+            </tbody>
+          </table>
+        )
       }
     }
     return instance

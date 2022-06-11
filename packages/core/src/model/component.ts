@@ -78,7 +78,7 @@ export interface MarkdownGrammarInterceptor<Data = any> {
 /**
  * 组件实例对象
  */
-export interface ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = any> {
+export interface ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = any, SlotState = unknown> {
   /**
    * 组件所在的插槽
    * @readonly
@@ -102,7 +102,7 @@ export interface ComponentInstance<Extends extends ComponentExtends = ComponentE
   /** 组件类型 */
   type: ContentType
   /** 组件的子插槽集合 */
-  slots: Slots
+  slots: Slots<SlotState>
   /** 组件内部实现的方法 */
   extends: Extends
   /** 组件动态上下文菜单注册表 */
@@ -133,7 +133,7 @@ export interface ComponentInstance<Extends extends ComponentExtends = ComponentE
 /**
  * Textbus 扩展组件接口
  */
-export interface ComponentOptions<Extends extends ComponentExtends, State> {
+export interface ComponentOptions<Extends extends ComponentExtends, State, SlotState> {
   /** 组件名 */
   name: string
   /** 组件类型 */
@@ -142,19 +142,19 @@ export interface ComponentOptions<Extends extends ComponentExtends, State> {
   separable?: boolean
 
   /** markdown 支持 */
-  markdownSupport?: MarkdownGrammarInterceptor<ComponentData<State>>
+  markdownSupport?: MarkdownGrammarInterceptor<ComponentData<State, SlotState>>
 
   /**
    * 组件初始化实现
    * @param initData
    */
-  setup(initData?: ComponentData<State>): Extends
+  setup(initData?: ComponentData<State, SlotState>): Extends
 }
 
 /**
  * Textbus 组件
  */
-export interface Component<Instance extends ComponentInstance = ComponentInstance, State = any> {
+export interface Component<Instance extends ComponentInstance = ComponentInstance, State extends ComponentData = ComponentData> {
   /** 组件名 */
   name: string
   /** 组件是否可拆分 */
@@ -311,14 +311,15 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
  * Textbus 扩展组件方法
  * @param options
  */
-export function defineComponent<Extends extends ComponentExtends,
-  State = any>(options: ComponentOptions<Extends, State>): Component<ComponentInstance<Extends, State>, ComponentData<State>> {
+export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
+  options: ComponentOptions<Extends, State, SlotState>
+): Component<ComponentInstance<Extends, State>, ComponentData<State, SlotState>> {
   const separable = Reflect.has(options, 'separable') ? !!options.separable : true
   return {
     name: options.name,
     separable,
     markdownSupport: options.markdownSupport,
-    createInstance(contextInjector: Injector, initData?: ComponentData<State>) {
+    createInstance(contextInjector: Injector, initData?: ComponentData<State, SlotState>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
 

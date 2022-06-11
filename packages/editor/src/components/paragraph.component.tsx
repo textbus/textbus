@@ -4,7 +4,6 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
   Slot,
   SlotRender,
   useContext,
@@ -12,24 +11,12 @@ import {
   VElement
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
-
 import { useEnterBreaking } from './hooks/single-block-enter'
 
-export const headingComponent = defineComponent({
+export const paragraphComponent = defineComponent({
   type: ContentType.BlockComponent,
-  name: 'HeadingComponent',
-  markdownSupport: {
-    key: ' ',
-    match(content: string) {
-      return /^#{1,6}$/.test(content)
-    },
-    generateInitData(content) {
-      return {
-        state: 'h' + content.length
-      }
-    }
-  },
-  setup(data?: ComponentData<string>) {
+  name: 'ParagraphComponent',
+  setup(data?: ComponentData) {
     const injector = useContext()
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
@@ -42,31 +29,28 @@ export const headingComponent = defineComponent({
       ]))
     }
     useEnterBreaking(injector, slots)
-
     return {
-      type: data?.state || 'h1',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return jsx(data?.state || 'h1')
+          return <p/>
         })
       }
     }
   }
 })
 
-export const headingComponentLoader: ComponentLoader = {
+export const paragraphComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
-    return /^h[1-6]$/i.test(element.tagName)
+    return element.tagName === 'P'
   },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slot = slotParser(new Slot([
-      ContentType.InlineComponent,
-      ContentType.Text
+      ContentType.Text,
+      ContentType.InlineComponent
     ]), element)
-    return headingComponent.createInstance(injector, {
-      slots: [slot],
-      state: element.tagName.toLowerCase()
+    return paragraphComponent.createInstance(injector, {
+      slots: [slot]
     })
   },
-  component: headingComponent
+  component: paragraphComponent
 }

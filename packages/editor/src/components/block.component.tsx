@@ -4,7 +4,6 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
   Slot,
   SlotRender,
   useContext,
@@ -35,7 +34,7 @@ export const blockComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return jsx('div')
+          return <div/>
         })
       }
     }

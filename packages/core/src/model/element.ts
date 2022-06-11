@@ -11,7 +11,7 @@ export class VTextNode {
     return this[parentNode]
   }
 
-  [parentNode]: VElement | null
+  [parentNode]: VElement | null = null
 
   constructor(public textContent = '') {
   }
@@ -67,7 +67,7 @@ export class VElement {
     return [...this._children]
   }
 
-  [parentNode]: VElement | null
+  [parentNode]: VElement | null = null
   readonly attrs = new Map<string, any>()
   readonly styles = new Map<string, string | number>()
   readonly classes: Set<string>

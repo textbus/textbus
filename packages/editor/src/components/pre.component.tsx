@@ -6,7 +6,6 @@ import {
   defineComponent,
   Formatter,
   FormatType,
-  jsx,
   onContextMenu,
   onEnter,
   onPaste,
@@ -554,40 +553,29 @@ export const preComponent = defineComponent({
 
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        const block = jsx('pre', {
-          class: 'tb-pre',
-          theme: data.state!.theme || null
-        }, [
-          jsx('div', {
-            class: 'tb-code-line-number-bg',
-            style: {
-              width: Math.max(String(slots.length).length, 2) + 'em'
-            }
-          }),
-          jsx('div', {
-            class: 'tb-code-content'
-          }, slots.toArray().map(item => {
-            return slotRender(item, () => {
-              return jsx('div', {
-                class: 'tb-code-line'
-              })
-            })
-          }))
-        ])
         let lang = ''
         languageList.forEach(i => {
           if (i.value === data.state!.lang) {
             lang = i.label
           }
         })
-        if (lang) {
-          block.appendChild(jsx('span', {
-            class: 'tb-pre-lang'
-          }, lang))
-        }
-        block.attrs.set('lang', data.state!.lang)
-        // block.attrs.set('theme', PreComponent.theme)
-        return block
+        return (
+          <pre class="td-pre" lang={lang} theme={data.state!.theme || null}>
+            <div class="tb-code-line-number-bg" style={{
+              width: Math.max(String(slots.length).length, 2) + 'em'
+            }}/>
+            <div class="tb-code-content">
+              {
+                slots.toArray().map(item => {
+                  return slotRender(item, () => {
+                    return <div class="tb-code-line"/>
+                  })
+                })
+              }
+            </div>
+            <span class="tb-pre-lang">{lang}</span>
+          </pre>
+        )
       }
     }
   }

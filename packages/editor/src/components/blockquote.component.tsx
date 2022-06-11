@@ -4,7 +4,6 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
   Slot,
   SlotRender,
   useSlots,
@@ -44,9 +43,7 @@ export const blockquoteComponent = defineComponent({
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return jsx('blockquote', {
-            class: 'tb-blockquote'
-          })
+          return <div class="tb-blockquote"/>
         })
       }
     }

@@ -4,7 +4,6 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
   Slot,
   SlotRender,
   useContext,
@@ -12,12 +11,24 @@ import {
   VElement
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
+
 import { useEnterBreaking } from './hooks/single-block-enter'
 
-export const paragraphComponent = defineComponent({
+export const headingComponent = defineComponent({
   type: ContentType.BlockComponent,
-  name: 'ParagraphComponent',
-  setup(data?: ComponentData) {
+  name: 'HeadingComponent',
+  markdownSupport: {
+    key: ' ',
+    match(content: string) {
+      return /^#{1,6}$/.test(content)
+    },
+    generateInitData(content) {
+      return {
+        state: 'h' + content.length
+      }
+    }
+  },
+  setup(data?: ComponentData<string>) {
     const injector = useContext()
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
@@ -30,28 +41,32 @@ export const paragraphComponent = defineComponent({
       ]))
     }
     useEnterBreaking(injector, slots)
+
     return {
+      type: data?.state || 'h1',
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, () => {
-          return jsx('p')
+          const Tag = data?.state || 'h1'
+          return <Tag/>
         })
       }
     }
   }
 })
 
-export const paragraphComponentLoader: ComponentLoader = {
+export const headingComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
-    return element.tagName === 'P'
+    return /^h[1-6]$/i.test(element.tagName)
   },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slot = slotParser(new Slot([
-      ContentType.Text,
-      ContentType.InlineComponent
+      ContentType.InlineComponent,
+      ContentType.Text
     ]), element)
-    return paragraphComponent.createInstance(injector, {
-      slots: [slot]
+    return headingComponent.createInstance(injector, {
+      slots: [slot],
+      state: element.tagName.toLowerCase()
     })
   },
-  component: paragraphComponent
+  component: headingComponent
 }

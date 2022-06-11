@@ -4,7 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
+  VElement,
   useRef,
   useState,
 } from '@textbus/core'
@@ -43,20 +43,17 @@ export const imageComponent = defineComponent({
     })
 
     return {
-      render() {
-        return jsx('img', {
-          ref,
-          src: state.src,
-          class: 'tb-img',
-          style: {
+      render(): VElement {
+        return (
+          <img src={state.src} ref={ref} class="tb-img" style={{
             width: state.width,
             height: state.height,
             maxWidth: state.maxWidth,
             maxHeight: state.maxHeight,
             margin: state.margin,
             float: state.float
-          }
-        })
+          }}/>
+        )
       }
     }
   }

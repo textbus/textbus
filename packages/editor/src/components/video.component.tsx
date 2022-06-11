@@ -4,9 +4,8 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  jsx,
   useRef,
-  useState,
+  useState, VElement,
 } from '@textbus/core'
 import { ComponentLoader } from '@textbus/browser'
 
@@ -47,20 +46,13 @@ export const videoComponent = defineComponent({
     })
 
     return {
-      render() {
-        const el = jsx('video', {
-          ref
-        })
-        el.attrs.set('src', state!.src)
-        el.attrs.set('autoplay', state!.autoplay)
-        el.attrs.set('controls', state!.controls)
-        if (state!.width) {
-          el.styles.set('width', state!.width)
-        }
-        if (state!.height) {
-          el.styles.set('height', state!.height)
-        }
-        return el
+      render(): VElement {
+        return (
+          <video src={state.src} ref={ref} autoPlay={state.autoplay} controls={state.controls} style={{
+            width: state.width,
+            height: state.height
+          }}/>
+        )
       },
       mergeProps(props: Partial<VideoState>) {
         state = controller.update(draft => {

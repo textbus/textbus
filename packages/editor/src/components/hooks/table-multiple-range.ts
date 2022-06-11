@@ -14,10 +14,12 @@ import {
 } from '@textbus/core'
 import { CubicBezier } from '@tanbo/bezier'
 
-export type TableCellSlot = Slot<{
+export interface TableSlotState {
   rowspan: number
   colspan: number
-}>
+}
+
+export type TableCellSlot = Slot<TableSlotState>
 
 interface ElementPosition {
   left: number
@@ -369,7 +371,7 @@ export function findFocusCell(componentInstance: ComponentInstance, slot: TableC
 }
 
 export function selectCells(startCell: TableCellSlot, endCell: TableCellSlot, componentInstance: ComponentInstance, columnCount: number) {
-  const serializedCells = serialize(slotsToTable(componentInstance.slots.toArray(), columnCount))
+  const serializedCells = serialize(slotsToTable(componentInstance.slots.toArray() as Slot<TableSlotState>[], columnCount))
   const p1 = findCellPosition(startCell, serializedCells)
   const p2 = findCellPosition(endCell, serializedCells)
   const minRow = Math.min(p1.minRow, p2.minRow)
