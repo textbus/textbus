@@ -155,12 +155,14 @@ tb-jumbotron {
   background-color: #eee;
   padding: 20px;
   position: relative;
+  border-radius: 4px;
+  overflow: hidden;
 }
 `
     ],
     editModeStyles: [
       // eslint-disable-next-line max-len
-      '.tb-jumbotron-setting { position: absolute; right: 10px; top: 10px; background: #eee; box-shadow: 1px 2px 3px rgba(0,0,0,.1); color: #333; border: 0; outline: none; cursor: pointer;}.tb-jumbotron-setting:hover{color: #1296db}'
+      '.tb-jumbotron-setting { font-size: 14px;position: absolute; right: 10px; top: 10px; background: #eee; box-shadow: 1px 2px 3px rgba(0,0,0,.1); color: #333; border: 0; outline: none; cursor: pointer;}.tb-jumbotron-setting:hover{color: #1296db}'
     ]
   },
   match(element: HTMLElement): boolean {
