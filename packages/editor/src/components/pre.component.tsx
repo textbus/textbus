@@ -560,7 +560,7 @@ export const preComponent = defineComponent({
           }
         })
         return (
-          <pre class="td-pre" lang={lang} theme={data.state!.theme || null}>
+          <pre class="tb-pre" lang={lang} theme={data.state!.theme || null}>
             <div class="tb-code-line-number-bg" style={{
               width: Math.max(String(slots.length).length, 2) + 'em'
             }}/>
