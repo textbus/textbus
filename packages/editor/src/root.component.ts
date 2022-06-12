@@ -58,7 +58,7 @@ export const rootComponent = defineComponent({
     const rootNode = useRef<HTMLElement>()
 
     const sub = fromEvent<MouseEvent>(docContainer, 'click').subscribe(ev => {
-      if (ev.clientY > rootNode.current!.getBoundingClientRect().bottom) {
+      if (ev.clientY > rootNode.current!.getBoundingClientRect().bottom - 30) {
         const slot = slots.get(0)!
         const lastContent = slot.getContentAtIndex(slot.length - 1)
         if (!slot.isEmpty && typeof lastContent !== 'string' && lastContent.name !== paragraphComponent.name) {
@@ -83,7 +83,7 @@ export const rootComponent = defineComponent({
             'textbus-document': 'true',
             'ref': rootNode,
             style: {
-              padding: '8px'
+              padding: '8px 8px 30px'
             },
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
           })

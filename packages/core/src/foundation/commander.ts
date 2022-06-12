@@ -342,8 +342,19 @@ export class Commander {
         break
       }
 
-      if (parentComponent.slots.length === 0 ||
-        parentComponent.slots.length === 1 && slot.isEmpty && parentComponent.slots.has(scope.slot)) {
+      if (slot.isEmpty) {
+        let isPreventDefault = true
+        const event = new Event<null>(slot, null, () => {
+          isPreventDefault = false
+        })
+        invokeListener(parentComponent, 'onSlotRemove', event)
+
+        if (!isPreventDefault) {
+          parentComponent.slots.remove(slot)
+        }
+      }
+
+      if (parentComponent.slots.length === 0) {
         const state = this._deleteTree(parentComponent, scope.slot, commonAncestorSlotRef)
         if (!state.success) {
           stoppedSlot = state.slot
@@ -357,18 +368,7 @@ export class Commander {
           slot.delete(scope.endIndex - scope.startIndex)
           return false
         }
-      } else {
-        let isPreventDefault = true
-        const event = new Event<null>(slot, null, () => {
-          isPreventDefault = false
-        })
-        invokeListener(parentComponent, 'onSlotRemove', event)
-
-        if (!isPreventDefault) {
-          parentComponent.slots.remove(slot)
-        }
       }
-
     }
 
     if (deletedSlot) {
