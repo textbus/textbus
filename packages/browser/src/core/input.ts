@@ -246,6 +246,7 @@ export class Input {
       fromEvent(textarea, 'compositionstart').subscribe(() => {
         const startSlot = this.selection.startSlot!
         formats = startSlot.extractFormatsByIndex(this.selection.startOffset!)
+        formats.push([this.inputFormatter, true])
         this.commander.write('')
         index = this.selection.startOffset!
       }),
