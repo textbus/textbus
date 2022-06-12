@@ -35,9 +35,9 @@ export function createJumbotronSlot(injector: Injector) {
   const h1 = headingComponent.createInstance(injector)
   h1.slots.first!.insert('Hello, world!')
   const p1 = paragraphComponent.createInstance(injector)
-  p1.slots.first!.insert('你好，我是 TextBus 富文本编辑器。')
+  p1.slots.first!.insert('你好，我是 Textbus，一个给你带来全新体验的富文本开发框架。')
   const p2 = paragraphComponent.createInstance(injector)
-  p2.slots.first!.insert('你现在还好吗？')
+  p2.slots.first!.insert('现在我们开始吧！')
 
   slot.insert(h1)
   slot.insert(p1)
@@ -123,14 +123,14 @@ export const jumbotronComponent = defineComponent({
       render(isOutputMode: boolean, slotRender): VElement {
         return (
           <tb-jumbotron style={{
-            backgroundImage: `url("${state.backgroundImage}")`,
+            backgroundImage: state.backgroundImage ? `url("${state.backgroundImage}")` : null,
             backgroundSize: state.backgroundSize || 'cover',
             backgroundPosition: state.backgroundPosition || 'center',
             minHeight: state.minHeight
           }}>
             {
               !isOutputMode &&
-              <button type="button" class="tb-jumbotron-setting" onClick={setting}>{componentI18n.get('settingBtn')}</button>
+              <button type="button" class="tb-jumbotron-setting" onClick={setting}><span class="textbus-icon-setting"></span></button>
             }
             {
               slotRender(slots.get(0)!, () => {
