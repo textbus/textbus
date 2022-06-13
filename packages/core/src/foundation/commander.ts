@@ -572,7 +572,7 @@ export class Commander {
     }
   }
 
-  private tryCleanDoc(): boolean {
+  protected tryCleanDoc(): boolean {
     let slot = this.selection.startSlot
     while (slot) {
       const parentComponent = slot.parent!
@@ -595,7 +595,7 @@ export class Commander {
     return false
   }
 
-  private _addContent(source: Slot, targetSlot: Slot) {
+  protected _addContent(source: Slot, targetSlot: Slot) {
     if (source.isEmpty && !targetSlot.isEmpty) {
       return true
     }
@@ -613,7 +613,7 @@ export class Commander {
     return true
   }
 
-  private _insert(content: string | ComponentInstance,
+  protected _insert(content: string | ComponentInstance,
                   expand: boolean,
                   formatter?: Formatter | Formats,
                   value?: FormatValue): false | Slot {
@@ -676,7 +676,7 @@ export class Commander {
     return selection.startSlot!
   }
 
-  private _deleteTree(component: ComponentInstance, currentSlot: Slot, stopSlot: Slot): DeleteTreeState {
+  protected _deleteTree(component: ComponentInstance, currentSlot: Slot, stopSlot: Slot): DeleteTreeState {
     const parentSlot = component.parent
     if (parentSlot) {
       const index = parentSlot.indexOf(component)

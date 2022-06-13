@@ -123,6 +123,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
     this.unListen()
     if (!range) {
+      this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
       return

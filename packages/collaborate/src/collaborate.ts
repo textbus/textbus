@@ -93,6 +93,7 @@ export class Collaborate implements History {
   back() {
     if (this.canBack) {
       this.scheduler.stopBroadcastChanges = true
+      this.selection.unSelect()
       this.manager.undo()
       this.scheduler.stopBroadcastChanges = false
     }
@@ -101,6 +102,7 @@ export class Collaborate implements History {
   forward() {
     if (this.canForward) {
       this.scheduler.stopBroadcastChanges = true
+      this.selection.unSelect()
       this.manager.redo()
       this.scheduler.stopBroadcastChanges = false
     }
@@ -109,6 +111,7 @@ export class Collaborate implements History {
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
     this.collaborateCursor.destroy()
+    this.manager.destroy()
   }
 
   private syncRootComponent() {

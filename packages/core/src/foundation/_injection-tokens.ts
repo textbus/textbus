@@ -67,3 +67,8 @@ export const USE_CONTENT_EDITABLE = new InjectionToken<boolean>('USE_CONTENT_EDI
 
 /** 开启 markdown 支持 */
 export const MARKDOWN_DETECT = new InjectionToken<boolean>('MARKDOWN_DETECT')
+
+/**
+ * 最大历史记录栈大小
+ */
+export const HISTORY_STACK_SIZE = new InjectionToken<number>('HISTORY_STACK_SIZE')

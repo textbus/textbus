@@ -456,7 +456,7 @@ export class Selection {
     }
     const scopes = this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
     return scopes.filter(item => {
-      return item.startIndex < item.endIndex
+      return item.slot && item.startIndex < item.endIndex
     })
   }
 

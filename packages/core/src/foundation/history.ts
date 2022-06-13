@@ -1,4 +1,4 @@
-import { Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
@@ -6,7 +6,7 @@ import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
 import { SelectionPaths, Selection } from './selection'
 import { Registry } from './registry'
-import { RootComponentRef } from './_injection-tokens'
+import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
 import { Scheduler } from './scheduler'
 
 export interface HistoryItem {
@@ -71,7 +71,8 @@ export class CoreHistory extends History {
   private subscription: Subscription | null = null
   private forceChangeSubscription: Subscription | null = null
 
-  constructor(private root: RootComponentRef,
+  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
+              private root: RootComponentRef,
               private scheduler: Scheduler,
               private selection: Selection,
               private translator: Translator,
@@ -144,6 +145,10 @@ export class CoreHistory extends History {
         beforePaths,
         afterPaths
       })
+      if (this.historySequence.length > this.stackSize) {
+        this.historySequence.shift()
+        this.index--
+      }
       beforePaths = afterPaths
       this.pushEvent.next()
       this.changeEvent.next()
