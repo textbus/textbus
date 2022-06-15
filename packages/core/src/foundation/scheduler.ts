@@ -1,24 +1,36 @@
 import { Injectable } from '@tanbo/di'
-import { map, microTask, Observable, Subject, Subscription, tap } from '@tanbo/stream'
+import { map, microTask, Observable, Subject, Subscription } from '@tanbo/stream'
 
 import { ComponentInstance, invokeListener, Operation } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Renderer } from './renderer'
 import { Selection } from './selection'
 
+export enum ChangeOrigin {
+  History,
+  Local,
+  Remote
+}
+
+export interface ChangeItem {
+  from: ChangeOrigin,
+  operations: Operation
+}
+
 @Injectable()
 export class Scheduler {
-  stopBroadcastChanges = false
-  onDocChange: Observable<Operation[]>
-
   get hasLocalUpdate() {
     return this._hasLocalUpdate
   }
 
+  onDocChange: Observable<ChangeItem[]>
+
   private _hasLocalUpdate = true
+  private changeFromRemote = false
+  private changeFromHistory = false
   private instanceList = new Set<ComponentInstance>()
 
-  private docChangeEvent = new Subject<Operation[]>()
+  private docChangeEvent = new Subject<ChangeItem[]>()
   private subs: Subscription[] = []
 
   constructor(private rootComponentRef: RootComponentRef,
@@ -28,12 +40,15 @@ export class Scheduler {
   }
 
   remoteUpdateTransact(task: () => void) {
-    if (!this.hasLocalUpdate) {
-      task()
-      this._hasLocalUpdate = false
-    } else {
-      task()
-    }
+    this.changeFromRemote = true
+    task()
+    this.changeFromRemote = false
+  }
+
+  historyApplyTransact(task: () => void) {
+    this.changeFromHistory = true
+    task()
+    this.changeFromHistory = false
   }
 
   run() {
@@ -45,21 +60,19 @@ export class Scheduler {
         this.renderer.render()
       }),
       changeMarker.onChange.pipe(
-        tap(() => {
-          this._hasLocalUpdate = true
-        }),
         map(op => {
-          return this.stopBroadcastChanges ? null : op
+          return {
+            from: this.changeFromRemote ? ChangeOrigin.Remote :
+              this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local,
+            operations: op
+          }
         }),
         microTask()
       ).subscribe(ops => {
         this.renderer.render()
-        this.selection.restore(this.hasLocalUpdate)
-        this._hasLocalUpdate = false
-        const operations = ops.filter(i => i)
-        if (operations.length) {
-          this.docChangeEvent.next(ops as Operation[])
-        }
+        this._hasLocalUpdate = ops.some(i => i.from === ChangeOrigin.Local)
+        this.selection.restore(this._hasLocalUpdate)
+        this.docChangeEvent.next(ops)
       }),
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)

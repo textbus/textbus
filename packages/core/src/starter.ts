@@ -17,8 +17,9 @@ import {
   Translator,
   NativeSelectionBridge,
   NativeRenderer,
+  Controller,
   USE_CONTENT_EDITABLE,
-  CoreHistory, MARKDOWN_DETECT, Scheduler, HISTORY_STACK_SIZE
+  CoreHistory, MARKDOWN_DETECT, Scheduler, HISTORY_STACK_SIZE, READONLY
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -69,6 +70,8 @@ export interface TextbusConfig extends Module {
   markdownDetect?: boolean
   /** 最大历史记录栈 */
   historyStackSize?: number
+  /** 是否只读 */
+  readonly?: boolean
 }
 
 /**
@@ -166,6 +169,10 @@ export class Starter extends ReflectiveInjector {
     const providers: Provider[] = [
       ...customProviders,
       {
+        provide: READONLY,
+        useValue: !!config.readonly
+      },
+      {
         provide: HISTORY_STACK_SIZE,
         useValue: typeof config.historyStackSize === 'number' ? config.historyStackSize : 500
       },
@@ -190,6 +197,7 @@ export class Starter extends ReflectiveInjector {
         provide: History,
         useClass: CoreHistory
       },
+      Controller,
       Scheduler,
       Commander,
       Registry,

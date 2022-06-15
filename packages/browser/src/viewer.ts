@@ -13,7 +13,7 @@ import {
   ComponentInstance,
   ComponentLiteral,
   invokeListener,
-  Plugin
+  Plugin, Controller
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
@@ -55,9 +55,19 @@ export class Viewer {
     DefaultShortcut,
   ]
 
+  get readonly() {
+    return this.controller.readonly
+  }
+
+  set readonly(b: boolean) {
+    this.controller.readonly = b
+  }
+
   protected changeEvent = new Subject<void>()
 
   protected subs: Subscription[] = []
+
+  private controller: Controller
 
   private workbench!: HTMLElement
 
@@ -91,9 +101,7 @@ export class Viewer {
       useValue: this
     }]
     this.injector = new Starter({
-      imports: options.imports,
-      plugins: options.plugins,
-      markdownDetect: options.markdownDetect,
+      ...options,
       components: (options.componentLoaders || []).map(i => i.component),
       formatters: (options.formatLoaders || []).map(i => i.formatter),
       providers: [
@@ -109,6 +117,7 @@ export class Viewer {
       ],
       setup: options.setup
     })
+    this.controller = this.injector.get(Controller)
   }
 
   /**

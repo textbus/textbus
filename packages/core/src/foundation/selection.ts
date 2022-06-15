@@ -4,6 +4,7 @@ import { distinctUntilChanged, map, Observable, share, Subject, Subscription } f
 import { ComponentInstance, ContentType, invokeListener, Slot, Event } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
+import { Controller } from './controller'
 
 export interface Range {
   focusSlot: Slot
@@ -170,6 +171,9 @@ export class Selection {
 
   set nativeSelectionDelegate(v: boolean) {
     this._nativeSelectionDelegate = v
+    if (this.controller.readonly) {
+      return
+    }
     if (v) {
       this.bridge.connect({
         setSelection: (range: Range | null) => {
@@ -215,6 +219,7 @@ export class Selection {
   private subscriptions: Subscription[] = []
 
   constructor(private root: RootComponentRef,
+              private controller: Controller,
               private renderer: Renderer) {
     let prevFocusComponent: ComponentInstance | null
     this.onChange = this.changeEvent.asObservable().pipe(
@@ -299,6 +304,9 @@ export class Selection {
    * @param offset 锚点位置索引
    */
   setAnchor(slot: Slot, offset: number) {
+    if (this.controller.readonly) {
+      return
+    }
     this._anchorSlot = slot
     slot.retain(offset)
     this._anchorOffset = slot.index
@@ -311,6 +319,9 @@ export class Selection {
    * @param offset 焦点位置的索引
    */
   setFocus(slot: Slot, offset: number) {
+    if (this.controller.readonly) {
+      return
+    }
     this._focusSlot = slot
     slot.retain(offset)
     this._focusOffset = slot.index
@@ -323,6 +334,9 @@ export class Selection {
    * @param offset 选区位置索引
    */
   setPosition(slot: Slot, offset: number) {
+    if (this.controller.readonly) {
+      return
+    }
     this._focusSlot = this._anchorSlot = slot
     slot.retain(offset)
     this._focusOffset = this._anchorOffset = slot.index

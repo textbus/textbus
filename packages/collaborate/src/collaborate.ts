@@ -1,6 +1,7 @@
 import { Injectable } from '@tanbo/di'
-import { delay, Observable, Subject, Subscription } from '@tanbo/stream'
+import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
+  ChangeOrigin,
   ComponentInstance,
   ContentType,
   Formats,
@@ -92,19 +93,19 @@ export class Collaborate implements History {
 
   back() {
     if (this.canBack) {
-      this.scheduler.stopBroadcastChanges = true
-      this.selection.unSelect()
-      this.manager.undo()
-      this.scheduler.stopBroadcastChanges = false
+      this.scheduler.historyApplyTransact(() => {
+        this.selection.unSelect()
+        this.manager.undo()
+      })
     }
   }
 
   forward() {
     if (this.canForward) {
-      this.scheduler.stopBroadcastChanges = true
-      this.selection.unSelect()
-      this.manager.redo()
-      this.scheduler.stopBroadcastChanges = false
+      this.scheduler.historyApplyTransact(() => {
+        this.selection.unSelect()
+        this.manager.redo()
+      })
     }
   }
 
@@ -123,7 +124,16 @@ export class Collaborate implements History {
     this.syncContent(root, rootComponent.slots.get(0)!)
 
     this.subscriptions.push(
-      this.scheduler.onDocChange.subscribe(() => {
+      this.scheduler.onDocChange.pipe(
+        map(item => {
+          return item.filter(i => {
+            return i.from === ChangeOrigin.Local
+          })
+        }),
+        filter(item => {
+          return item.length
+        })
+      ).subscribe(() => {
         this.yDoc.transact(() => {
           this.updateRemoteActions.forEach(fn => {
             fn()

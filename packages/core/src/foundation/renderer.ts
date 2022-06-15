@@ -13,6 +13,7 @@ import {
 } from '../model/_api'
 import { NativeNode, NativeRenderer, RootComponentRef, USE_CONTENT_EDITABLE } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
+import { Controller } from './controller'
 
 const rendererErrorFn = makeError('Renderer')
 
@@ -234,6 +235,7 @@ export class Renderer {
   private slotIdAttrKey = '__textbus-slot-id__'
 
   constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
+              private controller: Controller,
               private rootComponentRef: RootComponentRef) {
     this.onViewChecked = this.viewCheckedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
@@ -556,12 +558,14 @@ export class Renderer {
       classesChanges.add.forEach(i => this.nativeRenderer.addClass(nativeNode, i))
       classesChanges.remove.forEach(i => this.nativeRenderer.removeClass(nativeNode, i))
 
-      listenerChanges.add.forEach(i => {
-        this.nativeRenderer.listen(nativeNode, i[0], i[1])
-      })
-      listenerChanges.remove.forEach(i => {
-        this.nativeRenderer.unListen(nativeNode, i[0], i[1])
-      })
+      if (!this.controller.readonly) {
+        listenerChanges.add.forEach(i => {
+          this.nativeRenderer.listen(nativeNode, i[0], i[1])
+        })
+        listenerChanges.remove.forEach(i => {
+          this.nativeRenderer.unListen(nativeNode, i[0], i[1])
+        })
+      }
 
       this.renderedVNode.set(newVDom, true)
       this.nativeNodeCaches.set(newVDom, nativeNode)
@@ -820,10 +824,11 @@ export class Renderer {
     })
     vDom.classes.forEach(k => this.nativeRenderer.addClass(el, k))
 
-    Object.keys(vDom.listeners).forEach(type => {
-      this.nativeRenderer.listen(el, type, vDom.listeners[type])
-    })
-
+    if (!this.controller.readonly) {
+      Object.keys(vDom.listeners).forEach(type => {
+        this.nativeRenderer.listen(el, type, vDom.listeners[type])
+      })
+    }
     this.nativeNodeCaches.set(el, vDom)
     return el
   }

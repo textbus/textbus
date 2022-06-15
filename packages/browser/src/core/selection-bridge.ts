@@ -1,4 +1,4 @@
-import { fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
 import {
   ComponentInstance,
@@ -10,7 +10,7 @@ import {
   Range as TBRange,
   VElement,
   VTextNode,
-  RootComponentRef
+  RootComponentRef, Controller
 } from '@textbus/core'
 
 import { Caret, getLayoutRectByRange } from './caret'
@@ -41,10 +41,13 @@ export class SelectionBridge implements NativeSelectionBridge {
   constructor(@Inject(VIEW_DOCUMENT) private docContainer: HTMLElement,
               @Inject(VIEW_MASK) private maskContainer: HTMLElement,
               public caret: Caret,
+              private controller: Controller,
               private rootComponentRef: RootComponentRef,
               private input: Input,
               private renderer: Renderer) {
-    this.onSelectionChange = this.selectionChangeEvent.asObservable()
+    this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
+      return !controller.readonly
+    }))
     this.showNativeMask()
     document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {

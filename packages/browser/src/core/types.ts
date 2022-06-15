@@ -10,7 +10,7 @@ export interface ViewModule extends Omit<Module, 'components' | 'formatters'> {
 /**
  * Textbus PC 端配置接口
  */
-export interface BaseEditorOptions {
+export interface BaseEditorOptions extends TextbusConfig {
   imports?: ViewModule[]
   /** 编辑区域自动高度 */
   autoHeight?: boolean
@@ -28,14 +28,6 @@ export interface BaseEditorOptions {
   styleSheets?: string[]
   /** 配置文档编辑状态下用到的样式 */
   editingStyleSheets?: string[]
-  /** 插件 */
-  plugins?: TextbusConfig['plugins']
-  /** 提供者集合，数组内配置的类，可以使用 Textbus 中的依赖注入能力 */
-  providers?: TextbusConfig['providers']
-  /** 编辑器启动前调用 */
-  setup?: TextbusConfig['setup']
-  /** 开启 markdown 语法 */
-  markdownDetect?: boolean
 
   /** 当用户按 Ctrl + S 时调用 */
   onSave?(): void

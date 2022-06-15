@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@tanbo/di'
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Translator } from './translator'
-import { SelectionPaths, Selection } from './selection'
+import { Selection, SelectionPaths } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
-import { Scheduler } from './scheduler'
+import { ChangeOrigin, Scheduler } from './scheduler'
 
 export interface HistoryItem {
   beforePaths: SelectionPaths
@@ -96,11 +96,11 @@ export class CoreHistory extends History {
    */
   forward() {
     if (this.canForward) {
-      this.scheduler.stopBroadcastChanges = true
-      const item = this.historySequence[this.index]
-      this.apply(item, false)
-      this.selection.usePaths(item.afterPaths)
-      this.scheduler.stopBroadcastChanges = false
+      this.scheduler.historyApplyTransact(() => {
+        const item = this.historySequence[this.index]
+        this.apply(item, false)
+        this.selection.usePaths(item.afterPaths)
+      })
       this.index++
       this.forwardEvent.next()
       this.changeEvent.next()
@@ -112,11 +112,11 @@ export class CoreHistory extends History {
    */
   back() {
     if (this.canBack) {
-      this.scheduler.stopBroadcastChanges = true
-      const item = this.historySequence[this.index - 1]
-      this.apply(item, true)
-      this.selection.usePaths(item.beforePaths)
-      this.scheduler.stopBroadcastChanges = false
+      this.scheduler.historyApplyTransact(() => {
+        const item = this.historySequence[this.index - 1]
+        this.apply(item, true)
+        this.selection.usePaths(item.beforePaths)
+      })
       this.index--
       this.backEvent.next()
       this.changeEvent.next()
@@ -136,7 +136,16 @@ export class CoreHistory extends History {
 
   private record() {
     let beforePaths = this.selection.getPaths()
-    this.scheduler.onDocChange.subscribe((operations) => {
+    this.scheduler.onDocChange.pipe(map(i => {
+      return i.filter(item => {
+        return item.from === ChangeOrigin.Local
+      }).map(item => {
+        return item.operations
+      })
+    })).subscribe((operations) => {
+      if (!operations.length) {
+        return
+      }
       this.historySequence.length = this.index
       this.index++
       const afterPaths = this.selection.getPaths()

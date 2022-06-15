@@ -1,5 +1,6 @@
 export * from './_injection-tokens'
 export * from './commander'
+export * from './controller'
 export * from './history'
 export * from './keyboard'
 export * from './output-renderer'
