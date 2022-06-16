@@ -140,7 +140,7 @@ export class Viewer {
     const content = this.options.content
     if (content) {
       if (typeof content === 'string') {
-        component = parser.parseDoc(content, this.rootComponentLoader)
+        component = parser.parseDoc(content, this.rootComponentLoader) as ComponentInstance
       } else {
         component = translator.createComponentByFactory(content, this.rootComponentLoader.component)
       }
@@ -273,7 +273,7 @@ export class Viewer {
     const rootComponentLoader = this.rootComponentLoader!
     let component: ComponentInstance
     if (typeof content === 'string') {
-      component = parser.parseDoc(content, rootComponentLoader)
+      component = parser.parseDoc(content, rootComponentLoader) as ComponentInstance
     } else {
       component = translator.createComponentByFactory(content, rootComponentLoader.component)
     }

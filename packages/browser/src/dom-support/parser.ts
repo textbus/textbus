@@ -27,7 +27,7 @@ export interface ComponentLoader {
 
   match(element: HTMLElement): boolean
 
-  read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance
+  read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance | Slot
 
   component: Component
 }
@@ -89,10 +89,14 @@ export class Parser {
       }
       for (const t of this.loaders) {
         if (t.match(el as HTMLElement)) {
-          const componentInstance = t.read(el as HTMLElement, this.injector, (childSlot, childElement) => {
+          const result = t.read(el as HTMLElement, this.injector, (childSlot, childElement) => {
             return this.readSlot(childSlot, childElement)
           })
-          slot.insert(componentInstance)
+          if (result instanceof Slot) {
+            result.toDelta().forEach(i => slot.insert(i.insert, i.formats))
+            return
+          }
+          slot.insert(result)
           return
         }
       }

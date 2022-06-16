@@ -1,7 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
   ComponentData,
-  ComponentInstance,
   ContentType,
   defineComponent,
   Slot,
@@ -45,15 +44,20 @@ export const blockComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
     return element.tagName === 'DIV'
   },
-  read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
+  read(element: HTMLElement, injector: Injector, slotParser: SlotParser) {
     const slot = slotParser(new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ]), element)
-    return blockComponent.createInstance(injector, {
-      slots: [slot]
-    })
+    const content = slot.sliceContent()
+    const hasString = content.some(i => typeof i === 'string')
+    if (hasString) {
+      return blockComponent.createInstance(injector, {
+        slots: [slot]
+      })
+    }
+    return slot
   },
   component: blockComponent
 }
