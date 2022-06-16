@@ -190,14 +190,18 @@ export class CollaborateCursor {
 
       const cursorRect = getLayoutRectByRange(cursorRange)
 
-      users.push({
+      const rect: SelectionRect = {
         username: item.username,
         color: item.color,
         x: cursorRect.x - containerRect.x,
         y: cursorRect.y - containerRect.y,
         width: 2,
         height: cursorRect.height
-      })
+      }
+      if (rect.x < 0 || rect.y < 0 || rect.x > containerRect.width) {
+        return
+      }
+      users.push(rect)
     })
     this.drawUserCursor(users)
   }

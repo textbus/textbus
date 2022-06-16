@@ -1,11 +1,11 @@
-import { Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   ChangeOrigin,
   ComponentInstance,
-  ContentType,
+  ContentType, Controller,
   Formats,
-  History,
+  History, HISTORY_STACK_SIZE,
   makeError,
   Registry,
   RootComponentRef,
@@ -59,8 +59,10 @@ export class Collaborate implements History {
 
   private updateRemoteActions: Array<() => void> = []
 
-  constructor(private rootComponentRef: RootComponentRef,
+  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
+              private rootComponentRef: RootComponentRef,
               private collaborateCursor: CollaborateCursor,
+              private controller: Controller,
               private scheduler: Scheduler,
               private translator: Translator,
               private registry: Registry,
@@ -120,6 +122,11 @@ export class Collaborate implements History {
     const rootComponent = this.rootComponentRef.component!
     this.manager = new UndoManager(root, {
       trackedOrigins: new Set<any>([this.yDoc])
+    })
+    this.manager.on('stack-item-added', () => {
+      if (this.manager.undoStack.length > this.stackSize) {
+        this.manager.undoStack.shift()
+      }
     })
     this.syncContent(root, rootComponent.slots.get(0)!)
 
@@ -375,7 +382,7 @@ export class Collaborate implements History {
   }
 
   private runLocalUpdate(fn: () => void) {
-    if (this.updateFromRemote) {
+    if (this.updateFromRemote || this.controller.readonly) {
       return
     }
     this.updateRemoteActions.push(fn)
