@@ -70,7 +70,9 @@ export class Scheduler {
         microTask()
       ).subscribe(ops => {
         this.renderer.render()
-        this._hasLocalUpdate = ops.some(i => i.from === ChangeOrigin.Local)
+        this._hasLocalUpdate = ops.some(i => {
+          return i.from === ChangeOrigin.Local || i.from === ChangeOrigin.History
+        })
         this.selection.restore(this._hasLocalUpdate)
         this.docChangeEvent.next(ops)
       }),

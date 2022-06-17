@@ -33,11 +33,11 @@ export class Collaborate implements History {
   onPush: Observable<void>
 
   get canBack() {
-    return this.manager?.canUndo()
+    return this.manager?.canUndo() || false
   }
 
   get canForward() {
-    return this.manager?.canRedo()
+    return this.manager?.canRedo() || false
   }
 
   private backEvent = new Subject<void>()
@@ -45,7 +45,7 @@ export class Collaborate implements History {
   private changeEvent = new Subject<void>()
   private pushEvent = new Subject<void>()
 
-  private manager!: UndoManager
+  private manager: UndoManager | null = null
 
   private subscriptions: Subscription[] = []
   private updateFromRemote = false
@@ -97,7 +97,7 @@ export class Collaborate implements History {
     if (this.canBack) {
       this.scheduler.historyApplyTransact(() => {
         this.selection.unSelect()
-        this.manager.undo()
+        this.manager?.undo()
       })
     }
   }
@@ -106,7 +106,7 @@ export class Collaborate implements History {
     if (this.canForward) {
       this.scheduler.historyApplyTransact(() => {
         this.selection.unSelect()
-        this.manager.redo()
+        this.manager?.redo()
       })
     }
   }
@@ -114,7 +114,7 @@ export class Collaborate implements History {
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
     this.collaborateCursor.destroy()
-    this.manager.destroy()
+    this.manager?.destroy()
   }
 
   private syncRootComponent() {
@@ -124,8 +124,8 @@ export class Collaborate implements History {
       trackedOrigins: new Set<any>([this.yDoc])
     })
     this.manager.on('stack-item-added', () => {
-      if (this.manager.undoStack.length > this.stackSize) {
-        this.manager.undoStack.shift()
+      if (this.manager!.undoStack.length > this.stackSize) {
+        this.manager!.undoStack.shift()
       }
     })
     this.syncContent(root, rootComponent.slots.get(0)!)
