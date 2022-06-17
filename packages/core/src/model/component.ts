@@ -249,7 +249,9 @@ export interface EventTypes {
   onContentInsert: (event: Event<InsertEventData>) => void
   onEnter: (event: Event<EnterEventData>) => void
   onContentDelete: (event: Event<DeleteEventData>) => void
+  onContentDeleted: () => void
   onSlotRemove: (event: Event<null>) => void
+  onSlotRemoved: () => void
   onContextMenu: (event: ContextMenuEvent<null>) => ContextMenuConfig[]
   onViewChecked: () => void
   onViewInit: () => void
@@ -527,7 +529,9 @@ export class ContextMenuEvent<T, S extends Slot = Slot> extends Event<T, S> {
 export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<null>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<DeleteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<EnterEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<InsertEventData>): void
@@ -627,9 +631,19 @@ export const onViewInit = makeEventHook('onViewInit')
 export const onSlotRemove = makeEventHook('onSlotRemove')
 
 /**
+ * 组件子插槽删除完成时的勾子
+ */
+export const onSlotRemoved = makeEventHook('onSlotRemoved')
+
+/**
  * 组件子插槽内容删除时的勾子
  */
 export const onContentDelete = makeEventHook('onContentDelete')
+
+/**
+ * 组件子插槽内容删除完成时的勾子
+ */
+export const onContentDeleted = makeEventHook('onContentDeleted')
 
 /**
  * 组件子插槽换行时的勾子

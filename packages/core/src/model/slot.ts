@@ -251,7 +251,8 @@ export class Slot<T = any> {
   }
 
   /**
-   * 把当前插槽的修改位置移动到指定位置，如果传入了新的格式，则会同时在当前位置和传入的偏移量之间应用传入的格式
+   * 如果没有传入格式参数，则移动插槽下标到 offset
+   * 如果有传入格式参数，则以当前下标位置向后增加 offset 的区间内设置样式
    * @param offset
    */
   retain(offset: number): boolean

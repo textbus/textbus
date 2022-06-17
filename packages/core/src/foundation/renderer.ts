@@ -591,7 +591,7 @@ export class Renderer {
   private componentRender(component: ComponentInstance): VElement {
     if (component.changeMarker.dirty) {
       let slotVNode!: VElement
-      const node = component.extends.render(false, (slot, factory) => {
+      const node = component.extends.render(this.controller.readonly, (slot, factory) => {
         slotVNode = this.slotRender(component, slot, factory)
         return slotVNode
       })
@@ -710,7 +710,7 @@ export class Renderer {
         const formats = formatSort(child.formats)
         let host: VElement = null as any
         formats.forEach(item => {
-          const node = item.formatter.render(host, item.value, false)
+          const node = item.formatter.render(host, item.value, this.controller.readonly)
           if (node && host !== node) {
             this.vNodeLocation.set(node, {
               slot,
@@ -750,7 +750,7 @@ export class Renderer {
   private createVDomByOverlapFormats(formats: FormatItem[], host: VElement, slot: Slot): VElement {
     const item = formats.shift()
     if (item) {
-      const next = item.formatter.render(host, item.value, false)
+      const next = item.formatter.render(host, item.value, this.controller.readonly)
       if (next && next !== host) {
         host.appendChild(next)
         host = next

@@ -62,7 +62,7 @@ export class Commander {
     if (isPreventDefault) {
       return []
     }
-
+    invokeListener(source.parent!, 'onContentDeleted')
     const slot = source.cut(startIndex, endIndex)
     const content = slot.sliceContent()
     const slotList: Slot[] = []
@@ -284,6 +284,7 @@ export class Commander {
         selection.setPosition(startSlotRefCache, startOffset)
         return false
       }
+      invokeListener(selection.startSlot!.parent!, 'onContentDeleted')
       return true
     }
     // 提取尾插槽选区后的内容
@@ -295,6 +296,7 @@ export class Commander {
         count: endSlot.length - selection.endOffset!
       }, () => {
         deletedSlot = endSlot.cut(selection.endOffset!, endSlot.length)
+        invokeListener(endSlot.parent!, 'onContentDeleted')
       })
       invokeListener(endSlot.parent!, 'onContentDelete', event)
     }
@@ -338,6 +340,7 @@ export class Commander {
       }
       slot.retain(scope.startIndex)
       slot.delete(scope.endIndex - scope.startIndex)
+      invokeListener(parentComponent, 'onContentDeleted')
       if (slot === dumpStartSlot) {
         break
       }
@@ -351,6 +354,7 @@ export class Commander {
 
         if (!isPreventDefault) {
           parentComponent.slots.remove(slot)
+          invokeListener(parentComponent, 'onSlotRemoved')
         }
       }
 
@@ -614,9 +618,9 @@ export class Commander {
   }
 
   protected _insert(content: string | ComponentInstance,
-                  expand: boolean,
-                  formatter?: Formatter | Formats,
-                  value?: FormatValue): false | Slot {
+                    expand: boolean,
+                    formatter?: Formatter | Formats,
+                    value?: FormatValue): false | Slot {
     const selection = this.selection
     if (!selection.isSelected) {
       return false
@@ -692,6 +696,7 @@ export class Commander {
       if (!isPreventDefault) {
         parentSlot.retain(index)
         parentSlot.delete(1)
+        invokeListener(parentSlot.parent!, 'onContentDeleted')
         if (parentSlot === stopSlot || !parentSlot.isEmpty) {
           return {
             success: true,
@@ -709,6 +714,7 @@ export class Commander {
           invokeListener(parentComponent, 'onSlotRemove', event)
           if (!isPreventDefault) {
             parentComponent.slots.remove(parentSlot)
+            invokeListener(parentComponent, 'onSlotRemoved')
           }
           if (index === 0) {
             const p = parentComponent.parent!
