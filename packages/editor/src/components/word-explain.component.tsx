@@ -114,7 +114,7 @@ export const wordExplainComponent = defineComponent({
             })}
             {
               !isOutputMode && <span class="tb-word-explain-close" onClick={() => {
-                commander.remove(self)
+                commander.removeComponent(self)
               }
               }/>
             }

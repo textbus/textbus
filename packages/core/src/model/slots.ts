@@ -64,7 +64,9 @@ export class Slots<T = any> {
     if (index > -1) {
       this.retain(index)
       this.delete(1)
+      return true
     }
+    return false
   }
 
   /**
@@ -305,6 +307,7 @@ export class Slots<T = any> {
       }).flat()
     })
     this.childSlotRemoveEvent.next(deletedSlots)
+    return deletedSlots
   }
 
   /**

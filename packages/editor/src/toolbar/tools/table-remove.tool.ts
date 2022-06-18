@@ -24,7 +24,7 @@ export function tableRemoveToolConfigFactory(injector: Injector): ButtonToolConf
     onClick() {
       const s = query.queryComponent(tableComponent)
       if (s.state === QueryStateType.Enabled) {
-        commander.remove(s.value!)
+        commander.removeComponent(s.value!)
       }
     }
   }

@@ -501,7 +501,7 @@ export class Selection {
       }
       if (content && typeof content !== 'string') {
         let isPreventDefault = true
-        invokeListener(content, 'onSelectionFromEnd', new Event(startSlot!, null, () => {
+        invokeListener(content, 'onSelectionFromEnd', new Event(content, null, () => {
           isPreventDefault = false
         }))
         if (!isPreventDefault) {
@@ -551,7 +551,7 @@ export class Selection {
       }
       if (content && typeof content !== 'string') {
         let isPreventDefault = true
-        invokeListener(content, 'onSelectionFromFront', new Event(endSlot!, null, () => {
+        invokeListener(content, 'onSelectionFromFront', new Event(content, null, () => {
           isPreventDefault = false
         }))
         if (!isPreventDefault) {
@@ -1064,6 +1064,127 @@ export class Selection {
     return paths.reverse()
   }
 
+  getNextPositionByPosition(slot: Slot, offset: number) {
+    if (offset === slot.length - 1) {
+      const current = slot.getContentAtIndex(offset)
+      if (current === '\n') {
+        offset++
+      }
+    }
+    if (offset < slot.length) {
+      let current = slot.getContentAtIndex(offset)
+
+      if (current === '\n') {
+        current = slot.getContentAtIndex(offset + 1)
+      }
+      if (current && typeof current !== 'string') {
+        const firstChildSlot = current.slots.get(0)
+        if (firstChildSlot) {
+          return this.findFirstPosition(firstChildSlot)
+        }
+      }
+      return {
+        slot,
+        offset: offset + 1
+      }
+    }
+
+    // 循环向后找最后一个子 fragment，但有可能当前这个就是最后一个，这时循环
+    // 向上会找不到，那么就使用当前的 fragment
+    const cacheSlot = slot
+
+    while (slot) {
+      const parentComponent = slot.parent!
+      const slotIndex = parentComponent.slots.indexOf(slot)
+      if (slotIndex < parentComponent.slots.length - 1) {
+        return this.findFirstPosition(parentComponent.slots.get(slotIndex + 1)!)
+      }
+      const parentSlot = parentComponent.parent
+      if (!parentSlot) {
+        const len = cacheSlot.length
+        const last = cacheSlot.getContentAtIndex(len - 1)
+        return {
+          slot: cacheSlot,
+          offset: last === '\n' ? len - 1 : len
+        }
+      }
+      const componentIndex = parentSlot.indexOf(parentComponent)
+      if (componentIndex < parentSlot.length - 1) {
+        const nextContent = parentSlot.getContentAtIndex(componentIndex + 1)
+        if (typeof nextContent !== 'string') {
+          const nextFirstSlot = nextContent.slots.first
+          if (nextFirstSlot) {
+            return this.findFirstPosition(nextFirstSlot)
+          }
+        }
+        return {
+          slot: parentSlot,
+          offset: componentIndex + 1
+        }
+      }
+      slot = parentSlot
+    }
+    return {
+      slot: cacheSlot,
+      offset: this.endOffset!
+    }
+  }
+
+  getPreviousPositionByPosition(slot: Slot, offset: number) {
+    if (offset > 0) {
+      const prev = slot.getContentAtIndex(offset - 1)!
+      if (prev && typeof prev !== 'string') {
+        const lastChildSlot = prev.slots.last
+        if (lastChildSlot) {
+          return this.findLastPosition(lastChildSlot)
+        }
+      }
+      return {
+        slot: slot,
+        offset: offset - 1
+      }
+    }
+    // 循环向前找第一个子 fragment，但有可能当前这个就是第一个，这时循环
+    // 向上会找不到，那么就使用当前的 fragment
+    const cacheSlot = slot
+
+    while (slot) {
+      const parentComponent = slot.parent!
+      const slots = parentComponent.slots
+      const slotIndex = slots.indexOf(slot)
+      if (slotIndex > 0) {
+        return this.findLastPosition(slots.get(slotIndex - 1)!)
+      }
+
+      const parentSlot = parentComponent.parent
+      if (!parentSlot) {
+        return {
+          slot: cacheSlot,
+          offset: 0
+        }
+      }
+      const componentIndex = parentSlot.indexOf(parentComponent)
+      if (componentIndex > 0) {
+        const prevContent = parentSlot.getContentAtIndex(componentIndex - 1)
+        if (prevContent && typeof prevContent !== 'string') {
+          const lastChildSlot = prevContent.slots.last
+          if (lastChildSlot) {
+            return this.findLastPosition(lastChildSlot)
+          }
+        }
+        return {
+          slot: parentSlot,
+          offset: prevContent === '\n' ? componentIndex - 1 : componentIndex
+        }
+      }
+      slot = parentSlot
+    }
+    return {
+      slot: cacheSlot,
+      offset: 0
+    }
+  }
+
   static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
     let startComponent = startSlot?.parent
     let endComponent = endSlot?.parent
@@ -1344,127 +1465,6 @@ export class Selection {
     return oldPosition || {
       offset: focusSlot.length,
       slot: focusSlot
-    }
-  }
-
-  private getNextPositionByPosition(slot: Slot, offset: number) {
-    if (offset === slot.length - 1) {
-      const current = slot.getContentAtIndex(offset)
-      if (current === '\n') {
-        offset++
-      }
-    }
-    if (offset < slot.length) {
-      let current = slot.getContentAtIndex(offset)
-
-      if (current === '\n') {
-        current = slot.getContentAtIndex(offset + 1)
-      }
-      if (current && typeof current !== 'string') {
-        const firstChildSlot = current.slots.get(0)
-        if (firstChildSlot) {
-          return this.findFirstPosition(firstChildSlot)
-        }
-      }
-      return {
-        slot,
-        offset: offset + 1
-      }
-    }
-
-    // 循环向后找最后一个子 fragment，但有可能当前这个就是最后一个，这时循环
-    // 向上会找不到，那么就使用当前的 fragment
-    const cacheSlot = slot
-
-    while (slot) {
-      const parentComponent = slot.parent!
-      const slotIndex = parentComponent.slots.indexOf(slot)
-      if (slotIndex < parentComponent.slots.length - 1) {
-        return this.findFirstPosition(parentComponent.slots.get(slotIndex + 1)!)
-      }
-      const parentSlot = parentComponent.parent
-      if (!parentSlot) {
-        const len = cacheSlot.length
-        const last = cacheSlot.getContentAtIndex(len - 1)
-        return {
-          slot: cacheSlot,
-          offset: last === '\n' ? len - 1 : len
-        }
-      }
-      const componentIndex = parentSlot.indexOf(parentComponent)
-      if (componentIndex < parentSlot.length - 1) {
-        const nextContent = parentSlot.getContentAtIndex(componentIndex + 1)
-        if (typeof nextContent !== 'string') {
-          const nextFirstSlot = nextContent.slots.first
-          if (nextFirstSlot) {
-            return this.findFirstPosition(nextFirstSlot)
-          }
-        }
-        return {
-          slot: parentSlot,
-          offset: componentIndex + 1
-        }
-      }
-      slot = parentSlot
-    }
-    return {
-      slot: cacheSlot,
-      offset: this.endOffset!
-    }
-  }
-
-  private getPreviousPositionByPosition(slot: Slot, offset: number) {
-    if (offset > 0) {
-      const prev = slot.getContentAtIndex(offset - 1)!
-      if (prev && typeof prev !== 'string') {
-        const lastChildSlot = prev.slots.last
-        if (lastChildSlot) {
-          return this.findLastPosition(lastChildSlot)
-        }
-      }
-      return {
-        slot: slot,
-        offset: offset - 1
-      }
-    }
-    // 循环向前找第一个子 fragment，但有可能当前这个就是第一个，这时循环
-    // 向上会找不到，那么就使用当前的 fragment
-    const cacheSlot = slot
-
-    while (slot) {
-      const parentComponent = slot.parent!
-      const slots = parentComponent.slots
-      const slotIndex = slots.indexOf(slot)
-      if (slotIndex > 0) {
-        return this.findLastPosition(slots.get(slotIndex - 1)!)
-      }
-
-      const parentSlot = parentComponent.parent
-      if (!parentSlot) {
-        return {
-          slot: cacheSlot,
-          offset: 0
-        }
-      }
-      const componentIndex = parentSlot.indexOf(parentComponent)
-      if (componentIndex > 0) {
-        const prevContent = parentSlot.getContentAtIndex(componentIndex - 1)
-        if (prevContent && typeof prevContent !== 'string') {
-          const lastChildSlot = prevContent.slots.last
-          if (lastChildSlot) {
-            return this.findLastPosition(lastChildSlot)
-          }
-        }
-        return {
-          slot: parentSlot,
-          offset: prevContent === '\n' ? componentIndex - 1 : componentIndex
-        }
-      }
-      slot = parentSlot
-    }
-    return {
-      slot: cacheSlot,
-      offset: 0
     }
   }
 

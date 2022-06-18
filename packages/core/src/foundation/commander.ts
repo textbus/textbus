@@ -1,6 +1,6 @@
-import { Injectable, Prop } from '@tanbo/di'
+import { Injectable, Injector, Prop } from '@tanbo/di'
 
-import { SelectionPosition, Range, Selection } from './selection'
+import { SelectionPosition, Selection, Range } from './selection'
 import {
   ComponentInstance,
   ContentType,
@@ -13,160 +13,300 @@ import {
   Event,
   InsertEventData,
   EnterEventData,
-  Formats
+  Formats,
+  Component,
+  DeltaLite
 } from '../model/_api'
-import { NativeRenderer } from './_injection-tokens'
+import { NativeRenderer, RootComponentRef } from './_injection-tokens'
+import { Translator } from './translator'
 
-interface DeleteTreeState extends SelectionPosition {
-  success: boolean
+function getInsertPosition(
+  slot: Slot,
+  offset: number,
+  content: string | ComponentInstance,
+  excludeSlots: Slot[] = []
+): SelectionPosition | null {
+  if (canInsert(content, slot)) {
+    return {
+      slot,
+      offset
+    }
+  }
+  excludeSlots.push(slot)
+  return getNextInsertPosition(slot, content, excludeSlots)
 }
 
-export type Nullable<T> = {
-  [P in keyof T]: T[P] | null
+function canInsert(content: string | ComponentInstance, target: Slot) {
+  const insertType = typeof content === 'string' ? ContentType.Text : content.type
+  return target.schema.includes(insertType)
 }
 
-/**
- * Textbus 数据操作类，提供一系列的方法，完成文档数据的增删改查的操作
- */
+function getNextInsertPosition(currentSlot: Slot, content: string | ComponentInstance, excludeSlots: Slot[]): SelectionPosition | null {
+  const parentComponent = currentSlot.parent!
+  const slotIndex = parentComponent.slots.indexOf(currentSlot)
+  if (currentSlot !== parentComponent.slots.last) {
+    return getInsertPosition(parentComponent.slots.get(slotIndex + 1)!, 0, content, excludeSlots)
+  }
+  const parentSlot = parentComponent.parent
+  if (!parentSlot) {
+    return null
+  }
+  if (excludeSlots.includes(parentSlot)) {
+    return getNextInsertPosition(parentSlot, content, excludeSlots)
+  }
+  const index = parentSlot.indexOf(parentComponent)
+  const position = getInsertPosition(parentSlot, index + 1, content, excludeSlots)
+  if (position) {
+    return position
+  }
+  excludeSlots.push(parentSlot)
+
+  const afterContent = parentSlot.sliceContent(index + 1)
+  const firstComponent = afterContent.filter((i): i is ComponentInstance => {
+    return typeof i !== 'string'
+  }).shift()
+
+  if (firstComponent && firstComponent.slots.length) {
+    return getInsertPosition(firstComponent.slots.get(0)!, 0, content, excludeSlots)
+  }
+
+  return getNextInsertPosition(parentSlot, content, excludeSlots)
+}
+
+function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootComponent: ComponentInstance): SelectionPosition {
+  const parentComponent = slot.parent
+  if (!parentComponent) {
+    return {
+      slot,
+      offset
+    }
+  }
+  const parentSlot = parentComponent.parent!
+  if (!parentSlot) {
+    return {
+      slot,
+      offset
+    }
+  }
+  const index = parentSlot.indexOf(parentComponent)
+
+  // 单插槽组件
+  if (parentComponent.slots.length === 1) {
+    if (parentComponent === rootComponent) {
+      return {
+        slot,
+        offset
+      }
+    }
+
+    let isPreventDefault = true
+    invokeListener(parentSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(parentSlot, {
+      index,
+      count: 1
+    }, () => {
+      isPreventDefault = false
+      parentSlot.retain(index)
+      parentSlot.delete(1)
+      invokeListener(parentSlot.parent!, 'onContentDeleted')
+    }))
+    if (isPreventDefault) {
+      return {
+        slot,
+        offset
+      }
+    }
+    if (parentSlot.isEmpty) {
+      return deleteUpBySlot(selection, parentSlot, index, rootComponent)
+    }
+    return {
+      slot: parentSlot,
+      offset: parentSlot.index
+    }
+  }
+  // 多插槽组件
+  if (parentComponent.separable) {
+    const slotIndex = parentComponent.slots.indexOf(slot)
+    const position: SelectionPosition = slotIndex === 0 ? {
+      slot: parentSlot,
+      offset: index
+    } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
+
+    let isPreventDefault = true
+    invokeListener(parentComponent, 'onSlotRemove', new Event<ComponentInstance, DeleteEventData>(parentComponent, {
+      index: slotIndex,
+      count: 1
+    }, () => {
+      isPreventDefault = false
+      const isSuccess = parentComponent.slots.remove(slot)
+      if (isSuccess) {
+        invokeListener(parentComponent, 'onSlotRemoved')
+      }
+    }))
+    if (!isPreventDefault) {
+      return position
+    }
+  }
+  return {
+    slot,
+    offset
+  }
+}
+
+export interface TransformRule<ComponentState, SlotState> {
+  multipleSlot: boolean
+  target: Component
+
+  slotFactory(): Slot<SlotState>
+
+  stateFactory?(): ComponentState
+}
+
+function deltaToSlots<T>(selection: Selection, source: Slot, delta: DeltaLite, rule: TransformRule<any, T>, range: Range): Slot<T>[] {
+  let newSlot = rule.slotFactory()
+  const newSlots = [newSlot]
+
+  let index = 0
+  while (delta.length) {
+    const {insert, formats} = delta.shift()!
+    const b = canInsert(insert, newSlot)
+    const oldIndex = index
+    index += insert.length
+    if (b) {
+      newSlot.insert(insert, formats)
+      if (source === range.anchorSlot && range.anchorOffset >= oldIndex && range.anchorOffset <= index) {
+        range.anchorSlot = newSlot
+      }
+      if (source === range.focusSlot && range.focusOffset >= oldIndex && range.focusOffset <= index) {
+        range.focusSlot = newSlot
+      }
+      continue
+    }
+    if (range.anchorOffset > index) {
+      range.anchorOffset -= index
+    }
+    if (range.focusOffset > index) {
+      range.focusOffset -= index
+    }
+    if (typeof insert !== 'string') {
+      const slots = insert.slots.toArray().map(childSlot => {
+        return deltaToSlots(selection, source, childSlot.toDelta(), rule, range)
+      }).flat()
+      newSlots.push(...slots)
+    }
+    newSlot = rule.slotFactory()
+  }
+  return newSlots
+}
+
+function slotsToComponents<T>(injector: Injector, slots: Slot<T>[], rule: TransformRule<any, T>) {
+  const componentInstances: ComponentInstance[] = []
+  if (rule.multipleSlot) {
+    componentInstances.push(rule.target.createInstance(injector, {
+      state: rule.stateFactory?.(),
+      slots
+    }))
+  } else {
+    slots.forEach(childSlot => {
+      componentInstances.push(rule.target.createInstance(injector, {
+        state: rule.stateFactory?.(),
+        slots: [childSlot]
+      }))
+    })
+  }
+  return componentInstances
+}
+
 @Injectable()
 export class Commander {
   @Prop()
   private nativeRenderer!: NativeRenderer
 
-  constructor(private selection: Selection) {
+  constructor(protected selection: Selection,
+              protected injector: Injector,
+              protected translator: Translator,
+              protected rootComponentRef: RootComponentRef) {
   }
 
   /**
-   * 从源插槽内提取符合 schema 的一组数据，并返回一组插槽，同时删除源插槽在开始到结束位置的内容
-   * @param source 源插槽
-   * @param schema 新插槽的 schema
-   * @param startIndex 提取开始位置
-   * @param endIndex 提取结束位置
+   * 将选区内容转换为指定组件
+   * @param rule
    */
-  extractContentBySchema(source: Slot, schema: ContentType[], startIndex = 0, endIndex = source.length): Slot[] {
-    if (schema.length === 0) {
-      return []
+  transform<T, U>(rule: TransformRule<T, U>): boolean {
+    const selection = this.selection
+    if (!selection.isSelected) {
+      return false
     }
 
-    let isPreventDefault = true
-
-    const event = new Event<DeleteEventData>(source, {
-      count: endIndex - startIndex,
-      index: startIndex
-    }, () => {
-      isPreventDefault = false
-    })
-
-    invokeListener(source.parent!, 'onContentDelete', event)
-
-    if (isPreventDefault) {
-      return []
-    }
-    invokeListener(source.parent!, 'onContentDeleted')
-    const slot = source.cut(startIndex, endIndex)
-    const content = slot.sliceContent()
-    const slotList: Slot[] = []
-    let len = slot.length
-    let i = len
-
-    while (content.length) {
-      const item = content.pop()!
-      let contentType: ContentType
-      if (typeof item === 'string') {
-        contentType = ContentType.Text
-      } else {
-        contentType = item.type
-      }
-      if (!schema.includes(contentType)) {
-        if (len > i) {
-          slotList.unshift(slot.cutTo(new Slot(schema), i, len))
-          i = len
-        }
-        if (typeof item !== 'string') {
-          item.slots.toArray().forEach(slot => {
-            slotList.unshift(...this.extractContentBySchema(slot, schema))
-          })
-          i--
-        }
-      }
-      len -= item.length
-    }
-    if (i > 0) {
-      slotList.unshift(slot.cutTo(new Slot(schema), 0, i))
-    }
-    return slotList
-  }
-
-  /**
-   * 在当前选区内，根据 schema 提取出一组新的插槽和选区位置，并删除选区内的内容。
-   * @param schema 新插槽的 schema
-   * @param greedy 是否扩展选区，默认为 `false`。当值为 `true` 时，选区会向前后的行内内容扩展，主要用于转换块级内容。
-   */
-  extractSlots(schema: ContentType[], greedy = false) {
-    const range: Nullable<Range> = {
-      focusSlot: null,
-      focusOffset: null,
-      anchorSlot: null,
-      anchorOffset: null
+    const range: Range = {
+      anchorSlot: selection.anchorSlot!,
+      anchorOffset: selection.anchorOffset!,
+      focusSlot: selection.focusSlot!,
+      focusOffset: selection.focusOffset!
     }
 
-    if (!this.selection.isSelected) {
-      return {
-        range,
-        slots: []
-      }
-    }
+    const scopes = this.selection.getBlocks()
 
-    const scopes = greedy ? this.selection.getGreedyScopes() : this.selection.getSelectedScopes()
-    const slots: Slot[] = []
+    let slots: Slot<U>[] = []
 
     for (const scope of scopes) {
-      const childSlots = this.extractContentBySchema(scope.slot, schema, scope.startIndex, scope.endIndex)
-      if (scope.slot === this.selection.focusSlot) {
-        let offset = this.selection.focusOffset!
-        for (const slot of childSlots) {
-          if (offset > slot.length) {
-            offset -= slot.length
-          } else {
-            range.focusSlot = slot
-            range.focusOffset = offset
-          }
+      const {slot, startIndex, endIndex} = scope
+      const parentComponent = slot.parent!
+      if (parentComponent.separable) {
+        const slotIndex = parentComponent.slots.indexOf(slot)
+        if (slotIndex !== 0) {
+          invokeListener(parentComponent, 'onSlotRemove', new Event(parentComponent, {
+            index: 0,
+            count: slotIndex
+          }, () => {
+            parentComponent.slots.retain(0)
+            const deletedSlots = parentComponent.slots.delete(slotIndex)
+            const beforeComponent = this.translator.createComponentByData(parentComponent.name, {
+              state: JSON.parse(JSON.stringify(parentComponent.state)),
+              slots: deletedSlots
+            })
+            this.insertBefore(beforeComponent!, parentComponent)
+          }))
         }
       }
-      if (scope.slot === this.selection.anchorSlot) {
-        let offset = this.selection.anchorOffset!
-        for (const slot of childSlots) {
-          if (offset > slot.length) {
-            offset -= slot.length
-          } else {
-            range.anchorSlot = slot
-            range.anchorOffset = offset
-          }
+      selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
+      let position: SelectionPosition | null
+      this.delete(deletedSlot => {
+        position = null
+        const parentComponent = slot.parent!
+        if (parentComponent.separable || parentComponent.slots.length === 1) {
+          const delta = deletedSlot.toDelta()
+          slots.push(...deltaToSlots(selection, slot, delta, rule, range))
+          position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+          return
         }
+        let componentInstances = slotsToComponents(this.injector, slots, rule)
+        slots = []
+        componentInstances.forEach(instance => {
+          this.insertBefore(instance, parentComponent)
+        })
+        if (!slot.schema.includes(rule.target.instanceType)) {
+          return
+        }
+        const delta = deletedSlot.toDelta()
+        const dumpSlots = deltaToSlots(selection, slot, delta, rule, range)
+
+        componentInstances = slotsToComponents(this.injector, dumpSlots, rule)
+
+        componentInstances.forEach((instance, index) => {
+          selection.setPosition(slot, index)
+          this.insert(instance)
+        })
+      })
+      if (position!) {
+        selection.setPosition(position.slot, position.offset)
       }
-      slots.push(...childSlots)
     }
-
-    if (greedy) {
-      const firstScope = scopes[0]
-      const lastScope = scopes[scopes.length - 1]
-      const {startSlot, startOffset, endSlot, endOffset} = this.selection
-
-      this.selection.setAnchor(firstScope.slot, 0)
-      this.selection.setFocus(lastScope.slot, lastScope.slot.length)
-
-      const is = this.delete()
-      if (!is) {
-        this.selection.setAnchor(startSlot!, startOffset!)
-        this.selection.setFocus(endSlot!, endOffset!)
-      } else {
-        this.delete()
-      }
-    }
-    return {
-      slots,
-      range
-    }
+    const componentInstances = slotsToComponents(this.injector, slots, rule)
+    componentInstances.forEach(instance => {
+      this.insert(instance)
+    })
+    selection.setBaseAndExtent(range.anchorSlot, range.anchorOffset, range.focusSlot, range.focusOffset)
+    return true
   }
 
   /**
@@ -178,13 +318,27 @@ export class Commander {
   write(content: string | ComponentInstance, formats?: Formats): boolean
   write(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
   write(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
-    const slot = this._insert(content, true, formatter, value)
-    if (slot) {
-      const startSlot = this.selection.startSlot!
-      this.selection.setPosition(startSlot, startSlot.index)
-      return true
+    const selection = this.selection
+    const canInsert = selection.isCollapsed ? true : this.delete()
+    if (!canInsert) {
+      return false
     }
-    return false
+    const position = getInsertPosition(selection.startSlot!, selection.startOffset!, content)
+    if (!position) {
+      return false
+    }
+    let formats = position.slot.extractFormatsByIndex(position.offset)
+    if (formatter) {
+      if (Array.isArray(formatter)) {
+        formats = [
+          ...formats,
+          ...formatter
+        ]
+      } else {
+        formats.push([formatter, value as FormatValue])
+      }
+    }
+    return this.insert(content, formats)
   }
 
   /**
@@ -195,13 +349,143 @@ export class Commander {
   insert(content: string | ComponentInstance, formats?: Formats): boolean
   insert(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
   insert(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
-    const slot = this._insert(content, false, formatter, value)
-    if (slot) {
-      const startSlot = this.selection.startSlot!
-      this.selection.setPosition(startSlot, startSlot.index)
-      return true
+    const selection = this.selection
+    const canInsert = selection.isCollapsed ? true : this.delete()
+    if (!canInsert) {
+      return false
     }
-    return false
+    let formats: Formats = []
+    if (formatter) {
+      if (Array.isArray(formatter)) {
+        formats = formatter
+      } else {
+        formats.push([formatter, value as FormatValue])
+      }
+    }
+
+    const position = getInsertPosition(selection.startSlot!, selection.startOffset!, content)
+    if (!position) {
+      return false
+    }
+    const {slot, offset} = position
+    let isInsertSuccess = false
+    invokeListener(slot.parent!, 'onContentInsert', new Event<Slot, InsertEventData>(slot, {
+      index: offset,
+      content,
+      formats
+    }, () => {
+      isInsertSuccess = true
+      slot.retain(offset)
+      slot.insert(content, formats)
+      invokeListener(slot.parent!, 'onContentInserted', new Event<Slot, InsertEventData>(slot, {
+        index: offset,
+        content,
+        formats
+      }, () => {
+        selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
+      }))
+    }))
+    return isInsertSuccess
+  }
+
+  /**
+   * 触发删除操作，如当前选区未闭合，则删除选区内容。否则触发默认删除操作
+   * @param deleteBefore 默认为 `true`，当值为 `true` 时，则向前删除，否则向后删除
+   */
+  delete(deleteBefore?: boolean): boolean
+  delete(receiver: (slot: Slot) => void, deleteBefore?: boolean): boolean
+  delete(receiver?: any, deleteBefore = true): boolean {
+    if (typeof receiver === 'boolean') {
+      deleteBefore = receiver
+      receiver = function () {
+        //
+      }
+    } else if (typeof receiver !== 'function') {
+      receiver = function () {
+        //
+      }
+    }
+    const selection = this.selection
+    if (!selection.isSelected) {
+      return false
+    }
+    if (selection.isCollapsed) {
+      if (deleteBefore) {
+        const prevPosition = selection.getPreviousPosition()!
+        selection.setAnchor(prevPosition.slot, prevPosition.offset)
+      } else {
+        const nextPosition = selection.getNextPosition()!
+        selection.setFocus(nextPosition.slot, nextPosition.offset)
+      }
+    }
+
+    if (selection.isCollapsed) {
+      const startSlot = selection.startSlot!
+      const startOffset = selection.startOffset!
+      if (startSlot!.isEmpty) {
+        const position = deleteUpBySlot(selection, startSlot, startOffset, this.rootComponentRef.component)
+        selection.setBaseAndExtent(position.slot, position.offset, position.slot, position.offset)
+        return position.slot !== startSlot || position.offset !== startOffset
+      }
+      return false
+    }
+    const scopes = this.selection.getSelectedScopes()
+    const endSlot = selection.endSlot!
+    const startSlot = selection.startSlot!
+    const startOffset = selection.startOffset!
+    while (scopes.length) {
+      const lastScope = scopes.pop()!
+      let {slot, startIndex} = lastScope
+      const endIndex = lastScope.endIndex
+      const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
+      let isPreventDefault = true
+      invokeListener(slot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(slot, {
+        index: startIndex,
+        count: endIndex - startIndex
+      }, () => {
+        isPreventDefault = false
+        const deletedSlot = slot.cut(startIndex, endIndex)
+        receiver(deletedSlot)
+        // slot.retain(startIndex)
+        // slot.delete(endIndex - startIndex)
+        invokeListener(slot.parent!, 'onContentDeleted')
+      }))
+      if (isPreventDefault) {
+        if (isFocusEnd) {
+          selection.setFocus(slot, endIndex)
+        } else {
+          selection.setAnchor(slot, endIndex)
+        }
+        return false
+      }
+      if (slot !== startSlot && slot !== endSlot && slot.isEmpty) {
+        const position = deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component)
+        slot = position.slot
+        startIndex = position.offset
+      }
+      if (isFocusEnd) {
+        selection.setFocus(slot, startIndex)
+      } else {
+        selection.setAnchor(slot, startIndex)
+      }
+    }
+    if (startSlot !== endSlot) {
+      invokeListener(endSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(endSlot, {
+        index: 0,
+        count: endSlot.length
+      }, () => {
+        const deletedDelta = endSlot.cut().toDelta()
+        deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component)
+        if (deletedDelta.length === 1 && deletedDelta[0].insert === '\n') {
+          return
+        }
+        deletedDelta.forEach(item => {
+          startSlot.insert(item.insert, item.formats)
+        })
+      }))
+    }
+    selection.setBaseAndExtent(startSlot, startOffset, startSlot, startOffset)
+    return true
   }
 
   /**
@@ -221,169 +505,63 @@ export class Commander {
     }
     const startSlot = this.selection.startSlot!
     let isPreventDefault = true
-    const event = new Event<EnterEventData>(startSlot, {
+    invokeListener(startSlot.parent!, 'onEnter', new Event<Slot, EnterEventData>(startSlot, {
       index: this.selection.startOffset!
     }, () => {
       isPreventDefault = false
-    })
-    invokeListener(startSlot.parent!, 'onEnter', event)
-    if (isPreventDefault) {
-      return false
-    }
-    const startOffset = this.selection.startOffset!
-    const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
-    const content = isToEnd ? '\n\n' : '\n'
-    const isInserted = this.write(content)
-    if (isInserted && isToEnd) {
-      this.selection.setPosition(startSlot, startOffset + 1)
-    }
-    return true
+      const startOffset = this.selection.startOffset!
+      const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
+      const content = isToEnd ? '\n\n' : '\n'
+      const isInserted = this.write(content)
+      if (isInserted && isToEnd) {
+        this.selection.setPosition(startSlot, startOffset + 1)
+      }
+    }))
+    return !isPreventDefault
   }
 
   /**
-   * 触发删除操作，如当前选区未闭合，则删除选区内容。否则触发默认删除操作
-   * @param deleteBefore 默认为 `true`，当值为 `true` 时，则向前删除，否则向后删除
+   * 在指定组件前插入新的组件
+   * @param newChild 要插入的组件
+   * @param ref 新组件插入组件位置的引用
    */
-  delete(deleteBefore = true): boolean {
-    const selection = this.selection
-    if (!selection.isSelected) {
-      return false
+  insertBefore(newChild: ComponentInstance, ref: ComponentInstance): boolean {
+    const parentSlot = ref?.parent
+    if (parentSlot) {
+      const index = parentSlot.indexOf(ref)
+      this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
+      return this.insert(newChild)
     }
-    const startOffset = selection.startOffset!
-    const startSlotRefCache = selection.startSlot!
-    if (selection.isCollapsed) {
-      if (deleteBefore) {
-        const prevPosition = selection.getPreviousPosition()!
-        selection.setAnchor(prevPosition.slot, prevPosition.offset)
-      } else {
-        const nextPosition = selection.getNextPosition()!
-        selection.setFocus(nextPosition.slot, nextPosition.offset)
-      }
+    return false
+  }
+
+  /**
+   * 在指定组件后插入新的组件
+   * @param newChild 要插入的组件
+   * @param ref 新组件插入组件位置的引用
+   */
+  insertAfter(newChild: ComponentInstance, ref: ComponentInstance): boolean {
+    const parentSlot = ref?.parent
+    if (parentSlot) {
+      const index = parentSlot.indexOf(ref) + 1
+      this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
+      return this.insert(newChild)
     }
+    return false
+  }
 
-    if (selection.isCollapsed) {
-      if (selection.startSlot!.isEmpty) {
-        return this.tryCleanDoc()
-      }
-      return false
+  /**
+   * 用新组件替换旧组件
+   * @param oldComponent 要删除的组件
+   * @param newComponent 新插入的组件
+   */
+  replaceComponent(oldComponent: ComponentInstance, newComponent: ComponentInstance): boolean {
+    const b = this.insertBefore(newComponent, oldComponent)
+    if (b) {
+      this.selection.setFocus(this.selection.focusSlot!, this.selection.focusOffset! + 1)
+      return this.delete(false)
     }
-    if (selection.startSlot === selection.endSlot) {
-      const slot = selection.startSlot!
-      let isPreventDefault = true
-      const event = new Event<DeleteEventData>(slot, {
-        count: selection.endOffset! - selection.startOffset!,
-        index: selection.startOffset!,
-      }, () => {
-        isPreventDefault = false
-        slot.retain(selection.startOffset!)
-        slot.delete(selection.endOffset! - selection.startOffset!)
-        selection.collapse(true)
-      })
-      invokeListener(selection.startSlot!.parent!, 'onContentDelete', event)
-      if (isPreventDefault) {
-        selection.setPosition(startSlotRefCache, startOffset)
-        return false
-      }
-      invokeListener(selection.startSlot!.parent!, 'onContentDeleted')
-      return true
-    }
-    // 提取尾插槽选区后的内容
-    let deletedSlot: Slot | null = null
-    const endSlot = selection.endSlot!
-    if (!endSlot.isEmpty) {
-      const event = new Event<DeleteEventData>(endSlot, {
-        index: selection.endOffset!,
-        count: endSlot.length - selection.endOffset!
-      }, () => {
-        deletedSlot = endSlot.cut(selection.endOffset!, endSlot.length)
-        invokeListener(endSlot.parent!, 'onContentDeleted')
-      })
-      invokeListener(endSlot.parent!, 'onContentDelete', event)
-    }
-
-    // 删除选中的区域
-    const scopes = selection.getSelectedScopes()
-
-    if (selection.endOffset === 0) {
-      scopes.push({
-        slot: endSlot,
-        startIndex: 0,
-        endIndex: endSlot.length,
-      })
-    }
-
-    const commonAncestorSlotRef = selection.commonAncestorSlot!
-
-    const dumpStartSlot = selection.startSlot
-
-    while (scopes.length) {
-      const scope = scopes.pop()!
-      let stoppedSlot = scope.slot
-      const slot = scope.slot
-
-      let isPreventDefault = true
-      const event = new Event<DeleteEventData>(slot, {
-        count: scope.endIndex - scope.startIndex,
-        index: scope.startIndex,
-      }, () => {
-        isPreventDefault = false
-      })
-      const parentComponent = scope.slot.parent!
-      invokeListener(parentComponent, 'onContentDelete', event)
-      if (isPreventDefault) {
-        const index = stoppedSlot.index
-        if (deletedSlot) {
-          this._addContent(deletedSlot, stoppedSlot)
-        }
-        selection.setFocus(stoppedSlot, index)
-        return false
-      }
-      slot.retain(scope.startIndex)
-      slot.delete(scope.endIndex - scope.startIndex)
-      invokeListener(parentComponent, 'onContentDeleted')
-      if (slot === dumpStartSlot) {
-        break
-      }
-
-      if (slot.isEmpty) {
-        let isPreventDefault = true
-        const event = new Event<null>(slot, null, () => {
-          isPreventDefault = false
-        })
-        invokeListener(parentComponent, 'onSlotRemove', event)
-
-        if (!isPreventDefault) {
-          parentComponent.slots.remove(slot)
-          invokeListener(parentComponent, 'onSlotRemoved')
-        }
-      }
-
-      if (parentComponent.slots.length === 0) {
-        const state = this._deleteTree(parentComponent, scope.slot, commonAncestorSlotRef)
-        if (!state.success) {
-          stoppedSlot = state.slot
-          stoppedSlot.retain(state.offset)
-          if (deletedSlot) {
-            this._addContent(deletedSlot, stoppedSlot)
-          }
-          selection.setFocus(stoppedSlot, state.offset)
-
-          slot.retain(scope.startIndex)
-          slot.delete(scope.endIndex - scope.startIndex)
-          return false
-        }
-      }
-    }
-
-    if (deletedSlot) {
-      const startSlotRef = selection.startSlot!
-      const startOffset = selection.startOffset!
-      this._addContent(deletedSlot, startSlotRef)
-      selection.setAnchor(startSlotRef, startOffset)
-    }
-
-    selection.collapse(true)
-    return true
+    return false
   }
 
   /**
@@ -397,11 +575,11 @@ export class Commander {
    * 剪切当前选区内容
    */
   cut() {
-    if (this.selection.isCollapsed) {
-      return
-    }
     this.copy()
-    this.delete()
+    if (this.selection.isCollapsed) {
+      return false
+    }
+    return this.delete()
   }
 
   /**
@@ -411,7 +589,7 @@ export class Commander {
    */
   paste(pasteSlot: Slot, text: string) {
     if (!this.selection.isSelected) {
-      return
+      return false
     }
     if (!this.selection.isCollapsed) {
       this.delete()
@@ -425,21 +603,19 @@ export class Commander {
       text
     }, () => {
       isPreventDefault = false
+      const delta = pasteSlot.toDelta()
+      delta.forEach(action => {
+        this.insert(action.insert, action.formats)
+      })
     }))
-    if (isPreventDefault) {
-      return
-    }
-    const delta = pasteSlot.toDelta()
-    delta.forEach(action => {
-      this.insert(action.insert, action.formats)
-    })
+    return !isPreventDefault
   }
 
   /**
    * 清除当前选区的所有格式
-   * @param ignoreFormatters 在清除格式时，忽略的格式
+   * @param excludeFormatters 在清除格式时，排除的格式
    */
-  cleanFormats(ignoreFormatters: Formatter[] = []) {
+  cleanFormats(excludeFormatters: Formatter[] = []) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -463,7 +639,7 @@ export class Commander {
         })
       }
 
-      cleanFormats(slot, ignoreFormatters, scope.startIndex, scope.endIndex)
+      cleanFormats(slot, excludeFormatters, scope.startIndex, scope.endIndex)
     })
   }
 
@@ -523,222 +699,17 @@ export class Commander {
   }
 
   /**
-   * 在指定组件前插入新的组件
-   * @param component 要插入的组件
-   * @param ref 新组件插入组件位置的引用
-   */
-  insertBefore(component: ComponentInstance, ref: ComponentInstance) {
-    const parentSlot = ref?.parent
-
-    if (parentSlot) {
-      const index = parentSlot.indexOf(ref)
-      parentSlot.retain(index)
-      parentSlot.insert(component)
-    }
-  }
-
-  /**
-   * 在指定组件后插入新的组件
-   * @param component 要插入的组件
-   * @param ref 新组件插入组件位置的引用
-   */
-  insertAfter(component: ComponentInstance, ref: ComponentInstance) {
-    const parentSlot = ref?.parent
-
-    if (parentSlot) {
-      const index = parentSlot.indexOf(ref)
-      parentSlot.retain(index + 1)
-      parentSlot.insert(component)
-    }
-  }
-
-  /**
-   * 用新组件替换旧组件
-   * @param source 要删除的组件
-   * @param target 新插入的组件
-   */
-  replace(source: ComponentInstance, target: ComponentInstance) {
-    this.insertBefore(target, source)
-    this.remove(source)
-  }
-
-  /**
    * 删除指定组件
    * @param component
    */
-  remove(component: ComponentInstance) {
+  removeComponent(component: ComponentInstance) {
     const parentSlot = component?.parent
 
     if (parentSlot) {
       const index = parentSlot.indexOf(component)
-      parentSlot.retain(index)
-      parentSlot.delete(1)
-    }
-  }
-
-  protected tryCleanDoc(): boolean {
-    let slot = this.selection.startSlot
-    while (slot) {
-      const parentComponent = slot.parent!
-      if (parentComponent.slots.length > 1) {
-        return false
-      }
-      const parentSlot = parentComponent.parent
-      if (parentSlot) {
-        parentSlot.removeComponent(parentComponent)
-        if (parentSlot.sliceContent().filter(i => typeof i !== 'string').length !== 0) {
-          return true
-        }
-      } else {
-        slot.cut()
-        this.selection.setPosition(slot, 0)
-        return true
-      }
-      slot = parentSlot
+      this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index + 1)
+      return this.delete()
     }
     return false
-  }
-
-  protected _addContent(source: Slot, targetSlot: Slot) {
-    if (source.isEmpty && !targetSlot.isEmpty) {
-      return true
-    }
-    const delta = source.toDelta()
-    source.cut()
-
-    this.selection.setPosition(targetSlot, targetSlot.index)
-
-    for (const action of delta) {
-      const b = this.insert(action.insert, action.formats)
-      if (!b) {
-        return false
-      }
-    }
-    return true
-  }
-
-  protected _insert(content: string | ComponentInstance,
-                    expand: boolean,
-                    formatter?: Formatter | Formats,
-                    value?: FormatValue): false | Slot {
-    const selection = this.selection
-    if (!selection.isSelected) {
-      return false
-    }
-
-    if (!selection.isCollapsed) {
-      const isCollapsed = this.delete(false)
-      if (!isCollapsed) {
-        return false
-      }
-    }
-    let formats: Formats = []
-    if (formatter) {
-      if (Array.isArray(formatter)) {
-        formats = formatter
-      } else {
-        formats.push([formatter, value as FormatValue])
-      }
-    }
-    const startSlot = selection.startSlot!
-
-    let isPreventDefault = true
-    const event = new Event<InsertEventData>(startSlot, {
-      index: this.selection.startOffset!,
-      content,
-      formats: [...formats]
-    }, () => {
-      isPreventDefault = false
-    })
-    invokeListener(startSlot.parent!, 'onContentInsert', event)
-    if (isPreventDefault) {
-      return false
-    }
-
-    startSlot.retain(selection.startOffset!)
-    const isInserted = expand ? startSlot.write(content, formats) : startSlot.insert(content, formats)
-    if (!isInserted) {
-      const parentComponent = startSlot.parent!
-      const parentSlot = parentComponent.parent
-      if (!parentSlot) {
-        return false
-      }
-      selection.setPosition(parentSlot, parentSlot.indexOf(parentComponent) + 1)
-      return this._insert(content, expand, formats)
-    }
-    isPreventDefault = true
-    invokeListener(selection.commonAncestorComponent!, 'onContentInserted', new Event<InsertEventData>(selection.commonAncestorSlot!, {
-      index: selection.startOffset!,
-      content,
-      formats
-    }, () => {
-      isPreventDefault = false
-    }))
-    if (isPreventDefault) {
-      return false
-    }
-    return selection.startSlot!
-  }
-
-  protected _deleteTree(component: ComponentInstance, currentSlot: Slot, stopSlot: Slot): DeleteTreeState {
-    const parentSlot = component.parent
-    if (parentSlot) {
-      const index = parentSlot.indexOf(component)
-
-      let isPreventDefault = true
-      const event = new Event<DeleteEventData>(parentSlot, {
-        count: 1,
-        index: index,
-      }, () => {
-        isPreventDefault = false
-      })
-      invokeListener(parentSlot.parent!, 'onContentDelete', event)
-      if (!isPreventDefault) {
-        parentSlot.retain(index)
-        parentSlot.delete(1)
-        invokeListener(parentSlot.parent!, 'onContentDeleted')
-        if (parentSlot === stopSlot || !parentSlot.isEmpty) {
-          return {
-            success: true,
-            slot: parentSlot,
-            offset: parentSlot.index
-          }
-        }
-        const parentComponent = parentSlot.parent!
-        if (parentComponent.slots.length > 1) {
-          const index = parentComponent.slots.indexOf(parentSlot)
-          let isPreventDefault = true
-          const event = new Event<null>(parentSlot, null, () => {
-            isPreventDefault = false
-          })
-          invokeListener(parentComponent, 'onSlotRemove', event)
-          if (!isPreventDefault) {
-            parentComponent.slots.remove(parentSlot)
-            invokeListener(parentComponent, 'onSlotRemoved')
-          }
-          if (index === 0) {
-            const p = parentComponent.parent!
-            return {
-              success: true,
-              slot: p,
-              offset: p.indexOf(parentComponent)
-            }
-          }
-          const prevSlotRef = parentComponent.slots.get(index - 1)!
-          const position = this.selection.findLastPosition(prevSlotRef)
-          return {
-            success: true,
-            slot: position.slot,
-            offset: position.offset
-          }
-        }
-        return this._deleteTree(parentComponent, parentSlot, stopSlot)
-      }
-    }
-    return {
-      success: true,
-      slot: currentSlot,
-      offset: currentSlot.index
-    }
   }
 }

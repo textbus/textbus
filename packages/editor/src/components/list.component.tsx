@@ -32,6 +32,7 @@ export interface ListComponentExtends extends ComponentExtends {
 export const listComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ListComponent',
+  separable: true,
   markdownSupport: {
     key: ' ',
     match: /^(1\.|[+*])$/,

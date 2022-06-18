@@ -169,7 +169,7 @@ export class ContextMenu {
     }
     const menuItems: ContextMenuItem[][] = []
     while (component) {
-      const event = new ContextMenuEvent<null>(startSlot, null, (...menus: ContextMenuItem[][]) => {
+      const event = new ContextMenuEvent<ComponentInstance>(component as ComponentInstance, null, (...menus: ContextMenuItem[][]) => {
         menuItems.push(...menus)
       })
       invokeListener(

@@ -186,7 +186,7 @@ export const tableComponent = defineComponent({
         iconClasses: ['textbus-icon-table-remove'],
         label: i18n.get('components.tableComponent.contextMenuRemoveTable'),
         onClick() {
-          commander.remove(self)
+          commander.removeComponent(self)
         }
       }]
     })

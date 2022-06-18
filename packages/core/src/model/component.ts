@@ -157,6 +157,8 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
 export interface Component<Instance extends ComponentInstance = ComponentInstance, State extends ComponentData = ComponentData> {
   /** 组件名 */
   name: string
+  /** 实例数据类型 */
+  instanceType: ContentType
   /** 组件是否可拆分 */
   separable: boolean
 
@@ -240,22 +242,26 @@ export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 export interface EventTypes {
   onUnselect: () => void
   onSelected: () => void
-  onSelectionFromFront: (event: Event<null>) => void
-  onSelectionFromEnd: (event: Event<null>) => void
-  onFocus: (event: Event<null>) => void
-  onBlur: (event: Event<null>) => void
-  onPaste: (event: Event<PasteEventData>) => void
-  onContentInserted: (event: Event<InsertEventData>) => void
-  onContentInsert: (event: Event<InsertEventData>) => void
-  onEnter: (event: Event<EnterEventData>) => void
-  onContentDelete: (event: Event<DeleteEventData>) => void
-  onContentDeleted: () => void
-  onSlotRemove: (event: Event<null>) => void
-  onSlotRemoved: () => void
-  onContextMenu: (event: ContextMenuEvent<null>) => ContextMenuConfig[]
+  onFocus: () => void
+  onBlur: () => void
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
+  onSelectionFromFront: (event: Event<ComponentInstance>) => void
+  onSelectionFromEnd: (event: Event<ComponentInstance>) => void
+  onEnter: (event: Event<Slot, EnterEventData>) => void
+  onPaste: (event: Event<Slot, PasteEventData>) => void
+  onContextMenu: (event: ContextMenuEvent<ComponentInstance>) => ContextMenuConfig[]
+
+  onContentInserted: (event: Event<Slot, InsertEventData>) => void
+  onContentInsert: (event: Event<Slot, InsertEventData>) => void
+  onContentDelete: (event: Event<Slot, DeleteEventData>) => void
+  onContentDeleted: () => void
+
+  // onSlotInserted: (event: Event<Slot, InsertEventData>) => void
+  // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
+  onSlotRemove: (event: Event<ComponentInstance, DeleteEventData>) => void
+  onSlotRemoved: () => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -316,10 +322,11 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
 export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
   options: ComponentOptions<Extends, State, SlotState>
 ): Component<ComponentInstance<Extends, State>, ComponentData<State, SlotState>> {
-  const separable = Reflect.has(options, 'separable') ? !!options.separable : true
+  const separable = !!options.separable
   return {
     name: options.name,
     separable,
+    instanceType: options.type,
     markdownSupport: options.markdownSupport,
     createInstance(contextInjector: Injector, initData?: ComponentData<State, SlotState>) {
       const marker = new ChangeMarker()
@@ -495,7 +502,7 @@ let isPreventDefault = false
 /**
  * Textbus 事件对象
  */
-export class Event<T, S extends Slot = Slot> {
+export class Event<S, T = null> {
   constructor(public target: S,
               public data: T,
               eventHandle: (...args: any[]) => void
@@ -508,7 +515,7 @@ export class Event<T, S extends Slot = Slot> {
   }
 }
 
-export class ContextMenuEvent<T, S extends Slot = Slot> extends Event<T, S> {
+export class ContextMenuEvent<T> extends Event<T> {
   get stopped() {
     return this.isStopped
   }
@@ -526,17 +533,17 @@ export class ContextMenuEvent<T, S extends Slot = Slot> extends Event<T, S> {
  * @param eventType 事件名
  * @param data 事件对象
  */
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<null>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<null>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<DeleteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<Slot, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<null>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<ComponentInstance, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<EnterEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<null>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<PasteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<Slot, EnterEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<Slot, InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<Slot, InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
@@ -544,7 +551,12 @@ export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): 
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
 export function invokeListener<K extends keyof EventTypes,
-  D = EventTypes[K] extends (args: infer U) => any ? U : never>(target: ComponentInstance, eventType: K, data?: D) {
+  D = EventTypes[K] extends (args: infer U) => any ?
+    U extends Event<any> ? U : never
+    : never>(target: ComponentInstance, eventType: K, data?: D) {
+  if (typeof target !== 'object' || target === null) {
+    return
+  }
   const cache = eventCacheMap.get(target)
   if (cache) {
     const callbacks = cache.get(eventType)
@@ -558,11 +570,13 @@ export function invokeListener<K extends keyof EventTypes,
         (fn as any)(data)
       })
     }
-    if (!isPreventDefault) {
-      eventHandleFn?.(...values)
-    }
+    const is = isPreventDefault
+    const fn = eventHandleFn
     isPreventDefault = false
     eventHandleFn = null
+    if (!is) {
+      fn?.(...values)
+    }
   }
 }
 

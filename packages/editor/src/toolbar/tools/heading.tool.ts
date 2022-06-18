@@ -1,15 +1,13 @@
 import { Injector } from '@tanbo/di'
 import {
   Commander,
-  ComponentInstance,
   ContentType,
-  QueryState,
   Query,
+  QueryState,
   QueryStateType,
-  Selection,
-  Translator
+  Slot,
 } from '@textbus/core'
-import { blockComponent, headingComponent, paragraphComponent } from '../../components/_api'
+import { headingComponent, paragraphComponent } from '../../components/_api'
 
 import { SelectTool, SelectToolConfig } from '../toolkit/_api'
 import { I18n } from '../../i18n'
@@ -17,8 +15,6 @@ import { I18n } from '../../i18n'
 export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
   const i18n = injector.get(I18n)
   const query = injector.get(Query)
-  const selection = injector.get(Selection)
-  const translator = injector.get(Translator)
   const commander = injector.get(Commander)
   return {
     tooltip: i18n.get('plugins.toolbar.headingTool.tooltip'),
@@ -94,66 +90,19 @@ export function headingToolConfigFactory(injector: Injector): SelectToolConfig {
       }
     },
     onChecked(value: string) {
-      const names = [
-        paragraphComponent.name,
-        headingComponent.name,
-      ]
-
-      selection.getBlocks().reverse().forEach(block => {
-        const parent = block.slot.parent!
-
-        const currentSlot = block.slot
-        const isSingleBlock = names.includes(parent.name)
-        const isBlockContainer = currentSlot.schema.includes(ContentType.BlockComponent)
-
-        if (!isSingleBlock && !isBlockContainer) {
-          return
-        }
-
-        const slot = translator.createSlot(currentSlot.toJSON()).cut(block.startIndex, block.endIndex)
-
-        let component: ComponentInstance
-        if (/h[1-6]/.test(value)) {
-          component = headingComponent.createInstance(injector, {
-            state: value,
-            slots: [slot]
-          })
-        } else if (value === 'p') {
-          component = paragraphComponent.createInstance(injector, {
-            slots: [slot]
-          })
-        } else {
-          component = blockComponent.createInstance(injector, {
-            slots: [slot]
-          })
-        }
-
-        const length = currentSlot.length
-        if (block.startIndex === 0 && block.endIndex === length) {
-          if (isSingleBlock || isBlockContainer) {
-            if (isSingleBlock) {
-              commander.replace(parent, component)
-            } else {
-              currentSlot.retain(0)
-              currentSlot.delete(length)
-              currentSlot.insert(component)
-            }
-            if (block.slot === selection.anchorSlot) {
-              selection.setAnchor(slot, selection.startOffset!)
-            }
-            if (block.slot === selection.focusSlot) {
-              selection.setFocus(slot, selection.endOffset!)
-            }
-          }
-        } else if (isBlockContainer) {
-          currentSlot.retain(block.startIndex)
-          currentSlot.delete(block.endIndex - block.startIndex)
-          currentSlot.insert(component)
-          if (block.slot === selection.anchorSlot && block.startIndex <= selection.startOffset!) {
-            selection.setAnchor(slot, selection.startOffset! - block.startIndex)
-          }
-          if (block.slot === selection.focusSlot && block.endIndex >= selection.endOffset!) {
-            selection.setFocus(slot, selection.endOffset! - block.startIndex)
+      const isHeading = /h[1-6]/.test(value)
+      commander.transform({
+        target: isHeading ? headingComponent : paragraphComponent,
+        multipleSlot: false,
+        slotFactory() {
+          return new Slot([
+            ContentType.Text,
+            ContentType.InlineComponent
+          ])
+        },
+        stateFactory() {
+          if (isHeading) {
+            return value
           }
         }
       })

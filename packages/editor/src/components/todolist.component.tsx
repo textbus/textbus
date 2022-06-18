@@ -25,6 +25,7 @@ export interface TodoListSlotState {
 export const todolistComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TodolistComponent',
+  separable: true,
   markdownSupport: {
     match: /^-\s\[(x|\s)?\]$/,
     key: ' ',

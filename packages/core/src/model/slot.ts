@@ -459,14 +459,6 @@ export class Slot<T = any> {
     if (endIndex > length) {
       endIndex = length
     }
-    if (this.isEmpty) {
-      slot.format = this.format.createFormatByRange(slot, 0, 1)
-      return slot
-    }
-    if (startIndex === length || startIndex === length - 1 && this.content.getContentAtIndex(length - 1) === '\n') {
-      slot.format = this.format.createFormatByRange(slot, startIndex - 1, startIndex)
-      return slot
-    }
     if (startIndex >= endIndex) {
       return slot
     }

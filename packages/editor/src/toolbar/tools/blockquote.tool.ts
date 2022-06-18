@@ -33,7 +33,7 @@ export function blockquoteToolConfigFactory(injector: Injector): ButtonToolConfi
 
         parent.retain(index)
 
-        commander.remove(current)
+        commander.removeComponent(current)
 
         current.slots.get(0)!.sliceContent().forEach(i => {
           parent.insert(i)
