@@ -124,27 +124,25 @@ function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootCo
     }
   }
   // 多插槽组件
-  if (parentComponent.separable) {
-    const slotIndex = parentComponent.slots.indexOf(slot)
-    const position: SelectionPosition = slotIndex === 0 ? {
-      slot: parentSlot,
-      offset: index
-    } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
+  const slotIndex = parentComponent.slots.indexOf(slot)
+  const position: SelectionPosition = slotIndex === 0 ? {
+    slot: parentSlot,
+    offset: index
+  } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
 
-    let isPreventDefault = true
-    invokeListener(parentComponent, 'onSlotRemove', new Event<ComponentInstance, DeleteEventData>(parentComponent, {
-      index: slotIndex,
-      count: 1
-    }, () => {
-      isPreventDefault = false
-      const isSuccess = parentComponent.slots.remove(slot)
-      if (isSuccess) {
-        invokeListener(parentComponent, 'onSlotRemoved')
-      }
-    }))
-    if (!isPreventDefault) {
-      return position
+  let isPreventDefault = true
+  invokeListener(parentComponent, 'onSlotRemove', new Event<ComponentInstance, DeleteEventData>(parentComponent, {
+    index: slotIndex,
+    count: 1
+  }, () => {
+    isPreventDefault = false
+    const isSuccess = parentComponent.slots.remove(slot)
+    if (isSuccess) {
+      invokeListener(parentComponent, 'onSlotRemoved')
     }
+  }))
+  if (!isPreventDefault) {
+    return position
   }
   return {
     slot,
