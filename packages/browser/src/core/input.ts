@@ -1,12 +1,8 @@
-import { filter, fromEvent, map, Subscription } from '@tanbo/stream'
+import { filter, fromEvent, map, merge, Observable, Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
 import {
-  AttributeFormatter,
   Commander,
   ContentType,
-  Formats,
-  FormatType,
-  jsx,
   Keyboard,
   Selection,
   Slot
@@ -54,21 +50,21 @@ export class Input {
   private textarea: HTMLTextAreaElement | null = null
 
   private isFocus = false
-
-  private inputFormatterId = '__TextbusInputFormatter__'
-
-  private inputFormatter: AttributeFormatter = {
-    name: this.inputFormatterId,
-    type: FormatType.Attribute,
-    render: () => {
-      return jsx('span', {
-        'data-writing-format': this.inputFormatterId,
-        style: {
-          textDecoration: 'underline'
-        }
-      })
-    }
-  }
+  //
+  // private inputFormatterId = '__TextbusInputFormatter__'
+  //
+  // private inputFormatter: AttributeFormatter = {
+  //   name: this.inputFormatterId,
+  //   type: FormatType.Attribute,
+  //   render: () => {
+  //     return jsx('span', {
+  //       'data-writing-format': this.inputFormatterId,
+  //       style: {
+  //         textDecoration: 'underline'
+  //       }
+  //     })
+  //   }
+  // }
 
   constructor(private parser: Parser,
               private keyboard: Keyboard,
@@ -213,75 +209,78 @@ export class Input {
   }
 
   private handleInput(textarea: HTMLTextAreaElement) {
-    let index: number
-    let offset = 0
-    let formats: Formats = []
     this.subscription.add(
-      fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
-        filter(ev => {
+      merge(
+        fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
+          filter(ev => {
+            ev.preventDefault()
+            if (isSafari) {
+              return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
+            }
+            return !ev.isComposing && !!ev.data
+          }),
+          map(ev => {
+            return ev.data as string
+          })
+        ),
+        isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(map(ev => {
           ev.preventDefault()
-          if (isSafari) {
-            return ev.inputType === 'insertText'
-            // return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
-          }
-          return !ev.isComposing && !!ev.data
-        }),
-        map(ev => {
-          return ev.data as string
-        })
+          textarea.value = ''
+          return ev.data
+        }))
       ).subscribe(text => {
         if (text) {
           this.commander.write(text)
         }
-      }),
-      fromEvent(textarea, 'compositionstart').subscribe(() => {
-        const startSlot = this.selection.startSlot!
-        formats = startSlot.extractFormatsByIndex(this.selection.startOffset!)
-        formats.push([this.inputFormatter, true])
-        this.commander.write('')
-        index = this.selection.startOffset!
-      }),
-      fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe((ev) => {
-        const text = ev.data
-        const startSlot = this.selection.startSlot!
-        this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-        this.commander.insert(text, formats)
-        offset = text.length
-      }),
-      fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe((ev) => {
-        textarea.value = ''
-        const startSlot = this.selection.startSlot!
-        this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-        this.commander.insert(ev.data, formats.filter(i => i[0] !== this.inputFormatter))
-        offset = 0
       })
     )
-    // this.subscription.add(
-    //   merge(
-    //     fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
-    //       filter(ev => {
-    //         ev.preventDefault()
-    //         if (isSafari) {
-    //           return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
-    //         }
-    //         return !ev.isComposing && !!ev.data
-    //       }),
-    //       map(ev => {
-    //         return ev.data as string
-    //       })
-    //     ),
-    //     isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(map(ev => {
-    //       ev.preventDefault()
-    //       textarea.value = ''
-    //       return ev.data
-    //     }))
-    //   ).subscribe(text => {
-    //     if (text) {
-    //       this.commander.write(text)
-    //     }
-    //   })
-    // )
   }
+
+  // private handleInput(textarea: HTMLTextAreaElement) {
+  //   let index: number
+  //   let offset = 0
+  //   let formats: Formats = []
+  //   this.subscription.add(
+  //     fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
+  //       filter(ev => {
+  //         ev.preventDefault()
+  //         if (isSafari) {
+  //           return ev.inputType === 'insertText'
+  //           // return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
+  //         }
+  //         return !ev.isComposing && !!ev.data
+  //       }),
+  //       map(ev => {
+  //         return ev.data as string
+  //       })
+  //     ).subscribe(text => {
+  //       if (text) {
+  //         this.commander.write(text)
+  //       }
+  //     }),
+  //     fromEvent(textarea, 'compositionstart').subscribe(() => {
+  //       const startSlot = this.selection.startSlot!
+  //       formats = startSlot.extractFormatsByIndex(this.selection.startOffset!)
+  //       formats.push([this.inputFormatter, true])
+  //       this.commander.write('')
+  //       index = this.selection.startOffset!
+  //     }),
+  //     fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe((ev) => {
+  //       const text = ev.data
+  //       const startSlot = this.selection.startSlot!
+  //       this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
+  //       this.commander.insert(text, formats)
+  //       offset = text.length
+  //     }),
+  //     fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe((ev) => {
+  //       textarea.value = ''
+  //       const startSlot = this.selection.startSlot!
+  //       this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
+  //       this.commander.insert(ev.data, formats.filter(i => i[0] !== this.inputFormatter))
+  //       offset = 0
+  //     })
+  //   )
+  // }
 
   private static createEditableFrame() {
     return createElement('iframe', {
