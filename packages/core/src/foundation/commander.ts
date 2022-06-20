@@ -259,7 +259,7 @@ export class Commander {
             parentComponent.slots.retain(0)
             const deletedSlots = parentComponent.slots.delete(slotIndex)
             const beforeComponent = this.translator.createComponentByData(parentComponent.name, {
-              state: JSON.parse(JSON.stringify(parentComponent.state)),
+              state: typeof parentComponent.state === 'object' ? JSON.parse(JSON.stringify(parentComponent.state)) : parentComponent.state,
               slots: deletedSlots
             })
             this.insertBefore(beforeComponent!, parentComponent)

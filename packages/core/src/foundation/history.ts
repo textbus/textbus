@@ -29,6 +29,8 @@ export abstract class History {
 
   abstract forward(): void
 
+  abstract clear(): void
+
   abstract destroy(): void
 }
 
@@ -41,9 +43,17 @@ export class CoreHistory extends History {
    * 当历史记录变化时触发
    */
   onChange: Observable<void>
-
+  /**
+   * 当历史记录回退时触发
+   */
   onBack: Observable<void>
+  /**
+   * 当历史记录重做时触发
+   */
   onForward: Observable<void>
+  /**
+   * 当历史记录增加时触发
+   */
   onPush: Observable<void>
 
   /**
@@ -87,14 +97,14 @@ export class CoreHistory extends History {
   /**
    * 监听数据变化，并记录操作历史
    */
-  listen() {
+  override listen() {
     this.record()
   }
 
   /**
    * 重做历史记录
    */
-  forward() {
+  override forward() {
     if (this.canForward) {
       this.scheduler.historyApplyTransact(() => {
         const item = this.historySequence[this.index]
@@ -110,7 +120,7 @@ export class CoreHistory extends History {
   /**
    * 撤消操作
    */
-  back() {
+  override back() {
     if (this.canBack) {
       this.scheduler.historyApplyTransact(() => {
         const item = this.historySequence[this.index - 1]
@@ -124,9 +134,18 @@ export class CoreHistory extends History {
   }
 
   /**
+   * 清除历史记录
+   */
+  override clear() {
+    this.historySequence = []
+    this.index = 0
+    this.changeEvent.next()
+  }
+
+  /**
    * 销毁历史记录实例
    */
-  destroy() {
+  override destroy() {
     this.historySequence = []
     this.forceChangeSubscription?.unsubscribe()
     if (this.subscription) {

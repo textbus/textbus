@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@tanbo/di'
 import { Commander, History, Keyboard, Selection, Plugin } from '@textbus/core'
-import { EDITOR_OPTIONS, SelectionBridge, BaseEditorOptions } from '../core/_api'
+import { EDITOR_OPTIONS, SelectionBridge, ViewOptions } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
@@ -8,7 +8,7 @@ import { EDITOR_OPTIONS, SelectionBridge, BaseEditorOptions } from '../core/_api
 @Injectable()
 export class DefaultShortcut implements Plugin {
   constructor(private selection: Selection,
-              @Inject(EDITOR_OPTIONS) private options: BaseEditorOptions,
+              @Inject(EDITOR_OPTIONS) private options: ViewOptions,
               private selectionBridge: SelectionBridge,
               private history: History,
               private commander: Commander,

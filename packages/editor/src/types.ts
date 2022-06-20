@@ -1,12 +1,12 @@
 import { Observable } from '@tanbo/stream'
-import { BaseEditorOptions, ComponentLoader } from '@textbus/browser'
+import { ViewOptions, ComponentLoader } from '@textbus/browser'
 import { I18NConfig } from './i18n'
 import { UploadConfig } from './file-uploader'
 
 /**
  * 编辑器配置项
  */
-export interface EditorOptions extends BaseEditorOptions {
+export interface EditorOptions extends ViewOptions {
   /** 主题配置，目前只支持 dark */
   theme?: string
   /** 自定义根组件加载器，否则使用默认根组件加载器 */

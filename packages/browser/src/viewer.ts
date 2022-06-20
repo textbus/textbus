@@ -19,7 +19,7 @@ import {
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
 import { createElement } from './_utils/uikit'
 import {
-  BaseEditorOptions,
+  ViewOptions,
   Input,
   VIEW_CONTAINER,
   EDITOR_OPTIONS,
@@ -74,7 +74,7 @@ export class Viewer {
   private resourceNodes: HTMLElement[] = []
 
   constructor(private rootComponentLoader: ComponentLoader,
-              private options: BaseEditorOptions = {}) {
+              private options: ViewOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
     const {doc, mask, wrapper} = Viewer.createLayout(options.minHeight)
     this.workbench = wrapper
@@ -292,7 +292,7 @@ export class Viewer {
     }
   }
 
-  private initDocStyleSheetsAndScripts(options: BaseEditorOptions) {
+  private initDocStyleSheetsAndScripts(options: ViewOptions) {
     const links: Array<{ [key: string]: string }> = []
 
     const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)

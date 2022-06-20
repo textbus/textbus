@@ -8,7 +8,7 @@ import {
   Slot
 } from '@textbus/core'
 
-import { BaseEditorOptions } from '../core/types'
+import { ViewOptions } from '../core/types'
 import { EDITOR_OPTIONS } from '../core/injection-tokens'
 
 export interface ComponentResources {
@@ -50,7 +50,7 @@ export class Parser {
   private loaders: ComponentLoader[]
   private formatters: FormatLoader[]
 
-  constructor(@Inject(EDITOR_OPTIONS) private options: BaseEditorOptions,
+  constructor(@Inject(EDITOR_OPTIONS) private options: ViewOptions,
               private injector: Injector) {
     const componentLoaders = [
       ...(options.componentLoaders || [])

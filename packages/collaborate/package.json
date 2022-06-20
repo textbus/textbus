@@ -31,7 +31,7 @@
     "@textbus/core": "^2.0.0-beta.37",
     "reflect-metadata": "^0.1.13",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.27"
+    "yjs": "^13.5.39"
   },
   "author": {
     "name": "Tanbo",

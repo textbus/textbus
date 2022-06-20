@@ -10,13 +10,13 @@ export interface ViewModule extends Omit<Module, 'components' | 'formatters'> {
 /**
  * Textbus PC 端配置接口
  */
-export interface BaseEditorOptions extends TextbusConfig {
+export interface ViewOptions extends TextbusConfig {
   imports?: ViewModule[]
   /** 编辑区域自动高度 */
   autoHeight?: boolean
   /** 自动获取焦点 */
   autoFocus?: boolean
-  /** 编译框最小高度 */
+  /** 编辑区最小高度 */
   minHeight?: string
   /** 组件加载器 */
   componentLoaders?: ComponentLoader[]

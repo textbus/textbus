@@ -16,12 +16,67 @@ import {
   Starter,
   Translator
 } from '@textbus/core'
-import { Array as YArray, Doc as YDoc, Map as YMap, Text as YText, Transaction, UndoManager } from 'yjs'
+import {
+  Array as YArray, createAbsolutePositionFromRelativePosition, createRelativePositionFromTypeIndex,
+  Doc as YDoc,
+  Map as YMap,
+  RelativePosition,
+  Text as YText,
+  Transaction,
+  UndoManager
+} from 'yjs'
 
 import { CollaborateCursor, RemoteSelection } from './collaborate-cursor'
 import { createUnknownComponent } from './unknown.component'
 
 const collaborateErrorFn = makeError('Collaborate')
+
+interface CursorPosition {
+  anchor: RelativePosition
+  focus: RelativePosition
+}
+
+class ContentMap {
+  private slotAndYTextMap = new WeakMap<Slot, YText>()
+  private yTextAndSLotMap = new WeakMap<YText, Slot>()
+
+  set(key: Slot, value: YText): void
+  set(key: YText, value: Slot): void
+  set(key: any, value: any) {
+    if (key instanceof Slot) {
+      this.slotAndYTextMap.set(key, value)
+      this.yTextAndSLotMap.set(value, key)
+    } else {
+      this.slotAndYTextMap.set(value, key)
+      this.yTextAndSLotMap.set(key, value)
+    }
+  }
+
+  get(key: Slot): YText | null
+  get(key: YText): Slot | null
+  get(key: any) {
+    if (key instanceof Slot) {
+      return this.slotAndYTextMap.get(key) || null
+    }
+    return this.yTextAndSLotMap.get(key) || null
+  }
+
+  delete(key: Slot | YText) {
+    if (key instanceof Slot) {
+      const v = this.slotAndYTextMap.get(key)
+      this.slotAndYTextMap.delete(key)
+      if (v) {
+        this.yTextAndSLotMap.delete(v)
+      }
+    } else {
+      const v = this.yTextAndSLotMap.get(key)
+      this.yTextAndSLotMap.delete(key)
+      if (v) {
+        this.slotAndYTextMap.delete(v)
+      }
+    }
+  }
+}
 
 @Injectable()
 export class Collaborate implements History {
@@ -56,6 +111,7 @@ export class Collaborate implements History {
   private componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
 
   private selectionChangeEvent = new Subject<SelectionPaths>()
+  private contentMap = new ContentMap()
 
   private updateRemoteActions: Array<() => void> = []
 
@@ -95,20 +151,21 @@ export class Collaborate implements History {
 
   back() {
     if (this.canBack) {
-      this.scheduler.historyApplyTransact(() => {
-        this.selection.unSelect()
-        this.manager?.undo()
-      })
+      this.manager?.undo()
+      this.backEvent.next()
     }
   }
 
   forward() {
     if (this.canForward) {
-      this.scheduler.historyApplyTransact(() => {
-        this.selection.unSelect()
-        this.manager?.redo()
-      })
+      this.manager?.redo()
+      this.forwardEvent.next()
     }
+  }
+
+  clear() {
+    this.manager?.clear()
+    this.changeEvent.next()
   }
 
   destroy() {
@@ -123,9 +180,20 @@ export class Collaborate implements History {
     this.manager = new UndoManager(root, {
       trackedOrigins: new Set<any>([this.yDoc])
     })
-    this.manager.on('stack-item-added', () => {
+    const cursorKey = 'cursor-position'
+    this.manager.on('stack-item-added', event => {
+      event.stackItem.meta.set(cursorKey, this.getRelativeCursorLocation())
       if (this.manager!.undoStack.length > this.stackSize) {
         this.manager!.undoStack.shift()
+      }
+      if (event.origin === this.yDoc) {
+        this.pushEvent.next()
+      }
+    })
+    this.manager.on('stack-item-popped', event => {
+      const position = event.stackItem.meta.get(cursorKey) as CursorPosition
+      if (position) {
+        this.restoreCursorLocation(position)
       }
     })
     this.syncContent(root, rootComponent.slots.get(0)!)
@@ -151,7 +219,41 @@ export class Collaborate implements History {
     )
   }
 
+  private restoreCursorLocation(position: CursorPosition) {
+    const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.yDoc)
+    const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.yDoc)
+    if (anchorPosition && focusPosition) {
+      const focusSlot = this.contentMap.get(focusPosition.type as YText)
+      const anchorSlot = this.contentMap.get(anchorPosition.type as YText)
+      if (focusSlot && anchorSlot) {
+        this.selection.setBaseAndExtent(anchorSlot, anchorPosition.index, focusSlot, focusPosition.index)
+      }
+    }
+  }
+
+  private getRelativeCursorLocation(): CursorPosition | null {
+    const {anchorSlot, anchorOffset, focusSlot, focusOffset} = this.selection
+    if (anchorSlot) {
+      const anchorYText = this.contentMap.get(anchorSlot)
+      if (anchorYText) {
+        const anchorPosition = createRelativePositionFromTypeIndex(anchorYText, anchorOffset!)
+        if (focusSlot) {
+          const focusYText = this.contentMap.get(focusSlot)
+          if (focusYText) {
+            const focusPosition = createRelativePositionFromTypeIndex(focusYText, focusOffset!)
+            return {
+              focus: focusPosition,
+              anchor: anchorPosition
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
   private syncContent(content: YText, slot: Slot) {
+    this.contentMap.set(slot, content)
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         slot.retain(0)
@@ -393,7 +495,11 @@ export class Collaborate implements History {
       return
     }
     this.updateFromRemote = true
-    this.scheduler.remoteUpdateTransact(fn)
+    if (tr.origin === this.manager) {
+      this.scheduler.historyApplyTransact(fn)
+    } else {
+      this.scheduler.remoteUpdateTransact(fn)
+    }
     this.updateFromRemote = false
   }
 
@@ -499,6 +605,7 @@ export class Collaborate implements History {
   }
 
   private cleanSubscriptionsBySlot(slot: Slot) {
+    this.contentMap.delete(slot);
     [this.contentSyncCaches.get(slot), this.slotStateSyncCaches.get(slot)].forEach(fn => {
       if (fn) {
         fn()
