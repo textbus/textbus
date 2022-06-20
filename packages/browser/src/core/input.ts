@@ -156,16 +156,7 @@ export class Input {
         this.doc.body.appendChild(div)
         div.focus()
         setTimeout(() => {
-          let html = div.innerHTML
-          let hasEmpty = true
-          const reg = /<(?!(?:td|th))(\w+)[^>]*?>\s*?<\/\1>/g
-          while (hasEmpty) {
-            hasEmpty = false
-            html = html.replace(reg, function () {
-              hasEmpty = true
-              return ''
-            })
-          }
+          const html = div.innerHTML
           this.handlePaste(html, text)
 
           this.doc.body.removeChild(div)

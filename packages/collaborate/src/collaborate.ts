@@ -189,6 +189,7 @@ export class Collaborate implements History {
       if (event.origin === this.yDoc) {
         this.pushEvent.next()
       }
+      this.changeEvent.next()
     })
     this.manager.on('stack-item-popped', event => {
       const position = event.stackItem.meta.get(cursorKey) as CursorPosition
