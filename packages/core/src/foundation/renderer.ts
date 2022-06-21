@@ -214,7 +214,7 @@ export class Renderer {
   onViewChecked: Observable<void>
 
   @Prop()
-  private nativeRenderer!: NativeRenderer
+  nativeRenderer!: NativeRenderer
 
   private componentVNode = new WeakMap<ComponentInstance, VElement>()
 

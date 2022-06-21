@@ -286,7 +286,7 @@ class EventCache<T, K extends keyof T = keyof T> {
 }
 
 interface ComponentContext<T> {
-  slots: Slots
+  slots?: Slots
   initState?: T
   changeController: ChangeController<T>
   contextInjector: Injector
@@ -397,7 +397,6 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
       const context: ComponentContext<State> = {
         contextInjector,
         changeController,
-        slots: new Slots(componentInstance),
         componentInstance: componentInstance,
         dynamicShortcut: [],
         eventCache: new EventCache<EventTypes>(),
@@ -410,12 +409,12 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
       })
       eventCacheMap.set(componentInstance, context.eventCache)
       contextStack.pop()
-      componentInstance.slots = context.slots
+      componentInstance.slots = context.slots || new Slots(componentInstance)
       componentInstance.shortcutList = context.dynamicShortcut
       let state = Reflect.has(context, 'initState') ? context.initState : initData?.state
 
       const subscriptions: Subscription[] = [
-        context.slots.onChange.subscribe(ops => {
+        componentInstance.slots.onChange.subscribe(ops => {
           marker.markAsDirtied(ops)
         })
       ]
@@ -455,6 +454,9 @@ export function useSlots<T>(slots: Slot<T>[]): Slots<T> {
   const context = getCurrentContext()
   if (!context) {
     throw componentErrorFn('cannot be called outside the component!')
+  }
+  if (Reflect.has(context, 'slots')) {
+    throw componentErrorFn('only one unique slots is allowed for a component!')
   }
   const s = new Slots(context.componentInstance, slots)
   context.slots = s
