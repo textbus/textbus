@@ -45,8 +45,8 @@ export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwar
 
   override getRects(range: Range) {
     const {focusSlot, anchorSlot} = range
-    const focusPaths = this.selection.getPathsBySlot(focusSlot)
-    const anchorPaths = this.selection.getPathsBySlot(anchorSlot)
+    const focusPaths = this.selection.getPathsBySlot(focusSlot)!
+    const anchorPaths = this.selection.getPathsBySlot(anchorSlot)!
     const focusIsStart = Selection.compareSelectionPaths(focusPaths, anchorPaths)
     let startSlot: Slot
     let endSlot: Slot

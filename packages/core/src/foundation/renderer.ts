@@ -562,10 +562,10 @@ export class Renderer {
         listenerChanges.add.forEach(i => {
           this.nativeRenderer.listen(nativeNode, i[0], i[1])
         })
-        listenerChanges.remove.forEach(i => {
-          this.nativeRenderer.unListen(nativeNode, i[0], i[1])
-        })
       }
+      listenerChanges.remove.forEach(i => {
+        this.nativeRenderer.unListen(nativeNode, i[0], i[1])
+      })
 
       this.renderedVNode.set(newVDom, true)
       this.nativeNodeCaches.set(newVDom, nativeNode)

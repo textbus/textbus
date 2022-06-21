@@ -657,15 +657,15 @@ export class Selection {
    * 获取当前选区在文档中的路径
    */
   getPaths(): SelectionPaths {
-    if (!this.commonAncestorSlot) {
+    if (!this.isSelected) {
       return {
         anchor: [],
         focus: [],
       }
     }
-    const anchor = this.getPathsBySlot(this.anchorSlot!)
+    const anchor = this.getPathsBySlot(this.anchorSlot!) || []
     anchor.push(this.anchorOffset!)
-    const focus = this.getPathsBySlot(this.focusSlot!)
+    const focus = this.getPathsBySlot(this.focusSlot!) || []
     focus.push(this.focusOffset!)
     return {
       anchor,
@@ -1039,27 +1039,27 @@ export class Selection {
     return result
   }
 
-  getPathsBySlot(slot: Slot) {
+  getPathsBySlot(slot: Slot): number[] | null {
     const paths: number[] = []
 
     while (true) {
       const parentComponent = slot.parent
       if (!parentComponent) {
-        break
+        return null
       }
       const slotIndex = parentComponent.slots.indexOf(slot)
       paths.push(slotIndex)
 
-      const parentSlotRef = parentComponent.parent
-      if (!parentSlotRef) {
+      const parentSlot = parentComponent.parent
+      if (!parentSlot) {
         if (parentComponent !== this.root.component) {
-          paths.length = 0
+          return []
         }
         break
       }
-      const componentIndex = parentSlotRef.indexOf(parentComponent)
+      const componentIndex = parentSlot.indexOf(parentComponent)
       paths.push(componentIndex)
-      slot = parentSlotRef
+      slot = parentSlot
     }
     return paths.reverse()
   }
@@ -1292,12 +1292,22 @@ export class Selection {
     let focusPaths: number[] = []
     let anchorPaths: number[] = []
     if (this.focusSlot) {
-      focusPaths = this.getPathsBySlot(this.focusSlot)
-      focusPaths.push(this.focusOffset!)
+      const _focusPaths = this.getPathsBySlot(this.focusSlot)
+      if (_focusPaths) {
+        focusPaths = _focusPaths
+        focusPaths.push(this.focusOffset!)
+      } else {
+        this._focusSlot = this._focusOffset = null
+      }
     }
     if (this.anchorSlot) {
-      anchorPaths = this.getPathsBySlot(this.anchorSlot)
-      anchorPaths.push(this.anchorOffset!)
+      const _anchorPaths = this.getPathsBySlot(this.anchorSlot)
+      if (_anchorPaths) {
+        anchorPaths = _anchorPaths
+        anchorPaths.push(this.anchorOffset!)
+      } else {
+        this._anchorSlot = this._anchorOffset = null
+      }
     }
 
     const anchorSlotIsStart = Selection.compareSelectionPaths(anchorPaths, focusPaths)
