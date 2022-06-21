@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { distinctUntilChanged, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Provider, Type } from '@tanbo/di'
 import {
   NativeRenderer,
@@ -40,6 +40,10 @@ const editorError = makeError('CoreEditor')
  * Textbus PC 端编辑器
  */
 export class Viewer {
+  /** 当视图获得焦点时触发 */
+  onFocus: Observable<void>
+  /** 当视图失去焦点时触发 */
+  onBlur: Observable<void>
   /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
 
@@ -72,10 +76,14 @@ export class Viewer {
   private workbench!: HTMLElement
 
   private resourceNodes: HTMLElement[] = []
+  private focusEvent = new Subject<void>()
+  private blurEvent = new Subject<void>()
 
   constructor(private rootComponentLoader: ComponentLoader,
               private options: ViewOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
+    this.onFocus = this.focusEvent.asObservable()
+    this.onBlur = this.blurEvent.asObservable()
     const {doc, mask, wrapper} = Viewer.createLayout(options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
@@ -153,9 +161,22 @@ export class Viewer {
     await starter.mount(component, doc)
     this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
     const renderer = starter.get(Renderer)
-    this.subs.push(renderer.onViewChecked.subscribe(() => {
-      this.changeEvent.next()
-    }))
+    const caret = starter.get(Caret)
+    this.subs.push(
+      renderer.onViewChecked.subscribe(() => {
+        this.changeEvent.next()
+      }),
+      caret.onPositionChange.pipe(
+        map(p => !!p),
+        distinctUntilChanged()
+      ).subscribe(b => {
+        if (b) {
+          this.focusEvent.next()
+        } else {
+          this.blurEvent.next()
+        }
+      })
+    )
     starter.get(Input)
     this.isReady = true
     this.injector = starter

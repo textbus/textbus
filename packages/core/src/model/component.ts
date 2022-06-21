@@ -535,13 +535,13 @@ export class ContextMenuEvent<T> extends Event<T> {
  */
 export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<Slot, InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<Slot, InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<Slot, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<ComponentInstance, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<Slot, EnterEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<Slot, InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<Slot, InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
