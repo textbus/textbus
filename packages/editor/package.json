@@ -25,9 +25,9 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/bezier": "^1.0.0",
-    "@tanbo/color": "^0.0.3",
-    "@tanbo/color-picker": "^0.1.2",
+    "@tanbo/bezier": "^1.0.1",
+    "@tanbo/color": "^0.1.1",
+    "@tanbo/color-picker": "^0.1.4",
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.1",
     "@tanbo/stream": "^1.1.2",
