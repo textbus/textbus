@@ -462,17 +462,28 @@ export class Slot<T = any> {
     if (startIndex >= endIndex) {
       return slot
     }
-
+    if (this.isEmpty) {
+      slot.format = this.format.createFormatByRange(slot, 0, 1)
+      this.retain(startIndex)
+      this.delete(endIndex - startIndex)
+      return slot
+    }
+    if (startIndex === length || startIndex === length - 1 && this.content.getContentAtIndex(length - 1) === '\n') {
+      slot.format = this.format.createFormatByRange(slot, startIndex - 1, startIndex)
+      this.retain(startIndex)
+      this.delete(endIndex - startIndex)
+      return slot
+    }
     const deletedData = this.content.slice(startIndex, endIndex)
     const deletedFormat = this.format.extract(startIndex, endIndex).shrink(startIndex, startIndex)
 
-    slot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
     this.retain(startIndex)
     this.delete(endIndex - startIndex)
 
     deletedData.forEach(i => {
       slot.insert(i)
     })
+    slot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
     return slot
   }
 

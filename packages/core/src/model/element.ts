@@ -107,7 +107,10 @@ export class VElement {
     this.listeners = {}
     Object.keys(attrs).forEach(key => {
       if (/^on[A-Z]/.test(key)) {
-        this.listeners[key.replace(/^on/, '').toLowerCase()] = attrs![key]
+        const listener = attrs![key]
+        if (typeof listener === 'function') {
+          this.listeners[key.replace(/^on/, '').toLowerCase()] = listener
+        }
       } else {
         this.attrs.set(key, attrs![key])
       }
