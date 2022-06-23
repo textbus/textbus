@@ -11,17 +11,6 @@ import { WebrtcProvider } from 'y-webrtc'
 import { fromEvent, merge } from '@tanbo/stream';
 
 const header = document.getElementById('header')!
-const insertBtn = document.getElementById('insert-btn')!
-const insertSpan = document.getElementById('insert-span')!
-
-insertBtn.addEventListener('click', () => {
-  const commander = editor.injector.get(Commander)
-  commander.insert('xxx')
-})
-insertSpan.addEventListener('click', () => {
-  const commander = editor.injector!.get(Commander)
-  commander.insert('vvv')
-})
 
 export interface User {
   color: string

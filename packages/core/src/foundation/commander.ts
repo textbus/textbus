@@ -242,7 +242,7 @@ export class Commander {
       focusOffset: selection.focusOffset!
     }
 
-    const scopes = this.selection.getBlocks()
+    const scopes = selection.getBlocks()
 
     let slots: Slot<U>[] = []
 
@@ -267,40 +267,40 @@ export class Commander {
         }
       }
       selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
+      let position: SelectionPosition | null
       if (slot.isEmpty) {
         const delta = slot.toDelta()
         slots.push(...deltaToSlots(selection, slot, delta, rule, range))
-        this.delete()
-        continue
-      }
-      let position: SelectionPosition | null
-      this.delete(deletedSlot => {
-        position = null
-        const parentComponent = slot.parent!
-        if (parentComponent.separable || parentComponent.slots.length === 1) {
+        position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+      } else {
+        this.delete(deletedSlot => {
+          position = null
+          const parentComponent = slot.parent!
+          if (parentComponent.separable || parentComponent.slots.length === 1) {
+            const delta = deletedSlot.toDelta()
+            slots.push(...deltaToSlots(selection, slot, delta, rule, range))
+            position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+            return
+          }
+          let componentInstances = slotsToComponents(this.injector, slots, rule)
+          slots = []
+          componentInstances.forEach(instance => {
+            this.insertBefore(instance, parentComponent)
+          })
+          if (!slot.schema.includes(rule.target.instanceType)) {
+            return
+          }
           const delta = deletedSlot.toDelta()
-          slots.push(...deltaToSlots(selection, slot, delta, rule, range))
-          position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
-          return
-        }
-        let componentInstances = slotsToComponents(this.injector, slots, rule)
-        slots = []
-        componentInstances.forEach(instance => {
-          this.insertBefore(instance, parentComponent)
-        })
-        if (!slot.schema.includes(rule.target.instanceType)) {
-          return
-        }
-        const delta = deletedSlot.toDelta()
-        const dumpSlots = deltaToSlots(selection, slot, delta, rule, range)
+          const dumpSlots = deltaToSlots(selection, slot, delta, rule, range)
 
-        componentInstances = slotsToComponents(this.injector, dumpSlots, rule)
+          componentInstances = slotsToComponents(this.injector, dumpSlots, rule)
 
-        componentInstances.forEach((instance, index) => {
-          selection.setPosition(slot, index)
-          this.insert(instance)
+          componentInstances.forEach((instance, index) => {
+            selection.setPosition(slot, index)
+            this.insert(instance)
+          })
         })
-      })
+      }
       if (position!) {
         selection.setPosition(position.slot, position.offset)
       }
@@ -434,7 +434,7 @@ export class Commander {
       }
       return false
     }
-    const scopes = this.selection.getSelectedScopes()
+    const scopes = selection.getSelectedScopes()
     const endSlot = selection.endSlot!
     const startSlot = selection.startSlot!
     const startOffset = selection.startOffset!
@@ -479,11 +479,13 @@ export class Commander {
         index: 0,
         count: endSlot.length
       }, () => {
-        const deletedDelta = endSlot.cut().toDelta()
+        const deletedSlot = endSlot.cut()
+        receiver(deletedSlot)
         deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component)
-        if (deletedDelta.length === 1 && deletedDelta[0].insert === '\n') {
+        if (deletedSlot.isEmpty) {
           return
         }
+        const deletedDelta = deletedSlot.toDelta()
         deletedDelta.forEach(item => {
           startSlot.insert(item.insert, item.formats)
         })

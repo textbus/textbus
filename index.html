@@ -7,34 +7,21 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Textbus</title>
   <style>
-      #editor {
-          width: 1000px;
-          margin-left: auto;
-          margin-right: auto;
-      }
-
-      table {
-          border-collapse: collapse;
-          border-spacing: 0;
-      }
-
-      td {
-          width: 100px;
-          height: 20px;
-          border: 1px solid #ccc
-      }
+    #box {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+    }
   </style>
 </head>
 <body>
-<div>
-  <button type="button" id="insert-btn">insert</button>
-  <span id="insert-span">insert</span>
-  <button type="button" onclick="location.reload()">reload</button>
-</div>
+<div id="box"></div>
+
 <div style="max-width: 800px; margin: 30px auto; height: 40px" id="header">
 
 </div>
-<div style="max-width: 800px; margin: 30px auto;" id="box"></div>
 <div style="width: 800px; margin: 30px auto;" id="box1">fdsafdsa</div>
 <div id="template1" contenteditable="true">
   fdfads

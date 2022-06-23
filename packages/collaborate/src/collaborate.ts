@@ -353,7 +353,9 @@ export class Collaborate implements History {
             offset += length
           } else if (action.type === 'delete') {
             const delta = content.toDelta()
-            content.delete(offset, action.count)
+            if (content.length) {
+              content.delete(offset, action.count)
+            }
             if (content.length === 0) {
               content.insert(0, '\n', delta[0]?.attributes)
             }
