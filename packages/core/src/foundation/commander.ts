@@ -267,6 +267,12 @@ export class Commander {
         }
       }
       selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
+      if (slot.isEmpty) {
+        const delta = slot.toDelta()
+        slots.push(...deltaToSlots(selection, slot, delta, rule, range))
+        this.delete()
+        continue
+      }
       let position: SelectionPosition | null
       this.delete(deletedSlot => {
         position = null
@@ -421,6 +427,7 @@ export class Commander {
       const startSlot = selection.startSlot!
       const startOffset = selection.startOffset!
       if (startSlot!.isEmpty) {
+        receiver(startSlot.cut())
         const position = deleteUpBySlot(selection, startSlot, startOffset, this.rootComponentRef.component)
         selection.setBaseAndExtent(position.slot, position.offset, position.slot, position.offset)
         return position.slot !== startSlot || position.offset !== startOffset

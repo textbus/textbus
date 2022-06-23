@@ -10,6 +10,11 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'bundles/')
   },
+  resolve: {
+    alias: {
+      '@tanbo/color-picker/bundles/scss/index': path.resolve(__dirname, '../../node_modules/@tanbo/color-picker/bundles/scss/index.scss'),
+    }
+  },
   module: {
     rules: [{
       test: /\.ts$/,

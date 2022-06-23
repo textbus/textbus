@@ -9,7 +9,7 @@ import {
   useSlots,
   useState
 } from '@textbus/core'
-import { NullInjector, ReflectiveInjector } from '@tanbo/di'
+import { Injector, NullInjector, ReflectiveInjector } from '@tanbo/di'
 import { DomRenderer } from '@textbus/browser'
 
 describe('Component', () => {
@@ -79,7 +79,12 @@ describe('Component 初始化', () => {
 
 describe('Component Hooks', () => {
   test('获取上下文', () => {
-    const injector = new ReflectiveInjector(new NullInjector(), [])
+    const injector = new ReflectiveInjector(new NullInjector(), [{
+      provide: Injector,
+      useFactory() {
+        return injector
+      }
+    }])
     let context: any
     const testComponent = defineComponent({
       type: ContentType.InlineComponent,

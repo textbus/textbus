@@ -23,6 +23,7 @@ module.exports = {
       '@textbus/editor/*': path.resolve(__dirname, './packages/editor/'),
       '@textbus/collaborate': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
       '@textbus/collaborate/*': path.resolve(__dirname, './packages/collaborate/'),
+      '@tanbo/color-picker/bundles/scss/index': path.resolve(__dirname, './node_modules/@tanbo/color-picker/bundles/scss/index.scss'),
     }
   },
   devServer: {

@@ -1,6 +1,6 @@
 import { Draft, produce, Patch, enablePatches } from 'immer'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
-import { Injector } from '@tanbo/di'
+import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@tanbo/di'
 
 import { makeError } from '../_utils/make-error'
 import { VElement } from './element'
@@ -427,12 +427,14 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
 /**
  * 组件 setup 方法内获取编辑器 IoC 容器的勾子
  */
-export function useContext(): Injector {
+export function useContext(): Injector
+export function useContext<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T
+export function useContext(token: any = Injector, noFoundValue?: any, flags?: any): Injector {
   const context = getCurrentContext()
   if (!context) {
     throw componentErrorFn('cannot be called outside the component!')
   }
-  return context.contextInjector
+  return context.contextInjector.get(token, noFoundValue, flags)
 }
 
 /**
