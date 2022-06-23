@@ -34,5 +34,5 @@
     "array-callback-return": 1,
     "max-len": [1, 140]
   },
-  "ignorePatterns": ["index.ts", "webpack.config.js"]
+  "ignorePatterns": ["index.ts", "webpack.config.js", "bundles", "node_modules"]
 }

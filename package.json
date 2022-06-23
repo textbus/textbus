@@ -8,8 +8,37 @@
   "scripts": {
     "start": "webpack-dev-server",
     "publish:lib": "lerna publish",
+    "lint-staged": "lint-staged",
+    "lint": "eslint packages --ext .ts,.tsx --max-warnings 0",
     "test": "cross-env env=test jest",
-    "test-c": "cross-env env=test jest --coverage"
+    "test-c": "cross-env env=test jest --coverage",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "packages/core/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/browser/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/editor/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/collaborate/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "author": "tanbo",
   "license": "GPL-3.0-only",
@@ -45,9 +74,11 @@
     "file-loader": "^6.2.0",
     "gulp": "^4.0.2",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^8.0.1",
     "ip": "^1.1.5",
     "jest": "^27.5.1",
     "lerna": "^4.0.0",
+    "lint-staged": "^13.0.2",
     "loader-utils": "^3.2.0",
     "mini-css-extract-plugin": "^2.4.5",
     "open": "^8.4.0",
