@@ -17,13 +17,15 @@ import {
   Translator
 } from '@textbus/core'
 import {
-  Array as YArray, createAbsolutePositionFromRelativePosition, createRelativePositionFromTypeIndex,
+  Array as YArray,
   Doc as YDoc,
   Map as YMap,
   RelativePosition,
   Text as YText,
   Transaction,
-  UndoManager
+  UndoManager,
+  createAbsolutePositionFromRelativePosition,
+  createRelativePositionFromTypeIndex
 } from 'yjs'
 
 import { CollaborateCursor, RemoteSelection } from './collaborate-cursor'
@@ -175,7 +177,7 @@ export class Collaborate implements History {
   }
 
   private syncRootComponent() {
-    const root = this.yDoc.getText('content')
+    const root = this.yDoc.getMap('RootComponent')
     const rootComponent = this.rootComponentRef.component!
     this.manager = new UndoManager(root, {
       trackedOrigins: new Set<any>([this.yDoc])
@@ -197,7 +199,44 @@ export class Collaborate implements History {
         this.restoreCursorLocation(position)
       }
     })
-    this.syncContent(root, rootComponent.slots.get(0)!)
+
+    this.yDoc.once('update', () => {
+      let slots = root.get('slots') as YArray<YMap<any>>
+      if (!slots) {
+        slots = new YArray()
+        rootComponent.slots.toArray().forEach(i => {
+          const sharedSlot = this.createSharedSlotBySlot(i)
+          slots.push([sharedSlot])
+        })
+        this.yDoc.transact(() => {
+          root.set('state', rootComponent.state)
+          root.set('slots', slots)
+        })
+      } else if (slots.length === 0) {
+        rootComponent.updateState(() => {
+          return root.get('state')
+        })
+        this.yDoc.transact(() => {
+          rootComponent.slots.toArray().forEach(i => {
+            const sharedSlot = this.createSharedSlotBySlot(i)
+            slots.push([sharedSlot])
+          })
+        })
+      } else {
+        rootComponent.updateState(() => {
+          return root.get('state')
+        })
+        rootComponent.slots.clean()
+        slots.forEach(sharedSlot => {
+          const slot = this.createSlotBySharedSlot(sharedSlot)
+          this.syncContent(sharedSlot.get('content'), slot)
+          this.syncSlot(sharedSlot, slot)
+          rootComponent.slots.insert(slot)
+        })
+      }
+      this.syncComponent(root, rootComponent)
+      this.syncSlots(slots, rootComponent)
+    })
 
     this.subscriptions.push(
       this.scheduler.onDocChange.pipe(
