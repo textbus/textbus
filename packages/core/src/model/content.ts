@@ -131,14 +131,13 @@ export class Content {
   }
 
   toGrid() {
-    const splitPoints = new Set<number>()
+    const splitPoints = [0]
     let index = 0
-    splitPoints.add(index)
     this.data.forEach(i => {
       index += i.length
-      splitPoints.add(index)
+      splitPoints.push(index)
     })
-    return [...splitPoints].sort((a, b) => a - b)
+    return [...splitPoints]
   }
 
   toString() {

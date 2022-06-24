@@ -299,7 +299,11 @@ const eventCacheMap = new WeakMap<ComponentInstance, EventCache<EventTypes>>()
 const contextStack: ComponentContext<any>[] = []
 
 function getCurrentContext() {
-  return contextStack[contextStack.length - 1] || null
+  const current = contextStack[contextStack.length - 1]
+  if (!current) {
+    throw componentErrorFn('cannot be called outside the component!')
+  }
+  return current
 }
 
 /**
@@ -431,9 +435,6 @@ export function useContext(): Injector
 export function useContext<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T
 export function useContext(token: any = Injector, noFoundValue?: any, flags?: any): Injector {
   const context = getCurrentContext()
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
   return context.contextInjector.get(token, noFoundValue, flags)
 }
 
@@ -442,9 +443,6 @@ export function useContext(token: any = Injector, noFoundValue?: any, flags?: an
  */
 export function useSelf<Methods extends ComponentExtends = ComponentExtends, State = any>(): ComponentInstance<Methods, State> {
   const context = getCurrentContext()
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
   return context.componentInstance as ComponentInstance<Methods, State>
 }
 
@@ -454,9 +452,6 @@ export function useSelf<Methods extends ComponentExtends = ComponentExtends, Sta
  */
 export function useSlots<T>(slots: Slot<T>[]): Slots<T> {
   const context = getCurrentContext()
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
   if (Reflect.has(context, 'slots')) {
     throw componentErrorFn('only one unique slots is allowed for a component!')
   }
@@ -471,9 +466,6 @@ export function useSlots<T>(slots: Slot<T>[]): Slots<T> {
  */
 export function useState<T>(initState: T) {
   const context = getCurrentContext()
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
   if (Reflect.has(context, 'initState')) {
     throw componentErrorFn('only one unique state is allowed for a component!')
   }
@@ -494,9 +486,6 @@ export function useRef<T>(initValue: T | null = null) {
  */
 export function useDynamicShortcut(config: Shortcut) {
   const context = getCurrentContext()
-  if (!context) {
-    throw componentErrorFn('cannot be called outside the component!')
-  }
   context.dynamicShortcut.push(config)
 }
 
