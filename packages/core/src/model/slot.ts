@@ -459,7 +459,7 @@ export class Slot<T = any> {
     if (endIndex > length) {
       endIndex = length
     }
-    if (startIndex >= endIndex) {
+    if (startIndex > endIndex) {
       return slot
     }
     if (this.isEmpty) {

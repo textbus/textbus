@@ -150,17 +150,29 @@ function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootCo
   }
 }
 
+export interface TransformContext {
+  parentComponentName: string
+  parentComponentState: unknown
+  slotState: unknown
+}
+
 export interface TransformRule<ComponentState, SlotState> {
   multipleSlot: boolean
   target: Component
 
-  slotFactory(): Slot<SlotState>
+  slotFactory(transformContext: TransformContext): Slot<SlotState>
 
   stateFactory?(): ComponentState
 }
 
 function deltaToSlots<T>(selection: Selection, source: Slot, delta: DeltaLite, rule: TransformRule<any, T>, range: Range): Slot<T>[] {
-  let newSlot = rule.slotFactory()
+  const parentComponent = source.parent!
+  const context: TransformContext = {
+    slotState: source.state,
+    parentComponentName: parentComponent.name,
+    parentComponentState: parentComponent.state
+  }
+  let newSlot = rule.slotFactory(context)
   const newSlots = [newSlot]
 
   let index = 0
@@ -191,7 +203,7 @@ function deltaToSlots<T>(selection: Selection, source: Slot, delta: DeltaLite, r
       }).flat()
       newSlots.push(...slots)
     }
-    newSlot = rule.slotFactory()
+    newSlot = rule.slotFactory(context)
   }
   return newSlots
 }
@@ -269,13 +281,20 @@ export class Commander {
       selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
       let position: SelectionPosition | null
       if (slot.isEmpty) {
-        const delta = slot.toDelta()
-        slots.push(...deltaToSlots(selection, slot, delta, rule, range))
-        position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+        if (parentComponent.separable || parentComponent.slots.length === 1) {
+          const delta = slot.toDelta()
+          slots.push(...deltaToSlots(selection, slot, delta, rule, range))
+          position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+        } else if (!slot.schema.includes(rule.target.instanceType)) {
+          const componentInstances = slotsToComponents(this.injector, slots, rule)
+          componentInstances.forEach(instance => {
+            this.insert(instance)
+          })
+          slots = []
+        }
       } else {
         this.delete(deletedSlot => {
           position = null
-          const parentComponent = slot.parent!
           if (parentComponent.separable || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
             slots.push(...deltaToSlots(selection, slot, delta, rule, range))
