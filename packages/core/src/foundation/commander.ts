@@ -255,8 +255,18 @@ export class Commander {
     }
 
     const scopes = selection.getBlocks()
+    const commonAncestorSlot = selection.commonAncestorSlot!
+    const commonAncestorComponent = selection.commonAncestorComponent!
+    let stoppedComponent: ComponentInstance
+    if (commonAncestorSlot.parent !== commonAncestorComponent ||
+      (range.anchorSlot === commonAncestorSlot && range.focusSlot === commonAncestorSlot)) {
+      stoppedComponent = commonAncestorComponent.parentComponent!
+    } else {
+      stoppedComponent = commonAncestorComponent
+    }
 
     let slots: Slot<U>[] = []
+    let position: SelectionPosition | null = null
 
     for (const scope of scopes) {
       const {slot, startIndex, endIndex} = scope
@@ -279,13 +289,18 @@ export class Commander {
         }
       }
       selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
-      let position: SelectionPosition | null
       if (slot.isEmpty) {
         if (parentComponent.separable || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
+          const hasContent = slots.length > 0
           slots.push(...deltaToSlots(selection, slot, delta, rule, range))
-          position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+          if (position?.slot === commonAncestorSlot || hasContent) {
+            deleteUpBySlot(selection, slot, 0, stoppedComponent)
+          } else {
+            position = deleteUpBySlot(selection, slot, 0, stoppedComponent)
+          }
         } else if (!slot.schema.includes(rule.target.instanceType)) {
+          position = null
           const componentInstances = slotsToComponents(this.injector, slots, rule)
           componentInstances.forEach(instance => {
             this.insert(instance)
@@ -294,13 +309,19 @@ export class Commander {
         }
       } else {
         this.delete(deletedSlot => {
-          position = null
           if (parentComponent.separable || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
+            const hasContent = slots.length > 0
             slots.push(...deltaToSlots(selection, slot, delta, rule, range))
-            position = deleteUpBySlot(selection, slot, 0, this.rootComponentRef.component)
+            if (position?.slot === commonAncestorSlot || hasContent) {
+              deleteUpBySlot(selection, slot, 0, stoppedComponent)
+            } else {
+              position = deleteUpBySlot(selection, slot, 0, stoppedComponent)
+            }
             return
           }
+
+          position = null
           let componentInstances = slotsToComponents(this.injector, slots, rule)
           slots = []
           componentInstances.forEach(instance => {
