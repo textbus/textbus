@@ -19,7 +19,7 @@ import {
   NativeRenderer,
   Controller,
   USE_CONTENT_EDITABLE,
-  CoreHistory, MARKDOWN_DETECT, Scheduler, HISTORY_STACK_SIZE, READONLY
+  CoreHistory, ZEN_CODING_DETECT, Scheduler, HISTORY_STACK_SIZE, READONLY
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -66,8 +66,8 @@ export interface TextbusConfig extends Module {
   imports?: Module[]
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
-  /** 开启 markdown 支持 */
-  markdownDetect?: boolean
+  /** 开启 Zen Coding 支持 */
+  zenCoding?: boolean
   /** 最大历史记录栈 */
   historyStackSize?: number
   /** 是否只读 */
@@ -183,8 +183,8 @@ export class Starter extends ReflectiveInjector {
         provide: FORMATTER_LIST,
         useValue: formatters
       }, {
-        provide: MARKDOWN_DETECT,
-        useValue: config.markdownDetect
+        provide: ZEN_CODING_DETECT,
+        useValue: config.zenCoding
       }, {
         provide: RootComponentRef,
         useValue: {}

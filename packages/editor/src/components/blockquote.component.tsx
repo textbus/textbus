@@ -14,7 +14,7 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 export const blockquoteComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'BlockquoteComponent',
-  markdownSupport: {
+  zenCodingSupport: {
     key: ' ',
     match: /^>$/,
     generateInitData() {

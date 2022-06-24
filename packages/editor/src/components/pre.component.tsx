@@ -297,7 +297,7 @@ export const preComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'PreComponent',
   separable: false,
-  markdownSupport: {
+  zenCodingSupport: {
     key: 'Enter',
     match(c: string) {
       const matchString = languageList.map(i => i.label || i.value).concat('js', 'ts').join('|').replace(/\+/, '\\+')

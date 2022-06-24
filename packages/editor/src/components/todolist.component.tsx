@@ -26,7 +26,7 @@ export const todolistComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TodolistComponent',
   separable: true,
-  markdownSupport: {
+  zenCodingSupport: {
     match: /^-\s\[(x|\s)?\]$/,
     key: ' ',
     generateInitData(content: string): ComponentData<void, TodoListSlotState> {

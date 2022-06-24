@@ -66,9 +66,9 @@ export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
 export const USE_CONTENT_EDITABLE = new InjectionToken<boolean>('USE_CONTENT_EDITABLE')
 
 /**
- * 开启 markdown 支持
+ * 开启 Zen Coding 支持
  */
-export const MARKDOWN_DETECT = new InjectionToken<boolean>('MARKDOWN_DETECT')
+export const ZEN_CODING_DETECT = new InjectionToken<boolean>('ZEN_CODING_DETECT')
 
 /**
  * 最大历史记录栈大小

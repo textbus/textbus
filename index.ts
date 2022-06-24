@@ -21,7 +21,7 @@ const editor = createEditor({
   autoFocus: true,
   // i18n: i18n_en_US,
   // autoHeight: true,
-  markdownDetect: true,
+  zenCoding: true,
   // readonly: true,
   minHeight: '300px',
   theme: 'darkline',

@@ -17,7 +17,7 @@ import { useEnterBreaking } from './hooks/single-block-enter'
 export const headingComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'HeadingComponent',
-  markdownSupport: {
+  zenCodingSupport: {
     key: ' ',
     match(content: string) {
       return /^#{1,6}$/.test(content)

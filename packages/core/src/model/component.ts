@@ -65,7 +65,7 @@ export interface Shortcut {
   action(key: string): void
 }
 
-export interface MarkdownGrammarInterceptor<Data = any> {
+export interface ZenCodingGrammarInterceptor<Data = any> {
   /** 匹配字符 */
   match: RegExp | ((content: string) => boolean)
   /** 触发键 */
@@ -142,7 +142,7 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
   separable?: boolean
 
   /** markdown 支持 */
-  markdownSupport?: MarkdownGrammarInterceptor<ComponentData<State, SlotState>>
+  zenCodingSupport?: ZenCodingGrammarInterceptor<ComponentData<State, SlotState>>
 
   /**
    * 组件初始化实现
@@ -162,7 +162,7 @@ export interface Component<Instance extends ComponentInstance = ComponentInstanc
   /** 组件是否可拆分 */
   separable: boolean
 
-  markdownSupport?: MarkdownGrammarInterceptor<State>
+  zenCodingSupport?: ZenCodingGrammarInterceptor<State>
 
   /**
    * 组件创建实例的方法
@@ -327,7 +327,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
     name: options.name,
     separable,
     instanceType: options.type,
-    markdownSupport: options.markdownSupport,
+    zenCodingSupport: options.zenCodingSupport,
     createInstance(contextInjector: Injector, initData?: ComponentData<State, SlotState>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()

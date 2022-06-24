@@ -1,8 +1,8 @@
 import { Inject, Injectable, Injector } from '@tanbo/di'
-import { Component, MarkdownGrammarInterceptor, Shortcut } from '../model/_api'
+import { Component, ZenCodingGrammarInterceptor, Shortcut } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
-import { COMPONENT_LIST, MARKDOWN_DETECT } from './_injection-tokens'
+import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
 
 export interface KeymapState {
   ctrlKey: boolean
@@ -17,17 +17,17 @@ export interface KeymapState {
 @Injectable()
 export class Keyboard {
   private shortcutList: Shortcut[] = []
-  private markdownMatchers: Array<{ component: Component, markdownInterceptor: MarkdownGrammarInterceptor }> = []
+  private zenCodingMatchers: Array<{ component: Component, zenCodingInterceptor: ZenCodingGrammarInterceptor }> = []
 
   constructor(@Inject(COMPONENT_LIST) private components: Component[],
-              @Inject(MARKDOWN_DETECT) private markdownDetect: boolean,
+              @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
               private commander: Commander,
               private injector: Injector,
               private selection: Selection) {
     components.forEach(i => {
-      if (i.markdownSupport) {
-        this.markdownMatchers.push({
-          markdownInterceptor: i.markdownSupport,
+      if (i.zenCodingSupport) {
+        this.zenCodingMatchers.push({
+          zenCodingInterceptor: i.zenCodingSupport,
           component: i
         })
       }
@@ -49,8 +49,8 @@ export class Keyboard {
       !keymapState.altKey &&
       commonAncestorSlot === this.selection.startSlot &&
       commonAncestorSlot === this.selection.endSlot) {
-      for (const item of this.markdownMatchers) {
-        const markdownConfig = item.markdownInterceptor
+      for (const item of this.zenCodingMatchers) {
+        const markdownConfig = item.zenCodingInterceptor
         const matchKey = Array.isArray(markdownConfig.key) ?
           markdownConfig.key.some(k => reg.test(k)) :
           reg.test(markdownConfig.key)
