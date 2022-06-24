@@ -142,7 +142,7 @@ export class Starter extends ReflectiveInjector {
     this.beforeDestroyCallbacks.forEach(i => {
       i()
     });
-    [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
+    [this.get(History), this.get(Selection), this.get(Scheduler), this.get(Renderer)].forEach(i => {
       i.destroy()
     })
   }

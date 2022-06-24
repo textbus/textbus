@@ -1,5 +1,5 @@
 import { Inject, Injectable, Prop } from '@tanbo/di'
-import { Observable, Subject } from '@tanbo/stream'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 import {
   VElement,
@@ -233,12 +233,22 @@ export class Renderer {
   private oldVDom: VElement | null = null
 
   private slotIdAttrKey = '__textbus-slot-id__'
+  private readonlyStateChanged = false
+
+  private subscription = new Subscription()
 
   constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
               private controller: Controller,
               private rootComponentRef: RootComponentRef) {
     this.onViewChecked = this.viewCheckedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
+    this.subscription = controller.onReadonlyStateChange.subscribe(() => {
+      if (rootComponentRef.component) {
+        this.readonlyStateChanged = true
+        this.render()
+        this.readonlyStateChanged = false
+      }
+    })
   }
 
   /**
@@ -247,7 +257,7 @@ export class Renderer {
   render() {
     const component = this.rootComponentRef.component
     this.viewUpdateBeforeEvent.next()
-    if (component.changeMarker.changed) {
+    if (component.changeMarker.changed || this.readonlyStateChanged) {
       const dirty = component.changeMarker.dirty
       const root = this.componentRender(component)
       // hack 防止根节点替换插件时，没有父级虚拟 DOM 节点
@@ -321,6 +331,10 @@ export class Renderer {
   getLocationByNativeNode(node: NativeNode) {
     const vNode = this.nativeNodeCaches.get(node)
     return this.vNodeLocation.get(vNode) || null
+  }
+
+  destroy() {
+    this.subscription.unsubscribe()
   }
 
   private sortNativeNode(parent: NativeNode, children: NativeNode[]) {
@@ -589,7 +603,7 @@ export class Renderer {
   }
 
   private componentRender(component: ComponentInstance): VElement {
-    if (component.changeMarker.dirty) {
+    if (component.changeMarker.dirty || this.readonlyStateChanged) {
       let slotVNode!: VElement
       const node = component.extends.render(this.controller.readonly, (slot, factory) => {
         slotVNode = this.slotRender(component, slot, factory)
@@ -645,7 +659,7 @@ export class Renderer {
     if (typeof slotRenderFactory !== 'function') {
       throw rendererErrorFn(`component \`${component.name}\` slot render is not a function.`)
     }
-    if (slot.changeMarker.dirty) {
+    if (slot.changeMarker.dirty || this.readonlyStateChanged) {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const root = slotRenderFactory()
       if (!(root instanceof VElement)) {
