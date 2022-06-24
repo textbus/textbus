@@ -10,7 +10,6 @@ import { I18n } from './i18n'
 import { i18n_zh_CN } from './i18n/zh_CN'
 import { ContextMenu } from './context-menu'
 import { Dialog } from './dialog'
-import { EditorController } from './editor-controller'
 import { Message } from './message'
 import { FileUploader, UploadConfig } from './file-uploader'
 
@@ -39,12 +38,6 @@ export class Editor extends Viewer {
       }, {
         provide: I18n,
         useValue: new I18n(i18n_zh_CN, options.i18n as any)
-      }, {
-        provide: EditorController,
-        useValue: new EditorController({
-          readonly: false,
-          supportMarkdown: false
-        })
       }, {
         provide: Editor,
         useFactory: () => {
