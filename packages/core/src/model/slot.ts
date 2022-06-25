@@ -48,6 +48,8 @@ export class Slot<T = any> {
   onStateChange: Observable<ApplyAction[]>
   onChildComponentRemove: Observable<ComponentInstance[]>
 
+  readonly schema: ContentType[]
+
   private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
   private childComponentRemoveEvent = new Subject<ComponentInstance[]>()
 
@@ -81,7 +83,8 @@ export class Slot<T = any> {
   protected contentChangeEvent = new Subject<Action[]>()
   protected stateChangeEvent = new Subject<ApplyAction[]>()
 
-  constructor(public schema: ContentType[], public state?: T) {
+  constructor(schema: ContentType[], public state?: T) {
+    this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
     this.onStateChange = this.stateChangeEvent.asObservable()
     this.onChildComponentRemove = this.childComponentRemoveEvent.asObservable()
@@ -552,7 +555,7 @@ export class Slot<T = any> {
       schema: this.schema,
       content: this.content.toJSON(),
       formats: this.format.toJSON(),
-      state: this.state!
+      state: this.state ?? null
     }
   }
 

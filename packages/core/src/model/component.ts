@@ -390,7 +390,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
         toJSON() {
           return {
             name: options.name,
-            state: state!,
+            state: state ?? null as unknown as State,
             slots: componentInstance.slots.toJSON()
           }
         },

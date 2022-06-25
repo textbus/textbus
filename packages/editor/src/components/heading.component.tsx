@@ -60,8 +60,8 @@ export const headingComponentLoader: ComponentLoader = {
   },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slot = slotParser(new Slot([
+      ContentType.Text,
       ContentType.InlineComponent,
-      ContentType.Text
     ]), element)
     return headingComponent.createInstance(injector, {
       slots: [slot],

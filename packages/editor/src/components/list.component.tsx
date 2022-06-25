@@ -11,7 +11,7 @@ import {
   useContext,
   useSlots,
   VElement,
-  ComponentData,
+  ComponentData, useState, onDestroy,
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 
@@ -46,6 +46,16 @@ export const listComponent = defineComponent({
     const injector = useContext()
     const selection = injector.get(Selection)
 
+    let state = data?.state || 'ul'
+    const stateController = useState(state)
+    const sub = stateController.onChange.subscribe(v => {
+      state = v
+    })
+
+    onDestroy(() => {
+      sub.unsubscribe()
+    })
+
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
@@ -73,9 +83,9 @@ export const listComponent = defineComponent({
     })
 
     return {
-      type: data?.state || 'ul',
+      type: state,
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        const Tag = data?.state || 'ul'
+        const Tag = state
         return (
           <Tag>
             {

@@ -64,7 +64,10 @@ module.exports = {
   },
   plugins: [
     new EslintWebpackPlugin({
-      extensions: ['.ts', '.tsx']
+      extensions: ['.ts', '.tsx'],
+      exclude: [
+        './test'
+      ]
     }),
     new HtmlWebpackPlugin({
       template: 'index.html'

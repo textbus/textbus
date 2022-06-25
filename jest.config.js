@@ -3,6 +3,7 @@ module.exports = {
   roots: [
     '<rootDir>/test'
   ],
+  setupFiles: ['jest-canvas-mock'],
   testRegex: 'test/(.+)\\.spec\\.(jsx?|tsx?)$',
   transform: {
     '^.+\\.js$': 'babel-jest',
