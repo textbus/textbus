@@ -16,13 +16,9 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
       '@textbus/core$': path.resolve(__dirname, './packages/core/src/public-api.ts'),
-      '@textbus/core/*': path.resolve(__dirname, './packages/core/'),
-      '@textbus/browser': path.resolve(__dirname, './packages/browser/src/public-api.ts'),
-      '@textbus/browser/*': path.resolve(__dirname, './packages/browser/'),
-      '@textbus/editor': path.resolve(__dirname, './packages/editor/src/public-api.ts'),
-      '@textbus/editor/*': path.resolve(__dirname, './packages/editor/'),
-      '@textbus/collaborate': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
-      '@textbus/collaborate/*': path.resolve(__dirname, './packages/collaborate/'),
+      '@textbus/browser$': path.resolve(__dirname, './packages/browser/src/public-api.ts'),
+      '@textbus/editor$': path.resolve(__dirname, './packages/editor/src/public-api.ts'),
+      '@textbus/collaborate$': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
       '@tanbo/color-picker/bundles/scss/index': path.resolve(__dirname, './node_modules/@tanbo/color-picker/bundles/scss/index.scss'),
     }
   },
