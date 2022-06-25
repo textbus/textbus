@@ -513,7 +513,7 @@ export const tableComponent = defineComponent({
 export const tableComponentLoader: ComponentLoader = {
   resources: {
     styles: [`
-    .tb-table td,.tb-table th{border-width: 1px; border-style: solid;}
+    .tb-table td,.tb-table th{border-width: 1px; border-style: solid; padding:3px 8px}
    .tb-table {border-spacing: 0; border-collapse: collapse; width: 100%; }
    .tb-table-textbus td, th {border-color: #aaa;}`]
   },

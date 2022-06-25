@@ -125,7 +125,7 @@ const editor = createEditor({
     // })
   }
 })
-console.log('start before')
+window['textbus'] = editor
 editor.mount(document.getElementById('box')!).then(() => {
   console.log(3333)
 })

@@ -49,7 +49,6 @@ export const listComponent = defineComponent({
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,
-      ContentType.BlockComponent
     ])])
 
     onEnter(ev => {
@@ -82,7 +81,7 @@ export const listComponent = defineComponent({
             {
               slots.toArray().map(i => {
                 return slotRender(i, () => {
-                  return <li/>
+                  return <li class="tb-list-item"/>
                 })
               })
             }
@@ -104,6 +103,9 @@ export const listComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
     return element.tagName === 'OL' || element.tagName === 'UL'
   },
+  resources: {
+    styles: ['.tb-list-item {margin-top: 0.5em; margin-bottom: 0.5em}']
+  },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slots: Slot[] = []
 
@@ -111,7 +113,6 @@ export const listComponentLoader: ComponentLoader = {
     while (childNodes.length) {
       const slot = new Slot([
         ContentType.Text,
-        ContentType.BlockComponent,
         ContentType.InlineComponent
       ])
       let first = childNodes.shift()

@@ -61,7 +61,6 @@ export interface TableCellRect {
 
 export function createCell(colspan = 1, rowspan = 1) {
   return new Slot([
-    ContentType.BlockComponent,
     ContentType.InlineComponent,
     ContentType.Text
   ], {
