@@ -30,7 +30,6 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
     const component = paragraphComponent.createInstance(injector, {
       slots: [nextSlot]
     })
-    selection.setPosition(component.slots.get(0)!, 0)
     const beforeComponent = parentSlot.getContentAtIndex(index - 1)
     if (index === parentSlot.length - 1 &&
       beforeComponent &&
@@ -47,11 +46,13 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
         parentSlot.delete(2)
         host.retain(index2 + 1)
         host.insert(component)
+        selection.setPosition(component.slots.get(0)!, 0)
         ev.preventDefault()
         return
       }
     }
     parentSlot.insert(component)
+    selection.setPosition(component.slots.get(0)!, 0)
     ev.preventDefault()
   })
 }
