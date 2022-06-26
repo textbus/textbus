@@ -84,7 +84,7 @@ export class Viewer {
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
-    const {doc, mask, wrapper} = Viewer.createLayout(options.minHeight)
+    const { doc, mask, wrapper } = Viewer.createLayout(options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
       provide: EDITOR_OPTIONS,

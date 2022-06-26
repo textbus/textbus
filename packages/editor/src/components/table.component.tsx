@@ -44,7 +44,7 @@ export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwar
   }
 
   override getRects(range: Range) {
-    const {focusSlot, anchorSlot} = range
+    const { focusSlot, anchorSlot } = range
     const focusPaths = this.selection.getPathsBySlot(focusSlot)!
     const anchorPaths = this.selection.getPathsBySlot(anchorSlot)!
     const focusIsStart = Selection.compareSelectionPaths(focusPaths, anchorPaths)
@@ -90,7 +90,7 @@ export const tableComponent = defineComponent({
   name: 'TableComponent',
   separable: false,
   setup(data: ComponentData<TableConfig, TableSlotState> = {
-    slots: Array.from({length: 9}).fill(null).map(() => createCell()),
+    slots: Array.from({ length: 9 }).fill(null).map(() => createCell()),
     state: {
       columnCount: 3,
       rowCount: 3,
@@ -521,7 +521,7 @@ export const tableComponentLoader: ComponentLoader = {
     return element.tagName === 'TABLE'
   },
   read(element: HTMLTableElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
-    const {tHead, tBodies, tFoot} = element
+    const { tHead, tBodies, tFoot } = element
     const headers: Slot[][] = []
     const bodies: Slot[][] = []
     if (tHead) {
@@ -537,7 +537,7 @@ export const tableComponentLoader: ComponentLoader = {
     }
 
     if (tBodies) {
-      Array.of(...Array.from(tBodies), tFoot || {rows: []}).reduce((value, next) => {
+      Array.of(...Array.from(tBodies), tFoot || { rows: [] }).reduce((value, next) => {
         return value.concat(Array.from(next.rows))
       }, [] as HTMLTableRowElement[]).forEach((row: HTMLTableRowElement) => {
         const arr: Slot[] = []

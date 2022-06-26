@@ -45,7 +45,7 @@ export const todolistComponent = defineComponent({
     }
   },
   setup(initData: ComponentData<void, TodoListSlotState>) {
-    const {Text, InlineComponent} = ContentType
+    const { Text, InlineComponent } = ContentType
     const slots = useSlots<TodoListSlotState>(initData.slots || [
       new Slot<TodoListSlotState>([Text, InlineComponent])
     ])

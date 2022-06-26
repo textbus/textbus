@@ -406,7 +406,7 @@ export class Renderer {
         if (newFirstVNode.tagName !== oldFirstVNode.tagName) {
           break
         }
-        const {isChanged} = getNodeChanges(newFirstVNode, oldFirstVNode)
+        const { isChanged } = getNodeChanges(newFirstVNode, oldFirstVNode)
 
         if (isChanged) {
           break
@@ -444,7 +444,7 @@ export class Renderer {
         if (newLastVNode.tagName !== oldLastVNode.tagName) {
           break
         }
-        const {isChanged} = getNodeChanges(newLastVNode, oldLastVNode)
+        const { isChanged } = getNodeChanges(newLastVNode, oldLastVNode)
 
         if (isChanged) {
           break
@@ -556,7 +556,7 @@ export class Renderer {
     if (oldVDom.tagName !== newVDom.tagName) {
       nativeNode = this.createElement(newVDom)
     } else {
-      const {styleChanges, attrChanges, classesChanges, listenerChanges} = getNodeChanges(newVDom, oldVDom)
+      const { styleChanges, attrChanges, classesChanges, listenerChanges } = getNodeChanges(newVDom, oldVDom)
 
       styleChanges.set.forEach(i => this.nativeRenderer.setStyle(nativeNode, i[0], i[1]))
       styleChanges.remove.forEach(i => this.nativeRenderer.setStyle(nativeNode, i, ''))

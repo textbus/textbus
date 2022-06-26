@@ -86,7 +86,7 @@ export class Starter extends ReflectiveInjector {
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [])
-    const {plugins, providers} = this.mergeModules(config)
+    const { plugins, providers } = this.mergeModules(config)
     this.plugins = plugins.map(i => i())
     this.staticProviders = providers
     this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))

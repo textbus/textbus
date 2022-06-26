@@ -130,7 +130,8 @@ export const jumbotronComponent = defineComponent({
           }}>
             {
               !isOutputMode &&
-              <button type="button" class="tb-jumbotron-setting" onClick={setting}><span class="textbus-icon-setting"></span></button>
+              <button type="button" class="tb-jumbotron-setting" onClick={setting}><span
+                class="textbus-icon-setting"></span></button>
             }
             {
               slotRender(slots.get(0)!, () => {

@@ -101,7 +101,7 @@ export const wordExplainComponent = defineComponent({
       render(isOutputMode: boolean, slotRenderFn: SlotRender): VElement {
         return (
           <tb-word-explain>
-            <div class="tb-word-explain-title-group" style={{width: state.width}}>
+            <div class="tb-word-explain-title-group" style={{ width: state.width }}>
               {slotRenderFn(slots.get(0)!, () => {
                 return <div class="tb-word-explain-title"/>
               })}
@@ -216,7 +216,7 @@ tb-word-explain:hover .tb-word-explain-close {
     const subtitle = element.querySelector('.tb-word-explain-subtitle') as HTMLElement
     const detail = element.querySelector('.tb-word-explain-detail') as HTMLElement
 
-    const {Text, InlineComponent} = ContentType
+    const { Text, InlineComponent } = ContentType
     const titleSlot = new Slot([Text, InlineComponent])
     const subtitleSlot = new Slot([Text, InlineComponent])
     const detailSlot = new Slot([Text, InlineComponent])

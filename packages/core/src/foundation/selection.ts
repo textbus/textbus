@@ -13,7 +13,7 @@ export interface Range {
   anchorOffset: number
 }
 
-export interface SelectedScope {
+export interface SelectedContentRange {
   slot: Slot
   startIndex: number
   endIndex: number
@@ -52,7 +52,7 @@ export interface CommonAncestorSlotScope {
   endChildSlot: Slot
 }
 
-export interface RangePosition {
+export interface RangeViewPosition {
   left: number
   top: number
 }
@@ -83,7 +83,7 @@ export abstract class NativeSelectionBridge {
    * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
    * @param position
    */
-  abstract getRect(position: SelectionPosition): RangePosition | null
+  abstract getRect(position: SelectionPosition): RangeViewPosition | null
 }
 
 export interface SelectionPaths {
@@ -184,7 +184,7 @@ export class Selection {
             this.unSelect()
             return
           }
-          const {focusOffset, focusSlot, anchorOffset, anchorSlot} = range
+          const { focusOffset, focusSlot, anchorOffset, anchorSlot } = range
           if (focusSlot === this.focusSlot &&
             anchorSlot === this.anchorSlot &&
             focusOffset === this.focusOffset &&
@@ -214,7 +214,7 @@ export class Selection {
   private _nativeSelectionDelegate = true
 
   private cacheCaretPositionTimer!: any
-  private oldCaretPosition!: RangePosition | null
+  private oldCaretPosition!: RangeViewPosition | null
 
   private subscriptions: Subscription[] = []
 
@@ -360,7 +360,7 @@ export class Selection {
     const slots = componentInstance.slots
     if (slots.length) {
       const first = slots.first!
-      const {slot, offset} = this.findFirstPosition(first, false)
+      const { slot, offset } = this.findFirstPosition(first, false)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentFront(componentInstance)
@@ -379,7 +379,7 @@ export class Selection {
     const slots = componentInstance.slots
     if (slots.length) {
       const last = slots.last!
-      const {slot, offset} = this.findLastPosition(last, false)
+      const { slot, offset } = this.findLastPosition(last, false)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentEnd(componentInstance)
@@ -457,7 +457,7 @@ export class Selection {
   /**
    * 获取选区所选择的块的集合
    */
-  getSelectedScopes(): SelectedScope[] {
+  getSelectedScopes(): SelectedContentRange[] {
     if (!this.isSelected) {
       return []
     }
@@ -483,7 +483,7 @@ export class Selection {
       this.restore()
       return
     }
-    const {startSlot, startOffset} = this
+    const { startSlot, startOffset } = this
     const position = this.getPreviousPosition()
     if (position) {
       this.setPosition(position.slot, position.offset)
@@ -525,7 +525,7 @@ export class Selection {
       this.restore()
       return
     }
-    const {endSlot, endOffset} = this
+    const { endSlot, endOffset } = this
     const position = this.getNextPosition()
     if (position) {
       let offset = position.offset
@@ -750,18 +750,18 @@ export class Selection {
   /**
    * 获取选区内所有的块集合
    */
-  getBlocks(): SelectedScope[] {
-    const blocks: SelectedScope[] = []
+  getBlocks(): SelectedContentRange[] {
+    const blocks: SelectedContentRange[] = []
     if (!this.isSelected) {
       return blocks
     }
 
     function fn(slot: Slot, startIndex: number, endIndex: number, renderer: Renderer) {
-      const scopes: SelectedScope[] = []
+      const scopes: SelectedContentRange[] = []
       if (startIndex >= endIndex) {
         return scopes
       }
-      let newScope: SelectedScope | null = null
+      let newScope: SelectedContentRange | null = null
 
       let i = 0
       const contents = slot.sliceContent(startIndex, endIndex)
@@ -786,7 +786,7 @@ export class Selection {
       return scopes
     }
 
-    const scopes = this.getGreedyScopes()
+    const scopes = this.getGreedyRanges()
 
     scopes.forEach(i => {
       blocks.push(...fn(i.slot, i.startIndex, i.endIndex, this.renderer))
@@ -847,14 +847,14 @@ export class Selection {
   /**
    * 获取当前选区在开始和结束位置均扩展到最大行内内容位置是的块
    */
-  getGreedyScopes(): SelectedScope[] {
+  getGreedyRanges(): SelectedContentRange[] {
     if (!this.isSelected) {
       return []
     }
     return this.getScopes(this.startSlot!,
       this.endSlot!,
-      Selection.findExpandedStartIndex(this.startSlot!, this.startOffset!),
-      Selection.findExpandedEndIndex(this.endSlot!, this.endOffset!))
+      Selection.getInlineContentStartIndex(this.startSlot!, this.startOffset!),
+      Selection.getInlineContentEndIndex(this.endSlot!, this.endOffset!))
   }
 
   /**
@@ -949,9 +949,9 @@ export class Selection {
   getScopes(startSlot: Slot,
             endSlot: Slot,
             startIndex: number,
-            endIndex: number): SelectedScope[] {
-    const start: SelectedScope[] = []
-    const end: SelectedScope[] = []
+            endIndex: number): SelectedContentRange[] {
+    const start: SelectedContentRange[] = []
+    const end: SelectedContentRange[] = []
     let startParentComponent: ComponentInstance | null = null
     let endParentComponent: ComponentInstance | null = null
 
@@ -1017,7 +1017,7 @@ export class Selection {
       endSlot = endParentComponent.parent
       endIndex = endSlot.indexOf(endParentComponent)
     }
-    const result: Omit<SelectedScope, 'isStart' | 'isEnd'>[] = [...start]
+    const result: Omit<SelectedContentRange, 'isStart' | 'isEnd'>[] = [...start]
     if (startParentComponent && startParentComponent === endParentComponent) {
       const slots = startParentComponent.slots.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
       result.push(...slots.map(slot => {
@@ -1053,7 +1053,7 @@ export class Selection {
       const parentSlot = parentComponent.parent
       if (!parentSlot) {
         if (parentComponent !== this.root.component) {
-          return []
+          return null
         }
         break
       }
@@ -1061,7 +1061,7 @@ export class Selection {
       paths.push(componentIndex)
       slot = parentSlot
     }
-    return paths.reverse()
+    return paths.length ? paths.reverse() : null
   }
 
   getNextPositionByPosition(slot: Slot, offset: number) {
@@ -1262,7 +1262,7 @@ export class Selection {
     return f
   }
 
-  static compareSelectionPaths(minPaths: number[], maxPaths: number[]): boolean {
+  static compareSelectionPaths(minPaths: number[], maxPaths: number[], canEqual = true): boolean {
     let minIsStart = true
     let i = 0
     while (true) {
@@ -1271,6 +1271,9 @@ export class Selection {
           const min = minPaths[i]
           const max = maxPaths[i]
           if (min === max) {
+            if (i === maxPaths.length - 1 && i === minPaths.length - 1) {
+              return canEqual
+            }
             i++
             continue
           }
@@ -1286,6 +1289,32 @@ export class Selection {
       }
     }
     return minIsStart
+  }
+
+  static getInlineContentStartIndex(slot: Slot, index: number) {
+    const contents = slot.sliceContent(0, index)
+    const len = contents.length
+    for (let i = len - 1; i >= 0; i--) {
+      const item = contents[i]
+      if (typeof item !== 'string' && item.type === ContentType.BlockComponent) {
+        break
+      }
+      index -= item.length
+    }
+    return index
+  }
+
+  static getInlineContentEndIndex(slot: Slot, index: number) {
+    const contents = slot.sliceContent(index)
+
+    for (let i = 0; i < contents.length; i++) {
+      const item = contents[i]
+      if (typeof item !== 'string' && item.type === ContentType.BlockComponent) {
+        break
+      }
+      index += item.length
+    }
+    return index
   }
 
   private resetStartAndEndPosition() {
@@ -1518,31 +1547,5 @@ export class Selection {
       return component || null
     }
     return Selection.findTreeNode(paths, component)
-  }
-
-  private static findExpandedStartIndex(slot: Slot, index: number) {
-    const contents = slot.sliceContent(0, index)
-    const len = contents.length
-    for (let i = len - 1; i >= 0; i--) {
-      const item = contents[i]
-      if (typeof item !== 'string' && item.type === ContentType.BlockComponent) {
-        break
-      }
-      index -= item.length
-    }
-    return index
-  }
-
-  private static findExpandedEndIndex(slot: Slot, index: number) {
-    const contents = slot.sliceContent(index)
-
-    for (let i = 0; i < contents.length; i++) {
-      const item = contents[i]
-      if (typeof item !== 'string' && item.type === ContentType.BlockComponent) {
-        break
-      }
-      index += item.length
-    }
-    return index
   }
 }

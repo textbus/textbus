@@ -29,7 +29,7 @@ class MarginSetter implements FormItem<string> {
           children: [
             createElement('div', {
               classes: ['textbus-toolbar-image-margin-setter'],
-              children: Array.from({length: 4}).fill(null).map(() => createElement('input', {
+              children: Array.from({ length: 4 }).fill(null).map(() => createElement('input', {
                 attrs: {
                   type: 'text',
                   value: '0'
@@ -103,12 +103,12 @@ class SizeSetter implements FormItem {
               classes: ['textbus-toolbar-image-size-setter'],
               children: [
                 createElement('input', {
-                  attrs: {type: 'text', placeholder: i18n.get('widthPlaceholder')},
+                  attrs: { type: 'text', placeholder: i18n.get('widthPlaceholder') },
                   classes: ['textbus-form-control']
                 }),
                 createTextNode(' * '),
                 createElement('input', {
-                  attrs: {type: 'text', placeholder: i18n.get('heightPlaceholder')},
+                  attrs: { type: 'text', placeholder: i18n.get('heightPlaceholder') },
                   classes: ['textbus-form-control']
                 })
               ]

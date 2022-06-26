@@ -6,7 +6,7 @@ import { createElement } from '../_utils/uikit'
 import { VIEW_MASK } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
-  const {startContainer, startOffset} = range
+  const { startContainer, startOffset } = range
   if (startContainer.nodeType === Node.ELEMENT_NODE) {
     const offsetNode = startContainer.childNodes[startOffset]
     let isInsertBefore = false
@@ -153,7 +153,7 @@ export class Caret {
       return
     }
     const rect = getLayoutRectByRange(nativeRange)
-    const {fontSize, lineHeight, color} = getComputedStyle(node)
+    const { fontSize, lineHeight, color } = getComputedStyle(node)
 
     let height: number
     if (isNaN(+lineHeight)) {

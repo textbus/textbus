@@ -35,7 +35,7 @@ export class Palette {
       } else if (ev.rgba.a === 1) {
         this.completeEvent.next(ev.hex)
       } else {
-        const {r, g, b, a} = ev.rgba
+        const { r, g, b, a } = ev.rgba
         this.completeEvent.next(`rgba(${r},${g},${b},${a})`)
       }
     }

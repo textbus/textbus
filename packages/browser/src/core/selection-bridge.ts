@@ -104,7 +104,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getRect(location: SelectionPosition) {
-    const {focus, anchor} = this.getPositionByRange({
+    const { focus, anchor } = this.getPositionByRange({
       focusOffset: location.offset,
       anchorOffset: location.offset,
       focusSlot: location.slot,
@@ -132,7 +132,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    const {focus, anchor} = this.getPositionByRange(range)
+    const { focus, anchor } = this.getPositionByRange(range)
     if (!focus || !anchor) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
@@ -342,7 +342,7 @@ export class SelectionBridge implements NativeSelectionBridge {
             anchorSlot: endPosition.slot,
             anchorOffset: endPosition.offset
           }
-          const {focus, anchor} = this.getPositionByRange(range)
+          const { focus, anchor } = this.getPositionByRange(range)
 
           if (focus && anchor) {
             let start = anchor

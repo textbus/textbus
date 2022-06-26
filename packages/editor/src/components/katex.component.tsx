@@ -102,7 +102,7 @@ export const katexComponent = defineComponent({
             strict: 'warn',
             output: 'html',
             trust: false,
-            macros: {'\\f': '#1f(#2)'}
+            macros: { '\\f': '#1f(#2)' }
           })
         } catch (e: any) {
           htmlString = `<span style="color: red">${e.stack.split('\n').join('<br>')}</span>`

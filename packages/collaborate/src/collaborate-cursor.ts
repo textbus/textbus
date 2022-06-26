@@ -141,7 +141,7 @@ export class CollaborateCursor {
         return
       }
 
-      const {focus, anchor} = this.nativeSelection.getPositionByRange({
+      const { focus, anchor } = this.nativeSelection.getPositionByRange({
         focusOffset,
         anchorOffset,
         focusSlot,
@@ -209,7 +209,7 @@ export class CollaborateCursor {
   private drawUserCursor(rects: SelectionRect[]) {
     for (let i = 0; i < rects.length; i++) {
       const rect = rects[i]
-      const {cursor, userTip, anchor} = this.getUserCursor(i)
+      const { cursor, userTip, anchor } = this.getUserCursor(i)
       Object.assign(cursor.style, {
         left: rect.x + 'px',
         top: rect.y + 'px',

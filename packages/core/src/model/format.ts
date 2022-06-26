@@ -104,7 +104,7 @@ export class Format {
    * @param distance
    */
   split(index: number, distance: number) {
-    const expandedValues = Array.from<string>({length: distance})
+    const expandedValues = Array.from<string>({ length: distance })
     Array.from(this.map).forEach(([key, formatRanges]) => {
       if (key.type === FormatType.Block) {
         formatRanges.forEach(i => {
@@ -276,7 +276,7 @@ export class Format {
   toJSON() {
     const json: FormatLiteral = {}
     this.map.forEach((value, formatter) => {
-      json[formatter.name] = value.map(i => ({...i}))
+      json[formatter.name] = value.map(i => ({ ...i }))
     })
     return json
   }

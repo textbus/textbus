@@ -5,7 +5,7 @@ import {
   ContentType,
   onDestroy,
   Renderer,
-  SelectedScope,
+  SelectedContentRange,
   Selection,
   Slot,
   Slots,
@@ -458,7 +458,7 @@ export function useTableMultipleRange(
 
     selection.getScopes = function (startSlot, endSlot, startIndex, endIndex) {
       if (selectedCells.length > 1) {
-        return selectedCells.map<SelectedScope>(i => {
+        return selectedCells.map<SelectedContentRange>(i => {
           return {
             slot: i,
             startIndex: 0,
