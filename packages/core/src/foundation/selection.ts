@@ -948,98 +948,17 @@ export class Selection {
             endSlot: Slot,
             endIndex: number,
             discardEmptyScope = false): SelectedContentRange[] {
-    const start: SelectedContentRange[] = []
-    const end: SelectedContentRange[] = []
-    let startParentComponent: ComponentInstance | null = null
-    let endParentComponent: ComponentInstance | null = null
-
-    let startSlotRefIndex: number | null = null
-    let endSlotRefIndex: number | null = null
-
     const commonAncestorSlot = this.commonAncestorSlot
     const commonAncestorComponent = this.commonAncestorComponent
-
-    while (startSlot !== commonAncestorSlot) {
-      start.push({
-        startIndex,
-        endIndex: startSlot.length,
-        slot: startSlot
-      })
-
-      startParentComponent = startSlot.parent!
-
-      const childSlots = startParentComponent.slots
-      const end = childSlots.indexOf(this.endSlot!)
-      startSlotRefIndex = childSlots.indexOf(startSlot)
-      if (startParentComponent !== commonAncestorComponent && end === -1) {
-        start.push(...childSlots.slice(startSlotRefIndex + 1, childSlots.length).map(slot => {
-          return {
-            startIndex: 0,
-            endIndex: slot.length,
-            slot
-          }
-        }))
-      }
-      if (!startParentComponent.parent) {
-        break
-      }
-      startSlot = startParentComponent.parent
-      startIndex = startSlot.indexOf(startParentComponent) + 1
-    }
-    while (endSlot !== commonAncestorSlot) {
-      end.push({
-        startIndex: 0,
-        endIndex,
-        slot: endSlot
-      })
-      endParentComponent = endSlot.parent
-      if (!endParentComponent) {
-        break
-      }
-      const childSlots = endParentComponent.slots
-      const index = childSlots.indexOf(this.startSlot!)
-
-      endSlotRefIndex = childSlots.indexOf(endSlot)
-      if (endParentComponent !== commonAncestorComponent && index === -1) {
-        end.push(...childSlots.slice(0, endSlotRefIndex).map(slot => {
-          return {
-            startIndex: 0,
-            endIndex: slot.length,
-            slot
-          }
-        }).reverse())
-      }
-      if (!endParentComponent.parent) {
-        break
-      }
-      endSlot = endParentComponent.parent
-      endIndex = endSlot.indexOf(endParentComponent)
-    }
-    const result: Omit<SelectedContentRange, 'isStart' | 'isEnd'>[] = [...start]
-    if (startParentComponent && startParentComponent === endParentComponent) {
-      const slots = startParentComponent.slots.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
-      result.push(...slots.map(slot => {
-        return {
-          startIndex: 0,
-          endIndex: slot.length,
-          slot
-        }
-      }))
-    } else {
-      result.push({
-        startIndex,
-        endIndex,
-        slot: commonAncestorSlot!
-      })
-    }
-    result.push(...end.reverse())
-
-    if (discardEmptyScope) {
-      return result.filter(item => {
-        return item.slot && item.startIndex < item.endIndex
-      })
-    }
-    return result
+    return Selection.getScopesByRange(
+      startSlot,
+      startIndex,
+      endSlot,
+      endIndex,
+      commonAncestorSlot,
+      commonAncestorComponent,
+      discardEmptyScope
+    )
   }
 
   getPathsBySlot(slot: Slot): number[] | null {
@@ -1186,6 +1105,25 @@ export class Selection {
       slot: cacheSlot,
       offset: 0
     }
+  }
+
+  static getScopes(
+    startSlot: Slot,
+    startIndex: number,
+    endSlot: Slot,
+    endIndex: number,
+    discardEmptyScope = false) {
+    const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
+    const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
+    return Selection.getScopesByRange(
+      startSlot,
+      startIndex,
+      endSlot,
+      endIndex,
+      commonAncestorSlot,
+      commonAncestorComponent,
+      discardEmptyScope
+    )
   }
 
   static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
@@ -1530,6 +1468,107 @@ export class Selection {
       focusOffset: this.focusOffset!,
       anchorOffset: this.anchorOffset!
     } : null)
+  }
+
+  private static getScopesByRange(
+    startSlot: Slot,
+    startIndex: number,
+    endSlot: Slot,
+    endIndex: number,
+    commonAncestorSlot,
+    commonAncestorComponent,
+    discardEmptyScope = false): SelectedContentRange[] {
+
+    const start: SelectedContentRange[] = []
+    const end: SelectedContentRange[] = []
+    let startParentComponent: ComponentInstance | null = null
+    let endParentComponent: ComponentInstance | null = null
+
+    let startSlotRefIndex: number | null = null
+    let endSlotRefIndex: number | null = null
+
+
+    while (startSlot !== commonAncestorSlot) {
+      start.push({
+        startIndex,
+        endIndex: startSlot.length,
+        slot: startSlot
+      })
+
+      startParentComponent = startSlot.parent!
+
+      const childSlots = startParentComponent.slots
+      const end = childSlots.indexOf(endSlot!)
+      startSlotRefIndex = childSlots.indexOf(startSlot)
+      if (startParentComponent !== commonAncestorComponent && end === -1) {
+        start.push(...childSlots.slice(startSlotRefIndex + 1, childSlots.length).map(slot => {
+          return {
+            startIndex: 0,
+            endIndex: slot.length,
+            slot
+          }
+        }))
+      }
+      if (!startParentComponent.parent) {
+        break
+      }
+      startSlot = startParentComponent.parent
+      startIndex = startSlot.indexOf(startParentComponent) + 1
+    }
+    while (endSlot !== commonAncestorSlot) {
+      end.push({
+        startIndex: 0,
+        endIndex,
+        slot: endSlot
+      })
+      endParentComponent = endSlot.parent
+      if (!endParentComponent) {
+        break
+      }
+      const childSlots = endParentComponent.slots
+      const index = childSlots.indexOf(startSlot!)
+
+      endSlotRefIndex = childSlots.indexOf(endSlot)
+      if (endParentComponent !== commonAncestorComponent && index === -1) {
+        end.push(...childSlots.slice(0, endSlotRefIndex).map(slot => {
+          return {
+            startIndex: 0,
+            endIndex: slot.length,
+            slot
+          }
+        }).reverse())
+      }
+      if (!endParentComponent.parent) {
+        break
+      }
+      endSlot = endParentComponent.parent
+      endIndex = endSlot.indexOf(endParentComponent)
+    }
+    const result: Omit<SelectedContentRange, 'isStart' | 'isEnd'>[] = [...start]
+    if (startParentComponent && startParentComponent === endParentComponent) {
+      const slots = startParentComponent.slots.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
+      result.push(...slots.map(slot => {
+        return {
+          startIndex: 0,
+          endIndex: slot.length,
+          slot
+        }
+      }))
+    } else {
+      result.push({
+        startIndex,
+        endIndex,
+        slot: commonAncestorSlot!
+      })
+    }
+    result.push(...end.reverse())
+
+    if (discardEmptyScope) {
+      return result.filter(item => {
+        return item.slot && item.startIndex < item.endIndex
+      })
+    }
+    return result
   }
 
   private static findTreeNode(paths: number[], component: ComponentInstance): Slot | ComponentInstance | null {

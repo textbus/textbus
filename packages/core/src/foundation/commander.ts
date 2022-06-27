@@ -555,9 +555,7 @@ export class Commander {
       }
     }
 
-    if (selection.isCollapsed) {
-      const startSlot = selection.startSlot!
-      const startOffset = selection.startOffset!
+    if (startSlot === endSlot && startOffset === endOffset) {
       if (startSlot!.isEmpty) {
         receiver(startSlot.cut())
         const position = deleteUpBySlot(selection, startSlot, startOffset, this.rootComponentRef.component, deleteBefore)
@@ -566,7 +564,7 @@ export class Commander {
       }
       return false
     }
-    const scopes = selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
+    const scopes = Selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
 
     while (scopes.length) {
       const lastScope = scopes.pop()!
@@ -622,8 +620,9 @@ export class Commander {
       deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
       if (!deletedSlot.isEmpty) {
         const deletedDelta = deletedSlot.toDelta()
+        selection.setPosition(startSlot, startOffset)
         deletedDelta.forEach(item => {
-          startSlot.insert(item.insert, item.formats)
+          this.insert(item.insert, item.formats)
         })
       }
     }
