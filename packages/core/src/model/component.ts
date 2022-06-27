@@ -204,6 +204,7 @@ export interface EnterEventData {
 export interface DeleteEventData {
   index: number
   count: number
+  toEnd: boolean
 }
 
 export interface PasteEventData {

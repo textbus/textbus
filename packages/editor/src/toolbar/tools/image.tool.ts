@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Commander, Query, QueryState, QueryStateType } from '@textbus/core'
+import { Commander, Query, QueryState, QueryStateType, Selection } from '@textbus/core'
 import { createElement, createTextNode } from '@textbus/browser'
 
 import { DialogTool, DialogToolConfig } from '../toolkit/_api'
@@ -149,6 +149,7 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
   const query = injector.get(Query)
   const commander = injector.get(Commander)
   const fileUploader = injector.get(FileUploader)
+  const selection = injector.get(Selection)
 
   const childI18n = i18n.getContext('plugins.toolbar.imageTool.view')
   const form = new Form({
@@ -217,9 +218,12 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
       }
     },
     useValue(value: any) {
-      if (value) {
-        value = {
-          src: value.src,
+      if (!value) {
+        return
+      }
+      const configs = (value.src as string[] || []).map(src => {
+        return {
+          src,
           margin: value.margin,
           float: value.float,
           maxWidth: value.maxSize.width,
@@ -227,16 +231,27 @@ export function imageToolConfigFactory(injector: Injector): DialogToolConfig {
           width: value.size.width,
           height: value.size.height
         }
-      }
+      })
+      value = configs.unshift()
       const state = query.queryWrappedComponent(imageComponent)
       if (state.state === QueryStateType.Enabled) {
         state.value!.updateState(draft => {
           Object.assign(draft, value)
         })
-      } else if (value?.src) {
-        commander.insert(imageComponent.createInstance(injector, {
-          state: value
-        }))
+        if (configs.length) {
+          selection.selectComponentEnd(state.value!)
+          configs.forEach(i => {
+            commander.insert(imageComponent.createInstance(injector, {
+              state: i
+            }))
+          })
+        }
+      } else {
+        configs.forEach(i => {
+          commander.insert(imageComponent.createInstance(injector, {
+            state: i
+          }))
+        })
       }
     }
   }

@@ -73,7 +73,11 @@ function getNextInsertPosition(currentSlot: Slot, content: string | ComponentIns
   return getNextInsertPosition(parentSlot, content, excludeSlots)
 }
 
-function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootComponent: ComponentInstance): SelectionPosition {
+function deleteUpBySlot(selection: Selection,
+                        slot: Slot,
+                        offset: number,
+                        rootComponent: ComponentInstance,
+                        deleteBefore: boolean): SelectionPosition {
   const parentComponent = slot.parent
   if (!parentComponent) {
     return {
@@ -102,7 +106,8 @@ function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootCo
     let isPreventDefault = true
     invokeListener(parentSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(parentSlot, {
       index,
-      count: 1
+      count: 1,
+      toEnd: !deleteBefore
     }, () => {
       isPreventDefault = false
       parentSlot.retain(index)
@@ -116,7 +121,7 @@ function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootCo
       }
     }
     if (parentSlot.isEmpty) {
-      return deleteUpBySlot(selection, parentSlot, index, rootComponent)
+      return deleteUpBySlot(selection, parentSlot, index, rootComponent, deleteBefore)
     }
     return {
       slot: parentSlot,
@@ -133,7 +138,8 @@ function deleteUpBySlot(selection: Selection, slot: Slot, offset: number, rootCo
   let isPreventDefault = true
   invokeListener(parentComponent, 'onSlotRemove', new Event<ComponentInstance, DeleteEventData>(parentComponent, {
     index: slotIndex,
-    count: 1
+    count: 1,
+    toEnd: !deleteBefore
   }, () => {
     isPreventDefault = false
     const isSuccess = parentComponent.slots.remove(slot)
@@ -310,10 +316,11 @@ export class Commander {
         const count = parentComponent.slots.length - slotIndex
         invokeListener(parentComponent, 'onSlotRemove', new Event(parentComponent, {
           index: slotIndex + 1,
-          count
+          count: count - 1,
+          toEnd: false
         }, () => {
           parentComponent.slots.retain(slotIndex + 1)
-          const deletedSlots = parentComponent.slots.delete(count)
+          const deletedSlots = parentComponent.slots.delete(count - 1)
           const afterComponent = this.translator.createComponentByData(parentComponent.name, {
             state: typeof parentComponent.state === 'object' ? JSON.parse(JSON.stringify(parentComponent.state)) : parentComponent.state,
             slots: deletedSlots
@@ -363,7 +370,7 @@ export class Commander {
         if (parentComponent.separable || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, range, 0))
-          position = deleteUpBySlot(selection, slot, 0, stoppedComponent)
+          position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
         } else {
           const componentInstances = slotsToComponents(this.injector, slots, rule)
           slots = []
@@ -386,7 +393,7 @@ export class Commander {
               }
               return
             }
-            position = deleteUpBySlot(selection, slot, 0, stoppedComponent)
+            position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
             return
           }
 
@@ -531,13 +538,20 @@ export class Commander {
     if (!selection.isSelected) {
       return false
     }
+
+    let endSlot = selection.endSlot!
+    let endOffset = selection.endOffset!
+    let startSlot = selection.startSlot!
+    let startOffset = selection.startOffset!
     if (selection.isCollapsed) {
       if (deleteBefore) {
         const prevPosition = selection.getPreviousPosition()!
-        selection.setAnchor(prevPosition.slot, prevPosition.offset)
+        startSlot = prevPosition.slot
+        startOffset = prevPosition.offset
       } else {
         const nextPosition = selection.getNextPosition()!
-        selection.setFocus(nextPosition.slot, nextPosition.offset)
+        endSlot = nextPosition.slot
+        endOffset = nextPosition.offset
       }
     }
 
@@ -546,16 +560,14 @@ export class Commander {
       const startOffset = selection.startOffset!
       if (startSlot!.isEmpty) {
         receiver(startSlot.cut())
-        const position = deleteUpBySlot(selection, startSlot, startOffset, this.rootComponentRef.component)
+        const position = deleteUpBySlot(selection, startSlot, startOffset, this.rootComponentRef.component, deleteBefore)
         selection.setBaseAndExtent(position.slot, position.offset, position.slot, position.offset)
         return position.slot !== startSlot || position.offset !== startOffset
       }
       return false
     }
-    const scopes = selection.getSelectedScopes()
-    const endSlot = selection.endSlot!
-    const startSlot = selection.startSlot!
-    const startOffset = selection.startOffset!
+    const scopes = selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
+
     while (scopes.length) {
       const lastScope = scopes.pop()!
       let { slot, startIndex } = lastScope
@@ -564,7 +576,8 @@ export class Commander {
       let isPreventDefault = true
       invokeListener(slot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(slot, {
         index: startIndex,
-        count: endIndex - startIndex
+        count: endIndex - startIndex,
+        toEnd: !deleteBefore
       }, () => {
         isPreventDefault = false
         const deletedSlot = slot.cut(startIndex, endIndex)
@@ -582,7 +595,7 @@ export class Commander {
         return false
       }
       if (slot !== startSlot && slot !== endSlot && slot.isEmpty) {
-        const position = deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component)
+        const position = deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component, deleteBefore)
         slot = position.slot
         startIndex = position.offset
       }
@@ -593,21 +606,26 @@ export class Commander {
       }
     }
     if (startSlot !== endSlot) {
+      let isPreventDefault = true
       invokeListener(endSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(endSlot, {
         index: 0,
-        count: endSlot.length
+        count: endSlot.length,
+        toEnd: !deleteBefore
       }, () => {
-        const deletedSlot = endSlot.cut()
-        receiver(deletedSlot)
-        deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component)
-        if (deletedSlot.isEmpty) {
-          return
-        }
+        isPreventDefault = false
+      }))
+      if (isPreventDefault) {
+        return false
+      }
+      const deletedSlot = endSlot.cut()
+      receiver(deletedSlot)
+      deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
+      if (!deletedSlot.isEmpty) {
         const deletedDelta = deletedSlot.toDelta()
         deletedDelta.forEach(item => {
           startSlot.insert(item.insert, item.formats)
         })
-      }))
+      }
     }
     selection.setBaseAndExtent(startSlot, startOffset, startSlot, startOffset)
     return true

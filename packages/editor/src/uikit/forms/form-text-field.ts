@@ -2,7 +2,7 @@ import { Subscription } from '@tanbo/stream'
 
 import { AttrState, FormTextFieldParams, FormItem } from './help'
 
-export class FormTextField implements FormItem<string> {
+export class FormTextField implements FormItem<string | string[]> {
   elementRef = document.createElement('div')
   name: string
   private input: HTMLInputElement
@@ -67,10 +67,11 @@ export class FormTextField implements FormItem<string> {
     this.input.value = (value ?? this.config.value) || ''
   }
 
-  getAttr(): AttrState<string> {
+  getAttr(): AttrState<string | string[]> {
+    const value = this.input.value
     return {
       name: this.config.name,
-      value: this.input.value
+      value: this.config.uploadMultiple ? value.split(/(?<!base64),/g) : value
     }
   }
 

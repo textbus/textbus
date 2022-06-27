@@ -28,10 +28,18 @@ import {
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 
+export interface Resources {
+  componentName: string
+  resources: ComponentResources
+}
+
 export interface OutputContents<T = any> {
   content: T
-  resourcesList: Array<{ componentName: string, resources: ComponentResources }>
+  resourcesList: Resources[]
   styleSheets: string[]
+  styleSheet: string
+  links: Record<string, string>[]
+  scripts: string[]
 }
 
 const editorError = makeError('CoreEditor')
@@ -78,6 +86,10 @@ export class Viewer {
   private resourceNodes: HTMLElement[] = []
   private focusEvent = new Subject<void>()
   private blurEvent = new Subject<void>()
+  private resourcesList: Resources[] = []
+  private styleSheet = ''
+  private scripts: string[] = []
+  private links: Record<string, string>[] = []
 
   constructor(private rootComponentLoader: ComponentLoader,
               private options: ViewOptions = {}) {
@@ -233,8 +245,11 @@ export class Viewer {
 
     return {
       content: html,
-      resourcesList: this.getAllComponentResources(),
-      styleSheets: this.options?.styleSheets || []
+      resourcesList: this.resourcesList,
+      styleSheets: this.options?.styleSheets || [],
+      styleSheet: this.styleSheet,
+      links: this.links,
+      scripts: this.scripts
     }
   }
 
@@ -249,8 +264,11 @@ export class Viewer {
 
     return {
       content: rootComponentRef.component.toJSON(),
-      resourcesList: this.getAllComponentResources(),
-      styleSheets: this.options?.styleSheets || []
+      resourcesList: this.resourcesList,
+      styleSheets: this.options?.styleSheets || [],
+      styleSheet: this.styleSheet,
+      links: this.links,
+      scripts: this.scripts
     }
   }
 
@@ -314,25 +332,33 @@ export class Viewer {
   }
 
   private initDocStyleSheetsAndScripts(options: ViewOptions) {
-    const links: Array<{ [key: string]: string }> = []
+    this.resourcesList = this.getAllComponentResources()
 
     const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)
-    const componentStyles = resources.map(metadata => {
+    const docStyles: string[] = []
+    const editModeStyles: string[] = []
+    resources.forEach(metadata => {
       if (Array.isArray(metadata.links)) {
-        links.push(...metadata.links)
+        this.links.push(...metadata.links)
       }
-      return [metadata.styles?.join('') || '', metadata.editModeStyles?.join('') || ''].join('')
-    }).join('')
+      docStyles.push(metadata.styles?.join('') || '')
+      editModeStyles.push(metadata.editModeStyles?.join('') || '')
+    })
 
-    links.forEach(link => {
+    this.links.forEach(link => {
       const linkEle = document.createElement('link')
       Object.assign(linkEle, link)
       this.resourceNodes.push(linkEle)
       document.head.appendChild(linkEle)
     })
-    const docStyles = Viewer.cssMin([componentStyles, ...(options.styleSheets || [])].join(''))
     const styleEl = document.createElement('style')
-    styleEl.innerHTML = Viewer.cssMin([...docStyles, ...(options.editingStyleSheets || [])].join(''))
+    docStyles.push(...(options.styleSheets || []))
+    editModeStyles.push(...(options.editingStyleSheets || []))
+
+    this.styleSheet = Viewer.cssMin(docStyles.join(''))
+
+    styleEl.innerHTML = this.styleSheet + Viewer.cssMin(editModeStyles.join(''))
+
     this.resourceNodes.push(styleEl)
     document.head.append(styleEl)
 
@@ -340,6 +366,7 @@ export class Viewer {
       if (src) {
         const script = document.createElement('script')
         script.src = src
+        this.scripts.push(src)
         document.head.appendChild(script)
         this.resourceNodes.push(script)
       }

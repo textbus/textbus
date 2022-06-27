@@ -468,10 +468,7 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    const scopes = this.getScopes(this.startSlot!, this.endSlot!, this.startOffset!, this.endOffset!)
-    return scopes.filter(item => {
-      return item.slot && item.startIndex < item.endIndex
-    })
+    return this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
   }
 
   /**
@@ -852,8 +849,8 @@ export class Selection {
       return []
     }
     return this.getScopes(this.startSlot!,
-      this.endSlot!,
       Selection.getInlineContentStartIndex(this.startSlot!, this.startOffset!),
+      this.endSlot!,
       Selection.getInlineContentEndIndex(this.endSlot!, this.endOffset!))
   }
 
@@ -947,9 +944,10 @@ export class Selection {
   }
 
   getScopes(startSlot: Slot,
-            endSlot: Slot,
             startIndex: number,
-            endIndex: number): SelectedContentRange[] {
+            endSlot: Slot,
+            endIndex: number,
+            discardEmptyScope = false): SelectedContentRange[] {
     const start: SelectedContentRange[] = []
     const end: SelectedContentRange[] = []
     let startParentComponent: ComponentInstance | null = null
@@ -1036,6 +1034,11 @@ export class Selection {
     }
     result.push(...end.reverse())
 
+    if (discardEmptyScope) {
+      return result.filter(item => {
+        return item.slot && item.startIndex < item.endIndex
+      })
+    }
     return result
   }
 
