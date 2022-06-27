@@ -22,7 +22,7 @@ export class DefaultShortcut implements Plugin {
         key: 'Enter'
       },
       action: () => {
-        this.commander.enter()
+        this.commander.break()
       }
     })
     keyboard.addShortcut({

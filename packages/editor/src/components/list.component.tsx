@@ -4,7 +4,7 @@ import {
   ComponentExtends,
   ContentType,
   defineComponent,
-  onEnter,
+  onBreak,
   Slot,
   SlotRender,
   Selection,
@@ -61,7 +61,7 @@ export const listComponent = defineComponent({
       ContentType.InlineComponent,
     ])])
 
-    onEnter(ev => {
+    onBreak(ev => {
       if (ev.target.isEmpty && ev.target === slots.last) {
         const paragraph = paragraphComponent.createInstance(injector)
         const parentComponent = selection.commonAncestorComponent!

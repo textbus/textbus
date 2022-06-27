@@ -4,7 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  onEnter,
+  onBreak,
   Selection,
   Slot,
   useContext,
@@ -57,7 +57,7 @@ export const todolistComponent = defineComponent({
     const selection = injector.get(Selection)
     const commander = injector.get(Commander)
 
-    onEnter(ev => {
+    onBreak(ev => {
       const slot = ev.target
       const index = ev.data.index
       ev.preventDefault()

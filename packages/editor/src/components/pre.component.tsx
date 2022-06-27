@@ -7,7 +7,7 @@ import {
   Formatter,
   FormatType,
   onContextMenu,
-  onEnter,
+  onBreak,
   onPaste,
   Selection,
   Slot,
@@ -455,7 +455,7 @@ export const preComponent = defineComponent({
       }
     })
 
-    onEnter(ev => {
+    onBreak(ev => {
       if (ev.target.isEmpty && ev.target === slots.last) {
         const prevSlot = slots.get(slots.length - 2)
         if (prevSlot?.isEmpty) {

@@ -13,7 +13,7 @@ import {
   VElement,
   onDestroy,
   useRef,
-  onEnter,
+  onBreak,
   ComponentInstance,
   ComponentData,
   useSelf
@@ -51,7 +51,7 @@ export const rootComponent = defineComponent({
       }
     })
 
-    onEnter((ev) => {
+    onBreak((ev) => {
       const p = paragraphComponent.createInstance(injector)
       const slot = slots.get(0)!
       slot.insert(p)

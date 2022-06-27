@@ -197,7 +197,7 @@ export interface InsertEventData {
   formats: Formats
 }
 
-export interface EnterEventData {
+export interface BreakEventData {
   index: number
 }
 
@@ -250,7 +250,7 @@ export interface EventTypes {
   onDestroy: () => void
   onSelectionFromFront: (event: Event<ComponentInstance>) => void
   onSelectionFromEnd: (event: Event<ComponentInstance>) => void
-  onEnter: (event: Event<Slot, EnterEventData>) => void
+  onBreak: (event: Event<Slot, BreakEventData>) => void
   onPaste: (event: Event<Slot, PasteEventData>) => void
   onContextMenu: (event: ContextMenuEvent<ComponentInstance>) => ContextMenuConfig[]
 
@@ -535,7 +535,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContentD
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<ComponentInstance, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onEnter', data: Event<Slot, EnterEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onBreak', data: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
@@ -656,7 +656,7 @@ export const onContentDeleted = makeEventHook('onContentDeleted')
 /**
  * 组件子插槽换行时的勾子
  */
-export const onEnter = makeEventHook('onEnter')
+export const onBreak = makeEventHook('onBreak')
 
 /**
  * 组件子插槽插入内容时的勾子

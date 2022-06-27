@@ -5,7 +5,7 @@ import {
   ContentType,
   defineComponent,
   onDestroy,
-  onEnter,
+  onBreak,
   Selection,
   Slot,
   useContext,
@@ -65,7 +65,7 @@ export const imageCardComponent = defineComponent({
     })
 
     const self = useSelf()
-    onEnter(ev => {
+    onBreak(ev => {
       const slot = ev.target.cutTo(new Slot([
         ContentType.InlineComponent,
         ContentType.Text

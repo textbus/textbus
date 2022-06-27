@@ -7,7 +7,7 @@ import {
   ContentType,
   DeleteEventData,
   DeltaLite,
-  EnterEventData,
+  BreakEventData,
   Event,
   Formats,
   Formatter,
@@ -634,7 +634,7 @@ export class Commander {
   /**
    * 在当前选区内触发换行操作，如果选区未闭合，则先删除选区内容，再触发回车操作
    */
-  enter(): boolean {
+  break(): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
       return false
@@ -648,7 +648,7 @@ export class Commander {
     }
     const startSlot = this.selection.startSlot!
     let isPreventDefault = true
-    invokeListener(startSlot.parent!, 'onEnter', new Event<Slot, EnterEventData>(startSlot, {
+    invokeListener(startSlot.parent!, 'onBreak', new Event<Slot, BreakEventData>(startSlot, {
       index: this.selection.startOffset!
     }, () => {
       isPreventDefault = false

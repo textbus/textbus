@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { onEnter, Slots, Selection, useSelf } from '@textbus/core'
+import { onBreak, Slots, Selection, useSelf } from '@textbus/core'
 
 import { paragraphComponent } from '../paragraph.component'
 import { linkFormatter } from '../../formatters/link.formatter'
@@ -13,7 +13,7 @@ import { linkFormatter } from '../../formatters/link.formatter'
 export function useEnterBreaking(injector: Injector, slots: Slots) {
   const selection = injector.get(Selection)
   const self = useSelf()
-  onEnter(ev => {
+  onBreak(ev => {
     const parentSlot = self.parent!
 
     const index = parentSlot.indexOf(self)
