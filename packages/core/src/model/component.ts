@@ -491,12 +491,17 @@ export function useDynamicShortcut(config: Shortcut) {
 }
 
 let eventHandleFn: null | ((...args: any[]) => void) = null
-let isPreventDefault = false
 
 /**
  * Textbus 事件对象
  */
 export class Event<S, T = null> {
+  get isPrevented() {
+    return this._isPrevented
+  }
+
+  private _isPrevented = false
+
   constructor(public target: S,
               public data: T,
               eventHandle: (...args: any[]) => void
@@ -505,7 +510,7 @@ export class Event<S, T = null> {
   }
 
   preventDefault() {
-    isPreventDefault = true
+    this._isPrevented = true
   }
 }
 
@@ -525,19 +530,19 @@ export class ContextMenuEvent<T> extends Event<T> {
  * 触发组件事件的方法
  * @param target 目标组件
  * @param eventType 事件名
- * @param data 事件对象
+ * @param event 事件对象
  */
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', data: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', data: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<Slot, InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<Slot, InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<Slot, DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted', data: Event<Slot>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<ComponentInstance, DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved', data: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onBreak', data: Event<Slot, BreakEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<Slot, PasteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', event: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', event: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', event: Event<Slot, InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', event: Event<Slot, InsertEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', event: Event<Slot, DeleteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted', event: Event<Slot>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', event: Event<ComponentInstance, DeleteEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved', event: Event<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
@@ -547,7 +552,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onViewChec
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (args: infer U) => any ?
     U extends Event<any> ? U : never
-    : never>(target: ComponentInstance, eventType: K, data?: D) {
+    : never>(target: ComponentInstance, eventType: K, event?: D) {
   if (typeof target !== 'object' || target === null) {
     return
   }
@@ -555,20 +560,18 @@ export function invokeListener<K extends keyof EventTypes,
   if (cache) {
     const callbacks = cache.get(eventType)
     const values = callbacks.map(fn => {
-      return (fn as any)(data)
+      return (fn as any)(event)
     })
     if (eventType === 'onViewChecked') {
       const viewInitCallbacks = cache.get('onViewInit')
       cache.clean('onViewInit')
       viewInitCallbacks.forEach(fn => {
-        (fn as any)(data)
+        (fn as any)(event)
       })
     }
-    const is = isPreventDefault
     const fn = eventHandleFn
-    isPreventDefault = false
     eventHandleFn = null
-    if (!is) {
+    if (event && event instanceof Event && !event.isPrevented) {
       fn?.(...values)
     }
   }
