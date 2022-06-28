@@ -257,12 +257,12 @@ export interface EventTypes {
   onContentInserted: (event: Event<Slot, InsertEventData>) => void
   onContentInsert: (event: Event<Slot, InsertEventData>) => void
   onContentDelete: (event: Event<Slot, DeleteEventData>) => void
-  onContentDeleted: () => void
+  onContentDeleted: (event: Event<Slot>) => void
 
   // onSlotInserted: (event: Event<Slot, InsertEventData>) => void
   // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
   onSlotRemove: (event: Event<ComponentInstance, DeleteEventData>) => void
-  onSlotRemoved: () => void
+  onSlotRemoved: (event: Event<ComponentInstance>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -532,9 +532,9 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSelectio
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', data: Event<Slot, InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', data: Event<Slot, InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', data: Event<Slot, DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted', data: Event<Slot>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', data: Event<ComponentInstance, DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved', data: Event<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onBreak', data: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', data: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', data: Event<Slot, PasteEventData>): void

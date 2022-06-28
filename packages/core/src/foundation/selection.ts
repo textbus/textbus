@@ -91,6 +91,10 @@ export interface SelectionPaths {
   focus: number[]
 }
 
+export interface SelectionSnapshot {
+  restore(syncNative: boolean): void
+}
+
 /**
  * Textbus 选区实现类，用于选择 Textbus 文档内的内容
  */
@@ -285,6 +289,22 @@ export class Selection {
       })
     )
     Promise.resolve().then(() => this.nativeSelectionDelegate = true)
+  }
+
+  createSnapshot(): SelectionSnapshot {
+    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this
+    return {
+      restore: (syncNative: boolean) => {
+        this._anchorSlot = anchorSlot
+        this._anchorOffset = anchorOffset
+        this._focusSlot = focusSlot
+        this._focusOffset = focusOffset
+        this.resetStartAndEndPosition()
+        if (syncNative) {
+          this.restore(true)
+        }
+      }
+    }
   }
 
   destroy() {

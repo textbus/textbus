@@ -381,8 +381,7 @@ export class Collaborate implements History {
               content.insert(offset, action.content, action.formats || {})
             } else {
               length = 1
-              const component = slot.getContentAtIndex(offset) as ComponentInstance
-              const sharedComponent = this.createSharedComponentByComponent(component)
+              const sharedComponent = this.createSharedComponentByComponent(action.ref as ComponentInstance)
               content.insertEmbed(offset, sharedComponent)
             }
 
@@ -476,8 +475,7 @@ export class Collaborate implements History {
           if (action.type === 'retain') {
             index = action.offset
           } else if (action.type === 'insertSlot') {
-            const slot = slots.get(index)!
-            const sharedSlot = this.createSharedSlotBySlot(slot)
+            const sharedSlot = this.createSharedSlotBySlot(action.ref)
             remoteSlots.insert(index, [sharedSlot])
             index++
           } else if (action.type === 'delete') {

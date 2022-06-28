@@ -112,7 +112,9 @@ function deleteUpBySlot(selection: Selection,
       isPreventDefault = false
       parentSlot.retain(index)
       parentSlot.delete(1)
-      invokeListener(parentSlot.parent!, 'onContentDeleted')
+      invokeListener(parentSlot.parent!, 'onContentDeleted', new Event(parentSlot, null, () => {
+        //
+      }))
     }))
     if (isPreventDefault) {
       return {
@@ -144,7 +146,9 @@ function deleteUpBySlot(selection: Selection,
     isPreventDefault = false
     const isSuccess = parentComponent.slots.remove(slot)
     if (isSuccess) {
-      invokeListener(parentComponent, 'onSlotRemoved')
+      invokeListener(parentComponent, 'onSlotRemoved', new Event(parentComponent, null, () => {
+        //
+      }))
     }
   }))
   if (!isPreventDefault) {
@@ -319,8 +323,7 @@ export class Commander {
           count: count - 1,
           toEnd: false
         }, () => {
-          parentComponent.slots.retain(slotIndex + 1)
-          const deletedSlots = parentComponent.slots.delete(count - 1)
+          const deletedSlots = parentComponent.slots.cut(slotIndex + 1, slotIndex + count)
           const afterComponent = this.translator.createComponentByData(parentComponent.name, {
             state: typeof parentComponent.state === 'object' ? JSON.parse(JSON.stringify(parentComponent.state)) : parentComponent.state,
             slots: deletedSlots
@@ -568,7 +571,7 @@ export class Commander {
 
     while (scopes.length) {
       const lastScope = scopes.pop()!
-      let { slot, startIndex } = lastScope
+      const { slot, startIndex } = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
       let isPreventDefault = true
@@ -578,11 +581,16 @@ export class Commander {
         toEnd: !deleteBefore
       }, () => {
         isPreventDefault = false
-        const deletedSlot = slot.cut(startIndex, endIndex)
-        receiver(deletedSlot)
-        // slot.retain(startIndex)
-        // slot.delete(endIndex - startIndex)
-        invokeListener(slot.parent!, 'onContentDeleted')
+
+      }))
+      if (isPreventDefault) {
+        return false
+      }
+      const deletedSlot = slot.cut(startIndex, endIndex)
+      receiver(deletedSlot)
+      isPreventDefault = true
+      invokeListener(slot.parent!, 'onContentDeleted', new Event(slot, null, () => {
+        isPreventDefault = false
       }))
       if (isPreventDefault) {
         if (isFocusEnd) {
@@ -593,14 +601,7 @@ export class Commander {
         return false
       }
       if (slot !== startSlot && slot !== endSlot && slot.isEmpty) {
-        const position = deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component, deleteBefore)
-        slot = position.slot
-        startIndex = position.offset
-      }
-      if (isFocusEnd) {
-        selection.setFocus(slot, startIndex)
-      } else {
-        selection.setAnchor(slot, startIndex)
+        deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component, deleteBefore)
       }
     }
     if (startSlot !== endSlot) {
@@ -617,13 +618,20 @@ export class Commander {
       }
       const deletedSlot = endSlot.cut()
       receiver(deletedSlot)
-      deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
+      isPreventDefault = true
+      invokeListener(endSlot.parent!, 'onContentDeleted', new Event(endSlot, null, () => {
+        isPreventDefault = false
+        deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
+      }))
       if (!deletedSlot.isEmpty) {
         const deletedDelta = deletedSlot.toDelta()
         selection.setPosition(startSlot, startOffset)
         deletedDelta.forEach(item => {
           this.insert(item.insert, item.formats)
         })
+      }
+      if (isPreventDefault) {
+        return false
       }
     }
     selection.setBaseAndExtent(startSlot, startOffset, startSlot, startOffset)

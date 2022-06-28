@@ -169,7 +169,29 @@ export class CoreHistory extends History {
       this.index++
       const afterPaths = this.selection.getPaths()
       this.historySequence.push({
-        operations,
+        operations: operations.map(i => {
+          return {
+            path: [...i.path],
+            apply: i.apply.map(j => {
+              if (j.type === 'insert' || j.type === 'insertSlot') {
+                return {
+                  ...j,
+                  ref: null
+                } as any
+              }
+              return j
+            }),
+            unApply: i.unApply.map(j => {
+              if (j.type === 'insert' || j.type === 'insertSlot') {
+                return {
+                  ...j,
+                  ref: null
+                } as any
+              }
+              return j
+            })
+          }
+        }),
         beforePaths,
         afterPaths
       })

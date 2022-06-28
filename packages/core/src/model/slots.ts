@@ -246,7 +246,8 @@ export class Slots<T = any> {
       }, ...slots.map<Action>(i => {
         return {
           type: 'insertSlot',
-          slot: i.toJSON()
+          slot: i.toJSON(),
+          ref: i,
         }
       })],
       unApply: [{
@@ -302,11 +303,26 @@ export class Slots<T = any> {
           offset: startIndex + i
         }, {
           type: 'insertSlot',
-          slot: slot.toJSON()
+          slot: slot.toJSON(),
+          ref: slot
         }]
       }).flat()
     })
     this.childSlotRemoveEvent.next(deletedSlots)
+  }
+
+  /**
+   * 剪切子插槽
+   * @param startIndex
+   * @param endIndex
+   */
+  cut(startIndex = 0, endIndex = this.length) {
+    if (startIndex >= endIndex) {
+      return []
+    }
+    const deletedSlots = this.slots.slice(startIndex, endIndex)
+    this.retain(startIndex)
+    this.delete(endIndex - startIndex)
     return deletedSlots
   }
 

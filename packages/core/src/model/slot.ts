@@ -229,13 +229,15 @@ export class Slot<T = any> {
     }, formats.length ? {
       type: 'insert',
       content: actionData,
+      ref: content,
       formats: formats.reduce((opt: Record<string, any>, next) => {
         opt[next[0].name] = next[1]
         return opt
       }, {})
     } : {
       type: 'insert',
-      content: actionData
+      content: actionData,
+      ref: content
     }]
 
     this.changeMarker.markAsDirtied({
@@ -388,7 +390,8 @@ export class Slot<T = any> {
         if (typeof item === 'string') {
           return {
             type: 'insert',
-            content: item
+            content: item,
+            ref: item
           }
         }
         deletedComponents.push(item)
@@ -398,7 +401,8 @@ export class Slot<T = any> {
         item.parent = null
         return {
           type: 'insert',
-          content: item.toJSON()
+          content: item.toJSON(),
+          ref: item
         }
       }), ...Slot.createActionByFormat(deletedFormat)]
     })
