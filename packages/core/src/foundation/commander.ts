@@ -390,7 +390,8 @@ export class Commander {
             const delta = deletedSlot.toDelta()
             slots.unshift(...deltaToSlots(selection, slot, delta, rule, range, startIndex))
             if (startIndex > 0) {
-              startScope = {
+              startScope = selection.getPreviousPositionByPosition(slot, startIndex)
+              position = {
                 slot,
                 offset: startIndex
               }
@@ -418,7 +419,8 @@ export class Commander {
             this.insert(instance)
           })
           if (startIndex > 0) {
-            startScope = {
+            startScope = selection.getPreviousPositionByPosition(slot, startIndex)
+            position = {
               slot,
               offset: startIndex
             }
