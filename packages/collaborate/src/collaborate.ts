@@ -242,7 +242,7 @@ export class Collaborate implements History {
       this.scheduler.onDocChange.pipe(
         map(item => {
           return item.filter(i => {
-            return i.from === ChangeOrigin.Local
+            return i.from !== ChangeOrigin.Remote
           })
         }),
         filter(item => {

@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { onBreak, Slots, Selection, useSelf } from '@textbus/core'
+import { Commander, ContentType, onBreak, Selection, Slot, Slots, useSelf } from '@textbus/core'
 
 import { paragraphComponent } from '../paragraph.component'
 import { linkFormatter } from '../../formatters/link.formatter'
@@ -12,6 +12,7 @@ import { linkFormatter } from '../../formatters/link.formatter'
  */
 export function useEnterBreaking(injector: Injector, slots: Slots) {
   const selection = injector.get(Selection)
+  const commander = injector.get(Commander)
   const self = useSelf()
   onBreak(ev => {
     const parentSlot = self.parent!
@@ -19,7 +20,20 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
     const index = parentSlot.indexOf(self)
     parentSlot.retain(index + 1)
     const currentSlot = slots.get(0)!
-    const nextSlot = currentSlot.cut(ev.data.index)
+    const delta = currentSlot.cut(ev.data.index).toDelta()
+    const nextSlot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+    let i = 0
+    while (i < delta.length) {
+      const item = delta[i]
+      if (nextSlot.insert(item.insert, item.formats)) {
+        i++
+        continue
+      }
+      break
+    }
     if (nextSlot.isEmpty) {
       nextSlot.applyFormat(linkFormatter, {
         startIndex: 0,
@@ -46,12 +60,16 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
         parentSlot.delete(2)
         host.retain(index2 + 1)
         host.insert(component)
-        selection.setPosition(component.slots.get(0)!, 0)
-        ev.preventDefault()
-        return
       }
+    } else {
+      parentSlot.insert(component)
     }
-    parentSlot.insert(component)
+    selection.selectLastPosition(component)
+    while (i < delta.length) {
+      const item = delta[i]
+      i++
+      commander.insert(item.insert, item.formats)
+    }
     selection.setPosition(component.slots.get(0)!, 0)
     ev.preventDefault()
   })

@@ -218,7 +218,9 @@ export class Slot<T = any> {
     this.applyFormats(formats, startIndex, length)
 
     if (isEmpty && this._index === 0) {
-      this.content.cut(this.length - 1)
+      const len = this.length - 1
+      this.content.cut(len)
+      this.format.shrink(len, 1)
     }
 
     this._index = startIndex + length
