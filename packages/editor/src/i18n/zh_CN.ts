@@ -73,6 +73,9 @@ export const i18n_zh_CN: I18NConfig = {
       blockquoteTool: {
         tooltip: '引用'
       },
+      formatPainterTool: {
+        tooltip: '格式刷'
+      },
       boldTool: {
         tooltip: '加粗'
       },

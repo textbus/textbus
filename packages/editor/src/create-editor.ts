@@ -42,7 +42,7 @@ import {
   historyForwardTool, imageTool, insertParagraphAfterTool, insertParagraphBeforeTool,
   italicTool, linkTool, olTool,
   strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
-  underlineTool, unlinkTool, ToolFactory, componentsTool
+  underlineTool, unlinkTool, ToolFactory, componentsTool, formatPainterTool
 } from './toolbar/_api'
 import { LinkJumpTipPlugin } from './plugins/_api'
 import { ComponentLoader, FormatLoader } from '@textbus/browser'
@@ -104,6 +104,7 @@ export const defaultOptions: EditorOptions = {
 export const defaultTools: ToolFactory[][] = [
   [historyBackTool, historyForwardTool],
   [defaultGroupTool],
+  [formatPainterTool],
   [componentsTool],
   [headingTool],
   [boldTool, italicTool, strikeThroughTool, underlineTool],

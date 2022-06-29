@@ -73,6 +73,9 @@ export const i18n_en_US: I18NConfig = {
       blockquoteTool: {
         tooltip: 'blockquote'
       },
+      formatPainterTool: {
+        tooltip: 'format painter'
+      },
       boldTool: {
         tooltip: 'bold'
       },
