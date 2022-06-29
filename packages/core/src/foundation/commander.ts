@@ -568,6 +568,7 @@ export class Commander {
       return false
     }
     const scopes = Selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
+    let endCutIndex = 0
 
     while (scopes.length) {
       const lastScope = scopes.pop()!
@@ -581,7 +582,6 @@ export class Commander {
         toEnd: !deleteBefore
       }, () => {
         isPreventDefault = false
-
       }))
       if (isPreventDefault) {
         return false
@@ -600,14 +600,20 @@ export class Commander {
         }
         return false
       }
+      if (slot === endSlot) {
+        endCutIndex = startIndex
+      }
       if (slot !== startSlot && slot !== endSlot && slot.isEmpty) {
-        deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component, deleteBefore)
+        const position = deleteUpBySlot(selection, slot, startIndex, this.rootComponentRef.component, deleteBefore)
+        if (position.slot === endSlot) {
+          endCutIndex = position.offset
+        }
       }
     }
     if (startSlot !== endSlot) {
       let isPreventDefault = true
       invokeListener(endSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(endSlot, {
-        index: 0,
+        index: endCutIndex,
         count: endSlot.length,
         toEnd: !deleteBefore
       }, () => {
@@ -616,12 +622,14 @@ export class Commander {
       if (isPreventDefault) {
         return false
       }
-      const deletedSlot = endSlot.cut()
+      const deletedSlot = endSlot.cut(endCutIndex)
       receiver(deletedSlot)
       isPreventDefault = true
       invokeListener(endSlot.parent!, 'onContentDeleted', new Event(endSlot, null, () => {
         isPreventDefault = false
-        deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
+        if (endSlot.isEmpty) {
+          deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
+        }
       }))
       if (!deletedSlot.isEmpty) {
         const deletedDelta = deletedSlot.toDelta()
