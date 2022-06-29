@@ -17,7 +17,7 @@ export class VTextNode {
   }
 }
 
-export type VElementJSXChildNode = VElement | string | number | boolean;
+export type VElementJSXChildNode = VElement | string | number | boolean | null | undefined
 
 export interface VElementRenderFn {
   (props: { [key: string]: any }): VElement;

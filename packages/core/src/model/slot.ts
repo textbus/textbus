@@ -367,7 +367,7 @@ export class Slot<T = any> {
     const deletedData = this.content.cut(startIndex, endIndex)
     const deletedFormat = this.format.extract(startIndex, endIndex)
 
-    this.format.shrink(endIndex, count)
+    this.format.shrink(startIndex, count)
 
     if (this.length === 0) {
       this.content.append(Slot.emptyPlaceholder)
@@ -484,7 +484,7 @@ export class Slot<T = any> {
       return slot
     }
     const deletedData = this.content.slice(startIndex, endIndex)
-    const deletedFormat = this.format.extract(startIndex, endIndex).shrink(startIndex, startIndex)
+    const deletedFormat = this.format.extract(startIndex, endIndex).shrink(0, startIndex)
 
     this.retain(startIndex)
     this.delete(endIndex - startIndex)

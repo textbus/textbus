@@ -69,7 +69,7 @@ export class Format {
       return this
     }
 
-    const newRanges = Format.normalizeFormatRange(ranges, value as FormatRange)
+    const newRanges = this.normalizeFormatRange(ranges, value as FormatRange)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -112,7 +112,7 @@ export class Format {
         })
         return
       }
-      const values = Format.tileRanges(formatRanges)
+      const values = this.tileRanges(formatRanges)
       values.splice(index, 0, ...expandedValues)
       const newRanges = Format.toRanges(values)
       this.map.set(key, newRanges)
@@ -122,11 +122,11 @@ export class Format {
 
   /**
    * 从指定 index 位置的样式删除 count
-   * @param index
+   * @param startIndex
    * @param count
    */
-  shrink(index: number, count: number) {
-    const startIndex = index - count
+  shrink(startIndex: number, count: number) {
+    const endIndex = startIndex + count
     this.map.forEach(values => {
       values.forEach(range => {
         if (range.endIndex <= startIndex) {
@@ -134,13 +134,13 @@ export class Format {
         }
         range.endIndex = Math.max(startIndex, range.endIndex - count)
         if (range.startIndex > startIndex) {
-          range.startIndex = Math.max(startIndex, range.startIndex - count)
+          range.startIndex = Math.max(endIndex, range.startIndex - count)
         }
       })
     })
     Array.from(this.map.keys()).forEach(key => {
       const oldRanges = this.map.get(key)!
-      const newRanges = Format.normalizeFormatRange(oldRanges)
+      const newRanges = this.normalizeFormatRange(oldRanges)
       if (newRanges.length) {
         this.map.set(key, newRanges)
       } else {
@@ -223,7 +223,7 @@ export class Format {
   discard(formatter: Formatter, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
-      Format.normalizeFormatRange(oldRanges, {
+      this.normalizeFormatRange(oldRanges, {
         startIndex,
         endIndex,
         value: null as any
@@ -351,25 +351,26 @@ export class Format {
     return list
   }
 
-  static normalizeFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
+  private normalizeFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
     if (newRange) {
       oldRanges = [...oldRanges, newRange]
     }
-    const formatValues: Array<FormatValue> = Format.tileRanges(oldRanges)
+    const formatValues: Array<FormatValue> = this.tileRanges(oldRanges)
 
     return Format.toRanges(formatValues)
   }
 
-  static tileRanges(ranges: FormatRange[]) {
+  private tileRanges(ranges: FormatRange[]) {
     const formatValues: Array<FormatValue> = []
     ranges.forEach(range => {
       formatValues.length = Math.max(formatValues.length, range.endIndex)
       formatValues.fill(range.value, range.startIndex, range.endIndex)
     })
+    formatValues.length = Math.min(formatValues.length, this.slot.length)
     return formatValues
   }
 
-  static toRanges(values: Array<FormatValue>) {
+  private static toRanges(values: Array<FormatValue>) {
     const newRanges: FormatRange[] = []
     let range: FormatRange = null as any
     for (let i = 0; i < values.length; i++) {
