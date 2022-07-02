@@ -19,23 +19,27 @@ export interface ChangeItem {
 
 @Injectable()
 export class Scheduler {
-  get hasLocalUpdate() {
-    return this._hasLocalUpdate
+  get lastChangesHasLocalUpdate() {
+    return this._lastChangesHasLocalUpdate
   }
 
-  onDocChange: Observable<ChangeItem[]>
+  onDocChange: Observable<void>
 
-  private _hasLocalUpdate = true
+  onDocChanged: Observable<ChangeItem[]>
+
+  private _lastChangesHasLocalUpdate = true
   private changeFromRemote = false
   private changeFromHistory = false
   private instanceList = new Set<ComponentInstance>()
 
-  private docChangeEvent = new Subject<ChangeItem[]>()
+  private docChangedEvent = new Subject<ChangeItem[]>()
+  private docChangeEvent = new Subject<void>()
   private subs: Subscription[] = []
 
   constructor(private rootComponentRef: RootComponentRef,
               private selection: Selection,
               private renderer: Renderer) {
+    this.onDocChanged = this.docChangedEvent.asObservable()
     this.onDocChange = this.docChangeEvent.asObservable()
   }
 
@@ -55,12 +59,17 @@ export class Scheduler {
     const rootComponent = this.rootComponentRef.component
     const changeMarker = rootComponent.changeMarker
     this.renderer.render()
+    let isRendered = true
     this.subs.push(
       changeMarker.onForceChange.pipe(microTask()).subscribe(() => {
         this.renderer.render()
       }),
       changeMarker.onChange.pipe(
         map(op => {
+          if (isRendered) {
+            this.docChangeEvent.next()
+          }
+          isRendered = false
           return {
             from: this.changeFromRemote ? ChangeOrigin.Remote :
               this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local,
@@ -69,12 +78,13 @@ export class Scheduler {
         }),
         microTask()
       ).subscribe(ops => {
+        isRendered = true
         this.renderer.render()
-        this._hasLocalUpdate = ops.some(i => {
+        this._lastChangesHasLocalUpdate = ops.some(i => {
           return i.from === ChangeOrigin.Local || i.from === ChangeOrigin.History
         })
-        this.selection.restore(this._hasLocalUpdate)
-        this.docChangeEvent.next(ops)
+        this.selection.restore(this._lastChangesHasLocalUpdate)
+        this.docChangedEvent.next(ops)
       }),
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)

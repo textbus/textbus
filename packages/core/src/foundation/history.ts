@@ -155,7 +155,7 @@ export class CoreHistory extends History {
 
   private record() {
     let beforePaths = this.selection.getPaths()
-    this.scheduler.onDocChange.pipe(map(i => {
+    this.scheduler.onDocChanged.pipe(map(i => {
       return i.filter(item => {
         return item.from === ChangeOrigin.Local
       }).map(item => {

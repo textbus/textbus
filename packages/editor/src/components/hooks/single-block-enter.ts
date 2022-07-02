@@ -61,7 +61,8 @@ export function useEnterBreaking(injector: Injector, slots: Slots) {
         host.retain(index2 + 1)
         host.insert(component)
       }
-    } else {
+    }
+    if (!component.parent) {
       parentSlot.insert(component)
     }
     selection.selectLastPosition(component)

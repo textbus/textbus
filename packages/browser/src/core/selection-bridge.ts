@@ -301,7 +301,9 @@ export class SelectionBridge implements NativeSelectionBridge {
         if (this.ignoreSelectionChange || ev.button === 2) {
           return
         }
-        selection.removeAllRanges()
+        if (!ev.shiftKey) {
+          selection.removeAllRanges()
+        }
       }),
       fromEvent(document, 'selectionchange').subscribe(() => {
         this.changeFromUser = true

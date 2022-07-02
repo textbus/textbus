@@ -239,7 +239,7 @@ export class Collaborate implements History {
     })
 
     this.subscriptions.push(
-      this.scheduler.onDocChange.pipe(
+      this.scheduler.onDocChanged.pipe(
         map(item => {
           return item.filter(i => {
             return i.from !== ChangeOrigin.Remote

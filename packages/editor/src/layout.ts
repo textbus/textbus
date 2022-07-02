@@ -1,6 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { createElement, SelectionBridge } from '@textbus/browser'
+import { createElement } from '@textbus/browser'
 
 @Injectable()
 export class Layout {
@@ -66,28 +66,6 @@ export class Layout {
 
   setTheme(theme: string) {
     this.container.classList.add('textbus-theme-' + theme)
-  }
-
-  listenCaretChange(bridge: SelectionBridge) {
-    this.sub = bridge.caret.onPositionChange.subscribe(position => {
-      if (!position) {
-        return
-      }
-      setTimeout(() => {
-        const limit = this.scroller
-        const scrollTop = limit.scrollTop
-        const offsetHeight = limit.offsetHeight
-        const paddingTop = parseInt(getComputedStyle(limit).paddingTop) || 0
-
-        const cursorTop = position.top + position.height + paddingTop + 10
-        const viewTop = scrollTop + offsetHeight
-        if (cursorTop > viewTop) {
-          limit.scrollTop = cursorTop - offsetHeight
-        } else if (position.top < scrollTop) {
-          limit.scrollTop = position.top
-        }
-      })
-    })
   }
 
   destroy() {

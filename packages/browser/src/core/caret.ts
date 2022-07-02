@@ -1,9 +1,9 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Optional } from '@tanbo/di'
 import { Scheduler } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
-import { VIEW_MASK } from './injection-tokens'
+import { VIEW_MASK, VIEW_SCROLLER } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
   const { startContainer, startOffset } = range
@@ -50,6 +50,7 @@ export class Caret {
   elementRef: HTMLElement
   private timer: any = null
   private caret: HTMLElement
+  private oldPosition: CaretPosition | null = null
 
   private set display(v: boolean) {
     this._display = v
@@ -71,8 +72,14 @@ export class Caret {
 
   constructor(
     private scheduler: Scheduler,
+    @Optional() @Inject(VIEW_SCROLLER) private scroller: HTMLElement | null,
     @Inject(VIEW_MASK) private editorMask: HTMLElement) {
-    this.onPositionChange = this.positionChangeEvent.asObservable().pipe(distinctUntilChanged())
+    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged((oldPosition, newPosition) => {
+      if (oldPosition && newPosition) {
+        return !(oldPosition.top === newPosition.top && oldPosition.left === newPosition.left && oldPosition.height === newPosition.height)
+      }
+      return oldPosition !== newPosition
+    }))
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -99,8 +106,35 @@ export class Caret {
       }),
       fromEvent(document, 'mouseup').subscribe(() => {
         this.flashing = true
-      })
+      }),
     )
+    if (scroller) {
+      let docIsChanged = true
+      this.subs.push(
+        scheduler.onDocChange.subscribe(() => {
+          docIsChanged = true
+        }),
+        this.onPositionChange.subscribe(position => {
+          if (position) {
+            if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
+              const { scrollTop, offsetHeight } = scroller
+              const caretTop = position.top + position.height
+              const viewTop = scrollTop + offsetHeight
+              if (caretTop > viewTop) {
+                scroller.scrollTop = caretTop - offsetHeight
+              } else if (position.top < scrollTop) {
+                scroller.scrollTop = position.top
+              }
+            } else if (this.oldPosition) {
+              scroller.scrollTop += Math.floor(position.top - this.oldPosition.top)
+            }
+          }
+          if (docIsChanged) {
+            docIsChanged = false
+          }
+        })
+      )
+    }
 
     editorMask.appendChild(this.elementRef)
   }
@@ -113,12 +147,12 @@ export class Caret {
 
   show(range: Range, restart: boolean) {
     this.oldRange = range
-    if (restart || this.scheduler.hasLocalUpdate) {
+    if (restart || this.scheduler.lastChangesHasLocalUpdate) {
       clearTimeout(this.timer)
     }
+    this.updateCursorPosition(range)
     if (range.collapsed) {
-      this.updateCursorPosition(range)
-      if (restart || this.scheduler.hasLocalUpdate) {
+      if (restart || this.scheduler.lastChangesHasLocalUpdate) {
         this.display = true
         const toggleShowHide = () => {
           this.display = !this.display || !this.flashing
@@ -129,7 +163,6 @@ export class Caret {
     } else {
       this.display = false
       clearTimeout(this.timer)
-      this.positionChangeEvent.next(null)
     }
   }
 
@@ -167,18 +200,22 @@ export class Caret {
       height = parseFloat(fontSize) * parseFloat(lineHeight)
     }
 
-    const boxHeight = Math.max(height, rect.height)
+    // const boxHeight = Math.floor(Math.max(height, rect.height))
+    const boxHeight = Math.floor(height)
 
-    let top = rect.top
+    let rectTop = rect.top
     if (rect.height < height) {
-      top -= (height - rect.height) / 2
+      rectTop -= (height - rect.height) / 2
     }
 
     const containerRect = this.editorMask.getBoundingClientRect()
 
+    const top = Math.floor(rectTop - containerRect.top)
+    const left = Math.floor(rect.left - containerRect.left)
+
     Object.assign(this.elementRef.style, {
-      left: rect.left - containerRect.left + 'px',
-      top: top - containerRect.top + 'px',
+      left: left + 'px',
+      top: top + 'px',
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
       fontSize
@@ -191,9 +228,14 @@ export class Caret {
       fontSize
     })
     this.positionChangeEvent.next({
-      left: rect.left - containerRect.left,
-      top: top - containerRect.top,
+      left,
+      top,
       height: boxHeight
     })
+    this.oldPosition = {
+      left,
+      top,
+      height: boxHeight
+    }
   }
 }
