@@ -11,10 +11,7 @@ import {
 import { createElement } from '../_utils/uikit'
 import { Parser } from '../dom-support/parser'
 import { Caret } from './caret'
-
-export const isWindows = /win(dows|32|64)/i.test(navigator.userAgent)
-export const isMac = /mac os/i.test(navigator.userAgent)
-const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+import { isMac, isSafari, isWindows } from '../_utils/env'
 
 const iframeHTML = `
 <!DOCTYPE html>
@@ -291,7 +288,9 @@ export class Input {
         border: 'none',
         width: '100%',
         display: 'block',
-        height: '100%'
+        height: '100%',
+        position: 'relative',
+        top: isWindows ? '6px' : '0'
       }
     }) as HTMLIFrameElement
   }
