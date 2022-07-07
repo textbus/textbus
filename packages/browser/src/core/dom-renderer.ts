@@ -6,73 +6,103 @@ import { NativeNode, NativeRenderer } from '@textbus/core'
  */
 @Injectable()
 export class DomRenderer implements NativeRenderer {
-  isSVG = new RegExp(`^(${
-    [
-      // 'a',
-      'animate',
-      'animateMotion',
-      'animateTransform',
-      'circle',
-      'clipPath',
-      'defs',
-      'desc',
-      'ellipse',
-      'feBlend',
-      'feColorMatrix',
-      'feComponentTransfer',
-      'feComposite',
-      'feConvolveMatrix',
-      'feDiffuseLighting',
-      'feDisplacementMap',
-      'feDistantLight',
-      'feDropShadow',
-      'feFlood',
-      'feFuncA',
-      'feFuncB',
-      'feFuncG',
-      'feFuncR',
-      'feGaussianBlur',
-      'feImage',
-      'feMerge',
-      'feMergeNode',
-      'feMorphology',
-      'feOffset',
-      'fePointLight',
-      'feSpecularLighting',
-      'feSpotLight',
-      'feTile',
-      'feTurbulence',
-      'filter',
-      'foreignObject',
-      'g',
-      'image',
-      'line',
-      'linearGradient',
-      'marker',
-      'mask',
-      'metadata',
-      'mpath',
-      'path',
-      'pattern',
-      'polygon',
-      'polyline',
-      'radialGradient',
-      'rect',
-      // 'script',
-      'set',
-      'stop',
-      // 'style',
-      'svg',
-      'switch',
-      'symbol',
-      'text',
-      'textPath',
-      'title',
-      'tspan',
-      'use',
-      'view'
-    ].join('|')
-  })$`, 'i')
+  isSVG = new RegExp(`^(${[
+    // 'a',
+    'animate',
+    'animateMotion',
+    'animateTransform',
+    'circle',
+    'clipPath',
+    'defs',
+    'desc',
+    'ellipse',
+    'feBlend',
+    'feColorMatrix',
+    'feComponentTransfer',
+    'feComposite',
+    'feConvolveMatrix',
+    'feDiffuseLighting',
+    'feDisplacementMap',
+    'feDistantLight',
+    'feDropShadow',
+    'feFlood',
+    'feFuncA',
+    'feFuncB',
+    'feFuncG',
+    'feFuncR',
+    'feGaussianBlur',
+    'feImage',
+    'feMerge',
+    'feMergeNode',
+    'feMorphology',
+    'feOffset',
+    'fePointLight',
+    'feSpecularLighting',
+    'feSpotLight',
+    'feTile',
+    'feTurbulence',
+    'filter',
+    'foreignObject',
+    'g',
+    'image',
+    'line',
+    'linearGradient',
+    'marker',
+    'mask',
+    'metadata',
+    'mpath',
+    'path',
+    'pattern',
+    'polygon',
+    'polyline',
+    'radialGradient',
+    'rect',
+    // 'script',
+    'set',
+    'stop',
+    // 'style',
+    'svg',
+    'switch',
+    'symbol',
+    'text',
+    'textPath',
+    'title',
+    'tspan',
+    'use',
+    'view'
+  ].join('|')
+    })$`, 'i')
+  
+  xlinkNameSpace = 'http://www.w3.org/1999/xlink'
+  possibleXlinkNames = {
+    xlinkActuate: 'xlink:actuate',
+    xlinkactuate: 'xlink:actuate',
+    'xlink:actuate': 'xlink:actuate',
+
+    xlinkArcrole: 'xlink:arcrole',
+    xlinkarcrole: 'xlink:arcrole',
+    'xlink:arcrole': 'xlink:arcrole',
+
+    xlinkHref: 'xlink:href',
+    xlinkhref: 'xlink:href',
+    'xlink:href': 'xlink:href',
+
+    xlinkRole: 'xlink:role',
+    xlinkrole: 'xlink:role',
+    'xlink:role': 'xlink:role',
+
+    xlinkShow: 'xlink:show',
+    xlinkshow: 'xlink:show',
+    'xlink:show': 'xlink:show',
+
+    xlinkTitle: 'xlink:title',
+    xlinktitle: 'xlink:title',
+    'xlink:title': 'xlink:title',
+
+    xlinkType: 'xlink:type',
+    xlinktype: 'xlink:type',
+    'xlink:type': 'xlink:type'
+  }
 
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
     node.addEventListener(type, callback)
@@ -126,11 +156,26 @@ export class DomRenderer implements NativeRenderer {
   }
 
   setAttribute(target: NativeNode, key: string, value: string) {
+    if (this.possibleXlinkNames[key]) {
+      this.setXlinkAttribute(target, this.possibleXlinkNames[key], value)
+      return
+    }
     target.setAttribute(key, value)
   }
 
   removeAttribute(target: NativeNode, key: string) {
+    if (this.possibleXlinkNames[key]) {
+      this.removeXlinkAttribute(target, this.possibleXlinkNames[key])
+    }
     target.removeAttribute(key)
+  }
+
+  setXlinkAttribute(target: NativeNode, key: string, value: string) {
+    target.setAttributeNS(this.xlinkNameSpace, key, value)
+  }
+
+  removeXlinkAttribute(target: NativeNode, key: string) {
+    target.removeAttributeNS(this.xlinkNameSpace, key)
   }
 
   replace(newChild: NativeNode, oldChild: NativeNode) {
