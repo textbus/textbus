@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@tanbo/json-parser": "^0.0.2",
-    "@textbus/browser": "^2.0.0-beta.44",
-    "@textbus/core": "^2.0.0-beta.44",
-    "@textbus/editor": "^2.0.0-beta.44",
+    "@textbus/browser": "^2.0.0-beta.50",
+    "@textbus/core": "^2.0.0-beta.50",
+    "@textbus/editor": "^2.0.0-beta.50",
     "vue": "^3.0.0"
   },
   "devDependencies": {

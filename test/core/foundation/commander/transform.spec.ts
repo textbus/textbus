@@ -1,5 +1,5 @@
 import { createEditor, Editor, jumbotronComponent, listComponent, paragraphComponent } from '@textbus/editor'
-import { Commander, ContentType, RootComponentRef, Slot, Selection, ComponentInstance } from '@textbus/core'
+import { Commander, ComponentInstance, ContentType, RootComponentRef, Selection, Slot } from '@textbus/core'
 import { Injector } from '@tanbo/di'
 
 describe('Commander:transform 转换空白', () => {
@@ -19,7 +19,7 @@ describe('Commander:transform 转换空白', () => {
   afterEach(() => {
     editor.destroy()
   })
-  const {Text, InlineComponent} = ContentType
+  const { Text, InlineComponent } = ContentType
 
   /**
    * [] => <p>[]</p>
@@ -115,7 +115,7 @@ describe('Commander:transform 转换同级段落', () => {
   afterEach(() => {
     editor.destroy()
   })
-  const {Text, InlineComponent} = ContentType
+  const { Text, InlineComponent } = ContentType
 
   /**
    * <h1>[</h1>
@@ -236,7 +236,7 @@ describe('Commander:transform 转换复杂结构', () => {
   afterEach(() => {
     editor.destroy()
   })
-  const {Text, InlineComponent} = ContentType
+  const { Text, InlineComponent } = ContentType
 
   /**
    * <ul>
@@ -462,5 +462,106 @@ describe('Commander:transform 转换复杂结构', () => {
         }]
       }]
     })
+  })
+})
+
+describe('Commander:transform 转换块和行内混合内容', () => {
+  let editor: Editor
+  let injector: Injector
+  let selection: Selection
+  let commander: Commander
+  beforeEach(async () => {
+    editor = createEditor({
+      // eslint-disable-next-line max-len
+      content: '<p>aaaaa</p><p>bbbbb</p><tb-jumbotron style="background-size:cover;background-position:center;min-height:200px"><div><h1>Hello, world!</h1><p>你好，我是 Textbus，一个给你带来全新体验的富文本开发框架。</p><p>现在我们开始吧！</p></div></tb-jumbotron>11111<p>ccccc</p><p>ddddd</p>'
+    })
+    const container = document.createElement('div')
+    await editor.mount(container)
+
+    injector = editor.injector
+    selection = injector.get(Selection)
+    commander = injector.get(Commander)
+  })
+  afterEach(() => {
+    editor.destroy()
+  })
+
+  test('行内转换1', () => {
+    selection.usePaths({ 'anchor': [0, 2, 0, 2, 0, 3], 'focus': [0, 6] })
+    commander.transform({
+      target: listComponent,
+      multipleSlot: true,
+      slotFactory() {
+        return new Slot([
+          ContentType.Text,
+          ContentType.InlineComponent
+        ])
+      },
+      stateFactory() {
+        return 'ul'
+      }
+    })
+    expect(editor.getJSON().content).toEqual({
+      'name': 'RootComponent', 'state': null, 'slots': [{
+        'schema': [1, 2, 3],
+        'content': [{
+          'name': 'ParagraphComponent',
+          'state': null,
+          'slots': [{ 'schema': [1, 2], 'content': ['aaaaa'], 'formats': {}, 'state': null }]
+        }, {
+          'name': 'ParagraphComponent',
+          'state': null,
+          'slots': [{ 'schema': [1, 2], 'content': ['bbbbb'], 'formats': {}, 'state': null }]
+        }, {
+          'name': 'JumbotronComponent',
+          'state': {
+            'backgroundImage': '',
+            'backgroundSize': 'cover',
+            // 'backgroundPosition': 'center center', // 测试环境和浏览器不同
+            'backgroundPosition': 'center',
+            'minHeight': '200px'
+          },
+          'slots': [{
+            'schema': [1, 2, 3],
+            'content': [{
+              'name': 'HeadingComponent',
+              'state': 'h1',
+              'slots': [{ 'schema': [1, 2], 'content': ['Hello, world!'], 'formats': {}, 'state': null }]
+            }, {
+              'name': 'ParagraphComponent',
+              'state': null,
+              'slots': [{
+                'schema': [1, 2],
+                'content': ['你好，我是 Textbus，一个给你带来全新体验的富文本开发框架。'],
+                'formats': {},
+                'state': null
+              }]
+            }, {
+              'name': 'ListComponent',
+              'state': 'ul',
+              'slots': [{ 'schema': [1, 2], 'content': ['现在我们开始吧！'], 'formats': {}, 'state': null }, {
+                'schema': [1, 2],
+                'content': ['11111'],
+                'formats': {},
+                'state': null
+              }]
+            }],
+            'formats': {},
+            'state': null
+          }]
+        }, {
+          'name': 'ParagraphComponent',
+          'state': null,
+          'slots': [{ 'schema': [1, 2], 'content': ['ccccc'], 'formats': {}, 'state': null }]
+        }, {
+          'name': 'ParagraphComponent',
+          'state': null,
+          'slots': [{ 'schema': [1, 2], 'content': ['ddddd'], 'formats': {}, 'state': null }]
+        }],
+        'formats': {},
+        'state': null
+      }]
+    })
+    expect(selection.getPaths()).toEqual({ 'anchor': [0, 2, 0, 2, 0, 3], 'focus': [0, 2, 0, 2, 1, 3] })
   })
 })

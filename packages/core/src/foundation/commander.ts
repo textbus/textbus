@@ -200,9 +200,11 @@ function deltaToSlots<T>(selection: Selection,
       newSlot.insert(insert, formats)
       if (source === range.anchorSlot && range.anchorOffset - offset >= oldIndex && range.anchorOffset - offset <= index) {
         range.anchorSlot = newSlot
+        range.anchorOffset -= oldIndex + offset
       }
       if (source === range.focusSlot && range.focusOffset - offset >= oldIndex && range.focusOffset - offset <= index) {
         range.focusSlot = newSlot
+        range.focusOffset -= oldIndex + offset
       }
       continue
     }

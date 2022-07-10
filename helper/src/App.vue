@@ -19,6 +19,7 @@
         <div>
           <button type="button" @click="replaceFromJSON()">替换为框内 JSON</button>
           <button type="button" @click="replaceFromHTML()">替换为框内 HTML</button>
+          <button type="button" @click="applyPaths()">应用框内 JSON 路径</button>
         </div>
       </div>
     </div>
@@ -52,6 +53,9 @@ onUnmounted(() => {
   editor.destroy()
 })
 
+// ts-ignore
+window['textbus'] = editor
+
 function getSelectionPaths() {
   viewModel.value = JSON.stringify(selection.getPaths())
 }
@@ -70,6 +74,11 @@ function replaceFromJSON() {
 
 function replaceFromHTML() {
   editor.replaceContent(viewModel.value)
+}
+
+function applyPaths() {
+  selection.usePaths(parser.parse(viewModel.value))
+  selection.restore()
 }
 
 const textarea = ref()
