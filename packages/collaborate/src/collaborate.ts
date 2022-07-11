@@ -133,7 +133,7 @@ export class Collaborate implements History {
     this.onPush = this.pushEvent.asObservable()
   }
 
-  setup() {
+  sync() {
     this.subscriptions.push(
       this.selection.onChange.subscribe(() => {
         const paths = this.selection.getPaths()
@@ -200,43 +200,41 @@ export class Collaborate implements History {
       }
     })
 
-    this.yDoc.once('update', () => {
-      let slots = root.get('slots') as YArray<YMap<any>>
-      if (!slots) {
-        slots = new YArray()
+    let slots = root.get('slots') as YArray<YMap<any>>
+    if (!slots) {
+      slots = new YArray()
+      rootComponent.slots.toArray().forEach(i => {
+        const sharedSlot = this.createSharedSlotBySlot(i)
+        slots.push([sharedSlot])
+      })
+      this.yDoc.transact(() => {
+        root.set('state', rootComponent.state)
+        root.set('slots', slots)
+      })
+    } else if (slots.length === 0) {
+      rootComponent.updateState(() => {
+        return root.get('state')
+      })
+      this.yDoc.transact(() => {
         rootComponent.slots.toArray().forEach(i => {
           const sharedSlot = this.createSharedSlotBySlot(i)
           slots.push([sharedSlot])
         })
-        this.yDoc.transact(() => {
-          root.set('state', rootComponent.state)
-          root.set('slots', slots)
-        })
-      } else if (slots.length === 0) {
-        rootComponent.updateState(() => {
-          return root.get('state')
-        })
-        this.yDoc.transact(() => {
-          rootComponent.slots.toArray().forEach(i => {
-            const sharedSlot = this.createSharedSlotBySlot(i)
-            slots.push([sharedSlot])
-          })
-        })
-      } else {
-        rootComponent.updateState(() => {
-          return root.get('state')
-        })
-        rootComponent.slots.clean()
-        slots.forEach(sharedSlot => {
-          const slot = this.createSlotBySharedSlot(sharedSlot)
-          this.syncContent(sharedSlot.get('content'), slot)
-          this.syncSlot(sharedSlot, slot)
-          rootComponent.slots.insert(slot)
-        })
-      }
-      this.syncComponent(root, rootComponent)
-      this.syncSlots(slots, rootComponent)
-    })
+      })
+    } else {
+      rootComponent.updateState(() => {
+        return root.get('state')
+      })
+      rootComponent.slots.clean()
+      slots.forEach(sharedSlot => {
+        const slot = this.createSlotBySharedSlot(sharedSlot)
+        this.syncContent(sharedSlot.get('content'), slot)
+        this.syncSlot(sharedSlot, slot)
+        rootComponent.slots.insert(slot)
+      })
+    }
+    this.syncComponent(root, rootComponent)
+    this.syncSlots(slots, rootComponent)
 
     this.subscriptions.push(
       this.scheduler.onDocChanged.pipe(
