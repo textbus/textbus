@@ -290,18 +290,25 @@ export class Format {
 
     let nextStartIndex = endIndex
     let nextEndIndex = startIndex
+    const formats: FormatItem[] = []
+    const columnedFormats: FormatItem[] = []
+
     Array.from(copyFormat.map.keys()).forEach(formatter => {
       const ranges = copyFormat.map.get(formatter)!
       ranges.forEach(range => {
         if (range.startIndex === startIndex && range.endIndex === endIndex) {
-          if (!tree.formats) {
-            tree.formats = []
+          if (formatter.columnAlignment) {
+            columnedFormats.push({
+              formatter,
+              ...range
+            })
+          } else {
+            formats.push({
+              formatter,
+              ...range
+            })
+            copyFormat.map.delete(formatter)
           }
-          tree.formats.push({
-            formatter,
-            ...range
-          })
-          copyFormat.map.delete(formatter)
         } else if (range.startIndex < nextStartIndex) {
           nextStartIndex = range.startIndex
           nextEndIndex = range.endIndex
@@ -311,29 +318,45 @@ export class Format {
       })
     })
 
-    if (copyFormat.map.size) {
+    const hasChildren = copyFormat.map.size > columnedFormats.length
+    if (hasChildren) {
       tree.children = []
       if (startIndex < nextStartIndex) {
-        tree.children.push({
-          startIndex,
-          endIndex: nextStartIndex
-        })
+        if (columnedFormats.length) {
+          const childTree = copyFormat.extract(startIndex, nextStartIndex).toTree(startIndex, nextStartIndex)
+          tree.children.push(childTree)
+        } else {
+          tree.children.push({
+            startIndex,
+            endIndex: nextStartIndex
+          })
+        }
       }
-      tree.children.push(copyFormat.toTree(nextStartIndex, nextEndIndex))
+
+      const push = function (tree: FormatTree, childTree: FormatTree) {
+        if (childTree.formats) {
+          tree.children!.push(childTree)
+        } else if (childTree.children) {
+          tree.children!.push(...childTree.children)
+        } else {
+          tree.children!.push(childTree)
+        }
+      }
+      const nextTree = copyFormat.toTree(nextStartIndex, nextEndIndex)
+      push(tree, nextTree)
 
       if (nextEndIndex < endIndex) {
         const afterFormat = copyFormat.extract(nextEndIndex, endIndex)
         const afterTree = afterFormat.toTree(nextEndIndex, endIndex)
-        if (afterTree.formats) {
-          tree.children.push(afterTree)
-        } else if (afterTree.children) {
-          tree.children.push(...afterTree.children)
-        } else {
-          tree.children.push(afterTree)
-        }
+        push(tree, afterTree)
       }
+    } else {
+      formats.push(...columnedFormats)
     }
 
+    if (formats.length) {
+      tree.formats = formats
+    }
     return tree
   }
 

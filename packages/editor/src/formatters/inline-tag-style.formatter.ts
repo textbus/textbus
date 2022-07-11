@@ -44,10 +44,13 @@ export class InlineTagStyleFormatter implements AttributeFormatter {
   }
 }
 
+export class InlineTagLeafStyleFormatter extends InlineTagStyleFormatter {
+  columnAlignment = true
+}
 
 // 强制行内样式
 export const verticalAlignFormatter = new InlineTagStyleFormatter('verticalAlign', 'verticalAlign')
-export const textBackgroundColorFormatter = new InlineTagStyleFormatter('textBackgroundColor', 'backgroundColor')
+export const textBackgroundColorFormatter = new InlineTagLeafStyleFormatter('textBackgroundColor', 'backgroundColor')
 
 export const verticalAlignFormatLoader = new InlineTagStyleFormatLoader('verticalAlign', verticalAlignFormatter, {
   styles: {

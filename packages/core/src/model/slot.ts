@@ -484,7 +484,7 @@ export class Slot<T = any> {
       return slot
     }
     const deletedData = this.content.slice(startIndex, endIndex)
-    const deletedFormat = this.format.extract(startIndex, endIndex).shrink(0, startIndex)
+    const deletedFormat = this.format.createFormatByRange(slot, startIndex, endIndex)
 
     this.retain(startIndex)
     this.delete(endIndex - startIndex)
