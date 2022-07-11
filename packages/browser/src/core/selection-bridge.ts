@@ -86,7 +86,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   showNativeMask() {
-    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: rgba(18, 150, 219, .2)}`
+    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: rgba(18, 150, 219, .2); color:inherit}`
   }
 
   hideNativeMask() {

@@ -40,7 +40,7 @@ export class Keyboard {
    */
   execShortcut(keymapState: KeymapState): boolean {
     const key = keymapState.key
-    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\\])/g, '\\$1')}]$`, 'i')
+    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\^\\])/g, '\\$1')}]$`, 'i')
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
     if (this.markdownDetect &&

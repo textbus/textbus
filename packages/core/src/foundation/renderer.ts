@@ -565,6 +565,9 @@ export class Renderer {
         if (key === this.slotIdAttrKey) {
           return
         }
+        if (key === 'ref' && value instanceof Ref) {
+          value.current = nativeNode
+        }
         this.nativeRenderer.setAttribute(nativeNode, key, value)
       })
       attrChanges.remove.forEach(i => this.nativeRenderer.removeAttribute(nativeNode, i))
