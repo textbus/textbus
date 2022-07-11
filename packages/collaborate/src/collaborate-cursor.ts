@@ -3,7 +3,7 @@ import {
   createElement,
   VIEW_CONTAINER,
   getLayoutRectByRange,
-  SelectionBridge, VIEW_SCROLLER
+  SelectionBridge
 } from '@textbus/browser'
 import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
@@ -90,7 +90,6 @@ export class CollaborateCursor {
   private currentSelection: RemoteSelection[] = []
 
   constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
-              @Optional() @Inject(VIEW_SCROLLER) private scroller: HTMLElement,
               @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
@@ -109,12 +108,6 @@ export class CollaborateCursor {
       this.canvas.style.height = document.documentElement.clientHeight + 'px'
       this.refresh()
     }))
-
-    if (scroller) {
-      this.subscription.add(fromEvent(scroller, 'scroll').subscribe(() => {
-        this.refresh()
-      }))
-    }
   }
 
   refresh() {

@@ -143,8 +143,9 @@ export class Viewer {
   /**
    * 初始化编辑器
    * @param host 编辑器容器
+   * @param scroller 编辑器可滚动容器
    */
-  async mount(host: HTMLElement): Promise<Starter> {
+  async mount(host: HTMLElement, scroller = host): Promise<Starter> {
     if (this.destroyed) {
       throw editorError('the editor instance is destroyed!')
     }
@@ -190,6 +191,7 @@ export class Viewer {
       })
     )
     starter.get(Input)
+    caret.bindScroller(scroller)
     this.isReady = true
     this.injector = starter
 

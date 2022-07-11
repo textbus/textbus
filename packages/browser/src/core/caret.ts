@@ -1,9 +1,9 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Inject, Injectable, Optional } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { Scheduler } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
-import { VIEW_MASK, VIEW_SCROLLER } from './injection-tokens'
+import { VIEW_MASK } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range) {
   const { startContainer, startOffset } = range
@@ -72,7 +72,6 @@ export class Caret {
 
   constructor(
     private scheduler: Scheduler,
-    @Optional() @Inject(VIEW_SCROLLER) private scroller: HTMLElement | null,
     @Inject(VIEW_MASK) private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged((oldPosition, newPosition) => {
       if (oldPosition && newPosition) {
@@ -108,35 +107,36 @@ export class Caret {
         this.flashing = true
       }),
     )
-    if (scroller) {
-      let docIsChanged = true
-      this.subs.push(
-        scheduler.onDocChange.subscribe(() => {
-          docIsChanged = true
-        }),
-        this.onPositionChange.subscribe(position => {
-          if (position) {
-            if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
-              const { scrollTop, offsetHeight } = scroller
-              const caretTop = position.top + position.height
-              const viewTop = scrollTop + offsetHeight
-              if (caretTop > viewTop) {
-                scroller.scrollTop = caretTop - offsetHeight
-              } else if (position.top < scrollTop) {
-                scroller.scrollTop = position.top
-              }
-            } else if (this.oldPosition) {
-              scroller.scrollTop += Math.floor(position.top - this.oldPosition.top)
-            }
-          }
-          if (docIsChanged) {
-            docIsChanged = false
-          }
-        })
-      )
-    }
-
     editorMask.appendChild(this.elementRef)
+  }
+
+  bindScroller(scroller: HTMLElement) {
+    const scheduler = this.scheduler
+    let docIsChanged = true
+    this.subs.push(
+      scheduler.onDocChange.subscribe(() => {
+        docIsChanged = true
+      }),
+      this.onPositionChange.subscribe(position => {
+        if (position) {
+          if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
+            const { scrollTop, offsetHeight } = scroller
+            const caretTop = position.top + position.height
+            const viewTop = scrollTop + offsetHeight
+            if (caretTop > viewTop) {
+              scroller.scrollTop = caretTop - offsetHeight
+            } else if (position.top < scrollTop) {
+              scroller.scrollTop = position.top
+            }
+          } else if (this.oldPosition) {
+            scroller.scrollTop += Math.floor(position.top - this.oldPosition.top)
+          }
+        }
+        if (docIsChanged) {
+          docIsChanged = false
+        }
+      })
+    )
   }
 
   refresh() {

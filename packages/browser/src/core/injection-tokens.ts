@@ -21,8 +21,3 @@ export const VIEW_DOCUMENT = new InjectionToken<HTMLElement>('VIEW_DOCUMENT')
  * 编辑器容器遮罩层 token
  */
 export const VIEW_MASK = new InjectionToken<HTMLElement>('VIEW_MASK')
-
-/**
- * 编辑器滚动容器
- */
-export const VIEW_SCROLLER = new InjectionToken<HTMLElement>('VIEW_SCROLLER')

@@ -1,7 +1,7 @@
 import { Provider, Type } from '@tanbo/di'
 import { fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection, Starter } from '@textbus/core'
-import { Viewer, VIEW_SCROLLER } from '@textbus/browser'
+import { Viewer } from '@textbus/browser'
 
 import { EditorOptions } from './types'
 import { rootComponentLoader } from './root.component'
@@ -34,11 +34,6 @@ export class Editor extends Viewer {
         provide: Layout,
         useFactory: () => {
           return this.layout
-        }
-      }, {
-        provide: VIEW_SCROLLER,
-        useFactory: () => {
-          return this.layout.scroller
         }
       }, {
         provide: I18n,
