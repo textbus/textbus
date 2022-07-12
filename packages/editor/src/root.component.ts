@@ -1,4 +1,4 @@
-import { fromEvent } from '@tanbo/stream'
+import { fromEvent, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
 import {
   ContentType,
@@ -16,7 +16,7 @@ import {
   onBreak,
   ComponentInstance,
   ComponentData,
-  useSelf
+  useSelf, onViewInit
 } from '@textbus/core'
 import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
@@ -64,43 +64,45 @@ export const rootComponent = defineComponent({
     })
 
     const rootNode = useRef<HTMLElement>()
-
-    const sub = fromEvent<MouseEvent>(docContainer, 'click').subscribe(ev => {
-      const rect = rootNode.current!.getBoundingClientRect()
-      const firstSlot = slots.first!
-      if (ev.clientY > rect.bottom - 30) {
-        const lastContent = firstSlot.getContentAtIndex(firstSlot.length - 1)
-        if (!firstSlot.isEmpty && typeof lastContent !== 'string' && lastContent.name !== paragraphComponent.name) {
-          const index = firstSlot.index
-          firstSlot.retain(firstSlot.length)
-          const p = paragraphComponent.createInstance(injector)
-          firstSlot.insert(p)
-          firstSlot.retain(index)
-          selection.setPosition(p.slots.get(0)!, 0)
-        }
-      } else if (ev.target === rootNode.current) {
-        let parentComponent = selection.focusSlot!.parent
-        while (parentComponent && parentComponent.parentComponent !== self) {
-          parentComponent = parentComponent.parentComponent
-        }
-        if (!parentComponent) {
-          return
-        }
-        const index = firstSlot.indexOf(parentComponent)
-        if (index > -1) {
-          if (ev.clientX - rect.left < 4) {
-            selection.setPosition(firstSlot, index)
-            selection.restore()
-          } else if (rect.right - ev.clientX < 4) {
-            selection.setPosition(firstSlot, index + 1)
-            selection.restore()
+    const subscription = new Subscription()
+    onViewInit(() => {
+      subscription.add(fromEvent<MouseEvent>(docContainer, 'click').subscribe(ev => {
+        const rect = rootNode.current!.getBoundingClientRect()
+        const firstSlot = slots.first!
+        if (ev.clientY > rect.bottom - 30) {
+          const lastContent = firstSlot.getContentAtIndex(firstSlot.length - 1)
+          if (!firstSlot.isEmpty && typeof lastContent !== 'string' && lastContent.name !== paragraphComponent.name) {
+            const index = firstSlot.index
+            firstSlot.retain(firstSlot.length)
+            const p = paragraphComponent.createInstance(injector)
+            firstSlot.insert(p)
+            firstSlot.retain(index)
+            selection.setPosition(p.slots.get(0)!, 0)
+          }
+        } else if (ev.target === rootNode.current) {
+          let parentComponent = selection.focusSlot!.parent
+          while (parentComponent && parentComponent.parentComponent !== self) {
+            parentComponent = parentComponent.parentComponent
+          }
+          if (!parentComponent) {
+            return
+          }
+          const index = firstSlot.indexOf(parentComponent)
+          if (index > -1) {
+            if (ev.clientX - rect.left < 4) {
+              selection.setPosition(firstSlot, index)
+              selection.restore()
+            } else if (rect.right - ev.clientX < 4) {
+              selection.setPosition(firstSlot, index + 1)
+              selection.restore()
+            }
           }
         }
-      }
+      }))
     })
 
     onDestroy(() => {
-      sub.unsubscribe()
+      subscription.unsubscribe()
     })
 
     return {

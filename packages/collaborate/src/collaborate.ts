@@ -86,7 +86,7 @@ export class Collaborate implements History {
   yDoc = new YDoc()
   onBack: Observable<void>
   onForward: Observable<void>
-  onChange: Observable<any>
+  onChange: Observable<void>
   onPush: Observable<void>
 
   get canBack() {
@@ -133,22 +133,57 @@ export class Collaborate implements History {
     this.onPush = this.pushEvent.asObservable()
   }
 
-  sync() {
+  listen() {
+    const root = this.yDoc.getMap('RootComponent')
+    const rootComponent = this.rootComponentRef.component!
+    this.manager = new UndoManager(root, {
+      trackedOrigins: new Set<any>([this.yDoc])
+    })
+    const cursorKey = 'cursor-position'
+    this.manager.on('stack-item-added', event => {
+      event.stackItem.meta.set(cursorKey, this.getRelativeCursorLocation())
+      if (this.manager!.undoStack.length > this.stackSize) {
+        this.manager!.undoStack.shift()
+      }
+      if (event.origin === this.yDoc) {
+        this.pushEvent.next()
+      }
+      this.changeEvent.next()
+    })
+    this.manager.on('stack-item-popped', event => {
+      const position = event.stackItem.meta.get(cursorKey) as CursorPosition
+      if (position) {
+        this.restoreCursorLocation(position)
+      }
+    })
     this.subscriptions.push(
       this.selection.onChange.subscribe(() => {
         const paths = this.selection.getPaths()
         this.selectionChangeEvent.next(paths)
+      }),
+      this.scheduler.onDocChanged.pipe(
+        map(item => {
+          return item.filter(i => {
+            return i.from !== ChangeOrigin.Remote
+          })
+        }),
+        filter(item => {
+          return item.length
+        })
+      ).subscribe(() => {
+        this.yDoc.transact(() => {
+          this.updateRemoteActions.forEach(fn => {
+            fn()
+          })
+          this.updateRemoteActions = []
+        }, this.yDoc)
       })
     )
-    this.syncRootComponent()
+    this.syncRootComponent(root, rootComponent)
   }
 
   updateRemoteSelection(paths: RemoteSelection[]) {
     this.collaborateCursor.draw(paths)
-  }
-
-  listen() {
-    //
   }
 
   back() {
@@ -176,30 +211,7 @@ export class Collaborate implements History {
     this.manager?.destroy()
   }
 
-  private syncRootComponent() {
-    const root = this.yDoc.getMap('RootComponent')
-    const rootComponent = this.rootComponentRef.component!
-    this.manager = new UndoManager(root, {
-      trackedOrigins: new Set<any>([this.yDoc])
-    })
-    const cursorKey = 'cursor-position'
-    this.manager.on('stack-item-added', event => {
-      event.stackItem.meta.set(cursorKey, this.getRelativeCursorLocation())
-      if (this.manager!.undoStack.length > this.stackSize) {
-        this.manager!.undoStack.shift()
-      }
-      if (event.origin === this.yDoc) {
-        this.pushEvent.next()
-      }
-      this.changeEvent.next()
-    })
-    this.manager.on('stack-item-popped', event => {
-      const position = event.stackItem.meta.get(cursorKey) as CursorPosition
-      if (position) {
-        this.restoreCursorLocation(position)
-      }
-    })
-
+  private syncRootComponent(root: YMap<any>, rootComponent: ComponentInstance) {
     let slots = root.get('slots') as YArray<YMap<any>>
     if (!slots) {
       slots = new YArray()
@@ -235,26 +247,6 @@ export class Collaborate implements History {
     }
     this.syncComponent(root, rootComponent)
     this.syncSlots(slots, rootComponent)
-
-    this.subscriptions.push(
-      this.scheduler.onDocChanged.pipe(
-        map(item => {
-          return item.filter(i => {
-            return i.from !== ChangeOrigin.Remote
-          })
-        }),
-        filter(item => {
-          return item.length
-        })
-      ).subscribe(() => {
-        this.yDoc.transact(() => {
-          this.updateRemoteActions.forEach(fn => {
-            fn()
-          })
-          this.updateRemoteActions = []
-        }, this.yDoc)
-      })
-    )
   }
 
   private restoreCursorLocation(position: CursorPosition) {
@@ -302,6 +294,7 @@ export class Collaborate implements History {
               if (formats.length) {
                 slot.retain(action.retain!, formats)
               }
+              slot.retain(slot.index + action.retain)
             } else {
               slot.retain(action.retain)
             }
@@ -341,7 +334,11 @@ export class Collaborate implements History {
             }
           } else if (action.attributes) {
             slot.updateState(draft => {
-              Object.assign(draft, action.attributes)
+              if (typeof draft === 'object' && draft !== null) {
+                Object.assign(draft, action.attributes)
+              } else {
+                return action.attributes
+              }
             })
           }
         })
@@ -418,7 +415,11 @@ export class Collaborate implements History {
           if (key === 'state') {
             const state = (ev.target as YMap<any>).get('state')
             slot.updateState(draft => {
-              Object.assign(draft, state)
+              if (typeof draft === 'object' && draft !== null) {
+                Object.assign(draft, state)
+              } else {
+                return state
+              }
             })
           }
         })
@@ -502,7 +503,11 @@ export class Collaborate implements History {
           if (key === 'state') {
             const state = (ev.target as YMap<any>).get('state')
             component.updateState(draft => {
-              Object.assign(draft, state)
+              if (typeof draft === 'object' && draft !== null) {
+                Object.assign(draft, state)
+              } else {
+                return state
+              }
             })
           }
         })

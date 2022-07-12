@@ -572,7 +572,7 @@ export class Commander {
       return false
     }
     const scopes = Selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
-    let endCutIndex = 0
+    let endCutIndex = endOffset
 
     while (scopes.length) {
       const lastScope = scopes.pop()!

@@ -371,6 +371,19 @@ export function findFocusCell(componentInstance: ComponentInstance, slot: TableC
 
 export function selectCells(startCell: TableCellSlot, endCell: TableCellSlot, componentInstance: ComponentInstance, columnCount: number) {
   const serializedCells = serialize(slotsToTable(componentInstance.slots.toArray() as Slot<TableSlotState>[], columnCount))
+
+  const slots = componentInstance.slots
+
+  if (startCell === slots.first && endCell === slots.last) {
+    const last = serializedCells[serializedCells.length - 1].cellsPosition
+    const cells = serializedCells.map(i => i.cellsPosition).flat().map(i => i.cell)
+    return {
+      startPosition: serializedCells[0].cellsPosition[0],
+      endPosition: last[last.length - 1],
+      selectedCells: Array.from(new Set(cells))
+    }
+  }
+
   const p1 = findCellPosition(startCell, serializedCells)
   const p2 = findCellPosition(endCell, serializedCells)
   const minRow = Math.min(p1.minRow, p2.minRow)
