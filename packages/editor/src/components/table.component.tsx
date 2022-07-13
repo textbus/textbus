@@ -30,14 +30,14 @@ import {
   TableConfig, TableSlotState,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
-import { CollaborateCursorAwarenessDelegate } from '@textbus/collaborate'
+import { CollaborateSelectionAwarenessDelegate } from '@textbus/collaborate'
 
 export {
   createCell
 }
 
 @Injectable()
-export class TableComponentCursorAwarenessDelegate extends CollaborateCursorAwarenessDelegate {
+export class TableComponentSelectionAwarenessDelegate extends CollaborateSelectionAwarenessDelegate {
   constructor(private renderer: Renderer,
               private selection: Selection) {
     super()

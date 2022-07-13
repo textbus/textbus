@@ -1,9 +1,9 @@
 import "./index.scss"
-import { createEditor, Layout, i18n_en_US, TableComponentCursorAwarenessDelegate } from '@textbus/editor';
+import { createEditor, Layout, i18n_en_US, TableComponentSelectionAwarenessDelegate } from '@textbus/editor';
 import { RootComponentRef, Commander, Selection } from '@textbus/core';
 import {
   Collaborate, CollaborateCursor,
-  CollaborateCursorAwarenessDelegate, collaborateModule,
+  CollaborateSelectionAwarenessDelegate, collaborateModule,
   RemoteSelection
 } from '@textbus/collaborate';
 import { WebsocketProvider } from 'y-websocket'
@@ -32,8 +32,8 @@ const editor = createEditor({
   ],
   providers: [
     {
-      provide: CollaborateCursorAwarenessDelegate,
-      useClass: TableComponentCursorAwarenessDelegate
+      provide: CollaborateSelectionAwarenessDelegate,
+      useClass: TableComponentSelectionAwarenessDelegate
     }
   ],
   setup(starter) {

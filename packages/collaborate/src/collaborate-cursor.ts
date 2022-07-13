@@ -32,7 +32,7 @@ export interface RemoteSelectionCursor {
   userTip: HTMLElement
 }
 
-export abstract class CollaborateCursorAwarenessDelegate {
+export abstract class CollaborateSelectionAwarenessDelegate {
   abstract getRects(range: TBRange, nativeRange: Range): false | Rect[]
 }
 
@@ -90,7 +90,7 @@ export class CollaborateCursor {
   private currentSelection: RemoteSelection[] = []
 
   constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
-              @Optional() private awarenessDelegate: CollaborateCursorAwarenessDelegate,
+              @Optional() private awarenessDelegate: CollaborateSelectionAwarenessDelegate,
               private nativeSelection: SelectionBridge,
               private selection: Selection) {
     this.canvasContainer.append(this.canvas)
