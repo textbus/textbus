@@ -134,30 +134,11 @@ export const i18n_zh_CN: I18NConfig = {
       imageTool: {
         tooltip: '图片',
         view: {
-          title: '图片设置',
           linkLabel: '图片链接地址',
           linkInputPlaceholder: '请输入链接地址',
-          uploadBtnText: '上传新图片',
-          validateErrorMessage: '必填项不能为空',
-          sizeSetter: {
-            label: '宽高设置',
-            widthPlaceholder: '宽度',
-            heightPlaceholder: '高度'
-          },
-          maxSizeSetter: {
-            label: '最大尺寸',
-            widthPlaceholder: '宽度',
-            heightPlaceholder: '高度'
-          },
-          float: {
-            label: '浮动设置',
-            noFloatLabel: '不浮动',
-            floatToLeftLabel: '到左边',
-            floatToRightLabel: '到右边'
-          },
-          marginLabel: '边距设置',
+          uploadLabel: '上传图片',
+          uploadBtnText: ' 点击上传',
           confirmBtnText: '确定',
-          cancelBtnText: '取消'
         }
       },
       inlineMarginTool: {
@@ -371,6 +352,34 @@ export const i18n_zh_CN: I18NConfig = {
     }
   },
   components: {
+    imageComponent: {
+      contextMenu: {
+        title: '图片设置',
+        linkLabel: '图片链接地址',
+        linkInputPlaceholder: '请输入链接地址',
+        uploadBtnText: '上传',
+        validateErrorMessage: '必填项不能为空',
+        sizeSetter: {
+          label: '宽高设置',
+          widthPlaceholder: '宽度',
+          heightPlaceholder: '高度'
+        },
+        maxSizeSetter: {
+          label: '最大尺寸',
+          widthPlaceholder: '宽度',
+          heightPlaceholder: '高度'
+        },
+        float: {
+          label: '浮动设置',
+          noFloatLabel: '不浮动',
+          floatToLeftLabel: '到左边',
+          floatToRightLabel: '到右边'
+        },
+        marginLabel: '边距设置',
+        confirmBtnText: '确定',
+        cancelBtnText: '取消'
+      }
+    },
     tableComponent: {
       addColumnToLeft: '在左边添加列',
       addColumnToRight: '在右边添加列',

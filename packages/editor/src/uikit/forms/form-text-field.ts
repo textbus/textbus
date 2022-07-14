@@ -42,7 +42,7 @@ export class FormTextField implements FormItem<string | string[]> {
         this.sub = this.config.fileUploader?.upload({
           uploadType: this.config.uploadType!,
           currentValue: this.input.value,
-          multiple: !!this.config.uploadMultiple
+          multiple: false
         }).subscribe({
           next: url => {
             this.update(url)
@@ -68,10 +68,9 @@ export class FormTextField implements FormItem<string | string[]> {
   }
 
   getAttr(): AttrState<string | string[]> {
-    const value = this.input.value
     return {
       name: this.config.name,
-      value: this.config.uploadMultiple ? value.split(/(?<!base64),/g) : value
+      value: this.input.value
     }
   }
 

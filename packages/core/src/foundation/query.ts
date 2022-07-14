@@ -126,7 +126,7 @@ export class Query {
     let index = startIndex
 
     for (const child of childContents) {
-      if (typeof child === 'string') {
+      if (typeof child === 'string' || child.slots.length === 0) {
         const formats = slot.getFormatRangesByFormatter(formatter, index, index + child.length)
         let s = index
         for (const f of formats) {

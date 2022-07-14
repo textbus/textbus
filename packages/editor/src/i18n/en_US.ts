@@ -132,32 +132,13 @@ export const i18n_en_US: I18NConfig = {
         tooltip: 'forward'
       },
       imageTool: {
-        tooltip: 'picture',
+        tooltip: 'upload picture',
         view: {
-          title: 'picture setting',
           linkLabel: 'URL',
           linkInputPlaceholder: 'image url',
+          uploadLabel: 'upload',
           uploadBtnText: 'upload image',
-          validateErrorMessage: 'fields is required.',
-          sizeSetter: {
-            label: 'size',
-            widthPlaceholder: 'width',
-            heightPlaceholder: 'height'
-          },
-          maxSizeSetter: {
-            label: 'max size',
-            widthPlaceholder: 'width',
-            heightPlaceholder: 'height'
-          },
-          float: {
-            label: 'float',
-            noFloatLabel: 'no',
-            floatToLeftLabel: 'to left',
-            floatToRightLabel: 'to right'
-          },
-          marginLabel: 'margin',
           confirmBtnText: 'ok',
-          cancelBtnText: 'cancel'
         }
       },
       inlineMarginTool: {
@@ -371,6 +352,34 @@ export const i18n_en_US: I18NConfig = {
     }
   },
   components: {
+    imageComponent: {
+      contextMenu: {
+        title: 'picture setting',
+        linkLabel: 'URL',
+        linkInputPlaceholder: 'image url',
+        uploadBtnText: 'upload image',
+        validateErrorMessage: 'fields is required.',
+        sizeSetter: {
+          label: 'size',
+          widthPlaceholder: 'width',
+          heightPlaceholder: 'height'
+        },
+        maxSizeSetter: {
+          label: 'max size',
+          widthPlaceholder: 'width',
+          heightPlaceholder: 'height'
+        },
+        float: {
+          label: 'float',
+          noFloatLabel: 'no',
+          floatToLeftLabel: 'to left',
+          floatToRightLabel: 'to right'
+        },
+        marginLabel: 'margin',
+        confirmBtnText: 'ok',
+        cancelBtnText: 'cancel'
+      }
+    },
     tableComponent: {
       addColumnToLeft: 'add column to left',
       addColumnToRight: 'add column to right',

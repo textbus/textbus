@@ -9,10 +9,8 @@ export interface FormTextFieldParams {
   uploadType?: string;
   uploadBtnText?: string;
   fileUploader?: FileUploader
-  uploadMultiple?: boolean
 
   validateFn?(value: any): string | false
-
 }
 
 export interface FormTextareaParams {
@@ -54,6 +52,16 @@ export interface FormSwitchParams {
 export interface FormHiddenParams {
   name: string;
   value: string | number | boolean;
+}
+
+export interface FormButtonParams {
+  name: string;
+  value: string | number | boolean;
+  label: string
+  btnText: string
+  iconClasses?: string[]
+
+  onClick(): void
 }
 
 export interface FormStaticParams {

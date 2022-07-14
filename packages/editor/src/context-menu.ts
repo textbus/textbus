@@ -60,7 +60,7 @@ export class ContextMenu {
             }
           }
         })
-        const menus = this.makeContextmenu()
+        const menus = this.makeContextmenu(ev.target as HTMLElement)
         const defaultMenus: ContextMenuConfig[] = [{
           iconClasses: ['textbus-icon-copy'],
           label: this.i18n.get('editor.copy'),
@@ -155,13 +155,27 @@ export class ContextMenu {
     this.subs = []
   }
 
-  private makeContextmenu() {
+  private makeContextmenu(source: HTMLElement) {
     const startSlot = this.selection.startSlot
     if (!startSlot) {
       return []
     }
-    let component: ComponentInstance | null = startSlot.getContentAtIndex(this.selection.startOffset! - 1) as ComponentInstance
-    if (typeof component === 'string' || !component) {
+    let component: ComponentInstance | null = null
+    do {
+      const location = this.renderer.getLocationByNativeNode(source)
+      if (location) {
+        const current = location.slot.getContentAtIndex(location.startIndex)
+        if (location.endIndex - location.startIndex === 1 && typeof current === 'object') {
+          component = current
+        } else {
+          component = location.slot.parent
+        }
+        break
+      } else {
+        source = source.parentNode as HTMLElement
+      }
+    } while (source)
+    if (!component) {
       component = this.selection.commonAncestorComponent!
     }
     if (!component) {
