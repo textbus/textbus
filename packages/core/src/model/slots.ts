@@ -44,7 +44,7 @@ export class Slots<T = any> {
     this.onChange = this.changeEvent.asObservable()
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
     this.onChildSlotRemove = this.childSlotRemoveEvent.asObservable()
-    this.insert(...slots)
+    this.insert(...Array.from(new Set(slots)))
   }
 
   /**

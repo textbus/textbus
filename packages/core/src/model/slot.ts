@@ -104,6 +104,9 @@ export class Slot<T = any> {
       changes = p
       inverseChanges = ip
     })
+    if (changes.length === 0 && inverseChanges.length === 0) {
+      return oldState!
+    }
     this.state = newState
     const applyAction: ApplyAction = {
       type: 'apply',

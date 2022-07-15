@@ -66,6 +66,9 @@ export class SelectionBridge implements NativeSelectionBridge {
       fromEvent(document, 'focusin').subscribe(ev => {
         let target = ev.target as HTMLElement
         if (/^(input|textarea|select)$/i.test(target.nodeName)) {
+          if (target.tagName.toLowerCase() === 'input' && /^(range|date)$/.test((target as HTMLInputElement).type)) {
+            return
+          }
           this.ignoreSelectionChange = true
           return
         }

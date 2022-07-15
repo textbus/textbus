@@ -371,6 +371,9 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
             changes = p
             inverseChanges = ip
           }) as State
+          if (changes.length === 0 && inverseChanges.length === 0) {
+            return oldState!
+          }
           state = newState
           stateChangeSubject.next(newState)
           marker.markAsDirtied({

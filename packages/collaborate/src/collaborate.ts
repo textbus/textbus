@@ -257,8 +257,10 @@ export class Collaborate implements History {
       const anchorSlot = this.contentMap.get(anchorPosition.type as YText)
       if (focusSlot && anchorSlot) {
         this.selection.setBaseAndExtent(anchorSlot, anchorPosition.index, focusSlot, focusPosition.index)
+        return
       }
     }
+    this.selection.unSelect()
   }
 
   private getRelativeCursorLocation(): CursorPosition | null {

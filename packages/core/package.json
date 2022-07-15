@@ -33,8 +33,8 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/di": "^1.1.1",
-    "@tanbo/stream": "^1.1.3",
+    "@tanbo/di": "^1.1.2",
+    "@tanbo/stream": "^1.1.4",
     "immer": "^9.0.12"
   },
   "author": {
