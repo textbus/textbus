@@ -58,7 +58,7 @@ export function createSegmentDropdown(config: UISegmentDropdownConfig): UISegmen
       })
     ],
     on: {
-      click() {
+      mousedown() {
         isSelfClick = true
         dropdown.toggle()
       }
@@ -76,7 +76,7 @@ export function createSegmentDropdown(config: UISegmentDropdownConfig): UISegmen
   })
   const dropdown = createDropdown(buttonElement, config.menuView, config.stickyElement)
   let isSelfClick = false
-  const unClick = fromEvent(document, 'click').subscribe(() => {
+  const unClick = fromEvent(document, 'mousedown').subscribe(() => {
     if (!isSelfClick) {
       dropdown.hide()
     }

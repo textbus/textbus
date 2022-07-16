@@ -52,14 +52,14 @@ export function createDropdown(config: UIDropdownConfig): UIDropdown {
       })
     ],
     on: {
-      click() {
+      mousedown() {
         isSelfClick = true
         dropdown.toggle()
       }
     }
   }) as HTMLButtonElement
 
-  const unClick = fromEvent(document, 'click').subscribe(() => {
+  const unClick = fromEvent(document, 'mousedown').subscribe(() => {
     if (!isSelfClick) {
       dropdown.hide()
     }

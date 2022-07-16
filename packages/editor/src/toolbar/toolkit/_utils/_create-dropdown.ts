@@ -11,7 +11,7 @@ export function createDropdown(button: HTMLElement, menu: HTMLElement, stickyEle
     classes: ['textbus-toolbar-dropdown-menu'],
     children: [menu],
     on: {
-      click(ev) {
+      mousedown(ev) {
         ev.stopPropagation()
       }
     }
