@@ -20,7 +20,7 @@ export interface User {
 const editor = createEditor({
   autoFocus: true,
   // i18n: i18n_en_US,
-  // autoHeight: true,
+  autoHeight: true,
   zenCoding: true,
   // readonly: true,
   minHeight: '300px',

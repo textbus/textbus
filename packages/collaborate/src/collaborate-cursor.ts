@@ -5,7 +5,7 @@ import {
   getLayoutRectByRange,
   SelectionBridge
 } from '@textbus/browser'
-import { Selection, SelectionPaths, Range as TBRange } from '@textbus/core'
+import { Selection, SelectionPaths, Range as TBRange, Scheduler } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
@@ -92,6 +92,7 @@ export class CollaborateCursor {
   constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
               @Optional() private awarenessDelegate: CollaborateSelectionAwarenessDelegate,
               private nativeSelection: SelectionBridge,
+              private scheduler: Scheduler,
               private selection: Selection) {
     this.canvasContainer.append(this.canvas)
     this.host.append(this.canvasContainer, this.tooltips)
@@ -106,6 +107,8 @@ export class CollaborateCursor {
       }
     }), fromEvent(window, 'resize').subscribe(() => {
       this.canvas.style.height = document.documentElement.clientHeight + 'px'
+      this.refresh()
+    }), this.scheduler.onDocChanged.subscribe(() => {
       this.refresh()
     }))
   }

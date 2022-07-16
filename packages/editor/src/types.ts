@@ -7,6 +7,8 @@ import { UploadConfig } from './file-uploader'
  * 编辑器配置项
  */
 export interface EditorOptions extends ViewOptions {
+  /** 编辑区域自动高度 */
+  autoHeight?: boolean
   /** 主题配置，目前只支持 dark */
   theme?: string
   /** 自定义根组件加载器，否则使用默认根组件加载器 */

@@ -91,8 +91,8 @@ export class Viewer {
   private scripts: string[] = []
   private links: Record<string, string>[] = []
 
-  constructor(private rootComponentLoader: ComponentLoader,
-              private options: ViewOptions = {}) {
+  constructor(public rootComponentLoader: ComponentLoader,
+              public options: ViewOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
@@ -143,9 +143,8 @@ export class Viewer {
   /**
    * 初始化编辑器
    * @param host 编辑器容器
-   * @param scroller 编辑器可滚动容器
    */
-  async mount(host: HTMLElement, scroller = host): Promise<Starter> {
+  async mount(host: HTMLElement): Promise<Starter> {
     if (this.destroyed) {
       throw editorError('the editor instance is destroyed!')
     }
@@ -191,7 +190,6 @@ export class Viewer {
       })
     )
     starter.get(Input)
-    caret.bindScroller(scroller)
     this.isReady = true
     this.injector = starter
 

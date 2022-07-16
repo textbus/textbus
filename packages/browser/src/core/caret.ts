@@ -43,6 +43,14 @@ export interface CaretStyle {
   fontSize: string
 }
 
+export interface Scroller {
+  getScrollTop(): number
+
+  getHeight(): number
+
+  setScrollTop(scrollTop: number): void
+}
+
 @Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition | null>
@@ -108,35 +116,6 @@ export class Caret {
       }),
     )
     editorMask.appendChild(this.elementRef)
-  }
-
-  bindScroller(scroller: HTMLElement) {
-    const scheduler = this.scheduler
-    let docIsChanged = true
-    this.subs.push(
-      scheduler.onDocChange.subscribe(() => {
-        docIsChanged = true
-      }),
-      this.onPositionChange.subscribe(position => {
-        if (position) {
-          if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
-            const { scrollTop, offsetHeight } = scroller
-            const caretTop = position.top + position.height
-            const viewTop = scrollTop + offsetHeight
-            if (caretTop > viewTop) {
-              scroller.scrollTop = caretTop - offsetHeight
-            } else if (position.top < scrollTop) {
-              scroller.scrollTop = position.top
-            }
-          } else if (this.oldPosition) {
-            scroller.scrollTop += Math.floor(position.top - this.oldPosition.top)
-          }
-        }
-        if (docIsChanged) {
-          docIsChanged = false
-        }
-      })
-    )
   }
 
   refresh() {
@@ -237,5 +216,35 @@ export class Caret {
       top,
       height: boxHeight
     }
+  }
+
+  correctScrollTop(scroller: Scroller) {
+    const scheduler = this.scheduler
+    let docIsChanged = true
+    this.subs.push(
+      scheduler.onDocChange.subscribe(() => {
+        docIsChanged = true
+      }),
+      this.onPositionChange.subscribe(position => {
+        if (position) {
+          const scrollTop = scroller.getScrollTop()
+          if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
+            const offsetHeight = scroller.getHeight()
+            const caretTop = position.top + position.height
+            const viewTop = scrollTop + offsetHeight
+            if (caretTop > viewTop) {
+              scroller.setScrollTop(caretTop - offsetHeight)
+            } else if (position.top < scrollTop) {
+              scroller.setScrollTop(position.top)
+            }
+          } else if (this.oldPosition) {
+            scroller.setScrollTop(scrollTop + Math.floor(position.top - this.oldPosition.top))
+          }
+        }
+        if (docIsChanged) {
+          docIsChanged = false
+        }
+      })
+    )
   }
 }
