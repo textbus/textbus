@@ -968,7 +968,11 @@ export class Selection {
             endSlot: Slot,
             endIndex: number,
             discardEmptyScope = false): SelectedContentRange[] {
+    this.resetStartAndEndPosition()
     const commonAncestorSlot = this.commonAncestorSlot
+    if (!commonAncestorSlot) {
+      return []
+    }
     const commonAncestorComponent = this.commonAncestorComponent
     return Selection.getScopesByRange(
       startSlot,

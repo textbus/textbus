@@ -486,11 +486,15 @@ export class Slot<T = any> {
       this.delete(endIndex - startIndex)
       return slot
     }
-    const deletedData = this.content.slice(startIndex, endIndex)
-    const deletedFormat = this.format.createFormatByRange(slot, startIndex, endIndex)
-
     this.retain(startIndex)
-    this.delete(endIndex - startIndex)
+    const _endIndex = this.content.fixIndex(endIndex)
+    if (endIndex - _endIndex === 1) {
+      endIndex++
+    }
+    const deletedData = this.content.slice(this.index, endIndex)
+    const deletedFormat = this.format.createFormatByRange(slot, this.index, endIndex)
+
+    this.delete(endIndex - this.index)
 
     deletedData.forEach(i => {
       slot.insert(i)
