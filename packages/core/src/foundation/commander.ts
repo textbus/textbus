@@ -636,6 +636,12 @@ export class Commander {
         }
       }))
       if (!deletedSlot.isEmpty) {
+        const formats = deletedSlot.extractFormatsByIndex(0)
+        formats.forEach(item => {
+          if (item[0].type === FormatType.Block) {
+            deletedSlot.removeAttribute(item[0])
+          }
+        })
         const deletedDelta = deletedSlot.toDelta()
         selection.setPosition(startSlot, startOffset)
         deletedDelta.forEach(item => {

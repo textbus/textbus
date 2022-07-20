@@ -93,6 +93,43 @@ export class Slot<T = any> {
   }
 
   /**
+   * 设置块级格式
+   * @param formatter
+   * @param value
+   */
+  setAttribute(formatter: BlockFormatter, value: FormatValue) {
+    this.applyFormat(formatter, value)
+  }
+
+  /**
+   * 获取块级格式的值
+   * @param formatter
+   */
+  getAttribute(formatter: BlockFormatter) {
+    const ranges = this.getFormatRangesByFormatter(formatter, 0, this.length)
+    if (ranges.length) {
+      return ranges[0].value
+    }
+    return null
+  }
+
+  /**
+   * 删除块级格式
+   * @param formatter
+   */
+  removeAttribute(formatter: BlockFormatter) {
+    this.applyFormat(formatter, null)
+  }
+
+  /**
+   * 根据指定 formatter 查询是否包含块级格式
+   * @param formatter
+   */
+  hasAttribute(formatter: BlockFormatter) {
+    return this.getAttribute(formatter) !== null
+  }
+
+  /**
    * 更新插槽状态的方法
    * @param fn
    */
@@ -556,7 +593,7 @@ export class Slot<T = any> {
    * 提取 index 下标位置的格式
    * @param index
    */
-  extractFormatsByIndex(index: number) {
+  extractFormatsByIndex(index: number): Formats {
     return this.format.extractFormatsByIndex(index)
   }
 

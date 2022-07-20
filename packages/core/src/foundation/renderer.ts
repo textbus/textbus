@@ -559,7 +559,7 @@ export class Renderer {
       const { styleChanges, attrChanges, classesChanges, listenerChanges } = getNodeChanges(newVDom, oldVDom)
 
       styleChanges.set.forEach(i => this.nativeRenderer.setStyle(nativeNode, i[0], i[1]))
-      styleChanges.remove.forEach(i => this.nativeRenderer.setStyle(nativeNode, i, ''))
+      styleChanges.remove.forEach(i => this.nativeRenderer.removeStyle(nativeNode, i))
 
       attrChanges.set.forEach(([key, value]) => {
         if (key === this.slotIdAttrKey) {

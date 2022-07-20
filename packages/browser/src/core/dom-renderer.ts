@@ -71,8 +71,8 @@ export class DomRenderer implements NativeRenderer {
     'use',
     'view'
   ].join('|')
-    })$`, 'i')
-  
+  })$`, 'i')
+
   xlinkNameSpace = 'http://www.w3.org/1999/xlink'
   possibleXlinkNames = {
     xlinkActuate: 'xlink:actuate',
@@ -152,7 +152,11 @@ export class DomRenderer implements NativeRenderer {
   }
 
   setStyle(target: NativeNode, key: string, value: any) {
-    target.style[key] = value
+    target.style[key] = value ?? ''
+  }
+
+  removeStyle(target: NativeNode, key: string) {
+    target.style[key] = ''
   }
 
   setAttribute(target: NativeNode, key: string, value: string) {

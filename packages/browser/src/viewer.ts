@@ -13,7 +13,7 @@ import {
   ComponentInstance,
   ComponentLiteral,
   invokeListener,
-  Plugin, Controller
+  Controller
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
@@ -62,10 +62,6 @@ export class Viewer {
   destroyed = false
   /** 编辑器是否已准备好 */
   isReady = false
-
-  protected defaultPlugins: Type<Plugin>[] = [
-    DefaultShortcut,
-  ]
 
   get readonly() {
     return this.controller.readonly
@@ -124,10 +120,10 @@ export class Viewer {
       ...options,
       components: (options.componentLoaders || []).map(i => i.component),
       formatters: (options.formatLoaders || []).map(i => i.formatter),
+      plugins: [() => new DefaultShortcut(), ...(options.plugins || [])],
       providers: [
         ...(options.providers || []),
         ...staticProviders,
-        ...this.defaultPlugins,
         DomRenderer,
         Parser,
         Input,
@@ -171,7 +167,6 @@ export class Viewer {
     this.initDocStyleSheetsAndScripts(this.options)
     host.appendChild(this.workbench)
     await starter.mount(component, doc)
-    this.defaultPlugins.forEach(i => starter.get(i).setup(starter))
     const renderer = starter.get(Renderer)
     const caret = starter.get(Caret)
     this.subs.push(
@@ -282,9 +277,6 @@ export class Viewer {
     this.destroyed = true
     this.subs.forEach(i => i.unsubscribe())
     if (this.injector) {
-      this.defaultPlugins.forEach(i => {
-        this.injector.get(i).onDestroy?.()
-      })
       const types = [
         Input,
       ]

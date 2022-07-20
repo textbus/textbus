@@ -1,28 +1,23 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Injector } from '@tanbo/di'
 import { Commander, History, Keyboard, Selection, Plugin } from '@textbus/core'
-import { EDITOR_OPTIONS, SelectionBridge, ViewOptions } from '../core/_api'
+import { EDITOR_OPTIONS } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
  */
-@Injectable()
 export class DefaultShortcut implements Plugin {
-  constructor(private selection: Selection,
-              @Inject(EDITOR_OPTIONS) private options: ViewOptions,
-              private selectionBridge: SelectionBridge,
-              private history: History,
-              private commander: Commander,
-              private keyboard: Keyboard) {
-  }
-
-  setup() {
-    const keyboard = this.keyboard
+  setup(injector: Injector) {
+    const selection = injector.get(Selection)
+    const keyboard = injector.get(Keyboard)
+    const history = injector.get(History)
+    const options = injector.get(EDITOR_OPTIONS)
+    const commander = injector.get(Commander)
     keyboard.addShortcut({
       keymap: {
         key: 'Enter'
       },
       action: () => {
-        this.commander.break()
+        commander.break()
       }
     })
     keyboard.addShortcut({
@@ -31,13 +26,13 @@ export class DefaultShortcut implements Plugin {
         shiftKey: true
       },
       action: () => {
-        const startOffset = this.selection.startOffset!
-        const startSlot = this.selection.startSlot!
+        const startOffset = selection.startOffset!
+        const startSlot = selection.startSlot!
         const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
         const content = isToEnd ? '\n\n' : '\n'
-        const isInserted = this.commander.insert(content)
+        const isInserted = commander.insert(content)
         if (isInserted && isToEnd) {
-          this.selection.setPosition(startSlot, startOffset + 1)
+          selection.setPosition(startSlot, startOffset + 1)
         }
       }
     })
@@ -46,7 +41,7 @@ export class DefaultShortcut implements Plugin {
         key: ['Delete', 'Backspace']
       },
       action: (key) => {
-        this.commander.delete(key === 'Backspace')
+        commander.delete(key === 'Backspace')
       }
     })
     keyboard.addShortcut({
@@ -56,16 +51,16 @@ export class DefaultShortcut implements Plugin {
       action: (key) => {
         switch (key) {
           case 'ArrowLeft':
-            this.selection.toPrevious()
+            selection.toPrevious()
             break
           case 'ArrowRight':
-            this.selection.toNext()
+            selection.toNext()
             break
           case 'ArrowUp':
-            this.selection.toPreviousLine()
+            selection.toPreviousLine()
             break
           case 'ArrowDown':
-            this.selection.toNextLine()
+            selection.toNextLine()
             break
         }
       }
@@ -78,16 +73,16 @@ export class DefaultShortcut implements Plugin {
       action: (key) => {
         switch (key) {
           case 'ArrowLeft':
-            this.selection.wrapToBefore()
+            selection.wrapToBefore()
             break
           case 'ArrowRight':
-            this.selection.wrapToAfter()
+            selection.wrapToAfter()
             break
           case 'ArrowUp':
-            this.selection.wrapToTop()
+            selection.wrapToTop()
             break
           case 'ArrowDown':
-            this.selection.wrapToBottom()
+            selection.wrapToBottom()
             break
         }
       }
@@ -98,7 +93,7 @@ export class DefaultShortcut implements Plugin {
         key: 'Tab'
       },
       action: () => {
-        this.commander.insert('    ')
+        commander.insert('    ')
       }
     })
 
@@ -108,7 +103,7 @@ export class DefaultShortcut implements Plugin {
         ctrlKey: true
       },
       action: () => {
-        this.selection.selectAll()
+        selection.selectAll()
       }
     })
     keyboard.addShortcut({
@@ -117,7 +112,7 @@ export class DefaultShortcut implements Plugin {
         ctrlKey: true
       },
       action: () => {
-        this.commander.copy()
+        commander.copy()
       }
     })
     keyboard.addShortcut({
@@ -126,7 +121,7 @@ export class DefaultShortcut implements Plugin {
         ctrlKey: true
       },
       action: () => {
-        this.commander.cut()
+        commander.cut()
       }
     })
     keyboard.addShortcut({
@@ -135,7 +130,7 @@ export class DefaultShortcut implements Plugin {
         ctrlKey: true
       },
       action: () => {
-        this.history.back()
+        history.back()
       }
     })
     keyboard.addShortcut({
@@ -145,7 +140,7 @@ export class DefaultShortcut implements Plugin {
         shiftKey: true
       },
       action: () => {
-        this.history.forward()
+        history.forward()
       }
     })
     keyboard.addShortcut({
@@ -154,7 +149,7 @@ export class DefaultShortcut implements Plugin {
         ctrlKey: true
       },
       action: () => {
-        this.options.onSave?.()
+        options.onSave?.()
       }
     })
   }

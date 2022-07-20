@@ -28,6 +28,8 @@ export abstract class NativeRenderer {
 
   abstract setStyle(target: NativeNode, key: string, value: any): void
 
+  abstract removeStyle(target: NativeNode, key: string): void
+
   abstract replace(newChild: NativeNode, oldChild: NativeNode): void
 
   abstract remove(node: NativeNode): void
