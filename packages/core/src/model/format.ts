@@ -126,7 +126,6 @@ export class Format {
    * @param count
    */
   shrink(startIndex: number, count: number) {
-    const endIndex = startIndex + count
     this.map.forEach(values => {
       values.forEach(range => {
         if (range.endIndex <= startIndex) {
@@ -134,7 +133,7 @@ export class Format {
         }
         range.endIndex = Math.max(startIndex, range.endIndex - count)
         if (range.startIndex > startIndex) {
-          range.startIndex = Math.max(endIndex, range.startIndex - count)
+          range.startIndex = Math.max(startIndex, range.startIndex - count)
         }
       })
     })

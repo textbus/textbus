@@ -533,10 +533,25 @@ export class Slot<T = any> {
 
     this.delete(endIndex - this.index)
 
+    const temporarySlot = new Slot([
+      ...slot.schema
+    ])
+
     deletedData.forEach(i => {
-      slot.insert(i)
+      temporarySlot.insert(i)
     })
-    slot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
+    temporarySlot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
+    if (slot.isEmpty) {
+      temporarySlot.format.toArray().forEach(i => {
+        const f = i.formatter
+        if (f.type === FormatType.Block) {
+          temporarySlot.removeAttribute(f)
+        }
+      })
+    }
+    temporarySlot.toDelta().forEach(item => {
+      slot.insert(item.insert, item.formats)
+    })
     return slot
   }
 
