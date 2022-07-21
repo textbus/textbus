@@ -117,14 +117,11 @@ export class Editor extends Viewer {
         const scrollContainer = this.layout.scroller
         const caret = rootInjector.get(Caret)
         caret.correctScrollTop({
-          getHeight(): number {
-            return scrollContainer.offsetHeight
+          getLimit() {
+            return scrollContainer.getBoundingClientRect()
           },
-          getScrollTop(): number {
-            return scrollContainer.scrollTop
-          },
-          setScrollTop(scrollTop: number) {
-            scrollContainer.scrollTop = scrollTop
+          setOffset(offset: number) {
+            scrollContainer.scrollTop += offset
           }
         })
       }

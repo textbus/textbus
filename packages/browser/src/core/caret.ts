@@ -43,12 +43,15 @@ export interface CaretStyle {
   fontSize: string
 }
 
+export interface CaretLimit {
+  top: number
+  bottom: number
+}
+
 export interface Scroller {
-  getScrollTop(): number
+  getLimit(): CaretLimit
 
-  getHeight(): number
-
-  setScrollTop(scrollTop: number): void
+  setOffset(offsetScrollTop: number): void
 }
 
 @Injectable()
@@ -81,12 +84,7 @@ export class Caret {
   constructor(
     private scheduler: Scheduler,
     @Inject(VIEW_MASK) private editorMask: HTMLElement) {
-    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged((oldPosition, newPosition) => {
-      if (oldPosition && newPosition) {
-        return !(oldPosition.top === newPosition.top && oldPosition.left === newPosition.left && oldPosition.height === newPosition.height)
-      }
-      return oldPosition !== newPosition
-    }))
+    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -125,6 +123,12 @@ export class Caret {
   }
 
   show(range: Range, restart: boolean) {
+    const oldRect = this.elementRef.getBoundingClientRect()
+    this.oldPosition = {
+      top: oldRect.top,
+      left: oldRect.left,
+      height: oldRect.height
+    }
     this.oldRange = range
     if (restart || this.scheduler.lastChangesHasLocalUpdate) {
       clearTimeout(this.timer)
@@ -187,6 +191,8 @@ export class Caret {
       rectTop -= (height - rect.height) / 2
     }
 
+    rectTop = Math.floor(rectTop)
+
     const containerRect = this.editorMask.getBoundingClientRect()
 
     const top = Math.floor(rectTop - containerRect.top)
@@ -208,42 +214,44 @@ export class Caret {
     })
     this.positionChangeEvent.next({
       left,
-      top,
+      top: rectTop,
       height: boxHeight
     })
-    this.oldPosition = {
-      left,
-      top,
-      height: boxHeight
-    }
   }
 
   correctScrollTop(scroller: Scroller) {
     const scheduler = this.scheduler
     let docIsChanged = true
+
+    function limitPosition(position: CaretPosition) {
+      const { top, bottom } = scroller.getLimit()
+      const caretTop = position.top
+      if (caretTop + position.height > bottom) {
+        const offset = caretTop - bottom + position.height
+        scroller.setOffset(offset)
+      } else if (position.top < top) {
+        scroller.setOffset(-(top - position.top))
+      }
+    }
+
     this.subs.push(
       scheduler.onDocChange.subscribe(() => {
         docIsChanged = true
       }),
       this.onPositionChange.subscribe(position => {
         if (position) {
-          const scrollTop = scroller.getScrollTop()
-          if (docIsChanged && scheduler.lastChangesHasLocalUpdate || !docIsChanged) {
-            const offsetHeight = scroller.getHeight()
-            const caretTop = position.top + position.height
-            const viewTop = scrollTop + offsetHeight
-            if (caretTop > viewTop) {
-              scroller.setScrollTop(caretTop - offsetHeight)
-            } else if (position.top < scrollTop) {
-              scroller.setScrollTop(position.top)
+          if (docIsChanged) {
+            if (scheduler.lastChangesHasLocalUpdate) {
+              limitPosition(position)
+            } else if (this.oldPosition) {
+              const offset = Math.floor(position.top - this.oldPosition.top)
+              scroller.setOffset(offset)
             }
-          } else if (this.oldPosition) {
-            scroller.setScrollTop(scrollTop + Math.floor(position.top - this.oldPosition.top))
+          } else {
+            limitPosition(position)
           }
         }
-        if (docIsChanged) {
-          docIsChanged = false
-        }
+        docIsChanged = false
       })
     )
   }

@@ -3,6 +3,7 @@
   background-color: $color-lighter;
   font-size: 14px;
   border-radius: inherit;
+  text-align: left;
 
   &-title {
     background-color: $color-lighter;
@@ -45,9 +46,11 @@
       padding: 3px 6px;
       font-size: 13px;
     }
+
     .textbus-control-label {
       width: auto;
     }
+
     .textbus-form-group {
       display: inline-flex;
       align-items: center;
@@ -129,7 +132,6 @@
     border-bottom-right-radius: 4px;
   }
 }
-
 
 
 .textbus-input-group {

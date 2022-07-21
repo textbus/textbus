@@ -23,11 +23,16 @@ export class Scheduler {
     return this._lastChangesHasLocalUpdate
   }
 
+  get lastChangesHasRemoteUpdate() {
+    return this._lastChangesHasRemoteUpdate
+  }
+
   onDocChange: Observable<void>
 
   onDocChanged: Observable<ChangeItem[]>
 
   private _lastChangesHasLocalUpdate = true
+  private _lastChangesHasRemoteUpdate = false
   private changeFromRemote = false
   private changeFromHistory = false
   private instanceList = new Set<ComponentInstance>()
@@ -80,8 +85,14 @@ export class Scheduler {
       ).subscribe(ops => {
         isRendered = true
         this.renderer.render()
-        this._lastChangesHasLocalUpdate = ops.some(i => {
-          return i.from === ChangeOrigin.Local || i.from === ChangeOrigin.History
+        this._lastChangesHasRemoteUpdate = false
+        this._lastChangesHasLocalUpdate = false
+        ops.forEach(i => {
+          if (i.from === ChangeOrigin.Remote) {
+            this._lastChangesHasRemoteUpdate = true
+          } else {
+            this._lastChangesHasLocalUpdate = true
+          }
         })
         this.selection.restore(this._lastChangesHasLocalUpdate)
         this.docChangedEvent.next(ops)
