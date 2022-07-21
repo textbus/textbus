@@ -53,7 +53,7 @@ export const audioComponent = defineComponent({
 
 export const audioComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
-    return element.nodeName.toLowerCase() === 'video'
+    return element.nodeName.toLowerCase() === 'audio'
   },
   read(element: HTMLVideoElement, context: Injector): ComponentInstance {
     return audioComponent.createInstance(context, {
