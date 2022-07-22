@@ -16,7 +16,7 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SelectedContentRange
+  SlotRange
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { Translator } from './translator'
@@ -239,7 +239,7 @@ function slotsToComponents<T>(injector: Injector, slots: Slot<T>[], rule: Transf
   return componentInstances
 }
 
-function getBlockRangeToBegin(selection: Selection, slot: Slot, offset: number): SelectedContentRange {
+function getBlockRangeToBegin(selection: Selection, slot: Slot, offset: number): SlotRange {
   let startIndex = offset
   const content = slot.sliceContent(0, offset)
   while (content.length) {
@@ -347,7 +347,7 @@ export class Commander {
       if (!Selection.compareSelectionPaths(startPaths, endPaths)) {
         break
       }
-      const scope: SelectedContentRange = startScope.slot.isEmpty ? {
+      const scope: SlotRange = startScope.slot.isEmpty ? {
         slot: startScope.slot,
         startIndex: 0,
         endIndex: 0

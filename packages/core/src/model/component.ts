@@ -240,7 +240,7 @@ export interface ContextMenuGroup {
 
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
-export interface SelectedContentRange {
+export interface SlotRange {
   slot: Slot
   startIndex: number
   endIndex: number
@@ -270,7 +270,7 @@ export interface EventTypes {
   onSlotRemove: (event: Event<ComponentInstance, DeleteEventData>) => void
   onSlotRemoved: (event: Event<ComponentInstance>) => void
 
-  onContainSelection: (event: Event<ContainSelectionEvent<ComponentInstance>>) => void
+  onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -542,13 +542,13 @@ export class ContextMenuEvent<T> extends Event<T> {
   }
 }
 
-export class ContainSelectionEvent<T> extends Event<T> {
+export class GetRangesEvent<T> extends Event<T> {
   constructor(target: T,
-              private getRanges: (ranges: SelectedContentRange[]) => void) {
+              private getRanges: (ranges: SlotRange[]) => void) {
     super(target, null)
   }
 
-  useRanges(ranges: SelectedContentRange[]) {
+  useRanges(ranges: SlotRange[]) {
     this.getRanges(ranges)
   }
 }
@@ -570,6 +570,8 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemo
 export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
+// eslint-disable-next-line max-len
+export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
@@ -697,3 +699,7 @@ export const onContentInserted = makeEventHook('onContentInserted')
  * 组件销毁时的勾子
  */
 export const onDestroy = makeEventHook('onDestroy')
+/**
+ * 当组件为选区公共父组件时的勾子
+ */
+export const onGetRanges = makeEventHook('onGetRanges')

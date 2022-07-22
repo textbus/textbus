@@ -1,7 +1,15 @@
 import { Injectable, Prop } from '@tanbo/di'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
-import { ComponentInstance, ContentType, invokeListener, Slot, Event, SelectedContentRange } from '../model/_api'
+import {
+  ComponentInstance,
+  ContentType,
+  invokeListener,
+  Slot,
+  Event,
+  SlotRange,
+  GetRangesEvent
+} from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
@@ -471,7 +479,7 @@ export class Selection {
   /**
    * 获取选区所选择的块的集合
    */
-  getSelectedScopes(): SelectedContentRange[] {
+  getSelectedScopes(): SlotRange[] {
     if (!this.isSelected) {
       return []
     }
@@ -757,18 +765,18 @@ export class Selection {
   /**
    * 获取选区内所有的块集合
    */
-  getBlocks(): SelectedContentRange[] {
-    const blocks: SelectedContentRange[] = []
+  getBlocks(): SlotRange[] {
+    const blocks: SlotRange[] = []
     if (!this.isSelected) {
       return blocks
     }
 
     function fn(slot: Slot, startIndex: number, endIndex: number, renderer: Renderer) {
-      const scopes: SelectedContentRange[] = []
+      const scopes: SlotRange[] = []
       if (startIndex >= endIndex) {
         return scopes
       }
-      let newScope: SelectedContentRange | null = null
+      let newScope: SlotRange | null = null
 
       let i = 0
       const contents = slot.sliceContent(startIndex, endIndex)
@@ -854,7 +862,7 @@ export class Selection {
   /**
    * 获取当前选区在开始和结束位置均扩展到最大行内内容位置是的块
    */
-  getGreedyRanges(): SelectedContentRange[] {
+  getGreedyRanges(): SlotRange[] {
     if (!this.isSelected) {
       return []
     }
@@ -957,7 +965,7 @@ export class Selection {
             startIndex: number,
             endSlot: Slot,
             endIndex: number,
-            discardEmptyScope = false): SelectedContentRange[] {
+            discardEmptyScope = false): SlotRange[] {
     this.resetStartAndEndPosition()
     const commonAncestorSlot = this.commonAncestorSlot
     if (!commonAncestorSlot) {
@@ -1491,15 +1499,26 @@ export class Selection {
     endIndex: number,
     commonAncestorSlot,
     commonAncestorComponent,
-    discardEmptyScope = false): SelectedContentRange[] {
+    discardEmptyScope = false): SlotRange[] {
 
-    const start: SelectedContentRange[] = []
-    const end: SelectedContentRange[] = []
+    const start: SlotRange[] = []
+    const end: SlotRange[] = []
     let startParentComponent: ComponentInstance | null = null
     let endParentComponent: ComponentInstance | null = null
 
     let startSlotRefIndex: number | null = null
     let endSlotRefIndex: number | null = null
+
+    if (commonAncestorComponent) {
+      let ranges: SlotRange[] | null = null
+      invokeListener(commonAncestorComponent, 'onGetRanges',
+        new GetRangesEvent(commonAncestorComponent, (rgs: SlotRange[]) => {
+          ranges = rgs
+        }))
+      if (ranges) {
+        return ranges
+      }
+    }
 
 
     while (startSlot !== commonAncestorSlot) {
@@ -1558,7 +1577,7 @@ export class Selection {
       endSlot = endParentComponent.parent
       endIndex = endSlot.indexOf(endParentComponent)
     }
-    const result: Omit<SelectedContentRange, 'isStart' | 'isEnd'>[] = [...start]
+    const result: Omit<SlotRange, 'isStart' | 'isEnd'>[] = [...start]
     if (startParentComponent && startParentComponent === endParentComponent) {
       const slots = startParentComponent.slots.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
       result.push(...slots.map(slot => {

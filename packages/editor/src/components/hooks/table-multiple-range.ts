@@ -1,11 +1,11 @@
-import { debounceTime, Subscription } from '@tanbo/stream'
+import { debounceTime, merge, Subscription } from '@tanbo/stream'
 import { createElement, VIEW_CONTAINER, SelectionBridge } from '@textbus/browser'
 import {
-  ChangeController, ComponentInstance,
+  ChangeController, ComponentInstance, GetRangesEvent,
   ContentType,
+  onGetRanges,
   onDestroy,
   Renderer,
-  SelectedContentRange,
   Selection,
   Slot,
   Slots,
@@ -405,7 +405,6 @@ export function useTableMultipleRange(
   const editorContainer = injector.get(VIEW_CONTAINER)
   const animateBezier = new CubicBezier(0.25, 0.1, 0.25, 0.1)
 
-  const oldGetScopes = selection.getScopes
   const self = useSelf()
 
   const subs: Subscription[] = [
@@ -467,20 +466,6 @@ export function useTableMultipleRange(
 
     const startPosition = tableRange.startPosition
     const endPosition = tableRange.endPosition
-    const selectedCells = tableRange.selectedCells
-
-    selection.getScopes = function (startSlot, endSlot, startIndex, endIndex) {
-      if (selectedCells.length > 1) {
-        return selectedCells.map<SelectedContentRange>(i => {
-          return {
-            slot: i,
-            startIndex: 0,
-            endIndex: i.length
-          }
-        })
-      }
-      return Reflect.apply(oldGetScopes, selection, [startSlot, endSlot, startIndex, endIndex])
-    }
 
     const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()
     const endRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement).getBoundingClientRect()
@@ -512,9 +497,10 @@ export function useTableMultipleRange(
       mask.style.width = endRect.right - startRect.left + 'px'
       mask.style.height = endRect.bottom - startRect.top + 'px'
     }
+    return tableRange
   }
 
-  function updateMaskEffect() {
+  function updateMaskEffect(event?: GetRangesEvent<any>) {
     const commonAncestorComponent = selection.commonAncestorComponent
     if (commonAncestorComponent === self) {
       const containerRect = editorContainer.getBoundingClientRect()
@@ -526,30 +512,34 @@ export function useTableMultipleRange(
         nativeSelectionBridge.hideNativeMask()
       }
       if (startCell && endCell) {
-        setSelectedCellsAndUpdateMaskStyle(startCell, endCell, containerRect)
-      } else {
-        selection.getScopes = oldGetScopes
+        const range = setSelectedCellsAndUpdateMaskStyle(startCell, endCell, containerRect)
+        event?.useRanges(range.selectedCells.map(i => {
+          return {
+            slot: i,
+            startIndex: 0,
+            endIndex: i.length
+          }
+        }))
       }
     } else {
       removeMask()
       if (commonAncestorComponent?.name !== self.name) {
-        selection.getScopes = oldGetScopes
         nativeSelectionBridge.showNativeMask()
       }
     }
   }
 
+  onGetRanges(event => {
+    updateMaskEffect(event)
+  })
+
   subs.push(
-    selection.onChange.pipe(debounceTime(1)).subscribe(() => {
-      updateMaskEffect()
-    }),
-    renderer.onViewChecked.pipe(debounceTime(1)).subscribe(() => {
+    merge(selection.onChange, renderer.onViewChecked).pipe(debounceTime(1)).subscribe(() => {
       updateMaskEffect()
     })
   )
 
   onDestroy(() => {
-    selection.getScopes = oldGetScopes
     subs.forEach(i => i.unsubscribe())
     nativeSelectionBridge.showNativeMask()
     removeMask()
