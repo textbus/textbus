@@ -140,17 +140,17 @@ function deleteUpBySlot(selection: Selection,
     toEnd: !deleteBefore
   })
   invokeListener(parentComponent, 'onSlotRemove', event)
-  if (event.isPrevented) {
+  if (!event.isPrevented) {
     const isSuccess = parentComponent.slots.remove(slot)
     if (isSuccess) {
       invokeListener(parentComponent, 'onSlotRemoved', new Event(parentComponent, null))
     }
-    return {
-      slot,
-      offset
-    }
+    return position
   }
-  return position
+  return {
+    slot,
+    offset
+  }
 }
 
 export interface TransformContext {
