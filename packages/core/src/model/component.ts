@@ -240,6 +240,12 @@ export interface ContextMenuGroup {
 
 export type ContextMenuConfig = ContextMenuGroup | ContextMenuItem
 
+export interface SelectedContentRange {
+  slot: Slot
+  startIndex: number
+  endIndex: number
+}
+
 export interface EventTypes {
   onUnselect: () => void
   onSelected: () => void
@@ -252,7 +258,7 @@ export interface EventTypes {
   onSelectionFromEnd: (event: Event<ComponentInstance>) => void
   onBreak: (event: Event<Slot, BreakEventData>) => void
   onPaste: (event: Event<Slot, PasteEventData>) => void
-  onContextMenu: (event: ContextMenuEvent<ComponentInstance>) => ContextMenuConfig[]
+  onContextMenu: (event: ContextMenuEvent<ComponentInstance>) => void
 
   onContentInserted: (event: Event<Slot, InsertEventData>) => void
   onContentInsert: (event: Event<Slot, InsertEventData>) => void
@@ -263,6 +269,8 @@ export interface EventTypes {
   // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
   onSlotRemove: (event: Event<ComponentInstance, DeleteEventData>) => void
   onSlotRemoved: (event: Event<ComponentInstance>) => void
+
+  onContainSelection: (event: Event<ContainSelectionEvent<ComponentInstance>>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -493,8 +501,6 @@ export function useDynamicShortcut(config: Shortcut) {
   context.dynamicShortcut.push(config)
 }
 
-let eventHandleFn: null | ((...args: any[]) => void) = null
-
 /**
  * Textbus 事件对象
  */
@@ -507,9 +513,7 @@ export class Event<S, T = null> {
 
   constructor(public target: S,
               public data: T,
-              eventHandle: (...args: any[]) => void
   ) {
-    eventHandleFn = eventHandle
   }
 
   preventDefault() {
@@ -518,6 +522,11 @@ export class Event<S, T = null> {
 }
 
 export class ContextMenuEvent<T> extends Event<T> {
+  constructor(target: T,
+              private getMenus: (menus: ContextMenuConfig[]) => void) {
+    super(target, null)
+  }
+
   get stopped() {
     return this.isStopped
   }
@@ -526,6 +535,21 @@ export class ContextMenuEvent<T> extends Event<T> {
 
   stopPropagation() {
     this.isStopped = true
+  }
+
+  useMenus(menus: ContextMenuConfig[]) {
+    this.getMenus(menus)
+  }
+}
+
+export class ContainSelectionEvent<T> extends Event<T> {
+  constructor(target: T,
+              private getRanges: (ranges: SelectedContentRange[]) => void) {
+    super(target, null)
+  }
+
+  useRanges(ranges: SelectedContentRange[]) {
+    this.getRanges(ranges)
   }
 }
 
@@ -562,7 +586,7 @@ export function invokeListener<K extends keyof EventTypes,
   const cache = eventCacheMap.get(target)
   if (cache) {
     const callbacks = cache.get(eventType)
-    const values = callbacks.map(fn => {
+    callbacks.forEach(fn => {
       return (fn as any)(event)
     })
     if (eventType === 'onViewChecked') {
@@ -571,11 +595,6 @@ export function invokeListener<K extends keyof EventTypes,
       viewInitCallbacks.forEach(fn => {
         (fn as any)(event)
       })
-    }
-    const fn = eventHandleFn
-    eventHandleFn = null
-    if (event && event instanceof Event && !event.isPrevented) {
-      fn?.(...values)
     }
   }
 }

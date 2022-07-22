@@ -181,10 +181,10 @@ export class ContextMenu {
     if (!component) {
       return []
     }
-    const menuItems: ContextMenuItem[][] = []
+    const menuItems: ContextMenuConfig[][] = []
     while (component) {
-      const event = new ContextMenuEvent<ComponentInstance>(component as ComponentInstance, null, (...menus: ContextMenuItem[][]) => {
-        menuItems.push(...menus)
+      const event = new ContextMenuEvent<ComponentInstance>(component as ComponentInstance, (menus: ContextMenuConfig[]) => {
+        menuItems.push(menus)
       })
       invokeListener(
         component as ComponentInstance,

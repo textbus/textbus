@@ -191,8 +191,8 @@ export const imageComponent = defineComponent({
     const dialog = injector.get(Dialog)
 
     const childI18n = i18n.getContext('components.imageComponent.contextMenu')
-    onContextMenu(() => {
-      return [{
+    onContextMenu(event => {
+      event.useMenus([{
         label: childI18n.get('title'),
         iconClasses: ['textbus-icon-image'],
         onClick() {
@@ -273,7 +273,7 @@ export const imageComponent = defineComponent({
             sub.unsubscribe()
           }))
         }
-      }]
+      }])
     })
 
     return {

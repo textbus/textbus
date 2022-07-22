@@ -1,7 +1,7 @@
 import { Injectable, Prop } from '@tanbo/di'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
-import { ComponentInstance, ContentType, invokeListener, Slot, Event } from '../model/_api'
+import { ComponentInstance, ContentType, invokeListener, Slot, Event, SelectedContentRange } from '../model/_api'
 import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
@@ -11,12 +11,6 @@ export interface Range {
   anchorSlot: Slot
   focusOffset: number
   anchorOffset: number
-}
-
-export interface SelectedContentRange {
-  slot: Slot
-  startIndex: number
-  endIndex: number
 }
 
 export interface SelectedSlotRange {
@@ -517,11 +511,9 @@ export class Selection {
         content = this.endSlot?.parent || null
       }
       if (content && typeof content !== 'string') {
-        let isPreventDefault = true
-        invokeListener(content, 'onSelectionFromEnd', new Event(content, null, () => {
-          isPreventDefault = false
-        }))
-        if (!isPreventDefault) {
+        const event = new Event(content, null)
+        invokeListener(content, 'onSelectionFromEnd', event)
+        if (!event.isPrevented) {
           if (content.slots.length === 0) {
             this.selectComponent(content)
           }
@@ -567,11 +559,9 @@ export class Selection {
         content = this.endSlot?.parent || null
       }
       if (content && typeof content !== 'string') {
-        let isPreventDefault = true
-        invokeListener(content, 'onSelectionFromFront', new Event(content, null, () => {
-          isPreventDefault = false
-        }))
-        if (!isPreventDefault) {
+        const event = new Event(content, null)
+        invokeListener(content, 'onSelectionFromFront', event)
+        if (!event.isPrevented) {
           if (content.slots.length === 0) {
             this.selectComponent(content)
           }

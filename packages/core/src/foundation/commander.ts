@@ -1,6 +1,6 @@
 import { Injectable, Injector, Prop } from '@tanbo/di'
 
-import { Range, SelectedContentRange, Selection, SelectionPosition } from './selection'
+import { Range, Selection, SelectionPosition } from './selection'
 import {
   Component,
   ComponentInstance,
@@ -15,7 +15,8 @@ import {
   FormatValue,
   InsertEventData,
   invokeListener,
-  Slot
+  Slot,
+  SelectedContentRange
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { Translator } from './translator'
@@ -103,25 +104,21 @@ function deleteUpBySlot(selection: Selection,
       }
     }
 
-    let isPreventDefault = true
-    invokeListener(parentSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(parentSlot, {
+    const event = new Event<Slot, DeleteEventData>(parentSlot, {
       index,
       count: 1,
       toEnd: !deleteBefore
-    }, () => {
-      isPreventDefault = false
-      parentSlot.retain(index)
-      parentSlot.delete(1)
-      invokeListener(parentSlot.parent!, 'onContentDeleted', new Event(parentSlot, null, () => {
-        //
-      }))
-    }))
-    if (isPreventDefault) {
+    })
+    invokeListener(parentSlot.parent!, 'onContentDelete', event)
+    if (event.isPrevented) {
       return {
         slot,
         offset
       }
     }
+    parentSlot.retain(index)
+    parentSlot.delete(1)
+    invokeListener(parentSlot.parent!, 'onContentDeleted', new Event(parentSlot, null))
     if (parentSlot.isEmpty) {
       return deleteUpBySlot(selection, parentSlot, index, rootComponent, deleteBefore)
     }
@@ -137,27 +134,23 @@ function deleteUpBySlot(selection: Selection,
     offset: index
   } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
 
-  let isPreventDefault = true
-  invokeListener(parentComponent, 'onSlotRemove', new Event<ComponentInstance, DeleteEventData>(parentComponent, {
+  const event = new Event<ComponentInstance, DeleteEventData>(parentComponent, {
     index: slotIndex,
     count: 1,
     toEnd: !deleteBefore
-  }, () => {
-    isPreventDefault = false
+  })
+  invokeListener(parentComponent, 'onSlotRemove', event)
+  if (event.isPrevented) {
     const isSuccess = parentComponent.slots.remove(slot)
     if (isSuccess) {
-      invokeListener(parentComponent, 'onSlotRemoved', new Event(parentComponent, null, () => {
-        //
-      }))
+      invokeListener(parentComponent, 'onSlotRemoved', new Event(parentComponent, null))
     }
-  }))
-  if (!isPreventDefault) {
-    return position
+    return {
+      slot,
+      offset
+    }
   }
-  return {
-    slot,
-    offset
-  }
+  return position
 }
 
 export interface TransformContext {
@@ -323,18 +316,20 @@ export class Commander {
       if (startScope.slot !== parentComponent.slots.last) {
         const slotIndex = parentComponent.slots.indexOf(startScope.slot)
         const count = parentComponent.slots.length - slotIndex
-        invokeListener(parentComponent, 'onSlotRemove', new Event(parentComponent, {
+        const event = new Event(parentComponent, {
           index: slotIndex + 1,
           count: count - 1,
           toEnd: false
-        }, () => {
+        })
+        invokeListener(parentComponent, 'onSlotRemove', event)
+        if (!event.isPrevented) {
           const deletedSlots = parentComponent.slots.cut(slotIndex + 1, slotIndex + count)
           const afterComponent = this.translator.createComponentByData(parentComponent.name, {
             state: typeof parentComponent.state === 'object' ? JSON.parse(JSON.stringify(parentComponent.state)) : parentComponent.state,
             slots: deletedSlots
           })
           this.insertAfter(afterComponent!, parentComponent)
-        }))
+        }
       }
     }
 
@@ -507,24 +502,26 @@ export class Commander {
       return false
     }
     const { slot, offset } = position
-    let isInsertSuccess = false
-    invokeListener(slot.parent!, 'onContentInsert', new Event<Slot, InsertEventData>(slot, {
+    const event = new Event<Slot, InsertEventData>(slot, {
       index: offset,
       content,
       formats
-    }, () => {
-      isInsertSuccess = true
+    })
+    invokeListener(slot.parent!, 'onContentInsert', event)
+    if (!event.isPrevented) {
       slot.retain(offset)
       slot.insert(content, formats)
-      invokeListener(slot.parent!, 'onContentInserted', new Event<Slot, InsertEventData>(slot, {
+      const insertedEvent = new Event<Slot, InsertEventData>(slot, {
         index: offset,
         content,
         formats
-      }, () => {
+      })
+      invokeListener(slot.parent!, 'onContentInserted', event)
+      if (!insertedEvent.isPrevented) {
         selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
-      }))
-    }))
-    return isInsertSuccess
+      }
+    }
+    return event.isPrevented
   }
 
   /**
@@ -582,24 +579,20 @@ export class Commander {
       const { slot, startIndex } = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
-      let isPreventDefault = true
-      invokeListener(slot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(slot, {
+      const event = new Event<Slot, DeleteEventData>(slot, {
         index: startIndex,
         count: endIndex - startIndex,
         toEnd: !deleteBefore
-      }, () => {
-        isPreventDefault = false
-      }))
-      if (isPreventDefault) {
+      })
+      invokeListener(slot.parent!, 'onContentDelete', event)
+      if (event.isPrevented) {
         return false
       }
       const deletedSlot = slot.cut(startIndex, endIndex)
       receiver(deletedSlot)
-      isPreventDefault = true
-      invokeListener(slot.parent!, 'onContentDeleted', new Event(slot, null, () => {
-        isPreventDefault = false
-      }))
-      if (isPreventDefault) {
+      const deletedEvent = new Event(slot, null)
+      invokeListener(slot.parent!, 'onContentDeleted', deletedEvent)
+      if (deletedEvent.isPrevented) {
         if (isFocusEnd) {
           selection.setFocus(slot, endIndex)
         } else {
@@ -618,26 +611,24 @@ export class Commander {
       }
     }
     if (startSlot !== endSlot) {
-      let isPreventDefault = true
-      invokeListener(endSlot.parent!, 'onContentDelete', new Event<Slot, DeleteEventData>(endSlot, {
+      const event = new Event<Slot, DeleteEventData>(endSlot, {
         index: endCutIndex,
         count: endSlot.length,
         toEnd: !deleteBefore
-      }, () => {
-        isPreventDefault = false
-      }))
-      if (isPreventDefault) {
+      })
+      invokeListener(endSlot.parent!, 'onContentDelete', event)
+      if (event.isPrevented) {
         return false
       }
       const deletedSlot = endSlot.cut(endCutIndex)
       receiver(deletedSlot)
-      isPreventDefault = true
-      invokeListener(endSlot.parent!, 'onContentDeleted', new Event(endSlot, null, () => {
-        isPreventDefault = false
+      const deletedEvent = new Event(endSlot, null)
+      invokeListener(endSlot.parent!, 'onContentDeleted', deletedEvent)
+      if (!deletedEvent.isPrevented) {
         if (endSlot.isEmpty) {
           deleteUpBySlot(selection, endSlot, 0, this.rootComponentRef.component, deleteBefore)
         }
-      }))
+      }
       if (!deletedSlot.isEmpty) {
         const formats = deletedSlot.extractFormatsByIndex(0)
         formats.forEach(item => {
@@ -651,7 +642,7 @@ export class Commander {
           this.insert(item.insert, item.formats)
         })
       }
-      if (isPreventDefault) {
+      if (deletedEvent.isPrevented) {
         return false
       }
     }
@@ -675,11 +666,13 @@ export class Commander {
       }
     }
     const startSlot = this.selection.startSlot!
-    let isPreventDefault = true
-    invokeListener(startSlot.parent!, 'onBreak', new Event<Slot, BreakEventData>(startSlot, {
+    const event = new Event<Slot, BreakEventData>(startSlot, {
       index: this.selection.startOffset!
-    }, () => {
-      isPreventDefault = false
+    })
+
+    invokeListener(startSlot.parent!, 'onBreak', event)
+
+    if (!event.isPrevented) {
       const startOffset = this.selection.startOffset!
       const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
       const content = isToEnd ? '\n\n' : '\n'
@@ -687,8 +680,8 @@ export class Commander {
       if (isInserted && isToEnd) {
         this.selection.setPosition(startSlot, startOffset + 1)
       }
-    }))
-    return !isPreventDefault
+    }
+    return !event.isPrevented
   }
 
   /**
@@ -767,19 +760,19 @@ export class Commander {
     }
     const component = this.selection.commonAncestorComponent!
     const slot = this.selection.commonAncestorSlot!
-    let isPreventDefault = true
-    invokeListener(component, 'onPaste', new Event(slot, {
+    const event = new Event(slot, {
       index: this.selection.startOffset!,
       data: pasteSlot,
       text
-    }, () => {
-      isPreventDefault = false
+    })
+    invokeListener(component, 'onPaste', event)
+    if (!event.isPrevented) {
       const delta = pasteSlot.toDelta()
       delta.forEach(action => {
         this.insert(action.insert, action.formats)
       })
-    }))
-    return !isPreventDefault
+    }
+    return !event.isPrevented
   }
 
   /**

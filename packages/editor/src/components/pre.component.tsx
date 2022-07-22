@@ -487,8 +487,8 @@ export const preComponent = defineComponent({
       ev.preventDefault()
     })
 
-    onContextMenu(() => {
-      return [{
+    onContextMenu(event => {
+      event.useMenus([{
         iconClasses: ['textbus-icon-terminal'],
         label: i18n.get('components.preComponent.contextMenuLabel'),
         submenu: languageList.map(i => {
@@ -522,7 +522,7 @@ export const preComponent = defineComponent({
             })
           }
         }]
-      }]
+      }])
     })
 
     onPaste(ev => {

@@ -88,13 +88,13 @@ export const wordExplainComponent = defineComponent({
       }))
     }
 
-    onContextMenu(() => {
-      return [{
+    onContextMenu(event => {
+      event.useMenus([{
         label: childI18n.get('title'),
         onClick() {
           setting()
         }
-      }]
+      }])
     })
 
     return {

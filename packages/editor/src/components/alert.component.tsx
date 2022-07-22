@@ -45,8 +45,8 @@ export const alertComponent = defineComponent({
 
     const childI18n = i18n.getContext('components.alertComponent.contextMenu')
 
-    onContextMenu(() => {
-      return [{
+    onContextMenu(ev => {
+      ev.useMenus([{
         label: state.fill ? childI18n.get('noFill') : childI18n.get('fill'),
         onClick() {
           stateController.update(draft => {
@@ -65,7 +65,7 @@ export const alertComponent = defineComponent({
             }
           }
         })
-      }]
+      }])
     })
 
     return {

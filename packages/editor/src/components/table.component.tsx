@@ -129,8 +129,8 @@ export const tableComponent = defineComponent({
       ev.preventDefault()
     })
 
-    onContextMenu(() => {
-      return [{
+    onContextMenu(event => {
+      event.useMenus([{
         iconClasses: ['textbus-icon-table'],
         label: i18n.get('components.tableComponent.contextMenuLabel'),
         submenu: [{
@@ -188,7 +188,7 @@ export const tableComponent = defineComponent({
         onClick() {
           commander.removeComponent(self)
         }
-      }]
+      }])
     })
 
     const instance = {
