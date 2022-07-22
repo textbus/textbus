@@ -118,6 +118,20 @@ export class Input {
 
   private handleDefaultActions(textarea) {
     this.subscription.add(
+      fromEvent<ClipboardEvent>(document, 'copy').subscribe(ev => {
+        const clipboardData = ev.clipboardData!
+        const selection = document.getSelection()!
+        const range = selection.getRangeAt(0)
+        const div = document.createElement('div')
+        const fragment = range.cloneContents()
+        if (fragment.childNodes.length === 1 && fragment.childNodes[1].nodeType === Node.TEXT_NODE) {
+          return
+        }
+        div.append(fragment)
+        clipboardData.setData('text/html', div.innerHTML)
+        clipboardData.setData('text', div.innerText)
+        ev.preventDefault()
+      }),
       fromEvent<ClipboardEvent>(textarea, 'paste').subscribe(ev => {
         const text = ev.clipboardData!.getData('Text')
 

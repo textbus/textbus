@@ -227,6 +227,9 @@ function deltaToSlots<T>(selection: Selection,
 
 function slotsToComponents<T>(injector: Injector, slots: Slot<T>[], rule: TransformRule<any, T>) {
   const componentInstances: ComponentInstance[] = []
+  if (!slots.length) {
+    return componentInstances
+  }
   if (rule.multipleSlot) {
     componentInstances.push(rule.target.createInstance(injector, {
       state: rule.stateFactory?.(),
