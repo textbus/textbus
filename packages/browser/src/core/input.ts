@@ -119,18 +119,25 @@ export class Input {
   private handleDefaultActions(textarea) {
     this.subscription.add(
       fromEvent<ClipboardEvent>(document, 'copy').subscribe(ev => {
-        const clipboardData = ev.clipboardData!
-        const selection = document.getSelection()!
-        const range = selection.getRangeAt(0)
-        const div = document.createElement('div')
-        const fragment = range.cloneContents()
-        if (fragment.childNodes.length === 1 && fragment.childNodes[1].nodeType === Node.TEXT_NODE) {
+        const selection = this.selection
+        if (!selection.isSelected) {
           return
         }
-        div.append(fragment)
-        clipboardData.setData('text/html', div.innerHTML)
-        clipboardData.setData('text', div.innerText)
-        ev.preventDefault()
+        if (selection.startSlot === selection.endSlot && selection.endOffset! - selection.startOffset! === 1) {
+          const content = selection.startSlot!.getContentAtIndex(selection.startOffset!)
+          if (typeof content === 'object') {
+            const clipboardData = ev.clipboardData!
+            const nativeSelection = document.getSelection()!
+            const range = nativeSelection.getRangeAt(0)
+            const div = document.createElement('div')
+            const fragment = range.cloneContents()
+            div.append(fragment)
+            clipboardData.setData('text/html', div.innerHTML)
+            clipboardData.setData('text', div.innerText)
+            ev.preventDefault()
+          }
+        }
+
       }),
       fromEvent<ClipboardEvent>(textarea, 'paste').subscribe(ev => {
         const text = ev.clipboardData!.getData('Text')
@@ -158,7 +165,7 @@ export class Input {
         }
 
         const div = this.doc.createElement('div')
-        div.style.cssText = 'width:10px; height:10px; overflow: hidden; position: fixed; left: -9999px; top: -9999px; opacity:0'
+        div.style.cssText = 'width:1px; height:10px; overflow: hidden; position: fixed; left: 50%; top: 50%; opacity:0'
         div.contentEditable = 'true'
         this.doc.body.appendChild(div)
         div.focus()

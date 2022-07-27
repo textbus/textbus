@@ -72,9 +72,9 @@ export class Scheduler {
       changeMarker.onChange.pipe(
         map(op => {
           if (isRendered) {
+            isRendered = false
             this.docChangeEvent.next()
           }
-          isRendered = false
           return {
             from: this.changeFromRemote ? ChangeOrigin.Remote :
               this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local,
