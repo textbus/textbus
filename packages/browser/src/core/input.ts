@@ -62,6 +62,7 @@ export class Input {
   //     })
   //   }
   // }
+  private nativeFocus = false
 
   constructor(private parser: Parser,
               private keyboard: Keyboard,
@@ -76,22 +77,7 @@ export class Input {
           doc.write(iframeHTML)
           doc.close()
           this.doc = doc
-          const contentBody = doc.body
-          const textarea = doc.createElement('textarea')
-          contentBody.appendChild(textarea)
-          this.textarea = textarea
-          this.subscription.add(
-            fromEvent(textarea, 'blur').subscribe(() => {
-              this.isFocus = false
-              caret.hide()
-            }),
-            caret.onStyleChange.subscribe(style => {
-              Object.assign(textarea.style, style)
-            })
-          )
-          this.handleInput(textarea)
-          this.handleShortcut(textarea)
-          this.handleDefaultActions(textarea)
+          this.init()
           resolve()
         })
       )
@@ -103,6 +89,14 @@ export class Input {
   focus() {
     if (!this.isFocus) {
       this.textarea?.focus()
+      setTimeout(() => {
+        if (!this.nativeFocus && this.isFocus) {
+          this.subscription.unsubscribe()
+          this.subscription = new Subscription()
+          this.init()
+          this.textarea?.focus()
+        }
+      })
     }
     this.isFocus = true
   }
@@ -114,6 +108,26 @@ export class Input {
 
   destroy() {
     this.subscription.unsubscribe()
+  }
+
+  private init() {
+    const doc = this.doc
+    const contentBody = doc.body
+    const textarea = doc.createElement('textarea')
+    contentBody.appendChild(textarea)
+    this.textarea = textarea
+    this.subscription.add(
+      fromEvent(textarea, 'blur').subscribe(() => {
+        this.isFocus = false
+        this.caret.hide()
+      }),
+      this.caret.onStyleChange.subscribe(style => {
+        Object.assign(textarea.style, style)
+      })
+    )
+    this.handleInput(textarea)
+    this.handleShortcut(textarea)
+    this.handleDefaultActions(textarea)
   }
 
   private handleDefaultActions(textarea) {

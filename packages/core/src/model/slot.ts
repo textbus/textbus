@@ -540,8 +540,8 @@ export class Slot<T = any> {
     deletedData.forEach(i => {
       temporarySlot.insert(i)
     })
-    temporarySlot.format = deletedFormat.createFormatByRange(slot, 0, slot.length)
-    if (slot.isEmpty) {
+    temporarySlot.format = deletedFormat.createFormatByRange(temporarySlot, 0, temporarySlot.length)
+    if (!slot.isEmpty) {
       temporarySlot.format.toArray().forEach(i => {
         const f = i.formatter
         if (f.type === FormatType.Block) {
