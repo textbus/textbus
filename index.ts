@@ -21,7 +21,7 @@ export interface User {
 const editor = createEditor({
   autoFocus: true,
   // i18n: i18n_en_US,
-  // autoHeight: true,
+  autoHeight: true,
   zenCoding: true,
   // readonly: true,
   minHeight: '300px',
@@ -42,19 +42,19 @@ const editor = createEditor({
     const collaborate = starter.get(Collaborate)
     const collaborateCursor = starter.get(CollaborateCursor)
     const layout = starter.get(Layout)
-    // const caret = starter.get(Caret)
+    const caret = starter.get(Caret)
     //
-    // caret.correctScrollTop({
-    //   getLimit() {
-    //     return {
-    //       top: 0,
-    //       bottom: document.documentElement.clientHeight
-    //     }
-    //   },
-    //   setOffset(offset: number) {
-    //     document.documentElement.scrollTop += offset
-    //   }
-    // })
+    caret.correctScrollTop({
+      getLimit() {
+        return {
+          top: 0,
+          bottom: document.documentElement.clientHeight
+        }
+      },
+      setOffset(offset: number) {
+        document.documentElement.scrollTop += offset
+      }
+    })
 
     // const provide = new WebrtcProvider('textbus', collaborate.yDoc)
     // const provide = new WebsocketProvider('ws://192.168.1.2:1234', 'collab4', collaborate.yDoc)

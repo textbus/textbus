@@ -193,11 +193,11 @@ function deltaToSlots<T>(selection: Selection,
       newSlot.insert(insert, formats)
       if (source === range.anchorSlot && range.anchorOffset - offset >= oldIndex && range.anchorOffset - offset <= index) {
         range.anchorSlot = newSlot
-        range.anchorOffset -= oldIndex + offset
+        range.anchorOffset -= offset
       }
       if (source === range.focusSlot && range.focusOffset - offset >= oldIndex && range.focusOffset - offset <= index) {
         range.focusSlot = newSlot
-        range.focusOffset -= oldIndex + offset
+        range.focusOffset -= offset
       }
       continue
     }
@@ -571,7 +571,7 @@ export class Commander {
       }
       return false
     }
-    const scopes = Selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
+    const scopes = selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
     let endCutIndex = endOffset
 
     while (scopes.length) {

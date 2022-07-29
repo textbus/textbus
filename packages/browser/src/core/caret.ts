@@ -183,8 +183,8 @@ export class Caret {
       height = parseFloat(fontSize) * parseFloat(lineHeight)
     }
 
-    // const boxHeight = Math.floor(Math.max(height, rect.height))
-    const boxHeight = Math.floor(height)
+    const boxHeight = Math.floor(Math.max(height, rect.height))
+    // const boxHeight = Math.floor(height)
 
     let rectTop = rect.top
     if (rect.height < height) {
@@ -234,7 +234,15 @@ export class Caret {
       }
     }
 
+    let isPressed = false
+
     this.subs.push(
+      fromEvent(document, 'mousedown').subscribe(() => {
+        isPressed = true
+      }),
+      fromEvent(document, 'mouseup').subscribe(() => {
+        isPressed = false
+      }),
       scheduler.onDocChange.subscribe(() => {
         docIsChanged = true
       }),
@@ -247,7 +255,7 @@ export class Caret {
               const offset = Math.floor(position.top - this.oldPosition.top)
               scroller.setOffset(offset)
             }
-          } else {
+          } else if (!isPressed) {
             limitPosition(position)
           }
         }

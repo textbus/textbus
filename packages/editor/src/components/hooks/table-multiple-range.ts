@@ -513,13 +513,15 @@ export function useTableMultipleRange(
       }
       if (startCell && endCell) {
         const range = setSelectedCellsAndUpdateMaskStyle(startCell, endCell, containerRect)
-        event?.useRanges(range.selectedCells.map(i => {
-          return {
-            slot: i,
-            startIndex: 0,
-            endIndex: i.length
-          }
-        }))
+        if (startCell !== endCell) {
+          event?.useRanges(range.selectedCells.map(i => {
+            return {
+              slot: i,
+              startIndex: 0,
+              endIndex: i.length
+            }
+          }))
+        }
       }
     } else {
       removeMask()

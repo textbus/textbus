@@ -161,14 +161,14 @@ export class Selection {
    * 选区的公共父插槽
    */
   get commonAncestorSlot(): Slot | null {
-    return Selection.getCommonAncestorSlot(this.startSlot, this.endSlot)
+    return this._commonAncestorSlot
   }
 
   /**
    * 选区的公共父组件
    */
   get commonAncestorComponent(): ComponentInstance | null {
-    return Selection.getCommonAncestorComponent(this.startSlot, this.endSlot)
+    return this._commonAncestorComponent
   }
 
   get nativeSelectionDelegate() {
@@ -198,7 +198,6 @@ export class Selection {
             return
           }
           this.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
-          this.broadcastChanged()
         }
       })
     } else {
@@ -206,6 +205,9 @@ export class Selection {
       this.bridge.disConnect()
     }
   }
+
+  private _commonAncestorSlot: Slot | null = null
+  private _commonAncestorComponent: ComponentInstance | null = null
 
   private _startSlot: Slot | null = null
   private _endSlot: Slot | null = null
@@ -223,6 +225,8 @@ export class Selection {
   private oldCaretPosition!: RangeViewPosition | null
 
   private subscriptions: Subscription[] = []
+
+  private customRanges: SlotRange[] | null = null
 
   constructor(private root: RootComponentRef,
               private controller: Controller,
@@ -242,6 +246,18 @@ export class Selection {
     )
     let selectedComponent: ComponentInstance | null = null
     this.subscriptions.push(
+      this.onChange.pipe(map(() => {
+        return this.commonAncestorComponent
+      })).subscribe(commonAncestorComponent => {
+        let ranges: SlotRange[] | null = null
+        if (commonAncestorComponent) {
+          invokeListener(commonAncestorComponent, 'onGetRanges',
+            new GetRangesEvent(commonAncestorComponent, (rgs: SlotRange[]) => {
+              ranges = rgs
+            }))
+        }
+        this.customRanges = ranges
+      }),
       this.onChange.pipe(
         map<any, ComponentInstance | null>(() => {
           if (this.startSlot?.parent === this.endSlot?.parent) {
@@ -490,6 +506,7 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
+    this.resetStartAndEndPosition()
     return this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
   }
 
@@ -665,7 +682,6 @@ export class Selection {
         this.bridge.restore(null, fromLocal)
       }
     }
-    this.broadcastChanged()
   }
 
   /**
@@ -961,28 +977,6 @@ export class Selection {
     }
   }
 
-  getScopes(startSlot: Slot,
-            startIndex: number,
-            endSlot: Slot,
-            endIndex: number,
-            discardEmptyScope = false): SlotRange[] {
-    this.resetStartAndEndPosition()
-    const commonAncestorSlot = this.commonAncestorSlot
-    if (!commonAncestorSlot) {
-      return []
-    }
-    const commonAncestorComponent = this.commonAncestorComponent
-    return Selection.getScopesByRange(
-      startSlot,
-      startIndex,
-      endSlot,
-      endIndex,
-      commonAncestorSlot,
-      commonAncestorComponent,
-      discardEmptyScope
-    )
-  }
-
   getPathsBySlot(slot: Slot): number[] | null {
     const paths: number[] = []
 
@@ -1129,7 +1123,7 @@ export class Selection {
     }
   }
 
-  static getScopes(
+  getScopes(
     startSlot: Slot,
     startIndex: number,
     endSlot: Slot,
@@ -1137,7 +1131,7 @@ export class Selection {
     discardEmptyScope = false) {
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
-    return Selection.getScopesByRange(
+    return this.getScopesByRange(
       startSlot,
       startIndex,
       endSlot,
@@ -1314,6 +1308,9 @@ export class Selection {
       this._startSlot = this.focusSlot
       this._startOffset = this.focusOffset
     }
+    this._commonAncestorSlot = Selection.getCommonAncestorSlot(this.startSlot, this.endSlot)
+    this._commonAncestorComponent = Selection.getCommonAncestorComponent(this.startSlot, this.endSlot)
+    this.broadcastChanged()
   }
 
   private wrapTo(toLeft: boolean) {
@@ -1492,7 +1489,7 @@ export class Selection {
     } : null)
   }
 
-  private static getScopesByRange(
+  private getScopesByRange(
     startSlot: Slot,
     startIndex: number,
     endSlot: Slot,
@@ -1509,15 +1506,8 @@ export class Selection {
     let startSlotRefIndex: number | null = null
     let endSlotRefIndex: number | null = null
 
-    if (commonAncestorComponent) {
-      let ranges: SlotRange[] | null = null
-      invokeListener(commonAncestorComponent, 'onGetRanges',
-        new GetRangesEvent(commonAncestorComponent, (rgs: SlotRange[]) => {
-          ranges = rgs
-        }))
-      if (ranges) {
-        return ranges
-      }
+    if (this.customRanges) {
+      return this.customRanges
     }
 
 
