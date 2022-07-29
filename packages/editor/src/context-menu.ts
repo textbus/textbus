@@ -5,13 +5,13 @@ import {
   ComponentInstance,
   ContentType,
   ContextMenuItem,
-  invokeListener,
   Renderer,
   Slot,
   Selection,
   ContextMenuConfig,
   ContextMenuGroup,
-  ContextMenuEvent, RootComponentRef
+  RootComponentRef,
+  triggerContextMenu
 } from '@textbus/core'
 import {
   createElement,
@@ -181,22 +181,8 @@ export class ContextMenu {
     if (!component) {
       return []
     }
-    const menuItems: ContextMenuConfig[][] = []
-    while (component) {
-      const event = new ContextMenuEvent<ComponentInstance>(component as ComponentInstance, (menus: ContextMenuConfig[]) => {
-        menuItems.push(menus)
-      })
-      invokeListener(
-        component as ComponentInstance,
-        'onContextMenu',
-        event
-      )
-      if (event.stopped) {
-        break
-      }
-      component = component.parent?.parent || null
-    }
-    return menuItems
+
+    return triggerContextMenu(component)
   }
 
   private hide() {

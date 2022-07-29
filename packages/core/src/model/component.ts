@@ -611,6 +611,30 @@ function makeEventHook<T extends keyof EventTypes>(type: T) {
 }
 
 /**
+ * 根据组件触发上下文菜单
+ * @param component
+ */
+export function triggerContextMenu(component: ComponentInstance) {
+  let comp: ComponentInstance | null = component
+  const menuItems: ContextMenuConfig[][] = []
+  while (comp) {
+    const event = new ContextMenuEvent<ComponentInstance>(comp, (menus: ContextMenuConfig[]) => {
+      menuItems.push(menus)
+    })
+    invokeListener(
+      comp as ComponentInstance,
+      'onContextMenu',
+      event
+    )
+    if (event.stopped) {
+      break
+    }
+    comp = comp.parent?.parent || null
+  }
+  return menuItems
+}
+
+/**
  * 当已选中组件未选中或选区不只选中已选中组件时触发
  */
 export const onUnselect = makeEventHook('onUnselect')
