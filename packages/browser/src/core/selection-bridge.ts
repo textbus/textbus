@@ -48,7 +48,6 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly
     }))
-    this.showNativeMask()
     document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {
       if (r) {
@@ -86,14 +85,6 @@ export class SelectionBridge implements NativeSelectionBridge {
         this.ignoreSelectionChange = false
       })
     )
-  }
-
-  showNativeMask() {
-    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: rgba(18, 150, 219, .2); color:inherit}`
-  }
-
-  hideNativeMask() {
-    this.selectionMaskElement.innerHTML = `#${this.docContainer.id} *::selection{background-color: transparent}`
   }
 
   connect(connector: NativeSelectionConnector) {

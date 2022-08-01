@@ -120,9 +120,15 @@ export const tableComponent = defineComponent({
 
     let startPosition: TableCellPosition
     let endPosition: TableCellPosition
+    let hasMultipleCell = false
     useTableMultipleRange(slots, stateController, tableInfo, tableRange => {
       startPosition = tableRange.startPosition
       endPosition = tableRange.endPosition
+      const is = tableRange.selectedCells.length > 1
+      if (is !== hasMultipleCell) {
+        hasMultipleCell = is
+        self.changeMarker.forceMarkDirtied()
+      }
     })
 
     onSlotRemove(ev => {
@@ -484,7 +490,9 @@ export const tableComponent = defineComponent({
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
         return (
-          <table class={'tb-table' + (data.state!.useTextbusStyle ? ' tb-table-textbus' : '')}>
+          <table class={'tb-table' +
+            (data.state!.useTextbusStyle ? ' tb-table-textbus' : '') +
+            (hasMultipleCell ? ' td-table-multiple-select' : '')}>
             <tbody>
             {
               tableCells.map(row => {
@@ -515,7 +523,8 @@ export const tableComponentLoader: ComponentLoader = {
     styles: [`
     .tb-table td,.tb-table th{border-width: 1px; border-style: solid; padding:3px 8px}
    .tb-table {border-spacing: 0; border-collapse: collapse; width: 100%; }
-   .tb-table-textbus td, th {border-color: #aaa;}`]
+   .tb-table-textbus td, th {border-color: #aaa;}`],
+    editModeStyles: ['.td-table-multiple-select *::selection{background-color: transparent!important}']
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'TABLE'

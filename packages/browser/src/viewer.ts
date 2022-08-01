@@ -79,6 +79,7 @@ export class Viewer {
 
   private workbench!: HTMLElement
 
+  private id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
   private resourceNodes: HTMLElement[] = []
   private focusEvent = new Subject<void>()
   private blurEvent = new Subject<void>()
@@ -92,7 +93,7 @@ export class Viewer {
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
-    const { doc, mask, wrapper } = Viewer.createLayout(options.minHeight)
+    const { doc, mask, wrapper } = Viewer.createLayout(this.id, options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
       provide: EDITOR_OPTIONS,
@@ -345,7 +346,8 @@ export class Viewer {
     })
     const styleEl = document.createElement('style')
     docStyles.push(...(options.styleSheets || []))
-    editModeStyles.push(...(options.editingStyleSheets || []))
+    editModeStyles.push(`#${this.id} *::selection{background-color: rgba(18, 150, 219, .2); color:inherit}`,
+      ...(options.editingStyleSheets || []))
 
     this.styleSheet = Viewer.cssMin(docStyles.join(''))
 
@@ -379,8 +381,7 @@ export class Viewer {
     return resources
   }
 
-  private static createLayout(minHeight = '100%') {
-    const id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
+  private static createLayout(id: string, minHeight = '100%') {
     const doc = createElement('div', {
       styles: {
         cursor: 'text',

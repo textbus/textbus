@@ -1,5 +1,5 @@
 import { debounceTime, merge, Subscription } from '@tanbo/stream'
-import { createElement, VIEW_CONTAINER, SelectionBridge } from '@textbus/browser'
+import { createElement, VIEW_CONTAINER } from '@textbus/browser'
 import {
   ChangeController, ComponentInstance, GetRangesEvent,
   ContentType,
@@ -399,7 +399,6 @@ export function useTableMultipleRange(
   config: TableConfig,
   callback: (tableRange: TableRange) => void) {
   const injector = useContext()
-  const nativeSelectionBridge = injector.get(SelectionBridge)
   const renderer = injector.get(Renderer)
   const selection = injector.get(Selection)
   const editorContainer = injector.get(VIEW_CONTAINER)
@@ -506,11 +505,6 @@ export function useTableMultipleRange(
       const containerRect = editorContainer.getBoundingClientRect()
       const startCell = findFocusCell(self, selection.startSlot!)
       const endCell = findFocusCell(self, selection.endSlot!)
-      if (startCell === endCell) {
-        nativeSelectionBridge.showNativeMask()
-      } else {
-        nativeSelectionBridge.hideNativeMask()
-      }
       if (startCell && endCell) {
         const range = setSelectedCellsAndUpdateMaskStyle(startCell, endCell, containerRect)
         if (startCell !== endCell) {
@@ -525,9 +519,6 @@ export function useTableMultipleRange(
       }
     } else {
       removeMask()
-      if (commonAncestorComponent?.name !== self.name) {
-        nativeSelectionBridge.showNativeMask()
-      }
     }
   }
 
@@ -543,7 +534,6 @@ export function useTableMultipleRange(
 
   onDestroy(() => {
     subs.forEach(i => i.unsubscribe())
-    nativeSelectionBridge.showNativeMask()
     removeMask()
   })
 }

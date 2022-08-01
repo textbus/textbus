@@ -331,8 +331,15 @@ export class Selection {
   }
 
   setBaseAndExtent(anchorSlot: Slot, anchorOffset: number, focusSlot: Slot, focusOffset: number) {
-    this.setAnchor(anchorSlot, anchorOffset)
-    this.setFocus(focusSlot, focusOffset)
+    if (this.controller.readonly) {
+      return
+    }
+    this._anchorSlot = anchorSlot
+    anchorSlot.retain(anchorOffset)
+    this._anchorOffset = anchorSlot.index
+    this._focusSlot = focusSlot
+    focusSlot.retain(focusOffset)
+    this._focusOffset = focusSlot.index
     this.resetStartAndEndPosition()
   }
 
