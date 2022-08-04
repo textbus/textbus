@@ -237,6 +237,8 @@ export class Renderer {
 
   private subscription = new Subscription()
 
+  private renderedComponents: ComponentInstance[] = []
+
   constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
               private controller: Controller,
               private rootComponentRef: RootComponentRef) {
@@ -278,6 +280,13 @@ export class Renderer {
       this.oldVDom = root
     }
 
+    let index = this.renderedComponents.length - 1
+    while (index > -1) {
+      const item = this.renderedComponents[index]
+      index--
+      invokeListener(item, 'onViewChecked')
+    }
+    this.renderedComponents = []
     this.viewCheckedEvent.next()
   }
 
@@ -606,6 +615,7 @@ export class Renderer {
   }
 
   private componentRender(component: ComponentInstance): VElement {
+    this.renderedComponents.push(component)
     if (component.changeMarker.dirty || this.readonlyStateChanged) {
       let slotVNode!: VElement
       const node = component.extends.render(this.controller.readonly, (slot, factory) => {
@@ -618,7 +628,7 @@ export class Renderer {
         setEditable(node, this.useContentEditable, false)
       }
       this.componentVNode.set(component, node)
-      this.triggerComponentViewChecked(component)
+      component.changeMarker.rendered()
       return node
     }
     if (component.changeMarker.changed) {
@@ -650,7 +660,7 @@ export class Renderer {
           }
         }
       })
-      this.triggerComponentViewChecked(component)
+      component.changeMarker.rendered()
     }
     return this.componentVNode.get(component)!
   }
@@ -811,13 +821,6 @@ export class Renderer {
       })
       startIndex += length
       return vNode
-    })
-  }
-
-  private triggerComponentViewChecked(component: ComponentInstance) {
-    component.changeMarker.rendered()
-    Promise.resolve().then(() => {
-      invokeListener(component, 'onViewChecked')
     })
   }
 

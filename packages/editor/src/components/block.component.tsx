@@ -51,8 +51,10 @@ export const blockComponentLoader: ComponentLoader = {
       ContentType.InlineComponent
     ]), element)
     const content = slot.sliceContent()
-    const hasString = content.some(i => typeof i === 'string')
-    if (hasString) {
+    const isAllContent = content.some(i => {
+      return typeof i === 'string' || i.type === ContentType.InlineComponent
+    })
+    if (isAllContent) {
       return blockComponent.createInstance(injector, {
         slots: [slot]
       })

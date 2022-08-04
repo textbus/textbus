@@ -45,6 +45,7 @@ const editor = createEditor({
     const caret = starter.get(Caret)
     //
     caret.correctScrollTop({
+      onScroll: fromEvent(document, 'scroll'),
       getLimit() {
         return {
           top: 0,

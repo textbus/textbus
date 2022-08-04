@@ -521,7 +521,7 @@ export class Commander {
         selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
       }
     }
-    return event.isPrevented
+    return !event.isPrevented
   }
 
   /**

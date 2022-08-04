@@ -49,6 +49,8 @@ export interface CaretLimit {
 }
 
 export interface Scroller {
+  onScroll: Observable<any>
+
   getLimit(): CaretLimit
 
   setOffset(offsetScrollTop: number): void
@@ -80,6 +82,8 @@ export class Caret {
   private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
   private oldRange: Range | null = null
+
+  private isFixed = false
 
   constructor(
     private scheduler: Scheduler,
@@ -116,10 +120,12 @@ export class Caret {
     editorMask.appendChild(this.elementRef)
   }
 
-  refresh() {
+  refresh(isFixedCaret = false) {
+    this.isFixed = isFixedCaret
     if (this.oldRange) {
       this.show(this.oldRange, false)
     }
+    this.isFixed = false
   }
 
   show(range: Range, restart: boolean) {
@@ -158,6 +164,64 @@ export class Caret {
   destroy() {
     clearTimeout(this.timer)
     this.subs.forEach(i => i.unsubscribe())
+  }
+
+  correctScrollTop(scroller: Scroller) {
+    const scheduler = this.scheduler
+    let docIsChanged = true
+
+    function limitPosition(position: CaretPosition) {
+      const { top, bottom } = scroller.getLimit()
+      const caretTop = position.top
+      if (caretTop + position.height > bottom) {
+        const offset = caretTop - bottom + position.height
+        scroller.setOffset(offset)
+      } else if (position.top < top) {
+        scroller.setOffset(-(top - position.top))
+      }
+    }
+
+    let isPressed = false
+
+    this.subs.push(
+      scroller.onScroll.subscribe(() => {
+        if (this.oldPosition) {
+          const rect = this.elementRef.getBoundingClientRect()
+          this.oldPosition.top = rect.top
+          this.oldPosition.left = rect.left
+          this.oldPosition.height = rect.height
+        }
+      }),
+      fromEvent(document, 'mousedown').subscribe(() => {
+        isPressed = true
+      }),
+      fromEvent(document, 'mouseup').subscribe(() => {
+        isPressed = false
+      }),
+      scheduler.onDocChange.subscribe(() => {
+        docIsChanged = true
+      }),
+      this.onPositionChange.subscribe(position => {
+        if (position) {
+          if (docIsChanged) {
+            if (scheduler.lastChangesHasLocalUpdate) {
+              limitPosition(position)
+            } else if (this.oldPosition) {
+              const offset = Math.floor(position.top - this.oldPosition.top)
+              scroller.setOffset(offset)
+            }
+          } else if (!isPressed) {
+            if (this.isFixed && this.oldPosition) {
+              const offset = Math.floor(position.top - this.oldPosition.top)
+              scroller.setOffset(offset)
+            } else {
+              limitPosition(position)
+            }
+          }
+        }
+        docIsChanged = false
+      })
+    )
   }
 
   private updateCursorPosition(nativeRange: Range) {
@@ -217,50 +281,5 @@ export class Caret {
       top: rectTop,
       height: boxHeight
     })
-  }
-
-  correctScrollTop(scroller: Scroller) {
-    const scheduler = this.scheduler
-    let docIsChanged = true
-
-    function limitPosition(position: CaretPosition) {
-      const { top, bottom } = scroller.getLimit()
-      const caretTop = position.top
-      if (caretTop + position.height > bottom) {
-        const offset = caretTop - bottom + position.height
-        scroller.setOffset(offset)
-      } else if (position.top < top) {
-        scroller.setOffset(-(top - position.top))
-      }
-    }
-
-    let isPressed = false
-
-    this.subs.push(
-      fromEvent(document, 'mousedown').subscribe(() => {
-        isPressed = true
-      }),
-      fromEvent(document, 'mouseup').subscribe(() => {
-        isPressed = false
-      }),
-      scheduler.onDocChange.subscribe(() => {
-        docIsChanged = true
-      }),
-      this.onPositionChange.subscribe(position => {
-        if (position) {
-          if (docIsChanged) {
-            if (scheduler.lastChangesHasLocalUpdate) {
-              limitPosition(position)
-            } else if (this.oldPosition) {
-              const offset = Math.floor(position.top - this.oldPosition.top)
-              scroller.setOffset(offset)
-            }
-          } else if (!isPressed) {
-            limitPosition(position)
-          }
-        }
-        docIsChanged = false
-      })
-    )
   }
 }
