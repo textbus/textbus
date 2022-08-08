@@ -275,7 +275,13 @@ export class Selection {
         distinctUntilChanged()
       ).subscribe(component => {
         if (prevFocusComponent) {
-          invokeListener(prevFocusComponent, 'onBlur')
+          let parentComponent: ComponentInstance | null = prevFocusComponent
+          while (parentComponent) {
+            if (parentComponent === root.component) {
+              invokeListener(prevFocusComponent, 'onBlur')
+            }
+            parentComponent = parentComponent.parentComponent
+          }
         }
         if (component) {
           invokeListener(component, 'onFocus')
