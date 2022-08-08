@@ -1,18 +1,19 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@tanbo/di'
-import { Scheduler } from '@textbus/core'
+import { Scheduler, Rect } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { VIEW_MASK } from './injection-tokens'
+import { getBoundingClientRect } from '../_utils/dom'
 
-export function getLayoutRectByRange(range: Range) {
+export function getLayoutRectByRange(range: Range): Rect {
   const { startContainer, startOffset } = range
   if (startContainer.nodeType === Node.ELEMENT_NODE) {
     const offsetNode = startContainer.childNodes[startOffset]
     let isInsertBefore = false
     if (offsetNode) {
       if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
-        return (offsetNode as HTMLElement).getBoundingClientRect()
+        return getBoundingClientRect(offsetNode as HTMLElement)
       }
       isInsertBefore = true
     }
@@ -24,7 +25,7 @@ export function getLayoutRectByRange(range: Range) {
     } else {
       startContainer.appendChild(span)
     }
-    const rect = span.getBoundingClientRect()
+    const rect = getBoundingClientRect(span)
     startContainer.removeChild(span)
     return rect
   }
@@ -129,7 +130,7 @@ export class Caret {
   }
 
   show(range: Range, restart: boolean) {
-    const oldRect = this.elementRef.getBoundingClientRect()
+    const oldRect = getBoundingClientRect(this.elementRef)
     this.oldPosition = {
       top: oldRect.top,
       left: oldRect.left,
@@ -186,7 +187,7 @@ export class Caret {
     this.subs.push(
       scroller.onScroll.subscribe(() => {
         if (this.oldPosition) {
-          const rect = this.elementRef.getBoundingClientRect()
+          const rect = getBoundingClientRect(this.elementRef)
           this.oldPosition.top = rect.top
           this.oldPosition.left = rect.left
           this.oldPosition.height = rect.height
@@ -257,7 +258,7 @@ export class Caret {
 
     rectTop = Math.floor(rectTop)
 
-    const containerRect = this.editorMask.getBoundingClientRect()
+    const containerRect = getBoundingClientRect(this.editorMask)
 
     const top = Math.floor(rectTop - containerRect.top)
     const left = Math.floor(rect.left - containerRect.left)

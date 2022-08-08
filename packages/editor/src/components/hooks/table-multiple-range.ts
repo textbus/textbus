@@ -1,5 +1,5 @@
 import { debounceTime, merge, Subscription } from '@tanbo/stream'
-import { createElement, VIEW_CONTAINER } from '@textbus/browser'
+import { createElement, getBoundingClientRect, VIEW_CONTAINER } from '@textbus/browser'
 import {
   ChangeController, ComponentInstance, GetRangesEvent,
   ContentType,
@@ -10,7 +10,7 @@ import {
   Slot,
   Slots,
   useContext,
-  useSelf
+  useSelf, Rect
 } from '@textbus/core'
 import { CubicBezier } from '@tanbo/bezier'
 
@@ -458,7 +458,7 @@ export function useTableMultipleRange(
     animateId = requestAnimationFrame(animateFn)
   }
 
-  function setSelectedCellsAndUpdateMaskStyle(startSlot: TableCellSlot, endSlot: TableCellSlot, offsetRect: DOMRect) {
+  function setSelectedCellsAndUpdateMaskStyle(startSlot: TableCellSlot, endSlot: TableCellSlot, offsetRect: Rect) {
     const tableRange = selectCells(startSlot, endSlot, self, config.columnCount)
 
     callback(tableRange)
@@ -466,10 +466,10 @@ export function useTableMultipleRange(
     const startPosition = tableRange.startPosition
     const endPosition = tableRange.endPosition
 
-    const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()
-    const endRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement).getBoundingClientRect()
+    const startRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement)
+    const endRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement)
 
-    const maskRect = mask.getBoundingClientRect()
+    const maskRect = getBoundingClientRect(mask)
 
     if (startSlot === endSlot) {
       mask.style.background = 'none'
@@ -486,15 +486,15 @@ export function useTableMultipleRange(
       }, {
         left: startRect.left - offsetRect.left,
         top: startRect.top - offsetRect.top,
-        width: endRect.right - startRect.left,
-        height: endRect.bottom - startRect.top
+        width: endRect.left + endRect.width - startRect.left,
+        height: endRect.top + endRect.height - startRect.top
       })
     } else {
       addMask()
       mask.style.left = startRect.left - offsetRect.left + 'px'
       mask.style.top = startRect.top - offsetRect.top + 'px'
-      mask.style.width = endRect.right - startRect.left + 'px'
-      mask.style.height = endRect.bottom - startRect.top + 'px'
+      mask.style.width = endRect.left + endRect.width - startRect.left + 'px'
+      mask.style.height = endRect.top + endRect.height - startRect.top + 'px'
     }
     return tableRange
   }
@@ -502,7 +502,7 @@ export function useTableMultipleRange(
   function updateMaskEffect(event?: GetRangesEvent<any>) {
     const commonAncestorComponent = selection.commonAncestorComponent
     if (commonAncestorComponent === self) {
-      const containerRect = editorContainer.getBoundingClientRect()
+      const containerRect = getBoundingClientRect(editorContainer)
       const startCell = findFocusCell(self, selection.startSlot!)
       const endCell = findFocusCell(self, selection.endSlot!)
       if (startCell && endCell) {

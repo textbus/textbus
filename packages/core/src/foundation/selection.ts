@@ -54,6 +54,13 @@ export interface CommonAncestorSlotScope {
   endChildSlot: Slot
 }
 
+export interface Rect {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
 export interface RangeViewPosition {
   left: number
   top: number

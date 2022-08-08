@@ -1,9 +1,9 @@
 function DisableOutputWebpackPlugin(reg) {
   this.reg = reg || {
     test() {
-      return false;
+      return false
     }
-  };
+  }
 }
 
 DisableOutputWebpackPlugin.prototype.apply = function (compiler) {
@@ -12,9 +12,9 @@ DisableOutputWebpackPlugin.prototype.apply = function (compiler) {
       if (!this.reg.test(asset)) {
         delete compilation.assets[asset]
       }
-    });
-    callback();
-  });
-};
+    })
+    callback()
+  })
+}
 
-module.exports = DisableOutputWebpackPlugin;
+module.exports = DisableOutputWebpackPlugin

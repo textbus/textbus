@@ -3,22 +3,16 @@ import {
   createElement,
   VIEW_CONTAINER,
   getLayoutRectByRange,
-  SelectionBridge
+  SelectionBridge,
+  getBoundingClientRect
 } from '@textbus/browser'
-import { Selection, SelectionPaths, Range as TBRange, Scheduler } from '@textbus/core'
+import { Selection, SelectionPaths, Range as TBRange, Scheduler, Rect } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
   color: string
   username: string
   paths: SelectionPaths
-}
-
-export interface Rect {
-  x: number
-  y: number
-  width: number
-  height: number
 }
 
 export interface SelectionRect extends Rect {
@@ -101,7 +95,7 @@ export class CollaborateCursor {
       for (const rect of rects) {
         this.context.fillStyle = rect.color
         this.context.beginPath()
-        this.context.rect(rect.x, rect.y, rect.width, rect.height)
+        this.context.rect(rect.left, rect.top, rect.width, rect.height)
         this.context.fill()
         this.context.closePath()
       }
@@ -123,8 +117,8 @@ export class CollaborateCursor {
 
   draw(paths: RemoteSelection[]) {
     this.currentSelection = paths
-    const containerRect = this.container.getBoundingClientRect()
-    this.canvas.style.top = containerRect.y * -1 + 'px'
+    const containerRect = getBoundingClientRect(this.container)
+    this.canvas.style.top = containerRect.top * -1 + 'px'
     this.canvas.width = this.canvas.offsetWidth
     this.canvas.height = this.canvas.offsetHeight
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -179,8 +173,8 @@ export class CollaborateCursor {
         selectionRects.push({
           color: item.color,
           username: item.username,
-          x: rect.x - containerRect.x,
-          y: rect.y,
+          left: rect.left - containerRect.left,
+          top: rect.top,
           width: rect.width,
           height: rect.height,
         })
@@ -196,12 +190,12 @@ export class CollaborateCursor {
       const rect: SelectionRect = {
         username: item.username,
         color: item.color,
-        x: cursorRect.x - containerRect.x,
-        y: cursorRect.y - containerRect.y,
+        left: cursorRect.left - containerRect.left,
+        top: cursorRect.top - containerRect.top,
         width: 2,
         height: cursorRect.height
       }
-      if (rect.x < 0 || rect.y < 0 || rect.x > containerRect.width) {
+      if (rect.left < 0 || rect.top < 0 || rect.left > containerRect.width) {
         return
       }
       users.push(rect)
@@ -214,8 +208,8 @@ export class CollaborateCursor {
       const rect = rects[i]
       const { cursor, userTip, anchor } = this.getUserCursor(i)
       Object.assign(cursor.style, {
-        left: rect.x + 'px',
-        top: rect.y + 'px',
+        left: rect.left + 'px',
+        top: rect.top + 'px',
         width: rect.width + 'px',
         height: rect.height + 'px',
         background: rect.color,

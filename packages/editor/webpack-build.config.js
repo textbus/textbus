@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   mode: 'production',
@@ -21,4 +21,4 @@ module.exports = {
       use: ['ts-loader']
     }]
   }
-};
+}
