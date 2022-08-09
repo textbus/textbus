@@ -32,24 +32,9 @@ export class InlineStyleFormatter implements AttributeFormatter {
   }
 }
 
-
-// 行内样式
-export const colorFormatter = new InlineStyleFormatter('color', 'color')
-export const fontSizeFormatter = new InlineStyleFormatter('fontSize', 'fontSize')
 export const letterSpacingFormatter = new InlineStyleFormatter('letterSpacing', 'letterSpacing')
 export const fontFamilyFormatter = new InlineStyleFormatter('fontFamily', 'fontFamily')
 export const lineHeightFormatter = new InlineStyleFormatter('lineHeight', 'lineHeight')
-export const colorFormatLoader = new InlineStyleFormatLoader('color', colorFormatter, {
-  styles: {
-    color: /.+/
-  }
-})
-
-export const fontSizeFormatLoader = new InlineStyleFormatLoader('fontSize', fontSizeFormatter, {
-  styles: {
-    fontSize: /.+/
-  }
-})
 
 export const letterSpacingFormatLoader = new InlineStyleFormatLoader('letterSpacing', letterSpacingFormatter, {
   styles: {

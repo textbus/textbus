@@ -13,7 +13,7 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 import { Injector } from '@tanbo/di'
 
 import { blockComponent } from './block.component'
-import { colorFormatter, fontSizeFormatter } from '../formatters/inline-style.formatter'
+import { colorFormatter, fontSizeFormatter } from '../formatters/_api'
 import { boldFormatter } from '../formatters/inline-tag.formatter'
 import { paragraphComponent } from './paragraph.component'
 
