@@ -465,9 +465,14 @@ export function useTableMultipleRange(
 
     const startPosition = tableRange.startPosition
     const endPosition = tableRange.endPosition
+    const startCell = renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!)
+    const endCell = renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!)
+    if (!startCell || !endCell) {
+      return tableRange
+    }
 
-    const startRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement)
-    const endRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement)
+    const startRect = getBoundingClientRect(startCell)
+    const endRect = getBoundingClientRect(endCell)
 
     const maskRect = getBoundingClientRect(mask)
 
