@@ -78,5 +78,4 @@ export const videoComponentLoader: ComponentLoader = {
       }
     })
   },
-  component: videoComponent
 }

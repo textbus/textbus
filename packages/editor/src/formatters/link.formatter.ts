@@ -10,9 +10,12 @@ export class LinkFormatLoader extends Matcher {
   }
 
   read(element: HTMLElement) {
-    return this.extractFormatData(element, {
-      attrs: ['target', 'href', 'data-href']
-    }).attrs as Record<string, string>
+    return {
+      formatter: this.formatter,
+      value: this.extractFormatData(element, {
+        attrs: ['target', 'href', 'data-href']
+      }).attrs as Record<string, string>
+    }
   }
 }
 

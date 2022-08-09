@@ -146,7 +146,6 @@ export const jumbotronComponent = defineComponent({
 })
 
 export const jumbotronComponentLoader: ComponentLoader = {
-  component: jumbotronComponent,
   resources: {
     styles: [
       `

@@ -153,5 +153,4 @@ export const listComponentLoader: ComponentLoader = {
       state: element.tagName.toLowerCase() as any
     })
   },
-  component: listComponent
 }

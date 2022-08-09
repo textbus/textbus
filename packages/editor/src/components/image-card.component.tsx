@@ -138,7 +138,6 @@ export const imageCardComponent = defineComponent({
 })
 
 export const imageCardComponentLoader: ComponentLoader = {
-  component: imageCardComponent,
   resources: {
     styles: [
       `

@@ -117,7 +117,6 @@ export const stepComponent = defineComponent({
 })
 
 export const stepComponentLoader: ComponentLoader = {
-  component: stepComponent,
   resources: {
     styles: [
       `

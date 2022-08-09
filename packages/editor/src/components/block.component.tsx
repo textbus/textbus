@@ -61,5 +61,4 @@ export const blockComponentLoader: ComponentLoader = {
     }
     return slot
   },
-  component: blockComponent
 }

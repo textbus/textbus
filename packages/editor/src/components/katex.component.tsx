@@ -120,7 +120,6 @@ export const katexComponent = defineComponent({
 })
 
 export const katexComponentLoader: ComponentLoader = {
-  component: katexComponent,
   resources: {
     styles: [
       'tb-katex, .katex-display, .katex, .katex-html{display: inline-block} tb-katex{margin-left: 0.5em; margin-right: 0.5em}'

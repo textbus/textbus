@@ -13,10 +13,10 @@ import {
   ComponentInstance,
   ComponentLiteral,
   invokeListener,
-  Controller
+  Controller, Component
 } from '@textbus/core'
 
-import { Parser, OutputTranslator, ComponentResources, ComponentLoader } from './dom-support/_api'
+import { Parser, OutputTranslator, ComponentLoader } from './dom-support/_api'
 import { createElement } from './_utils/uikit'
 import {
   ViewOptions,
@@ -28,14 +28,8 @@ import {
 } from './core/_api'
 import { DefaultShortcut } from './preset/_api'
 
-export interface Resources {
-  componentName: string
-  resources: ComponentResources
-}
-
 export interface OutputContents<T = any> {
   content: T
-  resourcesList: Resources[]
   styleSheets: string[]
   styleSheet: string
   links: Record<string, string>[]
@@ -83,12 +77,12 @@ export class Viewer {
   private resourceNodes: HTMLElement[] = []
   private focusEvent = new Subject<void>()
   private blurEvent = new Subject<void>()
-  private resourcesList: Resources[] = []
   private styleSheet = ''
   private scripts: string[] = []
   private links: Record<string, string>[] = []
 
-  constructor(public rootComponentLoader: ComponentLoader,
+  constructor(public rootComponent: Component,
+              public rootComponentLoader: ComponentLoader,
               public options: ViewOptions = {}) {
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
@@ -119,8 +113,6 @@ export class Viewer {
     }]
     this.injector = new Starter({
       ...options,
-      components: (options.componentLoaders || []).map(i => i.component),
-      formatters: (options.formatLoaders || []).map(i => i.formatter),
       plugins: [() => new DefaultShortcut(), ...(options.plugins || [])],
       providers: [
         ...(options.providers || []),
@@ -159,10 +151,10 @@ export class Viewer {
       if (typeof content === 'string') {
         component = parser.parseDoc(content, this.rootComponentLoader) as ComponentInstance
       } else {
-        component = translator.createComponentByFactory(content, this.rootComponentLoader.component)
+        component = translator.createComponentByFactory(content, this.rootComponent)
       }
     } else {
-      component = this.rootComponentLoader.component.createInstance(starter)
+      component = this.rootComponent.createInstance(starter)
     }
 
     this.initDocStyleSheetsAndScripts(this.options)
@@ -241,7 +233,6 @@ export class Viewer {
 
     return {
       content: html,
-      resourcesList: this.resourcesList,
       styleSheets: this.options?.styleSheets || [],
       styleSheet: this.styleSheet,
       links: this.links,
@@ -260,7 +251,6 @@ export class Viewer {
 
     return {
       content: rootComponentRef.component.toJSON(),
-      resourcesList: this.resourcesList,
       styleSheets: this.options?.styleSheets || [],
       styleSheet: this.styleSheet,
       links: this.links,
@@ -307,7 +297,7 @@ export class Viewer {
     if (typeof content === 'string') {
       component = parser.parseDoc(content, rootComponentLoader) as ComponentInstance
     } else {
-      component = translator.createComponentByFactory(content, rootComponentLoader.component)
+      component = translator.createComponentByFactory(content, this.rootComponent)
     }
     selection.unSelect()
     rootComponentRef.component.slots.clean()
@@ -325,8 +315,6 @@ export class Viewer {
   }
 
   private initDocStyleSheetsAndScripts(options: ViewOptions) {
-    this.resourcesList = this.getAllComponentResources()
-
     const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)
     const docStyles: string[] = []
     const editModeStyles: string[] = []
@@ -365,20 +353,6 @@ export class Viewer {
         this.resourceNodes.push(script)
       }
     })
-  }
-
-  private getAllComponentResources() {
-    const resources: Array<{ componentName: string, resources: ComponentResources }> = []
-    this.options!.componentLoaders?.forEach(i => {
-      if (i.resources) {
-        resources.push({
-          componentName: i.component.name,
-          resources: i.resources
-        })
-      }
-    })
-
-    return resources
   }
 
   private static createLayout(id: string, minHeight = '100%') {

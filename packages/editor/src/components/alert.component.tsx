@@ -92,7 +92,6 @@ export const alertComponent = defineComponent({
 })
 
 export const alertComponentLoader: ComponentLoader = {
-  component: alertComponent,
   resources: {
     styles: [`
 .tb-alert {

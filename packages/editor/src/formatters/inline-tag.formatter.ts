@@ -8,7 +8,10 @@ export class InlineTagFormatLoader extends Matcher {
   }
 
   read() {
-    return true
+    return {
+      formatter: this.formatter,
+      value: true
+    }
   }
 }
 

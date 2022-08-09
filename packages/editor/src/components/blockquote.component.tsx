@@ -68,5 +68,4 @@ export const blockquoteComponentLoader: ComponentLoader = {
       slots: [slot]
     })
   },
-  component: blockquoteComponent
 }

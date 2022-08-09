@@ -2,7 +2,7 @@ import { ComponentLiteral, Module, TextbusConfig } from '@textbus/core'
 
 import { FormatLoader, ComponentLoader } from '../dom-support/parser'
 
-export interface ViewModule extends Omit<Module, 'components' | 'formatters'> {
+export interface ViewModule extends Module {
   componentLoaders?: ComponentLoader[]
   formatLoaders?: FormatLoader[]
 }

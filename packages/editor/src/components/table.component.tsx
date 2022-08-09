@@ -569,5 +569,4 @@ export const tableComponentLoader: ComponentLoader = {
       }
     })
   },
-  component: tableComponent
 }

@@ -17,9 +17,12 @@ export class BlockAttrFormatLoader extends Matcher {
   }
 
   read(node: HTMLElement) {
-    return this.extractFormatData(node, {
-      attrs: [this.attrName]
-    }).attrs?.[this.attrName] as FormatValue
+    return {
+      formatter: this.formatter,
+      value: this.extractFormatData(node, {
+        attrs: [this.attrName]
+      }).attrs?.[this.attrName] as FormatValue
+    }
   }
 }
 

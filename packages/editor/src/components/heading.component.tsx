@@ -68,5 +68,4 @@ export const headingComponentLoader: ComponentLoader = {
       state: element.tagName.toLowerCase()
     })
   },
-  component: headingComponent
 }

@@ -51,6 +51,5 @@ export const paragraphComponentLoader: ComponentLoader = {
     return paragraphComponent.createInstance(injector, {
       slots: [slot]
     })
-  },
-  component: paragraphComponent
+  }
 }

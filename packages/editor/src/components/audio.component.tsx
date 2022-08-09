@@ -64,5 +64,4 @@ export const audioComponentLoader: ComponentLoader = {
       }
     })
   },
-  component: audioComponent
 }

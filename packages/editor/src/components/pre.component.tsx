@@ -647,5 +647,4 @@ export const preComponentLoader: ComponentLoader = {
       })
     })
   },
-  component: preComponent
 }

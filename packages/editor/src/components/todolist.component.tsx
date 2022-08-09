@@ -141,7 +141,6 @@ export const todolistComponent = defineComponent({
 })
 
 export const todolistComponentLoader: ComponentLoader = {
-  component: todolistComponent,
   resources: {
     styles: [
       `

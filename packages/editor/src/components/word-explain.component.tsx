@@ -126,7 +126,6 @@ export const wordExplainComponent = defineComponent({
 })
 
 export const wordExplainComponentLoader: ComponentLoader = {
-  component: wordExplainComponent,
   resources: {
     styles: [
       `

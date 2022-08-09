@@ -123,7 +123,6 @@ export const rootComponent = defineComponent({
 })
 
 export const rootComponentLoader: ComponentLoader = {
-  component: rootComponent,
   match(): boolean {
     return true
   },

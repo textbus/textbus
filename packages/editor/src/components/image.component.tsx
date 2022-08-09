@@ -314,5 +314,4 @@ export const imageComponentLoader: ComponentLoader = {
       }
     })
   },
-  component: imageComponent
 }

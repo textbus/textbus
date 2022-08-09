@@ -17,9 +17,12 @@ export class BlockStyleFormatLoader extends Matcher {
   }
 
   read(node: HTMLElement) {
-    return this.extractFormatData(node, {
-      styleName: this.styleName
-    }).styles[this.styleName]
+    return {
+      formatter: this.formatter,
+      value: this.extractFormatData(node, {
+        styleName: this.styleName
+      }).styles[this.styleName]
+    }
   }
 }
 

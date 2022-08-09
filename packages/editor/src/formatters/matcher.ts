@@ -1,5 +1,5 @@
-import { FormatLoader } from '@textbus/browser'
-import { Formatter, FormatValue } from '@textbus/core'
+import { FormatLoader, FormatLoaderReadResult } from '@textbus/browser'
+import { Formatter } from '@textbus/core'
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -71,7 +71,7 @@ export abstract class Matcher implements FormatLoader {
     return this.validators.map(fn => fn(element)).includes(true)
   }
 
-  abstract read(element: HTMLElement): FormatValue
+  abstract read(element: HTMLElement): FormatLoaderReadResult
 
   protected extractFormatData(node: HTMLElement, config: EditableOptions) {
     const attrs: Record<string, string> = {}

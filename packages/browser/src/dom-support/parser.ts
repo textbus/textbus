@@ -1,9 +1,7 @@
 import { Inject, Injectable, Injector } from '@tanbo/di'
 import {
   ComponentInstance,
-  Component,
-  FormatItem,
-  Formatter,
+  FormatItem, Formatter,
   FormatValue,
   Slot
 } from '@textbus/core'
@@ -28,16 +26,17 @@ export interface ComponentLoader {
   match(element: HTMLElement): boolean
 
   read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance | Slot
+}
 
-  component: Component
+export interface FormatLoaderReadResult {
+  formatter: Formatter
+  value: FormatValue
 }
 
 export interface FormatLoader {
-  formatter: Formatter
-
   match(element: HTMLElement): boolean
 
-  read(element: HTMLElement): FormatValue
+  read(element: HTMLElement): FormatLoaderReadResult
 }
 
 
@@ -47,8 +46,8 @@ export class Parser {
     return new DOMParser().parseFromString(html, 'text/html').body
   }
 
-  private loaders: ComponentLoader[]
-  private formatters: FormatLoader[]
+  componentLoaders: ComponentLoader[]
+  formatLoaders: FormatLoader[]
 
   constructor(@Inject(EDITOR_OPTIONS) private options: ViewOptions,
               private injector: Injector) {
@@ -62,8 +61,8 @@ export class Parser {
       componentLoaders.push(...(i.componentLoaders || []))
       formatLoaders.push(...(i.formatLoaders || []))
     })
-    this.loaders = componentLoaders
-    this.formatters = formatLoaders
+    this.componentLoaders = componentLoaders
+    this.formatLoaders = formatLoaders
   }
 
   parseDoc(html: string, rootComponentLoader: ComponentLoader) {
@@ -87,7 +86,7 @@ export class Parser {
         slot.insert('\n')
         return
       }
-      for (const t of this.loaders) {
+      for (const t of this.componentLoaders) {
         if (t.match(el as HTMLElement)) {
           const result = t.read(el as HTMLElement, this.injector, (childSlot, childElement) => {
             return this.readSlot(childSlot, childElement)
@@ -111,13 +110,10 @@ export class Parser {
   }
 
   private readFormats(el: HTMLElement, slot: Slot, formatItems: FormatItem[]) {
-    const formats = this.formatters.filter(f => {
+    const formats = this.formatLoaders.filter(f => {
       return f.match(el)
     }).map(f => {
-      return {
-        formatter: f.formatter,
-        value: f.read(el)
-      }
+      return f.read(el)
     })
     const startIndex = slot.index
     Array.from(el.childNodes).forEach(child => {
