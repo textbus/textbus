@@ -280,14 +280,16 @@ export class Renderer {
       this.oldVDom = root
     }
 
-    let index = this.renderedComponents.length - 1
-    while (index > -1) {
-      const item = this.renderedComponents[index]
-      index--
-      invokeListener(item, 'onViewChecked')
-    }
-    this.renderedComponents = []
-    this.viewCheckedEvent.next()
+    Promise.resolve().then(() => {
+      let index = this.renderedComponents.length - 1
+      while (index > -1) {
+        const item = this.renderedComponents[index]
+        index--
+        invokeListener(item, 'onViewChecked')
+      }
+      this.renderedComponents = []
+      this.viewCheckedEvent.next()
+    })
   }
 
   /**

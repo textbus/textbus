@@ -39,8 +39,11 @@ export class Keyboard {
    * @param keymapState 快捷键配置
    */
   execShortcut(keymapState: KeymapState): boolean {
+    if (!this.selection.isSelected) {
+      return false
+    }
     const key = keymapState.key
-    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\^\\])/g, '\\$1')}]$`, 'i')
+    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\^\\\]\[])/g, '\\$1')}]$`, 'i')
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
     if (this.markdownDetect &&
