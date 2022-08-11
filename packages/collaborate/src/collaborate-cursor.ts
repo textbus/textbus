@@ -6,7 +6,7 @@ import {
   SelectionBridge,
   getBoundingClientRect
 } from '@textbus/browser'
-import { Selection, SelectionPaths, Range as TBRange, Scheduler, Rect } from '@textbus/core'
+import { Selection, SelectionPaths, AbstractSelection, Scheduler, Rect } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
@@ -27,7 +27,7 @@ export interface RemoteSelectionCursor {
 }
 
 export abstract class CollaborateSelectionAwarenessDelegate {
-  abstract getRects(range: TBRange, nativeRange: Range): false | Rect[]
+  abstract getRects(abstractSelection: AbstractSelection, nativeRange: Range): false | Rect[]
 }
 
 @Injectable()

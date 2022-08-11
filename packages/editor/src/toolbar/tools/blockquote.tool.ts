@@ -51,10 +51,10 @@ export function blockquoteToolConfigFactory(injector: Injector): ButtonToolConfi
         } else {
           const commonAncestorSlot = selection.commonAncestorSlot!
           const scope = selection.getCommonAncestorSlotScope()!
-          commonAncestorSlot.cut(scope.startIndex, scope.endIndex).sliceContent().forEach(i => {
+          commonAncestorSlot.cut(scope.startOffset, scope.endOffset).sliceContent().forEach(i => {
             slot.insert(i)
           })
-          commonAncestorSlot.retain(scope.startIndex)
+          commonAncestorSlot.retain(scope.startOffset)
           commonAncestorSlot.insert(block)
         }
       }

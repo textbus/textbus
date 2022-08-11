@@ -1,6 +1,6 @@
 import { Injectable, Injector, Prop } from '@tanbo/di'
 
-import { Range, Selection, SelectionPosition } from './selection'
+import { AbstractSelection, Selection, SelectionPosition } from './selection'
 import {
   Component,
   ComponentInstance,
@@ -172,7 +172,7 @@ function deltaToSlots<T>(selection: Selection,
                          source: Slot,
                          delta: DeltaLite,
                          rule: TransformRule<any, T>,
-                         range: Range,
+                         abstractSelection: AbstractSelection,
                          offset: number): Slot<T>[] {
   const parentComponent = source.parent!
   const context: TransformContext = {
@@ -191,25 +191,29 @@ function deltaToSlots<T>(selection: Selection,
     index += insert.length
     if (b) {
       newSlot.insert(insert, formats)
-      if (source === range.anchorSlot && range.anchorOffset - offset >= oldIndex && range.anchorOffset - offset <= index) {
-        range.anchorSlot = newSlot
-        range.anchorOffset -= offset
+      if (source === abstractSelection.anchorSlot &&
+        abstractSelection.anchorOffset - offset >= oldIndex &&
+        abstractSelection.anchorOffset - offset <= index) {
+        abstractSelection.anchorSlot = newSlot
+        abstractSelection.anchorOffset -= offset
       }
-      if (source === range.focusSlot && range.focusOffset - offset >= oldIndex && range.focusOffset - offset <= index) {
-        range.focusSlot = newSlot
-        range.focusOffset -= offset
+      if (source === abstractSelection.focusSlot &&
+        abstractSelection.focusOffset - offset >= oldIndex &&
+        abstractSelection.focusOffset - offset <= index) {
+        abstractSelection.focusSlot = newSlot
+        abstractSelection.focusOffset -= offset
       }
       continue
     }
-    if (range.anchorOffset > index) {
-      range.anchorOffset -= index
+    if (abstractSelection.anchorOffset > index) {
+      abstractSelection.anchorOffset -= index
     }
-    if (range.focusOffset > index) {
-      range.focusOffset -= index
+    if (abstractSelection.focusOffset > index) {
+      abstractSelection.focusOffset -= index
     }
     if (typeof insert !== 'string') {
       const slots = insert.slots.toArray().map(childSlot => {
-        return deltaToSlots(selection, source, childSlot.toDelta(), rule, range, offset)
+        return deltaToSlots(selection, source, childSlot.toDelta(), rule, abstractSelection, offset)
       }).flat()
       newSlots.push(...slots)
     }
@@ -277,7 +281,7 @@ export class Commander {
       return false
     }
 
-    const range: Range = {
+    const abstractSelection: AbstractSelection = {
       anchorSlot: selection.anchorSlot!,
       anchorOffset: selection.anchorOffset!,
       focusSlot: selection.focusSlot!,
@@ -288,7 +292,7 @@ export class Commander {
     const commonAncestorComponent = selection.commonAncestorComponent!
     let stoppedComponent: ComponentInstance
     if (commonAncestorSlot.parent !== commonAncestorComponent ||
-      (range.anchorSlot === commonAncestorSlot && range.focusSlot === commonAncestorSlot)) {
+      (abstractSelection.anchorSlot === commonAncestorSlot && abstractSelection.focusSlot === commonAncestorSlot)) {
       stoppedComponent = commonAncestorComponent.parentComponent!
     } else {
       stoppedComponent = commonAncestorComponent
@@ -372,7 +376,7 @@ export class Commander {
         startScope = selection.getPreviousPositionByPosition(slot, 0)
         if (parentComponent.separable || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
-          slots.unshift(...deltaToSlots(selection, slot, delta, rule, range, 0))
+          slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
           position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
         } else {
           const componentInstances = slotsToComponents(this.injector, slots, rule)
@@ -388,7 +392,7 @@ export class Commander {
         this.delete(deletedSlot => {
           if (parentComponent.separable || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
-            slots.unshift(...deltaToSlots(selection, slot, delta, rule, range, startIndex))
+            slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex))
             if (startIndex > 0) {
               startScope = selection.getPreviousPositionByPosition(slot, startIndex)
               position = {
@@ -410,7 +414,7 @@ export class Commander {
           })
 
           const delta = deletedSlot.toDelta()
-          const dumpSlots = deltaToSlots(selection, slot, delta, rule, range, startIndex)
+          const dumpSlots = deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex)
 
           componentInstances = slotsToComponents(this.injector, dumpSlots, rule)
 
@@ -439,7 +443,12 @@ export class Commander {
     componentInstances.forEach(instance => {
       this.insert(instance)
     })
-    selection.setBaseAndExtent(range.anchorSlot, range.anchorOffset, range.focusSlot, range.focusOffset)
+    selection.setBaseAndExtent(
+      abstractSelection.anchorSlot,
+      abstractSelection.anchorOffset,
+      abstractSelection.focusSlot,
+      abstractSelection.focusOffset
+    )
     return true
   }
 

@@ -10,7 +10,7 @@ import {
   onSlotRemove,
   Selection,
   Slot,
-  Range,
+  AbstractSelection,
   SlotRender,
   useContext,
   useSelf,
@@ -43,8 +43,8 @@ export class TableComponentSelectionAwarenessDelegate extends CollaborateSelecti
     super()
   }
 
-  override getRects(range: Range) {
-    const { focusSlot, anchorSlot } = range
+  override getRects(abstractSelection: AbstractSelection) {
+    const { focusSlot, anchorSlot } = abstractSelection
     const focusPaths = this.selection.getPathsBySlot(focusSlot)!
     const anchorPaths = this.selection.getPathsBySlot(anchorSlot)!
     const focusIsStart = Selection.compareSelectionPaths(focusPaths, anchorPaths)

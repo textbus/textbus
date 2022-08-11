@@ -7,7 +7,7 @@ import {
   Renderer,
   SelectionPosition,
   Slot,
-  Range as TBRange,
+  AbstractSelection,
   VElement,
   VTextNode,
   RootComponentRef, Controller
@@ -113,20 +113,20 @@ export class SelectionBridge implements NativeSelectionBridge {
     return getLayoutRectByRange(nativeRange)
   }
 
-  restore(range: TBRange | null, formLocal: boolean) {
+  restore(abstractSelection: AbstractSelection | null, formLocal: boolean) {
     this.changeFromUser = formLocal
     if (this.ignoreSelectionChange || !this.connector) {
       return
     }
     this.unListen()
-    if (!range) {
+    if (!abstractSelection) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
       this.listen(this.connector)
       return
     }
 
-    const { focus, anchor } = this.getPositionByRange(range)
+    const { focus, anchor } = this.getPositionByRange(abstractSelection)
     if (!focus || !anchor) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
@@ -154,14 +154,15 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.sub.unsubscribe()
   }
 
-  getPositionByRange(range: TBRange) {
+  getPositionByRange(abstractSelection: AbstractSelection) {
     let focus!: { node: Node, offset: number } | null
     let anchor!: { node: Node, offset: number } | null
     try {
-      focus = this.findSelectedNodeAndOffset(range.focusSlot!, range.focusOffset!)
+      focus = this.findSelectedNodeAndOffset(abstractSelection.focusSlot!, abstractSelection.focusOffset!)
       anchor = focus
-      if (range.anchorSlot !== range.focusSlot || range.anchorOffset !== range.focusOffset) {
-        anchor = this.findSelectedNodeAndOffset(range.anchorSlot!, range.anchorOffset!)
+      if (abstractSelection.anchorSlot !== abstractSelection.focusSlot ||
+        abstractSelection.anchorOffset !== abstractSelection.focusOffset) {
+        anchor = this.findSelectedNodeAndOffset(abstractSelection.anchorSlot!, abstractSelection.anchorOffset!)
       }
       return {
         focus,
@@ -327,7 +328,7 @@ export class SelectionBridge implements NativeSelectionBridge {
           this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
         if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
           startPosition && endPosition) {
-          const range: TBRange = isFocusEnd ? {
+          const abstractSelection: AbstractSelection = isFocusEnd ? {
             anchorSlot: startPosition.slot,
             anchorOffset: startPosition.offset,
             focusSlot: endPosition.slot,
@@ -338,7 +339,7 @@ export class SelectionBridge implements NativeSelectionBridge {
             anchorSlot: endPosition.slot,
             anchorOffset: endPosition.offset
           }
-          const { focus, anchor } = this.getPositionByRange(range)
+          const { focus, anchor } = this.getPositionByRange(abstractSelection)
 
           if (focus && anchor) {
             let start = anchor
@@ -353,7 +354,7 @@ export class SelectionBridge implements NativeSelectionBridge {
             if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
               nativeRange.setEnd(end.node, end.offset)
             }
-            connector.setSelection(range)
+            connector.setSelection(abstractSelection)
             this.selectionChangeEvent.next(nativeRange)
           } else {
             connector.setSelection(null)

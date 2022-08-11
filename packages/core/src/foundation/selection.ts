@@ -14,7 +14,7 @@ import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
 
-export interface Range {
+export interface AbstractSelection {
   focusSlot: Slot
   anchorSlot: Slot
   focusOffset: number
@@ -22,8 +22,8 @@ export interface Range {
 }
 
 export interface SelectedSlotRange {
-  startIndex: number
-  endIndex: number
+  startOffset: number
+  endOffset: number
   component: ComponentInstance
 }
 
@@ -33,9 +33,9 @@ export interface SelectedSlotRange {
 export interface NativeSelectionConnector {
   /**
    * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
-   * @param range 对应原生选区在 Textbus 中的选区
+   * @param abstractSelection 对应原生选区在 Textbus 中的选区
    */
-  setSelection(range: Range | null): void
+  setSelection(abstractSelection: AbstractSelection | null): void
 }
 
 export interface SelectionPosition {
@@ -44,10 +44,10 @@ export interface SelectionPosition {
 }
 
 export interface CommonAncestorSlotScope {
-  startIndex: number
+  startOffset: number
   startSlot: Slot
   startChildComponent: ComponentInstance | null
-  endIndex: number
+  endOffset: number
   endSlot: Slot
   endChildComponent: ComponentInstance | null
   startChildSlot: Slot
@@ -86,7 +86,7 @@ export abstract class NativeSelectionBridge {
    * @param range
    * @param changeFromLocal 是否是本地引起的变化
    */
-  abstract restore(range: Range | null, changeFromLocal: boolean): void
+  abstract restore(range: AbstractSelection | null, changeFromLocal: boolean): void
 
   /**
    * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
@@ -112,7 +112,7 @@ export class Selection {
   @Prop()
   private bridge!: NativeSelectionBridge
   /** 当选区变化时触发 */
-  onChange: Observable<Range | null>
+  onChange: Observable<AbstractSelection | null>
 
   /** 当前是否有选区 */
   get isSelected() {
@@ -189,7 +189,7 @@ export class Selection {
     }
     if (v) {
       this.bridge.connect({
-        setSelection: (range: Range | null) => {
+        setSelection: (range: AbstractSelection | null) => {
           if (range === null) {
             if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
               return
@@ -224,7 +224,7 @@ export class Selection {
   private _anchorOffset: number | null = null
   private _focusSlot: Slot | null = null
   private _focusOffset: number | null = null
-  private changeEvent = new Subject<Range | null>()
+  private changeEvent = new Subject<AbstractSelection | null>()
 
   private _nativeSelectionDelegate = true
 
@@ -857,13 +857,13 @@ export class Selection {
     let startSlot = this.startSlot!
     let endSlot = this.endSlot!
 
-    let startIndex: number
-    let endIndex: number
+    let startOffset: number
+    let endOffset: number
 
     while (true) {
       const parent = startSlot.parent
       if (parent === ancestorComponent) {
-        startIndex = parent.slots.indexOf(startSlot)
+        startOffset = parent.slots.indexOf(startSlot)
         break
       }
       if (parent?.parent) {
@@ -875,7 +875,7 @@ export class Selection {
     while (true) {
       const parent = endSlot.parent
       if (parent === ancestorComponent) {
-        endIndex = parent.slots.indexOf(endSlot) + 1
+        endOffset = parent.slots.indexOf(endSlot) + 1
         break
       }
       if (parent?.parent) {
@@ -885,10 +885,10 @@ export class Selection {
       }
     }
 
-    if (startIndex >= 0 && endIndex >= 1) {
+    if (startOffset >= 0 && endOffset >= 1) {
       return {
-        startIndex,
-        endIndex,
+        startOffset,
+        endOffset,
         component: ancestorComponent
       }
     }
@@ -959,8 +959,8 @@ export class Selection {
     let endSlot = this.endSlot!
     let startChildSlot = this.startSlot!
     let endChildSlot = this.endSlot!
-    let startIndex = this.startOffset!
-    let endIndex = this.endOffset!
+    let startOffset = this.startOffset!
+    let endOffset = this.endOffset!
     const commonAncestorSlot = this.commonAncestorSlot
     const commonAncestorComponent = this.commonAncestorComponent
 
@@ -973,7 +973,7 @@ export class Selection {
         startChildSlot = startSlot
       }
       startSlot = startChildComponent.parent!
-      startIndex = startSlot.indexOf(startChildComponent)
+      startOffset = startSlot.indexOf(startChildComponent)
     }
 
     while (endSlot !== commonAncestorSlot) {
@@ -982,14 +982,14 @@ export class Selection {
         endChildSlot = endSlot
       }
       endSlot = endChildComponent.parent!
-      endIndex = endSlot.indexOf(endChildComponent)
+      endOffset = endSlot.indexOf(endChildComponent)
     }
 
     return {
-      startIndex,
+      startOffset: startOffset,
       startSlot,
       startChildComponent,
-      endIndex: endIndex + 1,
+      endOffset: endOffset + 1,
       endSlot,
       endChildComponent,
       startChildSlot,
