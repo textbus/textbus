@@ -21,6 +21,13 @@ export interface AbstractSelection {
   anchorOffset: number
 }
 
+export interface Range {
+  startSlot: Slot
+  endSlot: Slot
+  startOffset: number
+  endOffset: number
+}
+
 export interface SelectedSlotRange {
   startOffset: number
   endOffset: number
@@ -354,6 +361,25 @@ export class Selection {
     focusSlot.retain(focusOffset)
     this._focusOffset = focusSlot.index
     this.resetStartAndEndPosition()
+  }
+
+  getRanges(): Range[] {
+    if (this.customRanges) {
+      return this.customRanges.map(i => {
+        return {
+          startOffset: i.startIndex,
+          endOffset: i.endIndex,
+          startSlot: i.slot,
+          endSlot: i.slot
+        }
+      })
+    }
+    return this.isSelected ? [{
+      startSlot: this.startSlot!,
+      endSlot: this.endSlot!,
+      startOffset: this.startOffset!,
+      endOffset: this.endOffset!
+    }] : []
   }
 
   /**

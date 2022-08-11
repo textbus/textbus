@@ -247,11 +247,11 @@ export class Slot<T = any> {
         formats.push([formatter, value as FormatValue])
       }
     }
-    // if (isEmpty) {
-    //   formats = formats.filter(i => {
-    //     return i[0].type !== FormatType.Block
-    //   })
-    // }
+    if (!isEmpty) {
+      formats = formats.filter(i => {
+        return i[0].type !== FormatType.Block
+      })
+    }
     this.format.split(startIndex, length)
 
     this.content.insert(startIndex, content)
