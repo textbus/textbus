@@ -1,4 +1,4 @@
-import { BlockFormatter, Formatter, FormatType, BelowBlockFormatter } from './formatter'
+import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { Slot } from './slot'
 
 export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
@@ -44,7 +44,7 @@ export class Format {
    * @param value
    */
   merge(formatter: BlockFormatter, value: FormatValue): this
-  merge(formatter: BelowBlockFormatter, value: FormatRange): this
+  merge(formatter: InlineFormatter, value: FormatRange): this
   merge(formatter: Formatter, value: FormatValue | FormatRange): this {
     if (formatter.type === FormatType.Block) {
       if (value === null || typeof value === 'undefined') {

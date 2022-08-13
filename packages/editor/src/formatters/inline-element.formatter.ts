@@ -1,9 +1,9 @@
-import { FormatType, InlineFormatter, VElement } from '@textbus/core'
+import { FormatType, InlineTagFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 
 export class InlineTagFormatLoader extends Matcher {
-  constructor(formatter: InlineFormatter, rule: MatchRule) {
+  constructor(formatter: InlineTagFormatter, rule: MatchRule) {
     super(formatter, rule)
   }
 
@@ -15,7 +15,7 @@ export class InlineTagFormatLoader extends Matcher {
   }
 }
 
-export class InlineTagFormatter implements InlineFormatter {
+export class InlineElementFormatter implements InlineTagFormatter {
   type: FormatType.InlineTag = FormatType.InlineTag
 
   constructor(public name: string,
@@ -28,13 +28,13 @@ export class InlineTagFormatter implements InlineFormatter {
 }
 
 // 行内标签
-export const boldFormatter = new InlineTagFormatter('bold', 'strong')
-export const italicFormatter = new InlineTagFormatter('italic', 'em')
-export const strikeThroughFormatter = new InlineTagFormatter('strikeThrough', 'del')
-export const underlineFormatter = new InlineTagFormatter('underline', 'u')
-export const subscriptFormatter = new InlineTagFormatter('subscript', 'sub')
-export const superscriptFormatter = new InlineTagFormatter('superscript', 'sup')
-export const codeFormatter = new InlineTagFormatter('code', 'code')
+export const boldFormatter = new InlineElementFormatter('bold', 'strong')
+export const italicFormatter = new InlineElementFormatter('italic', 'em')
+export const strikeThroughFormatter = new InlineElementFormatter('strikeThrough', 'del')
+export const underlineFormatter = new InlineElementFormatter('underline', 'u')
+export const subscriptFormatter = new InlineElementFormatter('subscript', 'sub')
+export const superscriptFormatter = new InlineElementFormatter('superscript', 'sup')
+export const codeFormatter = new InlineElementFormatter('code', 'code')
 export const boldFormatLoader = new InlineTagFormatLoader(boldFormatter, {
   tags: ['strong', 'b'],
   styles: {

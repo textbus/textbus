@@ -1,5 +1,5 @@
 import { Inject, Injectable, Injector } from '@tanbo/di'
-import { Component, ZenCodingGrammarInterceptor, Shortcut } from '../model/_api'
+import { Component, Shortcut } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
@@ -11,27 +11,78 @@ export interface KeymapState {
   key: string
 }
 
+export interface ZenCodingInterceptor {
+  /** 匹配字符 */
+  match: RegExp | ((content: string) => boolean)
+  /** 触发键 */
+  key: string | string[]
+
+  /** 触发执行的方法 */
+  action(content: string): boolean
+}
+
 /**
  * Textbus 键盘管理
  */
 @Injectable()
 export class Keyboard {
   private shortcutList: Shortcut[] = []
-  private zenCodingMatchers: Array<{ component: Component, zenCodingInterceptor: ZenCodingGrammarInterceptor }> = []
+  private zenCodingInterceptors: ZenCodingInterceptor[] = []
 
   constructor(@Inject(COMPONENT_LIST) private components: Component[],
               @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
               private commander: Commander,
               private injector: Injector,
               private selection: Selection) {
-    components.forEach(i => {
-      if (i.zenCodingSupport) {
-        this.zenCodingMatchers.push({
-          zenCodingInterceptor: i.zenCodingSupport,
-          component: i
+    components.forEach(component => {
+      const config = component.zenCoding
+      if (config) {
+        this.zenCodingInterceptors.push({
+          match(content: string) {
+            return typeof config.match === 'function' ? config.match(content) : config.match.test(content)
+          },
+          key: config.key,
+          action(content: string): boolean {
+            const commonAncestorSlot = selection.commonAncestorSlot!
+            const initData = config.generateInitData(content)
+            const newInstance = component.createInstance(injector, initData)
+            if (commonAncestorSlot.schema.includes(newInstance.type)) {
+              selection.selectSlot(commonAncestorSlot)
+              commander.delete()
+              commander.insert(newInstance)
+            } else {
+              const parentComponent = commonAncestorSlot.parent
+              if (parentComponent && parentComponent.slots.length > 1) {
+                return false
+              }
+              const parentSlot = parentComponent?.parent
+              if (!parentSlot) {
+                return false
+              }
+              selection.selectComponent(parentComponent)
+              commander.delete()
+              commander.insert(newInstance)
+            }
+            const newSlot = newInstance.slots.first
+            if (newSlot) {
+              selection.setPosition(newSlot, 0)
+            } else if (newInstance.parent) {
+              const index = newInstance.parent.indexOf(newInstance)
+              selection.setPosition(newInstance.parent, index + 1)
+            }
+            return true
+          }
         })
       }
     })
+  }
+
+  /**
+   * 注册输入语法糖
+   * @param interceptor
+   */
+  addZenCodingInterceptor(interceptor: ZenCodingInterceptor) {
+    this.zenCodingInterceptors.unshift(interceptor)
   }
 
   /**
@@ -43,7 +94,7 @@ export class Keyboard {
       return false
     }
     const key = keymapState.key
-    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-\^\\\]\[])/g, '\\$1')}]$`, 'i')
+    const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-^\\\]\[])/g, '\\$1')}]$`, 'i')
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
     if (this.markdownDetect &&
@@ -52,11 +103,10 @@ export class Keyboard {
       !keymapState.altKey &&
       commonAncestorSlot === this.selection.startSlot &&
       commonAncestorSlot === this.selection.endSlot) {
-      for (const item of this.zenCodingMatchers) {
-        const markdownConfig = item.zenCodingInterceptor
-        const matchKey = Array.isArray(markdownConfig.key) ?
-          markdownConfig.key.some(k => reg.test(k)) :
-          reg.test(markdownConfig.key)
+      for (const interceptor of this.zenCodingInterceptors) {
+        const matchKey = Array.isArray(interceptor.key) ?
+          interceptor.key.some(k => reg.test(k)) :
+          reg.test(interceptor.key)
         if (matchKey) {
           const activeSlotContents = commonAncestorSlot.sliceContent()
           let content = activeSlotContents[0]
@@ -67,40 +117,17 @@ export class Keyboard {
           content = content.replace(/\n$/, '')
 
           let matchContent = false
-          if (markdownConfig.match instanceof RegExp) {
-            matchContent = markdownConfig.match.test(content)
-          } else if (typeof markdownConfig.match === 'function') {
-            matchContent = markdownConfig.match(content)
+          if (interceptor.match instanceof RegExp) {
+            matchContent = interceptor.match.test(content)
+          } else if (typeof interceptor.match === 'function') {
+            matchContent = interceptor.match(content)
           }
           if (matchContent) {
-            const initData = markdownConfig.generateInitData(content)
-            const newInstance = item.component.createInstance(this.injector, initData)
-            if (commonAncestorSlot.schema.includes(newInstance.type)) {
-              this.selection.selectSlot(commonAncestorSlot)
-              this.commander.delete()
-              this.commander.insert(newInstance)
-            } else {
-              const parentComponent = commonAncestorSlot.parent
-              if (parentComponent && parentComponent.slots.length > 1) {
-                break
-              }
-              const parentSlot = parentComponent?.parent
-              if (!parentSlot) {
-                break
-              }
-              this.selection.selectComponent(parentComponent)
-              this.commander.delete()
-              this.commander.insert(newInstance)
+            const r = interceptor.action(content)
+            if (!r) {
+              break
             }
-            const newSlot = newInstance.slots.first
-            if (newSlot) {
-              this.selection.setPosition(newSlot, 0)
-              return true
-            } else if (newInstance.parent) {
-              const index = newInstance.parent.indexOf(newInstance)
-              this.selection.setPosition(newInstance.parent, index + 1)
-              return true
-            }
+            return true
           }
         }
       }

@@ -5,7 +5,7 @@ import { ComponentInstance, ComponentLiteral } from './component'
 import { Action, ApplyAction } from './operation'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats } from './format'
-import { BlockFormatter, Formatter, FormatType, BelowBlockFormatter } from './formatter'
+import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { ChangeMarker } from './change-marker'
 
 export enum ContentType {
@@ -461,7 +461,7 @@ export class Slot<T = any> {
    * @param data
    */
   applyFormat(formatter: BlockFormatter, data: FormatValue): void
-  applyFormat(formatter: BelowBlockFormatter, data: FormatRange): void
+  applyFormat(formatter: InlineFormatter, data: FormatRange): void
   applyFormat(formatter: Formatter, data: FormatValue | FormatRange): void {
     if (formatter.type === FormatType.Block) {
       this.retain(0)

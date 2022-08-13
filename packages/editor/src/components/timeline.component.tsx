@@ -14,7 +14,7 @@ import { Injector } from '@tanbo/di'
 
 import { blockComponent } from './block.component'
 import { colorFormatter, fontSizeFormatter } from '../formatters/_api'
-import { boldFormatter } from '../formatters/inline-tag.formatter'
+import { boldFormatter } from '../formatters/inline-element.formatter'
 import { paragraphComponent } from './paragraph.component'
 
 const timelineTypes = ['primary', 'info', 'success', 'warning', 'danger', 'dark', 'gray']

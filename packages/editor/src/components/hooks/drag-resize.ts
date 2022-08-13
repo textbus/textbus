@@ -40,7 +40,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
   const subs: Subscription[] = []
 
   subs.push(
-    renderer.onViewChecked.subscribe(() => {
+    renderer.onViewUpdated.subscribe(() => {
       if (isFocus && currentRef) {
         updateStyle(currentRef.current!, getBoundingClientRect(docContainer))
       }

@@ -1,4 +1,4 @@
-import { FormatType, InlineFormatter, VElement } from '@textbus/core'
+import { FormatType, InlineTagFormatter, VElement } from '@textbus/core'
 
 import { Matcher } from './matcher'
 
@@ -19,7 +19,7 @@ export class LinkFormatLoader extends Matcher {
   }
 }
 
-export class LinkFormatter implements InlineFormatter {
+export class LinkFormatter implements InlineTagFormatter {
   type: FormatType.InlineTag = FormatType.InlineTag
   name = 'link'
 

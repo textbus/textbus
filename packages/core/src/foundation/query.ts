@@ -56,23 +56,33 @@ export class Query {
   queryComponent<Extends extends ComponentExtends, T>(
     component: Component<ComponentInstance<Extends, T>>,
     filter?: (instance: ComponentInstance<Extends, T>) => boolean): QueryState<ComponentInstance<Extends, T>> {
-    let parent = this.selection.commonAncestorComponent
+    if (!this.selection.isSelected) {
+      return {
+        state: QueryStateType.Normal,
+        value: null
+      }
+    }
+    const ranges = this.selection.getRanges()
+    const states = ranges.map(item => {
+      let parent = Selection.getCommonAncestorComponent(item.startSlot, item.endSlot)
 
-    while (parent) {
-      if (parent.name === component.name) {
-        if (!filter || filter(parent as ComponentInstance<Extends>)) {
-          return {
-            state: QueryStateType.Enabled,
-            value: parent as ComponentInstance<Extends>
+      while (parent) {
+        if (parent.name === component.name) {
+          if (!filter || filter(parent as ComponentInstance<Extends>)) {
+            return {
+              state: QueryStateType.Enabled,
+              value: parent as ComponentInstance<Extends>
+            }
           }
         }
+        parent = parent.parent?.parent || null
       }
-      parent = parent.parent?.parent || null
-    }
-    return {
-      state: QueryStateType.Normal,
-      value: null
-    }
+      return {
+        state: QueryStateType.Normal,
+        value: null
+      }
+    })
+    return this.mergeState(states)
   }
 
   /**
@@ -83,25 +93,36 @@ export class Query {
     component: Component<ComponentInstance<Extends, T>>
   ): QueryState<ComponentInstance<Extends, T>> {
     const selection = this.selection
-    if (!selection.isSelected ||
-      selection.isCollapsed ||
-      selection.startSlot !== selection.endSlot ||
-      selection.endOffset! - selection.startOffset! > 1) {
+    if (!selection.isSelected || selection.isCollapsed) {
       return {
         state: QueryStateType.Normal,
         value: null
       }
     }
-    const instance = selection.startSlot!.getContentAtIndex(selection.startOffset!)
-    if (typeof instance !== 'string' && instance.name === component.name) {
-      return {
-        state: QueryStateType.Enabled,
-        value: instance as ComponentInstance<Extends>
+    const ranges = selection.getRanges()
+    const instances: ComponentInstance<Extends, T>[] = []
+    for (const range of ranges) {
+      const { startSlot, endSlot, startOffset, endOffset } = range
+      if (startSlot !== endSlot ||
+        endOffset! - startOffset! > 1) {
+        return {
+          state: QueryStateType.Normal,
+          value: null
+        }
+      }
+      const instance = startSlot.getContentAtIndex(startOffset)
+      if (typeof instance !== 'string' && instance.name === component.name) {
+        instances.push(instance as ComponentInstance<Extends, T>)
+      } else {
+        return {
+          state: QueryStateType.Normal,
+          value: null
+        }
       }
     }
     return {
-      state: QueryStateType.Normal,
-      value: null
+      state: QueryStateType.Enabled,
+      value: instances[0]
     }
   }
 
@@ -160,8 +181,8 @@ export class Query {
     return this.mergeState(states)
   }
 
-  private mergeState(states: Array<QueryState<FormatValue> | null>): QueryState<FormatValue> {
-    const states1 = states.filter(i => i) as QueryState<FormatValue>[]
+  private mergeState<T>(states: Array<QueryState<T> | null>): QueryState<T> {
+    const states1 = states.filter(i => i) as QueryState<T>[]
     const states2 = states1.filter(i => i.state !== QueryStateType.Normal)
     if (states.length !== states2.length) {
       return {

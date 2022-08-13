@@ -259,7 +259,30 @@ export class Selection {
       share()
     )
     let selectedComponent: ComponentInstance | null = null
+    const focusInComponents: ComponentInstance[] = []
     this.subscriptions.push(
+      this.onChange.pipe(
+        map(() => {
+          return this.commonAncestorComponent
+        }),
+        distinctUntilChanged()
+      ).subscribe(component => {
+        while (focusInComponents.length) {
+          const focusOutComponent = focusInComponents.shift()!
+          let parentComponent: ComponentInstance | null = focusOutComponent
+          while (parentComponent) {
+            if (parentComponent === root.component) {
+              invokeListener(focusOutComponent, 'onFocusOut')
+            }
+            parentComponent = parentComponent.parentComponent
+          }
+        }
+        while (component) {
+          focusInComponents.push(component)
+          invokeListener(component, 'onFocusIn')
+          component = component.parentComponent
+        }
+      }),
       this.onChange.pipe(map(() => {
         return this.commonAncestorComponent
       })).subscribe(commonAncestorComponent => {
@@ -552,7 +575,6 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    this.resetStartAndEndPosition()
     return this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
   }
 

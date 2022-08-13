@@ -15,7 +15,7 @@ import { ComponentLoader, SlotParser } from '@textbus/browser'
 
 import { blockComponent } from './block.component'
 import { fontSizeFormatter } from '../formatters/_api'
-import { boldFormatter } from '../formatters/inline-tag.formatter'
+import { boldFormatter } from '../formatters/inline-element.formatter'
 import { paragraphComponent } from './paragraph.component'
 
 export interface StepComponentState {

@@ -163,7 +163,7 @@ export class Viewer {
     const renderer = starter.get(Renderer)
     const caret = starter.get(Caret)
     this.subs.push(
-      renderer.onViewChecked.subscribe(() => {
+      renderer.onViewUpdated.subscribe(() => {
         this.changeEvent.next()
       }),
       caret.onPositionChange.pipe(

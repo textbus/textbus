@@ -33,7 +33,7 @@ export const listComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'ListComponent',
   separable: true,
-  zenCodingSupport: {
+  zenCoding: {
     key: ' ',
     match: /^(1\.|[+*])$/,
     generateInitData(content: string) {

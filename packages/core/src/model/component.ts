@@ -141,8 +141,8 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
   /** 组件是否可拆分 */
   separable?: boolean
 
-  /** markdown 支持 */
-  zenCodingSupport?: ZenCodingGrammarInterceptor<ComponentData<State, SlotState>>
+  /** 输入语法糖支持 */
+  zenCoding?: ZenCodingGrammarInterceptor<ComponentData<State, SlotState>>
 
   /**
    * 组件初始化实现
@@ -162,7 +162,7 @@ export interface Component<Instance extends ComponentInstance = ComponentInstanc
   /** 组件是否可拆分 */
   separable: boolean
 
-  zenCodingSupport?: ZenCodingGrammarInterceptor<State>
+  zenCoding?: ZenCodingGrammarInterceptor<State>
 
   /**
    * 组件创建实例的方法
@@ -251,6 +251,8 @@ export interface EventTypes {
   onSelected: () => void
   onFocus: () => void
   onBlur: () => void
+  onFocusIn: () => void
+  onFocusOut: () => void
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
@@ -340,7 +342,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
     name: options.name,
     separable,
     instanceType: options.type,
-    zenCodingSupport: options.zenCodingSupport,
+    zenCoding: options.zenCoding,
     createInstance(contextInjector: Injector, initData?: ComponentData<State, SlotState>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
@@ -576,6 +578,8 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSelected
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onFocusIn'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onFocusOut'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
 export function invokeListener<K extends keyof EventTypes,
@@ -663,6 +667,16 @@ export const onFocus = makeEventHook('onFocus')
  * 组件失去焦点事件的勾子
  */
 export const onBlur = makeEventHook('onBlur')
+
+/**
+ * 组件或子组件获取焦点事件的勾子
+ */
+export const onFocusIn = makeEventHook('onFocusIn')
+
+/**
+ * 组件或子组件失去焦点事件的勾子
+ */
+export const onFocusOut = makeEventHook('onFocusOut')
 
 /**
  * 组件内粘贴事件勾子

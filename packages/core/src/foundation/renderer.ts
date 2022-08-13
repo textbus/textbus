@@ -211,7 +211,7 @@ export class Renderer {
   /**
    * 视图更新后触发
    */
-  onViewChecked: Observable<void>
+  onViewUpdated: Observable<void>
 
   @Prop()
   nativeRenderer!: NativeRenderer
@@ -228,7 +228,7 @@ export class Renderer {
 
   private nativeNodeCaches = new NativeElementMappingTable()
 
-  private viewCheckedEvent = new Subject<void>()
+  private viewUpdatedEvent = new Subject<void>()
   private viewUpdateBeforeEvent = new Subject<void>()
   private oldVDom: VElement | null = null
 
@@ -242,7 +242,7 @@ export class Renderer {
   constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
               private controller: Controller,
               private rootComponentRef: RootComponentRef) {
-    this.onViewChecked = this.viewCheckedEvent.asObservable()
+    this.onViewUpdated = this.viewUpdatedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
     this.subscription = controller.onReadonlyStateChange.subscribe(() => {
       if (rootComponentRef.component) {
@@ -288,7 +288,7 @@ export class Renderer {
         invokeListener(item, 'onViewChecked')
       }
       this.renderedComponents = []
-      this.viewCheckedEvent.next()
+      this.viewUpdatedEvent.next()
     })
   }
 

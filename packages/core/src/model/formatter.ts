@@ -21,10 +21,10 @@ export interface Formatter<T extends FormatType = any> {
 
 export interface BlockFormatter extends Formatter<FormatType.Block> {}
 
-export interface InlineFormatter extends Formatter<FormatType.InlineTag> {}
+export interface InlineTagFormatter extends Formatter<FormatType.InlineTag> {}
 
 export interface AttributeFormatter extends Formatter<FormatType.Attribute> {}
 
 export interface OuterFormatter extends Formatter<FormatType.Outer> {}
 
-export type BelowBlockFormatter = InlineFormatter | AttributeFormatter | OuterFormatter
+export type InlineFormatter = InlineTagFormatter | AttributeFormatter | OuterFormatter

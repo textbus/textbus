@@ -26,8 +26,8 @@ export const todolistComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TodolistComponent',
   separable: true,
-  zenCodingSupport: {
-    match: /^-\s\[(x|\s)?\]$/,
+  zenCoding: {
+    match: /^-\s\[(x|\s)?\\]$/,
     key: ' ',
     generateInitData(content: string): ComponentData<void, TodoListSlotState> {
       const isChecked = content.charAt(3) === 'x'

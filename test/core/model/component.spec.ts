@@ -18,7 +18,7 @@ describe('Component', () => {
       type: ContentType.InlineComponent,
       name: 'Test',
       separable: true,
-      zenCodingSupport: {
+      zenCoding: {
         a: 1
       } as any,
       setup() {
@@ -32,7 +32,7 @@ describe('Component', () => {
     expect(testComponent.name).toBe('Test')
     expect(testComponent.instanceType).toBe(ContentType.InlineComponent)
     expect(testComponent.separable).toBe(true)
-    expect(testComponent.zenCodingSupport).toEqual({a: 1})
+    expect(testComponent.zenCoding).toEqual({a: 1})
   })
 })
 

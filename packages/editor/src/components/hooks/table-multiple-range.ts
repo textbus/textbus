@@ -532,7 +532,7 @@ export function useTableMultipleRange(
   })
 
   subs.push(
-    merge(selection.onChange, renderer.onViewChecked).pipe(debounceTime(1)).subscribe(() => {
+    merge(selection.onChange, renderer.onViewUpdated).pipe(debounceTime(1)).subscribe(() => {
       updateMaskEffect()
     })
   )

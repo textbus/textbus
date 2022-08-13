@@ -88,7 +88,7 @@ export class Toolbar implements Plugin {
     this.subs.push(
       merge(
         selection.onChange,
-        renderer.onViewChecked,
+        renderer.onViewUpdated,
       ).pipe(auditTime(100)).subscribe(() => {
         tools.forEach(tool => {
           tool.refreshState()

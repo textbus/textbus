@@ -100,7 +100,7 @@ export class Scheduler {
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)
       }),
-      this.renderer.onViewChecked.subscribe(() => {
+      this.renderer.onViewUpdated.subscribe(() => {
         this.instanceList.forEach(instance => {
           let comp = instance
           while (comp) {

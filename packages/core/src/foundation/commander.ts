@@ -842,6 +842,9 @@ export class Commander {
         }
       } else {
         startScope = selection.getPreviousPositionByPosition(slot, startIndex)
+        if (startIndex === endIndex) {
+          continue
+        }
         this.delete(deletedSlot => {
           if (parentComponent.separable || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
