@@ -1,5 +1,5 @@
 import {
-  ComponentData, ComponentInstance,
+  ComponentInitData, ComponentInstance,
   ContentType,
   defineComponent, onContextMenu,
   onDestroy,
@@ -20,7 +20,7 @@ export interface AlertComponentState {
 export const alertComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'AlertComponent',
-  setup(initData?: ComponentData<AlertComponentState>) {
+  setup(initData?: ComponentInitData<AlertComponentState>) {
     const slots = useSlots(initData?.slots || [])
     let state = initData?.state || {
       type: 'primary',

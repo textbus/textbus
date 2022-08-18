@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -18,7 +18,7 @@ export interface AudioState {
 export const audioComponent = defineComponent({
   name: 'AudioComponent',
   type: ContentType.InlineComponent,
-  setup(data?: ComponentData<AudioState>) {
+  setup(data?: ComponentInitData<AudioState>) {
     let state = data?.state || {
       src: '',
       autoplay: false,

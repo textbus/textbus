@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -48,7 +48,7 @@ export function createJumbotronSlot(injector: Injector) {
 export const jumbotronComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'JumbotronComponent',
-  setup(initData?: ComponentData<JumbotronComponentState>) {
+  setup(initData?: ComponentInitData<JumbotronComponentState>) {
     const slots = useSlots(initData?.slots || [])
     const injector = useContext()
     const dialog = injector.get(Dialog)

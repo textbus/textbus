@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -39,7 +39,7 @@ export interface KatexComponentState {
 export const katexComponent = defineComponent({
   type: ContentType.InlineComponent,
   name: 'KatexComponent',
-  setup(initData?: ComponentData<KatexComponentState>) {
+  setup(initData?: ComponentInitData<KatexComponentState>) {
     let state = initData?.state || {
       source: defaultSource
     }

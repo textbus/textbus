@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -43,7 +43,7 @@ export function createStepSlot(injector: Injector) {
 export const stepComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'StepComponent',
-  setup(initData?: ComponentData<StepComponentState>) {
+  setup(initData?: ComponentInitData<StepComponentState>) {
     let state = initData?.state || {
       step: 0
     }

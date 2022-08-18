@@ -1,6 +1,6 @@
 import {
   Commander,
-  ComponentData, ComponentInstance,
+  ComponentInitData, ComponentInstance,
   ContentType,
   defineComponent, onContextMenu,
   onDestroy,
@@ -27,7 +27,7 @@ export const wordExplainComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'WordExplainComponent',
   separable: false,
-  setup(initData?: ComponentData<WordExplainComponentState>) {
+  setup(initData?: ComponentInitData<WordExplainComponentState>) {
     const slots = useSlots(initData?.slots || [])
     let state = initData?.state || {
       width: '140px'

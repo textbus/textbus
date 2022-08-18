@@ -103,6 +103,12 @@ export class DomRenderer implements NativeRenderer {
     xlinktype: 'xlink:type',
     'xlink:type': 'xlink:type'
   }
+  formElement: Record<string, string[]> = {
+    input: ['disabled', 'readonly', 'value'],
+    select: ['disabled', 'readonly'],
+    option: ['disabled', 'selected', 'value'],
+    button: ['disabled'],
+  }
 
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
     node.addEventListener(type, callback)
@@ -124,10 +130,6 @@ export class DomRenderer implements NativeRenderer {
   }
 
   appendChild(parent: NativeNode, newChild: NativeNode) {
-    // if (/^text$/i.test(parent.nodeName) && typeof parent.ownerSVGElement !== 'undefined' && newChild.nodeType === Node.TEXT_NODE) {
-    //   parent.textContent = newChild.textContent
-    //   return
-    // }
     parent.appendChild(newChild)
   }
 
@@ -165,6 +167,10 @@ export class DomRenderer implements NativeRenderer {
       return
     }
     target.setAttribute(key, value)
+    const propNames = this.formElement[target.tagName.toLowerCase()]
+    if (propNames && propNames.includes(key)) {
+      target[key] = value
+    }
   }
 
   removeAttribute(target: NativeNode, key: string) {

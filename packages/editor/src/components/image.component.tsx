@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -166,7 +166,7 @@ class SizeSetter implements FormItem {
 export const imageComponent = defineComponent({
   type: ContentType.InlineComponent,
   name: 'ImgComponent',
-  setup(data?: ComponentData<ImageComponentLiteral>) {
+  setup(data?: ComponentInitData<ImageComponentLiteral>) {
     let state = data?.state || {
       src: ''
     }

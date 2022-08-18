@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -27,7 +27,7 @@ export const blockquoteComponent = defineComponent({
       }
     }
   },
-  setup(data?: ComponentData) {
+  setup(data?: ComponentInitData) {
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,
       ContentType.InlineComponent,

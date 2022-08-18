@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentInitData,
   ContentType, Controller,
   defineComponent,
   jsx, Ref, Renderer,
@@ -65,7 +65,7 @@ describe('Component 初始化', () => {
 
 
   test('有初始数据', () => {
-    const initData: ComponentData = {
+    const initData: ComponentInitData = {
       slots: [new Slot([])]
     }
     let result: any

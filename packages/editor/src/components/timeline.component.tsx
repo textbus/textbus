@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -55,7 +55,7 @@ export function createTimelineItem(injector: Injector, type: TimelineType = 'pri
 export const timelineComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TimelineComponent',
-  setup(initData?: ComponentData<void, TimelineSlotState>) {
+  setup(initData?: ComponentInitData<void, TimelineSlotState>) {
     const injector = useContext()
     const slots = useSlots<TimelineSlotState>(initData?.slots || [
       createTimelineItem(injector)

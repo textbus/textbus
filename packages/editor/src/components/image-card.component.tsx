@@ -1,6 +1,6 @@
 import {
   Commander,
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -34,7 +34,7 @@ export const imageCardComponent = defineComponent({
   type: ContentType.BlockComponent,
   separable: false,
   name: 'ImageCardComponent',
-  setup(initData?: ComponentData<ImageCardComponentState>) {
+  setup(initData?: ComponentInitData<ImageCardComponentState>) {
     let state = initData?.state || {
       src: defaultImageSrc,
       height: '200px'

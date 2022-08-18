@@ -2,7 +2,7 @@ import { Injectable, Injector } from '@tanbo/di'
 import { ComponentLoader, getBoundingClientRect, SlotParser } from '@textbus/browser'
 import {
   Commander,
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -89,7 +89,7 @@ export const tableComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'TableComponent',
   separable: false,
-  setup(data: ComponentData<TableConfig, TableSlotState> = {
+  setup(data: ComponentInitData<TableConfig, TableSlotState> = {
     slots: Array.from({ length: 9 }).fill(null).map(() => createCell()),
     state: {
       columnCount: 3,

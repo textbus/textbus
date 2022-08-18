@@ -11,7 +11,7 @@ import {
   useContext,
   useSlots,
   VElement,
-  ComponentData, useState, onDestroy,
+  ComponentInitData, useState, onDestroy,
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/browser'
 
@@ -42,7 +42,7 @@ export const listComponent = defineComponent({
       }
     }
   },
-  setup(data?: ComponentData<'ul' | 'ol'>): ListComponentExtends {
+  setup(data?: ComponentInitData<'ul' | 'ol'>): ListComponentExtends {
     const injector = useContext()
     const selection = injector.get(Selection)
 

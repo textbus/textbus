@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ContentType,
   defineComponent,
   Slot,
@@ -15,7 +15,7 @@ import { useEnterBreaking } from './hooks/single-block-enter'
 export const blockComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'BlockComponent',
-  setup(data?: ComponentData) {
+  setup(data?: ComponentInitData) {
     const injector = useContext()
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,

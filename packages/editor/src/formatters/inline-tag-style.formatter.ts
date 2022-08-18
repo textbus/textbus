@@ -48,7 +48,7 @@ export class InlineTagStyleFormatter implements AttributeFormatter {
 }
 
 export class InlineTagLeafStyleFormatter extends InlineTagStyleFormatter {
-  columnAlignment = true
+  columned = true
 }
 
 // 强制行内样式

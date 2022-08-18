@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -22,7 +22,7 @@ export interface VideoState {
 export const videoComponent = defineComponent({
   name: 'VideoComponent',
   type: ContentType.InlineComponent,
-  setup(data?: ComponentData<VideoState>) {
+  setup(data?: ComponentInitData<VideoState>) {
     let state = data?.state || {
       src: '',
       autoplay: false,

@@ -15,7 +15,7 @@ import {
   useRef,
   onBreak,
   ComponentInstance,
-  ComponentData,
+  ComponentInitData,
   useSelf, onViewInit
 } from '@textbus/core'
 import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser, getBoundingClientRect } from '@textbus/browser'
@@ -26,7 +26,7 @@ import { EditorOptions } from './types'
 export const rootComponent = defineComponent({
   type: ContentType.BlockComponent,
   name: 'RootComponent',
-  setup(data?: ComponentData<any>) {
+  setup(data?: ComponentInitData<any>) {
     const injector = useContext()
     const selection = injector.get(Selection)
     const options = injector.get(EDITOR_OPTIONS) as EditorOptions

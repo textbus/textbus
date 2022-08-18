@@ -14,7 +14,7 @@ export enum FormatType {
 export interface Formatter<T extends FormatType = any> {
   type: T
   name: string
-  columnAlignment?: boolean
+  columned?: boolean
 
   render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
 }

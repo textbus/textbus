@@ -1,6 +1,6 @@
 import {
   Commander,
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -29,7 +29,7 @@ export const todolistComponent = defineComponent({
   zenCoding: {
     match: /^-\s\[(x|\s)?\\]$/,
     key: ' ',
-    generateInitData(content: string): ComponentData<void, TodoListSlotState> {
+    generateInitData(content: string): ComponentInitData<void, TodoListSlotState> {
       const isChecked = content.charAt(3) === 'x'
       return {
         slots: [
@@ -44,7 +44,7 @@ export const todolistComponent = defineComponent({
       }
     }
   },
-  setup(initData: ComponentData<void, TodoListSlotState>) {
+  setup(initData: ComponentInitData<void, TodoListSlotState>) {
     const { Text, InlineComponent } = ContentType
     const slots = useSlots<TodoListSlotState>(initData.slots || [
       new Slot<TodoListSlotState>([Text, InlineComponent])

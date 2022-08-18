@@ -13,19 +13,19 @@ enablePatches()
 
 const componentErrorFn = makeError('DefineComponent')
 
-export interface SlotsComponentData<State, SlotState> {
+export interface SlotsComponentInitData<State, SlotState> {
   slots: Slot<SlotState>[]
   state?: State
 }
 
-export interface StateComponentData<State, SlotState> {
+export interface StateComponentInitData<State, SlotState> {
   slots?: Slot<SlotState>[]
   state: State
 }
 
-export type ComponentData<State = unknown, SlotState = unknown> =
-  SlotsComponentData<State, SlotState>
-  | StateComponentData<State, SlotState>
+export type ComponentInitData<State = unknown, SlotState = unknown> =
+  SlotsComponentInitData<State, SlotState>
+  | StateComponentInitData<State, SlotState>
 
 export interface ComponentLiteral<State = any> {
   name: string
@@ -142,19 +142,19 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
   separable?: boolean
 
   /** 输入语法糖支持 */
-  zenCoding?: ZenCodingGrammarInterceptor<ComponentData<State, SlotState>>
+  zenCoding?: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>
 
   /**
    * 组件初始化实现
    * @param initData
    */
-  setup(initData?: ComponentData<State, SlotState>): Extends
+  setup(initData?: ComponentInitData<State, SlotState>): Extends
 }
 
 /**
  * Textbus 组件
  */
-export interface Component<Instance extends ComponentInstance = ComponentInstance, State extends ComponentData = ComponentData> {
+export interface Component<Instance extends ComponentInstance = ComponentInstance, State extends ComponentInitData = ComponentInitData> {
   /** 组件名 */
   name: string
   /** 实例数据类型 */
@@ -336,14 +336,14 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
  */
 export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
   options: ComponentOptions<Extends, State, SlotState>
-): Component<ComponentInstance<Extends, State>, ComponentData<State, SlotState>> {
+): Component<ComponentInstance<Extends, State>, ComponentInitData<State, SlotState>> {
   const separable = !!options.separable
   return {
     name: options.name,
     separable,
     instanceType: options.type,
     zenCoding: options.zenCoding,
-    createInstance(contextInjector: Injector, initData?: ComponentData<State, SlotState>) {
+    createInstance(contextInjector: Injector, initData?: ComponentInitData<State, SlotState>) {
       const marker = new ChangeMarker()
       const stateChangeSubject = new Subject<any>()
 

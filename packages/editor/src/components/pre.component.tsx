@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -345,7 +345,7 @@ export const preComponent = defineComponent({
       }
     }
   },
-  setup(data: ComponentData<PreComponentState> = {
+  setup(data: ComponentInitData<PreComponentState> = {
     slots: [],
     state: {
       lang: '',

@@ -1,7 +1,8 @@
 import { Injectable, Injector } from '@tanbo/di'
 
 import {
-  Component, ComponentData,
+  Component,
+  ComponentInitData,
   ComponentInstance,
   ComponentLiteral,
   FormatType,
@@ -19,7 +20,7 @@ export class Translator {
               private registry: Registry) {
   }
 
-  createComponentByData(name: string, data: ComponentData) {
+  createComponentByData(name: string, data: ComponentInitData) {
     const factory = this.registry.getComponent(name)
     if (factory) {
       return factory.createInstance(this.contextInjector, data)

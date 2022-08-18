@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import {
-  ComponentData,
+  ComponentInitData,
   ComponentInstance,
   ContentType,
   defineComponent,
@@ -28,7 +28,7 @@ export const headingComponent = defineComponent({
       }
     }
   },
-  setup(data?: ComponentData<string>) {
+  setup(data?: ComponentInitData<string>) {
     const injector = useContext()
     const slots = useSlots(data?.slots || [new Slot([
       ContentType.Text,

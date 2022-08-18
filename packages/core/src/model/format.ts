@@ -296,7 +296,7 @@ export class Format {
       const ranges = copyFormat.map.get(formatter)!
       ranges.forEach(range => {
         if (range.startIndex === startIndex && range.endIndex === endIndex) {
-          if (formatter.columnAlignment) {
+          if (formatter.columned) {
             columnedFormats.push({
               formatter,
               ...range
