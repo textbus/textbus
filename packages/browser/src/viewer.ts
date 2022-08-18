@@ -13,7 +13,9 @@ import {
   ComponentInstance,
   ComponentLiteral,
   invokeListener,
-  Controller, Component
+  Controller,
+  Component,
+  Keyboard
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentLoader } from './dom-support/_api'
@@ -48,7 +50,8 @@ export class Viewer {
   onBlur: Observable<void>
   /** 当编辑器内容变化时触发 */
   onChange: Observable<void>
-
+  /** 当用户按 Ctrl + S 时触发 */
+  onSave: Observable<void>
   /** 访问编辑器内部实例的 IoC 容器 */
   injector: Starter
 
@@ -77,6 +80,7 @@ export class Viewer {
   private resourceNodes: HTMLElement[] = []
   private focusEvent = new Subject<void>()
   private blurEvent = new Subject<void>()
+  private saveEvent = new Subject<void>()
   private styleSheet = ''
   private scripts: string[] = []
   private links: Record<string, string>[] = []
@@ -87,6 +91,7 @@ export class Viewer {
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
+    this.onSave = this.saveEvent.asObservable()
     const { doc, mask, wrapper } = Viewer.createLayout(this.id, options.minHeight)
     this.workbench = wrapper
     const staticProviders: Provider[] = [{
@@ -144,6 +149,17 @@ export class Viewer {
     const parser = starter.get(Parser)
     const translator = starter.get(Translator)
     const doc = starter.get(VIEW_DOCUMENT)
+    const keyboard = starter.get(Keyboard)
+
+    keyboard.addShortcut({
+      keymap: {
+        key: 's',
+        ctrlKey: true
+      },
+      action: () => {
+        this.saveEvent.next()
+      }
+    })
 
     let component: ComponentInstance
     const content = this.options.content

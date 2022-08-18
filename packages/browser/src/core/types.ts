@@ -26,7 +26,4 @@ export interface ViewOptions extends TextbusConfig {
   styleSheets?: string[]
   /** 配置文档编辑状态下用到的样式 */
   editingStyleSheets?: string[]
-
-  /** 当用户按 Ctrl + S 时调用 */
-  onSave?(): void
 }

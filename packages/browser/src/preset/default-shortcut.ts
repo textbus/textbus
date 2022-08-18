@@ -1,6 +1,5 @@
 import { Injector } from '@tanbo/di'
 import { Commander, History, Keyboard, Selection, Plugin } from '@textbus/core'
-import { EDITOR_OPTIONS } from '../core/_api'
 
 /**
  * Textbus PC 端默认按键绑定
@@ -10,7 +9,6 @@ export class DefaultShortcut implements Plugin {
     const selection = injector.get(Selection)
     const keyboard = injector.get(Keyboard)
     const history = injector.get(History)
-    const options = injector.get(EDITOR_OPTIONS)
     const commander = injector.get(Commander)
     keyboard.addShortcut({
       keymap: {
@@ -141,15 +139,6 @@ export class DefaultShortcut implements Plugin {
       },
       action: () => {
         history.forward()
-      }
-    })
-    keyboard.addShortcut({
-      keymap: {
-        key: 's',
-        ctrlKey: true
-      },
-      action: () => {
-        options.onSave?.()
       }
     })
   }
