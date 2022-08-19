@@ -92,6 +92,7 @@ export class Input {
       setTimeout(() => {
         if (!this.nativeFocus && this.isFocus) {
           this.subscription.unsubscribe()
+          this.textarea?.parentNode?.removeChild(this.textarea)
           this.subscription = new Subscription()
           this.init()
           this.textarea?.focus()
@@ -119,7 +120,11 @@ export class Input {
     this.subscription.add(
       fromEvent(textarea, 'blur').subscribe(() => {
         this.isFocus = false
+        this.nativeFocus = false
         this.caret.hide()
+      }),
+      fromEvent(textarea, 'focus').subscribe(() => {
+        this.nativeFocus = true
       }),
       this.caret.onStyleChange.subscribe(style => {
         Object.assign(textarea.style, style)

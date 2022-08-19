@@ -1,7 +1,7 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Optional } from '@tanbo/di'
 import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
-  ChangeOrigin,
+  ChangeOrigin, ComponentInitData,
   ComponentInstance,
   ContentType, Controller,
   Formats,
@@ -80,6 +80,10 @@ class ContentMap {
   }
 }
 
+export abstract class TranslatorFallback {
+  abstract createComponentByData(name: string, data: ComponentInitData): ComponentInstance | null
+}
+
 @Injectable()
 export class Collaborate implements History {
   onSelectionChange: Observable<SelectionPaths>
@@ -125,7 +129,8 @@ export class Collaborate implements History {
               private translator: Translator,
               private registry: Registry,
               private selection: Selection,
-              private starter: Starter) {
+              private starter: Starter,
+              @Optional() private translatorFallback: TranslatorFallback) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(delay())
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
@@ -600,10 +605,17 @@ export class Collaborate implements History {
       slots.push(slot)
     })
     const name = yMap.get('name')
-    const instance = this.translator.createComponentByData(name, {
-      state: yMap.get('state'),
+    const state = yMap.get('state')
+    let instance = this.translator.createComponentByData(name, {
+      state,
       slots
     })
+    if (!instance) {
+      instance = this.translatorFallback.createComponentByData(name, {
+        state,
+        slots
+      })
+    }
     if (instance) {
       instance.slots.toArray().forEach((slot, index) => {
         let sharedSlot = sharedSlots.get(index)
