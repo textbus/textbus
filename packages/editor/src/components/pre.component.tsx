@@ -4,10 +4,10 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  Formatter,
-  FormatType,
-  onContextMenu,
+  FormatPriority,
+  InlineFormatter,
   onBreak,
+  onContextMenu,
   onPaste,
   Selection,
   Slot,
@@ -117,15 +117,19 @@ export interface PreComponentState {
   theme?: string
 }
 
-export const codeStyleFormatter: Formatter = {
-  type: FormatType.Attribute,
-  name: 'code' + Math.random(),
+export class CodeStyleFormatter extends InlineFormatter {
+  constructor() {
+    super('code' + Math.random(), FormatPriority.Attribute)
+  }
+
   render(node: VElement | null, formatValue: string) {
     return new VElement('span', {
       class: 'tb-hl-' + formatValue
     })
   }
 }
+
+export const codeStyleFormatter = new CodeStyleFormatter()
 
 function getLanguageBlockCommentStart(lang: string): [string, string] {
   const types: Record<string, [string, string]> = {

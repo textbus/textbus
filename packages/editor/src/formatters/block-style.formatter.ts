@@ -1,4 +1,4 @@
-import { BlockFormatter, FormatType, VElement } from '@textbus/core'
+import { BlockFormatter, FormatPriority, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
@@ -16,7 +16,7 @@ export class BlockStyleFormatLoader extends Matcher {
     return super.match(p)
   }
 
-  read(node: HTMLElement) {
+  override read(node: HTMLElement) {
     return {
       formatter: this.formatter,
       value: this.extractFormatData(node, {
@@ -26,14 +26,13 @@ export class BlockStyleFormatLoader extends Matcher {
   }
 }
 
-export class BlockStyleFormatter implements BlockFormatter {
-  type: FormatType.Block = FormatType.Block
-
-  constructor(public name: string,
+export class BlockStyleFormatter extends BlockFormatter {
+  constructor(name: string,
               public styleName: string) {
+    super(name, FormatPriority.Tag)
   }
 
-  render(node: VElement | null, formatValue: string): VElement | void {
+  override render(node: VElement | null, formatValue: string): VElement | void {
     if (node) {
       node.styles.set(this.styleName, formatValue)
     } else {

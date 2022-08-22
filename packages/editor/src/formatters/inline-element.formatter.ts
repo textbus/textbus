@@ -1,13 +1,13 @@
-import { FormatType, InlineTagFormatter, VElement } from '@textbus/core'
+import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 
 export class InlineTagFormatLoader extends Matcher {
-  constructor(formatter: InlineTagFormatter, rule: MatchRule) {
+  constructor(formatter: InlineElementFormatter, rule: MatchRule) {
     super(formatter, rule)
   }
 
-  read() {
+  override read() {
     return {
       formatter: this.formatter,
       value: true
@@ -15,14 +15,13 @@ export class InlineTagFormatLoader extends Matcher {
   }
 }
 
-export class InlineElementFormatter implements InlineTagFormatter {
-  type: FormatType.InlineTag = FormatType.InlineTag
-
-  constructor(public name: string,
+export class InlineElementFormatter extends InlineFormatter {
+  constructor(name: string,
               public tagName: string) {
+    super(name, FormatPriority.Tag)
   }
 
-  render() {
+  override render() {
     return new VElement(this.tagName)
   }
 }

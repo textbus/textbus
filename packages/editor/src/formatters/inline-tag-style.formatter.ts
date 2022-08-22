@@ -1,10 +1,10 @@
-import { AttributeFormatter, FormatType, VElement } from '@textbus/core'
+import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { inlineTags } from './_config'
 
 export class InlineTagStyleFormatLoader extends Matcher {
-  constructor(public styleName: string, formatter: AttributeFormatter, rule: MatchRule, public forceMatchTags = false) {
+  constructor(public styleName: string, formatter: InlineFormatter, rule: MatchRule, public forceMatchTags = false) {
     super(formatter, rule)
   }
 
@@ -18,7 +18,7 @@ export class InlineTagStyleFormatLoader extends Matcher {
     return super.match(element)
   }
 
-  read(node: HTMLElement) {
+  override read(node: HTMLElement) {
     return {
       formatter: this.formatter,
       value: this.extractFormatData(node, {
@@ -28,14 +28,13 @@ export class InlineTagStyleFormatLoader extends Matcher {
   }
 }
 
-export class InlineTagStyleFormatter implements AttributeFormatter {
-  type: FormatType.Attribute = FormatType.Attribute
-
-  constructor(public name: string,
+export class InlineTagStyleFormatter extends InlineFormatter {
+  constructor(name: string,
               public styleName: string) {
+    super(name, FormatPriority.Attribute)
   }
 
-  render(node: VElement | null, formatValue: string): VElement | void {
+  override render(node: VElement | null, formatValue: string): VElement | void {
     const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i')
     if (node && reg.test(node.tagName)) {
       node.styles.set(this.styleName, formatValue)
@@ -48,7 +47,7 @@ export class InlineTagStyleFormatter implements AttributeFormatter {
 }
 
 export class InlineTagLeafStyleFormatter extends InlineTagStyleFormatter {
-  columned = true
+  override columned = true
 }
 
 // 强制行内样式

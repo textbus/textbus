@@ -50,7 +50,11 @@ function setEditable(vElement: VElement, useContentEditable: boolean, is: boolea
 
 export function formatSort(formats: FormatItem[]) {
   formats.sort((a, b) => {
-    return a.formatter.type - b.formatter.type
+    const n = a.formatter.type - b.formatter.type
+    if (n === 0) {
+      return a.formatter.priority - b.formatter.priority
+    }
+    return n
   })
   return formats
 }

@@ -1,13 +1,13 @@
-import { AttributeFormatter, FormatType, VElement } from '@textbus/core'
+import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 
 export class InlineStyleFormatLoader extends Matcher {
-  constructor(public styleName: string, formatter: AttributeFormatter, rule: MatchRule) {
+  constructor(public styleName: string, formatter: InlineStyleFormatter, rule: MatchRule) {
     super(formatter, rule)
   }
 
-  read(node: HTMLElement) {
+  override read(node: HTMLElement) {
     return {
       formatter: this.formatter,
       value: this.extractFormatData(node, {
@@ -17,14 +17,13 @@ export class InlineStyleFormatLoader extends Matcher {
   }
 }
 
-export class InlineStyleFormatter implements AttributeFormatter {
-  type: FormatType.Attribute = FormatType.Attribute
-
-  constructor(public name: string,
+export class InlineStyleFormatter extends InlineFormatter {
+  constructor(name: string,
               public styleName: string) {
+    super(name, FormatPriority.Attribute)
   }
 
-  render(node: VElement | null, formatValue: string): VElement | void {
+  override render(node: VElement | null, formatValue: string): VElement | void {
     if (node) {
       node.styles.set(this.styleName, formatValue)
     } else {
