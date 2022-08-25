@@ -202,6 +202,13 @@ export class SelectionBridge implements NativeSelectionBridge {
       return this.findFocusNativeTextNode(vElement, offset, typeof prev === 'string' && prev !== '\n')
     }
     if (prev === '\n') {
+      if (typeof current === 'undefined') {
+        const container = this.renderer.getNativeNodeByVNode(vElement) as Element
+        return {
+          node: container,
+          offset: container.childNodes.length
+        }
+      }
       for (const component of slot.sliceContent().filter((i): i is ComponentInstance => {
         return typeof i !== 'string'
       })) {
