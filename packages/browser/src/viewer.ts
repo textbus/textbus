@@ -331,7 +331,12 @@ export class Viewer {
   }
 
   private initDocStyleSheetsAndScripts(options: ViewOptions) {
-    const resources = (options.componentLoaders || []).filter(i => i.resources).map(i => i.resources!)
+    const loaders: ComponentLoader[] = []
+    options.imports?.forEach(module => {
+      loaders.push(...(module.componentLoaders || []))
+    })
+    loaders.push(...(options.componentLoaders || []))
+    const resources = loaders.filter(i => i.resources).map(i => i.resources!)
     const docStyles: string[] = []
     const editModeStyles: string[] = []
     resources.forEach(metadata => {
