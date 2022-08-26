@@ -564,7 +564,7 @@ export class Selection {
   /**
    * 获取选区所选择的块的集合
    */
-  getSelectedScopes(): SlotRange[] {
+  getSelectedScopes(decompose = false): SlotRange[] {
     if (!this.isSelected) {
       return []
     }
@@ -575,7 +575,15 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    return this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
+    const scopes = this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
+    if (decompose) {
+      const ranges: SlotRange[] = []
+      scopes.forEach(i => {
+        ranges.push(...this.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
+      })
+      return ranges
+    }
+    return scopes
   }
 
   /**
@@ -855,40 +863,10 @@ export class Selection {
       return blocks
     }
 
-    function fn(slot: Slot, startIndex: number, endIndex: number, renderer: Renderer) {
-      const scopes: SlotRange[] = []
-      if (startIndex >= endIndex) {
-        return scopes
-      }
-      let newScope: SlotRange | null = null
-
-      let i = 0
-      const contents = slot.sliceContent(startIndex, endIndex)
-      contents.forEach(c => {
-        if (typeof c !== 'string' && c.type === ContentType.BlockComponent) {
-          newScope = null
-          c.slots.toArray().forEach(s => {
-            scopes.push(...fn(s, 0, s.length, renderer))
-          })
-        } else if (!newScope) {
-          newScope = {
-            startIndex: startIndex + i,
-            endIndex: startIndex + i + c.length,
-            slot: slot
-          }
-          scopes.push(newScope)
-        } else {
-          newScope.endIndex = startIndex + i + c.length
-        }
-        i += c.length
-      })
-      return scopes
-    }
-
     const scopes = this.getGreedyRanges()
 
     scopes.forEach(i => {
-      blocks.push(...fn(i.slot, i.startIndex, i.endIndex, this.renderer))
+      blocks.push(...this.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
     })
     return blocks
   }
@@ -1340,6 +1318,36 @@ export class Selection {
       index += item.length
     }
     return index
+  }
+
+  private decomposeSlotRange(slot: Slot, startIndex: number, endIndex: number) {
+    const scopes: SlotRange[] = []
+    if (startIndex >= endIndex) {
+      return scopes
+    }
+    let newScope: SlotRange | null = null
+
+    let i = 0
+    const contents = slot.sliceContent(startIndex, endIndex)
+    contents.forEach(c => {
+      if (typeof c !== 'string' && c.type === ContentType.BlockComponent) {
+        newScope = null
+        c.slots.toArray().forEach(s => {
+          scopes.push(...this.decomposeSlotRange(s, 0, s.length))
+        })
+      } else if (!newScope) {
+        newScope = {
+          startIndex: startIndex + i,
+          endIndex: startIndex + i + c.length,
+          slot: slot
+        }
+        scopes.push(newScope)
+      } else {
+        newScope.endIndex = startIndex + i + c.length
+      }
+      i += c.length
+    })
+    return scopes
   }
 
   private resetStartAndEndPosition() {

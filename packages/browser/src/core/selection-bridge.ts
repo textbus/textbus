@@ -141,12 +141,19 @@ export class SelectionBridge implements NativeSelectionBridge {
     } else {
       this.selectionChangeEvent.next(null)
     }
-    setTimeout(() => {
-      // hack 浏览器会触发上面选区更改事件
+
+    // hack start 浏览器会触发上面选区更改事件
+    const bind = () => {
       if (this.connector) {
         this.listen(this.connector)
       }
-    })
+    }
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(bind)
+    } else {
+      setTimeout(bind, 30)
+    }
+    // hack end
   }
 
   destroy() {
