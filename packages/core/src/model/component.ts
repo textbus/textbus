@@ -3,7 +3,7 @@ import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@tanbo/di'
 
 import { makeError } from '../_utils/make-error'
-import { VElement } from './element'
+import { VElement, VTextNode } from './element'
 import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
@@ -35,7 +35,7 @@ export interface ComponentLiteral<State = any> {
 }
 
 export interface SlotRenderFactory {
-  (): VElement
+  (children: Array<VElement | VTextNode>): VElement
 }
 
 export interface SlotRender {
@@ -363,19 +363,19 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
       }
 
       const componentInstance: ComponentInstance<Extends, State> = {
+        name: component.name,
+        type: component.instanceType,
+        separable: component.separable,
         changeMarker: marker,
         parent: null,
-        separable: component.separable,
         get parentComponent() {
           return componentInstance.parent?.parent || null
         },
         get state() {
           return state!
         },
-        name: component.name,
         length: 1,
         onStateChange,
-        type: component.instanceType,
         slots: null as any,
         extends: null as any,
         shortcutList: null as any,

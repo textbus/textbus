@@ -524,8 +524,8 @@ export const tableComponent = defineComponent({
                   <tr>
                     {
                       row.map(col => {
-                        return slotRender(col, () => {
-                          return <td colSpan={col.state?.colspan} rowSpan={col.state?.rowspan}/>
+                        return slotRender(col, children => {
+                          return <td colSpan={col.state?.colspan} rowSpan={col.state?.rowspan}>{children}</td>
                         })
                       })
                     }

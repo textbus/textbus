@@ -102,15 +102,15 @@ export const wordExplainComponent = defineComponent({
         return (
           <tb-word-explain>
             <div class="tb-word-explain-title-group" style={{ width: state.width }}>
-              {slotRenderFn(slots.get(0)!, () => {
-                return <div class="tb-word-explain-title"/>
+              {slotRenderFn(slots.get(0)!, children => {
+                return <div class="tb-word-explain-title">{children}</div>
               })}
-              {slotRenderFn(slots.get(1)!, () => {
-                return <div class="tb-word-explain-subtitle"/>
+              {slotRenderFn(slots.get(1)!, children => {
+                return <div class="tb-word-explain-subtitle">{children}</div>
               })}
             </div>
-            {slotRenderFn(slots.get(2)!, () => {
-              return <div class="tb-word-explain-detail"/>
+            {slotRenderFn(slots.get(2)!, children => {
+              return <div class="tb-word-explain-detail">{children}</div>
             })}
             {
               !isOutputMode && <span class="tb-word-explain-close" onClick={() => {

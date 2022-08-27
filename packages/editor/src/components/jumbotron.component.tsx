@@ -134,8 +134,8 @@ export const jumbotronComponent = defineComponent({
                 class="textbus-icon-setting"></span></button>
             }
             {
-              slotRender(slots.get(0)!, () => {
-                return <div/>
+              slotRender(slots.get(0)!, children => {
+                return <div>{children}</div>
               })
             }
           </tb-jumbotron>

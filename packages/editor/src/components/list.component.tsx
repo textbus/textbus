@@ -90,8 +90,8 @@ export const listComponent = defineComponent({
           <Tag>
             {
               slots.toArray().map(i => {
-                return slotRender(i, () => {
-                  return <li class="tb-list-item"/>
+                return slotRender(i, children => {
+                  return <li class="tb-list-item">{children}</li>
                 })
               })
             }

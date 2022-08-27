@@ -126,8 +126,8 @@ export const imageCardComponent = defineComponent({
               }}/>
             </div>
             {
-              slotRender(slots.get(0)!, () => {
-                return <p/>
+              slotRender(slots.get(0)!, children => {
+                return <p>{children}</p>
               })
             }
           </tb-image-card>

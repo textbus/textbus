@@ -107,7 +107,7 @@ export const rootComponent = defineComponent({
 
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return slotRender(slots.get(0)!, () => {
+        return slotRender(slots.get(0)!, (children) => {
           return new VElement('div', {
             'textbus-document': 'true',
             'ref': rootNode,
@@ -115,7 +115,7 @@ export const rootComponent = defineComponent({
               padding: '8px 8px 30px'
             },
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
-          })
+          }, children)
         })
       }
     }

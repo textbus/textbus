@@ -125,8 +125,8 @@ export const todolistComponent = defineComponent({
                       }}/>
                     </div>
                     {
-                      slotRender(slot, () => {
-                        return <div class="tb-todolist-content"/>
+                      slotRender(slot, children => {
+                        return <div class="tb-todolist-content">{children}</div>
                       })
                     }
                   </div>

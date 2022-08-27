@@ -258,7 +258,10 @@ export class SelectionBridge implements NativeSelectionBridge {
                                   offset: number,
                                   toLeft: boolean): { node: Node, offset: number } | null {
     for (const item of vElement.children) {
-      const position = this.renderer.getLocationByVNode(item)!
+      const position = this.renderer.getLocationByVNode(item)
+      if (!position) {
+        continue
+      }
       if (toLeft ? position.endIndex < offset : position.endIndex <= offset) {
         continue
       }

@@ -357,6 +357,12 @@ export class Slot<T = any> {
       opt[next[0].name] = null
       return opt
     }, {})
+    if (endIndex - startIndex === 1) {
+      const content = this.getContentAtIndex(startIndex)
+      if (typeof content !== 'string' && content.type === ContentType.InlineComponent) {
+        content.changeMarker.forceMarkDirtied()
+      }
+    }
     this.content.slice(startIndex, endIndex).forEach(content => {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {

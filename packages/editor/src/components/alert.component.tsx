@@ -80,8 +80,8 @@ export const alertComponent = defineComponent({
         return (
           <tb-alert data-type={state.type} class={classes.join(' ')}>
             {
-              slotRender(slots.get(0)!, () => {
-                return <div/>
+              slotRender(slots.get(0)!, children => {
+                return <div>{children}</div>
               })
             }
           </tb-alert>

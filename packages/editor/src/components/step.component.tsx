@@ -94,8 +94,8 @@ export const stepComponent = defineComponent({
                       }}>{index + 1}</div>
                     </div>
                     {
-                      slotRender(slot, () => {
-                        return <div class="tb-step-item-content"/>
+                      slotRender(slot, children => {
+                        return <div class="tb-step-item-content">{children}</div>
                       })
                     }
                     {

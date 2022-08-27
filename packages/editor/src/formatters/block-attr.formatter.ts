@@ -1,4 +1,4 @@
-import { BlockFormatter, FormatPriority, FormatType, FormatValue, VElement } from '@textbus/core'
+import { BlockFormatter, FormatHostBindingRender, FormatValue, VElement, FormatType, VTextNode } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
@@ -28,18 +28,16 @@ export class BlockAttrFormatLoader extends Matcher {
 
 export class BlockAttrFormatter implements BlockFormatter {
   type: FormatType.Block = FormatType.Block
-  priority = FormatPriority.Attribute
   constructor(public name: string, public attrName: string) {
   }
 
-  render(node: VElement | null, formatValue: FormatValue): VElement | void {
-    if (node) {
-      node.attrs.set(this.attrName, formatValue)
-      return node
+  render(children: Array<VElement | VTextNode>, formatValue: FormatValue): FormatHostBindingRender {
+    return {
+      fallbackTagName: 'div',
+      attach: (host: VElement) => {
+        host.attrs.set(this.attrName, formatValue)
+      }
     }
-    return new VElement('div', {
-      [this.attrName]: formatValue
-    })
   }
 }
 

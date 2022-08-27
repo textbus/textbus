@@ -1,4 +1,4 @@
-import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
+import { FormatHostBindingRender, InlineFormatter, VElement, VTextNode, FormatType } from '@textbus/core'
 import { Matcher, MatchRule } from './matcher'
 
 export class OuterStyleFormatLoader extends Matcher {
@@ -18,19 +18,17 @@ export class OuterStyleFormatLoader extends Matcher {
 
 export class OuterStyleFormatter implements InlineFormatter {
   type: FormatType.Inline = FormatType.Inline
-  priority = FormatPriority.Tag
 
   constructor(public name: string,
               public styleName: string) {
   }
 
-  render(node: VElement | null, formatValue: string): VElement | void {
-    if (node) {
-      node.styles.set(this.styleName, formatValue)
-    } else {
-      const el = new VElement('span')
-      el.styles.set(this.styleName, formatValue)
-      return el
+  render(children: Array<VElement | VTextNode>, formatValue: string): FormatHostBindingRender {
+    return {
+      fallbackTagName: 'span',
+      attach: (host: VElement) => {
+        host.styles.set(this.styleName, formatValue)
+      }
     }
   }
 }

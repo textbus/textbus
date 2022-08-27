@@ -1,4 +1,4 @@
-import { VElement } from './element'
+import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
 
 /**
@@ -9,13 +9,10 @@ export enum FormatType {
   Inline
 }
 
-/**
- * 格式渲染优先级
- */
-export enum FormatPriority {
-  Outer,
-  Tag,
-  Attribute
+export interface FormatHostBindingRender {
+  fallbackTagName: string
+
+  attach(host: VElement): void
 }
 
 /**
@@ -24,14 +21,12 @@ export enum FormatPriority {
 export interface Formatter<T extends FormatType = any> {
   name: string
   type: T
-  priority: FormatPriority
   columned?: boolean
 
   render(
-    node: VElement | null,
+    children: Array<VElement | VTextNode>,
     formatValue: FormatValue,
-    isOutputMode: boolean
-  ): VElement | void
+    isOutputMode: boolean): VElement | FormatHostBindingRender
 }
 
 export interface BlockFormatter extends Formatter<FormatType.Block> {

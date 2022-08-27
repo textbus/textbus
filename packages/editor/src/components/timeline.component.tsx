@@ -96,8 +96,8 @@ export const timelineComponent = defineComponent({
                       }}/>
                     }
                     {
-                      slotRender(slot, () => {
-                        return <div class="tb-timeline-content"/>
+                      slotRender(slot, children => {
+                        return <div class="tb-timeline-content">{children}</div>
                       })
                     }
                   </div>

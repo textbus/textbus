@@ -31,8 +31,8 @@ export const paragraphComponent = defineComponent({
     useEnterBreaking(injector, slots)
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return slotRender(slots.get(0)!, () => {
-          return <p/>
+        return slotRender(slots.get(0)!, (children) => {
+          return (<p>{children}</p>)
         })
       }
     }

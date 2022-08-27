@@ -32,8 +32,8 @@ export const blockComponent = defineComponent({
     useEnterBreaking(injector, slots)
     return {
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
-        return slotRender(slots.get(0)!, () => {
-          return <div/>
+        return slotRender(slots.get(0)!, children => {
+          return <div>{children}</div>
         })
       }
     }

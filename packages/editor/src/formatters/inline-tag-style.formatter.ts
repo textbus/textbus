@@ -1,4 +1,4 @@
-import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
+import { InlineFormatter, VElement, VTextNode, FormatType } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { inlineTags } from './_config'
@@ -30,21 +30,27 @@ export class InlineTagStyleFormatLoader extends Matcher {
 
 export class InlineTagStyleFormatter implements InlineFormatter {
   type: FormatType.Inline = FormatType.Inline
-  priority = FormatPriority.Attribute
 
   constructor(public name: string,
               public styleName: string) {
   }
 
-  render(node: VElement | null, formatValue: string): VElement | void {
-    const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i')
-    if (node && reg.test(node.tagName)) {
-      node.styles.set(this.styleName, formatValue)
-      return
+  render(children: Array<VElement | VTextNode>, formatValue: string): VElement {
+    if (children.length === 1 && children[0] instanceof VElement) {
+      const node = children[0]
+      if (node instanceof VElement) {
+        const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i')
+        if (node && reg.test(node.tagName)) {
+          node.styles.set(this.styleName, formatValue)
+          return node
+        }
+      }
     }
-    node = new VElement('span')
-    node.styles.set(this.styleName, formatValue)
-    return node
+    return new VElement('span', {
+      style: {
+        [this.styleName]: formatValue
+      }
+    }, children)
   }
 }
 
