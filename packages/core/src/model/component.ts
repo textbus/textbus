@@ -602,6 +602,9 @@ export function invokeListener<K extends keyof EventTypes,
         (fn as any)(event)
       })
     }
+    if (eventType === 'onDestroy') {
+      eventCacheMap.delete(target)
+    }
   }
 }
 
