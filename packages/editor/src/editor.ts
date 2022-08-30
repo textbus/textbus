@@ -1,7 +1,7 @@
 import { Provider, Type } from '@tanbo/di'
 import { fromEvent, fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection, Starter } from '@textbus/core'
-import { Caret, getBoundingClientRect, Viewer } from '@textbus/browser'
+import { Caret, Viewer } from '@textbus/browser'
 
 import { EditorOptions } from './types'
 import { rootComponent, rootComponentLoader } from './root.component'
@@ -123,7 +123,7 @@ export class Editor extends Viewer {
         caret.correctScrollTop({
           onScroll: fromEvent(scrollContainer, 'scroll'),
           getLimit() {
-            const rect = getBoundingClientRect(scrollContainer)
+            const rect = scrollContainer.getBoundingClientRect()
             return {
               top: rect.top,
               bottom: rect.top + rect.height

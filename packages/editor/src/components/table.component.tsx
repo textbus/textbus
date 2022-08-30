@@ -1,5 +1,5 @@
 import { Injectable, Injector } from '@tanbo/di'
-import { ComponentLoader, getBoundingClientRect, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/browser'
 import {
   Commander,
   ComponentInitData,
@@ -73,8 +73,8 @@ export class TableComponentSelectionAwarenessDelegate extends CollaborateSelecti
     } = selectCells(startFocusSlot as TableCellSlot, endFocusSlot as TableCellSlot, commonAncestorComponent, state.columnCount)
 
     const renderer = this.renderer
-    const startRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement)
-    const endRect = getBoundingClientRect(renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement)
+    const startRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(startPosition.cell!)!) as HTMLElement).getBoundingClientRect()
+    const endRect = (renderer.getNativeNodeByVNode(renderer.getVNodeBySlot(endPosition.cell!)!) as HTMLElement).getBoundingClientRect()
 
     return [{
       left: startRect.left,

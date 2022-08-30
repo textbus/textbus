@@ -1,9 +1,9 @@
-import { createElement, getBoundingClientRect } from '@textbus/browser'
+import { createElement } from '@textbus/browser'
 import { fromEvent } from '@tanbo/stream'
 
 function fixPosition(wrapper: HTMLElement, menu: HTMLElement, stickyElement: HTMLElement) {
-  const r = getBoundingClientRect(stickyElement)
-  const distance = r.left + r.width - (getBoundingClientRect(wrapper).left + menu.offsetWidth)
+  const r = stickyElement.getBoundingClientRect()
+  const distance = r.left + r.width - (wrapper.getBoundingClientRect().left + menu.offsetWidth)
   menu.style.left = `${Math.min(0, distance)}px`
 }
 

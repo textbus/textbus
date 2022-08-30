@@ -3,8 +3,7 @@ import {
   createElement,
   VIEW_CONTAINER,
   getLayoutRectByRange,
-  SelectionBridge,
-  getBoundingClientRect
+  SelectionBridge
 } from '@textbus/browser'
 import { Selection, SelectionPaths, AbstractSelection, Scheduler, Rect } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
@@ -117,7 +116,7 @@ export class CollaborateCursor {
 
   draw(paths: RemoteSelection[]) {
     this.currentSelection = paths
-    const containerRect = getBoundingClientRect(this.container)
+    const containerRect = this.container.getBoundingClientRect()
     this.canvas.style.top = containerRect.top * -1 + 'px'
     this.canvas.width = this.canvas.offsetWidth
     this.canvas.height = this.canvas.offsetHeight

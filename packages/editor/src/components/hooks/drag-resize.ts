@@ -1,5 +1,5 @@
 import { onDestroy, onViewInit, Ref, Selection, Renderer, useContext, useSelf, Rect } from '@textbus/core'
-import { createElement, getBoundingClientRect, VIEW_CONTAINER } from '@textbus/browser'
+import { createElement, VIEW_CONTAINER } from '@textbus/browser'
 import { fromEvent, Subscription } from '@tanbo/stream'
 
 const text = document.createElement('div')
@@ -42,7 +42,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
   subs.push(
     renderer.onViewUpdated.subscribe(() => {
       if (isFocus && currentRef) {
-        updateStyle(currentRef.current!, getBoundingClientRect(docContainer))
+        updateStyle(currentRef.current!, docContainer.getBoundingClientRect())
       }
     }),
     selection.onChange.subscribe(() => {
@@ -62,7 +62,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
 
       docContainer.style.pointerEvents = 'none'
 
-      const startRect = getBoundingClientRect(ref.current!)
+      const startRect = ref.current!.getBoundingClientRect()
 
       const startX = ev.clientX
       const startY = ev.clientY
@@ -132,7 +132,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
         }
         currentRef!.current!.style.width = endWidth + 'px'
         currentRef!.current!.style.height = endHeight + 'px'
-        updateStyle(currentRef!.current!, getBoundingClientRect(docContainer))
+        updateStyle(currentRef!.current!, docContainer.getBoundingClientRect())
       })
 
       const unUp = fromEvent(document, 'mouseup').subscribe(() => {
@@ -152,7 +152,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
       currentRef = ref
       isFocus = true
       selection.selectComponent(componentInstance, true)
-      updateStyle(ref.current!, getBoundingClientRect(docContainer))
+      updateStyle(ref.current!, docContainer.getBoundingClientRect())
       docContainer.appendChild(mask)
       ev.stopPropagation()
     }))
@@ -166,7 +166,7 @@ export function useDragResize(ref: Ref<HTMLElement>, callback: (rect: DragRect) 
 }
 
 function updateStyle(nativeElement: HTMLElement, offsetRect: Rect) {
-  const rect = getBoundingClientRect(nativeElement)
+  const rect = nativeElement.getBoundingClientRect()
   // eslint-disable-next-line max-len
   mask.style.cssText = `left: ${rect.left - offsetRect.left}px; top: ${rect.top - offsetRect.top}px; width: ${rect.width}px; height: ${rect.height}px;`
   text.innerText = `${Math.round(rect.width)}px * ${Math.round(rect.height)}px`

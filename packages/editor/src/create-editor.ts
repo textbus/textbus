@@ -90,6 +90,14 @@ import {
 import { LinkJumpTipPlugin } from './plugins/_api'
 
 export const defaultComponentLoaders: ComponentLoader[] = [
+  imageCardComponentLoader,
+  todolistComponentLoader,
+  katexComponentLoader,
+  wordExplainComponentLoader,
+  timelineComponentLoader,
+  stepComponentLoader,
+  alertComponentLoader,
+  jumbotronComponentLoader,
   audioComponentLoader,
   blockComponentLoader,
   blockquoteComponentLoader,
@@ -100,14 +108,6 @@ export const defaultComponentLoaders: ComponentLoader[] = [
   preComponentLoader,
   tableComponentLoader,
   videoComponentLoader,
-  imageCardComponentLoader,
-  todolistComponentLoader,
-  katexComponentLoader,
-  wordExplainComponentLoader,
-  timelineComponentLoader,
-  stepComponentLoader,
-  alertComponentLoader,
-  jumbotronComponentLoader
 ]
 
 export const defaultFormatLoaders: FormatLoader[] = [

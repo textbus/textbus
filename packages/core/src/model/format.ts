@@ -262,6 +262,10 @@ export class Format {
     return this
   }
 
+  /**
+   * 获取指定下标生效的格式
+   * @param index
+   */
   extractFormatsByIndex(index: number) {
     const formats: Formats = []
     if (index === 0) {

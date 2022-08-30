@@ -1,7 +1,7 @@
 import { Subscription } from '@tanbo/stream'
 import { NativeSelectionBridge, Selection, Plugin } from '@textbus/core'
 import { Injector } from '@tanbo/di'
-import { getBoundingClientRect, VIEW_CONTAINER } from '@textbus/browser'
+import { VIEW_CONTAINER } from '@textbus/browser'
 import { I18n } from '../i18n'
 
 export class LinkJumpTipPlugin implements Plugin {
@@ -42,7 +42,7 @@ export class LinkJumpTipPlugin implements Plugin {
             offset: selection.startOffset!
           })!
 
-          const offsetRect = getBoundingClientRect(container)
+          const offsetRect = container.getBoundingClientRect()
           if (nativeSelection.isCollapsed) {
             Object.assign(this.link.style, {
               left: rect.left - offsetRect.left + 'px',

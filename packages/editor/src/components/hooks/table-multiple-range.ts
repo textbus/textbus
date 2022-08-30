@@ -1,5 +1,5 @@
 import { debounceTime, merge, Subscription } from '@tanbo/stream'
-import { createElement, getBoundingClientRect, VIEW_CONTAINER } from '@textbus/browser'
+import { createElement, VIEW_CONTAINER } from '@textbus/browser'
 import {
   ChangeController, ComponentInstance, GetRangesEvent,
   ContentType,
@@ -471,10 +471,10 @@ export function useTableMultipleRange(
       return tableRange
     }
 
-    const startRect = getBoundingClientRect(startCell)
-    const endRect = getBoundingClientRect(endCell)
+    const startRect = startCell.getBoundingClientRect()
+    const endRect = endCell.getBoundingClientRect()
 
-    const maskRect = getBoundingClientRect(mask)
+    const maskRect = mask.getBoundingClientRect()
 
     if (startSlot === endSlot) {
       mask.style.background = 'none'
@@ -507,7 +507,7 @@ export function useTableMultipleRange(
   function updateMaskEffect(event?: GetRangesEvent<any>) {
     const commonAncestorComponent = selection.commonAncestorComponent
     if (commonAncestorComponent === self) {
-      const containerRect = getBoundingClientRect(editorContainer)
+      const containerRect = editorContainer.getBoundingClientRect()
       const startCell = findFocusCell(self, selection.startSlot!)
       const endCell = findFocusCell(self, selection.endSlot!)
       if (startCell && endCell) {

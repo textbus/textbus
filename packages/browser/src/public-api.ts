@@ -1,6 +1,5 @@
 import 'reflect-metadata'
 
-export * from './_utils/dom'
 export * from './_utils/uikit'
 export * from './_utils/env'
 export * from './core/_api'

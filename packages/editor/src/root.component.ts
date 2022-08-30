@@ -18,7 +18,7 @@ import {
   ComponentInitData,
   useSelf, onViewInit
 } from '@textbus/core'
-import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser, getBoundingClientRect } from '@textbus/browser'
+import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
 
 import { paragraphComponent } from './components/paragraph.component'
 import { EditorOptions } from './types'
@@ -67,7 +67,7 @@ export const rootComponent = defineComponent({
     const subscription = new Subscription()
     onViewInit(() => {
       subscription.add(fromEvent<MouseEvent>(docContainer, 'click').subscribe(ev => {
-        const rect = getBoundingClientRect(rootNode.current!)
+        const rect = rootNode.current!.getBoundingClientRect()
         const firstSlot = slots.first!
         if (ev.clientY > rect.top + rect.height - 30) {
           const lastContent = firstSlot.getContentAtIndex(firstSlot.length - 1)

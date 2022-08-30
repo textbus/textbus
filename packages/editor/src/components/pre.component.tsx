@@ -215,7 +215,9 @@ function formatCodeLines(
         lastToken.type === 'comment' &&
         (lastToken.content as string).indexOf(blockCommentStartString) === 0) {
         const regString = blockCommentEndString.replace(new RegExp(`[${blockCommentEndString}]`, 'g'), i => '\\' + i)
-        slot.state!.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+        slot.updateState(draft => {
+          draft.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+        })
         startBlock = !slot.state!.blockCommentEnd
       } else {
         startBlock = false
@@ -226,7 +228,9 @@ function formatCodeLines(
       //   (lastToken.content as string).indexOf(blockCommentStartString) === 0
       // slot.blockCommentEnd = !startBlock
     } else {
-      slot.state!.blockCommentEnd = true
+      slot.updateState(draft => {
+        draft.blockCommentEnd = true
+      })
     }
     return slot
   })
@@ -273,9 +277,13 @@ function reformat(
       lastToken.type === 'comment' &&
       (lastToken.content as string).indexOf(blockCommentStartString) === 0) {
       const regString = blockCommentEndString.replace(new RegExp(`[${blockCommentEndString}]`, 'g'), i => '\\' + i)
-      slot.state.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+      slot.updateState(draft => {
+        draft.blockCommentEnd = new RegExp(regString + '$').test(lastToken.content as string)
+      })
     } else {
-      slot.state.blockCommentEnd = true
+      slot.updateState(draft => {
+        draft.blockCommentEnd = true
+      })
     }
 
     const next = list[i + 1]
@@ -283,7 +291,9 @@ function reformat(
       if (!forceFormat && next.state.blockCommentStart === !slot.state.blockCommentEnd) {
         break
       }
-      next.state.blockCommentStart = !slot.state.blockCommentEnd
+      next.updateState(draft => {
+        draft.blockCommentStart = !slot.state.blockCommentEnd
+      })
     }
   }
 }
@@ -293,7 +303,8 @@ export function createCodeSlot() {
     ContentType.Text
   ], {
     blockCommentEnd: true,
-    blockCommentStart: false
+    blockCommentStart: false,
+    emphasize: false
   })
 }
 
@@ -377,8 +388,10 @@ export const preComponent = defineComponent({
       [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(newState.lang)
       isStop = true
       slots.toArray().forEach(i => {
-        i.state!.blockCommentStart = false
-        i.state!.blockCommentEnd = false
+        i.updateState(draft => {
+          draft.blockCommentStart = false
+          draft.blockCommentEnd = false
+        })
       })
       if (!languageGrammar) {
         slots.toArray().forEach(i => {
@@ -526,6 +539,32 @@ export const preComponent = defineComponent({
             })
           }
         }]
+      }, {
+        label: i18n.get('components.preComponent.emphasize'),
+        disabled: !selection.isSelected,
+        onClick() {
+          const { startSlot, endSlot } = selection
+          let startIndex = slots.indexOf(startSlot!)
+          const endIndex = slots.indexOf(endSlot!) + 1
+          for (; startIndex < endIndex; startIndex++) {
+            slots.get(startIndex)?.updateState(draft => {
+              draft.emphasize = true
+            })
+          }
+        }
+      }, {
+        label: i18n.get('components.preComponent.cancelEmphasize'),
+        disabled: !selection.isSelected,
+        onClick() {
+          const { startSlot, endSlot } = selection
+          let startIndex = slots.indexOf(startSlot!)
+          const endIndex = slots.indexOf(endSlot!) + 1
+          for (; startIndex < endIndex; startIndex++) {
+            slots.get(startIndex)?.updateState(draft => {
+              draft.emphasize = false
+            })
+          }
+        }
       }])
     })
 
@@ -563,16 +602,17 @@ export const preComponent = defineComponent({
             lang = i.label
           }
         })
+        const blockHighlight = slots.toArray().some(i => i.state?.emphasize === true)
         return (
           <pre class="tb-pre" lang={lang} theme={data.state!.theme || null}>
             <div class="tb-code-line-number-bg" style={{
-              width: Math.max(String(slots.length).length, 2) + 'em'
+              width: Math.max(String(slots.length).length, 2.5) + 'em'
             }}/>
-            <div class="tb-code-content">
+            <div class={'tb-code-content' + (blockHighlight ? ' tb-color-content-highlight' : '')}>
               {
                 slots.toArray().map(item => {
                   return slotRender(item, () => {
-                    return <div class="tb-code-line"/>
+                    return <div class={(item.state?.emphasize ? 'tb-code-line-emphasize ' : '') + 'tb-code-line'}/>
                   })
                 })
               }
@@ -593,12 +633,15 @@ export const preComponentLoader: ComponentLoader = {
     code, .tb-pre {background-color: #fefefe;}
    .tb-pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
    code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   .tb-pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #e9eaec; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
+   .tb-pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #efefef; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
    code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}
-   .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #ddd; width: 3em; }
-   .tb-code-content { flex: 1; padding: 15px 15px 15px 0.5em; counter-reset: codeNum; }
-   .tb-code-line { position: relative; display: block}
-   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -3.5em; top: 0; width: 2em; text-align: right; padding: 0 0.5em; overflow: hidden; white-space: nowrap; color: #aeaeae; }
+   .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #eee; width: 3em; }
+   .tb-code-content { flex: 1; padding: 15px 0 15px 0; counter-reset: codeNum; }
+   .tb-color-content-highlight { background-color: #eee }
+   .tb-color-content-highlight .tb-code-line { opacity: 0.56; }
+   .tb-code-line { position: relative; display: block; padding: 0 15px 0 0.5em}
+   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -5.3em; top: 0; width: 4em; text-align: right; padding: 0 0.8em 0 0.5em; overflow: hidden; white-space: nowrap; color: #aeaeae;}
+   .tb-color-content-highlight .tb-code-line-emphasize { opacity: 1; background-color: #fefefe}
    .tb-pre-lang { position: absolute; right: 0; top: 0; opacity: 0.5; pointer-events: none; font-size: 13px; padding: 4px 10px;}
   .tb-hl-keyword { font-weight: bold; }
   .tb-hl-string { color: rgb(221, 17, 68) }
@@ -614,6 +657,8 @@ export const preComponentLoader: ComponentLoader = {
   .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
   .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
   .tb-pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #353535 }
+  .tb-pre[theme=dark] .tb-color-content-highlight { background-color: #263140;}
+  .tb-pre[theme=dark] .tb-color-content-highlight .tb-code-line-emphasize { opacity: 1; background-color: #1c2838}
   .tb-pre[theme=dark] .tb-hl-keyword {color: rgb(0, 134, 179);}
   .tb-pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
   .tb-pre[theme=dark] .tb-hl-comment {color: #4c5156;}

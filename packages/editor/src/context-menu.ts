@@ -17,7 +17,7 @@ import {
   createElement,
   createTextNode,
   VIEW_CONTAINER,
-  Parser, getBoundingClientRect
+  Parser
 } from '@textbus/browser'
 import { I18n } from './i18n'
 import { Message } from './message'
@@ -280,7 +280,7 @@ export class ContextMenu {
                 }
                 wrappers.forEach(i => i.classList.remove('textbus-contextmenu-item-active'))
                 if (Array.isArray((item as ContextMenuGroup).submenu)) {
-                  const rect = getBoundingClientRect(wrapper)
+                  const rect = wrapper.getBoundingClientRect()
                   const submenu = this.show(
                     [(item as ContextMenuGroup).submenu as any],
                     rect.left + rect.width, rect.top, this.submenuSubscriptions

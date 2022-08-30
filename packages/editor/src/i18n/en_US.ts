@@ -395,7 +395,9 @@ export const i18n_en_US: I18NConfig = {
     preComponent: {
       defaultLang: 'other',
       contextMenuLabel: 'switch language',
-      changeTheme: 'change theme'
+      changeTheme: 'change theme',
+      emphasize: 'emphasize',
+      cancelEmphasize: 'cancel emphasize'
     },
     alertComponent: {
       creator: {

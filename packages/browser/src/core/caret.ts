@@ -4,7 +4,6 @@ import { Scheduler, Rect } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
 import { VIEW_MASK } from './injection-tokens'
-import { getBoundingClientRect } from '../_utils/dom'
 
 export function getLayoutRectByRange(range: Range): Rect {
   const { startContainer, startOffset } = range
@@ -13,7 +12,7 @@ export function getLayoutRectByRange(range: Range): Rect {
     let isInsertBefore = false
     if (offsetNode) {
       if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
-        return getBoundingClientRect(offsetNode as HTMLElement)
+        return (offsetNode as HTMLElement).getBoundingClientRect()
       }
       isInsertBefore = true
     }
@@ -25,7 +24,7 @@ export function getLayoutRectByRange(range: Range): Rect {
     } else {
       startContainer.appendChild(span)
     }
-    const rect = getBoundingClientRect(span)
+    const rect = span.getBoundingClientRect()
     startContainer.removeChild(span)
     return rect
   }
@@ -130,7 +129,7 @@ export class Caret {
   }
 
   show(range: Range, restart: boolean) {
-    const oldRect = getBoundingClientRect(this.elementRef)
+    const oldRect = this.elementRef.getBoundingClientRect()
     this.oldPosition = {
       top: oldRect.top,
       left: oldRect.left,
@@ -187,7 +186,7 @@ export class Caret {
     this.subs.push(
       scroller.onScroll.subscribe(() => {
         if (this.oldPosition) {
-          const rect = getBoundingClientRect(this.elementRef)
+          const rect = this.elementRef.getBoundingClientRect()
           this.oldPosition.top = rect.top
           this.oldPosition.left = rect.left
           this.oldPosition.height = rect.height
@@ -258,7 +257,7 @@ export class Caret {
 
     rectTop = Math.floor(rectTop)
 
-    const containerRect = getBoundingClientRect(this.editorMask)
+    const containerRect = this.editorMask.getBoundingClientRect()
 
     const top = Math.floor(rectTop - containerRect.top)
     const left = Math.floor(rect.left - containerRect.left)
