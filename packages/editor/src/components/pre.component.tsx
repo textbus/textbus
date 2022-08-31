@@ -190,14 +190,18 @@ function format(tokens: Array<string | Token>, slot: Slot, index: number) {
 }
 
 function formatCodeLines(
-  lines: string[],
+  lines: Array<{ emphasize: boolean, code: string }>,
   startBlock: boolean,
   blockCommentStartString: string,
   blockCommentEndString: string,
   languageGrammar: Grammar | null) {
-  return lines.map(i => {
+  return lines.map(item => {
+    let i = item.code
     const slot = createCodeSlot()
-    slot.state!.blockCommentStart = startBlock
+    slot.updateState(draft => {
+      draft.blockCommentStart = startBlock
+      draft.emphasize = item.emphasize
+    })
     if (slot.state!.blockCommentStart) {
       i = blockCommentStartString + i
     }
@@ -298,8 +302,14 @@ function reformat(
   }
 }
 
+export interface CodeSlotState {
+  blockCommentEnd: boolean
+  blockCommentStart: boolean
+  emphasize: boolean
+}
+
 export function createCodeSlot() {
-  return new Slot([
+  return new Slot<CodeSlotState>([
     ContentType.Text
   ], {
     blockCommentEnd: true,
@@ -360,7 +370,7 @@ export const preComponent = defineComponent({
       }
     }
   },
-  setup(data: ComponentInitData<PreComponentState> = {
+  setup(data: ComponentInitData<PreComponentState, CodeSlotState> = {
     slots: [],
     state: {
       lang: '',
@@ -404,8 +414,14 @@ export const preComponent = defineComponent({
       isStop = false
     })
 
+    const codeConfig = (data.slots || [createCodeSlot()]).map(i => {
+      return {
+        emphasize: i.state?.emphasize || false,
+        code: i.toString()
+      }
+    })
     const slotList = formatCodeLines(
-      (data.slots || [createCodeSlot()]).map(i => i.toString()),
+      codeConfig,
       false,
       blockCommentStartString,
       blockCommentEndString,
@@ -579,7 +595,12 @@ export const preComponent = defineComponent({
       if (codeList.length) {
         slots.retain(index + 1)
         const slotList = formatCodeLines(
-          codeList,
+          codeList.map(i => {
+            return {
+              code: i,
+              emphasize: false
+            }
+          }),
           !target.state.blockCommentEnd,
           blockCommentStartString,
           blockCommentEndString,
@@ -674,14 +695,26 @@ export const preComponentLoader: ComponentLoader = {
   },
   read(el: HTMLElement, injector: Injector): ComponentInstance {
     const lines = el.querySelectorAll('.tb-code-line')
-    let code: string
+    let slots: Slot[] = []
     if (lines.length) {
-      code = Array.from(lines).map(i => (i as HTMLElement).innerText.replace(/[\s\n]+$/, '')).join('\n')
+      slots = Array.from(lines).map(i => {
+        const code = (i as HTMLElement).innerText.replace(/[\s\n]+$/, '')
+        const slot = createCodeSlot()
+        slot.updateState(draft => {
+          draft.emphasize = i.classList.contains('tb-code-line-emphasize')
+        })
+        slot.insert(code)
+        return slot
+      })
     } else {
       el.querySelectorAll('br').forEach(br => {
         br.parentNode!.replaceChild(document.createTextNode('\n'), br)
       })
-      code = el.innerText
+      slots = el.innerText.split('\n').map(code => {
+        const slot = createCodeSlot()
+        slot.insert(code)
+        return slot
+      })
     }
 
     return preComponent.createInstance(injector, {
@@ -689,11 +722,7 @@ export const preComponentLoader: ComponentLoader = {
         lang: el.getAttribute('lang') || '',
         theme: el.getAttribute('theme') || ''
       },
-      slots: code.split('\n').map(i => {
-        const slot = createCodeSlot()
-        slot.insert(i)
-        return slot
-      })
+      slots
     })
   },
 }
