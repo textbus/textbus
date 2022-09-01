@@ -1,7 +1,12 @@
 import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { Slot } from './slot'
 
-export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
+export class CleanFormatRule {
+  constructor(public value: string | number | boolean | null | Record<string, string | number | boolean>) {
+  }
+}
+
+export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean> | CleanFormatRule
 
 export type Formats = [formatter: Formatter, value: FormatValue][]
 
@@ -29,6 +34,10 @@ export interface FormatTree {
   formats?: FormatItem[]
 }
 
+function isVoid(data: any) {
+  return data === null || typeof data === 'undefined'
+}
+
 /**
  * Textbus 格式管理类
  */
@@ -41,55 +50,63 @@ export class Format {
   /**
    * 将新样式合并到现有样式中
    * @param formatter
-   * @param value
+   * @param data
    */
-  merge(formatter: BlockFormatter, value: FormatValue): this
-  merge(formatter: InlineFormatter, value: FormatRange): this
-  merge(formatter: Formatter, value: FormatValue | FormatRange): this {
+  merge(formatter: BlockFormatter, data: FormatValue): this
+  merge(formatter: InlineFormatter, data: FormatRange): this
+  merge(formatter: any, data: any): this {
     if (formatter.type === FormatType.Block) {
-      if (value === null || typeof value === 'undefined') {
-        if (formatter.overlap) {
-          const values = this.map.get(formatter)
-          if (values) {
-            values.pop()
-            if (values.length === 0) {
-              this.map.delete(formatter)
-            }
+      if (isVoid(data)) {
+        this.map.delete(formatter)
+        return this
+      }
+      if (formatter.overlap) {
+        if (data instanceof CleanFormatRule) {
+          if (isVoid(data.value)) {
+            this.map.delete(formatter)
           }
         } else {
+          const oldRanges = this.map.get(formatter) || []
+          const map = Format.formatRangesToMap(oldRanges)
+          map.set(formatter, [{
+            startIndex: 0,
+            endIndex: this.slot.length,
+            value: data
+          }])
+
+          this.map.set(formatter, Array.from(map.values()).flat())
+        }
+      } else if (data instanceof CleanFormatRule) {
+        const value = data.value
+        if (isVoid(value)) {
           this.map.delete(formatter)
+        } else {
+          const oldRanges = this.map.get(formatter)
+          if (oldRanges && Format.equal(oldRanges[0]?.value, value)) {
+            this.map.delete(formatter)
+          }
         }
       } else {
-        const range = {
+        this.map.set(formatter, [{
           startIndex: 0,
           endIndex: this.slot.length,
-          value: value as FormatValue
-        }
-        if (formatter.overlap) {
-          let values = this.map.get(formatter)
-          if (!values) {
-            values = []
-            this.map.set(formatter, values)
-          }
-          values.push(range)
-        } else {
-          this.map.set(formatter, [range])
-        }
+          value: data
+        }])
       }
       return this
     }
     let ranges = this.map.get(formatter)
     if (!ranges) {
-      const v = (value as FormatRange).value
-      if (v === null || typeof v === 'undefined') {
+      const v = data.value
+      if (isVoid(v)) {
         return this
       }
-      ranges = [value as FormatRange]
+      ranges = [data]
       this.map.set(formatter, ranges)
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(formatter, ranges, value as FormatRange)
+    const newRanges = this.normalizeFormatRange(formatter, ranges, data)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -133,7 +150,7 @@ export class Format {
         return
       }
       if (key.overlap) {
-        const groups = Format.mergeOverlapFormatRange(formatRanges)
+        const groups = Format.formatRangesToMap(formatRanges)
         const ranges: FormatRange[] = []
         groups.forEach(group => {
           const values = this.tileRanges(group)
@@ -328,9 +345,10 @@ export class Format {
     const columnedFormats: FormatItem[] = []
 
     Array.from(copyFormat.map.keys()).forEach(formatter => {
-      const ranges = copyFormat.map.get(formatter)!;
+      const ranges = copyFormat.map.get(formatter)!
 
-      [...ranges].forEach((range, index) => {
+      for (let index = ranges.length - 1; index > -1; index--) {
+        const range = ranges[index]
         if (range.startIndex === startIndex && range.endIndex === endIndex) {
           if (formatter.columned) {
             columnedFormats.push({
@@ -353,7 +371,7 @@ export class Format {
         } else if (range.startIndex === nextStartIndex) {
           nextEndIndex = Math.max(nextEndIndex, range.endIndex)
         }
-      })
+      }
     })
 
     let rangeCount = 0
@@ -419,7 +437,45 @@ export class Format {
 
   private normalizeFormatRange(formatter: Formatter, oldRanges: FormatRange[], newRange?: FormatRange): FormatRange[] {
     if (formatter.overlap) {
-      const valueGroups = Format.mergeOverlapFormatRange(oldRanges, newRange)
+      let valueGroups: FormatRange[][]
+      if (newRange) {
+        const value = newRange.value
+        if (value instanceof CleanFormatRule) {
+          const map = Format.formatRangesToMap(oldRanges)
+          if (isVoid(value.value)) {
+            map.forEach(ranges => {
+              ranges.push({
+                ...newRange,
+                value: null
+              })
+            })
+          } else {
+            for (const item of map.keys()) {
+              if (Format.equal(item, value.value)) {
+                map.get(item)!.push({
+                  ...newRange,
+                  value: null
+                })
+                break
+              }
+            }
+          }
+          valueGroups = Array.from(map.values())
+        } else if (isVoid(value)) {
+          const map = Format.formatRangesToMap(oldRanges)
+          map.forEach(ranges => {
+            ranges.push({
+              ...newRange,
+              value: null
+            })
+          })
+          valueGroups = Array.from(map.values())
+        } else {
+          valueGroups = Array.from(Format.formatRangesToMap([newRange, ...oldRanges]).values())
+        }
+      } else {
+        valueGroups = Array.from(Format.formatRangesToMap(oldRanges).values())
+      }
       const result: FormatRange[] = []
       for (const item of valueGroups) {
         result.push(...Format.toRanges(this.tileRanges(item)))
@@ -427,7 +483,27 @@ export class Format {
       return result
     }
     if (newRange) {
-      oldRanges = [...oldRanges, newRange]
+      const value = newRange.value
+      if (value instanceof CleanFormatRule) {
+        const map = Format.formatRangesToMap(oldRanges)
+        if (isVoid(value.value)) {
+          oldRanges = [...oldRanges, newRange]
+        } else {
+          for (const item of map.keys()) {
+            if (Format.equal(item, value)) {
+              const values = this.tileRanges(map.get(item)!)
+              const { startIndex, endIndex } = newRange
+              const cleanValues = Array.from<null>({ length: endIndex - startIndex }).fill(null)
+              values.splice(startIndex, endIndex - startIndex, ...cleanValues)
+              map.set(item, Format.toRanges(cleanValues))
+              break
+            }
+          }
+          oldRanges = Array.from(map.values()).flat()
+        }
+      } else {
+        oldRanges = [...oldRanges, newRange]
+      }
     }
     const formatValues: Array<FormatValue> = this.tileRanges(oldRanges)
 
@@ -444,20 +520,24 @@ export class Format {
     return formatValues
   }
 
-  private static mergeOverlapFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
+  private static formatRangesToMap(oldRanges: FormatRange[]) {
     const map = new Map<any, FormatRange[]>()
-    if (newRange) {
-      oldRanges = [newRange, ...oldRanges]
-    }
+    const keys: any[] = []
     for (const item of oldRanges) {
-      let ranges = map.get(item.value)
-      if (!ranges) {
-        ranges = []
-        map.set(item.value, ranges)
+      let hasKey = false
+      for (const key of keys) {
+        if (Format.equal(key, item.value)) {
+          hasKey = true
+          map.get(key)!.push(item)
+          break
+        }
       }
-      ranges.push(item)
+      if (!hasKey) {
+        keys.push(item.value)
+        map.set(item.value, [item])
+      }
     }
-    return Array.from(map.values())
+    return map
   }
 
   private static toRanges(values: Array<FormatValue>) {
@@ -465,7 +545,7 @@ export class Format {
     let range: FormatRange = null as any
     for (let i = 0; i < values.length; i++) {
       const item = values[i]
-      if (typeof item === 'undefined' || item === null) {
+      if (isVoid(item)) {
         range = null as any
         continue
       }

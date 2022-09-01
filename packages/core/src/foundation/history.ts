@@ -34,6 +34,24 @@ export abstract class History {
   abstract destroy(): void
 }
 
+function objToFormats(formatsObj: Record<string, any>, registry: Registry): Formats {
+  const formats: Formats = []
+  Object.keys(formatsObj).forEach(i => {
+    const formatter = registry.getFormatter(i)
+    if (formatter) {
+      const value = formatsObj[i]
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          formats.push([formatter, item])
+        })
+      } else {
+        formats.push([formatter, formatsObj[i]])
+      }
+    }
+  })
+  return formats
+}
+
 /**
  * Textbus 历史记录管理类
  */
@@ -219,14 +237,9 @@ export class CoreHistory extends History {
         const slot = this.selection.findSlotByPaths(path)!
         actions.forEach(action => {
           if (action.type === 'retain') {
-            if (action.formats) {
-              const formats: Formats = []
-              Object.keys(action.formats).forEach(i => {
-                const formatter = this.registry.getFormatter(i)
-                if (formatter) {
-                  formats.push([formatter, action.formats![i]])
-                }
-              })
+            const formatsObj = action.formats
+            if (formatsObj) {
+              const formats = objToFormats(formatsObj, this.registry)
               slot.retain(action.offset, formats)
             } else {
               slot.retain(action.offset)
@@ -244,22 +257,18 @@ export class CoreHistory extends History {
             return
           }
           if (action.type === 'insert') {
-            if (typeof action.content === 'string') {
-              if (action.formats) {
-                const formats: Formats = []
-                Object.keys(action.formats).forEach(i => {
-                  const formatter = this.registry.getFormatter(i)
-                  if (formatter) {
-                    formats.push([formatter, action.formats![i]])
-                  }
-                })
-                slot.insert(action.content, formats)
-              } else {
-                slot.insert(action.content)
-              }
+            const formatsObj = action.formats
+            let formats: Formats | void
+            if (formatsObj) {
+              formats = objToFormats(formatsObj, this.registry)
+            }
+            const content = typeof action.content === 'string' ?
+              action.content :
+              this.translator.createComponent(action.content as ComponentLiteral)!
+            if (formats) {
+              slot.insert(content, formats)
             } else {
-              const component = this.translator.createComponent(action.content as ComponentLiteral)!
-              slot.insert(component)
+              slot.insert(content)
             }
           }
         })

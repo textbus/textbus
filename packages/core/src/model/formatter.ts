@@ -23,17 +23,43 @@ export abstract class Formatter {
                         public overlap = false) {
   }
 
-  abstract render(node: VElement | null, formatValue: FormatValue, isOutputMode: boolean): VElement | void
+  abstract render(
+    node: VElement | null,
+    formatValue: FormatValue,
+    isOutputMode: boolean
+  ): VElement | void
 }
 
 export abstract class BlockFormatter extends Formatter {
-  protected constructor(name: string, priority: FormatPriority = FormatPriority.Attribute, columned = false, overlap = false) {
-    super(name, FormatType.Block, priority, columned, overlap)
+  protected constructor(
+    name: string,
+    priority: FormatPriority = FormatPriority.Attribute,
+    columned = false,
+    overlap = false
+  ) {
+    super(
+      name,
+      FormatType.Block,
+      priority,
+      columned,
+      overlap
+    )
   }
 }
 
 export abstract class InlineFormatter extends Formatter {
-  protected constructor(name: string, priority: FormatPriority = FormatPriority.Attribute, columned = false, overlap = false) {
-    super(name, FormatType.Inline, priority, columned, overlap)
+  protected constructor(
+    name: string,
+    priority: FormatPriority = FormatPriority.Attribute,
+    columned = false,
+    overlap = false
+  ) {
+    super(
+      name,
+      FormatType.Inline,
+      priority,
+      columned,
+      overlap
+    )
   }
 }

@@ -28,6 +28,24 @@ export interface DeltaInsert {
 
 export type DeltaLite = DeltaInsert[]
 
+function formatsToObject(formats: Formats) {
+  const obj: Record<string, any> = {}
+  formats.forEach(item => {
+    const [formatter, value] = item
+    const name = formatter.name
+    if (formatter.overlap) {
+      if (obj[name]) {
+        obj[name].push(value)
+      } else {
+        obj[name] = [value]
+      }
+    } else {
+      obj[name] = value
+    }
+  })
+  return obj
+}
+
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
@@ -272,10 +290,7 @@ export class Slot<T = any> {
       type: 'insert',
       content: actionData,
       ref: content,
-      formats: formats.reduce((opt: Record<string, any>, next) => {
-        opt[next[0].name] = next[1]
-        return opt
-      }, {})
+      formats: formatsToObject(formats)
     } : {
       type: 'insert',
       content: actionData,
@@ -339,10 +354,7 @@ export class Slot<T = any> {
 
     const applyActions: Action[] = []
     const unApplyActions: Action[] = []
-    const formatsObj = formats.reduce((opt: Record<string, any>, next) => {
-      opt[next[0].name] = next[1]
-      return opt
-    }, {})
+    const formatsObj = formatsToObject(formats)
     const resetFormatObj = formats.reduce((opt: Record<string, any>, next) => {
       opt[next[0].name] = null
       return opt
@@ -666,8 +678,7 @@ export class Slot<T = any> {
   insertDelta(delta: DeltaLite): DeltaLite {
     while (delta.length) {
       const first = delta[0]!
-      // TODO 这里插入的还有组件，要修复类型
-      const is = this.insert(first.insert as string, first.formats)
+      const is = this.insert(first.insert, first.formats)
       if (is) {
         delta.shift()
       } else {
