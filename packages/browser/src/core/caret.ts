@@ -192,10 +192,10 @@ export class Caret {
           this.oldPosition.height = rect.height
         }
       }),
-      fromEvent(document, 'mousedown').subscribe(() => {
+      fromEvent(document, 'mousedown', true).subscribe(() => {
         isPressed = true
       }),
-      fromEvent(document, 'mouseup').subscribe(() => {
+      fromEvent(document, 'mouseup', true).subscribe(() => {
         isPressed = false
       }),
       scheduler.onDocChange.subscribe(() => {

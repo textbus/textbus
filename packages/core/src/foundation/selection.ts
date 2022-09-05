@@ -538,8 +538,14 @@ export class Selection {
    * @param isRestore
    */
   selectChildSlots(componentInstance: ComponentInstance, isRestore = false) {
-    this.selectFirstPosition(componentInstance)
-    this.selectLastPosition(componentInstance)
+    const slots = componentInstance.slots
+    if (slots.length) {
+      const firstPosition = this.findFirstPosition(slots.first!, false)
+      const lastPosition = this.findLastPosition(slots.last!, false)
+      this.setBaseAndExtent(firstPosition.slot, firstPosition.offset, lastPosition.slot, lastPosition.offset)
+    } else {
+      this.selectComponent(componentInstance, false)
+    }
     if (isRestore) {
       this.restore()
     }
