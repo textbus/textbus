@@ -7,6 +7,7 @@ import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats } from './format'
 import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { ChangeMarker } from './change-marker'
+import { StateChange } from './types'
 
 export enum ContentType {
   Text = 1,
@@ -63,7 +64,7 @@ export class Slot<T = any> {
   changeMarker = new ChangeMarker()
 
   onContentChange: Observable<Action[]>
-  onStateChange: Observable<ApplyAction[]>
+  onStateChange: Observable<StateChange<T>>
   onChildComponentRemove: Observable<ComponentInstance[]>
 
   readonly schema: ContentType[]
@@ -99,7 +100,7 @@ export class Slot<T = any> {
   protected format = new Format(this)
 
   protected contentChangeEvent = new Subject<Action[]>()
-  protected stateChangeEvent = new Subject<ApplyAction[]>()
+  protected stateChangeEvent = new Subject<StateChange<T>>()
 
   constructor(schema: ContentType[], public state?: T) {
     this.schema = schema.sort()
@@ -150,8 +151,9 @@ export class Slot<T = any> {
   /**
    * 更新插槽状态的方法
    * @param fn
+   * @param record
    */
-  updateState(fn: (draft: Draft<T>) => void): T {
+  updateState(fn: (draft: Draft<T>) => void, record = true): T {
     let changes!: Patch[]
     let inverseChanges!: Patch[]
     const oldState = this.state
@@ -166,7 +168,8 @@ export class Slot<T = any> {
     const applyAction: ApplyAction = {
       type: 'apply',
       patches: changes,
-      value: newState
+      value: newState,
+      record
     }
     this.changeMarker.markAsDirtied({
       path: [],
@@ -174,10 +177,15 @@ export class Slot<T = any> {
       unApply: [{
         type: 'apply',
         patches: inverseChanges,
-        value: oldState
+        value: oldState,
+        record
       }]
     })
-    this.stateChangeEvent.next([applyAction])
+    this.stateChangeEvent.next({
+      newState: newState!,
+      oldState: oldState!,
+      record
+    })
     return newState!
   }
 

@@ -174,11 +174,28 @@ export class CoreHistory extends History {
   private record() {
     let beforePaths = this.selection.getPaths()
     this.scheduler.onDocChanged.pipe(map(i => {
-      return i.filter(item => {
-        return item.from === ChangeOrigin.Local
-      }).map(item => {
-        return item.operations
-      })
+      const operations: Operation[] = []
+      for (const item of i) {
+        if (item.from !== ChangeOrigin.Local) {
+          continue
+        }
+        const operation = item.operation
+        const apply = operation.apply.filter(i => {
+          return i.type !== 'apply' || i.record
+        })
+        const unApply = operation.unApply.filter(i => {
+          return i.type !== 'apply' || i.record
+        })
+        if (apply.length && unApply.length) {
+
+          operations.push({
+            path: operation.path,
+            apply,
+            unApply
+          })
+        }
+      }
+      return operations
     })).subscribe((operations) => {
       if (!operations.length) {
         return

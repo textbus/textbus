@@ -14,7 +14,7 @@ export enum ChangeOrigin {
 
 export interface ChangeItem {
   from: ChangeOrigin,
-  operations: Operation
+  operation: Operation
 }
 
 @Injectable()
@@ -78,7 +78,7 @@ export class Scheduler {
           return {
             from: this.changeFromRemote ? ChangeOrigin.Remote :
               this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local,
-            operations: op
+            operation: op
           }
         }),
         microTask()

@@ -84,6 +84,17 @@ export abstract class TranslatorFallback {
   abstract createComponentByData(name: string, data: ComponentInitData): ComponentInstance | null
 }
 
+interface Update {
+  record: boolean
+  actions: Array<() => void>
+}
+
+interface UpdateItem {
+  record: boolean
+
+  action(): void
+}
+
 @Injectable()
 export class Collaborate implements History {
   onSelectionChange: Observable<SelectionPaths>
@@ -119,7 +130,8 @@ export class Collaborate implements History {
   private selectionChangeEvent = new Subject<SelectionPaths>()
   private contentMap = new ContentMap()
 
-  private updateRemoteActions: Array<() => void> = []
+  private updateRemoteActions: Array<UpdateItem> = []
+  private noRecord = {}
 
   constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
               private rootComponentRef: RootComponentRef,
@@ -176,12 +188,38 @@ export class Collaborate implements History {
           return item.length
         })
       ).subscribe(() => {
-        this.yDoc.transact(() => {
-          this.updateRemoteActions.forEach(fn => {
-            fn()
-          })
-          this.updateRemoteActions = []
-        }, this.yDoc)
+        const updates: Update[] = []
+
+        let update: Update | null = null
+
+        for (const item of this.updateRemoteActions) {
+          if (!update) {
+            update = {
+              record: item.record,
+              actions: []
+            }
+            updates.push(update)
+          }
+          if (update.record === item.record) {
+            update.actions.push(item.action)
+          } else {
+            update = {
+              record: item.record,
+              actions: [item.action]
+            }
+            updates.push(update)
+          }
+        }
+
+        this.updateRemoteActions = []
+
+        for (const item of updates) {
+          this.yDoc.transact(() => {
+            item.actions.forEach(fn => {
+              fn()
+            })
+          }, item.record ? this.yDoc : this.noRecord)
+        }
       })
     )
     this.syncRootComponent(root, rootComponent)
@@ -434,12 +472,10 @@ export class Collaborate implements History {
     }
     remoteSlot.observe(syncRemote)
 
-    const sub = slot.onStateChange.subscribe(actions => {
+    const sub = slot.onStateChange.subscribe(change => {
       this.runLocalUpdate(() => {
-        actions.forEach(action => {
-          remoteSlot.set('state', action.value)
-        })
-      })
+        remoteSlot.set('state', change.newState)
+      }, change.record)
     })
     this.slotStateSyncCaches.set(slot, () => {
       remoteSlot.unobserve(syncRemote)
@@ -522,10 +558,10 @@ export class Collaborate implements History {
     }
     remoteComponent.observe(syncRemote)
 
-    const sub = component.onStateChange.subscribe(newState => {
+    const sub = component.onStateChange.subscribe(change => {
       this.runLocalUpdate(() => {
-        remoteComponent.set('state', newState)
-      })
+        remoteComponent.set('state', change.newState)
+      }, change.record)
     })
     this.componentStateSyncCaches.set(component, () => {
       remoteComponent.unobserve(syncRemote)
@@ -533,11 +569,14 @@ export class Collaborate implements History {
     })
   }
 
-  private runLocalUpdate(fn: () => void) {
+  private runLocalUpdate(fn: () => void, record = true) {
     if (this.updateFromRemote || this.controller.readonly) {
       return
     }
-    this.updateRemoteActions.push(fn)
+    this.updateRemoteActions.push({
+      record,
+      action: fn
+    })
   }
 
   private runRemoteUpdate(tr: Transaction, fn: () => void) {

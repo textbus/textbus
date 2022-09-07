@@ -1,5 +1,5 @@
 import { Draft, produce, Patch, enablePatches } from 'immer'
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@tanbo/di'
 
 import { makeError } from '../_utils/make-error'
@@ -8,6 +8,7 @@ import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
+import { StateChange } from './types'
 
 enablePatches()
 
@@ -108,7 +109,7 @@ export interface ComponentInstance<Extends extends ComponentExtends = ComponentE
   /** 组件动态上下文菜单注册表 */
   shortcutList: Shortcut[]
   /** 当状态变更时触发 */
-  onStateChange: Observable<State>
+  onStateChange: Observable<StateChange<State>>
 
   /** 组件状态 */
   get state(): State
@@ -116,8 +117,9 @@ export interface ComponentInstance<Extends extends ComponentExtends = ComponentE
   /**
    * 更新组件状态的方法
    * @param fn
+   * @param record
    */
-  updateState(fn: (draft: Draft<State>) => void): State
+  updateState(fn: (draft: Draft<State>) => void, record?: boolean): State
 
   /**
    * 组件转为 JSON 数据的方法
@@ -345,15 +347,15 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
     zenCoding: options.zenCoding,
     createInstance(contextInjector: Injector, initData?: ComponentInitData<State, SlotState>) {
       const marker = new ChangeMarker()
-      const stateChangeSubject = new Subject<any>()
+      const stateChangeSubject = new Subject<StateChange<State>>()
 
       const onStateChange = stateChangeSubject.asObservable()
 
       const changeController: ChangeController<State> = {
-        update(fn) {
-          return componentInstance.updateState(fn)
+        update(fn, record = true) {
+          return componentInstance.updateState(fn, record)
         },
-        onChange: onStateChange
+        onChange: onStateChange.pipe(map(i => i.newState))
       }
 
       const componentInstance: ComponentInstance<Extends, State> = {
@@ -373,7 +375,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
         slots: null as any,
         extends: null as any,
         shortcutList: null as any,
-        updateState(fn) {
+        updateState(fn, record = true) {
           let changes!: Patch[]
           let inverseChanges!: Patch[]
           const oldState = state
@@ -385,19 +387,25 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
             return oldState!
           }
           state = newState
-          stateChangeSubject.next(newState)
           marker.markAsDirtied({
             path: [],
             apply: [{
               type: 'apply',
               patches: changes!,
-              value: newState
+              value: newState,
+              record
             }],
             unApply: [{
               type: 'apply',
               patches: inverseChanges!,
-              value: oldState
+              value: oldState,
+              record
             }]
+          })
+          stateChangeSubject.next({
+            oldState: oldState!,
+            newState,
+            record
           })
           return newState
         },

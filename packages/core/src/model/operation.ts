@@ -24,6 +24,7 @@ export interface ApplyAction {
   type: 'apply'
   patches: Patch[],
   value: any
+  record: boolean
 }
 
 export interface InsertSlotAction {
