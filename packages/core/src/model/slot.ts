@@ -34,7 +34,7 @@ function formatsToObject(formats: Formats) {
   formats.forEach(item => {
     const [formatter, value] = item
     const name = formatter.name
-    if (formatter.overlap) {
+    if (formatter.createValueIdIfOverlap) {
       if (obj[name]) {
         obj[name].push(value)
       } else {

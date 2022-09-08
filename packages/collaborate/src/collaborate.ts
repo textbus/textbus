@@ -399,17 +399,7 @@ export class Collaborate implements History {
           if (action.type === 'retain') {
             const formats = action.formats
             if (formats) {
-              const keys = Object.keys(formats)
-              let length = keys.length
-              keys.forEach(key => {
-                if (!this.registry.getFormatter(key)) {
-                  length--
-                  Reflect.deleteProperty(formats, key)
-                }
-              })
-              if (length) {
-                content.format(offset, action.offset, formats)
-              }
+              content.format(offset, action.offset, localFormatToRemote(formats, this.registry))
             } else {
               offset = action.offset
             }
@@ -418,11 +408,11 @@ export class Collaborate implements History {
             const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
             if (typeof action.content === 'string') {
               length = action.content.length
-              content.insert(offset, action.content, action.formats || {})
+              content.insert(offset, action.content, localFormatToRemote(action.formats || {}, this.registry))
             } else {
               length = 1
               const sharedComponent = this.createSharedComponentByComponent(action.ref as ComponentInstance)
-              content.insertEmbed(offset, sharedComponent)
+              content.insertEmbed(offset, sharedComponent, localFormatToRemote(action.formats || {}, this.registry))
             }
 
             if (isEmpty && offset === 0) {
@@ -615,13 +605,9 @@ export class Collaborate implements History {
     sharedSlot.set('content', sharedContent)
     let offset = 0
     slot.toDelta().forEach(i => {
-      let formats: any = {}
+      let formats
       if (i.formats) {
-        i.formats.forEach(item => {
-          formats[item[0].name] = item[1]
-        })
-      } else {
-        formats = null
+        formats = formatsToRemote(i.formats)
       }
       if (typeof i.insert === 'string') {
         sharedContent.insert(offset, i.insert, formats)
@@ -689,7 +675,7 @@ export class Collaborate implements History {
           const sharedComponent = action.insert as YMap<any>
           const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
           const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
-          slot.insert(component)
+          slot.insert(component, makeFormats(this.registry, action.attributes))
           this.syncSlots(sharedComponent.get('slots'), component)
           this.syncComponent(sharedComponent, component)
         }
@@ -726,11 +712,54 @@ export class Collaborate implements History {
   }
 }
 
+function formatsToRemote(formats: Formats) {
+  const result: Record<string, any> = {}
+
+  for (const item of formats) {
+    const [formatter, values] = item
+    if (typeof formatter.createValueIdIfOverlap === 'function') {
+      if (Array.isArray(values)) {
+        values.forEach(value => {
+          const valueId = (formatter.createValueIdIfOverlap as any)(value)
+          result[`${formatter.name}:${valueId}`] = value
+        })
+        break
+      }
+    }
+    result[formatter.name] = values
+  }
+  return result
+}
+
+function localFormatToRemote(formats: Record<string, any>, registry: Registry) {
+  const keys = Object.keys(formats)
+  const result: Record<string, any> = {}
+
+  for (const key of keys) {
+    const formatter = registry.getFormatter(key)
+    if (!formatter) {
+      break
+    }
+    if (typeof formatter.createValueIdIfOverlap === 'function') {
+      const values = formats[key]
+      if (Array.isArray(values)) {
+        values.forEach(value => {
+          const valueId = (formatter.createValueIdIfOverlap as any)(value)
+          result[`${formatter.name}:${valueId}`] = value
+        })
+        break
+      }
+    }
+    result[key] = formats[key]
+  }
+  return result
+}
+
 function makeFormats(registry: Registry, attrs?: any) {
   const formats: Formats = []
   if (attrs) {
     Object.keys(attrs).forEach(key => {
-      const formatter = registry.getFormatter(key)
+      const formatter = registry.getFormatter(key.split(':')[0])
       if (formatter) {
         formats.push([formatter, attrs[key]])
       }

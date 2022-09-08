@@ -20,7 +20,7 @@ export abstract class Formatter {
                         public type: FormatType,
                         public priority: FormatPriority,
                         public columned = false,
-                        public overlap = false) {
+                        public createValueIdIfOverlap?: (formatValue: FormatValue) => string) {
   }
 
   abstract render(
@@ -35,14 +35,14 @@ export abstract class BlockFormatter extends Formatter {
     name: string,
     priority: FormatPriority = FormatPriority.Attribute,
     columned = false,
-    overlap = false
+    createValueIdIfOverlap?: (formatValue: FormatValue) => string
   ) {
     super(
       name,
       FormatType.Block,
       priority,
       columned,
-      overlap
+      createValueIdIfOverlap
     )
   }
 }
@@ -52,14 +52,14 @@ export abstract class InlineFormatter extends Formatter {
     name: string,
     priority: FormatPriority = FormatPriority.Attribute,
     columned = false,
-    overlap = false
+    createValueIdIfOverlap?: (formatValue: FormatValue) => string
   ) {
     super(
       name,
       FormatType.Inline,
       priority,
       columned,
-      overlap
+      createValueIdIfOverlap
     )
   }
 }

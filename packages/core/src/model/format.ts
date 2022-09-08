@@ -54,13 +54,13 @@ export class Format {
    */
   merge(formatter: BlockFormatter, data: FormatValue): this
   merge(formatter: InlineFormatter, data: FormatRange): this
-  merge(formatter: any, data: any): this {
+  merge(formatter: BlockFormatter | InlineFormatter, data: any): this {
     if (formatter.type === FormatType.Block) {
       if (isVoid(data)) {
         this.map.delete(formatter)
         return this
       }
-      if (formatter.overlap) {
+      if (formatter.createValueIdIfOverlap) {
         if (data instanceof CleanFormatRule) {
           if (isVoid(data.value)) {
             this.map.delete(formatter)
@@ -149,7 +149,7 @@ export class Format {
         })
         return
       }
-      if (key.overlap) {
+      if (key.createValueIdIfOverlap) {
         const groups = Format.formatRangesToMap(formatRanges)
         const ranges: FormatRange[] = []
         groups.forEach(group => {
@@ -436,7 +436,7 @@ export class Format {
   }
 
   private normalizeFormatRange(formatter: Formatter, oldRanges: FormatRange[], newRange?: FormatRange): FormatRange[] {
-    if (formatter.overlap) {
+    if (formatter.createValueIdIfOverlap) {
       let valueGroups: FormatRange[][]
       if (newRange) {
         const value = newRange.value
