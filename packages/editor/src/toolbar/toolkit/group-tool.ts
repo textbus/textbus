@@ -1,6 +1,6 @@
 import { createElement, createTextNode } from '@textbus/browser'
 import { Injector } from '@tanbo/di'
-import { Keyboard, Keymap, QueryStateType } from '@textbus/core'
+import { Controller, Keyboard, Keymap, QueryStateType } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'
 
 import { Tool } from '../types'
@@ -71,7 +71,8 @@ export class GroupTool implements Tool {
   private menus: ToolItem[] = []
   private config!: GroupToolConfig
 
-  private controller!: UIDropdown
+  private uiDropdown!: UIDropdown
+  private controller!: Controller
 
   constructor(private factory: (injector: Injector) => GroupToolConfig) {
   }
@@ -80,6 +81,7 @@ export class GroupTool implements Tool {
     const config = this.factory(injector)
     const keyboard = injector.get(Keyboard)
     const dialog = injector.get(Dialog)
+    this.controller = injector.get(Controller)
     this.config = config
     // eslint-disable-next-line array-callback-return
     const menus = config.items.map(i => {
@@ -104,7 +106,13 @@ export class GroupTool implements Tool {
       menuView: groupItemGroup,
       stickyElement: limitElement
     })
-    this.controller = dropdown
+    this.controller.onReadonlyStateChange.subscribe(v => {
+      dropdown.disabled = v
+      menus.forEach(i => {
+        i.disabled(v)
+      })
+    })
+    this.uiDropdown = dropdown
     return dropdown.elementRef
   }
 
@@ -125,7 +133,7 @@ export class GroupTool implements Tool {
 
     fromEvent(item.elementRef, 'click').subscribe(() => {
       dialog.show(config.viewController.elementRef)
-      this.controller.hide()
+      this.uiDropdown.hide()
     })
 
     const defaultValue: any = {}
@@ -149,6 +157,7 @@ export class GroupTool implements Tool {
         }
       })
     }
+    const controller = this.controller
     return {
       elementRef: item.elementRef,
       disabled(is: boolean) {
@@ -158,8 +167,13 @@ export class GroupTool implements Tool {
         if (!config.queryState) {
           return
         }
-        const state = config.queryState()
         const viewer = item
+        if (controller.readonly) {
+          viewer.disabled = true
+          viewer.highlight = false
+          return
+        }
+        const state = config.queryState()
         switch (state.state) {
           case QueryStateType.Disabled:
             viewer.disabled = true
@@ -201,7 +215,7 @@ export class GroupTool implements Tool {
     config.viewController.onComplete.subscribe(v => {
       prevValue = v
       config.useValue(v)
-      this.controller.hide()
+      this.uiDropdown.hide()
     })
 
     if (config.keymap) {
@@ -217,6 +231,7 @@ export class GroupTool implements Tool {
 
     item.elementRef.appendChild(menu)
 
+    const controller = this.controller
     return {
       elementRef: item.elementRef,
       disabled(is: boolean) {
@@ -226,8 +241,13 @@ export class GroupTool implements Tool {
         if (!config.queryState) {
           return
         }
-        const state = config.queryState()
         const viewer = item
+        if (controller.readonly) {
+          viewer.disabled = true
+          viewer.highlight = false
+          return
+        }
+        const state = config.queryState()
         switch (state.state) {
           case QueryStateType.Disabled:
             viewer.disabled = true
@@ -266,7 +286,7 @@ export class GroupTool implements Tool {
               ...option,
               onClick: () => {
                 config.onChecked(option.value)
-                this.controller.hide()
+                this.uiDropdown.hide()
               }
             })
             map.set(option, el)
@@ -287,6 +307,7 @@ export class GroupTool implements Tool {
     })
     item.elementRef.appendChild(menu)
 
+    const controller = this.controller
     return {
       elementRef: item.elementRef,
       disabled(is: boolean) {
@@ -296,8 +317,13 @@ export class GroupTool implements Tool {
         if (!config.queryState) {
           return
         }
-        const state = config.queryState()
         const viewer = item
+        if (controller.readonly) {
+          viewer.disabled = true
+          viewer.highlight = false
+          return
+        }
+        const state = config.queryState()
         switch (state.state) {
           case QueryStateType.Disabled:
             viewer.disabled = true
@@ -334,7 +360,7 @@ export class GroupTool implements Tool {
 
     fromEvent(item.elementRef, 'click').subscribe(() => {
       config.onClick()
-      this.controller.hide()
+      this.uiDropdown.hide()
     })
 
     if (config.keymap) {
@@ -348,6 +374,7 @@ export class GroupTool implements Tool {
       })
     }
 
+    const controller = this.controller
     return {
       elementRef: item.elementRef,
       disabled(is: boolean) {
@@ -357,8 +384,13 @@ export class GroupTool implements Tool {
         if (!config.queryState) {
           return
         }
-        const state = config.queryState()
         const viewer = item
+        if (controller.readonly) {
+          viewer.disabled = true
+          viewer.highlight = false
+          return
+        }
+        const state = config.queryState()
         switch (state.state) {
           case QueryStateType.Disabled:
             viewer.disabled = true

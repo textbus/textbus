@@ -269,7 +269,7 @@ export class Renderer {
       // hack 防止根节点替换插件时，没有父级虚拟 DOM 节点
       new VElement('html', null, [root])
       // hack end
-      if (dirty) {
+      if (dirty || this.readonlyStateChanged) {
         if (this.oldVDom) {
           const oldNativeNode = this.nativeNodeCaches.get(this.oldVDom)
           const newNativeNode = this.diffAndUpdate(root, this.oldVDom)

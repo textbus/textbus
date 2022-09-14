@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Controller, Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { createSelect, UISelect } from './_utils/_api'
@@ -50,12 +50,14 @@ export interface SelectToolConfig<T = any> {
 export class SelectTool implements Tool {
   private config!: SelectToolConfig
   private viewer!: UISelect
+  private controller!: Controller
 
   constructor(private factory: (injector: Injector) => SelectToolConfig) {
   }
 
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
+    this.controller = injector.get(Controller)
     this.config = config
     const keyboard = injector.get(Keyboard)
     const dropdown = createSelect({
@@ -83,8 +85,13 @@ export class SelectTool implements Tool {
     if (!this.config.queryState) {
       return
     }
-    const state = this.config.queryState()
     const dropdown = this.viewer
+    if (this.controller.readonly) {
+      dropdown.disabled = true
+      dropdown.highlight = false
+      return
+    }
+    const state = this.config.queryState()
     if (state.value) {
       const option = this.config.options.find(i => {
         return i.value === state.value

@@ -1,5 +1,5 @@
 import { Injector } from '@tanbo/di'
-import { QueryState, QueryStateType, Keymap, Keyboard } from '@textbus/core'
+import { QueryState, QueryStateType, Keymap, Keyboard, Controller } from '@textbus/core'
 
 import { createButton, UIButton } from './_utils/_api'
 import { Tool } from '../types'
@@ -26,12 +26,14 @@ export interface ButtonToolConfig<T = any> {
 export class ButtonTool implements Tool {
   private viewer!: UIButton
   private config!: ButtonToolConfig<any>
+  private controller!: Controller
 
   constructor(private factory: (injector: Injector) => ButtonToolConfig<any>) {
   }
 
   setup(injector: Injector): HTMLElement {
     this.config = this.factory(injector)
+    this.controller = injector.get(Controller)
     const keyboard = injector.get(Keyboard)
     const viewer = createButton({
       ...this.config,
@@ -55,8 +57,13 @@ export class ButtonTool implements Tool {
     if (!this.config.queryState) {
       return
     }
-    const state = this.config.queryState()
     const viewer = this.viewer
+    if (this.controller.readonly) {
+      viewer.disabled = true
+      viewer.highlight = false
+      return
+    }
+    const state = this.config.queryState()
     switch (state.state) {
       case QueryStateType.Disabled:
         viewer.disabled = true

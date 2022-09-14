@@ -195,28 +195,30 @@ export class Selection {
       return
     }
     if (v) {
-      this.bridge.connect({
-        setSelection: (range: AbstractSelection | null) => {
-          if (range === null) {
-            if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
-              return
-            }
-            this.unSelect()
-            return
-          }
-          const { focusOffset, focusSlot, anchorOffset, anchorSlot } = range
-          if (focusSlot === this.focusSlot &&
-            anchorSlot === this.anchorSlot &&
-            focusOffset === this.focusOffset &&
-            anchorOffset === this.anchorOffset) {
-            return
-          }
-          this.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
-        }
-      })
+      this.bridge.connect(this.connector)
     } else {
       this.unSelect()
       this.bridge.disConnect()
+    }
+  }
+
+  private connector: NativeSelectionConnector = {
+    setSelection: (range: AbstractSelection | null) => {
+      if (range === null) {
+        if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
+          return
+        }
+        this.unSelect()
+        return
+      }
+      const { focusOffset, focusSlot, anchorOffset, anchorSlot } = range
+      if (focusSlot === this.focusSlot &&
+        anchorSlot === this.anchorSlot &&
+        focusOffset === this.focusOffset &&
+        anchorOffset === this.anchorOffset) {
+        return
+      }
+      this.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
     }
   }
 
@@ -261,6 +263,13 @@ export class Selection {
     let selectedComponent: ComponentInstance | null = null
     const focusInComponents: ComponentInstance[] = []
     this.subscriptions.push(
+      controller.onReadonlyStateChange.subscribe(b => {
+        if (b) {
+          this.bridge.disConnect()
+        } else {
+          this.bridge.connect(this.connector)
+        }
+      }),
       this.onChange.pipe(
         map(() => {
           return this.commonAncestorComponent

@@ -1,6 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Controller, Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { UISegmentDropdown } from './_utils/_api'
 import { Tool } from '../types'
@@ -36,12 +36,14 @@ export class SegmentDropdownTool implements Tool {
   private subs: Subscription[] = []
   private config!: SegmentDropdownToolConfig
   private viewer!: UISegmentDropdown
+  private controller!: Controller
 
   constructor(private factory: (injector: Injector) => SegmentDropdownToolConfig) {
   }
 
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
+    this.controller = injector.get(Controller)
     this.config = config
     const keyboard = injector.get(Keyboard)
 
@@ -92,6 +94,11 @@ export class SegmentDropdownTool implements Tool {
       return
     }
     const viewer = this.viewer
+    if (this.controller.readonly) {
+      viewer.disabled = true
+      viewer.highlight = false
+      return
+    }
     const state = this.config.queryState()
     this.config.viewController.update(state.value)
     switch (state.state) {

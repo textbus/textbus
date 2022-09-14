@@ -98,7 +98,7 @@ export class Format {
     let ranges = this.map.get(formatter)
     if (!ranges) {
       const v = data.value
-      if (isVoid(v)) {
+      if (isVoid(v) || v instanceof CleanFormatRule) {
         return this
       }
       ranges = [data]

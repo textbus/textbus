@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import { Subscription } from '@tanbo/stream'
-import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Controller, Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { createDropdown, UIDropdown } from './_utils/dropdown'
@@ -30,6 +30,7 @@ export interface DropdownToolConfig {
 export class DropdownTool implements Tool {
   private config!: DropdownToolConfig
   private viewer!: UIDropdown
+  private controller!: Controller
 
   private subs: Subscription[] = []
 
@@ -39,6 +40,7 @@ export class DropdownTool implements Tool {
   setup(injector: Injector, limitElement: HTMLElement): HTMLElement {
     const config = this.factory(injector)
     this.config = config
+    this.controller = injector.get(Controller)
     const keyboard = injector.get(Keyboard)
     const initValue: any = {}
     let prevValue: any = initValue
@@ -68,8 +70,14 @@ export class DropdownTool implements Tool {
   }
 
   refreshState() {
-    const state = this.config.queryState()
     const viewer = this.viewer
+
+    if (this.controller.readonly) {
+      viewer.disabled = true
+      viewer.highlight = false
+      return
+    }
+    const state = this.config.queryState()
     if (state.value) {
       this.config.viewController.update(state.value)
     } else {

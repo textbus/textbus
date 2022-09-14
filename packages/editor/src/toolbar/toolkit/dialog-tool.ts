@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import { Subscription } from '@tanbo/stream'
-import { Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
+import { Controller, Keyboard, Keymap, QueryState, QueryStateType } from '@textbus/core'
 
 import { Tool } from '../types'
 import { ViewController } from '../../uikit/types'
@@ -31,6 +31,7 @@ export interface DialogToolConfig {
 export class DialogTool implements Tool {
   private config!: DialogToolConfig
   private viewer!: UIButton
+  private controller!: Controller
 
   private subs: Subscription[] = []
 
@@ -39,6 +40,7 @@ export class DialogTool implements Tool {
 
   setup(injector: Injector): HTMLElement {
     const config = this.factory(injector)
+    this.controller = injector.get(Controller)
     this.config = config
     const keyboard = injector.get(Keyboard)
     const dialog = injector.get(Dialog)
@@ -77,8 +79,13 @@ export class DialogTool implements Tool {
   }
 
   refreshState() {
-    const state = this.config.queryState()
     const viewer = this.viewer
+    if (this.controller.readonly) {
+      viewer.disabled = true
+      viewer.highlight = false
+      return
+    }
+    const state = this.config.queryState()
     if (state.value) {
       this.config.viewController.update(state.value)
     } else {
