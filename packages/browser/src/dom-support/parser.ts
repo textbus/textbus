@@ -20,11 +20,17 @@ export interface SlotParser {
   <T extends Slot>(childSlot: T, childElement: HTMLElement): T
 }
 
+/**
+ * 组件加载器
+ */
 export interface ComponentLoader {
+  /** 组件所需要的外部资源 */
   resources?: ComponentResources
 
+  /** 识别组件的匹配方法 */
   match(element: HTMLElement): boolean
 
+  /** 读取组件内容的方法 */
   read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance | Slot
 }
 
@@ -74,8 +80,7 @@ export class Parser {
 
   parse(html: string, rootSlot: Slot) {
     const element = Parser.parseHTML(html)
-    const formatItems: FormatItem[] = []
-    this.readFormats(element, rootSlot, formatItems)
+    const formatItems: FormatItem[] = this.readFormats(element, rootSlot, [])
     this.applyFormats(rootSlot, formatItems)
     return rootSlot
   }
@@ -120,7 +125,7 @@ export class Parser {
       this.readComponent(child, slot, formatItems)
     })
     const endIndex = slot.index
-    formatItems.push(...formats.map<FormatItem>(i => {
+    formatItems.unshift(...formats.map<FormatItem>(i => {
       return {
         formatter: i.formatter,
         value: i.value,
@@ -128,11 +133,11 @@ export class Parser {
         endIndex
       }
     }))
+    return formatItems
   }
 
   private readSlot<T extends Slot>(childSlot: T, childElement: HTMLElement): T {
-    const childFormatItems: FormatItem[] = []
-    this.readFormats(childElement, childSlot, childFormatItems)
+    const childFormatItems: FormatItem[] = this.readFormats(childElement, childSlot, [])
     this.applyFormats(childSlot, childFormatItems)
     return childSlot
   }

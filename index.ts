@@ -142,10 +142,7 @@ const editor = createEditor({
 })
 
 editor.mount(document.getElementById('box')!).then(() => {
-  window['textbus'] = {
-    selection: editor.injector.get(Selection),
-    rootComponent: editor.injector.get(RootComponentRef).component
-  }
+  window['textbus'] = editor
 })
 
 editor.onChange.subscribe(() => {

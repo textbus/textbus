@@ -181,7 +181,7 @@ export const alertComponentLoader: ComponentLoader = {
     ]
   },
   match(element: HTMLElement): boolean {
-    return element.tagName.toLowerCase() === 'td-alert'
+    return element.tagName.toLowerCase() === 'tb-alert'
   },
   read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance {
     return alertComponent.createInstance(context, {
