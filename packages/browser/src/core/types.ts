@@ -26,4 +26,6 @@ export interface ViewOptions extends TextbusConfig {
   styleSheets?: string[]
   /** 配置文档编辑状态下用到的样式 */
   editingStyleSheets?: string[]
+  /** 使用 contentEditable 作为编辑器控制可编辑范围 */
+  useContentEditable?: boolean
 }

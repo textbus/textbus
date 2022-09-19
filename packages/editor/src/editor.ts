@@ -1,7 +1,7 @@
 import { Provider, Type } from '@tanbo/di'
 import { fromEvent, fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection, Starter } from '@textbus/core'
-import { Caret, Viewer } from '@textbus/browser'
+import { Input, Viewer } from '@textbus/browser'
 
 import { EditorOptions } from './types'
 import { rootComponent, rootComponentLoader } from './root.component'
@@ -116,8 +116,8 @@ export class Editor extends Viewer {
       }
       if (!(this.options as EditorOptions).autoHeight) {
         const scrollContainer = this.layout.scroller
-        const caret = rootInjector.get(Caret)
-        caret.correctScrollTop({
+        const input = rootInjector.get(Input)
+        input.caret.correctScrollTop({
           onScroll: fromEvent(scrollContainer, 'scroll'),
           getLimit() {
             const rect = scrollContainer.getBoundingClientRect()

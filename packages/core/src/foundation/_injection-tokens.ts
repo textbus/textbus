@@ -63,11 +63,6 @@ export const COMPONENT_LIST = new InjectionToken<Component[]>('COMPONENT_LIST')
 export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
 
 /**
- * 使用 contentEditable 作为可编辑范围控制
- */
-export const USE_CONTENT_EDITABLE = new InjectionToken<boolean>('USE_CONTENT_EDITABLE')
-
-/**
  * 开启 Zen Coding 支持
  */
 export const ZEN_CODING_DETECT = new InjectionToken<boolean>('ZEN_CODING_DETECT')

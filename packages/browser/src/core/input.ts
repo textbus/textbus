@@ -1,10 +1,14 @@
 import { filter, fromEvent, map, merge, Observable, Subscription } from '@tanbo/stream'
-import { Injectable } from '@tanbo/di'
+import { Injectable, Injector } from '@tanbo/di'
 import {
   Commander,
   ContentType,
   Controller,
+  Formatter,
+  FormatType,
+  jsx,
   Keyboard,
+  Scheduler,
   Selection,
   Slot
 } from '@textbus/core'
@@ -13,6 +17,7 @@ import { createElement } from '../_utils/uikit'
 import { Parser } from '../dom-support/parser'
 import { Caret } from './caret'
 import { isMac, isSafari, isWindows } from '../_utils/env'
+import { VIEW_MASK } from './injection-tokens'
 
 const iframeHTML = `
 <!DOCTYPE html>
@@ -40,6 +45,7 @@ const iframeHTML = `
 @Injectable()
 export class Input {
   onReady: Promise<void>
+  caret = new Caret(this.scheduler, this.injector.get(VIEW_MASK))
   private container = this.createEditableFrame()
 
   private subscription = new Subscription()
@@ -48,21 +54,23 @@ export class Input {
   private textarea: HTMLTextAreaElement | null = null
 
   private isFocus = false
-  //
-  // private inputFormatterId = '__TextbusInputFormatter__'
-  //
-  // private inputFormatter: AttributeFormatter = {
-  //   name: this.inputFormatterId,
-  //   type: FormatType.Attribute,
-  //   render: () => {
-  //     return jsx('span', {
-  //       'data-writing-format': this.inputFormatterId,
-  //       style: {
-  //         textDecoration: 'underline'
-  //       }
-  //     })
-  //   }
-  // }
+
+  private inputFormatterId = '__TextbusInputFormatter__'
+
+  private inputFormatter: Formatter = {
+    name: this.inputFormatterId,
+    type: FormatType.Inline,
+    columned: false,
+    render: (children) => {
+      return jsx('span', {
+        'data-writing-format': this.inputFormatterId,
+        style: {
+          textDecoration: 'underline'
+        },
+        children
+      })
+    }
+  }
   private nativeFocus = false
 
   private isSafari = isSafari()
@@ -76,7 +84,8 @@ export class Input {
               private commander: Commander,
               private selection: Selection,
               private controller: Controller,
-              private caret: Caret) {
+              private scheduler: Scheduler,
+              private injector: Injector) {
     this.onReady = new Promise<void>(resolve => {
       this.subscription.add(
         fromEvent(this.container, 'load').subscribe(() => {
@@ -96,10 +105,11 @@ export class Input {
       )
     })
 
-    caret.elementRef.append(this.container)
+    this.caret.elementRef.append(this.container)
   }
 
-  focus() {
+  focus(range: Range, restart: boolean) {
+    this.caret.show(range, restart)
     if (this.controller.readonly) {
       return
     }
@@ -119,11 +129,13 @@ export class Input {
   }
 
   blur() {
+    this.caret.hide()
     this.textarea?.blur()
     this.isFocus = false
   }
 
   destroy() {
+    this.caret.destroy()
     this.subscription.unsubscribe()
   }
 
@@ -302,52 +314,6 @@ export class Input {
       })
     )
   }
-
-  // private handleInput(textarea: HTMLTextAreaElement) {
-  //   let index: number
-  //   let offset = 0
-  //   let formats: Formats = []
-  //   this.subscription.add(
-  //     fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
-  //       filter(ev => {
-  //         ev.preventDefault()
-  //         if (isSafari) {
-  //           return ev.inputType === 'insertText'
-  //           // return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
-  //         }
-  //         return !ev.isComposing && !!ev.data
-  //       }),
-  //       map(ev => {
-  //         return ev.data as string
-  //       })
-  //     ).subscribe(text => {
-  //       if (text) {
-  //         this.commander.write(text)
-  //       }
-  //     }),
-  //     fromEvent(textarea, 'compositionstart').subscribe(() => {
-  //       const startSlot = this.selection.startSlot!
-  //       formats = startSlot.extractFormatsByIndex(this.selection.startOffset!)
-  //       formats.push([this.inputFormatter, true])
-  //       this.commander.write('')
-  //       index = this.selection.startOffset!
-  //     }),
-  //     fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe((ev) => {
-  //       const text = ev.data
-  //       const startSlot = this.selection.startSlot!
-  //       this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-  //       this.commander.insert(text, formats)
-  //       offset = text.length
-  //     }),
-  //     fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe((ev) => {
-  //       textarea.value = ''
-  //       const startSlot = this.selection.startSlot!
-  //       this.selection.setBaseAndExtent(startSlot, index, startSlot, index + offset)
-  //       this.commander.insert(ev.data, formats.filter(i => i[0] !== this.inputFormatter))
-  //       offset = 0
-  //     })
-  //   )
-  // }
 
   private createEditableFrame() {
     return createElement('iframe', {

@@ -18,7 +18,6 @@ import {
   NativeSelectionBridge,
   NativeRenderer,
   Controller,
-  USE_CONTENT_EDITABLE,
   CoreHistory, ZEN_CODING_DETECT, Scheduler, HISTORY_STACK_SIZE, READONLY
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
@@ -192,10 +191,6 @@ export class Starter extends ReflectiveInjector {
       }, {
         provide: RootComponentRef,
         useValue: {}
-      },
-      {
-        provide: USE_CONTENT_EDITABLE,
-        useValue: config.useContentEditable
       },
       {
         provide: History,

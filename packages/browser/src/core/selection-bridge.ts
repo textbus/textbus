@@ -13,7 +13,7 @@ import {
   RootComponentRef, Controller
 } from '@textbus/core'
 
-import { Caret, getLayoutRectByRange } from './caret'
+import { getLayoutRectByRange } from './caret'
 import { VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
 import { Input } from './input'
@@ -41,7 +41,6 @@ export class SelectionBridge implements NativeSelectionBridge {
   private maskContainer: HTMLElement
 
   constructor(private injector: Injector,
-              public caret: Caret,
               private controller: Controller,
               private rootComponentRef: RootComponentRef,
               private input: Input,
@@ -54,12 +53,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     document.head.appendChild(this.selectionMaskElement)
     this.sub = this.onSelectionChange.subscribe((r) => {
       if (r) {
-        this.caret.show(r, this.changeFromUser)
-      } else {
-        this.caret.hide()
-      }
-      if (r) {
-        input.focus()
+        input.focus(r, this.changeFromUser)
       } else {
         input.blur()
       }
@@ -162,7 +156,6 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   destroy() {
-    this.caret.destroy()
     this.sub.unsubscribe()
   }
 

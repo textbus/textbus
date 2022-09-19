@@ -1,9 +1,7 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Injectable, Injector } from '@tanbo/di'
 import { Scheduler, Rect } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
-import { VIEW_MASK } from './injection-tokens'
 
 export function getLayoutRectByRange(range: Range): Rect {
   const { startContainer, startOffset } = range
@@ -68,11 +66,15 @@ export interface Scroller {
   setOffset(offsetScrollTop: number): void
 }
 
-@Injectable()
 export class Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
+
+  get rect() {
+    return this.caret.getBoundingClientRect()
+  }
+
   private timer: any = null
   private caret: HTMLElement
   private oldPosition: CaretPosition | null = null
@@ -96,12 +98,10 @@ export class Caret {
   private oldRange: Range | null = null
 
   private isFixed = false
-  private editorMask: HTMLElement
 
   constructor(
     private scheduler: Scheduler,
-    private injector: Injector) {
-    this.editorMask = injector.get(VIEW_MASK)
+    private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
@@ -182,6 +182,8 @@ export class Caret {
   }
 
   correctScrollTop(scroller: Scroller) {
+    this.subs.forEach(i => i.unsubscribe())
+    this.subs = []
     const scheduler = this.scheduler
     let docIsChanged = true
 
@@ -201,7 +203,7 @@ export class Caret {
     this.subs.push(
       scroller.onScroll.subscribe(() => {
         if (this.oldPosition) {
-          const rect = this.elementRef.getBoundingClientRect()
+          const rect = this.rect
           this.oldPosition.top = rect.top
           this.oldPosition.left = rect.left
           this.oldPosition.height = rect.height

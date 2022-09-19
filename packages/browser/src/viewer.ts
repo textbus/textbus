@@ -28,7 +28,7 @@ import {
   VIEW_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, VIEW_MASK, VIEW_DOCUMENT, Caret
+  SelectionBridge, VIEW_MASK, VIEW_DOCUMENT
 } from './core/_api'
 
 export interface OutputContents<T = any> {
@@ -131,7 +131,6 @@ export class Viewer {
         DomRenderer,
         Parser,
         Input,
-        Caret,
         SelectionBridge,
         OutputTranslator,
       ],
@@ -173,12 +172,12 @@ export class Viewer {
     host.appendChild(this.workbench)
     await starter.mount(component, doc)
     const renderer = starter.get(Renderer)
-    const caret = starter.get(Caret)
+    const input = starter.get(Input)
     this.subs.push(
       renderer.onViewUpdated.subscribe(() => {
         this.changeEvent.next()
       }),
-      caret.onPositionChange.pipe(
+      input.caret.onPositionChange.pipe(
         map(p => !!p),
         distinctUntilChanged()
       ).subscribe(b => {
@@ -191,12 +190,11 @@ export class Viewer {
         }
       })
     )
-    starter.get(Input)
     this.isReady = true
     this.injector = starter
 
     if (this.options.autoFocus) {
-      starter.get(Input).onReady.then(() => {
+      input.onReady.then(() => {
         this.focus()
       })
     }

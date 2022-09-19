@@ -1,4 +1,4 @@
-import { Inject, Injectable, Prop } from '@tanbo/di'
+import { Injectable, Prop } from '@tanbo/di'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 import {
@@ -12,7 +12,7 @@ import {
   Ref,
   SlotRenderFactory, FormatHostBindingRender, jsx
 } from '../model/_api'
-import { NativeNode, NativeRenderer, RootComponentRef, USE_CONTENT_EDITABLE } from './_injection-tokens'
+import { NativeNode, NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
 import { Controller } from './controller'
 
@@ -33,20 +33,8 @@ interface ObjectChanges {
   add: [string, any][]
 }
 
-function setEditable(vElement: VElement, useContentEditable: boolean, is: boolean | null) {
-  if (useContentEditable) {
-    if (is === null) {
-      vElement.attrs.delete('contenteditable')
-      return
-    }
-    vElement.attrs.set('contenteditable', is ? 'true' : 'false')
-    return
-  }
-  if (is === null) {
-    vElement.attrs.delete('textbus-editable')
-    return
-  }
-  vElement.attrs.set('textbus-editable', is ? 'on' : 'off')
+function setEditable(vElement: VElement, isSlot: boolean) {
+  vElement.attrs.set(isSlot ? 'textbus-slot-root' : 'textbus-component-root', '')
 }
 
 // export function formatSort(formats: FormatItem[]) {
@@ -247,8 +235,7 @@ export class Renderer {
 
   private renderedComponents: ComponentInstance[] = []
 
-  constructor(@Inject(USE_CONTENT_EDITABLE) private useContentEditable: boolean,
-              private controller: Controller,
+  constructor(private controller: Controller,
               private rootComponentRef: RootComponentRef) {
     this.onViewUpdated = this.viewUpdatedEvent.asObservable()
     this.onViewUpdateBefore = this.viewUpdateBeforeEvent.asObservable()
@@ -633,11 +620,7 @@ export class Renderer {
         slotVNode = this.slotRender(component, slot, factory)
         return slotVNode
       })
-      if (component.slots.length === 1 && slotVNode === node) {
-        setEditable(node, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
-      } else {
-        setEditable(node, this.useContentEditable, false)
-      }
+      setEditable(node, false)
       this.componentVNode.set(component, node)
       component.changeMarker.rendered()
       return node
@@ -655,11 +638,7 @@ export class Renderer {
         if (dirty) {
           if (oldComponentVNode === oldVNode) {
             this.componentVNode.set(component, vNode)
-            if (component.slots.length === 1) {
-              setEditable(vNode, this.useContentEditable, this.useContentEditable && !component.parent ? true : null)
-            } else {
-              setEditable(vNode, this.useContentEditable, false)
-            }
+            setEditable(vNode, false)
           }
           (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
           const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
@@ -703,7 +682,7 @@ export class Renderer {
         throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
       }
       root.attrs.set(this.slotIdAttrKey, slot.id)
-      setEditable(root, this.useContentEditable, true)
+      setEditable(root, true)
       this.vNodeLocation.set(root, {
         slot: slot,
         startIndex: 0,

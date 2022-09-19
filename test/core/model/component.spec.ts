@@ -229,7 +229,7 @@ describe('Component Hooks', () => {
       }
     })
     const componentInstance = testComponent.createInstance(injector)
-    const renderer = new Renderer(false, new Controller(false), {
+    const renderer = new Renderer(new Controller(false), {
       component: componentInstance,
       host: document.createElement('div')
     })
