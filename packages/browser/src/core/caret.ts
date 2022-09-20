@@ -228,7 +228,7 @@ export class Caret {
     const startContainer = nativeRange.startContainer
 
     const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement
-    if (node?.nodeType !== Node.ELEMENT_NODE) {
+    if (node?.nodeType !== Node.ELEMENT_NODE || !nativeRange.collapsed) {
       this.positionChangeEvent.next(null)
       return
     }

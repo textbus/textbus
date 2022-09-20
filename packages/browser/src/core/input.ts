@@ -64,6 +64,8 @@ export class Input {
   // }
   private nativeFocus = false
 
+  private isSougouPinYin = false // 有 bug 版本搜狗拼音
+
   constructor(private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
@@ -232,13 +234,21 @@ export class Input {
         }
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
+        let key = ev.key
+        const b = key === 'Process' && ev.code === 'Digit2'
+        if (b) {
+          key = '@'
+        }
         const is = this.keyboard.execShortcut({
-          key: ev.key,
+          key: key,
           altKey: ev.altKey,
           shiftKey: ev.shiftKey,
           ctrlKey: isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
+          if (b) {
+            this.isSougouPinYin = true
+          }
           ev.preventDefault()
         }
       })
@@ -260,11 +270,18 @@ export class Input {
             return ev.data as string
           })
         ),
-        isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(map(ev => {
-          ev.preventDefault()
-          textarea.value = ''
-          return ev.data
-        }))
+        isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(
+          map(ev => {
+            ev.preventDefault()
+            textarea.value = ''
+            return ev.data
+          }),
+          filter(() => {
+            const b = this.isSougouPinYin
+            this.isSougouPinYin = false
+            return !b
+          })
+        )
       ).subscribe(text => {
         if (text) {
           this.commander.write(text)
