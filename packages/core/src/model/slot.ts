@@ -29,24 +29,6 @@ export interface DeltaInsert {
 
 export type DeltaLite = DeltaInsert[]
 
-function formatsToObject(formats: Formats) {
-  const obj: Record<string, any> = {}
-  formats.forEach(item => {
-    const [formatter, value] = item
-    const name = formatter.name
-    if (formatter.createValueIdIfOverlap) {
-      if (obj[name]) {
-        obj[name].push(value)
-      } else {
-        obj[name] = [value]
-      }
-    } else {
-      obj[name] = value
-    }
-  })
-  return obj
-}
-
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
@@ -298,7 +280,10 @@ export class Slot<T = any> {
       type: 'insert',
       content: actionData,
       ref: content,
-      formats: formatsToObject(formats)
+      formats: formats.reduce((opt: Record<string, any>, next) => {
+        opt[next[0].name] = next[1]
+        return opt
+      }, {})
     } : {
       type: 'insert',
       content: actionData,
@@ -362,7 +347,10 @@ export class Slot<T = any> {
 
     const applyActions: Action[] = []
     const unApplyActions: Action[] = []
-    const formatsObj = formatsToObject(formats)
+    const formatsObj = formats.reduce((opt: Record<string, any>, next) => {
+      opt[next[0].name] = next[1]
+      return opt
+    }, {})
     const resetFormatObj = formats.reduce((opt: Record<string, any>, next) => {
       opt[next[0].name] = null
       return opt

@@ -1,4 +1,4 @@
-import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
+import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 
@@ -15,13 +15,15 @@ export class InlineTagFormatLoader extends Matcher {
   }
 }
 
-export class InlineElementFormatter extends InlineFormatter {
-  constructor(name: string,
+export class InlineElementFormatter implements InlineFormatter {
+  type: FormatType.Inline = FormatType.Inline
+  priority = FormatPriority.Tag
+
+  constructor(public name: string,
               public tagName: string) {
-    super(name, FormatPriority.Tag)
   }
 
-  override render() {
+  render() {
     return new VElement(this.tagName)
   }
 }

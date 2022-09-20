@@ -1,11 +1,13 @@
-import { Inject, Injectable, Optional } from '@tanbo/di'
+import { Inject, Injectable } from '@tanbo/di'
 import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
-  ChangeOrigin, ComponentInitData,
+  ChangeOrigin,
   ComponentInstance,
-  ContentType, Controller,
+  ContentType,
+  Controller,
   Formats,
-  History, HISTORY_STACK_SIZE,
+  History,
+  HISTORY_STACK_SIZE,
   makeError,
   Registry,
   RootComponentRef,
@@ -80,10 +82,6 @@ class ContentMap {
   }
 }
 
-export abstract class TranslatorFallback {
-  abstract createComponentByData(name: string, data: ComponentInitData): ComponentInstance | null
-}
-
 interface Update {
   record: boolean
   actions: Array<() => void>
@@ -141,8 +139,7 @@ export class Collaborate implements History {
               private translator: Translator,
               private registry: Registry,
               private selection: Selection,
-              private starter: Starter,
-              @Optional() private translatorFallback: TranslatorFallback) {
+              private starter: Starter) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(delay())
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
@@ -335,7 +332,7 @@ export class Collaborate implements History {
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
             if (action.attributes) {
-              const formats = makeFormats(this.registry, action.attributes)
+              const formats = remoteFormatsToLocal(this.registry, action.attributes)
               if (formats.length) {
                 slot.retain(action.retain!, formats)
               }
@@ -348,7 +345,7 @@ export class Collaborate implements History {
             let length = 1
             if (typeof action.insert === 'string') {
               length = action.insert.length
-              slot.insert(action.insert, makeFormats(this.registry, action.attributes))
+              slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
             } else {
               const sharedComponent = action.insert as YMap<any>
               const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
@@ -399,7 +396,18 @@ export class Collaborate implements History {
           if (action.type === 'retain') {
             const formats = action.formats
             if (formats) {
-              content.format(offset, action.offset, localFormatToRemote(formats, this.registry))
+              const keys = Object.keys(formats)
+              let length = keys.length
+              keys.forEach(key => {
+                const formatter = this.registry.getFormatter(key)
+                if (!formatter) {
+                  length--
+                  Reflect.deleteProperty(formats, key)
+                }
+              })
+              if (length) {
+                content.format(offset, action.offset, formats)
+              }
             } else {
               offset = action.offset
             }
@@ -408,11 +416,11 @@ export class Collaborate implements History {
             const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
             if (typeof action.content === 'string') {
               length = action.content.length
-              content.insert(offset, action.content, localFormatToRemote(action.formats || {}, this.registry))
+              content.insert(offset, action.content, action.formats || {})
             } else {
               length = 1
               const sharedComponent = this.createSharedComponentByComponent(action.ref as ComponentInstance)
-              content.insertEmbed(offset, sharedComponent, localFormatToRemote(action.formats || {}, this.registry))
+              content.insertEmbed(offset, sharedComponent, action.formats || {})
             }
 
             if (isEmpty && offset === 0) {
@@ -605,9 +613,13 @@ export class Collaborate implements History {
     sharedSlot.set('content', sharedContent)
     let offset = 0
     slot.toDelta().forEach(i => {
-      let formats
+      let formats: any = {}
       if (i.formats) {
-        formats = formatsToRemote(i.formats)
+        i.formats.forEach(item => {
+          formats[item[0].name] = item[1]
+        })
+      } else {
+        formats = null
       }
       if (typeof i.insert === 'string') {
         sharedContent.insert(offset, i.insert, formats)
@@ -631,16 +643,10 @@ export class Collaborate implements History {
     })
     const name = yMap.get('name')
     const state = yMap.get('state')
-    let instance = this.translator.createComponentByData(name, {
+    const instance = this.translator.createComponentByData(name, {
       state,
       slots
     })
-    if (!instance) {
-      instance = this.translatorFallback.createComponentByData(name, {
-        state,
-        slots
-      })
-    }
     if (instance) {
       instance.slots.toArray().forEach((slot, index) => {
         let sharedSlot = sharedSlots.get(index)
@@ -670,12 +676,12 @@ export class Collaborate implements History {
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
-          slot.insert(action.insert, makeFormats(this.registry, action.attributes))
+          slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
         } else {
           const sharedComponent = action.insert as YMap<any>
           const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
           const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
-          slot.insert(component, makeFormats(this.registry, action.attributes))
+          slot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
           this.syncSlots(sharedComponent.get('slots'), component)
           this.syncComponent(sharedComponent, component)
         }
@@ -712,54 +718,11 @@ export class Collaborate implements History {
   }
 }
 
-function formatsToRemote(formats: Formats) {
-  const result: Record<string, any> = {}
-
-  for (const item of formats) {
-    const [formatter, values] = item
-    if (typeof formatter.createValueIdIfOverlap === 'function') {
-      if (Array.isArray(values)) {
-        values.forEach(value => {
-          const valueId = (formatter.createValueIdIfOverlap as any)(value)
-          result[`${formatter.name}:${valueId}`] = value
-        })
-        break
-      }
-    }
-    result[formatter.name] = values
-  }
-  return result
-}
-
-function localFormatToRemote(formats: Record<string, any>, registry: Registry) {
-  const keys = Object.keys(formats)
-  const result: Record<string, any> = {}
-
-  for (const key of keys) {
-    const formatter = registry.getFormatter(key)
-    if (!formatter) {
-      break
-    }
-    if (typeof formatter.createValueIdIfOverlap === 'function') {
-      const values = formats[key]
-      if (Array.isArray(values)) {
-        values.forEach(value => {
-          const valueId = (formatter.createValueIdIfOverlap as any)(value)
-          result[`${formatter.name}:${valueId}`] = value
-        })
-        break
-      }
-    }
-    result[key] = formats[key]
-  }
-  return result
-}
-
-function makeFormats(registry: Registry, attrs?: any) {
+function remoteFormatsToLocal(registry: Registry, attrs?: any,) {
   const formats: Formats = []
   if (attrs) {
     Object.keys(attrs).forEach(key => {
-      const formatter = registry.getFormatter(key.split(':')[0])
+      const formatter = registry.getFormatter(key)
       if (formatter) {
         formats.push([formatter, attrs[key]])
       }

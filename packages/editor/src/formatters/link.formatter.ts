@@ -1,4 +1,4 @@
-import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
+import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher } from './matcher'
 
@@ -19,12 +19,12 @@ export class LinkFormatLoader extends Matcher {
   }
 }
 
-export class LinkFormatter extends InlineFormatter {
-  constructor() {
-    super('link', FormatPriority.Tag)
-  }
+export class LinkFormatter implements InlineFormatter {
+  type: FormatType.Inline = FormatType.Inline
+  priority = FormatPriority.Tag
+  name = 'link'
 
-  override render(node: VElement | null, formatValue: Record<string, string>, isOutputMode: boolean): VElement | void {
+  render(node: VElement | null, formatValue: Record<string, string>, isOutputMode: boolean): VElement | void {
     if (isOutputMode) {
       return new VElement('a', {
         target: formatValue.target,

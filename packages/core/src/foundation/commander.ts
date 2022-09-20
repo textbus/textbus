@@ -16,7 +16,7 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange, CleanFormatRule
+  SlotRange
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { Translator } from './translator'
@@ -698,31 +698,30 @@ export class Commander {
   /**
    * 清除当前选区特定的格式
    * @param formatter 要清除的格式
-   * @param value 指定要清除的格式的值
    */
-  unApplyFormat(formatter: Formatter, value: CleanFormatRule | null = null) {
+  unApplyFormat(formatter: Formatter) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
       if (formatter.type === FormatType.Block || slot.isEmpty) {
         slot.retain(0)
-        slot.retain(slot.length, formatter, value)
+        slot.retain(slot.length, formatter, null)
       } else {
         const startOffset = this.selection.startOffset!
         const prevContent = slot.getContentAtIndex(startOffset - 1)
         if (prevContent === Slot.placeholder) {
           slot.retain(startOffset - 1)
-          slot.retain(1, formatter, value)
+          slot.retain(1, formatter, null)
         } else {
           this.write(Slot.placeholder)
           slot.retain(startOffset)
-          slot.retain(1, formatter, value)
+          slot.retain(1, formatter, null)
         }
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
-      i.slot.retain(i.endIndex - i.startIndex, formatter, value)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, null)
     })
   }
 

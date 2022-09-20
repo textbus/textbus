@@ -4,7 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  FormatPriority,
+  FormatPriority, FormatType,
   InlineFormatter,
   onBreak,
   onContextMenu,
@@ -117,10 +117,10 @@ export interface PreComponentState {
   theme?: string
 }
 
-export class CodeStyleFormatter extends InlineFormatter {
-  constructor() {
-    super('code' + Math.random(), FormatPriority.Attribute)
-  }
+export class CodeStyleFormatter implements InlineFormatter {
+  type: FormatType.Inline = FormatType.Inline
+  priority = FormatPriority.Attribute
+  name = 'code' + Math.random()
 
   render(node: VElement | null, formatValue: string) {
     return new VElement('span', {

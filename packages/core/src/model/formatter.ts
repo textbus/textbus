@@ -15,51 +15,21 @@ export enum FormatPriority {
 /**
  * Textbus 扩展格式要实现的接口
  */
-export abstract class Formatter {
-  protected constructor(public name: string,
-                        public type: FormatType,
-                        public priority: FormatPriority,
-                        public columned = false,
-                        public createValueIdIfOverlap?: (formatValue: FormatValue) => string) {
-  }
+export interface Formatter<T extends FormatType = any> {
+  name: string
+  type: T
+  priority: FormatPriority
+  columned?: boolean
 
-  abstract render(
+  render(
     node: VElement | null,
     formatValue: FormatValue,
     isOutputMode: boolean
   ): VElement | void
 }
 
-export abstract class BlockFormatter extends Formatter {
-  protected constructor(
-    name: string,
-    priority: FormatPriority = FormatPriority.Attribute,
-    columned = false,
-    createValueIdIfOverlap?: (formatValue: FormatValue) => string
-  ) {
-    super(
-      name,
-      FormatType.Block,
-      priority,
-      columned,
-      createValueIdIfOverlap
-    )
-  }
+export interface BlockFormatter extends Formatter<FormatType.Block> {
 }
 
-export abstract class InlineFormatter extends Formatter {
-  protected constructor(
-    name: string,
-    priority: FormatPriority = FormatPriority.Attribute,
-    columned = false,
-    createValueIdIfOverlap?: (formatValue: FormatValue) => string
-  ) {
-    super(
-      name,
-      FormatType.Inline,
-      priority,
-      columned,
-      createValueIdIfOverlap
-    )
-  }
+export interface InlineFormatter extends Formatter<FormatType.Inline> {
 }

@@ -1,4 +1,4 @@
-import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
+import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { inlineTags } from './_config'
@@ -28,13 +28,15 @@ export class InlineTagStyleFormatLoader extends Matcher {
   }
 }
 
-export class InlineTagStyleFormatter extends InlineFormatter {
-  constructor(name: string,
+export class InlineTagStyleFormatter implements InlineFormatter {
+  type: FormatType.Inline = FormatType.Inline
+  priority = FormatPriority.Attribute
+
+  constructor(public name: string,
               public styleName: string) {
-    super(name, FormatPriority.Attribute)
   }
 
-  override render(node: VElement | null, formatValue: string): VElement | void {
+  render(node: VElement | null, formatValue: string): VElement | void {
     const reg = new RegExp(`^(${inlineTags.join('|')})$`, 'i')
     if (node && reg.test(node.tagName)) {
       node.styles.set(this.styleName, formatValue)
@@ -47,7 +49,7 @@ export class InlineTagStyleFormatter extends InlineFormatter {
 }
 
 export class InlineTagLeafStyleFormatter extends InlineTagStyleFormatter {
-  override columned = true
+  columned = true
 }
 
 // 强制行内样式

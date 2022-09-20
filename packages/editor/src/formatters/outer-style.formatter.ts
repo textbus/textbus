@@ -1,4 +1,4 @@
-import { FormatPriority, InlineFormatter, VElement } from '@textbus/core'
+import { FormatPriority, FormatType, InlineFormatter, VElement } from '@textbus/core'
 import { Matcher, MatchRule } from './matcher'
 
 export class OuterStyleFormatLoader extends Matcher {
@@ -16,13 +16,15 @@ export class OuterStyleFormatLoader extends Matcher {
   }
 }
 
-export class OuterStyleFormatter extends InlineFormatter {
-  constructor(name: string,
+export class OuterStyleFormatter implements InlineFormatter {
+  type: FormatType.Inline = FormatType.Inline
+  priority = FormatPriority.Tag
+
+  constructor(public name: string,
               public styleName: string) {
-    super(name, FormatPriority.Outer)
   }
 
-  override render(node: VElement | null, formatValue: string): VElement | void {
+  render(node: VElement | null, formatValue: string): VElement | void {
     if (node) {
       node.styles.set(this.styleName, formatValue)
     } else {
