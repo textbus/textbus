@@ -18,6 +18,7 @@
     "paths": {
       "@textbus/browser": ["./packages/browser/src/public-api.ts"],
       "@textbus/core": ["./packages/core/src/public-api.ts"],
+      "@textbus/core/*": ["./packages/core/src/*"],
       "@textbus/editor": ["./packages/editor/src/public-api.ts"],
       "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"]
     },

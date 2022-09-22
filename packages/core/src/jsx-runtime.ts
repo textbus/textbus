@@ -1,23 +1,26 @@
-import { Ref, NativeNode, VElement, jsx } from '@textbus/core'
+import { jsx, jsxs, VElement } from '@textbus/core'
+
+export {
+  jsxs,
+  jsx
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface Element extends VElement {
+      [name: string]: any
     }
 
     interface IntrinsicElements {
-      [name: string]: Element
+      [name: string]: any
     }
 
     interface IntrinsicAttributes {
-      ref: Ref<NativeNode>
+      [name: string]: any
+    }
+
+    interface ElementAttributesProperty {
     }
   }
-}
-
-export const jsxDEV = jsx
-
-export {
-  jsx
 }

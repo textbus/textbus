@@ -17,7 +17,7 @@ export class VTextNode {
   }
 }
 
-export type VElementJSXChildNode = VElement | string | number | boolean | null | undefined
+export type VElementJSXChildNode = VElement | VTextNode | string | number | boolean | null | undefined
 
 export interface VElementRenderFn {
   (props: { [key: string]: any }): VElement;
@@ -25,6 +25,10 @@ export interface VElementRenderFn {
 
 export interface VElementOptions {
   [key: string]: any
+}
+
+export interface VElementProps extends VElementOptions {
+  children: Array<VElement | VTextNode>
 }
 
 export interface VElementListeners {
@@ -51,6 +55,12 @@ export function jsx(tagName: string | VElementRenderFn,
     }
   })
   return vNode
+}
+
+export function jsxs(tagName: string, props: VElementProps) {
+  const children = props.children
+  Reflect.deleteProperty(props, 'children')
+  return new VElement(tagName, props, children)
 }
 
 /**

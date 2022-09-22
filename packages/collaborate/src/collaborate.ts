@@ -110,36 +110,36 @@ export class Collaborate implements History {
     return this.manager?.canRedo() || false
   }
 
-  private backEvent = new Subject<void>()
-  private forwardEvent = new Subject<void>()
-  private changeEvent = new Subject<void>()
-  private pushEvent = new Subject<void>()
+  protected backEvent = new Subject<void>()
+  protected forwardEvent = new Subject<void>()
+  protected changeEvent = new Subject<void>()
+  protected pushEvent = new Subject<void>()
 
-  private manager: UndoManager | null = null
+  protected manager: UndoManager | null = null
 
-  private subscriptions: Subscription[] = []
-  private updateFromRemote = false
+  protected subscriptions: Subscription[] = []
+  protected updateFromRemote = false
 
-  private contentSyncCaches = new WeakMap<Slot, () => void>()
-  private slotStateSyncCaches = new WeakMap<Slot, () => void>()
-  private slotsSyncCaches = new WeakMap<ComponentInstance, () => void>()
-  private componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
+  protected contentSyncCaches = new WeakMap<Slot, () => void>()
+  protected slotStateSyncCaches = new WeakMap<Slot, () => void>()
+  protected slotsSyncCaches = new WeakMap<ComponentInstance, () => void>()
+  protected componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
 
-  private selectionChangeEvent = new Subject<SelectionPaths>()
-  private contentMap = new ContentMap()
+  protected selectionChangeEvent = new Subject<SelectionPaths>()
+  protected contentMap = new ContentMap()
 
-  private updateRemoteActions: Array<UpdateItem> = []
-  private noRecord = {}
+  protected updateRemoteActions: Array<UpdateItem> = []
+  protected noRecord = {}
 
-  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
-              private rootComponentRef: RootComponentRef,
-              private collaborateCursor: CollaborateCursor,
-              private controller: Controller,
-              private scheduler: Scheduler,
-              private translator: Translator,
-              private registry: Registry,
-              private selection: Selection,
-              private starter: Starter) {
+  constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
+              protected rootComponentRef: RootComponentRef,
+              protected collaborateCursor: CollaborateCursor,
+              protected controller: Controller,
+              protected scheduler: Scheduler,
+              protected translator: Translator,
+              protected registry: Registry,
+              protected selection: Selection,
+              protected starter: Starter) {
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(delay())
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
@@ -251,7 +251,7 @@ export class Collaborate implements History {
     this.manager?.destroy()
   }
 
-  private syncRootComponent(root: YMap<any>, rootComponent: ComponentInstance) {
+  protected syncRootComponent(root: YMap<any>, rootComponent: ComponentInstance) {
     let slots = root.get('slots') as YArray<YMap<any>>
     if (!slots) {
       slots = new YArray()
@@ -289,7 +289,7 @@ export class Collaborate implements History {
     this.syncSlots(slots, rootComponent)
   }
 
-  private restoreCursorLocation(position: CursorPosition) {
+  protected restoreCursorLocation(position: CursorPosition) {
     const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.yDoc)
     const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.yDoc)
     if (anchorPosition && focusPosition) {
@@ -303,7 +303,7 @@ export class Collaborate implements History {
     this.selection.unSelect()
   }
 
-  private getRelativeCursorLocation(): CursorPosition | null {
+  protected getRelativeCursorLocation(): CursorPosition | null {
     const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
     if (anchorSlot) {
       const anchorYText = this.contentMap.get(anchorSlot)
@@ -324,7 +324,7 @@ export class Collaborate implements History {
     return null
   }
 
-  private syncContent(content: YText, slot: Slot) {
+  protected syncContent(content: YText, slot: Slot) {
     this.contentMap.set(slot, content)
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
@@ -451,7 +451,7 @@ export class Collaborate implements History {
     })
   }
 
-  private syncSlot(remoteSlot: YMap<any>, slot: Slot) {
+  protected syncSlot(remoteSlot: YMap<any>, slot: Slot) {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -481,7 +481,7 @@ export class Collaborate implements History {
     })
   }
 
-  private syncSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
+  protected syncSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
     const slots = component.slots
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
@@ -537,7 +537,7 @@ export class Collaborate implements History {
     })
   }
 
-  private syncComponent(remoteComponent: YMap<any>, component: ComponentInstance) {
+  protected syncComponent(remoteComponent: YMap<any>, component: ComponentInstance) {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -567,7 +567,7 @@ export class Collaborate implements History {
     })
   }
 
-  private runLocalUpdate(fn: () => void, record = true) {
+  protected runLocalUpdate(fn: () => void, record = true) {
     if (this.updateFromRemote || this.controller.readonly) {
       return
     }
@@ -577,7 +577,7 @@ export class Collaborate implements History {
     })
   }
 
-  private runRemoteUpdate(tr: Transaction, fn: () => void) {
+  protected runRemoteUpdate(tr: Transaction, fn: () => void) {
     if (tr.origin === this.yDoc) {
       return
     }
@@ -590,7 +590,7 @@ export class Collaborate implements History {
     this.updateFromRemote = false
   }
 
-  private createSharedComponentByComponent(component: ComponentInstance): YMap<any> {
+  protected createSharedComponentByComponent(component: ComponentInstance): YMap<any> {
     const sharedComponent = new YMap()
     sharedComponent.set('state', component.state)
     sharedComponent.set('name', component.name)
@@ -605,7 +605,7 @@ export class Collaborate implements History {
     return sharedComponent
   }
 
-  private createSharedSlotBySlot(slot: Slot): YMap<any> {
+  protected createSharedSlotBySlot(slot: Slot): YMap<any> {
     const sharedSlot = new YMap()
     sharedSlot.set('schema', slot.schema)
     sharedSlot.set('state', slot.state)
@@ -634,7 +634,7 @@ export class Collaborate implements History {
     return sharedSlot
   }
 
-  private createComponentBySharedComponent(yMap: YMap<any>, canInsertInlineComponent: boolean): ComponentInstance {
+  protected createComponentBySharedComponent(yMap: YMap<any>, canInsertInlineComponent: boolean): ComponentInstance {
     const sharedSlots = yMap.get('slots') as YArray<YMap<any>>
     const slots: Slot[] = []
     sharedSlots.forEach(sharedSlot => {
@@ -662,7 +662,7 @@ export class Collaborate implements History {
     return createUnknownComponent(name, canInsertInlineComponent).createInstance(this.starter)
   }
 
-  private createSlotBySharedSlot(sharedSlot: YMap<any>): Slot {
+  protected createSlotBySharedSlot(sharedSlot: YMap<any>): Slot {
     const content = sharedSlot.get('content') as YText
     const delta = content.toDelta()
 
@@ -692,7 +692,7 @@ export class Collaborate implements History {
     return slot
   }
 
-  private cleanSubscriptionsBySlot(slot: Slot) {
+  protected cleanSubscriptionsBySlot(slot: Slot) {
     this.contentMap.delete(slot);
     [this.contentSyncCaches.get(slot), this.slotStateSyncCaches.get(slot)].forEach(fn => {
       if (fn) {
@@ -706,7 +706,7 @@ export class Collaborate implements History {
     })
   }
 
-  private cleanSubscriptionsByComponent(component: ComponentInstance) {
+  protected cleanSubscriptionsByComponent(component: ComponentInstance) {
     [this.slotsSyncCaches.get(component), this.componentStateSyncCaches.get(component)].forEach(fn => {
       if (fn) {
         fn()

@@ -9,6 +9,7 @@ import { Selection, SelectionPaths, AbstractSelection, Scheduler, Rect } from '@
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 export interface RemoteSelection {
+  id: string
   color: string
   username: string
   paths: SelectionPaths
@@ -17,6 +18,7 @@ export interface RemoteSelection {
 export interface SelectionRect extends Rect {
   color: string
   username: string
+  id: string
 }
 
 export interface RemoteSelectionCursor {
@@ -170,6 +172,7 @@ export class CollaborateCursor {
       for (let i = rects.length - 1; i >= 0; i--) {
         const rect = rects[i]
         selectionRects.push({
+          id: item.id,
           color: item.color,
           username: item.username,
           left: rect.left - containerRect.left,
@@ -187,6 +190,7 @@ export class CollaborateCursor {
       const cursorRect = getLayoutRectByRange(cursorRange)
 
       const rect: SelectionRect = {
+        id: item.id,
         username: item.username,
         color: item.color,
         left: cursorRect.left - containerRect.left,
@@ -202,7 +206,7 @@ export class CollaborateCursor {
     this.drawUserCursor(users)
   }
 
-  private drawUserCursor(rects: SelectionRect[]) {
+  protected drawUserCursor(rects: SelectionRect[]) {
     for (let i = 0; i < rects.length; i++) {
       const rect = rects[i]
       const { cursor, userTip, anchor } = this.getUserCursor(i)

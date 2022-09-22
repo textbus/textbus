@@ -90,7 +90,8 @@ const editor = createEditor({
   //     const localSelection: RemoteSelection = {
   //       username: user.name,
   //       color: user.color,
-  //       paths
+  //       paths,
+  //       id: Math.random().toString()
   //     }
   //     provide.awareness.setLocalStateField('selection', localSelection)
   //   })
