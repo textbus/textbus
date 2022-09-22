@@ -8,16 +8,19 @@ import {
   COMPONENT_LIST,
   FORMATTER_LIST,
   Commander,
-  Registry,
   Keyboard,
   OutputRenderer,
   Query,
   Selection,
-  Translator,
   NativeSelectionBridge,
   NativeRenderer,
   Controller,
-  CoreHistory, ZEN_CODING_DETECT, Scheduler, HISTORY_STACK_SIZE, READONLY
+  CoreHistory,
+  ZEN_CODING_DETECT,
+  Scheduler,
+  HISTORY_STACK_SIZE,
+  READONLY,
+  Registry
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -198,13 +201,12 @@ export class Starter extends ReflectiveInjector {
       Controller,
       Scheduler,
       Commander,
-      Registry,
       Keyboard,
       OutputRenderer,
       Query,
       Renderer,
       Selection,
-      Translator,
+      Registry,
       {
         provide: Starter,
         useFactory: () => this

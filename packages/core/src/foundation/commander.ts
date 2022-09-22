@@ -16,10 +16,10 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange
+  SlotRange,
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
-import { Translator } from './translator'
+import { Registry } from './registry'
 
 function getInsertPosition(
   slot: Slot,
@@ -290,7 +290,7 @@ export class Commander {
 
   constructor(protected selection: Selection,
               protected injector: Injector,
-              protected translator: Translator,
+              protected registry: Registry,
               protected rootComponentRef: RootComponentRef) {
   }
 
@@ -672,7 +672,7 @@ export class Commander {
         if (parentComponent.separable) {
           const index = parentComponent.slots.indexOf(commonAncestorSlot)
           const nextSlots = parentComponent.slots.cut(index + 1)
-          const nextComponent = this.translator.createComponentByData(parentComponent.name, {
+          const nextComponent = this.registry.createComponentByData(parentComponent.name, {
             state: typeof parentComponent.state === 'object' && parentComponent.state !== null ?
               JSON.parse(JSON.stringify(parentComponent.state)) :
               parentComponent.state,
@@ -860,7 +860,7 @@ export class Commander {
             afterComponent = rule.existingComponentTransformer(parentComponent.name, deletedSlots, newState) || null
           }
           if (!afterComponent) {
-            afterComponent = this.translator.createComponentByData(parentComponent.name, {
+            afterComponent = this.registry.createComponentByData(parentComponent.name, {
               state: newState,
               slots: deletedSlots
             })

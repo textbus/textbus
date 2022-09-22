@@ -6,18 +6,18 @@ import {
   ComponentInstance,
   ContentType,
   Controller,
-  Formats, FormatType,
+  Registry,
+  Formats,
+  FormatType,
   History,
   HISTORY_STACK_SIZE,
   makeError,
-  Registry,
   RootComponentRef,
   Scheduler,
   Selection,
   SelectionPaths,
   Slot,
-  Starter,
-  Translator
+  Starter
 } from '@textbus/core'
 import {
   Array as YArray,
@@ -142,7 +142,6 @@ export class Collaborate implements History {
               protected collaborateCursor: CollaborateCursor,
               protected controller: Controller,
               protected scheduler: Scheduler,
-              protected translator: Translator,
               protected registry: Registry,
               protected selection: Selection,
               protected starter: Starter) {
@@ -680,7 +679,7 @@ export class Collaborate implements History {
     })
     const name = yMap.get('name')
     const state = yMap.get('state')
-    const instance = this.translator.createComponentByData(name, {
+    const instance = this.registry.createComponentByData(name, {
       state,
       slots
     })
@@ -703,7 +702,7 @@ export class Collaborate implements History {
     const content = sharedSlot.get('content') as YText
     const delta = content.toDelta()
 
-    const slot = this.translator.createSlot({
+    const slot = this.registry.createSlot({
       schema: sharedSlot.get('schema'),
       state: sharedSlot.get('state'),
       formats: {},

@@ -3,7 +3,6 @@ import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
-import { Translator } from './translator'
 import { Selection, SelectionPaths } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
@@ -103,7 +102,6 @@ export class CoreHistory extends History {
               private root: RootComponentRef,
               private scheduler: Scheduler,
               private selection: Selection,
-              private translator: Translator,
               private registry: Registry) {
     super()
     this.onChange = this.changeEvent.asObservable()
@@ -281,7 +279,7 @@ export class CoreHistory extends History {
             }
             const content = typeof action.content === 'string' ?
               action.content :
-              this.translator.createComponent(action.content as ComponentLiteral)!
+              this.registry.createComponent(action.content as ComponentLiteral)!
             if (formats) {
               slot.insert(content, formats)
             } else {
@@ -301,7 +299,7 @@ export class CoreHistory extends History {
             return
           }
           if (action.type === 'insertSlot') {
-            const slot = this.translator.createSlot(action.slot)
+            const slot = this.registry.createSlot(action.slot)
             component.slots.insert(slot)
           }
           if (action.type === 'apply') {

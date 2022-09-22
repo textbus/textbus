@@ -5,7 +5,6 @@ import {
   NativeSelectionBridge,
   Renderer,
   RootComponentRef,
-  Translator,
   makeError,
   OutputRenderer,
   Starter,
@@ -15,9 +14,10 @@ import {
   invokeListener,
   Controller,
   Component,
-  Keyboard,
   History,
-  Commander
+  Commander,
+  Keyboard,
+  Registry
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentLoader } from './dom-support/_api'
@@ -155,7 +155,7 @@ export class Viewer {
       return starter
     }
     const parser = starter.get(Parser)
-    const translator = starter.get(Translator)
+    const registry = starter.get(Registry)
     const doc = starter.get(VIEW_DOCUMENT)
 
     this.initDefaultShortcut()
@@ -165,7 +165,7 @@ export class Viewer {
       if (typeof content === 'string') {
         component = parser.parseDoc(content, this.rootComponentLoader) as ComponentInstance
       } else {
-        component = translator.createComponentByFactory(content, this.rootComponent)
+        component = registry.createComponentByFactory(content, this.rootComponent)
       }
     } else {
       component = this.rootComponent.createInstance(starter)
@@ -304,7 +304,7 @@ export class Viewer {
   replaceContent(content: string | ComponentLiteral) {
     this.guardReady()
     const parser = this.injector!.get(Parser)
-    const translator = this.injector!.get(Translator)
+    const registry = this.injector!.get(Registry)
     const rootComponentRef = this.injector!.get(RootComponentRef)
     const selection = this.injector!.get(Selection)
     const rootComponentLoader = this.rootComponentLoader!
@@ -312,7 +312,7 @@ export class Viewer {
     if (typeof content === 'string') {
       component = parser.parseDoc(content, rootComponentLoader) as ComponentInstance
     } else {
-      component = translator.createComponentByFactory(content, this.rootComponent)
+      component = registry.createComponentByFactory(content, this.rootComponent)
     }
     selection.unSelect()
     rootComponentRef.component.slots.clean()
