@@ -1,11 +1,17 @@
 import { VElement } from './element'
 import { FormatValue } from './format'
 
+/**
+ * 格式类型
+ */
 export enum FormatType {
   Block = 0,
   Inline
 }
 
+/**
+ * 格式渲染优先级
+ */
 export enum FormatPriority {
   Outer,
   Tag,

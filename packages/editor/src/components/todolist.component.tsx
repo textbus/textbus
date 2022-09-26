@@ -198,9 +198,9 @@ tb-todolist {
   },
   read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance {
     const listConfig = Array.from(element.children).map(child => {
-      const stateElement = child.querySelector('.tb-todo-list-state')
+      const stateElement = child.querySelector('.tb-todolist-state')
       return {
-        childSlot: child.querySelector('.tb-todo-list-content') as HTMLElement,
+        childSlot: child.querySelector('.tb-todolist-content') as HTMLElement,
         slot: new Slot<TodoListSlotState>([
           ContentType.Text,
           ContentType.InlineComponent
