@@ -19,16 +19,17 @@ export class VTextNode {
 
 export type VElementJSXChildNode = VElement | VTextNode | string | number | boolean | null | undefined
 
-export interface VElementRenderFn {
-  (props: { [key: string]: any }): VElement;
-}
-
 export interface VElementOptions {
   [key: string]: any
 }
 
 export interface VElementProps extends VElementOptions {
-  children: Array<VElement | VTextNode>
+  children?: Array<VElementJSXChildNode>
+}
+
+
+export interface VElementRenderFn {
+  (props: VElementProps | null): VElement;
 }
 
 export interface VElementListeners {
@@ -36,38 +37,44 @@ export interface VElementListeners {
 }
 
 export function jsx(tagName: string | VElementRenderFn,
-                    attrs: VElementOptions | null = null,
-                    ...children: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
-  if (typeof tagName === 'function') {
-    return tagName({
-      ...attrs,
-      children
-    })
+                    props: VElementProps | null = null) {
+  if (props?.children) {
+    const children = props.children
+    Reflect.deleteProperty(props, 'children')
+    return VElement.createElement(tagName, props, children)
   }
-  const vNode = new VElement(tagName, attrs)
-  children.flat().forEach(i => {
-    if (i instanceof VElement) {
-      vNode.appendChild(i)
-    } else if (typeof i === 'string' && i.length > 0) {
-      vNode.appendChild(new VTextNode(i))
-    } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
-      vNode.appendChild(new VTextNode(String(i)))
-    }
-  })
-  return vNode
+  return VElement.createElement(tagName, props)
 }
 
-export function jsxs(tagName: string, props: VElementProps) {
-  const children = props.children
-  Reflect.deleteProperty(props, 'children')
-  return new VElement(tagName, props, children)
+export function jsxs(tagName: string | VElementRenderFn, props: VElementProps | null = null) {
+  return jsx(tagName, props)
 }
 
 /**
  * Textbus 虚拟 DOM 元素节点
  */
 export class VElement {
-  static createElement = jsx
+  static createElement(tagName: string | VElementRenderFn,
+                       attrs: VElementOptions | null = null,
+                       ...childNodes: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
+    const children: Array<VElement | VTextNode> = []
+    childNodes.flat().forEach(i => {
+      if (i instanceof VElement) {
+        children.push(i)
+      } else if (typeof i === 'string' && i.length > 0) {
+        children.push(new VTextNode(i))
+      } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
+        children.push(new VTextNode(String(i)))
+      }
+    })
+    if (typeof tagName === 'function') {
+      return tagName({
+        ...attrs,
+        children
+      })
+    }
+    return new VElement(tagName, attrs, children)
+  }
 
   get parentNode() {
     return this[parentNode]
@@ -88,7 +95,7 @@ export class VElement {
 
   constructor(public tagName: string,
               attrs: VElementOptions | null = null,
-              children: Array<VElement | VTextNode | string> = []) {
+              children: Array<VElement | VTextNode> = []) {
     attrs = attrs || {}
     const className = (attrs.class || '').trim()
     this.classes = new Set<string>(className ? className.split(/\s+/g) : [])
@@ -126,12 +133,7 @@ export class VElement {
       }
     })
 
-    this.appendChild(...children.filter(i => i).map(i => {
-      if (typeof i === 'string') {
-        return new VTextNode(i)
-      }
-      return i
-    }))
+    this.appendChild(...children)
   }
 
   /**

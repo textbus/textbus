@@ -15,12 +15,7 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "VElement.createElement",
-    "paths": {
-      "@textbus/core": ["./src/public-api.ts"],
-    }
+    "downlevelIteration": true
   },
   "include": [
     "src/"

@@ -10,7 +10,7 @@
       "import": "./bundles/public-api.js"
     },
     "./jsx-runtime": {
-      "import": "./bundles/jsx-runtime.js"
+      "import": "./jsx-runtime.js"
     }
   },
   "scripts": {

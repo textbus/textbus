@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext",
+    "strict": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "noImplicitOverride": true,
+    "baseUrl": "./",
+    "paths": {
+      "@textbus/browser": ["./packages/browser/src/public-api.ts"],
+      "@textbus/core": ["./packages/core/src/public-api.ts"],
+      "@textbus/core/*": ["./packages/core/src/*"],
+      "@textbus/editor": ["./packages/editor/src/public-api.ts"],
+      "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "@textbus/core"
+  },
+  "exclude": ["packages", "_docs", "helper", "test"]
+}

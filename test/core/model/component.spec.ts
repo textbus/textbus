@@ -257,8 +257,7 @@ describe('Component Hooks', () => {
         useDynamicShortcut(config)
         return {
           render() {
-            return jsx('p', {
-            })
+            return jsx('p')
           }
         }
       }
