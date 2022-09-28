@@ -63,7 +63,7 @@ export interface Keymap {
 export interface Shortcut {
   keymap: Keymap
 
-  action(key: string): void
+  action(key: string): boolean | void
 }
 
 export interface ZenCodingGrammarInterceptor<Data = any> {

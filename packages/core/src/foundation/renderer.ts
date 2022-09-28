@@ -573,9 +573,10 @@ export class Renderer {
     } else {
       const { styleChanges, attrChanges, classesChanges, listenerChanges } = getNodeChanges(newVDom, oldVDom)
 
-      styleChanges.set.forEach(i => this.nativeRenderer.setStyle(nativeNode, i[0], i[1]))
       styleChanges.remove.forEach(i => this.nativeRenderer.removeStyle(nativeNode, i))
+      styleChanges.set.forEach(i => this.nativeRenderer.setStyle(nativeNode, i[0], i[1]))
 
+      attrChanges.remove.forEach(i => this.nativeRenderer.removeAttribute(nativeNode, i))
       attrChanges.set.forEach(([key, value]) => {
         if (key === this.slotIdAttrKey) {
           return
@@ -585,19 +586,18 @@ export class Renderer {
         }
         this.nativeRenderer.setAttribute(nativeNode, key, value)
       })
-      attrChanges.remove.forEach(i => this.nativeRenderer.removeAttribute(nativeNode, i))
 
-      classesChanges.add.forEach(i => this.nativeRenderer.addClass(nativeNode, i))
       classesChanges.remove.forEach(i => this.nativeRenderer.removeClass(nativeNode, i))
+      classesChanges.add.forEach(i => this.nativeRenderer.addClass(nativeNode, i))
 
+      listenerChanges.remove.forEach(i => {
+        this.nativeRenderer.unListen(nativeNode, i[0], i[1])
+      })
       if (!this.controller.readonly) {
         listenerChanges.add.forEach(i => {
           this.nativeRenderer.listen(nativeNode, i[0], i[1])
         })
       }
-      listenerChanges.remove.forEach(i => {
-        this.nativeRenderer.unListen(nativeNode, i[0], i[1])
-      })
 
       this.renderedVNode.set(newVDom, true)
       this.nativeNodeCaches.set(newVDom, nativeNode)

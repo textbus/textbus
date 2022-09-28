@@ -159,8 +159,10 @@ export class Keyboard {
         !!config.keymap.altKey === keymap.altKey &&
         !!config.keymap.shiftKey === keymap.shiftKey &&
         !!config.keymap.ctrlKey === keymap.ctrlKey) {
-        config.action(keymap.key)
-        return true
+        const b = config.action(keymap.key)
+        if (b !== false) {
+          return true
+        }
       }
     }
     return false

@@ -127,6 +127,11 @@ export class Content {
   }
 
   getContentAtIndex(index: number) {
+    if (this.fixIndex(index + 1) === index) {
+      return this.slice(index, index + 2)[0]
+    } else if (this.fixIndex(index) === index - 1) {
+      return this.slice(index - 1, index + 1)[0]
+    }
     return this.slice(index, index + 1)[0]
   }
 

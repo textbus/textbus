@@ -1075,6 +1075,8 @@ export class Selection {
 
       if (current === '\n') {
         current = slot.getContentAtIndex(offset + 1)
+      } else if (current.length === 2) {
+        current = slot.getContentAtIndex(offset)
       }
       if (current && typeof current !== 'string') {
         const firstChildSlot = current.slots.get(0)
@@ -1084,7 +1086,7 @@ export class Selection {
       }
       return {
         slot,
-        offset: offset + 1
+        offset: offset + current.length
       }
     }
 
@@ -1140,7 +1142,7 @@ export class Selection {
       }
       return {
         slot: slot,
-        offset: offset - 1
+        offset: offset - prev.length
       }
     }
     // 循环向前找第一个子 fragment，但有可能当前这个就是第一个，这时循环
