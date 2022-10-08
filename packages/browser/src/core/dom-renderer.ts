@@ -108,6 +108,8 @@ export class DomRenderer implements NativeRenderer {
     select: ['disabled', 'readonly'],
     option: ['disabled', 'selected', 'value'],
     button: ['disabled'],
+    video: ['controls', 'autoplay', 'loop', 'muted'],
+    audio: ['controls', 'autoplay', 'loop', 'muted'],
   }
 
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
@@ -169,7 +171,7 @@ export class DomRenderer implements NativeRenderer {
     target.setAttribute(key, value)
     const propNames = this.formElement[target.tagName.toLowerCase()]
     if (propNames && propNames.includes(key)) {
-      target[key] = value
+      target[key] = Boolean(value)
     }
   }
 
@@ -178,6 +180,10 @@ export class DomRenderer implements NativeRenderer {
       this.removeXlinkAttribute(target, this.possibleXlinkNames[key])
     }
     target.removeAttribute(key)
+    const propNames = this.formElement[target.tagName.toLowerCase()]
+    if (propNames && propNames.includes(key)) {
+      target[key] = false
+    }
   }
 
   setXlinkAttribute(target: NativeNode, key: string, value: string) {
