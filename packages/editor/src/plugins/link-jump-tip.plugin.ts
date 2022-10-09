@@ -1,4 +1,4 @@
-import { Subscription } from '@tanbo/stream'
+import { delay, Subscription } from '@tanbo/stream'
 import { NativeSelectionBridge, Selection, Plugin } from '@textbus/core'
 import { Injector } from '@tanbo/di'
 import { VIEW_CONTAINER } from '@textbus/browser'
@@ -17,7 +17,7 @@ export class LinkJumpTipPlugin implements Plugin {
     this.link.target = '_blank'
     this.link.className = 'textbus-link-jump-plugin'
     this.subs.push(
-      selection.onChange.subscribe(() => {
+      selection.onChange.pipe(delay()).subscribe(() => {
         this.onSelectionChange(document, selection, nativeSelectionBridge, container)
       })
     )
