@@ -14,7 +14,11 @@ export function createKeymap(config: Keymap): Node[] {
   }
   const keys = Array.isArray(config.key) ?
     config.key.map(i => i.toUpperCase()).join('/') :
-    config.key.toUpperCase()
+    typeof config.key === 'string' ?
+      config.key.toUpperCase() :
+      Array.isArray(config.key.name) ?
+        config.key.name.map(i => i.toUpperCase()).join('/') :
+        config.key.name.toLowerCase()
   const result: Node[] = []
   if (isMac) {
     result.push(...arr.map(s => {
