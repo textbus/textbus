@@ -53,11 +53,16 @@ export interface ComponentExtends {
   render: ComponentRender
 }
 
+export interface Key {
+  match: RegExp | ((key: string) => boolean)
+  name: string | string[]
+}
+
 export interface Keymap {
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
-  key: string | string[];
+  key: string | string[] | Key;
 }
 
 export interface Shortcut {
@@ -70,10 +75,10 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   /** 匹配字符 */
   match: RegExp | ((content: string) => boolean)
   /** 触发键 */
-  key: string | string[]
+  key: string | string[] | RegExp | ((content: string) => boolean)
 
   /** 触发执行的方法 */
-  generateInitData(content: string): Data
+  generateInitData(content: string, injector: Injector): Data
 }
 
 /**
