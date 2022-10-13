@@ -22,14 +22,21 @@ export class Palette {
   private picker: Picker
   private completeEvent = new Subject<string | null>()
 
-  constructor(private styleName: string, btnText: string, colors?: string[]) {
+  constructor(
+    private styleName: string,
+    btnText: string,
+    recentText: string,
+    backText: string,
+    paletteText: string) {
     this.elementRef.classList.add('textbus-toolbar-palette')
     this.onComplete = this.completeEvent.asObservable()
     this.picker = createPicker(this.elementRef, {
+      recentText,
       btnText,
-      colors: colors || (Palette.defaultColors?.length ? Palette.defaultColors : [])
+      backText,
+      paletteText
     })
-    this.picker.onSelected = (ev) => {
+    this.picker.onSelected.subscribe((ev) => {
       if (!ev.rgba) {
         this.completeEvent.next(null)
       } else if (ev.rgba.a === 1) {
@@ -38,7 +45,7 @@ export class Palette {
         const { r, g, b, a } = ev.rgba
         this.completeEvent.next(`rgba(${r},${g},${b},${a})`)
       }
-    }
+    })
   }
 
   update(d?: string): void {

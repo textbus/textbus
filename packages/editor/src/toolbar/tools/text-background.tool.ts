@@ -7,11 +7,16 @@ import { textBackgroundColorFormatter } from '../../formatters/_api'
 import { colorToolCreator } from './_utils/color-tool-creator'
 
 export function textBackgroundToolConfigFactory(injector: Injector): SegmentDropdownToolConfig {
-  const i18n = injector.get(I18n)
-  const palette = new Palette('color', i18n.get('plugins.toolbar.textBackgroundColorTool.view.confirmBtnText'))
+  const i18n = injector.get(I18n).getContext('plugins.toolbar.textBackgroundColorTool')
+  const palette = new Palette('color',
+    i18n.get('view.btnText'),
+    i18n.get('view.recentText'),
+    i18n.get('view.backText'),
+    i18n.get('view.paletteText'),
+  )
   return {
     iconClasses: ['textbus-icon-background-color'],
-    tooltip: i18n.get('plugins.toolbar.textBackgroundColorTool.tooltip'),
+    tooltip: i18n.get('tooltip'),
     ...colorToolCreator(injector, palette, textBackgroundColorFormatter)
   }
 }
