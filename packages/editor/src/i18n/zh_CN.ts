@@ -88,7 +88,10 @@ export const i18n_zh_CN: I18NConfig = {
       colorTool: {
         tooltip: '文字颜色',
         view: {
-          btnText: '确定'
+          btnText: '确定',
+          recentText: '最近使用',
+          backText: '返回',
+          paletteText: '调色盘'
         }
       },
       emojiTool: {
@@ -288,7 +291,10 @@ export const i18n_zh_CN: I18NConfig = {
       textBackgroundColorTool: {
         tooltip: '文字背景颜色',
         view: {
-          confirmBtnText: '确定'
+          btnText: '确定',
+          recentText: '最近使用',
+          backText: '返回',
+          paletteText: '调色盘'
         }
       },
       textIndentTool: {

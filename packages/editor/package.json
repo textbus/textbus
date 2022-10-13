@@ -27,7 +27,7 @@
   "dependencies": {
     "@tanbo/bezier": "^1.0.1",
     "@tanbo/color": "^0.1.1",
-    "@tanbo/color-picker": "^0.1.4",
+    "@tanbo/color-picker": "^1.0.1",
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.3",
     "@tanbo/stream": "^1.1.8",

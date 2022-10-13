@@ -35,7 +35,8 @@ export const i18n_en_US: I18NConfig = {
       blockBackgroundColorTool: {
         tooltip: 'block background',
         view: {
-          btnText: 'ok'
+          btnText: 'ok',
+          paletteText: 'palette'
         }
       },
       blockMarginTool: {
@@ -88,7 +89,10 @@ export const i18n_en_US: I18NConfig = {
       colorTool: {
         tooltip: 'text color',
         view: {
-          btnText: 'ok'
+          btnText: 'ok',
+          recentText: 'recent colors',
+          backText: 'back',
+          paletteText: 'palette'
         }
       },
       emojiTool: {
@@ -288,7 +292,10 @@ export const i18n_en_US: I18NConfig = {
       textBackgroundColorTool: {
         tooltip: 'text background color',
         view: {
-          confirmBtnText: 'ok'
+          btnText: 'ok',
+          recentText: 'recent colors',
+          backText: 'back',
+          paletteText: 'palette'
         }
       },
       textIndentTool: {
