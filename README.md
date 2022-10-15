@@ -3,7 +3,7 @@ Textbus
 
 > 如果你还在使用 1.0 版本，源代码请访问 [Textbus 1.*](https://github.com/textbus/textbus-1.0)
 
-Textbus 是一个组件化、跨平台、数据驱动的富文本框架，并坚定的支持在线协同。使用 Textbus 你可以轻松创建你自完全自定义的编辑器。
+Textbus 是一个组件化、跨平台、数据驱动的富文本框架，并坚定的支持在线协同。使用 Textbus 你可以轻松创建出类似钉钉文档、石墨文档、飞书文档等完全自定义的编辑器。
 
 我们一直致力于让富文本开发也能像普通前端框架一样，通过简明易懂的 api 和少量的约定，即可扩展出健壮的、符合预期的富文本编辑器。在 Textbus 1.0 的时，我们为此做了非常多的探索和努力，取得了不错的成果，但也因为如此，1.0 的设计在某些方面还留下一些遗憾。
 
@@ -15,6 +15,12 @@ Textbus 是一个组件化、跨平台、数据驱动的富文本框架，并坚
 + 重写了渲染层，现在 Textbus 2.0 大多数情况下更新视图仅需要 0.2ms 时间，比 1.0 性能更好
 
 ![](./_source/demo.png)
+
+
+## 官方文档
+
+[Textbus 官方文档](https://Textbus.io)
+
 
 ## 安装
 
@@ -59,10 +65,56 @@ editor.mount(document.getElementById('editor'))
 </body>
 </html>
 ```
-## 官方文档
 
-[Textbus 官方文档](https://Textbus.io)
+### 设置默认内容
 
+```ts
+
+const editor = createEditor({
+  content: '<p>这里是默认内容</p>'
+})
+```
+
+## 常用方法
+
+### 销毁编辑器
+```ts
+editor.destroy()
+```
+
+### 获取焦点
+```ts
+editor.focus()
+```
+
+### 取消焦点
+```ts
+editor.blur()
+```
+
+### 获取 HTML 内容
+```ts
+const content = editor.getContents().content
+```
+
+### 获取 JSON 内容
+```ts
+const json = editor.getJSON().content
+```
+
+### 替换内容
+```ts
+editor.replaceContent('<p>新内容！</p>')
+
+editor.replaceContent({
+  // 必须为 Textbus 导出的 JSON 格式
+})
+```
+
+### 清空编辑器
+```ts
+editor.replaceContent('')
+```
 ## 本地开发
 
 Textbus 采用 lerna 作为多模块管理，全局安装 lerna。

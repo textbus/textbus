@@ -41,6 +41,9 @@ export interface Plugin {
   onDestroy?(): void
 }
 
+/**
+ * Textbus 模块配置
+ */
 export interface Module {
   /** 组件列表 */
   components?: Component[]
