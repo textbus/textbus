@@ -4,7 +4,7 @@ import { Draft, Patch, produce } from 'immer'
 import { ComponentInstance, ComponentLiteral } from './component'
 import { Action, ApplyAction } from './operation'
 import { Content } from './content'
-import { Format, FormatLiteral, FormatRange, FormatValue, Formats } from './format'
+import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
 import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
 import { ChangeMarker } from './change-marker'
 import { StateChange } from './types'
@@ -591,7 +591,7 @@ export class Slot<T = any> {
   /**
    * 根据插槽的格式数据，生成格式树
    */
-  createFormatTree() {
+  createFormatTree(): FormatTree {
     return this.format.toTree(0, this.length)
   }
 
@@ -601,14 +601,14 @@ export class Slot<T = any> {
    * @param startIndex
    * @param endIndex
    */
-  getFormatRangesByFormatter(formatter: Formatter, startIndex: number, endIndex: number) {
+  getFormatRangesByFormatter(formatter: Formatter, startIndex: number, endIndex: number): FormatRange[] {
     return this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
   }
 
   /**
    * 获取插槽格式的数组集合
    */
-  getFormats() {
+  getFormats(): FormatItem[] {
     return this.format.toArray()
   }
 
@@ -690,9 +690,9 @@ export class Slot<T = any> {
    * @param startIndex 开始位置
    * @param endIndex 结束位置
    */
-  cleanFormats(excludeFormats: Formatter[] = [], startIndex = 0, endIndex = this.length) {
+  cleanFormats(excludeFormats: Formatter[] | ((formatter: Formatter) => boolean) = [], startIndex = 0, endIndex = this.length) {
     this.getFormats().forEach(item => {
-      if (excludeFormats.includes(item.formatter)) {
+      if (typeof excludeFormats === 'function' ? excludeFormats(item.formatter) : excludeFormats.includes(item.formatter)) {
         return
       }
       this.retain(startIndex)
