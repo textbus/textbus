@@ -642,7 +642,7 @@ export class Commander {
    * 清除当前选区的所有格式
    * @param excludeFormatters 在清除格式时，排除的格式
    */
-  cleanFormats(excludeFormatters: Formatter[] = []) {
+  cleanFormats(excludeFormatters: Formatter[] | ((formatter: Formatter) => boolean) = []) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -654,7 +654,12 @@ export class Commander {
         }
       }
 
-      function cleanFormats(slot: Slot, excludeFormatters: Formatter[], startIndex: number, endIndex: number) {
+      function cleanFormats(
+        slot: Slot,
+        excludeFormatters: Formatter[] | ((formatter: Formatter) => boolean),
+        startIndex: number,
+        endIndex: number
+      ) {
         slot.cleanFormats(excludeFormatters, startIndex, endIndex)
 
         slot.sliceContent(startIndex, endIndex).forEach(child => {
