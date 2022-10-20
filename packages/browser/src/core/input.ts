@@ -3,6 +3,7 @@ import { Injectable } from '@tanbo/di'
 import {
   Commander,
   ContentType,
+  Controller,
   Keyboard,
   Selection,
   Slot
@@ -70,6 +71,7 @@ export class Input {
               private keyboard: Keyboard,
               private commander: Commander,
               private selection: Selection,
+              private controller: Controller,
               private caret: Caret) {
     this.onReady = new Promise<void>(resolve => {
       this.subscription.add(
@@ -81,6 +83,11 @@ export class Input {
           this.doc = doc
           this.init()
           resolve()
+        }),
+        controller.onReadonlyStateChange.subscribe(() => {
+          if (controller.readonly) {
+            this.blur()
+          }
         })
       )
     })
@@ -89,6 +96,9 @@ export class Input {
   }
 
   focus() {
+    if (this.controller.readonly) {
+      return
+    }
     if (!this.isFocus) {
       this.textarea?.focus()
       setTimeout(() => {
