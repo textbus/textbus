@@ -10,7 +10,6 @@ import {
   SlotRange,
   GetRangesEvent
 } from '../model/_api'
-import { Renderer } from './renderer'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
 
@@ -197,7 +196,7 @@ export class Selection {
     if (v) {
       this.bridge.connect(this.connector)
     } else {
-      this.unSelect()
+      // this.unSelect()
       this.bridge.disConnect()
     }
   }
@@ -245,8 +244,7 @@ export class Selection {
   private customRanges: SlotRange[] | null = null
 
   constructor(private root: RootComponentRef,
-              private controller: Controller,
-              private renderer: Renderer) {
+              private controller: Controller) {
     let prevFocusComponent: ComponentInstance | null
     this.onChange = this.changeEvent.asObservable().pipe(
       distinctUntilChanged((previous, current) => {

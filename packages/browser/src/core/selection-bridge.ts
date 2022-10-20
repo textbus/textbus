@@ -89,6 +89,7 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   connect(connector: NativeSelectionConnector) {
     this.connector = connector
+    this.syncSelection(connector)
     this.listen(connector)
   }
 
@@ -315,69 +316,74 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
       }),
       fromEvent(document, 'selectionchange').subscribe(() => {
-        this.changeFromUser = true
-        if (this.ignoreSelectionChange ||
-          selection.rangeCount === 0 ||
-          !this.docContainer.contains(selection.anchorNode)) {
-          return
-        }
-        const nativeRange = selection.getRangeAt(0).cloneRange()
-        const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
-        const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
-        if (!this.docContainer.contains(selection.focusNode)) {
-          if (isFocusEnd) {
-            const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)!
-            const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
-            nativeRange.setEndAfter(nativeNode.lastChild!)
-          } else {
-            const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.last!)!
-            const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
-            nativeRange.setStartBefore(nativeNode.firstChild!)
-          }
-        }
-
-        const startPosition = this.getCorrectedPosition(nativeRange.startContainer, nativeRange.startOffset, isFocusStart)
-        const endPosition = nativeRange.collapsed ?
-          startPosition :
-          this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
-        if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
-          startPosition && endPosition) {
-          const abstractSelection: AbstractSelection = isFocusEnd ? {
-            anchorSlot: startPosition.slot,
-            anchorOffset: startPosition.offset,
-            focusSlot: endPosition.slot,
-            focusOffset: endPosition.offset
-          } : {
-            focusSlot: startPosition.slot,
-            focusOffset: startPosition.offset,
-            anchorSlot: endPosition.slot,
-            anchorOffset: endPosition.offset
-          }
-          const { focus, anchor } = this.getPositionByRange(abstractSelection)
-
-          if (focus && anchor) {
-            let start = anchor
-            let end = focus
-            if (isFocusStart) {
-              start = focus
-              end = anchor
-            }
-            if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
-              nativeRange.setStart(start.node, start.offset)
-            }
-            if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
-              nativeRange.setEnd(end.node, end.offset)
-            }
-            connector.setSelection(abstractSelection)
-            this.selectionChangeEvent.next(nativeRange)
-          } else {
-            connector.setSelection(null)
-          }
-          return
-        }
-        connector.setSelection(null)
+        this.syncSelection(connector)
       })
     )
+  }
+
+  private syncSelection(connector: NativeSelectionConnector) {
+    const selection = this.nativeSelection
+    this.changeFromUser = true
+    if (this.ignoreSelectionChange ||
+      selection.rangeCount === 0 ||
+      !this.docContainer.contains(selection.anchorNode)) {
+      return
+    }
+    const nativeRange = selection.getRangeAt(0).cloneRange()
+    const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
+    const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
+    if (!this.docContainer.contains(selection.focusNode)) {
+      if (isFocusEnd) {
+        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)!
+        const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+        nativeRange.setEndAfter(nativeNode.lastChild!)
+      } else {
+        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.last!)!
+        const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+        nativeRange.setStartBefore(nativeNode.firstChild!)
+      }
+    }
+
+    const startPosition = this.getCorrectedPosition(nativeRange.startContainer, nativeRange.startOffset, isFocusStart)
+    const endPosition = nativeRange.collapsed ?
+      startPosition :
+      this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
+    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
+      startPosition && endPosition) {
+      const abstractSelection: AbstractSelection = isFocusEnd ? {
+        anchorSlot: startPosition.slot,
+        anchorOffset: startPosition.offset,
+        focusSlot: endPosition.slot,
+        focusOffset: endPosition.offset
+      } : {
+        focusSlot: startPosition.slot,
+        focusOffset: startPosition.offset,
+        anchorSlot: endPosition.slot,
+        anchorOffset: endPosition.offset
+      }
+      const { focus, anchor } = this.getPositionByRange(abstractSelection)
+
+      if (focus && anchor) {
+        let start = anchor
+        let end = focus
+        if (isFocusStart) {
+          start = focus
+          end = anchor
+        }
+        if (nativeRange.startContainer !== start.node || nativeRange.startOffset !== start.offset) {
+          nativeRange.setStart(start.node, start.offset)
+        }
+        if (nativeRange.endContainer !== end.node || nativeRange.endOffset !== end.offset) {
+          nativeRange.setEnd(end.node, end.offset)
+        }
+        connector.setSelection(abstractSelection)
+        this.selectionChangeEvent.next(nativeRange)
+      } else {
+        connector.setSelection(null)
+      }
+      return
+    }
+    connector.setSelection(null)
   }
 
   private getCorrectedPosition(node: Node, offset: number, toAfter: boolean, excludeNodes: Node[] = []): SelectionPosition | null {

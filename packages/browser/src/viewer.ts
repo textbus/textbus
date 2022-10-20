@@ -68,9 +68,14 @@ export class Viewer {
     this.controller.readonly = b
   }
 
+  isFocus() {
+    return this._isFocus
+  }
+
   protected changeEvent = new Subject<void>()
 
   protected subs: Subscription[] = []
+  protected _isFocus = false
 
   private controller: Controller
 
@@ -187,8 +192,10 @@ export class Viewer {
         distinctUntilChanged()
       ).subscribe(b => {
         if (b) {
+          this._isFocus = true
           this.focusEvent.next()
         } else {
+          this._isFocus = false
           this.blurEvent.next()
         }
       })
