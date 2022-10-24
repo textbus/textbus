@@ -88,6 +88,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   connect(connector: NativeSelectionConnector) {
+    this.disConnect()
     this.connector = connector
     this.syncSelection(connector)
     this.listen(connector)

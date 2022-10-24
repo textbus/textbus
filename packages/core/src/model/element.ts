@@ -17,7 +17,7 @@ export class VTextNode {
   }
 }
 
-export type VElementJSXChildNode = VElement | VTextNode | string | number | boolean | null | undefined
+export type VElementJSXChildNode = VElement | VFragment | VTextNode | string | number | boolean | null | undefined
 
 export interface VElementOptions {
   [key: string]: any
@@ -36,18 +36,45 @@ export interface VElementListeners {
   [listenKey: string]: <T extends Event>(ev: T) => any;
 }
 
+export function Fragment(fragment: { children: VElementJSXChildNode[] }) {
+  return new VFragment(fragment.children)
+}
+
 export function jsx(tagName: string | VElementRenderFn,
-                    props: VElementProps | null = null) {
-  if (props?.children) {
-    const children = props.children
-    Reflect.deleteProperty(props, 'children')
+                    props: VElementProps = {}) {
+  const children = props.children
+  Reflect.deleteProperty(props, 'children')
+  if (children) {
     return VElement.createElement(tagName, props, children)
   }
   return VElement.createElement(tagName, props)
 }
 
-export function jsxs(tagName: string | VElementRenderFn, props: VElementProps | null = null) {
+export function jsxs(tagName: string | VElementRenderFn, props: VElementProps = {}) {
   return jsx(tagName, props)
+}
+
+export class VFragment {
+  constructor(public children: VElementJSXChildNode[]) {
+  }
+}
+
+function append(children: Array<VElement | VTextNode>, node: VElementJSXChildNode) {
+  if (node instanceof VElement) {
+    children.push(node)
+  } else if (node instanceof VTextNode) {
+    if (node.textContent) {
+      children.push(node)
+    }
+  } else if (typeof node === 'string' && node.length > 0) {
+    children.push(new VTextNode(node))
+  } else if (node instanceof VFragment) {
+    for (const item of node.children.flat()) {
+      append(children, item)
+    }
+  } else if (node !== false && node !== true && node !== null && typeof node !== 'undefined') {
+    children.push(new VTextNode(String(node)))
+  }
 }
 
 /**
@@ -59,13 +86,7 @@ export class VElement {
                        ...childNodes: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
     const children: Array<VElement | VTextNode> = []
     childNodes.flat().forEach(i => {
-      if (i instanceof VElement) {
-        children.push(i)
-      } else if (typeof i === 'string' && i.length > 0) {
-        children.push(new VTextNode(i))
-      } else if (i !== false && i !== true && i !== null && typeof i !== 'undefined') {
-        children.push(new VTextNode(String(i)))
-      }
+      append(children, i)
     })
     if (typeof tagName === 'function') {
       return tagName({

@@ -583,6 +583,7 @@ export class Renderer {
         }
         if (key === 'ref' && value instanceof Ref) {
           value.current = nativeNode
+          return
         }
         this.nativeRenderer.setAttribute(nativeNode, key, value)
       })
