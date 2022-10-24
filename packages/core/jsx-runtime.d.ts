@@ -1,8 +1,9 @@
-import { jsx, jsxs, VElement } from '@textbus/core'
+import { jsx, jsxs, VElement, Fragment } from '@textbus/core'
 
 export {
   jsxs,
-  jsx
+  jsx,
+  Fragment
 }
 
 declare global {

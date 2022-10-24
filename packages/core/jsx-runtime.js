@@ -1,6 +1,7 @@
-import { jsx, jsxs } from '@textbus/core'
+import { jsx, jsxs, Fragment } from '@textbus/core'
 
 export {
   jsxs,
-  jsx
+  jsx,
+  Fragment
 }

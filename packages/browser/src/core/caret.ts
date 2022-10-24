@@ -10,6 +10,18 @@ export function getLayoutRectByRange(range: Range): Rect {
   if (startContainer.nodeType === Node.ELEMENT_NODE) {
     const offsetNode = startContainer.childNodes[startOffset]
     let isInsertBefore = false
+    if (!offsetNode) {
+      const lastChild = startContainer.lastChild
+      if (lastChild && lastChild.nodeType === Node.ELEMENT_NODE) {
+        const rect = (lastChild as HTMLElement).getBoundingClientRect()
+        return {
+          left: rect.right,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height
+        }
+      }
+    }
     if (offsetNode) {
       if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
         return (offsetNode as HTMLElement).getBoundingClientRect()
