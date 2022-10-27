@@ -5,7 +5,7 @@ import {
   ComponentInstance,
   ContentType,
   Controller,
-  Formats,
+  Formats, FormatType,
   History,
   HISTORY_STACK_SIZE,
   makeError,
@@ -486,6 +486,7 @@ export class Collaborate implements History {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         let index = 0
+        slots.retain(index)
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
             index += action.retain
@@ -676,7 +677,20 @@ export class Collaborate implements History {
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
-          slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
+          const blockFormats: Formats = []
+          const formats = remoteFormatsToLocal(this.registry, action.attributes).filter(item => {
+            if (item[0].type === FormatType.Block) {
+              blockFormats.push(item)
+              return false
+            }
+            return true
+          })
+          slot.insert(action.insert, formats)
+          const index = slot.index
+          blockFormats.forEach(item => {
+            slot.setAttribute(item[0], item[1])
+          })
+          slot.retain(index)
         } else {
           const sharedComponent = action.insert as YMap<any>
           const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)

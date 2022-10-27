@@ -1,4 +1,4 @@
-import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector } from '@tanbo/di'
+import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@tanbo/di'
 
 import { ComponentInstance, Formatter, Component } from './model/_api'
 import {
@@ -81,6 +81,7 @@ export interface TextbusConfig extends Module {
  * Textbus 内核启动器
  */
 export class Starter extends ReflectiveInjector {
+  static diScope = new Scope('Textbus')
   private beforeDestroyCallbacks: Array<() => void> = []
 
   private plugins: Plugin[]
@@ -88,7 +89,7 @@ export class Starter extends ReflectiveInjector {
   private isDestroyed = false
 
   constructor(public config: TextbusConfig) {
-    super(new NullInjector(), [])
+    super(new NullInjector(), [], Starter.diScope)
     const { plugins, providers } = this.mergeModules(config)
     this.plugins = plugins.map(i => i())
     this.staticProviders = providers
