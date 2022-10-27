@@ -1,6 +1,6 @@
 import { InjectionToken } from '@tanbo/di'
 
-import { ComponentInstance, Formatter, Component, NativeNode } from '../model/_api'
+import { ComponentInstance, Formatter, Component, NativeNode, Attribute } from '../model/_api'
 
 /**
  * 原生渲染器抽象类，由具体平台提供具体实现
@@ -56,7 +56,12 @@ export const COMPONENT_LIST = new InjectionToken<Component[]>('COMPONENT_LIST')
 /**
  * @internal Textbus 格式列表注入 token
  */
-export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
+export const FORMATTER_LIST = new InjectionToken<Formatter<any>[]>('FORMATTER_LIST')
+
+/**
+ * @internal Textbus 插槽属性注入列表
+ */
+export const ATTRIBUTE_LIST = new InjectionToken<Attribute<any>[]>('ATTRIBUTE_LIST')
 
 /**
  * 开启 Zen Coding 支持

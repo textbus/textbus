@@ -13,16 +13,16 @@ export function leftToRightToolConfigFactory(injector: Injector): ButtonToolConf
     iconClasses: ['textbus-icon-ltr'],
     tooltip: i18n.get('plugins.toolbar.leftToRightTool.tooltip'),
     queryState(): QueryState<FormatValue> {
-      const state = query.queryFormat(dirFormatter)
+      const state = query.queryAttribute(dirFormatter)
       return {
         state: state.value === 'ltr' ? QueryStateType.Enabled : QueryStateType.Normal,
         value: state.value
       }
     },
     onClick() {
-      const state = query.queryFormat(dirFormatter)
+      const state = query.queryAttribute(dirFormatter)
       const b = state.value === 'ltr'
-      b ? commander.unApplyFormat(dirFormatter) : commander.applyFormat(dirFormatter, 'ltr')
+      b ? commander.unApplyAttribute(dirFormatter) : commander.applyAttribute(dirFormatter, 'ltr')
     }
   }
 }

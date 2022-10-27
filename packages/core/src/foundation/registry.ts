@@ -1,35 +1,31 @@
-import { Inject, Injectable, Injector, Optional } from '@tanbo/di'
+import { Inject, Injectable, Injector } from '@tanbo/di'
 import {
+  Attribute,
   Component,
   ComponentInitData,
   ComponentInstance,
   ComponentLiteral,
   Formatter,
-  FormatType,
   Slot,
   SlotLiteral
 } from '../model/_api'
-import { COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
-
-export abstract class FactoryFallback {
-  abstract getComponent(name: string): Component | null
-
-  abstract getFormatter(name: string): Formatter | null
-
-  abstract createComponentByData(name: string, data: ComponentInitData): ComponentInstance | null
-}
+import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 
 @Injectable()
 export class Registry {
   private componentMap = new Map<string, Component>()
-  private formatMap = new Map<string, Formatter>()
+  private formatMap = new Map<string, Formatter<any>>()
+  private attributeMap = new Map<string, Attribute<any>>()
 
-  constructor(private contextInjector: Injector,
+  constructor(public contextInjector: Injector,
               @Inject(COMPONENT_LIST) private components: Component[],
-              @Inject(FORMATTER_LIST) private formatters: Formatter[],
-              @Optional() private factoryFallback?: FactoryFallback) {
+              @Inject(ATTRIBUTE_LIST) private attributes: Attribute<any>[],
+              @Inject(FORMATTER_LIST) private formatters: Formatter<any>[]) {
     components.reverse().forEach(f => {
       this.componentMap.set(f.name, f)
+    })
+    attributes.reverse().forEach(f => {
+      this.attributeMap.set(f.name, f)
     })
     formatters.reverse().forEach(f => {
       this.formatMap.set(f.name, f)
@@ -41,7 +37,7 @@ export class Registry {
    * @param name 组件名
    */
   getComponent(name: string) {
-    return this.componentMap.get(name) || this.factoryFallback?.getComponent(name) || null
+    return this.componentMap.get(name) || null
   }
 
   /**
@@ -49,7 +45,15 @@ export class Registry {
    * @param name 格式名
    */
   getFormatter(name: string) {
-    return this.formatMap.get(name) || this.factoryFallback?.getFormatter(name) || null
+    return this.formatMap.get(name) || null
+  }
+
+  /**
+   * 根据名字获取 Attribute 实例
+   * @param name
+   */
+  getAttribute(name: string) {
+    return this.attributeMap.get(name) || null
   }
 
   /**
@@ -62,7 +66,7 @@ export class Registry {
     if (factory) {
       return factory.createInstance(this.contextInjector, data)
     }
-    return this.factoryFallback?.createComponentByData(name, data) || null
+    return null
   }
 
   /**
@@ -70,7 +74,7 @@ export class Registry {
    * @param slotLiteral
    * @param customComponentCreator
    */
-  createSlot(slotLiteral: SlotLiteral,
+  createSlot(slotLiteral: SlotLiteral<any, any>,
              customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): Slot {
     const slot = new Slot(slotLiteral.schema, slotLiteral.state)
     return this.loadSlot(slot, slotLiteral, customComponentCreator)
@@ -82,7 +86,7 @@ export class Registry {
    * @param customSlotCreator
    */
   createComponent(componentLiteral: ComponentLiteral,
-                  customSlotCreator?: (slotLiteral: SlotLiteral, index: number) => Slot): ComponentInstance | null {
+                  customSlotCreator?: (slotLiteral: SlotLiteral<any, any>, index: number) => Slot): ComponentInstance | null {
     const factory = this.getComponent(componentLiteral.name)
     if (factory) {
       return this.createComponentByFactory(componentLiteral, factory, customSlotCreator)
@@ -98,7 +102,7 @@ export class Registry {
    */
   createComponentByFactory(componentLiteral: ComponentLiteral,
                            factory: Component,
-                           customSlotCreator?: (slotLiteral: SlotLiteral, index: number) => Slot) {
+                           customSlotCreator?: (slotLiteral: SlotLiteral<any, any>, index: number) => Slot) {
     const slots = componentLiteral.slots.map(customSlotCreator || ((i) => this.createSlot(i)))
     return factory.createInstance(this.contextInjector, {
       state: componentLiteral.state,
@@ -111,11 +115,11 @@ export class Registry {
    * @param source
    * @param target
    */
-  fillSlot<T extends SlotLiteral, U extends Slot>(source: T, target: U): U {
+  fillSlot<T extends SlotLiteral<any, any>, U extends Slot>(source: T, target: U): U {
     return this.loadSlot(target, source)
   }
 
-  private loadSlot<T extends SlotLiteral, U extends Slot>(
+  private loadSlot<T extends SlotLiteral<any, any>, U extends Slot>(
     slot: U,
     slotLiteral: T,
     customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): U {
@@ -133,19 +137,21 @@ export class Registry {
     Object.keys(slotLiteral.formats).forEach(key => {
       const formatter = this.getFormatter(key)
       if (formatter) {
-        if (formatter.type === FormatType.Block) {
-          slotLiteral.formats[key].forEach(i => {
-            slot.retain(0)
-            slot.retain(slot.length, formatter, i.value)
-          })
-          return
-        }
         slotLiteral.formats[key].forEach(i => {
           slot.retain(i.startIndex)
           slot.retain(i.endIndex - i.startIndex, formatter, i.value)
         })
       }
     })
+
+    if (slotLiteral.attributes !== null && typeof slotLiteral.attributes === 'object') {
+      Object.keys(slotLiteral.attributes).forEach(key => {
+        const attribute = this.attributeMap.get(key)
+        if (attribute) {
+          slot.setAttribute(attribute, slotLiteral.attributes[key])
+        }
+      })
+    }
 
     return slot
   }

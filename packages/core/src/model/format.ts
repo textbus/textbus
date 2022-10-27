@@ -1,32 +1,39 @@
-import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
+import { Attribute, Formatter } from './attribute'
 import { Slot } from './slot'
 
 export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
 
-export type Formats = [formatter: Formatter, value: FormatValue][]
+export type Formats = [formatter: Formatter<any>, value: FormatValue][]
 
-export interface FormatRange {
+export interface FormatRange<T extends FormatValue> {
   startIndex: number
   endIndex: number
-  value: FormatValue
+  value: T
 }
 
-export interface FormatLiteral {
-  [key: string]: FormatRange[]
+export interface FormatLiteral<T extends FormatValue> {
+  [key: string]: FormatRange<T>[]
 }
 
-export interface FormatItem {
-  formatter: Formatter
-  value: FormatValue,
+export interface FormatItem<T extends FormatValue> {
+  formatter: Formatter<T>
+  value: T
   startIndex: number
   endIndex: number
 }
 
-export interface FormatTree {
+export interface AttributeItem<T extends FormatValue> {
+  formatter: Attribute<T>
+  value: T
   startIndex: number
   endIndex: number
-  children?: FormatTree[]
-  formats?: FormatItem[]
+}
+
+export interface FormatTree<T extends FormatValue> {
+  startIndex: number
+  endIndex: number
+  children?: FormatTree<T>[]
+  formats?: (FormatItem<T> | AttributeItem<T>)[]
 }
 
 function isVoid(data: any) {
@@ -37,7 +44,7 @@ function isVoid(data: any) {
  * Textbus 格式管理类
  */
 export class Format {
-  private map = new Map<Formatter, FormatRange[]>()
+  private map = new Map<Formatter<any>, FormatRange<any>[]>()
 
   constructor(private slot: Slot) {
   }
@@ -48,33 +55,31 @@ export class Format {
    * @param value
    * @param background
    */
-  merge(formatter: BlockFormatter, value: FormatValue, background?: boolean): this
-  merge(formatter: InlineFormatter, value: FormatRange, background?: boolean): this
-  merge(formatter: Formatter, value: FormatValue | FormatRange, background = false): this {
-    if (formatter.type === FormatType.Block) {
-      if (isVoid(value)) {
-        this.map.delete(formatter)
-      } else if (!background || !this.map.has(formatter)) {
-        this.map.set(formatter, [{
-          startIndex: 0,
-          endIndex: this.slot.length,
-          value: value as FormatValue
-        }])
-      }
-      return this
-    }
+  merge<T extends FormatValue>(formatter: Formatter<T>, value: FormatRange<T>, background = false): this {
+    // if (formatter.type === FormatType.Block) {
+    //   if (isVoid(value)) {
+    //     this.map.delete(formatter)
+    //   } else if (!background || !this.map.has(formatter)) {
+    //     this.map.set(formatter, [{
+    //       startIndex: 0,
+    //       endIndex: this.slot.length,
+    //       value: value as FormatValue
+    //     }])
+    //   }
+    //   return this
+    // }
     let ranges = this.map.get(formatter)
     if (!ranges) {
-      const v = (value as FormatRange).value
+      const v = value.value
       if (isVoid(v)) {
         return this
       }
-      ranges = [value as FormatRange]
+      ranges = [value]
       this.map.set(formatter, ranges)
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(background, ranges, value as FormatRange)
+    const newRanges = this.normalizeFormatRange(background, ranges, value)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -111,12 +116,12 @@ export class Format {
   split(index: number, distance: number) {
     const expandedValues = Array.from<string>({ length: distance })
     Array.from(this.map).forEach(([key, formatRanges]) => {
-      if (key.type === FormatType.Block) {
-        formatRanges.forEach(i => {
-          i.endIndex += distance
-        })
-        return
-      }
+      // if (key.type === FormatType.Block) {
+      //   formatRanges.forEach(i => {
+      //     i.endIndex += distance
+      //   })
+      //   return
+      // }
       const values = this.tileRanges(formatRanges)
       values.splice(index, 0, ...expandedValues)
       const newRanges = Format.toRanges(values)
@@ -197,8 +202,8 @@ export class Format {
    * @param endIndex
    * @param formatter
    */
-  extractFormatRangesByFormatter(startIndex: number, endIndex: number, formatter: Formatter) {
-    const extractRanges: FormatRange[] = []
+  extractFormatRangesByFormatter(startIndex: number, endIndex: number, formatter: Formatter<any>) {
+    const extractRanges: FormatRange<any>[] = []
 
     const ranges = this.map.get(formatter) || []
     ranges.forEach(range => {
@@ -224,7 +229,7 @@ export class Format {
    * @param startIndex
    * @param endIndex
    */
-  discard(formatter: Formatter, startIndex: number, endIndex: number) {
+  discard(formatter: Formatter<any>, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
       this.normalizeFormatRange(false, oldRanges, {
@@ -278,24 +283,24 @@ export class Format {
   }
 
   toJSON() {
-    const json: FormatLiteral = {}
+    const json: FormatLiteral<any> = {}
     this.map.forEach((value, formatter) => {
       json[formatter.name] = value.map(i => ({ ...i }))
     })
     return json
   }
 
-  toTree(startIndex: number, endIndex: number): FormatTree {
+  toTree(startIndex: number, endIndex: number): FormatTree<any> {
     const copyFormat = this.extract(startIndex, endIndex)
-    const tree: FormatTree = {
+    const tree: FormatTree<any> = {
       startIndex,
       endIndex,
     }
 
     let nextStartIndex = endIndex
     let nextEndIndex = startIndex
-    const formats: FormatItem[] = []
-    const columnedFormats: FormatItem[] = []
+    const formats: FormatItem<any>[] = []
+    const columnedFormats: FormatItem<any>[] = []
 
     Array.from(copyFormat.map.keys()).forEach(formatter => {
       const ranges = copyFormat.map.get(formatter)!
@@ -337,7 +342,7 @@ export class Format {
         }
       }
 
-      const push = function (tree: FormatTree, childTree: FormatTree) {
+      const push = function (tree: FormatTree<any>, childTree: FormatTree<any>) {
         if (childTree.formats) {
           tree.children!.push(childTree)
         } else if (childTree.children) {
@@ -365,7 +370,7 @@ export class Format {
   }
 
   toArray() {
-    const list: FormatItem[] = []
+    const list: FormatItem<any>[] = []
     Array.from(this.map).forEach(i => {
       const formatter = i[0]
       i[1].forEach(range => {
@@ -378,7 +383,7 @@ export class Format {
     return list
   }
 
-  private normalizeFormatRange(background: boolean, oldRanges: FormatRange[], newRange?: FormatRange) {
+  private normalizeFormatRange(background: boolean, oldRanges: FormatRange<any>[], newRange?: FormatRange<any>) {
     if (newRange) {
       oldRanges = background ? [newRange, ...oldRanges] : [...oldRanges, newRange]
     }
@@ -387,7 +392,7 @@ export class Format {
     return Format.toRanges(formatValues)
   }
 
-  private tileRanges(ranges: FormatRange[]) {
+  private tileRanges(ranges: FormatRange<any>[]) {
     const formatValues: Array<FormatValue> = []
     ranges.forEach(range => {
       formatValues.length = Math.max(formatValues.length, range.endIndex)
@@ -398,8 +403,8 @@ export class Format {
   }
 
   private static toRanges(values: Array<FormatValue>) {
-    const newRanges: FormatRange[] = []
-    let range: FormatRange = null as any
+    const newRanges: FormatRange<any>[] = []
+    let range: FormatRange<any> = null as any
     for (let i = 0; i < values.length; i++) {
       const item = values[i]
       if (isVoid(item)) {

@@ -5,7 +5,7 @@ import { Observable } from '@tanbo/stream'
 import { Palette } from './palette'
 import { UISegmentDropdown } from '../../toolkit/_utils/_api'
 
-export function colorToolCreator(injector: Injector, palette: Palette, formatter: Formatter) {
+export function colorToolCreator(injector: Injector, palette: Palette, formatter: Formatter<any>) {
   const query = injector.get(Query)
   const commander = injector.get(Commander)
   let viewer!: UISegmentDropdown

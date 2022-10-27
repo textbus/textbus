@@ -1,5 +1,4 @@
-import { FormatLoader, FormatLoaderReadResult } from '@textbus/browser'
-import { Formatter } from '@textbus/core'
+import { Attribute, Formatter, FormatValue } from '@textbus/core'
 
 export interface EditableOptions {
   /** 设置是否要编辑标签 */
@@ -32,12 +31,12 @@ export interface MatchRule {
   filter?: (node: HTMLElement) => boolean;
 }
 
-export abstract class Matcher implements FormatLoader {
+export abstract class Matcher<T extends FormatValue, U = Attribute<T> | Formatter<T>> {
   private validators: Array<(node: HTMLElement) => boolean> = []
   private excludeValidators: Array<(node: HTMLElement) => boolean> = []
 
   protected constructor(
-    public formatter: Formatter,
+    public target: U,
     protected rule: MatchRule,
   ) {
     if (rule.tags) {
@@ -70,8 +69,6 @@ export abstract class Matcher implements FormatLoader {
     }
     return this.validators.map(fn => fn(element)).includes(true)
   }
-
-  abstract read(element: HTMLElement): FormatLoaderReadResult
 
   protected extractFormatData(node: HTMLElement, config: EditableOptions) {
     const attrs: Record<string, string> = {}

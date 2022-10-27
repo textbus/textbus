@@ -46,10 +46,10 @@ export function textAlignToolConfigFactory(injector: Injector): SelectToolConfig
       },
     }],
     queryState(): QueryState<FormatValue> {
-      return query.queryFormat(textAlignFormatter)
+      return query.queryAttribute(textAlignFormatter)
     },
     onChecked(value: string) {
-      commander.applyFormat(textAlignFormatter, value)
+      commander.applyAttribute(textAlignFormatter, value)
     }
   }
 }

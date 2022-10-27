@@ -1,16 +1,14 @@
 import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable, Injector } from '@tanbo/di'
 import {
-  ComponentInstance,
   NativeSelectionBridge,
   NativeSelectionConnector,
   Renderer,
   SelectionPosition,
   Slot,
   AbstractSelection,
-  VElement,
-  VTextNode,
-  RootComponentRef, Controller
+  RootComponentRef,
+  Controller, VElement, VTextNode
 } from '@textbus/core'
 
 import { getLayoutRectByRange } from './caret'
@@ -184,124 +182,6 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
   }
 
-  private findSelectedNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
-    const vElement = this.renderer.getVNodeBySlot(slot)!
-    if (offset >= slot.length) {
-      const container = this.renderer.getNativeNodeByVNode(vElement) as Element
-      const lastChild = container.lastChild!
-      if (lastChild.nodeType === Node.TEXT_NODE) {
-        return {
-          node: lastChild,
-          offset: lastChild.textContent!.length
-        }
-      }
-    }
-
-    const current = slot.getContentAtIndex(offset)
-    const prev = slot.getContentAtIndex(offset - 1)
-
-    if (current === '\n') {
-      if (typeof prev === 'string' && prev !== '\n') {
-        return this.findFocusNativeTextNode(vElement, offset, true)
-      }
-      return this.deepFindNativeNodeByOffset(slot, vElement, offset)
-    }
-    if (typeof current === 'string') {
-      return this.findFocusNativeTextNode(vElement, offset, typeof prev === 'string' && prev !== '\n')
-    }
-    if (prev === '\n') {
-      if (typeof current === 'undefined') {
-        const container = this.renderer.getNativeNodeByVNode(vElement) as Element
-        return {
-          node: container,
-          offset: container.childNodes.length
-        }
-      }
-      for (const component of slot.sliceContent().filter((i): i is ComponentInstance => {
-        return typeof i !== 'string'
-      })) {
-        if (component === current) {
-          const vNode = this.renderer.getVNodeByComponent(component)!
-          const nativeNode = this.renderer.getNativeNodeByVNode(vNode) as any
-          return {
-            node: nativeNode.parentNode!,
-            offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode)
-          }
-        }
-      }
-    }
-    if (typeof prev === 'string') {
-      return this.findFocusNativeTextNode(vElement, offset, true)
-    }
-    if (typeof prev === 'undefined') {
-      const vNode = this.renderer.getVNodeByComponent(current)!
-      const nativeNode = this.renderer.getNativeNodeByVNode(vNode)
-      return {
-        node: nativeNode.parentNode!,
-        offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode)
-      }
-    }
-    const vNode = this.renderer.getVNodeByComponent(prev)!
-    const nativeNode = this.renderer.getNativeNodeByVNode(vNode)!
-    return {
-      node: nativeNode.parentNode,
-      offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode) + 1
-    }
-    // return this.deepFindNativeNodeByOffset(slot, vElement, offset)
-  }
-
-  private findFocusNativeTextNode(vElement: VElement,
-                                  offset: number,
-                                  toLeft: boolean): { node: Node, offset: number } | null {
-    for (const item of vElement.children) {
-      const position = this.renderer.getLocationByVNode(item)
-      if (!position) {
-        continue
-      }
-      if (toLeft ? position.endIndex < offset : position.endIndex <= offset) {
-        continue
-      }
-      if (item instanceof VTextNode) {
-        return {
-          node: this.renderer.getNativeNodeByVNode(item),
-          offset: offset - position.startIndex
-        }
-      }
-      return this.findFocusNativeTextNode(item, offset, toLeft)
-    }
-    return null
-  }
-
-  private deepFindNativeNodeByOffset(source: Slot,
-                                     root: VElement,
-                                     offset: number): { node: Node, offset: number } | null {
-    for (const item of root.children) {
-      const position = this.renderer.getLocationByVNode(item)!
-      if (position.slot !== source) {
-        return null
-      }
-      if (position.endIndex <= offset) {
-        continue
-      }
-      if (item instanceof VElement) {
-        if (position.startIndex === offset && position.endIndex === offset + 1) {
-          const position = this.deepFindNativeNodeByOffset(source, item, offset)
-          if (position) {
-            return position
-          }
-          const node = this.renderer.getNativeNodeByVNode(item)
-          const parent = node.parentNode
-          return {
-            node: parent,
-            offset: Array.from(parent.childNodes).indexOf(node as ChildNode)
-          }
-        }
-        return this.deepFindNativeNodeByOffset(source, item, offset)
-      }
-    }
-    return null
-  }
-
   private unListen() {
     this.subs.forEach(i => i.unsubscribe())
     this.subs = []
@@ -371,6 +251,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     const endPosition = nativeRange.collapsed ?
       startPosition :
       this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
+
     if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
       startPosition && endPosition) {
       const abstractSelection: AbstractSelection = isFocusEnd ? {
@@ -385,7 +266,6 @@ export class SelectionBridge implements NativeSelectionBridge {
         anchorOffset: endPosition.offset
       }
       const { focus, anchor } = this.getPositionByRange(abstractSelection)
-
       if (focus && anchor) {
         let start = anchor
         let end = focus
@@ -411,6 +291,79 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
     connector.setSelection(null)
+  }
+
+  private findSelectedNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
+    const prev = slot.getContentAtIndex(offset - 1)
+    const vNodes = this.renderer.getVNodesBySlot(slot)
+
+    if (prev) {
+      if (typeof prev !== 'string') {
+        const vNode = this.renderer.getVNodeByComponent(prev)!
+        const nativeNode = this.renderer.getNativeNodeByVNode(vNode)
+        return {
+          node: nativeNode.parentNode,
+          offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode) + 1
+        }
+      } else if (prev === '\n') {
+        for (const vNode of vNodes) {
+          if (vNode instanceof VTextNode) {
+            continue
+          }
+          if (vNode.tagName === 'br') {
+            const position = this.renderer.getLocationByVNode(vNode)
+            if (position) {
+              if (position.endIndex === offset) {
+                const nativeNode = this.renderer.getNativeNodeByVNode(vNode)!
+                const parentNode = nativeNode.parentNode!
+                return {
+                  node: parentNode,
+                  offset: Array.from(parentNode.childNodes).indexOf(nativeNode) + 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    const current = slot.getContentAtIndex(offset)
+    if (current && typeof current !== 'string') {
+      const vNode = this.renderer.getVNodeByComponent(current)!
+      const nativeNode = this.renderer.getNativeNodeByVNode(vNode)
+      return {
+        node: nativeNode.parentNode,
+        offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode)
+      }
+    }
+    for (const vNode of vNodes) {
+      if (vNode instanceof VElement) {
+        if (vNode.tagName === 'br') {
+          const position = this.renderer.getLocationByVNode(vNode)
+          if (position) {
+            if (position.startIndex === offset) {
+              const nativeNode = this.renderer.getNativeNodeByVNode(vNode)!
+              const parentNode = nativeNode.parentNode!
+              return {
+                node: parentNode,
+                offset: Array.from(parentNode.childNodes).indexOf(nativeNode)
+              }
+            }
+          }
+        }
+        continue
+      }
+      const position = this.renderer.getLocationByVNode(vNode)
+      if (position) {
+        if (offset >= position.startIndex && offset <= position.endIndex) {
+          const nativeNode = this.renderer.getNativeNodeByVNode(vNode)!
+          return {
+            node: nativeNode,
+            offset: offset - position.startIndex
+          }
+        }
+      }
+    }
+    return null
   }
 
   private getCorrectedPosition(node: Node, offset: number, toAfter: boolean, excludeNodes: Node[] = []): SelectionPosition | null {

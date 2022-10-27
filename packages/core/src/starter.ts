@@ -1,6 +1,6 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@tanbo/di'
 
-import { ComponentInstance, Formatter, Component, NativeNode } from './model/_api'
+import { ComponentInstance, Formatter, Component, NativeNode, Attribute } from './model/_api'
 import {
   History,
   RootComponentRef,
@@ -20,7 +20,8 @@ import {
   Scheduler,
   HISTORY_STACK_SIZE,
   READONLY,
-  Registry
+  Registry,
+  ATTRIBUTE_LIST
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -49,7 +50,9 @@ export interface Module {
   /** 组件列表 */
   components?: Component[]
   /** 格式列表 */
-  formatters?: Formatter[]
+  formatters?: Formatter<any>[]
+  /** 属性列表 */
+  attributes?: Attribute<any>[]
   /** 跨平台及基础扩展实现的提供者 */
   providers?: Provider[]
   /** 插件集合 */
@@ -159,6 +162,9 @@ export class Starter extends ReflectiveInjector {
     const components = [
       ...(config.components || [])
     ]
+    const attributes = [
+      ...(config.attributes || [])
+    ]
     const formatters = [
       ...(config.formatters || [])
     ]
@@ -184,6 +190,9 @@ export class Starter extends ReflectiveInjector {
       {
         provide: COMPONENT_LIST,
         useValue: components
+      }, {
+        provide: ATTRIBUTE_LIST,
+        useValue: attributes
       }, {
         provide: FORMATTER_LIST,
         useValue: formatters

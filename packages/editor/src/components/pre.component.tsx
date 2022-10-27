@@ -4,8 +4,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  FormatType,
-  InlineFormatter,
+  Formatter,
   onBreak,
   onContextMenu,
   onPaste,
@@ -118,9 +117,9 @@ export interface PreComponentState {
   theme?: string
 }
 
-export class CodeStyleFormatter implements InlineFormatter {
-  type: FormatType.Inline = FormatType.Inline
+export class CodeStyleFormatter implements Formatter<string> {
   name = 'code' + Math.random()
+  columned = false
 
   render(children: Array<VElement | VTextNode>, formatValue: string) {
     return new VElement('span', {
@@ -670,7 +669,8 @@ export const preComponent = defineComponent({
               {
                 slots.toArray().map(item => {
                   return slotRender(item, children => {
-                    return <div class={(item.state?.emphasize ? 'tb-code-line-emphasize ' : '') + 'tb-code-line'}>{children}</div>
+                    return <div
+                      class={(item.state?.emphasize ? 'tb-code-line-emphasize ' : '') + 'tb-code-line'}>{children}</div>
                   })
                 })
               }

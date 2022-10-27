@@ -85,7 +85,7 @@ export class VElement {
                        attrs: VElementOptions | null = null,
                        ...childNodes: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
     const children: Array<VElement | VTextNode> = []
-    childNodes.flat().forEach(i => {
+    childNodes.flat(2).forEach(i => {
       append(children, i)
     })
     if (typeof tagName === 'function') {

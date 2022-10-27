@@ -5,8 +5,10 @@
     color: $color-gray-dark;
   }
 }
+
 .textbus-toolbar.textbus-toolbar-dark {
   box-shadow: 0 2px 3px rgba(0, 0, 0, .2);
+
   .textbus-toolbar-wrapper {
     background-color: $color-darker;
     border-color: $color-darker;
@@ -18,9 +20,11 @@
 
   .textbus-toolbar-button {
     color: $color-gray;
+
     &:hover {
       background-color: rgba(255, 255, 255, .1);
     }
+
     &-active {
       color: $color-primary;
     }

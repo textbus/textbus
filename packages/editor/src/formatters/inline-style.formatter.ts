@@ -1,24 +1,31 @@
-import { FormatHostBindingRender, InlineFormatter, VElement, VTextNode, FormatType } from '@textbus/core'
+import {
+  FormatHostBindingRender,
+  VElement,
+  VTextNode,
+  FormatValue,
+  Formatter
+} from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
+import { FormatLoader } from '@textbus/browser'
 
-export class InlineStyleFormatLoader extends Matcher {
+export class InlineStyleFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<any>> implements FormatLoader<T> {
   constructor(public styleName: string, formatter: InlineStyleFormatter, rule: MatchRule) {
     super(formatter, rule)
   }
 
-  override read(node: HTMLElement) {
+  read(node: HTMLElement) {
     return {
-      formatter: this.formatter,
+      formatter: this.target,
       value: this.extractFormatData(node, {
         styleName: this.styleName
-      }).styles[this.styleName]
+      }).styles[this.styleName] as T
     }
   }
 }
 
-export class InlineStyleFormatter implements InlineFormatter {
-  type: FormatType.Inline = FormatType.Inline
+export class InlineStyleFormatter implements Formatter<string> {
+  columned = false
 
   constructor(public name: string,
               public styleName: string) {

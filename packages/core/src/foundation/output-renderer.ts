@@ -6,7 +6,7 @@ import {
   FormatItem,
   FormatTree,
   ComponentInstance,
-  Slot, SlotRenderFactory, FormatHostBindingRender, jsx,
+  Slot, SlotRenderFactory, FormatHostBindingRender, jsx, AttributeItem,
 } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 // import { makeError } from '../_utils/make-error'
@@ -104,7 +104,7 @@ export class OutputRenderer {
     return this.slotVNodeCaches.get(slot)!
   }
 
-  private createVDomByFormatTree(slot: Slot, formats: FormatTree[]) {
+  private createVDomByFormatTree(slot: Slot, formats: FormatTree<any>[]) {
     const nodes: Array<VElement | VTextNode> = []
     for (const child of formats) {
       if (child.formats?.length) {
@@ -130,7 +130,7 @@ export class OutputRenderer {
   }
 
   private createVDomByOverlapFormats(
-    formats: FormatItem[],
+    formats: (FormatItem<any> | AttributeItem<any>)[],
     children: Array<VElement | VTextNode>,
     getWrapper: (nextChildren: Array<VElement | VTextNode>) => VElement | void): VElement {
     const hostBindings: Array<FormatHostBindingRender> = []

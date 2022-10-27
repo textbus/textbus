@@ -28,6 +28,7 @@
     -webkit-border-radius: 0;
   }
 }
+
 @mixin scroll() {
   /*---滚动条默认显示样式--*/
   &::-webkit-scrollbar-thumb {

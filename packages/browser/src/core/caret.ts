@@ -7,6 +7,16 @@ import { Caret, CaretPosition, Scroller } from './types'
 export function getLayoutRectByRange(range: Range): Rect {
   const { startContainer, startOffset } = range
   if (startContainer.nodeType === Node.ELEMENT_NODE) {
+    const beforeNode = startContainer.childNodes[startOffset - 1]
+    if (beforeNode) {
+      const rect = (beforeNode as HTMLElement).getBoundingClientRect()
+      return {
+        left: rect.right,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height
+      }
+    }
     const offsetNode = startContainer.childNodes[startOffset]
     let isInsertBefore = false
     if (!offsetNode) {

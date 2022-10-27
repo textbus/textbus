@@ -1,7 +1,8 @@
 Textbus PC 浏览器支持模块
 =====================
 
-Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见 API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时还能驱动复杂的富文本应用。
+Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见
+API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时还能驱动复杂的富文本应用。
 
 本项目为 Textbus PC 端浏览器中间层实现，提供了 Textbus PC 端所需要的编辑器基本支持能力。如光标、选区桥接、DOM 解析及渲染能力桥接等。
 
@@ -26,11 +27,13 @@ const config: ViewOptions = {
 
 const editor = new Viewer(rootComponent, rootComponentLoader, config)
 ```
+
 其中 `rootComponent`，`rootComponentLoader` 实现请参考[官方文档](https://textbus.io/docs/guide)。
 
 ### 配置项
 
 配置项接口如下：
+
 ```ts
 export interface ViewModule extends Module {
   componentLoaders?: ComponentLoader[]
@@ -60,6 +63,7 @@ export interface ViewOptions extends TextbusConfig {
 ```
 
 ### 启动
+
 ```ts
 const host = document.getElementById('editor')
 
@@ -69,31 +73,37 @@ editor.mount(host).then(() => {
 ```
 
 ### 销毁编辑器
+
 ```ts
 editor.destroy()
 ```
 
 ### 获取焦点
+
 ```ts
 editor.focus()
 ```
 
 ### 取消焦点
+
 ```ts
 editor.blur()
 ```
 
 ### 获取 HTML 内容
+
 ```ts
 const content = editor.getContents().content
 ```
 
 ### 获取 JSON 内容
+
 ```ts
 const json = editor.getJSON().content
 ```
 
 ### 替换内容
+
 ```ts
 editor.replaceContent('<p>新内容！</p>')
 
@@ -103,6 +113,7 @@ editor.replaceContent({
 ```
 
 ### 清空编辑器
+
 ```ts
 editor.replaceContent('')
 ```

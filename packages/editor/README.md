@@ -1,7 +1,8 @@
 Textbus 富文本编辑器
 =====================
 
-Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见 API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时还能驱动复杂的富文本应用。
+Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见
+API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时还能驱动复杂的富文本应用。
 
 ### 文档
 
@@ -12,10 +13,13 @@ Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富
 Textbus 可能通过两种方式引入到你的项目中。
 
 #### 通过 npm 安装
+
 ```
 npm install @textbus/core @textbus/browser @textbus/editor
 ```
+
 在 DOM 中准备好一个空的标签
+
 ```html
 <div id="editor"></div>
 ```
@@ -30,7 +34,6 @@ const editor = createEditor()
 editor.mount(document.getElementById('editor'))
 
 ```
-
 
 #### 通过 script 标签引入
 

@@ -10,11 +10,9 @@ import {
   Slot,
   invokeListener,
   Ref,
-  SlotRenderFactory,
-  FormatHostBindingRender,
-  jsx,
   Event,
-  NativeNode
+  NativeNode,
+  SlotRenderFactory, FormatHostBindingRender, jsx, AttributeItem
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
@@ -206,12 +204,10 @@ export class Renderer {
   nativeRenderer!: NativeRenderer
 
   private componentVNode = new WeakMap<ComponentInstance, VElement>()
-
-  private slotVNodeCaches = new WeakMap<Slot, VElement>()
-
+  private slotRootVNodeCaches = new WeakMap<Slot, VElement>()
   private vNodeLocation = new WeakMap<VElement | VTextNode, VNodeLocation>()
-
   private renderedVNode = new WeakMap<VElement | VTextNode, true>()
+  private slotVNodesCaches = new WeakMap<Slot, Array<VElement | VTextNode>>()
 
   private slotRenderFactory = new WeakMap<Slot, SlotRenderFactory>()
 
@@ -293,7 +289,7 @@ export class Renderer {
    * @param slot
    */
   getVNodeBySlot(slot: Slot) {
-    return this.slotVNodeCaches.get(slot)
+    return this.slotRootVNodeCaches.get(slot)
   }
 
   /**
@@ -318,7 +314,7 @@ export class Renderer {
    */
   getLocationByVNode(node: VElement | VTextNode | Slot) {
     if (node instanceof Slot) {
-      node = this.slotVNodeCaches.get(node)!
+      node = this.slotRootVNodeCaches.get(node)!
     }
     return this.vNodeLocation.get(node)
   }
@@ -332,6 +328,17 @@ export class Renderer {
     return this.vNodeLocation.get(vNode) || null
   }
 
+  /**
+   * 获取插槽内容节点集合
+   * @param slot
+   */
+  getVNodesBySlot(slot: Slot) {
+    return this.slotVNodesCaches.get(slot) || []
+  }
+
+  /**
+   * 销毁渲染器
+   */
   destroy() {
     this.subscription.unsubscribe()
   }
@@ -638,13 +645,32 @@ export class Renderer {
     return this.createTextNode(vDom)
   }
 
+  private extractVNodesBySlot(slot: Slot, tree: Array<VElement | VTextNode>, vNodes: Array<VTextNode | VElement>) {
+    for (const child of tree) {
+      const position = this.getLocationByVNode(child)
+      if (position) {
+        if (position.slot === slot) {
+          vNodes.push(child)
+        } else {
+          break
+        }
+        if (child instanceof VElement) {
+          this.extractVNodesBySlot(slot, child.children, vNodes)
+        }
+      }
+    }
+    return vNodes
+  }
+
   private componentRender(component: ComponentInstance): VElement {
     this.renderedComponents.push(component)
     if (component.changeMarker.dirty || this.readonlyStateChanged) {
-      let slotVNode!: VElement
       const node = component.extends.render(this.controller.readonly, (slot, factory) => {
-        slotVNode = this.slotRender(component, slot, factory)
-        return slotVNode
+        return this.slotRender(component, slot, children => {
+          const vNodes = this.extractVNodesBySlot(slot, children, [])
+          this.slotVNodesCaches.set(slot, vNodes)
+          return factory(children)
+        })
       })
       setEditable(node, false)
       this.componentVNode.set(component, node)
@@ -658,7 +684,7 @@ export class Renderer {
           return
         }
         const dirty = slot.changeMarker.dirty
-        const oldVNode = this.slotVNodeCaches.get(slot)!
+        const oldVNode = this.slotRootVNodeCaches.get(slot)!
         const factory = this.slotRenderFactory.get(slot)!
         const vNode = this.slotRender(component, slot, factory)
         if (dirty) {
@@ -670,7 +696,7 @@ export class Renderer {
           const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
           const newNativeNode = this.diffAndUpdate(vNode, oldVNode, component)
           this.nativeNodeCaches.set(newNativeNode, vNode)
-          this.slotVNodeCaches.set(slot, vNode)
+          this.slotRootVNodeCaches.set(slot, vNode)
           if (oldNativeNode !== newNativeNode) {
             this.nativeRenderer.replace(newNativeNode, oldNativeNode)
           }
@@ -715,7 +741,7 @@ export class Renderer {
         endIndex: slot.length
       })
       slot.changeMarker.rendered()
-      this.slotVNodeCaches.set(slot, root)
+      this.slotRootVNodeCaches.set(slot, root)
       return root
     }
     slot.sliceContent().filter((i): i is ComponentInstance => {
@@ -743,10 +769,10 @@ export class Renderer {
       }
     })
     slot.changeMarker.rendered()
-    return this.slotVNodeCaches.get(slot)!
+    return this.slotRootVNodeCaches.get(slot)!
   }
 
-  private createVDomByFormatTree(slot: Slot, formats: FormatTree[]) {
+  private createVDomByFormatTree(slot: Slot, formats: FormatTree<any>[]) {
     const nodes: Array<VElement | VTextNode> = []
     for (const child of formats) {
       if (child.formats?.length) {
@@ -773,11 +799,11 @@ export class Renderer {
   }
 
   private createVDomByOverlapFormats(
-    formats: FormatItem[],
+    formats: (FormatItem<any> | AttributeItem<any>)[],
     children: Array<VElement | VTextNode>,
     slot: Slot,
     getWrapper: (nextChildren: Array<VElement | VTextNode>) => VElement | void): VElement {
-    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem }> = []
+    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> | AttributeItem<any> }> = []
     // formats = formatSort(formats)
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]

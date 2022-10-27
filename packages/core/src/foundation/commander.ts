@@ -11,12 +11,11 @@ import {
   Event,
   Formats,
   Formatter,
-  FormatType,
   FormatValue,
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange,
+  SlotRange, Attribute
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
@@ -336,8 +335,8 @@ export class Commander {
    * @param formats 新的格式
    */
   write(content: string | ComponentInstance, formats?: Formats): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+  write<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T>, value?: T): boolean
+  write<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
     const canInsert = selection.isCollapsed ? true : this.delete()
     if (!canInsert) {
@@ -367,8 +366,8 @@ export class Commander {
    * @param formats 新的格式
    */
   insert(content: string | ComponentInstance, formats?: Formats): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+  insert<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T>, value?: T): boolean
+  insert<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
     const canInsert = selection.isCollapsed ? true : this.delete()
     if (!canInsert) {
@@ -516,12 +515,12 @@ export class Commander {
         }
       }
       if (!deletedSlot.isEmpty) {
-        const formats = deletedSlot.extractFormatsByIndex(0)
-        formats.forEach(item => {
-          if (item[0].type === FormatType.Block) {
-            deletedSlot.removeAttribute(item[0])
-          }
-        })
+        // const formats = deletedSlot.extractFormatsByIndex(0)
+        // formats.forEach(item => {
+        //   if (item[0].type === FormatType.Block) {
+        //     deletedSlot.removeAttribute(item[0])
+        //   }
+        // })
         const deletedDelta = deletedSlot.toDelta()
         selection.setPosition(startSlot, startOffset)
         deletedDelta.forEach(item => {
@@ -653,7 +652,7 @@ export class Commander {
     invokeListener(component, 'onPaste', event)
     if (!event.isPrevented) {
       const delta = pasteSlot.toDelta()
-      const afterDelta: DeltaLite = []
+      const afterDelta = new DeltaLite()
       while (delta.length) {
         const { insert, formats } = delta.shift()!
         const commonAncestorSlot = this.selection.commonAncestorSlot!
@@ -707,7 +706,7 @@ export class Commander {
    * 清除当前选区的所有格式
    * @param excludeFormatters 在清除格式时，排除的格式
    */
-  cleanFormats(excludeFormatters: Formatter[] | ((formatter: Formatter) => boolean) = []) {
+  cleanFormats(excludeFormatters: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = []) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -718,25 +717,7 @@ export class Commander {
           }
         }
       }
-
-      function cleanFormats(
-        slot: Slot,
-        excludeFormatters: Formatter[] | ((formatter: Formatter) => boolean),
-        startIndex: number,
-        endIndex: number
-      ) {
-        slot.cleanFormats(excludeFormatters, startIndex, endIndex)
-
-        slot.sliceContent(startIndex, endIndex).forEach(child => {
-          if (typeof child !== 'string') {
-            child.slots.toArray().forEach(childSlot => {
-              cleanFormats(childSlot, excludeFormatters, 0, childSlot.length)
-            })
-          }
-        })
-      }
-
-      cleanFormats(slot, excludeFormatters, scope.startIndex, scope.endIndex)
+      slot.cleanFormats(excludeFormatters, scope.startIndex, scope.endIndex)
     })
   }
 
@@ -745,10 +726,10 @@ export class Commander {
    * @param formatter 要应用的格式
    * @param value 当前格式要应用的值
    */
-  applyFormat(formatter: Formatter, value: FormatValue) {
+  applyFormat<T extends FormatValue>(formatter: Formatter<T>, value: T) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
-      if (formatter.type === FormatType.Block || slot.isEmpty) {
+      if (slot.isEmpty) {
         slot.retain(0)
         slot.retain(slot.length, formatter, value)
       } else {
@@ -769,10 +750,10 @@ export class Commander {
    * 清除当前选区特定的格式
    * @param formatter 要清除的格式
    */
-  unApplyFormat(formatter: Formatter) {
+  unApplyFormat(formatter: Formatter<any>) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
-      if (formatter.type === FormatType.Block || slot.isEmpty) {
+      if (slot.isEmpty) {
         slot.retain(0)
         slot.retain(slot.length, formatter, null)
       } else {
@@ -792,6 +773,46 @@ export class Commander {
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
       i.slot.retain(i.endIndex - i.startIndex, formatter, null)
+    })
+  }
+
+  /**
+   * 根据选区应用插槽属性
+   * @param attribute
+   * @param value
+   */
+  applyAttribute<T extends FormatValue>(attribute: Attribute<T>, value: T) {
+    if (this.selection.isCollapsed) {
+      const slot = this.selection.commonAncestorSlot!
+      slot.setAttribute(attribute, value)
+      return
+    }
+    this.selection.getSelectedScopes().forEach(i => {
+      i.slot.setAttribute(attribute, value)
+    })
+  }
+
+  /**
+   * 根据选区清除插槽属性
+   * @param attribute
+   */
+  unApplyAttribute(attribute: Attribute<any>) {
+    if (this.selection.isCollapsed) {
+      const slot = this.selection.commonAncestorSlot!
+      slot.removeAttribute(attribute)
+      return
+    }
+    this.selection.getSelectedScopes().forEach(i => {
+      i.slot.removeAttribute(attribute)
+    })
+  }
+
+  /**
+   * 根据选区清除属性
+   */
+  cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
+    this.selection.getSelectedScopes().forEach(scope => {
+      scope.slot.cleanAttributes(excludeAttributes)
     })
   }
 

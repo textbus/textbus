@@ -37,10 +37,10 @@ export function textIndentToolConfigFactory(injector: Injector): SelectToolConfi
       value: '4em'
     }],
     queryState(): QueryState<FormatValue> {
-      return query.queryFormat(textIndentFormatter)
+      return query.queryAttribute(textIndentFormatter)
     },
     onChecked(value: string) {
-      value === '0' ? commander.unApplyFormat(textIndentFormatter) : commander.applyFormat(textIndentFormatter, value)
+      value === '0' ? commander.unApplyAttribute(textIndentFormatter) : commander.applyAttribute(textIndentFormatter, value)
     }
   }
 }

@@ -8,7 +8,6 @@ import {
   Controller,
   Registry,
   Formats,
-  FormatType,
   History,
   HISTORY_STACK_SIZE,
   makeError,
@@ -312,13 +311,13 @@ export class Collaborate implements History {
       rootComponent.slots.clean()
       slots.forEach(sharedSlot => {
         const slot = this.createSlotBySharedSlot(sharedSlot)
-        this.syncContent(sharedSlot.get('content'), slot)
-        this.syncSlot(sharedSlot, slot)
+        this.syncSlotContent(sharedSlot.get('content'), slot)
+        this.syncSlotState(sharedSlot, slot)
         rootComponent.slots.insert(slot)
       })
     }
-    this.syncComponent(root, rootComponent)
-    this.syncSlots(slots, rootComponent)
+    this.syncComponentState(root, rootComponent)
+    this.syncComponentSlots(slots, rootComponent)
   }
 
   protected getAbstractSelection(position: CursorPosition): AbstractSelection | null {
@@ -360,11 +359,25 @@ export class Collaborate implements History {
     return null
   }
 
-  protected syncContent(content: YText, slot: Slot) {
+  protected syncSlotContent(content: YText, slot: Slot) {
     this.contentMap.set(slot, content)
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         slot.retain(0)
+        ev.keysChanged.forEach(key => {
+          const updateType = ev.keys.get(key).action
+          if (updateType === 'update' || updateType === 'add') {
+            const attribute = this.registry.getAttribute(key)
+            if (attribute) {
+              slot.setAttribute(attribute, content.getAttribute(key))
+            }
+          } else if (updateType === 'delete') {
+            const attribute = this.registry.getAttribute(key)
+            if (attribute) {
+              slot.removeAttribute(attribute)
+            }
+          }
+        })
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
             if (action.attributes) {
@@ -386,8 +399,8 @@ export class Collaborate implements History {
               const sharedComponent = action.insert as YMap<any>
               const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
               const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
-              this.syncSlots(sharedComponent.get('slots'), component)
-              this.syncComponent(sharedComponent, component)
+              this.syncComponentSlots(sharedComponent.get('slots'), component)
+              this.syncComponentState(sharedComponent, component)
               slot.insert(component)
             }
             if (this.selection.isSelected && tr.origin !== this.manager) {
@@ -409,14 +422,6 @@ export class Collaborate implements History {
                 this.selection.setFocus(slot, this.selection.focusOffset! - action.delete)
               }
             }
-          } else if (action.attributes) {
-            slot.updateState(draft => {
-              if (typeof draft === 'object' && draft !== null) {
-                Object.assign(draft, action.attributes)
-              } else {
-                return action.attributes
-              }
-            })
           }
         })
       })
@@ -470,6 +475,10 @@ export class Collaborate implements History {
             if (content.length === 0) {
               content.insert(0, '\n', delta[0]?.attributes)
             }
+          } else if (action.type === 'attrSet') {
+            content.setAttribute(action.name, action.value)
+          } else if (action.type === 'attrRemove') {
+            content.removeAttribute(action.name)
           }
         }
       })
@@ -486,7 +495,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected syncSlot(remoteSlot: YMap<any>, slot: Slot) {
+  protected syncSlotState(remoteSlot: YMap<any>, slot: Slot) {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -516,7 +525,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected syncSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
+  protected syncComponentSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
     const slots = component.slots
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
@@ -530,8 +539,8 @@ export class Collaborate implements History {
             (action.insert as Array<YMap<any>>).forEach(item => {
               const slot = this.createSlotBySharedSlot(item)
               slots.insert(slot)
-              this.syncContent(item.get('content'), slot)
-              this.syncSlot(item, slot)
+              this.syncSlotContent(item.get('content'), slot)
+              this.syncSlotState(item, slot)
               index++
             })
           } else if (action.delete) {
@@ -573,7 +582,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected syncComponent(remoteComponent: YMap<any>, component: ComponentInstance) {
+  protected syncComponentState(remoteComponent: YMap<any>, component: ComponentInstance) {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -636,8 +645,8 @@ export class Collaborate implements History {
       const sharedSlot = this.createSharedSlotBySlot(slot)
       sharedSlots.push([sharedSlot])
     })
-    this.syncSlots(sharedSlots, component)
-    this.syncComponent(sharedComponent, component)
+    this.syncComponentSlots(sharedSlots, component)
+    this.syncComponentState(sharedComponent, component)
     return sharedComponent
   }
 
@@ -665,8 +674,11 @@ export class Collaborate implements History {
       }
       offset += i.insert.length
     })
-    this.syncContent(sharedContent, slot)
-    this.syncSlot(sharedSlot, slot)
+    slot.getAttributes().forEach(item => {
+      sharedContent.setAttribute(item[0].name, item[1])
+    })
+    this.syncSlotContent(sharedContent, slot)
+    this.syncSlotState(sharedSlot, slot)
     return sharedSlot
   }
 
@@ -690,8 +702,8 @@ export class Collaborate implements History {
           sharedSlot = this.createSharedSlotBySlot(slot)
           sharedSlots.push([sharedSlot])
         }
-        this.syncSlot(sharedSlot, slot)
-        this.syncContent(sharedSlot.get('content'), slot)
+        this.syncSlotState(sharedSlot, slot)
+        this.syncSlotContent(sharedSlot.get('content'), slot)
       })
       return instance
     }
@@ -705,34 +717,30 @@ export class Collaborate implements History {
     const slot = this.registry.createSlot({
       schema: sharedSlot.get('schema'),
       state: sharedSlot.get('state'),
+      attributes: {},
       formats: {},
       content: []
     })
 
+    const attrs = content.getAttributes()
+    Object.keys(attrs).forEach(key => {
+      const attribute = this.registry.getAttribute(key)
+      if (attribute) {
+        slot.setAttribute(attribute, attrs[key])
+      }
+    })
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
-          const blockFormats: Formats = []
-          const formats = remoteFormatsToLocal(this.registry, action.attributes).filter(item => {
-            if (item[0].type === FormatType.Block) {
-              blockFormats.push(item)
-              return false
-            }
-            return true
-          })
+          const formats = remoteFormatsToLocal(this.registry, action.attributes)
           slot.insert(action.insert, formats)
-          const index = slot.index
-          blockFormats.forEach(item => {
-            slot.setAttribute(item[0], item[1])
-          })
-          slot.retain(index)
         } else {
           const sharedComponent = action.insert as YMap<any>
           const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
           const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
           slot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
-          this.syncSlots(sharedComponent.get('slots'), component)
-          this.syncComponent(sharedComponent, component)
+          this.syncComponentSlots(sharedComponent.get('slots'), component)
+          this.syncComponentState(sharedComponent, component)
         }
       } else {
         throw collaborateErrorFn('unexpected delta action.')

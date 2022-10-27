@@ -5,7 +5,7 @@ import { ComponentInstance, ComponentLiteral } from './component'
 import { Action, ApplyAction } from './operation'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
-import { BlockFormatter, Formatter, FormatType, InlineFormatter } from './formatter'
+import { Attribute, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
 import { StateChange } from './types'
 
@@ -15,10 +15,11 @@ export enum ContentType {
   BlockComponent
 }
 
-export interface SlotLiteral<T = any> {
+export interface SlotLiteral<T, U extends FormatValue> {
   schema: ContentType[]
   content: Array<string | ComponentLiteral>
-  formats: FormatLiteral
+  attributes: Record<string, U>
+  formats: FormatLiteral<U>
   state: T | null
 }
 
@@ -27,7 +28,9 @@ export interface DeltaInsert {
   formats: Formats
 }
 
-export type DeltaLite = DeltaInsert[]
+export class DeltaLite extends Array<DeltaInsert> {
+  attributes = new Map<Attribute<any>, any>()
+}
 
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
@@ -80,6 +83,7 @@ export class Slot<T = any> {
 
   protected content = new Content()
   protected format = new Format(this)
+  protected attributes = new Map<Attribute<any>, any>()
 
   protected contentChangeEvent = new Subject<Action[]>()
   protected stateChangeEvent = new Subject<StateChange<T>>()
@@ -96,40 +100,98 @@ export class Slot<T = any> {
   }
 
   /**
-   * 设置块级格式
-   * @param formatter
+   * 设置属性
+   * @param attribute
    * @param value
    */
-  setAttribute(formatter: BlockFormatter, value: FormatValue) {
-    this.applyFormat(formatter, value)
+  setAttribute(attribute: Attribute<any>, value: FormatValue) {
+    const has = this.attributes.has(attribute)
+    const v = this.attributes.get(attribute)
+
+    this.attributes.set(attribute, value)
+    const applyActions: Action[] = [{
+      type: 'attrSet',
+      name: attribute.name,
+      value
+    }]
+    this.sliceContent().forEach(item => {
+      if (typeof item !== 'string') {
+        item.slots.toArray().forEach(slot => {
+          slot.setAttribute(attribute, value)
+        })
+      }
+    })
+    this.changeMarker.markAsDirtied({
+      path: [],
+      apply: applyActions,
+      unApply: [has ? {
+        type: 'attrSet',
+        name: attribute.name,
+        value: v
+      } : {
+        type: 'attrRemove',
+        name: attribute.name
+      }]
+    })
+    this.contentChangeEvent.next(applyActions)
   }
 
   /**
-   * 获取块级格式的值
-   * @param formatter
+   * 获取属性
+   * @param attribute
    */
-  getAttribute(formatter: BlockFormatter) {
-    const ranges = this.getFormatRangesByFormatter(formatter, 0, this.length)
-    if (ranges.length) {
-      return ranges[0].value
+  getAttribute(attribute: Attribute<any>) {
+    return this.attributes.get(attribute) ?? null
+  }
+
+  /**
+   * 获取所有属性
+   */
+  getAttributes() {
+    return Array.from(this.attributes.entries())
+  }
+
+  /**
+   * 删除属性
+   * @param attribute
+   */
+  removeAttribute(attribute: Attribute<any>) {
+    this.sliceContent().forEach(item => {
+      if (typeof item !== 'string') {
+        item.slots.toArray().forEach(slot => {
+          slot.removeAttribute(attribute)
+        })
+      }
+    })
+    const has = this.attributes.has(attribute)
+    if (!has) {
+      return
     }
-    return null
+    const v = this.attributes.get(attribute)
+
+    this.attributes.delete(attribute)
+    const applyActions: Action[] = [{
+      type: 'attrRemove',
+      name: attribute.name
+    }]
+    this.changeMarker.markAsDirtied({
+      path: [],
+      apply: applyActions,
+      unApply: [{
+        type: 'attrSet',
+        name: attribute.name,
+        value: v
+      }]
+    })
+    this.contentChangeEvent.next(applyActions)
   }
 
   /**
-   * 删除块级格式
-   * @param formatter
+   * 根据是否包含指定 Attribute
+   * @param attribute
    */
-  removeAttribute(formatter: BlockFormatter) {
-    this.applyFormat(formatter, null)
-  }
-
-  /**
-   * 根据指定 formatter 查询是否包含块级格式
-   * @param formatter
-   */
-  hasAttribute(formatter: BlockFormatter) {
-    return this.getAttribute(formatter) !== null
+  hasAttribute(attribute: Attribute<any>) {
+    return this.attributes.has(attribute)
   }
 
   /**
@@ -179,8 +241,8 @@ export class Slot<T = any> {
    * @param formats
    */
   write(content: string | ComponentInstance, formats?: Formats): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+  write(content: string | ComponentInstance, formatter?: Formatter<any>, value?: FormatValue): boolean
+  write(content: string | ComponentInstance, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const index = this.index
     const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
 
@@ -206,8 +268,8 @@ export class Slot<T = any> {
    * @param formats
    */
   insert(content: string | ComponentInstance, formats?: Formats): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter, value?: FormatValue): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter | Formats, value?: FormatValue): boolean {
+  insert(content: string | ComponentInstance, formatter?: Formatter<any>, value?: FormatValue): boolean
+  insert(content: string | ComponentInstance, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
       return false
@@ -256,11 +318,6 @@ export class Slot<T = any> {
       } else {
         formats.push([formatter, value as FormatValue])
       }
-    }
-    if (!isEmpty) {
-      formats = formats.filter(i => {
-        return i[0].type !== FormatType.Block
-      })
     }
     this.format.split(startIndex, length)
 
@@ -314,8 +371,8 @@ export class Slot<T = any> {
    */
   retain(offset: number): boolean
   retain(offset: number, formats: Formats): boolean
-  retain(offset: number, formatter: Formatter, value: FormatValue | null): boolean
-  retain(offset: number, formatter?: Formatter | Formats, value?: FormatValue | null): boolean {
+  retain(offset: number, formatter: Formatter<any>, value: FormatValue | null): boolean
+  retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null): boolean {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
@@ -484,16 +541,9 @@ export class Slot<T = any> {
    * @param formatter
    * @param data
    */
-  applyFormat(formatter: BlockFormatter, data: FormatValue): void
-  applyFormat(formatter: InlineFormatter, data: FormatRange): void
-  applyFormat(formatter: Formatter, data: FormatValue | FormatRange): void {
-    if (formatter.type === FormatType.Block) {
-      this.retain(0)
-      this.retain(this.length, formatter, data as FormatValue)
-    } else {
-      this.retain((data as FormatRange).startIndex)
-      this.retain((data as FormatRange).endIndex - (data as FormatRange).startIndex, formatter, (data as FormatRange).value)
-    }
+  applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>): void {
+    this.retain(data.startIndex)
+    this.retain(data.endIndex - data.startIndex, formatter, data.value)
   }
 
   /**
@@ -515,7 +565,11 @@ export class Slot<T = any> {
    * @param endIndex
    */
   cut(startIndex = 0, endIndex = this.length): Slot {
-    return this.cutTo(new Slot(this.schema, this.state), startIndex, endIndex)
+    const slot = this.cutTo(new Slot(this.schema, this.state), startIndex, endIndex)
+    this.attributes.forEach((value, key) => {
+      slot.setAttribute(key, value)
+    })
+    return slot
   }
 
   /**
@@ -534,6 +588,11 @@ export class Slot<T = any> {
     }
     if (startIndex > endIndex) {
       return slot
+    }
+    if (slot.getAttributes().length === 0) {
+      this.attributes.forEach((value, key) => {
+        slot.setAttribute(key, value)
+      })
     }
     startIndex = this.content.correctIndex(startIndex, false)
     endIndex = this.content.correctIndex(endIndex, true)
@@ -563,14 +622,6 @@ export class Slot<T = any> {
       temporarySlot.insert(i)
     })
     temporarySlot.format = deletedFormat.createFormatByRange(temporarySlot, 0, temporarySlot.length)
-    if (!slot.isEmpty) {
-      temporarySlot.format.toArray().forEach(i => {
-        const f = i.formatter
-        if (f.type === FormatType.Block) {
-          temporarySlot.removeAttribute(f)
-        }
-      })
-    }
     temporarySlot.toDelta().forEach(item => {
       slot.insert(item.insert, item.formats)
     })
@@ -605,8 +656,22 @@ export class Slot<T = any> {
   /**
    * 根据插槽的格式数据，生成格式树
    */
-  createFormatTree(): FormatTree {
-    return this.format.toTree(0, this.length)
+  createFormatTree(): FormatTree<FormatValue> {
+    const tree = this.format.toTree(0, this.length)
+    if (this.attributes.size) {
+      if (!tree.formats) {
+        tree.formats = []
+      }
+      this.getAttributes().forEach(item => {
+        tree.formats!.push({
+          formatter: item[0],
+          value: item[1],
+          startIndex: 0,
+          endIndex: this.length
+        })
+      })
+    }
+    return tree
   }
 
   /**
@@ -615,14 +680,14 @@ export class Slot<T = any> {
    * @param startIndex
    * @param endIndex
    */
-  getFormatRangesByFormatter(formatter: Formatter, startIndex: number, endIndex: number): FormatRange[] {
+  getFormatRangesByFormatter<U extends FormatValue>(formatter: Formatter<U>, startIndex: number, endIndex: number): FormatRange<U>[] {
     return this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
   }
 
   /**
    * 获取插槽格式的数组集合
    */
-  getFormats(): FormatItem[] {
+  getFormats(): FormatItem<FormatValue>[] {
     return this.format.toArray()
   }
 
@@ -637,10 +702,15 @@ export class Slot<T = any> {
   /**
    * 把插槽内容转换为 JSON
    */
-  toJSON(): SlotLiteral<T> {
+  toJSON<U extends FormatValue>(): SlotLiteral<T, U> {
+    const attrs: Record<string, U> = {}
+    this.attributes.forEach((value, key) => {
+      attrs[key.name] = value
+    })
     return {
       schema: this.schema,
       content: this.content.toJSON(),
+      attributes: attrs,
       formats: this.format.toJSON(),
       state: this.state ?? null
     }
@@ -654,8 +724,9 @@ export class Slot<T = any> {
    * 将插槽数据转换为 delta 表示
    */
   toDelta(): DeltaLite {
+    const deltaList = new DeltaLite()
     if (this.length === 0) {
-      return []
+      return deltaList
     }
     const formatGrid = this.format.toGrid()
     const contentGrid = this.content.toGrid()
@@ -664,8 +735,9 @@ export class Slot<T = any> {
 
     const grid = [...gridSet].sort((a, b) => a - b)
 
-    const deltaList: DeltaLite = []
-
+    this.attributes.forEach((value, key) => {
+      deltaList.attributes.set(key, value)
+    })
     let startIndex = grid.shift()!
     while (grid.length) {
       const endIndex = grid.shift()!
@@ -686,6 +758,9 @@ export class Slot<T = any> {
    * @param delta
    */
   insertDelta(delta: DeltaLite): DeltaLite {
+    delta.attributes.forEach((value, key) => {
+      this.setAttribute(key, value)
+    })
     while (delta.length) {
       const first = delta[0]!
       const is = this.insert(first.insert, first.formats)
@@ -704,7 +779,7 @@ export class Slot<T = any> {
    * @param startIndex 开始位置
    * @param endIndex 结束位置
    */
-  cleanFormats(excludeFormats: Formatter[] | ((formatter: Formatter) => boolean) = [], startIndex = 0, endIndex = this.length) {
+  cleanFormats(excludeFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [], startIndex = 0, endIndex = this.length) {
     const formats = this.getFormats()
     if (formats.length) {
       formats.forEach(item => {
@@ -735,20 +810,36 @@ export class Slot<T = any> {
     this.applyFormatCoverChild = false
   }
 
+  /**
+   * 清除插槽属性
+   * @param excludeAttributes 要排除的属性
+   */
+  cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
+    Array.from(this.attributes.keys()).forEach(item => {
+      if (typeof excludeAttributes === 'function' ? excludeAttributes(item) : excludeAttributes.includes(item)) {
+        return
+      }
+      this.removeAttribute(item)
+    })
+    this.sliceContent().forEach(item => {
+      if (typeof item !== 'string') {
+        item.slots.toArray().forEach(slot => {
+          slot.cleanAttributes(excludeAttributes)
+        })
+      }
+    })
+  }
+
   private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
 
-      if (key.type === FormatType.Block) {
-        this.format.merge(key, value, background)
-      } else {
-        this.format.merge(key, {
-          startIndex,
-          endIndex: startIndex + offset,
-          value
-        }, background)
-      }
+      this.format.merge(key, {
+        startIndex,
+        endIndex: startIndex + offset,
+        value
+      }, background)
     })
   }
 

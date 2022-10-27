@@ -30,7 +30,7 @@ export type ComponentInitData<State = unknown, SlotState = unknown> =
 
 export interface ComponentLiteral<State = any> {
   name: string
-  slots: SlotLiteral[]
+  slots: SlotLiteral<any, any>[]
   state: State
 }
 

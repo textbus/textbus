@@ -134,8 +134,8 @@ export function componentsToolConfigFactory(injector: Injector): DropdownToolCon
       const detailSlot = new Slot([Text, InlineComponent])
       titleSlot.insert('标题', boldFormatter, true)
       subtitleSlot.insert('副标题')
-      titleSlot.applyFormat(textAlignFormatter, 'right')
-      subtitleSlot.applyFormat(textAlignFormatter, 'right')
+      titleSlot.setAttribute(textAlignFormatter, 'right')
+      subtitleSlot.setAttribute(textAlignFormatter, 'right')
       detailSlot.insert('正文...')
       return wordExplainComponent.createInstance(injector, {
         slots: [

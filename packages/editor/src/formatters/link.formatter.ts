@@ -1,17 +1,18 @@
-import { InlineFormatter, VElement, VTextNode, FormatType } from '@textbus/core'
+import { VElement, VTextNode, FormatValue, Formatter } from '@textbus/core'
 
 import { Matcher } from './matcher'
+import { FormatLoader } from '@textbus/browser'
 
-export class LinkFormatLoader extends Matcher {
-  constructor(formatter: LinkFormatter) {
+export class LinkFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<any>> implements FormatLoader<any> {
+  constructor(formatter: Formatter<any>) {
     super(formatter, {
       tags: ['a']
     })
   }
 
-  override read(element: HTMLElement) {
+  read(element: HTMLElement) {
     return {
-      formatter: this.formatter,
+      formatter: this.target,
       value: this.extractFormatData(element, {
         attrs: ['target', 'href', 'data-href']
       }).attrs as Record<string, string>
@@ -19,9 +20,10 @@ export class LinkFormatLoader extends Matcher {
   }
 }
 
-export class LinkFormatter implements InlineFormatter {
-  type: FormatType.Inline = FormatType.Inline
+export class LinkFormatter implements Formatter<any> {
   name = 'link'
+
+  columned = false
 
   render(children: Array<VElement | VTextNode>, formatValue: Record<string, string>, isOutputMode: boolean): VElement {
     if (isOutputMode) {

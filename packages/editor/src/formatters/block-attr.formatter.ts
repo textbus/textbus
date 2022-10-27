@@ -1,11 +1,12 @@
-import { BlockFormatter, FormatHostBindingRender, FormatValue, VElement, FormatType, VTextNode } from '@textbus/core'
+import { Attribute, FormatHostBindingRender, FormatValue, VElement, VTextNode } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
+import { AttributeLoader } from '@textbus/browser'
 
-export class BlockAttrFormatLoader extends Matcher {
-  constructor(public attrName: string, formatter: BlockFormatter, rule: MatchRule) {
-    super(formatter, rule)
+export class BlockAttrLoader<T extends FormatValue> extends Matcher<T, Attribute<T>> implements AttributeLoader<any> {
+  constructor(public attrName: string, attribute: Attribute<T>, rule: MatchRule) {
+    super(attribute, rule)
   }
 
   override match(p: HTMLElement) {
@@ -16,18 +17,17 @@ export class BlockAttrFormatLoader extends Matcher {
     return super.match(p)
   }
 
-  override read(node: HTMLElement) {
+  read(node: HTMLElement) {
     return {
-      formatter: this.formatter,
+      attribute: this.target,
       value: this.extractFormatData(node, {
         attrs: [this.attrName]
-      }).attrs?.[this.attrName] as FormatValue
+      }).attrs?.[this.attrName] as T
     }
   }
 }
 
-export class BlockAttrFormatter implements BlockFormatter {
-  type: FormatType.Block = FormatType.Block
+export class BlockAttrFormatter implements Attribute<string> {
   constructor(public name: string, public attrName: string) {
   }
 
@@ -44,7 +44,7 @@ export class BlockAttrFormatter implements BlockFormatter {
 export const dirFormatter = new BlockAttrFormatter('dir', 'dir')
 
 // 块级属性
-export const dirFormatLoader = new BlockAttrFormatLoader('dir', dirFormatter, {
+export const dirFormatLoader = new BlockAttrLoader('dir', dirFormatter, {
   attrs: [{
     key: 'dir',
     value: ['ltr', 'rtl']

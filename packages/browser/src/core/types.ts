@@ -1,11 +1,12 @@
 import { ComponentLiteral, Module, TextbusConfig, Rect } from '@textbus/core'
 import { Observable } from '@tanbo/stream'
 
-import { FormatLoader, ComponentLoader } from '../dom-support/parser'
+import { FormatLoader, ComponentLoader, AttributeLoader } from '../dom-support/parser'
 
 export interface ViewModule extends Module {
   componentLoaders?: ComponentLoader[]
-  formatLoaders?: FormatLoader[]
+  formatLoaders?: FormatLoader<any>[]
+  attributeLoaders?: AttributeLoader<any>[]
 }
 
 /**
@@ -20,7 +21,9 @@ export interface ViewOptions extends TextbusConfig {
   /** 组件加载器 */
   componentLoaders?: ComponentLoader[]
   /** 格式加载器 */
-  formatLoaders?: FormatLoader[]
+  formatLoaders?: FormatLoader<any>[]
+  /** 属性加载器 */
+  attributeLoaders?: AttributeLoader<any>[]
   /** 默认内容 */
   content?: string | ComponentLiteral
   /** 文档默认样式表 */

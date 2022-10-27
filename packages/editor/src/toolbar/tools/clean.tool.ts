@@ -26,6 +26,7 @@ export function cleanToolConfigFactory(injector: Injector): ButtonToolConfig<any
     },
     onClick() {
       commander.cleanFormats([linkFormatter])
+      commander.cleanAttributes()
     }
   }
 }

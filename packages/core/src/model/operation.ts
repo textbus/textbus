@@ -29,11 +29,28 @@ export interface ApplyAction {
 
 export interface InsertSlotAction {
   type: 'insertSlot'
-  slot: SlotLiteral
+  slot: SlotLiteral<any, any>
   ref: Slot
 }
 
-export type Action = InsertAction | RetainAction | DeleteAction | ApplyAction | InsertSlotAction
+export interface AttributeSetAction {
+  type: 'attrSet'
+  name: string
+  value: any
+}
+
+export interface AttributeRemoveAction {
+  type: 'attrRemove'
+  name: string
+}
+
+export type Action = InsertAction |
+  RetainAction |
+  DeleteAction |
+  ApplyAction |
+  InsertSlotAction |
+  AttributeSetAction |
+  AttributeRemoveAction
 
 export interface Operation {
   path: number[]

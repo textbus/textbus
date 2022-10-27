@@ -271,6 +271,20 @@ export class CoreHistory extends History {
             })
             return
           }
+          if (action.type === 'attrSet') {
+            const attribute = this.registry.getAttribute(action.name)
+            if (attribute) {
+              slot.setAttribute(attribute, action.value)
+            }
+            return
+          }
+          if (action.type === 'attrRemove') {
+            const attribute = this.registry.getAttribute(action.name)
+            if (attribute) {
+              slot.removeAttribute(attribute)
+            }
+            return
+          }
           if (action.type === 'insert') {
             const formatsObj = action.formats
             let formats: Formats | void

@@ -40,7 +40,7 @@ export function verticalAlignToolConfigFactory(injector: Injector): SelectToolCo
       value: 'text-bottom'
     }],
     queryState(): QueryState<FormatValue> {
-      return query.queryFormat(textAlignFormatter)
+      return query.queryAttribute(textAlignFormatter)
     },
     onChecked(value: string) {
       commander.applyFormat(fontSizeFormatter, value)

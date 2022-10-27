@@ -1,28 +1,29 @@
-import { InlineFormatter, VElement, VTextNode, FormatType } from '@textbus/core'
+import { VElement, VTextNode, FormatValue, Formatter } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
+import { FormatLoader } from '@textbus/browser'
 
-export class InlineTagFormatLoader extends Matcher {
+export class InlineTagFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<T>> implements FormatLoader<T> {
   constructor(formatter: InlineElementFormatter, rule: MatchRule) {
     super(formatter, rule)
   }
 
-  override read() {
+  read() {
     return {
-      formatter: this.formatter,
-      value: true
+      formatter: this.target,
+      value: true as T
     }
   }
 }
 
-export class InlineElementFormatter implements InlineFormatter {
-  type: FormatType.Inline = FormatType.Inline
+export class InlineElementFormatter implements Formatter<boolean> {
+  columned = false
 
   constructor(public name: string,
               public tagName: string) {
   }
 
-  render(children: Array<VElement|VTextNode>) {
+  render(children: Array<VElement | VTextNode>) {
     return new VElement(this.tagName, null, children)
   }
 }
