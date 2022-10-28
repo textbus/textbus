@@ -1,4 +1,5 @@
-import { ComponentLiteral, Module, TextbusConfig } from '@textbus/core'
+import { ComponentLiteral, Module, TextbusConfig, Rect } from '@textbus/core'
+import { Observable } from '@tanbo/stream'
 
 import { FormatLoader, ComponentLoader } from '../dom-support/parser'
 
@@ -28,4 +29,44 @@ export interface ViewOptions extends TextbusConfig {
   editingStyleSheets?: string[]
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
+}
+
+export interface CaretLimit {
+  top: number
+  bottom: number
+}
+
+export interface Scroller {
+  onScroll: Observable<any>
+
+  getLimit(): CaretLimit
+
+  setOffset(offsetScrollTop: number): void
+}
+
+export interface CaretPosition {
+  left: number
+  top: number
+  height: number
+}
+
+export interface Caret {
+  onPositionChange: Observable<CaretPosition | null>
+  readonly rect: Rect
+
+  refresh(isFixedCaret: boolean): void
+
+  correctScrollTop(scroller: Scroller): void
+}
+
+export abstract class Input {
+  abstract composition: boolean
+  abstract onReady: Promise<void>
+  abstract caret: Caret
+
+  abstract focus(nativeRange: Range, reFlash: boolean): void
+
+  abstract blur(): void
+
+  abstract destroy(): void
 }

@@ -37,17 +37,6 @@ function setEditable(vElement: VElement, isSlot: boolean) {
   vElement.attrs.set(isSlot ? 'textbus-slot-root' : 'textbus-component-root', '')
 }
 
-// export function formatSort(formats: FormatItem[]) {
-//   formats.sort((a, b) => {
-//     const n = a.formatter.type - b.formatter.type
-//     if (n === 0) {
-//       return a.formatter.priority - b.formatter.priority
-//     }
-//     return n
-//   })
-//   return formats
-// }
-
 function getObjectChanges(target: Record<string, any>, source: Record<string, any>) {
   const changes: ObjectChanges = {
     remove: [],

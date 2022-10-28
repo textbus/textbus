@@ -1,5 +1,5 @@
 import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Injectable, Injector } from '@tanbo/di'
+import { Inject, Injectable, Injector } from '@tanbo/di'
 import {
   ComponentInstance,
   NativeSelectionBridge,
@@ -14,9 +14,9 @@ import {
 } from '@textbus/core'
 
 import { getLayoutRectByRange } from './caret'
-import { VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
+import { EDITOR_OPTIONS, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
 import { createElement } from '../_utils/uikit'
-import { Input } from './input'
+import { Input, ViewOptions } from './types'
 
 /**
  * Textbus PC 端选区桥接实现
@@ -40,7 +40,8 @@ export class SelectionBridge implements NativeSelectionBridge {
   private docContainer: HTMLElement
   private maskContainer: HTMLElement
 
-  constructor(private injector: Injector,
+  constructor(@Inject(EDITOR_OPTIONS) private config: ViewOptions,
+              private injector: Injector,
               private controller: Controller,
               private rootComponentRef: RootComponentRef,
               private input: Input,
@@ -68,12 +69,14 @@ export class SelectionBridge implements NativeSelectionBridge {
           this.ignoreSelectionChange = true
           return
         }
-        while (target) {
-          if (target.contentEditable === 'true') {
-            this.ignoreSelectionChange = true
-            return
+        if (!config.useContentEditable) {
+          while (target) {
+            if (target.contentEditable === 'true') {
+              this.ignoreSelectionChange = true
+              return
+            }
+            target = target.parentNode as HTMLElement
           }
-          target = target.parentNode as HTMLElement
         }
       })
     )
@@ -305,16 +308,21 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   private listen(connector: NativeSelectionConnector) {
-    const selection = this.nativeSelection
+    if (!this.config.useContentEditable) {
+      const selection = this.nativeSelection
+      this.subs.push(
+        fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
+          if (this.ignoreSelectionChange || ev.button === 2) {
+            return
+          }
+          if (!ev.shiftKey) {
+            selection.removeAllRanges()
+          }
+        })
+      )
+    }
+
     this.subs.push(
-      fromEvent<MouseEvent>(this.docContainer, 'mousedown').subscribe(ev => {
-        if (this.ignoreSelectionChange || ev.button === 2) {
-          return
-        }
-        if (!ev.shiftKey) {
-          selection.removeAllRanges()
-        }
-      }),
       fromEvent(document, 'selectionchange').subscribe(() => {
         this.syncSelection(connector)
       })
@@ -325,12 +333,14 @@ export class SelectionBridge implements NativeSelectionBridge {
     const selection = this.nativeSelection
     this.changeFromUser = true
     if (this.ignoreSelectionChange ||
+      this.input.composition ||
       selection.rangeCount === 0 ||
       !this.docContainer.contains(selection.anchorNode) ||
       this.rootComponentRef.component.slots.length === 0) {
       return
     }
-    const nativeRange = selection.getRangeAt(0).cloneRange()
+    const rawRange = selection.getRangeAt(0)
+    const nativeRange = rawRange.cloneRange()
     const isFocusEnd = selection.focusNode === nativeRange.endContainer && selection.focusOffset === nativeRange.endOffset
     const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
     if (!this.docContainer.contains(selection.focusNode)) {
@@ -390,6 +400,10 @@ export class SelectionBridge implements NativeSelectionBridge {
           nativeRange.setEnd(end.node, end.offset)
         }
         connector.setSelection(abstractSelection)
+        if (selection.isCollapsed) {
+          rawRange.setStart(start.node, start.offset)
+          rawRange.setEnd(end.node, end.offset)
+        }
         this.selectionChangeEvent.next(nativeRange)
       } else {
         connector.setSelection(null)

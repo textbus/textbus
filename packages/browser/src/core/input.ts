@@ -4,9 +4,6 @@ import {
   Commander,
   ContentType,
   Controller,
-  Formatter,
-  FormatType,
-  jsx,
   Keyboard,
   Scheduler,
   Selection,
@@ -15,9 +12,10 @@ import {
 
 import { createElement } from '../_utils/uikit'
 import { Parser } from '../dom-support/parser'
-import { Caret } from './caret'
+import { ExperimentalCaret } from './caret'
 import { isMac, isSafari, isWindows } from '../_utils/env'
 import { VIEW_MASK } from './injection-tokens'
+import { Input } from './types'
 
 const iframeHTML = `
 <!DOCTYPE html>
@@ -43,9 +41,10 @@ const iframeHTML = `
  * Textbus PC 端输入实现
  */
 @Injectable()
-export class Input {
+export class MagicInput extends Input {
+  composition = false
   onReady: Promise<void>
-  caret = new Caret(this.scheduler, this.injector.get(VIEW_MASK))
+  caret = new ExperimentalCaret(this.scheduler, this.injector.get(VIEW_MASK))
   private container = this.createEditableFrame()
 
   private subscription = new Subscription()
@@ -54,23 +53,6 @@ export class Input {
   private textarea: HTMLTextAreaElement | null = null
 
   private isFocus = false
-
-  private inputFormatterId = '__TextbusInputFormatter__'
-
-  private inputFormatter: Formatter = {
-    name: this.inputFormatterId,
-    type: FormatType.Inline,
-    columned: false,
-    render: (children) => {
-      return jsx('span', {
-        'data-writing-format': this.inputFormatterId,
-        style: {
-          textDecoration: 'underline'
-        },
-        children
-      })
-    }
-  }
   private nativeFocus = false
 
   private isSafari = isSafari()
@@ -86,6 +68,7 @@ export class Input {
               private controller: Controller,
               private scheduler: Scheduler,
               private injector: Injector) {
+    super()
     this.onReady = new Promise<void>(resolve => {
       this.subscription.add(
         fromEvent(this.container, 'load').subscribe(() => {

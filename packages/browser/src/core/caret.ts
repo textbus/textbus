@@ -2,6 +2,7 @@ import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } fr
 import { Scheduler, Rect } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
+import { Caret, CaretPosition, Scroller } from './types'
 
 export function getLayoutRectByRange(range: Range): Rect {
   const { startContainer, startOffset } = range
@@ -41,32 +42,13 @@ export function getLayoutRectByRange(range: Range): Rect {
   return range.getBoundingClientRect()
 }
 
-export interface CaretPosition {
-  left: number
-  top: number
-  height: number
-}
-
-export interface CaretStyle {
+interface CaretStyle {
   height: string
   lineHeight: string
   fontSize: string
 }
 
-export interface CaretLimit {
-  top: number
-  bottom: number
-}
-
-export interface Scroller {
-  onScroll: Observable<any>
-
-  getLimit(): CaretLimit
-
-  setOffset(offsetScrollTop: number): void
-}
-
-export class Caret {
+export class ExperimentalCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement

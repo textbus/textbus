@@ -1,5 +1,5 @@
 import { distinctUntilChanged, map, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Provider, Type } from '@tanbo/di'
+import { Provider } from '@tanbo/di'
 import {
   NativeRenderer,
   NativeSelectionBridge,
@@ -24,11 +24,12 @@ import { Parser, OutputTranslator, ComponentLoader } from './dom-support/_api'
 import { createElement } from './_utils/uikit'
 import {
   ViewOptions,
+  MagicInput,
   Input,
   VIEW_CONTAINER,
   EDITOR_OPTIONS,
   DomRenderer,
-  SelectionBridge, VIEW_MASK, VIEW_DOCUMENT
+  SelectionBridge, VIEW_MASK, VIEW_DOCUMENT, NativeInput
 } from './core/_api'
 
 export interface OutputContents<T = any> {
@@ -119,6 +120,9 @@ export class Viewer {
       provide: NativeSelectionBridge,
       useExisting: SelectionBridge
     }, {
+      provide: Input,
+      useClass: options.useContentEditable ? NativeInput : MagicInput
+    }, {
       provide: Viewer,
       useValue: this
     }]
@@ -130,7 +134,6 @@ export class Viewer {
         ...staticProviders,
         DomRenderer,
         Parser,
-        Input,
         SelectionBridge,
         OutputTranslator,
       ],
@@ -284,7 +287,7 @@ export class Viewer {
         Input,
       ]
       types.forEach(i => {
-        this.injector.get(i as Type<{ destroy(): void }>).destroy()
+        this.injector.get(i).destroy()
       })
       this.injector.destroy()
     }
