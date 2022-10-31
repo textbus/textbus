@@ -5,10 +5,19 @@ import { createElement } from '../_utils/uikit'
 import { Caret, CaretPosition, Scroller } from './types'
 
 export function getLayoutRectByRange(range: Range): Rect {
-  const { startContainer, startOffset } = range
-  if (startContainer.nodeType === Node.ELEMENT_NODE) {
-    const beforeNode = startContainer.childNodes[startOffset - 1]
-    if (beforeNode) {
+  let { startContainer, startOffset } = range
+  if (startContainer.nodeType === Node.TEXT_NODE) {
+    if (startOffset > 0) {
+      return range.getBoundingClientRect()
+    }
+    const parentNode = startContainer.parentNode!
+    startOffset = Array.from(parentNode.childNodes).indexOf(startContainer as any)
+    startContainer = parentNode
+  }
+
+  const beforeNode = startContainer.childNodes[startOffset - 1]
+  if (beforeNode) {
+    if (beforeNode.nodeType === Node.ELEMENT_NODE && beforeNode.nodeName.toLowerCase() !== 'br') {
       const rect = (beforeNode as HTMLElement).getBoundingClientRect()
       return {
         left: rect.right,
@@ -16,40 +25,44 @@ export function getLayoutRectByRange(range: Range): Rect {
         width: rect.width,
         height: rect.height
       }
+    } else if (beforeNode.nodeType === Node.TEXT_NODE) {
+      const range2 = document.createRange()
+      range2.setStart(beforeNode, beforeNode.textContent!.length)
+      range2.setEnd(beforeNode, beforeNode.textContent!.length)
+      return range2.getBoundingClientRect()
     }
-    const offsetNode = startContainer.childNodes[startOffset]
-    let isInsertBefore = false
-    if (!offsetNode) {
-      const lastChild = startContainer.lastChild
-      if (lastChild && lastChild.nodeType === Node.ELEMENT_NODE) {
-        const rect = (lastChild as HTMLElement).getBoundingClientRect()
-        return {
-          left: rect.right,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height
-        }
-      }
-    }
-    if (offsetNode) {
-      if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
-        return (offsetNode as HTMLElement).getBoundingClientRect()
-      }
-      isInsertBefore = true
-    }
-    const span = startContainer.ownerDocument!.createElement('span')
-    span.innerText = '\u200b'
-    span.style.display = 'inline-block'
-    if (isInsertBefore) {
-      startContainer.insertBefore(span, offsetNode)
-    } else {
-      startContainer.appendChild(span)
-    }
-    const rect = span.getBoundingClientRect()
-    startContainer.removeChild(span)
-    return rect
   }
-  return range.getBoundingClientRect()
+  const offsetNode = startContainer.childNodes[startOffset]
+  let isInsertBefore = false
+  if (!offsetNode) {
+    const lastChild = startContainer.lastChild
+    if (lastChild && lastChild.nodeType === Node.ELEMENT_NODE) {
+      const rect = (lastChild as HTMLElement).getBoundingClientRect()
+      return {
+        left: rect.right,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height
+      }
+    }
+  }
+  if (offsetNode) {
+    if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
+      return (offsetNode as HTMLElement).getBoundingClientRect()
+    }
+    isInsertBefore = true
+  }
+  const span = startContainer.ownerDocument!.createElement('span')
+  span.innerText = '\u200b'
+  span.style.display = 'inline-block'
+  if (isInsertBefore) {
+    startContainer.insertBefore(span, offsetNode)
+  } else {
+    startContainer.appendChild(span)
+  }
+  const rect = span.getBoundingClientRect()
+  startContainer.removeChild(span)
+  return rect
 }
 
 interface CaretStyle {

@@ -365,7 +365,11 @@ export class Collaborate implements History {
       this.runRemoteUpdate(tr, () => {
         slot.retain(0)
         ev.keysChanged.forEach(key => {
-          const updateType = ev.keys.get(key).action
+          const change = ev.keys.get(key)
+          if (!change) {
+            return
+          }
+          const updateType = change.action
           if (updateType === 'update' || updateType === 'add') {
             const attribute = this.registry.getAttribute(key)
             if (attribute) {

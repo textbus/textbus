@@ -788,7 +788,25 @@ export class Commander {
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
-      i.slot.setAttribute(attribute, value)
+      const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
+      const childComponents: ComponentInstance[] = []
+      let hasString = false
+      contents.forEach(item => {
+        if (typeof item !== 'string') {
+          childComponents.push(item)
+        } else {
+          hasString = true
+        }
+      })
+      if (hasString) {
+        i.slot.setAttribute(attribute, value)
+      } else {
+        childComponents.forEach(i => {
+          i.slots.toArray().forEach(slot => {
+            slot.setAttribute(attribute, value)
+          })
+        })
+      }
     })
   }
 
@@ -803,7 +821,25 @@ export class Commander {
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
-      i.slot.removeAttribute(attribute)
+      const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
+      const childComponents: ComponentInstance[] = []
+      let hasString = false
+      contents.forEach(item => {
+        if (typeof item !== 'string') {
+          childComponents.push(item)
+        } else {
+          hasString = true
+        }
+      })
+      if (hasString) {
+        i.slot.removeAttribute(attribute)
+      } else {
+        childComponents.forEach(i => {
+          i.slots.toArray().forEach(slot => {
+            slot.removeAttribute(attribute)
+          })
+        })
+      }
     })
   }
 
@@ -811,8 +847,26 @@ export class Commander {
    * 根据选区清除属性
    */
   cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
-    this.selection.getSelectedScopes().forEach(scope => {
-      scope.slot.cleanAttributes(excludeAttributes)
+    this.selection.getSelectedScopes().forEach(i => {
+      const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
+      const childComponents: ComponentInstance[] = []
+      let hasString = false
+      contents.forEach(item => {
+        if (typeof item !== 'string') {
+          childComponents.push(item)
+        } else {
+          hasString = true
+        }
+      })
+      if (hasString) {
+        i.slot.cleanAttributes(excludeAttributes)
+      } else {
+        childComponents.forEach(i => {
+          i.slots.toArray().forEach(slot => {
+            slot.cleanAttributes(excludeAttributes)
+          })
+        })
+      }
     })
   }
 

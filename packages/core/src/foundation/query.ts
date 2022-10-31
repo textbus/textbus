@@ -60,16 +60,46 @@ export class Query {
       }
     }
     const states = this.selection.getSelectedScopes().map(i => {
-      if (i.slot.hasAttribute(attribute)) {
+      const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
+      const childComponents: ComponentInstance[] = []
+      let hasString = false
+      contents.forEach(item => {
+        if (typeof item !== 'string') {
+          childComponents.push(item)
+        } else {
+          hasString = true
+        }
+      })
+      if (hasString) {
+        if (i.slot.hasAttribute(attribute)) {
+          return {
+            state: QueryStateType.Enabled,
+            value: i.slot.getAttribute(attribute)
+          }
+        }
         return {
-          state: QueryStateType.Enabled,
-          value: i.slot.getAttribute(attribute)
+          state: QueryStateType.Normal,
+          value: null
         }
       }
-      return {
-        state: QueryStateType.Normal,
-        value: null
+      const states: QueryState<T>[] = []
+      for (const component of childComponents) {
+        const slots = component.slots.toArray()
+        for (const slot of slots) {
+          if (slot.hasAttribute(attribute)) {
+            states.push({
+              state: QueryStateType.Enabled,
+              value: i.slot.getAttribute(attribute)
+            })
+          } else {
+            return {
+              state: QueryStateType.Normal,
+              value: null
+            }
+          }
+        }
       }
+      return this.mergeState(states)
     })
     return this.mergeState(states)
   }
