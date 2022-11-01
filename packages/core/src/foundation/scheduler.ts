@@ -13,7 +13,7 @@ export enum ChangeOrigin {
 }
 
 export interface ChangeItem {
-  from: ChangeOrigin,
+  from: ChangeOrigin
   operation: Operation
 }
 

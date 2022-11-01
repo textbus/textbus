@@ -67,11 +67,6 @@ export interface Rect {
   height: number
 }
 
-export interface RangeViewPosition {
-  left: number
-  top: number
-}
-
 /**
  * 用于跨平台实现的原生选区抽象类
  */
@@ -98,7 +93,7 @@ export abstract class NativeSelectionBridge {
    * 获取原生选区的坐标位置，用于 Textbus 计算光标移动相关功能
    * @param position
    */
-  abstract getRect(position: SelectionPosition): RangeViewPosition | null
+  abstract getRect(position: SelectionPosition): Rect | null
 }
 
 export interface SelectionPaths {
@@ -237,7 +232,7 @@ export class Selection {
   private _nativeSelectionDelegate = true
 
   private cacheCaretPositionTimer!: any
-  private oldCaretPosition!: RangeViewPosition | null
+  private oldCaretPosition!: Rect | null
 
   private subscriptions: Subscription[] = []
 
