@@ -4,11 +4,8 @@ import { Injector } from '@tanbo/di'
 import { I18n } from '../../i18n'
 import { fontFamilyFormatter } from '../../formatters/_api'
 
-export function isSupportFont(fontName: string) {
+export const isSupportFont = (function () {
   const fullbackFontName = 'Arial'
-  if (fontName.toLowerCase() === fullbackFontName.toLowerCase()) {
-    return true
-  }
   const text = 'HeRe-is*SoMe%tEst +99.? !@ #~ &^teXtWw L$VEY$U0'
   const fontSize = 20
   const width = 200
@@ -29,8 +26,13 @@ export function isSupportFont(fontName: string) {
     return Array.from(data).filter(n => n !== 0)
   }
 
-  return checker(fullbackFontName).join('') !== checker(fontName).join('')
-}
+  return function (fontName: string) {
+    if (fontName.toLowerCase() === fullbackFontName.toLowerCase()) {
+      return true
+    }
+    return checker(fullbackFontName).join('') !== checker(fontName).join('')
+  }
+})()
 
 export function fontFamilyToolConfigFactory(injector: Injector): SelectToolConfig {
   const i18n = injector.get(I18n)
