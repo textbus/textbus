@@ -9,7 +9,7 @@ import {
 import { WebsocketProvider } from 'y-websocket'
 import { WebrtcProvider } from 'y-webrtc'
 import { fromEvent, merge } from '@tanbo/stream';
-import { Caret } from '@textbus/browser';
+import { Input } from '@textbus/browser';
 import { Parser } from '@tanbo/json-parser';
 
 const parser = new Parser()
@@ -45,9 +45,9 @@ const editor = createEditor({
   //   const collaborate = starter.get(Collaborate)
   //   const collaborateCursor = starter.get(CollaborateCursor)
   //   const layout = starter.get(Layout)
-  //   const caret = starter.get(Caret)
+  //   const input = starter.get(Input)
   //   //
-  //   caret.correctScrollTop({
+  //   input.caret.correctScrollTop({
   //     onScroll: fromEvent(document, 'scroll'),
   //     getLimit() {
   //       return {
@@ -149,22 +149,22 @@ editor.mount(document.getElementById('editor')!).then(() => {
 })
 
 editor.onChange.subscribe(() => {
-  const root = editor.injector!.get(RootComponentRef)
+  const root = editor!.get(RootComponentRef)
   // console.log(root)
   // console.log(root.component.toString())
 })
 
 fromEvent(btns[0], 'click').subscribe(() => {
-  const paths = editor.injector.get(Selection).getPaths()
+  const paths = editor.get(Selection).getPaths()
   textarea.value = JSON.stringify(paths)
 })
 fromEvent(btns[1], 'click').subscribe(() => {
   const json = editor.getJSON()
-  textarea.value = JSON.stringify(json.content)
+  textarea.value = JSON.stringify(json)
 })
 fromEvent(btns[2], 'click').subscribe(() => {
-  const contents = editor.getContents()
-  textarea.value = contents.content
+  const contents = editor.getContent()
+  textarea.value = contents
 })
 fromEvent(btns[3], 'click').subscribe(() => {
   textarea.select()
@@ -180,7 +180,7 @@ fromEvent(btns[5], 'click').subscribe(() => {
 })
 fromEvent(btns[6], 'click').subscribe(() => {
   const paths = parser.parse(textarea.value)
-  const selection = editor.injector.get(Selection)
+  const selection = editor.get(Selection)
   selection.usePaths(paths)
   selection.restore()
 })

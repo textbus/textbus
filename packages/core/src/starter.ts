@@ -102,10 +102,10 @@ export class Starter extends ReflectiveInjector {
 
   /**
    * 启动一个 Textbus 实例，并将根组件渲染到原生节点
-   * @param rootComponent 根组件
    * @param host 原生节点
+   * @param rootComponent 根组件
    */
-  async mount(rootComponent: ComponentInstance, host: NativeNode) {
+  async mount(host: NativeNode, rootComponent: ComponentInstance): Promise<this> {
     const rootComponentRef = this.get(RootComponentRef)
     rootComponentRef.component = rootComponent
     rootComponentRef.host = host

@@ -100,7 +100,7 @@ export class Editor extends Viewer {
     }
   }
 
-  override mount(selector: string | HTMLElement): Promise<Starter> {
+  override mount(selector: string | HTMLElement): Promise<this> {
     if (typeof selector === 'string') {
       this.host = document.querySelector(selector)!
     } else {
@@ -140,15 +140,13 @@ export class Editor extends Viewer {
     if (this.destroyed) {
       return
     }
-    if (this.injector) {
-      const types = [
-        Dialog
-      ]
+    const types = [
+      Dialog
+    ]
 
-      types.forEach(i => {
-        this.injector!.get(i as Type<{ destroy(): void }>).destroy()
-      })
-    }
+    types.forEach(i => {
+      this.get(i as Type<{ destroy(): void }>).destroy()
+    })
     this.layout.destroy()
     this.layout.container.parentNode?.removeChild(this.layout.container)
     super.destroy()

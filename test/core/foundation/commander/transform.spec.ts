@@ -9,11 +9,10 @@ describe('Commander:transform 转换空白', () => {
   let selection: Selection
   beforeEach(async () => {
     editor = createEditor()
-    injector = editor.injector
     const container = document.createElement('div')
     await editor.mount(container)
-    commander = injector.get(Commander)
-    selection = injector.get(Selection)
+    commander = editor.get(Commander)
+    selection = editor.get(Selection)
     editor.focus()
   })
   afterEach(() => {
@@ -103,7 +102,6 @@ describe('Commander:transform 转换同级段落', () => {
     const container = document.createElement('div')
     await editor.mount(container)
 
-    injector = editor.injector
     selection = injector.get(Selection)
     commander = injector.get(Commander)
     selection.usePaths({
@@ -229,9 +227,8 @@ describe('Commander:transform 转换复杂结构', () => {
     const container = document.createElement('div')
     await editor.mount(container)
 
-    injector = editor.injector
-    selection = injector.get(Selection)
-    commander = injector.get(Commander)
+    selection = editor.get(Selection)
+    commander = editor.get(Commander)
   })
   afterEach(() => {
     editor.destroy()
@@ -467,7 +464,6 @@ describe('Commander:transform 转换复杂结构', () => {
 
 describe('Commander:transform 转换块和行内混合内容', () => {
   let editor: Editor
-  let injector: Injector
   let selection: Selection
   let commander: Commander
   beforeEach(async () => {
@@ -478,9 +474,8 @@ describe('Commander:transform 转换块和行内混合内容', () => {
     const container = document.createElement('div')
     await editor.mount(container)
 
-    injector = editor.injector
-    selection = injector.get(Selection)
-    commander = injector.get(Commander)
+    selection = editor.get(Selection)
+    commander = editor.get(Commander)
   })
   afterEach(() => {
     editor.destroy()
@@ -501,7 +496,7 @@ describe('Commander:transform 转换块和行内混合内容', () => {
         return 'ul'
       }
     })
-    expect(editor.getJSON().content).toEqual({
+    expect(editor.getJSON()).toEqual({
       'name': 'RootComponent', 'state': null, 'slots': [{
         'schema': [1, 2, 3],
         'content': [{
