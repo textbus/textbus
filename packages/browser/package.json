@@ -1,6 +1,6 @@
 {
   "name": "@textbus/browser",
-  "version": "2.4.5",
+  "version": "2.5.2",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@tanbo/di": "^1.1.3",
     "@tanbo/stream": "^1.1.8",
-    "@textbus/core": "^2.4.5",
+    "@textbus/core": "^2.5.2",
     "reflect-metadata": "^0.1.13"
   },
   "author": {
