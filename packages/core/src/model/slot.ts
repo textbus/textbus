@@ -333,12 +333,12 @@ export class Slot<T = any> {
       if (offset > len) {
         offset = len
       }
-      this._index = this.content.fixIndex(offset)
+      this._index = this.content.correctIndex(offset, false)
       return true
     }
 
     const startIndex = this._index
-    let endIndex = this.content.fixIndex(startIndex + offset)
+    let endIndex = this.content.correctIndex(startIndex + offset, true)
     if (endIndex > len) {
       endIndex = len
     }
@@ -408,7 +408,8 @@ export class Slot<T = any> {
       return false
     }
     const startIndex = this._index
-    let endIndex = this._index + count
+    let endIndex = this.content.correctIndex(this._index + count, true)
+    count = endIndex - startIndex
     if (endIndex > this.length) {
       endIndex = this.length
     }
@@ -519,6 +520,8 @@ export class Slot<T = any> {
     if (startIndex > endIndex) {
       return slot
     }
+    startIndex = this.content.correctIndex(startIndex, false)
+    endIndex = this.content.correctIndex(endIndex, true)
     if (this.isEmpty) {
       slot.format = this.format.createFormatByRange(slot, 0, 1)
       this.retain(startIndex)
@@ -532,10 +535,6 @@ export class Slot<T = any> {
       return slot
     }
     this.retain(startIndex)
-    const _endIndex = this.content.fixIndex(endIndex)
-    if (endIndex - _endIndex === 1) {
-      endIndex++
-    }
     const deletedData = this.content.slice(this.index, endIndex)
     const deletedFormat = this.format.createFormatByRange(slot, this.index, endIndex)
 
@@ -691,13 +690,24 @@ export class Slot<T = any> {
    * @param endIndex 结束位置
    */
   cleanFormats(excludeFormats: Formatter[] | ((formatter: Formatter) => boolean) = [], startIndex = 0, endIndex = this.length) {
-    this.getFormats().forEach(item => {
-      if (typeof excludeFormats === 'function' ? excludeFormats(item.formatter) : excludeFormats.includes(item.formatter)) {
-        return
-      }
-      this.retain(startIndex)
-      this.retain(endIndex - startIndex, item.formatter, null)
-    })
+    const formats = this.getFormats()
+    if (formats.length) {
+      formats.forEach(item => {
+        if (typeof excludeFormats === 'function' ? excludeFormats(item.formatter) : excludeFormats.includes(item.formatter)) {
+          return
+        }
+        this.retain(startIndex)
+        this.retain(endIndex - startIndex, item.formatter, null)
+      })
+    } else {
+      this.sliceContent(startIndex, endIndex).forEach(item => {
+        if (typeof item !== 'string') {
+          item.slots.toArray().forEach(slot => {
+            slot.cleanFormats(excludeFormats)
+          })
+        }
+      })
+    }
   }
 
   private applyFormats(formats: Formats, startIndex: number, offset: number) {
