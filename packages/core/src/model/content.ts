@@ -10,14 +10,31 @@ export class Content {
     return this.data.reduce((p, n) => p + n.length, 0)
   }
 
-  fixIndex(index: number) {
+  correctIndex(index: number, toEnd: boolean) {
     if (index === 0 || index === this.length) {
       return index
     }
-    const c = this.slice(index - 1, index + 1)[0]
-    if (typeof c === 'string') {
-      if (c.length === 2 && [...c].length === 1) {
-        return index - 1
+    let i = 0
+    for (const item of this.data) {
+      const itemLength = item.length
+      if (typeof item === 'string') {
+        if (index > i && index < i + itemLength) {
+          const segmenter = new Intl.Segmenter()
+          const segments = segmenter.segment(item)
+          const points = [...segments]
+          let offset = 0
+          for (const p of points) {
+            const segmentLength = p.segment.length
+            if (index > i + offset && index < i + offset + segmentLength) {
+              return toEnd ? i + offset + segmentLength : i + offset
+            }
+            offset += segmentLength
+          }
+        }
+      }
+      i += itemLength
+      if (i >= index) {
+        break
       }
     }
     return index
@@ -84,6 +101,8 @@ export class Content {
     if (startIndex >= endIndex) {
       return []
     }
+    startIndex = this.correctIndex(startIndex, false)
+    endIndex = this.correctIndex(endIndex, true)
     let index = 0
     const result: Array<string | ComponentInstance> = []
     for (const el of this.data) {
@@ -127,11 +146,6 @@ export class Content {
   }
 
   getContentAtIndex(index: number) {
-    if (this.fixIndex(index + 1) === index) {
-      return this.slice(index, index + 2)[0]
-    } else if (this.fixIndex(index) === index - 1) {
-      return this.slice(index - 1, index + 1)[0]
-    }
     return this.slice(index, index + 1)[0]
   }
 

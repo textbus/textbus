@@ -1064,14 +1064,9 @@ export class Selection {
       }
     }
     if (offset < slot.length) {
-      let current = slot.getContentAtIndex(offset)
+      const current = slot.getContentAtIndex(offset)
 
-      if (current === '\n') {
-        current = slot.getContentAtIndex(offset + 1)
-      } else if (current.length === 2) {
-        current = slot.getContentAtIndex(offset)
-      }
-      if (current && typeof current !== 'string') {
+      if (typeof current !== 'string') {
         const firstChildSlot = current.slots.get(0)
         if (firstChildSlot) {
           return this.findFirstPosition(firstChildSlot)
