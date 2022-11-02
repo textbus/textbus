@@ -1,7 +1,16 @@
 import { Injectable } from '@tanbo/di'
 
 import { Selection } from './selection'
-import { ComponentInstance, ComponentExtends, Formatter, FormatValue, Slot, Component, Attribute } from '../model/_api'
+import {
+  ComponentInstance,
+  ComponentExtends,
+  Formatter,
+  FormatValue,
+  Slot,
+  Component,
+  Attribute,
+  SlotRange
+} from '../model/_api'
 
 /**
  * Textbus 状态查询状态枚举
@@ -59,7 +68,20 @@ export class Query {
         value: null
       }
     }
-    const states = this.selection.getSelectedScopes().map(i => {
+
+    let ranges: SlotRange[]
+
+    if (this.selection.isCollapsed) {
+      const c = this.selection.commonAncestorSlot!
+      ranges = [{
+        slot: c,
+        startIndex: 0,
+        endIndex: c.length
+      }]
+    } else {
+      ranges = this.selection.getSelectedScopes()
+    }
+    const states = ranges.map(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
       const childComponents: ComponentInstance[] = []
       let hasString = false

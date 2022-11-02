@@ -657,21 +657,21 @@ export class Slot<T = any> {
    * 根据插槽的格式数据，生成格式树
    */
   createFormatTree(): FormatTree<FormatValue> {
-    const tree = this.format.toTree(0, this.length)
-    if (this.attributes.size) {
-      if (!tree.formats) {
-        tree.formats = []
-      }
-      this.getAttributes().forEach(item => {
-        tree.formats!.push({
-          formatter: item[0],
-          value: item[1],
-          startIndex: 0,
-          endIndex: this.length
-        })
-      })
-    }
-    return tree
+    return this.format.toTree(0, this.length)
+    // if (this.attributes.size) {
+    //   if (!tree.formats) {
+    //     tree.formats = []
+    //   }
+    //   this.getAttributes().forEach(item => {
+    //     tree.formats!.push({
+    //       formatter: item[0],
+    //       value: item[1],
+    //       startIndex: 0,
+    //       endIndex: this.length
+    //     })
+    //   })
+    // }
+    // return tree
   }
 
   /**

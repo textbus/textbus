@@ -1,4 +1,4 @@
-import { FormatHostBindingRender, VElement, VTextNode, Attribute, FormatValue } from '@textbus/core'
+import { VElement, Attribute, FormatValue } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
@@ -32,13 +32,8 @@ export class BlockStyleFormatter implements Attribute<string> {
               public styleName: string) {
   }
 
-  render(children: Array<VElement | VTextNode>, formatValue: string): FormatHostBindingRender {
-    return {
-      fallbackTagName: 'div',
-      attach: (host: VElement) => {
-        host.styles.set(this.styleName, formatValue)
-      }
-    }
+  render(host: VElement, formatValue: string) {
+    host.styles.set(this.styleName, formatValue)
   }
 }
 

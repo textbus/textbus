@@ -12,7 +12,9 @@ import {
   Ref,
   Event,
   NativeNode,
-  SlotRenderFactory, FormatHostBindingRender, jsx, AttributeItem
+  SlotRenderFactory,
+  FormatHostBindingRender,
+  jsx
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
@@ -718,20 +720,20 @@ export class Renderer {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const formatTree = slot.createFormatTree()
 
-      const children = formatTree.children ?
+      let children = formatTree.children ?
         this.createVDomByFormatTree(slot, formatTree.children) :
         this.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
 
-      let root: VElement
       if (formatTree.formats) {
-        root = this.createVDomByOverlapFormats(formatTree.formats, children, slot, nextChildren => {
-          return slotRenderFactory(nextChildren)
-        })
-      } else {
-        root = slotRenderFactory(children)
+        children = [this.createVDomByOverlapFormats(formatTree.formats, children, slot)]
       }
+      const root = slotRenderFactory(children)
+
       if (!(root instanceof VElement)) {
         throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
+      }
+      for (const [attribute, value] of slot.getAttributes()) {
+        attribute.render(root, value, this.controller.readonly)
       }
       root.attrs.set(this.slotIdAttrKey, slot.id)
       setEditable(root, true)
@@ -783,12 +785,7 @@ export class Renderer {
         const nextChildren = this.createVDomByOverlapFormats(
           child.formats,
           children,
-          slot,
-          nextChildren => {
-            if (nextChildren.length === 1 && nextChildren[0] instanceof VElement) {
-              return nextChildren[0]
-            }
-          }
+          slot
         )
         nodes.push(nextChildren)
       } else {
@@ -799,12 +796,11 @@ export class Renderer {
   }
 
   private createVDomByOverlapFormats(
-    formats: (FormatItem<any> | AttributeItem<any>)[],
+    formats: (FormatItem<any>)[],
     children: Array<VElement | VTextNode>,
-    slot: Slot,
-    getWrapper: (nextChildren: Array<VElement | VTextNode>) => VElement | void): VElement {
-    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> | AttributeItem<any> }> = []
-    // formats = formatSort(formats)
+    slot: Slot): VElement {
+    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
+    let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
       const next = item.formatter.render(children, item.value, this.controller.readonly)
@@ -818,6 +814,7 @@ export class Renderer {
         })
         continue
       }
+      host = next
       this.vNodeLocation.set(next, {
         slot,
         startIndex: item.startIndex,
@@ -825,7 +822,6 @@ export class Renderer {
       })
       children = [next]
     }
-    let host = getWrapper(children)
     for (const binding of hostBindings) {
       const { render, item } = binding
       if (!host) {

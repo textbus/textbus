@@ -6,7 +6,7 @@ import {
   FormatItem,
   FormatTree,
   ComponentInstance,
-  Slot, SlotRenderFactory, FormatHostBindingRender, jsx, AttributeItem,
+  Slot, SlotRenderFactory, FormatHostBindingRender, jsx,
 } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 // import { makeError } from '../_utils/make-error'
@@ -71,17 +71,16 @@ export class OutputRenderer {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const formatTree = slot.createFormatTree()
 
-      const children = formatTree.children ?
+      let children = formatTree.children ?
         this.createVDomByFormatTree(slot, formatTree.children) :
         this.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
 
-      let root: VElement
       if (formatTree.formats) {
-        root = this.createVDomByOverlapFormats(formatTree.formats, children, nextChildren => {
-          return slotRenderFactory(nextChildren)
-        })
-      } else {
-        root = slotRenderFactory(children)
+        children = [this.createVDomByOverlapFormats(formatTree.formats, children)]
+      }
+      const root = slotRenderFactory(children)
+      for (const [attribute, value] of slot.getAttributes()) {
+        attribute.render(root, value, true)
       }
       slot.changeMarker.outputRendered()
       this.slotVNodeCaches.set(slot, root)
@@ -114,12 +113,7 @@ export class OutputRenderer {
 
         const nextChildren = this.createVDomByOverlapFormats(
           child.formats,
-          children,
-          nextChildren => {
-            if (nextChildren.length === 1 && nextChildren[0] instanceof VElement) {
-              return nextChildren[0]
-            }
-          }
+          children
         )
         nodes.push(nextChildren)
       } else {
@@ -130,10 +124,10 @@ export class OutputRenderer {
   }
 
   private createVDomByOverlapFormats(
-    formats: (FormatItem<any> | AttributeItem<any>)[],
-    children: Array<VElement | VTextNode>,
-    getWrapper: (nextChildren: Array<VElement | VTextNode>) => VElement | void): VElement {
+    formats: (FormatItem<any>)[],
+    children: Array<VElement | VTextNode>): VElement {
     const hostBindings: Array<FormatHostBindingRender> = []
+    let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
       const next = item.formatter.render(children, item.value, true)
@@ -141,9 +135,9 @@ export class OutputRenderer {
         hostBindings.push(next)
         continue
       }
+      host = next
       children = [next]
     }
-    let host = getWrapper(children)
     for (const binding of hostBindings) {
       if (!host) {
         host = jsx(binding.fallbackTagName)

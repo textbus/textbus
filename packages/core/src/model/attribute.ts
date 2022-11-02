@@ -25,7 +25,8 @@ export abstract class Attribute<T extends FormatValue> {
   }
 
   abstract render(
-    children: Array<VElement | VTextNode>,
+    node: VElement,
     formatValue: T,
-    isOutputMode: boolean): VElement | FormatHostBindingRender
+    isOutputMode: boolean
+  ): void
 }

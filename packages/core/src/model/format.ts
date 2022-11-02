@@ -1,4 +1,4 @@
-import { Attribute, Formatter } from './attribute'
+import { Formatter } from './attribute'
 import { Slot } from './slot'
 
 export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
@@ -22,18 +22,11 @@ export interface FormatItem<T extends FormatValue> {
   endIndex: number
 }
 
-export interface AttributeItem<T extends FormatValue> {
-  formatter: Attribute<T>
-  value: T
-  startIndex: number
-  endIndex: number
-}
-
 export interface FormatTree<T extends FormatValue> {
   startIndex: number
   endIndex: number
   children?: FormatTree<T>[]
-  formats?: (FormatItem<T> | AttributeItem<T>)[]
+  formats?: FormatItem<T>[]
 }
 
 function isVoid(data: any) {

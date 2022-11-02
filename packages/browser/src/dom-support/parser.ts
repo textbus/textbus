@@ -19,7 +19,7 @@ export interface ComponentResources {
 }
 
 export interface SlotParser {
-  <T extends Slot>(childSlot: T, childElement: HTMLElement): T
+  <T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentHostElement?: HTMLElement): T
 }
 
 /**
@@ -90,9 +90,13 @@ export class Parser {
 
   parseDoc(html: string, rootComponentLoader: ComponentLoader) {
     const element = Parser.parseHTML(html)
-    return rootComponentLoader.read(element, this.injector, (childSlot, childElement) => {
-      return this.readSlot(childSlot, childElement)
-    })
+    return rootComponentLoader.read(
+      element,
+      this.injector,
+      (childSlot, slotRootElement, slotContentHostElement = slotRootElement) => {
+        return this.readSlot(childSlot, slotRootElement, slotContentHostElement)
+      }
+    )
   }
 
   parse(html: string, rootSlot: Slot) {
@@ -108,9 +112,13 @@ export class Parser {
       }
       for (const t of this.componentLoaders) {
         if (t.match(el as HTMLElement)) {
-          const result = t.read(el as HTMLElement, this.injector, (childSlot, childElement) => {
-            return this.readSlot(childSlot, childElement)
-          })
+          const result = t.read(
+            el as HTMLElement,
+            this.injector,
+            (childSlot, slotRootElement, slotContentHostElement = slotRootElement) => {
+              return this.readSlot(childSlot, slotRootElement, slotContentHostElement)
+            }
+          )
           if (result instanceof Slot) {
             result.toDelta().forEach(i => slot.insert(i.insert, i.formats))
             return
@@ -152,14 +160,14 @@ export class Parser {
     return slot
   }
 
-  private readSlot<T extends Slot>(childSlot: T, childElement: HTMLElement): T {
+  private readSlot<T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentElement: HTMLElement): T {
     this.attributeLoaders.filter(a => {
-      return a.match(childElement)
+      return a.match(slotRootElement)
     }).forEach(a => {
-      const r = a.read(childElement)
+      const r = a.read(slotRootElement)
       childSlot.setAttribute(r.attribute, r.value)
     })
-    this.readFormats(childElement, childSlot)
+    this.readFormats(slotContentElement, childSlot)
     return childSlot
   }
 
