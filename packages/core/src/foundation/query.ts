@@ -111,7 +111,7 @@ export class Query {
           if (slot.hasAttribute(attribute)) {
             states.push({
               state: QueryStateType.Enabled,
-              value: i.slot.getAttribute(attribute)
+              value: slot.getAttribute(attribute)
             })
           } else {
             return {
