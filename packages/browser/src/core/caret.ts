@@ -159,6 +159,7 @@ export class Caret {
           this.display = !this.display || !this.flashing
           this.timer = setTimeout(toggleShowHide, 400)
         }
+        clearTimeout(this.timer)
         this.timer = setTimeout(toggleShowHide, 400)
       }
     } else {
