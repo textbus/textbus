@@ -55,6 +55,14 @@ export class Keyboard {
    */
   addZenCodingInterceptor(interceptor: ZenCodingInterceptor) {
     this.zenCodingInterceptors.unshift(interceptor)
+    return {
+      remove: () => {
+        const index = this.zenCodingInterceptors.indexOf(interceptor)
+        if (index > -1) {
+          this.zenCodingInterceptors.splice(index, 1)
+        }
+      }
+    }
   }
 
   /**
@@ -112,7 +120,16 @@ export class Keyboard {
    * @param shortcut 快捷键配置
    */
   addShortcut(shortcut: Shortcut) {
-    this.shortcutList.unshift(this.createShortcutEx(shortcut))
+    const shortcutEx = this.createShortcutEx(shortcut)
+    this.shortcutList.unshift(shortcutEx)
+    return {
+      remove: () => {
+        const index = this.shortcutList.indexOf(shortcutEx)
+        if (index > -1) {
+          this.shortcutList.splice(index, 1)
+        }
+      }
+    }
   }
 
   private handleShortcut(keymap: KeymapState, shortcutList: ShortcutEx[]) {
