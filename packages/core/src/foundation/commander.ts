@@ -153,18 +153,33 @@ function deleteUpBySlot(selection: Selection,
   }
 }
 
+/**
+ * 组件转换上下文
+ */
 export interface TransformContext {
   parentComponentName: string
   parentComponentState: unknown
   slotState: unknown
 }
 
+/**
+ * 组件转换规则
+ */
 export interface TransformRule<ComponentState, SlotState> {
+  /** 组件是否支持多插槽 */
   multipleSlot: boolean
+  /** 要转换的目标组件 */
   target: Component
 
+  /**
+   * 创建目标组件新插槽的工厂函数
+   * @param transformContext
+   */
   slotFactory(transformContext: TransformContext): Slot<SlotState>
 
+  /**
+   * 创建组件状态的工厂函数
+   */
   stateFactory?(): ComponentState
 }
 

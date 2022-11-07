@@ -6,6 +6,9 @@ import { RootComponentRef } from './_injection-tokens'
 import { Renderer } from './renderer'
 import { Selection } from './selection'
 
+/**
+ * 数据变更源
+ */
 export enum ChangeOrigin {
   History,
   Local,
@@ -17,18 +20,33 @@ export interface ChangeItem {
   operation: Operation
 }
 
+/**
+ * Textbus 调度器，用于控制文档内容的更新及渲染
+ */
 @Injectable()
 export class Scheduler {
+  /**
+   * 最后一次文档变更是否包含本地变更
+   */
   get lastChangesHasLocalUpdate() {
     return this._lastChangesHasLocalUpdate
   }
 
+  /**
+   * 最后一次文档变更是否包含远程变更
+   */
   get lastChangesHasRemoteUpdate() {
     return this._lastChangesHasRemoteUpdate
   }
 
+  /**
+   * 当文档发生变更时触发
+   */
   onDocChange: Observable<void>
 
+  /**
+   * 当文档渲染完成时触发
+   */
   onDocChanged: Observable<ChangeItem[]>
 
   private _lastChangesHasLocalUpdate = true
@@ -48,18 +66,29 @@ export class Scheduler {
     this.onDocChange = this.docChangeEvent.asObservable()
   }
 
+  /**
+   * 远程更新文档事务
+   * @param task 事务处理函数
+   */
   remoteUpdateTransact(task: () => void) {
     this.changeFromRemote = true
     task()
     this.changeFromRemote = false
   }
 
+  /**
+   * 历史记录更新文档事务
+   * @param task 事务处理函数
+   */
   historyApplyTransact(task: () => void) {
     this.changeFromHistory = true
     task()
     this.changeFromHistory = false
   }
 
+  /**
+   * 启动调度器，并兼听文档变更自动渲染文档
+   */
   run() {
     const rootComponent = this.rootComponentRef.component
     const changeMarker = rootComponent.changeMarker
@@ -120,6 +149,9 @@ export class Scheduler {
     )
   }
 
+  /**
+   * 销毁调度器
+   */
   destroy() {
     this.subs.forEach(i => i.unsubscribe())
     Scheduler.invokeChildComponentDestroyHook(this.rootComponentRef.component)

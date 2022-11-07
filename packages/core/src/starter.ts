@@ -130,8 +130,8 @@ export class Starter extends ReflectiveInjector {
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
 
-    scheduler.run()
     history.listen()
+    scheduler.run()
 
     this.plugins.forEach(i => i.setup(this))
     return this

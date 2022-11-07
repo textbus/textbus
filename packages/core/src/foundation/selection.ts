@@ -13,6 +13,9 @@ import {
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
 
+/**
+ * 选区锚点和焦点位置
+ */
 export interface AbstractSelection {
   focusSlot: Slot
   anchorSlot: Slot
@@ -20,6 +23,9 @@ export interface AbstractSelection {
   anchorOffset: number
 }
 
+/**
+ * 选区开始和结果位置
+ */
 export interface Range {
   startSlot: Slot
   endSlot: Slot
@@ -27,6 +33,9 @@ export interface Range {
   endOffset: number
 }
 
+/**
+ * 选中组件的子插槽范围
+ */
 export interface SelectedSlotRange {
   startOffset: number
   endOffset: number
@@ -44,11 +53,17 @@ export interface NativeSelectionConnector {
   setSelection(abstractSelection: AbstractSelection | null): void
 }
 
+/**
+ * 插槽偏移量
+ */
 export interface SelectionPosition {
   slot: Slot
   offset: number
 }
 
+/**
+ * 选中选区在组件树中的位置
+ */
 export interface CommonAncestorSlotScope {
   startOffset: number
   startSlot: Slot
@@ -60,6 +75,9 @@ export interface CommonAncestorSlotScope {
   endChildSlot: Slot
 }
 
+/**
+ * 选区焦点可视位置
+ */
 export interface Rect {
   left: number
   top: number
@@ -96,12 +114,22 @@ export abstract class NativeSelectionBridge {
   abstract getRect(position: SelectionPosition): Rect | null
 }
 
+/**
+ * 选区锚点和焦点的绝对路径
+ */
 export interface SelectionPaths {
   anchor: number[]
   focus: number[]
 }
 
+/**
+ * 选区快照
+ */
 export interface SelectionSnapshot {
+  /**
+   * 恢复选区
+   * @param syncNative 是否同步原生选区
+   */
   restore(syncNative: boolean): void
 }
 
@@ -179,6 +207,9 @@ export class Selection {
     return this._commonAncestorComponent
   }
 
+  /**
+   * 是否代理原生选区
+   */
   get nativeSelectionDelegate() {
     return this._nativeSelectionDelegate
   }
@@ -354,6 +385,9 @@ export class Selection {
     Promise.resolve().then(() => this.nativeSelectionDelegate = true)
   }
 
+  /**
+   * 创建选区快照，并可在需要时恢复选区，前提是缓存的插槽和位置还在文档中存在
+   */
   createSnapshot(): SelectionSnapshot {
     const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this
     return {
@@ -370,11 +404,21 @@ export class Selection {
     }
   }
 
+  /**
+   * 销毁选区
+   */
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
     this.subscriptions = []
   }
 
+  /**
+   * 设置锚点和焦点的位置
+   * @param anchorSlot 锚点插槽
+   * @param anchorOffset 锚点偏移量
+   * @param focusSlot 焦点插槽
+   * @param focusOffset 焦点偏移量
+   */
   setBaseAndExtent(anchorSlot: Slot, anchorOffset: number, focusSlot: Slot, focusOffset: number) {
     if (this.controller.readonly) {
       return
@@ -388,6 +432,9 @@ export class Selection {
     this.resetStartAndEndPosition()
   }
 
+  /**
+   * 获取选区内的选择范围，一般情况下为一个。组件可以 onGetRanges 勾子函数中定制范围个数，如表格中可能为多个
+   */
   getRanges(): Range[] {
     if (this.customRanges) {
       return this.customRanges.map(i => {
@@ -1031,6 +1078,10 @@ export class Selection {
     }
   }
 
+  /**
+   * 获取插槽在文档中的绝对路径
+   * @param slot
+   */
   getPathsBySlot(slot: Slot): number[] | null {
     const paths: number[] = []
 
@@ -1056,6 +1107,11 @@ export class Selection {
     return paths.length ? paths.reverse() : null
   }
 
+  /**
+   * 根据当前位置获取下一个光标位置
+   * @param slot
+   * @param offset
+   */
   getNextPositionByPosition(slot: Slot, offset: number) {
     if (offset === slot.length - 1) {
       const current = slot.getContentAtIndex(offset)
@@ -1119,6 +1175,11 @@ export class Selection {
     }
   }
 
+  /**
+   * 根据当前位置，获取下一个光标位置
+   * @param slot
+   * @param offset
+   */
   getPreviousPositionByPosition(slot: Slot, offset: number) {
     if (offset > 0) {
       const prev = slot.getContentAtIndex(offset - 1)!
@@ -1174,6 +1235,14 @@ export class Selection {
     }
   }
 
+  /**
+   * 根据指定的开始位置和结束位置，获取选区中片段
+   * @param startSlot
+   * @param startIndex
+   * @param endSlot
+   * @param endIndex
+   * @param discardEmptyScope
+   */
   getScopes(
     startSlot: Slot,
     startIndex: number,
@@ -1193,6 +1262,11 @@ export class Selection {
     )
   }
 
+  /**
+   * 根据开始插槽和结束插槽获取最近的公共父组件
+   * @param startSlot
+   * @param endSlot
+   */
   static getCommonAncestorComponent(startSlot: Slot | null, endSlot: Slot | null) {
     let startComponent = startSlot?.parent
     let endComponent = endSlot?.parent
@@ -1232,6 +1306,11 @@ export class Selection {
     return f
   }
 
+  /**
+   * 根据开始插槽和结束插槽获取最近的公共父插槽
+   * @param startSlot
+   * @param endSlot
+   */
   static getCommonAncestorSlot(startSlot: Slot | null, endSlot: Slot | null) {
     if (startSlot === endSlot) {
       return startSlot
@@ -1270,6 +1349,12 @@ export class Selection {
     return f
   }
 
+  /**
+   * 比较两个绝对路径的前后，当 minPaths 小于 maxPaths 时，返回 true，否则返回 false
+   * @param minPaths 假定的小路径
+   * @param maxPaths 假定的大路径
+   * @param canEqual minPaths 和 maxPaths 是否可以相等
+   */
   static compareSelectionPaths(minPaths: number[], maxPaths: number[], canEqual = true): boolean {
     let minIsStart = true
     let i = 0
@@ -1299,6 +1384,11 @@ export class Selection {
     return minIsStart
   }
 
+  /**
+   * 获取插槽指定位置之前的非 BlockComponent 内容
+   * @param slot
+   * @param index
+   */
   static getInlineContentStartIndex(slot: Slot, index: number) {
     const contents = slot.sliceContent(0, index)
     const len = contents.length
@@ -1311,7 +1401,11 @@ export class Selection {
     }
     return index
   }
-
+  /**
+   * 获取插槽指定位置之后的非 BlockComponent 内容
+   * @param slot
+   * @param index
+   */
   static getInlineContentEndIndex(slot: Slot, index: number) {
     const contents = slot.sliceContent(index)
 

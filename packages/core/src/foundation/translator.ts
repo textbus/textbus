@@ -20,6 +20,11 @@ export class Translator {
               private registry: Registry) {
   }
 
+  /**
+   * 根据组件名和数据创建组件
+   * @param name
+   * @param data
+   */
   createComponentByData(name: string, data: ComponentInitData) {
     const factory = this.registry.getComponent(name)
     if (factory) {
