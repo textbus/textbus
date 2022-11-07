@@ -217,6 +217,9 @@ export class Renderer {
    */
   onViewUpdated: Observable<void>
 
+  /**
+   * 原生渲染器
+   */
   @Prop()
   nativeRenderer!: NativeRenderer
 
