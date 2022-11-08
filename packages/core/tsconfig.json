@@ -15,11 +15,14 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "VElement.createElement"
+    "downlevelIteration": true
   },
   "include": [
-    "src/"
-  ]
+    "src"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
