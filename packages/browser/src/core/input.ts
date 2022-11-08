@@ -40,7 +40,7 @@ const iframeHTML = `
 @Injectable()
 export class Input {
   onReady: Promise<void>
-  private container = Input.createEditableFrame()
+  private container = this.createEditableFrame()
 
   private subscription = new Subscription()
   private doc!: Document
@@ -64,6 +64,10 @@ export class Input {
   //   }
   // }
   private nativeFocus = false
+
+  private isSafari = isSafari()
+  private isMac = isMac()
+  private isWindows = isWindows()
 
   private isSougouPinYin = false // 有 bug 版本搜狗拼音
 
@@ -231,14 +235,14 @@ export class Input {
         isWriting = false
       }),
       fromEvent<InputEvent>(textarea, 'beforeinput').subscribe(ev => {
-        if (isSafari) {
+        if (this.isSafari) {
           if (ev.inputType === 'insertFromComposition') {
             isIgnore = true
           }
         }
       }),
       fromEvent<KeyboardEvent>(textarea, 'keydown').pipe(filter(() => {
-        if (isSafari && isIgnore) {
+        if (this.isSafari && isIgnore) {
           isIgnore = false
           return false
         }
@@ -253,7 +257,7 @@ export class Input {
           key: key,
           altKey: ev.altKey,
           shiftKey: ev.shiftKey,
-          ctrlKey: isMac ? ev.metaKey : ev.ctrlKey
+          ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
           if (b) {
@@ -271,7 +275,7 @@ export class Input {
         fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
           filter(ev => {
             ev.preventDefault()
-            if (isSafari) {
+            if (this.isSafari) {
               return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
             }
             return !ev.isComposing && !!ev.data
@@ -280,7 +284,7 @@ export class Input {
             return ev.data as string
           })
         ),
-        isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(
+        this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(
           map(ev => {
             ev.preventDefault()
             textarea.value = ''
@@ -346,7 +350,7 @@ export class Input {
   //   )
   // }
 
-  private static createEditableFrame() {
+  private createEditableFrame() {
     return createElement('iframe', {
       attrs: {
         scrolling: 'no'
@@ -357,7 +361,7 @@ export class Input {
         display: 'block',
         height: '100%',
         position: 'relative',
-        top: isWindows ? '6px' : '0'
+        top: this.isWindows ? '6px' : '0'
       }
     }) as HTMLIFrameElement
   }
