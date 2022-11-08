@@ -5,7 +5,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["esnext", "dom"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "target": "es6",
     "strict": true,
     "module": "es2020",
@@ -15,14 +18,14 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "VElement.createElement",
-    "paths": {
-      "@textbus/collaborate": ["./src/public-api.ts"],
-    }
+    "downlevelIteration": true
   },
   "include": [
-    "src/"
-  ]
+    "src"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

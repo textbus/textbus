@@ -13,6 +13,7 @@ index.html
 webpack-build.config.js
 disable-output-webpack-plugin.js
 gulpfile.js
+rollup.config.ts
 package-lock.json
 template-style-loader.js
 tsconfig.json
