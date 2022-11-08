@@ -2,15 +2,16 @@ import { isMac, createElement, createTextNode } from '@textbus/browser'
 import { Keymap } from '@textbus/core'
 
 export function createKeymap(config: Keymap): Node[] {
+  const _isMac = isMac()
   const arr: string[] = []
   if (config.ctrlKey) {
-    arr.push(isMac ? 'textbus-icon-command' : 'Ctrl')
+    arr.push(_isMac ? 'textbus-icon-command' : 'Ctrl')
   }
   if (config.shiftKey) {
-    arr.push(isMac ? 'textbus-icon-shift' : 'Shift')
+    arr.push(_isMac ? 'textbus-icon-shift' : 'Shift')
   }
   if (config.altKey) {
-    arr.push(isMac ? 'textbus-icon-opt' : 'Alt')
+    arr.push(_isMac ? 'textbus-icon-opt' : 'Alt')
   }
   const keys = Array.isArray(config.key) ?
     config.key.map(i => i.toUpperCase()).join('/') :
@@ -20,7 +21,7 @@ export function createKeymap(config: Keymap): Node[] {
         config.key.name.map(i => i.toUpperCase()).join('/') :
         config.key.name.toLowerCase()
   const result: Node[] = []
-  if (isMac) {
+  if (_isMac) {
     result.push(...arr.map(s => {
       return createElement('span', {
         classes: [s]
