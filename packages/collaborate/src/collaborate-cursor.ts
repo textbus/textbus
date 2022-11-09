@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@tanbo/di'
+import { Injectable, Injector, Optional } from '@tanbo/di'
 import {
   createElement,
   VIEW_CONTAINER,
@@ -83,15 +83,17 @@ export class CollaborateCursor {
 
   private subscription = new Subscription()
   private currentSelection: RemoteSelection[] = []
+  private container: HTMLElement
 
-  constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
-              @Optional() private awarenessDelegate: CollaborateSelectionAwarenessDelegate,
+  constructor(private injector: Injector,
               private nativeSelection: SelectionBridge,
               private scheduler: Scheduler,
-              private selection: Selection) {
+              private selection: Selection,
+              @Optional() private awarenessDelegate?: CollaborateSelectionAwarenessDelegate) {
+    this.container = injector.get(VIEW_CONTAINER)
     this.canvasContainer.append(this.canvas)
     this.host.append(this.canvasContainer, this.tooltips)
-    container.prepend(this.host)
+    this.container.prepend(this.host)
     this.subscription.add(this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
         this.context.fillStyle = rect.color

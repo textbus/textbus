@@ -1,5 +1,5 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Inject, Injectable } from '@tanbo/di'
+import { Injectable, Injector } from '@tanbo/di'
 import { Scheduler, Rect } from '@textbus/core'
 
 import { createElement } from '../_utils/uikit'
@@ -96,10 +96,12 @@ export class Caret {
   private oldRange: Range | null = null
 
   private isFixed = false
+  private editorMask: HTMLElement
 
   constructor(
     private scheduler: Scheduler,
-    @Inject(VIEW_MASK) private editorMask: HTMLElement) {
+    private injector: Injector) {
+    this.editorMask = injector.get(VIEW_MASK)
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
@@ -129,7 +131,7 @@ export class Caret {
         this.flashing = true
       }),
     )
-    editorMask.appendChild(this.elementRef)
+    this.editorMask.appendChild(this.elementRef)
   }
 
   refresh(isFixedCaret = false) {
