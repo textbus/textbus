@@ -1,5 +1,5 @@
 import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Inject, Injectable } from '@tanbo/di'
+import { Injectable, Injector } from '@tanbo/di'
 import {
   ComponentInstance,
   NativeSelectionBridge,
@@ -37,14 +37,17 @@ export class SelectionBridge implements NativeSelectionBridge {
   private ignoreSelectionChange = false
 
   private changeFromUser = false
+  private docContainer: HTMLElement
+  private maskContainer: HTMLElement
 
-  constructor(@Inject(VIEW_DOCUMENT) private docContainer: HTMLElement,
-              @Inject(VIEW_MASK) private maskContainer: HTMLElement,
+  constructor(private injector: Injector,
               public caret: Caret,
               private controller: Controller,
               private rootComponentRef: RootComponentRef,
               private input: Input,
               private renderer: Renderer) {
+    this.docContainer = injector.get(VIEW_DOCUMENT)
+    this.maskContainer = injector.get(VIEW_MASK)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly
     }))
