@@ -121,9 +121,11 @@ importers:
       '@rollup/plugin-typescript': ^9.0.2
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/core': ^2.5.2
+      '@textbus/core': ^2.5.4
       reflect-metadata: ^0.1.13
+      rimraf: ^3.0.2
       rollup: ^3.2.5
+      tslib: ^2.4.1
     dependencies:
       '@tanbo/di': 1.1.3
       '@tanbo/stream': 1.1.8
@@ -131,8 +133,10 @@ importers:
       reflect-metadata: 0.1.13
     devDependencies:
       '@rollup/plugin-commonjs': 23.0.2_rollup@3.2.5
-      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5
+      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5+tslib@2.4.1
+      rimraf: 3.0.2
       rollup: 3.2.5
+      tslib: 2.4.1
 
   packages/collaborate:
     specifiers:
@@ -140,10 +144,12 @@ importers:
       '@rollup/plugin-typescript': ^9.0.2
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/browser': ^2.5.2
-      '@textbus/core': ^2.5.2
+      '@textbus/browser': ^2.5.4
+      '@textbus/core': ^2.5.4
       reflect-metadata: ^0.1.13
+      rimraf: ^3.0.2
       rollup: ^3.2.5
+      tslib: ^2.4.1
       y-protocols: ^1.0.5
       yjs: ^13.5.39
     dependencies:
@@ -156,8 +162,10 @@ importers:
       yjs: 13.5.42
     devDependencies:
       '@rollup/plugin-commonjs': 23.0.2_rollup@3.2.5
-      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5
+      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5+tslib@2.4.1
+      rimraf: 3.0.2
       rollup: 3.2.5
+      tslib: 2.4.1
 
   packages/core:
     specifiers:
@@ -166,15 +174,19 @@ importers:
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
       immer: ^9.0.12
+      rimraf: ^3.0.2
       rollup: ^3.2.5
+      tslib: ^2.4.1
     dependencies:
       '@tanbo/di': 1.1.3
       '@tanbo/stream': 1.1.8
       immer: 9.0.16
     devDependencies:
       '@rollup/plugin-commonjs': 23.0.2_rollup@3.2.5
-      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5
+      '@rollup/plugin-typescript': 9.0.2_rollup@3.2.5+tslib@2.4.1
+      rimraf: 3.0.2
       rollup: 3.2.5
+      tslib: 2.4.1
 
   packages/editor:
     specifiers:
@@ -184,11 +196,12 @@ importers:
       '@tanbo/css-themes': ^0.0.1
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/browser': ^2.5.2
-      '@textbus/collaborate': ^2.5.2
-      '@textbus/core': ^2.5.2
+      '@textbus/browser': ^2.5.4
+      '@textbus/collaborate': ^2.5.4
+      '@textbus/core': ^2.5.4
       katex: ^0.16.0
       prismjs: ^1.23.0
+      rimraf: ^3.0.2
     dependencies:
       '@tanbo/bezier': 1.0.1
       '@tanbo/color': 0.1.1
@@ -201,6 +214,8 @@ importers:
       '@textbus/core': link:../core
       katex: 0.16.3
       prismjs: 1.29.0
+    devDependencies:
+      rimraf: 3.0.2
 
 packages:
 
@@ -2749,7 +2764,7 @@ packages:
       rollup: 3.2.5
     dev: true
 
-  /@rollup/plugin-typescript/9.0.2_rollup@3.2.5:
+  /@rollup/plugin-typescript/9.0.2_rollup@3.2.5+tslib@2.4.1:
     resolution: {integrity: sha512-/sS93vmHUMjzDUsl5scNQr1mUlNE1QjBBvOhmRwJCH8k2RRhDIm3c977B3wdu3t3Ap17W6dDeXP3hj1P1Un1bA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -2765,6 +2780,7 @@ packages:
       '@rollup/pluginutils': 5.0.2_rollup@3.2.5
       resolve: 1.22.1
       rollup: 3.2.5
+      tslib: 2.4.1
     dev: true
 
   /@rollup/pluginutils/5.0.2_rollup@3.2.5:

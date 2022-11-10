@@ -48,5 +48,8 @@
   "bugs": {
     "url": "https://github.com/textbus/textbus.git/issues"
   },
-  "gitHead": "cd75d4ae54f0976cbb87c654ab322b5d66f572e5"
+  "gitHead": "cd75d4ae54f0976cbb87c654ab322b5d66f572e5",
+  "devDependencies": {
+    "rimraf": "^3.0.2"
+  }
 }

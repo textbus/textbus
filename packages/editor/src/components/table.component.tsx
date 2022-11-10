@@ -215,21 +215,34 @@ export const tableComponent = defineComponent({
           .reduce((p, n) => {
             return p.concat(n)
           })
-        const newNode = selectedCells.shift()
-        newNode!.cell.updateState(draft => {
+        const newNode = selectedCells.shift()!
+        newNode.cell.updateState(draft => {
           draft.rowspan = maxRow - minRow
           draft.colspan = maxColumn - minColumn
         })
 
         selectedCells.forEach(cell => {
           slots.remove(cell.cell)
+          const lastContent = cell.cell.getContentAtIndex(cell.cell.length - 1)
+          if (
+            cell.cell.isEmpty ||
+            (cell.cell.length === 1 && typeof lastContent !== 'string' && lastContent.slots.last?.isEmpty)
+          ) {
+            return
+          }
+          const slot = newNode.cell
+          const index = slot.isEmpty ? 0 : slot.length
+          slot.retain(index)
+          cell.cell.cutTo(slot)
+          slot.retain(index)
         })
 
-        if (selection.startSlot !== newNode!.cell) {
-          selection.setAnchor(newNode!.cell, 0)
-        }
-        if (selection.endSlot !== newNode!.cell) {
-          selection.setFocus(newNode!.cell, newNode!.cell.length)
+        const lastContent = newNode.cell.getContentAtIndex(newNode.cell.length - 1)
+        if (typeof lastContent !== 'string') {
+          const lastContentSlot = lastContent.slots.first
+          selection.setPosition(lastContentSlot, lastContentSlot!.length)
+        } else {
+          selection.setPosition(newNode.cell, 0)
         }
       },
       splitCells() {
@@ -280,10 +293,48 @@ export const tableComponent = defineComponent({
         if (!startPosition || !endPosition) {
           return
         }
-        const serializedCells = serialize(tableCells)
         const startIndex = startPosition.columnIndex
         const endIndex = endPosition.columnIndex
-
+        instance.deleteColumnByIndex(startIndex, endIndex)
+      },
+      deleteRows() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        const startIndex = startPosition.rowIndex
+        const endIndex = endPosition.rowIndex
+        instance.deleteRowByIndex(startIndex, endIndex)
+      },
+      addRowToBottom() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertRow(endPosition.rowIndex + 1)
+      },
+      addRowToTop() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertRow(startPosition.rowIndex)
+      },
+      addColumnToRight() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertColumn(endPosition.columnIndex + 1)
+      },
+      addColumnToLeft() {
+        if (!startPosition || !endPosition) {
+          return
+        }
+        this.insertColumn(startPosition.columnIndex)
+      },
+      deleteColumnByIndex(startIndex: number, endIndex: number) {
+        if (tableInfo.columnCount === 1) {
+          self.parent?.removeComponent(self)
+          return
+        }
+        const serializedCells = serialize(tableCells)
         stateController.update(draft => {
           draft.columnCount = tableInfo.columnCount - (endIndex - startIndex + 1)
         })
@@ -320,14 +371,12 @@ export const tableComponent = defineComponent({
           self.parent?.removeComponent(self)
         }
       },
-      deleteRows() {
-        if (!startPosition || !endPosition) {
+      deleteRowByIndex(startIndex: number, endIndex: number) {
+        if (tableInfo.rowCount === 1) {
+          self.parent?.removeComponent(self)
           return
         }
         const serializedCells = serialize(tableCells)
-        const startIndex = startPosition.rowIndex
-        const endIndex = endPosition.rowIndex
-
         stateController.update(draft => {
           draft.rowCount = tableInfo.rowCount - (endIndex - startIndex + 1)
         })
@@ -358,40 +407,17 @@ export const tableComponent = defineComponent({
               slots.remove(td.cell)
             }
           })
-
-          // tableCells.splice(startIndex, 1)
         }
         if (slots.length === 0) {
           self.parent?.removeComponent(self)
         }
       },
-      addRowToBottom() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertRow(endPosition.rowIndex + 1)
-      },
-      addRowToTop() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertRow(startPosition.rowIndex)
-      },
-      addColumnToRight() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertColumn(endPosition.columnIndex + 1)
-      },
-      addColumnToLeft() {
-        if (!startPosition || !endPosition) {
-          return
-        }
-        this.insertColumn(startPosition.columnIndex)
-      },
       insertRow(index: number) {
         const serializedCells = serialize(tableCells)
         const tr: Slot[] = []
+        stateController.update(draft => {
+          draft.rowCount = tableInfo.rowCount + 1
+        })
         if (index === 0 || index === serializedCells.length) {
           for (let i = 0; i < tableInfo.columnCount; i++) {
             tr.push(createCell())
@@ -406,12 +432,8 @@ export const tableComponent = defineComponent({
 
         const row = serializedCells[index]
 
-        stateController.update(draft => {
-          draft.rowCount = tableInfo.rowCount + 1
-        })
-
         row.cellsPosition.forEach(cell => {
-          if (cell.offsetRow < cell.cell.state!.rowspan - 1) {
+          if (cell.offsetRow > 0) {
             if (cell.offsetColumn === 0) {
               cell.cell.updateState(draft => {
                 draft.rowspan = cell.cell.state!.rowspan + 1
@@ -486,6 +508,8 @@ export const tableComponent = defineComponent({
         stateController.update(draft => {
           draft.columnCount = tableInfo.columnCount + 1
         })
+
+        tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
       },
       render(isOutputMode: boolean, slotRender: SlotRender): VElement {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
