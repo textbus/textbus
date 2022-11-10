@@ -1,4 +1,4 @@
-import { createElement, createTextNode } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/platform-browser'
 
 import { FormStaticParams, AttrState, FormItem } from './help'
 

@@ -1,5 +1,5 @@
 import { Injectable, Injector } from '@tanbo/di'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser, CollaborateSelectionAwarenessDelegate } from '@textbus/platform-browser'
 import {
   Commander,
   ComponentInitData,
@@ -30,7 +30,6 @@ import {
   TableConfig, TableSlotState,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
-import { CollaborateSelectionAwarenessDelegate } from '@textbus/collaborate'
 
 export {
   createCell

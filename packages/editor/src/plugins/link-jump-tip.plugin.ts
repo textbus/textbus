@@ -1,7 +1,7 @@
 import { delay, Subscription } from '@tanbo/stream'
-import { NativeSelectionBridge, Selection, Plugin } from '@textbus/core'
+import { Selection, Plugin } from '@textbus/core'
 import { Injector } from '@tanbo/di'
-import { VIEW_CONTAINER } from '@textbus/browser'
+import { SelectionBridge, VIEW_CONTAINER } from '@textbus/platform-browser'
 import { I18n } from '../i18n'
 
 export class LinkJumpTipPlugin implements Plugin {
@@ -10,7 +10,7 @@ export class LinkJumpTipPlugin implements Plugin {
 
   setup(injector: Injector) {
     const selection = injector.get(Selection)
-    const nativeSelectionBridge = injector.get(NativeSelectionBridge)
+    const nativeSelectionBridge = injector.get(SelectionBridge)
     const container = injector.get(VIEW_CONTAINER)
     const i18n = injector.get(I18n)
     this.link.innerText = i18n.get('plugins.linkJump.accessLink') || '跳转'
@@ -27,7 +27,7 @@ export class LinkJumpTipPlugin implements Plugin {
     this.subs.forEach(i => i.unsubscribe())
   }
 
-  private onSelectionChange(contentDocument: Document, selection: Selection, bridge: NativeSelectionBridge, container: HTMLElement) {
+  private onSelectionChange(contentDocument: Document, selection: Selection, bridge: SelectionBridge, container: HTMLElement) {
     const nativeSelection = contentDocument.getSelection()!
     const firstNativeRange = nativeSelection.rangeCount ? nativeSelection.getRangeAt(0) : null
     if (firstNativeRange) {

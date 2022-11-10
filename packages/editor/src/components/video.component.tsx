@@ -7,7 +7,7 @@ import {
   useRef,
   useState, VElement,
 } from '@textbus/core'
-import { ComponentLoader } from '@textbus/browser'
+import { ComponentLoader } from '@textbus/platform-browser'
 
 import { useDragResize } from './hooks/drag-resize'
 

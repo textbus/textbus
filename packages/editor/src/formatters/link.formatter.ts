@@ -1,7 +1,7 @@
 import { VElement, VTextNode, FormatValue, Formatter } from '@textbus/core'
 
 import { Matcher } from './matcher'
-import { FormatLoader } from '@textbus/browser'
+import { FormatLoader } from '@textbus/platform-browser'
 
 export class LinkFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<any>> implements FormatLoader<any> {
   constructor(formatter: Formatter<any>) {

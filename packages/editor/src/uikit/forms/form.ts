@@ -1,5 +1,5 @@
 import { Observable, Subject } from '@tanbo/stream'
-import { createElement, createTextNode } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/platform-browser'
 
 import { FormItem } from './help'
 import { ViewController } from '../types'

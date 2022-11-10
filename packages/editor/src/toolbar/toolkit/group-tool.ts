@@ -1,4 +1,4 @@
-import { createElement, createTextNode } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/platform-browser'
 import { Injector } from '@tanbo/di'
 import { Controller, Keyboard, Keymap, QueryStateType } from '@textbus/core'
 import { fromEvent } from '@tanbo/stream'

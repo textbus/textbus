@@ -1,6 +1,6 @@
 import { Observable } from '@tanbo/stream'
 import { Component } from '@textbus/core'
-import { ViewOptions, ComponentLoader } from '@textbus/browser'
+import { ViewOptions, ComponentLoader } from '@textbus/platform-browser'
 
 import { I18NConfig } from './i18n'
 import { UploadConfig } from './file-uploader'

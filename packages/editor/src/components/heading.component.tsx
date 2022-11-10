@@ -10,7 +10,7 @@ import {
   useSlots,
   VElement
 } from '@textbus/core'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 
 import { useEnterBreaking } from './hooks/single-block-enter'
 

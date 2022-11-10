@@ -13,7 +13,7 @@ import {
   VElement,
   ComponentInitData, useState, onDestroy,
 } from '@textbus/core'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 
 import { paragraphComponent } from './paragraph.component'
 

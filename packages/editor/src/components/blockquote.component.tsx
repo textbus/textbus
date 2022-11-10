@@ -9,7 +9,7 @@ import {
   useSlots,
   VElement
 } from '@textbus/core'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 
 export const blockquoteComponent = defineComponent({
   type: ContentType.BlockComponent,

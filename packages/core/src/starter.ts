@@ -15,7 +15,7 @@ import {
   NativeSelectionBridge,
   NativeRenderer,
   Controller,
-  CoreHistory,
+  LocalHistory,
   ZEN_CODING_DETECT,
   Scheduler,
   HISTORY_STACK_SIZE,
@@ -205,7 +205,7 @@ export class Starter extends ReflectiveInjector {
       },
       {
         provide: History,
-        useClass: CoreHistory
+        useClass: LocalHistory
       },
       Controller,
       Scheduler,

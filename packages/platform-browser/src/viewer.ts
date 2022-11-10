@@ -31,6 +31,7 @@ import {
   DomRenderer,
   SelectionBridge, VIEW_MASK, VIEW_DOCUMENT, NativeInput
 } from './core/_api'
+import { CollaborateCursor } from './collaborate/collaborate-cursor'
 
 export interface Resources {
   styleSheets: string[]
@@ -129,6 +130,7 @@ export class Viewer extends Starter {
         Parser,
         SelectionBridge,
         OutputTranslator,
+        CollaborateCursor
       ],
       setup: options.setup
     })
@@ -398,10 +400,10 @@ export class Viewer extends Starter {
             selection.wrapToAfter()
             break
           case 'ArrowUp':
-            selection.wrapToTop()
+            selection.wrapToPreviousLine()
             break
           case 'ArrowDown':
-            selection.wrapToBottom()
+            selection.wrapToNextLine()
             break
         }
       }

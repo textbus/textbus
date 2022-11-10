@@ -31,9 +31,9 @@
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.4",
     "@tanbo/stream": "^1.1.9",
-    "@textbus/browser": "^3.0.0-alpha.14",
     "@textbus/collaborate": "^3.0.0-alpha.14",
     "@textbus/core": "^3.0.0-alpha.14",
+    "@textbus/platform-browser": "^3.0.0-alpha.14",
     "katex": "^0.16.0",
     "prismjs": "^1.23.0"
   },

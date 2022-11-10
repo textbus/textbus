@@ -1,5 +1,5 @@
 import { debounceTime, merge, Subscription } from '@tanbo/stream'
-import { createElement, VIEW_CONTAINER } from '@textbus/browser'
+import { createElement, VIEW_CONTAINER, Rect } from '@textbus/platform-browser'
 import {
   ChangeController, ComponentInstance, GetRangesEvent,
   ContentType,
@@ -10,7 +10,7 @@ import {
   Slot,
   Slots,
   useContext,
-  useSelf, Rect
+  useSelf
 } from '@textbus/core'
 import { CubicBezier } from '@tanbo/bezier'
 

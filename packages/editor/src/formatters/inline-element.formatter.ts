@@ -1,7 +1,7 @@
 import { VElement, VTextNode, FormatValue, Formatter } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
-import { FormatLoader } from '@textbus/browser'
+import { FormatLoader } from '@textbus/platform-browser'
 
 export class InlineTagFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<T>> implements FormatLoader<T> {
   constructor(formatter: InlineElementFormatter, rule: MatchRule) {

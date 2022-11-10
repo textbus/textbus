@@ -1,6 +1,6 @@
 import { Injector } from '@tanbo/di'
 import { Commander, ComponentInstance, ContentType, QueryStateType, Selection, Slot } from '@textbus/core'
-import { createElement } from '@textbus/browser'
+import { createElement } from '@textbus/platform-browser'
 import { Observable, Subject } from '@tanbo/stream'
 
 import { DropdownTool, DropdownToolConfig } from '../toolkit/_api'

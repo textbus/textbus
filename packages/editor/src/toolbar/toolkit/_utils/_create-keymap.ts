@@ -1,4 +1,4 @@
-import { isMac, createElement, createTextNode } from '@textbus/browser'
+import { isMac, createElement, createTextNode } from '@textbus/platform-browser'
 import { Keymap } from '@textbus/core'
 
 export function createKeymap(config: Keymap): Node[] {

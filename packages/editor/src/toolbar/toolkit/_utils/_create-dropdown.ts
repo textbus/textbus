@@ -1,4 +1,4 @@
-import { createElement } from '@textbus/browser'
+import { createElement } from '@textbus/platform-browser'
 import { fromEvent } from '@tanbo/stream'
 
 function fixPosition(wrapper: HTMLElement, menu: HTMLElement, stickyElement: HTMLElement) {

@@ -19,7 +19,7 @@ import {
   createTextNode,
   VIEW_CONTAINER,
   Parser
-} from '@textbus/browser'
+} from '@textbus/platform-browser'
 import { I18n } from '../i18n'
 import { Message } from '../message'
 import { paragraphComponent } from '../components/paragraph.component'

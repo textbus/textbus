@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { createElement, createTextNode } from '@textbus/browser'
+import { createElement, createTextNode } from '@textbus/platform-browser'
 
 import { Layout } from './layout'
 

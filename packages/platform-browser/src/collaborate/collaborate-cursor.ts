@@ -1,12 +1,11 @@
 import { Injectable, Injector, Optional } from '@tanbo/di'
-import {
-  createElement,
-  VIEW_CONTAINER,
-  getLayoutRectByRange,
-  SelectionBridge
-} from '@textbus/browser'
-import { Selection, SelectionPaths, AbstractSelection, Scheduler, Rect } from '@textbus/core'
+import { Selection, SelectionPaths, AbstractSelection, Scheduler } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
+
+import { VIEW_CONTAINER } from '../core/injection-tokens'
+import { getLayoutRectByRange } from '../core/caret'
+import { SelectionBridge } from '../core/selection-bridge'
+import { createElement, Rect } from '../_utils/uikit'
 
 export interface RemoteSelection {
   id: string

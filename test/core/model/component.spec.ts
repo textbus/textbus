@@ -10,7 +10,7 @@ import {
   useState
 } from '@textbus/core'
 import { Injector, NullInjector, ReflectiveInjector } from '@tanbo/di'
-import { DomRenderer } from '@textbus/browser'
+import { DomRenderer } from '@textbus/platform-browser'
 
 describe('Component', () => {
   test('正确返回组件', () => {

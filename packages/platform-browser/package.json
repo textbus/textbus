@@ -1,5 +1,5 @@
 {
-  "name": "@textbus/browser",
+  "name": "@textbus/platform-browser",
   "version": "3.0.0-alpha.14",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",

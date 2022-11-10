@@ -8,7 +8,7 @@ import {
   useState,
   VElement
 } from '@textbus/core'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 import { Injector } from '@tanbo/di'
 import { I18n } from '../i18n'
 

@@ -1,7 +1,8 @@
-import { ComponentLiteral, Module, TextbusConfig, Rect } from '@textbus/core'
+import { ComponentLiteral, Module, TextbusConfig } from '@textbus/core'
 import { Observable } from '@tanbo/stream'
 
 import { FormatLoader, ComponentLoader, AttributeLoader } from '../dom-support/parser'
+import { Rect } from '../_utils/uikit'
 
 export interface ViewModule extends Module {
   componentLoaders?: ComponentLoader[]

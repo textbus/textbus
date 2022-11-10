@@ -2,7 +2,7 @@ import { VElement, Attribute, FormatValue } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
 import { blockTags } from './_config'
-import { AttributeLoader } from '@textbus/browser'
+import { AttributeLoader } from '@textbus/platform-browser'
 
 export class BlockStyleFormatLoader<T extends FormatValue> extends Matcher<T, Attribute<T>> implements AttributeLoader<T> {
   constructor(public styleName: string, formatter: Attribute<any>, rule: MatchRule) {

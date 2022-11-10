@@ -8,12 +8,15 @@ import {
   Slot,
   AbstractSelection,
   RootComponentRef,
-  Controller, VElement, VTextNode
+  Controller,
+  VElement,
+  VTextNode,
+  Selection
 } from '@textbus/core'
 
 import { getLayoutRectByRange } from './caret'
 import { EDITOR_OPTIONS, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
-import { createElement } from '../_utils/uikit'
+import { createElement, Rect } from '../_utils/uikit'
 import { Input, ViewOptions } from './types'
 
 /**
@@ -38,9 +41,13 @@ export class SelectionBridge implements NativeSelectionBridge {
   private docContainer: HTMLElement
   private maskContainer: HTMLElement
 
+  private cacheCaretPositionTimer!: any
+  private oldCaretPosition!: Rect | null
+
   constructor(@Inject(EDITOR_OPTIONS) private config: ViewOptions,
               private injector: Injector,
               private controller: Controller,
+              private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
               private renderer: Renderer) {
@@ -179,6 +186,144 @@ export class SelectionBridge implements NativeSelectionBridge {
         focus: null,
         anchor: null
       }
+    }
+  }
+
+  getPreviousLinePositionByCurrent(position: SelectionPosition): SelectionPosition | null {
+    return this.getLinePosition(position, false)
+  }
+
+  getNextLinePositionByCurrent(position: SelectionPosition): SelectionPosition | null {
+    return this.getLinePosition(position, true)
+  }
+
+  private getLinePosition(currentPosition: SelectionPosition, toNext: boolean): SelectionPosition | null {
+    clearTimeout(this.cacheCaretPositionTimer)
+    let p: SelectionPosition
+    if (this.oldCaretPosition) {
+      p = toNext ?
+        this.getNextLinePositionByOffset(currentPosition, this.oldCaretPosition.left) :
+        this.getPreviousLinePositionByOffset(currentPosition, this.oldCaretPosition.left)
+    } else {
+      this.oldCaretPosition = this.getRect(currentPosition)!
+      p = toNext ?
+        this.getNextLinePositionByOffset(currentPosition, this.oldCaretPosition!.left) :
+        this.getPreviousLinePositionByOffset(currentPosition, this.oldCaretPosition!.left)
+    }
+    this.cacheCaretPositionTimer = setTimeout(() => {
+      this.oldCaretPosition = null
+    }, 3000)
+    return p
+  }
+
+  /**
+   * 获取选区向上移动一行的位置。
+   * @param currentPosition
+   * @param startLeft 参考位置。
+   */
+  private getPreviousLinePositionByOffset(currentPosition: SelectionPosition, startLeft: number): SelectionPosition {
+    let isToPrevLine = false
+    let loopCount = 0
+    let minLeft = startLeft
+    let focusSlot = currentPosition.slot
+    let focusOffset = currentPosition.offset
+    let minTop = this.getRect({
+      slot: focusSlot,
+      offset: focusOffset
+    })!.top
+
+    let position: SelectionPosition
+    let oldPosition!: SelectionPosition
+    let oldLeft = 0
+    while (true) {
+      loopCount++
+      position = this.selection.getPreviousPositionByPosition(focusSlot, focusOffset)
+      focusSlot = position.slot
+      focusOffset = position.offset
+      const rect2 = this.getRect(position)!
+      if (!isToPrevLine) {
+        if (rect2.left > minLeft || rect2.top < minTop) {
+          isToPrevLine = true
+        } else if (rect2.left === minLeft && rect2.top === minTop) {
+          return position
+        }
+        minLeft = rect2.left
+        minTop = rect2.top
+      }
+      if (isToPrevLine) {
+        if (rect2.left < startLeft) {
+          return position
+        }
+        if (oldPosition) {
+          if (rect2.left >= oldLeft) {
+            return oldPosition
+          }
+        }
+        oldLeft = rect2.left
+        oldPosition = position
+      }
+      if (loopCount > 10000) {
+        break
+      }
+    }
+    return position || {
+      offset: 0,
+      slot: focusSlot
+    }
+  }
+
+  /**
+   * 获取选区向下移动一行的位置。
+   * @param currentPosition
+   * @param startLeft 参考位置。
+   */
+  private getNextLinePositionByOffset(currentPosition: SelectionPosition, startLeft: number): SelectionPosition {
+    let isToNextLine = false
+    let loopCount = 0
+    let maxRight = startLeft
+    let focusSlot = currentPosition.slot
+    let focusOffset = currentPosition.offset
+    let minTop = this.getRect({
+      slot: focusSlot,
+      offset: focusOffset
+    })!.top
+    let oldPosition!: SelectionPosition
+    let oldLeft = 0
+    while (true) {
+      loopCount++
+      const position = this.selection.getNextPositionByPosition(focusSlot, focusOffset)
+      focusSlot = position.slot
+      focusOffset = position.offset
+      const rect2 = this.getRect(position)!
+      if (!isToNextLine) {
+        if (rect2.left < maxRight || rect2.top > minTop) {
+          isToNextLine = true
+        } else if (rect2.left === maxRight && rect2.top === minTop) {
+          return position
+        }
+        maxRight = rect2.left
+        minTop = rect2.top
+        oldPosition = position
+      }
+      if (isToNextLine) {
+        if (rect2.left > startLeft) {
+          return oldPosition
+        }
+        if (oldPosition) {
+          if (rect2.left <= oldLeft) {
+            return oldPosition
+          }
+        }
+        oldPosition = position
+        oldLeft = rect2.left
+      }
+      if (loopCount > 10000) {
+        break
+      }
+    }
+    return oldPosition || {
+      offset: focusSlot.length,
+      slot: focusSlot
     }
   }
 

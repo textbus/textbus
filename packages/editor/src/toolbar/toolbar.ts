@@ -1,6 +1,6 @@
 import { auditTime, fromEvent, merge, Subscription } from '@tanbo/stream'
 import { Injector } from '@tanbo/di'
-import { createElement, EDITOR_OPTIONS } from '@textbus/browser'
+import { createElement, EDITOR_OPTIONS } from '@textbus/platform-browser'
 import {
   Keymap,
   makeError,

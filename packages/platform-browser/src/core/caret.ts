@@ -1,7 +1,7 @@
 import { distinctUntilChanged, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Scheduler, Rect } from '@textbus/core'
+import { Scheduler } from '@textbus/core'
 
-import { createElement } from '../_utils/uikit'
+import { createElement, Rect } from '../_utils/uikit'
 import { Caret, CaretPosition, Scroller } from './types'
 
 export function getLayoutRectByRange(range: Range): Rect {

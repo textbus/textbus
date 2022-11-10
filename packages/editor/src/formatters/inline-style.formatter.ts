@@ -7,7 +7,7 @@ import {
 } from '@textbus/core'
 
 import { Matcher, MatchRule } from './matcher'
-import { FormatLoader } from '@textbus/browser'
+import { FormatLoader } from '@textbus/platform-browser'
 
 export class InlineStyleFormatLoader<T extends FormatValue> extends Matcher<T, Formatter<any>> implements FormatLoader<T> {
   constructor(public styleName: string, formatter: InlineStyleFormatter, rule: MatchRule) {

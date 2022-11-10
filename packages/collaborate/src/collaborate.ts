@@ -1,10 +1,9 @@
 import { Inject, Injectable } from '@tanbo/di'
-import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
+import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   AbstractSelection,
   ChangeOrigin,
   ComponentInstance,
-  ContentType,
   Controller,
   Registry,
   Formats,
@@ -29,9 +28,6 @@ import {
   createAbsolutePositionFromRelativePosition,
   createRelativePositionFromTypeIndex
 } from 'yjs'
-
-import { CollaborateCursor, RemoteSelection } from './collaborate-cursor'
-import { createUnknownComponent } from './unknown.component'
 
 const collaborateErrorFn = makeError('Collaborate')
 
@@ -96,7 +92,6 @@ interface UpdateItem {
 @Injectable()
 export class Collaborate implements History {
   onLocalChangesApplied: Observable<void>
-  onSelectionChange: Observable<SelectionPaths>
   yDoc = new YDoc()
   onBack: Observable<void>
   onForward: Observable<void>
@@ -138,13 +133,11 @@ export class Collaborate implements History {
 
   constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
               protected rootComponentRef: RootComponentRef,
-              protected collaborateCursor: CollaborateCursor,
               protected controller: Controller,
               protected scheduler: Scheduler,
               protected registry: Registry,
               protected selection: Selection,
               protected starter: Starter) {
-    this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(delay())
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
     this.onChange = this.changeEvent.asObservable()
@@ -249,10 +242,6 @@ export class Collaborate implements History {
     this.syncRootComponent(root, rootComponent)
   }
 
-  updateRemoteSelection(paths: RemoteSelection[]) {
-    this.collaborateCursor.draw(paths)
-  }
-
   back() {
     if (this.canBack) {
       this.manager?.undo()
@@ -278,7 +267,6 @@ export class Collaborate implements History {
     this.index = 0
     this.historyItems = []
     this.subscriptions.forEach(i => i.unsubscribe())
-    this.collaborateCursor.destroy()
     this.manager?.destroy()
   }
 
@@ -401,8 +389,7 @@ export class Collaborate implements History {
               slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
             } else {
               const sharedComponent = action.insert as YMap<any>
-              const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
-              const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
+              const component = this.createComponentBySharedComponent(sharedComponent)
               this.syncComponentSlots(sharedComponent.get('slots'), component)
               this.syncComponentState(sharedComponent, component)
               slot.insert(component)
@@ -686,7 +673,7 @@ export class Collaborate implements History {
     return sharedSlot
   }
 
-  protected createComponentBySharedComponent(yMap: YMap<any>, canInsertInlineComponent: boolean): ComponentInstance {
+  protected createComponentBySharedComponent(yMap: YMap<any>): ComponentInstance {
     const sharedSlots = yMap.get('slots') as YArray<YMap<any>>
     const slots: Slot[] = []
     sharedSlots.forEach(sharedSlot => {
@@ -711,7 +698,8 @@ export class Collaborate implements History {
       })
       return instance
     }
-    return createUnknownComponent(name, canInsertInlineComponent).createInstance(this.starter)
+
+    throw collaborateErrorFn(`cannot find component factory \`${name}\`.`)
   }
 
   protected createSlotBySharedSlot(sharedSlot: YMap<any>): Slot {
@@ -740,8 +728,7 @@ export class Collaborate implements History {
           slot.insert(action.insert, formats)
         } else {
           const sharedComponent = action.insert as YMap<any>
-          const canInsertInlineComponent = slot.schema.includes(ContentType.InlineComponent)
-          const component = this.createComponentBySharedComponent(sharedComponent, canInsertInlineComponent)
+          const component = this.createComponentBySharedComponent(sharedComponent)
           slot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
           this.syncComponentSlots(sharedComponent.get('slots'), component)
           this.syncComponentState(sharedComponent, component)

@@ -1,3 +1,13 @@
+/**
+ * 选区焦点可视位置
+ */
+export interface Rect {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
 export interface UIElementParams {
   classes?: string[]
   attrs?: { [key: string]: any }

@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { createElement } from '@textbus/browser'
+import { createElement } from '@textbus/platform-browser'
 import { Subscription } from '@tanbo/stream'
 import { Controller } from '@textbus/core'
 

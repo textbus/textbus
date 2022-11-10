@@ -1,5 +1,5 @@
 import { Attribute, Component, Formatter } from '@textbus/core'
-import { AttributeLoader, ComponentLoader, FormatLoader } from '@textbus/browser'
+import { AttributeLoader, ComponentLoader, FormatLoader } from '@textbus/platform-browser'
 
 import { EditorOptions } from './types'
 import {

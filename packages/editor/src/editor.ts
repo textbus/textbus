@@ -1,7 +1,7 @@
 import { Provider, Type } from '@tanbo/di'
 import { fromEvent, fromPromise, Observable, of, Subject } from '@tanbo/stream'
 import { makeError, Selection, Starter } from '@textbus/core'
-import { Input, Viewer } from '@textbus/browser'
+import { Input, Viewer } from '@textbus/platform-browser'
 
 import { EditorOptions } from './types'
 import { rootComponent, rootComponentLoader } from './root.component'

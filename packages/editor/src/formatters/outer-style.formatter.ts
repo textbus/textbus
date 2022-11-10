@@ -1,6 +1,6 @@
 import { FormatHostBindingRender, VElement, VTextNode, Formatter } from '@textbus/core'
 import { Matcher, MatchRule } from './matcher'
-import { FormatLoader } from '@textbus/browser'
+import { FormatLoader } from '@textbus/platform-browser'
 
 export class OuterStyleFormatLoader extends Matcher<any, Formatter<any>> implements FormatLoader<any> {
   constructor(public styleName: string, formatter: Formatter<any>, rule: MatchRule) {

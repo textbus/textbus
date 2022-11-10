@@ -8,7 +8,7 @@ import {
   VElement
 } from '@textbus/core'
 import Katex from 'katex'
-import { ComponentLoader } from '@textbus/browser'
+import { ComponentLoader } from '@textbus/platform-browser'
 import { Injector } from '@tanbo/di'
 import { Form, FormTextarea } from '../uikit/forms/_api'
 import { Dialog } from '../dialog'

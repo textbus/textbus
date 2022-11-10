@@ -6,7 +6,7 @@ import {
   Registry,
   Selection, Slot
 } from '@textbus/core'
-import { VIEW_DOCUMENT } from '@textbus/browser'
+import { VIEW_DOCUMENT } from '@textbus/platform-browser'
 import { Injector } from '@tanbo/di'
 import { delay, fromEvent, take } from '@tanbo/stream'
 

@@ -8,7 +8,7 @@ import {
   useRef,
   useState, onContextMenu, useContext,
 } from '@textbus/core'
-import { ComponentLoader, createElement, createTextNode } from '@textbus/browser'
+import { ComponentLoader, createElement, createTextNode } from '@textbus/platform-browser'
 import { Subscription } from '@tanbo/stream'
 
 import { useDragResize } from './hooks/drag-resize'

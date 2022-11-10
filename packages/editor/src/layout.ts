@@ -1,6 +1,6 @@
 import { Subscription } from '@tanbo/stream'
 import { Injectable } from '@tanbo/di'
-import { createElement } from '@textbus/browser'
+import { createElement } from '@textbus/platform-browser'
 
 @Injectable()
 export class Layout {

@@ -18,7 +18,7 @@ import {
   ComponentInitData,
   useSelf, onViewInit
 } from '@textbus/core'
-import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/browser'
+import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/platform-browser'
 
 import { paragraphComponent } from './components/paragraph.component'
 import { EditorOptions } from './types'

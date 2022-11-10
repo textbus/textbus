@@ -55,7 +55,7 @@ function objToFormats(formatsObj: Record<string, any>, registry: Registry): Form
  * Textbus 历史记录管理类
  */
 @Injectable()
-export class CoreHistory extends History {
+export class LocalHistory extends History {
   /**
    * 当历史记录变化时触发
    */

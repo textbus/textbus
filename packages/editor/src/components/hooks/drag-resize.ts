@@ -1,5 +1,5 @@
-import { onDestroy, onViewInit, Ref, Selection, Renderer, useContext, useSelf, Rect } from '@textbus/core'
-import { createElement, VIEW_CONTAINER } from '@textbus/browser'
+import { onDestroy, onViewInit, Ref, Selection, Renderer, useContext, useSelf } from '@textbus/core'
+import { createElement, VIEW_CONTAINER, Rect } from '@textbus/platform-browser'
 import { fromEvent, Subscription } from '@tanbo/stream'
 
 const text = document.createElement('div')

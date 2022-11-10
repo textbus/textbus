@@ -11,7 +11,7 @@ import {
   VElement
 } from '@textbus/core'
 import { Injector } from '@tanbo/di'
-import { ComponentLoader, SlotParser } from '@textbus/browser'
+import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 
 import { blockComponent } from './block.component'
 import { fontSizeFormatter } from '../formatters/_api'

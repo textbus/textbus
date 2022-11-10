@@ -7,7 +7,7 @@ import {
   VElement,
   useState,
 } from '@textbus/core'
-import { ComponentLoader } from '@textbus/browser'
+import { ComponentLoader } from '@textbus/platform-browser'
 
 export interface AudioState {
   src: string

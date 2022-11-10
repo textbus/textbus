@@ -19,7 +19,7 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { ComponentLoader } from '@textbus/browser'
+import { ComponentLoader } from '@textbus/platform-browser'
 import { Grammar, languages, Token, tokenize } from 'prismjs'
 import 'prismjs/components/prism-typescript'
 import 'prismjs/components/prism-java'
