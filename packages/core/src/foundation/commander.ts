@@ -1,4 +1,4 @@
-import { Injectable, Injector, Prop } from '@tanbo/di'
+import { Injectable, Injector } from '@tanbo/di'
 
 import { AbstractSelection, Range, Selection, SelectionPosition } from './selection'
 import {
@@ -284,8 +284,6 @@ function getBlockRangeToBegin(selection: Selection, slot: Slot, offset: number):
 
 @Injectable()
 export class Commander {
-  @Prop()
-  private nativeRenderer!: NativeRenderer
 
   constructor(protected selection: Selection,
               protected injector: Injector,
@@ -616,7 +614,7 @@ export class Commander {
    * 复制当前选区内容
    */
   copy() {
-    this.nativeRenderer.copy()
+    this.injector.get(NativeRenderer).copy()
   }
 
   /**

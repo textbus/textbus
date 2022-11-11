@@ -11,7 +11,7 @@ export interface FormatHostBindingRender {
  * Textbus 扩展格式要实现的接口
  */
 export abstract class Formatter<T extends FormatValue> {
-  protected constructor(public name: string, public columned = false) {
+  protected constructor(public name: string, public columned?: boolean) {
   }
 
   abstract render(
