@@ -585,7 +585,44 @@ export const preComponent = defineComponent({
     })
 
     onPaste(ev => {
-      const codeList = ev.data.text.split('\n')
+      const codeList: string[] = []
+      const sourceCode = ev.data.text
+
+      let str = ''
+      let isBreak = true
+      for (let i = 0; i < sourceCode.length; i++) {
+        const char = sourceCode[i]
+        if (char === '\r') {
+          if (sourceCode[i + 1] === '\n') {
+            i++
+          }
+          if (str) {
+            codeList.push(str)
+            str = ''
+          }
+          if (!isBreak) {
+            codeList.push('')
+          } else {
+            isBreak = false
+          }
+        } else if (char === '\n') {
+          if (str) {
+            codeList.push(str)
+            str = ''
+          }
+          if (!isBreak) {
+            codeList.push('')
+          } else {
+            isBreak = false
+          }
+        } else {
+          isBreak = true
+          str += char
+        }
+      }
+      if (str) {
+        codeList.push(str)
+      }
       const firstCode = codeList.shift()
       const target = ev.target
       if (firstCode) {
@@ -608,7 +645,7 @@ export const preComponent = defineComponent({
         )
         const last = slotList[slotList.length - 1]
         slots.insert(...slotList)
-        selection.setPosition(last, last.index)
+        selection.setPosition(last, last.length)
       } else {
         selection.setPosition(target, target.index)
       }
