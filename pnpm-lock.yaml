@@ -121,7 +121,7 @@ importers:
       '@rollup/plugin-typescript': ^9.0.2
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/core': ^2.5.4
+      '@textbus/core': ^2.5.5
       reflect-metadata: ^0.1.13
       rimraf: ^3.0.2
       rollup: ^3.2.5
@@ -144,8 +144,8 @@ importers:
       '@rollup/plugin-typescript': ^9.0.2
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/browser': ^2.5.4
-      '@textbus/core': ^2.5.4
+      '@textbus/browser': ^2.5.5
+      '@textbus/core': ^2.5.5
       reflect-metadata: ^0.1.13
       rimraf: ^3.0.2
       rollup: ^3.2.5
@@ -196,9 +196,9 @@ importers:
       '@tanbo/css-themes': ^0.0.1
       '@tanbo/di': ^1.1.3
       '@tanbo/stream': ^1.1.8
-      '@textbus/browser': ^2.5.4
-      '@textbus/collaborate': ^2.5.4
-      '@textbus/core': ^2.5.4
+      '@textbus/browser': ^2.5.5
+      '@textbus/collaborate': ^2.5.5
+      '@textbus/core': ^2.5.5
       katex: ^0.16.0
       prismjs: ^1.23.0
       rimraf: ^3.0.2

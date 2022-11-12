@@ -197,7 +197,7 @@ export class CollaborateCursor {
         color: item.color,
         left: cursorRect.left - containerRect.left,
         top: cursorRect.top - containerRect.top,
-        width: 2,
+        width: 1,
         height: cursorRect.height
       }
       if (rect.left < 0 || rect.top < 0 || rect.left > containerRect.width) {
@@ -243,7 +243,6 @@ export class CollaborateCursor {
     const userTip = createElement('span', {
       styles: {
         position: 'absolute',
-        display: 'none',
         left: '50%',
         transform: 'translateX(-50%)',
         marginBottom: '2px',
@@ -251,6 +250,7 @@ export class CollaborateCursor {
         whiteSpace: 'nowrap',
         color: '#fff',
         boxShadow: '0 1px 2px rgba(0,0,0,.1)',
+        opacity: 0.8,
         borderRadius: '3px',
         padding: '3px 5px',
         pointerEvents: 'none',
@@ -262,20 +262,13 @@ export class CollaborateCursor {
         position: 'absolute',
         top: '-2px',
         left: '-2px',
-        width: '6px',
-        height: '6px',
+        width: '5px',
+        height: '5px',
+        borderRadius: '50%',
         pointerEvents: 'auto',
         pointer: 'cursor',
       },
-      children: [userTip],
-      on: {
-        mouseenter() {
-          userTip.style.display = 'block'
-        },
-        mouseleave() {
-          userTip.style.display = 'none'
-        }
-      }
+      children: [userTip]
     })
     child = createElement('span', {
       styles: {
