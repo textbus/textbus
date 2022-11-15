@@ -348,10 +348,16 @@
   min-width: 120px;
   position: relative;
 
+  .textbus-toolbar-submenu {
+    height: 0;
+    overflow: hidden;
+  }
+
   &:hover {
     z-index: 4;
-
     .textbus-toolbar-submenu {
+      height: auto;
+      overflow: auto;
       transform: scale(1);
     }
   }
