@@ -75,6 +75,7 @@
     "gulp": "^4.0.2",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
+    "intl-segmenter-polyfill": "^0.4.4",
     "ip": "^1.1.5",
     "jest": "^27.5.1",
     "jest-canvas-mock": "^2.4.0",
