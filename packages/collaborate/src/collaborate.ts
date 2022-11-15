@@ -95,6 +95,7 @@ interface UpdateItem {
 
 @Injectable()
 export class Collaborate implements History {
+  onLocalChangesApplied: Observable<void>
   onSelectionChange: Observable<SelectionPaths>
   yDoc = new YDoc()
   onBack: Observable<void>
@@ -125,6 +126,7 @@ export class Collaborate implements History {
   protected slotsSyncCaches = new WeakMap<ComponentInstance, () => void>()
   protected componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
 
+  protected localChangesAppliedEvent = new Subject<void>()
   protected selectionChangeEvent = new Subject<SelectionPaths>()
   protected contentMap = new ContentMap()
 
@@ -145,6 +147,7 @@ export class Collaborate implements History {
     this.onForward = this.forwardEvent.asObservable()
     this.onChange = this.changeEvent.asObservable()
     this.onPush = this.pushEvent.asObservable()
+    this.onLocalChangesApplied = this.localChangesAppliedEvent.asObservable()
   }
 
   listen() {
@@ -217,6 +220,7 @@ export class Collaborate implements History {
             })
           }, item.record ? this.yDoc : this.noRecord)
         }
+        this.localChangesAppliedEvent.next()
       })
     )
     this.syncRootComponent(root, rootComponent)

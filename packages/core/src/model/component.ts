@@ -344,10 +344,9 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
 export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
   options: ComponentOptions<Extends, State, SlotState>
 ): Component<ComponentInstance<Extends, State>, ComponentInitData<State, SlotState>> {
-  const separable = !!options.separable
-  return {
+  const component: Component<ComponentInstance<Extends, State>, ComponentInitData<State, SlotState>> = {
     name: options.name,
-    separable,
+    separable: !!options.separable,
     instanceType: options.type,
     zenCoding: options.zenCoding,
     createInstance(contextInjector: Injector, initData?: ComponentInitData<State, SlotState>) {
@@ -366,17 +365,17 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
       const componentInstance: ComponentInstance<Extends, State> = {
         changeMarker: marker,
         parent: null,
-        separable,
+        separable: component.separable,
         get parentComponent() {
           return componentInstance.parent?.parent || null
         },
         get state() {
           return state!
         },
-        name: options.name,
+        name: component.name,
         length: 1,
         onStateChange,
-        type: options.type,
+        type: component.instanceType,
         slots: null as any,
         extends: null as any,
         shortcutList: null as any,
@@ -416,7 +415,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
         },
         toJSON() {
           return {
-            name: options.name,
+            name: component.name,
             state: state ?? null as unknown as State,
             slots: componentInstance.slots.toJSON()
           }
@@ -453,6 +452,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
       return componentInstance
     }
   }
+  return component
 }
 
 /**
