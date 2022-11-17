@@ -646,9 +646,45 @@ export class Commander {
     invokeListener(component, 'onPaste', event)
     if (!event.isPrevented) {
       const delta = pasteSlot.toDelta()
-      delta.forEach(action => {
-        this.insert(action.insert, action.formats)
-      })
+      while (delta.length) {
+        const { insert, formats } = delta.shift()!
+        const commonAncestorSlot = this.selection.commonAncestorSlot!
+        if (canInsert(insert, commonAncestorSlot)) {
+          this.insert(insert, formats)
+          continue
+        }
+
+        delta.push(...commonAncestorSlot.cut(this.selection.startOffset!).toDelta())
+        const parentComponent = commonAncestorSlot.parent!
+
+        if (commonAncestorSlot === parentComponent.slots.last) {
+          this.insert(insert, formats)
+          continue
+        }
+        if (parentComponent.separable) {
+          const index = parentComponent.slots.indexOf(commonAncestorSlot)
+          const nextSlots = parentComponent.slots.cut(index + 1)
+          const nextComponent = this.translator.createComponentByData(parentComponent.name, {
+            state: typeof parentComponent.state === 'object' && parentComponent.state !== null ?
+              JSON.parse(JSON.stringify(parentComponent.state)) :
+              parentComponent.state,
+            slots: nextSlots
+          })!
+          delta.push({
+            insert: nextComponent,
+            formats: []
+          })
+          this.insert(insert, formats)
+          continue
+        }
+        if (typeof insert === 'string') {
+          this.insert(insert, formats)
+          continue
+        }
+        for (const childSlot of insert.slots.toArray()) {
+          delta.unshift(...childSlot.toDelta())
+        }
+      }
     }
     return !event.isPrevented
   }

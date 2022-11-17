@@ -902,6 +902,9 @@ export class Selection {
    * @param paths
    */
   findComponentByPaths(paths: number[]): ComponentInstance | null {
+    if (paths.length === 0) {
+      return this.root.component
+    }
     const result = Selection.findTreeNode(paths, this.root.component)
     if (result instanceof Slot) {
       return null
@@ -1401,6 +1404,7 @@ export class Selection {
     }
     return index
   }
+
   /**
    * 获取插槽指定位置之后的非 BlockComponent 内容
    * @param slot
