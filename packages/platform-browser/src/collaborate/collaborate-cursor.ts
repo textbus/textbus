@@ -3,9 +3,8 @@ import { Selection, SelectionPaths, AbstractSelection, Scheduler } from '@textbu
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 import { VIEW_CONTAINER } from '../core/injection-tokens'
-import { getLayoutRectByRange } from '../core/caret'
 import { SelectionBridge } from '../core/selection-bridge'
-import { createElement, Rect } from '../_utils/uikit'
+import { createElement, getLayoutRectByRange, Rect } from '../_utils/uikit'
 
 export interface RemoteSelection {
   id: string

@@ -71,8 +71,6 @@ export interface Module {
 export interface TextbusConfig extends Module {
   /** 导入第三方包 */
   imports?: Module[]
-  /** 使用 contentEditable 作为编辑器控制可编辑范围 */
-  useContentEditable?: boolean
   /** 开启 Zen Coding 支持 */
   zenCoding?: boolean
   /** 最大历史记录栈 */

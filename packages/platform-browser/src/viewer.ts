@@ -275,7 +275,7 @@ export class Viewer extends Starter {
     this.destroyed = true
     this.subs.forEach(i => i.unsubscribe())
     const types = [
-      Input,
+      Input
     ]
     types.forEach(i => {
       this.get(i).destroy()

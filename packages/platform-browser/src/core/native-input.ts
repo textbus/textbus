@@ -276,6 +276,8 @@ export class NativeInput extends Input {
         const b = key === 'Process' && ev.code === 'Digit2'
         if (b) {
           key = '@'
+          this.isSougouPinYin = true
+          ev.preventDefault()
         }
         const is = this.keyboard.execShortcut({
           key: key,
@@ -284,9 +286,6 @@ export class NativeInput extends Input {
           ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
-          if (b) {
-            this.isSougouPinYin = true
-          }
           ev.preventDefault()
         }
       })

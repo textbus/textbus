@@ -14,10 +14,10 @@ import {
   Selection
 } from '@textbus/core'
 
-import { getLayoutRectByRange } from './caret'
 import { EDITOR_OPTIONS, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
-import { createElement, Rect } from '../_utils/uikit'
+import { createElement, getLayoutRectByRange, Rect } from '../_utils/uikit'
 import { Input, ViewOptions } from './types'
+
 
 /**
  * Textbus PC 端选区桥接实现
@@ -207,8 +207,8 @@ export class SelectionBridge implements NativeSelectionBridge {
     } else {
       this.oldCaretPosition = this.getRect(currentPosition)!
       p = toNext ?
-        this.getNextLinePositionByOffset(currentPosition, this.oldCaretPosition!.left) :
-        this.getPreviousLinePositionByOffset(currentPosition, this.oldCaretPosition!.left)
+        this.getNextLinePositionByOffset(currentPosition, this.oldCaretPosition.left) :
+        this.getPreviousLinePositionByOffset(currentPosition, this.oldCaretPosition.left)
     }
     this.cacheCaretPositionTimer = setTimeout(() => {
       this.oldCaretPosition = null

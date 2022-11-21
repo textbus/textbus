@@ -20,7 +20,9 @@
     "outDir": "bundles/",
     "downlevelIteration": true,
     "paths": {
-      "@textbus/core": ["../core/src/public-api.ts"]
+      "@textbus/core": [
+        "../core/src/public-api.ts"
+      ]
     }
   },
   "include": [
