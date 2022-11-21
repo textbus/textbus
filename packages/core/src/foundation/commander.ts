@@ -2,12 +2,13 @@ import { Injectable, Injector } from '@tanbo/di'
 
 import { AbstractSelection, Range, Selection, SelectionPosition } from './selection'
 import {
+  Attribute,
+  BreakEventData,
   Component,
   ComponentInstance,
   ContentType,
   DeleteEventData,
   DeltaLite,
-  BreakEventData,
   Event,
   Formats,
   Formatter,
@@ -15,7 +16,7 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange, Attribute
+  SlotRange
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
@@ -788,15 +789,15 @@ export class Commander {
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
       const childComponents: ComponentInstance[] = []
-      let hasString = false
+      let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item !== 'string') {
-          childComponents.push(item)
+        if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
+          hasInlineContent = true
         } else {
-          hasString = true
+          childComponents.push(item)
         }
       })
-      if (hasString) {
+      if (hasInlineContent) {
         i.slot.setAttribute(attribute, value)
       } else {
         childComponents.forEach(i => {

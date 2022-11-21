@@ -106,8 +106,21 @@ export class Query {
       }
       const states: QueryState<T>[] = []
       for (const component of childComponents) {
-        const slots = component.slots.toArray()
-        for (const slot of slots) {
+        const slots = component.slots
+        if (slots.length === 0) {
+          if (i.slot.hasAttribute(attribute)) {
+            states.push({
+              state: QueryStateType.Enabled,
+              value: i.slot.getAttribute(attribute)
+            })
+          } else {
+            return {
+              state: QueryStateType.Normal,
+              value: null
+            }
+          }
+        }
+        for (const slot of slots.toArray()) {
           if (slot.hasAttribute(attribute)) {
             states.push({
               state: QueryStateType.Enabled,
