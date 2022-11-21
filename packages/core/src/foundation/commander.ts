@@ -646,6 +646,7 @@ export class Commander {
     invokeListener(component, 'onPaste', event)
     if (!event.isPrevented) {
       const delta = pasteSlot.toDelta()
+      const afterDelta: DeltaLite = []
       while (delta.length) {
         const { insert, formats } = delta.shift()!
         const commonAncestorSlot = this.selection.commonAncestorSlot!
@@ -654,7 +655,7 @@ export class Commander {
           continue
         }
 
-        delta.push(...commonAncestorSlot.cut(this.selection.startOffset!).toDelta())
+        afterDelta.push(...commonAncestorSlot.cut(this.selection.startOffset!).toDelta())
         const parentComponent = commonAncestorSlot.parent!
 
         if (commonAncestorSlot === parentComponent.slots.last) {
@@ -685,6 +686,12 @@ export class Commander {
           delta.unshift(...childSlot.toDelta())
         }
       }
+      const snapshot = this.selection.createSnapshot()
+      while (afterDelta.length) {
+        const { insert, formats } = afterDelta.shift()!
+        this.insert(insert, formats)
+      }
+      snapshot.restore()
     }
     return !event.isPrevented
   }

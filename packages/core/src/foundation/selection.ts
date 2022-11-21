@@ -130,7 +130,7 @@ export interface SelectionSnapshot {
    * 恢复选区
    * @param syncNative 是否同步原生选区
    */
-  restore(syncNative: boolean): void
+  restore(syncNative?: boolean): void
 }
 
 /**
@@ -391,7 +391,7 @@ export class Selection {
   createSnapshot(): SelectionSnapshot {
     const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this
     return {
-      restore: (syncNative: boolean) => {
+      restore: (syncNative?: boolean) => {
         this._anchorSlot = anchorSlot
         this._anchorOffset = anchorOffset
         this._focusSlot = focusSlot
